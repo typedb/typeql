@@ -18,13 +18,13 @@
 
 package graql.lang.statement.builder;
 
+import graql.lang.Graql;
 import graql.lang.property.ValueProperty;
 import graql.lang.property.ValueProperty.Operation.Assignment;
 import graql.lang.property.ValueProperty.Operation.Comparison;
 import graql.lang.property.VarProperty;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementAttribute;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.time.LocalDateTime;
@@ -92,8 +92,8 @@ public interface StatementAttributeBuilder extends StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default <T> StatementAttribute eq(BiFunction<Token.Comparator, T, Comparison<T>> constructor, T value) {
-        return operation(constructor.apply(Token.Comparator.EQV, value));
+    default <T> StatementAttribute eq(BiFunction<Graql.Token.Comparator, T, Comparison<T>> constructor, T value) {
+        return operation(constructor.apply(Graql.Token.Comparator.EQV, value));
     }
 
     // Attribute value inequality property
@@ -129,8 +129,8 @@ public interface StatementAttributeBuilder extends StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default <T> StatementAttribute neq(BiFunction<Token.Comparator, T, Comparison<T>> constructor, T value) {
-        return operation(constructor.apply(Token.Comparator.NEQV, value));
+    default <T> StatementAttribute neq(BiFunction<Graql.Token.Comparator, T, Comparison<T>> constructor, T value) {
+        return operation(constructor.apply(Graql.Token.Comparator.NEQV, value));
     }
 
     // Attribute value greater-than property
@@ -166,8 +166,8 @@ public interface StatementAttributeBuilder extends StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default <T> StatementAttribute gt(BiFunction<Token.Comparator, T, Comparison<T>> constructor, T value) {
-        return operation(constructor.apply(Token.Comparator.GT, value));
+    default <T> StatementAttribute gt(BiFunction<Graql.Token.Comparator, T, Comparison<T>> constructor, T value) {
+        return operation(constructor.apply(Graql.Token.Comparator.GT, value));
     }
 
     // Attribute value greater-than-or-equals property
@@ -203,8 +203,8 @@ public interface StatementAttributeBuilder extends StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default <T> StatementAttribute gte(BiFunction<Token.Comparator, T, Comparison<T>> constructor, T value) {
-        return operation(constructor.apply(Token.Comparator.GTE, value));
+    default <T> StatementAttribute gte(BiFunction<Graql.Token.Comparator, T, Comparison<T>> constructor, T value) {
+        return operation(constructor.apply(Graql.Token.Comparator.GTE, value));
     }
 
     // Attribute value less-than property
@@ -240,8 +240,8 @@ public interface StatementAttributeBuilder extends StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default <T> StatementAttribute lt(BiFunction<Token.Comparator, T, Comparison<T>> constructor, T value) {
-        return operation(constructor.apply(Token.Comparator.LT, value));
+    default <T> StatementAttribute lt(BiFunction<Graql.Token.Comparator, T, Comparison<T>> constructor, T value) {
+        return operation(constructor.apply(Graql.Token.Comparator.LT, value));
     }
 
     // Attribute value less-than-or-equals property
@@ -277,8 +277,8 @@ public interface StatementAttributeBuilder extends StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default <T> StatementAttribute lte(BiFunction<Token.Comparator, T, Comparison<T>> constructor, T value) {
-        return operation(constructor.apply(Token.Comparator.LTE, value));
+    default <T> StatementAttribute lte(BiFunction<Graql.Token.Comparator, T, Comparison<T>> constructor, T value) {
+        return operation(constructor.apply(Graql.Token.Comparator.LTE, value));
     }
 
     // Attribute value contains (in String) property
@@ -294,15 +294,15 @@ public interface StatementAttributeBuilder extends StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default <T> StatementAttribute contains(BiFunction<Token.Comparator, T, Comparison<T>> constructor, T value) {
-        return operation(constructor.apply(Token.Comparator.CONTAINS, value));
+    default <T> StatementAttribute contains(BiFunction<Graql.Token.Comparator, T, Comparison<T>> constructor, T value) {
+        return operation(constructor.apply(Graql.Token.Comparator.CONTAINS, value));
     }
 
     // Attribute value like (regex) property
 
     @CheckReturnValue
     default StatementAttribute like(String value) {
-        return operation(new Comparison.String(Token.Comparator.LIKE, value));
+        return operation(new Comparison.String(Graql.Token.Comparator.LIKE, value));
     }
 
     // Attribute Statement builder methods

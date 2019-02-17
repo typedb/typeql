@@ -21,7 +21,6 @@ package graql.lang.pattern;
 import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Collections;
@@ -71,15 +70,15 @@ public class Negation<T extends Pattern> implements Pattern {
     @Override
     public String toString() {
         StringBuilder negation = new StringBuilder();
-        negation.append(Token.Operator.NOT).append(Token.Char.SPACE);
+        negation.append(Graql.Token.Operator.NOT).append(Graql.Token.Char.SPACE);
 
         if (pattern instanceof Conjunction<?>) {
             negation.append(pattern.toString());
         } else {
-            negation.append(Token.Char.CURLY_OPEN).append(Token.Char.SPACE);
+            negation.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
             negation.append(pattern.toString());
-            negation.append(Token.Char.SPACE).append(Token.Char.CURLY_CLOSE);
-            negation.append(Token.Char.SEMICOLON);
+            negation.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE);
+            negation.append(Graql.Token.Char.SEMICOLON);
         }
 
         return negation.toString();

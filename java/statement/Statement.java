@@ -19,6 +19,7 @@
 package graql.lang.statement;
 
 import graql.lang.Graql;
+import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Pattern;
@@ -30,7 +31,6 @@ import graql.lang.statement.builder.StatementInstanceBuilder;
 import graql.lang.statement.builder.StatementRelationBuilder;
 import graql.lang.statement.builder.StatementThingBuilder;
 import graql.lang.statement.builder.StatementTypeBuilder;
-import graql.lang.exception.GraqlException;
 import graql.lang.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

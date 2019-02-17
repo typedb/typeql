@@ -18,9 +18,9 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementType;
-import graql.lang.util.Token;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -55,7 +55,7 @@ public class RelatesProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.RELATES.toString();
+        return Graql.Token.Property.RELATES.toString();
     }
 
     @Override

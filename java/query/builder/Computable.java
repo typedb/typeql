@@ -18,8 +18,8 @@
 
 package graql.lang.query.builder;
 
+import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
@@ -33,10 +33,10 @@ import java.util.Set;
 public interface Computable {
 
     @CheckReturnValue
-    Token.Compute.Method method();
+    Graql.Token.Compute.Method method();
 
     @CheckReturnValue
-    Set<Token.Compute.Condition> conditionsRequired();
+    Set<Graql.Token.Compute.Condition> conditionsRequired();
 
     @CheckReturnValue
     Optional<GraqlException> getException();
@@ -102,13 +102,13 @@ public interface Computable {
             U extends Computable.Argument, V extends Computable.Arguments> extends Computable {
 
         @CheckReturnValue
-        Token.Compute.Algorithm using();
+        Graql.Token.Compute.Algorithm using();
 
         @CheckReturnValue
         V where();
 
         @CheckReturnValue
-        T using(Token.Compute.Algorithm algorithm);
+        T using(Graql.Token.Compute.Algorithm algorithm);
 
         @CheckReturnValue
         @SuppressWarnings("unchecked")
@@ -124,18 +124,18 @@ public interface Computable {
         T where(List<U> args);
 
         @CheckReturnValue
-        Set<Token.Compute.Algorithm> algorithmsAccepted();
+        Set<Graql.Token.Compute.Algorithm> algorithmsAccepted();
 
         @CheckReturnValue
-        Map<Token.Compute.Algorithm, Set<Token.Compute.Param>> argumentsAccepted();
+        Map<Graql.Token.Compute.Algorithm, Set<Graql.Token.Compute.Param>> argumentsAccepted();
 
         @CheckReturnValue
-        Map<Token.Compute.Algorithm, Map<Token.Compute.Param, Object>> argumentsDefault();
+        Map<Graql.Token.Compute.Algorithm, Map<Graql.Token.Compute.Param, Object>> argumentsDefault();
     }
 
     interface Argument<T> {
 
-        Token.Compute.Param type();
+        Graql.Token.Compute.Param type();
 
         T value();
     }

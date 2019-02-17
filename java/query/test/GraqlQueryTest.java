@@ -24,9 +24,11 @@ import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.MatchClause;
-import graql.lang.util.Token;
 import org.junit.Test;
 
+import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
+import static graql.lang.Graql.Token.Compute.Algorithm.DEGREE;
+import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.lte;
 import static graql.lang.Graql.match;
@@ -37,9 +39,6 @@ import static graql.lang.Graql.var;
 import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.min_k;
 import static graql.lang.query.GraqlCompute.Argument.size;
-import static graql.lang.util.Token.Compute.Algorithm.CONNECTED_COMPONENT;
-import static graql.lang.util.Token.Compute.Algorithm.DEGREE;
-import static graql.lang.util.Token.Compute.Algorithm.K_CORE;
 import static org.junit.Assert.assertEquals;
 
 // TODO: This test should be split into one Graql query test class each
@@ -86,7 +85,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithDatatypeToString() {
-        assertSameStringRepresentation(Graql.match(var("x").datatype(Token.DataType.LONG)).get());
+        assertSameStringRepresentation(Graql.match(var("x").datatype(Graql.Token.DataType.LONG)).get());
     }
 
     @Test

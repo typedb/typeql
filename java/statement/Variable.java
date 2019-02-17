@@ -18,7 +18,7 @@
 
 package graql.lang.statement;
 
-import graql.lang.util.Token;
+import graql.lang.Graql;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
@@ -124,9 +124,9 @@ public class Variable {
     @Override
     public String toString() {
         if (isUserDefinedName()) {
-            return Token.Char.$ + name();
+            return Graql.Token.Char.$ + name();
         } else {
-            return Token.Char.$_.toString();
+            return Graql.Token.Char.$_.toString();
         }
     }
 

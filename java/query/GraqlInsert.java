@@ -18,9 +18,9 @@
 
 package graql.lang.query;
 
-import graql.lang.statement.Statement;
+import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
-import graql.lang.util.Token;
+import graql.lang.statement.Statement;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -62,15 +62,15 @@ public class GraqlInsert extends GraqlQuery {
     public final String toString() {
         StringBuilder query = new StringBuilder();
 
-        if (match() != null) query.append(match()).append(Token.Char.NEW_LINE);
+        if (match() != null) query.append(match()).append(Graql.Token.Char.NEW_LINE);
 
-        query.append(Token.Command.INSERT);
-        if (statements.size()>1) query.append(Token.Char.NEW_LINE);
-        else query.append(Token.Char.SPACE);
+        query.append(Graql.Token.Command.INSERT);
+        if (statements.size()>1) query.append(Graql.Token.Char.NEW_LINE);
+        else query.append(Graql.Token.Char.SPACE);
 
         query.append(statements().stream()
                              .map(Statement::toString)
-                             .collect(Collectors.joining(Token.Char.NEW_LINE.toString())));
+                             .collect(Collectors.joining(Graql.Token.Char.NEW_LINE.toString())));
 
         return query.toString();
     }

@@ -18,8 +18,8 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.StatementType;
-import graql.lang.util.Token;
 
 /**
  * Represents the {@code abstract} property on a Type.
@@ -38,7 +38,7 @@ public class AbstractProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.ABSTRACT.toString();
+        return Graql.Token.Property.ABSTRACT.toString();
     }
 
     @Override

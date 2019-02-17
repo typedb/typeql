@@ -18,12 +18,12 @@
 
 package graql.lang.query;
 
+import graql.lang.Graql;
+import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
-import graql.lang.exception.GraqlException;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
@@ -190,13 +190,13 @@ public class MatchClause {
     public final String toString() {
         StringBuilder query = new StringBuilder();
 
-        query.append(Token.Command.MATCH);
-        if (pattern.getPatterns().size()>1) query.append(Token.Char.NEW_LINE);
-        else query.append(Token.Char.SPACE);
+        query.append(Graql.Token.Command.MATCH);
+        if (pattern.getPatterns().size()>1) query.append(Graql.Token.Char.NEW_LINE);
+        else query.append(Graql.Token.Char.SPACE);
 
         query.append(pattern.getPatterns().stream()
                              .map(Object::toString)
-                             .collect(Collectors.joining(Token.Char.NEW_LINE.toString())));
+                             .collect(Collectors.joining(Graql.Token.Char.NEW_LINE.toString())));
 
         return query.toString();
     }

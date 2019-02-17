@@ -18,8 +18,8 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.StatementThing;
-import graql.lang.util.Token;
 
 /**
  * Represents the {@code id} property on a Concept.
@@ -43,7 +43,7 @@ public class IdProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.ID.toString();
+        return Graql.Token.Property.ID.toString();
     }
 
     @Override

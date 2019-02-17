@@ -18,9 +18,9 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementType;
-import graql.lang.util.Token;
 
 import java.util.stream.Stream;
 
@@ -54,7 +54,7 @@ public class HasAttributeTypeProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return isKey ? Token.Property.KEY.toString() : Token.Property.HAS.toString();
+        return isKey ? Graql.Token.Property.KEY.toString() : Graql.Token.Property.HAS.toString();
     }
 
     @Override

@@ -18,10 +18,10 @@
 
 package graql.lang.query;
 
+import graql.lang.Graql;
+import graql.lang.exception.GraqlException;
 import graql.lang.query.builder.Filterable;
 import graql.lang.statement.Variable;
-import graql.lang.exception.GraqlException;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.LinkedHashSet;
@@ -107,20 +107,20 @@ public class GraqlDelete extends GraqlQuery implements Filterable {
     @Override @SuppressWarnings("Duplicates")
     public String toString() {
         StringBuilder query = new StringBuilder(match().toString());
-        if (match().getPatterns().getPatterns().size()>1) query.append(Token.Char.NEW_LINE);
-        else query.append(Token.Char.SPACE);
+        if (match().getPatterns().getPatterns().size()>1) query.append(Graql.Token.Char.NEW_LINE);
+        else query.append(Graql.Token.Char.SPACE);
 
-        query.append(Token.Command.DELETE);
+        query.append(Graql.Token.Command.DELETE);
         if (!vars.isEmpty()) { // Which is not equal to !vars().isEmpty()
-            query.append(Token.Char.SPACE).append(
+            query.append(Graql.Token.Char.SPACE).append(
                     vars.stream().map(Variable::toString)
-                            .collect(joining(Token.Char.COMMA_SPACE.toString()))
+                            .collect(joining(Graql.Token.Char.COMMA_SPACE.toString()))
             );
         }
-        query.append(Token.Char.SEMICOLON);
+        query.append(Graql.Token.Char.SEMICOLON);
 
         if (sort().isPresent() || offset().isPresent() || limit().isPresent()) {
-            query.append(Token.Char.SPACE).append(printFilters());
+            query.append(Graql.Token.Char.SPACE).append(printFilters());
         }
 
         return query.toString();
