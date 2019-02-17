@@ -18,10 +18,10 @@
 
 package graql.lang.statement;
 
+import graql.lang.Graql;
 import graql.lang.property.IdProperty;
 import graql.lang.property.NeqProperty;
 import graql.lang.property.VarProperty;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.LinkedHashSet;
@@ -90,12 +90,12 @@ public class StatementThing extends StatementInstance {
         statement.append(this.var());
 
         String properties = Stream.of(thingSyntax(), hasSyntax()).filter(s -> !s.isEmpty())
-                .collect(joining(Token.Char.COMMA_SPACE.toString()));
+                .collect(joining(Graql.Token.Char.COMMA_SPACE.toString()));
 
         if (!properties.isEmpty()) {
-            statement.append(Token.Char.SPACE).append(properties);
+            statement.append(Graql.Token.Char.SPACE).append(properties);
         }
-        statement.append(Token.Char.SEMICOLON);
+        statement.append(Graql.Token.Char.SEMICOLON);
         return statement.toString();
     }
 }

@@ -18,7 +18,11 @@
 
 package graql.lang.parser;
 
+import graql.grammar.GraqlBaseVisitor;
+import graql.grammar.GraqlLexer;
+import graql.grammar.GraqlParser;
 import graql.lang.Graql;
+import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.HasAttributeProperty;
 import graql.lang.property.IsaProperty;
@@ -36,12 +40,7 @@ import graql.lang.query.builder.Computable;
 import graql.lang.query.builder.Filterable;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
-import graql.grammar.GraqlBaseVisitor;
-import graql.grammar.GraqlLexer;
-import graql.grammar.GraqlParser;
-import graql.lang.exception.GraqlException;
 import graql.lang.util.StringUtil;
-import graql.lang.util.Token;
 import graql.lang.util.Triple;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
@@ -144,7 +143,7 @@ public class Parser extends GraqlBaseVisitor {
         // Remove '$' prefix
         String name = variable.getSymbol().getText().substring(1);
 
-        if (name.equals(Token.Char.UNDERSCORE.toString())) {
+        if (name.equals(Graql.Token.Char.UNDERSCORE.toString())) {
             return new Variable();
         } else {
             return new Variable(name);
@@ -280,7 +279,7 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.sort() != null) {
             Variable var = getVar(ctx.sort().VAR_());
             order = ctx.sort().ORDER_() == null ? new Filterable.Sorting(var) :
-                    new Filterable.Sorting(var, Token.Order.of(ctx.sort().ORDER_().getText()));
+                    new Filterable.Sorting(var, Graql.Token.Order.of(ctx.sort().ORDER_().getText()));
         }
         if (ctx.offset() != null) {
             offset = getInteger(ctx.offset().INTEGER_());
@@ -304,7 +303,7 @@ public class Parser extends GraqlBaseVisitor {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
         return new GraqlGet.Aggregate(visitQuery_get(ctx.query_get()),
-                                      Token.Aggregate.Method.of(function.function_method().getText()),
+                                      Graql.Token.Aggregate.Method.of(function.function_method().getText()),
                                       function.VAR_() != null ? getVar(function.VAR_()) : null);
     }
 
@@ -320,7 +319,7 @@ public class Parser extends GraqlBaseVisitor {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
         return new GraqlGet.Group.Aggregate(visitQuery_get(ctx.query_get()).group(var),
-                                            Token.Aggregate.Method.of(function.function_method().getText()),
+                                            Graql.Token.Aggregate.Method.of(function.function_method().getText()),
                                             function.VAR_() != null ? getVar(function.VAR_()) : null);
     }
 
@@ -367,27 +366,27 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public GraqlCompute.Statistics.Value visitConditions_value(GraqlParser.Conditions_valueContext ctx) {
         GraqlCompute.Statistics.Value compute;
-        Token.Compute.Method method = Token.Compute.Method.of(ctx.compute_method().getText());
+        Graql.Token.Compute.Method method = Graql.Token.Compute.Method.of(ctx.compute_method().getText());
 
         if (method == null) {
             throw new IllegalArgumentException("Unrecognised Graql Compute Statistics method: " + ctx.getText());
 
-        } else if (method.equals(Token.Compute.Method.MAX)) {
+        } else if (method.equals(Graql.Token.Compute.Method.MAX)) {
             compute = Graql.compute().max();
 
-        } else if (method.equals(Token.Compute.Method.MIN)) {
+        } else if (method.equals(Graql.Token.Compute.Method.MIN)) {
             compute = Graql.compute().min();
 
-        } else if (method.equals(Token.Compute.Method.MEAN)) {
+        } else if (method.equals(Graql.Token.Compute.Method.MEAN)) {
             compute = Graql.compute().mean();
 
-        } else if (method.equals(Token.Compute.Method.MEDIAN)) {
+        } else if (method.equals(Graql.Token.Compute.Method.MEDIAN)) {
             compute = Graql.compute().median();
 
-        } else if (method.equals(Token.Compute.Method.SUM)) {
+        } else if (method.equals(Graql.Token.Compute.Method.SUM)) {
             compute = Graql.compute().sum();
 
-        } else if (method.equals(Token.Compute.Method.STD)) {
+        } else if (method.equals(Graql.Token.Compute.Method.STD)) {
             compute = Graql.compute().std();
 
         } else {
@@ -480,7 +479,7 @@ public class Parser extends GraqlBaseVisitor {
 
     private Computable.Configurable setComputeConfig(Computable.Configurable compute, GraqlParser.Compute_configContext ctx) {
         if (ctx.USING() != null) {
-            compute = compute.using(Token.Compute.Algorithm.of(ctx.compute_algorithm().getText()));
+            compute = compute.using(Graql.Token.Compute.Algorithm.of(ctx.compute_algorithm().getText()));
 
         } else if (ctx.WHERE() != null) {
             compute = compute.where(visitCompute_args(ctx.compute_args()));
@@ -608,12 +607,12 @@ public class Parser extends GraqlBaseVisitor {
                 type = type.isAbstract();
 
             } else if (property.SUB_() != null) {
-                Token.Property sub = Token.Property.of(property.SUB_().getText());
+                Graql.Token.Property sub = Graql.Token.Property.of(property.SUB_().getText());
 
-                if (sub != null && sub.equals(Token.Property.SUB)) {
+                if (sub != null && sub.equals(Graql.Token.Property.SUB)) {
                     type = type.sub(visitType(property.type(0)));
 
-                } else if (sub != null && sub.equals(Token.Property.SUBX)) {
+                } else if (sub != null && sub.equals(Graql.Token.Property.SUBX)) {
                     type = type.subX(visitType(property.type(0)));
 
                 } else {
@@ -637,7 +636,7 @@ public class Parser extends GraqlBaseVisitor {
                     type = type.relates(visitType(property.type(0)));
                 }
             } else if (property.DATATYPE() != null) {
-                type = type.datatype(Token.DataType.of(property.datatype().getText()));
+                type = type.datatype(Graql.Token.DataType.of(property.datatype().getText()));
 
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));
@@ -761,12 +760,12 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     private IsaProperty getIsaProperty(TerminalNode isaToken, GraqlParser.TypeContext ctx) {
-        Token.Property isa = Token.Property.of(isaToken.getText());
+        Graql.Token.Property isa = Graql.Token.Property.of(isaToken.getText());
 
-        if (isa != null && isa.equals(Token.Property.ISA)) {
+        if (isa != null && isa.equals(Graql.Token.Property.ISA)) {
             return new IsaProperty(visitType(ctx));
 
-        } else if (isa != null && isa.equals(Token.Property.ISAX)) {
+        } else if (isa != null && isa.equals(Graql.Token.Property.ISAX)) {
             return new IsaProperty(visitType(ctx), true);
 
         } else {
@@ -921,7 +920,7 @@ public class Parser extends GraqlBaseVisitor {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
 
-        Token.Comparator comparator = Token.Comparator.of(comparatorStr);
+        Graql.Token.Comparator comparator = Graql.Token.Comparator.of(comparatorStr);
         if (comparator == null) {
             throw new IllegalArgumentException("Unrecognised Value Comparator: " + comparatorStr);
         }
@@ -979,17 +978,17 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Token.DataType visitDatatype(GraqlParser.DatatypeContext datatype) {
+    public Graql.Token.DataType visitDatatype(GraqlParser.DatatypeContext datatype) {
         if (datatype.BOOLEAN() != null) {
-            return Token.DataType.BOOLEAN;
+            return Graql.Token.DataType.BOOLEAN;
         } else if (datatype.DATE() != null) {
-            return Token.DataType.DATE;
+            return Graql.Token.DataType.DATE;
         } else if (datatype.DOUBLE() != null) {
-            return Token.DataType.DOUBLE;
+            return Graql.Token.DataType.DOUBLE;
         } else if (datatype.LONG() != null) {
-            return Token.DataType.LONG;
+            return Graql.Token.DataType.LONG;
         } else if (datatype.STRING() != null) {
-            return Token.DataType.STRING;
+            return Graql.Token.DataType.STRING;
         } else {
             throw new IllegalArgumentException("Unrecognised DataType: " + datatype);
         }
@@ -1039,12 +1038,12 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     private boolean getBoolean(TerminalNode bool) {
-        Token.Literal literal = Token.Literal.of(bool.getText());
+        Graql.Token.Literal literal = Graql.Token.Literal.of(bool.getText());
 
-        if (literal != null && literal.equals(Token.Literal.TRUE)) {
+        if (literal != null && literal.equals(Graql.Token.Literal.TRUE)) {
             return true;
 
-        } else if (literal != null && literal.equals(Token.Literal.FALSE)) {
+        } else if (literal != null && literal.equals(Graql.Token.Literal.FALSE)) {
             return false;
 
         } else {

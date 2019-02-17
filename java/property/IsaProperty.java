@@ -18,9 +18,9 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementInstance;
-import graql.lang.util.Token;
 
 import java.util.stream.Stream;
 
@@ -55,9 +55,9 @@ public class IsaProperty extends VarProperty {
     @Override
     public String keyword() {
         if (!explicit) {
-            return Token.Property.ISA.toString();
+            return Graql.Token.Property.ISA.toString();
         } else {
-            return Token.Property.ISAX.toString();
+            return Graql.Token.Property.ISAX.toString();
         }
     }
 

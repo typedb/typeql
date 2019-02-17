@@ -22,7 +22,6 @@ import com.google.common.collect.Sets;
 import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.HashSet;
@@ -108,9 +107,9 @@ public class Conjunction<T extends Pattern> implements Pattern {
     public String toString() {
         StringBuilder pattern = new StringBuilder();
 
-        pattern.append(Token.Char.CURLY_OPEN).append(Token.Char.SPACE);
-        pattern.append(patterns.stream().map(Objects::toString).collect(Collectors.joining(Token.Char.SPACE.toString())));
-        pattern.append(Token.Char.SPACE).append(Token.Char.CURLY_CLOSE).append(Token.Char.SEMICOLON);
+        pattern.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
+        pattern.append(patterns.stream().map(Objects::toString).collect(Collectors.joining(Graql.Token.Char.SPACE.toString())));
+        pattern.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE).append(Graql.Token.Char.SEMICOLON);
 
         return pattern.toString();
     }

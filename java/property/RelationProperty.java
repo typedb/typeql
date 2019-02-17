@@ -18,9 +18,9 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementRelation;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -54,14 +54,14 @@ public class RelationProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.RELATION.toString();
+        return Graql.Token.Property.RELATION.toString();
     }
 
     public String property() {
-        return Token.Char.PARAN_OPEN +
+        return Graql.Token.Char.PARAN_OPEN +
                 relationPlayers().stream().map(Object::toString)
-                .collect(joining(Token.Char.COMMA_SPACE.toString())) +
-                Token.Char.PARAN_CLOSE;
+                .collect(joining(Graql.Token.Char.COMMA_SPACE.toString())) +
+                Graql.Token.Char.PARAN_CLOSE;
     }
 
     @Override

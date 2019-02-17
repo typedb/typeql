@@ -22,7 +22,6 @@ import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementInstance;
 import graql.lang.statement.Variable;
-import graql.lang.util.Token;
 
 import java.util.stream.Stream;
 
@@ -73,7 +72,7 @@ public class HasAttributeProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.HAS.toString();
+        return Graql.Token.Property.HAS.toString();
     }
 
     @Override
@@ -89,10 +88,10 @@ public class HasAttributeProperty extends VarProperty {
         }
 
         if (hasReifiedRelationship()) {
-            property.add(Token.Property.VIA.toString()).add(relationship().getPrintableName());
+            property.add(Graql.Token.Property.VIA.toString()).add(relationship().getPrintableName());
         }
 
-        return property.build().collect(joining(Token.Char.SPACE.toString()));
+        return property.build().collect(joining(Graql.Token.Char.SPACE.toString()));
     }
 
     @Override

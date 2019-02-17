@@ -18,9 +18,9 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.StatementType;
 import graql.lang.util.StringUtil;
-import graql.lang.util.Token;
 
 /**
  * Represents the {@code label} property on a Type.
@@ -44,7 +44,7 @@ public class TypeProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.TYPE.toString();
+        return Graql.Token.Property.TYPE.toString();
     }
 
     @Override

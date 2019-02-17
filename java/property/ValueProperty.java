@@ -18,10 +18,10 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementAttribute;
 import graql.lang.util.StringUtil;
-import graql.lang.util.Token;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -49,7 +49,7 @@ public class ValueProperty<T> extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.VALUE.toString();
+        return Graql.Token.Property.VALUE.toString();
     }
 
     @Override
@@ -99,15 +99,15 @@ public class ValueProperty<T> extends VarProperty {
 
     public abstract static class Operation<T> {
 
-        private final Token.Comparator comparator;
+        private final Graql.Token.Comparator comparator;
         private final T value;
 
-        Operation(Token.Comparator comparator, T value) {
+        Operation(Graql.Token.Comparator comparator, T value) {
             this.comparator = comparator;
             this.value = value;
         }
 
-        public Token.Comparator comparator() {
+        public Graql.Token.Comparator comparator() {
             return comparator;
         }
 
@@ -116,7 +116,7 @@ public class ValueProperty<T> extends VarProperty {
         }
 
         public boolean isValueEquality() {
-            return comparator.equals(Token.Comparator.EQV) && !hasVariable();
+            return comparator.equals(Graql.Token.Comparator.EQV) && !hasVariable();
         }
 
         public boolean hasVariable(){ return innerStatement() != null;}
@@ -126,7 +126,7 @@ public class ValueProperty<T> extends VarProperty {
 
         @Override
         public String toString() {
-            return comparator.toString() + Token.Char.SPACE + StringUtil.valueToString(value);
+            return comparator.toString() + Graql.Token.Char.SPACE + StringUtil.valueToString(value);
         }
 
         @Override
@@ -153,7 +153,7 @@ public class ValueProperty<T> extends VarProperty {
         public abstract static class Assignment<T> extends Operation<T> {
 
             Assignment(T value) {
-                super(Token.Comparator.EQV, value);
+                super(Graql.Token.Comparator.EQV, value);
             }
 
             public java.lang.String toString() {
@@ -191,11 +191,11 @@ public class ValueProperty<T> extends VarProperty {
 
         public abstract static class Comparison<T> extends Operation<T> {
 
-            Comparison(Token.Comparator comparator, T value) {
+            Comparison(Graql.Token.Comparator comparator, T value) {
                 super(comparator, value);
             }
 
-            public static Comparison<?> of(Token.Comparator comparator, Object value) {
+            public static Comparison<?> of(Graql.Token.Comparator comparator, Object value) {
                 if (value instanceof Integer) {
                     return new ValueProperty.Operation.Comparison.Number<>(comparator, (Integer) value);
                 } else if (value instanceof Long) {
@@ -219,21 +219,21 @@ public class ValueProperty<T> extends VarProperty {
 
             public static class Number<N extends java.lang.Number> extends Comparison<N> {
 
-                public Number(Token.Comparator comparator, N value) {
+                public Number(Graql.Token.Comparator comparator, N value) {
                     super(comparator, value);
                 }
             }
 
             public static class Boolean extends Comparison<java.lang.Boolean> {
 
-                public Boolean(Token.Comparator comparator, boolean value) {
+                public Boolean(Graql.Token.Comparator comparator, boolean value) {
                     super(comparator, value);
                 }
             }
 
             public static class String extends Comparison<java.lang.String> {
 
-                public String(Token.Comparator comparator, java.lang.String value) {
+                public String(Graql.Token.Comparator comparator, java.lang.String value) {
                     super(comparator, value);
                 }
 
@@ -241,8 +241,8 @@ public class ValueProperty<T> extends VarProperty {
                 public java.lang.String toString() {
                     StringBuilder operation = new StringBuilder();
 
-                    operation.append(comparator()).append(Token.Char.SPACE);
-                    if (comparator().equals(Token.Comparator.LIKE)) {
+                    operation.append(comparator()).append(Graql.Token.Char.SPACE);
+                    if (comparator().equals(Graql.Token.Comparator.LIKE)) {
                         operation.append("\"").append(value().replaceAll("/", "\\\\/")).append("\"");
                     } else {
                         operation.append(StringUtil.quoteString(value()));
@@ -254,19 +254,19 @@ public class ValueProperty<T> extends VarProperty {
 
             public static class DateTime extends Comparison<LocalDateTime> {
 
-                public DateTime(Token.Comparator comparator, LocalDateTime value) {
+                public DateTime(Graql.Token.Comparator comparator, LocalDateTime value) {
                     super(comparator, value);
                 }
             }
 
             public static class Variable extends Comparison<Statement> {
 
-                public Variable(Token.Comparator comparator, Statement value) {
+                public Variable(Graql.Token.Comparator comparator, Statement value) {
                     super(comparator, value);
                 }
 
                 public java.lang.String toString() {
-                    return comparator().toString() + Token.Char.SPACE + value().getPrintableName();
+                    return comparator().toString() + Graql.Token.Char.SPACE + value().getPrintableName();
                 }
 
                 @Override

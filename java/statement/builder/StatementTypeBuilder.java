@@ -33,7 +33,6 @@ import graql.lang.property.VarProperty;
 import graql.lang.property.WhenProperty;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementType;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -199,7 +198,7 @@ public interface StatementTypeBuilder {
      */
     @CheckReturnValue
     default StatementType datatype(String datatype) {
-        return datatype(Token.DataType.of(datatype));
+        return datatype(Graql.Token.DataType.of(datatype));
     }
 
     /**
@@ -207,7 +206,7 @@ public interface StatementTypeBuilder {
      * @return this
      */
     @CheckReturnValue
-    default StatementType datatype(Token.DataType datatype) {
+    default StatementType datatype(Graql.Token.DataType datatype) {
         return type(new DataTypeProperty(datatype));
     }
 

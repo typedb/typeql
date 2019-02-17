@@ -18,8 +18,8 @@
 
 package graql.lang.query;
 
+import graql.lang.Graql;
 import graql.lang.statement.Statement;
-import graql.lang.util.Token;
 
 import java.util.List;
 
@@ -46,13 +46,13 @@ public class GraqlDefine extends GraqlQuery {
     public String toString() {
         StringBuilder query = new StringBuilder();
 
-        query.append(Token.Command.DEFINE);
-        if (statements.size()>1) query.append(Token.Char.NEW_LINE);
-        else query.append(Token.Char.SPACE);
+        query.append(Graql.Token.Command.DEFINE);
+        if (statements.size()>1) query.append(Graql.Token.Char.NEW_LINE);
+        else query.append(Graql.Token.Char.SPACE);
 
         query.append(statements().stream()
                              .map(Statement::toString)
-                             .collect(joining(Token.Char.NEW_LINE.toString())));
+                             .collect(joining(Graql.Token.Char.NEW_LINE.toString())));
 
         return query.toString();
     }

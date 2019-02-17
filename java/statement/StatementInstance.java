@@ -18,13 +18,13 @@
 
 package graql.lang.statement;
 
+import graql.lang.Graql;
 import graql.lang.property.HasAttributeProperty;
 import graql.lang.property.IsaProperty;
 import graql.lang.property.RelationProperty;
 import graql.lang.property.TypeProperty;
 import graql.lang.property.ValueProperty;
 import graql.lang.property.VarProperty;
-import graql.lang.util.Token;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -92,7 +92,7 @@ public abstract class StatementInstance extends Statement {
         return this.properties().stream()
                 .filter(p -> p instanceof HasAttributeProperty)
                 .map(VarProperty::toString)
-                .collect(joining(Token.Char.COMMA_SPACE.toString()));
+                .collect(joining(Graql.Token.Char.COMMA_SPACE.toString()));
     }
 
     @Override
@@ -102,18 +102,18 @@ public abstract class StatementInstance extends Statement {
         StringBuilder statement = new StringBuilder();
 
         if (this.var().isVisible()) {
-            statement.append(this.var()).append(Token.Char.SPACE);
+            statement.append(this.var()).append(Graql.Token.Char.SPACE);
         }
         getProperty(RelationProperty.class).ifPresent(statement::append);
         getProperty(ValueProperty.class).ifPresent(statement::append);
 
         String properties = Stream.of(isaSyntax(), hasSyntax()).filter(s -> !s.isEmpty())
-                .collect(joining(Token.Char.COMMA_SPACE.toString()));
+                .collect(joining(Graql.Token.Char.COMMA_SPACE.toString()));
 
         if (!properties.isEmpty()) {
-            statement.append(Token.Char.SPACE).append(properties);
+            statement.append(Graql.Token.Char.SPACE).append(properties);
         }
-        statement.append(Token.Char.SEMICOLON);
+        statement.append(Graql.Token.Char.SEMICOLON);
         return statement.toString();
     }
 

@@ -18,8 +18,8 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.StatementType;
-import graql.lang.util.Token;
 
 /**
  * Represents the {@code datatype} property on a AttributeType.
@@ -27,23 +27,23 @@ import graql.lang.util.Token;
  */
 public class DataTypeProperty extends VarProperty {
 
-    private final Token.DataType dataType;
+    private final Graql.Token.DataType dataType;
 
 
-    public DataTypeProperty(Token.DataType dataType) {
+    public DataTypeProperty(Graql.Token.DataType dataType) {
         if (dataType == null) {
             throw new NullPointerException("Null dataType");
         }
         this.dataType = dataType;
     }
 
-    public Token.DataType dataType() {
+    public Graql.Token.DataType dataType() {
         return dataType;
     }
 
     @Override
     public String keyword() {
-        return Token.Property.DATA_TYPE.toString();
+        return Graql.Token.Property.DATA_TYPE.toString();
     }
 
     @Override

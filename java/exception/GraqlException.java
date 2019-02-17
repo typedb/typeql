@@ -19,7 +19,7 @@
 package graql.lang.exception;
 
 
-import graql.lang.util.Token;
+import graql.lang.Graql;
 
 import java.util.List;
 import java.util.Set;
@@ -60,23 +60,23 @@ public class GraqlException extends RuntimeException {
         return new GraqlException(ErrorMessage.NO_PATTERNS.getMessage());
     }
 
-    public static GraqlException invalidComputeQuery_invalidMethod(List<Token.Compute.Method> methods) {
+    public static GraqlException invalidComputeQuery_invalidMethod(List<Graql.Token.Compute.Method> methods) {
         return new GraqlException(INVALID_COMPUTE_METHOD.getMessage(methods));
     }
 
-    public static GraqlException invalidComputeQuery_invalidCondition(Token.Compute.Method method, Set<Token.Compute.Condition> accepted) {
+    public static GraqlException invalidComputeQuery_invalidCondition(Graql.Token.Compute.Method method, Set<Graql.Token.Compute.Condition> accepted) {
         return new GraqlException(INVALID_COMPUTE_CONDITION.getMessage(method, accepted));
     }
 
-    public static GraqlException invalidComputeQuery_missingCondition(Token.Compute.Method method, Set<Token.Compute.Condition> required) {
+    public static GraqlException invalidComputeQuery_missingCondition(Graql.Token.Compute.Method method, Set<Graql.Token.Compute.Condition> required) {
         return new GraqlException(MISSING_COMPUTE_CONDITION.getMessage(method, required));
     }
 
-    public static GraqlException invalidComputeQuery_invalidMethodAlgorithm(Token.Compute.Method method, Set<Token.Compute.Algorithm> accepted) {
+    public static GraqlException invalidComputeQuery_invalidMethodAlgorithm(Graql.Token.Compute.Method method, Set<Graql.Token.Compute.Algorithm> accepted) {
         return new GraqlException(INVALID_COMPUTE_METHOD_ALGORITHM.getMessage(method, accepted));
     }
 
-    public static GraqlException invalidComputeQuery_invalidArgument(Token.Compute.Method method, Token.Compute.Algorithm algorithm, Set<Token.Compute.Param> accepted) {
+    public static GraqlException invalidComputeQuery_invalidArgument(Graql.Token.Compute.Method method, Graql.Token.Compute.Algorithm algorithm, Set<Graql.Token.Compute.Param> accepted) {
         return new GraqlException(INVALID_COMPUTE_ARGUMENT.getMessage(method, algorithm, accepted));
     }
 }

@@ -18,10 +18,10 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.statement.StatementType;
-import graql.lang.util.Token;
 
 import static java.util.stream.Collectors.joining;
 
@@ -48,24 +48,24 @@ public class ThenProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Property.THEN.toString();
+        return Graql.Token.Property.THEN.toString();
     }
 
     @Override @SuppressWarnings("Duplicates")
     public String property() {
         StringBuilder then = new StringBuilder();
 
-        then.append(Token.Char.CURLY_OPEN).append(Token.Char.SPACE);
+        then.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
 
         if (pattern instanceof Conjunction) {
             then.append(((Conjunction<?>) pattern).getPatterns().stream()
                                 .map(Object::toString)
-                                .collect(joining(Token.Char.SPACE.toString())));
+                                .collect(joining(Graql.Token.Char.SPACE.toString())));
         } else {
             then.append(pattern.toString());
         }
 
-        then.append(Token.Char.SPACE).append(Token.Char.CURLY_CLOSE);
+        then.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE);
         return then.toString();
     }
 

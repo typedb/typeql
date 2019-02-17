@@ -30,7 +30,6 @@ import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
 import graql.lang.statement.Statement;
-import graql.lang.util.Token;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -44,6 +43,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
+import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.define;
 import static graql.lang.Graql.gte;
@@ -60,8 +61,6 @@ import static graql.lang.Graql.var;
 import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.size;
 import static graql.lang.util.Collections.list;
-import static graql.lang.util.Token.Compute.Algorithm.CONNECTED_COMPONENT;
-import static graql.lang.util.Token.Compute.Algorithm.K_CORE;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -349,7 +348,7 @@ public class ParserTest {
         GraqlGet parsed = Graql.parse(query).asGet();
         GraqlGet expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).get().sort("r", Token.Order.DESC).offset(10).limit(10);
+        ).get().sort("r", "desc").offset(10).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -631,7 +630,7 @@ public class ParserTest {
     public void testMatchDataTypeQuery() {
         String query = "match $x datatype double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").datatype(Token.DataType.DOUBLE)).get();
+        GraqlGet expected = match(var("x").datatype(Graql.Token.DataType.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -649,7 +648,7 @@ public class ParserTest {
     public void whenParsingDateKeyword_ParseAsTheCorrectDataType() {
         String query = "match $x datatype date; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").datatype(Token.DataType.DATE)).get();
+        GraqlGet expected = match(var("x").datatype(Graql.Token.DataType.DATE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -658,7 +657,7 @@ public class ParserTest {
     public void testDefineDataTypeQuery() {
         String query = "define my-type sub attribute, datatype long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
-        GraqlDefine expected = define(type("my-type").sub("attribute").datatype(Token.DataType.LONG));
+        GraqlDefine expected = define(type("my-type").sub("attribute").datatype(Graql.Token.DataType.LONG));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -939,7 +938,7 @@ public class ParserTest {
         //noinspection OptionalGetWithoutIsPresent
         DataTypeProperty property = var.getProperty(DataTypeProperty.class).get();
 
-        Assert.assertEquals(Token.DataType.BOOLEAN, property.dataType());
+        Assert.assertEquals(Graql.Token.DataType.BOOLEAN, property.dataType());
     }
 
     @Test

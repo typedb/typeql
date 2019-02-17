@@ -18,11 +18,11 @@
 
 package graql.lang.query;
 
+import graql.lang.Graql;
+import graql.lang.exception.GraqlException;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Filterable;
 import graql.lang.statement.Variable;
-import graql.lang.exception.GraqlException;
-import graql.lang.util.Token;
 
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -77,7 +77,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     }
 
     @Override
-    public Aggregate aggregate(Token.Aggregate.Method method, Variable var) {
+    public Aggregate aggregate(Graql.Token.Aggregate.Method method, Variable var) {
         return new Aggregate(this, method, var);
     }
 
@@ -117,20 +117,20 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     @Override @SuppressWarnings("Duplicates")
     public String toString() {
         StringBuilder query = new StringBuilder(match().toString());
-        if (match().getPatterns().getPatterns().size()>1) query.append(Token.Char.NEW_LINE);
-        else query.append(Token.Char.SPACE);
+        if (match().getPatterns().getPatterns().size()>1) query.append(Graql.Token.Char.NEW_LINE);
+        else query.append(Graql.Token.Char.SPACE);
 
-        query.append(Token.Command.GET);
+        query.append(Graql.Token.Command.GET);
         if (!vars.isEmpty()) { // Which is not equal to !vars().isEmpty()
-            query.append(Token.Char.SPACE).append(
+            query.append(Graql.Token.Char.SPACE).append(
                     vars.stream().map(Variable::toString)
-                            .collect(joining(Token.Char.COMMA_SPACE.toString()))
+                            .collect(joining(Graql.Token.Char.COMMA_SPACE.toString()))
             );
         }
-        query.append(Token.Char.SEMICOLON);
+        query.append(Graql.Token.Char.SEMICOLON);
 
         if (sort().isPresent() || offset().isPresent() || limit().isPresent()) {
-            query.append(Token.Char.SPACE).append(printFilters());
+            query.append(Graql.Token.Char.SPACE).append(printFilters());
         }
 
         return query.toString();
@@ -241,10 +241,10 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     public static class Aggregate extends GraqlQuery {
 
         private final GraqlGet query;
-        private final Token.Aggregate.Method method;
+        private final Graql.Token.Aggregate.Method method;
         private final Variable var;
 
-        public Aggregate(GraqlGet query, Token.Aggregate.Method method, Variable var) {
+        public Aggregate(GraqlGet query, Graql.Token.Aggregate.Method method, Variable var) {
             if (query == null) {
                 throw new NullPointerException("GetQuery is null");
             }
@@ -255,9 +255,9 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             }
             this.method = method;
 
-            if (var == null && !method.equals(Token.Aggregate.Method.COUNT)) {
+            if (var == null && !method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                 throw new NullPointerException("Variable is null");
-            } else if (var != null && method.equals(Token.Aggregate.Method.COUNT)) {
+            } else if (var != null && method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                 throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
             } else if (var != null && !query.vars().contains(var)) {
                 throw new IllegalArgumentException("Aggregate variable should be contained in GET query");
@@ -270,7 +270,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             return query;
         }
 
-        public Token.Aggregate.Method method() {
+        public Graql.Token.Aggregate.Method method() {
             return method;
         }
 
@@ -282,10 +282,10 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         public final String toString() {
             StringBuilder query = new StringBuilder();
 
-            query.append(query()).append(Token.Char.SPACE).append(method);
+            query.append(query()).append(Graql.Token.Char.SPACE).append(method);
 
-            if (var != null) query.append(Token.Char.SPACE).append(var);
-            query.append(Token.Char.SEMICOLON);
+            if (var != null) query.append(Graql.Token.Char.SPACE).append(var);
+            query.append(Graql.Token.Char.SEMICOLON);
 
             return query.toString();
         }
@@ -344,7 +344,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
 
         @Override
-        public Aggregate aggregate(Token.Aggregate.Method method, Variable var) {
+        public Aggregate aggregate(Graql.Token.Aggregate.Method method, Variable var) {
             return new Aggregate(this, method, var);
         }
 
@@ -352,9 +352,9 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         public String toString() {
             StringBuilder query = new StringBuilder();
 
-            query.append(query()).append(Token.Char.SPACE)
-                    .append(Token.Command.GROUP).append(Token.Char.SPACE)
-                    .append(var).append(Token.Char.SEMICOLON);
+            query.append(query()).append(Graql.Token.Char.SPACE)
+                    .append(Graql.Token.Command.GROUP).append(Graql.Token.Char.SPACE)
+                    .append(var).append(Graql.Token.Char.SEMICOLON);
 
             return query.toString();
         }
@@ -383,10 +383,10 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         public static class Aggregate extends GraqlQuery {
 
             private final GraqlGet.Group group;
-            private final Token.Aggregate.Method method;
+            private final Graql.Token.Aggregate.Method method;
             private final Variable var;
 
-            public Aggregate(GraqlGet.Group group, Token.Aggregate.Method method, Variable var) {
+            public Aggregate(GraqlGet.Group group, Graql.Token.Aggregate.Method method, Variable var) {
 
                 if (group == null) {
                     throw new NullPointerException("GraqlGet.Group is null");
@@ -398,9 +398,9 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 }
                 this.method = method;
 
-                if (var == null && !this.method.equals(Token.Aggregate.Method.COUNT)) {
+                if (var == null && !this.method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                     throw new NullPointerException("Variable is null");
-                } else if (var != null && this.method.equals(Token.Aggregate.Method.COUNT)) {
+                } else if (var != null && this.method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
                 } else if (var != null && !group.query().vars().contains(var)) {
                     throw new IllegalArgumentException("Aggregate variable should be contained in GET query");
@@ -412,7 +412,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 return group;
             }
 
-            public Token.Aggregate.Method method() {
+            public Graql.Token.Aggregate.Method method() {
                 return method;
             }
 
@@ -424,13 +424,13 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             public final String toString() {
                 StringBuilder query = new StringBuilder();
 
-                query.append(group().query()).append(Token.Char.SPACE)
-                        .append(Token.Command.GROUP).append(Token.Char.SPACE)
-                        .append(group().var()).append(Token.Char.SEMICOLON).append(Token.Char.SPACE)
+                query.append(group().query()).append(Graql.Token.Char.SPACE)
+                        .append(Graql.Token.Command.GROUP).append(Graql.Token.Char.SPACE)
+                        .append(group().var()).append(Graql.Token.Char.SEMICOLON).append(Graql.Token.Char.SPACE)
                         .append(method);
 
-                if (var != null) query.append(Token.Char.SPACE).append(var);
-                query.append(Token.Char.SEMICOLON);
+                if (var != null) query.append(Graql.Token.Char.SPACE).append(var);
+                query.append(Graql.Token.Char.SEMICOLON);
 
                 return query.toString();
             }

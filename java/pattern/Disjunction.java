@@ -23,7 +23,6 @@ import com.google.common.collect.Sets;
 import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Iterator;
@@ -89,24 +88,24 @@ public class Disjunction<T extends Pattern> implements Pattern {
         Iterator<T> patternIter = patterns.iterator();
         while (patternIter.hasNext()) {
             Pattern pattern = patternIter.next();
-            disjunction.append(Token.Char.CURLY_OPEN).append(Token.Char.SPACE);
+            disjunction.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
 
             if (pattern instanceof Conjunction<?>) {
                 disjunction.append(((Conjunction<? extends Pattern>) pattern).getPatterns().stream()
                                            .map(Object::toString)
-                                           .collect(Collectors.joining(Token.Char.SPACE.toString())));
+                                           .collect(Collectors.joining(Graql.Token.Char.SPACE.toString())));
             } else {
                 disjunction.append(pattern.toString());
             }
 
-            disjunction.append(Token.Char.SPACE).append(Token.Char.CURLY_CLOSE);
+            disjunction.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE);
 
             if (patternIter.hasNext()) {
-                disjunction.append(Token.Char.SPACE).append(Token.Operator.OR).append(Token.Char.SPACE);
+                disjunction.append(Graql.Token.Char.SPACE).append(Graql.Token.Operator.OR).append(Graql.Token.Char.SPACE);
             }
         }
 
-        disjunction.append(Token.Char.SEMICOLON);
+        disjunction.append(Graql.Token.Char.SEMICOLON);
 
         return disjunction.toString();
     }

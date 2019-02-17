@@ -18,9 +18,9 @@
 
 package graql.lang.property;
 
+import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementThing;
-import graql.lang.util.Token;
 
 import java.util.stream.Stream;
 
@@ -47,7 +47,7 @@ public class NeqProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Token.Comparator.NEQ.toString();
+        return Graql.Token.Comparator.NEQ.toString();
     }
 
     @Override

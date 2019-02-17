@@ -18,9 +18,9 @@
 
 package graql.lang.statement;
 
+import graql.lang.Graql;
 import graql.lang.property.TypeProperty;
 import graql.lang.property.VarProperty;
-import graql.lang.util.Token;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Collection;
@@ -75,18 +75,18 @@ public class StatementType extends Statement {
         StringBuilder statement = new StringBuilder();
 
         if (this.var().isVisible()) {
-            statement.append(this.var()).append(Token.Char.SPACE);
+            statement.append(this.var()).append(Graql.Token.Char.SPACE);
             statement.append(this.properties().stream()
                                      .map(VarProperty::toString)
-                                     .collect(joining(Token.Char.COMMA_SPACE.toString())));
+                                     .collect(joining(Graql.Token.Char.COMMA_SPACE.toString())));
         } else {
-            statement.append(getProperty(TypeProperty.class).get().property()).append(Token.Char.SPACE);
+            statement.append(getProperty(TypeProperty.class).get().property()).append(Graql.Token.Char.SPACE);
             statement.append(this.properties().stream().filter(p -> !(p instanceof TypeProperty))
                                      .map(VarProperty::toString)
-                                     .collect(joining(Token.Char.COMMA_SPACE.toString())));
+                                     .collect(joining(Graql.Token.Char.COMMA_SPACE.toString())));
         }
 
-        statement.append(Token.Char.SEMICOLON);
+        statement.append(Graql.Token.Char.SEMICOLON);
         return statement.toString();
     }
 }
