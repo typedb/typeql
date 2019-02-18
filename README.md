@@ -56,3 +56,5 @@ This product includes software developed by [Grakn Labs Ltd](https://grakn.ai/).
 Copyright (C) 2018  Grakn Labs Ltd
 
 test
+
+test2
