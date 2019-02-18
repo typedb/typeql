@@ -54,3 +54,5 @@ $ bazel build //...
 This product includes software developed by [Grakn Labs Ltd](https://grakn.ai/).  It's released under the GNU Affero GENERAL PUBLIC LICENSE, Version 3, 29 June 2007. For license information, please see [LICENSE](https://github.com/graknlabs/graql/blob/master/LICENSE). Grakn Labs Ltd also provides a commercial license for Grakn Enterprise KGMS - get in touch with our team at enterprise@grakn.ai.
 
 Copyright (C) 2018  Grakn Labs Ltd
+
+test
