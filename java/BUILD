@@ -19,6 +19,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("//dependencies/tools/checkstyle:checkstyle.bzl", "checkstyle_test")
+load("//dependencies/maven:rules.bzl", "deploy_maven_jar")
 
 java_library(
     name = "graql",
@@ -31,6 +32,13 @@ java_library(
         "//dependencies/maven/artifacts/org/antlr:antlr4-runtime", # sync version with @antlr4_runtime//jar
         "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
     ],
+    tags = ["maven_coordinates=graql:lang:{pom_version}"],
+)
+
+deploy_maven_jar(
+  name = "deploy-maven-jar",
+  target = ":graql",
+  package = "java",
 )
 
 checkstyle_test(
