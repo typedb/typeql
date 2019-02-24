@@ -22,9 +22,9 @@ grammar Graql;
 // Needed by Graql's Parser to ensure that it parses till end of string
 
 eof_query           :   query       EOF ;
-eof_query_list      :   query*      EOF ;
+eof_query_list      :   query+      EOF ;
 eof_pattern         :   pattern     EOF ;
-eof_pattern_list    :   pattern*    EOF ;
+eof_pattern_list    :   pattern+    EOF ;
 
 // GRAQL QUERY LANGUAGE ========================================================
 

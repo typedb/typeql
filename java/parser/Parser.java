@@ -74,26 +74,25 @@ import static java.util.stream.Collectors.toList;
  */
 public class Parser extends GraqlBaseVisitor {
 
-    private GraqlParser parse(String queryString, ErrorListener errorListener) {
-        CharStream charStream = CharStreams.fromString(queryString);
-
-        GraqlLexer lexer = new GraqlLexer(charStream);
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(errorListener);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        GraqlParser parser = new GraqlParser(tokens);
-        parser.removeErrorListeners();
-        parser.addErrorListener(errorListener);
-
-        return parser;
-    }
-
     private <CONTEXT extends ParserRuleContext, RETURN> RETURN parseQuery(
             String queryString, Function<GraqlParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
     ) {
+        if (queryString == null || queryString.isEmpty()) {
+            throw GraqlException.create("Query String is NULL or Empty");
+        }
+
         ErrorListener errorListener = ErrorListener.of(queryString);
-        GraqlParser parser = parse(queryString, errorListener);
+        CharStream charStream = CharStreams.fromString(queryString);
+        GraqlLexer lexer = new GraqlLexer(charStream);
+
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(errorListener);
+
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        GraqlParser parser = new GraqlParser(tokens);
+
+        parser.removeErrorListeners();
+        parser.addErrorListener(errorListener);
 
         // BailErrorStrategy + SLL is a very fast parsing strategy for queries
         // that are expected to be correct. However, it may not be able to
