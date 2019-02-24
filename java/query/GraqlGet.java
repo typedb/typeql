@@ -260,7 +260,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             } else if (var != null && method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                 throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
             } else if (var != null && !query.vars().contains(var)) {
-                throw new IllegalArgumentException("Aggregate variable should be contained in GET query");
+                throw GraqlException.variableOutOfScope(var.toString());
             }
 
             this.var = var;
@@ -331,6 +331,8 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
             if (var == null) {
                 throw new NullPointerException("Variable is null");
+            } else if (!query.vars().contains(var)) {
+                throw GraqlException.variableOutOfScope(var.toString());
             }
             this.var = var;
         }
@@ -403,7 +405,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 } else if (var != null && this.method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
                 } else if (var != null && !group.query().vars().contains(var)) {
-                    throw new IllegalArgumentException("Aggregate variable should be contained in GET query");
+                    throw GraqlException.variableOutOfScope(var.toString());
                 }
                 this.var = var;
             }
