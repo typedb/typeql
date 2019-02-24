@@ -948,8 +948,8 @@ public class ParserTest {
 
     @Test
     public void testParseListEmpty() {
+        exception.expect(GraqlException.class);
         List<GraqlQuery> queries = Graql.parseList("").collect(toList());
-        assertEquals(0, queries.size());
     }
 
     @Test
