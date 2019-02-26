@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * This property can be queried or inserted. Whether this is a key is indicated by the
  * HasAttributeTypeProperty#isKey field.
  * This property is defined as an implicit ontological structure between a Type and a AttributeType,
- * including one implicit RelationshipType and two implicit Roles. The labels of these types are derived
+ * including one implicit RelationType and two implicit Roles. The labels of these types are derived
  * from the label of the AttributeType.
  * Like HasAttributeProperty, if this is not a key and is used in a match clause it will not use the implicit
  * structure - instead, it will match if there is any kind of relation type connecting the two types.

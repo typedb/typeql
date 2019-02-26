@@ -682,7 +682,7 @@ public class Graql {
             PLAYS("plays"),
             REGEX("regex"),
             RELATES("relates"),
-            RELATION("relationship"), // TODO: Relationship syntax need to be updated
+            RELATION("relation"),
             SUB("sub"),
             SUBX("sub!"),
             THEN("then"),

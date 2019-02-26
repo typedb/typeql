@@ -524,14 +524,14 @@ public class ParserTest {
         String query = "define\n" +
                 "parent sub role;\n" +
                 "child sub role;\n" +
-                "parenthood sub relationship, relates parent, relates child;\n" +
+                "parenthood sub relation, relates parent, relates child;\n" +
                 "fatherhood sub parenthood, relates father as parent, relates son as child;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
 
         GraqlDefine expected = define(
                 type("parent").sub("role"),
                 type("child").sub("role"),
-                type("parenthood").sub("relationship")
+                type("parenthood").sub("relation")
                         .relates(var().type("parent"))
                         .relates(var().type("child")),
                 type("fatherhood").sub("parenthood")
@@ -559,7 +559,7 @@ public class ParserTest {
     public void whenParsingDefineQuery_ResultIsSameAsJavaGraql() {
         String query = "define\n" +
                 "pokemon sub entity;\n" +
-                "evolution sub relationship;\n" +
+                "evolution sub relation;\n" +
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
                 "evolution relates evolves-from, relates evolves-to;\n" +
@@ -568,7 +568,7 @@ public class ParserTest {
 
         GraqlDefine expected = define(
                 type("pokemon").sub("entity"),
-                type("evolution").sub("relationship"),
+                type("evolution").sub("relation"),
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
                 type("evolution").relates("evolves-from").relates("evolves-to"),
@@ -582,7 +582,7 @@ public class ParserTest {
     public void whenParsingUndefineQuery_ResultIsSameAsJavaGraql() {
         String query = "undefine\n" +
                 "pokemon sub entity;\n" +
-                "evolution sub relationship;\n" +
+                "evolution sub relation;\n" +
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
                 "evolution relates evolves-from, relates evolves-to;\n" +
@@ -591,7 +591,7 @@ public class ParserTest {
 
         GraqlUndefine expected = undefine(
                 type("pokemon").sub("entity"),
-                type("evolution").sub("relationship"),
+                type("evolution").sub("relation"),
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
                 type("evolution").relates("evolves-from").relates("evolves-to"),
@@ -1049,7 +1049,7 @@ public class ParserTest {
     }
 
     @Test
-    public void whenParsingAQueryWithReifiedAttributeRelationshipSyntax_ItIsEquivalentToJavaGraql() {
+    public void whenParsingAQueryWithReifiedAttributeRelationSyntax_ItIsEquivalentToJavaGraql() {
         assertParseEquivalence("match $x has name $z via $x; get $x;");
     }
 
