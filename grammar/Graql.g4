@@ -240,7 +240,7 @@ DEFINE          : 'define'      ;   UNDEFINE        : 'undefine'    ;
 INSERT          : 'insert'      ;   DELETE          : 'delete'      ;
 AGGREGATE       : 'aggregate'   ;   COMPUTE         : 'compute'     ;
 
-// TYPE KEYWORDS
+// NATIVE TYPE KEYWORDS
 
 THING           : 'thing'       ;   ENTITY          : 'entity'      ;
 ATTRIBUTE       : 'attribute'   ;   RELATION        : 'relation'    ;

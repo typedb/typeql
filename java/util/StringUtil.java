@@ -19,6 +19,7 @@
 package graql.lang.util;
 
 import graql.grammar.GraqlLexer;
+import graql.lang.Graql;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.text.DecimalFormat;
@@ -65,7 +66,7 @@ public class StringUtil {
     public static String escapeLabelOrId(String value) {
         // TODO: This regex should be saved in Query class once it is moved to //graql package
         if (value.matches("^@?[a-zA-Z_][a-zA-Z0-9_-]*$") &&
-                (!GRAQL_KEYWORDS.contains(value)) || ALLOWED_ID_KEYWORDS.contains(value)) {
+                (Graql.Token.Type.of(value) != null || ALLOWED_ID_KEYWORDS.contains(value) || !GRAQL_KEYWORDS.contains(value)) ) {
             return value;
         } else {
             return quoteString(value);
