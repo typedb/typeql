@@ -42,6 +42,11 @@ import javax.annotation.Nullable;
  */
 public interface StatementTypeBuilder {
 
+    @CheckReturnValue
+    default StatementType type(Graql.Token.Type type) {
+        return type(type.toString());
+    }
+    
     /**
      * @param name a string that this variable's label must match
      * @return this
