@@ -29,33 +29,33 @@ import static java.util.stream.Collectors.joining;
 
 /**
  * Represents the {@code has} property on an Thing. This property can be queried, inserted or deleted.
- * The property is defined as a Relationship between an Thing and a Attribute,
+ * The property is defined as a Relation between an Thing and a Attribute,
  * where theAttribute is of a particular type. When matching,  Schema.EdgeLabel#ROLE_PLAYER
- * edges are used to speed up the traversal. The type of the Relationship does notmatter.
- * When inserting, an implicit Relationship is created between the instance and the Attribute,
+ * edges are used to speed up the traversal. The type of the Relation does not matter.
+ * When inserting, an implicit Relation is created between the instance and the Attribute,
  * using type labels derived from the label of the AttributeType.
  */
 public class HasAttributeProperty extends VarProperty {
 
     private final String type;
     private final Statement attribute;
-    private final Statement relationship;
+    private final Statement relation;
 
     public HasAttributeProperty(String type, Statement attribute) {
         this(type, attribute, new Statement(new Variable()));
     }
 
-    public HasAttributeProperty(String type, Statement attribute, Statement relationship) {
+    public HasAttributeProperty(String type, Statement attribute, Statement relation) {
         attribute = attribute.isa(Graql.type(type));
         if (type == null) {
             throw new NullPointerException("Null type");
         }
         this.type = type;
         this.attribute = attribute;
-        if (relationship == null) {
-            throw new NullPointerException("Null relationship");
+        if (relation == null) {
+            throw new NullPointerException("Null relation");
         }
-        this.relationship = relationship;
+        this.relation = relation;
     }
 
     public String type() {
@@ -66,8 +66,8 @@ public class HasAttributeProperty extends VarProperty {
         return attribute;
     }
 
-    public Statement relationship() {
-        return relationship;
+    public Statement relation() {
+        return relation;
     }
 
     @Override
@@ -87,8 +87,8 @@ public class HasAttributeProperty extends VarProperty {
             attribute().getProperties(ValueProperty.class).forEach(prop -> property.add(prop.operation().toString()));
         }
 
-        if (hasReifiedRelationship()) {
-            property.add(Graql.Token.Property.VIA.toString()).add(relationship().getPrintableName());
+        if (hasReifiedRelation()) {
+            property.add(Graql.Token.Property.VIA.toString()).add(relation().getPrintableName());
         }
 
         return property.build().collect(joining(Graql.Token.Char.SPACE.toString()));
@@ -106,7 +106,7 @@ public class HasAttributeProperty extends VarProperty {
 
     @Override
     public Stream<Statement> statements() {
-        return Stream.of(attribute(), relationship());
+        return Stream.of(attribute(), relation());
     }
 
     @Override
@@ -114,8 +114,8 @@ public class HasAttributeProperty extends VarProperty {
         return StatementInstance.class;
     }
 
-    private boolean hasReifiedRelationship() {
-        return relationship().properties().stream().findAny().isPresent() || relationship().var().isUserDefinedName();
+    private boolean hasReifiedRelation() {
+        return relation().properties().stream().findAny().isPresent() || relation().var().isUserDefinedName();
     }
 
     @Override
@@ -132,7 +132,7 @@ public class HasAttributeProperty extends VarProperty {
         // This check is necessary for `equals` and `hashCode` because `Statement` equality is defined
         // s.t. `var() != var()`, but `var().label("movie") == var().label("movie")`
         // i.e., a `Var` is compared by name, but a `Statement` ignores the name if the var is not user-defined
-        return !hasReifiedRelationship() || relationship().equals(that.relationship());
+        return !hasReifiedRelation() || relation().equals(that.relation());
     }
 
     @Override
@@ -141,8 +141,8 @@ public class HasAttributeProperty extends VarProperty {
         result = 31 * result + attribute().hashCode();
 
         // TODO: Having to check this is pretty dodgy, explanation in #equals
-        if (hasReifiedRelationship()) {
-            result = 31 * result + relationship().hashCode();
+        if (hasReifiedRelation()) {
+            result = 31 * result + relation().hashCode();
         }
 
         return result;

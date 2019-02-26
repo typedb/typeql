@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Represents the relation property (e.g. {@code ($x, $y)} or {@code (wife: $x, husband: $y)}) on a relationship.
+ * Represents the relation property (e.g. {@code ($x, $y)} or {@code (wife: $x, husband: $y)}) on a relation.
  * This property can be queried and inserted.
  * This propert is comprised of instances of RolePlayer, which represents associations between a
  * role-player Thing and an optional Role.

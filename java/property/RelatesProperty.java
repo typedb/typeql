@@ -27,10 +27,10 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * Represents the {@code relates} property on a RelationshipType.
+ * Represents the {@code relates} property on a RelationType.
  * This property can be queried, inserted or deleted.
- * This property relates a RelationshipType and a Role. It indicates that a Relationship whose
- * type is this RelationshipType may have a role-player playing the given Role.
+ * This property relates a RelationType and a Role. It indicates that a Relation whose
+ * type is this RelationType may have a role-player playing the given Role.
  */
 public class RelatesProperty extends VarProperty {
 

@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 /**
  * Represents the {@code isa} property on a Thing.
  * This property can be queried and inserted.
- * THe property is defined as a relationship between an Thing and a Type.
+ * THe property is defined as a relation between an Thing and a Type.
  * When matching, any subtyping is respected. For example, if we have {@code $bob isa man}, {@code man sub person},
  * {@code person sub entity} then it follows that {@code $bob isa person} and {@code bob isa entity}.
  */
