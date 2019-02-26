@@ -247,10 +247,11 @@ public class Graql {
         return var(new Variable(false));
     }
 
-    /**
-     * @param label the label of a concept
-     * @return a variable pattern that identifies a concept by label
-     */
+    @CheckReturnValue
+    public static StatementType type(Graql.Token.Type type) {
+        return type(type.toString());
+    }
+
     @CheckReturnValue
     public static StatementType type(String label) {
         return hiddenVar().type(label);
