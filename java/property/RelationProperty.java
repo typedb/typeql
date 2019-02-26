@@ -54,7 +54,7 @@ public class RelationProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Graql.Token.Property.RELATION.toString();
+        return Graql.Token.Type.RELATION.toString(); // TODO: figure out a way to not use this
     }
 
     public String property() {
