@@ -847,7 +847,9 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public String visitLabel(GraqlParser.LabelContext ctx) {
-        if (ctx.identifier() != null) {
+        if (ctx.type_native() != null) {
+            return ctx.type_native().getText();
+        } else if (ctx.identifier() != null) {
             return visitIdentifier(ctx.identifier());
         } else {
             return ctx.ID_IMPLICIT_().getText();

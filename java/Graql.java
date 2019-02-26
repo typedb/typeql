@@ -513,6 +513,35 @@ public class Graql {
 
     public static class Token {
 
+        public enum Type {
+            THING("thing"),
+            ENTITY("entity"),
+            ATTRIBUTE("attribute"),
+            RELATION("relation"),
+            ROLE("role"),
+            RULE("rule");
+
+            private final String type;
+
+            Type(String type) {
+                this.type = type;
+            }
+
+            @Override
+            public String toString() {
+                return this.type;
+            }
+
+            public static Type of(String value) {
+                for (Type c : Type.values()) {
+                    if (c.type.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
+        }
+
         /**
          * Graql commands to determine the type of query
          */
@@ -682,7 +711,6 @@ public class Graql {
             PLAYS("plays"),
             REGEX("regex"),
             RELATES("relates"),
-            RELATION("relation"),
             SUB("sub"),
             SUBX("sub!"),
             THEN("then"),

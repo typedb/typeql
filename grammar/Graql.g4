@@ -207,13 +207,15 @@ compute_arg         :   MIN_K     '=' INTEGER_                                  
 type                :   label | VAR_ ;                                          // A type can be a label or variable
 types               :   label | label_array ;
 label_array         :   '[' label ( ',' label )* ']' ;
-label               :   identifier | ID_IMPLICIT_;
+label               :   type_native | identifier | ID_IMPLICIT_;
 
 id                  :   identifier ;
 identifier          :   ID_ | STRING_ | unreserved ;                            // TODO: disallow quoted strings as IDs
 
 // LITERAL INPUT VALUES =======================================================
 
+type_native         :   THING       |   ENTITY      |   ATTRIBUTE
+                    |   RELATION    |   ROLE        |   RULE        ;
 datatype            :   LONG        |   DOUBLE      |   STRING
                     |   BOOLEAN     |   DATE        ;
 literal             :   STRING_     |   INTEGER_    |   REAL_
@@ -238,10 +240,16 @@ DEFINE          : 'define'      ;   UNDEFINE        : 'undefine'    ;
 INSERT          : 'insert'      ;   DELETE          : 'delete'      ;
 AGGREGATE       : 'aggregate'   ;   COMPUTE         : 'compute'     ;
 
+// NATIVE TYPE KEYWORDS
+
+THING           : 'thing'       ;   ENTITY          : 'entity'      ;
+ATTRIBUTE       : 'attribute'   ;   RELATION        : 'relation'    ;
+ROLE            : 'role'        ;   RULE            : 'rule'        ;
+
 // DELETE AND GET QUERY MODIFIER KEYWORDS
 
 OFFSET          : 'offset'      ;   LIMIT           : 'limit'       ;
-SORT            : 'sort'        ;   ORDER_           : ASC | DESC    ;
+SORT            : 'sort'        ;   ORDER_          : ASC | DESC    ;
 ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
 // STATEMENT PROPERTY KEYWORDS
