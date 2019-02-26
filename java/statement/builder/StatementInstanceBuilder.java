@@ -31,6 +31,11 @@ import java.time.LocalDateTime;
 public interface StatementInstanceBuilder {
 
     @CheckReturnValue
+    default StatementInstance isa(Graql.Token.Type type) {
+        return isa(type.toString());
+    }
+
+    @CheckReturnValue
     default StatementInstance isa(String type) {
         return isa(Graql.type(type));
     }
@@ -38,6 +43,11 @@ public interface StatementInstanceBuilder {
     @CheckReturnValue
     default StatementInstance isa(Statement type) {
         return isa(new IsaProperty(type));
+    }
+
+    @CheckReturnValue
+    default StatementInstance isaX(Graql.Token.Type type) {
+        return isa(type.toString());
     }
 
     @CheckReturnValue
