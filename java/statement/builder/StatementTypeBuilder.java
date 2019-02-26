@@ -61,6 +61,10 @@ public interface StatementTypeBuilder {
         return type(AbstractProperty.get());
     }
 
+    default StatementType sub(Graql.Token.Type type) {
+        return sub(type.toString());
+    }
+
     /**
      * @param type a concept type id that this variable must be a kind of
      * @return this
@@ -77,6 +81,10 @@ public interface StatementTypeBuilder {
     @CheckReturnValue
     default StatementType sub(Statement type) {
         return sub(new SubProperty(type));
+    }
+
+    default StatementType subX(Graql.Token.Type type) {
+        return subX(type.toString());
     }
 
     /**
