@@ -43,11 +43,6 @@ dependencies:
       version: "23.0"
       lang: java
 
-  commons-lang:
-    commons-lang:
-      version: "2.6"
-      lang: java
-
   org.antlr:
     antlr4-runtime:
       version: "4.7.1" # sync version with @antlr4_runtime//jar

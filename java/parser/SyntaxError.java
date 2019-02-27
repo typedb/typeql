@@ -19,7 +19,6 @@
 package graql.lang.parser;
 
 import graql.lang.exception.ErrorMessage;
-import org.apache.commons.lang.StringUtils;
 
 public class SyntaxError {
 
@@ -38,6 +37,15 @@ public class SyntaxError {
         this.msg = msg;
     }
 
+    private String spaces(int len) {
+        char ch = ' ';
+        char[] output = new char[len];
+        for (int i = len - 1; i >= 0; i--) {
+            output[i] = ch;
+        }
+        return new String(output);
+    }
+
     @Override
     public String toString() {
         if (queryLine == null) {
@@ -49,7 +57,7 @@ public class SyntaxError {
             // match $
             //       ^
             // blah blah antlr blah
-            String pointer = StringUtils.repeat(" ", charPositionInLine) + "^";
+            String pointer = spaces(charPositionInLine) + "^";
             return ErrorMessage.SYNTAX_ERROR.getMessage(line, queryLine, pointer, msg);
         }
     }

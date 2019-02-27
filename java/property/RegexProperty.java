@@ -20,7 +20,9 @@ package graql.lang.property;
 
 import graql.lang.Graql;
 import graql.lang.statement.StatementType;
-import graql.lang.util.StringUtil;
+
+import static graql.lang.util.StringUtil.escapeRegex;
+import static graql.lang.util.StringUtil.quoteString;
 
 /**
  * Represents the {@code regex} property on a AttributeType. This property can be queried and inserted.
@@ -49,7 +51,7 @@ public class RegexProperty extends VarProperty {
 
     @Override
     public String property() {
-        return "\"" + StringUtil.escapeString(regex()) + "\"";
+        return quoteString(escapeRegex(regex()));
     }
 
     @Override

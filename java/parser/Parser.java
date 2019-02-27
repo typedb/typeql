@@ -67,6 +67,7 @@ import static graql.lang.Graql.and;
 import static graql.lang.Graql.not;
 import static graql.lang.Graql.type;
 import static graql.lang.util.Collections.triple;
+import static graql.lang.util.StringUtil.unescapeRegex;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -973,9 +974,7 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public String visitRegex(GraqlParser.RegexContext ctx) {
-        // Remove surrounding /.../
-        String unquoted = unquoteString(ctx.STRING_());
-        return unquoted.replaceAll("\\\\/", "/");
+        return unescapeRegex(unquoteString(ctx.STRING_()));
     }
 
     @Override
@@ -1022,8 +1021,7 @@ public class Parser extends GraqlBaseVisitor {
 
     private String getString(TerminalNode string) {
         // Remove surrounding quotes
-        String unquoted = unquoteString(string);
-        return StringUtil.unescapeString(unquoted);
+        return unquoteString(string);
     }
 
     private String unquoteString(TerminalNode string) {

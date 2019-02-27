@@ -116,15 +116,14 @@ public class GraqlQueryTest {
 
     @Test
     public void testEscapeStrings() {
-        assertEquals("insert $x \"hello\\nworld\";", Graql.insert(var("x").val("hello\nworld")).toString());
+        assertEquals("insert $x \"hello\nworld\";", Graql.insert(var("x").val("hello\nworld")).toString());
+        assertEquals("insert $x \"hello\\nworld\";", Graql.insert(var("x").val("hello\\nworld")).toString());
     }
 
     @Test
     public void testQuoteIds() {
-        assertEquals(
-                "match $a (\"hello\\tworld\");",
-                match(var("a").rel(type("hello\tworld"))).toString()
-        );
+        assertEquals("match $a (\"hello\tworld\");", match(var("a").rel(type("hello\tworld"))).toString());
+        assertEquals("match $a (\"hello\\tworld\");", match(var("a").rel(type("hello\\tworld"))).toString());
     }
 
     @Test
