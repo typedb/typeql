@@ -20,7 +20,6 @@ package graql.lang.util;
 
 import graql.grammar.GraqlLexer;
 import graql.lang.Graql;
-import org.apache.commons.lang.StringEscapeUtils;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -39,20 +38,12 @@ public class StringUtil {
             Arrays.asList("min", "max", "median", "mean", "std", "sum", "count", "path", "cluster", "degrees", "members", "persist")
     );
 
-    /**
-     * @param string the string to unescape
-     * @return the unescaped string, replacing any backslash escapes with the real characters
-     */
-    public static String unescapeString(String string) {
-        return StringEscapeUtils.unescapeJavaScript(string);
+    public static String unescapeRegex(String regex) {
+        return regex.replaceAll("\\\\/", "/");
     }
 
-    /**
-     * @param string the string to escape
-     * @return the escaped string, replacing any escapable characters with backslashes
-     */
-    public static String escapeString(String string) {
-        return StringEscapeUtils.escapeJavaScript(string);
+    public static String escapeRegex(String regex) {
+        return regex.replaceAll("/", "\\\\/");
     }
 
     /**
@@ -60,7 +51,7 @@ public class StringUtil {
      * @return a string, surrounded with double quotes and escaped
      */
     public static String quoteString(String string) {
-        return "\"" + escapeString(string) + "\"";
+        return "\"" + string + "\"";
     }
 
     public static String escapeLabelOrId(String value) {

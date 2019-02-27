@@ -79,4 +79,7 @@ public interface Pattern {
      */
     @CheckReturnValue
     default Negation<?> asNegation(){ throw new UnsupportedOperationException(); }
+
+    @Override
+    String toString();
 }

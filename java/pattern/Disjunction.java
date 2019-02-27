@@ -18,11 +18,11 @@
 
 package graql.lang.pattern;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
+import graql.lang.util.Collections;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Iterator;
@@ -78,7 +78,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     @Override
     public Set<Variable> variables() {
-        return getPatterns().stream().map(Pattern::variables).reduce(Sets::intersection).orElse(ImmutableSet.of());
+        return getPatterns().stream().map(Pattern::variables).reduce(Sets::intersection).orElse(Collections.set());
     }
 
     @Override

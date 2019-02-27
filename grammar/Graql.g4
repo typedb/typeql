@@ -302,8 +302,8 @@ DATE            : 'date'        ;
 BOOLEAN_        : TRUE | FALSE  ; // order of lexer declaration matters
 TRUE            : 'true'        ;
 FALSE           : 'false'       ;
-STRING_         : '"'  (~["\\/] | ESCAPE_SEQ_ )* '"'
-                | '\'' (~['\\/] | ESCAPE_SEQ_ )* '\''   ;
+STRING_         : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
+                | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''   ;
 INTEGER_        : ('+' | '-')? [0-9]+                   ;
 REAL_           : ('+' | '-')? [0-9]+ '.' [0-9]+        ;
 DATE_           : DATE_FRAGMENT_                        ;

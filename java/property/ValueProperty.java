@@ -27,6 +27,9 @@ import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
+import static graql.lang.util.StringUtil.escapeRegex;
+import static graql.lang.util.StringUtil.quoteString;
+
 /**
  * Represents the {@code value} property on an attribute.
  * This property can be queried or inserted.
@@ -243,9 +246,9 @@ public class ValueProperty<T> extends VarProperty {
 
                     operation.append(comparator()).append(Graql.Token.Char.SPACE);
                     if (comparator().equals(Graql.Token.Comparator.LIKE)) {
-                        operation.append("\"").append(value().replaceAll("/", "\\\\/")).append("\"");
+                        operation.append(quoteString(escapeRegex(value())));
                     } else {
-                        operation.append(StringUtil.quoteString(value()));
+                        operation.append(quoteString(value()));
                     }
 
                     return operation.toString();

@@ -100,6 +100,25 @@ public class ParserTest {
     }
 
     @Test
+    public void testParseStringWithSlash() {
+        String query = "match $x isa person, has name 'alice/bob'; get;";
+        GraqlGet parsed = Graql.parse(query).asGet();
+        GraqlGet expected = match(var("x").isa("person").has("name", "alice/bob")).get();
+
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
+//
+//        String string = "alice/bob";
+//        System.out.println("original  : " + string);
+//
+//        String escaped = StringUtil.escapeString(string);
+//        System.out.println("escaped   : " + escaped);
+//
+//        String unescaped = StringUtil.unescapeString(escaped);
+//        System.out.println("unescaped : " + unescaped);
+
+    }
+
+    @Test
     public void testRelationQuery() {
         String query = "match\n" +
                 "$brando 'Marl B' isa name;\n" +
@@ -664,12 +683,13 @@ public class ParserTest {
 
     @Test
     public void testEscapeString() {
-        String unescaped = "This has \"double quotes\" and a single-quoted backslash: '\\'";
-        String escaped = "This has \\\"double quotes\\\" and a single-quoted backslash: \\'\\\\\\'";
+        // ANTLR will see this as a string that looks like:
+        // "This has \"double quotes\" and a single-quoted backslash: '\\'"
+        String input = "This has \\\"double quotes\\\" and a single-quoted backslash: \\'\\\\\\'";
 
-        String query = "insert $_ isa movie, has title \"" + escaped + "\";";
+        String query = "insert $_ isa movie, has title \"" + input + "\";";
         GraqlInsert parsed = Graql.parse(query).asInsert();
-        GraqlInsert expected = insert(var().isa("movie").has("title", unescaped));
+        GraqlInsert expected = insert(var().isa("movie").has("title", input));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -1097,28 +1117,51 @@ public class ParserTest {
     }
 
     @Test
+    public void regexAttributeProperty() {
+        String query = "define digit sub attribute, regex '\\d';";
+        GraqlDefine parsed = parse(query);
+        GraqlDefine expected = define(type("digit").sub("attribute").regex("\\d"));
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
+    }
+
+    @Test
     public void regexPredicateParsesCharacterClassesCorrectly() {
-        assertEquals(match(var("x").like("\\d")).get(), parse("match $x like '\\d'; get;"));
+        String query = "match $x like '\\d'; get;";
+        GraqlGet parsed = parse(query);
+        GraqlGet expected = match(var("x").like("\\d")).get();
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesQuotesCorrectly() {
-        assertEquals(match(var("x").like("\"")).get(), parse("match $x like '\"'; get;"));
+        String query = "match $x like '\\\"'; get;";
+        GraqlGet parsed = parse(query);
+        GraqlGet expected = match(var("x").like("\\\"")).get();
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesBackslashesCorrectly() {
-        assertEquals(match(var("x").like("\\\\")).get(), parse("match $x like '\\\\'; get;"));
+        String query = "match $x like '\\\\'; get;";
+        GraqlGet parsed = parse(query);
+        GraqlGet expected = match(var("x").like("\\\\")).get();
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesNewlineCorrectly() {
-        assertEquals(match(var("x").like("\\n")).get(), parse("match $x like '\\n'; get;"));
+        String query = "match $x like '\\n'; get;";
+        GraqlGet parsed = parse(query);
+        GraqlGet expected = match(var("x").like("\\n")).get();
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesForwardSlashesCorrectly() {
-        assertEquals(match(var("x").like("/")).get(), parse("match $x like '\\/'; get;"));
+        String query = "match $x like '\\/'; get;";
+        GraqlGet parsed = parse(query);
+        GraqlGet expected = match(var("x").like("/")).get();
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
