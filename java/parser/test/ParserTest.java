@@ -106,16 +106,6 @@ public class ParserTest {
         GraqlGet expected = match(var("x").isa("person").has("name", "alice/bob")).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
-//
-//        String string = "alice/bob";
-//        System.out.println("original  : " + string);
-//
-//        String escaped = StringUtil.escapeString(string);
-//        System.out.println("escaped   : " + escaped);
-//
-//        String unescaped = StringUtil.unescapeString(escaped);
-//        System.out.println("unescaped : " + unescaped);
-
     }
 
     @Test
