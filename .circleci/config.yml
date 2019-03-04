@@ -61,8 +61,29 @@ jobs:
       - bazel:
           command: bazel test //... --test_output=errors
 
+  dependency-update:
+    machine: true
+    working_directory: ~/grakn
+    steps:
+      - run: echo hello
+#      - checkout
+#      - bazel_install
+#      - run:
+#          name: Sync grakn:master to the latest Graql version
+#          command: |
+#            bazel run @graknlabs_grabl//ci:dependency-update -- --dependency graql:master --user grakn:master
+
+
 workflows:
   graql:
     jobs:
       - build
       - graql
+      - dependency-update:
+          filters:
+            branches:
+              only: dependency-update
+#              only: master
+          requires:
+            - build
+            - graql
