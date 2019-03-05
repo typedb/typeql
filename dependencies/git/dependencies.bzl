@@ -21,6 +21,6 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 def graknlabs_grabl():
     git_repository(
         name = "graknlabs_grabl",
-        remote = "https://github.com/lolski/grabl", # TODO: change to graknlabs/grabl
-        commit = "4e544a9b167c3f86c91845130634acb48c67a0ed",
+        remote = "https://github.com/graknlabs/grabl",
+        commit = "ad79f87f869d25694fe11196e16be42a80e95d14",
     )
