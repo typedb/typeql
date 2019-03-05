@@ -65,13 +65,12 @@ jobs:
     machine: true
     working_directory: ~/grakn
     steps:
-      - run: echo hello
-#      - checkout
-#      - bazel_install
-#      - run:
-#          name: Sync grakn:master to the latest Graql version
-#          command: |
-#            bazel run @graknlabs_grabl//ci:dependency-update -- --dependency graql:master --user grakn:master
+      - checkout
+      - bazel_install
+      - run: # TODO: change to --user grakn:master
+          name: Sync grakn:master to the latest Graql version
+          command: |
+            bazel run @graknlabs_grabl//ci:dependency-update -- --dependency graql:master --user grakn:dependency-update-graql
 
 
 workflows:

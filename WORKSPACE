@@ -30,6 +30,9 @@ tools_dependencies()
 load("//dependencies/tools/checkstyle:checkstyle.bzl", "checkstyle_dependencies")
 checkstyle_dependencies()
 
+load("//dependencies/git:dependencies.bzl", "graknlabs_grabl")
+graknlabs_grabl()
+
 #####################################
 # Load Java dependencies from Maven #
 #####################################
