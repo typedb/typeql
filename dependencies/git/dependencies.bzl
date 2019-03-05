@@ -22,5 +22,5 @@ def graknlabs_grabl():
     git_repository(
         name = "graknlabs_grabl",
         remote = "https://github.com/lolski/grabl", # TODO: change to graknlabs/grabl
-        commit = "4939306f26c3b959c6a9f6b2b3ac6f86be3b517c",
+        commit = "4e544a9b167c3f86c91845130634acb48c67a0ed",
     )
