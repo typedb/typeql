@@ -81,8 +81,7 @@ workflows:
       - dependency-update:
           filters:
             branches:
-              only: dependency-update
-#              only: master
+              only: master
           requires:
             - build
             - graql
