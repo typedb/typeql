@@ -25,11 +25,8 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 # Grakn Labs Dependencies #
 ###########################
 
-git_repository(
-    name = "graknlabs_build_tools",
-    remote = "https://github.com/graknlabs/build-tools",
-    commit = "4815b8583ca98ad59058d1a808b87e6b2f47dbf7", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_build_tools
-)
+load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_build_tools")
+graknlabs_build_tools()
 
 load("@graknlabs_build_tools//distribution:dependencies.bzl", "graknlabs_bazel_distribution")
 graknlabs_bazel_distribution()

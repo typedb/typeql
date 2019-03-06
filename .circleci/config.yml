@@ -79,27 +79,8 @@ jobs:
       - bazel:
           command: bazel test //... --test_output=errors
 
-  sync-dependencies:
-    machine: true
-    working_directory: ~/grakn
-    steps:
-      - checkout
-      - bazel_install
-      - run:
-          name: Sync grakn:master client-java:master and docs:development to the latest Graql version
-          command: |
-            bazel run @graknlabs_build_tools//ci:sync-dependencies -- --dependency graql:master \
-            --user grakn:master client-java:master docs:development
-
 workflows:
   graql:
     jobs:
       - build
       - test-java
-      - sync-dependencies:
-          filters:
-            branches:
-              only: master
-          requires:
-            - build
-            - test-java

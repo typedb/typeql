@@ -15,24 +15,3 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-def antlr_dependencies():
-    git_repository(
-        name = "rules_antlr",
-        remote = "https://github.com/graknlabs/rules_antlr",
-        commit = "3d1806329d7c61241781f7578240d1ff17f9e5d8"
-    )
-
-def grpc_dependencies():
-    git_repository(
-        name = "com_github_grpc_grpc",
-        remote = "https://github.com/graknlabs/grpc",
-        commit = "4a1528f6f20a8aa68bdbdc9a66286ec2394fc170"
-    )
-    git_repository(
-        name = "stackb_rules_proto",
-        remote = "https://github.com/stackb/rules_proto",
-        commit = "137014a36f389cfcb4987a567b7bd23a7a259cf9",
-    )
