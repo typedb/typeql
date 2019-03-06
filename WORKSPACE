@@ -18,17 +18,35 @@
 
 workspace(name = "graknlabs_graql")
 
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+
+###########################
+# Grakn Labs Dependencies #
+###########################
+
+git_repository(
+    name = "graknlabs_build_tools",
+    remote = "https://github.com/graknlabs/build-tools",
+    commit = "eda06eac46ca37851038584c70b35b9dffabb1eb", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_build_tools
+)
+
+load("@graknlabs_build_tools//distribution:dependencies.bzl", "graknlabs_bazel_distribution")
+graknlabs_bazel_distribution()
+
 
 ####################
 # Load Build Tools #
 ####################
 
-# Load additional build tools, such bazel-deps and unused-deps
-load("//dependencies/tools:dependencies.bzl", "tools_dependencies")
-tools_dependencies()
+load("@graknlabs_build_tools//bazel:dependencies.bzl", "bazel_common", "bazel_deps", "bazel_toolchain")
+bazel_common()
+bazel_deps()
+bazel_toolchain()
 
-load("//dependencies/tools/checkstyle:checkstyle.bzl", "checkstyle_dependencies")
+load("@graknlabs_build_tools//checkstyle:dependencies.bzl", "checkstyle_dependencies")
 checkstyle_dependencies()
+
 
 #####################################
 # Load Java dependencies from Maven #
@@ -51,13 +69,9 @@ load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
 antlr_dependencies()
 
 
-
 ########################################
 #    Load Distribution Dependencies    #
 ########################################
-
-load("//dependencies/distribution:dependencies.bzl", "distribution_dependencies")
-distribution_dependencies()
 
 load("@graknlabs_bazel_distribution//github:dependencies.bzl", "github_dependencies_for_deployment")
 github_dependencies_for_deployment()

@@ -1,3 +1,21 @@
+#
+# GRAKN.AI - THE KNOWLEDGE GRAPH
+# Copyright (C) 2018 Grakn Labs Ltd
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
 version: 2.1
 commands:
   bazel_install:
@@ -51,7 +69,7 @@ jobs:
       - bazel:
           command: bazel build //...
 
-  graql:
+  test-java:
     machine: true
     working_directory: ~/grakn
     steps:
@@ -61,8 +79,27 @@ jobs:
       - bazel:
           command: bazel test //... --test_output=errors
 
+  sync-dependencies:
+    machine: true
+    working_directory: ~/grakn
+    steps:
+      - checkout
+      - bazel_install
+      - run:
+          name: Sync grakn:master client-java:master and docs:development to the latest Graql version
+          command: |
+            bazel run @graknlabs_build_tools//ci:sync-dependencies -- --dependency graql:master \
+            --user grakn:master client-java:master docs:development
+
 workflows:
   graql:
     jobs:
       - build
-      - graql
+      - test-java
+      - sync-dependencies:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build
+            - test-java
