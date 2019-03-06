@@ -65,7 +65,7 @@ jobs:
       - checkout
       - bazel_install
       - bazel_add_rbe_credential
-      - run: python ./dependencies/tools/checkstyle/test-coverage.py
+      - run: bazel run @graknlabs_build_tools//checkstyle:test-coverage
       - bazel:
           command: bazel build //...
 
