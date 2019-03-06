@@ -18,8 +18,6 @@
 
 workspace(name = "graknlabs_graql")
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
 
 ###########################
 # Grakn Labs Dependencies #

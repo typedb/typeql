@@ -16,6 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
 def graknlabs_build_tools():
     git_repository(
         name = "graknlabs_build_tools",
