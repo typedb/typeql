@@ -43,7 +43,7 @@ commands:
 jobs:
   build:
     machine: true
-    working_directory: ~/grakn
+    working_directory: ~/graql
     steps:
       - checkout
       - install-bazel
@@ -53,7 +53,7 @@ jobs:
 
   test-java:
     machine: true
-    working_directory: ~/grakn
+    working_directory: ~/graql
     steps:
       - checkout
       - install-bazel
