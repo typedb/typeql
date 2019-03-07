@@ -75,8 +75,8 @@ jobs:
       - run:
           name: Run test-deployment
           command: |
-            sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$(cat VERSION)/g" java/test/test-deployment/pom.xml
-            cd java/test/test-deployment/ && mvn test # TODO: this should be invoked by 'bazel test //java:test-deployment'
+            sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$(cat VERSION)/g" test/deployment/pom.xml
+            cd test/deployment/ && mvn test
 
 
 workflows:
