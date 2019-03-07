@@ -74,8 +74,8 @@ jobs:
             fi
             echo VERSION=$(cat VERSION)
       - run: bazel run //java:deploy-maven-jar -- snapshot $REPO_GRAKN_AI_USER $REPO_GRAKN_AI_PASSWORD
-      - run: echo update test/pom.xml
-      - run: echo mvn compile
+      - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$(cat VERSION)/g" java/test/test-deployment/pom.xml
+      - run: cd java/test/test-deployment/ && mvn test
 
 
 workflows:

@@ -4,6 +4,9 @@
 # Bazel files #
 bazel-*
 
+# Maven files #
+java/test/test-deployment/target
+
 # IDE files #
 .idea/
 *.iml
