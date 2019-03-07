@@ -67,15 +67,16 @@ jobs:
       - checkout
       - install-bazel
       - run:
-          name: Optionally append commit id before deploying to test repository
+          name: Deploy to test repository
           command: |
-            if [[ $(cat VERSION | grep "SNAPSHOT" | wc -l) -eq 1 ]]; then
-              echo $(cat VERSION)-$CIRCLE_SHA1 > VERSION
-            fi
+            echo $(cat VERSION)-$CIRCLE_SHA1 > VERSION
             echo VERSION=$(cat VERSION)
-      - run: bazel run //java:deploy-maven-jar -- snapshot $REPO_GRAKN_AI_USER $REPO_GRAKN_AI_PASSWORD
-      - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$(cat VERSION)/g" java/test/test-deployment/pom.xml
-      - run: cd java/test/test-deployment/ && mvn test
+            bazel run //java:deploy-maven-jar -- snapshot $REPO_GRAKN_AI_USER $REPO_GRAKN_AI_PASSWORD
+      - run:
+          name: Run test-deployment
+          command: |
+            sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$(cat VERSION)/g" java/test/test-deployment/pom.xml
+            cd java/test/test-deployment/ && mvn test # TODO: this should be invoked by 'bazel test //java:test-deployment'
 
 
 workflows:
