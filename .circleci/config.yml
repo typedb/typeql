@@ -66,7 +66,14 @@ jobs:
     steps:
       - checkout
       - install-bazel
-      - run: bazel run //server:deploy-maven-jar -- snapshot REPO_GRAKN_AI_USER REPO_GRAKN_AI_PASSWORD
+      - run:
+          name: Optionally append commit id before deploying to test repository
+          command: |
+            if [[ $(cat VERSION | grep "SNAPSHOT" | wc -l) -eq 1 ]]; then
+              echo $(cat VERSION)-$CIRCLE_SHA1 > VERSION
+            fi
+            echo VERSION=$(cat VERSION)
+      - run: bazel run //java:deploy-maven-jar -- snapshot $REPO_GRAKN_AI_USER $REPO_GRAKN_AI_PASSWORD
       - run: echo update test/pom.xml
       - run: echo mvn compile
 
