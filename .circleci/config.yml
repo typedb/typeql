@@ -60,8 +60,20 @@ jobs:
       - run-bazel-rbe:
           command: bazel test //... --test_output=errors
 
+  test-deployment:
+    machine: true
+    working_directory: ~/graql
+    steps:
+      - checkout
+      - install-bazel
+      - run: bazel run //server:deploy-maven-jar -- snapshot REPO_GRAKN_AI_USER REPO_GRAKN_AI_PASSWORD
+      - run: echo update test/pom.xml
+      - run: echo mvn compile
+
+
 workflows:
   graql:
     jobs:
-      - build
-      - test-java
+#      - build
+#      - test-java
+      - test-deployment
