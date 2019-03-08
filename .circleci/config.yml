@@ -82,6 +82,6 @@ jobs:
 workflows:
   graql:
     jobs:
-#      - build
-#      - test-java
+      - build
+      - test-java
       - test-deployment
