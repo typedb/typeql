@@ -10,7 +10,7 @@
     <repositories>
         <repository>
             <id>repo.grakn.ai</id>
-            <url>http://repo.grakn.ai/repository/test-maven/</url>
+            <url>https://repo.grakn.ai/repository/test-maven/</url>
         </repository>
     </repositories>
     <dependencies>
