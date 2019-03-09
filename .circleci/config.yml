@@ -71,7 +71,7 @@ jobs:
           command: |
             echo $(cat VERSION)-$CIRCLE_SHA1 > VERSION
             echo VERSION=$(cat VERSION)
-            bazel run //java:deploy-maven -- snapshot $REPO_GRAKN_AI_USER $REPO_GRAKN_AI_PASSWORD
+            bazel run //java:deploy-maven -- snapshot $REPO_GRAKN_USERNAME REPO_GRAKN_PASSWORD
       - run:
           name: Run test-deployment
           command: |
