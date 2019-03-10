@@ -36,9 +36,7 @@ commands:
       command:
         type: string
     steps:
-      - run:
-          command: |
-            bazel run @graknlabs_build_tools//ci:run-bazel-rbe << parameters.command >>
+      - run: bazel run @graknlabs_build_tools//ci:run-bazel-rbe << parameters.command >>
 
 jobs:
   build:
