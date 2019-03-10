@@ -16,4 +16,4 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-exports_files(["grakn", "VERSION", "deployment.properties"], visibility = ["//visibility:public"])
+exports_files(["VERSION"], visibility = ["//visibility:public"])
