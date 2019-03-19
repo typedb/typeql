@@ -70,7 +70,6 @@ jobs:
             sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$(cat VERSION)/g" test/deployment/pom.xml
             cd test/deployment/ && mvn test
 
-
 workflows:
   graql:
     jobs:
