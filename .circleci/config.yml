@@ -18,18 +18,12 @@
 
 version: 2.1
 commands:
-  install-bazel:
+  install-bazel-linux-rbe:
     steps:
-      - run:
-          name: Install bazel and RBE credential
-          command: |
-            # Install bazel
-            curl -OL https://github.com/bazelbuild/bazel/releases/download/0.20.0/bazel-0.20.0-installer-linux-x86_64.sh
-            chmod +x bazel-0.20.0-installer-linux-x86_64.sh
-            sudo ./bazel-0.20.0-installer-linux-x86_64.sh
-
-            # Install RBE credential
-            bazel run @graknlabs_build_tools//ci:install-bazel-rbe-credential
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-linux.sh
+      - run: sh ./install-bazel-linux.sh && rm ./install-bazel-linux.sh
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-rbe.sh
+      - run: sh ./install-bazel-rbe.sh && rm ./install-bazel-rbe.sh
 
   run-bazel-rbe:
     parameters:
@@ -43,8 +37,8 @@ jobs:
     machine: true
     working_directory: ~/graql
     steps:
+      - install-bazel-linux-rbe
       - checkout
-      - install-bazel
       - run: bazel run @graknlabs_build_tools//checkstyle:test-coverage
       - run-bazel-rbe:
           command: bazel build //...
@@ -53,8 +47,8 @@ jobs:
     machine: true
     working_directory: ~/graql
     steps:
+      - install-bazel-linux-rbe
       - checkout
-      - install-bazel
       - run-bazel-rbe:
           command: bazel test //... --test_output=errors
 
@@ -62,8 +56,8 @@ jobs:
     machine: true
     working_directory: ~/graql
     steps:
+      - install-bazel-linux-rbe
       - checkout
-      - install-bazel
       - run:
           name: Deploy to test repository
           command: |
