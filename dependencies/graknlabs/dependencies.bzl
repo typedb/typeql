@@ -19,6 +19,7 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 def graknlabs_build_tools():
+    # TODO: update to graknlabs/build-tools before merging the PR
     git_repository(
         name = "graknlabs_build_tools",
         remote = "https://github.com/graknlabs/build-tools",
