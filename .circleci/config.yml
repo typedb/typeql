@@ -85,7 +85,13 @@ workflows:
     jobs:
       - build
       - test-java
-      - deploy-maven-test
+      - deploy-maven-test:
+          filters:
+            branches:
+              only: deploy-maven-test # TODO: replace with master before merging the PR
       - test-deployment:
           requires:
             - deploy-maven-test
+          filters:
+            branches:
+              only: deploy-maven-test # TODO: replace with master before merging the PR
