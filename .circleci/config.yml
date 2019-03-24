@@ -58,12 +58,8 @@ jobs:
     steps:
       - install-bazel-linux-rbe
       - checkout
-      - run:
-          name: Deploy to test repository
-          command: |
-            echo $CIRCLE_SHA1 > VERSION
-            cat VERSION
-            bazel run //java:deploy-maven -- snapshot $REPO_GRAKN_USERNAME $REPO_GRAKN_PASSWORD
+      - run: echo $CIRCLE_SHA1
+      - run: bazel run //java:deploy-maven -- snapshot $CIRCLE_SHA1 $REPO_GRAKN_USERNAME $REPO_GRAKN_PASSWORD
 
   test-deployment:
     machine: true
@@ -71,13 +67,9 @@ jobs:
     steps:
       - install-bazel-linux-rbe
       - checkout
-      - run:
-          name: Run test-deployment
-          command: |
-            echo $CIRCLE_SHA1 > VERSION
-            cat VERSION
-            sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$(cat VERSION)/g" test/deployment/pom.xml
-            cd test/deployment/ && mvn test
+      - run: echo $CIRCLE_SHA1
+      - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$CIRCLE_SHA1/g" test/deployment/pom.xml
+      - run: cd test/deployment/ && mvn test
 
 
 workflows:
