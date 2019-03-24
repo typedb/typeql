@@ -31,7 +31,7 @@ java_library(
         "//dependencies/maven/artifacts/org/antlr:antlr4-runtime", # sync version with @antlr4_runtime//jar
         "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
     ],
-    tags = ["maven_coordinates=graql:lang:{pom_version}"],
+    tags = ["maven_coordinates=io.graql:lang:{pom_version}"],
 )
 
 assemble_maven(

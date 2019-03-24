@@ -15,7 +15,7 @@
     </repositories>
     <dependencies>
         <dependency>
-            <groupId>graql</groupId>
+            <groupId>io.graql</groupId>
             <artifactId>lang</artifactId>
             <version>GRAQL_LANG_VERSION_MARKER</version>
             <scope>test</scope>
