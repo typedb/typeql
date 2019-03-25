@@ -80,10 +80,10 @@ workflows:
       - deploy-maven-test:
           filters:
             branches:
-              only: deploy-maven-test # TODO: replace with master before merging the PR
+              only: master
       - test-deployment:
           requires:
             - deploy-maven-test
           filters:
             branches:
-              only: deploy-maven-test # TODO: replace with master before merging the PR
+              only: master
