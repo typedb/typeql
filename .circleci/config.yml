@@ -71,6 +71,26 @@ jobs:
       - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$CIRCLE_SHA1/g" test/deployment/pom.xml
       - run: cd test/deployment/ && mvn test
 
+  release-approval:
+    machine: true
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: bazel run @graknlabs_build_tools//ci:release-approval
+
+  release-github-draft:
+    machine: true
+    working_directory: ~/grakn
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: echo 'bazel run //:deploy-github-zip -- ${GRABL_CREDENTIAL}'
+
+  release-cleanup:
+    machine: true
+    steps:
+      - checkout
+      - run: git push --delete origin graql-release-branch
 
 workflows:
   graql:
@@ -90,3 +110,23 @@ workflows:
               only: master
           requires:
             - deploy-maven-test
+      - release-approval:
+          filters:
+            branches:
+              only: release-pipeline # TODO: change back to master before merging the PR
+          requires:
+            - build
+            - test-java
+            - test-deployment
+  graql-release:
+    jobs:
+      - release-github-draft:
+          filters:
+            branches:
+              only: graql-release-branch
+      - release-cleanup:
+          filters:
+            branches:
+              only: graql-release-branch
+          requires:
+            - release-github-draft
