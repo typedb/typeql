@@ -100,14 +100,15 @@ workflows:
       - deploy-maven-test:
           filters:
             branches:
-              only: master
+              only: release-pipeline # TODO: change back to master before merging the PR
+      - test-deployment:
           requires:
             - build
             - test-java
       - test-deployment-maven:
           filters:
             branches:
-              only: master
+              only: release-pipeline # TODO: change back to master before merging the PR
           requires:
             - deploy-maven-test
       - release-approval:
