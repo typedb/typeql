@@ -57,7 +57,6 @@ java_deps(
     visibility = ["//:__pkg__"]
 )
 
-
 assemble_zip(
     name = "assemble-zip",
     targets = [":graql-deps"],
@@ -68,10 +67,9 @@ assemble_zip(
     visibility = ["//visibility:public"]
 )
 
-
 deploy_github(
     name = "deploy-github-zip",
-    target = ":assemble-zip",
+    target = ":assemble-zip", # TODO: don't deploy this artifact as it isn't correct
     deployment_properties = "//:deployment.properties",
     version_file = "//:VERSION"
 )

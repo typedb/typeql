@@ -86,6 +86,14 @@ jobs:
       - checkout
       - run: bazel run //java:deploy-github-zip -- ${GRABL_CREDENTIAL}
 
+  release-maven:
+    machine: true
+    working_directory: ~/grakn
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: bazel run //java:deploy-maven -- release $(cat VERSION) $REPO_GRAKN_USERNAME $REPO_GRAKN_PASSWORD # TODO: change to Maven central
+
   release-cleanup:
     machine: true
     steps:
@@ -131,9 +139,19 @@ workflows:
           filters:
             branches:
               only: graql-release-branch
+      - release-artifacts-approval:
+          type: approval
+          requires:
+            - release-github-draft
+      - release-maven:
+          filters:
+            branches:
+              only: graql-release-branch
+          requires:
+            - release-artifacts-approval
       - release-cleanup:
           filters:
             branches:
               only: graql-release-branch
           requires:
-            - release-github-draft
+            - release-maven
