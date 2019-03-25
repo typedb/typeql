@@ -95,8 +95,14 @@ jobs:
 workflows:
   graql:
     jobs:
-      - build
-      - test-java
+      - build:
+          filters:
+            branches:
+              ignore: graql-release-branch
+      - test-java:
+          filters:
+            branches:
+              ignore: graql-release-branch
       - deploy-maven-test:
           filters:
             branches:
