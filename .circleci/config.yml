@@ -103,36 +103,34 @@ jobs:
 workflows:
   graql:
     jobs:
-      - build:
-          filters:
-            branches:
-              ignore: graql-release-branch
-      - test-java:
-          filters:
-            branches:
-              ignore: graql-release-branch
-      - deploy-maven-test:
-          filters:
-            branches:
-              only: release-pipeline # TODO: change back to master before merging the PR
-      - test-deployment:
-          requires:
-            - build
-            - test-java
-      - test-deployment-maven:
-          filters:
-            branches:
-              only: release-pipeline # TODO: change back to master before merging the PR
-          requires:
-            - deploy-maven-test
+# TODO: enable before merging the PR
+#      - build:
+#          filters:
+#            branches:
+#              ignore: graql-release-branch
+#      - test-java:
+#          filters:
+#            branches:
+#              ignore: graql-release-branch
+#      - deploy-maven-test:
+#          filters:
+#            branches:
+#              only: release-pipeline # TODO: change back to master before merging the PR
+#      - test-deployment-maven:
+#          requires:
+#            - deploy-maven-test
+#          filters:
+#            branches:
+#              only: release-pipeline # TODO: change back to master before merging the PR
       - release-approval:
           filters:
             branches:
               only: release-pipeline # TODO: change back to master before merging the PR
-          requires:
-            - build
-            - test-java
-            - test-deployment
+# TODO: enable before merging the PR
+#          requires:
+#            - build
+#            - test-java
+#            - test-deployment
   graql-release:
     jobs:
       - release-github-draft:
