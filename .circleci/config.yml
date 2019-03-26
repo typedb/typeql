@@ -80,13 +80,13 @@ workflows:
       - deploy-maven-test:
           filters:
             branches:
-              only: ci-fix-sync-dependency # TODO: revert
+              only: master
           requires:
             - build
             - test-java
       - test-deployment-maven:
           filters:
             branches:
-              only: ci-fix-sync-dependency # TODO: revert
+              only: master
           requires:
             - deploy-maven-test
