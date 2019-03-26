@@ -86,7 +86,7 @@ jobs:
       - checkout
       - run: bazel run //java:deploy-github -- ${GRABL_CREDENTIAL}
 
-  release-maven:
+  deploy-maven:
     machine: true
     working_directory: ~/grakn
     steps:
@@ -141,7 +141,7 @@ workflows:
           type: approval
           requires:
             - deploy-github
-      - release-maven:
+      - deploy-maven:
           filters:
             branches:
               only: graql-release-branch
@@ -152,4 +152,4 @@ workflows:
             branches:
               only: graql-release-branch
           requires:
-            - release-maven
+            - deploy-maven
