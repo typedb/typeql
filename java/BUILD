@@ -47,30 +47,38 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
-    deployment_properties = ":deployment.properties"
+    deployment_properties = "//:deployment.properties"
 )
 
-java_deps(
-    name = "graql-deps",
-    target = ":graql",
-    java_deps_root = "",
-    version_file = "//:VERSION",
-    visibility = ["//:__pkg__"]
-)
-
-assemble_zip(
-    name = "assemble-zip",
-    targets = [":graql-deps"],
-    additional_files = {},
-    empty_directories = [],
-    permissions = {},
-    output_filename = "graql",
-    visibility = ["//visibility:public"]
-)
+#java_deps(
+#    name = "graql-deps",
+#    target = ":graql",
+#    java_deps_root = "",
+#    version_file = "//:VERSION",
+#    visibility = ["//:__pkg__"]
+#)
+#
+#assemble_zip(
+#    name = "assemble-zip",
+#    targets = [":graql-deps"],
+#    additional_files = {},
+#    empty_directories = [],
+#    permissions = {},
+#    output_filename = "graql",
+#    visibility = ["//visibility:public"]
+#)
+#
+#deploy_github(
+#    name = "deploy-github-zip",
+#    target = ":assemble-zip", # TODO: don't deploy this artifact as it isn't correct
+#    deployment_properties = "//:deployment.properties",
+#    version_file = "//:VERSION"
+#)
 
 deploy_github(
-    name = "deploy-github-zip",
-    target = ":assemble-zip", # TODO: don't deploy this artifact as it isn't correct
+    name = "deploy-github",
+    targets = [],
+    release_description = "//:RELEASE_TEMPLATE.md",
     deployment_properties = "//:deployment.properties",
     version_file = "//:VERSION"
 )
