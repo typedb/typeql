@@ -71,22 +71,87 @@ jobs:
       - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$CIRCLE_SHA1/g" test/deployment/pom.xml
       - run: cd test/deployment/ && mvn test
 
+  release-approval:
+    machine: true
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: bazel run @graknlabs_build_tools//ci:release-approval
+
+  deploy-github:
+    machine: true
+    working_directory: ~/grakn
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: DEPLOY_GITHUB_TOKEN="$GRABL_CREDENTIAL" bazel run //java:deploy-github
+
+  deploy-maven:
+    machine: true
+    working_directory: ~/grakn
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: bazel run //java:deploy-maven -- release $(cat VERSION) $REPO_GRAKN_USERNAME $REPO_GRAKN_PASSWORD
+
+  release-cleanup:
+    machine: true
+    steps:
+      - checkout
+      - run: git push --delete origin graql-release-branch
 
 workflows:
   graql:
     jobs:
-      - build
-      - test-java
+      - build:
+          filters:
+            branches:
+              ignore: graql-release-branch
+      - test-java:
+          filters:
+            branches:
+              ignore: graql-release-branch
       - deploy-maven-test:
           filters:
             branches:
               only: master
           requires:
-            - build
             - test-java
+            - build
       - test-deployment-maven:
           filters:
             branches:
               only: master
           requires:
             - deploy-maven-test
+      - release-approval:
+          filters:
+            branches:
+              only: master
+          requires:
+            - test-deployment-maven
+  graql-release:
+    jobs:
+      - deploy-github:
+          filters:
+            branches:
+              only: graql-release-branch
+      - deploy-approval:
+          type: approval
+          requires:
+            - deploy-github
+          filters:
+            branches:
+              only: graql-release-branch
+      - deploy-maven:
+          filters:
+            branches:
+              only: graql-release-branch
+          requires:
+            - deploy-approval
+      - release-cleanup:
+          filters:
+            branches:
+              only: graql-release-branch
+          requires:
+            - deploy-maven

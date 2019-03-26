@@ -20,6 +20,7 @@ package(default_visibility = ["//visibility:public"])
 
 load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
 load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 
 java_library(
     name = "graql",
@@ -44,7 +45,15 @@ assemble_maven(
 
 deploy_maven(
     name = "deploy-maven",
-    target = ":assemble-maven"
+    target = ":assemble-maven",
+)
+
+deploy_github(
+    name = "deploy-github",
+    targets = [],
+    release_description = "//:RELEASE_TEMPLATE.md",
+    deployment_properties = "//:deployment.properties",
+    version_file = "//:VERSION"
 )
 
 checkstyle_test(
