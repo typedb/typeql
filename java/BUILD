@@ -46,7 +46,6 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
-    deployment_properties = "//:deployment.properties"
 )
 
 deploy_github(
