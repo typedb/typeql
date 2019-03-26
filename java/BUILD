@@ -20,7 +20,6 @@ package(default_visibility = ["//visibility:public"])
 
 load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
 load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_zip", "java_deps")
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 
 java_library(
