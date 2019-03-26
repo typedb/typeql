@@ -84,7 +84,7 @@ jobs:
     steps:
       - install-bazel-linux-rbe
       - checkout
-      - run: DEPLOY_GITHUB_TOKEN="$LOLSKI_GRABL_CREDENTIAL" bazel run //java:deploy-github # TODO: revert
+      - run: DEPLOY_GITHUB_TOKEN="$GRABL_CREDENTIAL" bazel run //java:deploy-github
 
   deploy-maven:
     machine: true
@@ -92,7 +92,7 @@ jobs:
     steps:
       - install-bazel-linux-rbe
       - checkout
-      - run: bazel run //java:deploy-maven -- release $(cat VERSION) $REPO_GRAKN_USERNAME $REPO_GRAKN_PASSWORD # TODO: change to Maven central
+      - run: bazel run //java:deploy-maven -- release $(cat VERSION) $REPO_GRAKN_USERNAME $REPO_GRAKN_PASSWORD
 
   release-cleanup:
     machine: true
@@ -114,20 +114,20 @@ workflows:
       - deploy-maven-test:
           filters:
             branches:
-              only: release-pipeline # TODO: change back to master before merging the PR
+              only: master
           requires:
             - test-java
             - build
       - test-deployment-maven:
           filters:
             branches:
-              only: release-pipeline # TODO: change back to master before merging the PR
+              only: master
           requires:
             - deploy-maven-test
       - release-approval:
           filters:
             branches:
-              only: release-pipeline # TODO: change back to master before merging the PR
+              only: master
           requires:
             - test-deployment-maven
   graql-release:
