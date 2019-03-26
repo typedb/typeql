@@ -78,7 +78,7 @@ jobs:
       - checkout
       - run: bazel run @graknlabs_build_tools//ci:release-approval
 
-  release-github-draft:
+  deploy-github:
     machine: true
     working_directory: ~/grakn
     steps:
@@ -133,14 +133,14 @@ workflows:
 #            - test-deployment
   graql-release:
     jobs:
-      - release-github-draft:
+      - deploy-github:
           filters:
             branches:
               only: graql-release-branch
       - release-artifacts-approval:
           type: approval
           requires:
-            - release-github-draft
+            - deploy-github
       - release-maven:
           filters:
             branches:
