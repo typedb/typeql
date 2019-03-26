@@ -91,20 +91,6 @@ antlr_dependencies()
 load("@graknlabs_bazel_distribution//github:dependencies.bzl", "github_dependencies_for_deployment")
 github_dependencies_for_deployment()
 
-load("@graknlabs_build_tools//bazel:dependencies.bzl", "bazel_rules_docker")
-bazel_rules_docker()
-
-load("@io_bazel_rules_docker//repositories:repositories.bzl",
-bazel_rules_docker_repositories = "repositories")
-bazel_rules_docker_repositories()
-
-load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
-container_pull(
-  name = "openjdk_image",
-  registry = "index.docker.io",
-  repository = "library/openjdk",
-  tag = "8"
-)
 
 #####################################
 # Load Bazel common workspace rules #
