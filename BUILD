@@ -16,4 +16,4 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-exports_files(["VERSION", "deployment.properties"], visibility = ["//visibility:public"])
+exports_files(["VERSION", "deployment.properties", "RELEASE_TEMPLATE.md"], visibility = ["//visibility:public"])

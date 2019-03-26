@@ -84,7 +84,7 @@ jobs:
     steps:
       - install-bazel-linux-rbe
       - checkout
-      - run: bazel run //java:deploy-github-zip -- ${GRABL_CREDENTIAL}
+      - run: bazel run //java:deploy-github -- ${GRABL_CREDENTIAL}
 
   release-maven:
     machine: true
