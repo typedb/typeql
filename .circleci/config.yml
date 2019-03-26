@@ -61,7 +61,7 @@ jobs:
       - run: echo $CIRCLE_SHA1
       - run: bazel run //java:deploy-maven -- snapshot $CIRCLE_SHA1 $REPO_GRAKN_USERNAME $REPO_GRAKN_PASSWORD
 
-  test-deployment:
+  test-deployment-maven:
     machine: true
     working_directory: ~/graql
     steps:
@@ -81,9 +81,12 @@ workflows:
           filters:
             branches:
               only: master
-      - test-deployment:
           requires:
-            - deploy-maven-test
+            - build
+            - test-java
+      - test-deployment-maven:
           filters:
             branches:
               only: master
+          requires:
+            - deploy-maven-test
