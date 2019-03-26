@@ -137,7 +137,7 @@ workflows:
           filters:
             branches:
               only: graql-release-branch
-      - release-artifacts-approval:
+      - deploy-approval:
           type: approval
           requires:
             - deploy-github
@@ -146,7 +146,7 @@ workflows:
             branches:
               only: graql-release-branch
           requires:
-            - release-artifacts-approval
+            - deploy-approval
       - release-cleanup:
           filters:
             branches:
