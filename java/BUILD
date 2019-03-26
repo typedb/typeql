@@ -50,31 +50,6 @@ deploy_maven(
     deployment_properties = "//:deployment.properties"
 )
 
-#java_deps(
-#    name = "graql-deps",
-#    target = ":graql",
-#    java_deps_root = "",
-#    version_file = "//:VERSION",
-#    visibility = ["//:__pkg__"]
-#)
-#
-#assemble_zip(
-#    name = "assemble-zip",
-#    targets = [":graql-deps"],
-#    additional_files = {},
-#    empty_directories = [],
-#    permissions = {},
-#    output_filename = "graql",
-#    visibility = ["//visibility:public"]
-#)
-#
-#deploy_github(
-#    name = "deploy-github-zip",
-#    target = ":assemble-zip", # TODO: don't deploy this artifact as it isn't correct
-#    deployment_properties = "//:deployment.properties",
-#    version_file = "//:VERSION"
-#)
-
 deploy_github(
     name = "deploy-github",
     targets = [],
