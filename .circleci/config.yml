@@ -99,8 +99,8 @@ jobs:
       - install-bazel-linux-rbe
       - checkout
       - run: |
-          export DEPLOY_MAVEN_USERNAME=$REPO_SONATYPE_USERNAME
-          export DEPLOY_MAVEN_PASSWORD=$REPO_SONATYPE_PASSWORD
+          export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run //java:deploy-maven -- release $(cat VERSION)
 
   release-cleanup:
