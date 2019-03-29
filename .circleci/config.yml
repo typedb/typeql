@@ -79,7 +79,7 @@ jobs:
       - install-bazel-linux-rbe
       - checkout
       - run: |
-          export RELEASE_APPROVAL_TOKEN=REPO_GITHUB_TOKEN_GRABL
+          export RELEASE_APPROVAL_TOKEN=$REPO_GITHUB_TOKEN_GRABL
           bazel run @graknlabs_build_tools//ci:release-approval
 
   deploy-github:
