@@ -459,7 +459,9 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 h *= 1000003;
                 h ^= this.method.hashCode();
                 h *= 1000003;
-                h ^= this.var.hashCode();
+                if (this.var != null) {
+                    h ^= this.var.hashCode();
+                }
                 return h;
             }
         }
