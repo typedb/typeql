@@ -53,7 +53,7 @@ With the expressivity of the schema, inference through OLTP and distributed algo
 
 Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title-graql
 
-## Compiling Grakn Core from Source
+## Compiling Graql from Source
 
 > Note: You don't need to compile Graql from source if you just want to use Graql. See the _"Importing Graql"_ section above.
 
@@ -61,10 +61,20 @@ Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title
     - Java 8
     - [Bazel](https://docs.bazel.build/versions/master/install.html)
 
-2. Compile:
+2. Build the JAR:
+
+a) to build the native/raw JAR:
 ```
-$ bazel build //java:graql
+bazel build //java:graql
 ```
+The Graql library JAR will be produced at: `bazel-bin/java/libgraql.jar`
+
+b) to build the JAR for a Maven application:
+```
+bazel build //java:assembl-maven
+```
+The Graql Maven JAR will be produced at: `bazel-bin/java/io.graql:lang.jar`
+
 
 ## Licensing
 
