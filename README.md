@@ -32,9 +32,26 @@ Graql performs distributed [Pregel](https://kowshik.github.io/JPregel/pregel_pap
 
 With the expressivity of the schema, inference through OLTP and distributed algorithms through OLAP, Graql provides strong abstraction over low-level data constructs and complicated relationships through its query language. The language provides a higher-level schema, OLTP, and OLAP query language, that makes working with complex data a lot easier. When developers can achieve more by writing less code, productivity rate increases by orders of magnitude.
 
-## Importing Graql
+## Importing Graql through Maven (for Java)
 
-_TO BE RELEASED, VERY SOON!_
+```xml
+<repositories>
+    <repository>
+        <id>repo.grakn.ai</id>
+        <url>https://repo.grakn.ai/repository/maven/</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>io.graql</groupId>
+        <artifactId>lang</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+</dependencies>
+```
+
+Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title-graql
 
 ## Compiling Grakn Core from Source
 
@@ -42,11 +59,11 @@ _TO BE RELEASED, VERY SOON!_
 
 1. Make sure you have the following dependencies installed on your machine:
     - Java 8
-    - [Bazel](https://docs.bazel.build/versions/master/install-os-x.html)
+    - [Bazel](https://docs.bazel.build/versions/master/install.html)
 
 2. Compile:
 ```
-$ bazel build //...
+$ bazel build //java:graql
 ```
 
 ## Licensing
