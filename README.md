@@ -63,17 +63,17 @@ Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title
 
 2. Build the JAR:
 
-a) to build the native/raw JAR:
-```
-bazel build //java:graql
-```
-The Graql library JAR will be produced at: `bazel-bin/java/libgraql.jar`
+    a) to build the native/raw JAR:
+    ```
+    bazel build //java:graql
+    ```
+    The Graql library JAR will be produced at: `bazel-bin/java/libgraql.jar`
 
-b) to build the JAR for a Maven application:
-```
-bazel build //java:assembl-maven
-```
-The Graql Maven JAR will be produced at: `bazel-bin/java/io.graql:lang.jar`
+    b) to build the JAR for a Maven application:
+    ```
+    bazel build //java:assembl-maven
+    ```
+    The Graql Maven JAR will be produced at: `bazel-bin/java/io.graql:lang.jar`
 
 
 ## Licensing
