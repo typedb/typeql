@@ -81,7 +81,7 @@ public class HasAttributeProperty extends VarProperty {
 
         property.add(type);
 
-        if (attribute().var().isUserDefinedName()) {
+        if (attribute().var().isRetrieved()) {
             property.add(attribute().var().toString());
         } else {
             attribute().getProperties(ValueProperty.class).forEach(prop -> property.add(prop.operation().toString()));
@@ -115,7 +115,7 @@ public class HasAttributeProperty extends VarProperty {
     }
 
     private boolean hasReifiedRelation() {
-        return relation().properties().stream().findAny().isPresent() || relation().var().isUserDefinedName();
+        return relation().properties().stream().findAny().isPresent() || relation().var().isRetrieved();
     }
 
     @Override
