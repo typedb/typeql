@@ -73,7 +73,7 @@ Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title
    ```
    bazel build //:assembl-maven
    ```
-   The Maven JAR will be produced at: 
+   The Maven JAR and POM will be produced at: 
    ```
    bazel-bin/java/io.graql:lang.jar
    bazel-bin/java/pom.xml
