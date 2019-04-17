@@ -76,7 +76,7 @@ Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title
    The Maven JAR will be produced at: 
    ```
    bazel-bin/java/io.graql:lang.jar
-   bazel-bin/pom.xml
+   bazel-bin/java/pom.xml
    ```
 
 ## Licensing
