@@ -53,9 +53,9 @@ With the expressivity of the schema, inference through OLTP and distributed algo
 
 Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title-graql
 
-## Compiling Graql from Source
+## Building Graql from Source
 
-> Note: You don't need to compile Graql from source if you just want to use Graql. See the _"Importing Graql"_ section above.
+> Note: You don't need to compile Graql from source if you just want to use it in your code. See the _"Importing Graql"_ section above.
 
 1. Make sure you have the following dependencies installed on your machine:
     - Java 8
