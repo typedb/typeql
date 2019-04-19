@@ -89,7 +89,7 @@ public class Variable {
      *
      * @return whether the variable has been manually defined or automatically generated.
      */
-    public boolean isUserDefinedName() {
+    public boolean isReturned() {
         return type() == Type.NAMED;
     }
 
@@ -99,8 +99,8 @@ public class Variable {
      *
      * @return a new variable with the same symbol as the previous, but set as user-defined.
      */
-    public Variable asUserDefined() {
-        if (isUserDefinedName()) {
+    public Variable asReturnedVar() {
+        if (isReturned()) {
             return this;
         } else {
             return new Variable(name(), Type.NAMED);
@@ -123,7 +123,7 @@ public class Variable {
 
     @Override
     public String toString() {
-        if (isUserDefinedName()) {
+        if (isReturned()) {
             return Graql.Token.Char.$ + name();
         } else {
             return Graql.Token.Char.$_.toString();
