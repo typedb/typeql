@@ -321,7 +321,7 @@ ID_IMPLICIT_    : '@' NameChar+ ;
 fragment NameChar : NameStartChar
    | '0'..'9'
    | '_'
-   | '_'
+   | '-'
    | '\u00B7'
    | '\u0300'..'\u036F'
    | '\u203F'..'\u2040';
