@@ -314,13 +314,13 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
 VAR_NAMED_      : '$' [a-zA-Z0-9_-]* ;
-//ID_             : [a-zA-Z_] [a-zA-Z0-9_-]* ;
 ID_             : NameStartChar NameChar* ;
-ID_IMPLICIT_    : '@' [a-zA-Z0-9_-]+ ;
+ID_IMPLICIT_    : '@' NameChar+ ;
 
 
 fragment NameChar : NameStartChar
    | '0'..'9'
+   | '_'
    | '_'
    | '\u00B7'
    | '\u0300'..'\u036F'
