@@ -264,7 +264,7 @@ public class Statement implements Pattern,
     @Override
     public Set<Variable> variables() {
         return innerStatements().stream().map(Statement::var)
-                .filter(Variable::isRetrieved)
+                .filter(Variable::isReturned)
                 .collect(toSet());
     }
 
@@ -312,13 +312,13 @@ public class Statement implements Pattern,
 
         Statement other = (Statement) o;
 
-        if (var().isRetrieved() != other.var().isRetrieved()) return false;
+        if (var().isReturned() != other.var().isReturned()) return false;
 
         // "simplifying" this makes it harder to read
         //noinspection SimplifiableIfStatement
         if (!properties().equals(other.properties())) return false;
 
-        return !var().isRetrieved() || var().equals(other.var());
+        return !var().isReturned() || var().equals(other.var());
 
     }
 
@@ -327,8 +327,8 @@ public class Statement implements Pattern,
         if (hashCode == 0) {
             // This hashCode implementation is special: it considers all non-user-defined vars as equivalent
             hashCode = properties().hashCode();
-            if (var().isRetrieved()) hashCode = 31 * hashCode + var().hashCode();
-            hashCode = 31 * hashCode + (var().isRetrieved() ? 1 : 0);
+            if (var().isReturned()) hashCode = 31 * hashCode + var().hashCode();
+            hashCode = 31 * hashCode + (var().isReturned() ? 1 : 0);
         }
         return hashCode;
     }
