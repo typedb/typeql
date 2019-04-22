@@ -31,7 +31,6 @@ import graql.lang.statement.builder.StatementInstanceBuilder;
 import graql.lang.statement.builder.StatementRelationBuilder;
 import graql.lang.statement.builder.StatementThingBuilder;
 import graql.lang.statement.builder.StatementTypeBuilder;
-import graql.lang.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -280,7 +279,7 @@ public class Statement implements Pattern,
             // If there is only a label, we display that
             Optional<String> label = getType();
             if (label.isPresent()) {
-                return StringUtil.escapeLabelOrId(label.get());
+                return label.get();
             }
         }
 

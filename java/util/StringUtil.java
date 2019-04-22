@@ -31,12 +31,6 @@ import java.util.Set;
 
 public class StringUtil {
     private static final Set<String> GRAQL_KEYWORDS = getKeywords();
-    // TODO: This is critical knowledge that is lost in a Util class.
-    //       Move it to the Query class along with other Syntax rules
-    //       once they are moved to //graql package
-    private static final Set<String> ALLOWED_ID_KEYWORDS = new HashSet<>(
-            Arrays.asList("min", "max", "median", "mean", "std", "sum", "count", "path", "cluster", "degrees", "members", "persist")
-    );
 
     public static String unescapeRegex(String regex) {
         return regex.replaceAll("\\\\/", "/");
@@ -52,16 +46,6 @@ public class StringUtil {
      */
     public static String quoteString(String string) {
         return "\"" + string + "\"";
-    }
-
-    public static String escapeLabelOrId(String value) {
-        // TODO: This regex should be saved in Query class once it is moved to //graql package
-        if (value.matches("^@?[a-zA-Z_][a-zA-Z0-9_-]*$") &&
-                (Graql.Token.Type.of(value) != null || ALLOWED_ID_KEYWORDS.contains(value) || !GRAQL_KEYWORDS.contains(value)) ) {
-            return value;
-        } else {
-            return quoteString(value);
-        }
     }
 
     /**
