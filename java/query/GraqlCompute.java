@@ -104,8 +104,8 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         // Because, we want to know the user provided conditions, rather than the default conditions from the getters.
         // The exception is for arguments. It needs to be set internally for the query object to have default argument
         // values. However, we can query for .getParameters() to get user provided argument parameters.
-        if (fromID != null) conditionsList.add(str(Graql.Token.Compute.Condition.FROM, Graql.Token.Char.SPACE, Graql.Token.Char.QUOTE, fromID, Graql.Token.Char.QUOTE));
-        if (toID != null) conditionsList.add(str(Graql.Token.Compute.Condition.TO, Graql.Token.Char.SPACE, Graql.Token.Char.QUOTE, toID, Graql.Token.Char.QUOTE));
+        if (fromID != null) conditionsList.add(str(Graql.Token.Compute.Condition.FROM, Graql.Token.Char.SPACE, fromID));
+        if (toID != null) conditionsList.add(str(Graql.Token.Compute.Condition.TO, Graql.Token.Char.SPACE, toID));
         if (ofTypes != null) conditionsList.add(printOf());
         if (inTypes != null) conditionsList.add(printIn());
         if (algorithm != null) conditionsList.add(printAlgorithm());

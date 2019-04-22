@@ -24,8 +24,9 @@ load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 
 java_library(
     name = "graql",
-    srcs = ["//grammar:graql-java"] + glob(["**/*.java"], exclude = ["**/test/**"]),
+    srcs = glob(["**/*.java"], exclude = ["**/test/**"]),
     deps = [
+        "//grammar:java",
         # External dependencies
         "//dependencies/maven/artifacts/com/google/guava:guava",
         "//dependencies/maven/artifacts/com/google/code/findbugs:jsr305",

@@ -40,7 +40,6 @@ import graql.lang.query.builder.Computable;
 import graql.lang.query.builder.Filterable;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
-import graql.lang.util.StringUtil;
 import graql.lang.util.Triple;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
@@ -357,7 +356,7 @@ public class Parser extends GraqlBaseVisitor {
         GraqlCompute.Statistics.Count compute = Graql.compute().count();
 
         if (ctx.input_count() != null) {
-            compute = compute.in(visitTypes(ctx.input_count().compute_scope().types()));
+            compute = compute.in(visitType_labels(ctx.input_count().compute_scope().type_labels()));
         }
 
         return compute;
@@ -396,10 +395,10 @@ public class Parser extends GraqlBaseVisitor {
         for (GraqlParser.Input_valueContext valueCtx : ctx.input_value()) {
 
             if (valueCtx.compute_target() != null) {
-                compute = compute.of(visitTypes(valueCtx.compute_target().types()));
+                compute = compute.of(visitType_labels(valueCtx.compute_target().type_labels()));
 
             } else if (valueCtx.compute_scope() != null) {
-                compute = compute.in(visitTypes(valueCtx.compute_scope().types()));
+                compute = compute.in(visitType_labels(valueCtx.compute_scope().type_labels()));
 
             } else {
                 throw new IllegalArgumentException("Unrecognised Graql Compute Statistics condition: " + ctx.getText());
@@ -416,7 +415,7 @@ public class Parser extends GraqlBaseVisitor {
         for (GraqlParser.Input_pathContext pathCtx : ctx.input_path()) {
 
             if (pathCtx.compute_direction() != null) {
-                String id = visitId(pathCtx.compute_direction().id());
+                String id = pathCtx.compute_direction().ID_().getText();
 
                 if (pathCtx.compute_direction().FROM() != null) {
                     compute = compute.from(id);
@@ -425,7 +424,7 @@ public class Parser extends GraqlBaseVisitor {
                     compute = compute.to(id);
                 }
             } else if (pathCtx.compute_scope() != null) {
-                compute = compute.in(visitTypes(pathCtx.compute_scope().types()));
+                compute = compute.in(visitType_labels(pathCtx.compute_scope().type_labels()));
 
             } else {
                 throw new IllegalArgumentException("Unrecognised Graql Compute Path condition: " + ctx.getText());
@@ -442,10 +441,10 @@ public class Parser extends GraqlBaseVisitor {
         for (GraqlParser.Input_centralContext centralityCtx : ctx.input_central()) {
 
             if (centralityCtx.compute_target() != null) {
-                compute = compute.of(visitTypes(centralityCtx.compute_target().types()));
+                compute = compute.of(visitType_labels(centralityCtx.compute_target().type_labels()));
 
             } else if (centralityCtx.compute_scope() != null) {
-                compute = compute.in(visitTypes(centralityCtx.compute_scope().types()));
+                compute = compute.in(visitType_labels(centralityCtx.compute_scope().type_labels()));
 
             } else if (centralityCtx.compute_config() != null) {
                 compute = (GraqlCompute.Centrality) setComputeConfig(compute, centralityCtx.compute_config());
@@ -465,7 +464,7 @@ public class Parser extends GraqlBaseVisitor {
         for (GraqlParser.Input_clusterContext clusterCtx : ctx.input_cluster()) {
 
             if (clusterCtx.compute_scope() != null) {
-                compute = compute.in(visitTypes(clusterCtx.compute_scope().types()));
+                compute = compute.in(visitType_labels(clusterCtx.compute_scope().type_labels()));
 
             } else if (clusterCtx.compute_config() != null) {
                 compute = (GraqlCompute.Cluster) setComputeConfig(compute, clusterCtx.compute_config());
@@ -511,7 +510,7 @@ public class Parser extends GraqlBaseVisitor {
                 argList.add(GraqlCompute.Argument.size(getInteger(argContext.INTEGER_())));
 
             } else if (argContext.CONTAINS() != null) {
-                argList.add(GraqlCompute.Argument.contains(visitId(argContext.id())));
+                argList.add(GraqlCompute.Argument.contains(argContext.ID_().getText()));
             }
         }
 
@@ -654,7 +653,7 @@ public class Parser extends GraqlBaseVisitor {
                                 .collect(Collectors.toList())
                 ));
             } else if (property.TYPE() != null) {
-                type = type.type(visitLabel(property.label()));
+                type = type.type(visitType_label(property.type_label()));
 
             } else {
                 throw new IllegalArgumentException("Unrecognised Type Statement: " + property.getText());
@@ -694,7 +693,7 @@ public class Parser extends GraqlBaseVisitor {
             instance = instance.isa(getIsaProperty(ctx.ISA_(), ctx.type()));
 
         } else if (ctx.ID() != null) {
-            instance = instance.id(visitId(ctx.id()));
+            instance = instance.id(ctx.ID_().getText());
 
         } else if (ctx.NEQ() != null) {
             instance = instance.not(getVar(ctx.VAR_(1)));
@@ -782,7 +781,7 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public HasAttributeProperty visitAttribute(GraqlParser.AttributeContext ctx) {
-        String type = ctx.label().getText();
+        String type = ctx.type_label().getText();
 
         if (ctx.VAR_() != null) {
             Statement variable = Graql.var(getVar(ctx.VAR_()));
@@ -824,50 +823,36 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public Statement visitType(GraqlParser.TypeContext ctx) {
-        if (ctx.label() != null) {
-            return type(visitLabel(ctx.label()));
+        if (ctx.type_label() != null) {
+            return type(visitType_label(ctx.type_label()));
         } else {
             return new Statement(getVar(ctx.VAR_()));
         }
     }
 
     @Override
-    public LinkedHashSet<String> visitTypes(GraqlParser.TypesContext ctx) {
-        List<GraqlParser.LabelContext> labelsList = new ArrayList<>();
+    public LinkedHashSet<String> visitType_labels(GraqlParser.Type_labelsContext ctx) {
+        List<GraqlParser.Type_labelContext> labelsList = new ArrayList<>();
 
-        if (ctx.label() != null) {
-            labelsList.add(ctx.label());
-        } else if (ctx.label_array() != null) {
-            labelsList.addAll(ctx.label_array().label());
+        if (ctx.type_label() != null) {
+            labelsList.add(ctx.type_label());
+        } else if (ctx.type_label_array() != null) {
+            labelsList.addAll(ctx.type_label_array().type_label());
         }
 
         return labelsList.stream()
-                .map(this::visitLabel)
+                .map(this::visitType_label)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
-    public String visitLabel(GraqlParser.LabelContext ctx) {
+    public String visitType_label(GraqlParser.Type_labelContext ctx) {
         if (ctx.type_native() != null) {
             return ctx.type_native().getText();
-        } else if (ctx.identifier() != null) {
-            return visitIdentifier(ctx.identifier());
+        } else if (ctx.type_name() != null) {
+            return ctx.type_name().getText();
         } else {
-            return ctx.ID_IMPLICIT_().getText();
-        }
-    }
-
-    @Override
-    public String visitId(GraqlParser.IdContext ctx) {
-        return visitIdentifier(ctx.identifier());
-    }
-
-    @Override
-    public String visitIdentifier(GraqlParser.IdentifierContext ctx) {
-        if (ctx.STRING_() != null) {
-            return getString(ctx.STRING_());
-        } else {
-            return ctx.getText();
+            return ctx.unreserved().getText();
         }
     }
 
