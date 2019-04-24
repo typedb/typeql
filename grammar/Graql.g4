@@ -108,7 +108,7 @@ type_property       :   ABSTRACT
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
-                    |   TYPE        label
+                    |   TYPE        type_label
                     ;
 
 // INSTANCE STATEMENTS =========================================================
@@ -118,7 +118,7 @@ statement_instance  :   statement_thing
                     |   statement_attribute
                     ;
 statement_thing     :   VAR_                ISA_ type   ( ',' attributes )? ';'
-                    |   VAR_                ID   id     ( ',' attributes )? ';'
+                    |   VAR_                ID   ID_    ( ',' attributes )? ';'
                     |   VAR_                NEQ  VAR_                       ';'
                     |   VAR_                attributes                      ';'
                     ;
@@ -143,7 +143,7 @@ via                 :   VIA VAR_ ;                                              
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS label ( VAR_ | operation ) via? ;                   // Attribute ownership by variable or a
+attribute           :   HAS type_label ( VAR_ | operation ) via? ;                   // Attribute ownership by variable or a
                                                                                 // predicate, and the "via" Relation
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
@@ -187,10 +187,10 @@ input_cluster       :   compute_scope                       | compute_config ;
 input_path          :   compute_scope | compute_direction   ;
 
 
-compute_direction   :   FROM    id                                              // an instance to start the compute from
-                    |   TO      id                  ;                           // an instance to end the compute at
-compute_target      :   OF      types               ;                           // type(s) of instances to apply compute
-compute_scope       :   IN      types               ;                           // type(s) to scope compute visibility
+compute_direction   :   FROM    ID_                                             // an instance to start the compute from
+                    |   TO      ID_                 ;                           // an instance to end the compute at
+compute_target      :   OF      type_labels         ;                           // type(s) of instances to apply compute
+compute_scope       :   IN      type_labels         ;                           // type(s) to scope compute visibility
 compute_config      :   USING   compute_algorithm                               // algorithm to determine how to compute
                     |   WHERE   compute_args        ;                           // additional args for compute method
 
@@ -200,27 +200,27 @@ compute_args_array  :   '[' compute_arg (',' compute_arg)* ']' ;                
 compute_arg         :   MIN_K     '=' INTEGER_                                  // a single argument for min-k=INTEGER
                     |   K         '=' INTEGER_                                  // a single argument for k=INTEGER
                     |   SIZE      '=' INTEGER_                                  // a single argument for size=INTEGER
-                    |   CONTAINS  '=' id            ;                           // a single argument for contains=ID
+                    |   CONTAINS  '=' ID_           ;                           // a single argument for contains=ID
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type                :   label | VAR_ ;                                          // A type can be a label or variable
-types               :   label | label_array ;
-label_array         :   '[' label ( ',' label )* ']' ;
-label               :   type_native | identifier | ID_IMPLICIT_;
+type                :   type_label      | VAR_ ;                                // A type can be a label or variable
+type_label          :   type_native     | type_name         | unreserved    ;
+type_labels         :   type_label      | type_label_array  ;
 
-id                  :   identifier ;
-identifier          :   ID_ | STRING_ | unreserved ;                            // TODO: disallow quoted strings as IDs
+type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
 
 // LITERAL INPUT VALUES =======================================================
 
-type_native         :   THING       |   ENTITY      |   ATTRIBUTE
-                    |   RELATION    |   ROLE        |   RULE        ;
-datatype            :   LONG        |   DOUBLE      |   STRING
-                    |   BOOLEAN     |   DATE        ;
-literal             :   STRING_     |   INTEGER_    |   REAL_
-                    |   BOOLEAN_    |   DATE_       |   DATETIME_   ;
-regex               :   STRING_     ;
+type_native         :   THING           |   ENTITY          |   ATTRIBUTE
+                    |   RELATION        |   ROLE            |   RULE        ;
+type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
+
+datatype            :   LONG            |   DOUBLE          |   STRING
+                    |   BOOLEAN         |   DATE            ;
+literal             :   STRING_         |   INTEGER_        |   REAL_
+                    |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
+regex               :   STRING_         ;
 
 // UNRESERVED KEYWORDS =========================================================
 // Most of Graql syntax should not be reserved from being used as identifiers
@@ -314,38 +314,34 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
 VAR_NAMED_      : '$' [a-zA-Z0-9_-]* ;
-ID_             : LABEL_START_CHAR LABEL_CHAR* ;
-ID_IMPLICIT_    : '@' LABEL_CHAR+ ;
-
-
-
-// LABEL NAME FRAGMENTS
-fragment LABEL_START_CHAR : 'A'..'Z' | 'a'..'z'
-                       | '\u00C0'..'\u00D6'
-                       | '\u00D8'..'\u00F6'
-                       | '\u00F8'..'\u02FF'
-                       | '\u0370'..'\u037D'
-                       | '\u037F'..'\u1FFF'
-                       | '\u200C'..'\u200D'
-                       | '\u2070'..'\u218F'
-                       | '\u2C00'..'\u2FEF'
-                       | '\u3001'..'\uD7FF'
-                       | '\uF900'..'\uFDCF'
-                       | '\uFDF0'..'\uFFFD';
-
-fragment LABEL_CHAR : LABEL_START_CHAR
-                  | '0'..'9'
-                  | '_'
-                  | '-'
-                  | '\u00B7'
-                  | '\u0300'..'\u036F'
-                  | '\u203F'..'\u2040';
-
-
+ID_             : ('V'|'E')[a-z0-9-]* ;
+TYPE_IMPLICIT_  : '@' TYPE_CHAR_T_+ ;
+TYPE_NAME_      : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
 
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
+fragment TYPE_CHAR_H_   : 'A'..'Z' | 'a'..'z'
+                        | '\u00C0'..'\u00D6'
+                        | '\u00D8'..'\u00F6'
+                        | '\u00F8'..'\u02FF'
+                        | '\u0370'..'\u037D'
+                        | '\u037F'..'\u1FFF'
+                        | '\u200C'..'\u200D'
+                        | '\u2070'..'\u218F'
+                        | '\u2C00'..'\u2FEF'
+                        | '\u3001'..'\uD7FF'
+                        | '\uF900'..'\uFDCF'
+                        | '\uFDF0'..'\uFFFD'
+                        ;
+fragment TYPE_CHAR_T_   : TYPE_CHAR_H_
+                        | '0'..'9'
+                        | '_'
+                        | '-'
+                        | '\u00B7'
+                        | '\u0300'..'\u036F'
+                        | '\u203F'..'\u2040'
+                        ;
 fragment DATE_FRAGMENT_ : YEAR_ '-' MONTH_ '-' DAY_ ;
 fragment MONTH_         : [0-1][0-9] ;
 fragment DAY_           : [0-3][0-9] ;

@@ -61,6 +61,7 @@ jobs:
       - run: |
           export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run //grammar:deploy-maven -- snapshot $CIRCLE_SHA1
           bazel run //java:deploy-maven -- snapshot $CIRCLE_SHA1
 
   test-deployment-maven:
@@ -101,6 +102,7 @@ jobs:
       - run: |
           export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run //grammar:deploy-maven -- snapshot $(cat VERSION)
           bazel run //java:deploy-maven -- release $(cat VERSION)
 
   release-cleanup:

@@ -18,12 +18,35 @@
 
 package(default_visibility = ["//:__subpackages__"])
 
+load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@rules_antlr//antlr:antlr4.bzl", "antlr4")
 
 antlr4(
-    name = "graql-java",
-    srcs = glob(["**/*.g4"]),
+    name = "java-src",
+    srcs = glob(["*.g4"]),
     language = "Java",
     visitor = True,
     package = "graql.grammar",
+)
+
+java_library(
+    name = "java",
+    srcs = [":java-src"],
+    deps = [
+        "//dependencies/maven/artifacts/org/antlr:antlr4-runtime", # sync version with @antlr4_runtime//jar
+    ],
+    tags = ["maven_coordinates=io.graql:grammar:{pom_version}", "checkstyle_ignore"],
+)
+
+assemble_maven(
+  name = "assemble-maven",
+  target = ":java",
+  package = "grammar",
+  version_file = "//:VERSION",
+  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
+)
+
+deploy_maven(
+    name = "deploy-maven",
+    target = ":assemble-maven",
 )

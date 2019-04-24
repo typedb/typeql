@@ -21,7 +21,6 @@ package graql.lang.query;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.query.builder.Computable;
-import graql.lang.util.StringUtil;
 
 import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ import java.util.function.Supplier;
 import static graql.lang.util.Collections.map;
 import static graql.lang.util.Collections.set;
 import static graql.lang.util.Collections.tuple;
-import static graql.lang.util.StringUtil.escapeLabelOrId;
 import static java.util.stream.Collectors.joining;
 
 
@@ -104,8 +102,8 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         // Because, we want to know the user provided conditions, rather than the default conditions from the getters.
         // The exception is for arguments. It needs to be set internally for the query object to have default argument
         // values. However, we can query for .getParameters() to get user provided argument parameters.
-        if (fromID != null) conditionsList.add(str(Graql.Token.Compute.Condition.FROM, Graql.Token.Char.SPACE, Graql.Token.Char.QUOTE, fromID, Graql.Token.Char.QUOTE));
-        if (toID != null) conditionsList.add(str(Graql.Token.Compute.Condition.TO, Graql.Token.Char.SPACE, Graql.Token.Char.QUOTE, toID, Graql.Token.Char.QUOTE));
+        if (fromID != null) conditionsList.add(str(Graql.Token.Compute.Condition.FROM, Graql.Token.Char.SPACE, fromID));
+        if (toID != null) conditionsList.add(str(Graql.Token.Compute.Condition.TO, Graql.Token.Char.SPACE, toID));
         if (ofTypes != null) conditionsList.add(printOf());
         if (inTypes != null) conditionsList.add(printIn());
         if (algorithm != null) conditionsList.add(printAlgorithm());
@@ -131,12 +129,10 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         if (!types.isEmpty()) {
             if (types.size() == 1) {
-                inTypesString.append(escapeLabelOrId(types.iterator().next()));
+                inTypesString.append(types.iterator().next());
             } else {
                 inTypesString.append(Graql.Token.Char.SQUARE_OPEN);
-                inTypesString.append(inTypes.stream()
-                                             .map(StringUtil::escapeLabelOrId)
-                                             .collect(joining(Graql.Token.Char.COMMA_SPACE.toString())));
+                inTypesString.append(inTypes.stream().collect(joining(Graql.Token.Char.COMMA_SPACE.toString())));
                 inTypesString.append(Graql.Token.Char.SQUARE_CLOSE);
             }
         }

@@ -20,7 +20,6 @@ package graql.lang.property;
 
 import graql.lang.Graql;
 import graql.lang.statement.StatementType;
-import graql.lang.util.StringUtil;
 
 /**
  * Represents the {@code label} property on a Type.
@@ -49,7 +48,7 @@ public class TypeProperty extends VarProperty {
 
     @Override
     public String property() {
-        return StringUtil.escapeLabelOrId(name());
+        return name();
     }
 
     @Override

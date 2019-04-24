@@ -864,12 +864,12 @@ public class ParserTest {
 
     @Test
     public void testParseComputePath() {
-        assertParseEquivalence("compute path from \"1\", to \"2\", in person;");
+        assertParseEquivalence("compute path from V1, to V2, in person;");
     }
 
     @Test
     public void testParseComputePathWithMultipleInTypes() {
-        assertParseEquivalence("compute path from \"1\", to \"2\", in [person, marriage];");
+        assertParseEquivalence("compute path from V1, to V2, in [person, marriage];");
     }
 
     @Test

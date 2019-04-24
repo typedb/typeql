@@ -121,15 +121,9 @@ public class GraqlQueryTest {
     }
 
     @Test
-    public void testQuoteIds() {
-        assertEquals("match $a (\"hello\tworld\");", match(var("a").rel(type("hello\tworld"))).toString());
-        assertEquals("match $a (\"hello\\tworld\");", match(var("a").rel(type("hello\\tworld"))).toString());
-    }
-
-    @Test
-    public void testQuoteIdsNumbers() {
+    public void testNumericTypeLabels() {
         assertEquals(
-                "match $a (\"1hi\");",
+                "match $a (1hi);",
                 match(var("a").rel(type("1hi"))).toString()
         );
     }
@@ -178,12 +172,6 @@ public class GraqlQueryTest {
 
         query = Graql.compute().centrality().using(K_CORE).in("movie", "person").of("person").where(min_k(5));
         assertEquivalent(query, "compute centrality of person, in [movie, person], using k-core, where min-k=5;");
-    }
-
-    @Test
-    public void testQueryToStringWithReservedKeywords() {
-        GraqlGet query = Graql.match(var("x").isa("isa")).get("x");
-        assertEquals("match $x isa \"isa\"; get $x;", query.toString());
     }
 
     @Test
