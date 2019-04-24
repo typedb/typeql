@@ -174,11 +174,11 @@ compute_conditions  :   conditions_count                                        
 compute_method      :   MIN         |   MAX         |   MEDIAN                  // statistical value methods
                     |   MEAN        |   STD         |   SUM
                     ;
-conditions_count    :   COUNT          input_count?                             ';';
-conditions_value    :   compute_method input_value      (',' input_value     )* ';';
-conditions_central  :   CENTRALITY     input_central (',' input_central)* ';';
-conditions_cluster  :   CLUSTER        input_cluster    (',' input_cluster   )* ';';
-conditions_path     :   PATH           input_path       (',' input_path      )* ';';
+conditions_count    :   COUNT          input_count?                         ';';
+conditions_value    :   compute_method input_value   (',' input_value    )* ';';
+conditions_central  :   CENTRALITY     input_central (',' input_central  )* ';';
+conditions_cluster  :   CLUSTER        input_cluster (',' input_cluster  )* ';';
+conditions_path     :   PATH           input_path    (',' input_path     )* ';';
 
 input_count         :   compute_scope ;
 input_value         :   compute_scope | compute_target      ;
