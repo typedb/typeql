@@ -74,6 +74,17 @@ jobs:
       - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$CIRCLE_SHA1/g" test/deployment/pom.xml
       - run: cd test/deployment/ && mvn test
 
+  sync-dependencies-snapshot:
+    machine: true
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: |
+          export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
+          bazel run @graknlabs_build_tools//ci:sync-dependencies -- \
+          --source graql@$CIRCLE_SHA1 \
+          --targets grakn:master
+
   release-approval:
     machine: true
     steps:
@@ -106,6 +117,17 @@ jobs:
           bazel run //grammar:deploy-maven -- release $(cat VERSION)
           bazel run //java:deploy-maven -- release $(cat VERSION)
 
+  sync-dependencies-release:
+    machine: true
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: |
+          export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
+          bazel run @graknlabs_build_tools//ci:sync-dependencies -- \
+          --source graql@$(cat VERSION) \
+          --targets grakn:master
+
   release-cleanup:
     machine: true
     steps:
@@ -136,12 +158,18 @@ workflows:
               only: master
           requires:
             - deploy-maven-snapshot
-      - release-approval:
+      - sync-dependencies-snapshot:
           filters:
             branches:
               only: master
           requires:
             - test-deployment-maven
+      - release-approval:
+          filters:
+            branches:
+              only: master
+          requires:
+            - sync-dependencies-snapshot
   graql-release:
     jobs:
       - deploy-github:
@@ -161,9 +189,15 @@ workflows:
               only: graql-release-branch
           requires:
             - deploy-approval
-      - release-cleanup:
+      - sync-dependencies-release:
           filters:
             branches:
               only: graql-release-branch
           requires:
             - deploy-maven-release
+      - release-cleanup:
+          filters:
+            branches:
+              only: graql-release-branch
+          requires:
+            - sync-dependencies-release
