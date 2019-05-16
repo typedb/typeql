@@ -22,6 +22,7 @@ import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
 
+import java.util.Objects;
 import javax.annotation.CheckReturnValue;
 import java.util.Collections;
 import java.util.Set;
@@ -40,6 +41,19 @@ public class Negation<T extends Pattern> implements Pattern {
             throw new NullPointerException("Null patterns");
         }
         this.pattern = pattern;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Negation<?> negation = (Negation<?>) o;
+        return Objects.equals(pattern, negation.pattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return pattern.hashCode();
     }
 
     @CheckReturnValue

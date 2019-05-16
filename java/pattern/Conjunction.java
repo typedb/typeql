@@ -51,6 +51,19 @@ public class Conjunction<T extends Pattern> implements Pattern {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Conjunction<?> that = (Conjunction<?>) o;
+        return Objects.equals(patterns, that.patterns);
+    }
+
+    @Override
+    public int hashCode() {
+        return patterns.hashCode();
+    }
+
     /**
      * @return the patterns within this conjunction
      */
@@ -112,25 +125,5 @@ public class Conjunction<T extends Pattern> implements Pattern {
         pattern.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE).append(Graql.Token.Char.SEMICOLON);
 
         return pattern.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (o instanceof Conjunction) {
-            Conjunction<?> that = (Conjunction<?>) o;
-            return (this.patterns.equals(that.getPatterns()));
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        h ^= this.patterns.hashCode();
-        return h;
     }
 }

@@ -35,6 +35,7 @@ public class Variable {
     private final Type type;
     private final boolean visible;
     private volatile String symbol;
+    private int hashCode = 0;
 
     public Variable() {
         this(true);
@@ -64,6 +65,24 @@ public class Variable {
         }
         this.type = type;
         this.visible = visible;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        // This equals implementation is special: it ignores whether a variable is user-defined
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Variable varName = (Variable) o;
+        return name().equals(varName.name());
+    }
+
+    @Override
+    public final int hashCode() {
+        // This hashCode implementation is special: it ignores whether a variable is user-defined
+        if (hashCode == 0) {
+            hashCode = name().hashCode();
+        }
+        return hashCode;
     }
 
     /**
@@ -128,23 +147,6 @@ public class Variable {
         } else {
             return Graql.Token.Char.$_.toString();
         }
-    }
-
-    @Override
-    public final boolean equals(Object o) {
-        // This equals implementation is special: it ignores whether a variable is user-defined
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Variable varName = (Variable) o;
-
-        return name().equals(varName.name());
-    }
-
-    @Override
-    public final int hashCode() {
-        // This hashCode implementation is special: it ignores whether a variable is user-defined
-        return name().hashCode();
     }
 
     /**

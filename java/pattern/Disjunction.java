@@ -50,6 +50,19 @@ public class Disjunction<T extends Pattern> implements Pattern {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Disjunction<?> that = (Disjunction<?>) o;
+        return Objects.equals(patterns, that.patterns);
+    }
+
+    @Override
+    public int hashCode() {
+        return patterns.hashCode();
+    }
+
     /**
      * @return the patterns within this disjunction
      */
@@ -108,25 +121,5 @@ public class Disjunction<T extends Pattern> implements Pattern {
         disjunction.append(Graql.Token.Char.SEMICOLON);
 
         return disjunction.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (o instanceof Disjunction) {
-            Disjunction<?> that = (Disjunction<?>) o;
-            return (this.patterns.equals(that.getPatterns()));
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        h ^= this.patterns.hashCode();
-        return h;
     }
 }
