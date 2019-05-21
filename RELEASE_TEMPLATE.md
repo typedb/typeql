@@ -17,4 +17,4 @@
 </dependencies>
 ```
 
-{ Release notes to be written }
+{ release notes }
