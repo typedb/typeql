@@ -683,7 +683,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             return this.value;
         }
 
-        public static Argument<Long> min_k(long minK) {
+        public static Argument<Long> minK(long minK) {
             return new Argument<>(Graql.Token.Compute.Param.MIN_K, minK);
         }
 

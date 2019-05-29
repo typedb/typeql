@@ -543,9 +543,6 @@ public class Graql {
             }
         }
 
-        /**
-         * Graql commands to determine the type of query
-         */
         public enum Command {
             COMPUTE("compute"),
             MATCH("match"),
@@ -555,9 +552,7 @@ public class Graql {
             DELETE("delete"),
             GET("get"),
             AGGREGATE("aggregate"),
-            GROUP("group"),
-            OFFSET("offset"),
-            LIMIT("limit");
+            GROUP("group");
 
             private final String command;
 
@@ -606,9 +601,6 @@ public class Graql {
             }
         }
 
-        /**
-         * Characters available for use in the Graql syntax
-         */
         public enum Char {
             EQUAL("="),
             COLON(":"),

@@ -37,7 +37,7 @@ import static graql.lang.Graql.rel;
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.var;
 import static graql.lang.query.GraqlCompute.Argument.k;
-import static graql.lang.query.GraqlCompute.Argument.min_k;
+import static graql.lang.query.GraqlCompute.Argument.minK;
 import static graql.lang.query.GraqlCompute.Argument.size;
 import static org.junit.Assert.assertEquals;
 
@@ -170,7 +170,7 @@ public class GraqlQueryTest {
         GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person").of("person");
         assertEquivalent(query, "compute centrality of person, in [movie, person], using degree;");
 
-        query = Graql.compute().centrality().using(K_CORE).in("movie", "person").of("person").where(min_k(5));
+        query = Graql.compute().centrality().using(K_CORE).in("movie", "person").of("person").where(minK(5));
         assertEquivalent(query, "compute centrality of person, in [movie, person], using k-core, where min-k=5;");
     }
 

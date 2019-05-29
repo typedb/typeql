@@ -501,7 +501,7 @@ public class Parser extends GraqlBaseVisitor {
 
         for (GraqlParser.Compute_argContext argContext : argContextList) {
             if (argContext.MIN_K() != null) {
-                argList.add(GraqlCompute.Argument.min_k(getInteger(argContext.INTEGER_())));
+                argList.add(GraqlCompute.Argument.minK(getInteger(argContext.INTEGER_())));
 
             } else if (argContext.K() != null) {
                 argList.add(GraqlCompute.Argument.k(getInteger(argContext.INTEGER_())));

@@ -31,11 +31,9 @@ import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
 import graql.lang.statement.Statement;
 import org.junit.Assert;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.Timeout;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -72,11 +70,6 @@ public class ParserTest {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
-
-    // Some of these tests execute against infinite or very large input.
-    // Therefore we add a (generous) timeout so we can tell if something is wrong sooner.
-    @ClassRule
-    public static final Timeout timeout = Timeout.seconds(60 * 5);
 
     private void assertQueryEquals(GraqlQuery expected, GraqlQuery parsed, String query) {
         assertEquals(expected, parsed);
@@ -541,8 +534,8 @@ public class ParserTest {
                 type("parent").sub("role"),
                 type("child").sub("role"),
                 type("parenthood").sub("relation")
-                        .relates(var().type("parent"))
-                        .relates(var().type("child")),
+                        .relates(type("parent"))
+                        .relates(type("child")),
                 type("fatherhood").sub("parenthood")
                         .relates(type("father"), type("parent"))
                         .relates(type("son"), type("child"))
