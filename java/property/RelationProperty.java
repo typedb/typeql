@@ -168,8 +168,8 @@ public class RelationProperty extends VarProperty {
         @Override
         public int hashCode() {
             int h = 1;
-            h *= 1000003;
             if (this.role != null) {
+                h *= 1000003;
                 h ^= this.role.hashCode();
             }
             h *= 1000003;

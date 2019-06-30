@@ -951,7 +951,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (value instanceof Statement) {
             return new ValueProperty.Operation.Comparison.Variable(comparator, (Statement) value);
         } else {
-            throw new IllegalArgumentException("Unrecognised Value Assignment: " + ctx.getText());
+            throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
     }
 
