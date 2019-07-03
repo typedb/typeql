@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>io.graql</groupId>
-            <artifactId>lang</artifactId>
+            <artifactId>graql-lang</artifactId>
             <version>GRAQL_LANG_VERSION_MARKER</version>
             <scope>test</scope>
         </dependency>
