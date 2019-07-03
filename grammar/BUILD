@@ -35,7 +35,7 @@ java_library(
     deps = [
         "//dependencies/maven/artifacts/org/antlr:antlr4-runtime", # sync version with @antlr4_runtime//jar
     ],
-    tags = ["maven_coordinates=io.graql:grammar:{pom_version}", "checkstyle_ignore"],
+    tags = ["maven_coordinates=io.graql:graql-grammar:{pom_version}", "checkstyle_ignore"],
 )
 
 assemble_maven(
