@@ -17,3 +17,11 @@
 #
 
 exports_files(["VERSION", "deployment.properties", "RELEASE_TEMPLATE.md"], visibility = ["//visibility:public"])
+load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
+
+deploy_github(
+    name = "deploy-github",
+    release_description = "//:RELEASE_TEMPLATE.md",
+    deployment_properties = "//:deployment.properties",
+    version_file = "//:VERSION"
+)

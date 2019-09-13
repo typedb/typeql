@@ -43,6 +43,17 @@ jobs:
       - run-bazel-rbe:
           command: bazel build //...
 
+  build-analysis:
+    machine: true
+    working_directory: ~/graql
+    steps:
+      - install-bazel-linux-rbe
+      - checkout
+      - run: |
+          SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
+            bazel run @graknlabs_build_tools//sonarcloud:code-analysis -- \
+            --project-key graknlabs_graql --branch=$CIRCLE_BRANCH --commit-id=$CIRCLE_SHA1
+
   test-java:
     machine: true
     working_directory: ~/graql
@@ -107,7 +118,7 @@ jobs:
           bazel run @graknlabs_build_tools//ci:release-notes -- graql $(cat VERSION) ./RELEASE_TEMPLATE.md
       - run: |
           export DEPLOY_GITHUB_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run //java:deploy-github -- $CIRCLE_SHA1
+          bazel run //:deploy-github -- $CIRCLE_SHA1
 
   deploy-maven-release:
     machine: true
@@ -145,6 +156,10 @@ workflows:
           filters:
             branches:
               ignore: graql-release-branch
+      - build-analysis:
+          filters:
+            branches:
+              only: master
       - test-java:
           filters:
             branches:
@@ -154,8 +169,9 @@ workflows:
             branches:
               only: master
           requires:
-            - test-java
             - build
+            - build-analysis
+            - test-java
       - test-deployment-maven:
           filters:
             branches:
