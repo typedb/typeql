@@ -147,7 +147,7 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run: git push --delete origin graql-release-branch
+      - run: git push --delete https://$REPO_GITHUB_TOKEN@github.com/graknlabs/graql $CIRCLE_BRANCH
 
 workflows:
   graql:
