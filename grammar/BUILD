@@ -42,7 +42,6 @@ assemble_maven(
   name = "assemble-maven",
   target = ":java",
   package = "grammar",
-  version_file = "//:VERSION",
   workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
 )
 
