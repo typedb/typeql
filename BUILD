@@ -24,5 +24,4 @@ deploy_github(
     release_description = "//:RELEASE_TEMPLATE.md",
     title = "Graql",
     deployment_properties = "//:deployment.properties",
-    version_file = "//:VERSION"
 )
