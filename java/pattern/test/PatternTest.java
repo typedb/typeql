@@ -28,7 +28,7 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static graql.lang.util.Collections.set;
+import static grakn.common.util.Collections.set;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("unchecked")

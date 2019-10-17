@@ -26,6 +26,7 @@ java_library(
     srcs = glob(["**/*.java"], exclude = ["**/test/**"]),
     deps = [
         "//grammar:java",
+        "@graknlabs_common//:common",
         # External dependencies
         "//dependencies/maven/artifacts/com/google/guava:guava",
         "//dependencies/maven/artifacts/com/google/code/findbugs:jsr305",
