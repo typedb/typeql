@@ -24,6 +24,7 @@ java_test(
     srcs = ["PatternTest.java"],
     deps = [
         "//java:graql",
+        "@graknlabs_common//:common",
     ],
     size = "small"
 )

@@ -24,6 +24,7 @@ java_test(
     srcs = ["ParserTest.java"],
     deps = [
         "//java:graql",
+        "@graknlabs_common//:common",
         "//dependencies/maven/artifacts/org/hamcrest:hamcrest-library",
     ],
     size = "medium"

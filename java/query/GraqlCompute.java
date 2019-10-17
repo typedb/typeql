@@ -34,9 +34,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static graql.lang.util.Collections.map;
-import static graql.lang.util.Collections.set;
-import static graql.lang.util.Collections.tuple;
+import static grakn.common.util.Collections.map;
+import static grakn.common.util.Collections.set;
+import static grakn.common.util.Collections.pair;
 import static java.util.stream.Collectors.joining;
 
 
@@ -561,12 +561,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         @Override
         public Map<Graql.Token.Compute.Algorithm, Set<Graql.Token.Compute.Param>> argumentsAccepted() {
-            return map(tuple(Graql.Token.Compute.Algorithm.K_CORE, set(Graql.Token.Compute.Param.MIN_K)));
+            return map(pair(Graql.Token.Compute.Algorithm.K_CORE, set(Graql.Token.Compute.Param.MIN_K)));
         }
 
         @Override
         public Map<Graql.Token.Compute.Algorithm, Map<Graql.Token.Compute.Param, Object>> argumentsDefault() {
-            return map(tuple(Graql.Token.Compute.Algorithm.K_CORE, map(tuple(Graql.Token.Compute.Param.MIN_K, DEFAULT_MIN_K))));
+            return map(pair(Graql.Token.Compute.Algorithm.K_CORE, map(pair(Graql.Token.Compute.Param.MIN_K, DEFAULT_MIN_K))));
         }
 
         @Override
@@ -625,13 +625,13 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         @Override
         public Map<Graql.Token.Compute.Algorithm, Set<Graql.Token.Compute.Param>> argumentsAccepted() {
-            return map(tuple(Graql.Token.Compute.Algorithm.K_CORE, set(Graql.Token.Compute.Param.K)),
-                       tuple(Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT, set(Graql.Token.Compute.Param.SIZE, Graql.Token.Compute.Param.CONTAINS)));
+            return map(pair(Graql.Token.Compute.Algorithm.K_CORE, set(Graql.Token.Compute.Param.K)),
+                       pair(Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT, set(Graql.Token.Compute.Param.SIZE, Graql.Token.Compute.Param.CONTAINS)));
         }
 
         @Override
         public Map<Graql.Token.Compute.Algorithm, Map<Graql.Token.Compute.Param, Object>> argumentsDefault() {
-            return map(tuple(Graql.Token.Compute.Algorithm.K_CORE, map(tuple(Graql.Token.Compute.Param.K, DEFAULT_K))));
+            return map(pair(Graql.Token.Compute.Algorithm.K_CORE, map(pair(Graql.Token.Compute.Param.K, DEFAULT_K))));
         }
 
         @Override

@@ -18,11 +18,11 @@
 
 package graql.lang.query.test;
 
+import grakn.common.util.Collections;
 import graql.lang.Graql;
 import graql.lang.query.GraqlDelete;
 import graql.lang.query.MatchClause;
 import graql.lang.statement.Variable;
-import graql.lang.util.Collections;
 import org.junit.Test;
 
 import java.util.Collection;
