@@ -260,8 +260,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
             @Override
             public GraqlCompute.Statistics.Count attributes(boolean include) {
-                LOG.warn("Attributes inclusion/exclusion cannot be set on compute count (always included unless scoped), ignoring");
-                this.includeAttributes = true;
+                LOG.warn("Attributes are always included in Compute Count queries unless scoped, ignoring");
                 return this;
             }
 
@@ -324,7 +323,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
             @Override
             public GraqlCompute.Statistics.Value attributes(boolean include) {
-                LOG.warn("Attributes inclusion/exclusion cannot be set on statistics (always included unless scoped), ignoring");
+                LOG.warn("Attributes are always included in Compute Statistics queries unless scoped, ignoring");
                 return this;
             }
 
