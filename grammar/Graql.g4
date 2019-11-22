@@ -238,7 +238,7 @@ unreserved          : MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
 MATCH           : 'match'       ;   GET             : 'get'         ;
 DEFINE          : 'define'      ;   UNDEFINE        : 'undefine'    ;
 INSERT          : 'insert'      ;   DELETE          : 'delete'      ;
-AGGREGATE       : 'aggregate'   ;   COMPUTE         : 'compute'     ;
+COMPUTE         : 'compute'     ;
 
 // NATIVE TYPE KEYWORDS
 
