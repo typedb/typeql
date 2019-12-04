@@ -205,7 +205,7 @@ workflows:
       - release-validate:
           filters:
             branches:
-              only: grakn-release-branch
+              only: graql-release-branch
       - deploy-github:
           filters:
             branches:
