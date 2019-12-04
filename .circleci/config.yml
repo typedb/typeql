@@ -210,6 +210,8 @@ workflows:
           filters:
             branches:
               only: graql-release-branch
+          requires:
+            - release-validate
       - deploy-approval:
           type: approval
           requires:
