@@ -289,7 +289,7 @@ public class ParserTest {
 
     @Test
     public void whenParsingDate_HandleMillis() {
-        String query = "match $x has release-date 1000-11-12T13:14:15.12312; get;";
+        String query = "match $x has release-date 1000-11-12T13:14:15.123; get;";
         GraqlGet expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123000000))).get();
         GraqlGet parsed = Graql.parse(query).asGet();
         assertQueryEquals(expected, parsed, query);

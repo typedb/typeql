@@ -346,11 +346,11 @@ fragment DATE_FRAGMENT_ : YEAR_ '-' MONTH_ '-' DAY_ ;
 fragment MONTH_         : [0-1][0-9] ;
 fragment DAY_           : [0-3][0-9] ;
 fragment YEAR_          : [0-9][0-9][0-9][0-9] | ('+' | '-') [0-9]+ ;
-fragment TIME_          : HOUR_ ':' MINUTE_ (':' SECOND_ ('.' MILLIS_)? )? ;
+fragment TIME_          : HOUR_ ':' MINUTE_ (':' SECOND_ ('.' SECOND_FRACTION_)? )? ;
 fragment HOUR_          : [0-2][0-9] ;
 fragment MINUTE_        : [0-6][0-9] ;
 fragment SECOND_        : [0-6][0-9] ;
-fragment MILLIS_        : [0-9] ([0-9] ([0-9])?)?; // between 1 and 3 digits
+fragment SECOND_FRACTION_   : [0-9] ([0-9] ([0-9])?)?; // between 1 and 3 digits
 fragment ESCAPE_SEQ_    : '\\' . ;
 
 COMMENT         : '#' .*? '\r'? ('\n' | EOF)    -> channel(HIDDEN) ;
