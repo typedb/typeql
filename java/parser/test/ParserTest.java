@@ -289,7 +289,7 @@ public class ParserTest {
 
     @Test
     public void whenParsingDate_HandleMillis() {
-        String query = "match $x has release-date 1000-11-12T13:14:15.123; get;";
+        String query = "match $x has release-date 1000-11-12T13:14:15.12312; get;";
         GraqlGet expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123000000))).get();
         GraqlGet parsed = Graql.parse(query).asGet();
         assertQueryEquals(expected, parsed, query);
@@ -311,6 +311,13 @@ public class ParserTest {
         exception.expect(GraqlException.class);
         exception.expectMessage(Matchers.containsString("no viable alternative"));
         GraqlGet parsed = Graql.parse(query).asGet();
+    }
+
+    @Test
+    public void whenParsingDateTime_ErrorWhenHandlingOverPreciseNanos() {
+        exception.expect(GraqlException.class);
+        exception.expectMessage(Matchers.containsString("has sub-millisecond precision time"));
+        GraqlGet apiQuery = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000))).get();
     }
 
 
@@ -376,7 +383,7 @@ public class ParserTest {
 
     @Test
     public void testGetOffsetLimit() {
-        String query = "match $y isa movie, has title $n; get; offset 2; limit 4;" ;
+        String query = "match $y isa movie, has title $n; get; offset 2; limit 4;";
         GraqlGet parsed = Graql.parse(query).asGet();
         GraqlGet expected = match(
                 var("y").isa("movie").has("title", var("n"))
@@ -1049,7 +1056,7 @@ public class ParserTest {
         int numQueries = 10_000;
         String matchInsertString = "match $x isa person; insert $y isa person;\n";
         StringBuilder longQuery = new StringBuilder();
-        for(int i=0; i<numQueries; i++) {
+        for (int i = 0; i < numQueries; i++) {
             longQuery.append(matchInsertString);
         }
 

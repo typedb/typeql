@@ -19,6 +19,7 @@
 package graql.lang.property;
 
 import graql.lang.Graql;
+import graql.lang.exception.GraqlException;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementAttribute;
 import graql.lang.util.StringUtil;
@@ -188,6 +189,14 @@ public class ValueProperty<T> extends VarProperty {
 
                 public DateTime(LocalDateTime value) {
                     super(value);
+
+                    // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
+                    int nanos = value.toLocalTime().getNano();
+                    long nanosPerMilli = 1000000L;
+                    long remainder = nanos % nanosPerMilli;
+                    if (remainder != 0) {
+                        throw GraqlException.subsecondPrecisionTooPrecise(value);
+                    }
                 }
             }
         }
