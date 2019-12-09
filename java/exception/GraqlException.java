@@ -21,6 +21,7 @@ package graql.lang.exception;
 
 import graql.lang.Graql;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_CONDITION;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
 import static graql.lang.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
+import static graql.lang.exception.ErrorMessage.OVERPRECISE_SECOND_FRACTION;
 
 public class GraqlException extends RuntimeException {
 
@@ -78,5 +80,9 @@ public class GraqlException extends RuntimeException {
 
     public static GraqlException invalidComputeQuery_invalidArgument(Graql.Token.Compute.Method method, Graql.Token.Compute.Algorithm algorithm, Set<Graql.Token.Compute.Param> accepted) {
         return new GraqlException(INVALID_COMPUTE_ARGUMENT.getMessage(method, algorithm, accepted));
+    }
+
+    public static GraqlException subsecondPrecisionTooPrecise(LocalDateTime localDateTime) {
+        return new GraqlException(OVERPRECISE_SECOND_FRACTION.getMessage(localDateTime));
     }
 }
