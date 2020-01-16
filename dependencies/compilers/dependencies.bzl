@@ -22,5 +22,5 @@ def antlr_dependencies():
     git_repository(
         name = "rules_antlr",
         remote = "https://github.com/marcohu/rules_antlr",
-        tag = "0.4.0"
+        tag = "0.2.0"
     )
