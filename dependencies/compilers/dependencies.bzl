@@ -22,5 +22,5 @@ def antlr_dependencies():
     git_repository(
         name = "rules_antlr",
         remote = "https://github.com/graknlabs/rules_antlr",
-        branch = "0.2.1"
+        commit = "8fd16b2900ebf6b893c2b7695850960dcc2d102c"
     )
