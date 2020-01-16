@@ -1,0 +1,136 @@
+diff -ruN WORKSPACE WORKSPACE
+--- WORKSPACE	2019-06-04 18:32:08.000000000 +0300
++++ WORKSPACE	2020-01-16 13:21:46.000000000 +0300
+@@ -10,17 +10,17 @@
+ 
+ http_jar(
+     name = "junit",
+-    url = "http://central.maven.org/maven2/junit/junit/4.12/junit-4.12.jar",
++    url = "https://repo.maven.apache.org/maven2/junit/junit/4.12/junit-4.12.jar",
+     sha256 = "59721f0805e223d84b90677887d9ff567dc534d7c502ca903c0c2b17f05c116a",
+ )
+ http_jar(
+     name = "jimfs",
+-    url = "http://central.maven.org/maven2/com/google/jimfs/jimfs/1.1/jimfs-1.1.jar",
++    url = "https://repo.maven.apache.org/maven2/com/google/jimfs/jimfs/1.1/jimfs-1.1.jar",
+     sha256 = "c4828e28d7c0a930af9387510b3bada7daa5c04d7c25a75c7b8b081f1c257ddd",
+ )
+ http_jar(
+     name = "guava",
+-    url = "http://central.maven.org/maven2/com/google/guava/guava/27.1-jre/guava-27.1-jre.jar",
++    url = "https://repo.maven.apache.org/maven2/com/google/guava/guava/27.1-jre/guava-27.1-jre.jar",
+     sha256 = "4a5aa70cc968a4d137e599ad37553e5cfeed2265e8c193476d7119036c536fe7",
+ )
+ 
+diff -ruN antlr/deps.bzl antlr/deps.bzl
+--- antlr/deps.bzl	2019-06-04 18:32:08.000000000 +0300
++++ antlr/deps.bzl	2020-01-16 13:21:35.000000000 +0300
+@@ -43,12 +43,12 @@
+ def _antlr472_dependencies(skipAntlr3=False):
+     http_jar(
+         name = "antlr4_runtime",
+-        url = "http://central.maven.org/maven2/org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar",
++        url = "https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar",
+         sha256 = "4c518b87d4bdff8b44cd8cbc1af816e944b62a3fe5b80b781501cf1f4759bbc4",
+     )
+     http_jar(
+         name = "antlr4_tool",
+-        url = "http://central.maven.org/maven2/org/antlr/antlr4/4.7.2/antlr4-4.7.2.jar",
++        url = "https://repo.maven.apache.org/maven2/org/antlr/antlr4/4.7.2/antlr4-4.7.2.jar",
+         sha256 = "a3811fad1e4cb6dde62c189c204cf931c5fa40e06e43839ead4a9f2e188f2fe5",
+     )
+     _antlr4_transitive_dependencies(skipAntlr3)
+@@ -56,12 +56,12 @@
+ def _antlr471_dependencies(skipAntlr3=False):
+     http_jar(
+         name = "antlr4_runtime",
+-        url = "http://central.maven.org/maven2/org/antlr/antlr4-runtime/4.7.1/antlr4-runtime-4.7.1.jar",
++        url = "https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.7.1/antlr4-runtime-4.7.1.jar",
+         sha256 = "43516d19beae35909e04d06af6c0c58c17bc94e0070c85e8dc9929ca640dc91d",
+     )
+     http_jar(
+         name = "antlr4_tool",
+-        url = "http://central.maven.org/maven2/org/antlr/antlr4/4.7.1/antlr4-4.7.1.jar",
++        url = "https://repo.maven.apache.org/maven2/org/antlr/antlr4/4.7.1/antlr4-4.7.1.jar",
+         sha256 = "a2cdc2f2f8eb893728832568dc54d080eb5a1495edb3b66e51b97122a60a0d87",
+     )
+     _antlr4_transitive_dependencies(skipAntlr3)
+@@ -69,12 +69,12 @@
+ def _antlr472_optimized_dependencies():
+     http_jar(
+         name = "antlr4_runtime",
+-        url = "http://central.maven.org/maven2/com/tunnelvisionlabs/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar",
++        url = "https://repo.maven.apache.org/maven2/com/tunnelvisionlabs/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar",
+         sha256 = "fdec73953ba059034336a8e0b0ea5204f6897900bf0b0fa35347ce8a8bb88816",
+     )
+     http_jar(
+         name = "antlr4_tool",
+-        url = "http://central.maven.org/maven2/com/tunnelvisionlabs/antlr4/4.7.2/antlr4-4.7.2.jar",
++        url = "https://repo.maven.apache.org/maven2/com/tunnelvisionlabs/antlr4/4.7.2/antlr4-4.7.2.jar",
+         sha256 = "fcc2a0365de371d8676ab9b45c49aa2e784036a77b76383892887c89c5725ca3",
+     )
+     _antlr4_transitive_dependencies(False)
+@@ -82,12 +82,12 @@
+ def _antlr471_optimized_dependencies():
+     http_jar(
+         name = "antlr4_runtime",
+-        url = "http://central.maven.org/maven2/com/tunnelvisionlabs/antlr4-runtime/4.7.1/antlr4-runtime-4.7.1.jar",
++        url = "https://repo.maven.apache.org/maven2/com/tunnelvisionlabs/antlr4-runtime/4.7.1/antlr4-runtime-4.7.1.jar",
+         sha256 = "ce4f77ff9dc014feb9a8e700de5c77101d203acb6a1e8fa3446905c391ac72b9",
+     )
+     http_jar(
+         name = "antlr4_tool",
+-        url = "http://central.maven.org/maven2/com/tunnelvisionlabs/antlr4/4.7.1/antlr4-4.7.1.jar",
++        url = "https://repo.maven.apache.org/maven2/com/tunnelvisionlabs/antlr4/4.7.1/antlr4-4.7.1.jar",
+         sha256 = "de9a7b94b48ea7c8100663cbb1a54465c37671841c0aefdf4c53a72212555ae8",
+     )
+     _antlr4_transitive_dependencies(False)
+@@ -96,41 +96,41 @@
+     if not skipAntlr3:
+         http_jar(
+             name = "antlr3_runtime",
+-            url = "http://central.maven.org/maven2/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar",
++            url = "https://repo.maven.apache.org/maven2/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar",
+             sha256 = "ce3fc8ecb10f39e9a3cddcbb2ce350d272d9cd3d0b1e18e6fe73c3b9389c8734",
+         )
+         http_jar(
+             name = "stringtemplate4",
+-            url = "http://central.maven.org/maven2/org/antlr/ST4/4.0.8/ST4-4.0.8.jar",
++            url = "https://repo.maven.apache.org/maven2/org/antlr/ST4/4.0.8/ST4-4.0.8.jar",
+             sha256 = "58caabc40c9f74b0b5993fd868e0f64a50c0759094e6a251aaafad98edfc7a3b",
+         )
+     http_jar(
+         name = "javax_json",
+-        url = "http://central.maven.org/maven2/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar",
++        url = "https://repo.maven.apache.org/maven2/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar",
+         sha256 = "0e1dec40a1ede965941251eda968aeee052cc4f50378bc316cc48e8159bdbeb4",
+     )
+ 
+ def _antlr3_dependencies():
+     http_jar(
+         name = "antlr3_runtime",
+-        url = "http://central.maven.org/maven2/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar",
++        url = "https://repo.maven.apache.org/maven2/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar",
+         sha256 = "ce3fc8ecb10f39e9a3cddcbb2ce350d272d9cd3d0b1e18e6fe73c3b9389c8734",
+     )
+     http_jar(
+         name = "antlr3_tool",
+-        url = "http://central.maven.org/maven2/org/antlr/antlr/3.5.2/antlr-3.5.2.jar",
++        url = "https://repo.maven.apache.org/maven2/org/antlr/antlr/3.5.2/antlr-3.5.2.jar",
+         sha256 = "5ac36c2acfb0a0f3d37dafe20b5b570f2643e2d000c648d44503c2738be643df",
+     )
+     http_jar(
+         name = "stringtemplate4",
+-        url = "http://central.maven.org/maven2/org/antlr/ST4/4.0.8/ST4-4.0.8.jar",
++        url = "https://repo.maven.apache.org/maven2/org/antlr/ST4/4.0.8/ST4-4.0.8.jar",
+         sha256 = "58caabc40c9f74b0b5993fd868e0f64a50c0759094e6a251aaafad98edfc7a3b",
+     )
+ 
+ def _antlr2_dependencies():
+     http_jar(
+         name = "antlr2",
+-        url = "http://central.maven.org/maven2/antlr/antlr/2.7.7/antlr-2.7.7.jar",
++        url = "https://repo.maven.apache.org/maven2/antlr/antlr/2.7.7/antlr-2.7.7.jar",
+         sha256 = "88fbda4b912596b9f56e8e12e580cc954bacfb51776ecfddd3e18fc1cf56dc4c",
+     )
+ 

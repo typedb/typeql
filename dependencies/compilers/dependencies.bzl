@@ -16,11 +16,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def antlr_dependencies():
-    git_repository(
+    http_archive(
         name = "rules_antlr",
-        remote = "https://github.com/marcohu/rules_antlr",
-        tag = "0.2.0"
+        urls = ["https://github.com/marcohu/rules_antlr/archive/0.2.0.zip"],
+        strip_prefix = "rules_antlr-0.2.0",
+        patches = ["//dependencies/compilers:maven-https.patch"]
     )
