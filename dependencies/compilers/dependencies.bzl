@@ -21,6 +21,6 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 def antlr_dependencies():
     git_repository(
         name = "rules_antlr",
-        remote = "https://github.com/marcohu/rules_antlr",
-        tag = "0.2.0"
+        remote = "https://github.com/graknlabs/rules_antlr",
+        branch = "0.2.1"
     )
