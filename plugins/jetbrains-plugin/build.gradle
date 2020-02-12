@@ -1,0 +1,38 @@
+plugins {
+    id 'org.jetbrains.intellij' version '0.4.15'
+}
+
+group 'com.intellij.lang.graql'
+version '2.0.0'
+
+apply plugin: 'java'
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'antlr'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    antlr "org.antlr:antlr4:4.7.1"
+
+    implementation 'org.antlr:antlr4-intellij-adaptor:0.1'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+intellij {
+    version '2019.3.1'
+}
+patchPluginXml {
+    changeNotes """
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>"""
+}
+
+generateGrammarSource {
+    sourceSets.main.antlr.srcDirs = ['../../grammar']
+    outputDirectory = file("build/generated-src/antlr/main/ai/graknlabs/graql")
+    arguments += ["-package", "ai.graknlabs.graql", "-visitor"]
+}
