@@ -3,6 +3,7 @@ package ai.graknlabs.graql.usage;
 import ai.graknlabs.graql.GraqlLanguage;
 import ai.graknlabs.graql.GraqlLexer;
 import ai.graknlabs.graql.GraqlParserDefinition;
+import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
 import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
@@ -47,12 +48,17 @@ public class GraqlFindUsagesProvider implements FindUsagesProvider {
     @NotNull
     @Override
     public String getType(@NotNull PsiElement element) {
-        return element.toString();
-//        if (element instanceof PsiGraqlNamedElement) {
-//            return "Graql named element";
-//        } else {
-//            return "";
-//        }
+        if (element instanceof PsiGraqlNamedElement) {
+            String declarationType = GraqlPsiUtils.determineDeclarationType((PsiGraqlNamedElement) element);
+            if (declarationType != null) {
+                return "Graql " + declarationType;
+            } else {
+                return "Graql element";
+            }
+        } else {
+            //todo: can this happen?
+            return "";
+        }
     }
 
     @NotNull
