@@ -87,7 +87,7 @@ public class GraqlParserDefinition implements ParserDefinition {
             @Override
             protected ParseTree parse(Parser parser, IElementType root) {
                 if (root instanceof IFileElementType) {
-                    return ((GraqlParser) parser).eof_query();
+                    return ((GraqlParser) parser).eof_query_list();
                 }
                 throw new UnsupportedOperationException();
             }
