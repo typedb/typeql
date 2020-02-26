@@ -39,3 +39,9 @@ Run the tests:
 ```bash
 $ ./gradlew test
 ```
+
+## Information
+
+For more information about how this plugin works and how to add additional functionality please see:
+ - https://www.jetbrains.org/intellij/sdk/docs/basics.html
+ - https://www.jetbrains.org/intellij/sdk/docs/tutorials/custom_language_support_tutorial.html
