@@ -11,6 +11,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
 
 /**
@@ -23,22 +26,20 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new PsiElementVisitor() {
             @Override
-            public void visitElement(PsiElement identifier) {
-                if (identifier instanceof PsiGraqlElement
-                        && !(identifier instanceof PsiGraqlNamedElement)
-                        && !(identifier instanceof PsiStatementType)) {
-                    PsiGraqlElement identifierElement = ((PsiGraqlElement) identifier);
-                    if (identifierElement.getName() == null) {
-                        return;
-                    }
+            public void visitElement(PsiElement element) {
+                List<PsiGraqlElement> identifiers = new ArrayList<>();
+                if (element instanceof PsiStatementType) {
+                    identifiers.addAll(((PsiStatementType) element).findHasTypeProperties());
+                    identifiers.addAll(((PsiStatementType) element).findPlaysTypeProperties());
+                    identifiers.addAll(((PsiStatementType) element).findSubTypeProperties());
+                }
 
+                for (PsiGraqlElement identifier : identifiers) {
                     PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
-                            identifier.getProject(), identifierElement.getName());
+                            identifier.getProject(), identifier.getName());
                     if (declaration == null) {
                         PsiElement undefinedConcept = identifier.getFirstChild().getNextSibling().getNextSibling();
-                        if ("".equals(undefinedConcept.getText())) {
-                            return; //user still typing
-                        } else if (GRAQL_TYPES.contains(undefinedConcept.getText())) {
+                        if (GRAQL_TYPES.contains(undefinedConcept.getText())) {
                             return; //defined by language
                         }
 

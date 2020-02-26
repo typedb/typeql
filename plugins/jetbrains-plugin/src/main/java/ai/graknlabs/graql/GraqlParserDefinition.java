@@ -23,6 +23,7 @@ import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
 
@@ -118,27 +119,44 @@ public class GraqlParserDefinition implements ParserDefinition {
             case GraqlParser.RULE_statement_type:
                 return new PsiStatementType(node);
             case GraqlParser.RULE_type_property:
-                if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("has")) {
-                    return new PsiHasTypeProperty(node);
-                } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("plays")) {
-                    return new PsiPlaysTypeProperty(node);
-                } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("relates")) {
-                    return new PsiRelatesTypeProperty(node);
-                } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("sub") &&
-                        !GRAQL_TYPES.contains(node.getLastChildNode().getText())) {
-                    return new PsiSubTypeProperty(node);
-                }
+                PsiElement ruleTypePropertyElement = getRuleTypePropertyElement(node);
+                if (ruleTypePropertyElement != null) return ruleTypePropertyElement;
             case GraqlParser.RULE_type:
-                if (node.getTreePrev() != null && node.getTreePrev().getTreePrev() != null
-                        && node.getTreePrev().getTreePrev().getText().equals("as")) {
-                    return new PsiRelatesSuperRoleTypeProperty(node);
-                } else if (node.getTreeNext() != null && node.getTreeNext().getTreeNext() != null
-                        && node.getTreeNext().getTreeNext().getFirstChildNode() != null
-                        && node.getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")) {
-                    return new PsiTypeProperty(node);
-                }
+                PsiElement ruleTypeElement = getRuleTypeElement(node);
+                if (ruleTypeElement != null) return ruleTypeElement;
             default:
                 return new ANTLRPsiNode(node);
         }
+    }
+
+    @Nullable
+    public static PsiElement getRuleTypeElement(ASTNode node) {
+        if (node.getTreePrev() != null && node.getTreePrev().getTreePrev() != null
+                && node.getTreePrev().getTreePrev().getText().equals("as")) {
+            return new PsiRelatesSuperRoleTypeProperty(node);
+        } else if (node.getTreeNext() != null && node.getTreeNext().getTreeNext() != null
+                && node.getTreeNext().getTreeNext().getFirstChildNode() != null
+                && node.getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")) {
+            return new PsiTypeProperty(node);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static PsiElement getRuleTypePropertyElement(ASTNode node) {
+        if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("has")) {
+            String hasTo = node.getLastChildNode().getText();
+            if (!hasTo.isEmpty()) return new PsiHasTypeProperty(node);
+        } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("plays")) {
+            String playsTo = node.getLastChildNode().getText();
+            if (!playsTo.isEmpty()) return new PsiPlaysTypeProperty(node);
+        } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("relates")) {
+            String relatesTo = node.getLastChildNode().getText();
+            if (!relatesTo.isEmpty()) return new PsiRelatesTypeProperty(node);
+        } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("sub")) {
+            String subsTo = node.getLastChildNode().getText();
+            if (!subsTo.isEmpty() && !GRAQL_TYPES.contains(subsTo)) return new PsiSubTypeProperty(node);
+        }
+        return null;
     }
 }

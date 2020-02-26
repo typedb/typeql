@@ -3,12 +3,14 @@ package ai.graknlabs.graql.inspection.unusedDeclaration;
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
+import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,9 +23,13 @@ public class GraqlUnusedAttributeDeclarationInspection extends LocalInspectionTo
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new PsiElementVisitor() {
             @Override
-            public void visitElement(PsiElement identifier) {
-                if (identifier instanceof PsiGraqlNamedElement) {
-                    PsiGraqlNamedElement declaration = (PsiGraqlNamedElement) identifier;
+            public void visitElement(PsiElement element) {
+                List<PsiGraqlNamedElement> declarations = new ArrayList<>();
+                if (element instanceof PsiStatementType) {
+                    declarations.addAll(((PsiStatementType) element).findTypeProperties());
+                }
+
+                for (PsiGraqlNamedElement declaration : declarations) {
                     String type = GraqlPsiUtils.determineDeclarationType(declaration);
                     if ("attribute".equals(type)) {
                         List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
