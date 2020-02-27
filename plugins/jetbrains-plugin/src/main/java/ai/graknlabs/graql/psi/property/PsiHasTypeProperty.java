@@ -33,6 +33,10 @@ public class PsiHasTypeProperty extends PsiGraqlElement {
         return Objects.equals(getHasType(), "abstract");
     }
 
+    public boolean isKey() {
+        return getFirstChild() != null && Objects.equals(getFirstChild().getText(), "key");
+    }
+
     @Override
     public PsiReference getReference() {
         if (getHasType() == null || isAbstractType()) {
