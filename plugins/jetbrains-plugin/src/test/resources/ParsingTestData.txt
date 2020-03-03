@@ -1,5 +1,5 @@
 Graql Language file(0,867)
-  ANTLRPsiNode(eof_query)(0,867)
+  ANTLRPsiNode(eof_query_list)(0,867)
     ANTLRPsiNode(query)(0,867)
       ANTLRPsiNode(query_define)(0,867)
         PsiElement('define')('define')(0,6)
