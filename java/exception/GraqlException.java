@@ -19,6 +19,7 @@ package graql.lang.exception;
 
 
 import graql.lang.Graql;
+import graql.lang.query.builder.Filterable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
 import static graql.lang.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
 import static graql.lang.exception.ErrorMessage.OVERPRECISE_SECOND_FRACTION;
+import static graql.lang.exception.ErrorMessage.SORTING_NOT_ALLOWED;
 
 public class GraqlException extends RuntimeException {
 
@@ -83,5 +85,9 @@ public class GraqlException extends RuntimeException {
 
     public static GraqlException subsecondPrecisionTooPrecise(LocalDateTime localDateTime) {
         return new GraqlException(OVERPRECISE_SECOND_FRACTION.getMessage(localDateTime));
+    }
+
+    public static GraqlException sortingNotAllowed(Filterable.Sorting sorting) {
+        return new GraqlException(SORTING_NOT_ALLOWED.getMessage(sorting));
     }
 }

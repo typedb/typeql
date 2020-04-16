@@ -135,54 +135,21 @@ public class MatchClause {
     }
 
     /**
-     * Construct a delete query with all all variables mentioned in the query
-     */
-    @CheckReturnValue
-    public GraqlDelete.Unfiltered delete() {
-        return delete(Collections.emptyList());
-    }
-
-    /**
-     * @param vars an array of variables to delete for each result of this match clause
+     * @param statements, an array of statements that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(String var, String... vars) {
-        LinkedHashSet<Variable> varSet = Stream
-                .concat(Stream.of(var), Stream.of(vars))
-                .map(Variable::new)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return delete(varSet);
+    public final GraqlDelete.Unfiltered delete(Statement... statements) {
+        return delete(Arrays.asList(statements));
     }
 
     /**
-     * @param vars an array of variables to delete for each result of this match clause
+     * @param delete a collection of statements that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(Variable var, Variable... vars) {
-        LinkedHashSet<Variable> varSet = new LinkedHashSet<>();
-        varSet.add(var);
-        varSet.addAll(Arrays.asList(vars));
-        return delete(varSet);
-    }
-
-    /**
-     * @param vars a collection of variables to delete for each result of this match clause
-     * @return a delete query that will delete the given variables for each result of this match clause
-     */
-    @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(List<Variable> vars) {
-        return delete(new LinkedHashSet<>(vars));
-    }
-
-    /**
-     * @param vars a collection of variables to delete for each result of this match clause
-     * @return a delete query that will delete the given variables for each result of this match clause
-     */
-    @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(LinkedHashSet<Variable> vars) {
-        return new GraqlDelete.Unfiltered(this, vars);
+    public final GraqlDelete.Unfiltered delete(Collection<? extends Statement> delete) {
+        return new GraqlDelete.Unfiltered(this, new ArrayList<>(delete));
     }
 
     @Override

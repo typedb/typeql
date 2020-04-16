@@ -240,16 +240,19 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDelete visitQuery_delete(GraqlParser.Query_deleteContext ctx) {
-        LinkedHashSet<Variable> vars = visitVariables(ctx.variables());
+        List<Statement> statements = ctx.statement_instance().stream()
+                .map(this::visitStatement_instance)
+                .collect(toList());
+
         MatchClause match = Graql.match(ctx.pattern()
                 .stream().map(this::visitPattern)
                 .collect(Collectors.toCollection(LinkedHashSet::new)));
 
         if (ctx.filters().getChildCount() == 0) {
-            return new GraqlDelete(match, vars);
+            return new GraqlDelete(match, statements);
         } else {
             Triple<Filterable.Sorting, Long, Long> filters = visitFilters(ctx.filters());
-            return new GraqlDelete(match, vars, filters.first(), filters.second(), filters.third());
+            return new GraqlDelete(match, statements, filters.first(), filters.second(), filters.third());
         }
     }
 

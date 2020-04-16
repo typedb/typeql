@@ -29,7 +29,8 @@ public enum ErrorMessage {
     INVALID_COMPUTE_METHOD_ALGORITHM("Invalid algorithm for 'compute [%s]'. The accepted algorithm(s) are: [%s]."),
     INVALID_COMPUTE_ARGUMENT("Invalid argument(s) 'compute [%s] using [%s]'. The accepted argument(s) are: [%s]."),
 
-    OVERPRECISE_SECOND_FRACTION("LocalDateTime [%s] has sub-millisecond precision time. Precision up to 1 millisecond is supported");
+    OVERPRECISE_SECOND_FRACTION("LocalDateTime [%s] has sub-millisecond precision time. Precision up to 1 millisecond is supported"),
+    SORTING_NOT_ALLOWED("Sorting [%s] not supported");
 
 
     private final String message;
