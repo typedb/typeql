@@ -139,7 +139,7 @@ public class MatchClause {
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(Statement... statements) {
+    public final GraqlDelete delete(Statement... statements) {
         return delete(Arrays.asList(statements));
     }
 
@@ -148,8 +148,8 @@ public class MatchClause {
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(Collection<? extends Statement> delete) {
-        return new GraqlDelete.Unfiltered(this, new ArrayList<>(delete));
+    public final GraqlDelete delete(Collection<? extends Statement> delete) {
+        return new GraqlDelete(this, new ArrayList<>(delete));
     }
 
     @Override

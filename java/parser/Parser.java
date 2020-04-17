@@ -248,12 +248,7 @@ public class Parser extends GraqlBaseVisitor {
                 .stream().map(this::visitPattern)
                 .collect(Collectors.toCollection(LinkedHashSet::new)));
 
-        if (ctx.filters().getChildCount() == 0) {
-            return new GraqlDelete(match, statements);
-        } else {
-            Triple<Filterable.Sorting, Long, Long> filters = visitFilters(ctx.filters());
-            return new GraqlDelete(match, statements, filters.first(), filters.second(), filters.third());
-        }
+        return new GraqlDelete(match, statements);
     }
 
     @Override
@@ -304,8 +299,8 @@ public class Parser extends GraqlBaseVisitor {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
         return new GraqlGet.Aggregate(visitQuery_get(ctx.query_get()),
-                                      Graql.Token.Aggregate.Method.of(function.function_method().getText()),
-                                      function.VAR_() != null ? getVar(function.VAR_()) : null);
+                Graql.Token.Aggregate.Method.of(function.function_method().getText()),
+                function.VAR_() != null ? getVar(function.VAR_()) : null);
     }
 
     @Override
@@ -320,8 +315,8 @@ public class Parser extends GraqlBaseVisitor {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
         return new GraqlGet.Group.Aggregate(visitQuery_get(ctx.query_get()).group(var),
-                                            Graql.Token.Aggregate.Method.of(function.function_method().getText()),
-                                            function.VAR_() != null ? getVar(function.VAR_()) : null);
+                Graql.Token.Aggregate.Method.of(function.function_method().getText()),
+                function.VAR_() != null ? getVar(function.VAR_()) : null);
     }
 
     // DELETE AND GET QUERY MODIFIERS ==========================================
@@ -632,7 +627,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (property.RELATES() != null) {
                 if (property.AS() != null) {
                     type = type.relates(visitType(property.type(0)),
-                                        visitType(property.type(1)));
+                            visitType(property.type(1)));
                 } else {
                     type = type.relates(visitType(property.type(0)));
                 }
@@ -685,7 +680,8 @@ public class Parser extends GraqlBaseVisitor {
         }
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
+    @SuppressWarnings("Duplicates")
     public Statement visitStatement_thing(GraqlParser.Statement_thingContext ctx) {
         // TODO: restrict for Insert VS Match
 
@@ -710,7 +706,8 @@ public class Parser extends GraqlBaseVisitor {
         return instance;
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
+    @SuppressWarnings("Duplicates")
     public Statement visitStatement_relation(GraqlParser.Statement_relationContext ctx) {
         // TODO: restrict for Insert VS Match
 
@@ -735,7 +732,8 @@ public class Parser extends GraqlBaseVisitor {
         return instance;
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
+    @SuppressWarnings("Duplicates")
     public Statement visitStatement_attribute(GraqlParser.Statement_attributeContext ctx) {
         // TODO: restrict for Insert VS Match
 
@@ -1039,7 +1037,7 @@ public class Parser extends GraqlBaseVisitor {
 
     private LocalDateTime getDate(TerminalNode date) {
         return LocalDate.parse(date.getText(),
-                               DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+                DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
     }
 
     private LocalDateTime getDateTime(TerminalNode dateTime) {

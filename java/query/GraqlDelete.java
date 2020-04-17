@@ -36,27 +36,14 @@ import static java.util.stream.Collectors.joining;
 /**
  * A query for deleting concepts from a match clause clause.
  * The delete operation to perform is based on what Statement objects
- * are provided to it. If only variable names are provided, then the delete
- * query will delete the concept bound to each given variable name. If property
- * flags are provided, e.g. {@code var("x").has("name")} then only those
- * properties are deleted.
+ * are provided to it. Only those properties will be deleted.
  */
-public class GraqlDelete extends GraqlQuery implements Filterable {
+public class GraqlDelete extends GraqlQuery {
 
     private final MatchClause match;
     private final List<Statement> delete;
-    private final long offset;
-    private final long limit;
-
-    public GraqlDelete(MatchClause match) {
-        this(match, new ArrayList<>());
-    }
 
     public GraqlDelete(MatchClause match, List<Statement> delete) {
-        this(match, delete, null, -1, -1);
-    }
-
-    public GraqlDelete(MatchClause match, List<Statement> delete, Filterable.Sorting sorting, long offset, long limit) {
         if (match == null) {
             throw new NullPointerException("Null match");
         }
@@ -74,12 +61,6 @@ public class GraqlDelete extends GraqlQuery implements Filterable {
             }
         });
         this.delete = delete;
-
-        if (sorting != null) {
-            throw GraqlException.sortingNotAllowed(sorting);
-        }
-        this.offset = offset;
-        this.limit = limit;
     }
 
     @CheckReturnValue
@@ -90,21 +71,6 @@ public class GraqlDelete extends GraqlQuery implements Filterable {
     public Set<Variable> vars() {
         if (delete.isEmpty()) return match.getPatterns().variables();
         return delete.stream().flatMap(statement -> statement.variables().stream()).collect(Collectors.toSet());
-    }
-
-    @Override
-    public Optional<Sorting> sort() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Long> offset(){
-        return this.offset < 0 ? Optional.empty() : Optional.of(this.offset);
-    }
-
-    @Override
-    public Optional<Long> limit() {
-        return limit < 0 ? Optional.empty() : Optional.of(limit);
     }
 
     @Override @SuppressWarnings("Duplicates")
@@ -121,10 +87,6 @@ public class GraqlDelete extends GraqlQuery implements Filterable {
         query.append(delete.stream()
             .map(Statement::toString)
             .collect(Collectors.joining(Graql.Token.Char.NEW_LINE.toString())));
-
-        if (sort().isPresent() || offset().isPresent() || limit().isPresent()) {
-            query.append(Graql.Token.Char.SPACE).append(printFilters());
-        }
 
         return query.toString();
     }
@@ -143,10 +105,7 @@ public class GraqlDelete extends GraqlQuery implements Filterable {
         // vars() (the method) returns match.vars() if vars (the property) is empty
         // we want to compare vars() (the method) which determines the final value
         return (this.match().equals(that.match()) &&
-                this.vars().equals(that.vars()) &&
-                this.sort().equals(that.sort()) &&
-                this.offset().equals(that.offset()) &&
-                this.limit().equals(that.limit()));
+                this.vars().equals(that.vars()));
     }
 
     @Override
@@ -158,71 +117,6 @@ public class GraqlDelete extends GraqlQuery implements Filterable {
         h ^= this.vars().hashCode();
         h *= 1000003;
         h ^= this.match().hashCode();
-        h *= 1000003;
-        h ^= this.sort().hashCode();
-        h *= 1000003;
-        h ^= this.offset().hashCode();
-        h *= 1000003;
-        h ^= this.limit().hashCode();
         return h;
-    }
-
-    public static class Unfiltered extends GraqlDelete
-            implements Filterable.Unfiltered<GraqlDelete.Sorted, GraqlDelete.Offsetted, GraqlDelete.Limited> {
-
-        Unfiltered(MatchClause match, List<Statement> delete) {
-            super(match, delete);
-        }
-
-        @Override
-        public GraqlDelete.Sorted sort(Sorting sorting) {
-            return new GraqlDelete.Sorted(this, sorting);
-        }
-
-        @Override
-        public GraqlDelete.Offsetted offset(long offset) {
-            return new GraqlDelete.Offsetted(this, offset);
-        }
-
-        @Override
-        public GraqlDelete.Limited limit(long limit) {
-            return new GraqlDelete.Limited(this, limit);
-        }
-    }
-
-    public class Sorted extends GraqlDelete implements Filterable.Sorted<GraqlDelete.Offsetted, GraqlDelete.Limited> {
-
-        Sorted(GraqlDelete graqlDelete, Filterable.Sorting sorting) {
-            super(graqlDelete.match, graqlDelete.delete, sorting, graqlDelete.offset, graqlDelete.limit);
-        }
-
-        @Override
-        public GraqlDelete.Offsetted offset(long offset) {
-            return new GraqlDelete.Offsetted(this, offset);
-        }
-
-        @Override
-        public GraqlDelete.Limited limit(long limit) {
-            return new GraqlDelete.Limited(this, limit);
-        }
-    }
-
-    public class Offsetted extends GraqlDelete implements Filterable.Offsetted<GraqlDelete.Limited> {
-
-        Offsetted(GraqlDelete graqlDelete, long offset) {
-            super(graqlDelete.match, graqlDelete.delete, null, offset, graqlDelete.limit);
-        }
-
-        @Override
-        public GraqlDelete.Limited limit(long limit) {
-            return new GraqlDelete.Limited(this, limit);
-        }
-    }
-
-    public class Limited extends GraqlDelete implements Filterable.Limited {
-
-        Limited(GraqlDelete graqlDelete, long limit) {
-            super(graqlDelete.match, graqlDelete.delete, null, graqlDelete.offset, limit);
-        }
     }
 }
