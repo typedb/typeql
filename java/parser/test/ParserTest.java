@@ -501,12 +501,14 @@ public class ParserTest {
         String query = "match\n" +
                 "$x isa movie, has title 'The Title';\n" +
                 "$y isa movie;\n" +
-                "delete $x, $y;";
+                "delete\n" +
+                "$x isa movie;\n" +
+                "$y isa movie;";
         GraqlDelete parsed = Graql.parse(query).asDelete();
         GraqlDelete expected = match(
                 var("x").isa("movie").has("title", "The Title"),
                 var("y").isa("movie")
-        ).delete(Graql.parsePatternList("$x isa movie; $y isa movie"));
+        ).delete(Graql.parsePattern("{$x isa movie; $y isa movie;};").statements());
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }

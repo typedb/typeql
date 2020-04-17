@@ -69,7 +69,7 @@ public class GraqlDelete extends GraqlQuery implements Filterable {
         delete.forEach(statement ->{
             for (Variable var : statement.variables()) {
                 if (!match.getSelectedNames().contains(var)) {
-                    throw GraqlException.variableOutOfScope(var.toString());
+                    throw GraqlException.deleteVariableUnbound(var.toString());
                 }
             }
         });

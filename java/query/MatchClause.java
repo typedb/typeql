@@ -116,22 +116,22 @@ public class MatchClause {
     }
 
     /**
-     * @param vars an array of variables to insert for each result of this match clause
+     * @param statements an array of variables to insert for each result of this match clause
      * @return an insert query that will insert the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlInsert insert(Statement... vars) {
-        return insert(Arrays.asList(vars));
+    public final GraqlInsert insert(Statement... statements) {
+        return insert(Arrays.asList(statements));
     }
 
     /**
-     * @param vars a collection of variables to insert for each result of this match clause
+     * @param statements a collection of variables to insert for each result of this match clause
      * @return an insert query that will insert the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlInsert insert(Collection<? extends Statement> vars) {
+    public final GraqlInsert insert(Collection<? extends Statement> statements) {
         MatchClause match = this;
-        return new GraqlInsert(match, Collections.unmodifiableList(new ArrayList<>(vars)));
+        return new GraqlInsert(match, Collections.unmodifiableList(new ArrayList<>(statements)));
     }
 
     /**

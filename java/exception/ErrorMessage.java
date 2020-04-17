@@ -22,6 +22,7 @@ public enum ErrorMessage {
     SYNTAX_ERROR("syntax error at line %s: \n%s\n%s\n%s"),
     CONFLICTING_PROPERTIES("the following unique properties in '%s' conflict: '%s' and '%s'"),
     VARIABLE_OUT_OF_SCOPE("the variable [%s] is out of scope of the query"),
+    UNBOUND_DELETE_VARIABLE("the delete clause variable [%s] is not defined in the match clause"),
     NO_PATTERNS("no patterns have been provided. at least one pattern must be provided"),
     INVALID_COMPUTE_METHOD("Invalid compute method. The available compute methods are: [%s]."),
     INVALID_COMPUTE_CONDITION("Invalid condition(s) for 'compute [%s]'. The accepted condition(s) are: [%s]."),
