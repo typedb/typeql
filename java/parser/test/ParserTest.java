@@ -514,21 +514,6 @@ public class ParserTest {
     }
 
     @Test
-    public void whenParsingDeleteQueryWithNoArguments_ResultIsSameAsJavaGraql() {
-        String query = "match\n" +
-                "$x isa movie, has title 'The Title';\n" +
-                "$y isa movie;\n" +
-                "delete;";
-        GraqlDelete parsed = Graql.parse(query).asDelete();
-        GraqlDelete expected = match(
-                var("x").isa("movie").has("title", "The Title"),
-                var("y").isa("movie")
-        ).delete();
-
-        assertQueryEquals(expected, parsed, query.replace("'", "\""));
-    }
-
-    @Test
     public void whenParsingInsertQuery_ResultIsSameAsJavaGraql() {
         String query = "insert\n" +
                 "$x isa pokemon, has name 'Pichu';\n" +
