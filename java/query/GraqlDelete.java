@@ -68,6 +68,10 @@ public class GraqlDelete extends GraqlQuery {
         return match;
     }
 
+    public List<Statement> statements() {
+        return delete;
+    }
+
     public Set<Variable> vars() {
         if (delete.isEmpty()) return match.getPatterns().variables();
         return delete.stream().flatMap(statement -> statement.variables().stream()).collect(Collectors.toSet());
