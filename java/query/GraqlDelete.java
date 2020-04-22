@@ -19,15 +19,11 @@ package graql.lang.query;
 
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
-import graql.lang.query.builder.Filterable;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
 
 import javax.annotation.CheckReturnValue;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,26 +37,30 @@ import static java.util.stream.Collectors.joining;
 public class GraqlDelete extends GraqlQuery {
 
     private final MatchClause match;
-    private final List<Statement> delete;
+    private final List<Statement> statements;
 
-    public GraqlDelete(MatchClause match, List<Statement> delete) {
+    public GraqlDelete(MatchClause match, List<Statement> statements) {
         if (match == null) {
             throw new NullPointerException("Null match");
         }
         this.match = match;
 
-        if (delete == null) {
+        if (statements == null) {
             throw new NullPointerException("Null delete");
         }
 
-        delete.forEach(statement ->{
+        if (statements.isEmpty()) {
+            throw GraqlException.noPatterns();
+        }
+
+        statements.forEach(statement ->{
             for (Variable var : statement.variables()) {
                 if (!match.getSelectedNames().contains(var)) {
                     throw GraqlException.deleteVariableUnbound(var.toString());
                 }
             }
         });
-        this.delete = delete;
+        this.statements = statements;
     }
 
     @CheckReturnValue
@@ -69,12 +69,11 @@ public class GraqlDelete extends GraqlQuery {
     }
 
     public List<Statement> statements() {
-        return delete;
+        return statements;
     }
 
     public Set<Variable> vars() {
-        if (delete.isEmpty()) return match.getPatterns().variables();
-        return delete.stream().flatMap(statement -> statement.variables().stream()).collect(Collectors.toSet());
+        return statements.stream().flatMap(statement -> statement.variables().stream()).collect(Collectors.toSet());
     }
 
     @Override @SuppressWarnings("Duplicates")
@@ -83,12 +82,12 @@ public class GraqlDelete extends GraqlQuery {
         query.append(Graql.Token.Char.NEW_LINE);
 
         query.append(Graql.Token.Command.DELETE);
-        if (delete.size() > 1) {
+        if (statements.size() > 1) {
             query.append(Graql.Token.Char.NEW_LINE);
         } else {
             query.append(Graql.Token.Char.SPACE);
         }
-        query.append(delete.stream()
+        query.append(statements.stream()
             .map(Statement::toString)
             .collect(Collectors.joining(Graql.Token.Char.NEW_LINE.toString())));
 

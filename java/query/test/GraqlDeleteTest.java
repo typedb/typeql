@@ -18,6 +18,7 @@
 package graql.lang.query.test;
 
 import graql.lang.Graql;
+import graql.lang.exception.ErrorMessage;
 import graql.lang.exception.GraqlException;
 import graql.lang.query.GraqlDelete;
 import graql.lang.query.MatchClause;
@@ -26,6 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,5 +66,19 @@ public class GraqlDeleteTest {
         exception.expect(GraqlException.class);
         exception.expectMessage("the delete clause variable [$y] is not defined in the match clause");
         GraqlDelete query = new GraqlDelete(match1, delete2);
+    }
+
+    @Test
+    public void deleteQueryWithoutStatementsThrows() {
+        exception.expect(GraqlException.class);
+        exception.expectMessage(ErrorMessage.NO_PATTERNS.getMessage());
+        GraqlDelete query = new GraqlDelete(match1, new ArrayList<>());
+    }
+
+    @Test
+    public void deleteQueryWithBuilderWithoutStatementThrows() {
+        exception.expect(GraqlException.class);
+        exception.expectMessage(ErrorMessage.NO_PATTERNS.getMessage());
+        GraqlDelete query = match1.delete();
     }
 }
