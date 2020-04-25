@@ -655,7 +655,7 @@ public class ParserTest {
 
     @Test
     public void testMatchValueTypeQuery() {
-        String query = "match $x valuetype double; get;";
+        String query = "match $x value double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
         GraqlGet expected = match(var("x").valueType(Graql.Token.ValueType.DOUBLE)).get();
 
@@ -673,7 +673,7 @@ public class ParserTest {
 
     @Test
     public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
-        String query = "match $x valuetype date; get;";
+        String query = "match $x value date; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
         GraqlGet expected = match(var("x").valueType(Graql.Token.ValueType.DATE)).get();
 
@@ -682,7 +682,7 @@ public class ParserTest {
 
     @Test
     public void testDefineValueTypeQuery() {
-        String query = "define my-type sub attribute, valuetype long;";
+        String query = "define my-type sub attribute, value long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
         GraqlDefine expected = define(type("my-type").sub("attribute").valueType(Graql.Token.ValueType.LONG));
 
@@ -959,7 +959,7 @@ public class ParserTest {
 
     @Test
     public void testParseBooleanType() {
-        GraqlGet query = parse("match $x valuetype boolean; get;").asGet();
+        GraqlGet query = parse("match $x value boolean; get;").asGet();
 
         Statement var = query.match().getPatterns().statements().iterator().next();
 

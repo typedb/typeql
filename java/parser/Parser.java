@@ -634,7 +634,7 @@ public class Parser extends GraqlBaseVisitor {
                     type = type.relates(visitType(property.type(0)));
                 }
             } else if (property.VALUE() != null) {
-                type = type.valueType(Graql.Token.ValueType.of(property.valuetype().getText()));
+                type = type.valueType(Graql.Token.ValueType.of(property.type_value().getText()));
 
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));
@@ -962,7 +962,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Graql.Token.ValueType visitValuetype(GraqlParser.ValuetypeContext valueType) {
+    public Graql.Token.ValueType visitType_value(GraqlParser.Type_valueContext valueType) {
         if (valueType.BOOLEAN() != null) {
             return Graql.Token.ValueType.BOOLEAN;
         } else if (valueType.DATE() != null) {
