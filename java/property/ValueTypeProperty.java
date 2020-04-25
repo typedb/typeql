@@ -42,7 +42,7 @@ public class ValueTypeProperty extends VarProperty {
 
     @Override
     public String keyword() {
-        return Graql.Token.Property.VALUETYPE.toString();
+        return Graql.Token.Property.VALUE_TYPE.toString();
     }
 
     @Override

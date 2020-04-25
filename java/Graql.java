@@ -691,7 +691,8 @@ public class Graql {
         }
 
         public enum Property {
-            VALUETYPE("valuetype"),
+            VALUE(""),
+            VALUE_TYPE("value"),
             HAS("has"),
             KEY("key"),
             VIA("via"),
@@ -706,8 +707,7 @@ public class Graql {
             SUB("sub"),
             SUBX("sub!"),
             THEN("then"),
-            WHEN("when"),
-            VALUE("");
+            WHEN("when");
 
             private final String name;
 

@@ -84,7 +84,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(Graql.match(var("x").valueType(Graql.Token.ValueType.LONG)).get());
+        assertSameStringRepresentation(Graql.match(var("x").value(Graql.Token.ValueType.LONG)).get());
     }
 
     @Test

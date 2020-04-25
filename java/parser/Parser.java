@@ -634,7 +634,7 @@ public class Parser extends GraqlBaseVisitor {
                     type = type.relates(visitType(property.type(0)));
                 }
             } else if (property.VALUE() != null) {
-                type = type.valueType(Graql.Token.ValueType.of(property.type_value().getText()));
+                type = type.value(Graql.Token.ValueType.of(property.type_value().getText()));
 
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));

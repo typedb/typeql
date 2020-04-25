@@ -209,8 +209,8 @@ public interface StatementTypeBuilder {
      * @return this
      */
     @CheckReturnValue
-    default StatementType valueType(String valueType) {
-        return valueType(Graql.Token.ValueType.of(valueType));
+    default StatementType value(String valueType) {
+        return value(Graql.Token.ValueType.of(valueType));
     }
 
     /**
@@ -218,7 +218,7 @@ public interface StatementTypeBuilder {
      * @return this
      */
     @CheckReturnValue
-    default StatementType valueType(Graql.Token.ValueType valueType) {
+    default StatementType value(Graql.Token.ValueType valueType) {
         return type(new ValueTypeProperty(valueType));
     }
 
