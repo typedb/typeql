@@ -633,7 +633,7 @@ public class Parser extends GraqlBaseVisitor {
                 } else {
                     type = type.relates(visitType(property.type(0)));
                 }
-            } else if (property.VALUETYPE() != null) {
+            } else if (property.VALUE() != null) {
                 type = type.valueType(Graql.Token.ValueType.of(property.valuetype().getText()));
 
             } else if (property.REGEX() != null) {
@@ -870,7 +870,7 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public ValueProperty.Operation<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
-        Object value = visitLiteral(ctx.literal());
+        Object value = visitValue(ctx.value());
 
         if (value instanceof Integer) {
             return new ValueProperty.Operation.Assignment.Number<>(((Integer) value));
@@ -912,8 +912,8 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (ctx.comparable() != null) {
-            if (ctx.comparable().literal() != null) {
-                value = visitLiteral(ctx.comparable().literal());
+            if (ctx.comparable().value() != null) {
+                value = visitValue(ctx.comparable().value());
             } else if (ctx.comparable().VAR_() != null) {
                 value = new Statement(getVar(ctx.comparable().VAR_()));
             } else {
@@ -979,7 +979,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Object visitLiteral(GraqlParser.LiteralContext ctx) {
+    public Object visitValue(GraqlParser.ValueContext ctx) {
         if (ctx.STRING_() != null) {
             return getString(ctx.STRING_());
 

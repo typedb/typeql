@@ -103,7 +103,7 @@ type_property       :   ABSTRACT
                     |   HAS         type
                     |   PLAYS       type
                     |   RELATES     type ( AS type )?
-                    |   VALUETYPE   valuetype
+                    |   VALUE   valuetype
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
@@ -149,13 +149,13 @@ attribute           :   HAS type_label ( VAR_ | operation ) via? ;              
 operation           :   assignment
                     |   comparison
                     ;
-assignment          :   literal   ;
+assignment          :   value ;
 comparison          :   comparator  comparable
                     |   CONTAINS    containable
                     |   LIKE        regex
                     ;
 comparator          :   EQV | NEQV | GT | GTE | LT | LTE ;
-comparable          :   literal | VAR_  ;
+comparable          :   value | VAR_  ;
 containable         :   STRING_ | VAR_  ;
 
 
@@ -215,9 +215,9 @@ type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
 type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
 
-valuetype            :   LONG            |   DOUBLE          |   STRING
+valuetype           :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATE            ;
-literal             :   STRING_         |   INTEGER_        |   REAL_
+value               :   STRING_         |   INTEGER_        |   REAL_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
 regex               :   STRING_         ;
 
@@ -261,7 +261,7 @@ ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
 KEY             : 'key'         ;   HAS             : 'has'         ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
-VALUETYPE       : 'valuetype'   ;   REGEX           : 'regex'       ;
+VALUE           : 'value'   ;   REGEX           : 'regex'       ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
