@@ -20,7 +20,7 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.DataTypeProperty;
+import graql.lang.property.ValueTypeProperty;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -654,10 +654,10 @@ public class ParserTest {
     }
 
     @Test
-    public void testMatchDataTypeQuery() {
-        String query = "match $x datatype double; get;";
+    public void testMatchValueTypeQuery() {
+        String query = "match $x valuetype double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").datatype(Graql.Token.DataType.DOUBLE)).get();
+        GraqlGet expected = match(var("x").valueType(Graql.Token.ValueType.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -672,19 +672,19 @@ public class ParserTest {
     }
 
     @Test
-    public void whenParsingDateKeyword_ParseAsTheCorrectDataType() {
-        String query = "match $x datatype date; get;";
+    public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
+        String query = "match $x valuetype date; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").datatype(Graql.Token.DataType.DATE)).get();
+        GraqlGet expected = match(var("x").valueType(Graql.Token.ValueType.DATE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
-    public void testDefineDataTypeQuery() {
-        String query = "define my-type sub attribute, datatype long;";
+    public void testDefineValueTypeQuery() {
+        String query = "define my-type sub attribute, valuetype long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
-        GraqlDefine expected = define(type("my-type").sub("attribute").datatype(Graql.Token.DataType.LONG));
+        GraqlDefine expected = define(type("my-type").sub("attribute").valueType(Graql.Token.ValueType.LONG));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -959,14 +959,14 @@ public class ParserTest {
 
     @Test
     public void testParseBooleanType() {
-        GraqlGet query = parse("match $x datatype boolean; get;").asGet();
+        GraqlGet query = parse("match $x valuetype boolean; get;").asGet();
 
         Statement var = query.match().getPatterns().statements().iterator().next();
 
         //noinspection OptionalGetWithoutIsPresent
-        DataTypeProperty property = var.getProperty(DataTypeProperty.class).get();
+        ValueTypeProperty property = var.getProperty(ValueTypeProperty.class).get();
 
-        Assert.assertEquals(Graql.Token.DataType.BOOLEAN, property.dataType());
+        Assert.assertEquals(Graql.Token.ValueType.BOOLEAN, property.valueType());
     }
 
     @Test

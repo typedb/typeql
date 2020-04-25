@@ -103,7 +103,7 @@ type_property       :   ABSTRACT
                     |   HAS         type
                     |   PLAYS       type
                     |   RELATES     type ( AS type )?
-                    |   DATATYPE    datatype
+                    |   VALUETYPE   valuetype
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
@@ -215,7 +215,7 @@ type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
 type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
 
-datatype            :   LONG            |   DOUBLE          |   STRING
+valuetype            :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATE            ;
 literal             :   STRING_         |   INTEGER_        |   REAL_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
@@ -261,7 +261,7 @@ ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
 KEY             : 'key'         ;   HAS             : 'has'         ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
-DATATYPE        : 'datatype'    ;   REGEX           : 'regex'       ;
+VALUETYPE       : 'valuetype'   ;   REGEX           : 'regex'       ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
@@ -291,7 +291,7 @@ EQV             : '=='          ;   NEQV            : '!=='         ;
 GT              : '>'           ;   GTE             : '>='          ;
 LT              : '<'           ;   LTE             : '<='          ;
 
-// DATA TYPE KEYWORDS
+// VALUE TYPE KEYWORDS
 
 LONG            : 'long'        ;   DOUBLE          : 'double'      ;
 STRING          : 'string'      ;   BOOLEAN         : 'boolean'     ;

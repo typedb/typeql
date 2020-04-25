@@ -21,33 +21,33 @@ import graql.lang.Graql;
 import graql.lang.statement.StatementType;
 
 /**
- * Represents the {@code datatype} property on a AttributeType.
+ * Represents the {@code valuetype} property on a AttributeType.
  * This property can be queried or inserted.
  */
-public class DataTypeProperty extends VarProperty {
+public class ValueTypeProperty extends VarProperty {
 
-    private final Graql.Token.DataType dataType;
+    private final Graql.Token.ValueType valueType;
 
 
-    public DataTypeProperty(Graql.Token.DataType dataType) {
-        if (dataType == null) {
-            throw new NullPointerException("Null dataType");
+    public ValueTypeProperty(Graql.Token.ValueType valueType) {
+        if (valueType == null) {
+            throw new NullPointerException("Null valueType");
         }
-        this.dataType = dataType;
+        this.valueType = valueType;
     }
 
-    public Graql.Token.DataType dataType() {
-        return dataType;
+    public Graql.Token.ValueType valueType() {
+        return valueType;
     }
 
     @Override
     public String keyword() {
-        return Graql.Token.Property.DATA_TYPE.toString();
+        return Graql.Token.Property.VALUETYPE.toString();
     }
 
     @Override
     public String property() {
-        return dataType.toString();
+        return valueType.toString();
     }
 
     @Override
@@ -65,9 +65,9 @@ public class DataTypeProperty extends VarProperty {
         if (o == this) {
             return true;
         }
-        if (o instanceof DataTypeProperty) {
-            DataTypeProperty that = (DataTypeProperty) o;
-            return (this.dataType.equals(that.dataType()));
+        if (o instanceof ValueTypeProperty) {
+            ValueTypeProperty that = (ValueTypeProperty) o;
+            return (this.valueType.equals(that.valueType()));
         }
         return false;
     }
@@ -76,7 +76,7 @@ public class DataTypeProperty extends VarProperty {
     public int hashCode() {
         int h = 1;
         h *= 1000003;
-        h ^= this.dataType.hashCode();
+        h ^= this.valueType.hashCode();
         return h;
     }
 }
