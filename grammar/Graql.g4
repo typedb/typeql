@@ -224,7 +224,8 @@ regex               :   STRING_         ;
 // UNRESERVED KEYWORDS =========================================================
 // Most of Graql syntax should not be reserved from being used as identifiers
 
-unreserved          : MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
+unreserved          : VALUE
+                    | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
                     | PATH | CLUSTER | FROM | TO | OF | IN
                     | DEGREE | K_CORE | CONNECTED_COMPONENT
                     | MIN_K | K | CONTAINS | SIZE | WHERE
