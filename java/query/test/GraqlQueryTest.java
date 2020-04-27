@@ -52,7 +52,7 @@ public class GraqlQueryTest {
         String defineQuery = "define\n" +
                 "\n" +
                 "\tname sub attribute,\n" +
-                "\t\tdatatype string;\n" +
+                "\t\tvalue string;\n" +
                 "\tperson sub entity,\n" +
                 "\t\thas name;\n";
         String insertQuery = "insert\n" +
@@ -68,7 +68,7 @@ public class GraqlQueryTest {
         String defineQuery = "define\n" +
                 "\n" +
                 "\tname sub attribute,\n" +
-                "\t\tdatatype string;\n" +
+                "\t\tvalue string;\n" +
                 "\tperson sub entity,\n" +
                 "\t\thas name;\n";
         GraqlQuery query = Graql.parse(defineQuery);
