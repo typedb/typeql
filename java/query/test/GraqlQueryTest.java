@@ -25,6 +25,10 @@ import graql.lang.query.GraqlQuery;
 import graql.lang.query.MatchClause;
 import org.junit.Test;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
 import static graql.lang.Graql.Token.Compute.Algorithm.DEGREE;
 import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
@@ -42,6 +46,33 @@ import static org.junit.Assert.assertEquals;
 
 // TODO: This test should be split into one Graql query test class each
 public class GraqlQueryTest {
+
+    @Test
+    public void testParseList_doesNotThrow() {
+        String defineQuery = "define\n" +
+                "\n" +
+                "\tname sub attribute,\n" +
+                "\t\tdatatype string;\n" +
+                "\tperson sub entity,\n" +
+                "\t\thas name;\n";
+        String insertQuery = "insert\n" +
+                "\n" +
+                "\t$x isa person,\n" +
+                "\t\thas name \"John\";\n";
+
+        List<GraqlQuery> queries = Graql.parseList(defineQuery + insertQuery).collect(Collectors.toList());
+    }
+
+    @Test
+    public void testParse_doesNotThrow() {
+        String defineQuery = "define\n" +
+                "\n" +
+                "\tname sub attribute,\n" +
+                "\t\tdatatype string;\n" +
+                "\tperson sub entity,\n" +
+                "\t\thas name;\n";
+        GraqlQuery query = Graql.parse(defineQuery);
+    }
 
     @Test
     public void testSimpleGetQueryToString() {
