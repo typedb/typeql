@@ -38,8 +38,7 @@ query_undefine      :   UNDEFINE    statement_type+ ;
 
 query_insert        :   MATCH       pattern+    INSERT  statement_instance+
                     |                           INSERT  statement_instance+  ;
-
-query_delete        :   MATCH       pattern+    DELETE  variables   filters  ;  // GET QUERY followed by aggregate fn
+query_delete        :   MATCH       pattern+    DELETE  statement_instance+  ;  // DELETE QUERY
 query_get           :   MATCH       pattern+    GET     variables   filters  ;  // GET QUERY followed by group fn, and
                                                                                 // optionally, an aggregate fn
 query_compute       :   COMPUTE     compute_conditions  ;

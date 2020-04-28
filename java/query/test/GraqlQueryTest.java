@@ -201,8 +201,8 @@ public class GraqlQueryTest {
 
     @Test
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
-        String query = "match $x isa movie; delete $x;";
-
+        String query = "match $x isa movie;\n" +
+                "delete $x isa movie;";
         assertEquals(query, Graql.parse(query).toString());
     }
 

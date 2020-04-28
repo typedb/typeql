@@ -116,73 +116,40 @@ public class MatchClause {
     }
 
     /**
-     * @param vars an array of variables to insert for each result of this match clause
+     * @param statements an array of variables to insert for each result of this match clause
      * @return an insert query that will insert the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlInsert insert(Statement... vars) {
-        return insert(Arrays.asList(vars));
+    public final GraqlInsert insert(Statement... statements) {
+        return insert(Arrays.asList(statements));
     }
 
     /**
-     * @param vars a collection of variables to insert for each result of this match clause
+     * @param statements a collection of variables to insert for each result of this match clause
      * @return an insert query that will insert the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlInsert insert(Collection<? extends Statement> vars) {
+    public final GraqlInsert insert(Collection<? extends Statement> statements) {
         MatchClause match = this;
-        return new GraqlInsert(match, Collections.unmodifiableList(new ArrayList<>(vars)));
+        return new GraqlInsert(match, Collections.unmodifiableList(new ArrayList<>(statements)));
     }
 
     /**
-     * Construct a delete query with all all variables mentioned in the query
-     */
-    @CheckReturnValue
-    public GraqlDelete.Unfiltered delete() {
-        return delete(Collections.emptyList());
-    }
-
-    /**
-     * @param vars an array of variables to delete for each result of this match clause
+     * @param statements, an array of statements that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(String var, String... vars) {
-        LinkedHashSet<Variable> varSet = Stream
-                .concat(Stream.of(var), Stream.of(vars))
-                .map(Variable::new)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return delete(varSet);
+    public final GraqlDelete delete(Statement... statements) {
+        return delete(Arrays.asList(statements));
     }
 
     /**
-     * @param vars an array of variables to delete for each result of this match clause
+     * @param statements a collection of statements that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(Variable var, Variable... vars) {
-        LinkedHashSet<Variable> varSet = new LinkedHashSet<>();
-        varSet.add(var);
-        varSet.addAll(Arrays.asList(vars));
-        return delete(varSet);
-    }
-
-    /**
-     * @param vars a collection of variables to delete for each result of this match clause
-     * @return a delete query that will delete the given variables for each result of this match clause
-     */
-    @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(List<Variable> vars) {
-        return delete(new LinkedHashSet<>(vars));
-    }
-
-    /**
-     * @param vars a collection of variables to delete for each result of this match clause
-     * @return a delete query that will delete the given variables for each result of this match clause
-     */
-    @CheckReturnValue
-    public final GraqlDelete.Unfiltered delete(LinkedHashSet<Variable> vars) {
-        return new GraqlDelete.Unfiltered(this, vars);
+    public final GraqlDelete delete(Collection<? extends Statement> statements) {
+        return new GraqlDelete(this, new ArrayList<>(statements));
     }
 
     @Override
