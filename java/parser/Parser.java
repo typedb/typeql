@@ -631,8 +631,8 @@ public class Parser extends GraqlBaseVisitor {
                 } else {
                     type = type.relates(visitType(property.type(0)));
                 }
-            } else if (property.DATATYPE() != null) {
-                type = type.datatype(Graql.Token.DataType.of(property.datatype().getText()));
+            } else if (property.VALUE() != null) {
+                type = type.value(Graql.Token.ValueType.of(property.type_value().getText()));
 
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));
@@ -871,7 +871,7 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public ValueProperty.Operation<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
-        Object value = visitLiteral(ctx.literal());
+        Object value = visitValue(ctx.value());
 
         if (value instanceof Integer) {
             return new ValueProperty.Operation.Assignment.Number<>(((Integer) value));
@@ -913,8 +913,8 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (ctx.comparable() != null) {
-            if (ctx.comparable().literal() != null) {
-                value = visitLiteral(ctx.comparable().literal());
+            if (ctx.comparable().value() != null) {
+                value = visitValue(ctx.comparable().value());
             } else if (ctx.comparable().VAR_() != null) {
                 value = new Statement(getVar(ctx.comparable().VAR_()));
             } else {
@@ -963,24 +963,24 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Graql.Token.DataType visitDatatype(GraqlParser.DatatypeContext datatype) {
-        if (datatype.BOOLEAN() != null) {
-            return Graql.Token.DataType.BOOLEAN;
-        } else if (datatype.DATE() != null) {
-            return Graql.Token.DataType.DATE;
-        } else if (datatype.DOUBLE() != null) {
-            return Graql.Token.DataType.DOUBLE;
-        } else if (datatype.LONG() != null) {
-            return Graql.Token.DataType.LONG;
-        } else if (datatype.STRING() != null) {
-            return Graql.Token.DataType.STRING;
+    public Graql.Token.ValueType visitType_value(GraqlParser.Type_valueContext valueType) {
+        if (valueType.BOOLEAN() != null) {
+            return Graql.Token.ValueType.BOOLEAN;
+        } else if (valueType.DATE() != null) {
+            return Graql.Token.ValueType.DATE;
+        } else if (valueType.DOUBLE() != null) {
+            return Graql.Token.ValueType.DOUBLE;
+        } else if (valueType.LONG() != null) {
+            return Graql.Token.ValueType.LONG;
+        } else if (valueType.STRING() != null) {
+            return Graql.Token.ValueType.STRING;
         } else {
-            throw new IllegalArgumentException("Unrecognised DataType: " + datatype);
+            throw new IllegalArgumentException("Unrecognised ValueType: " + valueType);
         }
     }
 
     @Override
-    public Object visitLiteral(GraqlParser.LiteralContext ctx) {
+    public Object visitValue(GraqlParser.ValueContext ctx) {
         if (ctx.STRING_() != null) {
             return getString(ctx.STRING_());
 
