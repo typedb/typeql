@@ -144,12 +144,12 @@ public class MatchClause {
     }
 
     /**
-     * @param delete a collection of statements that indicate properties to delete
+     * @param statements a collection of statements that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     @CheckReturnValue
-    public final GraqlDelete delete(Collection<? extends Statement> delete) {
-        return new GraqlDelete(this, new ArrayList<>(delete));
+    public final GraqlDelete delete(Collection<? extends Statement> statements) {
+        return new GraqlDelete(this, new ArrayList<>(statements));
     }
 
     @Override
