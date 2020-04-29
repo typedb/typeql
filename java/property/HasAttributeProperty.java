@@ -86,10 +86,6 @@ public class HasAttributeProperty extends VarProperty {
             attribute().getProperties(ValueProperty.class).forEach(prop -> property.add(prop.operation().toString()));
         }
 
-        if (hasReifiedRelation()) {
-            property.add(Graql.Token.Property.VIA.toString()).add(relation().getPrintableName());
-        }
-
         return property.build().collect(joining(Graql.Token.Char.SPACE.toString()));
     }
 
