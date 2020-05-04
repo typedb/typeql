@@ -692,7 +692,7 @@ public class Graql {
 
         public enum Property {
             VALUE(""),
-            VALUE_TYPE("value"),
+            VALUE_CLASS("value"),
             HAS("has"),
             KEY("key"),
             ID("id"),
@@ -729,16 +729,16 @@ public class Graql {
             }
         }
 
-        public enum ValueType {
+        public enum ValueClass {
             BOOLEAN("boolean"),
-            DATE("date"),
+            DATETIME("datetime"),
             DOUBLE("double"),
             LONG("long"),
             STRING("string");
 
             private final String type;
 
-            ValueType(String type) {
+            ValueClass(String type) {
                 this.type = type;
             }
 
@@ -747,8 +747,8 @@ public class Graql {
                 return this.type;
             }
 
-            public static ValueType of(String value) {
-                for (ValueType c : ValueType.values()) {
+            public static ValueClass of(String value) {
+                for (ValueClass c : ValueClass.values()) {
                     if (c.type.equals(value)) {
                         return c;
                     }

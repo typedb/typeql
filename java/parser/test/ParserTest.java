@@ -20,7 +20,7 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.ValueTypeProperty;
+import graql.lang.property.ValueClassProperty;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -641,10 +641,10 @@ public class ParserTest {
     }
 
     @Test
-    public void testMatchValueTypeQuery() {
+    public void testMatchValueClassQuery() {
         String query = "match $x value double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueType.DOUBLE)).get();
+        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -659,19 +659,19 @@ public class ParserTest {
     }
 
     @Test
-    public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
-        String query = "match $x value date; get;";
+    public void whenParsingDateKeyword_ParseAsTheCorrectValueClass() {
+        String query = "match $x value datetime; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueType.DATE)).get();
+        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DATETIME)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
-    public void testDefineValueTypeQuery() {
+    public void testDefineValueClassQuery() {
         String query = "define my-type sub attribute, value long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
-        GraqlDefine expected = define(type("my-type").sub("attribute").value(Graql.Token.ValueType.LONG));
+        GraqlDefine expected = define(type("my-type").sub("attribute").value(Graql.Token.ValueClass.LONG));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -951,9 +951,9 @@ public class ParserTest {
         Statement var = query.match().getPatterns().statements().iterator().next();
 
         //noinspection OptionalGetWithoutIsPresent
-        ValueTypeProperty property = var.getProperty(ValueTypeProperty.class).get();
+        ValueClassProperty property = var.getProperty(ValueClassProperty.class).get();
 
-        Assert.assertEquals(Graql.Token.ValueType.BOOLEAN, property.valueType());
+        Assert.assertEquals(Graql.Token.ValueClass.BOOLEAN, property.valueClass());
     }
 
     @Test

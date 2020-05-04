@@ -632,7 +632,7 @@ public class Parser extends GraqlBaseVisitor {
                     type = type.relates(visitType(property.type(0)));
                 }
             } else if (property.VALUE() != null) {
-                type = type.value(Graql.Token.ValueType.of(property.type_value().getText()));
+                type = type.value(Graql.Token.ValueClass.of(property.value_class().getText()));
 
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));
@@ -955,19 +955,19 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Graql.Token.ValueType visitType_value(GraqlParser.Type_valueContext valueType) {
-        if (valueType.BOOLEAN() != null) {
-            return Graql.Token.ValueType.BOOLEAN;
-        } else if (valueType.DATE() != null) {
-            return Graql.Token.ValueType.DATE;
-        } else if (valueType.DOUBLE() != null) {
-            return Graql.Token.ValueType.DOUBLE;
-        } else if (valueType.LONG() != null) {
-            return Graql.Token.ValueType.LONG;
-        } else if (valueType.STRING() != null) {
-            return Graql.Token.ValueType.STRING;
+    public Graql.Token.ValueClass visitValue_class(GraqlParser.Value_classContext valueClass) {
+        if (valueClass.BOOLEAN() != null) {
+            return Graql.Token.ValueClass.BOOLEAN;
+        } else if (valueClass.DATETIME() != null) {
+            return Graql.Token.ValueClass.DATETIME;
+        } else if (valueClass.DOUBLE() != null) {
+            return Graql.Token.ValueClass.DOUBLE;
+        } else if (valueClass.LONG() != null) {
+            return Graql.Token.ValueClass.LONG;
+        } else if (valueClass.STRING() != null) {
+            return Graql.Token.ValueClass.STRING;
         } else {
-            throw new IllegalArgumentException("Unrecognised ValueType: " + valueType);
+            throw new IllegalArgumentException("Unrecognised Value Class: " + valueClass);
         }
     }
 
