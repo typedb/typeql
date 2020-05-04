@@ -102,7 +102,7 @@ type_property       :   ABSTRACT
                     |   HAS         type
                     |   PLAYS       type
                     |   RELATES     type ( AS type )?
-                    |   VALUE       type_value
+                    |   VALUE       value_class
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
@@ -211,8 +211,8 @@ type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
 type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
 
-type_value          :   LONG            |   DOUBLE          |   STRING
-                    |   BOOLEAN         |   DATE            ;
+value_class         :   LONG            |   DOUBLE          |   STRING
+                    |   BOOLEAN         |   DATETIME            ;
 value               :   STRING_         |   INTEGER_        |   REAL_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
 regex               :   STRING_         ;
@@ -287,11 +287,11 @@ EQV             : '=='          ;   NEQV            : '!=='         ;
 GT              : '>'           ;   GTE             : '>='          ;
 LT              : '<'           ;   LTE             : '<='          ;
 
-// VALUE TYPE KEYWORDS
+// VALUE CLASS KEYWORDS
 
 LONG            : 'long'        ;   DOUBLE          : 'double'      ;
 STRING          : 'string'      ;   BOOLEAN         : 'boolean'     ;
-DATE            : 'date'        ;
+DATETIME        : 'datetime'        ;
 
 // LITERAL VALUE KEYWORDS
 BOOLEAN_        : TRUE | FALSE  ; // order of lexer declaration matters
