@@ -209,7 +209,7 @@ type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
 
 type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
-type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
+type_name           :   TYPE_NAME_      |   ID_         ;
 
 value_class         :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME            ;
@@ -310,7 +310,6 @@ VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
 VAR_NAMED_      : '$' [a-zA-Z0-9_-]* ;
 ID_             : ('V'|'E')[a-z0-9-]* ;
-TYPE_IMPLICIT_  : '@' TYPE_CHAR_T_+ ;
 TYPE_NAME_      : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
 
 
