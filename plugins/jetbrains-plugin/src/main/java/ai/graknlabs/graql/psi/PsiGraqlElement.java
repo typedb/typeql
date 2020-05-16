@@ -39,7 +39,8 @@ public class PsiGraqlElement extends ANTLRPsiNode {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " - Location: " + getTextRange();
+        return String.format("%s(%s) - Location: %s",
+                getClass().getSimpleName(), getNode().getElementType(), getTextRange());
     }
 
     @Override

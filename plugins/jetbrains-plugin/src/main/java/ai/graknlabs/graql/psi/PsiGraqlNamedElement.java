@@ -35,6 +35,7 @@ public abstract class PsiGraqlNamedElement extends PsiGraqlElement implements Ps
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " - Name: " + getName() + " - Location: " + getTextRange();
+        return String.format("%s(%s) - Name: %s - Location: %s",
+                getClass().getSimpleName(), getNode().getElementType(), getName(), getTextRange());
     }
 }
