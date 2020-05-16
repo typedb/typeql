@@ -21,9 +21,13 @@ public class PsiRelatesTypeProperty extends PsiGraqlNamedElement {
     @Override
     public PsiElement getNameIdentifier() {
         //todo: seems wrong
-        ASTNode idNode = getNode().getFirstChildNode().getTreeNext().getTreeNext();
-        if (idNode != null) {
-            return idNode.getPsi();
+        if (getNode().getFirstChildNode() != null
+                && getNode().getFirstChildNode().getTreeNext() != null
+                && getNode().getFirstChildNode().getTreeNext().getTreeNext() != null) {
+            ASTNode idNode = getNode().getFirstChildNode().getTreeNext().getTreeNext();
+            if (idNode != null) {
+                return idNode.getPsi();
+            }
         }
         return null;
     }

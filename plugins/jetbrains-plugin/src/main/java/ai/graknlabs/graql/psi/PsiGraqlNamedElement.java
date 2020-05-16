@@ -17,7 +17,8 @@ public abstract class PsiGraqlNamedElement extends PsiGraqlElement implements Ps
 
     @Override
     public TextRange getTextRange() {
-        return getNameIdentifier().getTextRange();
+        PsiElement id = getNameIdentifier();
+        return id != null ? id.getTextRange() : null;
     }
 
     @Override

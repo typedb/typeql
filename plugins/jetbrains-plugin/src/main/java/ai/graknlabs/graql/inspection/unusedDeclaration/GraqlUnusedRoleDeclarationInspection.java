@@ -9,6 +9,7 @@ import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -31,6 +32,10 @@ public class GraqlUnusedRoleDeclarationInspection extends LocalInspectionTool {
                 }
 
                 for (PsiGraqlNamedElement declaration : declarations) {
+                    if (StringUtils.isEmpty(declaration.getName())) {
+                        return; //user still typing
+                    }
+
                     String type = GraqlPsiUtils.determineDeclarationType(declaration);
                     if ("role".equals(type)) {
                         List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(

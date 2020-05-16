@@ -9,6 +9,7 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -35,6 +36,10 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
                 }
 
                 for (PsiGraqlElement identifier : identifiers) {
+                    if (StringUtils.isEmpty(identifier.getName())) {
+                        return; //user still typing
+                    }
+
                     PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
                             identifier.getProject(), identifier.getName());
                     if (declaration == null) {

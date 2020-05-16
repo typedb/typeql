@@ -1,5 +1,6 @@
 package ai.graknlabs.graql;
 
+import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.PsiGraqlFileBase;
 import ai.graknlabs.graql.psi.property.*;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
@@ -19,7 +20,6 @@ import org.antlr.intellij.adaptor.lexer.PSIElementTypeFactory;
 import org.antlr.intellij.adaptor.lexer.RuleIElementType;
 import org.antlr.intellij.adaptor.lexer.TokenIElementType;
 import org.antlr.intellij.adaptor.parser.ANTLRParserAdaptor;
-import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
@@ -32,33 +32,26 @@ import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
  */
 public class GraqlParserDefinition implements ParserDefinition {
 
-    public static final IFileElementType FILE =
-            new IFileElementType(GraqlLanguage.INSTANCE);
+    public static GraqlParserDefinition INSTANCE;
 
     static {
-        PSIElementTypeFactory.defineLanguageIElementTypes(GraqlLanguage.INSTANCE,
-                GraqlParser.tokenNames,
-                GraqlParser.ruleNames);
+        PSIElementTypeFactory.defineLanguageIElementTypes(
+                GraqlLanguage.INSTANCE, GraqlParser.tokenNames, GraqlParser.ruleNames);
     }
 
+    public static final IFileElementType FILE = new IFileElementType(GraqlLanguage.INSTANCE);
     public static final TokenSet IDS =
-            PSIElementTypeFactory.createTokenSet(
-                    GraqlLanguage.INSTANCE, GraqlParser.TYPE_NAME_);
-
+            PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlParser.TYPE_NAME_);
     public static final TokenSet COMMENTS =
-            PSIElementTypeFactory.createTokenSet(
-                    GraqlLanguage.INSTANCE,
-                    GraqlLexer.COMMENT);
-
+            PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlLexer.COMMENT);
     public static final TokenSet WHITESPACE =
-            PSIElementTypeFactory.createTokenSet(
-                    GraqlLanguage.INSTANCE,
-                    GraqlLexer.WS);
-
+            PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlLexer.WS);
     public static final TokenSet STRING =
-            PSIElementTypeFactory.createTokenSet(
-                    GraqlLanguage.INSTANCE,
-                    GraqlLexer.STRING_);
+            PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlLexer.STRING_);
+
+    public GraqlParserDefinition() {
+        INSTANCE = this;
+    }
 
     @NotNull
     @Override
@@ -108,10 +101,10 @@ public class GraqlParserDefinition implements ParserDefinition {
     public PsiElement createElement(ASTNode node) {
         IElementType elType = node.getElementType();
         if (elType instanceof TokenIElementType) {
-            return new ANTLRPsiNode(node);
+            return new PsiGraqlElement(node);
         }
         if (!(elType instanceof RuleIElementType)) {
-            return new ANTLRPsiNode(node);
+            return new PsiGraqlElement(node);
         }
 
         RuleIElementType ruleElType = (RuleIElementType) elType;
@@ -125,7 +118,7 @@ public class GraqlParserDefinition implements ParserDefinition {
                 PsiElement ruleTypeElement = getRuleTypeElement(node);
                 if (ruleTypeElement != null) return ruleTypeElement;
             default:
-                return new ANTLRPsiNode(node);
+                return new PsiGraqlElement(node);
         }
     }
 
