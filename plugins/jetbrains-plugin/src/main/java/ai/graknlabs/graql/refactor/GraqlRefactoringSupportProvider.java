@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlRefactoringSupportProvider extends RefactoringSupportProvider {
 

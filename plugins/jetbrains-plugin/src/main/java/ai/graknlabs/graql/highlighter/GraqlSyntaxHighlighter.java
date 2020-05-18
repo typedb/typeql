@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
 

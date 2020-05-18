@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlDuplicateDeclarationInspection extends LocalInspectionTool {
 

@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlCompletionContributor extends CompletionContributor {
 

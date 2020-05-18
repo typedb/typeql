@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlCommenter implements Commenter, SelfManagingCommenter<CommenterDataHolder> {
 

@@ -13,7 +13,7 @@ import javax.swing.*;
 import java.util.Map;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlColorSettingsPage implements ColorSettingsPage {
 

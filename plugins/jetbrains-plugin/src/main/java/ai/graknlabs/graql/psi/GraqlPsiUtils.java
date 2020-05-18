@@ -20,7 +20,7 @@ import java.util.List;
 import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlPsiUtils {
 

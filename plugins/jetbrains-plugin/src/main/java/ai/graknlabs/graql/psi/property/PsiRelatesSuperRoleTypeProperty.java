@@ -7,7 +7,7 @@ import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class PsiRelatesSuperRoleTypeProperty extends PsiGraqlElement {
 

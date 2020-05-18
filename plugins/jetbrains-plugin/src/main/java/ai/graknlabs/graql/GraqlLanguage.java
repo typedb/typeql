@@ -6,7 +6,7 @@ import com.intellij.lang.Language;
 import java.util.Set;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlLanguage extends Language {
 

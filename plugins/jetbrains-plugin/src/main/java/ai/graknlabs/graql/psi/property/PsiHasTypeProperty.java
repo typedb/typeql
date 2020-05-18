@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
- * @author <a href="mailto:brandon@srcpl.us">Brandon Fergerson</a>
+ * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class PsiHasTypeProperty extends PsiGraqlElement {
 
