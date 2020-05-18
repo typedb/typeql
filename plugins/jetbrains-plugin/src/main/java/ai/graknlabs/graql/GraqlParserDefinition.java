@@ -9,6 +9,7 @@ import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -33,6 +34,7 @@ import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
  */
 public class GraqlParserDefinition implements ParserDefinition {
 
+    public static Key<Boolean> WRAPPER_SET = new Key<>("graql.wrapper");
     public static GraqlParserDefinition INSTANCE;
 
     static {
@@ -103,71 +105,69 @@ public class GraqlParserDefinition implements ParserDefinition {
         RuleIElementType ruleElType = (RuleIElementType) node.getElementType();
         switch (ruleElType.getRuleIndex()) {
             case GraqlParser.RULE_statement_type:
-                PsiStatementType statementType = new PsiStatementType(node);
-                ((CompositeElement) node).setPsi(statementType);
-                return statementType;
+                return updateWrappedTypeIfNecessary(node, new PsiStatementType(node));
             case GraqlParser.RULE_type_property:
-                PsiElement ruleTypePropertyElement = getRuleTypePropertyElement(node);
-                if (ruleTypePropertyElement != null) return ruleTypePropertyElement;
+                PsiGraqlElement ruleTypePropertyElement = getRuleTypePropertyElement(node);
+                if (ruleTypePropertyElement != null) {
+                    return updateWrappedTypeIfNecessary(node, ruleTypePropertyElement);
+                }
             case GraqlParser.RULE_type:
-                PsiElement ruleTypeElement = getRuleTypeElement(node);
-                if (ruleTypeElement != null) return ruleTypeElement;
+                PsiGraqlElement ruleTypeElement = getRuleTypeElement(node);
+                if (ruleTypeElement != null) {
+                    return updateWrappedTypeIfNecessary(node, ruleTypeElement);
+                }
             default:
-                PsiGraqlElement defaultType = new PsiGraqlElement(node);
-                ((CompositeElement) node).setPsi(defaultType);
-                return defaultType;
+                return updateWrappedTypeIfNecessary(node, new PsiGraqlElement(node));
         }
     }
 
     @Nullable
-    public static PsiElement getRuleTypeElement(ASTNode node) {
+    public static PsiGraqlElement getRuleTypeElement(ASTNode node) {
         if (node.getTreePrev() != null && node.getTreePrev().getTreePrev() != null
                 && node.getTreePrev().getTreePrev().getText().equals("as")) {
-            PsiRelatesSuperRoleTypeProperty type = new PsiRelatesSuperRoleTypeProperty(node);
-            ((CompositeElement) node).setPsi(type);
-            return type;
+            return new PsiRelatesSuperRoleTypeProperty(node);
         } else if (node.getTreeNext() != null && node.getTreeNext().getTreeNext() != null
                 && node.getTreeNext().getTreeNext().getFirstChildNode() != null
                 && node.getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")) {
-            PsiTypeProperty type = new PsiTypeProperty(node);
-            ((CompositeElement) node).setPsi(type);
-            return type;
+            return new PsiTypeProperty(node);
         }
         return null;
     }
 
     @Nullable
-    public static PsiElement getRuleTypePropertyElement(ASTNode node) {
+    public static PsiGraqlElement getRuleTypePropertyElement(ASTNode node) {
         if (node.getFirstChildNode() != null && (node.getFirstChildNode().getText().equals("has")
                 || node.getFirstChildNode().getText().equals("key"))) {
             String hasTo = node.getLastChildNode().getText();
             if (!hasTo.isEmpty()) {
-                PsiHasTypeProperty type = new PsiHasTypeProperty(node);
-                ((CompositeElement) node).setPsi(type);
-                return type;
+                return new PsiHasTypeProperty(node);
             }
         } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("plays")) {
             String playsTo = node.getLastChildNode().getText();
             if (!playsTo.isEmpty()) {
-                PsiPlaysTypeProperty type = new PsiPlaysTypeProperty(node);
-                ((CompositeElement) node).setPsi(type);
-                return type;
+                return new PsiPlaysTypeProperty(node);
             }
         } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("relates")) {
             String relatesTo = node.getLastChildNode().getText();
             if (!relatesTo.isEmpty()) {
-                PsiRelatesTypeProperty type = new PsiRelatesTypeProperty(node);
-                ((CompositeElement) node).setPsi(type);
-                return type;
+                return new PsiRelatesTypeProperty(node);
             }
         } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("sub")) {
             String subsTo = node.getLastChildNode().getText();
             if (!subsTo.isEmpty() && !GRAQL_TYPES.contains(subsTo)) {
-                PsiSubTypeProperty type = new PsiSubTypeProperty(node);
-                ((CompositeElement) node).setPsi(type);
-                return type;
+                return new PsiSubTypeProperty(node);
             }
         }
         return null;
+    }
+
+    private static PsiGraqlElement updateWrappedTypeIfNecessary(ASTNode node, PsiGraqlElement element) {
+        CompositeElement composite = (CompositeElement) node;
+        Boolean wrapperSet = composite.getUserData(WRAPPER_SET);
+        if (wrapperSet == null || (wrapperSet && element.getClass() != composite.getPsi().getClass())) {
+            composite.setPsi(element);
+            composite.putUserData(WRAPPER_SET, true);
+        }
+        return element;
     }
 }

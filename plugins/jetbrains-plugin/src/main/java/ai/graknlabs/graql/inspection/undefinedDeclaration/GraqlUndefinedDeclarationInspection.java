@@ -9,6 +9,7 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiErrorElement;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
+import static ai.graknlabs.graql.psi.GraqlPsiUtils.ensureGraqlElementsUpToDate;
 
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
@@ -28,6 +30,8 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
         return new PsiElementVisitor() {
             @Override
             public void visitElement(PsiElement element) {
+                ensureGraqlElementsUpToDate(element.getContainingFile());
+
                 List<PsiGraqlElement> identifiers = new ArrayList<>();
                 if (element instanceof PsiStatementType) {
                     identifiers.addAll(((PsiStatementType) element).findHasTypeProperties());
@@ -43,14 +47,22 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
                     PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
                             identifier.getProject(), identifier.getName());
                     if (declaration == null) {
-                        PsiElement undefinedConcept = identifier.getFirstChild().getNextSibling().getNextSibling();
+                        PsiElement undefinedConcept;
+                        if (identifier.getFirstChild() != null && identifier.getFirstChild().getNextSibling() != null
+                                && identifier.getFirstChild().getNextSibling().getNextSibling() != null) {
+                            undefinedConcept = identifier.getFirstChild().getNextSibling().getNextSibling();
+                        } else {
+                            return; //user still typing
+                        }
                         if (GRAQL_TYPES.contains(undefinedConcept.getText())) {
                             return; //defined by language
                         }
 
-                        holder.registerProblem(undefinedConcept,
-                                "Concept <code>#ref</code> has not been defined",
-                                ProblemHighlightType.GENERIC_ERROR);
+                        if (!(undefinedConcept.getFirstChild() instanceof PsiErrorElement)) {
+                            holder.registerProblem(undefinedConcept,
+                                    "Concept <code>#ref</code> has not been defined",
+                                    ProblemHighlightType.GENERIC_ERROR);
+                        }
                     }
                 }
             }

@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static ai.graknlabs.graql.psi.GraqlPsiUtils.ensureGraqlElementsUpToDate;
+
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
@@ -41,6 +43,8 @@ public class GraqlInvalidTypeUsageInspection extends LocalInspectionTool {
         return new PsiElementVisitor() {
             @Override
             public void visitElement(PsiElement identifier) {
+                ensureGraqlElementsUpToDate(identifier.getContainingFile());
+
                 if (identifier instanceof PsiGraqlElement
                         && !(identifier instanceof PsiGraqlNamedElement)
                         && !(identifier instanceof PsiStatementType)) {
@@ -58,7 +62,7 @@ public class GraqlInvalidTypeUsageInspection extends LocalInspectionTool {
                         } else {
                             throw new UnsupportedOperationException();
                         }
-                        if (invalidTypeUsages.get(declarationType).contains(usageType)) {
+                        if (declarationType != null && invalidTypeUsages.get(declarationType).contains(usageType)) {
                             holder.registerProblem(identifier.getFirstChild().getNextSibling().getNextSibling(),
                                     String.format("%s <code>#ref</code> cannot be used as '%s'",
                                             StringUtils.capitalize(declarationType), usageType),

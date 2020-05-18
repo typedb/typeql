@@ -24,6 +24,10 @@ import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
  */
 public class GraqlPsiUtils {
 
+    public static void ensureGraqlElementsUpToDate(PsiFile file) {
+        PsiTreeUtil.collectElementsOfType(file, PsiGraqlElement.class).forEach(PsiGraqlElement::subtreeChanged);
+    }
+
     public static List<PsiGraqlNamedElement> getIdentifiers(Project project) {
         List<PsiGraqlNamedElement> result = new ArrayList<>();
         Collection<VirtualFile> virtualFiles =

@@ -32,6 +32,7 @@ public class PsiSubTypeProperty extends PsiGraqlElement {
         if (getSubType() == null) {
             return null;
         }
-        return ReferenceProvidersRegistry.getReferencesFromProviders(this)[0];
+        PsiReference[] references = ReferenceProvidersRegistry.getReferencesFromProviders(this);
+        return references.length > 0 ? references[0] : null;
     }
 }

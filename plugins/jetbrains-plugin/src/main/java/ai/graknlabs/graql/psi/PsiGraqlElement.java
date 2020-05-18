@@ -9,6 +9,8 @@ import com.intellij.psi.impl.source.tree.CompositeElement;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
 
+import static ai.graknlabs.graql.GraqlParserDefinition.WRAPPER_SET;
+
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
@@ -45,9 +47,12 @@ public class PsiGraqlElement extends ANTLRPsiNode {
 
     @Override
     public void subtreeChanged() {
-        PsiGraqlElement updatedElement = (PsiGraqlElement) GraqlParserDefinition.INSTANCE.createElement(getNode());
-        if (updatedElement.getClass() != getClass()) {
-            getNode().setPsi(updatedElement);
+        CompositeElement composite = getNode();
+        Boolean wrapperSet = composite.getUserData(WRAPPER_SET);
+        PsiGraqlElement updatedElement = (PsiGraqlElement) GraqlParserDefinition.INSTANCE.createElement(composite);
+        if (wrapperSet == null || (wrapperSet && updatedElement.getClass() != composite.getPsi().getClass())) {
+            composite.setPsi(updatedElement);
+            composite.putUserData(WRAPPER_SET, true);
         }
     }
 }
