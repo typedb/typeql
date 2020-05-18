@@ -48,11 +48,7 @@ public class PsiGraqlElement extends ANTLRPsiNode {
     @Override
     public void subtreeChanged() {
         CompositeElement composite = getNode();
-        Boolean wrapperSet = composite.getUserData(WRAPPER_SET);
         PsiGraqlElement updatedElement = (PsiGraqlElement) GraqlParserDefinition.INSTANCE.createElement(composite);
-        if (wrapperSet == null || (wrapperSet && updatedElement.getClass() != composite.getPsi().getClass())) {
-            composite.setPsi(updatedElement);
-            composite.putUserData(WRAPPER_SET, true);
-        }
+        GraqlParserDefinition.updateWrappedTypeIfNecessary(getNode(), updatedElement);
     }
 }

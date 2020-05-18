@@ -161,7 +161,7 @@ public class GraqlParserDefinition implements ParserDefinition {
         return null;
     }
 
-    private static PsiGraqlElement updateWrappedTypeIfNecessary(ASTNode node, PsiGraqlElement element) {
+    public static PsiGraqlElement updateWrappedTypeIfNecessary(ASTNode node, PsiGraqlElement element) {
         CompositeElement composite = (CompositeElement) node;
         Boolean wrapperSet = composite.getUserData(WRAPPER_SET);
         if (wrapperSet == null || (wrapperSet && element.getClass() != composite.getPsi().getClass())) {
