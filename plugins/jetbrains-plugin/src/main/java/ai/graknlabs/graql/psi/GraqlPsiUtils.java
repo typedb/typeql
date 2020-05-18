@@ -154,7 +154,7 @@ public class GraqlPsiUtils {
             return subType;
         }
         PsiGraqlNamedElement declaration = findDeclaration(identifier.getProject(), subType);
-        if (declaration == null) {
+        if (declaration == null || declaration == identifier) {
             return null;
         } else {
             return determineDeclarationType(declaration);
