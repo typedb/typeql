@@ -88,7 +88,6 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
             case GraqlLexer.CENTRALITY:
             case GraqlLexer.USING:
             case GraqlLexer.ABSTRACT:
-            case GraqlLexer.VIA:
             case GraqlLexer.AS:
             case GraqlLexer.TYPE:
             case GraqlLexer.ISA:
@@ -101,7 +100,7 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
             case GraqlLexer.HAS:
             case GraqlLexer.PLAYS:
             case GraqlLexer.RELATES:
-            case GraqlLexer.DATATYPE:
+            case GraqlLexer.VALUE:
             case GraqlLexer.REGEX:
             case GraqlLexer.WHEN:
             case GraqlLexer.THEN:
@@ -109,7 +108,7 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
             case GraqlLexer.DOUBLE:
             case GraqlLexer.STRING:
             case GraqlLexer.BOOLEAN:
-            case GraqlLexer.DATE:
+            case GraqlLexer.DATETIME:
                 attrKey = KEYWORD;
                 break;
             case GraqlLexer.COMMENT:
