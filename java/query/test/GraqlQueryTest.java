@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -84,8 +83,8 @@ public class GraqlQueryTest {
     }
 
     @Test
-    public void testQueryWithDatatypeToString() {
-        assertSameStringRepresentation(Graql.match(var("x").datatype(Graql.Token.DataType.LONG)).get());
+    public void testQueryWithValueClassToString() {
+        assertSameStringRepresentation(Graql.match(var("x").value(Graql.Token.ValueClass.LONG)).get());
     }
 
     @Test
@@ -202,8 +201,8 @@ public class GraqlQueryTest {
 
     @Test
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
-        String query = "match $x isa movie; delete $x;";
-
+        String query = "match $x isa movie;\n" +
+                "delete $x isa movie;";
         assertEquals(query, Graql.parse(query).toString());
     }
 

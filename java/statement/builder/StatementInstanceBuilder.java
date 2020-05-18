@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -71,18 +70,8 @@ public interface StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default StatementInstance has(String type, long value, Statement via) {
-        return has(type, Graql.val(value), via);
-    }
-
-    @CheckReturnValue
     default StatementInstance has(String type, double value) {
         return has(type, Graql.val(value));
-    }
-
-    @CheckReturnValue
-    default StatementInstance has(String type, double value, Statement via) {
-        return has(type, Graql.val(value), via);
     }
 
     @CheckReturnValue
@@ -91,18 +80,8 @@ public interface StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default StatementInstance has(String type, boolean value, Statement via) {
-        return has(type, Graql.val(value), via);
-    }
-
-    @CheckReturnValue
     default StatementInstance has(String type, String value) {
         return has(type, Graql.val(value));
-    }
-
-    @CheckReturnValue
-    default StatementInstance has(String type, String value, Statement via) {
-        return has(type, Graql.val(value), via);
     }
 
     @CheckReturnValue
@@ -111,18 +90,8 @@ public interface StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default StatementInstance has(String type, LocalDateTime value, Statement via) {
-        return has(type, Graql.val(value), via);
-    }
-
-    @CheckReturnValue
     default StatementInstance has(String type, Statement variable) {
         return has(new HasAttributeProperty(type, variable));
-    }
-
-    @CheckReturnValue
-    default StatementInstance has(String type, Statement variable, Statement via) {
-        return has(new HasAttributeProperty(type, variable, via));
     }
 
     @CheckReturnValue

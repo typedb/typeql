@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,7 +20,7 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.DataTypeProperty;
+import graql.lang.property.ValueClassProperty;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -502,27 +501,14 @@ public class ParserTest {
         String query = "match\n" +
                 "$x isa movie, has title 'The Title';\n" +
                 "$y isa movie;\n" +
-                "delete $x, $y;";
+                "delete\n" +
+                "$x isa movie;\n" +
+                "$y isa movie;";
         GraqlDelete parsed = Graql.parse(query).asDelete();
         GraqlDelete expected = match(
                 var("x").isa("movie").has("title", "The Title"),
                 var("y").isa("movie")
-        ).delete("x", "y");
-
-        assertQueryEquals(expected, parsed, query.replace("'", "\""));
-    }
-
-    @Test
-    public void whenParsingDeleteQueryWithNoArguments_ResultIsSameAsJavaGraql() {
-        String query = "match\n" +
-                "$x isa movie, has title 'The Title';\n" +
-                "$y isa movie;\n" +
-                "delete;";
-        GraqlDelete parsed = Graql.parse(query).asDelete();
-        GraqlDelete expected = match(
-                var("x").isa("movie").has("title", "The Title"),
-                var("y").isa("movie")
-        ).delete();
+        ).delete(Graql.parsePattern("{$x isa movie; $y isa movie;};").statements());
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -655,10 +641,10 @@ public class ParserTest {
     }
 
     @Test
-    public void testMatchDataTypeQuery() {
-        String query = "match $x datatype double; get;";
+    public void testMatchValueClassQuery() {
+        String query = "match $x value double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").datatype(Graql.Token.DataType.DOUBLE)).get();
+        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -673,19 +659,19 @@ public class ParserTest {
     }
 
     @Test
-    public void whenParsingDateKeyword_ParseAsTheCorrectDataType() {
-        String query = "match $x datatype date; get;";
+    public void whenParsingDateKeyword_ParseAsTheCorrectValueClass() {
+        String query = "match $x value datetime; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").datatype(Graql.Token.DataType.DATE)).get();
+        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DATETIME)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
-    public void testDefineDataTypeQuery() {
-        String query = "define my-type sub attribute, datatype long;";
+    public void testDefineValueClassQuery() {
+        String query = "define my-type sub attribute, value long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
-        GraqlDefine expected = define(type("my-type").sub("attribute").datatype(Graql.Token.DataType.LONG));
+        GraqlDefine expected = define(type("my-type").sub("attribute").value(Graql.Token.ValueClass.LONG));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -960,14 +946,14 @@ public class ParserTest {
 
     @Test
     public void testParseBooleanType() {
-        GraqlGet query = parse("match $x datatype boolean; get;").asGet();
+        GraqlGet query = parse("match $x value boolean; get;").asGet();
 
         Statement var = query.match().getPatterns().statements().iterator().next();
 
         //noinspection OptionalGetWithoutIsPresent
-        DataTypeProperty property = var.getProperty(DataTypeProperty.class).get();
+        ValueClassProperty property = var.getProperty(ValueClassProperty.class).get();
 
-        Assert.assertEquals(Graql.Token.DataType.BOOLEAN, property.dataType());
+        Assert.assertEquals(Graql.Token.ValueClass.BOOLEAN, property.valueClass());
     }
 
     @Test
@@ -1075,11 +1061,6 @@ public class ParserTest {
 
         //noinspection ResultOfMethodCallIgnored
         Graql.parse(queryText);
-    }
-
-    @Test
-    public void whenParsingAQueryWithReifiedAttributeRelationSyntax_ItIsEquivalentToJavaGraql() {
-        assertParseEquivalence("match $x has name $z via $x; get $x;");
     }
 
     @SuppressWarnings("CheckReturnValue")
