@@ -29,7 +29,7 @@ public class GraqlInvalidTypeUsageInspection extends LocalInspectionTool {
 
     public GraqlInvalidTypeUsageInspection() {
         invalidTypeUsages = new HashMap<>();
-        invalidTypeUsages.put("entity", Sets.newHashSet("relates", "plays"));
+        invalidTypeUsages.put("entity", Sets.newHashSet("relates", "plays", "has"));
         invalidTypeUsages.put("role", Sets.newHashSet("has"));
         invalidTypeUsages.put("attribute", Sets.newHashSet("plays"));
         invalidTypeUsages.put("relation", Sets.newHashSet("plays", "has"));
