@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -39,23 +38,14 @@ public class HasAttributeProperty extends VarProperty {
 
     private final String type;
     private final Statement attribute;
-    private final Statement relation;
 
     public HasAttributeProperty(String type, Statement attribute) {
-        this(type, attribute, new Statement(new Variable()));
-    }
-
-    public HasAttributeProperty(String type, Statement attribute, Statement relation) {
         attribute = attribute.isa(Graql.type(type));
         if (type == null) {
             throw new NullPointerException("Null type");
         }
         this.type = type;
         this.attribute = attribute;
-        if (relation == null) {
-            throw new NullPointerException("Null relation");
-        }
-        this.relation = relation;
     }
 
     public String type() {
@@ -64,10 +54,6 @@ public class HasAttributeProperty extends VarProperty {
 
     public Statement attribute() {
         return attribute;
-    }
-
-    public Statement relation() {
-        return relation;
     }
 
     @Override
@@ -87,10 +73,6 @@ public class HasAttributeProperty extends VarProperty {
             attribute().getProperties(ValueProperty.class).forEach(prop -> property.add(prop.operation().toString()));
         }
 
-        if (hasReifiedRelation()) {
-            property.add(Graql.Token.Property.VIA.toString()).add(relation().getPrintableName());
-        }
-
         return property.build().collect(joining(Graql.Token.Char.SPACE.toString()));
     }
 
@@ -106,16 +88,12 @@ public class HasAttributeProperty extends VarProperty {
 
     @Override
     public Stream<Statement> statements() {
-        return Stream.of(attribute(), relation());
+        return Stream.of(attribute());
     }
 
     @Override
     public Class statementClass() {
         return StatementInstance.class;
-    }
-
-    private boolean hasReifiedRelation() {
-        return relation().properties().stream().findAny().isPresent() || relation().var().isReturned();
     }
 
     @Override
@@ -128,23 +106,13 @@ public class HasAttributeProperty extends VarProperty {
         if (!type().equals(that.type())) return false;
         if (!attribute().equals(that.attribute())) return false;
 
-        // TODO: Having to check this is pretty dodgy
-        // This check is necessary for `equals` and `hashCode` because `Statement` equality is defined
-        // s.t. `var() != var()`, but `var().label("movie") == var().label("movie")`
-        // i.e., a `Var` is compared by name, but a `Statement` ignores the name if the var is not user-defined
-        return !hasReifiedRelation() || relation().equals(that.relation());
+        return true;
     }
 
     @Override
     public int hashCode() {
         int result = type().hashCode();
         result = 31 * result + attribute().hashCode();
-
-        // TODO: Having to check this is pretty dodgy, explanation in #equals
-        if (hasReifiedRelation()) {
-            result = 31 * result + relation().hashCode();
-        }
-
         return result;
     }
 }

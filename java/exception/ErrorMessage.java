@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,6 +22,7 @@ public enum ErrorMessage {
     SYNTAX_ERROR("syntax error at line %s: \n%s\n%s\n%s"),
     CONFLICTING_PROPERTIES("the following unique properties in '%s' conflict: '%s' and '%s'"),
     VARIABLE_OUT_OF_SCOPE("the variable [%s] is out of scope of the query"),
+    UNBOUND_DELETE_VARIABLE("the delete clause variable [%s] is not defined in the match clause"),
     NO_PATTERNS("no patterns have been provided. at least one pattern must be provided"),
     INVALID_COMPUTE_METHOD("Invalid compute method. The available compute methods are: [%s]."),
     INVALID_COMPUTE_CONDITION("Invalid condition(s) for 'compute [%s]'. The accepted condition(s) are: [%s]."),
@@ -30,7 +30,8 @@ public enum ErrorMessage {
     INVALID_COMPUTE_METHOD_ALGORITHM("Invalid algorithm for 'compute [%s]'. The accepted algorithm(s) are: [%s]."),
     INVALID_COMPUTE_ARGUMENT("Invalid argument(s) 'compute [%s] using [%s]'. The accepted argument(s) are: [%s]."),
 
-    OVERPRECISE_SECOND_FRACTION("LocalDateTime [%s] has sub-millisecond precision time. Precision up to 1 millisecond is supported");
+    OVERPRECISE_SECOND_FRACTION("LocalDateTime [%s] has sub-millisecond precision time. Precision up to 1 millisecond is supported"),
+    SORTING_NOT_ALLOWED("Sorting [%s] not supported");
 
 
     private final String message;

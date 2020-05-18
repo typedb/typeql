@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,17 +19,22 @@ package graql.lang.exception;
 
 
 import graql.lang.Graql;
+import graql.lang.query.builder.Filterable;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import static graql.lang.exception.ErrorMessage.CONFLICTING_PROPERTIES;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_CONDITION;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
 import static graql.lang.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
 import static graql.lang.exception.ErrorMessage.OVERPRECISE_SECOND_FRACTION;
+import static graql.lang.exception.ErrorMessage.SORTING_NOT_ALLOWED;
+import static graql.lang.exception.ErrorMessage.UNBOUND_DELETE_VARIABLE;
+import static graql.lang.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
 
 public class GraqlException extends RuntimeException {
 
@@ -51,11 +55,15 @@ public class GraqlException extends RuntimeException {
     }
 
     public static GraqlException conflictingProperties(String statement, String property, String other) {
-        return new GraqlException(graql.lang.exception.ErrorMessage.CONFLICTING_PROPERTIES.getMessage(statement, property, other));
+        return new GraqlException(CONFLICTING_PROPERTIES.getMessage(statement, property, other));
     }
 
     public static GraqlException variableOutOfScope(String var) {
-        return new GraqlException(graql.lang.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE.getMessage(var));
+        return new GraqlException(VARIABLE_OUT_OF_SCOPE.getMessage(var));
+    }
+
+    public static GraqlException deleteVariableUnbound(String var) {
+        return new GraqlException(UNBOUND_DELETE_VARIABLE.getMessage(var));
     }
 
     public static GraqlException noPatterns() {
@@ -84,5 +92,9 @@ public class GraqlException extends RuntimeException {
 
     public static GraqlException subsecondPrecisionTooPrecise(LocalDateTime localDateTime) {
         return new GraqlException(OVERPRECISE_SECOND_FRACTION.getMessage(localDateTime));
+    }
+
+    public static GraqlException sortingNotAllowed(Filterable.Sorting sorting) {
+        return new GraqlException(SORTING_NOT_ALLOWED.getMessage(sorting));
     }
 }

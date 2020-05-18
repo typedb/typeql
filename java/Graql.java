@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -692,10 +691,10 @@ public class Graql {
         }
 
         public enum Property {
-            DATA_TYPE("datatype"),
+            VALUE(""),
+            VALUE_CLASS("value"),
             HAS("has"),
             KEY("key"),
-            VIA("via"),
             ID("id"),
             ABSTRACT("abstract"),
             ISA("isa"),
@@ -707,8 +706,7 @@ public class Graql {
             SUB("sub"),
             SUBX("sub!"),
             THEN("then"),
-            WHEN("when"),
-            VALUE("");
+            WHEN("when");
 
             private final String name;
 
@@ -731,16 +729,16 @@ public class Graql {
             }
         }
 
-        public enum DataType {
+        public enum ValueClass {
             BOOLEAN("boolean"),
-            DATE("date"),
+            DATETIME("datetime"),
             DOUBLE("double"),
             LONG("long"),
             STRING("string");
 
             private final String type;
 
-            DataType(String type) {
+            ValueClass(String type) {
                 this.type = type;
             }
 
@@ -749,8 +747,8 @@ public class Graql {
                 return this.type;
             }
 
-            public static DataType of(String value) {
-                for (DataType c : DataType.values()) {
+            public static ValueClass of(String value) {
+                for (ValueClass c : ValueClass.values()) {
                     if (c.type.equals(value)) {
                         return c;
                     }

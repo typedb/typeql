@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,33 +21,33 @@ import graql.lang.Graql;
 import graql.lang.statement.StatementType;
 
 /**
- * Represents the {@code datatype} property on a AttributeType.
+ * Represents the {@code ValueClass} property on a AttributeType.
  * This property can be queried or inserted.
  */
-public class DataTypeProperty extends VarProperty {
+public class ValueClassProperty extends VarProperty {
 
-    private final Graql.Token.DataType dataType;
+    private final Graql.Token.ValueClass valueClass;
 
 
-    public DataTypeProperty(Graql.Token.DataType dataType) {
-        if (dataType == null) {
-            throw new NullPointerException("Null dataType");
+    public ValueClassProperty(Graql.Token.ValueClass valueClass) {
+        if (valueClass == null) {
+            throw new NullPointerException("Null ValueClass");
         }
-        this.dataType = dataType;
+        this.valueClass = valueClass;
     }
 
-    public Graql.Token.DataType dataType() {
-        return dataType;
+    public Graql.Token.ValueClass valueClass() {
+        return valueClass;
     }
 
     @Override
     public String keyword() {
-        return Graql.Token.Property.DATA_TYPE.toString();
+        return Graql.Token.Property.VALUE_CLASS.toString();
     }
 
     @Override
     public String property() {
-        return dataType.toString();
+        return valueClass.toString();
     }
 
     @Override
@@ -66,9 +65,9 @@ public class DataTypeProperty extends VarProperty {
         if (o == this) {
             return true;
         }
-        if (o instanceof DataTypeProperty) {
-            DataTypeProperty that = (DataTypeProperty) o;
-            return (this.dataType.equals(that.dataType()));
+        if (o instanceof ValueClassProperty) {
+            ValueClassProperty that = (ValueClassProperty) o;
+            return (this.valueClass.equals(that.valueClass()));
         }
         return false;
     }
@@ -77,7 +76,7 @@ public class DataTypeProperty extends VarProperty {
     public int hashCode() {
         int h = 1;
         h *= 1000003;
-        h ^= this.dataType.hashCode();
+        h ^= this.valueClass.hashCode();
         return h;
     }
 }

@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -241,17 +240,15 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDelete visitQuery_delete(GraqlParser.Query_deleteContext ctx) {
-        LinkedHashSet<Variable> vars = visitVariables(ctx.variables());
+        List<Statement> statements = ctx.statement_instance().stream()
+                .map(this::visitStatement_instance)
+                .collect(toList());
+
         MatchClause match = Graql.match(ctx.pattern()
                 .stream().map(this::visitPattern)
                 .collect(Collectors.toCollection(LinkedHashSet::new)));
 
-        if (ctx.filters().getChildCount() == 0) {
-            return new GraqlDelete(match, vars);
-        } else {
-            Triple<Filterable.Sorting, Long, Long> filters = visitFilters(ctx.filters());
-            return new GraqlDelete(match, vars, filters.first(), filters.second(), filters.third());
-        }
+        return new GraqlDelete(match, statements);
     }
 
     @Override
@@ -302,8 +299,8 @@ public class Parser extends GraqlBaseVisitor {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
         return new GraqlGet.Aggregate(visitQuery_get(ctx.query_get()),
-                                      Graql.Token.Aggregate.Method.of(function.function_method().getText()),
-                                      function.VAR_() != null ? getVar(function.VAR_()) : null);
+                Graql.Token.Aggregate.Method.of(function.function_method().getText()),
+                function.VAR_() != null ? getVar(function.VAR_()) : null);
     }
 
     @Override
@@ -318,8 +315,8 @@ public class Parser extends GraqlBaseVisitor {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
         return new GraqlGet.Group.Aggregate(visitQuery_get(ctx.query_get()).group(var),
-                                            Graql.Token.Aggregate.Method.of(function.function_method().getText()),
-                                            function.VAR_() != null ? getVar(function.VAR_()) : null);
+                Graql.Token.Aggregate.Method.of(function.function_method().getText()),
+                function.VAR_() != null ? getVar(function.VAR_()) : null);
     }
 
     // DELETE AND GET QUERY MODIFIERS ==========================================
@@ -630,12 +627,12 @@ public class Parser extends GraqlBaseVisitor {
             } else if (property.RELATES() != null) {
                 if (property.AS() != null) {
                     type = type.relates(visitType(property.type(0)),
-                                        visitType(property.type(1)));
+                            visitType(property.type(1)));
                 } else {
                     type = type.relates(visitType(property.type(0)));
                 }
-            } else if (property.DATATYPE() != null) {
-                type = type.datatype(Graql.Token.DataType.of(property.datatype().getText()));
+            } else if (property.VALUE() != null) {
+                type = type.value(Graql.Token.ValueClass.of(property.value_class().getText()));
 
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));
@@ -683,7 +680,8 @@ public class Parser extends GraqlBaseVisitor {
         }
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
+    @SuppressWarnings("Duplicates")
     public Statement visitStatement_thing(GraqlParser.Statement_thingContext ctx) {
         // TODO: restrict for Insert VS Match
 
@@ -708,7 +706,8 @@ public class Parser extends GraqlBaseVisitor {
         return instance;
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
+    @SuppressWarnings("Duplicates")
     public Statement visitStatement_relation(GraqlParser.Statement_relationContext ctx) {
         // TODO: restrict for Insert VS Match
 
@@ -733,7 +732,8 @@ public class Parser extends GraqlBaseVisitor {
         return instance;
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
+    @SuppressWarnings("Duplicates")
     public Statement visitStatement_attribute(GraqlParser.Statement_attributeContext ctx) {
         // TODO: restrict for Insert VS Match
 
@@ -785,18 +785,10 @@ public class Parser extends GraqlBaseVisitor {
 
         if (ctx.VAR_() != null) {
             Statement variable = Graql.var(getVar(ctx.VAR_()));
-            if (ctx.via() != null) {
-                return new HasAttributeProperty(type, variable, Graql.var(getVar(ctx.via().VAR_())));
-            } else {
-                return new HasAttributeProperty(type, variable);
-            }
+            return new HasAttributeProperty(type, variable);
         } else if (ctx.operation() != null) {
             Statement value = Graql.var().attribute(new ValueProperty<>(visitOperation(ctx.operation())));
-            if (ctx.via() != null) {
-                return new HasAttributeProperty(type, value, Graql.var(getVar(ctx.via().VAR_())));
-            } else {
-                return new HasAttributeProperty(type, value);
-            }
+            return new HasAttributeProperty(type, value);
         } else {
             throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
         }
@@ -871,7 +863,7 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public ValueProperty.Operation<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
-        Object value = visitLiteral(ctx.literal());
+        Object value = visitValue(ctx.value());
 
         if (value instanceof Integer) {
             return new ValueProperty.Operation.Assignment.Number<>(((Integer) value));
@@ -913,8 +905,8 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (ctx.comparable() != null) {
-            if (ctx.comparable().literal() != null) {
-                value = visitLiteral(ctx.comparable().literal());
+            if (ctx.comparable().value() != null) {
+                value = visitValue(ctx.comparable().value());
             } else if (ctx.comparable().VAR_() != null) {
                 value = new Statement(getVar(ctx.comparable().VAR_()));
             } else {
@@ -963,24 +955,24 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Graql.Token.DataType visitDatatype(GraqlParser.DatatypeContext datatype) {
-        if (datatype.BOOLEAN() != null) {
-            return Graql.Token.DataType.BOOLEAN;
-        } else if (datatype.DATE() != null) {
-            return Graql.Token.DataType.DATE;
-        } else if (datatype.DOUBLE() != null) {
-            return Graql.Token.DataType.DOUBLE;
-        } else if (datatype.LONG() != null) {
-            return Graql.Token.DataType.LONG;
-        } else if (datatype.STRING() != null) {
-            return Graql.Token.DataType.STRING;
+    public Graql.Token.ValueClass visitValue_class(GraqlParser.Value_classContext valueClass) {
+        if (valueClass.BOOLEAN() != null) {
+            return Graql.Token.ValueClass.BOOLEAN;
+        } else if (valueClass.DATETIME() != null) {
+            return Graql.Token.ValueClass.DATETIME;
+        } else if (valueClass.DOUBLE() != null) {
+            return Graql.Token.ValueClass.DOUBLE;
+        } else if (valueClass.LONG() != null) {
+            return Graql.Token.ValueClass.LONG;
+        } else if (valueClass.STRING() != null) {
+            return Graql.Token.ValueClass.STRING;
         } else {
-            throw new IllegalArgumentException("Unrecognised DataType: " + datatype);
+            throw new IllegalArgumentException("Unrecognised Value Class: " + valueClass);
         }
     }
 
     @Override
-    public Object visitLiteral(GraqlParser.LiteralContext ctx) {
+    public Object visitValue(GraqlParser.ValueContext ctx) {
         if (ctx.STRING_() != null) {
             return getString(ctx.STRING_());
 
@@ -1037,7 +1029,7 @@ public class Parser extends GraqlBaseVisitor {
 
     private LocalDateTime getDate(TerminalNode date) {
         return LocalDate.parse(date.getText(),
-                               DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+                DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
     }
 
     private LocalDateTime getDateTime(TerminalNode dateTime) {

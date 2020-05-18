@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,7 +20,7 @@ package graql.lang.statement.builder;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.AbstractProperty;
-import graql.lang.property.DataTypeProperty;
+import graql.lang.property.ValueClassProperty;
 import graql.lang.property.HasAttributeTypeProperty;
 import graql.lang.property.PlaysProperty;
 import graql.lang.property.RegexProperty;
@@ -206,21 +205,21 @@ public interface StatementTypeBuilder {
     }
 
     /**
-     * @param datatype the datatype to set for this resource type variable
+     * @param valueClass the valueClass to set for this resource type variable
      * @return this
      */
     @CheckReturnValue
-    default StatementType datatype(String datatype) {
-        return datatype(Graql.Token.DataType.of(datatype));
+    default StatementType value(String valueClass) {
+        return value(Graql.Token.ValueClass.of(valueClass));
     }
 
     /**
-     * @param datatype the datatype to set for this resource type variable
+     * @param valueClass the valueClass to set for this resource type variable
      * @return this
      */
     @CheckReturnValue
-    default StatementType datatype(Graql.Token.DataType datatype) {
-        return type(new DataTypeProperty(datatype));
+    default StatementType value(Graql.Token.ValueClass valueClass) {
+        return type(new ValueClassProperty(valueClass));
     }
 
     /**

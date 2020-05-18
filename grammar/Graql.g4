@@ -1,6 +1,5 @@
 /*
- * GRAKN.AI - THE KNOWLEDGE GRAPH
- * Copyright (C) 2019 Grakn Labs Ltd
+ * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -39,8 +38,7 @@ query_undefine      :   UNDEFINE    statement_type+ ;
 
 query_insert        :   MATCH       pattern+    INSERT  statement_instance+
                     |                           INSERT  statement_instance+  ;
-
-query_delete        :   MATCH       pattern+    DELETE  variables   filters  ;  // GET QUERY followed by aggregate fn
+query_delete        :   MATCH       pattern+    DELETE  statement_instance+  ;  // DELETE QUERY
 query_get           :   MATCH       pattern+    GET     variables   filters  ;  // GET QUERY followed by group fn, and
                                                                                 // optionally, an aggregate fn
 query_compute       :   COMPUTE     compute_conditions  ;
@@ -104,7 +102,7 @@ type_property       :   ABSTRACT
                     |   HAS         type
                     |   PLAYS       type
                     |   RELATES     type ( AS type )?
-                    |   DATATYPE    datatype
+                    |   VALUE       value_class
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
@@ -137,26 +135,23 @@ relation            :   '(' role_player ( ',' role_player )* ')' ;              
 role_player         :   type ':' player                                         // The Role type and and player variable
                     |            player ;                                       // Or just the player variable
 player              :   VAR_ ;                                                  // A player is just a variable
-via                 :   VIA VAR_ ;                                              // The Relation variable that holds the
-                                                                                // assertion between an Attribute and
-                                                                                // its owner (any Thing)
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS type_label ( VAR_ | operation ) via? ;                   // Attribute ownership by variable or a
-                                                                                // predicate, and the "via" Relation
+attribute           :   HAS type_label ( VAR_ | operation ) ;                   // Attribute ownership by variable or a
+                                                                                // predicate
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
 operation           :   assignment
                     |   comparison
                     ;
-assignment          :   literal   ;
+assignment          :   value ;
 comparison          :   comparator  comparable
                     |   CONTAINS    containable
                     |   LIKE        regex
                     ;
 comparator          :   EQV | NEQV | GT | GTE | LT | LTE ;
-comparable          :   literal | VAR_  ;
+comparable          :   value | VAR_  ;
 containable         :   STRING_ | VAR_  ;
 
 
@@ -216,16 +211,17 @@ type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
 type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
 
-datatype            :   LONG            |   DOUBLE          |   STRING
-                    |   BOOLEAN         |   DATE            ;
-literal             :   STRING_         |   INTEGER_        |   REAL_
+value_class         :   LONG            |   DOUBLE          |   STRING
+                    |   BOOLEAN         |   DATETIME            ;
+value               :   STRING_         |   INTEGER_        |   REAL_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
 regex               :   STRING_         ;
 
 // UNRESERVED KEYWORDS =========================================================
 // Most of Graql syntax should not be reserved from being used as identifiers
 
-unreserved          : MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
+unreserved          : VALUE
+                    | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
                     | PATH | CLUSTER | FROM | TO | OF | IN
                     | DEGREE | K_CORE | CONNECTED_COMPONENT
                     | MIN_K | K | CONTAINS | SIZE | WHERE
@@ -254,15 +250,14 @@ ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
 // STATEMENT PROPERTY KEYWORDS
 
-ABSTRACT        : 'abstract'    ;
-VIA             : 'via'         ;   AS              : 'as'          ;
+ABSTRACT        : 'abstract'    ;   AS              : 'as'          ;
 ID              : 'id'          ;   TYPE            : 'type'        ;
 ISA_            : ISA | ISAX    ;   SUB_            : SUB | SUBX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
 KEY             : 'key'         ;   HAS             : 'has'         ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
-DATATYPE        : 'datatype'    ;   REGEX           : 'regex'       ;
+VALUE           : 'value'       ;   REGEX           : 'regex'       ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
@@ -292,11 +287,11 @@ EQV             : '=='          ;   NEQV            : '!=='         ;
 GT              : '>'           ;   GTE             : '>='          ;
 LT              : '<'           ;   LTE             : '<='          ;
 
-// DATA TYPE KEYWORDS
+// VALUE CLASS KEYWORDS
 
 LONG            : 'long'        ;   DOUBLE          : 'double'      ;
 STRING          : 'string'      ;   BOOLEAN         : 'boolean'     ;
-DATE            : 'date'        ;
+DATETIME        : 'datetime'        ;
 
 // LITERAL VALUE KEYWORDS
 BOOLEAN_        : TRUE | FALSE  ; // order of lexer declaration matters
