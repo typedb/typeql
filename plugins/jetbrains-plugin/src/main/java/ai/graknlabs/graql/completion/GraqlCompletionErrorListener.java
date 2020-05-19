@@ -2,8 +2,6 @@ package ai.graknlabs.graql.completion;
 
 import org.antlr.intellij.adaptor.parser.SyntaxError;
 import org.antlr.intellij.adaptor.parser.SyntaxErrorListener;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,18 +11,17 @@ import java.util.Map;
  */
 public class GraqlCompletionErrorListener extends SyntaxErrorListener {
 
-    //todo: evicting cache
-    static Map<Integer, SyntaxError> tokenToErrorMap = new HashMap<>();
+    private static GraqlCompletionErrorListener INSTANCE;
 
-    @Override
-    public void syntaxError(Recognizer<?, ?> recognizer,
-                            Object offendingSymbol,
-                            int line, int charPositionInLine,
-                            String msg, RecognitionException e) {
-        super.syntaxError(recognizer, offendingSymbol, line, charPositionInLine, msg, e);
+    public GraqlCompletionErrorListener() {
+        INSTANCE = this;
+    }
 
-        for (SyntaxError error : getSyntaxErrors()) {
+    static Map<Integer, SyntaxError> getTokenToErrorMap() {
+        Map<Integer, SyntaxError> tokenToErrorMap = new HashMap<>();
+        for (SyntaxError error : INSTANCE.getSyntaxErrors()) {
             tokenToErrorMap.put(error.getOffendingSymbol().getStartIndex(), error);
         }
+        return tokenToErrorMap;
     }
 }

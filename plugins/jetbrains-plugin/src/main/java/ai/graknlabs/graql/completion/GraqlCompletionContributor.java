@@ -15,6 +15,8 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import org.antlr.intellij.adaptor.parser.SyntaxError;
+import org.antlr.v4.runtime.misc.IntervalSet;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -29,6 +31,9 @@ import static java.util.Objects.requireNonNull;
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
 public class GraqlCompletionContributor extends CompletionContributor {
+
+    public static @NonNls
+    final String DUMMY_IDENTIFIER = "IntellijIdeaRulezzz";
 
     public GraqlCompletionContributor() {
         extend(CompletionType.BASIC, PlatformPatterns.psiElement(),
@@ -65,10 +70,19 @@ public class GraqlCompletionContributor extends CompletionContributor {
                         }
 
                         if (includeKeywords) {
-                            SyntaxError syntaxError = GraqlCompletionErrorListener.tokenToErrorMap.get(parameters.getOffset());
+                            Map<Integer, SyntaxError> tokenToErrorMap = GraqlCompletionErrorListener.getTokenToErrorMap();
+                            SyntaxError syntaxError = tokenToErrorMap.get(parameters.getOffset());
+                            if (syntaxError == null) {
+                                String currentText = parameters.getPosition().getText();
+                                if (currentText.contains(DUMMY_IDENTIFIER)) {
+                                    //currently typing; suggest same as before typing started
+                                    syntaxError = tokenToErrorMap.get(
+                                            parameters.getOffset() - (currentText.length() - DUMMY_IDENTIFIER.length()));
+                                }
+                            }
                             if (syntaxError != null && syntaxError.getException() != null
                                     && syntaxError.getException().getExpectedTokens() != null) {
-                                getActualKeywords(syntaxError).forEach(keyword -> {
+                                getActualKeywords(syntaxError.getException().getExpectedTokens()).forEach(keyword -> {
                                     resultSet.addElement(LookupElementBuilder.create(keyword)
                                             .withIcon(GraqlFileType.INSTANCE.getIcon())
                                             .withTypeText(keyword)
@@ -154,8 +168,8 @@ public class GraqlCompletionContributor extends CompletionContributor {
                 .withBoldness(true));
     }
 
-    private static List<String> getActualKeywords(SyntaxError syntaxError) {
-        return syntaxError.getException().getExpectedTokens().toList().stream()
+    private static List<String> getActualKeywords(IntervalSet keywordSet) {
+        return keywordSet.toList().stream()
                 .map(it -> TOKEN_ELEMENT_TYPES.get(it).toString().replace("'", ""))
                 .map(s -> {
                     switch (s) {
@@ -171,6 +185,6 @@ public class GraqlCompletionContributor extends CompletionContributor {
                     return Collections.singletonList(s);
                 })
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .distinct().collect(Collectors.toList());
     }
 }

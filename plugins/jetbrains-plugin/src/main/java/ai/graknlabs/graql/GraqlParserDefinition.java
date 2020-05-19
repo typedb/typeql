@@ -138,7 +138,9 @@ public class GraqlParserDefinition implements ParserDefinition {
             return new PsiRelatesSuperRoleTypeProperty(node);
         } else if (node.getTreeNext() != null && node.getTreeNext().getTreeNext() != null
                 && node.getTreeNext().getTreeNext().getFirstChildNode() != null
-                && node.getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")) {
+                && node.getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")
+                && node.getFirstChildNode() != null
+                && node.getFirstChildNode().getElementType() == RULE_ELEMENT_TYPES.get(GraqlParser.RULE_type_label)) {
             return new PsiTypeProperty(node);
         }
         return null;
