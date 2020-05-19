@@ -202,13 +202,13 @@ public class GraqlPsiUtils {
         return element;
     }
 
-    public static PsiElement findParentByType(PsiElement element, RuleIElementType ruleElementType) {
+    public static PsiGraqlElement findParentByType(PsiElement element, RuleIElementType ruleElementType) {
         PsiElement parent = element;
         while ((parent = parent.getParent()) != null) {
             if (parent instanceof PsiGraqlElement) {
                 CompositeElement compositeElement = ((PsiGraqlElement) parent).getNode();
                 if (compositeElement.getElementType() == ruleElementType) {
-                    return compositeElement.getPsi();
+                    return (PsiGraqlElement) compositeElement.getPsi();
                 }
             }
         }

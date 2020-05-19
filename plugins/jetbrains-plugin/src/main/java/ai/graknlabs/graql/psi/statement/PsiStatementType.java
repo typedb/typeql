@@ -19,6 +19,11 @@ public class PsiStatementType extends PsiGraqlElement {
         super(node);
     }
 
+    @Override
+    public String getName() {
+        return getFirstChild().getText();
+    }
+
     public String getSubType() {
         //todo: seems wrong
         if (getNode().getFirstChildNode() == null || getNode().getFirstChildNode().getTreeNext() == null

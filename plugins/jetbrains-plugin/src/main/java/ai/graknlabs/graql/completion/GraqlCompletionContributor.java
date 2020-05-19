@@ -3,10 +3,12 @@ package ai.graknlabs.graql.completion;
 import ai.graknlabs.graql.GraqlFileType;
 import ai.graknlabs.graql.GraqlLanguage;
 import ai.graknlabs.graql.GraqlParser;
+import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.property.PsiHasTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
+import com.google.common.collect.Sets;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
@@ -42,15 +44,19 @@ public class GraqlCompletionContributor extends CompletionContributor {
                                                @NotNull ProcessingContext context,
                                                @NotNull CompletionResultSet resultSet) {
                         boolean includeKeywords = true;
-                        PsiElement ruleType = findParentByType(parameters.getPosition(),
+                        PsiGraqlElement ruleType = findParentByType(parameters.getPosition(),
                                 RULE_ELEMENT_TYPES.get(GraqlParser.RULE_type_property));
                         if (ruleType != null) {
                             if (ruleType instanceof PsiHasTypeProperty) {
                                 //has, include all attributes
-                                includeAttributeTypes(resultSet, ruleType);
+                                PsiGraqlElement statementType = findParentByType(parameters.getPosition(),
+                                        RULE_ELEMENT_TYPES.get(GraqlParser.RULE_statement_type));
+                                includeAttributeTypes(resultSet, ruleType, requireNonNull(statementType).getName());
                             } else if (ruleType instanceof PsiSubTypeProperty) {
-                                //sub, include all declarations (except current) & base types
-                                includeAllTypes(resultSet, ruleType);
+                                //sub, include all declarations & base types
+                                PsiGraqlElement statementType = findParentByType(parameters.getPosition(),
+                                        RULE_ELEMENT_TYPES.get(GraqlParser.RULE_statement_type));
+                                includeAllTypes(resultSet, ruleType, statementType.getName());
                                 includeBaseTypes(resultSet);
                             } else if (ruleType instanceof PsiRelatesTypeProperty) {
                                 //relates, include all plays (roles)
@@ -98,10 +104,13 @@ public class GraqlCompletionContributor extends CompletionContributor {
         );
     }
 
-    private void includeAttributeTypes(@NotNull CompletionResultSet resultSet, PsiElement ruleType) {
-        getDeclarationsByType(ruleType.getProject(), "attribute").forEach(identifier -> {
-            String declarationType = determineDeclarationType(identifier);
-            resultSet.addElement(LookupElementBuilder.create(identifier)
+    private void includeAttributeTypes(@NotNull CompletionResultSet resultSet, @NotNull PsiElement ruleType,
+                                       String... excludedNames) {
+        Set<String> excludedNameSet = Sets.newHashSet(excludedNames);
+        getDeclarationsByType(ruleType.getProject(), "attribute").stream()
+                .filter(it -> !excludedNameSet.contains(it.getName())).forEach(it -> {
+            String declarationType = determineDeclarationType(it);
+            resultSet.addElement(LookupElementBuilder.create(it)
                     .withIcon(GraqlFileType.INSTANCE.getIcon())
                     .withTypeText(declarationType != null ? declarationType : "unknown")
                     .withStrikeoutness(declarationType == null)
@@ -109,11 +118,14 @@ public class GraqlCompletionContributor extends CompletionContributor {
         });
     }
 
-    private void includeAllTypes(@NotNull CompletionResultSet resultSet, PsiElement ruleType) {
-        getAllDeclarations(ruleType.getProject()).forEach(identifier -> {
-            String declarationType = determineDeclarationType(identifier);
+    private void includeAllTypes(@NotNull CompletionResultSet resultSet, @NotNull PsiElement ruleType,
+                                 String... excludedNames) {
+        Set<String> excludedNameSet = Sets.newHashSet(excludedNames);
+        getAllDeclarations(ruleType.getProject()).stream()
+                .filter(it -> !excludedNameSet.contains(it.getName())).forEach(it -> {
+            String declarationType = determineDeclarationType(it);
             if (declarationType != null) {
-                resultSet.addElement(LookupElementBuilder.create(identifier)
+                resultSet.addElement(LookupElementBuilder.create(it)
                         .withIcon(GraqlFileType.INSTANCE.getIcon())
                         .withTypeText(declarationType)
                 );
@@ -168,7 +180,7 @@ public class GraqlCompletionContributor extends CompletionContributor {
                 .withBoldness(true));
     }
 
-    private static List<String> getActualKeywords(IntervalSet keywordSet) {
+    private static List<String> getActualKeywords(@NotNull IntervalSet keywordSet) {
         return keywordSet.toList().stream()
                 .map(it -> TOKEN_ELEMENT_TYPES.get(it).toString().replace("'", ""))
                 .map(s -> {
