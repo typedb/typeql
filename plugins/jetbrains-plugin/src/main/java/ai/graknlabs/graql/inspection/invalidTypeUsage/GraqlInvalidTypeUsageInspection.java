@@ -43,11 +43,11 @@ public class GraqlInvalidTypeUsageInspection extends LocalInspectionTool {
         return new PsiElementVisitor() {
             @Override
             public void visitElement(PsiElement identifier) {
-                ensureGraqlElementsUpToDate(identifier.getContainingFile());
-
                 if (identifier instanceof PsiGraqlElement
                         && !(identifier instanceof PsiGraqlNamedElement)
                         && !(identifier instanceof PsiStatementType)) {
+                    ensureGraqlElementsUpToDate(identifier.getContainingFile());
+
                     PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
                             identifier.getProject(), ((PsiGraqlElement) identifier).getName());
                     if (declaration != null) {

@@ -14,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static ai.graknlabs.graql.psi.GraqlPsiUtils.ensureGraqlElementsUpToDate;
+
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
@@ -28,6 +30,8 @@ public class GraqlUnplayedRoleInspection extends LocalInspectionTool {
                 if (identifier instanceof PsiGraqlElement
                         && !(identifier instanceof PsiGraqlNamedElement)
                         && !(identifier instanceof PsiStatementType)) {
+                    ensureGraqlElementsUpToDate(identifier.getContainingFile());
+
                     PsiGraqlElement identifierElement = (PsiGraqlElement) identifier;
                     PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
                             identifier.getProject(), identifierElement.getName());

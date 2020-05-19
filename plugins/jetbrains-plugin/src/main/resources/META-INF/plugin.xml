@@ -41,8 +41,8 @@
                 implementation="ai.graknlabs.graql.inspection.unusedDeclaration.GraqlUnusedDeclarationProvider"/>
         <inspectionToolProvider
                 implementation="ai.graknlabs.graql.inspection.undefinedDeclaration.GraqlUndefinedDeclarationProvider"/>
-        <!--        <inspectionToolProvider-->
-        <!--                implementation="ai.graknlabs.graql.inspection.duplicateDeclaration.GraqlDuplicateDeclarationProvider"/>-->
+        <inspectionToolProvider
+                implementation="ai.graknlabs.graql.inspection.duplicateDeclaration.GraqlDuplicateDeclarationProvider"/>
         <inspectionToolProvider
                 implementation="ai.graknlabs.graql.inspection.unplayedRole.GraqlUnplayedRoleProvider"/>
         <inspectionToolProvider

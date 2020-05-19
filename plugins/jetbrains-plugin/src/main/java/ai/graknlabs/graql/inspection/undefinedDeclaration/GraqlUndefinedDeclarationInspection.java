@@ -30,38 +30,38 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
         return new PsiElementVisitor() {
             @Override
             public void visitElement(PsiElement element) {
-                ensureGraqlElementsUpToDate(element.getContainingFile());
-
-                List<PsiGraqlElement> identifiers = new ArrayList<>();
                 if (element instanceof PsiStatementType) {
+                    ensureGraqlElementsUpToDate(element.getContainingFile());
+
+                    List<PsiGraqlElement> identifiers = new ArrayList<>();
                     identifiers.addAll(((PsiStatementType) element).findHasTypeProperties());
                     identifiers.addAll(((PsiStatementType) element).findPlaysTypeProperties());
                     identifiers.addAll(((PsiStatementType) element).findSubTypeProperties());
-                }
 
-                for (PsiGraqlElement identifier : identifiers) {
-                    if (StringUtils.isEmpty(identifier.getName())) {
-                        return; //user still typing
-                    }
-
-                    PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
-                            identifier.getProject(), identifier.getName());
-                    if (declaration == null) {
-                        PsiElement undefinedConcept;
-                        if (identifier.getFirstChild() != null && identifier.getFirstChild().getNextSibling() != null
-                                && identifier.getFirstChild().getNextSibling().getNextSibling() != null) {
-                            undefinedConcept = identifier.getFirstChild().getNextSibling().getNextSibling();
-                        } else {
+                    for (PsiGraqlElement identifier : identifiers) {
+                        if (StringUtils.isEmpty(identifier.getName())) {
                             return; //user still typing
                         }
-                        if (GRAQL_TYPES.contains(undefinedConcept.getText())) {
-                            return; //defined by language
-                        }
 
-                        if (!(undefinedConcept.getFirstChild() instanceof PsiErrorElement)) {
-                            holder.registerProblem(undefinedConcept,
-                                    "Concept <code>#ref</code> has not been defined",
-                                    ProblemHighlightType.GENERIC_ERROR);
+                        PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
+                                identifier.getProject(), identifier.getName());
+                        if (declaration == null) {
+                            PsiElement undefinedConcept;
+                            if (identifier.getFirstChild() != null && identifier.getFirstChild().getNextSibling() != null
+                                    && identifier.getFirstChild().getNextSibling().getNextSibling() != null) {
+                                undefinedConcept = identifier.getFirstChild().getNextSibling().getNextSibling();
+                            } else {
+                                return; //user still typing
+                            }
+                            if (GRAQL_TYPES.contains(undefinedConcept.getText())) {
+                                return; //defined by language
+                            }
+
+                            if (!(undefinedConcept.getFirstChild() instanceof PsiErrorElement)) {
+                                holder.registerProblem(undefinedConcept,
+                                        "Concept <code>#ref</code> has not been defined",
+                                        ProblemHighlightType.GENERIC_ERROR);
+                            }
                         }
                     }
                 }

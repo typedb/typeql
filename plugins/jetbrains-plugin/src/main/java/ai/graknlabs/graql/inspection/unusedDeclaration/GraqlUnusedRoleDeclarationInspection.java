@@ -12,8 +12,9 @@ import com.intellij.psi.PsiElementVisitor;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static ai.graknlabs.graql.psi.GraqlPsiUtils.ensureGraqlElementsUpToDate;
 
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
@@ -26,27 +27,26 @@ public class GraqlUnusedRoleDeclarationInspection extends LocalInspectionTool {
         return new PsiElementVisitor() {
             @Override
             public void visitElement(PsiElement element) {
-                List<PsiGraqlNamedElement> declarations = new ArrayList<>();
                 if (element instanceof PsiStatementType) {
-                    declarations.addAll(((PsiStatementType) element).findRelatesTypeProperties());
-                }
+                    ensureGraqlElementsUpToDate(element.getContainingFile());
 
-                for (PsiGraqlNamedElement declaration : declarations) {
-                    if (StringUtils.isEmpty(declaration.getName())) {
-                        return; //user still typing
-                    }
+                    for (PsiGraqlNamedElement declaration : ((PsiStatementType) element).findRelatesTypeProperties()) {
+                        if (StringUtils.isEmpty(declaration.getName())) {
+                            return; //user still typing
+                        }
 
-                    String type = GraqlPsiUtils.determineDeclarationType(declaration);
-                    if ("role".equals(type)) {
-                        List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
-                                declaration.getProject(), declaration, declaration.getName());
-                        if (usages.isEmpty()) {
-                            if (declaration instanceof PsiTypeProperty) {
-                                holder.registerProblem(declaration.getFirstChild(),
-                                        "Role <code>#ref</code> is never used");
-                            } else {
-                                holder.registerProblem(declaration.getFirstChild().getNextSibling().getNextSibling(),
-                                        "Role <code>#ref</code> is never used");
+                        String type = GraqlPsiUtils.determineDeclarationType(declaration);
+                        if ("role".equals(type)) {
+                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
+                                    declaration.getProject(), declaration, declaration.getName());
+                            if (usages.isEmpty()) {
+                                if (declaration instanceof PsiTypeProperty) {
+                                    holder.registerProblem(declaration.getFirstChild(),
+                                            "Role <code>#ref</code> is never used");
+                                } else {
+                                    holder.registerProblem(declaration.getFirstChild().getNextSibling().getNextSibling(),
+                                            "Role <code>#ref</code> is never used");
+                                }
                             }
                         }
                     }

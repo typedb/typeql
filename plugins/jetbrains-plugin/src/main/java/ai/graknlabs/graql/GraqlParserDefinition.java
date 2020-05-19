@@ -1,5 +1,6 @@
 package ai.graknlabs.graql;
 
+import ai.graknlabs.graql.completion.GraqlCompletionErrorListener;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.PsiGraqlFileBase;
 import ai.graknlabs.graql.psi.property.*;
@@ -27,6 +28,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
 
 /**
@@ -51,6 +54,10 @@ public class GraqlParserDefinition implements ParserDefinition {
             PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlLexer.WS);
     public static final TokenSet STRING =
             PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlLexer.STRING_);
+    public static final List<TokenIElementType> TOKEN_ELEMENT_TYPES =
+            PSIElementTypeFactory.getTokenIElementTypes(GraqlLanguage.INSTANCE);
+    public static final List<RuleIElementType> RULE_ELEMENT_TYPES =
+            PSIElementTypeFactory.getRuleIElementTypes(GraqlLanguage.INSTANCE);
 
     public GraqlParserDefinition() {
         INSTANCE = this;
@@ -80,9 +87,12 @@ public class GraqlParserDefinition implements ParserDefinition {
 
     @NotNull
     public PsiParser createParser(final Project project) {
-        return new ANTLRParserAdaptor(GraqlLanguage.INSTANCE, new GraqlParser(null)) {
+        GraqlParser parser = new GraqlParser(null);
+        GraqlCompletionErrorListener completionErrorListener = new GraqlCompletionErrorListener();
+        return new ANTLRParserAdaptor(GraqlLanguage.INSTANCE, parser) {
             @Override
             protected ParseTree parse(Parser parser, IElementType root) {
+                parser.addErrorListener(completionErrorListener);
                 if (root instanceof IFileElementType) {
                     return ((GraqlParser) parser).eof_query_list();
                 }

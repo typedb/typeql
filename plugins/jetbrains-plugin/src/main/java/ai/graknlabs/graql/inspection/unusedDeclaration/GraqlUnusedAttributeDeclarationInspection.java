@@ -10,8 +10,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static ai.graknlabs.graql.psi.GraqlPsiUtils.ensureGraqlElementsUpToDate;
 
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
@@ -24,18 +25,17 @@ public class GraqlUnusedAttributeDeclarationInspection extends LocalInspectionTo
         return new PsiElementVisitor() {
             @Override
             public void visitElement(PsiElement element) {
-                List<PsiGraqlNamedElement> declarations = new ArrayList<>();
                 if (element instanceof PsiStatementType) {
-                    declarations.addAll(((PsiStatementType) element).findTypeProperties());
-                }
+                    ensureGraqlElementsUpToDate(element.getContainingFile());
 
-                for (PsiGraqlNamedElement declaration : declarations) {
-                    String type = GraqlPsiUtils.determineDeclarationType(declaration);
-                    if ("attribute".equals(type)) {
-                        List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
-                                declaration.getProject(), declaration, declaration.getName());
-                        if (usages.isEmpty()) {
-                            holder.registerProblem(declaration, "Attribute <code>#ref</code> is never used");
+                    for (PsiGraqlNamedElement declaration : ((PsiStatementType) element).findTypeProperties()) {
+                        String type = GraqlPsiUtils.determineDeclarationType(declaration);
+                        if ("attribute".equals(type)) {
+                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
+                                    declaration.getProject(), declaration, declaration.getName());
+                            if (usages.isEmpty()) {
+                                holder.registerProblem(declaration, "Attribute <code>#ref</code> is never used");
+                            }
                         }
                     }
                 }
