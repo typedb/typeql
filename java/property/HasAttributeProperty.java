@@ -28,11 +28,8 @@ import static java.util.stream.Collectors.joining;
 
 /**
  * Represents the {@code has} property on an Thing. This property can be queried, inserted or deleted.
- * The property is defined as a Relation between an Thing and a Attribute,
- * where theAttribute is of a particular type. When matching,  Schema.EdgeLabel#ROLE_PLAYER
- * edges are used to speed up the traversal. The type of the Relation does not matter.
- * When inserting, an implicit Relation is created between the instance and the Attribute,
- * using type labels derived from the label of the AttributeType.
+ * The property is defined as an ownership between a Thing and an Attribute,
+ * where the Attribute is of a particular type.
  */
 public class HasAttributeProperty extends VarProperty {
 
