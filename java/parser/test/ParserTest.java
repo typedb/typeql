@@ -330,15 +330,6 @@ public class ParserTest {
     }
 
     @Test
-    public void whenSearchingForImplicitType_EnsureQueryCanBeParsed() {
-        String query = "match $x plays @has-release-date-owner; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").plays("@has-release-date-owner")).get();
-
-        assertQueryEquals(expected, parsed, query);
-    }
-
-    @Test
     public void testSchemaQuery() {
         String query = "match $x plays actor; get; sort $x asc;";
         GraqlGet parsed = Graql.parse(query).asGet();
