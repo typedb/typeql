@@ -695,6 +695,7 @@ public class Graql {
             VALUE_TYPE("value"),
             HAS("has"),
             KEY("key"),
+            VIA("via"),
             ID("id"),
             ABSTRACT("abstract"),
             ISA("isa"),
