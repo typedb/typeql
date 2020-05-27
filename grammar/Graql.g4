@@ -102,7 +102,7 @@ type_property       :   ABSTRACT
                     |   HAS         type
                     |   PLAYS       type
                     |   RELATES     type ( AS type )?
-                    |   VALUE       value_class
+                    |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
@@ -211,7 +211,7 @@ type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
 type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
 
-value_class         :   LONG            |   DOUBLE          |   STRING
+value_type          :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME            ;
 value               :   STRING_         |   INTEGER_        |   REAL_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
@@ -287,7 +287,7 @@ EQV             : '=='          ;   NEQV            : '!=='         ;
 GT              : '>'           ;   GTE             : '>='          ;
 LT              : '<'           ;   LTE             : '<='          ;
 
-// VALUE CLASS KEYWORDS
+// VALUE TYPE KEYWORDS
 
 LONG            : 'long'        ;   DOUBLE          : 'double'      ;
 STRING          : 'string'      ;   BOOLEAN         : 'boolean'     ;

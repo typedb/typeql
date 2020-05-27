@@ -21,33 +21,33 @@ import graql.lang.Graql;
 import graql.lang.statement.StatementType;
 
 /**
- * Represents the {@code ValueClass} property on a AttributeType.
+ * Represents the {@code ValueType} property on a AttributeType.
  * This property can be queried or inserted.
  */
-public class ValueClassProperty extends VarProperty {
+public class ValueTypeProperty extends VarProperty {
 
-    private final Graql.Token.ValueClass valueClass;
+    private final Graql.Token.ValueType ValueType;
 
 
-    public ValueClassProperty(Graql.Token.ValueClass valueClass) {
-        if (valueClass == null) {
-            throw new NullPointerException("Null ValueClass");
+    public ValueTypeProperty(Graql.Token.ValueType ValueType) {
+        if (ValueType == null) {
+            throw new NullPointerException("Null ValueType");
         }
-        this.valueClass = valueClass;
+        this.ValueType = ValueType;
     }
 
-    public Graql.Token.ValueClass valueClass() {
-        return valueClass;
+    public Graql.Token.ValueType ValueType() {
+        return ValueType;
     }
 
     @Override
     public String keyword() {
-        return Graql.Token.Property.VALUE_CLASS.toString();
+        return Graql.Token.Property.VALUE_TYPE.toString();
     }
 
     @Override
     public String property() {
-        return valueClass.toString();
+        return ValueType.toString();
     }
 
     @Override
@@ -65,9 +65,9 @@ public class ValueClassProperty extends VarProperty {
         if (o == this) {
             return true;
         }
-        if (o instanceof ValueClassProperty) {
-            ValueClassProperty that = (ValueClassProperty) o;
-            return (this.valueClass.equals(that.valueClass()));
+        if (o instanceof ValueTypeProperty) {
+            ValueTypeProperty that = (ValueTypeProperty) o;
+            return (this.ValueType.equals(that.ValueType()));
         }
         return false;
     }
@@ -76,7 +76,7 @@ public class ValueClassProperty extends VarProperty {
     public int hashCode() {
         int h = 1;
         h *= 1000003;
-        h ^= this.valueClass.hashCode();
+        h ^= this.ValueType.hashCode();
         return h;
     }
 }
