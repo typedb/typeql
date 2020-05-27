@@ -785,10 +785,18 @@ public class Parser extends GraqlBaseVisitor {
 
         if (ctx.VAR_() != null) {
             Statement variable = Graql.var(getVar(ctx.VAR_()));
-            return new HasAttributeProperty(type, variable);
+            if (ctx.via() != null) {
+                return new HasAttributeProperty(type, variable, Graql.var(getVar(ctx.via().VAR_())));
+            } else {
+                return new HasAttributeProperty(type, variable);
+            }
         } else if (ctx.operation() != null) {
             Statement value = Graql.var().attribute(new ValueProperty<>(visitOperation(ctx.operation())));
-            return new HasAttributeProperty(type, value);
+            if (ctx.via() != null) {
+                return new HasAttributeProperty(type, value, Graql.var(getVar(ctx.via().VAR_())));
+            } else {
+                return new HasAttributeProperty(type, value);
+            }
         } else {
             throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
         }
