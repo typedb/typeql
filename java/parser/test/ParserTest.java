@@ -1054,11 +1054,6 @@ public class ParserTest {
         Graql.parse(queryText);
     }
 
-    @Test
-    public void whenParsingAQueryWithReifiedAttributeRelationSyntax_ItIsEquivalentToJavaGraql() {
-        assertParseEquivalence("match $x has name $z via $x; get $x;");
-    }
-
     @SuppressWarnings("CheckReturnValue")
     @Test(expected = GraqlException.class)
     public void whenParsingMultipleQueriesLikeOne_Throw() {
