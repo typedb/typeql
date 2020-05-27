@@ -632,7 +632,7 @@ public class Parser extends GraqlBaseVisitor {
                     type = type.relates(visitType(property.type(0)));
                 }
             } else if (property.VALUE() != null) {
-                type = type.value(Graql.Token.ValueClass.of(property.value_class().getText()));
+                type = type.value(Graql.Token.ValueType.of(property.value_type().getText()));
 
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));
@@ -785,10 +785,18 @@ public class Parser extends GraqlBaseVisitor {
 
         if (ctx.VAR_() != null) {
             Statement variable = Graql.var(getVar(ctx.VAR_()));
-            return new HasAttributeProperty(type, variable);
+            if (ctx.via() != null) {
+                return new HasAttributeProperty(type, variable, Graql.var(getVar(ctx.via().VAR_())));
+            } else {
+                return new HasAttributeProperty(type, variable);
+            }
         } else if (ctx.operation() != null) {
             Statement value = Graql.var().attribute(new ValueProperty<>(visitOperation(ctx.operation())));
-            return new HasAttributeProperty(type, value);
+            if (ctx.via() != null) {
+                return new HasAttributeProperty(type, value, Graql.var(getVar(ctx.via().VAR_())));
+            } else {
+                return new HasAttributeProperty(type, value);
+            }
         } else {
             throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
         }
@@ -955,17 +963,17 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Graql.Token.ValueClass visitValue_class(GraqlParser.Value_classContext valueClass) {
+    public Graql.Token.ValueType visitValue_type(GraqlParser.Value_typeContext valueClass) {
         if (valueClass.BOOLEAN() != null) {
-            return Graql.Token.ValueClass.BOOLEAN;
+            return Graql.Token.ValueType.BOOLEAN;
         } else if (valueClass.DATETIME() != null) {
-            return Graql.Token.ValueClass.DATETIME;
+            return Graql.Token.ValueType.DATETIME;
         } else if (valueClass.DOUBLE() != null) {
-            return Graql.Token.ValueClass.DOUBLE;
+            return Graql.Token.ValueType.DOUBLE;
         } else if (valueClass.LONG() != null) {
-            return Graql.Token.ValueClass.LONG;
+            return Graql.Token.ValueType.LONG;
         } else if (valueClass.STRING() != null) {
-            return Graql.Token.ValueClass.STRING;
+            return Graql.Token.ValueType.STRING;
         } else {
             throw new IllegalArgumentException("Unrecognised Value Class: " + valueClass);
         }

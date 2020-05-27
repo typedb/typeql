@@ -20,7 +20,7 @@ package graql.lang.statement.builder;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.AbstractProperty;
-import graql.lang.property.ValueClassProperty;
+import graql.lang.property.ValueTypeProperty;
 import graql.lang.property.HasAttributeTypeProperty;
 import graql.lang.property.PlaysProperty;
 import graql.lang.property.RegexProperty;
@@ -205,21 +205,21 @@ public interface StatementTypeBuilder {
     }
 
     /**
-     * @param valueClass the valueClass to set for this resource type variable
+     * @param ValueType the ValueType to set for this resource type variable
      * @return this
      */
     @CheckReturnValue
-    default StatementType value(String valueClass) {
-        return value(Graql.Token.ValueClass.of(valueClass));
+    default StatementType value(String ValueType) {
+        return value(Graql.Token.ValueType.of(ValueType));
     }
 
     /**
-     * @param valueClass the valueClass to set for this resource type variable
+     * @param ValueType the ValueType to set for this resource type variable
      * @return this
      */
     @CheckReturnValue
-    default StatementType value(Graql.Token.ValueClass valueClass) {
-        return type(new ValueClassProperty(valueClass));
+    default StatementType value(Graql.Token.ValueType ValueType) {
+        return type(new ValueTypeProperty(ValueType));
     }
 
     /**
