@@ -20,7 +20,7 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.ValueClassProperty;
+import graql.lang.property.ValueTypeProperty;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -329,14 +329,6 @@ public class ParserTest {
         assertQueryEquals(expected, parsed, query);
     }
 
-    @Test
-    public void whenSearchingForImplicitType_EnsureQueryCanBeParsed() {
-        String query = "match $x plays @has-release-date-owner; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").plays("@has-release-date-owner")).get();
-
-        assertQueryEquals(expected, parsed, query);
-    }
 
     @Test
     public void testSchemaQuery() {
@@ -641,10 +633,10 @@ public class ParserTest {
     }
 
     @Test
-    public void testMatchValueClassQuery() {
+    public void testMatchValueTypeQuery() {
         String query = "match $x value double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DOUBLE)).get();
+        GraqlGet expected = match(var("x").value(Graql.Token.ValueType.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -659,19 +651,19 @@ public class ParserTest {
     }
 
     @Test
-    public void whenParsingDateKeyword_ParseAsTheCorrectValueClass() {
+    public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
         String query = "match $x value datetime; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DATETIME)).get();
+        GraqlGet expected = match(var("x").value(Graql.Token.ValueType.DATETIME)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
-    public void testDefineValueClassQuery() {
+    public void testDefineValueTypeQuery() {
         String query = "define my-type sub attribute, value long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
-        GraqlDefine expected = define(type("my-type").sub("attribute").value(Graql.Token.ValueClass.LONG));
+        GraqlDefine expected = define(type("my-type").sub("attribute").value(Graql.Token.ValueType.LONG));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -951,9 +943,9 @@ public class ParserTest {
         Statement var = query.match().getPatterns().statements().iterator().next();
 
         //noinspection OptionalGetWithoutIsPresent
-        ValueClassProperty property = var.getProperty(ValueClassProperty.class).get();
+        ValueTypeProperty property = var.getProperty(ValueTypeProperty.class).get();
 
-        Assert.assertEquals(Graql.Token.ValueClass.BOOLEAN, property.valueClass());
+        Assert.assertEquals(Graql.Token.ValueType.BOOLEAN, property.ValueType());
     }
 
     @Test
