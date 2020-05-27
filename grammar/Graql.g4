@@ -102,7 +102,7 @@ type_property       :   ABSTRACT
                     |   HAS         type
                     |   PLAYS       type
                     |   RELATES     type ( AS type )?
-                    |   VALUE       value_class
+                    |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
@@ -135,11 +135,14 @@ relation            :   '(' role_player ( ',' role_player )* ')' ;              
 role_player         :   type ':' player                                         // The Role type and and player variable
                     |            player ;                                       // Or just the player variable
 player              :   VAR_ ;                                                  // A player is just a variable
+via                 :   VIA VAR_ ;                                              // The Relation variable that holds the
+                                                                                // assertion between an Attribute and
+                                                                                // its owner (any Thing)
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS type_label ( VAR_ | operation ) ;                   // Attribute ownership by variable or a
-                                                                                // predicate
+attribute           :   HAS type_label ( VAR_ | operation ) via? ;                   // Attribute ownership by variable or a
+                                                                                // predicate, and the "via" Relation
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
 operation           :   assignment
@@ -211,7 +214,7 @@ type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
 type_name           :   TYPE_NAME_      |   ID_         ;
 
-value_class         :   LONG            |   DOUBLE          |   STRING
+value_type          :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME            ;
 value               :   STRING_         |   INTEGER_        |   REAL_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
@@ -250,14 +253,15 @@ ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
 // STATEMENT PROPERTY KEYWORDS
 
-ABSTRACT        : 'abstract'    ;   AS              : 'as'          ;
+ABSTRACT        : 'abstract'    ;
+VIA             : 'via'         ;   AS              : 'as'          ;
 ID              : 'id'          ;   TYPE            : 'type'        ;
 ISA_            : ISA | ISAX    ;   SUB_            : SUB | SUBX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
 KEY             : 'key'         ;   HAS             : 'has'         ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
-VALUE           : 'value'       ;   REGEX           : 'regex'       ;
+VALUE           : 'value'   ;   REGEX           : 'regex'       ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
@@ -287,7 +291,7 @@ EQV             : '=='          ;   NEQV            : '!=='         ;
 GT              : '>'           ;   GTE             : '>='          ;
 LT              : '<'           ;   LTE             : '<='          ;
 
-// VALUE CLASS KEYWORDS
+// VALUE TYPE KEYWORDS
 
 LONG            : 'long'        ;   DOUBLE          : 'double'      ;
 STRING          : 'string'      ;   BOOLEAN         : 'boolean'     ;
