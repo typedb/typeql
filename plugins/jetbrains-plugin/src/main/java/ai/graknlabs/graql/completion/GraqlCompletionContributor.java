@@ -11,9 +11,13 @@ import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
 import com.google.common.collect.Sets;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.ide.scratch.ScratchUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
+import com.intellij.psi.search.FileTypeIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import org.antlr.intellij.adaptor.parser.SyntaxError;
@@ -107,7 +111,15 @@ public class GraqlCompletionContributor extends CompletionContributor {
     private void includeAttributeTypes(@NotNull CompletionResultSet resultSet, @NotNull PsiElement ruleType,
                                        String... excludedNames) {
         Set<String> excludedNameSet = Sets.newHashSet(excludedNames);
-        getDeclarationsByType(ruleType.getProject(), "attribute").stream()
+        Collection<VirtualFile> searchScope;
+        if (ScratchUtil.isScratch(ruleType.getContainingFile().getVirtualFile())) {
+            searchScope = Collections.singletonList(ruleType.getContainingFile().getVirtualFile());
+        } else {
+            searchScope = FileTypeIndex.getFiles(GraqlFileType.INSTANCE,
+                    GlobalSearchScope.allScope(ruleType.getProject()));
+        }
+
+        getDeclarationsByType(ruleType.getProject(), searchScope, "attribute").stream()
                 .filter(it -> !excludedNameSet.contains(it.getName())).forEach(it -> {
             String declarationType = determineDeclarationType(it);
             resultSet.addElement(LookupElementBuilder.create(it)
@@ -121,7 +133,15 @@ public class GraqlCompletionContributor extends CompletionContributor {
     private void includeAllTypes(@NotNull CompletionResultSet resultSet, @NotNull PsiElement ruleType,
                                  String... excludedNames) {
         Set<String> excludedNameSet = Sets.newHashSet(excludedNames);
-        getAllDeclarations(ruleType.getProject()).stream()
+        Collection<VirtualFile> searchScope;
+        if (ScratchUtil.isScratch(ruleType.getContainingFile().getVirtualFile())) {
+            searchScope = Collections.singletonList(ruleType.getContainingFile().getVirtualFile());
+        } else {
+            searchScope = FileTypeIndex.getFiles(GraqlFileType.INSTANCE,
+                    GlobalSearchScope.allScope(ruleType.getProject()));
+        }
+
+        getAllDeclarations(ruleType.getProject(), searchScope).stream()
                 .filter(it -> !excludedNameSet.contains(it.getName())).forEach(it -> {
             String declarationType = determineDeclarationType(it);
             if (declarationType != null) {

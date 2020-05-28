@@ -32,7 +32,7 @@ public class GraqlDuplicateDeclarationInspection extends LocalInspectionTool {
 
                     PsiGraqlNamedElement namedElement = (PsiGraqlNamedElement) identifier;
                     List<String> declarationTypes = GraqlPsiUtils.findDeclarations(
-                            identifier.getProject(), namedElement.getName()).stream()
+                            identifier.getProject(), namedElement).stream()
                             .map(it -> it instanceof PsiRelatesTypeProperty ? "relation" : GraqlPsiUtils.determineDeclarationType(it))
                             .distinct().collect(Collectors.toList());
                     if (declarationTypes.size() > 1) {

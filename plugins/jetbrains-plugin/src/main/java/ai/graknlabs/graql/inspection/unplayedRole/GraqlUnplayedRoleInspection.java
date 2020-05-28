@@ -34,13 +34,12 @@ public class GraqlUnplayedRoleInspection extends LocalInspectionTool {
 
                     PsiGraqlElement identifierElement = (PsiGraqlElement) identifier;
                     PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
-                            identifier.getProject(), identifierElement.getName());
+                            identifier.getProject(), identifierElement);
                     if (declaration != null) {
                         String type = GraqlPsiUtils.determineDeclarationType(declaration);
                         if ("role".equals(type)) {
                             boolean isPlayed = false;
-                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
-                                    identifier.getProject(), identifierElement, identifierElement.getName());
+                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(identifierElement);
                             for (PsiGraqlElement usage : usages) {
                                 if (usage instanceof PsiPlaysTypeProperty) {
                                     isPlayed = true;

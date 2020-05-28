@@ -49,7 +49,7 @@ public class GraqlInvalidTypeUsageInspection extends LocalInspectionTool {
                     ensureGraqlElementsUpToDate(identifier.getContainingFile());
 
                     PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
-                            identifier.getProject(), ((PsiGraqlElement) identifier).getName());
+                            identifier.getProject(), ((PsiGraqlElement) identifier));
                     if (declaration != null) {
                         String declarationType = GraqlPsiUtils.determineDeclarationType(declaration);
                         String usageType;

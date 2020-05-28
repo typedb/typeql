@@ -17,26 +17,21 @@ import java.util.List;
  */
 public class GraqlReference extends PsiReferenceBase<PsiGraqlElement> implements PsiPolyVariantReference {
 
-    private final String identifier;
-
-    public GraqlReference(@NotNull PsiGraqlElement element, @NotNull TextRange textRange,
-                          @NotNull String identifier) {
+    public GraqlReference(@NotNull PsiGraqlElement element, @NotNull TextRange textRange) {
         super(element, textRange);
-        this.identifier = identifier;
     }
 
     @NotNull
     @Override
-    public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+    public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
         return GraqlPsiUtils.setName(myElement, newElementName);
     }
 
     @NotNull
     @Override
     public ResolveResult[] multiResolve(boolean incompleteCode) {
-        Project project = myElement.getProject();
         List<ResolveResult> results = new ArrayList<>();
-        for (PsiGraqlElement identifier : GraqlPsiUtils.findUsages(project, getElement(), identifier)) {
+        for (PsiGraqlElement identifier : GraqlPsiUtils.findUsages(myElement)) {
             results.add(new PsiElementResolveResult(identifier));
         }
         return results.toArray(new ResolveResult[0]);
@@ -45,7 +40,7 @@ public class GraqlReference extends PsiReferenceBase<PsiGraqlElement> implements
     @Nullable
     @Override
     public PsiElement resolve() {
-        return GraqlPsiUtils.findDeclaration(myElement.getProject(), identifier);
+        return GraqlPsiUtils.findDeclaration(myElement.getProject(), myElement);
     }
 
     @NotNull

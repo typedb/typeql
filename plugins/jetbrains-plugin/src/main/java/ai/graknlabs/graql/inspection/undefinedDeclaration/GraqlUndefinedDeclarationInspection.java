@@ -44,7 +44,7 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
                         }
 
                         PsiGraqlNamedElement declaration = GraqlPsiUtils.findDeclaration(
-                                identifier.getProject(), identifier.getName());
+                                identifier.getProject(), identifier);
                         if (declaration == null) {
                             PsiElement undefinedConcept;
                             if (identifier.getFirstChild() != null && identifier.getFirstChild().getNextSibling() != null

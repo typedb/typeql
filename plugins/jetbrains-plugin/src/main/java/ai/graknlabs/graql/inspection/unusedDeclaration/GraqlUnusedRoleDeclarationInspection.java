@@ -37,8 +37,7 @@ public class GraqlUnusedRoleDeclarationInspection extends LocalInspectionTool {
 
                         String type = GraqlPsiUtils.determineDeclarationType(declaration);
                         if ("role".equals(type)) {
-                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
-                                    declaration.getProject(), declaration, declaration.getName());
+                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(declaration);
                             if (usages.isEmpty()) {
                                 if (declaration instanceof PsiTypeProperty) {
                                     holder.registerProblem(declaration.getFirstChild(),

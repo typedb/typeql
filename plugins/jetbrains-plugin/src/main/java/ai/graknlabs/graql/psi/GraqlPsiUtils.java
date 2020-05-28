@@ -3,6 +3,7 @@ package ai.graknlabs.graql.psi;
 import ai.graknlabs.graql.GraqlFileType;
 import ai.graknlabs.graql.psi.property.*;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
+import com.intellij.ide.scratch.ScratchUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -16,10 +17,7 @@ import org.antlr.intellij.adaptor.lexer.RuleIElementType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ai.graknlabs.graql.GraqlLanguage.GRAQL_TYPES;
@@ -36,34 +34,49 @@ public class GraqlPsiUtils {
         }
     }
 
-    public static List<PsiGraqlNamedElement> getDeclarationsByType(Project project, String type) {
-        return getAllDeclarations(project).stream().filter(it -> Objects.equals(type, determineDeclarationType(it)))
+    @NotNull
+    public static List<PsiGraqlNamedElement> getDeclarationsByType(@NotNull Project project,
+                                                                   @NotNull Collection<VirtualFile> searchScope,
+                                                                   @NotNull String type) {
+        return getAllDeclarations(project, searchScope).stream()
+                .filter(it -> Objects.equals(type, determineDeclarationType(it)))
                 .collect(Collectors.toList());
     }
 
-    public static List<PsiGraqlNamedElement> getAllDeclarations(Project project) {
+    @NotNull
+    public static List<PsiGraqlNamedElement> getAllDeclarations(@NotNull Project project,
+                                                                @NotNull Collection<VirtualFile> searchScope) {
         List<PsiGraqlNamedElement> declarations = new ArrayList<>();
-        Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(
-                GraqlFileType.INSTANCE, GlobalSearchScope.allScope(project));
-        for (VirtualFile virtualFile : virtualFiles) {
+        for (VirtualFile virtualFile : searchScope) {
             PsiGraqlFileBase graqlFile = (PsiGraqlFileBase) PsiManager.getInstance(project).findFile(virtualFile);
             if (graqlFile != null) {
-                Collection<PsiGraqlNamedElement> identifiers = PsiTreeUtil.collectElementsOfType(
-                        graqlFile, PsiGraqlNamedElement.class);
-                for (PsiGraqlNamedElement identifier : identifiers) {
-                    declarations.add(identifier);
-                }
+                declarations.addAll(PsiTreeUtil.collectElementsOfType(graqlFile, PsiGraqlNamedElement.class));
             }
         }
         return declarations;
     }
 
-    public static List<PsiGraqlElement> findUsages(Project project, PsiGraqlElement element, String name) {
+    @NotNull
+    public static List<PsiGraqlElement> findUsages(@NotNull PsiGraqlElement identifier) {
+        VirtualFile identifierFile = identifier.getNode().getPsi().getContainingFile().getVirtualFile();
+        if (ScratchUtil.isScratch(identifierFile)) {
+            return findUsages(identifier.getProject(), identifier, identifier.getName(), Collections.singletonList(identifierFile));
+        } else {
+            return findUsages(identifier.getProject(), identifier, identifier.getName(), FileTypeIndex.getFiles(
+                    GraqlFileType.INSTANCE, GlobalSearchScope.allScope(identifier.getProject())));
+        }
+    }
+
+    @NotNull
+    public static List<PsiGraqlElement> findUsages(@NotNull Project project, @NotNull PsiGraqlElement element,
+                                                   String name, @NotNull Collection<VirtualFile> searchScope) {
         //todo: review logic in this method
         List<PsiGraqlElement> result = new ArrayList<>();
-        Collection<VirtualFile> virtualFiles =
-                FileTypeIndex.getFiles(GraqlFileType.INSTANCE, GlobalSearchScope.allScope(project));
-        for (VirtualFile virtualFile : virtualFiles) {
+        if (name == null) {
+            return result;
+        }
+
+        for (VirtualFile virtualFile : searchScope) {
             PsiGraqlFileBase graqlFile = (PsiGraqlFileBase) PsiManager.getInstance(project).findFile(virtualFile);
             if (graqlFile != null) {
                 if (element instanceof PsiHasTypeProperty) {
@@ -134,12 +147,19 @@ public class GraqlPsiUtils {
     }
 
     @Nullable
-    public static PsiGraqlNamedElement findDeclaration(Project project, String name) {
-        if (name == null) {
+    public static PsiGraqlNamedElement findDeclaration(@NotNull Project project, String name,
+                                                       @NotNull Collection<VirtualFile> searchScope) {
+        List<PsiGraqlNamedElement> declarations = findDeclarations(project, name, searchScope);
+        if (declarations.isEmpty()) {
             return null;
+        } else {
+            return declarations.get(0);
         }
+    }
 
-        List<PsiGraqlNamedElement> declarations = findDeclarations(project, name);
+    @Nullable
+    public static PsiGraqlNamedElement findDeclaration(@NotNull Project project, @NotNull PsiGraqlElement identifier) {
+        List<PsiGraqlNamedElement> declarations = findDeclarations(project, identifier);
         if (declarations.isEmpty()) {
             return null;
         } else {
@@ -148,11 +168,26 @@ public class GraqlPsiUtils {
     }
 
     @NotNull
-    public static List<PsiGraqlNamedElement> findDeclarations(Project project, String name) {
+    public static List<PsiGraqlNamedElement> findDeclarations(@NotNull Project project,
+                                                              @NotNull PsiGraqlElement identifier) {
+        VirtualFile identifierFile = identifier.getNode().getPsi().getContainingFile().getVirtualFile();
+        if (ScratchUtil.isScratch(identifierFile)) {
+            return findDeclarations(project, identifier.getName(), Collections.singletonList(identifierFile));
+        } else {
+            return findDeclarations(project, identifier.getName(), FileTypeIndex.getFiles(
+                    GraqlFileType.INSTANCE, GlobalSearchScope.allScope(project)));
+        }
+    }
+
+    @NotNull
+    public static List<PsiGraqlNamedElement> findDeclarations(@NotNull Project project, String name,
+                                                              @NotNull Collection<VirtualFile> searchScope) {
         List<PsiGraqlNamedElement> declarations = new ArrayList<>();
-        Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(
-                GraqlFileType.INSTANCE, GlobalSearchScope.allScope(project));
-        for (VirtualFile virtualFile : virtualFiles) {
+        if (name == null) {
+            return declarations;
+        }
+
+        for (VirtualFile virtualFile : searchScope) {
             PsiGraqlFileBase graqlFile = (PsiGraqlFileBase) PsiManager.getInstance(project).findFile(virtualFile);
             if (graqlFile != null) {
                 Collection<PsiGraqlNamedElement> identifiers = PsiTreeUtil.collectElementsOfType(
@@ -167,14 +202,23 @@ public class GraqlPsiUtils {
         return declarations;
     }
 
-    public static String determineDeclarationType(PsiGraqlNamedElement identifier) {
+    @Nullable
+    public static String determineDeclarationType(@NotNull PsiGraqlNamedElement identifier) {
         String subType = ((PsiStatementType) identifier.getParent()).getSubType();
         if (identifier instanceof PsiRelatesTypeProperty) {
             return "role";
         } else if (GRAQL_TYPES.contains(subType)) {
             return subType;
         }
-        PsiGraqlNamedElement declaration = findDeclaration(identifier.getProject(), subType);
+
+        Collection<VirtualFile> searchScope;
+        if (ScratchUtil.isScratch(identifier.getContainingFile().getVirtualFile())) {
+            searchScope = Collections.singletonList(identifier.getContainingFile().getVirtualFile());
+        } else {
+            searchScope = FileTypeIndex.getFiles(GraqlFileType.INSTANCE,
+                    GlobalSearchScope.allScope(identifier.getProject()));
+        }
+        PsiGraqlNamedElement declaration = findDeclaration(identifier.getProject(), subType, searchScope);
         if (declaration == null || declaration == identifier) {
             return null;
         } else {
@@ -182,7 +226,8 @@ public class GraqlPsiUtils {
         }
     }
 
-    public static PsiElement setName(PsiGraqlElement element, String newName) {
+    @NotNull
+    public static PsiElement setName(@NotNull PsiGraqlElement element, @NotNull String newName) {
         if (element instanceof PsiTypeProperty) {
             PsiGraqlNamedElement typeProperty = GraqlPsiElementFactory.createTypeProperty(element.getProject(), newName);
             element.getParent().getNode().replaceChild(element.getNode(), typeProperty.getNode());
@@ -202,7 +247,9 @@ public class GraqlPsiUtils {
         return element;
     }
 
-    public static PsiGraqlElement findParentByType(PsiElement element, RuleIElementType ruleElementType) {
+    @Nullable
+    public static PsiGraqlElement findParentByType(@NotNull PsiElement element,
+                                                   @NotNull RuleIElementType ruleElementType) {
         PsiElement parent = element;
         while ((parent = parent.getParent()) != null) {
             if (parent instanceof PsiGraqlElement) {

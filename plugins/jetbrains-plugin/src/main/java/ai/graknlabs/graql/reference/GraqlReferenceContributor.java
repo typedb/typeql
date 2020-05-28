@@ -23,7 +23,7 @@ public class GraqlReferenceContributor extends PsiReferenceContributor {
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
                 PsiHasTypeProperty hasElement = (PsiHasTypeProperty) element;
                 return new PsiReference[]{
-                        new GraqlReference(hasElement, hasElement.getHasTypeTextRange(), hasElement.getHasType())
+                        new GraqlReference(hasElement, hasElement.getHasTypeTextRange())
                 };
             }
         });
@@ -33,8 +33,7 @@ public class GraqlReferenceContributor extends PsiReferenceContributor {
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
                 PsiPlaysTypeProperty playsElement = (PsiPlaysTypeProperty) element;
                 return new PsiReference[]{
-                        new GraqlReference(playsElement, playsElement.getPlaysTypeTextRange(),
-                                playsElement.getPlaysType())
+                        new GraqlReference(playsElement, playsElement.getPlaysTypeTextRange())
                 };
             }
         });
@@ -45,8 +44,7 @@ public class GraqlReferenceContributor extends PsiReferenceContributor {
                 PsiRelatesSuperRoleTypeProperty relatesSuperRoleElement = (PsiRelatesSuperRoleTypeProperty) element;
                 return new PsiReference[]{
                         new GraqlReference(relatesSuperRoleElement,
-                                new TextRange(0, relatesSuperRoleElement.getText().length()),
-                                relatesSuperRoleElement.getText())
+                                new TextRange(0, relatesSuperRoleElement.getText().length()))
                 };
             }
         });
@@ -56,8 +54,7 @@ public class GraqlReferenceContributor extends PsiReferenceContributor {
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
                 PsiSubTypeProperty subTypeElement = (PsiSubTypeProperty) element;
                 return new PsiReference[]{
-                        new GraqlReference(subTypeElement, subTypeElement.getSubTypeTextRange(),
-                                subTypeElement.getSubType())
+                        new GraqlReference(subTypeElement, subTypeElement.getSubTypeTextRange())
                 };
             }
         });

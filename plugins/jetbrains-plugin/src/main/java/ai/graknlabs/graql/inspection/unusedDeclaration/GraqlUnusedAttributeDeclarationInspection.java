@@ -31,8 +31,7 @@ public class GraqlUnusedAttributeDeclarationInspection extends LocalInspectionTo
                     for (PsiGraqlNamedElement declaration : ((PsiStatementType) element).findTypeProperties()) {
                         String type = GraqlPsiUtils.determineDeclarationType(declaration);
                         if ("attribute".equals(type)) {
-                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(
-                                    declaration.getProject(), declaration, declaration.getName());
+                            List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(declaration);
                             if (usages.isEmpty()) {
                                 holder.registerProblem(declaration, "Attribute <code>#ref</code> is never used");
                             }
