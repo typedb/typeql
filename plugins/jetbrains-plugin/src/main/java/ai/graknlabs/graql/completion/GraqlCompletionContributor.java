@@ -8,6 +8,7 @@ import ai.graknlabs.graql.psi.property.PsiHasTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
@@ -41,6 +42,10 @@ public class GraqlCompletionContributor extends CompletionContributor {
     public static @NonNls
     final String DUMMY_IDENTIFIER = "IntellijIdeaRulezzz";
 
+    private static final Set<String> TYPE_PROPERTY_MODIFIERS = ImmutableSet.copyOf(
+            new String[]{"abstract", "sub", "key", "has", "plays", "relates"}
+    );
+
     public GraqlCompletionContributor() {
         extend(CompletionType.BASIC, PlatformPatterns.psiElement(),
                 new CompletionProvider<CompletionParameters>() {
@@ -55,12 +60,14 @@ public class GraqlCompletionContributor extends CompletionContributor {
                                 //has, include all attributes
                                 PsiGraqlElement statementType = findParentByType(parameters.getPosition(),
                                         RULE_ELEMENT_TYPES.get(GraqlParser.RULE_statement_type));
-                                includeAttributeTypes(resultSet, ruleType, requireNonNull(statementType).getName());
+                                includeAttributeTypes(resultSet, ruleType, parameters.getOriginalFile().getVirtualFile(),
+                                        requireNonNull(statementType).getName());
                             } else if (ruleType instanceof PsiSubTypeProperty) {
                                 //sub, include all declarations & base types
                                 PsiGraqlElement statementType = findParentByType(parameters.getPosition(),
                                         RULE_ELEMENT_TYPES.get(GraqlParser.RULE_statement_type));
-                                includeAllTypes(resultSet, ruleType, statementType.getName());
+                                includeAllTypes(resultSet, ruleType, parameters.getOriginalFile().getVirtualFile(),
+                                        statementType.getName());
                                 includeBaseTypes(resultSet);
                             } else if (ruleType instanceof PsiRelatesTypeProperty) {
                                 //relates, include all plays (roles)
@@ -68,6 +75,13 @@ public class GraqlCompletionContributor extends CompletionContributor {
                             } else if (ruleType instanceof PsiPlaysTypeProperty) {
                                 //plays, include all relates (roles)
                                 includeRelateRoles(parameters, resultSet);
+                            } else {
+                                //add type property modifiers
+                                TYPE_PROPERTY_MODIFIERS.forEach(keyword ->
+                                        resultSet.addElement(LookupElementBuilder.create(keyword)
+                                                .withIcon(GraqlFileType.INSTANCE.getIcon())
+                                                .withTypeText(keyword)
+                                                .withBoldness(true)));
                             }
 
                             //if looking for TYPE_NAME_ don't include keywords
@@ -109,11 +123,11 @@ public class GraqlCompletionContributor extends CompletionContributor {
     }
 
     private void includeAttributeTypes(@NotNull CompletionResultSet resultSet, @NotNull PsiElement ruleType,
-                                       String... excludedNames) {
+                                       @NotNull VirtualFile containingFile, String... excludedNames) {
         Set<String> excludedNameSet = Sets.newHashSet(excludedNames);
         Collection<VirtualFile> searchScope;
-        if (ScratchUtil.isScratch(ruleType.getContainingFile().getVirtualFile())) {
-            searchScope = Collections.singletonList(ruleType.getContainingFile().getVirtualFile());
+        if (ScratchUtil.isScratch(containingFile)) {
+            searchScope = Collections.singletonList(containingFile);
         } else {
             searchScope = FileTypeIndex.getFiles(GraqlFileType.INSTANCE,
                     GlobalSearchScope.allScope(ruleType.getProject()));
@@ -131,11 +145,11 @@ public class GraqlCompletionContributor extends CompletionContributor {
     }
 
     private void includeAllTypes(@NotNull CompletionResultSet resultSet, @NotNull PsiElement ruleType,
-                                 String... excludedNames) {
+                                 @NotNull VirtualFile containingFile, String... excludedNames) {
         Set<String> excludedNameSet = Sets.newHashSet(excludedNames);
         Collection<VirtualFile> searchScope;
-        if (ScratchUtil.isScratch(ruleType.getContainingFile().getVirtualFile())) {
-            searchScope = Collections.singletonList(ruleType.getContainingFile().getVirtualFile());
+        if (ScratchUtil.isScratch(containingFile)) {
+            searchScope = Collections.singletonList(containingFile);
         } else {
             searchScope = FileTypeIndex.getFiles(GraqlFileType.INSTANCE,
                     GlobalSearchScope.allScope(ruleType.getProject()));
