@@ -329,7 +329,6 @@ public class ParserTest {
         assertQueryEquals(expected, parsed, query);
     }
 
-
     @Test
     public void testSchemaQuery() {
         String query = "match $x plays actor; get; sort $x asc;";
@@ -1053,11 +1052,6 @@ public class ParserTest {
 
         //noinspection ResultOfMethodCallIgnored
         Graql.parse(queryText);
-    }
-
-    @Test
-    public void whenParsingAQueryWithReifiedAttributeRelationSyntax_ItIsEquivalentToJavaGraql() {
-        assertParseEquivalence("match $x has name $z via $x; get $x;");
     }
 
     @SuppressWarnings("CheckReturnValue")

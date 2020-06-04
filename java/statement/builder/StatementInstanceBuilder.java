@@ -70,18 +70,8 @@ public interface StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default StatementInstance has(String type, long value, Statement via) {
-        return has(type, Graql.val(value), via);
-    }
-
-    @CheckReturnValue
     default StatementInstance has(String type, double value) {
         return has(type, Graql.val(value));
-    }
-
-    @CheckReturnValue
-    default StatementInstance has(String type, double value, Statement via) {
-        return has(type, Graql.val(value), via);
     }
 
     @CheckReturnValue
@@ -90,18 +80,8 @@ public interface StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default StatementInstance has(String type, boolean value, Statement via) {
-        return has(type, Graql.val(value), via);
-    }
-
-    @CheckReturnValue
     default StatementInstance has(String type, String value) {
         return has(type, Graql.val(value));
-    }
-
-    @CheckReturnValue
-    default StatementInstance has(String type, String value, Statement via) {
-        return has(type, Graql.val(value), via);
     }
 
     @CheckReturnValue
@@ -110,18 +90,8 @@ public interface StatementInstanceBuilder {
     }
 
     @CheckReturnValue
-    default StatementInstance has(String type, LocalDateTime value, Statement via) {
-        return has(type, Graql.val(value), via);
-    }
-
-    @CheckReturnValue
     default StatementInstance has(String type, Statement variable) {
         return has(new HasAttributeProperty(type, variable));
-    }
-
-    @CheckReturnValue
-    default StatementInstance has(String type, Statement variable, Statement via) {
-        return has(new HasAttributeProperty(type, variable, via));
     }
 
     @CheckReturnValue

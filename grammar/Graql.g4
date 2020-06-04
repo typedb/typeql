@@ -135,14 +135,11 @@ relation            :   '(' role_player ( ',' role_player )* ')' ;              
 role_player         :   type ':' player                                         // The Role type and and player variable
                     |            player ;                                       // Or just the player variable
 player              :   VAR_ ;                                                  // A player is just a variable
-via                 :   VIA VAR_ ;                                              // The Relation variable that holds the
-                                                                                // assertion between an Attribute and
-                                                                                // its owner (any Thing)
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS type_label ( VAR_ | operation ) via? ;                   // Attribute ownership by variable or a
-                                                                                // predicate, and the "via" Relation
+attribute           :   HAS type_label ( VAR_ | operation ) ;                   // Attribute ownership by variable or a
+                                                                                // predicate
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
 operation           :   assignment
@@ -212,7 +209,7 @@ type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
 
 type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
-type_name           :   TYPE_NAME_      |   TYPE_IMPLICIT_  |   ID_         ;
+type_name           :   TYPE_NAME_      |   ID_         ;
 
 value_type          :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME            ;
@@ -253,15 +250,14 @@ ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
 // STATEMENT PROPERTY KEYWORDS
 
-ABSTRACT        : 'abstract'    ;
-VIA             : 'via'         ;   AS              : 'as'          ;
+ABSTRACT        : 'abstract'    ;   AS              : 'as'          ;
 ID              : 'id'          ;   TYPE            : 'type'        ;
 ISA_            : ISA | ISAX    ;   SUB_            : SUB | SUBX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
 KEY             : 'key'         ;   HAS             : 'has'         ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
-VALUE           : 'value'   ;   REGEX           : 'regex'       ;
+VALUE           : 'value'       ;   REGEX           : 'regex'       ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
@@ -314,7 +310,6 @@ VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
 VAR_NAMED_      : '$' [a-zA-Z0-9_-]* ;
 ID_             : ('V'|'E')[a-z0-9-]* ;
-TYPE_IMPLICIT_  : '@' TYPE_CHAR_T_+ ;
 TYPE_NAME_      : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
 
 

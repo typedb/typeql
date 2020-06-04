@@ -27,11 +27,8 @@ import java.util.stream.Stream;
  * Represents the {@code has} and {@code key} properties on a Type.
  * This property can be queried or inserted. Whether this is a key is indicated by the
  * HasAttributeTypeProperty#isKey field.
- * This property is defined as an implicit ontological structure between a Type and a AttributeType,
- * including one implicit RelationType and two implicit Roles. The labels of these types are derived
- * from the label of the AttributeType.
- * Like HasAttributeProperty, if this is not a key and is used in a match clause it will not use the implicit
- * structure - instead, it will match if there is any kind of relation type connecting the two types.
+ * This property is defined an ontological structure between a Type and a AttributeType,
+ * using different structure labels (on edges) to indicate a Has versus a Key relationship between the types.
  */
 public class HasAttributeTypeProperty extends VarProperty {
 
