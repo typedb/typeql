@@ -33,7 +33,8 @@ commands:
 
 jobs:
   build:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/graql
     steps:
       - install-bazel-linux-rbe
@@ -44,7 +45,8 @@ jobs:
       - run: bazel run @graknlabs_build_tools//unused_deps -- list
 
   build-analysis:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/graql
     steps:
       - install-bazel-linux-rbe
@@ -55,7 +57,8 @@ jobs:
             --project-key graknlabs_graql --branch=$CIRCLE_BRANCH --commit-id=$CIRCLE_SHA1
 
   test-java:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/graql
     steps:
       - install-bazel-linux-rbe
@@ -64,7 +67,8 @@ jobs:
           command: bazel test //... --test_output=errors
 
   deploy-maven-snapshot:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/graql
     steps:
       - install-bazel-linux-rbe
@@ -76,7 +80,8 @@ jobs:
           bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
 
   test-deployment-maven:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/graql
     steps:
       - install-bazel-linux-rbe
@@ -86,7 +91,8 @@ jobs:
       - run: cd test/deployment/ && mvn test
 
   sync-dependencies-snapshot:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - install-bazel-linux-rbe
       - checkout
@@ -97,7 +103,8 @@ jobs:
           --targets grakn:master
 
   release-approval:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - install-bazel-linux-rbe
       - checkout
@@ -107,7 +114,8 @@ jobs:
           bazel run @graknlabs_build_tools//ci:release-approval
 
   release-validate:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - install-bazel-linux-rbe
       - checkout
@@ -116,7 +124,8 @@ jobs:
             graknlabs_common
 
   deploy-github:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/grakn
     steps:
       - install-bazel-linux-rbe
@@ -130,7 +139,8 @@ jobs:
           bazel run --define version=$(cat VERSION) //:deploy-github -- $CIRCLE_SHA1
 
   deploy-maven-release:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/grakn
     steps:
       - install-bazel-linux-rbe
@@ -142,7 +152,8 @@ jobs:
           bazel run --define version=$(cat VERSION) //java:deploy-maven -- release
 
   sync-dependencies-release:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - install-bazel-linux-rbe
       - checkout
@@ -153,7 +164,8 @@ jobs:
           --targets grakn:master
 
   release-cleanup:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - checkout
       - run: git push --delete https://$REPO_GITHUB_TOKEN@github.com/graknlabs/graql $CIRCLE_BRANCH
