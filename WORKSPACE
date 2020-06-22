@@ -17,100 +17,207 @@
 
 workspace(name = "graknlabs_graql")
 
+################################
+# Load @graknlabs_dependencies #
+################################
+load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_dependencies")
+graknlabs_dependencies()
 
-###########################
-# Grakn Labs Dependencies #
-###########################
-
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_build_tools", "graknlabs_common")
-graknlabs_build_tools()
-graknlabs_common()
-
-load("@graknlabs_build_tools//distribution:dependencies.bzl", "graknlabs_bazel_distribution")
-graknlabs_bazel_distribution()
-
-load("@graknlabs_build_tools//unused_deps:dependencies.bzl", "unused_deps_dependencies")
-unused_deps_dependencies()
-
-
-###########################
-# Load Bazel Dependencies #
-###########################
-
-load("@graknlabs_build_tools//bazel:dependencies.bzl", "bazel_common", "bazel_deps", "bazel_toolchain")
+load("@graknlabs_dependencies//builder/bazel:deps.bzl","bazel_common", "bazel_deps", "bazel_toolchain")
 bazel_common()
 bazel_deps()
 bazel_toolchain()
 
+load("@graknlabs_dependencies//builder/grpc:deps.bzl", grpc_deps = "deps")
+grpc_deps()
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl",
+com_github_grpc_grpc_deps = "grpc_deps")
+com_github_grpc_grpc_deps()
+load("@stackb_rules_proto//java:deps.bzl", "java_grpc_compile")
+java_grpc_compile()
+load("@stackb_rules_proto//node:deps.bzl", "node_grpc_compile")
+node_grpc_compile()
 
-#################################
-# Load Build Tools dependencies #
-#################################
+load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
+java_deps()
 
-load("@graknlabs_build_tools//checkstyle:dependencies.bzl", "checkstyle_dependencies")
-checkstyle_dependencies()
+load("@graknlabs_dependencies//builder/nodejs:deps.bzl", nodejs_deps = "deps")
+nodejs_deps()
+load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
+node_repositories()
 
-load("@graknlabs_build_tools//sonarcloud:dependencies.bzl", "sonarcloud_dependencies")
-sonarcloud_dependencies()
-
-load("@graknlabs_build_tools//bazel:dependencies.bzl", "bazel_rules_python")
-bazel_rules_python()
-
+load("@graknlabs_dependencies//builder/python:deps.bzl", python_deps = "deps")
+python_deps()
 load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
 pip_repositories()
+pip3_import(
+    name = "graknlabs_dependencies_ci_pip",
+    requirements = "@graknlabs_dependencies//tools:requirements.txt",
+)
+load("@graknlabs_dependencies_ci_pip//:requirements.bzl",
+graknlabs_dependencies_ci_pip_install = "pip_install")
+graknlabs_dependencies_ci_pip_install()
+
+load("@graknlabs_dependencies//distribution:deps.bzl", distribution_deps = "deps")
+distribution_deps()
 
 pip3_import(
-    name = "graknlabs_build_tools_ci_pip",
-    requirements = "@graknlabs_build_tools//ci:requirements.txt",
+    name = "graknlabs_bazel_distribution_pip",
+    requirements = "@graknlabs_bazel_distribution//pip:requirements.txt",
 )
-load("@graknlabs_build_tools_ci_pip//:requirements.bzl",
-graknlabs_build_tools_ci_pip_install = "pip_install")
-graknlabs_build_tools_ci_pip_install()
-
-
-#####################################
-# Load Java dependencies from Maven #
-#####################################
-
-load("//dependencies/maven:dependencies.bzl", "maven_dependencies")
-maven_dependencies()
-
-
-########################################
-# Load compiler dependencies for ANTLR #
-########################################
-
-# Load ANTLR dependencies for Bazel
-load("//dependencies/compilers:dependencies.bzl", "antlr_dependencies")
-antlr_dependencies()
-
-# Load ANTLR dependencies for ANTLR programs
-load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
-antlr_dependencies()
-
-
-##################################
-# Load Distribution dependencies #
-##################################
+load("@graknlabs_bazel_distribution_pip//:requirements.bzl",
+graknlabs_bazel_distribution_pip_install = "pip_install")
+graknlabs_bazel_distribution_pip_install()
 
 load("@graknlabs_bazel_distribution//github:dependencies.bzl", "tcnksm_ghr")
 tcnksm_ghr()
 
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+git_repository(
+    name = "io_bazel_skydoc",
+    remote = "https://github.com/graknlabs/skydoc.git",
+    branch = "experimental-skydoc-allow-dep-on-bazel-tools",
+)
+
+load("@io_bazel_skydoc//:setup.bzl", "skydoc_repositories")
+skydoc_repositories()
+
+load("@io_bazel_rules_sass//:package.bzl", "rules_sass_dependencies")
+rules_sass_dependencies()
+
+load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
+node_repositories()
+
+load("@io_bazel_rules_sass//:defs.bzl", "sass_repositories")
+sass_repositories()
+
 load("@graknlabs_bazel_distribution//common:dependencies.bzl", "bazelbuild_rules_pkg")
 bazelbuild_rules_pkg()
 
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+rules_pkg_dependencies()
 
-#####################################
-# Load Bazel common workspace rules #
-#####################################
+load("@graknlabs_dependencies//distribution/docker:deps.bzl", docker_deps = "deps")
+docker_deps()
 
-# TODO: Figure out why this cannot be loaded at earlier at the top of the file
-load("@com_github_google_bazel_common//:workspace_defs.bzl", "google_common_workspace_rules")
-google_common_workspace_rules()
+load("@graknlabs_dependencies//tools/checkstyle:deps.bzl", checkstyle_deps = "deps")
+checkstyle_deps()
 
+load("@graknlabs_dependencies//tools/sonarcloud:deps.bzl", "sonarcloud_dependencies")
+sonarcloud_dependencies()
 
-# Generate a JSON document of commit hashes of all external workspace dependencies
+load("@graknlabs_dependencies//tools/unuseddeps:deps.bzl", unuseddeps_deps = "deps")
+unuseddeps_deps()
+
+########################
+# Load Maven Artifacts #
+########################
+load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+load("//dependencies/maven:artifacts.bzl", "artifacts")
+maven(artifacts)
+
+#########################
+# Create Workspace Refs #
+#########################
 load("@graknlabs_bazel_distribution//common:rules.bzl", "workspace_refs")
 workspace_refs(
     name = "graknlabs_graql_workspace_refs"
 )
+
+
+# ###########################
+# # Grakn Labs Dependencies #
+# ###########################
+
+# load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_build_tools", "graknlabs_common")
+# graknlabs_build_tools()
+# graknlabs_common()
+
+# load("@graknlabs_build_tools//distribution:dependencies.bzl", "graknlabs_bazel_distribution")
+# graknlabs_bazel_distribution()
+
+# load("@graknlabs_build_tools//unused_deps:dependencies.bzl", "unused_deps_dependencies")
+# unused_deps_dependencies()
+
+
+# ###########################
+# # Load Bazel Dependencies #
+# ###########################
+
+# load("@graknlabs_build_tools//bazel:dependencies.bzl", "bazel_common", "bazel_deps", "bazel_toolchain")
+# bazel_common()
+# bazel_deps()
+# bazel_toolchain()
+
+
+# #################################
+# # Load Build Tools dependencies #
+# #################################
+
+# load("@graknlabs_build_tools//checkstyle:dependencies.bzl", "checkstyle_dependencies")
+# checkstyle_dependencies()
+
+# load("@graknlabs_build_tools//sonarcloud:dependencies.bzl", "sonarcloud_dependencies")
+# sonarcloud_dependencies()
+
+# load("@graknlabs_build_tools//bazel:dependencies.bzl", "bazel_rules_python")
+# bazel_rules_python()
+
+# load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
+# pip_repositories()
+
+# pip3_import(
+#     name = "graknlabs_build_tools_ci_pip",
+#     requirements = "@graknlabs_build_tools//ci:requirements.txt",
+# )
+# load("@graknlabs_build_tools_ci_pip//:requirements.bzl",
+# graknlabs_build_tools_ci_pip_install = "pip_install")
+# graknlabs_build_tools_ci_pip_install()
+
+
+# #####################################
+# # Load Java dependencies from Maven #
+# #####################################
+
+# load("//dependencies/maven:dependencies.bzl", "maven_dependencies")
+# maven_dependencies()
+
+
+# ########################################
+# # Load compiler dependencies for ANTLR #
+# ########################################
+
+# # Load ANTLR dependencies for Bazel
+# load("//dependencies/compilers:dependencies.bzl", "antlr_dependencies")
+# antlr_dependencies()
+
+# # Load ANTLR dependencies for ANTLR programs
+# load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
+# antlr_dependencies()
+
+
+# ##################################
+# # Load Distribution dependencies #
+# ##################################
+
+# load("@graknlabs_bazel_distribution//github:dependencies.bzl", "tcnksm_ghr")
+# tcnksm_ghr()
+
+# load("@graknlabs_bazel_distribution//common:dependencies.bzl", "bazelbuild_rules_pkg")
+# bazelbuild_rules_pkg()
+
+
+# #####################################
+# # Load Bazel common workspace rules #
+# #####################################
+
+# # TODO: Figure out why this cannot be loaded at earlier at the top of the file
+# load("@com_github_google_bazel_common//:workspace_defs.bzl", "google_common_workspace_rules")
+# google_common_workspace_rules()
+
+
+# # Generate a JSON document of commit hashes of all external workspace dependencies
+# load("@graknlabs_bazel_distribution//common:rules.bzl", "workspace_refs")
+# workspace_refs(
+#     name = "graknlabs_graql_workspace_refs"
+# )
