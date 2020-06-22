@@ -23,6 +23,11 @@ workspace(name = "graknlabs_graql")
 load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
+load("@graknlabs_dependencies//builder/antlr:deps.bzl", antlr_deps = "deps")
+antlr_deps()
+load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
+antlr_dependencies()
+
 load("@graknlabs_dependencies//builder/bazel:deps.bzl","bazel_common", "bazel_deps", "bazel_toolchain")
 bazel_common()
 bazel_deps()
@@ -109,12 +114,20 @@ sonarcloud_dependencies()
 load("@graknlabs_dependencies//tools/unuseddeps:deps.bzl", unuseddeps_deps = "deps")
 unuseddeps_deps()
 
+##########################
+# Load @graknlabs_common #
+##########################
+load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_common")
+graknlabs_common()
+
 ########################
 # Load Maven Artifacts #
 ########################
-load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
-load("//dependencies/maven:artifacts.bzl", "artifacts")
-maven(artifacts)
+# load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+# load("//dependencies/maven:artifacts.bzl", "artifacts")
+# maven(artifacts)
+load("//dependencies/maven:dependencies.bzl", "maven_dependencies")
+maven_dependencies()
 
 #########################
 # Create Workspace Refs #

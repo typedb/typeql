@@ -17,7 +17,7 @@
 
 package(default_visibility = ["//:__subpackages__"])
 
-load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@rules_antlr//antlr:antlr4.bzl", "antlr4")
 
 antlr4(
