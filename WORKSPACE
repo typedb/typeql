@@ -123,11 +123,11 @@ graknlabs_common()
 ########################
 # Load Maven Artifacts #
 ########################
-# load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
-# load("//dependencies/maven:artifacts.bzl", "artifacts")
-# maven(artifacts)
-load("//dependencies/maven:dependencies.bzl", "maven_dependencies")
-maven_dependencies()
+load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+load("//dependencies/maven:artifacts.bzl", "artifacts")
+maven(artifacts)
+# load("//dependencies/maven:dependencies.bzl", "maven_dependencies")
+# maven_dependencies()
 
 #########################
 # Create Workspace Refs #

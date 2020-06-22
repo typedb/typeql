@@ -24,7 +24,7 @@ java_test(
     deps = [
         "//java:graql",
         "@graknlabs_common//:common",
-        "//dependencies/maven/artifacts/org/hamcrest:hamcrest-library",
+        "@maven//:org_hamcrest_hamcrest_library",
     ],
     size = "medium"
 )
