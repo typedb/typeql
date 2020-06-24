@@ -22,9 +22,9 @@ commands:
       - run: |
           mkdir install
           cd install
-          curl -OL https://raw.githubusercontent.com/lolski/build-tools/refactor/tools/bazelinstall/linux.sh
+          curl -OL https://raw.githubusercontent.com/lolski/build-tools/refactor/tool/bazelinstall/linux.sh
           bash ./linux.sh
-          curl -OL https://raw.githubusercontent.com/lolski/build-tools/refactor/tools/bazelinstall/rbe.sh
+          curl -OL https://raw.githubusercontent.com/lolski/build-tools/refactor/tool/bazelinstall/rbe.sh
           bash ./rbe.sh
           cd ..
           rm -rf install
