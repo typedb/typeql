@@ -19,16 +19,12 @@ version: 2.1
 commands:
   install-bazel:
     steps:
-      - run: |
-          mkdir install
-          cd install
-          curl -OL https://raw.githubusercontent.com/lolski/build-tools/refactor/tool/bazelinstall/linux.sh
-          bash ./linux.sh
-          curl -OL https://raw.githubusercontent.com/lolski/build-tools/refactor/tool/bazelinstall/rbe.sh
-          bash ./rbe.sh
-          cd ..
-          rm -rf install
-  run-bazel:
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/linux.sh
+      - run: bash ./linux.sh && rm ./linux.sh
+      - run: curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/rbe.sh
+      - run: bash ./rbe.sh && rm ./rbe.sh          
+
+      run-bazel:
     parameters:
       command:
         type: string
