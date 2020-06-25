@@ -95,13 +95,13 @@ pattern_statement   :   statement_type
 
 // TYPE STATEMENTS =============================================================
 
-statement_type      :   type        type_property ( ',' type_property )* ';' ;
+statement_type      :   type type_property ( ',' type_property )* ';' ;
 type_property       :   ABSTRACT
                     |   SUB_        type
-                    |   KEY         type
-                    |   HAS         type
-                    |   PLAYS       type
-                    |   RELATES     type ( AS type )?
+                    |   KEY         unscoped_type
+                    |   HAS         unscoped_type
+                    |   PLAYS       scoped_type
+                    |   RELATES     unscoped_type ( AS unscoped_type )?
                     |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
@@ -115,16 +115,16 @@ statement_instance  :   statement_thing
                     |   statement_relation
                     |   statement_attribute
                     ;
-statement_thing     :   VAR_                ISA_ type   ( ',' attributes )? ';'
+statement_thing     :   VAR_                ISA_ unscoped_type   ( ',' attributes )? ';'
                     |   VAR_                ID   ID_    ( ',' attributes )? ';'
                     |   VAR_                NEQ  VAR_                       ';'
                     |   VAR_                attributes                      ';'
                     ;
-statement_relation  :   VAR_? relation      ISA_ type   ( ',' attributes )? ';'
+statement_relation  :   VAR_? relation      ISA_ unscoped_type   ( ',' attributes )? ';'
                     |   VAR_? relation      attributes                      ';'
                     |   VAR_? relation                                      ';'
                     ;
-statement_attribute :   VAR_? operation     ISA_ type   ( ',' attributes )? ';'
+statement_attribute :   VAR_? operation     ISA_ unscoped_type   ( ',' attributes )? ';'
                     |   VAR_? operation     attributes                      ';'
                     |   VAR_? operation                                     ';'
                     ;
@@ -132,8 +132,8 @@ statement_attribute :   VAR_? operation     ISA_ type   ( ',' attributes )? ';'
 // RELATION CONSTRUCT ==========================================================
 
 relation            :   '(' role_player ( ',' role_player )* ')' ;              // A list of role players in a Relations
-role_player         :   type ':' player                                         // The Role type and and player variable
-                    |            player ;                                       // Or just the player variable
+role_player         :   unscoped_type ':' player                                // The Role type and and player variable
+                    |   player ;                                                // Or just the player variable
 player              :   VAR_ ;                                                  // A player is just a variable
 // ATTRIBUTE CONSTRUCT =========================================================
 
@@ -199,10 +199,17 @@ compute_arg         :   MIN_K     '=' INTEGER_                                  
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type                :   type_label      | VAR_ ;                                // A type can be a label or variable
-type_label          :   type_native     | type_name         | unreserved    ;
-type_labels         :   type_label      | type_label_array  ;
+// we have both scoped and unscoped types, both of which can just be vars
+type                :   scoped_type            | unscoped_type ;
+scoped_type         :   scoped_type_label      | VAR_ ;
+unscoped_type       :   unscoped_type_label    | VAR_ ;
 
+
+type_label          :   unscoped_type_label     | scoped_type_label        ;
+scoped_type_label   :   unscoped_type_label ':' unscoped_type_label        ;
+unscoped_type_label :   type_native     | type_name         | unreserved   ;
+
+type_labels         :   type_label              | type_label_array         ;
 type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
 
 // LITERAL INPUT VALUES =======================================================
