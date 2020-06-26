@@ -20,6 +20,7 @@ package graql.lang.query;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.query.builder.Computable;
+import graql.lang.statement.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +56,8 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     // they will be initialised when the user provides input
     String fromID = null;
     String toID = null;
-    Set<String> ofTypes = null;
-    Set<String> inTypes = null;
+    Set<Label> ofTypes = null;
+    Set<Label> inTypes = null;
     Graql.Token.Compute.Algorithm algorithm = null;
     Arguments arguments = null;
     // But 'arguments' will also be set when where() is called for cluster/centrality
@@ -72,7 +73,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     }
 
     @CheckReturnValue
-    public Set<String> in() {
+    public Set<Label> in() {
         if (this.inTypes == null) return set();
         return inTypes;
     }
@@ -127,7 +128,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         return "";
     }
 
-    private String printTypes(Set<String> types) {
+    private String printTypes(Set<Label> types) {
         StringBuilder inTypesString = new StringBuilder();
 
         if (!types.isEmpty()) {
@@ -135,7 +136,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 inTypesString.append(types.iterator().next());
             } else {
                 inTypesString.append(Graql.Token.Char.SQUARE_OPEN);
-                inTypesString.append(inTypes.stream().collect(joining(Graql.Token.Char.COMMA_SPACE.toString())));
+                inTypesString.append(inTypes.stream().map(Label::toString).collect(joining(Graql.Token.Char.COMMA_SPACE.toString())));
                 inTypesString.append(Graql.Token.Char.SQUARE_CLOSE);
             }
         }
@@ -252,7 +253,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
 
             @Override
-            public GraqlCompute.Statistics.Count in(Collection<String> types) {
+            public GraqlCompute.Statistics.Count in(Collection<Label> types) {
                 this.inTypes = set(types);
                 return this;
             }
@@ -304,18 +305,18 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
 
             @CheckReturnValue
-            public final Set<String> of(){
+            public final Set<Label> of(){
                 return ofTypes == null ? set() : ofTypes;
             }
 
             @Override
-            public GraqlCompute.Statistics.Value of(Collection<String> types) {
+            public GraqlCompute.Statistics.Value of(Collection<Label> types) {
                 this.ofTypes = set(types);
                 return this;
             }
 
             @Override
-            public GraqlCompute.Statistics.Value in(Collection<String> types) {
+            public GraqlCompute.Statistics.Value in(Collection<Label> types) {
                 this.inTypes = set(types);
                 return this;
             }
@@ -398,7 +399,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public GraqlCompute.Path in(Collection<String> types) {
+        public GraqlCompute.Path in(Collection<Label> types) {
             this.inTypes = set(types);
             return this;
         }
@@ -484,7 +485,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public T in(Collection<String> types) {
+        public T in(Collection<Label> types) {
             this.inTypes = set(types);
             return self();
         }
@@ -547,12 +548,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @CheckReturnValue
-        public final Set<String> of(){
+        public final Set<Label> of(){
             return ofTypes == null ? set() : ofTypes;
         }
 
         @Override
-        public GraqlCompute.Centrality of(Collection<String> types) {
+        public GraqlCompute.Centrality of(Collection<Label> types) {
             this.ofTypes = set(types);
             return this;
         }
