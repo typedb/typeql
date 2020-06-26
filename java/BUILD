@@ -17,8 +17,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 
 java_library(
     name = "graql",
@@ -27,10 +27,10 @@ java_library(
         "//grammar:java",
         "@graknlabs_common//:common",
         # External dependencies
-        "//dependencies/maven/artifacts/com/google/guava:guava",
-        "//dependencies/maven/artifacts/com/google/code/findbugs:jsr305",
-        "//dependencies/maven/artifacts/org/antlr:antlr4-runtime", # sync version with @antlr4_runtime//jar
-        "//dependencies/maven/artifacts/org/slf4j:slf4j-api",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
+        "@maven//:org_slf4j_slf4j_api",
     ],
     tags = ["maven_coordinates=io.graql:graql-lang:{pom_version}"],
 )

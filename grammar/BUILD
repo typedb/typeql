@@ -17,7 +17,7 @@
 
 package(default_visibility = ["//:__subpackages__"])
 
-load("@graknlabs_build_tools//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@rules_antlr//antlr:antlr4.bzl", "antlr4")
 
 antlr4(
@@ -32,7 +32,7 @@ java_library(
     name = "java",
     srcs = [":java-src"],
     deps = [
-        "//dependencies/maven/artifacts/org/antlr:antlr4-runtime", # sync version with @antlr4_runtime//jar
+        "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
     ],
     tags = ["maven_coordinates=io.graql:graql-grammar:{pom_version}", "checkstyle_ignore"],
 )
