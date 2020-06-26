@@ -595,7 +595,7 @@ public class Parser extends GraqlBaseVisitor {
     public Statement visitStatement_type(GraqlParser.Statement_typeContext ctx) {
         // TODO: restrict for Define VS Match for all usage of visitType(...)
 
-        Statement type = visitType(ctx.type());
+        Statement type = visitTypeRef(ctx.type_ref());
 
         for (GraqlParser.Type_propertyContext property : ctx.type_property()) {
 
@@ -650,7 +650,7 @@ public class Parser extends GraqlBaseVisitor {
                                 .collect(Collectors.toList())
                 ));
             } else if (property.TYPE() != null) {
-                type = type.type(visitType_label(property.type_label()));
+                type = type.type(visitType_label_ref(property.type_label_ref()));
 
             } else {
                 throw new IllegalArgumentException("Unrecognised Type Statement: " + property.getText());
@@ -813,14 +813,30 @@ public class Parser extends GraqlBaseVisitor {
 
     // TYPE, LABEL, AND IDENTIFIER CONSTRUCTS ==================================
 
-    @Override
+    public Statement visitTypeRef(GraqlParser.Type_refContext ctx) {
+        if (ctx.type() != null) {
+            return visitType(ctx.type());
+        } else {
+            return visitTypeScoped(ctx.type_scoped());
+        }
+    }
+
     public Statement visitType(GraqlParser.TypeContext ctx) {
-        if (ctx.type_label() != null) {
+        if (ctx.type_label()  != null) {
             return type(visitType_label(ctx.type_label()));
         } else {
             return new Statement(getVar(ctx.VAR_()));
         }
     }
+
+    public Statement visitTypeScoped(GraqlParser.Type_scopedContext ctx) {
+        if (ctx.type_label_scoped()  != null) {
+            return type(visitType_label_scoped(ctx.type_label_scoped()));
+        } else {
+            return new Statement(getVar(ctx.VAR_()));
+        }
+    }
+
 
     @Override
     public LinkedHashSet<String> visitType_labels(GraqlParser.Type_labelsContext ctx) {
@@ -836,6 +852,23 @@ public class Parser extends GraqlBaseVisitor {
                 .map(this::visitType_label)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    @Override
+    public String visitType_label_ref(GraqlParser.Type_label_refContext ctx) {
+        if (ctx.type_label() != null) {
+            return visitType_label(ctx.type_label());
+        } else {
+            return visitType_label_scoped(ctx.type_label_scoped());
+        }
+    }
+
+    @Override
+    public String visitType_label_scoped(GraqlParser.Type_label_scopedContext ctx) {
+        GraqlParser.Type_labelContext scope = ctx.type_label(0);
+        GraqlParser.Type_labelContext scoped = ctx.type_label(1);
+        return scope.getText() + ":" + scoped.getText();
+    }
+
 
     @Override
     public String visitType_label(GraqlParser.Type_labelContext ctx) {
