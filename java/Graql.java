@@ -248,6 +248,11 @@ public class Graql {
     }
 
     @CheckReturnValue
+    public static StatementType type(Label label) {
+        return hiddenVar().type(label);
+    }
+
+    @CheckReturnValue
     public static StatementType type(String label) {
         return hiddenVar().type(label);
     }
@@ -255,11 +260,6 @@ public class Graql {
     @CheckReturnValue
     public static StatementType type(String label, String scope) {
         return hiddenVar().type(label, scope);
-    }
-
-    @CheckReturnValue
-    public static StatementType type(Label label) {
-        return hiddenVar().type(label);
     }
 
     @CheckReturnValue

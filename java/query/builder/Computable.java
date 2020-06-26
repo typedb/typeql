@@ -96,7 +96,7 @@ public interface Computable {
         boolean includesAttributes();
 
         /**
-         * Specify an unscoped list of types to us, as compute always uses unscoped types
+         * Specify an unscoped list of types to use, as compute always uses unscoped types
          */
         @CheckReturnValue
         default T in(String type, String... types) {
