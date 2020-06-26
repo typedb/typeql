@@ -72,7 +72,7 @@ public interface StatementTypeBuilder {
     }
 
     @CheckReturnValue
-    default StatementType sub(String type, @Nullable String scope) {
+    default StatementType sub(String type, String scope) {
         return sub(Graql.type(type, scope));
     }
 
@@ -96,7 +96,7 @@ public interface StatementTypeBuilder {
     }
 
     @CheckReturnValue
-    default StatementType subX(String type, @Nullable String scope) {
+    default StatementType subX(String type, String scope) {
         return subX(Graql.type(type, scope));
     }
 
@@ -167,40 +167,24 @@ public interface StatementTypeBuilder {
         return type(new PlaysProperty(type, false));
     }
 
-    /**
-     * @param type a Role id that this relation type variable must have
-     * @return this
-     */
     @CheckReturnValue
     default StatementType relates(String type) {
         return relates(type, null);
     }
 
-    /**
-     * @param type a Role that this relation type variable must have
-     * @return this
-     */
+    @CheckReturnValue
+    default StatementType relates(String roleType, String superRoleType) {
+        return relates(Graql.type(roleType), superRoleType == null ?
+                null : Graql.type(superRoleType));
+    }
+
     @CheckReturnValue
     default StatementType relates(Statement type) {
         return relates(type, null);
     }
 
-    /**
-     * @param roleType a Role id that this relation type variable must have
-     * @return this
-     */
     @CheckReturnValue
-    default StatementType relates(String roleType, @Nullable String superRoleType) {
-        return relates(Graql.type(roleType), superRoleType == null ?
-                null : Graql.type(superRoleType));
-    }
-
-    /**
-     * @param roleType a Role that this relation type variable must have
-     * @return this
-     */
-    @CheckReturnValue
-    default StatementType relates(Statement roleType, @Nullable Statement superRoleType) {
+    default StatementType relates(Statement roleType, Statement superRoleType) {
         return type(new RelatesProperty(roleType, superRoleType));
     }
 

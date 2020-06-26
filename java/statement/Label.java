@@ -50,7 +50,17 @@ public class Label implements Comparable<Label>, Serializable {
      * @return The matching Type Label
      */
     @CheckReturnValue
-    public static Label of(String name, @Nullable String scope) {
+    public static Label of(String name) {
+        return new Label(name, null);
+    }
+
+    /**
+     * @param name The string which potentially represents a Type
+     * @param scope The scope for this type
+     * @return The matching Type Label
+     */
+    @CheckReturnValue
+    public static Label of(String name, String scope) {
         return new Label(name, scope);
     }
 
