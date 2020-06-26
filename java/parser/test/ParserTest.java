@@ -20,7 +20,10 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
+import graql.lang.property.PlaysProperty;
+import graql.lang.property.TypeProperty;
 import graql.lang.property.ValueTypeProperty;
+import graql.lang.property.VarProperty;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -28,6 +31,7 @@ import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
+import graql.lang.statement.Label;
 import graql.lang.statement.Statement;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -64,6 +68,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class ParserTest {
@@ -950,6 +955,33 @@ public class ParserTest {
     @Test
     public void testParseKey() {
         assertEquals("match $x key name; get $x;", parse("match $x key name; get $x;").toString());
+    }
+
+    @Test
+    public void testScopedPlays() {
+        String query = "match $x plays marriage:spouse; get;";
+        GraqlGet get = Graql.parse(query).asGet();
+        PlaysProperty playsProperty = get.match().getPatterns().statements().iterator().next().getProperty(PlaysProperty.class).get();
+        assertNotNull(playsProperty.role().getType().get().scope());
+        assertEquals(playsProperty.role().getType().get().scope(), "marriage");
+    }
+
+    @Test
+    public void testScopedType() {
+        String query = "match $x type marriage:spouse; get;";
+        GraqlGet get = Graql.parse(query).asGet();
+        TypeProperty typeProperty = get.match().getPatterns().statements().iterator().next().getProperty(TypeProperty.class).get();
+        assertNotNull(typeProperty.label().scope());
+        assertEquals(typeProperty.label().scope(), "marriage");
+    }
+
+    @Test
+    public void testScopedStatement() {
+        String query = "match marriage:spouse sub $x; get;";
+        GraqlGet get = Graql.parse(query).asGet();
+        Label type = get.match().getPatterns().statements().iterator().next().getType().get();
+        assertNotNull(type.scope());
+        assertEquals(type.scope(), "marriage");
     }
 
     @Test
