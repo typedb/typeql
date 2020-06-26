@@ -95,18 +95,18 @@ pattern_statement   :   statement_type
 
 // TYPE STATEMENTS =============================================================
 
-statement_type      :   type        type_property ( ',' type_property )* ';' ;
+statement_type      :   type_ref type_property ( ',' type_property )* ';' ;
 type_property       :   ABSTRACT
-                    |   SUB_        type
+                    |   SUB_        type_ref
                     |   KEY         type
                     |   HAS         type
-                    |   PLAYS       type
+                    |   PLAYS       type_scoped
                     |   RELATES     type ( AS type )?
                     |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
-                    |   TYPE        type_label
+                    |   TYPE        type_label_ref
                     ;
 
 // INSTANCE STATEMENTS =========================================================
@@ -199,11 +199,18 @@ compute_arg         :   MIN_K     '=' INTEGER_                                  
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type                :   type_label      | VAR_ ;                                // A type can be a label or variable
-type_label          :   type_native     | type_name         | unreserved    ;
-type_labels         :   type_label      | type_label_array  ;
+// we have both scoped and unscoped types, both of which can just be vars
+type_ref            :   type                | type_scoped ;
+type_scoped         :   type_label_scoped   | VAR_        ;
+type                :   type_label          | VAR_        ;
 
-type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
+
+type_label_ref      :   type_label      |  type_label_scoped  ;
+type_label_scoped   :   type_label     ':' type_label         ;
+type_label          :   type_native     |  type_name          | unreserved  ;
+
+type_labels         :   type_label      | type_label_array      ;
+type_label_array    :   '[' type_label ( ',' type_label )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 

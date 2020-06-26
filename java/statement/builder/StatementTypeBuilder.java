@@ -30,6 +30,7 @@ import graql.lang.property.ThenProperty;
 import graql.lang.property.TypeProperty;
 import graql.lang.property.VarProperty;
 import graql.lang.property.WhenProperty;
+import graql.lang.statement.Label;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementType;
 
@@ -46,72 +47,67 @@ public interface StatementTypeBuilder {
         return type(type.toString());
     }
     
-    /**
-     * @param name a string that this variable's label must match
-     * @return this
-     */
     @CheckReturnValue
-    default StatementType type(String name) {
-        return type(new TypeProperty(name));
+    default StatementType type(String label) {
+        return type(new TypeProperty(Label.of(label, null)));
     }
 
-    /**
-     * set this concept type variable as abstract, meaning it cannot have direct instances
-     *
-     * @return this
-     */
+    @CheckReturnValue
+    default StatementType type(String label, String scope) {
+        return type(new TypeProperty(Label.of(label, scope)));
+    }
+
+    @CheckReturnValue
+    default StatementType type(Label label) {
+        return type(new TypeProperty(label));
+    }
+
     @CheckReturnValue
     default StatementType isAbstract() {
         return type(AbstractProperty.get());
     }
 
     default StatementType sub(Graql.Token.Type type) {
-        return sub(type.toString());
+        return sub(type.toString(), null);
     }
 
-    /**
-     * @param type a concept type id that this variable must be a kind of
-     * @return this
-     */
+    @CheckReturnValue
+    default StatementType sub(String type, String scope) {
+        return sub(Graql.type(type, scope));
+    }
+
     @CheckReturnValue
     default StatementType sub(String type) {
         return sub(Graql.type(type));
     }
 
-    /**
-     * @param type a concept type that this variable must be a kind of
-     * @return this
-     */
     @CheckReturnValue
     default StatementType sub(Statement type) {
         return sub(new SubProperty(type));
     }
 
-    default StatementType subX(Graql.Token.Type type) {
-        return subX(type.toString());
-    }
-
-    /**
-     * @param type a concept type id that this variable must be a kind of, without looking at parent types
-     * @return this
-     */
-    @CheckReturnValue
-    default StatementType subX(String type) {
-        return subX(Graql.type(type));
-    }
-
-    /**
-     * @param type a concept type that this variable must be a kind of, without looking at parent type
-     * @return this
-     */
-    @CheckReturnValue
-    default StatementType subX(Statement type) {
-        return sub(new SubProperty(type, true));
-    }
-
     @CheckReturnValue
     default StatementType sub(SubProperty property) {
         return type(property);
+    }
+
+    default StatementType subX(Graql.Token.Type type) {
+        return subX(type.toString(), null);
+    }
+
+    @CheckReturnValue
+    default StatementType subX(String type, String scope) {
+        return subX(Graql.type(type, scope));
+    }
+
+    @CheckReturnValue
+    default StatementType subX(String type) {
+        return subX(Graql.type(type ));
+    }
+
+    @CheckReturnValue
+    default StatementType subX(Statement type) {
+        return sub(new SubProperty(type, true));
     }
 
     /**
@@ -138,7 +134,7 @@ public interface StatementTypeBuilder {
      */
     @CheckReturnValue
     default StatementType has(String type) {
-        return has(Graql.type(type));
+        return has(Graql.type(type, null));
     }
 
     /**
@@ -155,8 +151,11 @@ public interface StatementTypeBuilder {
      * @return this
      */
     @CheckReturnValue
-    default StatementType plays(String type) {
-        return plays(Graql.type(type));
+    default StatementType plays(String type, String scope) {
+        if (scope == null) {
+            throw new NullPointerException("Plays must specify a non-null scope");
+        }
+        return plays(Graql.type(type, scope));
     }
 
     /**
@@ -168,39 +167,24 @@ public interface StatementTypeBuilder {
         return type(new PlaysProperty(type, false));
     }
 
-    /**
-     * @param type a Role id that this relation type variable must have
-     * @return this
-     */
     @CheckReturnValue
     default StatementType relates(String type) {
         return relates(type, null);
     }
 
-    /**
-     * @param type a Role that this relation type variable must have
-     * @return this
-     */
+    @CheckReturnValue
+    default StatementType relates(String roleType, String superRoleType) {
+        return relates(Graql.type(roleType), superRoleType == null ?
+                null : Graql.type(superRoleType));
+    }
+
     @CheckReturnValue
     default StatementType relates(Statement type) {
         return relates(type, null);
     }
 
-    /**
-     * @param roleType a Role id that this relation type variable must have
-     * @return this
-     */
     @CheckReturnValue
-    default StatementType relates(String roleType, @Nullable String superRoleType) {
-        return relates(Graql.type(roleType), superRoleType == null ? null : Graql.type(superRoleType));
-    }
-
-    /**
-     * @param roleType a Role that this relation type variable must have
-     * @return this
-     */
-    @CheckReturnValue
-    default StatementType relates(Statement roleType, @Nullable Statement superRoleType) {
+    default StatementType relates(Statement roleType, Statement superRoleType) {
         return type(new RelatesProperty(roleType, superRoleType));
     }
 

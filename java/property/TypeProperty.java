@@ -18,6 +18,7 @@
 package graql.lang.property;
 
 import graql.lang.Graql;
+import graql.lang.statement.Label;
 import graql.lang.statement.StatementType;
 
 /**
@@ -27,17 +28,17 @@ import graql.lang.statement.StatementType;
  */
 public class TypeProperty extends VarProperty {
 
-    private final String name;
+    private final Label label;
 
-    public TypeProperty(String name) {
-        if (name == null) {
+    public TypeProperty(Label label) {
+        if (label == null) {
             throw new NullPointerException("Null label");
         }
-        this.name = name;
+        this.label = label;
     }
 
-    public String name() {
-        return name;
+    public Label label() {
+        return label;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class TypeProperty extends VarProperty {
 
     @Override
     public String property() {
-        return name();
+        return label().toString();
     }
 
     @Override
@@ -72,7 +73,7 @@ public class TypeProperty extends VarProperty {
         }
         if (o instanceof TypeProperty) {
             TypeProperty that = (TypeProperty) o;
-            return (this.name.equals(that.name));
+            return (this.label.equals(that.label));
         }
         return false;
     }
@@ -81,7 +82,7 @@ public class TypeProperty extends VarProperty {
     public int hashCode() {
         int h = 1;
         h *= 1000003;
-        h ^= this.name.hashCode();
+        h ^= this.label.hashCode();
         return h;
     }
 }

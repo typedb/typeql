@@ -28,6 +28,7 @@ import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
 import graql.lang.query.MatchClause;
+import graql.lang.statement.Label;
 import graql.lang.statement.Statement;
 import graql.lang.statement.StatementAttribute;
 import graql.lang.statement.StatementRelation;
@@ -247,13 +248,18 @@ public class Graql {
     }
 
     @CheckReturnValue
-    public static StatementType type(Graql.Token.Type type) {
-        return type(type.toString());
+    public static StatementType type(Label label) {
+        return hiddenVar().type(label);
     }
 
     @CheckReturnValue
     public static StatementType type(String label) {
         return hiddenVar().type(label);
+    }
+
+    @CheckReturnValue
+    public static StatementType type(String label, String scope) {
+        return hiddenVar().type(label, scope);
     }
 
     @CheckReturnValue

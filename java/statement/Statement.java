@@ -188,15 +188,15 @@ public class Statement implements Pattern,
      * @return the name this variable represents, if it represents something with a specific name
      */
     @CheckReturnValue
-    public Optional<String> getType() {
-        return getProperty(TypeProperty.class).map(TypeProperty::name);
+    public Optional<Label> getType() {
+        return getProperty(TypeProperty.class).map(TypeProperty::label);
     }
 
     /**
      * @return all type names that this variable refers to
      */
     @CheckReturnValue
-    public Set<String> getTypes() {
+    public Set<Label> getTypes() {
         return properties().stream()
                 .flatMap(VarProperty::types)
                 .map(Statement::getType)
@@ -276,9 +276,9 @@ public class Statement implements Pattern,
             return var().toString();
         } else if (properties().size() == 1) {
             // If there is only a label, we display that
-            Optional<String> label = getType();
+            Optional<Label> label = getType();
             if (label.isPresent()) {
-                return label.get();
+                return label.get().toString();
             }
         }
 

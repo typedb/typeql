@@ -19,6 +19,7 @@ package graql.lang.query.builder;
 
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
+import graql.lang.statement.Label;
 
 import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
@@ -58,11 +59,24 @@ public interface Computable {
     interface Targetable<T extends Computable.Targetable> extends Computable {
 
         @CheckReturnValue
-        Set<String> of();
+        Set<Label> of();
 
+        /**
+         * Specify a list of unscoped types to use, as compute always uses unscoped targetable types
+         */
         @CheckReturnValue
         default T of(String type, String... types) {
-            ArrayList<String> typeList = new ArrayList<>(types.length + 1);
+            ArrayList<Label> typeList = new ArrayList<>(types.length + 1);
+            typeList.add(Label.of(type, null));
+            for (String t : types) {
+                typeList.add(Label.of(t, null));
+            }
+
+            return of(typeList);
+        }
+        @CheckReturnValue
+        default T of(Label type, Label... types) {
+            ArrayList<Label> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
             typeList.addAll(Arrays.asList(types));
 
@@ -70,20 +84,34 @@ public interface Computable {
         }
 
         @CheckReturnValue
-        T of(Collection<String> types);
+        T of(Collection<Label> types);
     }
 
     interface Scopeable<T extends Computable.Scopeable> extends Computable {
 
         @CheckReturnValue
-        Set<String> in();
+        Set<Label> in();
 
         @CheckReturnValue
         boolean includesAttributes();
 
+        /**
+         * Specify an unscoped list of types to use, as compute always uses unscoped types
+         */
         @CheckReturnValue
         default T in(String type, String... types) {
-            ArrayList<String> typeList = new ArrayList<>(types.length + 1);
+            ArrayList<Label> typeList = new ArrayList<>(types.length + 1);
+            typeList.add(Label.of(type, null));
+            for (String t : types) {
+                typeList.add(Label.of(t, null));
+            }
+
+            return in(typeList);
+        }
+
+        @CheckReturnValue
+        default T in(Label type, Label... types) {
+            ArrayList<Label> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
             typeList.addAll(Arrays.asList(types));
 
@@ -91,7 +119,7 @@ public interface Computable {
         }
 
         @CheckReturnValue
-        T in(Collection<String> types);
+        T in(Collection<Label> types);
 
         @CheckReturnValue
         T attributes(boolean include);
