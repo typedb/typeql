@@ -146,16 +146,19 @@ public interface StatementTypeBuilder {
         return type(new HasAttributeTypeProperty(type, false));
     }
 
-    /**
-     * @param type a Role id that this concept type variable must play
-     * @return this
-     */
     @CheckReturnValue
     default StatementType plays(String type, String scope) {
-        if (scope == null) {
-            throw new NullPointerException("Plays must specify a non-null scope");
-        }
         return plays(Graql.type(type, scope));
+    }
+
+    /**
+     * Specify a role without a scope - this may be used in match statements but not for define
+     * @param type the unscoped role label
+     * @return
+     */
+    @CheckReturnValue
+    default StatementType plays(String type) {
+        return plays(Graql.type(type));
     }
 
     /**
