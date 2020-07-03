@@ -95,18 +95,18 @@ pattern_statement   :   statement_type
 
 // TYPE STATEMENTS =============================================================
 
-statement_type      :   type_ref type_property ( ',' type_property )* ';' ;
+statement_type      :   type type_property ( ',' type_property )* ';' ;
 type_property       :   ABSTRACT
-                    |   SUB_        type_ref
-                    |   KEY         type
-                    |   HAS         type
-                    |   PLAYS       type_scoped
-                    |   RELATES     type ( AS type )?
+                    |   SUB_        type
+                    |   KEY         type_unscoped
+                    |   HAS         type_unscoped
+                    |   PLAYS       type
+                    |   RELATES     type_unscoped ( AS type_unscoped )?
                     |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
                     |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
-                    |   TYPE        type_label_ref
+                    |   TYPE        type_label
                     ;
 
 // INSTANCE STATEMENTS =========================================================
@@ -115,16 +115,16 @@ statement_instance  :   statement_thing
                     |   statement_relation
                     |   statement_attribute
                     ;
-statement_thing     :   VAR_                ISA_ type   ( ',' attributes )? ';'
+statement_thing     :   VAR_                ISA_ type_unscoped   ( ',' attributes )? ';'
                     |   VAR_                ID   ID_    ( ',' attributes )? ';'
                     |   VAR_                NEQ  VAR_                       ';'
                     |   VAR_                attributes                      ';'
                     ;
-statement_relation  :   VAR_? relation      ISA_ type   ( ',' attributes )? ';'
+statement_relation  :   VAR_? relation      ISA_ type_unscoped   ( ',' attributes )? ';'
                     |   VAR_? relation      attributes                      ';'
                     |   VAR_? relation                                      ';'
                     ;
-statement_attribute :   VAR_? operation     ISA_ type   ( ',' attributes )? ';'
+statement_attribute :   VAR_? operation     ISA_ type_unscoped   ( ',' attributes )? ';'
                     |   VAR_? operation     attributes                      ';'
                     |   VAR_? operation                                     ';'
                     ;
@@ -132,13 +132,13 @@ statement_attribute :   VAR_? operation     ISA_ type   ( ',' attributes )? ';'
 // RELATION CONSTRUCT ==========================================================
 
 relation            :   '(' role_player ( ',' role_player )* ')' ;              // A list of role players in a Relations
-role_player         :   type ':' player                                         // The Role type and and player variable
-                    |            player ;                                       // Or just the player variable
+role_player         :   type_unscoped   ':' player                              // The Role type and and player variable
+                    |   player          ;                                       // Or just the player variable
 player              :   VAR_ ;                                                  // A player is just a variable
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS type_label ( VAR_ | operation ) ;                   // Attribute ownership by variable or a
+attribute           :   HAS type_label_unscoped ( VAR_ | operation ) ;          // Attribute ownership by variable or a
                                                                                 // predicate
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
@@ -200,17 +200,17 @@ compute_arg         :   MIN_K     '=' INTEGER_                                  
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
 // we have both scoped and unscoped types, both of which can just be vars
-type_ref            :   type                | type_scoped ;
-type_scoped         :   type_label_scoped   | VAR_        ;
-type                :   type_label          | VAR_        ;
+type                :   type_unscoped           | type_scoped ;
+type_scoped         :   type_label_scoped       | VAR_        ;
+type_unscoped       :   type_label_unscoped     | VAR_        ;
 
 
-type_label_ref      :   type_label      |  type_label_scoped  ;
-type_label_scoped   :   type_label     ':' type_label         ;
-type_label          :   type_native     |  type_name          | unreserved  ;
+type_label          :   type_label_unscoped     |  type_label_scoped    ;
+type_label_scoped   :   type_label_unscoped    ':' type_label_unscoped  ;
+type_label_unscoped :   type_native             |  type_name            | unreserved  ;
 
-type_labels         :   type_label      | type_label_array      ;
-type_label_array    :   '[' type_label ( ',' type_label )* ']'  ;
+type_labels         :   type_label_unscoped     | type_label_array                ;
+type_label_array    :   '[' type_label_unscoped ( ',' type_label_unscoped )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 
