@@ -100,8 +100,8 @@ type_property       :   ABSTRACT
                     |   SUB_        type
                     |   KEY         type_unscoped
                     |   HAS         type_unscoped
-                    |   PLAYS       type
-                    |   RELATES     type_unscoped ( AS type_unscoped )?
+                    |   PLAYS       type                                        // may be unscoped in a 'match'
+                    |   RELATES     type ( AS type_unscoped )?                  // may be unscoped in a 'match'
                     |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'

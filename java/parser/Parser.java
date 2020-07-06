@@ -617,20 +617,20 @@ public class Parser extends GraqlBaseVisitor {
                 }
 
             } else if (property.KEY() != null) {
-                type = type.key(visitType_unscoped(property.type_unscoped(0)));
+                type = type.key(visitType_unscoped(property.type_unscoped()));
 
             } else if (property.HAS() != null) {
-                type = type.has(visitType_unscoped(property.type_unscoped(0)));
+                type = type.has(visitType_unscoped(property.type_unscoped()));
 
             } else if (property.PLAYS() != null) {
                 type = type.plays(visitType(property.type()));
 
             } else if (property.RELATES() != null) {
                 if (property.AS() != null) {
-                    type = type.relates(visitType_unscoped(property.type_unscoped(0)),
-                            visitType_unscoped(property.type_unscoped(1)));
+                    type = type.relates(visitType(property.type()),
+                            visitType_unscoped(property.type_unscoped()));
                 } else {
-                    type = type.relates(visitType_unscoped(property.type_unscoped(0)));
+                    type = type.relates(visitType(property.type()));
                 }
             } else if (property.VALUE() != null) {
                 type = type.value(Graql.Token.ValueType.of(property.value_type().getText()));
