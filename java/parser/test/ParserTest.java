@@ -967,6 +967,13 @@ public class ParserTest {
     }
 
     @Test
+    public void testMatchType() {
+        String query = "match $x type person; get;";
+        GraqlGet get = Graql.parse(query).asGet();
+        System.out.println(get);
+    }
+
+    @Test
     public void testScopedType() {
         String query = "match $x type marriage:spouse; get;";
         GraqlGet get = Graql.parse(query).asGet();

@@ -651,7 +651,7 @@ public class Parser extends GraqlBaseVisitor {
                                 .collect(Collectors.toList())
                 ));
             } else if (property.TYPE() != null) {
-                type = type(visitType_label(property.type_label()));
+                type = type.type(visitType_label(property.type_label()));
             } else {
                 throw new IllegalArgumentException("Unrecognised Type Statement: " + property.getText());
             }
