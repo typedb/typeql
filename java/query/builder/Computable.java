@@ -20,7 +20,6 @@ package graql.lang.query.builder;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 
-import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,36 +30,27 @@ import java.util.Set;
 
 public interface Computable {
 
-    @CheckReturnValue
     Graql.Token.Compute.Method method();
 
-    @CheckReturnValue
     Set<Graql.Token.Compute.Condition> conditionsRequired();
 
-    @CheckReturnValue
     Optional<GraqlException> getException();
 
     interface Directional<T extends Computable.Directional> extends Computable {
 
-        @CheckReturnValue
         String from();
 
-        @CheckReturnValue
         String to();
 
-        @CheckReturnValue
         T from(String fromID);
 
-        @CheckReturnValue
         T to(String toID);
     }
 
     interface Targetable<T extends Computable.Targetable> extends Computable {
 
-        @CheckReturnValue
         Set<String> of();
 
-        @CheckReturnValue
         default T of(String type, String... types) {
             ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
@@ -69,19 +59,15 @@ public interface Computable {
             return of(typeList);
         }
 
-        @CheckReturnValue
         T of(Collection<String> types);
     }
 
     interface Scopeable<T extends Computable.Scopeable> extends Computable {
 
-        @CheckReturnValue
         Set<String> in();
 
-        @CheckReturnValue
         boolean includesAttributes();
 
-        @CheckReturnValue
         default T in(String type, String... types) {
             ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
@@ -90,26 +76,20 @@ public interface Computable {
             return in(typeList);
         }
 
-        @CheckReturnValue
         T in(Collection<String> types);
 
-        @CheckReturnValue
         T attributes(boolean include);
     }
 
     interface Configurable<T extends Computable.Configurable,
             U extends Computable.Argument, V extends Computable.Arguments> extends Computable {
 
-        @CheckReturnValue
         Graql.Token.Compute.Algorithm using();
 
-        @CheckReturnValue
         V where();
 
-        @CheckReturnValue
         T using(Graql.Token.Compute.Algorithm algorithm);
 
-        @CheckReturnValue
         @SuppressWarnings("unchecked")
         default T where(U arg, U... args) {
             ArrayList<U> argList = new ArrayList<>(args.length + 1);
@@ -119,16 +99,12 @@ public interface Computable {
             return where(argList);
         }
 
-        @CheckReturnValue
         T where(List<U> args);
 
-        @CheckReturnValue
         Set<Graql.Token.Compute.Algorithm> algorithmsAccepted();
 
-        @CheckReturnValue
         Map<Graql.Token.Compute.Algorithm, Set<Graql.Token.Compute.Param>> argumentsAccepted();
 
-        @CheckReturnValue
         Map<Graql.Token.Compute.Algorithm, Map<Graql.Token.Compute.Param, Object>> argumentsDefault();
     }
 
@@ -141,7 +117,6 @@ public interface Computable {
 
     interface Arguments {
 
-        @CheckReturnValue
         Optional<Long> minK();
 
         Optional<Long> k();

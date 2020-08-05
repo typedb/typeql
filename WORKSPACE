@@ -20,7 +20,7 @@ workspace(name = "graknlabs_graql")
 ################################
 # Load @graknlabs_dependencies #
 ################################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_dependencies")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
 # Load Antlr
@@ -138,7 +138,7 @@ rules_pkg_dependencies()
 ##########################
 # Load @graknlabs_common #
 ##########################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_common")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_common")
 graknlabs_common()
 
 ###############

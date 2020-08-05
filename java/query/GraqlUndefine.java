@@ -18,45 +18,40 @@
 package graql.lang.query;
 
 import graql.lang.Graql;
-import graql.lang.statement.Statement;
+import graql.lang.variable.TypeVariable;
 
 import java.util.List;
+import java.util.Objects;
 
+import static graql.lang.Graql.Token.Char.NEW_LINE;
 import static java.util.stream.Collectors.joining;
 
-/**
- * A query for undefining the Schema types.
- * The query will undefine all concepts described in the pattern provided.
- */
 public class GraqlUndefine extends GraqlQuery {
 
-    private final List<? extends Statement> statements;
+    private final List<TypeVariable> variables;
+    private final int hash;
 
-    public GraqlUndefine(List<? extends Statement> statements) {
-        if (statements == null) {
-            throw new NullPointerException("Null statements");
-        } else if (statements.isEmpty()) {
-            throw new IllegalArgumentException("Define Statements could not be empty");
+    public GraqlUndefine(List<TypeVariable> variables) {
+        if (variables == null || variables.isEmpty()) {
+            throw new IllegalArgumentException("Undefine Query missing type variables");
         }
-        this.statements = statements;
+        this.variables = variables;
+        this.hash = Objects.hash(this.variables.toArray());
     }
 
-    public List<? extends Statement> statements() {
-        return statements;
+    public List<TypeVariable> variables() {
+        return variables;
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
     public String toString() {
         StringBuilder query = new StringBuilder();
-
         query.append(Graql.Token.Command.UNDEFINE);
-        if (statements.size()>1) query.append(Graql.Token.Char.NEW_LINE);
+
+        if (variables.size() > 1) query.append(NEW_LINE);
         else query.append(Graql.Token.Char.SPACE);
 
-        query.append(statements().stream()
-                             .map(Statement::toString)
-                             .collect(joining(Graql.Token.Char.NEW_LINE.toString())));
-
+        query.append(variables().stream().map(TypeVariable::toString).collect(joining(NEW_LINE.toString())));
         return query.toString();
     }
 
@@ -64,17 +59,12 @@ public class GraqlUndefine extends GraqlQuery {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         GraqlUndefine that = (GraqlUndefine) o;
-
-        return this.statements.equals(that.statements);
+        return this.variables.equals(that.variables);
     }
 
     @Override
     public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        h ^= this.statements.hashCode();
-        return h;
+        return hash;
     }
 }

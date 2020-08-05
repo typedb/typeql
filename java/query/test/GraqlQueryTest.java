@@ -45,17 +45,17 @@ public class GraqlQueryTest {
 
     @Test
     public void testSimpleGetQueryToString() {
-        assertSameStringRepresentation(Graql.match(var("x").isa("movie").has("title", "Godfather")).get());
+        assertSameStringRepresentation(match(var("x").isa("movie").has("title", "Godfather")).get());
     }
 
     @Test
     public void testComplexQueryToString() {
-        GraqlGet query = Graql.match(
+        GraqlGet query = match(
                 var("x").isa("movie"),
                 var().rel("x").rel("y"),
                 or(
                         var("y").isa("person"),
-                        var("y").isa("genre").neq("crime")
+                        var("y").neq("crime")
                 ),
                 var("y").has("name", var("n"))
         ).get("x", "y", "n").sort("n").offset(4).limit(8);
@@ -64,32 +64,32 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithResourcesToString() {
-        assertSameStringRepresentation(Graql.match(var("x").has("tmdb-vote-count", lte(400))).get());
+        assertSameStringRepresentation(match(var("x").has("tmdb-vote-count", lte(400))).get());
     }
 
     @Test
     public void testQueryWithSubToString() {
-        assertSameStringRepresentation(Graql.match(var("x").sub(var("y"))).get());
+        assertSameStringRepresentation(match(var("x").sub(var("y"))).get());
     }
 
     @Test
     public void testQueryWithPlaysToString() {
-        assertSameStringRepresentation(Graql.match(var("x").plays(var("y"))).get());
+        assertSameStringRepresentation(match(var("x").plays(var("y"))).get());
     }
 
     @Test
     public void testQueryWithRelatesToString() {
-        assertSameStringRepresentation(Graql.match(var("x").relates(var("y"))).get());
+        assertSameStringRepresentation(match(var("x").relates(var("y"))).get());
     }
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(Graql.match(var("x").value(Graql.Token.ValueType.LONG)).get());
+        assertSameStringRepresentation(match(var("x").value(Graql.Token.ValueType.LONG)).get());
     }
 
     @Test
     public void testQueryIsAbstractToString() {
-        assertSameStringRepresentation(Graql.match(var("x").isAbstract()).get());
+        assertSameStringRepresentation(match(var("x").isAbstract()).get());
     }
 
     @Test
@@ -120,16 +120,8 @@ public class GraqlQueryTest {
     }
 
     @Test
-    public void testNumericTypeLabels() {
-        assertEquals(
-                "match $a (1hi);",
-                match(var("a").rel(type("1hi"))).toString()
-        );
-    }
-
-    @Test
     public void testHas() {
-        assertEquals("insert $x has thingy;", Graql.insert(var("x").has("thingy")).toString());
+        assertEquals("define $x has thingy;", Graql.define(var("x").has("thingy")).toString());
     }
 
     @Test
@@ -180,23 +172,23 @@ public class GraqlQueryTest {
 
     @Test
     public void testMatchInsertToString() {
-        GraqlInsert query = Graql.match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
+        GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
         assertEquals("match $x isa movie;\ninsert $x has title \"hello\";", query.toString());
     }
 
     @Test
     public void testZeroToString() {
-        assertEquals("match $x 0.0;", Graql.match(var("x").val(0.0)).toString());
+        assertEquals("match $x 0.0;", match(var("x").val(0.0)).toString());
     }
 
     @Test
     public void testExponentsToString() {
-        assertEquals("match $x 1000000000.0;", Graql.match(var("x").val(1_000_000_000.0)).toString());
+        assertEquals("match $x 1000000000.0;", match(var("x").val(1_000_000_000.0)).toString());
     }
 
     @Test
     public void testDecimalToString() {
-        assertEquals("match $x 0.0001;", Graql.match(var("x").val(0.0001)).toString());
+        assertEquals("match $x 0.0001;", match(var("x").val(0.0001)).toString());
     }
 
     @Test

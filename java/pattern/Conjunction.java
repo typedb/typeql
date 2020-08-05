@@ -17,37 +17,46 @@
 
 package graql.lang.pattern;
 
-import com.google.common.collect.Sets;
 import graql.lang.Graql;
-import graql.lang.statement.Statement;
-import graql.lang.statement.Variable;
+import graql.lang.variable.Variable;
 
-import javax.annotation.CheckReturnValue;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-/**
- * A class representing a conjunction (and) of patterns. All inner patterns must match in a query
- *
- * @param <T> the type of patterns in this conjunction
- */
 public class Conjunction<T extends Pattern> implements Pattern {
 
-    private final LinkedHashSet<T> patterns;
+    private final List<T> patterns;
+    private final int hash;
 
-    public Conjunction(Set<T> patterns) {
-        if (patterns == null) {
-            throw new NullPointerException("Null patterns");
-        }
-        this.patterns = patterns.stream()
-                .map(Objects::requireNonNull)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+    public Conjunction(List<T> patterns) {
+        if (patterns == null) throw new NullPointerException("Null patterns");
+        this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
+        this.hash = Objects.hash(this.patterns);
+    }
+
+    public Stream<Variable> variables() {
+        return patterns.stream().flatMap(pattern -> {
+            if (pattern instanceof Variable) return ((Variable) pattern).variables();
+            else if (pattern instanceof Conjunction) return ((Conjunction<?>) pattern).variables();
+            else return Stream.of();
+        });
+    }
+
+    public List<T> patterns() {
+        return patterns;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder pattern = new StringBuilder();
+        pattern.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
+        pattern.append(patterns.stream().map(Objects::toString).collect(Collectors.joining(Graql.Token.Char.SPACE.toString())));
+        pattern.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE).append(Graql.Token.Char.SEMICOLON);
+        return pattern.toString();
     }
 
     @Override
@@ -60,69 +69,6 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     @Override
     public int hashCode() {
-        return patterns.hashCode();
-    }
-
-    /**
-     * @return the patterns within this conjunction
-     */
-    @CheckReturnValue
-    public Set<T> getPatterns() {
-        return patterns;
-    }
-
-    @Override
-    public Disjunction<Conjunction<Statement>> getDisjunctiveNormalForm() {
-        // Get all disjunctions in query
-        List<Set<Conjunction<Statement>>> disjunctionsOfConjunctions = getPatterns().stream()
-                .map(p -> p.getDisjunctiveNormalForm().getPatterns())
-                .collect(toList());
-
-        // Get the cartesian product.
-        // in other words, this puts the 'ands' on the inside and the 'ors' on the outside
-        // e.g. (A or B) and (C or D)  <=>  (A and C) or (A and D) or (B and C) or (B and D)
-        Set<Conjunction<Statement>> dnf = Sets.cartesianProduct(disjunctionsOfConjunctions).stream()
-                .map(Conjunction::fromConjunctions)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        return Graql.or(dnf);
-
-        // Wasn't that a horrible function? Here it is in Haskell:
-        //     dnf = map fromConjunctions . sequence . map getDisjunctiveNormalForm . patterns
-    }
-
-    @Override
-    public Disjunction<Conjunction<Pattern>> getNegationDNF() {
-        List<Set<Conjunction<Pattern>>> disjunctionsOfConjunctions = getPatterns().stream()
-                .map(p -> p.getNegationDNF().getPatterns())
-                .collect(toList());
-
-        Set<Conjunction<Pattern>> dnf = Sets.cartesianProduct(disjunctionsOfConjunctions).stream()
-                .map(Conjunction::fromConjunctions)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return Graql.or(dnf);
-    }
-
-    @Override
-    public Set<Variable> variables() {
-        return getPatterns().stream().map(Pattern::variables).reduce(new HashSet<>(), Sets::union);
-    }
-
-    private static <U extends Pattern> Conjunction<U> fromConjunctions(List<Conjunction<U>> conjunctions) {
-        Set<U> patterns = conjunctions.stream()
-                .flatMap(p -> p.getPatterns().stream())
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return Graql.and(patterns);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder pattern = new StringBuilder();
-
-        pattern.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
-        pattern.append(patterns.stream().map(Objects::toString).collect(Collectors.joining(Graql.Token.Char.SPACE.toString())));
-        pattern.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE).append(Graql.Token.Char.SEMICOLON);
-
-        return pattern.toString();
+        return hash;
     }
 }

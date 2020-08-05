@@ -19,58 +19,48 @@ package graql.lang.query;
 
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
-import graql.lang.statement.Statement;
+import graql.lang.variable.ThingVariable;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
-/**
- * A query for inserting data.
- * When built without a match clause the insert query will execute once, inserting all the variables provided.
- * When built from a match clause, the insert query will execute for each result of the match clause,
- * where variable names in the insert query are bound to the concept in the result of the match clause.
- */
+import static graql.lang.Graql.Token.Char.NEW_LINE;
+import static java.util.stream.Collectors.joining;
+
 public class GraqlInsert extends GraqlQuery {
 
     private final MatchClause match;
-    private final List<Statement> statements;
+    private final List<ThingVariable> variables;
+    private final int hash;
 
-    public GraqlInsert(@Nullable MatchClause match, List<Statement> statements) {
-        if (statements.isEmpty()) {
-            throw GraqlException.noPatterns();
-        }
-
+    public GraqlInsert(@Nullable MatchClause match, List<ThingVariable> variables) {
+        if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
         this.match = match;
-        this.statements = statements;
+        this.variables = variables;
+        this.hash = Objects.hash(match, variables.toArray());
     }
 
     @Nullable
-    @CheckReturnValue
     public MatchClause match() {
         return match;
     }
 
-    @CheckReturnValue
-    public List<Statement> statements() {
-        return statements;
+    public List<ThingVariable> variables() {
+        return variables;
     }
 
     @Override
     public final String toString() {
         StringBuilder query = new StringBuilder();
 
-        if (match() != null) query.append(match()).append(Graql.Token.Char.NEW_LINE);
-
+        if (match() != null) query.append(match()).append(NEW_LINE);
         query.append(Graql.Token.Command.INSERT);
-        if (statements.size()>1) query.append(Graql.Token.Char.NEW_LINE);
+
+        if (variables.size() > 1) query.append(NEW_LINE);
         else query.append(Graql.Token.Char.SPACE);
 
-        query.append(statements().stream()
-                             .map(Statement::toString)
-                             .collect(Collectors.joining(Graql.Token.Char.NEW_LINE.toString())));
-
+        query.append(variables().stream().map(ThingVariable::toString).collect(joining(NEW_LINE.toString())));
         return query.toString();
     }
 
@@ -78,20 +68,13 @@ public class GraqlInsert extends GraqlQuery {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         GraqlInsert that = (GraqlInsert) o;
-
-        return (this.match == null ? that.match == null : this.match.equals(that.match) &&
-                this.statements.equals(that.statements));
+        return (Objects.equals(this.match, that.match) &&
+                this.variables.equals(that.variables));
     }
 
     @Override
     public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        h ^= (match == null) ? 0 : this.match.hashCode();
-        h *= 1000003;
-        h ^= this.statements.hashCode();
-        return h;
+        return hash;
     }
 }

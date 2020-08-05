@@ -19,7 +19,7 @@ package graql.lang.query.builder;
 
 import graql.lang.Graql;
 import graql.lang.query.GraqlQuery;
-import graql.lang.statement.Variable;
+import graql.lang.variable.UnscopedVariable;
 
 public interface Aggregatable<T extends GraqlQuery> {
 
@@ -28,53 +28,53 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T max(String var) {
-        return max(new Variable(var));
+        return max(UnscopedVariable.named(var));
     }
 
-    default T max(Variable var) {
+    default T max(UnscopedVariable var) {
         return aggregate(Graql.Token.Aggregate.Method.MAX, var);
     }
 
     default T mean(String var) {
-        return mean(new Variable(var));
+        return mean(UnscopedVariable.named(var));
     }
 
-    default T mean(Variable var) {
+    default T mean(UnscopedVariable var) {
         return aggregate(Graql.Token.Aggregate.Method.MEAN, var);
     }
 
     default T median(String var) {
-        return median(new Variable(var));
+        return median(UnscopedVariable.named(var));
     }
 
-    default T median(Variable var) {
+    default T median(UnscopedVariable var) {
         return aggregate(Graql.Token.Aggregate.Method.MEDIAN, var);
     }
 
     default T min(String var) {
-        return min(new Variable(var));
+        return min(UnscopedVariable.named(var));
     }
 
-    default T min(Variable var) {
+    default T min(UnscopedVariable var) {
         return aggregate(Graql.Token.Aggregate.Method.MIN, var);
     }
 
     default T std(String var) {
-        return std(new Variable(var));
+        return std(UnscopedVariable.named(var));
     }
 
-    default T std(Variable var) {
+    default T std(UnscopedVariable var) {
         return aggregate(Graql.Token.Aggregate.Method.STD, var);
     }
 
     default T sum(String var) {
-        return sum(new Variable(var));
+        return sum(UnscopedVariable.named(var));
     }
 
-    default T sum(Variable var) {
+    default T sum(UnscopedVariable var) {
         return aggregate(Graql.Token.Aggregate.Method.SUM, var);
     }
 
     // TODO: will be made "private" once we upgrade to Java 9 or higher
-    T aggregate(Graql.Token.Aggregate.Method method, Variable var);
+    T aggregate(Graql.Token.Aggregate.Method method, UnscopedVariable var);
 }

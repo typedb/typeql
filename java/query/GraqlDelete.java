@@ -19,107 +19,59 @@ package graql.lang.query;
 
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
-import graql.lang.statement.Statement;
-import graql.lang.statement.Variable;
+import graql.lang.variable.ThingVariable;
 
-import javax.annotation.CheckReturnValue;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
+import static graql.lang.Graql.Token.Char.NEW_LINE;
 import static java.util.stream.Collectors.joining;
 
-/**
- * A query for deleting concepts from a match clause clause.
- * The delete operation to perform is based on what Statement objects
- * are provided to it. Only those properties will be deleted.
- */
 public class GraqlDelete extends GraqlQuery {
 
     private final MatchClause match;
-    private final List<Statement> statements;
+    private final List<ThingVariable> variable;
+    private final int hash;
 
-    public GraqlDelete(MatchClause match, List<Statement> statements) {
-        if (match == null) {
-            throw new NullPointerException("Null match");
-        }
+    public GraqlDelete(MatchClause match, List<ThingVariable> variable) {
+        if (match == null) throw new NullPointerException("Null match");
+        if (variable == null || variable.isEmpty()) throw GraqlException.noPatterns();
         this.match = match;
-
-        if (statements == null) {
-            throw new NullPointerException("Null delete");
-        }
-
-        if (statements.isEmpty()) {
-            throw GraqlException.noPatterns();
-        }
-
-        statements.forEach(statement ->{
-            for (Variable var : statement.variables()) {
-                if (!match.getSelectedNames().contains(var)) {
-                    throw GraqlException.deleteVariableUnbound(var.toString());
-                }
-            }
-        });
-        this.statements = statements;
+        this.variable = variable;
+        this.hash = Objects.hash(match, variable.toArray());
     }
 
-    @CheckReturnValue
     public MatchClause match() {
         return match;
     }
 
-    public List<Statement> statements() {
-        return statements;
+    public List<ThingVariable> variables() {
+        return variable;
     }
 
-    public Set<Variable> vars() {
-        return statements.stream().flatMap(statement -> statement.variables().stream()).collect(Collectors.toSet());
-    }
-
-    @Override @SuppressWarnings("Duplicates")
+    @Override
     public String toString() {
         StringBuilder query = new StringBuilder(match().toString());
-        query.append(Graql.Token.Char.NEW_LINE);
+        query.append(NEW_LINE).append(Graql.Token.Command.DELETE);
 
-        query.append(Graql.Token.Command.DELETE);
-        if (statements.size() > 1) {
-            query.append(Graql.Token.Char.NEW_LINE);
-        } else {
-            query.append(Graql.Token.Char.SPACE);
-        }
-        query.append(statements.stream()
-            .map(Statement::toString)
-            .collect(Collectors.joining(Graql.Token.Char.NEW_LINE.toString())));
+        if (variable.size() > 1) query.append(NEW_LINE);
+        else query.append(Graql.Token.Char.SPACE);
 
+        query.append(variable.stream().map(ThingVariable::toString).collect(joining(NEW_LINE.toString())));
         return query.toString();
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null) return false;
-        if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
-            return false;
-        }
-
+        if (o == null || getClass() != o.getClass()) return false;
         GraqlDelete that = (GraqlDelete) o;
-
-        // It is important that we use vars() (the method) and not vars (the property)
-        // vars (the property) stores the variables as the user defined
-        // vars() (the method) returns match.vars() if vars (the property) is empty
-        // we want to compare vars() (the method) which determines the final value
-        return (this.match().equals(that.match()) &&
-                this.vars().equals(that.vars()));
+        return (this.match.equals(that.match) &&
+                this.variable.equals(that.variable));
     }
 
     @Override
     public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        // It is important that we use vars() (the method) and not vars (the property)
-        // For reasons explained in the equals() method above
-        h ^= this.vars().hashCode();
-        h *= 1000003;
-        h ^= this.match().hashCode();
-        return h;
+        return hash;
     }
 }

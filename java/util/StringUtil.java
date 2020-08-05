@@ -18,11 +18,9 @@
 package graql.lang.util;
 
 import graql.grammar.GraqlLexer;
-import graql.lang.Graql;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
@@ -53,7 +51,7 @@ public class StringUtil {
     private static Set<String> getKeywords() {
         HashSet<String> keywords = new HashSet<>();
 
-        for (int i = 1; i <= GraqlLexer.VOCABULARY.getMaxTokenType(); i ++) {
+        for (int i = 1; i <= GraqlLexer.VOCABULARY.getMaxTokenType(); i++) {
             if (GraqlLexer.VOCABULARY.getLiteralName(i) != null) {
                 String name = GraqlLexer.VOCABULARY.getLiteralName(i);
                 keywords.add(name.replaceAll("'", ""));

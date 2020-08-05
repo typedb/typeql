@@ -15,14 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern;
+package graql.lang.property;
 
-public interface Pattern {
+import graql.lang.variable.Variable;
 
-    default boolean isNegation() { return false; }
+import java.util.stream.Stream;
 
-    default Negation<?> asNegation() { throw new UnsupportedOperationException(); }
+public abstract class Property {
+
+    public abstract Stream<Variable> variables();
+
+    public abstract String syntax();
 
     @Override
-    String toString();
+    public String toString() {
+        return syntax();
+    }
 }

@@ -15,22 +15,18 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-java_test(
-    name = "pattern-test",
-    test_class = "graql.lang.pattern.test.PatternTest",
-    srcs = ["PatternTest.java"],
-    deps = [
-        "//java:graql",
-        "@graknlabs_common//:common",
-    ],
-    size = "small"
-)
+def graknlabs_dependencies():
+    git_repository(
+        name = "graknlabs_dependencies",
+        remote = "https://github.com/graknlabs/dependencies",
+        commit = "61fe8156b640196b4673fdf4f84075655bc0bc61", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
+    )
 
-checkstyle_test(
-    name = "checkstyle",
-    targets = [
-        ":pattern-test"
-    ],
-)
+def graknlabs_common():
+    git_repository(
+        name = "graknlabs_common",
+        remote = "https://github.com/graknlabs/common",
+        commit = "741f72e46b1f4f375aef144fc2998d60debbf99e" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_common
+    )

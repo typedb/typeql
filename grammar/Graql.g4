@@ -33,12 +33,12 @@ query               :   query_define    |   query_undefine                      
                     |   query_get_group |   query_get_group_agg
                     |   query_compute   ;                                       // compute analytics over graph (OLAP)
 
-query_define        :   DEFINE      statement_type+ ;
-query_undefine      :   UNDEFINE    statement_type+ ;
+query_define        :   DEFINE      variable_type+ ;
+query_undefine      :   UNDEFINE    variable_type+ ;
 
-query_insert        :   MATCH       pattern+    INSERT  statement_instance+
-                    |                           INSERT  statement_instance+  ;
-query_delete        :   MATCH       pattern+    DELETE  statement_instance+  ;  // DELETE QUERY
+query_insert        :   MATCH       pattern+    INSERT  variable_thing_any+
+                    |                           INSERT  variable_thing_any+  ;
+query_delete        :   MATCH       pattern+    DELETE  variable_thing_any+  ;  // DELETE QUERY
 query_get           :   MATCH       pattern+    GET     variables   filters  ;  // GET QUERY followed by group fn, and
                                                                                 // optionally, an aggregate fn
 query_compute       :   COMPUTE     compute_conditions  ;
@@ -79,7 +79,7 @@ function_group      :   GROUP   VAR_    ';' ;
 // QUERY PATTERNS ==============================================================
 
 patterns            :   pattern+ ;
-pattern             :   pattern_statement
+pattern             :   pattern_variable
                     |   pattern_conjunction
                     |   pattern_disjunction
                     |   pattern_negation
@@ -90,12 +90,12 @@ pattern_negation    :   NOT '{' patterns '}' ';' ;
 
 // PATTERN STATEMENTS ==========================================================
 
-pattern_statement   :   statement_type
-                    |   statement_instance  ;
+pattern_variable    :   variable_type
+                    |   variable_thing_any   ;
 
 // TYPE STATEMENTS =============================================================
 
-statement_type      :   type        type_property ( ',' type_property )* ';' ;
+variable_type       :   type        type_property ( ',' type_property )* ';' ;
 type_property       :   ABSTRACT
                     |   SUB_        type
                     |   KEY         type
@@ -105,28 +105,26 @@ type_property       :   ABSTRACT
                     |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' pattern+              '}'
-                    |   THEN    '{' statement_instance+   '}'                   // TODO: remove '+'
+                    |   THEN    '{' variable_thing_any+   '}'                   // TODO: remove '+'
                     |   TYPE        type_label
                     ;
 
 // INSTANCE STATEMENTS =========================================================
 
-statement_instance  :   statement_thing
-                    |   statement_relation
-                    |   statement_attribute
+variable_thing_any  :   variable_thing
+                    |   variable_relation
+                    |   variable_attribute
                     ;
-statement_thing     :   VAR_                ISA_ type   ( ',' attributes )? ';'
+variable_thing      :   VAR_                ISA_ type   ( ',' attributes )? ';'
                     |   VAR_                ID   ID_    ( ',' attributes )? ';'
                     |   VAR_                NEQ  VAR_                       ';'
                     |   VAR_                attributes                      ';'
                     ;
-statement_relation  :   VAR_? relation      ISA_ type   ( ',' attributes )? ';'
-                    |   VAR_? relation      attributes                      ';'
-                    |   VAR_? relation                                      ';'
+variable_relation   :   VAR_? relation      ISA_ type   ( ',' attributes )? ';'
+                    |   VAR_? relation      attributes?                     ';'
                     ;
-statement_attribute :   VAR_? operation     ISA_ type   ( ',' attributes )? ';'
-                    |   VAR_? operation     attributes                      ';'
-                    |   VAR_? operation                                     ';'
+variable_attribute  :   VAR_? value     ISA_ type   ( ',' attributes )? ';'
+                    |   VAR_? value     attributes?                     ';'
                     ;
 
 // RELATION CONSTRUCT ==========================================================
@@ -135,23 +133,24 @@ relation            :   '(' role_player ( ',' role_player )* ')' ;              
 role_player         :   type ':' player                                         // The Role type and and player variable
                     |            player ;                                       // Or just the player variable
 player              :   VAR_ ;                                                  // A player is just a variable
+
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS type_label ( VAR_ | operation ) ;                   // Attribute ownership by variable or a
+attribute           :   HAS type_label ( VAR_ | value ) ;                   // Attribute ownership by variable or a
                                                                                 // predicate
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
-operation           :   assignment
+value               :   assignment
                     |   comparison
                     ;
-assignment          :   value ;
+assignment          :   literal ;
 comparison          :   comparator  comparable
                     |   CONTAINS    containable
                     |   LIKE        regex
                     ;
 comparator          :   EQV | NEQV | GT | GTE | LT | LTE ;
-comparable          :   value | VAR_  ;
+comparable          :   literal | VAR_  ;
 containable         :   STRING_ | VAR_  ;
 
 
@@ -213,7 +212,7 @@ type_name           :   TYPE_NAME_      |   ID_         ;
 
 value_type          :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME            ;
-value               :   STRING_         |   INTEGER_        |   REAL_
+literal               :   STRING_         |   INTEGER_        |   REAL_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
 regex               :   STRING_         ;
 
@@ -308,7 +307,7 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 // All token names must end with an underscore ('_')
 VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
-VAR_NAMED_      : '$' [a-zA-Z0-9_-]* ;
+VAR_NAMED_      : '$' [a-zA-Z0-9][a-zA-Z0-9_-]* ;
 ID_             : ('V'|'E')[a-z0-9-]* ;
 TYPE_NAME_      : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
 

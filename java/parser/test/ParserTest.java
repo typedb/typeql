@@ -20,7 +20,6 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.ValueTypeProperty;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -28,9 +27,7 @@ import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
-import graql.lang.statement.Statement;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -41,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static grakn.common.util.Collections.list;
 import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
 import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
 import static graql.lang.Graql.and;
@@ -58,7 +56,6 @@ import static graql.lang.Graql.undefine;
 import static graql.lang.Graql.var;
 import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.size;
-import static grakn.common.util.Collections.list;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -499,7 +496,7 @@ public class ParserTest {
         GraqlDelete expected = match(
                 var("x").isa("movie").has("title", "The Title"),
                 var("y").isa("movie")
-        ).delete(Graql.parsePattern("{$x isa movie; $y isa movie;};").statements());
+        ).delete(var("x").isa("movie"), var("y").isa("movie"));
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -537,11 +534,11 @@ public class ParserTest {
                 type("parent").sub("role"),
                 type("child").sub("role"),
                 type("parenthood").sub("relation")
-                        .relates(type("parent"))
-                        .relates(type("child")),
+                        .relates("parent")
+                        .relates("child"),
                 type("fatherhood").sub("parenthood")
-                        .relates(type("father"), type("parent"))
-                        .relates(type("son"), type("child"))
+                        .relates("father", "parent")
+                        .relates("son", "child")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -553,8 +550,8 @@ public class ParserTest {
         GraqlGet parsed = Graql.parse(query).asGet();
         GraqlGet expected = match(
                 type("fatherhood").sub("parenthood")
-                        .relates(type("father"), type("parent"))
-                        .relates(type("son"), type("child"))
+                        .relates("father", "parent")
+                        .relates("son", "child")
         ).get();
 
         assertQueryEquals(expected, parsed, query);
@@ -933,18 +930,6 @@ public class ParserTest {
     @Test
     public void testGraqlParseQuery() {
         assertTrue(parse("match $x isa movie; get;") instanceof GraqlGet);
-    }
-
-    @Test
-    public void testParseBooleanType() {
-        GraqlGet query = parse("match $x value boolean; get;").asGet();
-
-        Statement var = query.match().getPatterns().statements().iterator().next();
-
-        //noinspection OptionalGetWithoutIsPresent
-        ValueTypeProperty property = var.getProperty(ValueTypeProperty.class).get();
-
-        Assert.assertEquals(Graql.Token.ValueType.BOOLEAN, property.ValueType());
     }
 
     @Test
