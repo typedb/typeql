@@ -17,8 +17,6 @@
 
 package graql.lang.pattern;
 
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
