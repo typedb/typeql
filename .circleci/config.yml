@@ -49,6 +49,16 @@ jobs:
             git diff --exit-code dependencies/maven/artifacts.snapshot
       - run: bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
 
+  build-checkstyle:
+    machine: true
+    working_directory: ~/graql
+    steps:
+      - install-bazel
+      - checkout
+      - run: bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
+      - run-bazel:
+          command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
+
   build-analysis:
     machine:
       image: ubuntu-1604:201903-01
