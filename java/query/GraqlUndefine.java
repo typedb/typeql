@@ -36,7 +36,7 @@ public class GraqlUndefine extends GraqlQuery {
             throw new IllegalArgumentException("Undefine Query missing type variables");
         }
         this.variables = variables;
-        this.hash = Objects.hash(this.variables.toArray());
+        this.hash = Objects.hash(this.variables);
     }
 
     public List<TypeVariable> variables() {

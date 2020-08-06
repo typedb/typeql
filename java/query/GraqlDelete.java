@@ -38,7 +38,7 @@ public class GraqlDelete extends GraqlQuery {
         if (variable == null || variable.isEmpty()) throw GraqlException.noPatterns();
         this.match = match;
         this.variable = variable;
-        this.hash = Objects.hash(match, variable.toArray());
+        this.hash = Objects.hash(this.match, this.variable);
     }
 
     public MatchClause match() {

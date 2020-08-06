@@ -38,7 +38,7 @@ public class GraqlInsert extends GraqlQuery {
         if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
         this.match = match;
         this.variables = variables;
-        this.hash = Objects.hash(match, variables.toArray());
+        this.hash = Objects.hash(this.match, this.variables);
     }
 
     @Nullable

@@ -36,7 +36,7 @@ public class GraqlDefine extends GraqlQuery {
             throw new IllegalArgumentException("Define Query missing type variables");
         }
         this.variables = variables;
-        this.hash = Objects.hash(this.variables.toArray());
+        this.hash = Objects.hash(this.variables);
     }
 
     public List<TypeVariable> variables() {

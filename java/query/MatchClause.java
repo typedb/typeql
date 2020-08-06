@@ -45,7 +45,7 @@ public class MatchClause {
     public MatchClause(Conjunction<Pattern> pattern) {
         if (pattern.patterns().size() == 0) throw GraqlException.noPatterns();
         this.pattern = pattern;
-        this.hash = Objects.hash(pattern);
+        this.hash = Objects.hash(this.pattern);
     }
 
     public final Conjunction<Pattern> getPatterns() {

@@ -58,20 +58,20 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         for (UnscopedVariable var : vars) {
             if (!match.variables().contains(var)) throw GraqlException.variableOutOfScope(var.toString());
         }
-
-        this.match = match;
-        this.vars = vars;
-
-        if (sorting != null && !variables().contains(sorting.var())) {
+        List<? extends Variable> sortable = vars.isEmpty() ? match.variables() : vars;
+        if (sorting != null && !sortable.contains(sorting.var())) {
             throw GraqlException.variableOutOfScope(sorting.var().toString());
         }
 
+        this.match = match;
+        this.vars = vars;
         this.sorting = sorting;
         this.offset = offset;
         this.limit = limit;
 
         // It is important that we use vars() (the method) and not vars (the property)
         // For reasons explained in the equals() method above
+        // TODO replace the other methods with fields once we replace offset and limit type from 'int' to 'Integer'
         this.hash = Objects.hash(variables(), match(), sort(), offset(), limit());
     }
 

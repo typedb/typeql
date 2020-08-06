@@ -53,7 +53,6 @@ public abstract class Variable implements Pattern {
         throw GraqlException.invalidCastException(TypeVariable.class, ThingVariable.class);
     }
 
-    @Override
     public Stream<Variable> variables() {
         return properties().stream().flatMap(Property::variables).map(Variable::withoutProperties).distinct();
     }
