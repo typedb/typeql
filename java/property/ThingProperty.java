@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static grakn.common.util.Collections.list;
+import static graql.lang.Graql.Token.Char.COLON;
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.PARAN_CLOSE;
 import static graql.lang.Graql.Token.Char.PARAN_OPEN;
@@ -534,7 +535,7 @@ public abstract class ThingProperty extends Property {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Relation that = (Relation) o;
-            return (this.players.equals(that.players()));
+            return (this.players.equals(that.players));
         }
 
         @Override
@@ -581,7 +582,7 @@ public abstract class ThingProperty extends Property {
 
             @Override
             public String toString() {
-                return roleType == null ? "" : (roleType + ": ") + player;
+                return (roleType == null ? "" : ("" + roleType + COLON + SPACE)) + player;
             }
 
             @Override

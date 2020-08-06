@@ -122,7 +122,7 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
     @Override
     public String toString() {
         StringBuilder syntax = new StringBuilder();
-        if (isVisible()) syntax.append(identity).append(SPACE);
+        if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
 
         relationProperty().ifPresent(syntax::append);
         valueProperty().ifPresent(syntax::append);
@@ -160,7 +160,7 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
         @Override
         public String toString() {
             StringBuilder syntax = new StringBuilder();
-            syntax.append(identity);
+            syntax.append(identity.syntax());
 
             String properties = Stream.of(thingSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));

@@ -255,8 +255,9 @@ public class Parser extends GraqlBaseVisitor {
 
         if (ctx.sort() != null) {
             UnscopedVariable var = getVar(ctx.sort().VAR_());
-            order = ctx.sort().ORDER_() == null ? new Filterable.Sorting(var) :
-                    new Filterable.Sorting(var, Graql.Token.Order.of(ctx.sort().ORDER_().getText()));
+            order = ctx.sort().ORDER_() == null
+                    ? new Filterable.Sorting(var)
+                    : new Filterable.Sorting(var, Graql.Token.Order.of(ctx.sort().ORDER_().getText()));
         }
         if (ctx.offset() != null) {
             offset = getInteger(ctx.offset().INTEGER_());
