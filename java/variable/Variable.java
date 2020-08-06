@@ -73,10 +73,6 @@ public abstract class Variable implements Pattern {
         }
     }
 
-    public String syntax() {
-        return identity.syntax();
-    }
-
     public String identifier() {
         return identity.identifier();
     }
@@ -88,6 +84,9 @@ public abstract class Variable implements Pattern {
     public boolean isVisible() {
         return identity.isVisible();
     }
+
+    @Override
+    public abstract String toString();
 
     @Override
     public final boolean equals(Object o) {

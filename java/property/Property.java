@@ -25,10 +25,6 @@ public abstract class Property {
 
     public abstract Stream<Variable> variables();
 
-    public abstract String syntax();
-
     @Override
-    public String toString() {
-        return syntax();
-    }
+    public abstract String toString();
 }

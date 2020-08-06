@@ -133,24 +133,20 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
                 .stream().map(TypeProperty::asRelates).collect(toList());
     }
 
-    public String syntax() {
+    @Override
+    public String toString() {
         StringBuilder syntax = new StringBuilder();
 
         if (isVisible()) {
             syntax.append(identity.syntax()).append(SPACE);
-            syntax.append(properties().stream().map(Property::syntax).collect(joining(COMMA_SPACE.toString())));
+            syntax.append(properties().stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
         } else {
             syntax.append(labelProperty().get().label()).append(SPACE);
             syntax.append(properties().stream().filter(p -> !(p instanceof TypeProperty.Label))
-                                  .map(Property::syntax).collect(joining(COMMA_SPACE.toString())));
+                                  .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
         }
 
         syntax.append(Graql.Token.Char.SEMICOLON);
         return syntax.toString();
-    }
-
-    @Override
-    public String toString() {
-        return syntax();
     }
 }

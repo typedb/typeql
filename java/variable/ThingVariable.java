@@ -116,10 +116,11 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
     }
 
     String hasSyntax() {
-        return hasProperty().stream().map(ThingProperty.Has::syntax).collect(joining(COMMA_SPACE.toString()));
+        return hasProperty().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
     }
 
-    public String syntax() {
+    @Override
+    public String toString() {
         StringBuilder syntax = new StringBuilder();
         if (isVisible()) syntax.append(identity).append(SPACE);
 
@@ -131,11 +132,6 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
         if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
         syntax.append(SEMICOLON);
         return syntax.toString();
-    }
-
-    @Override
-    public String toString() {
-        return syntax();
     }
 
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder<Thing> {
@@ -156,13 +152,13 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
 
         private String thingSyntax() {
             if (isaProperty().isPresent()) return isaSyntax();
-            else if (idProperty().isPresent()) return idProperty().get().syntax();
+            else if (idProperty().isPresent()) return idProperty().get().toString();
             else if (neqProperty().isPresent()) return neqProperty().get().toString();
             else return "";
         }
 
         @Override
-        public String syntax() {
+        public String toString() {
             StringBuilder syntax = new StringBuilder();
             syntax.append(identity);
 

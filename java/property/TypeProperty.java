@@ -43,6 +43,7 @@ import static graql.lang.Graql.Token.Property.RELATES;
 import static graql.lang.Graql.Token.Property.SUB;
 import static graql.lang.Graql.Token.Property.SUBX;
 import static graql.lang.Graql.Token.Property.THEN;
+import static graql.lang.Graql.Token.Property.TYPE;
 import static graql.lang.Graql.Token.Property.VALUE_TYPE;
 import static graql.lang.Graql.Token.Property.WHEN;
 import static graql.lang.util.StringUtil.escapeRegex;
@@ -154,13 +155,13 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return Graql.Token.Property.TYPE.toString() + " " + label();
+        public TypeProperty.Label asLabel() {
+            return this;
         }
 
         @Override
-        public TypeProperty.Label asLabel() {
-            return this;
+        public String toString() {
+            return TYPE.toString() + SPACE + label();
         }
 
         @Override
@@ -212,13 +213,13 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return isExplicit ? SUBX.toString() : SUB.toString() + type();
+        public TypeProperty.Sub asSub() {
+            return this;
         }
 
         @Override
-        public TypeProperty.Sub asSub() {
-            return this;
+        public String toString() {
+            return isExplicit ? SUBX.toString() : SUB.toString() + type();
         }
 
         @Override
@@ -249,13 +250,13 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return Graql.Token.Property.ABSTRACT.toString();
+        public TypeProperty.Abstract asAbstract() {
+            return this;
         }
 
         @Override
-        public TypeProperty.Abstract asAbstract() {
-            return this;
+        public String toString() {
+            return Graql.Token.Property.ABSTRACT.toString();
         }
 
         @Override
@@ -291,13 +292,13 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return VALUE_TYPE.toString() + " " + valueType.toString();
+        public TypeProperty.ValueType asValueType() {
+            return this;
         }
 
         @Override
-        public TypeProperty.ValueType asValueType() {
-            return this;
+        public String toString() {
+            return VALUE_TYPE.toString() + SPACE + valueType.toString();
         }
 
         @Override
@@ -335,13 +336,13 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return REGEX.toString() + " " + quoteString(escapeRegex(regex()));
+        public TypeProperty.Regex asRegex() {
+            return this;
         }
 
         @Override
-        public TypeProperty.Regex asRegex() {
-            return this;
+        public String toString() {
+            return REGEX.toString() + SPACE + quoteString(escapeRegex(regex()));
         }
 
         @Override
@@ -380,7 +381,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
+        public TypeProperty.Then asThen() {
+            return this;
+        }
+
+        @Override
+        public String toString() {
             StringBuilder then = new StringBuilder();
 
             then.append(THEN).append(SPACE);
@@ -396,11 +402,6 @@ public abstract class TypeProperty extends Property {
 
             then.append(SPACE).append(CURLY_CLOSE);
             return then.toString();
-        }
-
-        @Override
-        public TypeProperty.Then asThen() {
-            return this;
         }
 
         @Override
@@ -439,7 +440,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
+        public TypeProperty.When asWhen() {
+            return this;
+        }
+
+        @Override
+        public String toString() {
             StringBuilder when = new StringBuilder();
 
             when.append(WHEN).append(SPACE);
@@ -455,10 +461,6 @@ public abstract class TypeProperty extends Property {
 
             when.append(SPACE).append(CURLY_CLOSE);
             return when.toString();
-        }
-
-        public TypeProperty.When asWhen() {
-            return this;
         }
 
         @Override
@@ -513,13 +515,13 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return isKey ? KEY.toString() : HAS.toString() + attributeType;
+        public TypeProperty.Has asHas() {
+            return this;
         }
 
         @Override
-        public TypeProperty.Has asHas() {
-            return this;
+        public String toString() {
+            return isKey ? KEY.toString() : HAS.toString() + attributeType;
         }
 
         @Override
@@ -569,13 +571,13 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return PLAYS.toString() + " " + roleType;
+        public TypeProperty.Plays asPlays() {
+            return this;
         }
 
         @Override
-        public TypeProperty.Plays asPlays() {
-            return this;
+        public String toString() {
+            return PLAYS.toString() + SPACE + roleType;
         }
 
         @Override
@@ -649,17 +651,17 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public String syntax() {
+        public TypeProperty.Relates asRelates() {
+            return this;
+        }
+
+        @Override
+        public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append(RELATES).append(SPACE).append(roleType);
             if (overriddenRoleType != null)
                 builder.append(SPACE).append(AS).append(SPACE).append(overriddenRoleType);
             return builder.toString();
-        }
-
-        @Override
-        public TypeProperty.Relates asRelates() {
-            return this;
         }
 
         @Override

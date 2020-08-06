@@ -29,7 +29,6 @@ import graql.lang.variable.Variable;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -136,13 +135,13 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return Graql.Token.Property.ID.toString() + SPACE + id;
+        public ThingProperty.ID asID() {
+            return this;
         }
 
         @Override
-        public ThingProperty.ID asID() {
-            return this;
+        public String toString() {
+            return Graql.Token.Property.ID.toString() + SPACE + id;
         }
 
         @Override
@@ -191,11 +190,6 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return isExplicit ? ISAX.toString() : ISA.toString() + SPACE + type();
-        }
-
-        @Override
         public Stream<Variable> variables() {
             return Stream.of(type);
         }
@@ -203,6 +197,11 @@ public abstract class ThingProperty extends Property {
         @Override
         public ThingProperty.Isa asIsa() {
             return this;
+        }
+
+        @Override
+        public String toString() {
+            return isExplicit ? ISAX.toString() : ISA.toString() + SPACE + type();
         }
 
         @Override
@@ -235,11 +234,6 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return Graql.Token.Comparator.NEQ.toString() + SPACE + variable();
-        }
-
-        @Override
         public Stream<Variable> variables() {
             return Stream.of(variable());
         }
@@ -247,6 +241,11 @@ public abstract class ThingProperty extends Property {
         @Override
         public ThingProperty.NEQ asNEQ() {
             return this;
+        }
+
+        @Override
+        public String toString() {
+            return Graql.Token.Comparator.NEQ.toString() + SPACE + variable();
         }
 
         @Override
@@ -279,11 +278,6 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return operation().toString();
-        }
-
-        @Override
         public Stream<Variable> variables() {
             return operation.variable() != null ? Stream.of(operation.variable()) : Stream.empty();
         }
@@ -291,6 +285,11 @@ public abstract class ThingProperty extends Property {
         @Override
         public ThingProperty.Value<?> asValue() {
             return this;
+        }
+
+        @Override
+        public String toString() {
+            return operation().toString();
         }
 
         @Override
@@ -526,8 +525,8 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return PARAN_OPEN + players().stream().map(RolePlayer::syntax).collect(joining(COMMA_SPACE.toString())) + PARAN_CLOSE;
+        public String toString() {
+            return PARAN_OPEN + players().stream().map(RolePlayer::toString).collect(joining(COMMA_SPACE.toString())) + PARAN_CLOSE;
         }
 
         @Override
@@ -580,7 +579,8 @@ public abstract class ThingProperty extends Property {
                 return player;
             }
 
-            public String syntax() {
+            @Override
+            public String toString() {
                 return roleType == null ? "" : (roleType + ": ") + player;
             }
 
@@ -626,13 +626,13 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public String syntax() {
-            return String.valueOf(HAS) + SPACE + type + SPACE + attribute;
+        public ThingProperty.Has asHas() {
+            return this;
         }
 
         @Override
-        public ThingProperty.Has asHas() {
-            return this;
+        public String toString() {
+            return String.valueOf(HAS) + SPACE + type + SPACE + attribute;
         }
 
         @Override
