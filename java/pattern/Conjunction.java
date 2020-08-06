@@ -17,14 +17,17 @@
 
 package graql.lang.pattern;
 
-import graql.lang.Graql;
 import graql.lang.variable.Variable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
+import static graql.lang.Graql.Token.Char.CURLY_OPEN;
+import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.Graql.Token.Char.SPACE;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class Conjunction<T extends Pattern> implements Pattern {
@@ -53,9 +56,9 @@ public class Conjunction<T extends Pattern> implements Pattern {
     @Override
     public String toString() {
         StringBuilder pattern = new StringBuilder();
-        pattern.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
-        pattern.append(patterns.stream().map(Objects::toString).collect(Collectors.joining(Graql.Token.Char.SPACE.toString())));
-        pattern.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE).append(Graql.Token.Char.SEMICOLON);
+        pattern.append(CURLY_OPEN).append(SPACE);
+        pattern.append(patterns.stream().map(Objects::toString).collect(joining("" + SEMICOLON + SPACE)));
+        pattern.append(SPACE).append(CURLY_CLOSE);
         return pattern.toString();
     }
 

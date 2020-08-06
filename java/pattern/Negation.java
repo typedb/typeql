@@ -67,7 +67,6 @@ public class Negation<T extends Pattern> implements Pattern {
             negation.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
             negation.append(pattern.toString());
             negation.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE);
-            negation.append(Graql.Token.Char.SEMICOLON);
         }
 
         return negation.toString();

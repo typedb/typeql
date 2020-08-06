@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -122,15 +121,17 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
     @Override
     public String toString() {
         StringBuilder syntax = new StringBuilder();
-        if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
+        if (isVisible()) syntax.append(identity.syntax());
+        if (properties().size() > 0) syntax.append(SPACE);
 
+        // Only either one of the following commands will be executed
         relationProperty().ifPresent(syntax::append);
         valueProperty().ifPresent(syntax::append);
+
         String properties = Stream.of(isaSyntax(), hasSyntax())
                 .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
         if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
-        syntax.append(SEMICOLON);
         return syntax.toString();
     }
 
@@ -166,7 +167,6 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
             if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
-            syntax.append(SEMICOLON);
             return syntax.toString();
         }
     }

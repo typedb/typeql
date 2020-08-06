@@ -55,7 +55,10 @@ public class GraqlQueryTest {
                 var().rel("x").rel("y"),
                 or(
                         var("y").isa("person"),
-                        var("y").neq("crime")
+                        and(
+                                var("y").neq("crime"),
+                                var("y").neq("book")
+                        )
                 ),
                 var("y").has("name", var("n"))
         ).get("x", "y", "n").sort("n").offset(4).limit(8);

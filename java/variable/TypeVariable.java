@@ -17,7 +17,6 @@
 
 package graql.lang.variable;
 
-import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 import graql.lang.property.Property;
 import graql.lang.property.TypeProperty;
@@ -141,12 +140,12 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
             syntax.append(identity.syntax()).append(SPACE);
             syntax.append(properties().stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
         } else {
-            syntax.append(labelProperty().get().label()).append(SPACE);
+            assert properties().size() > 0;
+            syntax.append(labelProperty().get().label());
+            if (properties().size() > 1) syntax.append(SPACE);
             syntax.append(properties().stream().filter(p -> !(p instanceof TypeProperty.Label))
                                   .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
         }
-
-        syntax.append(Graql.Token.Char.SEMICOLON);
         return syntax.toString();
     }
 }

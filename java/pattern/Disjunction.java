@@ -17,7 +17,7 @@
 
 package graql.lang.pattern;
 
-import graql.lang.Graql;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
 import static graql.lang.Graql.Token.Char.CURLY_OPEN;
+import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static graql.lang.Graql.Token.Operator.OR;
 import static java.util.stream.Collectors.joining;
@@ -47,25 +48,23 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     @Override
     public String toString() {
-        StringBuilder disjunction = new StringBuilder();
+        StringBuilder syntax = new StringBuilder();
 
         Iterator<T> patternIter = patterns.iterator();
         while (patternIter.hasNext()) {
             Pattern pattern = patternIter.next();
-            disjunction.append(CURLY_OPEN).append(SPACE);
+            syntax.append(CURLY_OPEN).append(SPACE);
 
             if (pattern instanceof Conjunction<?>) {
                 Conjunction<?> conjunction = (Conjunction<? extends Pattern>) pattern;
-                disjunction.append(conjunction.patterns().stream().map(Object::toString).collect(joining(SPACE.toString())));
+                syntax.append(conjunction.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
             } else {
-                disjunction.append(pattern);
+                syntax.append(pattern);
             }
-
-            disjunction.append(SPACE).append(CURLY_CLOSE);
-            if (patternIter.hasNext()) disjunction.append(SPACE).append(OR).append(SPACE);
+            syntax.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
+            if (patternIter.hasNext()) syntax.append(SPACE).append(OR).append(SPACE);
         }
-        disjunction.append(Graql.Token.Char.SEMICOLON);
-        return disjunction.toString();
+        return syntax.toString();
     }
 
     @Override
