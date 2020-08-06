@@ -56,9 +56,9 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         if (match == null) throw new NullPointerException("Null match");
         if (vars == null) throw new NullPointerException("Null vars");
         for (UnscopedVariable var : vars) {
-            if (!match.variables().contains(var)) throw GraqlException.variableOutOfScope(var.toString());
+            if (!match.variablesUnscoped().contains(var)) throw GraqlException.variableOutOfScope(var.toString());
         }
-        List<? extends Variable> sortable = vars.isEmpty() ? match.variables() : vars;
+        List<? extends Variable> sortable = vars.isEmpty() ? match.variablesUnscoped() : vars;
         if (sorting != null && !sortable.contains(sorting.var())) {
             throw GraqlException.variableOutOfScope(sorting.var().toString());
         }
@@ -89,7 +89,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     }
 
     public List<? extends Variable> variables() {
-        if (vars.isEmpty()) return match.variables();
+        if (vars.isEmpty()) return match.variablesUnscoped();
         else return vars;
     }
 

@@ -56,6 +56,10 @@ public class MatchClause {
         return pattern.variables().collect(toList());
     }
 
+    public final List<Variable> variablesUnscoped() {
+        return pattern.variables().map(Variable::withoutProperties).collect(toList());
+    }
+
     /**
      * Construct a get query with all all variables mentioned in the query
      */

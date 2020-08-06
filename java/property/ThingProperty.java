@@ -28,6 +28,8 @@ import graql.lang.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -496,7 +498,7 @@ public abstract class ThingProperty extends Property {
 
         public Relation(List<RolePlayer> players) {
             if (players == null) throw new NullPointerException("Null relationPlayers");
-            this.players = players;
+            this.players = new ArrayList<>(players);
             this.hash = Objects.hash(this.players);
         }
 

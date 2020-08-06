@@ -92,7 +92,7 @@ public abstract class Variable implements Pattern {
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || o.getClass().isAssignableFrom(Variable.class)) return false;
         Variable that = (Variable) o;
         return (this.identity.equals(that.identity) &&
                 this.properties().equals(that.properties()));

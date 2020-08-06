@@ -111,4 +111,9 @@ public class UnscopedVariable extends Variable implements TypeVariableBuilder,
     public ThingVariable.Relation asRelationWith(ThingProperty.Relation property) {
         return new ThingVariable.Relation(identity, property);
     }
+
+    @Override
+    public String toString() {
+        return identity.syntax();
+    }
 }

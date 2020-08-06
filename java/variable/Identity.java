@@ -28,6 +28,8 @@ public abstract class Identity {
 
     protected final Type type;
 
+    enum Type {NAMED, ANONYMOUS}
+
     Identity(Type type) {
         this.type = type;
     }
@@ -62,7 +64,16 @@ public abstract class Identity {
         throw GraqlException.invalidCastException(this.getClass(), Identity.Anonymous.class);
     }
 
-    enum Type {NAMED, ANONYMOUS}
+    @Override
+    public String toString() {
+        return identifier();
+    }
+
+    @Override
+    public abstract boolean equals(Object o);
+
+    @Override
+    public abstract int hashCode();
 
     public static class Named extends Identity {
 
@@ -153,7 +164,7 @@ public abstract class Identity {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Anonymous that = (Anonymous) o;
-            return (this.id == that.id && this.isVisible == that.isVisible);
+            return (this.id.equals(that.id) && this.isVisible == that.isVisible);
         }
 
         @Override
