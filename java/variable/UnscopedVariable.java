@@ -46,11 +46,11 @@ public class UnscopedVariable extends Variable implements TypeVariableBuilder,
     }
 
     public static UnscopedVariable anonymous() {
-        return of(Identity.anonymous());
+        return of(Identity.anonymous(true));
     }
 
     public static UnscopedVariable hidden() {
-        return of(Identity.hidden());
+        return of(Identity.anonymous(false));
     }
 
     @Override
@@ -76,7 +76,7 @@ public class UnscopedVariable extends Variable implements TypeVariableBuilder,
     @Override
     public TypeVariable asTypeWith(TypeProperty.Singular property) {
         if (!isVisible() && property instanceof TypeProperty.Label) {
-            return new TypeVariable(new Identity.Labelled(((TypeProperty.Label) property).label()), property);
+            return new TypeVariable(Identity.label(((TypeProperty.Label) property).label()), property);
         } else {
             return new TypeVariable(identity, property);
         }

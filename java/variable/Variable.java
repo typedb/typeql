@@ -63,8 +63,9 @@ public abstract class Variable implements Pattern {
 
     public String name() {
         switch (identity.type()) {
-            case NAMED:
+            case NAME:
                 return identity.asNamed().name();
+            case LABEL:
             case ANONYMOUS:
                 return null;
             default:
@@ -74,11 +75,19 @@ public abstract class Variable implements Pattern {
     }
 
     public String identifier() {
-        return identity.identifier();
+        return identity.syntax();
     }
 
     public boolean isNamed() {
-        return identity.type() == Identity.Type.NAMED;
+        return identity.type() == Identity.Type.NAME;
+    }
+
+    public boolean isLabel() {
+        return identity.type() == Identity.Type.LABEL;
+    }
+
+    public boolean isAnonymous() {
+        return identity.type() == Identity.Type.ANONYMOUS;
     }
 
     public boolean isVisible() {

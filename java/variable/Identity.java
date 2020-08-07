@@ -21,29 +21,30 @@ import graql.lang.Graql;
 import graql.lang.exception.GraqlException;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 abstract class Identity {
 
     protected final Type type;
+    protected final boolean isVisible;
 
-    enum Type {NAMED, ANONYMOUS}
+    enum Type {NAME, LABEL, ANONYMOUS}
 
-    Identity(Type type) {
+    Identity(Type type, boolean isVisible) {
         this.type = type;
+        this.isVisible = isVisible;
     }
 
-    static Identity named(String name) {
-        return new Identity.Named(name);
+    static Identity.Name named(String name) {
+        return new Name(name);
     }
 
-    static Identity anonymous() {
-        return new Identity.Anonymous(true);
+    static Identity.Label label(String label) {
+        return new Label(label);
     }
 
-    static Identity hidden() {
-        return new Identity.Anonymous(false);
+    static Identity.Anonymous anonymous(boolean isVisible) {
+        return new Identity.Anonymous(isVisible);
     }
 
     Identity.Type type() {
@@ -52,12 +53,16 @@ abstract class Identity {
 
     abstract String syntax();
 
-    abstract String identifier();
+    boolean isVisible() {
+        return isVisible;
+    }
 
-    abstract boolean isVisible();
+    Identity.Name asNamed() {
+        throw GraqlException.invalidCastException(this.getClass(), Name.class);
+    }
 
-    Identity.Named asNamed() {
-        throw GraqlException.invalidCastException(this.getClass(), Identity.Named.class);
+    Identity.Label asLabel() {
+        throw GraqlException.invalidCastException(this.getClass(), Label.class);
     }
 
     Identity.Anonymous asAnonymous() {
@@ -66,7 +71,7 @@ abstract class Identity {
 
     @Override
     public String toString() {
-        return identifier();
+        return syntax();
     }
 
     @Override
@@ -75,21 +80,21 @@ abstract class Identity {
     @Override
     public abstract int hashCode();
 
-    static class Named extends Identity {
+    static class Name extends Identity {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
-        private final String name;
+        protected final String name;
         private final int hash;
 
-        Named(String name) {
-            super(Type.NAMED);
-            if (!REGEX.matcher(name).matches()) throw GraqlException.invalidVariableName(name, REGEX.toString());
-            this.name = name;
-            this.hash = Objects.hash(this.type, this.name);
+        Name(String name) {
+            this(name, true);
         }
 
-        Identity.Named asNamed() {
-            return this;
+        private Name(String name, boolean isVisible) {
+            super(Type.NAME, isVisible);
+            if (!REGEX.matcher(name).matches()) throw GraqlException.invalidVariableName(name, REGEX.toString());
+            this.name = name;
+            this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }
 
         String name() {
@@ -102,21 +107,59 @@ abstract class Identity {
         }
 
         @Override
-        String identifier() {
-            return syntax();
-        }
-
-        @Override
-        boolean isVisible() {
-            return true;
+        Name asNamed() {
+            return this;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Named that = (Named) o;
-            return this.name.equals(that.name);
+            Name that = (Name) o;
+            return (this.type == that.type &&
+                    this.isVisible == that.isVisible &&
+                    this.name.equals(that.name));
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+    }
+
+    static class Label extends Identity {
+
+        private final String label;
+        private final int hash;
+
+        Label(String label) {
+            super(Type.LABEL, false);
+            this.label = label;
+            this.hash = Objects.hash(this.type, this.isVisible, this.label);
+        }
+
+        String label() {
+            return label;
+        }
+
+        @Override
+        String syntax() {
+            return Graql.Token.Char.$_ + label;
+        }
+
+        @Override
+        Identity.Label asLabel() {
+            return this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Label that = (Label) o;
+            return (this.type == that.type &&
+                    this.isVisible == that.isVisible &&
+                    this.label.equals(that.label));
         }
 
         @Override
@@ -127,27 +170,11 @@ abstract class Identity {
 
     static class Anonymous extends Identity {
 
-        private static final AtomicInteger counter = new AtomicInteger(0);
-        private final String id;
-        private final boolean isVisible;
         private final int hash;
 
-        Anonymous(boolean isVisible) {
-            super(Type.ANONYMOUS);
-            this.id = Integer.toString(counter.getAndIncrement());
-            this.isVisible = isVisible;
-            this.hash = Objects.hash(this.type, this.id, this.isVisible);
-        }
-
-        Anonymous(String id) {
-            super(Type.ANONYMOUS);
-            this.id = id;
-            this.isVisible = false;
-            this.hash = Objects.hash(this.type, this.id, this.isVisible);
-        }
-
-        String name() {
-            return id;
+        private Anonymous(boolean isVisible) {
+            super(Type.ANONYMOUS, isVisible);
+            this.hash = Objects.hash(this.type, this.isVisible);
         }
 
         @Override
@@ -156,13 +183,8 @@ abstract class Identity {
         }
 
         @Override
-        String identifier() {
-            return Graql.Token.Char.$_ + id;
-        }
-
-        @Override
-        boolean isVisible() {
-            return isVisible;
+        Identity.Anonymous asAnonymous() {
+            return this;
         }
 
         @Override
@@ -170,19 +192,12 @@ abstract class Identity {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Anonymous that = (Anonymous) o;
-            return (this.id.equals(that.id) && this.isVisible == that.isVisible);
+            return (this.type == that.type && this.isVisible == that.isVisible);
         }
 
         @Override
         public int hashCode() {
             return hash;
-        }
-    }
-
-    static class Labelled extends Identity.Anonymous {
-
-        Labelled(String label) {
-            super(label);
         }
     }
 }
