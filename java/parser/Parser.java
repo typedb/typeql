@@ -679,9 +679,9 @@ public class Parser extends GraqlBaseVisitor {
         String type = ctx.type_label().getText();
 
         if (ctx.VAR_() != null) {
-            return new ThingProperty.Has(type, getVar(ctx.VAR_()).asThing());
+            return new ThingProperty.Has(type, getVar(ctx.VAR_()));
         } else if (ctx.value() != null) {
-            return new ThingProperty.Has(type, hidden().asAttributeWith(new ThingProperty.Value<>(visitValue(ctx.value()))));
+            return new ThingProperty.Has(type, new ThingProperty.Value<>(visitValue(ctx.value())));
         } else {
             throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
         }
@@ -792,7 +792,7 @@ public class Parser extends GraqlBaseVisitor {
             if (ctx.comparable().literal() != null) {
                 value = visitLiteral(ctx.comparable().literal());
             } else if (ctx.comparable().VAR_() != null) {
-                value = getVar(ctx.comparable().VAR_()).asThing();
+                value = getVar(ctx.comparable().VAR_());
             } else {
                 throw new IllegalArgumentException("Unrecognised Comparable value: " + ctx.comparable().getText());
             }
@@ -825,7 +825,7 @@ public class Parser extends GraqlBaseVisitor {
             return new ThingProperty.Value.Operation.Comparison.String(comparator, (String) value);
         } else if (value instanceof LocalDateTime) {
             return new ThingProperty.Value.Operation.Comparison.DateTime(comparator, (LocalDateTime) value);
-        } else if (value instanceof ThingVariable) {
+        } else if (value instanceof UnscopedVariable) {
             return new ThingProperty.Value.Operation.Comparison.Variable(comparator, (UnscopedVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());

@@ -74,7 +74,7 @@ public interface ThingVariableBuilder<T> {
     }
 
     default T has(String type, UnscopedVariable variable) {
-        return asSameThingWith(new ThingProperty.Has(type, variable.asThing()));
+        return asSameThingWith(new ThingProperty.Has(type, variable));
     }
 
     default T has(String type, ThingVariable.Attribute variable) {

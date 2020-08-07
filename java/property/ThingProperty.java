@@ -45,6 +45,7 @@ import static graql.lang.Graql.Token.Property.ISA;
 import static graql.lang.Graql.Token.Property.ISAX;
 import static graql.lang.util.StringUtil.escapeRegex;
 import static graql.lang.util.StringUtil.quoteString;
+import static graql.lang.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
 public abstract class ThingProperty extends Property {
@@ -605,6 +606,14 @@ public abstract class ThingProperty extends Property {
         private final String type;
         private final ThingVariable attribute;
         private final int hash;
+
+        public Has(String type, ThingProperty.Value<?> value) {
+            this(type, hidden().asAttributeWith(value));
+        }
+
+        public Has(String type, UnscopedVariable var) {
+            this(type, var.asThing());
+        }
 
         public Has(String type, ThingVariable attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
