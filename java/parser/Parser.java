@@ -65,6 +65,7 @@ import static graql.lang.Graql.not;
 import static graql.lang.Graql.or;
 import static graql.lang.Graql.var;
 import static graql.lang.util.StringUtil.unescapeRegex;
+import static graql.lang.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -623,7 +624,7 @@ public class Parser extends GraqlBaseVisitor {
     public ThingVariable.Relation visitVariable_relation(GraqlParser.Variable_relationContext ctx) {
         UnscopedVariable unscoped;
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
-        else unscoped = UnscopedVariable.hidden();
+        else unscoped = hidden();
 
         ThingVariable.Relation relation = unscoped.asRelationWith(visitRelation(ctx.relation()));
         if (ctx.ISA_() != null) relation = relation.asSameThingWith(getIsaProperty(ctx.ISA_(), ctx.type()));
@@ -640,7 +641,7 @@ public class Parser extends GraqlBaseVisitor {
     public ThingVariable.Attribute visitVariable_attribute(GraqlParser.Variable_attributeContext ctx) {
         UnscopedVariable unscoped;
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
-        else unscoped = UnscopedVariable.hidden();
+        else unscoped = hidden();
 
         ThingVariable.Attribute attribute = unscoped.asAttributeWith(new ThingProperty.Value<>(visitValue(ctx.value())));
         if (ctx.ISA_() != null) attribute = attribute.asSameThingWith(getIsaProperty(ctx.ISA_(), ctx.type()));
@@ -679,7 +680,7 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.VAR_() != null) {
             return new ThingProperty.Has(type, getVar(ctx.VAR_()).asThing());
         } else if (ctx.value() != null) {
-            return new ThingProperty.Has(type, var().asAttributeWith(new ThingProperty.Value<>(visitValue(ctx.value()))));
+            return new ThingProperty.Has(type, hidden().asAttributeWith(new ThingProperty.Value<>(visitValue(ctx.value()))));
         } else {
             throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
         }

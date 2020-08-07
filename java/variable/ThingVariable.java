@@ -118,6 +118,9 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
         return hasProperty().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
     }
 
+    @Override
+    public abstract String toString();
+
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder<Thing> {
 
         Thing(Identity identity, ThingProperty property) {
