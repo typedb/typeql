@@ -124,7 +124,6 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             query.append(SPACE).append(varsStr);
         }
         query.append(SEMICOLON);
-
         if (sort().isPresent() || offset().isPresent() || limit().isPresent()) {
             query.append(SPACE).append(printFilters());
         }

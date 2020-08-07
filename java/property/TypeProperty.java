@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 
 import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
 import static graql.lang.Graql.Token.Char.CURLY_OPEN;
+import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static graql.lang.Graql.Token.Property.AS;
 import static graql.lang.Graql.Token.Property.HAS;
@@ -219,7 +220,7 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            return isExplicit ? SUBX.toString() : SUB.toString() + type();
+            return (isExplicit ? SUBX.toString() : SUB.toString()) + SPACE + type();
         }
 
         @Override
@@ -387,21 +388,17 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            StringBuilder then = new StringBuilder();
-
-            then.append(THEN).append(SPACE);
-            then.append(CURLY_OPEN).append(SPACE);
-
+            StringBuilder syntax = new StringBuilder();
+            syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
             if (pattern instanceof Conjunction) {
-                then.append(((Conjunction<?>) pattern).patterns()
+                syntax.append(((Conjunction<?>) pattern).patterns()
                                     .stream().map(Object::toString)
-                                    .collect(joining(SPACE.toString())));
+                                    .collect(joining("" + SEMICOLON + SPACE)));
             } else {
-                then.append(pattern.toString());
+                syntax.append(pattern.toString());
             }
-
-            then.append(SPACE).append(CURLY_CLOSE);
-            return then.toString();
+            syntax.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
+            return syntax.toString();
         }
 
         @Override
@@ -446,21 +443,17 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            StringBuilder when = new StringBuilder();
-
-            when.append(WHEN).append(SPACE);
-            when.append(CURLY_OPEN).append(SPACE);
-
+            StringBuilder syntax = new StringBuilder();
+            syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
             if (pattern instanceof Conjunction) {
-                when.append(((Conjunction<?>) pattern).patterns().stream()
-                                    .map(Object::toString)
-                                    .collect(joining(SPACE.toString())));
+                syntax.append(((Conjunction<?>) pattern).patterns()
+                                    .stream().map(Object::toString)
+                                    .collect(joining("" + SEMICOLON + SPACE)));
             } else {
-                when.append(pattern);
+                syntax.append(pattern);
             }
-
-            when.append(SPACE).append(CURLY_CLOSE);
-            return when.toString();
+            syntax.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
+            return syntax.toString();
         }
 
         @Override
@@ -521,7 +514,7 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            return isKey ? KEY.toString() : HAS.toString() + attributeType;
+            return (isKey ? KEY.toString() : HAS.toString()) + SPACE + attributeType;
         }
 
         @Override

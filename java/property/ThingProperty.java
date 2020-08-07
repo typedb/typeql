@@ -202,7 +202,7 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public String toString() {
-            return isExplicit ? ISAX.toString() : ISA.toString() + SPACE + type();
+            return (isExplicit ? ISAX.toString() : ISA.toString()) + SPACE + type();
         }
 
         @Override

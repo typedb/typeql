@@ -21,6 +21,11 @@ import graql.lang.Graql;
 
 import java.util.Objects;
 
+import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
+import static graql.lang.Graql.Token.Char.CURLY_OPEN;
+import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.Graql.Token.Char.SPACE;
+
 /**
  * A class representing a negation of patterns. All inner patterns must not match in a query.
  *
@@ -59,14 +64,14 @@ public class Negation<T extends Pattern> implements Pattern {
     @Override
     public String toString() {
         StringBuilder negation = new StringBuilder();
-        negation.append(Graql.Token.Operator.NOT).append(Graql.Token.Char.SPACE);
+        negation.append(Graql.Token.Operator.NOT).append(SPACE);
 
         if (pattern instanceof Conjunction<?>) {
             negation.append(pattern.toString());
         } else {
-            negation.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
-            negation.append(pattern.toString());
-            negation.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE);
+            negation.append(CURLY_OPEN).append(SPACE);
+            negation.append(pattern.toString()).append(SEMICOLON);
+            negation.append(SPACE).append(CURLY_CLOSE);
         }
 
         return negation.toString();

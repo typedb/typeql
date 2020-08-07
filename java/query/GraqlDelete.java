@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static graql.lang.Graql.Token.Char.NEW_LINE;
+import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static java.util.stream.Collectors.joining;
 
 public class GraqlDelete extends GraqlQuery {
@@ -57,7 +58,8 @@ public class GraqlDelete extends GraqlQuery {
         if (variable.size() > 1) query.append(NEW_LINE);
         else query.append(Graql.Token.Char.SPACE);
 
-        query.append(variable.stream().map(ThingVariable::toString).collect(joining(NEW_LINE.toString())));
+        query.append(variable.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(SEMICOLON);
         return query.toString();
     }
 

@@ -137,14 +137,19 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
         StringBuilder syntax = new StringBuilder();
 
         if (isVisible()) {
-            syntax.append(identity.syntax()).append(SPACE);
-            syntax.append(properties().stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+            syntax.append(identity.syntax());
+            if (!properties().isEmpty()) {
+                syntax.append(SPACE);
+                syntax.append(properties().stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+            }
         } else {
-            assert properties().size() > 0;
+            assert labelProperty().isPresent();
             syntax.append(labelProperty().get().label());
-            if (properties().size() > 1) syntax.append(SPACE);
-            syntax.append(properties().stream().filter(p -> !(p instanceof TypeProperty.Label))
-                                  .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+            if (properties().size() > 1) {
+                syntax.append(SPACE);
+                syntax.append(properties().stream().filter(p -> !(p instanceof TypeProperty.Label))
+                                      .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+            }
         }
         return syntax.toString();
     }
