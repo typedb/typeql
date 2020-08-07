@@ -118,22 +118,6 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
         return hasProperty().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
     }
 
-    @Override
-    public String toString() {
-        StringBuilder syntax = new StringBuilder();
-        if (isVisible()) syntax.append(identity.syntax());
-
-        // Only either one of the following commands will be executed
-        relationProperty().ifPresent(relation -> syntax.append(SPACE).append(relation));
-        valueProperty().ifPresent(value -> syntax.append(SPACE).append(value));
-
-        String properties = Stream.of(isaSyntax(), hasSyntax())
-                .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
-
-        if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
-        return syntax.toString();
-    }
-
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder<Thing> {
 
         Thing(Identity identity, ThingProperty property) {
@@ -195,6 +179,20 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
             this.relationProperty.player(rolePlayer);
             return this;
         }
+
+        @Override
+        public String toString() {
+            assert relationProperty().isPresent();
+            StringBuilder syntax = new StringBuilder();
+            if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
+            syntax.append(relationProperty().get());
+
+            String properties = Stream.of(isaSyntax(), hasSyntax())
+                    .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
+
+            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            return syntax.toString();
+        }
     }
 
     public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder<Attribute> {
@@ -211,6 +209,20 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
         @Override
         public ThingVariable.Attribute withoutProperties() {
             return new ThingVariable.Attribute(identity, null);
+        }
+
+        @Override
+        public String toString() {
+            assert valueProperty().isPresent();
+            StringBuilder syntax = new StringBuilder();
+            if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
+            syntax.append(valueProperty().get());
+
+            String properties = Stream.of(isaSyntax(), hasSyntax())
+                    .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
+
+            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            return syntax.toString();
         }
     }
 }
