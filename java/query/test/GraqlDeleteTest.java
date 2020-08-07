@@ -63,7 +63,7 @@ public class GraqlDeleteTest {
     @Test
     public void deleteQueryWithNewUnboundVariablesThrows() {
         exception.expect(GraqlException.class);
-        exception.expectMessage("the delete clause variable [$y] is not defined in the match clause");
+        exception.expectMessage("the variable [$y] is out of scope of the query");
         GraqlDelete query = match1.delete(delete2);
     }
 

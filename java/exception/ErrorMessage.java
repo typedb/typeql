@@ -22,7 +22,6 @@ public enum ErrorMessage {
     SYNTAX_ERROR("syntax error at line %s: \n%s\n%s\n%s"),
     ILLEGAL_REPETITION("The variable '%s' contains illegally repeating properties: '%s' and '%s'"),
     VARIABLE_OUT_OF_SCOPE("the variable [%s] is out of scope of the query"),
-    UNBOUND_DELETE_VARIABLE("the delete clause variable [%s] is not defined in the match clause"),
     NO_PATTERNS("no patterns have been provided. at least one pattern must be provided"),
     INVALID_CAST_EXCEPTION("Cannot cast class '%s' to '%s'"),
     INVALID_VARIABLE_NAME("Variable name '%s' is invalid. Must match regex '%s'."),

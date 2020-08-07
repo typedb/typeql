@@ -35,7 +35,6 @@ import static graql.lang.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 import static graql.lang.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
 import static graql.lang.exception.ErrorMessage.OVERPRECISE_SECOND_FRACTION;
 import static graql.lang.exception.ErrorMessage.SORTING_NOT_ALLOWED;
-import static graql.lang.exception.ErrorMessage.UNBOUND_DELETE_VARIABLE;
 import static graql.lang.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
 
 // TODO: Refactor this to the style we have in Grakn 2.0
@@ -63,10 +62,6 @@ public class GraqlException extends RuntimeException {
 
     public static GraqlException variableOutOfScope(String var) {
         return new GraqlException(VARIABLE_OUT_OF_SCOPE.getMessage(var));
-    }
-
-    public static GraqlException deleteVariableUnbound(String var) {
-        return new GraqlException(UNBOUND_DELETE_VARIABLE.getMessage(var));
     }
 
     public static GraqlException noPatterns() {

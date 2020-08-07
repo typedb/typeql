@@ -54,7 +54,7 @@ public abstract class Variable implements Pattern {
     }
 
     public Stream<Variable> variables() {
-        return properties().stream().flatMap(Property::variables).map(Variable::withoutProperties).distinct();
+        return properties().stream().flatMap(Property::variables);
     }
 
     public Identity.Type type() {

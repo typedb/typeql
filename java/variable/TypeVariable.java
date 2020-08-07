@@ -142,14 +142,15 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
                 syntax.append(SPACE);
                 syntax.append(properties().stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
-        } else {
-            assert labelProperty().isPresent();
+        } else if (labelProperty().isPresent()) {
             syntax.append(labelProperty().get().label());
             if (properties().size() > 1) {
-                syntax.append(SPACE);
-                syntax.append(properties().stream().filter(p -> !(p instanceof TypeProperty.Label))
-                                      .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+                syntax.append(SPACE).append(properties().stream().filter(p -> !(p instanceof TypeProperty.Label))
+                                                    .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
+        } else {
+            // This should only be called by debuggers trying to print nested variables
+            syntax.append(identity);
         }
         return syntax.toString();
     }

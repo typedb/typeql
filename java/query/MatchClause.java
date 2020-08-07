@@ -42,6 +42,8 @@ public class MatchClause {
 
     private final Conjunction<Pattern> pattern;
     private final int hash;
+    private List<Variable> vars;
+    private List<Variable> varsNamedNoProps;
 
     public MatchClause(Conjunction<Pattern> pattern) {
         if (pattern.patterns().size() == 0) throw GraqlException.noPatterns();
@@ -54,11 +56,17 @@ public class MatchClause {
     }
 
     public final List<Variable> variables() {
-        return pattern.variables().collect(toList());
+        if (vars == null) vars = pattern.variables().collect(toList());
+        return vars;
     }
 
-    public final List<Variable> variablesUnscoped() {
-        return pattern.variables().map(Variable::withoutProperties).collect(toList());
+    final List<Variable> variablesNamedNoProps() {
+        if (varsNamedNoProps == null) {
+            varsNamedNoProps = pattern.variables().filter(Variable::isNamed)
+                    .map(Variable::withoutProperties)
+                    .distinct().collect(toList());
+        }
+        return varsNamedNoProps;
     }
 
     /**

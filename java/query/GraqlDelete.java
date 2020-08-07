@@ -38,6 +38,18 @@ public class GraqlDelete extends GraqlQuery {
     GraqlDelete(MatchClause match, List<ThingVariable> variables) {
         if (match == null) throw new NullPointerException("Null match");
         if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
+
+        variables.forEach(var -> {
+            if (var.isNamed() && !match.variablesNamedNoProps().contains(var.withoutProperties())) {
+                throw GraqlException.variableOutOfScope(var.withoutProperties().toString());
+            }
+            var.variables().forEach(nestedVar -> {
+                if (nestedVar.isNamed() && !match.variablesNamedNoProps().contains(nestedVar.withoutProperties())) {
+                    throw GraqlException.variableOutOfScope(nestedVar.withoutProperties().toString());
+                }
+            });
+        });
+
         this.match = match;
         this.variables = list(variables);
         this.hash = Objects.hash(this.match, this.variables);

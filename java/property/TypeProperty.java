@@ -392,8 +392,8 @@ public abstract class TypeProperty extends Property {
             syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
             if (pattern instanceof Conjunction) {
                 syntax.append(((Conjunction<?>) pattern).patterns()
-                                    .stream().map(Object::toString)
-                                    .collect(joining("" + SEMICOLON + SPACE)));
+                                      .stream().map(Object::toString)
+                                      .collect(joining("" + SEMICOLON + SPACE)));
             } else {
                 syntax.append(pattern.toString());
             }
@@ -447,8 +447,8 @@ public abstract class TypeProperty extends Property {
             syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
             if (pattern instanceof Conjunction) {
                 syntax.append(((Conjunction<?>) pattern).patterns()
-                                    .stream().map(Object::toString)
-                                    .collect(joining("" + SEMICOLON + SPACE)));
+                                      .stream().map(Object::toString)
+                                      .collect(joining("" + SEMICOLON + SPACE)));
             } else {
                 syntax.append(pattern);
             }

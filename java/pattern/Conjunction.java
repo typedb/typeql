@@ -29,6 +29,8 @@ import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
 public class Conjunction<T extends Pattern> implements Pattern {
 
@@ -43,9 +45,9 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     public Stream<Variable> variables() {
         return patterns.stream().flatMap(pattern -> {
-            if (pattern instanceof Variable) return ((Variable) pattern).variables();
+            if (pattern instanceof Variable) return concat(of(((Variable) pattern)), ((Variable) pattern).variables());
             else if (pattern instanceof Conjunction) return ((Conjunction<?>) pattern).variables();
-            else return Stream.of();
+            else return of();
         });
     }
 
