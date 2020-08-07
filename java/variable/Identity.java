@@ -2,16 +2,16 @@
  * Copyright (C) 2020 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
+ * it under the terms of the GNU Affero General License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU Affero General License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU Affero General License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-public abstract class Identity {
+abstract class Identity {
 
     protected final Type type;
 
@@ -34,33 +34,33 @@ public abstract class Identity {
         this.type = type;
     }
 
-    public static Identity named(String name) {
+    static Identity named(String name) {
         return new Identity.Named(name);
     }
 
-    public static Identity anonymous() {
+    static Identity anonymous() {
         return new Identity.Anonymous(true);
     }
 
-    public static Identity hidden() {
+    static Identity hidden() {
         return new Identity.Anonymous(false);
     }
 
-    public Identity.Type type() {
+    Identity.Type type() {
         return type;
     }
 
-    public abstract String syntax();
+    abstract String syntax();
 
-    public abstract String identifier();
+    abstract String identifier();
 
-    public abstract boolean isVisible();
+    abstract boolean isVisible();
 
-    public Identity.Named asNamed() {
+    Identity.Named asNamed() {
         throw GraqlException.invalidCastException(this.getClass(), Identity.Named.class);
     }
 
-    public Identity.Anonymous asAnonymous() {
+    Identity.Anonymous asAnonymous() {
         throw GraqlException.invalidCastException(this.getClass(), Identity.Anonymous.class);
     }
 
@@ -75,7 +75,7 @@ public abstract class Identity {
     @Override
     public abstract int hashCode();
 
-    public static class Named extends Identity {
+    static class Named extends Identity {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         private final String name;
@@ -88,26 +88,26 @@ public abstract class Identity {
             this.hash = Objects.hash(this.type, this.name);
         }
 
-        public Identity.Named asNamed() {
+        Identity.Named asNamed() {
             return this;
         }
 
-        public String name() {
+        String name() {
             return name;
         }
 
         @Override
-        public String syntax() {
+        String syntax() {
             return Graql.Token.Char.$ + name;
         }
 
         @Override
-        public String identifier() {
+        String identifier() {
             return syntax();
         }
 
         @Override
-        public boolean isVisible() {
+        boolean isVisible() {
             return true;
         }
 
@@ -123,10 +123,9 @@ public abstract class Identity {
         public int hashCode() {
             return hash;
         }
-
     }
 
-    public static class Anonymous extends Identity {
+    static class Anonymous extends Identity {
 
         private static final AtomicInteger counter = new AtomicInteger(0);
         private final String id;
@@ -140,22 +139,29 @@ public abstract class Identity {
             this.hash = Objects.hash(this.type, this.id, this.isVisible);
         }
 
-        public String name() {
+        Anonymous(String id) {
+            super(Type.ANONYMOUS);
+            this.id = id;
+            this.isVisible = false;
+            this.hash = Objects.hash(this.type, this.id, this.isVisible);
+        }
+
+        String name() {
             return id;
         }
 
         @Override
-        public String syntax() {
+        String syntax() {
             return Graql.Token.Char.$_.toString();
         }
 
         @Override
-        public String identifier() {
+        String identifier() {
             return Graql.Token.Char.$_ + id;
         }
 
         @Override
-        public boolean isVisible() {
+        boolean isVisible() {
             return isVisible;
         }
 
@@ -170,6 +176,13 @@ public abstract class Identity {
         @Override
         public int hashCode() {
             return hash;
+        }
+    }
+
+    static class Labelled extends Identity.Anonymous {
+
+        Labelled(String label) {
+            super(label);
         }
     }
 }

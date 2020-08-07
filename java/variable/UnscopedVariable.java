@@ -75,7 +75,11 @@ public class UnscopedVariable extends Variable implements TypeVariableBuilder,
 
     @Override
     public TypeVariable asTypeWith(TypeProperty.Singular property) {
-        return new TypeVariable(identity, property);
+        if (!isVisible() && property instanceof TypeProperty.Label) {
+            return new TypeVariable(new Identity.Labelled(((TypeProperty.Label) property).label()), property);
+        } else {
+            return new TypeVariable(identity, property);
+        }
     }
 
     @Override
