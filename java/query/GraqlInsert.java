@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
+import static grakn.common.util.Collections.list;
 import static graql.lang.Graql.Token.Char.NEW_LINE;
 import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static java.util.stream.Collectors.joining;
@@ -35,10 +36,14 @@ public class GraqlInsert extends GraqlQuery {
     private final List<ThingVariable> variables;
     private final int hash;
 
-    public GraqlInsert(@Nullable MatchClause match, List<ThingVariable> variables) {
+    public GraqlInsert(List<ThingVariable> variables) {
+        this(null, variables);
+    }
+
+    GraqlInsert(@Nullable MatchClause match, List<ThingVariable> variables) {
         if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
         this.match = match;
-        this.variables = variables;
+        this.variables = list(variables);
         this.hash = Objects.hash(this.match, this.variables);
     }
 

@@ -60,7 +60,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     Arguments arguments = null;
     // But 'arguments' will also be set when where() is called for cluster/centrality
 
-    protected GraqlCompute(Graql.Token.Compute.Method method, boolean includeAttributes) {
+    GraqlCompute(Graql.Token.Compute.Method method, boolean includeAttributes) {
         this.method = method;
         this.includeAttributes = includeAttributes;
     }
@@ -713,7 +713,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     /**
      * Argument inner class to provide access Compute Query arguments
      */
-    public class Arguments implements Computable.Arguments {
+    public static class Arguments implements Computable.Arguments {
 
         private LinkedHashMap<Graql.Token.Compute.Param, Argument> argumentsOrdered = new LinkedHashMap<>();
         private Map<Graql.Token.Compute.Param, Object> defaults = new HashMap<>();

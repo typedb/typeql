@@ -44,14 +44,15 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     private final long limit;
     private final int hash;
 
-    public GraqlGet(MatchClause match) {
+    GraqlGet(MatchClause match) {
         this(match, list());
     }
 
-    public GraqlGet(MatchClause match, List<UnscopedVariable> vars) {
+    GraqlGet(MatchClause match, List<UnscopedVariable> vars) {
         this(match, vars, null, -1, -1); // TODO replace -1 with NULL
     }
 
+    // We keep this contructor 'public' as it is more efficient for use during parsing
     public GraqlGet(MatchClause match, List<UnscopedVariable> vars, Sorting sorting, long offset, long limit) {
         if (match == null) throw new NullPointerException("Null match");
         if (vars == null) throw new NullPointerException("Null vars");
@@ -184,7 +185,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
     }
 
-    public class Sorted extends GraqlGet implements Filterable.Sorted<GraqlGet.Offsetted, GraqlGet.Limited> {
+    public static class Sorted extends GraqlGet implements Filterable.Sorted<GraqlGet.Offsetted, GraqlGet.Limited> {
 
         Sorted(GraqlGet graqlGet, Sorting sorting) {
             super(graqlGet.match, graqlGet.vars, sorting, graqlGet.offset, graqlGet.limit);
@@ -227,7 +228,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         private final UnscopedVariable var;
         private final int hash;
 
-        public Aggregate(GraqlGet query, Graql.Token.Aggregate.Method method, UnscopedVariable var) {
+        Aggregate(GraqlGet query, Graql.Token.Aggregate.Method method, UnscopedVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
@@ -294,7 +295,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         private final UnscopedVariable var;
         private final int hash;
 
-        public Group(GraqlGet query, UnscopedVariable var) {
+        Group(GraqlGet query, UnscopedVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.variables().contains(var)) throw GraqlException.variableOutOfScope(var.toString());
@@ -351,7 +352,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             private final UnscopedVariable var;
             private final int hash;
 
-            public Aggregate(GraqlGet.Group group, Graql.Token.Aggregate.Method method, UnscopedVariable var) {
+            Aggregate(GraqlGet.Group group, Graql.Token.Aggregate.Method method, UnscopedVariable var) {
                 if (group == null) throw new NullPointerException("GraqlGet.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
                 if (var == null && !method.equals(Graql.Token.Aggregate.Method.COUNT)) {

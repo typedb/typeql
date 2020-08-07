@@ -63,7 +63,6 @@ import static grakn.common.util.Collections.triple;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.not;
 import static graql.lang.Graql.or;
-import static graql.lang.Graql.var;
 import static graql.lang.util.StringUtil.unescapeRegex;
 import static graql.lang.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.toList;
@@ -241,7 +240,7 @@ public class Parser extends GraqlBaseVisitor {
         MatchClause match = Graql.match(patterns);
 
         if (ctx.filters().getChildCount() == 0) {
-            return new GraqlGet(match, vars);
+            return match.get(vars);
         } else {
             Triple<Filterable.Sorting, Long, Long> filters = visitFilters(ctx.filters());
             return new GraqlGet(match, vars, filters.first(), filters.second(), filters.third());
@@ -281,9 +280,10 @@ public class Parser extends GraqlBaseVisitor {
     public GraqlGet.Aggregate visitQuery_get_aggregate(GraqlParser.Query_get_aggregateContext ctx) {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
-        return new GraqlGet.Aggregate(visitQuery_get(ctx.query_get()),
-                                      Graql.Token.Aggregate.Method.of(function.function_method().getText()),
-                                      function.VAR_() != null ? getVar(function.VAR_()) : null);
+        return visitQuery_get(ctx.query_get()).aggregate(
+                Graql.Token.Aggregate.Method.of(function.function_method().getText()),
+                function.VAR_() != null ? getVar(function.VAR_()) : null
+        );
     }
 
     @Override
@@ -297,9 +297,10 @@ public class Parser extends GraqlBaseVisitor {
         UnscopedVariable var = getVar(ctx.function_group().VAR_());
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
-        return new GraqlGet.Group.Aggregate(visitQuery_get(ctx.query_get()).group(var),
-                                            Graql.Token.Aggregate.Method.of(function.function_method().getText()),
-                                            function.VAR_() != null ? getVar(function.VAR_()) : null);
+        return visitQuery_get(ctx.query_get()).group(var).aggregate(
+                Graql.Token.Aggregate.Method.of(function.function_method().getText()),
+                function.VAR_() != null ? getVar(function.VAR_()) : null
+        );
     }
 
     // DELETE AND GET QUERY MODIFIERS ==========================================

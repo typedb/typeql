@@ -86,7 +86,7 @@ public class Graql {
      * @return an insert query that will insert the given variable patterns into the graph
      */
     public static GraqlInsert insert(ThingVariable... things) {
-        return new GraqlInsert(null, list(things));
+        return new GraqlInsert(list(things));
     }
 
     /**

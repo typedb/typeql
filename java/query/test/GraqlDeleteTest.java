@@ -47,16 +47,16 @@ public class GraqlDeleteTest {
 
     @Test
     public void deleteQueriesWithTheSameMatchAndVarsAreEqual() {
-        GraqlDelete query1 = new GraqlDelete(match1, delete1);
-        GraqlDelete query2 = new GraqlDelete(match1, delete1);
+        GraqlDelete query1 = match1.delete(delete1);
+        GraqlDelete query2 = match1.delete(delete1);
         assertEquals(query1, query2);
         assertEquals(query1.hashCode(), query2.hashCode());
     }
 
     @Test
     public void deleteQueriesWithDifferentMatchesOrVarsAreDifferent() {
-        GraqlDelete query1 = new GraqlDelete(match1, delete1);
-        GraqlDelete query2 = new GraqlDelete(match2, delete2);
+        GraqlDelete query1 = match1.delete(delete1);
+        GraqlDelete query2 = match2.delete(delete2);
         assertNotEquals(query1, query2);
     }
 
@@ -64,14 +64,14 @@ public class GraqlDeleteTest {
     public void deleteQueryWithNewUnboundVariablesThrows() {
         exception.expect(GraqlException.class);
         exception.expectMessage("the delete clause variable [$y] is not defined in the match clause");
-        GraqlDelete query = new GraqlDelete(match1, delete2);
+        GraqlDelete query = match1.delete(delete2);
     }
 
     @Test
     public void deleteQueryWithoutVariablesThrows() {
         exception.expect(GraqlException.class);
         exception.expectMessage(ErrorMessage.NO_PATTERNS.getMessage());
-        GraqlDelete query = new GraqlDelete(match1, new ArrayList<>());
+        GraqlDelete query = match1.delete(new ArrayList<>());
     }
 
     @Test

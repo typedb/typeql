@@ -24,6 +24,7 @@ import graql.lang.variable.ThingVariable;
 import java.util.List;
 import java.util.Objects;
 
+import static grakn.common.util.Collections.list;
 import static graql.lang.Graql.Token.Char.NEW_LINE;
 import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static java.util.stream.Collectors.joining;
@@ -31,15 +32,15 @@ import static java.util.stream.Collectors.joining;
 public class GraqlDelete extends GraqlQuery {
 
     private final MatchClause match;
-    private final List<ThingVariable> variable;
+    private final List<ThingVariable> variables;
     private final int hash;
 
-    public GraqlDelete(MatchClause match, List<ThingVariable> variable) {
+    GraqlDelete(MatchClause match, List<ThingVariable> variables) {
         if (match == null) throw new NullPointerException("Null match");
-        if (variable == null || variable.isEmpty()) throw GraqlException.noPatterns();
+        if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
         this.match = match;
-        this.variable = variable;
-        this.hash = Objects.hash(this.match, this.variable);
+        this.variables = list(variables);
+        this.hash = Objects.hash(this.match, this.variables);
     }
 
     public MatchClause match() {
@@ -47,7 +48,7 @@ public class GraqlDelete extends GraqlQuery {
     }
 
     public List<ThingVariable> variables() {
-        return variable;
+        return variables;
     }
 
     @Override
@@ -55,10 +56,10 @@ public class GraqlDelete extends GraqlQuery {
         StringBuilder query = new StringBuilder(match().toString());
         query.append(NEW_LINE).append(Graql.Token.Command.DELETE);
 
-        if (variable.size() > 1) query.append(NEW_LINE);
+        if (variables.size() > 1) query.append(NEW_LINE);
         else query.append(Graql.Token.Char.SPACE);
 
-        query.append(variable.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(variables.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
     }
@@ -69,7 +70,7 @@ public class GraqlDelete extends GraqlQuery {
         if (o == null || getClass() != o.getClass()) return false;
         GraqlDelete that = (GraqlDelete) o;
         return (this.match.equals(that.match) &&
-                this.variable.equals(that.variable));
+                this.variables.equals(that.variables));
     }
 
     @Override

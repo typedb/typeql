@@ -40,8 +40,8 @@ public class GraqlInsertTest {
 
     @Test
     public void insertQueriesWithTheSameVarsAndQueryAreEqual() {
-        GraqlInsert query1 = new GraqlInsert(match1, vars1);
-        GraqlInsert query2 = new GraqlInsert(match1, vars1);
+        GraqlInsert query1 = match1.insert(vars1);
+        GraqlInsert query2 = match1.insert(vars1);
 
         assertEquals(query1, query2);
         assertEquals(query1.hashCode(), query2.hashCode());
@@ -49,8 +49,8 @@ public class GraqlInsertTest {
 
     @Test
     public void insertQueriesWithTheSameVarsAndGraphAreEqual() {
-        GraqlInsert query1 = new GraqlInsert(null, list(vars1));
-        GraqlInsert query2 = new GraqlInsert(null, list(vars1));
+        GraqlInsert query1 = new GraqlInsert(vars1);
+        GraqlInsert query2 = new GraqlInsert(vars1);
 
         assertEquals(query1, query2);
         assertEquals(query1.hashCode(), query2.hashCode());
@@ -58,16 +58,16 @@ public class GraqlInsertTest {
 
     @Test
     public void insertQueriesWithDifferentMatchesAreDifferent() {
-        GraqlInsert query1 = new GraqlInsert(match1, list(vars1));
-        GraqlInsert query2 = new GraqlInsert(match2, list(vars1));
+        GraqlInsert query1 = match1.insert(vars1);
+        GraqlInsert query2 = match2.insert(vars1);
 
         assertNotEquals(query1, query2);
     }
 
     @Test
     public void insertQueriesWithDifferentVarsAreDifferent() {
-        GraqlInsert query1 = new GraqlInsert(match1, list(vars1));
-        GraqlInsert query2 = new GraqlInsert(match1, list(vars2));
+        GraqlInsert query1 = match1.insert(vars1);
+        GraqlInsert query2 = match1.insert(vars2);
 
         assertNotEquals(query1, query2);
     }

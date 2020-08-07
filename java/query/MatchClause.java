@@ -103,12 +103,20 @@ public class MatchClause {
         return new GraqlInsert(this, list(things));
     }
 
+    public final GraqlInsert insert(List<ThingVariable> things) {
+        return new GraqlInsert(this, things);
+    }
+
     /**
      * @param things, an array of things that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
     public final GraqlDelete delete(ThingVariable... things) {
         return new GraqlDelete(this, list(things));
+    }
+
+    public final GraqlDelete delete(List<ThingVariable> things) {
+        return new GraqlDelete(this, things);
     }
 
     @Override
