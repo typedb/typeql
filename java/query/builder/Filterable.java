@@ -19,9 +19,9 @@
 package graql.lang.query.builder;
 
 import graql.lang.Graql;
-import graql.lang.statement.Statement;
-import graql.lang.statement.Variable;
+import graql.lang.variable.UnscopedVariable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public interface Filterable {
@@ -50,35 +50,27 @@ public interface Filterable {
     interface Unfiltered<S extends Sorted, O extends Offsetted, L extends Limited> extends Filterable {
 
         default S sort(String var) {
-            return sort(new Variable(var));
+            return sort(UnscopedVariable.named(var));
         }
 
         default S sort(String var, String order) {
             Graql.Token.Order o = Graql.Token.Order.of(order);
             if (o == null) throw new IllegalArgumentException(
-                    "Invalid sorting order. Valid options: '" + Graql.Token.Order.ASC +"' or '" + Graql.Token.Order.DESC
+                    "Invalid sorting order. Valid options: '" + Graql.Token.Order.ASC + "' or '" + Graql.Token.Order.DESC
             );
-            return sort(new Variable(var), o);
+            return sort(UnscopedVariable.named(var), o);
         }
 
         default S sort(String var, Graql.Token.Order order) {
-            return sort(new Variable(var), order);
+            return sort(UnscopedVariable.named(var), order);
         }
 
-        default S sort(Variable var) {
+        default S sort(UnscopedVariable var) {
             return sort(new Sorting(var));
         }
 
-        default S sort(Variable var, Graql.Token.Order order) {
+        default S sort(UnscopedVariable var, Graql.Token.Order order) {
             return sort(new Sorting(var, order));
-        }
-
-        default S sort(Statement var) {
-            return sort(new Sorting(var.var()));
-        }
-
-        default S sort(Statement var, Graql.Token.Order order) {
-            return sort(new Sorting(var.var(), order));
         }
 
         S sort(Sorting sorting);
@@ -106,18 +98,21 @@ public interface Filterable {
 
     class Sorting {
 
-        private Variable var;
-        private Graql.Token.Order order;
+        private final UnscopedVariable var;
+        private final Graql.Token.Order order;
+        private final int hash;
 
-        public Sorting(Variable var) {
+        public Sorting(UnscopedVariable var) {
             this(var, null);
         }
-        public Sorting(Variable var, Graql.Token.Order order) {
+
+        public Sorting(UnscopedVariable var, Graql.Token.Order order) {
             this.var = var;
             this.order = order;
+            this.hash = Objects.hash(var(), order());
         }
 
-        public Variable var() {
+        public UnscopedVariable var() {
             return var;
         }
 
@@ -150,12 +145,7 @@ public interface Filterable {
 
         @Override
         public int hashCode() {
-            int h = 1;
-            h *= 1000003;
-            h ^= this.var().hashCode();
-            h *= 1000003;
-            h ^= this.order().hashCode();
-            return h;
+            return hash;
         }
     }
 }

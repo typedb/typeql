@@ -25,17 +25,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static graql.lang.exception.ErrorMessage.CONFLICTING_PROPERTIES;
+import static graql.lang.exception.ErrorMessage.ILLEGAL_REPETITION;
+import static graql.lang.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_CONDITION;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD;
 import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
+import static graql.lang.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 import static graql.lang.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
 import static graql.lang.exception.ErrorMessage.OVERPRECISE_SECOND_FRACTION;
 import static graql.lang.exception.ErrorMessage.SORTING_NOT_ALLOWED;
-import static graql.lang.exception.ErrorMessage.UNBOUND_DELETE_VARIABLE;
 import static graql.lang.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
 
+// TODO: Refactor this to the style we have in Grakn 2.0
 public class GraqlException extends RuntimeException {
 
     protected GraqlException(String error) {
@@ -50,24 +52,28 @@ public class GraqlException extends RuntimeException {
         return this.getClass().getName();
     }
 
-    public static GraqlException create(String error){
+    public static GraqlException create(String error) {
         return new GraqlException(error);
     }
 
-    public static GraqlException conflictingProperties(String statement, String property, String other) {
-        return new GraqlException(CONFLICTING_PROPERTIES.getMessage(statement, property, other));
+    public static GraqlException illegalRepetitions(String variable, String property1, String property2) {
+        return new GraqlException(ILLEGAL_REPETITION.getMessage(variable, property1, property2));
     }
 
     public static GraqlException variableOutOfScope(String var) {
         return new GraqlException(VARIABLE_OUT_OF_SCOPE.getMessage(var));
     }
 
-    public static GraqlException deleteVariableUnbound(String var) {
-        return new GraqlException(UNBOUND_DELETE_VARIABLE.getMessage(var));
-    }
-
     public static GraqlException noPatterns() {
         return new GraqlException(ErrorMessage.NO_PATTERNS.getMessage());
+    }
+
+    public static GraqlException invalidCastException(Class<?> origin, Class<?> target) {
+        return new GraqlException(INVALID_CAST_EXCEPTION.getMessage(origin.getSimpleName(), target.getSimpleName()));
+    }
+
+    public static GraqlException invalidVariableName(String name, String regex) {
+        return new GraqlException(INVALID_VARIABLE_NAME.getMessage(name, regex));
     }
 
     public static GraqlException invalidComputeQuery_invalidMethod(List<Graql.Token.Compute.Method> methods) {

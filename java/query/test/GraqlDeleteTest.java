@@ -22,16 +22,15 @@ import graql.lang.exception.ErrorMessage;
 import graql.lang.exception.GraqlException;
 import graql.lang.query.GraqlDelete;
 import graql.lang.query.MatchClause;
-import graql.lang.statement.Statement;
+import graql.lang.variable.ThingVariable;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 
+import static grakn.common.util.Collections.list;
 import static graql.lang.Graql.var;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -43,40 +42,40 @@ public class GraqlDeleteTest {
     private final MatchClause match1 = Graql.match(var("x").isa("movie"));
     private final MatchClause match2 = Graql.match(var("y").isa("movie"));
 
-    private final List<Statement> delete1 = Arrays.asList(var("x").isa("movie"));
-    private final List<Statement> delete2 = Arrays.asList(var("y").isa("movie"));
+    private final List<ThingVariable<?>> delete1 = list(var("x").isa("movie"));
+    private final List<ThingVariable<?>> delete2 = list(var("y").isa("movie"));
 
     @Test
     public void deleteQueriesWithTheSameMatchAndVarsAreEqual() {
-        GraqlDelete query1 = new GraqlDelete(match1, delete1);
-        GraqlDelete query2 = new GraqlDelete(match1, delete1);
+        GraqlDelete query1 = match1.delete(delete1);
+        GraqlDelete query2 = match1.delete(delete1);
         assertEquals(query1, query2);
         assertEquals(query1.hashCode(), query2.hashCode());
     }
 
     @Test
     public void deleteQueriesWithDifferentMatchesOrVarsAreDifferent() {
-        GraqlDelete query1 = new GraqlDelete(match1, delete1);
-        GraqlDelete query2 = new GraqlDelete(match2, delete2);
+        GraqlDelete query1 = match1.delete(delete1);
+        GraqlDelete query2 = match2.delete(delete2);
         assertNotEquals(query1, query2);
     }
 
     @Test
     public void deleteQueryWithNewUnboundVariablesThrows() {
         exception.expect(GraqlException.class);
-        exception.expectMessage("the delete clause variable [$y] is not defined in the match clause");
-        GraqlDelete query = new GraqlDelete(match1, delete2);
+        exception.expectMessage("the variable [$y] is out of scope of the query");
+        GraqlDelete query = match1.delete(delete2);
     }
 
     @Test
-    public void deleteQueryWithoutStatementsThrows() {
+    public void deleteQueryWithoutVariablesThrows() {
         exception.expect(GraqlException.class);
         exception.expectMessage(ErrorMessage.NO_PATTERNS.getMessage());
-        GraqlDelete query = new GraqlDelete(match1, new ArrayList<>());
+        GraqlDelete query = match1.delete(new ArrayList<>());
     }
 
     @Test
-    public void deleteQueryWithBuilderWithoutStatementThrows() {
+    public void deleteQueryWithBuilderWithoutVariablesThrows() {
         exception.expect(GraqlException.class);
         exception.expectMessage(ErrorMessage.NO_PATTERNS.getMessage());
         GraqlDelete query = match1.delete();

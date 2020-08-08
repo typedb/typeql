@@ -18,13 +18,13 @@
 package graql.lang.pattern;
 
 import graql.lang.Graql;
-import graql.lang.statement.Statement;
-import graql.lang.statement.Variable;
 
 import java.util.Objects;
-import javax.annotation.CheckReturnValue;
-import java.util.Collections;
-import java.util.Set;
+
+import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
+import static graql.lang.Graql.Token.Char.CURLY_OPEN;
+import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.Graql.Token.Char.SPACE;
 
 /**
  * A class representing a negation of patterns. All inner patterns must not match in a query.
@@ -36,9 +36,7 @@ public class Negation<T extends Pattern> implements Pattern {
     private final T pattern;
 
     public Negation(T pattern) {
-        if (pattern == null) {
-            throw new NullPointerException("Null patterns");
-        }
+        if (pattern == null) throw new NullPointerException("Null patterns");
         this.pattern = pattern;
     }
 
@@ -55,19 +53,7 @@ public class Negation<T extends Pattern> implements Pattern {
         return pattern.hashCode();
     }
 
-    @CheckReturnValue
-    public T getPattern(){ return pattern;}
-
-    @Override
-    public Disjunction<Conjunction<Statement>> getDisjunctiveNormalForm() {
-        return pattern.getDisjunctiveNormalForm();
-    }
-
-    @Override
-    public Disjunction<Conjunction<Pattern>> getNegationDNF() {
-        if(pattern.isNegation()) return pattern.asNegation().getPattern().getNegationDNF();
-        return Graql.or(Collections.singleton(Graql.and(Collections.singleton(this))));
-    }
+    public T getPattern() { return pattern;}
 
     @Override
     public boolean isNegation() { return true; }
@@ -76,22 +62,16 @@ public class Negation<T extends Pattern> implements Pattern {
     public Negation<?> asNegation() { return this; }
 
     @Override
-    public Set<Variable> variables() {
-        return pattern.variables();
-    }
-
-    @Override
     public String toString() {
         StringBuilder negation = new StringBuilder();
-        negation.append(Graql.Token.Operator.NOT).append(Graql.Token.Char.SPACE);
+        negation.append(Graql.Token.Operator.NOT).append(SPACE);
 
         if (pattern instanceof Conjunction<?>) {
             negation.append(pattern.toString());
         } else {
-            negation.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
-            negation.append(pattern.toString());
-            negation.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE);
-            negation.append(Graql.Token.Char.SEMICOLON);
+            negation.append(CURLY_OPEN).append(SPACE);
+            negation.append(pattern.toString()).append(SEMICOLON);
+            negation.append(SPACE).append(CURLY_CLOSE);
         }
 
         return negation.toString();

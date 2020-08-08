@@ -23,7 +23,6 @@ import graql.lang.query.builder.Computable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,8 +35,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static grakn.common.util.Collections.map;
-import static grakn.common.util.Collections.set;
 import static grakn.common.util.Collections.pair;
+import static grakn.common.util.Collections.set;
 import static java.util.stream.Collectors.joining;
 
 
@@ -61,28 +60,24 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     Arguments arguments = null;
     // But 'arguments' will also be set when where() is called for cluster/centrality
 
-    protected GraqlCompute(Graql.Token.Compute.Method method, boolean includeAttributes) {
+    GraqlCompute(Graql.Token.Compute.Method method, boolean includeAttributes) {
         this.method = method;
         this.includeAttributes = includeAttributes;
     }
 
-    @CheckReturnValue
     public final Graql.Token.Compute.Method method() {
         return method;
     }
 
-    @CheckReturnValue
     public Set<String> in() {
         if (this.inTypes == null) return set();
         return inTypes;
     }
 
-    @CheckReturnValue
     public boolean includesAttributes() {
         return includeAttributes;
     }
 
-    @CheckReturnValue
     public final boolean isValid() {
         return !getException().isPresent();
     }
@@ -303,8 +298,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 super(method, true);
             }
 
-            @CheckReturnValue
-            public final Set<String> of(){
+            public final Set<String> of() {
                 return ofTypes == null ? set() : ofTypes;
             }
 
@@ -371,16 +365,14 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             implements Computable.Directional<GraqlCompute.Path>,
                        Computable.Scopeable<GraqlCompute.Path> {
 
-        Path(){
+        Path() {
             super(Graql.Token.Compute.Method.PATH, false);
         }
 
-        @CheckReturnValue
         public final String from() {
             return fromID;
         }
 
-        @CheckReturnValue
         public final String to() {
             return toID;
         }
@@ -415,7 +407,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public  Optional<GraqlException> getException() {
+        public Optional<GraqlException> getException() {
             if (fromID == null || toID == null) {
                 return Optional.of(GraqlException.invalidComputeQuery_missingCondition(
                         this.method(), conditionsRequired()
@@ -461,7 +453,6 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         protected abstract T self();
 
-        @CheckReturnValue
         public GraqlCompute.Arguments where() {
             GraqlCompute.Arguments args = arguments;
             if (args == null) {
@@ -474,7 +465,6 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
 
-        @CheckReturnValue
         public Graql.Token.Compute.Algorithm using() {
             if (algorithm == null) {
                 return Graql.Token.Compute.Algorithm.DEGREE;
@@ -538,7 +528,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         final static long DEFAULT_MIN_K = 2L;
 
-        Centrality(){
+        Centrality() {
             super(Graql.Token.Compute.Method.CENTRALITY, true);
         }
 
@@ -546,8 +536,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             return this;
         }
 
-        @CheckReturnValue
-        public final Set<String> of(){
+        public final Set<String> of() {
             return ofTypes == null ? set() : ofTypes;
         }
 
@@ -604,7 +593,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         final static long DEFAULT_K = 2L;
 
-        Cluster(){
+        Cluster() {
             super(Graql.Token.Compute.Method.CLUSTER, false);
         }
 
@@ -612,7 +601,6 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             return this;
         }
 
-        @CheckReturnValue
         public Graql.Token.Compute.Algorithm using() {
             if (algorithm == null) {
                 return Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
@@ -725,7 +713,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     /**
      * Argument inner class to provide access Compute Query arguments
      */
-    public class Arguments implements Computable.Arguments {
+    public static class Arguments implements Computable.Arguments {
 
         private LinkedHashMap<Graql.Token.Compute.Param, Argument> argumentsOrdered = new LinkedHashMap<>();
         private Map<Graql.Token.Compute.Param, Object> defaults = new HashMap<>();
@@ -751,24 +739,21 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             this.defaults = defaults;
         }
 
-        @CheckReturnValue
         Optional<?> getArgument(Graql.Token.Compute.Param param) {
             return argumentsMap.get(param).get();
         }
 
-        @CheckReturnValue
         public Set<Graql.Token.Compute.Param> getParameters() {
             return argumentsOrdered.keySet();
         }
 
-        @CheckReturnValue
         @Override
         public Optional<Long> minK() {
             Long minK = (Long) getArgumentValue(Graql.Token.Compute.Param.MIN_K);
             if (minK != null) {
                 return Optional.of(minK);
 
-            } else if (defaults.containsKey(Graql.Token.Compute.Param.MIN_K)){
+            } else if (defaults.containsKey(Graql.Token.Compute.Param.MIN_K)) {
                 return Optional.of((Long) defaults.get(Graql.Token.Compute.Param.MIN_K));
 
             } else {
@@ -776,14 +761,13 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
         }
 
-        @CheckReturnValue
         @Override
         public Optional<Long> k() {
             Long minK = (Long) getArgumentValue(Graql.Token.Compute.Param.K);
             if (minK != null) {
                 return Optional.of(minK);
 
-            } else if (defaults.containsKey(Graql.Token.Compute.Param.K)){
+            } else if (defaults.containsKey(Graql.Token.Compute.Param.K)) {
                 return Optional.of((Long) defaults.get(Graql.Token.Compute.Param.K));
 
             } else {
@@ -791,13 +775,11 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
         }
 
-        @CheckReturnValue
         @Override
         public Optional<Long> size() {
             return Optional.ofNullable((Long) getArgumentValue(Graql.Token.Compute.Param.SIZE));
         }
 
-        @CheckReturnValue
         @Override
         public Optional<String> contains() {
             return Optional.ofNullable((String) getArgumentValue(Graql.Token.Compute.Param.CONTAINS));

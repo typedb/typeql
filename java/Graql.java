@@ -28,23 +28,17 @@ import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
 import graql.lang.query.MatchClause;
-import graql.lang.statement.Statement;
-import graql.lang.statement.StatementAttribute;
-import graql.lang.statement.StatementRelation;
-import graql.lang.statement.StatementType;
-import graql.lang.statement.Variable;
+import graql.lang.variable.ThingVariable;
+import graql.lang.variable.TypeVariable;
+import graql.lang.variable.UnscopedVariable;
 
-import javax.annotation.CheckReturnValue;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static grakn.common.util.Collections.list;
+import static graql.lang.variable.UnscopedVariable.hidden;
 
 /**
  * Main class containing static methods for creating Graql queries.
@@ -54,31 +48,26 @@ public class Graql {
 
     private static final Parser parser = new Parser();
 
-    @CheckReturnValue
     public static <T extends GraqlQuery> T parse(String queryString) {
         return parser.parseQueryEOF(queryString);
     }
 
-    @CheckReturnValue
     public static <T extends GraqlQuery> Stream<T> parseList(String queryString) {
         return parser.parseQueryListEOF(queryString);
     }
 
-    @CheckReturnValue
     public static Pattern parsePattern(String pattern) {
         return parser.parsePatternEOF(pattern);
     }
 
-    @CheckReturnValue
-    public static List<Pattern> parsePatternList(String pattern) {
-        return parser.parsePatternListEOF(pattern).collect(Collectors.toList());
+    public static List<? extends Pattern> parsePatternList(String pattern) {
+        return parser.parsePatternListEOF(pattern);
     }
 
     /**
      * @param patterns an array of patterns to match in the graph
      * @return a match clause that will find matches of the given patterns
      */
-    @CheckReturnValue
     public static MatchClause match(Pattern... patterns) {
         return match(Arrays.asList(patterns));
     }
@@ -87,66 +76,46 @@ public class Graql {
      * @param patterns a collection of patterns to match in the graph
      * @return a match clause that will find matches of the given patterns
      */
-    @CheckReturnValue
-    public static MatchClause match(Collection<? extends Pattern> patterns) {
-        return new MatchClause(and(Collections.unmodifiableSet(new LinkedHashSet<>(patterns))));
+    public static MatchClause match(List<? extends Pattern> patterns) {
+        return new MatchClause(and(patterns));
     }
 
     /**
-     * @param statements an array of variable patterns to insert into the graph
+     * @param things an array of variable patterns to insert into the graph
      * @return an insert query that will insert the given variable patterns into the graph
      */
-    @CheckReturnValue
-    public static GraqlInsert insert(Statement... statements) {
-        return insert(Arrays.asList(statements));
+    public static GraqlInsert insert(ThingVariable<?>... things) {
+        return new GraqlInsert(list(things));
+    }
+
+    public static GraqlInsert insert(List<ThingVariable<?>> things) {
+        return new GraqlInsert(things);
     }
 
     /**
-     * @param statements a collection of variable patterns to insert into the graph
-     * @return an insert query that will insert the given variable patterns into the graph
-     */
-    @CheckReturnValue
-    public static GraqlInsert insert(Collection<? extends Statement> statements) {
-        return new GraqlInsert(null, Collections.unmodifiableList(new ArrayList<>(statements)));
-    }
-
-    /**
-     * @param statements an array of of statements to define the schema
+     * @param types an array of of types to define the schema
      * @return a define query that will apply the changes described in the {@code patterns}
      */
-    @CheckReturnValue
-    public static GraqlDefine define(Statement... statements) {
-        return define(Arrays.asList(statements));
+    public static GraqlDefine define(TypeVariable... types) {
+        return new GraqlDefine(list(types));
+    }
+
+    public static GraqlDefine define(List<TypeVariable> types) {
+        return new GraqlDefine(types);
     }
 
     /**
-     * @param statements a collection of statements to define the schema
-     * @return a define query that will apply the changes described in the {@code patterns}
-     */
-    @CheckReturnValue
-    public static GraqlDefine define(Collection<? extends Statement> statements) {
-        return new GraqlDefine(Collections.unmodifiableList(new ArrayList<>(statements)));
-    }
-
-    /**
-     * @param statements an array of statements to undefine the schema
+     * @param types an array of types to undefine the schema
      * @return an undefine query that will remove the changes described in the {@code patterns}
      */
-    @CheckReturnValue
-    public static GraqlUndefine undefine(Statement... statements) {
-        return undefine(Arrays.asList(statements));
+    public static GraqlUndefine undefine(TypeVariable... types) {
+        return new GraqlUndefine(list(types));
     }
 
-    /**
-     * @param statements a collection of statements to undefine the schema
-     * @return an undefine query that will remove the changes described in the {@code patterns}
-     */
-    @CheckReturnValue
-    public static GraqlUndefine undefine(Collection<? extends Statement> statements) {
-        return new GraqlUndefine(Collections.unmodifiableList(new ArrayList<>(statements)));
+    public static GraqlUndefine undefine(List<TypeVariable> types) {
+        return new GraqlUndefine(types);
     }
 
-    @CheckReturnValue
     public static GraqlCompute.Builder compute() {
         return new GraqlCompute.Builder();
     }
@@ -157,8 +126,7 @@ public class Graql {
      * @param patterns an array of patterns to match
      * @return a pattern that will match only when all contained patterns match
      */
-    @CheckReturnValue
-    public static Conjunction<?> and(Pattern... patterns) {
+    public static Conjunction<? extends Pattern> and(Pattern... patterns) {
         return and(Arrays.asList(patterns));
     }
 
@@ -166,13 +134,7 @@ public class Graql {
      * @param patterns a collection of patterns to match
      * @return a pattern that will match only when all contained patterns match
      */
-    @CheckReturnValue
-    public static Conjunction<?> and(Collection<? extends Pattern> patterns) {
-        return and(new LinkedHashSet<>(patterns));
-    }
-
-    @CheckReturnValue
-    public static <T extends Pattern> Conjunction<T> and(Set<T> patterns) {
+    public static Conjunction<? extends Pattern> and(List<? extends Pattern> patterns) {
         return new Conjunction<>(patterns);
     }
 
@@ -180,7 +142,6 @@ public class Graql {
      * @param patterns an array of patterns to match
      * @return a pattern that will match when any contained pattern matches
      */
-    @CheckReturnValue
     public static Pattern or(Pattern... patterns) {
         return or(Arrays.asList(patterns));
     }
@@ -189,18 +150,12 @@ public class Graql {
      * @param patterns a collection of patterns to match
      * @return a pattern that will match when any contained pattern matches
      */
-    @CheckReturnValue
-    public static Pattern or(Collection<? extends Pattern> patterns) {
+    public static Pattern or(List<Pattern> patterns) {
         // Simplify representation when there is only one alternative
         if (patterns.size() == 1) {
             return patterns.iterator().next();
         }
 
-        return or(new LinkedHashSet<>(patterns));
-    }
-
-    @CheckReturnValue
-    public static <T extends Pattern> Disjunction<T> or(Set<T> patterns) {
         return new Disjunction<>(patterns);
     }
 
@@ -208,307 +163,241 @@ public class Graql {
      * @param pattern a patterns to a negate
      * @return a pattern that will match when no contained pattern matches
      */
-    @CheckReturnValue
     public static Negation<Pattern> not(Pattern pattern) {
         return new Negation<>(pattern);
     }
 
-    // Statement Builder Methods
+    // Variable Builder Methods
 
     /**
-     * @return a new statement with an anonymous Variable
+     * @return a new variable with an anonymous Variable
      */
-    @CheckReturnValue
-    public static Statement var() {
-        return var(new Variable());
+    public static UnscopedVariable var() {
+        return UnscopedVariable.anonymous();
     }
 
     /**
      * @param name the name of the variable
-     * @return a new statement with a variable of a given name
+     * @return a new variable with a variable of a given name
      */
-    @CheckReturnValue
-    public static Statement var(String name) {
-        return var(new Variable(name));
+    public static UnscopedVariable var(String name) {
+        return UnscopedVariable.named(name);
     }
 
-    /**
-     * @param var a variable to create a statement
-     * @return a new statement with a provided variable
-     */
-    @CheckReturnValue
-    public static Statement var(Variable var) {
-        return new Statement(var);
-    }
-
-    @CheckReturnValue
-    private static Statement hiddenVar() {
-        return var(new Variable(false));
-    }
-
-    @CheckReturnValue
-    public static StatementType type(Graql.Token.Type type) {
+    public static TypeVariable type(Graql.Token.Type type) {
         return type(type.toString());
     }
 
-    @CheckReturnValue
-    public static StatementType type(String label) {
-        return hiddenVar().type(label);
+    public static TypeVariable type(String label) {
+        return hidden().type(label);
     }
 
-    @CheckReturnValue
-    public static StatementRelation rel(String player) {
-        return hiddenVar().rel(player);
+    public static ThingVariable.Relation rel(String player) {
+        return hidden().rel(player);
     }
 
-    @CheckReturnValue
-    public static StatementRelation rel(String role, String player) {
-        return hiddenVar().rel(role, player);
+    public static ThingVariable.Relation rel(String role, String player) {
+        return hidden().rel(role, player);
     }
 
-    @CheckReturnValue
-    public static StatementRelation rel(Statement role, Statement player) {
-        return hiddenVar().rel(role, player);
+    public static ThingVariable.Relation rel(UnscopedVariable role, UnscopedVariable player) {
+        return hidden().rel(role, player);
     }
 
-    // Attribute Statement Builder Methods
+    // Attribute Variable Builder Methods
 
     // Attribute value assignment property
 
-    @CheckReturnValue
-    public static StatementAttribute val(long value) {
-        return hiddenVar().val(value);
+    public static ThingVariable.Attribute val(long value) {
+        return hidden().val(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute val(double value) {
-        return hiddenVar().val(value);
+    public static ThingVariable.Attribute val(double value) {
+        return hidden().val(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute val(boolean value) {
-        return hiddenVar().val(value);
+    public static ThingVariable.Attribute val(boolean value) {
+        return hidden().val(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute val(String value) {
-        return hiddenVar().val(value);
+    public static ThingVariable.Attribute val(String value) {
+        return hidden().val(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute val(LocalDateTime value) {
-        return hiddenVar().val(value);
+    public static ThingVariable.Attribute val(LocalDateTime value) {
+        return hidden().val(value);
     }
 
     // Attribute value equality property
 
-    @CheckReturnValue
-    public static StatementAttribute eq(long value) {
-        return hiddenVar().eq(value);
+    public static ThingVariable.Attribute eq(long value) {
+        return hidden().eq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute eq(double value) {
-        return hiddenVar().eq(value);
+    public static ThingVariable.Attribute eq(double value) {
+        return hidden().eq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute eq(boolean value) {
-        return hiddenVar().eq(value);
+    public static ThingVariable.Attribute eq(boolean value) {
+        return hidden().eq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute eq(String value) {
-        return hiddenVar().eq(value);
+    public static ThingVariable.Attribute eq(String value) {
+        return hidden().eq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute eq(LocalDateTime value) {
-        return hiddenVar().eq(value);
+    public static ThingVariable.Attribute eq(LocalDateTime value) {
+        return hidden().eq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute eq(Statement variable) {
-        return hiddenVar().eq(variable);
+    public static ThingVariable.Attribute eq(UnscopedVariable variable) {
+        return hidden().eq(variable);
     }
 
     // Attribute value inequality property
 
-    @CheckReturnValue
-    public static StatementAttribute neq(long value) {
-        return hiddenVar().neq(value);
+    public static ThingVariable.Attribute neq(long value) {
+        return hidden().neq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute neq(double value) {
-        return hiddenVar().neq(value);
+    public static ThingVariable.Attribute neq(double value) {
+        return hidden().neq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute neq(boolean value) {
-        return hiddenVar().neq(value);
+    public static ThingVariable.Attribute neq(boolean value) {
+        return hidden().neq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute neq(String value) {
-        return hiddenVar().neq(value);
+    public static ThingVariable.Attribute neq(String value) {
+        return hidden().neq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute neq(LocalDateTime value) {
-        return hiddenVar().neq(value);
+    public static ThingVariable.Attribute neq(LocalDateTime value) {
+        return hidden().neq(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute neq(Statement variable) {
-        return hiddenVar().neq(variable);
+    public static ThingVariable.Attribute neq(UnscopedVariable variable) {
+        return hidden().neq(variable);
     }
 
     // Attribute value greater-than property
 
-    @CheckReturnValue
-    public static StatementAttribute gt(long value) {
-        return hiddenVar().gt(value);
+    public static ThingVariable.Attribute gt(long value) {
+        return hidden().gt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gt(double value) {
-        return hiddenVar().gt(value);
+    public static ThingVariable.Attribute gt(double value) {
+        return hidden().gt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gt(boolean value) {
-        return hiddenVar().gt(value);
+    public static ThingVariable.Attribute gt(boolean value) {
+        return hidden().gt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gt(String value) {
-        return hiddenVar().gt(value);
+    public static ThingVariable.Attribute gt(String value) {
+        return hidden().gt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gt(LocalDateTime value) {
-        return hiddenVar().gt(value);
+    public static ThingVariable.Attribute gt(LocalDateTime value) {
+        return hidden().gt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gt(Statement variable) {
-        return hiddenVar().gt(variable);
+    public static ThingVariable.Attribute gt(UnscopedVariable variable) {
+        return hidden().gt(variable);
     }
 
     // Attribute value greater-than-or-equals property
 
-    @CheckReturnValue
-    public static StatementAttribute gte(long value) {
-        return hiddenVar().gte(value);
+    public static ThingVariable.Attribute gte(long value) {
+        return hidden().gte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gte(double value) {
-        return hiddenVar().gte(value);
+    public static ThingVariable.Attribute gte(double value) {
+        return hidden().gte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gte(boolean value) {
-        return hiddenVar().gte(value);
+    public static ThingVariable.Attribute gte(boolean value) {
+        return hidden().gte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gte(String value) {
-        return hiddenVar().gte(value);
+    public static ThingVariable.Attribute gte(String value) {
+        return hidden().gte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gte(LocalDateTime value) {
-        return hiddenVar().gte(value);
+    public static ThingVariable.Attribute gte(LocalDateTime value) {
+        return hidden().gte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute gte(Statement variable) {
-        return hiddenVar().gte(variable);
+    public static ThingVariable.Attribute gte(UnscopedVariable variable) {
+        return hidden().gte(variable);
     }
 
     // Attribute value less-than property
 
-    @CheckReturnValue
-    public static StatementAttribute lt(long value) {
-        return hiddenVar().lt(value);
+    public static ThingVariable.Attribute lt(long value) {
+        return hidden().lt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lt(double value) {
-        return hiddenVar().lt(value);
+    public static ThingVariable.Attribute lt(double value) {
+        return hidden().lt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lt(boolean value) {
-        return hiddenVar().lt(value);
+    public static ThingVariable.Attribute lt(boolean value) {
+        return hidden().lt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lt(String value) {
-        return hiddenVar().lt(value);
+    public static ThingVariable.Attribute lt(String value) {
+        return hidden().lt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lt(LocalDateTime value) {
-        return hiddenVar().lt(value);
+    public static ThingVariable.Attribute lt(LocalDateTime value) {
+        return hidden().lt(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lt(Statement variable) {
-        return hiddenVar().lt(variable);
+    public static ThingVariable.Attribute lt(UnscopedVariable variable) {
+        return hidden().lt(variable);
     }
 
     // Attribute value less-than-or-equals property
 
-    @CheckReturnValue
-    public static StatementAttribute lte(long value) {
-        return hiddenVar().lte(value);
+    public static ThingVariable.Attribute lte(long value) {
+        return hidden().lte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lte(double value) {
-        return hiddenVar().lte(value);
+    public static ThingVariable.Attribute lte(double value) {
+        return hidden().lte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lte(boolean value) {
-        return hiddenVar().lte(value);
+    public static ThingVariable.Attribute lte(boolean value) {
+        return hidden().lte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lte(String value) {
-        return hiddenVar().lte(value);
+    public static ThingVariable.Attribute lte(String value) {
+        return hidden().lte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lte(LocalDateTime value) {
-        return hiddenVar().lte(value);
+    public static ThingVariable.Attribute lte(LocalDateTime value) {
+        return hidden().lte(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute lte(Statement variable) {
-        return hiddenVar().lte(variable);
+    public static ThingVariable.Attribute lte(UnscopedVariable variable) {
+        return hidden().lte(variable);
     }
 
     // Attribute value contains (in String) property
 
-    @CheckReturnValue
-    public static StatementAttribute contains(String value) {
-        return hiddenVar().contains(value);
+    public static ThingVariable.Attribute contains(String value) {
+        return hidden().contains(value);
     }
 
-    @CheckReturnValue
-    public static StatementAttribute contains(Statement variable) {
-        return hiddenVar().contains(variable);
+    public static ThingVariable.Attribute contains(UnscopedVariable variable) {
+        return hidden().contains(variable);
     }
 
     // Attribute value regex property
 
-    @CheckReturnValue
-    public static StatementAttribute like(String value) {
-        return hiddenVar().like(value);
+    public static ThingVariable.Attribute like(String value) {
+        return hidden().like(value);
     }
 
     public static class Token {
@@ -691,21 +580,22 @@ public class Graql {
         }
 
         public enum Property {
-            VALUE(""),
-            VALUE_TYPE("value"),
+            ABSTRACT("abstract"),
+            AS("as"),
             HAS("has"),
             KEY("key"),
-            ID("id"),
-            ABSTRACT("abstract"),
+            ID("id"), // TODO: rename to 'IID'
             ISA("isa"),
             ISAX("isa!"),
-            TYPE("type"),
             PLAYS("plays"),
             REGEX("regex"),
             RELATES("relates"),
             SUB("sub"),
             SUBX("sub!"),
             THEN("then"),
+            TYPE("type"),
+            VALUE(""),
+            VALUE_TYPE("value"),
             WHEN("when");
 
             private final String name;

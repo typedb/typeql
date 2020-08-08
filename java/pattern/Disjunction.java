@@ -17,36 +17,52 @@
 
 package graql.lang.pattern;
 
-import com.google.common.collect.Sets;
-import graql.lang.Graql;
-import graql.lang.statement.Statement;
-import graql.lang.statement.Variable;
-import grakn.common.util.Collections;
-
-import javax.annotation.CheckReturnValue;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
+import static graql.lang.Graql.Token.Char.CURLY_OPEN;
+import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.Graql.Token.Char.SPACE;
+import static graql.lang.Graql.Token.Operator.OR;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
-/**
- * A class representing a disjunction (or) of patterns. Any inner pattern must match in a query
- *
- * @param <T> the type of patterns in this disjunction
- */
 public class Disjunction<T extends Pattern> implements Pattern {
 
-    private final LinkedHashSet<T> patterns;
+    private final List<T> patterns;
+    private final int hash;
 
-    public Disjunction(Set<T> patterns) {
-        if (patterns == null) {
-            throw new NullPointerException("Null patterns");
+    public Disjunction(List<T> patterns) {
+        if (patterns == null) throw new NullPointerException("Null patterns");
+        this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
+        this.hash = Objects.hash(this.patterns);
+    }
+
+    public List<T> patterns() {
+        return patterns;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder syntax = new StringBuilder();
+
+        Iterator<T> patternIter = patterns.iterator();
+        while (patternIter.hasNext()) {
+            Pattern pattern = patternIter.next();
+            syntax.append(CURLY_OPEN).append(SPACE);
+
+            if (pattern instanceof Conjunction<?>) {
+                Conjunction<?> conjunction = (Conjunction<? extends Pattern>) pattern;
+                syntax.append(conjunction.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
+            } else {
+                syntax.append(pattern);
+            }
+            syntax.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
+            if (patternIter.hasNext()) syntax.append(SPACE).append(OR).append(SPACE);
         }
-        this.patterns = patterns.stream()
-                .map(Objects::requireNonNull)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return syntax.toString();
     }
 
     @Override
@@ -59,66 +75,6 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     @Override
     public int hashCode() {
-        return patterns.hashCode();
-    }
-
-    /**
-     * @return the patterns within this disjunction
-     */
-    @CheckReturnValue
-    public Set<T> getPatterns() {
-        return patterns;
-    }
-
-    @Override
-    public Disjunction<Conjunction<Statement>> getDisjunctiveNormalForm() {
-        // Concatenate all disjunctions into one big disjunction
-        Set<Conjunction<Statement>> dnf = getPatterns().stream()
-                .flatMap(p -> p.getDisjunctiveNormalForm().getPatterns().stream())
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        return Graql.or(dnf);
-    }
-
-    @Override
-    public Disjunction<Conjunction<Pattern>> getNegationDNF() {
-        Set<Conjunction<Pattern>> dnf = getPatterns().stream()
-                .flatMap(p -> p.getNegationDNF().getPatterns().stream())
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return Graql.or(dnf);
-    }
-
-    @Override
-    public Set<Variable> variables() {
-        return getPatterns().stream().map(Pattern::variables).reduce(Sets::intersection).orElse(Collections.set());
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder disjunction = new StringBuilder();
-
-        Iterator<T> patternIter = patterns.iterator();
-        while (patternIter.hasNext()) {
-            Pattern pattern = patternIter.next();
-            disjunction.append(Graql.Token.Char.CURLY_OPEN).append(Graql.Token.Char.SPACE);
-
-            if (pattern instanceof Conjunction<?>) {
-                disjunction.append(((Conjunction<? extends Pattern>) pattern).getPatterns().stream()
-                                           .map(Object::toString)
-                                           .collect(Collectors.joining(Graql.Token.Char.SPACE.toString())));
-            } else {
-                disjunction.append(pattern.toString());
-            }
-
-            disjunction.append(Graql.Token.Char.SPACE).append(Graql.Token.Char.CURLY_CLOSE);
-
-            if (patternIter.hasNext()) {
-                disjunction.append(Graql.Token.Char.SPACE).append(Graql.Token.Operator.OR).append(Graql.Token.Char.SPACE);
-            }
-        }
-
-        disjunction.append(Graql.Token.Char.SEMICOLON);
-
-        return disjunction.toString();
+        return hash;
     }
 }
