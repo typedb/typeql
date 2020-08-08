@@ -23,9 +23,9 @@ import graql.lang.property.TypeProperty;
 import graql.lang.variable.builder.ThingVariableBuilder;
 import graql.lang.variable.builder.TypeVariableBuilder;
 
-import java.util.List;
+import java.util.Set;
 
-import static grakn.common.util.Collections.list;
+import static grakn.common.util.Collections.set;
 
 public class UnscopedVariable extends Variable implements TypeVariableBuilder,
                                                           ThingVariableBuilder<ThingVariable.Thing>,
@@ -69,8 +69,8 @@ public class UnscopedVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public List<Property> properties() {
-        return list();
+    public Set<Property> properties() {
+        return set();
     }
 
     @Override

@@ -27,7 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import static grakn.common.util.Collections.set;
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static java.util.stream.Collectors.joining;
@@ -56,8 +58,8 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
     }
 
     @Override
-    public List<TypeProperty> properties() {
-        return orderedProperties;
+    public Set<TypeProperty> properties() {
+        return set(orderedProperties);
     }
 
     @Override
@@ -138,14 +140,14 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
 
         if (isVisible()) {
             syntax.append(identity.syntax());
-            if (!properties().isEmpty()) {
+            if (!orderedProperties.isEmpty()) {
                 syntax.append(SPACE);
-                syntax.append(properties().stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+                syntax.append(orderedProperties.stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else if (labelProperty().isPresent()) {
             syntax.append(labelProperty().get().label());
-            if (properties().size() > 1) {
-                syntax.append(SPACE).append(properties().stream().filter(p -> !(p instanceof TypeProperty.Label))
+            if (orderedProperties.size() > 1) {
+                syntax.append(SPACE).append(orderedProperties.stream().filter(p -> !(p instanceof TypeProperty.Label))
                                                     .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else {

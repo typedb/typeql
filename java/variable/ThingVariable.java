@@ -22,12 +22,16 @@ import graql.lang.property.ThingProperty;
 import graql.lang.variable.builder.ThingVariableBuilder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static grakn.common.util.Collections.list;
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static java.util.stream.Collectors.joining;
@@ -35,15 +39,13 @@ import static java.util.stream.Collectors.toList;
 
 public abstract class ThingVariable<T extends ThingVariable> extends Variable {
 
-    private final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties;
+    final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties;
     private final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties;
-    private final List<ThingProperty> orderedProperties;
 
     public ThingVariable(Identity identity, ThingProperty property) {
         super(identity);
         this.singularProperties = new HashMap<>();
         this.repeatingProperties = new HashMap<>();
-        this.orderedProperties = new ArrayList<>();
         if (property != null) {
             if (property.isSingular()) asSameThingWith(property.asSingular());
             else asSameThingWith(property.asRepeatable());
@@ -53,8 +55,11 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
     public abstract T getThis();
 
     @Override
-    public List<ThingProperty> properties() {
-        return orderedProperties;
+    public Set<ThingProperty> properties() {
+        return Stream.concat(
+                singularProperties.values().stream(),
+                repeatingProperties.values().stream().flatMap(Collection::stream)
+        ).collect(Collectors.toSet());
     }
 
     @Override
@@ -99,13 +104,11 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
                                                     property.toString());
         }
         singularProperties.put(property.getClass(), property);
-        orderedProperties.add(property);
         return getThis();
     }
 
     public T asSameThingWith(ThingProperty.Repeatable property) {
         repeatingProperties.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
-        orderedProperties.add(property);
         return getThis();
     }
 
@@ -179,6 +182,8 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
 
         @Override
         public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
+            ThingProperty.Relation relProp = singularProperties.get(ThingProperty.Relation.class).asRelation();
+            this.singularProperties.put(ThingProperty.Relation.class, new ThingProperty.Relation(list(relProp.players(), rolePlayer)));
             this.relationProperty.player(rolePlayer);
             return this;
         }

@@ -21,8 +21,8 @@ import graql.lang.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.Property;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public abstract class Variable implements Pattern {
@@ -35,7 +35,7 @@ public abstract class Variable implements Pattern {
 
     public abstract Variable withoutProperties();
 
-    public abstract List<? extends Property> properties();
+    public abstract Set<? extends Property> properties();
 
     public boolean isType() {
         return false;
