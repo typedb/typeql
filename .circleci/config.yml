@@ -103,8 +103,8 @@ jobs:
       - install-bazel
       - checkout
       - run: echo $CIRCLE_SHA1
-      - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$CIRCLE_SHA1/g" test/deployment/pom.xml
-      - run: cd test/deployment/ && mvn test
+      - run: sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$CIRCLE_SHA1/g" java/test/deployment/pom.xml
+      - run: cd java/test/deployment/ && mvn test
 
   sync-dependencies-snapshot:
     machine:

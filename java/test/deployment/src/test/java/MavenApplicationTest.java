@@ -1,3 +1,5 @@
+package graql.lang.test.deployment.src.test.java;
+
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlQuery;
