@@ -222,7 +222,7 @@ public abstract class ThingProperty extends Property {
 
     public static class NEQ extends ThingProperty.Singular {
 
-        private final ThingVariable variable;
+        private final ThingVariable<?> variable;
         private final int hash;
 
         public NEQ(UnscopedVariable var) {
@@ -231,7 +231,7 @@ public abstract class ThingProperty extends Property {
             this.hash = Objects.hash(var);
         }
 
-        public ThingVariable variable() {
+        public ThingVariable<?> variable() {
             return variable;
         }
 
@@ -333,7 +333,7 @@ public abstract class ThingProperty extends Property {
 
             public boolean hasVariable() { return variable() != null;}
 
-            public ThingVariable variable() { return null;}
+            public ThingVariable<?> variable() { return null;}
 
             @Override
             public String toString() {
@@ -482,7 +482,7 @@ public abstract class ThingProperty extends Property {
                     }
 
                     @Override
-                    public ThingVariable variable() { return value().asThing(); }
+                    public ThingVariable<?> variable() { return value().asThing(); }
                 }
             }
         }
@@ -547,7 +547,7 @@ public abstract class ThingProperty extends Property {
         public static class RolePlayer {
 
             private final TypeVariable roleType;
-            private final ThingVariable player;
+            private final ThingVariable<?> player;
             private final int hash;
 
             public RolePlayer(String roleType, UnscopedVariable playerVar) {
@@ -566,7 +566,7 @@ public abstract class ThingProperty extends Property {
                 this(roleTypeArg == null ? null : roleTypeArg.apply(Graql::type, UnscopedVariable::asType), playerVar.asThing());
             }
 
-            private RolePlayer(@Nullable TypeVariable roleType, ThingVariable player) {
+            private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
                 if (player == null) throw new NullPointerException("Null player");
                 this.roleType = roleType;
                 this.player = player;
@@ -577,7 +577,7 @@ public abstract class ThingProperty extends Property {
                 return Optional.ofNullable(roleType);
             }
 
-            public ThingVariable player() {
+            public ThingVariable<?> player() {
                 return player;
             }
 
@@ -604,7 +604,7 @@ public abstract class ThingProperty extends Property {
     public static class Has extends ThingProperty.Repeatable {
 
         private final String type;
-        private final ThingVariable attribute;
+        private final ThingVariable<?> variable;
         private final int hash;
 
         public Has(String type, ThingProperty.Value<?> value) {
@@ -616,24 +616,24 @@ public abstract class ThingProperty extends Property {
         }
 
         // TODO: this need to be made private, and all value comparison builders on Graql API needs to be more strict
-        public Has(String type, ThingVariable attribute) {
-            if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
+        public Has(String type, ThingVariable<?> variable) {
+            if (type == null || variable == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
-            this.attribute = attribute;
-            this.hash = Objects.hash(this.type, this.attribute);
+            this.variable = variable;
+            this.hash = Objects.hash(this.type, this.variable);
         }
 
         public String type() {
             return type;
         }
 
-        public ThingVariable attribute() {
-            return attribute;
+        public ThingVariable<?> variable() {
+            return variable;
         }
 
         @Override
         public Stream<Variable> variables() {
-            return Stream.of(attribute);
+            return Stream.of(variable);
         }
 
         @Override
@@ -643,7 +643,7 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public String toString() {
-            return String.valueOf(HAS) + SPACE + type + SPACE + attribute;
+            return String.valueOf(HAS) + SPACE + type + SPACE + variable;
         }
 
         @Override
@@ -651,7 +651,7 @@ public abstract class ThingProperty extends Property {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Has that = (Has) o;
-            return (type.equals(that.type) && attribute.equals(that.attribute));
+            return (type.equals(that.type) && variable.equals(that.variable));
         }
 
         @Override

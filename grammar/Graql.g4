@@ -23,7 +23,7 @@ grammar Graql;
 eof_query           :   query       EOF ;
 eof_query_list      :   query+      EOF ;
 eof_pattern         :   pattern     EOF ;
-eof_pattern_list    :   pattern+    EOF ;
+eof_pattern_list    :   patterns    EOF ;
 
 // GRAQL QUERY LANGUAGE ========================================================
 
@@ -33,15 +33,15 @@ query               :   query_define    |   query_undefine                      
                     |   query_get_group |   query_get_group_agg
                     |   query_compute   ;                                       // compute analytics over graph (OLAP)
 
-query_define        :   DEFINE      variable_type+ ;
-query_undefine      :   UNDEFINE    variable_type+ ;
+query_define        :   DEFINE      variable_types ;
+query_undefine      :   UNDEFINE    variable_types ;
 
-query_insert        :   MATCH       pattern+    INSERT  variable_thing_any+
-                    |                           INSERT  variable_thing_any+  ;
-query_delete        :   MATCH       pattern+    DELETE  variable_thing_any+  ;  // DELETE QUERY
-query_get           :   MATCH       pattern+    GET     variables   filters  ;  // GET QUERY followed by group fn, and
+query_insert        :   MATCH       patterns      INSERT  variable_things
+                    |                             INSERT  variable_things     ;
+query_delete        :   MATCH       patterns      DELETE  variable_things     ; // DELETE QUERY
+query_get           :   MATCH       patterns      GET     variables  filters  ; // GET QUERY followed by group fn, and
                                                                                 // optionally, an aggregate fn
-query_compute       :   COMPUTE     compute_conditions  ;
+query_compute       :   COMPUTE     compute_conditions                        ;
 
 // GET QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ==============================
 
@@ -53,11 +53,11 @@ query_get_group_agg :   query_get   function_group      function_aggregate ;
 
 variables           :   ( VAR_ ( ',' VAR_ )* )? ';'     ;
 
-filters             :   sort?       offset?     limit?  ;
+filters             :   ( sort ';' )? ( offset ';' )? ( limit ';' )?  ;
 
-sort                :   SORT        VAR_        ORDER_? ';' ;
-offset              :   OFFSET      INTEGER_            ';' ;
-limit               :   LIMIT       INTEGER_            ';' ;
+sort                :   SORT        VAR_        ORDER_? ;
+offset              :   OFFSET      INTEGER_            ;
+limit               :   LIMIT       INTEGER_            ;
 
 
 // GET AGGREGATE QUERY =========================================================
@@ -78,15 +78,15 @@ function_group      :   GROUP   VAR_    ';' ;
 
 // QUERY PATTERNS ==============================================================
 
-patterns            :   pattern+ ;
+patterns            : ( pattern ';' )+      ;
 pattern             :   pattern_variable
                     |   pattern_conjunction
                     |   pattern_disjunction
                     |   pattern_negation
                     ;
-pattern_conjunction :   '{' patterns '}' ';' ;
-pattern_disjunction :   '{' patterns '}'  ( OR '{' patterns '}' )+  ';' ;
-pattern_negation    :   NOT '{' patterns '}' ';' ;
+pattern_conjunction :   '{' patterns '}'                            ;
+pattern_disjunction :   '{' patterns '}'  ( OR '{' patterns '}' )+  ;
+pattern_negation    :   NOT '{' patterns '}'                        ;
 
 // PATTERN STATEMENTS ==========================================================
 
@@ -95,7 +95,8 @@ pattern_variable    :   variable_type
 
 // TYPE STATEMENTS =============================================================
 
-variable_type       :   type        type_property ( ',' type_property )* ';' ;
+variable_types      : ( variable_type ';' )+ ;
+variable_type       :   type        type_property ( ',' type_property )*  ;
 type_property       :   ABSTRACT
                     |   SUB_        type
                     |   KEY         type
@@ -104,27 +105,28 @@ type_property       :   ABSTRACT
                     |   RELATES     type ( AS type )?
                     |   VALUE       value_type
                     |   REGEX       regex
-                    |   WHEN    '{' pattern+              '}'
-                    |   THEN    '{' variable_thing_any+   '}'                   // TODO: remove '+'
+                    |   WHEN    '{' patterns        '}'
+                    |   THEN    '{' variable_things '}'
                     |   TYPE        type_label
                     ;
 
 // INSTANCE STATEMENTS =========================================================
 
+variable_things     : ( variable_thing_any ';' )+ ;
 variable_thing_any  :   variable_thing
                     |   variable_relation
                     |   variable_attribute
                     ;
-variable_thing      :   VAR_                ISA_ type   ( ',' attributes )? ';'
-                    |   VAR_                ID   ID_    ( ',' attributes )? ';'
-                    |   VAR_                NEQ  VAR_                       ';'
-                    |   VAR_                attributes                      ';'
+variable_thing      :   VAR_                ISA_ type   ( ',' attributes )?
+                    |   VAR_                ID   ID_    ( ',' attributes )?
+                    |   VAR_                NEQ  VAR_
+                    |   VAR_                attributes
                     ;
-variable_relation   :   VAR_? relation      ISA_ type   ( ',' attributes )? ';'
-                    |   VAR_? relation      attributes?                     ';'
+variable_relation   :   VAR_? relation      ISA_ type   ( ',' attributes )?
+                    |   VAR_? relation      attributes?
                     ;
-variable_attribute  :   VAR_? value     ISA_ type   ( ',' attributes )? ';'
-                    |   VAR_? value     attributes?                     ';'
+variable_attribute  :   VAR_? value     ISA_ type   ( ',' attributes )?
+                    |   VAR_? value     attributes?
                     ;
 
 // RELATION CONSTRUCT ==========================================================
@@ -159,20 +161,20 @@ containable         :   STRING_ | VAR_  ;
 // A compute query is composed of 3 things:
 // The "compute" keyword followed by a method and optionally a set of input
 
-compute_conditions  :   conditions_count                                        // compute the number of concepts
-                    |   conditions_value                                        // compute statistical values
-                    |   conditions_central                                      // compute density of connected concepts
-                    |   conditions_cluster                                      // compute density of connected concepts
-                    |   conditions_path                                         // compute the paths between concepts
+compute_conditions  :   conditions_count    ';'                                 // compute the number of concepts
+                    |   conditions_value    ';'                                 // compute statistical values
+                    |   conditions_central  ';'                                 // compute density of connected concepts
+                    |   conditions_cluster  ';'                                 // compute density of connected concepts
+                    |   conditions_path     ';'                                 // compute the paths between concepts
                     ;
 compute_method      :   MIN         |   MAX         |   MEDIAN                  // statistical value methods
                     |   MEAN        |   STD         |   SUM
                     ;
-conditions_count    :   COUNT          input_count?                         ';';
-conditions_value    :   compute_method input_value   (',' input_value    )* ';';
-conditions_central  :   CENTRALITY     input_central (',' input_central  )* ';';
-conditions_cluster  :   CLUSTER        input_cluster (',' input_cluster  )* ';';
-conditions_path     :   PATH           input_path    (',' input_path     )* ';';
+conditions_count    :   COUNT          input_count?                           ;
+conditions_value    :   compute_method input_value   (',' input_value    )*   ;
+conditions_central  :   CENTRALITY     input_central (',' input_central  )*   ;
+conditions_cluster  :   CLUSTER        input_cluster (',' input_cluster  )*   ;
+conditions_path     :   PATH           input_path    (',' input_path     )*   ;
 
 input_count         :   compute_scope ;
 input_value         :   compute_scope | compute_target      ;

@@ -49,7 +49,7 @@ public abstract class Variable implements Pattern {
         throw GraqlException.invalidCastException(ThingVariable.class, TypeVariable.class);
     }
 
-    public ThingVariable asThing() {
+    public ThingVariable<?> asThing() {
         throw GraqlException.invalidCastException(TypeVariable.class, ThingVariable.class);
     }
 

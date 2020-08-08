@@ -32,10 +32,10 @@ import static java.util.stream.Collectors.joining;
 public class GraqlDelete extends GraqlQuery {
 
     private final MatchClause match;
-    private final List<ThingVariable> variables;
+    private final List<ThingVariable<?>> variables;
     private final int hash;
 
-    GraqlDelete(MatchClause match, List<ThingVariable> variables) {
+    GraqlDelete(MatchClause match, List<ThingVariable<?>> variables) {
         if (match == null) throw new NullPointerException("Null match");
         if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
 
@@ -59,7 +59,7 @@ public class GraqlDelete extends GraqlQuery {
         return match;
     }
 
-    public List<ThingVariable> variables() {
+    public List<ThingVariable<?>> variables() {
         return variables;
     }
 

@@ -40,18 +40,18 @@ import static java.util.stream.Stream.of;
 
 public class MatchClause {
 
-    private final Conjunction<Pattern> pattern;
+    private final Conjunction<? extends Pattern> pattern;
     private final int hash;
     private List<Variable> vars;
     private List<Variable> varsNamedNoProps;
 
-    public MatchClause(Conjunction<Pattern> pattern) {
+    public MatchClause(Conjunction<? extends Pattern> pattern) {
         if (pattern.patterns().size() == 0) throw GraqlException.noPatterns();
         this.pattern = pattern;
         this.hash = Objects.hash(this.pattern);
     }
 
-    public final Conjunction<Pattern> getPatterns() {
+    public final Conjunction<? extends Pattern> getPatterns() {
         return pattern;
     }
 
@@ -111,7 +111,7 @@ public class MatchClause {
         return new GraqlInsert(this, list(things));
     }
 
-    public final GraqlInsert insert(List<ThingVariable> things) {
+    public final GraqlInsert insert(List<ThingVariable<?>> things) {
         return new GraqlInsert(this, things);
     }
 
@@ -119,11 +119,11 @@ public class MatchClause {
      * @param things, an array of things that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
-    public final GraqlDelete delete(ThingVariable... things) {
+    public final GraqlDelete delete(ThingVariable<?>... things) {
         return new GraqlDelete(this, list(things));
     }
 
-    public final GraqlDelete delete(List<ThingVariable> things) {
+    public final GraqlDelete delete(List<ThingVariable<?>> things) {
         return new GraqlDelete(this, things);
     }
 

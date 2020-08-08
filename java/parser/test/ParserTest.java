@@ -690,7 +690,7 @@ public class ParserTest {
 
     @Test
     public void testParsingPattern() {
-        String pattern = "{ (wife: $a, husband: $b) isa marriage; $a has gender 'male'; $b has gender 'female'; };";
+        String pattern = "{ (wife: $a, husband: $b) isa marriage; $a has gender 'male'; $b has gender 'female'; }";
         Pattern parsed = Graql.parsePattern(pattern);
         Pattern expected = Graql.and(
                 rel("wife", "a").rel("husband", "b").isa("marriage"),

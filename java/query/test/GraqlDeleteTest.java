@@ -42,8 +42,8 @@ public class GraqlDeleteTest {
     private final MatchClause match1 = Graql.match(var("x").isa("movie"));
     private final MatchClause match2 = Graql.match(var("y").isa("movie"));
 
-    private final List<ThingVariable> delete1 = list(var("x").isa("movie"));
-    private final List<ThingVariable> delete2 = list(var("y").isa("movie"));
+    private final List<ThingVariable<?>> delete1 = list(var("x").isa("movie"));
+    private final List<ThingVariable<?>> delete2 = list(var("y").isa("movie"));
 
     @Test
     public void deleteQueriesWithTheSameMatchAndVarsAreEqual() {

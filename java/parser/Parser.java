@@ -130,7 +130,7 @@ public class Parser extends GraqlBaseVisitor {
         return parseQuery(patternString, GraqlParser::eof_pattern, this::visitEof_pattern);
     }
 
-    public Stream<? extends Pattern> parsePatternListEOF(String patternsString) {
+    public List<? extends Pattern> parsePatternListEOF(String patternsString) {
         return parseQuery(patternsString, GraqlParser::eof_pattern_list, this::visitEof_pattern_list);
     }
 
@@ -165,8 +165,8 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Stream<? extends Pattern> visitEof_pattern_list(GraqlParser.Eof_pattern_listContext ctx) {
-        return ctx.pattern().stream().map(this::visitPattern);
+    public List<? extends Pattern> visitEof_pattern_list(GraqlParser.Eof_pattern_listContext ctx) {
+        return visitPatterns(ctx.patterns());
     }
 
     // GRAQL QUERIES ===========================================================
@@ -207,37 +207,37 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDefine visitQuery_define(GraqlParser.Query_defineContext ctx) {
-        return Graql.define(ctx.variable_type().stream().map(this::visitVariable_type).toArray(TypeVariable[]::new));
+        return Graql.define(visitVariable_types(ctx.variable_types()));
     }
 
     @Override
     public GraqlUndefine visitQuery_undefine(GraqlParser.Query_undefineContext ctx) {
-        return Graql.undefine(ctx.variable_type().stream().map(this::visitVariable_type).toArray(TypeVariable[]::new));
+        return Graql.undefine(visitVariable_types(ctx.variable_types()));
+    }
+
+    @Override
+    public List<TypeVariable> visitVariable_types(GraqlParser.Variable_typesContext ctx) {
+        return ctx.variable_type().stream().map(this::visitVariable_type).collect(toList());
     }
 
     @Override
     public GraqlInsert visitQuery_insert(GraqlParser.Query_insertContext ctx) {
-        ThingVariable[] things = ctx.variable_thing_any().stream().map(this::visitVariable_thing_any).toArray(ThingVariable[]::new);
-        if (ctx.pattern() != null && !ctx.pattern().isEmpty()) {
-            List<Pattern> patterns = ctx.pattern().stream().map(this::visitPattern).collect(toList());
-            return Graql.match(patterns).insert(things);
+        if (ctx.patterns() != null) {
+            return Graql.match(visitPatterns(ctx.patterns())).insert(visitVariable_things(ctx.variable_things()));
         } else {
-            return Graql.insert(things);
+            return Graql.insert(visitVariable_things(ctx.variable_things()));
         }
     }
 
     @Override
     public GraqlDelete visitQuery_delete(GraqlParser.Query_deleteContext ctx) {
-        ThingVariable[] things = ctx.variable_thing_any().stream().map(this::visitVariable_thing_any).toArray(ThingVariable[]::new);
-        List<Pattern> patterns = ctx.pattern().stream().map(this::visitPattern).collect(toList());
-        return Graql.match(patterns).delete(things);
+        return Graql.match(visitPatterns(ctx.patterns())).delete(visitVariable_things(ctx.variable_things()));
     }
 
     @Override
     public GraqlGet visitQuery_get(GraqlParser.Query_getContext ctx) {
+        MatchClause match = Graql.match(visitPatterns(ctx.patterns()));
         List<UnscopedVariable> vars = visitVariables(ctx.variables());
-        List<Pattern> patterns = ctx.pattern().stream().map(this::visitPattern).collect(toList());
-        MatchClause match = Graql.match(patterns);
 
         if (ctx.filters().getChildCount() == 0) {
             return match.get(vars);
@@ -303,7 +303,7 @@ public class Parser extends GraqlBaseVisitor {
         );
     }
 
-    // DELETE AND GET QUERY MODIFIERS ==========================================
+    // GET QUERY MODIFIERS ==========================================
 
     @Override
     public List<UnscopedVariable> visitVariables(GraqlParser.VariablesContext ctx) {
@@ -517,7 +517,7 @@ public class Parser extends GraqlBaseVisitor {
         else return not(and(patterns));
     }
 
-    // PATTERN STATEMENTS ======================================================
+    // VARIABLE PATTERNS =======================================================
 
     @Override
     public Variable visitPattern_variable(GraqlParser.Pattern_variableContext ctx) {
@@ -534,7 +534,7 @@ public class Parser extends GraqlBaseVisitor {
         }
     }
 
-    // TYPE STATEMENTS =========================================================
+    // TYPE VARIABLES ==========================================================
 
     @Override
     public TypeVariable visitVariable_type(GraqlParser.Variable_typeContext ctx) {
@@ -570,9 +570,9 @@ public class Parser extends GraqlBaseVisitor {
             } else if (property.REGEX() != null) {
                 type = type.regex(visitRegex(property.regex()));
             } else if (property.WHEN() != null) {
-                type = type.when(and(property.pattern().stream().map(this::visitPattern).collect(toList())));
+                type = type.when(and(visitPatterns(property.patterns())));
             } else if (property.THEN() != null) {
-                type = type.then(and(property.variable_thing_any().stream().map(this::visitVariable_thing_any).collect(toList())));
+                type = type.then(and(visitVariable_things(property.variable_things())));
             } else if (property.TYPE() != null) {
                 type = type.type(visitType_label(property.type_label()));
 
@@ -584,10 +584,15 @@ public class Parser extends GraqlBaseVisitor {
         return type;
     }
 
-    // INSTANCE STATEMENTS =====================================================
+    // THING VARIABLES =========================================================
 
     @Override
-    public ThingVariable visitVariable_thing_any(GraqlParser.Variable_thing_anyContext ctx) {
+    public List<ThingVariable<?>> visitVariable_things(GraqlParser.Variable_thingsContext ctx) {
+        return ctx.variable_thing_any().stream().map(this::visitVariable_thing_any).collect(toList());
+    }
+
+    @Override
+    public ThingVariable<?> visitVariable_thing_any(GraqlParser.Variable_thing_anyContext ctx) {
         if (ctx.variable_thing() != null) {
             return this.visitVariable_thing(ctx.variable_thing());
         } else if (ctx.variable_relation() != null) {

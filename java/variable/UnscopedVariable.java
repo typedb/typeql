@@ -59,7 +59,7 @@ public class UnscopedVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public ThingVariable asThing() {
+    public ThingVariable<?> asThing() {
         return new ThingVariable.Thing(identity, null);
     }
 

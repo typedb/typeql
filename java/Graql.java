@@ -61,8 +61,8 @@ public class Graql {
         return parser.parsePatternEOF(pattern);
     }
 
-    public static List<Pattern> parsePatternList(String pattern) {
-        return parser.parsePatternListEOF(pattern).collect(Collectors.toList());
+    public static List<? extends Pattern> parsePatternList(String pattern) {
+        return parser.parsePatternListEOF(pattern);
     }
 
     /**
@@ -77,7 +77,7 @@ public class Graql {
      * @param patterns a collection of patterns to match in the graph
      * @return a match clause that will find matches of the given patterns
      */
-    public static MatchClause match(List<Pattern> patterns) {
+    public static MatchClause match(List<? extends Pattern> patterns) {
         return new MatchClause(and(patterns));
     }
 
@@ -85,8 +85,12 @@ public class Graql {
      * @param things an array of variable patterns to insert into the graph
      * @return an insert query that will insert the given variable patterns into the graph
      */
-    public static GraqlInsert insert(ThingVariable... things) {
+    public static GraqlInsert insert(ThingVariable<?>... things) {
         return new GraqlInsert(list(things));
+    }
+
+    public static GraqlInsert insert(List<ThingVariable<?>> things) {
+        return new GraqlInsert(things);
     }
 
     /**
@@ -97,12 +101,20 @@ public class Graql {
         return new GraqlDefine(list(types));
     }
 
+    public static GraqlDefine define(List<TypeVariable> types) {
+        return new GraqlDefine(types);
+    }
+
     /**
      * @param types an array of types to undefine the schema
      * @return an undefine query that will remove the changes described in the {@code patterns}
      */
     public static GraqlUndefine undefine(TypeVariable... types) {
         return new GraqlUndefine(list(types));
+    }
+
+    public static GraqlUndefine undefine(List<TypeVariable> types) {
+        return new GraqlUndefine(types);
     }
 
     public static GraqlCompute.Builder compute() {
@@ -115,7 +127,7 @@ public class Graql {
      * @param patterns an array of patterns to match
      * @return a pattern that will match only when all contained patterns match
      */
-    public static Conjunction<Pattern> and(Pattern... patterns) {
+    public static Conjunction<? extends Pattern> and(Pattern... patterns) {
         return and(Arrays.asList(patterns));
     }
 
@@ -123,7 +135,7 @@ public class Graql {
      * @param patterns a collection of patterns to match
      * @return a pattern that will match only when all contained patterns match
      */
-    public static Conjunction<Pattern> and(List<Pattern> patterns) {
+    public static Conjunction<? extends Pattern> and(List<? extends Pattern> patterns) {
         return new Conjunction<>(patterns);
     }
 
@@ -156,10 +168,10 @@ public class Graql {
         return new Negation<>(pattern);
     }
 
-    // Statement Builder Methods
+    // Variable Builder Methods
 
     /**
-     * @return a new statement with an anonymous Variable
+     * @return a new variable with an anonymous Variable
      */
     public static UnscopedVariable var() {
         return UnscopedVariable.anonymous();
@@ -167,7 +179,7 @@ public class Graql {
 
     /**
      * @param name the name of the variable
-     * @return a new statement with a variable of a given name
+     * @return a new variable with a variable of a given name
      */
     public static UnscopedVariable var(String name) {
         return UnscopedVariable.named(name);
@@ -193,7 +205,7 @@ public class Graql {
         return hidden().rel(role, player);
     }
 
-    // Attribute Statement Builder Methods
+    // Attribute Variable Builder Methods
 
     // Attribute value assignment property
 

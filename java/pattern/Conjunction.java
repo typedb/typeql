@@ -60,7 +60,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
         StringBuilder pattern = new StringBuilder();
         pattern.append(CURLY_OPEN).append(SPACE);
         pattern.append(patterns.stream().map(Objects::toString).collect(joining("" + SEMICOLON + SPACE)));
-        pattern.append(SPACE).append(CURLY_CLOSE);
+        pattern.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
         return pattern.toString();
     }
 

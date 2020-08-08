@@ -37,7 +37,7 @@ import static graql.lang.Graql.Token.Char.SPACE;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public abstract class ThingVariable<T extends ThingVariable> extends Variable {
+public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable {
 
     final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties;
     private final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties;
@@ -68,7 +68,7 @@ public abstract class ThingVariable<T extends ThingVariable> extends Variable {
     }
 
     @Override
-    public ThingVariable asThing() {
+    public ThingVariable<?> asThing() {
         return this;
     }
 
