@@ -17,7 +17,7 @@
 
 package graql.lang.variable;
 
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.Property;
 

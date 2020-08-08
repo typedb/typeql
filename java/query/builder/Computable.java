@@ -18,7 +18,7 @@
 package graql.lang.query.builder;
 
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -23,7 +23,7 @@ import graql.grammar.GraqlBaseVisitor;
 import graql.grammar.GraqlLexer;
 import graql.grammar.GraqlParser;
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 import graql.lang.property.ThingProperty;
 import graql.lang.property.TypeProperty;
@@ -63,7 +63,7 @@ import static grakn.common.util.Collections.triple;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.not;
 import static graql.lang.Graql.or;
-import static graql.lang.util.StringUtil.unescapeRegex;
+import static graql.lang.common.util.Strings.unescapeRegex;
 import static graql.lang.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.toList;
 

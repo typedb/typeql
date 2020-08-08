@@ -18,7 +18,7 @@
 package graql.lang.parser.test;
 
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;

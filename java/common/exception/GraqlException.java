@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.exception;
+package graql.lang.common.exception;
 
 
 import graql.lang.Graql;
@@ -25,17 +25,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static graql.lang.exception.ErrorMessage.ILLEGAL_REPETITION;
-import static graql.lang.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
-import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
-import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_CONDITION;
-import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD;
-import static graql.lang.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
-import static graql.lang.exception.ErrorMessage.INVALID_VARIABLE_NAME;
-import static graql.lang.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
-import static graql.lang.exception.ErrorMessage.OVERPRECISE_SECOND_FRACTION;
-import static graql.lang.exception.ErrorMessage.SORTING_NOT_ALLOWED;
-import static graql.lang.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_REPETITION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
+import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_CONDITION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD;
+import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
+import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
+import static graql.lang.common.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
+import static graql.lang.common.exception.ErrorMessage.OVERPRECISE_SECOND_FRACTION;
+import static graql.lang.common.exception.ErrorMessage.SORTING_NOT_ALLOWED;
+import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
 
 // TODO: Refactor this to the style we have in Grakn 2.0
 public class GraqlException extends RuntimeException {

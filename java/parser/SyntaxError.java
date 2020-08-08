@@ -17,7 +17,7 @@
 
 package graql.lang.parser;
 
-import graql.lang.exception.ErrorMessage;
+import graql.lang.common.exception.ErrorMessage;
 
 import java.util.Objects;
 

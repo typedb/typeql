@@ -18,7 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.variable.ThingVariable;

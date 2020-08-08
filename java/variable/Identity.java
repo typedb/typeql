@@ -18,7 +18,7 @@
 package graql.lang.variable;
 
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 
 import java.util.Objects;
 import java.util.regex.Pattern;

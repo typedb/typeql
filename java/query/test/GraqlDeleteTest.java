@@ -18,8 +18,8 @@
 package graql.lang.query.test;
 
 import graql.lang.Graql;
-import graql.lang.exception.ErrorMessage;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.query.GraqlDelete;
 import graql.lang.query.MatchClause;
 import graql.lang.variable.ThingVariable;

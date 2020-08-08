@@ -19,8 +19,8 @@ package graql.lang.property;
 
 import grakn.common.util.Either;
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
-import graql.lang.util.StringUtil;
+import graql.lang.common.exception.GraqlException;
+import graql.lang.common.util.Strings;
 import graql.lang.variable.ThingVariable;
 import graql.lang.variable.TypeVariable;
 import graql.lang.variable.UnscopedVariable;
@@ -43,8 +43,8 @@ import static graql.lang.Graql.Token.Char.SPACE;
 import static graql.lang.Graql.Token.Property.HAS;
 import static graql.lang.Graql.Token.Property.ISA;
 import static graql.lang.Graql.Token.Property.ISAX;
-import static graql.lang.util.StringUtil.escapeRegex;
-import static graql.lang.util.StringUtil.quoteString;
+import static graql.lang.common.util.Strings.escapeRegex;
+import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
@@ -337,7 +337,7 @@ public abstract class ThingProperty extends Property {
 
             @Override
             public String toString() {
-                return comparator.toString() + SPACE + StringUtil.valueToString(value);
+                return comparator.toString() + SPACE + Strings.valueToString(value);
             }
 
             @Override
@@ -360,7 +360,7 @@ public abstract class ThingProperty extends Property {
                 }
 
                 public java.lang.String toString() {
-                    return StringUtil.valueToString(value());
+                    return Strings.valueToString(value());
                 }
 
                 public static class Number<N extends java.lang.Number> extends Assignment<N> {

@@ -18,7 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Filterable;
 import graql.lang.variable.UnscopedVariable;

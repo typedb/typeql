@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.util;
+package graql.lang.common.util;
 
 import graql.grammar.GraqlLexer;
 
@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-public class StringUtil {
+public class Strings {
     private static final Set<String> GRAQL_KEYWORDS = getKeywords();
 
     public static String unescapeRegex(String regex) {

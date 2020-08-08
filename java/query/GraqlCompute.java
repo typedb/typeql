@@ -18,7 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.query.builder.Computable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

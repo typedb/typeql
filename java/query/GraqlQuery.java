@@ -17,7 +17,7 @@
 
 package graql.lang.query;
 
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 
 /**
  * A Graql query of any kind. May read and write to the graph.

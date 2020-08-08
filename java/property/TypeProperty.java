@@ -19,7 +19,7 @@ package graql.lang.property;
 
 import grakn.common.util.Either;
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.variable.TypeVariable;
@@ -47,8 +47,8 @@ import static graql.lang.Graql.Token.Property.THEN;
 import static graql.lang.Graql.Token.Property.TYPE;
 import static graql.lang.Graql.Token.Property.VALUE_TYPE;
 import static graql.lang.Graql.Token.Property.WHEN;
-import static graql.lang.util.StringUtil.escapeRegex;
-import static graql.lang.util.StringUtil.quoteString;
+import static graql.lang.common.util.Strings.escapeRegex;
+import static graql.lang.common.util.Strings.quoteString;
 import static java.util.stream.Collectors.joining;
 
 public abstract class TypeProperty extends Property {

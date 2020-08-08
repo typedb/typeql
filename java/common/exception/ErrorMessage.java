@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.exception;
+package graql.lang.common.exception;
 
 public enum ErrorMessage {
     SYNTAX_ERROR_NO_POINTER("syntax error at line %s:\n%s"),
