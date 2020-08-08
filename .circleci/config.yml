@@ -220,18 +220,12 @@ workflows:
               only: master
           requires:
             - deploy-maven-snapshot
-      - sync-dependencies-snapshot:
-          filters:
-            branches:
-              only: master
-          requires:
-            - test-deployment-maven
       - release-approval:
           filters:
             branches:
               only: master
           requires:
-            - sync-dependencies-snapshot
+            - test-deployment-maven
   graql-release:
     jobs:
       - release-validate:
@@ -257,15 +251,9 @@ workflows:
               only: graql-release-branch
           requires:
             - deploy-approval
-      - sync-dependencies-release:
-          filters:
-            branches:
-              only: graql-release-branch
-          requires:
-            - deploy-maven-release
       - release-cleanup:
           filters:
             branches:
               only: graql-release-branch
           requires:
-            - sync-dependencies-release
+            - deploy-maven-release
