@@ -30,6 +30,7 @@ java_library(
         # Internal Repository Dependencies
         "@graknlabs_common//:common",
     ],
+    tags = ["maven_coordinates=io.graql:graql-common:{pom_version}"],
 )
 
 checkstyle_test(
