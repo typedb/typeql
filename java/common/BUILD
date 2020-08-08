@@ -18,43 +18,22 @@
 package(default_visibility = ["//visibility:public"])
 
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 
 java_library(
-    name = "graql",
-    srcs = glob(["**/*.java"], exclude = ["**/test/**"]),
+    name = "common",
+    srcs = glob([
+        "exception/*.java",
+        "util/*.java",
+    ]),
     deps = [
-        # Internal Package Dependencies
-        "//grammar:java",
-        "//java/common:common",
-
         # Internal Repository Dependencies
         "@graknlabs_common//:common",
-
-        # External dependencies
-        "@maven//:com_google_guava_guava",
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
-        "@maven//:org_slf4j_slf4j_api",
     ],
-    tags = ["maven_coordinates=io.graql:graql-lang:{pom_version}"],
-)
-
-assemble_maven(
-  name = "assemble-maven",
-  target = ":graql",
-  package = "java",
-  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
-)
-
-deploy_maven(
-    name = "deploy-maven",
-    target = ":assemble-maven",
 )
 
 checkstyle_test(
     name = "checkstyle",
     targets = [
-        ":graql",
+        ":common",
     ],
 )

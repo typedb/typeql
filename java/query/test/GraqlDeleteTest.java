@@ -63,21 +63,21 @@ public class GraqlDeleteTest {
     @Test
     public void deleteQueryWithNewUnboundVariablesThrows() {
         exception.expect(GraqlException.class);
-        exception.expectMessage("the variable [$y] is out of scope of the query");
+        exception.expectMessage("The variable '$y' is out of scope of the query.");
         GraqlDelete query = match1.delete(delete2);
     }
 
     @Test
     public void deleteQueryWithoutVariablesThrows() {
         exception.expect(GraqlException.class);
-        exception.expectMessage(ErrorMessage.NO_PATTERNS.getMessage());
+        exception.expectMessage(ErrorMessage.MISSING_PATTERNS.message());
         GraqlDelete query = match1.delete(new ArrayList<>());
     }
 
     @Test
     public void deleteQueryWithBuilderWithoutVariablesThrows() {
         exception.expect(GraqlException.class);
-        exception.expectMessage(ErrorMessage.NO_PATTERNS.getMessage());
+        exception.expectMessage(ErrorMessage.MISSING_PATTERNS.message());
         GraqlDelete query = match1.delete();
     }
 }

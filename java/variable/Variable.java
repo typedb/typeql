@@ -25,6 +25,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+
 public abstract class Variable implements Pattern {
 
     final Identity identity;
@@ -46,11 +48,15 @@ public abstract class Variable implements Pattern {
     }
 
     public TypeVariable asType() {
-        throw GraqlException.invalidCastException(ThingVariable.class, TypeVariable.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                ThingVariable.class.getCanonicalName(), TypeVariable.class.getCanonicalName()
+        ));
     }
 
     public ThingVariable<?> asThing() {
-        throw GraqlException.invalidCastException(TypeVariable.class, ThingVariable.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeVariable.class.getCanonicalName(), ThingVariable.class.getCanonicalName()
+        ));
     }
 
     public Stream<Variable> variables() {

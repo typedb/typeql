@@ -47,6 +47,7 @@ import static graql.lang.Graql.Token.Property.THEN;
 import static graql.lang.Graql.Token.Property.TYPE;
 import static graql.lang.Graql.Token.Property.VALUE_TYPE;
 import static graql.lang.Graql.Token.Property.WHEN;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static java.util.stream.Collectors.joining;
@@ -62,51 +63,75 @@ public abstract class TypeProperty extends Property {
     }
 
     public TypeProperty.Singular asSingular() {
-        throw GraqlException.invalidCastException(TypeProperty.Repeatable.class, TypeProperty.Singular.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Repeatable asRepeatable() {
-        throw GraqlException.invalidCastException(TypeProperty.Singular.class, TypeProperty.Repeatable.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), Repeatable.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Label asLabel() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Label.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Label.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Sub asSub() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Sub.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Sub.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Abstract asAbstract() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Abstract.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Abstract.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.ValueType asValueType() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.ValueType.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), ValueType.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Regex asRegex() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Regex.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Regex.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Then asThen() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Then.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Then.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.When asWhen() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.When.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), When.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Has asHas() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Has.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Has.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Plays asPlays() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Plays.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Plays.class.getCanonicalName()
+        ));
     }
 
     public TypeProperty.Relates asRelates() {
-        throw GraqlException.invalidCastException(TypeProperty.class, TypeProperty.Relates.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                TypeProperty.class.getCanonicalName(), Relates.class.getCanonicalName()
+        ));
     }
 
     public static abstract class Singular extends TypeProperty {

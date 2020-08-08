@@ -34,6 +34,7 @@ java_test(
     srcs = ["GraqlDeleteTest.java"],
     deps = [
         "//java:graql",
+        "//java/common:common",
         "@graknlabs_common//:common",
     ],
     size = "small"

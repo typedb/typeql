@@ -23,6 +23,9 @@ import graql.lang.common.exception.GraqlException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
+
 abstract class Identity {
 
     protected final Type type;
@@ -58,15 +61,21 @@ abstract class Identity {
     }
 
     Identity.Name asNamed() {
-        throw GraqlException.invalidCastException(this.getClass(), Name.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                this.getClass().getCanonicalName(), Name.class.getCanonicalName()
+        ));
     }
 
     Identity.Label asLabel() {
-        throw GraqlException.invalidCastException(this.getClass(), Label.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                this.getClass().getCanonicalName(), Label.class.getCanonicalName()
+        ));
     }
 
     Identity.Anonymous asAnonymous() {
-        throw GraqlException.invalidCastException(this.getClass(), Identity.Anonymous.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                this.getClass().getCanonicalName(), Anonymous.class.getCanonicalName()
+        ));
     }
 
     @Override
@@ -92,7 +101,8 @@ abstract class Identity {
 
         private Name(String name, boolean isVisible) {
             super(Type.NAME, isVisible);
-            if (!REGEX.matcher(name).matches()) throw GraqlException.invalidVariableName(name, REGEX.toString());
+            if (!REGEX.matcher(name).matches())
+                throw GraqlException.create(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
             this.name = name;
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }

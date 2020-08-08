@@ -18,6 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.Graql;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
@@ -46,7 +47,7 @@ public class MatchClause {
     private List<Variable> varsNamedNoProps;
 
     public MatchClause(Conjunction<? extends Pattern> pattern) {
-        if (pattern.patterns().size() == 0) throw GraqlException.noPatterns();
+        if (pattern.patterns().size() == 0) throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
         this.pattern = pattern;
         this.hash = Objects.hash(this.pattern);
     }

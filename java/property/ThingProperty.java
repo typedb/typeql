@@ -43,6 +43,8 @@ import static graql.lang.Graql.Token.Char.SPACE;
 import static graql.lang.Graql.Token.Property.HAS;
 import static graql.lang.Graql.Token.Property.ISA;
 import static graql.lang.Graql.Token.Property.ISAX;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_PROPERTY_DATETIME_PRECISION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.variable.UnscopedVariable.hidden;
@@ -59,35 +61,51 @@ public abstract class ThingProperty extends Property {
     }
 
     public ThingProperty.Singular asSingular() {
-        throw GraqlException.invalidCastException(ThingProperty.Repeatable.class, ThingProperty.Singular.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
+        ));
     }
 
     public ThingProperty.Repeatable asRepeatable() {
-        throw GraqlException.invalidCastException(ThingProperty.Singular.class, ThingProperty.Repeatable.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), Repeatable.class.getCanonicalName()
+        ));
     }
 
     public ThingProperty.ID asID() {
-        throw GraqlException.invalidCastException(ThingProperty.Singular.class, ThingProperty.ID.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), ID.class.getCanonicalName()
+        ));
     }
 
     public ThingProperty.Isa asIsa() {
-        throw GraqlException.invalidCastException(ThingProperty.Singular.class, ThingProperty.Isa.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), Isa.class.getCanonicalName()
+        ));
     }
 
     public ThingProperty.NEQ asNEQ() {
-        throw GraqlException.invalidCastException(ThingProperty.Singular.class, ThingProperty.NEQ.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), NEQ.class.getCanonicalName()
+        ));
     }
 
     public ThingProperty.Value<?> asValue() {
-        throw GraqlException.invalidCastException(ThingProperty.Singular.class, ThingProperty.Value.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), Value.class.getCanonicalName()
+        ));
     }
 
     public ThingProperty.Relation asRelation() {
-        throw GraqlException.invalidCastException(ThingProperty.Singular.class, ThingProperty.Relation.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), Relation.class.getCanonicalName()
+        ));
     }
 
     public ThingProperty.Has asHas() {
-        throw GraqlException.invalidCastException(ThingProperty.Singular.class, ThingProperty.Has.class);
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                Singular.class.getCanonicalName(), Has.class.getCanonicalName()
+        ));
     }
 
     public static abstract class Singular extends ThingProperty {
@@ -394,7 +412,7 @@ public abstract class ThingProperty extends Property {
                         long nanosPerMilli = 1000000L;
                         long remainder = nanos % nanosPerMilli;
                         if (remainder != 0) {
-                            throw GraqlException.subsecondPrecisionTooPrecise(value);
+                            throw GraqlException.create(INVALID_PROPERTY_DATETIME_PRECISION.message(value));
                         }
                     }
                 }

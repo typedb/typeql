@@ -18,6 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.Graql;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.variable.ThingVariable;
 
@@ -27,6 +28,7 @@ import java.util.Objects;
 import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.Token.Char.NEW_LINE;
 import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
 import static java.util.stream.Collectors.joining;
 
 public class GraqlDelete extends GraqlQuery {
@@ -37,15 +39,16 @@ public class GraqlDelete extends GraqlQuery {
 
     GraqlDelete(MatchClause match, List<ThingVariable<?>> variables) {
         if (match == null) throw new NullPointerException("Null match");
-        if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
+        if (variables == null || variables.isEmpty())
+            throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
 
         variables.forEach(var -> {
             if (var.isNamed() && !match.variablesNamedNoProps().contains(var.withoutProperties())) {
-                throw GraqlException.variableOutOfScope(var.withoutProperties().toString());
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.withoutProperties().toString()));
             }
             var.variables().forEach(nestedVar -> {
                 if (nestedVar.isNamed() && !match.variablesNamedNoProps().contains(nestedVar.withoutProperties())) {
-                    throw GraqlException.variableOutOfScope(nestedVar.withoutProperties().toString());
+                    throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(nestedVar.withoutProperties().toString()));
                 }
             });
         });

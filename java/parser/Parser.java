@@ -55,7 +55,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -71,6 +74,21 @@ import static java.util.stream.Collectors.toList;
  * Graql query string parser to produce Graql Java objects
  */
 public class Parser extends GraqlBaseVisitor {
+
+    private static final Set<String> GRAQL_KEYWORDS = getKeywords();
+
+    private static Set<String> getKeywords() {
+        HashSet<String> keywords = new HashSet<>();
+
+        for (int i = 1; i <= GraqlLexer.VOCABULARY.getMaxTokenType(); i++) {
+            if (GraqlLexer.VOCABULARY.getLiteralName(i) != null) {
+                String name = GraqlLexer.VOCABULARY.getLiteralName(i);
+                keywords.add(name.replaceAll("'", ""));
+            }
+        }
+
+        return Collections.unmodifiableSet(keywords);
+    }
 
     private <CONTEXT extends ParserRuleContext, RETURN> RETURN parseQuery(
             String queryString, Function<GraqlParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor

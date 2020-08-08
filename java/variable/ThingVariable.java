@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.SPACE;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -99,9 +100,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
 
     public T asSameThingWith(ThingProperty.Singular property) {
         if (singularProperties.containsKey(property.getClass())) {
-            throw GraqlException.illegalRepetitions(withoutProperties().toString(),
-                                                    singularProperties.get(property.getClass()).toString(),
-                                                    property.toString());
+            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(
+                    withoutProperties().toString(),
+                    singularProperties.get(property.getClass()).toString(),
+                    property.toString()
+            ));
         }
         singularProperties.put(property.getClass(), property);
         return getThis();

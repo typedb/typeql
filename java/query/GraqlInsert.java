@@ -18,6 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.Graql;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.variable.ThingVariable;
 
@@ -41,7 +42,8 @@ public class GraqlInsert extends GraqlQuery {
     }
 
     GraqlInsert(@Nullable MatchClause match, List<ThingVariable<?>> variables) {
-        if (variables == null || variables.isEmpty()) throw GraqlException.noPatterns();
+        if (variables == null || variables.isEmpty())
+            throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
         this.match = match;
         this.variables = list(variables);
         this.hash = Objects.hash(this.match, this.variables);

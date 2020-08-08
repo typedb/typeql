@@ -17,17 +17,11 @@
 
 package graql.lang.common.util;
 
-import graql.grammar.GraqlLexer;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 public class Strings {
-    private static final Set<String> GRAQL_KEYWORDS = getKeywords();
 
     public static String unescapeRegex(String regex) {
         return regex.replaceAll("\\\\/", "/");
@@ -43,22 +37,6 @@ public class Strings {
      */
     public static String quoteString(String string) {
         return "\"" + string + "\"";
-    }
-
-    /**
-     * @return all Graql keywords
-     */
-    private static Set<String> getKeywords() {
-        HashSet<String> keywords = new HashSet<>();
-
-        for (int i = 1; i <= GraqlLexer.VOCABULARY.getMaxTokenType(); i++) {
-            if (GraqlLexer.VOCABULARY.getLiteralName(i) != null) {
-                String name = GraqlLexer.VOCABULARY.getLiteralName(i);
-                keywords.add(name.replaceAll("'", ""));
-            }
-        }
-
-        return Collections.unmodifiableSet(keywords);
     }
 
     /**

@@ -37,6 +37,9 @@ import java.util.function.Supplier;
 import static grakn.common.collection.Collections.map;
 import static grakn.common.collection.Collections.pair;
 import static grakn.common.collection.Collections.set;
+import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
+import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
+import static graql.lang.common.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
 import static java.util.stream.Collectors.joining;
 
 
@@ -328,9 +331,9 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             @Override
             public Optional<GraqlException> getException() {
                 if (ofTypes == null) {
-                    return Optional.of(GraqlException.invalidComputeQuery_missingCondition(
+                    return Optional.of(GraqlException.create(MISSING_COMPUTE_CONDITION.message(
                             this.method(), conditionsRequired()
-                    ));
+                    )));
                 } else {
                     return Optional.empty();
                 }
@@ -409,9 +412,9 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         @Override
         public Optional<GraqlException> getException() {
             if (fromID == null || toID == null) {
-                return Optional.of(GraqlException.invalidComputeQuery_missingCondition(
+                return Optional.of(GraqlException.create(MISSING_COMPUTE_CONDITION.message(
                         this.method(), conditionsRequired()
-                ));
+                )));
             } else {
                 return Optional.empty();
             }
@@ -507,15 +510,15 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         @Override
         public Optional<GraqlException> getException() {
             if (!algorithmsAccepted().contains(using())) {
-                return Optional.of(GraqlException.invalidComputeQuery_invalidMethodAlgorithm(method(), algorithmsAccepted()));
+                return Optional.of(GraqlException.create(INVALID_COMPUTE_METHOD_ALGORITHM.message(method(), algorithmsAccepted())));
             }
 
             // Check that the provided arguments are accepted for the current query method and algorithm
             for (Graql.Token.Compute.Param param : this.where().getParameters()) {
                 if (!argumentsAccepted().get(this.using()).contains(param)) {
-                    return Optional.of(GraqlException.invalidComputeQuery_invalidArgument(
+                    return Optional.of(GraqlException.create(INVALID_COMPUTE_ARGUMENT.message(
                             this.method(), this.using(), argumentsAccepted().get(this.using())
-                    ));
+                    )));
                 }
             }
 

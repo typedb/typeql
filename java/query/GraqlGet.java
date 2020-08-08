@@ -33,6 +33,7 @@ import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.NEW_LINE;
 import static graql.lang.Graql.Token.Char.SEMICOLON;
 import static graql.lang.Graql.Token.Char.SPACE;
+import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
 import static java.util.stream.Collectors.joining;
 
 public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<GraqlGet.Aggregate> {
@@ -58,11 +59,11 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         if (vars == null) throw new NullPointerException("Null vars");
         for (UnscopedVariable var : vars) {
             if (!match.variablesNamedNoProps().contains(var))
-                throw GraqlException.variableOutOfScope(var.toString());
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
         }
         List<? extends Variable> sortableVars = vars.isEmpty() ? match.variablesNamedNoProps() : vars;
         if (sorting != null && !sortableVars.contains(sorting.var())) {
-            throw GraqlException.variableOutOfScope(sorting.var().toString());
+            throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
         }
 
         this.match = match;
@@ -239,7 +240,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             } else if (var != null && method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                 throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
             } else if (var != null && !query.variables().contains(var)) {
-                throw GraqlException.variableOutOfScope(var.toString());
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
             }
 
             this.query = query;
@@ -299,7 +300,8 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         Group(GraqlGet query, UnscopedVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
-            else if (!query.variables().contains(var)) throw GraqlException.variableOutOfScope(var.toString());
+            else if (!query.variables().contains(var))
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
 
             this.query = query;
             this.var = var;
@@ -361,7 +363,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 } else if (var != null && method.equals(Graql.Token.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
                 } else if (var != null && !group.query().variables().contains(var)) {
-                    throw GraqlException.variableOutOfScope(var.toString());
+                    throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
                 }
 
                 this.group = group;

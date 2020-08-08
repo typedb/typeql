@@ -17,9 +17,10 @@
 
 package graql.lang.parser;
 
-import graql.lang.common.exception.ErrorMessage;
-
 import java.util.Objects;
+
+import static graql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_DETAILED;
+import static graql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_NO_DETAILS;
 
 public class SyntaxError {
 
@@ -50,7 +51,7 @@ public class SyntaxError {
     @Override
     public String toString() {
         if (queryLine == null) {
-            return ErrorMessage.SYNTAX_ERROR_NO_POINTER.getMessage(line, msg);
+            return SYNTAX_ERROR_NO_DETAILS.message(line, msg);
         } else {
             // Error message appearance:
             //
@@ -59,7 +60,7 @@ public class SyntaxError {
             //       ^
             // blah blah antlr blah
             String pointer = spaces(charPositionInLine) + "^";
-            return ErrorMessage.SYNTAX_ERROR.getMessage(line, queryLine, pointer, msg);
+            return SYNTAX_ERROR_DETAILED.message(line, queryLine, pointer, msg);
         }
     }
 

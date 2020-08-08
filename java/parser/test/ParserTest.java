@@ -312,7 +312,7 @@ public class ParserTest {
     @Test
     public void whenParsingDateTime_ErrorWhenHandlingOverPreciseNanos() {
         exception.expect(GraqlException.class);
-        exception.expectMessage(Matchers.containsString("has sub-millisecond precision time"));
+        exception.expectMessage(Matchers.containsString("more precise than 1 millisecond"));
         GraqlGet apiQuery = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000))).get();
     }
 

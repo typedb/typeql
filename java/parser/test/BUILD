@@ -23,6 +23,7 @@ java_test(
     srcs = ["ParserTest.java"],
     deps = [
         "//java:graql",
+        "//java/common:common",
         "@graknlabs_common//:common",
         "@maven//:org_hamcrest_hamcrest_library",
     ],
