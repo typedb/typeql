@@ -24,7 +24,6 @@ java_test(
     deps = [
         "//java:graql",
         "//java/common:common",
-        "//java/pattern:pattern",
         "//java/query:query",
     ],
     size = "small"
