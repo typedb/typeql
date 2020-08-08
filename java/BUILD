@@ -28,6 +28,7 @@ java_library(
         "//grammar:java",
         "//java/common:common",
         "//java/pattern:pattern",
+        "//java/query:query",
 
         # Internal Repository Dependencies
         "@graknlabs_common//:common",

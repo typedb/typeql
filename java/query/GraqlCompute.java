@@ -17,12 +17,10 @@
 
 package graql.lang.query;
 
-import graql.lang.common.exception.GraqlException;
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.query.builder.Computable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,8 +46,6 @@ import static java.util.stream.Collectors.joining;
  * Graql Compute Query: to perform distributed analytics OLAP computation on Grakn
  */
 public abstract class GraqlCompute extends GraqlQuery implements Computable {
-    private static Logger LOG = LoggerFactory.getLogger(GraqlCompute.class);
-
 
     private GraqlToken.Compute.Method method;
     boolean includeAttributes;
@@ -258,7 +254,6 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
             @Override
             public GraqlCompute.Statistics.Count attributes(boolean include) {
-                LOG.warn("Attributes are always included in Compute Count queries unless scoped, ignoring");
                 return this;
             }
 
@@ -320,7 +315,6 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
             @Override
             public GraqlCompute.Statistics.Value attributes(boolean include) {
-                LOG.warn("Attributes are always included in Compute Statistics queries unless scoped, ignoring");
                 return this;
             }
 

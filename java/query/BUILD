@@ -15,54 +15,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+package(default_visibility = ["//visibility:public"])
+
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
-java_test(
-    name = "graql-query-test",
-    test_class = "graql.lang.query.test.GraqlQueryTest",
-    srcs = ["GraqlQueryTest.java"],
+java_library(
+    name = "query",
+    srcs = glob([
+        "*.java",
+        "builder/*.java",
+    ]),
     deps = [
-        "//java:graql",
+        # Internal Package Dependencies
         "//java/common:common",
         "//java/pattern:pattern",
-        "//java/query:query",
-    ],
-    size = "small"
-)
 
-
-java_test(
-    name = "graql-delete-test",
-    test_class = "graql.lang.query.test.GraqlDeleteTest",
-    srcs = ["GraqlDeleteTest.java"],
-    deps = [
-        "//java:graql",
-        "//java/common:common",
-        "//java/pattern:pattern",
-        "//java/query:query",
+        # Internal Repository Dependencies
         "@graknlabs_common//:common",
-    ],
-    size = "small"
-)
 
-java_test(
-    name = "graql-insert-test",
-    test_class = "graql.lang.query.test.GraqlInsertTest",
-    srcs = ["GraqlInsertTest.java"],
-    deps = [
-        "//java:graql",
-        "//java/pattern:pattern",
-        "//java/query:query",
-        "@graknlabs_common//:common",
+        # External dependencies
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
-    size = "small"
+    tags = ["maven_coordinates=io.graql:graql-query:{pom_version}"],
 )
 
 checkstyle_test(
     name = "checkstyle",
     targets = [
-        ":graql-query-test",
-        ":graql-delete-test",
-        ":graql-insert-test",
-    ]
+        ":query",
+    ],
 )
