@@ -20,21 +20,28 @@ package(default_visibility = ["//visibility:public"])
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
-    name = "common",
+    name = "pattern",
     srcs = glob([
         "*.java",
-        "exception/*.java",
-        "util/*.java",
+        "property/*.java",
+        "variable/*.java",
+        "variable/builder/*.java",
     ]),
     deps = [
+        # Internal Package Dependencies
+        "//java/common:common",
+
         # Internal Repository Dependencies
         "@graknlabs_common//:common",
+
+        # External dependencies
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
 checkstyle_test(
     name = "checkstyle",
     targets = [
-        ":common",
+        ":pattern",
     ],
 )

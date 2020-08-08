@@ -17,8 +17,8 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.UnscopedVariable;
 import graql.lang.pattern.variable.Variable;
 import graql.lang.query.builder.Aggregatable;
@@ -29,10 +29,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.Graql.Token.Char.COMMA_SPACE;
-import static graql.lang.Graql.Token.Char.NEW_LINE;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
-import static graql.lang.Graql.Token.Char.SPACE;
+import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
 import static java.util.stream.Collectors.joining;
 
@@ -79,7 +79,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     }
 
     @Override
-    public Aggregate aggregate(Graql.Token.Aggregate.Method method, UnscopedVariable var) {
+    public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnscopedVariable var) {
         return new Aggregate(this, method, var);
     }
 
@@ -121,7 +121,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         if (match().getPatterns().patterns().size() > 1) query.append(NEW_LINE);
         else query.append(SPACE);
 
-        query.append(Graql.Token.Command.GET);
+        query.append(GraqlToken.Command.GET);
         if (!vars.isEmpty()) { // Which is not equal to !vars().isEmpty()
             String varsStr = vars.stream().map(UnscopedVariable::toString).collect(joining(COMMA_SPACE.toString()));
             query.append(SPACE).append(varsStr);
@@ -226,18 +226,18 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     public static class Aggregate extends GraqlQuery {
 
         private final GraqlGet query;
-        private final Graql.Token.Aggregate.Method method;
+        private final GraqlToken.Aggregate.Method method;
         private final UnscopedVariable var;
         private final int hash;
 
-        Aggregate(GraqlGet query, Graql.Token.Aggregate.Method method, UnscopedVariable var) {
+        Aggregate(GraqlGet query, GraqlToken.Aggregate.Method method, UnscopedVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
 
-            if (var == null && !method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+            if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new NullPointerException("Variable is null");
-            } else if (var != null && method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+            } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
             } else if (var != null && !query.variables().contains(var)) {
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
@@ -253,7 +253,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             return query;
         }
 
-        public Graql.Token.Aggregate.Method method() {
+        public GraqlToken.Aggregate.Method method() {
             return method;
         }
 
@@ -317,7 +317,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
 
         @Override
-        public Aggregate aggregate(Graql.Token.Aggregate.Method method, UnscopedVariable var) {
+        public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnscopedVariable var) {
             return new Aggregate(this, method, var);
         }
 
@@ -326,7 +326,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             StringBuilder query = new StringBuilder();
 
             query.append(query()).append(SPACE)
-                    .append(Graql.Token.Command.GROUP).append(SPACE)
+                    .append(GraqlToken.Command.GROUP).append(SPACE)
                     .append(var).append(SEMICOLON);
 
             return query.toString();
@@ -351,16 +351,16 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         public static class Aggregate extends GraqlQuery {
 
             private final GraqlGet.Group group;
-            private final Graql.Token.Aggregate.Method method;
+            private final GraqlToken.Aggregate.Method method;
             private final UnscopedVariable var;
             private final int hash;
 
-            Aggregate(GraqlGet.Group group, Graql.Token.Aggregate.Method method, UnscopedVariable var) {
+            Aggregate(GraqlGet.Group group, GraqlToken.Aggregate.Method method, UnscopedVariable var) {
                 if (group == null) throw new NullPointerException("GraqlGet.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
-                if (var == null && !method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+                if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new NullPointerException("Variable is null");
-                } else if (var != null && method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+                } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
                 } else if (var != null && !group.query().variables().contains(var)) {
                     throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
@@ -376,7 +376,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 return group;
             }
 
-            public Graql.Token.Aggregate.Method method() {
+            public GraqlToken.Aggregate.Method method() {
                 return method;
             }
 
@@ -389,7 +389,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 StringBuilder query = new StringBuilder();
 
                 query.append(group().query()).append(SPACE)
-                        .append(Graql.Token.Command.GROUP).append(SPACE)
+                        .append(GraqlToken.Command.GROUP).append(SPACE)
                         .append(group().var()).append(SEMICOLON).append(SPACE)
                         .append(method);
 

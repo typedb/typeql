@@ -21,11 +21,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
-import static graql.lang.Graql.Token.Char.CURLY_OPEN;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
-import static graql.lang.Graql.Token.Char.SPACE;
-import static graql.lang.Graql.Token.Operator.OR;
+import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
+import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.GraqlToken.Operator.OR;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 

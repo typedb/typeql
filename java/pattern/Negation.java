@@ -17,14 +17,14 @@
 
 package graql.lang.pattern;
 
-import graql.lang.Graql;
+import graql.lang.common.GraqlToken;
 
 import java.util.Objects;
 
-import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
-import static graql.lang.Graql.Token.Char.CURLY_OPEN;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
-import static graql.lang.Graql.Token.Char.SPACE;
+import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
+import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
 
 /**
  * A class representing a negation of patterns. All inner patterns must not match in a query.
@@ -64,7 +64,7 @@ public class Negation<T extends Pattern> implements Pattern {
     @Override
     public String toString() {
         StringBuilder negation = new StringBuilder();
-        negation.append(Graql.Token.Operator.NOT).append(SPACE);
+        negation.append(GraqlToken.Operator.NOT).append(SPACE);
 
         if (pattern instanceof Conjunction<?>) {
             negation.append(pattern.toString());

@@ -19,6 +19,7 @@ package graql.lang.parser.test;
 
 import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlArg;
 import graql.lang.pattern.Pattern;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
@@ -39,8 +40,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
-import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
+import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
+import static graql.lang.common.GraqlArg.Algorithm.K_CORE;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.define;
 import static graql.lang.Graql.gte;
@@ -632,7 +633,7 @@ public class ParserTest {
     public void testMatchValueTypeQuery() {
         String query = "match $x value double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueType.DOUBLE)).get();
+        GraqlGet expected = match(var("x").value(GraqlArg.ValueType.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -650,7 +651,7 @@ public class ParserTest {
     public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
         String query = "match $x value datetime; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueType.DATETIME)).get();
+        GraqlGet expected = match(var("x").value(GraqlArg.ValueType.DATETIME)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -659,7 +660,7 @@ public class ParserTest {
     public void testDefineValueTypeQuery() {
         String query = "define my-type sub attribute, value long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
-        GraqlDefine expected = define(type("my-type").sub("attribute").value(Graql.Token.ValueType.LONG));
+        GraqlDefine expected = define(type("my-type").sub("attribute").value(GraqlArg.ValueType.LONG));
 
         assertQueryEquals(expected, parsed, query);
     }

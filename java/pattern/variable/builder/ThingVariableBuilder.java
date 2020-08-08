@@ -17,7 +17,7 @@
 
 package graql.lang.pattern.variable.builder;
 
-import graql.lang.Graql;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnscopedVariable;
@@ -25,11 +25,11 @@ import graql.lang.pattern.variable.UnscopedVariable;
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 
-import static graql.lang.Graql.var;
+import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 
 public interface ThingVariableBuilder<T> {
 
-    default T isa(Graql.Token.Type type) {
+    default T isa(GraqlToken.Type type) {
         return isa(type.toString());
     }
 
@@ -41,7 +41,7 @@ public interface ThingVariableBuilder<T> {
         return asSameThingWith(new ThingProperty.Isa(var, false));
     }
 
-    default T isaX(Graql.Token.Type type) {
+    default T isaX(GraqlToken.Type type) {
         return isa(type.toString());
     }
 
@@ -54,23 +54,23 @@ public interface ThingVariableBuilder<T> {
     }
 
     default T has(String type, long value) {
-        return has(type, Graql.val(value));
+        return has(type, hidden().val(value));
     }
 
     default T has(String type, double value) {
-        return has(type, Graql.val(value));
+        return has(type, hidden().val(value));
     }
 
     default T has(String type, boolean value) {
-        return has(type, Graql.val(value));
+        return has(type, hidden().val(value));
     }
 
     default T has(String type, String value) {
-        return has(type, Graql.val(value));
+        return has(type, hidden().val(value));
     }
 
     default T has(String type, LocalDateTime value) {
-        return has(type, Graql.val(value));
+        return has(type, hidden().val(value));
     }
 
     default T has(String type, UnscopedVariable variable) {
@@ -92,7 +92,7 @@ public interface ThingVariableBuilder<T> {
         }
 
         default ThingVariable.Thing not(String var) {
-            return not(var(var));
+            return not(UnscopedVariable.named(var));
         }
 
         default ThingVariable.Thing not(UnscopedVariable var) {
@@ -105,7 +105,7 @@ public interface ThingVariableBuilder<T> {
     interface Relation {
 
         default ThingVariable.Relation rel(String playerVar) {
-            return rel(var(playerVar));
+            return rel(UnscopedVariable.named(playerVar));
         }
 
         default ThingVariable.Relation rel(UnscopedVariable playerVar) {
@@ -113,7 +113,7 @@ public interface ThingVariableBuilder<T> {
         }
 
         default ThingVariable.Relation rel(String roleType, String playerVar) {
-            return relation(new ThingProperty.Relation.RolePlayer(roleType, var(playerVar)));
+            return relation(new ThingProperty.Relation.RolePlayer(roleType, UnscopedVariable.named(playerVar)));
         }
 
         default ThingVariable.Relation rel(String roleType, UnscopedVariable playerVar) {
@@ -182,8 +182,8 @@ public interface ThingVariableBuilder<T> {
             return eq(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute eq(BiFunction<Graql.Token.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
-            return operation(constructor.apply(Graql.Token.Comparator.EQV, value));
+        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+            return operation(constructor.apply(GraqlToken.Comparator.EQV, value));
         }
 
         // Attribute value inequality property
@@ -212,8 +212,8 @@ public interface ThingVariableBuilder<T> {
             return neq(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute neq(BiFunction<Graql.Token.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
-            return operation(constructor.apply(Graql.Token.Comparator.NEQV, value));
+        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+            return operation(constructor.apply(GraqlToken.Comparator.NEQV, value));
         }
 
         // Attribute value greater-than property
@@ -242,8 +242,8 @@ public interface ThingVariableBuilder<T> {
             return gt(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute gt(BiFunction<Graql.Token.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
-            return operation(constructor.apply(Graql.Token.Comparator.GT, value));
+        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+            return operation(constructor.apply(GraqlToken.Comparator.GT, value));
         }
 
         // Attribute value greater-than-or-equals property
@@ -272,8 +272,8 @@ public interface ThingVariableBuilder<T> {
             return gte(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute gte(BiFunction<Graql.Token.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
-            return operation(constructor.apply(Graql.Token.Comparator.GTE, value));
+        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+            return operation(constructor.apply(GraqlToken.Comparator.GTE, value));
         }
 
         // Attribute value less-than property
@@ -302,8 +302,8 @@ public interface ThingVariableBuilder<T> {
             return lt(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute lt(BiFunction<Graql.Token.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
-            return operation(constructor.apply(Graql.Token.Comparator.LT, value));
+        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+            return operation(constructor.apply(GraqlToken.Comparator.LT, value));
         }
 
         // Attribute value less-than-or-equals property
@@ -332,8 +332,8 @@ public interface ThingVariableBuilder<T> {
             return lte(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute lte(BiFunction<Graql.Token.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
-            return operation(constructor.apply(Graql.Token.Comparator.LTE, value));
+        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+            return operation(constructor.apply(GraqlToken.Comparator.LTE, value));
         }
 
         // Attribute value contains (in String) property
@@ -346,14 +346,14 @@ public interface ThingVariableBuilder<T> {
             return contains(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute contains(BiFunction<Graql.Token.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
-            return operation(constructor.apply(Graql.Token.Comparator.CONTAINS, value));
+        default <T> ThingVariable.Attribute contains(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+            return operation(constructor.apply(GraqlToken.Comparator.CONTAINS, value));
         }
 
         // Attribute value like (regex) property
 
         default ThingVariable.Attribute like(String value) {
-            return operation(new ThingProperty.Value.Operation.Comparison.String(Graql.Token.Comparator.LIKE, value));
+            return operation(new ThingProperty.Value.Operation.Comparison.String(GraqlToken.Comparator.LIKE, value));
         }
 
         default ThingVariable.Attribute operation(ThingProperty.Value.Operation<?> operation) {

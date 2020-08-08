@@ -24,6 +24,7 @@ java_test(
     deps = [
         "//java:graql",
         "//java/common:common",
+        "//java/pattern:pattern",
         "@graknlabs_common//:common",
         "@maven//:org_hamcrest_hamcrest_library",
     ],

@@ -17,17 +17,17 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.List;
 import java.util.Objects;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.Graql.Token.Char.NEW_LINE;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
 import static java.util.stream.Collectors.joining;
 
@@ -69,10 +69,10 @@ public class GraqlDelete extends GraqlQuery {
     @Override
     public String toString() {
         StringBuilder query = new StringBuilder(match().toString());
-        query.append(NEW_LINE).append(Graql.Token.Command.DELETE);
+        query.append(NEW_LINE).append(GraqlToken.Command.DELETE);
 
         if (variables.size() > 1) query.append(NEW_LINE);
-        else query.append(Graql.Token.Char.SPACE);
+        else query.append(GraqlToken.Char.SPACE);
 
         query.append(variables.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);

@@ -17,9 +17,9 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.ThingVariable;
@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.Graql.Token.Char.NEW_LINE;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -131,10 +131,10 @@ public class MatchClause {
     @Override
     public final String toString() {
         StringBuilder query = new StringBuilder();
-        query.append(Graql.Token.Command.MATCH);
+        query.append(GraqlToken.Command.MATCH);
 
         if (pattern.patterns().size() > 1) query.append(NEW_LINE);
-        else query.append(Graql.Token.Char.SPACE);
+        else query.append(GraqlToken.Char.SPACE);
 
         query.append(pattern.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);

@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.Graql.Token.Char.COMMA_SPACE;
-import static graql.lang.Graql.Token.Char.SPACE;
+import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
+import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;

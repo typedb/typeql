@@ -17,14 +17,14 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.List;
 import java.util.Objects;
 
-import static graql.lang.Graql.Token.Char.NEW_LINE;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static java.util.stream.Collectors.joining;
 
 public class GraqlUndefine extends GraqlQuery {
@@ -47,10 +47,10 @@ public class GraqlUndefine extends GraqlQuery {
     @Override
     public String toString() {
         StringBuilder query = new StringBuilder();
-        query.append(Graql.Token.Command.UNDEFINE);
+        query.append(GraqlToken.Command.UNDEFINE);
 
         if (variables.size() > 1) query.append(NEW_LINE);
-        else query.append(Graql.Token.Char.SPACE);
+        else query.append(GraqlToken.Char.SPACE);
 
         query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);

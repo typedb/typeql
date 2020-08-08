@@ -18,8 +18,9 @@
 package graql.lang.pattern.property;
 
 import grakn.common.collection.Either;
-import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlArg;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.TypeVariable;
@@ -31,25 +32,26 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static graql.lang.Graql.Token.Char.CURLY_CLOSE;
-import static graql.lang.Graql.Token.Char.CURLY_OPEN;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
-import static graql.lang.Graql.Token.Char.SPACE;
-import static graql.lang.Graql.Token.Property.AS;
-import static graql.lang.Graql.Token.Property.HAS;
-import static graql.lang.Graql.Token.Property.KEY;
-import static graql.lang.Graql.Token.Property.PLAYS;
-import static graql.lang.Graql.Token.Property.REGEX;
-import static graql.lang.Graql.Token.Property.RELATES;
-import static graql.lang.Graql.Token.Property.SUB;
-import static graql.lang.Graql.Token.Property.SUBX;
-import static graql.lang.Graql.Token.Property.THEN;
-import static graql.lang.Graql.Token.Property.TYPE;
-import static graql.lang.Graql.Token.Property.VALUE_TYPE;
-import static graql.lang.Graql.Token.Property.WHEN;
+import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
+import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.GraqlToken.Property.AS;
+import static graql.lang.common.GraqlToken.Property.HAS;
+import static graql.lang.common.GraqlToken.Property.KEY;
+import static graql.lang.common.GraqlToken.Property.PLAYS;
+import static graql.lang.common.GraqlToken.Property.REGEX;
+import static graql.lang.common.GraqlToken.Property.RELATES;
+import static graql.lang.common.GraqlToken.Property.SUB;
+import static graql.lang.common.GraqlToken.Property.SUBX;
+import static graql.lang.common.GraqlToken.Property.THEN;
+import static graql.lang.common.GraqlToken.Property.TYPE;
+import static graql.lang.common.GraqlToken.Property.VALUE_TYPE;
+import static graql.lang.common.GraqlToken.Property.WHEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
+import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
 public abstract class TypeProperty extends Property {
@@ -211,7 +213,7 @@ public abstract class TypeProperty extends Property {
         private final int hash;
 
         public Sub(String type, boolean isExplicit) {
-            this(Graql.type(type), isExplicit);
+            this(hidden().type(type), isExplicit);
         }
 
         public Sub(UnscopedVariable var, boolean isExplicit) {
@@ -219,7 +221,7 @@ public abstract class TypeProperty extends Property {
         }
 
         public Sub(Either<String, UnscopedVariable> arg, boolean isExplicit) {
-            this(arg.apply(Graql::type, UnscopedVariable::asType), isExplicit);
+            this(arg.apply(label -> hidden().type(label), UnscopedVariable::asType), isExplicit);
         }
 
         private Sub(TypeVariable type, boolean isExplicit) {
@@ -282,7 +284,7 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            return Graql.Token.Property.ABSTRACT.toString();
+            return GraqlToken.Property.ABSTRACT.toString();
         }
 
         @Override
@@ -299,16 +301,16 @@ public abstract class TypeProperty extends Property {
 
     public static class ValueType extends TypeProperty.Singular {
 
-        private final Graql.Token.ValueType valueType;
+        private final GraqlArg.ValueType valueType;
         private final int hash;
 
-        public ValueType(Graql.Token.ValueType valueType) {
+        public ValueType(GraqlArg.ValueType valueType) {
             if (valueType == null) throw new NullPointerException("Null ValueType");
             this.valueType = valueType;
             this.hash = Objects.hash(this.valueType);
         }
 
-        public Graql.Token.ValueType valueType() {
+        public GraqlArg.ValueType valueType() {
             return valueType;
         }
 
@@ -502,7 +504,7 @@ public abstract class TypeProperty extends Property {
         private final int hash;
 
         public Has(String type, boolean isKey) {
-            this(Graql.type(type), isKey);
+            this(hidden().type(type), isKey);
         }
 
         public Has(UnscopedVariable var, boolean isKey) {
@@ -510,7 +512,7 @@ public abstract class TypeProperty extends Property {
         }
 
         public Has(Either<String, UnscopedVariable> arg, boolean isKey) {
-            this(arg.apply(Graql::type, UnscopedVariable::asType), isKey);
+            this(arg.apply(label -> hidden().type(label), UnscopedVariable::asType), isKey);
         }
 
         private Has(TypeVariable attributeType, boolean isKey) {
@@ -562,7 +564,7 @@ public abstract class TypeProperty extends Property {
         private final int hash;
 
         public Plays(String roleType) {
-            this(Graql.type(roleType));
+            this(hidden().type(roleType));
         }
 
         public Plays(UnscopedVariable var) {
@@ -570,7 +572,7 @@ public abstract class TypeProperty extends Property {
         }
 
         public Plays(Either<String, UnscopedVariable> arg) {
-            this(arg.apply(Graql::type, UnscopedVariable::asType));
+            this(arg.apply(label -> hidden().type(label), UnscopedVariable::asType));
         }
 
         private Plays(TypeVariable roleType) {
@@ -619,7 +621,7 @@ public abstract class TypeProperty extends Property {
         private final int hash;
 
         public Relates(String roleType) {
-            this(Graql.type(roleType), null);
+            this(hidden().type(roleType), null);
         }
 
         public Relates(UnscopedVariable roleTypeVar) {
@@ -627,15 +629,15 @@ public abstract class TypeProperty extends Property {
         }
 
         public Relates(String roleType, String overriddenRoleType) {
-            this(Graql.type(roleType), overriddenRoleType == null ? null : Graql.type(overriddenRoleType));
+            this(hidden().type(roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
         }
 
         public Relates(UnscopedVariable roleTypeVar, String overriddenRoleType) {
-            this(roleTypeVar.asType(), overriddenRoleType == null ? null : Graql.type(overriddenRoleType));
+            this(roleTypeVar.asType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
         }
 
         public Relates(String roleType, UnscopedVariable overriddenRoleTypeVar) {
-            this(Graql.type(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
+            this(hidden().type(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
         }
 
         public Relates(UnscopedVariable roleTypeVar, UnscopedVariable overriddenRoleTypeVar) {
@@ -644,8 +646,8 @@ public abstract class TypeProperty extends Property {
 
         public Relates(Either<String, UnscopedVariable> roleTypeArg,
                        Either<String, UnscopedVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(Graql::type, UnscopedVariable::asType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Graql::type, UnscopedVariable::asType));
+            this(roleTypeArg.apply(label -> hidden().type(label), UnscopedVariable::asType),
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnscopedVariable::asType));
         }
 
         private Relates(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {

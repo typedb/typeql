@@ -18,9 +18,9 @@
 package graql.lang.pattern.property;
 
 import grakn.common.collection.Either;
-import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnscopedVariable;
@@ -35,18 +35,18 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.Graql.Token.Char.COLON;
-import static graql.lang.Graql.Token.Char.COMMA_SPACE;
-import static graql.lang.Graql.Token.Char.PARAN_CLOSE;
-import static graql.lang.Graql.Token.Char.PARAN_OPEN;
-import static graql.lang.Graql.Token.Char.SPACE;
-import static graql.lang.Graql.Token.Property.HAS;
-import static graql.lang.Graql.Token.Property.ISA;
-import static graql.lang.Graql.Token.Property.ISAX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_PROPERTY_DATETIME_PRECISION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
+import static graql.lang.common.GraqlToken.Char.COLON;
+import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
+import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
+import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
+import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.GraqlToken.Property.HAS;
+import static graql.lang.common.GraqlToken.Property.ISA;
+import static graql.lang.common.GraqlToken.Property.ISAX;
 import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
@@ -161,7 +161,7 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public String toString() {
-            return Graql.Token.Property.ID.toString() + SPACE + id;
+            return GraqlToken.Property.ID.toString() + SPACE + id;
         }
 
         @Override
@@ -185,7 +185,7 @@ public abstract class ThingProperty extends Property {
         private final int hash;
 
         public Isa(String type, boolean isExplicit) {
-            this(Graql.type(type), isExplicit);
+            this(hidden().type(type), isExplicit);
         }
 
         public Isa(UnscopedVariable typeVar, boolean isExplicit) {
@@ -193,7 +193,7 @@ public abstract class ThingProperty extends Property {
         }
 
         public Isa(Either<String, UnscopedVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(Graql::type, UnscopedVariable::asType), isExplicit);
+            this(typeArg.apply(label -> hidden().type(label), UnscopedVariable::asType), isExplicit);
         }
 
         private Isa(TypeVariable type, boolean isExplicit) {
@@ -265,7 +265,7 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public String toString() {
-            return Graql.Token.Comparator.NEQ.toString() + SPACE + variable();
+            return GraqlToken.Comparator.NEQ.toString() + SPACE + variable();
         }
 
         @Override
@@ -327,17 +327,17 @@ public abstract class ThingProperty extends Property {
 
         public abstract static class Operation<T> {
 
-            private final Graql.Token.Comparator comparator;
+            private final GraqlToken.Comparator comparator;
             private final T value;
             private final int hash;
 
-            Operation(Graql.Token.Comparator comparator, T value) {
+            Operation(GraqlToken.Comparator comparator, T value) {
                 this.comparator = comparator;
                 this.value = value;
                 this.hash = Objects.hash(this.comparator, this.value);
             }
 
-            public Graql.Token.Comparator comparator() {
+            public GraqlToken.Comparator comparator() {
                 return comparator;
             }
 
@@ -346,7 +346,7 @@ public abstract class ThingProperty extends Property {
             }
 
             public boolean isValueEquality() {
-                return comparator.equals(Graql.Token.Comparator.EQV) && !hasVariable();
+                return comparator.equals(GraqlToken.Comparator.EQV) && !hasVariable();
             }
 
             public boolean hasVariable() { return variable() != null;}
@@ -374,7 +374,7 @@ public abstract class ThingProperty extends Property {
             public abstract static class Assignment<T> extends Operation<T> {
 
                 Assignment(T value) {
-                    super(Graql.Token.Comparator.EQV, value);
+                    super(GraqlToken.Comparator.EQV, value);
                 }
 
                 public java.lang.String toString() {
@@ -420,12 +420,12 @@ public abstract class ThingProperty extends Property {
 
             public abstract static class Comparison<T> extends Operation<T> {
 
-                Comparison(Graql.Token.Comparator comparator, T value) {
+                Comparison(GraqlToken.Comparator comparator, T value) {
                     super(comparator, value);
                 }
 
                 // TODO: remove INTEGER and FLOAT
-                public static Comparison<?> of(Graql.Token.Comparator comparator, Object value) {
+                public static Comparison<?> of(GraqlToken.Comparator comparator, Object value) {
                     if (value instanceof Integer) {
                         return new Comparison.Number<>(comparator, (Integer) value);
                     } else if (value instanceof Long) {
@@ -449,21 +449,21 @@ public abstract class ThingProperty extends Property {
 
                 public static class Number<N extends java.lang.Number> extends Comparison<N> {
 
-                    public Number(Graql.Token.Comparator comparator, N value) {
+                    public Number(GraqlToken.Comparator comparator, N value) {
                         super(comparator, value);
                     }
                 }
 
                 public static class Boolean extends Comparison<java.lang.Boolean> {
 
-                    public Boolean(Graql.Token.Comparator comparator, boolean value) {
+                    public Boolean(GraqlToken.Comparator comparator, boolean value) {
                         super(comparator, value);
                     }
                 }
 
                 public static class String extends Comparison<java.lang.String> {
 
-                    public String(Graql.Token.Comparator comparator, java.lang.String value) {
+                    public String(GraqlToken.Comparator comparator, java.lang.String value) {
                         super(comparator, value);
                     }
 
@@ -472,7 +472,7 @@ public abstract class ThingProperty extends Property {
                         StringBuilder operation = new StringBuilder();
 
                         operation.append(comparator()).append(SPACE);
-                        if (comparator().equals(Graql.Token.Comparator.LIKE)) {
+                        if (comparator().equals(GraqlToken.Comparator.LIKE)) {
                             operation.append(quoteString(escapeRegex(value())));
                         } else {
                             operation.append(quoteString(value()));
@@ -484,14 +484,14 @@ public abstract class ThingProperty extends Property {
 
                 public static class DateTime extends Comparison<LocalDateTime> {
 
-                    public DateTime(Graql.Token.Comparator comparator, LocalDateTime value) {
+                    public DateTime(GraqlToken.Comparator comparator, LocalDateTime value) {
                         super(comparator, value);
                     }
                 }
 
                 public static class Variable extends Comparison<UnscopedVariable> {
 
-                    public Variable(Graql.Token.Comparator comparator, UnscopedVariable var) {
+                    public Variable(GraqlToken.Comparator comparator, UnscopedVariable var) {
                         super(comparator, var);
                     }
 
@@ -569,7 +569,7 @@ public abstract class ThingProperty extends Property {
             private final int hash;
 
             public RolePlayer(String roleType, UnscopedVariable playerVar) {
-                this(roleType == null ? null : Graql.type(roleType), playerVar.asThing());
+                this(roleType == null ? null : hidden().type(roleType), playerVar.asThing());
             }
 
             public RolePlayer(UnscopedVariable roleTypeVar, UnscopedVariable playerVar) {
@@ -581,7 +581,7 @@ public abstract class ThingProperty extends Property {
             }
 
             public RolePlayer(Either<String, UnscopedVariable> roleTypeArg, UnscopedVariable playerVar) {
-                this(roleTypeArg == null ? null : roleTypeArg.apply(Graql::type, UnscopedVariable::asType), playerVar.asThing());
+                this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnscopedVariable::asType), playerVar.asThing());
             }
 
             private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {

@@ -18,7 +18,8 @@
 
 package graql.lang.query.builder;
 
-import graql.lang.Graql;
+import graql.lang.common.GraqlArg;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.UnscopedVariable;
 
 import java.util.Objects;
@@ -35,14 +36,14 @@ public interface Filterable {
     default String printFilters() {
         StringBuilder filters = new StringBuilder();
 
-        sort().ifPresent(sort -> filters.append(Graql.Token.Filter.SORT).append(Graql.Token.Char.SPACE)
-                .append(sort).append(Graql.Token.Char.SEMICOLON).append(Graql.Token.Char.SPACE));
+        sort().ifPresent(sort -> filters.append(GraqlToken.Filter.SORT).append(GraqlToken.Char.SPACE)
+                .append(sort).append(GraqlToken.Char.SEMICOLON).append(GraqlToken.Char.SPACE));
 
-        offset().ifPresent(offset -> filters.append(Graql.Token.Filter.OFFSET).append(Graql.Token.Char.SPACE)
-                .append(offset).append(Graql.Token.Char.SEMICOLON).append(Graql.Token.Char.SPACE));
+        offset().ifPresent(offset -> filters.append(GraqlToken.Filter.OFFSET).append(GraqlToken.Char.SPACE)
+                .append(offset).append(GraqlToken.Char.SEMICOLON).append(GraqlToken.Char.SPACE));
 
-        limit().ifPresent(limit -> filters.append(Graql.Token.Filter.LIMIT).append(Graql.Token.Char.SPACE)
-                .append(limit).append(Graql.Token.Char.SEMICOLON).append(Graql.Token.Char.SPACE));
+        limit().ifPresent(limit -> filters.append(GraqlToken.Filter.LIMIT).append(GraqlToken.Char.SPACE)
+                .append(limit).append(GraqlToken.Char.SEMICOLON).append(GraqlToken.Char.SPACE));
 
         return filters.toString().trim();
     }
@@ -54,14 +55,14 @@ public interface Filterable {
         }
 
         default S sort(String var, String order) {
-            Graql.Token.Order o = Graql.Token.Order.of(order);
+            GraqlArg.Order o = GraqlArg.Order.of(order);
             if (o == null) throw new IllegalArgumentException(
-                    "Invalid sorting order. Valid options: '" + Graql.Token.Order.ASC + "' or '" + Graql.Token.Order.DESC
+                    "Invalid sorting order. Valid options: '" + GraqlArg.Order.ASC + "' or '" + GraqlArg.Order.DESC
             );
             return sort(UnscopedVariable.named(var), o);
         }
 
-        default S sort(String var, Graql.Token.Order order) {
+        default S sort(String var, GraqlArg.Order order) {
             return sort(UnscopedVariable.named(var), order);
         }
 
@@ -69,7 +70,7 @@ public interface Filterable {
             return sort(new Sorting(var));
         }
 
-        default S sort(UnscopedVariable var, Graql.Token.Order order) {
+        default S sort(UnscopedVariable var, GraqlArg.Order order) {
             return sort(new Sorting(var, order));
         }
 
@@ -99,14 +100,14 @@ public interface Filterable {
     class Sorting {
 
         private final UnscopedVariable var;
-        private final Graql.Token.Order order;
+        private final GraqlArg.Order order;
         private final int hash;
 
         public Sorting(UnscopedVariable var) {
             this(var, null);
         }
 
-        public Sorting(UnscopedVariable var, Graql.Token.Order order) {
+        public Sorting(UnscopedVariable var, GraqlArg.Order order) {
             this.var = var;
             this.order = order;
             this.hash = Objects.hash(var(), order());
@@ -116,8 +117,8 @@ public interface Filterable {
             return var;
         }
 
-        public Graql.Token.Order order() {
-            return order == null ? Graql.Token.Order.ASC : order;
+        public GraqlArg.Order order() {
+            return order == null ? GraqlArg.Order.ASC : order;
         }
 
         @Override
@@ -126,7 +127,7 @@ public interface Filterable {
 
             sort.append(var);
             if (order != null) {
-                sort.append(Graql.Token.Char.SPACE).append(order);
+                sort.append(GraqlToken.Char.SPACE).append(order);
             }
 
             return sort.toString();

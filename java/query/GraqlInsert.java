@@ -17,9 +17,9 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.Graql.Token.Char.NEW_LINE;
-import static graql.lang.Graql.Token.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static java.util.stream.Collectors.joining;
 
 public class GraqlInsert extends GraqlQuery {
@@ -63,10 +63,10 @@ public class GraqlInsert extends GraqlQuery {
         StringBuilder query = new StringBuilder();
 
         if (match() != null) query.append(match()).append(NEW_LINE);
-        query.append(Graql.Token.Command.INSERT);
+        query.append(GraqlToken.Command.INSERT);
 
         if (variables.size() > 1) query.append(NEW_LINE);
-        else query.append(Graql.Token.Char.SPACE);
+        else query.append(GraqlToken.Char.SPACE);
 
         query.append(variables().stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);

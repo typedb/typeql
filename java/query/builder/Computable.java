@@ -17,8 +17,9 @@
 
 package graql.lang.query.builder;
 
-import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlArg;
+import graql.lang.common.GraqlToken;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,9 +31,9 @@ import java.util.Set;
 
 public interface Computable {
 
-    Graql.Token.Compute.Method method();
+    GraqlToken.Compute.Method method();
 
-    Set<Graql.Token.Compute.Condition> conditionsRequired();
+    Set<GraqlToken.Compute.Condition> conditionsRequired();
 
     Optional<GraqlException> getException();
 
@@ -84,11 +85,11 @@ public interface Computable {
     interface Configurable<T extends Computable.Configurable,
             U extends Computable.Argument, V extends Computable.Arguments> extends Computable {
 
-        Graql.Token.Compute.Algorithm using();
+        GraqlArg.Algorithm using();
 
         V where();
 
-        T using(Graql.Token.Compute.Algorithm algorithm);
+        T using(GraqlArg.Algorithm algorithm);
 
         @SuppressWarnings("unchecked")
         default T where(U arg, U... args) {
@@ -101,16 +102,16 @@ public interface Computable {
 
         T where(List<U> args);
 
-        Set<Graql.Token.Compute.Algorithm> algorithmsAccepted();
+        Set<GraqlArg.Algorithm> algorithmsAccepted();
 
-        Map<Graql.Token.Compute.Algorithm, Set<Graql.Token.Compute.Param>> argumentsAccepted();
+        Map<GraqlArg.Algorithm, Set<GraqlToken.Compute.Param>> argumentsAccepted();
 
-        Map<Graql.Token.Compute.Algorithm, Map<Graql.Token.Compute.Param, Object>> argumentsDefault();
+        Map<GraqlArg.Algorithm, Map<GraqlToken.Compute.Param, Object>> argumentsDefault();
     }
 
     interface Argument<T> {
 
-        Graql.Token.Compute.Param type();
+        GraqlToken.Compute.Param type();
 
         T value();
     }

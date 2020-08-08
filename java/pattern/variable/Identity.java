@@ -17,8 +17,8 @@
 
 package graql.lang.pattern.variable;
 
-import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.GraqlToken;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -113,7 +113,7 @@ abstract class Identity {
 
         @Override
         String syntax() {
-            return Graql.Token.Char.$ + name;
+            return GraqlToken.Char.$ + name;
         }
 
         @Override
@@ -154,7 +154,7 @@ abstract class Identity {
 
         @Override
         String syntax() {
-            return Graql.Token.Char.$_ + label;
+            return GraqlToken.Char.$_ + label;
         }
 
         @Override
@@ -189,7 +189,7 @@ abstract class Identity {
 
         @Override
         String syntax() {
-            return Graql.Token.Char.$_.toString();
+            return GraqlToken.Char.$_.toString();
         }
 
         @Override

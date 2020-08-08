@@ -18,6 +18,7 @@
 package graql.lang.query.test;
 
 import graql.lang.Graql;
+import graql.lang.common.GraqlArg;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlGet;
@@ -26,9 +27,9 @@ import graql.lang.query.GraqlQuery;
 import graql.lang.query.MatchClause;
 import org.junit.Test;
 
-import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
-import static graql.lang.Graql.Token.Compute.Algorithm.DEGREE;
-import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
+import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
+import static graql.lang.common.GraqlArg.Algorithm.DEGREE;
+import static graql.lang.common.GraqlArg.Algorithm.K_CORE;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.lte;
 import static graql.lang.Graql.match;
@@ -89,7 +90,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(match(var("x").value(Graql.Token.ValueType.LONG)).get());
+        assertSameStringRepresentation(match(var("x").value(GraqlArg.ValueType.LONG)).get());
     }
 
     @Test

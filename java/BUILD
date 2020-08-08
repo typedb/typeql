@@ -27,12 +27,12 @@ java_library(
         # Internal Package Dependencies
         "//grammar:java",
         "//java/common:common",
+        "//java/pattern:pattern",
 
         # Internal Repository Dependencies
         "@graknlabs_common//:common",
 
         # External dependencies
-        "@maven//:com_google_guava_guava",
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
         "@maven//:org_slf4j_slf4j_api",

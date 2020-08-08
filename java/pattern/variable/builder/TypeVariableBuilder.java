@@ -17,7 +17,8 @@
 
 package graql.lang.pattern.variable.builder;
 
-import graql.lang.Graql;
+import graql.lang.common.GraqlArg;
+import graql.lang.common.GraqlToken;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.variable.TypeVariable;
@@ -25,7 +26,7 @@ import graql.lang.pattern.variable.UnscopedVariable;
 
 public interface TypeVariableBuilder {
 
-    default TypeVariable type(Graql.Token.Type type) {
+    default TypeVariable type(GraqlToken.Type type) {
         return type(type.toString());
     }
 
@@ -37,7 +38,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Abstract());
     }
 
-    default TypeVariable sub(Graql.Token.Type type) {
+    default TypeVariable sub(GraqlToken.Type type) {
         return sub(type.toString());
     }
 
@@ -49,7 +50,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Sub(var, false));
     }
 
-    default TypeVariable subX(Graql.Token.Type type) {
+    default TypeVariable subX(GraqlToken.Type type) {
         return subX(type.toString());
     }
 
@@ -109,7 +110,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Relates(roleTypeVar, overriddenRoleTypeVar));
     }
 
-    default TypeVariable value(Graql.Token.ValueType ValueType) {
+    default TypeVariable value(GraqlArg.ValueType ValueType) {
         return asTypeWith(new TypeProperty.ValueType(ValueType));
     }
 

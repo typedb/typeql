@@ -23,6 +23,8 @@ java_test(
     srcs = ["GraqlQueryTest.java"],
     deps = [
         "//java:graql",
+        "//java/common:common",
+        "//java/pattern:pattern",
     ],
     size = "small"
 )
@@ -35,6 +37,7 @@ java_test(
     deps = [
         "//java:graql",
         "//java/common:common",
+        "//java/pattern:pattern",
         "@graknlabs_common//:common",
     ],
     size = "small"
@@ -46,6 +49,7 @@ java_test(
     srcs = ["GraqlInsertTest.java"],
     deps = [
         "//java:graql",
+        "//java/pattern:pattern",
         "@graknlabs_common//:common",
     ],
     size = "small"
