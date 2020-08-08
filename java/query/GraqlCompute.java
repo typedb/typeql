@@ -34,9 +34,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static grakn.common.util.Collections.map;
-import static grakn.common.util.Collections.pair;
-import static grakn.common.util.Collections.set;
+import static grakn.common.collection.Collections.map;
+import static grakn.common.collection.Collections.pair;
+import static grakn.common.collection.Collections.set;
 import static java.util.stream.Collectors.joining;
 
 

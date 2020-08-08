@@ -25,7 +25,7 @@ import graql.lang.variable.builder.TypeVariableBuilder;
 
 import java.util.Set;
 
-import static grakn.common.util.Collections.set;
+import static grakn.common.collection.Collections.set;
 
 public class UnscopedVariable extends Variable implements TypeVariableBuilder,
                                                           ThingVariableBuilder<ThingVariable.Thing>,

@@ -17,7 +17,7 @@
 
 package graql.lang.property;
 
-import grakn.common.util.Either;
+import grakn.common.collection.Either;
 import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;

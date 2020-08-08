@@ -38,7 +38,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static grakn.common.util.Collections.list;
+import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
 import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
 import static graql.lang.Graql.and;

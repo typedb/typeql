@@ -17,8 +17,8 @@
 
 package graql.lang.parser;
 
-import grakn.common.util.Either;
-import grakn.common.util.Triple;
+import grakn.common.collection.Either;
+import grakn.common.collection.Triple;
 import graql.grammar.GraqlBaseVisitor;
 import graql.grammar.GraqlLexer;
 import graql.grammar.GraqlParser;
@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static grakn.common.util.Collections.triple;
+import static grakn.common.collection.Collections.triple;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.not;
 import static graql.lang.Graql.or;

@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static grakn.common.util.Collections.list;
+import static grakn.common.collection.Collections.list;
 import static graql.lang.variable.UnscopedVariable.hidden;
 
 /**

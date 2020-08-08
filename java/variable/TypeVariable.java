@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static grakn.common.util.Collections.set;
+import static grakn.common.collection.Collections.set;
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static java.util.stream.Collectors.joining;

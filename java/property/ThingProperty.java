@@ -17,7 +17,7 @@
 
 package graql.lang.property;
 
-import grakn.common.util.Either;
+import grakn.common.collection.Either;
 import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static grakn.common.util.Collections.list;
+import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.Token.Char.COLON;
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.PARAN_CLOSE;

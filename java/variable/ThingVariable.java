@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static grakn.common.util.Collections.list;
+import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.Token.Char.COMMA_SPACE;
 import static graql.lang.Graql.Token.Char.SPACE;
 import static java.util.stream.Collectors.joining;
