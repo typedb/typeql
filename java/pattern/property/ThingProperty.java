@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.property;
+package graql.lang.pattern.property;
 
 import grakn.common.collection.Either;
 import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
-import graql.lang.variable.ThingVariable;
-import graql.lang.variable.TypeVariable;
-import graql.lang.variable.UnscopedVariable;
-import graql.lang.variable.Variable;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.TypeVariable;
+import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -47,7 +47,7 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_PROPERTY_DATETIME_PRECISION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
-import static graql.lang.variable.UnscopedVariable.hidden;
+import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
 public abstract class ThingProperty extends Property {

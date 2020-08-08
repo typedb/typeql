@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.property;
+package graql.lang.pattern.property;
 
 import grakn.common.collection.Either;
 import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
-import graql.lang.variable.TypeVariable;
-import graql.lang.variable.UnscopedVariable;
-import graql.lang.variable.Variable;
+import graql.lang.pattern.variable.TypeVariable;
+import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.util.Objects;

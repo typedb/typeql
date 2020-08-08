@@ -22,9 +22,9 @@ import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
-import graql.lang.variable.ThingVariable;
-import graql.lang.variable.UnscopedVariable;
-import graql.lang.variable.Variable;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.Variable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

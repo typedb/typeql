@@ -18,9 +18,9 @@
 package graql.lang.query.test;
 
 import graql.lang.Graql;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.MatchClause;
-import graql.lang.variable.ThingVariable;
 import org.junit.Test;
 
 import java.util.List;

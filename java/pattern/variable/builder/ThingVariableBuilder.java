@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.variable.builder;
+package graql.lang.pattern.variable.builder;
 
 import graql.lang.Graql;
-import graql.lang.property.ThingProperty;
-import graql.lang.variable.ThingVariable;
-import graql.lang.variable.UnscopedVariable;
+import graql.lang.pattern.property.ThingProperty;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.UnscopedVariable;
 
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;

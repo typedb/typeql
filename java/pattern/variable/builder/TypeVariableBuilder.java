@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.variable.builder;
+package graql.lang.pattern.variable.builder;
 
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.TypeProperty;
-import graql.lang.variable.TypeVariable;
-import graql.lang.variable.UnscopedVariable;
+import graql.lang.pattern.property.TypeProperty;
+import graql.lang.pattern.variable.TypeVariable;
+import graql.lang.pattern.variable.UnscopedVariable;
 
 public interface TypeVariableBuilder {
 

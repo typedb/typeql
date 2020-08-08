@@ -20,7 +20,7 @@ package graql.lang.query;
 import graql.lang.Graql;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.variable.ThingVariable;
+import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;

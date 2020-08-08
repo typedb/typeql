@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.variable;
+package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.Property;
+import graql.lang.pattern.property.Property;
 
 import java.util.Objects;
 import java.util.Set;

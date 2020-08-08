@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.property;
+package graql.lang.pattern.property;
 
-import graql.lang.variable.Variable;
+import graql.lang.pattern.variable.Variable;
 
 import java.util.stream.Stream;
 

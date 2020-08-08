@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.variable;
+package graql.lang.pattern.variable;
 
 import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;

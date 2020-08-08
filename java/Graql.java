@@ -22,15 +22,15 @@ import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.TypeVariable;
+import graql.lang.pattern.variable.UnscopedVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
 import graql.lang.query.MatchClause;
-import graql.lang.variable.ThingVariable;
-import graql.lang.variable.TypeVariable;
-import graql.lang.variable.UnscopedVariable;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.variable.UnscopedVariable.hidden;
+import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 
 /**
  * Main class containing static methods for creating Graql queries.

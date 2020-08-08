@@ -19,10 +19,10 @@ package graql.lang.query;
 
 import graql.lang.Graql;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.Variable;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Filterable;
-import graql.lang.variable.UnscopedVariable;
-import graql.lang.variable.Variable;
 
 import java.util.List;
 import java.util.Objects;

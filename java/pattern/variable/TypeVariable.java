@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.variable;
+package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
-import graql.lang.property.Property;
-import graql.lang.property.TypeProperty;
-import graql.lang.variable.builder.TypeVariableBuilder;
+import graql.lang.pattern.property.Property;
+import graql.lang.pattern.property.TypeProperty;
+import graql.lang.pattern.variable.builder.TypeVariableBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;

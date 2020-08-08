@@ -17,7 +17,7 @@
 
 package graql.lang.pattern;
 
-import graql.lang.variable.Variable;
+import graql.lang.pattern.variable.Variable;
 
 import java.util.List;
 import java.util.Objects;

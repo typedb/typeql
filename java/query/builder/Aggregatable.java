@@ -18,8 +18,8 @@
 package graql.lang.query.builder;
 
 import graql.lang.Graql;
+import graql.lang.pattern.variable.UnscopedVariable;
 import graql.lang.query.GraqlQuery;
-import graql.lang.variable.UnscopedVariable;
 
 public interface Aggregatable<T extends GraqlQuery> {
 

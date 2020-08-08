@@ -19,7 +19,7 @@
 package graql.lang.query.builder;
 
 import graql.lang.Graql;
-import graql.lang.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnscopedVariable;
 
 import java.util.Objects;
 import java.util.Optional;
