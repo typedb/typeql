@@ -134,6 +134,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
+    // TODO: Rename to IID
     public static class ID extends ThingProperty.Singular {
 
         private final String id;

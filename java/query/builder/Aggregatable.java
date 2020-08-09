@@ -75,6 +75,5 @@ public interface Aggregatable<T extends GraqlQuery> {
         return aggregate(GraqlToken.Aggregate.Method.SUM, var);
     }
 
-    // TODO: will be made "private" once we upgrade to Java 9 or higher
     T aggregate(GraqlToken.Aggregate.Method method, UnscopedVariable var);
 }

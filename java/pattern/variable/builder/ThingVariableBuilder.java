@@ -109,24 +109,19 @@ public interface ThingVariableBuilder<T> {
         }
 
         default ThingVariable.Relation rel(UnscopedVariable playerVar) {
-            return relation(new ThingProperty.Relation.RolePlayer(playerVar));
+            return asRelationWith(new ThingProperty.Relation.RolePlayer(playerVar));
         }
 
         default ThingVariable.Relation rel(String roleType, String playerVar) {
-            return relation(new ThingProperty.Relation.RolePlayer(roleType, UnscopedVariable.named(playerVar)));
+            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleType, UnscopedVariable.named(playerVar)));
         }
 
         default ThingVariable.Relation rel(String roleType, UnscopedVariable playerVar) {
-            return relation(new ThingProperty.Relation.RolePlayer(roleType, playerVar));
+            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleType, playerVar));
         }
 
         default ThingVariable.Relation rel(UnscopedVariable roleTypeVar, UnscopedVariable playerVar) {
-            return relation(new ThingProperty.Relation.RolePlayer(roleTypeVar, playerVar));
-        }
-
-        // TODO: will be made "private" once we upgrade to Java 9 or higher
-        default ThingVariable.Relation relation(ThingProperty.Relation.RolePlayer rolePlayer) {
-            return asRelationWith(rolePlayer);
+            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleTypeVar, playerVar));
         }
 
         ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer);

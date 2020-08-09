@@ -172,7 +172,7 @@ public class GraqlToken {
         GTE(">="),
         LT("<"),
         LTE("<="),
-        CONTAINS("contains"), // TODO: remove duplicate in ComputeQuery.Param
+        CONTAINS("contains"),
         LIKE("like");
 
         private final String comparator;

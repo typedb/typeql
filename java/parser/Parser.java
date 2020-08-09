@@ -547,8 +547,6 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public Variable visitPattern_variable(GraqlParser.Pattern_variableContext ctx) {
-        // TODO: restrict for Match VS Define VS Insert
-
         if (ctx.variable_thing_any() != null) {
             return this.visitVariable_thing_any(ctx.variable_thing_any());
 
@@ -564,7 +562,6 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public TypeVariable visitVariable_type(GraqlParser.Variable_typeContext ctx) {
-        // TODO: restrict for Define VS Match for all usage of visitType(...)
         TypeVariable type = visitType(ctx.type()).apply(label -> hidden().type(label), UnscopedVariable::asType);
 
         for (GraqlParser.Type_propertyContext property : ctx.type_property()) {
@@ -765,7 +762,7 @@ public class Parser extends GraqlBaseVisitor {
 
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
 
-    @Override // TODO: this visitor method should not return a Predicate if we have the right data structure
+    @Override
     public ThingProperty.Value.Operation<?> visitValue(GraqlParser.ValueContext ctx) {
         if (ctx.assignment() != null) {
             return visitAssignment(ctx.assignment());

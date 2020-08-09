@@ -59,6 +59,10 @@ sonarcloud_dependencies()
 load("@graknlabs_dependencies//tool/unuseddeps:deps.bzl", unuseddeps_deps = "deps")
 unuseddeps_deps()
 
+##################################
+# Load Distribution Dependencies #
+##################################
+
 load("@graknlabs_dependencies//builder/python:deps.bzl", python_deps = "deps")
 python_deps()
 
@@ -73,10 +77,6 @@ pip3_import(
 load("@graknlabs_dependencies_ci_pip//:requirements.bzl",
 graknlabs_dependencies_ci_pip_install = "pip_install")
 graknlabs_dependencies_ci_pip_install()
-
-##################################
-# Load Distribution Dependencies #
-##################################
 
 load("@graknlabs_dependencies//distribution:deps.bzl", distribution_deps = "deps")
 distribution_deps()
