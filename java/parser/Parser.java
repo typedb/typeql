@@ -31,6 +31,7 @@ import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.property.TypeProperty;
+import graql.lang.pattern.property.ValueOperation;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnscopedVariable;
@@ -763,7 +764,7 @@ public class Parser extends GraqlBaseVisitor {
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
 
     @Override
-    public ThingProperty.Value.Operation<?> visitValue(GraqlParser.ValueContext ctx) {
+    public ValueOperation<?> visitValue(GraqlParser.ValueContext ctx) {
         if (ctx.assignment() != null) {
             return visitAssignment(ctx.assignment());
         } else if (ctx.comparison() != null) {
@@ -774,30 +775,30 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public ThingProperty.Value.Operation.Assignment<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
+    public ValueOperation.Assignment<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
         Object value = visitLiteral(ctx.literal());
 
         if (value instanceof Integer) {
-            return new ThingProperty.Value.Operation.Assignment.Number<>(((Integer) value));
+            return new ValueOperation.Assignment.Number<>(((Integer) value));
         } else if (value instanceof Long) {
-            return new ThingProperty.Value.Operation.Assignment.Number<>((Long) value);
+            return new ValueOperation.Assignment.Number<>((Long) value);
         } else if (value instanceof Float) {
-            return new ThingProperty.Value.Operation.Assignment.Number<>((Float) value);
+            return new ValueOperation.Assignment.Number<>((Float) value);
         } else if (value instanceof Double) {
-            return new ThingProperty.Value.Operation.Assignment.Number<>((Double) value);
+            return new ValueOperation.Assignment.Number<>((Double) value);
         } else if (value instanceof Boolean) {
-            return new ThingProperty.Value.Operation.Assignment.Boolean((Boolean) value);
+            return new ValueOperation.Assignment.Boolean((Boolean) value);
         } else if (value instanceof String) {
-            return new ThingProperty.Value.Operation.Assignment.String((String) value);
+            return new ValueOperation.Assignment.String((String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ThingProperty.Value.Operation.Assignment.DateTime((LocalDateTime) value);
+            return new ValueOperation.Assignment.DateTime((LocalDateTime) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Assignment: " + ctx.getText());
         }
     }
 
     @Override
-    public ThingProperty.Value.Operation.Comparison<?> visitComparison(GraqlParser.ComparisonContext ctx) {
+    public ValueOperation.Comparison<?> visitComparison(GraqlParser.ComparisonContext ctx) {
         String comparatorStr;
         Object value;
 
@@ -839,17 +840,17 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (value instanceof Long) {
-            return new ThingProperty.Value.Operation.Comparison.Number<>(comparator, (Long) value);
+            return new ValueOperation.Comparison.Number<>(comparator, (Long) value);
         } else if (value instanceof Double) {
-            return new ThingProperty.Value.Operation.Comparison.Number<>(comparator, (Double) value);
+            return new ValueOperation.Comparison.Number<>(comparator, (Double) value);
         } else if (value instanceof Boolean) {
-            return new ThingProperty.Value.Operation.Comparison.Boolean(comparator, (Boolean) value);
+            return new ValueOperation.Comparison.Boolean(comparator, (Boolean) value);
         } else if (value instanceof String) {
-            return new ThingProperty.Value.Operation.Comparison.String(comparator, (String) value);
+            return new ValueOperation.Comparison.String(comparator, (String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ThingProperty.Value.Operation.Comparison.DateTime(comparator, (LocalDateTime) value);
+            return new ValueOperation.Comparison.DateTime(comparator, (LocalDateTime) value);
         } else if (value instanceof UnscopedVariable) {
-            return new ThingProperty.Value.Operation.Comparison.Variable(comparator, (UnscopedVariable) value);
+            return new ValueOperation.Comparison.Variable(comparator, (UnscopedVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }

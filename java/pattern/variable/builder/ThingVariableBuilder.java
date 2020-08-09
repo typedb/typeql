@@ -19,13 +19,12 @@ package graql.lang.pattern.variable.builder;
 
 import graql.lang.common.GraqlToken;
 import graql.lang.pattern.property.ThingProperty;
+import graql.lang.pattern.property.ValueOperation;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnscopedVariable;
 
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
-
-import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 
 public interface ThingVariableBuilder<T> {
 
@@ -54,30 +53,30 @@ public interface ThingVariableBuilder<T> {
     }
 
     default T has(String type, long value) {
-        return has(type, hidden().val(value));
+        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Number<>(value)));
     }
 
     default T has(String type, double value) {
-        return has(type, hidden().val(value));
+        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Number<>(value)));
     }
 
     default T has(String type, boolean value) {
-        return has(type, hidden().val(value));
+        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Boolean(value)));
     }
 
     default T has(String type, String value) {
-        return has(type, hidden().val(value));
+        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.String(value)));
     }
 
     default T has(String type, LocalDateTime value) {
-        return has(type, hidden().val(value));
+        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.DateTime(value)));
+    }
+
+    default T has(String type, ThingProperty.Value<?> value) {
+        return asSameThingWith(new ThingProperty.Has(type, value));
     }
 
     default T has(String type, UnscopedVariable variable) {
-        return asSameThingWith(new ThingProperty.Has(type, variable));
-    }
-
-    default T has(String type, ThingVariable.Attribute variable) {
         return asSameThingWith(new ThingProperty.Has(type, variable));
     }
 
@@ -132,226 +131,226 @@ public interface ThingVariableBuilder<T> {
         // Attribute value assignment property
 
         default ThingVariable.Attribute val(long value) {
-            return operation(new ThingProperty.Value.Operation.Assignment.Number<>(value));
+            return operation(new ValueOperation.Assignment.Number<>(value));
         }
 
         default ThingVariable.Attribute val(double value) {
-            return operation(new ThingProperty.Value.Operation.Assignment.Number<>(value));
+            return operation(new ValueOperation.Assignment.Number<>(value));
         }
 
         default ThingVariable.Attribute val(boolean value) {
-            return operation(new ThingProperty.Value.Operation.Assignment.Boolean(value));
+            return operation(new ValueOperation.Assignment.Boolean(value));
         }
 
         default ThingVariable.Attribute val(String value) {
-            return operation(new ThingProperty.Value.Operation.Assignment.String(value));
+            return operation(new ValueOperation.Assignment.String(value));
         }
 
         default ThingVariable.Attribute val(LocalDateTime value) {
-            return operation(new ThingProperty.Value.Operation.Assignment.DateTime(value));
+            return operation(new ValueOperation.Assignment.DateTime(value));
         }
 
         // Attribute value equality property
 
         default ThingVariable.Attribute eq(long value) {
-            return eq(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return eq(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute eq(double value) {
-            return eq(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return eq(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute eq(boolean value) {
-            return eq(ThingProperty.Value.Operation.Comparison.Boolean::new, value);
+            return eq(ValueOperation.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute eq(String value) {
-            return eq(ThingProperty.Value.Operation.Comparison.String::new, value);
+            return eq(ValueOperation.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute eq(LocalDateTime value) {
-            return eq(ThingProperty.Value.Operation.Comparison.DateTime::new, value);
+            return eq(ValueOperation.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute eq(UnscopedVariable variable) {
-            return eq(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
+            return eq(ValueOperation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.EQV, value));
         }
 
         // Attribute value inequality property
 
         default ThingVariable.Attribute neq(long value) {
-            return neq(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return neq(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute neq(double value) {
-            return neq(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return neq(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute neq(boolean value) {
-            return neq(ThingProperty.Value.Operation.Comparison.Boolean::new, value);
+            return neq(ValueOperation.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute neq(String value) {
-            return neq(ThingProperty.Value.Operation.Comparison.String::new, value);
+            return neq(ValueOperation.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute neq(LocalDateTime value) {
-            return neq(ThingProperty.Value.Operation.Comparison.DateTime::new, value);
+            return neq(ValueOperation.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute neq(UnscopedVariable variable) {
-            return neq(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
+            return neq(ValueOperation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.NEQV, value));
         }
 
         // Attribute value greater-than property
 
         default ThingVariable.Attribute gt(long value) {
-            return gt(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return gt(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute gt(double value) {
-            return gt(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return gt(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute gt(boolean value) {
-            return gt(ThingProperty.Value.Operation.Comparison.Boolean::new, value);
+            return gt(ValueOperation.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute gt(String value) {
-            return gt(ThingProperty.Value.Operation.Comparison.String::new, value);
+            return gt(ValueOperation.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute gt(LocalDateTime value) {
-            return gt(ThingProperty.Value.Operation.Comparison.DateTime::new, value);
+            return gt(ValueOperation.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute gt(UnscopedVariable variable) {
-            return gt(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
+            return gt(ValueOperation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.GT, value));
         }
 
         // Attribute value greater-than-or-equals property
 
         default ThingVariable.Attribute gte(long value) {
-            return gte(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return gte(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute gte(double value) {
-            return gte(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return gte(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute gte(boolean value) {
-            return gte(ThingProperty.Value.Operation.Comparison.Boolean::new, value);
+            return gte(ValueOperation.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute gte(String value) {
-            return gte(ThingProperty.Value.Operation.Comparison.String::new, value);
+            return gte(ValueOperation.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute gte(LocalDateTime value) {
-            return gte(ThingProperty.Value.Operation.Comparison.DateTime::new, value);
+            return gte(ValueOperation.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute gte(UnscopedVariable variable) {
-            return gte(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
+            return gte(ValueOperation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.GTE, value));
         }
 
         // Attribute value less-than property
 
         default ThingVariable.Attribute lt(long value) {
-            return lt(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return lt(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute lt(double value) {
-            return lt(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return lt(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute lt(boolean value) {
-            return lt(ThingProperty.Value.Operation.Comparison.Boolean::new, value);
+            return lt(ValueOperation.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute lt(String value) {
-            return lt(ThingProperty.Value.Operation.Comparison.String::new, value);
+            return lt(ValueOperation.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute lt(LocalDateTime value) {
-            return lt(ThingProperty.Value.Operation.Comparison.DateTime::new, value);
+            return lt(ValueOperation.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute lt(UnscopedVariable variable) {
-            return lt(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
+            return lt(ValueOperation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.LT, value));
         }
 
         // Attribute value less-than-or-equals property
 
         default ThingVariable.Attribute lte(long value) {
-            return lte(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return lte(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute lte(double value) {
-            return lte(ThingProperty.Value.Operation.Comparison.Number::new, value);
+            return lte(ValueOperation.Comparison.Number::new, value);
         }
 
         default ThingVariable.Attribute lte(boolean value) {
-            return lte(ThingProperty.Value.Operation.Comparison.Boolean::new, value);
+            return lte(ValueOperation.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute lte(String value) {
-            return lte(ThingProperty.Value.Operation.Comparison.String::new, value);
+            return lte(ValueOperation.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute lte(LocalDateTime value) {
-            return lte(ThingProperty.Value.Operation.Comparison.DateTime::new, value);
+            return lte(ValueOperation.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute lte(UnscopedVariable variable) {
-            return lte(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
+            return lte(ValueOperation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.LTE, value));
         }
 
         // Attribute value contains (in String) property
 
         default ThingVariable.Attribute contains(String value) {
-            return contains(ThingProperty.Value.Operation.Comparison.String::new, value);
+            return contains(ValueOperation.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute contains(UnscopedVariable variable) {
-            return contains(ThingProperty.Value.Operation.Comparison.Variable::new, variable);
+            return contains(ValueOperation.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute contains(BiFunction<GraqlToken.Comparator, T, ThingProperty.Value.Operation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute contains(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.CONTAINS, value));
         }
 
         // Attribute value like (regex) property
 
         default ThingVariable.Attribute like(String value) {
-            return operation(new ThingProperty.Value.Operation.Comparison.String(GraqlToken.Comparator.LIKE, value));
+            return operation(new ValueOperation.Comparison.String(GraqlToken.Comparator.LIKE, value));
         }
 
-        default ThingVariable.Attribute operation(ThingProperty.Value.Operation<?> operation) {
+        default ThingVariable.Attribute operation(ValueOperation<?> operation) {
             return asAttributeWith(new ThingProperty.Value<>(operation));
         }
 

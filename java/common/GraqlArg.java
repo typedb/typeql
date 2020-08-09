@@ -18,6 +18,7 @@
 package graql.lang.common;
 
 public class GraqlArg {
+
     public enum ValueType {
         BOOLEAN("boolean"),
         DATETIME("datetime"),

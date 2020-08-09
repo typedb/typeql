@@ -23,6 +23,8 @@ import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.property.ThingProperty;
+import graql.lang.pattern.property.ValueOperation;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnscopedVariable;
@@ -180,174 +182,174 @@ public class Graql {
 
     // Attribute value equality property
 
-    public static ThingVariable.Attribute eq(long value) {
-        return hidden().eq(value);
+    public static ThingProperty.Value<Long> eq(long value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.EQ, value));
     }
 
-    public static ThingVariable.Attribute eq(double value) {
-        return hidden().eq(value);
+    public static ThingProperty.Value<Double> eq(double value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.EQ, value));
     }
 
-    public static ThingVariable.Attribute eq(boolean value) {
-        return hidden().eq(value);
+    public static ThingProperty.Value<Boolean> eq(boolean value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.EQ, value));
     }
 
-    public static ThingVariable.Attribute eq(String value) {
-        return hidden().eq(value);
+    public static ThingProperty.Value<String> eq(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.EQ, value));
     }
 
-    public static ThingVariable.Attribute eq(LocalDateTime value) {
-        return hidden().eq(value);
+    public static ThingProperty.Value<LocalDateTime> eq(LocalDateTime value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.EQ, value));
     }
 
-    public static ThingVariable.Attribute eq(UnscopedVariable variable) {
-        return hidden().eq(variable);
+    public static ThingProperty.Value<UnscopedVariable> eq(UnscopedVariable variable) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.EQ, variable));
     }
 
     // Attribute value inequality property
 
-    public static ThingVariable.Attribute neq(long value) {
-        return hidden().neq(value);
+    public static ThingProperty.Value<Long> neq(long value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.NEQ, value));
     }
 
-    public static ThingVariable.Attribute neq(double value) {
-        return hidden().neq(value);
+    public static ThingProperty.Value<Double> neq(double value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.NEQ, value));
     }
 
-    public static ThingVariable.Attribute neq(boolean value) {
-        return hidden().neq(value);
+    public static ThingProperty.Value<Boolean> neq(boolean value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.NEQ, value));
     }
 
-    public static ThingVariable.Attribute neq(String value) {
-        return hidden().neq(value);
+    public static ThingProperty.Value<String> neq(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.NEQ, value));
     }
 
-    public static ThingVariable.Attribute neq(LocalDateTime value) {
-        return hidden().neq(value);
+    public static ThingProperty.Value<LocalDateTime> neq(LocalDateTime value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.NEQ, value));
     }
 
-    public static ThingVariable.Attribute neq(UnscopedVariable variable) {
-        return hidden().neq(variable);
+    public static ThingProperty.Value<UnscopedVariable> neq(UnscopedVariable variable) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.NEQ, variable));
     }
 
     // Attribute value greater-than property
 
-    public static ThingVariable.Attribute gt(long value) {
-        return hidden().gt(value);
+    public static ThingProperty.Value<Long> gt(long value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GT, value));
     }
 
-    public static ThingVariable.Attribute gt(double value) {
-        return hidden().gt(value);
+    public static ThingProperty.Value<Double> gt(double value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GT, value));
     }
 
-    public static ThingVariable.Attribute gt(boolean value) {
-        return hidden().gt(value);
+    public static ThingProperty.Value<Boolean> gt(boolean value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.GT, value));
     }
 
-    public static ThingVariable.Attribute gt(String value) {
-        return hidden().gt(value);
+    public static ThingProperty.Value<String> gt(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.GT, value));
     }
 
-    public static ThingVariable.Attribute gt(LocalDateTime value) {
-        return hidden().gt(value);
+    public static ThingProperty.Value<LocalDateTime> gt(LocalDateTime value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.GT, value));
     }
 
-    public static ThingVariable.Attribute gt(UnscopedVariable variable) {
-        return hidden().gt(variable);
+    public static ThingProperty.Value<UnscopedVariable> gt(UnscopedVariable variable) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.GT, variable));
     }
 
     // Attribute value greater-than-or-equals property
 
-    public static ThingVariable.Attribute gte(long value) {
-        return hidden().gte(value);
+    public static ThingProperty.Value<Long> gte(long value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GTE, value));
     }
 
-    public static ThingVariable.Attribute gte(double value) {
-        return hidden().gte(value);
+    public static ThingProperty.Value<Double> gte(double value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GTE, value));
     }
 
-    public static ThingVariable.Attribute gte(boolean value) {
-        return hidden().gte(value);
+    public static ThingProperty.Value<Boolean> gte(boolean value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.GTE, value));
     }
 
-    public static ThingVariable.Attribute gte(String value) {
-        return hidden().gte(value);
+    public static ThingProperty.Value<String> gte(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.GTE, value));
     }
 
-    public static ThingVariable.Attribute gte(LocalDateTime value) {
-        return hidden().gte(value);
+    public static ThingProperty.Value<LocalDateTime> gte(LocalDateTime value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.GTE, value));
     }
 
-    public static ThingVariable.Attribute gte(UnscopedVariable variable) {
-        return hidden().gte(variable);
+    public static ThingProperty.Value<UnscopedVariable> gte(UnscopedVariable variable) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.GTE, variable));
     }
 
     // Attribute value less-than property
 
-    public static ThingVariable.Attribute lt(long value) {
-        return hidden().lt(value);
+    public static ThingProperty.Value<Long> lt(long value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LT, value));
     }
 
-    public static ThingVariable.Attribute lt(double value) {
-        return hidden().lt(value);
+    public static ThingProperty.Value<Double> lt(double value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LT, value));
     }
 
-    public static ThingVariable.Attribute lt(boolean value) {
-        return hidden().lt(value);
+    public static ThingProperty.Value<Boolean> lt(boolean value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.LT, value));
     }
 
-    public static ThingVariable.Attribute lt(String value) {
-        return hidden().lt(value);
+    public static ThingProperty.Value<String> lt(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.LT, value));
     }
 
-    public static ThingVariable.Attribute lt(LocalDateTime value) {
-        return hidden().lt(value);
+    public static ThingProperty.Value<LocalDateTime> lt(LocalDateTime value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.LT, value));
     }
 
-    public static ThingVariable.Attribute lt(UnscopedVariable variable) {
-        return hidden().lt(variable);
+    public static ThingProperty.Value<UnscopedVariable> lt(UnscopedVariable variable) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.LT, variable));
     }
 
     // Attribute value less-than-or-equals property
 
-    public static ThingVariable.Attribute lte(long value) {
-        return hidden().lte(value);
+    public static ThingProperty.Value<Long> lte(long value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LTE, value));
     }
 
-    public static ThingVariable.Attribute lte(double value) {
-        return hidden().lte(value);
+    public static ThingProperty.Value<Double> lte(double value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LTE, value));
     }
 
-    public static ThingVariable.Attribute lte(boolean value) {
-        return hidden().lte(value);
+    public static ThingProperty.Value<Boolean> lte(boolean value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.LTE, value));
     }
 
-    public static ThingVariable.Attribute lte(String value) {
-        return hidden().lte(value);
+    public static ThingProperty.Value<String> lte(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.LTE, value));
     }
 
-    public static ThingVariable.Attribute lte(LocalDateTime value) {
-        return hidden().lte(value);
+    public static ThingProperty.Value<LocalDateTime> lte(LocalDateTime value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.LTE, value));
     }
 
-    public static ThingVariable.Attribute lte(UnscopedVariable variable) {
-        return hidden().lte(variable);
+    public static ThingProperty.Value<UnscopedVariable> lte(UnscopedVariable variable) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.LTE, variable));
     }
 
     // Attribute value contains (in String) property
 
-    public static ThingVariable.Attribute contains(String value) {
-        return hidden().contains(value);
+    public static ThingProperty.Value<String> contains(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.CONTAINS, value));
     }
 
-    public static ThingVariable.Attribute contains(UnscopedVariable variable) {
-        return hidden().contains(variable);
+    public static ThingProperty.Value<UnscopedVariable> contains(UnscopedVariable variable) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.CONTAINS, variable));
     }
 
     // Attribute value regex property
 
-    public static ThingVariable.Attribute like(String value) {
-        return hidden().like(value);
+    public static ThingProperty.Value<String> like(String value) {
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.LIKE, value));
     }
 
 }
