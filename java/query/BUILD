@@ -17,6 +17,7 @@
 
 package(default_visibility = ["//visibility:public"])
 
+load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
@@ -37,6 +38,18 @@ java_library(
         "@maven//:com_google_code_findbugs_jsr305",
     ],
     tags = ["maven_coordinates=io.graql:graql-query:{pom_version}"],
+)
+
+assemble_maven(
+  name = "assemble-maven",
+  target = ":query",
+  package = "java",
+  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
+)
+
+deploy_maven(
+    name = "deploy-maven",
+    target = ":assemble-maven",
 )
 
 checkstyle_test(

@@ -93,6 +93,10 @@ jobs:
           export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(git rev-parse HEAD) //grammar:deploy-maven -- snapshot
+          bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
+          bazel run --define version=$(git rev-parse HEAD) //java/pattern:deploy-maven -- snapshot
+          bazel run --define version=$(git rev-parse HEAD) //java/query:deploy-maven -- snapshot
+          bazel run --define version=$(git rev-parse HEAD) //java/parser:deploy-maven -- snapshot
           bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
 
   test-deployment-maven:
