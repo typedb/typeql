@@ -449,7 +449,6 @@ public abstract class ThingProperty extends Property {
             this(type, var.asThing());
         }
 
-        // TODO: this need to be made private, and all value comparison builders on Graql API needs to be more strict
         private Has(String type, ThingVariable<?> variable) {
             if (type == null || variable == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
