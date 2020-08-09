@@ -24,6 +24,7 @@ import graql.lang.pattern.variable.Variable;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Filterable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,20 +42,20 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     private final List<UnscopedVariable> vars;
     private final MatchClause match;
     private final Sorting sorting;
-    private final long offset;
-    private final long limit;
+    private final Long offset;
+    private final Long limit;
     private final int hash;
 
     GraqlGet(MatchClause match) {
-        this(match, list());
+        this(match, new ArrayList<>());
     }
 
     GraqlGet(MatchClause match, List<UnscopedVariable> vars) {
-        this(match, vars, null, -1, -1); // TODO replace -1 with NULL
+        this(match, vars, null, null, null);
     }
 
     // We keep this contructor 'public' as it is more efficient for use during parsing
-    public GraqlGet(MatchClause match, List<UnscopedVariable> vars, Sorting sorting, long offset, long limit) {
+    public GraqlGet(MatchClause match, List<UnscopedVariable> vars, Sorting sorting, Long offset, Long limit) {
         if (match == null) throw new NullPointerException("Null match");
         if (vars == null) throw new NullPointerException("Null vars");
         for (UnscopedVariable var : vars) {
@@ -67,15 +68,14 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
 
         this.match = match;
-        this.vars = vars;
+        this.vars = list(vars);
         this.sorting = sorting;
         this.offset = offset;
         this.limit = limit;
 
         // It is important that we use vars() (the method) and not vars (the property)
         // For reasons explained in the equals() method above
-        // TODO replace the other methods with fields once we replace offset and limit type from 'int' to 'Integer'
-        this.hash = Objects.hash(variables(), match(), sort(), offset(), limit());
+        this.hash = Objects.hash(this.match, this.vars, this.sorting, this.offset, this.limit);
     }
 
     @Override
@@ -107,12 +107,12 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
     @Override
     public Optional<Long> offset() {
-        return offset < 0 ? Optional.empty() : Optional.of(offset);
+        return Optional.ofNullable(offset);
     }
 
     @Override
     public Optional<Long> limit() {
-        return limit < 0 ? Optional.empty() : Optional.of(limit);
+        return Optional.ofNullable(limit);
     }
 
     @Override

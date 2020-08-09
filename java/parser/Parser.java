@@ -269,8 +269,8 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public Triple<Filterable.Sorting, Long, Long> visitFilters(GraqlParser.FiltersContext ctx) {
         Filterable.Sorting order = null;
-        long offset = -1;
-        long limit = -1;
+        Long offset = null;
+        Long limit = null;
 
         if (ctx.sort() != null) {
             UnscopedVariable var = getVar(ctx.sort().VAR_());
@@ -279,10 +279,10 @@ public class Parser extends GraqlBaseVisitor {
                     : new Filterable.Sorting(var, GraqlArg.Order.of(ctx.sort().ORDER_().getText()));
         }
         if (ctx.offset() != null) {
-            offset = getInteger(ctx.offset().INTEGER_());
+            offset = getLong(ctx.offset().INTEGER_());
         }
         if (ctx.limit() != null) {
-            limit = getInteger(ctx.limit().INTEGER_());
+            limit = getLong(ctx.limit().INTEGER_());
         }
 
         return triple(order, offset, limit);
@@ -477,13 +477,13 @@ public class Parser extends GraqlBaseVisitor {
 
         for (GraqlParser.Compute_argContext argContext : argContextList) {
             if (argContext.MIN_K() != null) {
-                argList.add(GraqlCompute.Argument.minK(getInteger(argContext.INTEGER_())));
+                argList.add(GraqlCompute.Argument.minK(getLong(argContext.INTEGER_())));
 
             } else if (argContext.K() != null) {
-                argList.add(GraqlCompute.Argument.k(getInteger(argContext.INTEGER_())));
+                argList.add(GraqlCompute.Argument.k(getLong(argContext.INTEGER_())));
 
             } else if (argContext.SIZE() != null) {
-                argList.add(GraqlCompute.Argument.size(getInteger(argContext.INTEGER_())));
+                argList.add(GraqlCompute.Argument.size(getLong(argContext.INTEGER_())));
 
             } else if (argContext.CONTAINS() != null) {
                 argList.add(GraqlCompute.Argument.contains(argContext.ID_().getText()));
@@ -890,7 +890,7 @@ public class Parser extends GraqlBaseVisitor {
             return getString(ctx.STRING_());
 
         } else if (ctx.INTEGER_() != null) {
-            return getInteger(ctx.INTEGER_());
+            return getLong(ctx.INTEGER_());
 
         } else if (ctx.REAL_() != null) {
             return getReal(ctx.REAL_());
@@ -918,7 +918,7 @@ public class Parser extends GraqlBaseVisitor {
         return string.getText().substring(1, string.getText().length() - 1);
     }
 
-    private long getInteger(TerminalNode number) {
+    private long getLong(TerminalNode number) {
         return Long.parseLong(number.getText());
     }
 
