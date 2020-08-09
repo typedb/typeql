@@ -18,8 +18,8 @@
 package graql.lang.parser.test;
 
 import graql.lang.Graql;
-import graql.lang.common.exception.GraqlException;
 import graql.lang.common.GraqlArg;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
@@ -40,8 +40,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
-import static graql.lang.common.GraqlArg.Algorithm.K_CORE;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.define;
 import static graql.lang.Graql.gte;
@@ -55,6 +53,8 @@ import static graql.lang.Graql.rel;
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.undefine;
 import static graql.lang.Graql.var;
+import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
+import static graql.lang.common.GraqlArg.Algorithm.K_CORE;
 import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.size;
 import static java.util.stream.Collectors.toList;

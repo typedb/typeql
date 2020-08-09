@@ -18,9 +18,9 @@
 package graql.lang.pattern.property;
 
 import grakn.common.collection.Either;
+import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
-import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnscopedVariable;
@@ -35,10 +35,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
-import static graql.lang.common.exception.ErrorMessage.INVALID_PROPERTY_DATETIME_PRECISION;
-import static graql.lang.common.util.Strings.escapeRegex;
-import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
@@ -47,6 +43,10 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Property.HAS;
 import static graql.lang.common.GraqlToken.Property.ISA;
 import static graql.lang.common.GraqlToken.Property.ISAX;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_PROPERTY_DATETIME_PRECISION;
+import static graql.lang.common.util.Strings.escapeRegex;
+import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 import static java.util.stream.Collectors.joining;
 

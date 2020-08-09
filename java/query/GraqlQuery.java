@@ -17,20 +17,18 @@
 
 package graql.lang.query;
 
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 
-/**
- * A Graql query of any kind. May read and write to the graph.
- *
- * TODO: this class should return more informative exception messages
- */
 public abstract class GraqlQuery {
 
     public GraqlDefine asDefine() {
         if (this instanceof GraqlDefine) {
             return (GraqlDefine) this;
         } else {
-            throw GraqlException.create("This is not a GraqlDefine query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlDefine.class.getCanonicalName()
+            ));
         }
     }
 
@@ -38,7 +36,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlUndefine) {
             return (GraqlUndefine) this;
         } else {
-            throw GraqlException.create("This is not a GraqlUndefine query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlUndefine.class.getCanonicalName()
+            ));
         }
     }
 
@@ -46,7 +46,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlInsert) {
             return (GraqlInsert) this;
         } else {
-            throw GraqlException.create("This is not a GraqlInsert query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlInsert.class.getCanonicalName()
+            ));
         }
     }
 
@@ -54,7 +56,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlDelete) {
             return (GraqlDelete) this;
         } else {
-            throw GraqlException.create("This is not a GraqlDelete query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlDelete.class.getCanonicalName()
+            ));
         }
     }
 
@@ -62,7 +66,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlGet) {
             return (GraqlGet) this;
         } else {
-            throw GraqlException.create("This is not a GraqlGet query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlGet.class.getCanonicalName()
+            ));
         }
     }
 
@@ -70,7 +76,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlGet.Aggregate) {
             return (GraqlGet.Aggregate) this;
         } else {
-            throw GraqlException.create("This is not a GraqlGet.Aggregate query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlGet.Aggregate.class.getCanonicalName()
+            ));
         }
     }
 
@@ -78,7 +86,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlGet.Group) {
             return (GraqlGet.Group) this;
         } else {
-            throw GraqlException.create("This is not a GraqlGet.Group query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlGet.Group.class.getCanonicalName()
+            ));
         }
     }
 
@@ -86,7 +96,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlGet.Group.Aggregate) {
             return (GraqlGet.Group.Aggregate) this;
         } else {
-            throw GraqlException.create("This is not a GraqlGet.Group.Aggregate query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlGet.Group.Aggregate.class.getCanonicalName()
+            ));
         }
     }
 
@@ -94,7 +106,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Statistics) {
             return (GraqlCompute.Statistics) this;
         } else {
-            throw GraqlException.create("This is not a GraqlCompute.Statistics query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Statistics.class.getCanonicalName()
+            ));
         }
     }
 
@@ -102,7 +116,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Path) {
             return (GraqlCompute.Path) this;
         } else {
-            throw GraqlException.create("This is not a GraqlCompute.Path query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Path.class.getCanonicalName()
+            ));
         }
     }
 
@@ -110,7 +126,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Centrality) {
             return (GraqlCompute.Centrality) this;
         } else {
-            throw GraqlException.create("This is not a GraqlCompute.Centrality query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Centrality.class.getCanonicalName()
+            ));
         }
     }
 
@@ -118,7 +136,9 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Cluster) {
             return (GraqlCompute.Cluster) this;
         } else {
-            throw GraqlException.create("This is not a GraqlCompute.Cluster query");
+            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
+                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Cluster.class.getCanonicalName()
+            ));
         }
     }
 
