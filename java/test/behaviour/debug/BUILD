@@ -15,46 +15,37 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-package(default_visibility = ["//visibility:public"])
-
+package(default_visibility = ["//visibility:__subpackages__"])
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 
-java_library(
-    name = "graql",
-    srcs = glob(["*.java"], exclude = ["**/test/**"]),
+java_test(
+    name = "test",
+    srcs = [
+        "DebugTest.java",
+    ],
+    test_class = "graql.lang.test.behaviour.debug.DebugTest",
     deps = [
         # Internal Package Dependencies
-        "//java/common:common",
-        "//java/parser:parser",
-        "//java/pattern:pattern",
-        "//java/query:query",
 
-        # Internal Repository Dependencies
-        "@graknlabs_common//:common",
+        # Add your additional debugging dependencies here
+        # e.g. "//test/behaviour/connection/session:steps",
 
-        # External dependencies
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:org_slf4j_slf4j_api",
+        # External Maven Dependencies
+        "@maven//:io_cucumber_cucumber_java",
+        "@maven//:io_cucumber_cucumber_junit",
     ],
-    tags = ["maven_coordinates=io.graql:graql-lang:{pom_version}"],
-)
-
-assemble_maven(
-  name = "assemble-maven",
-  target = ":graql",
-  package = "java",
-  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
-)
-
-deploy_maven(
-    name = "deploy-maven",
-    target = ":assemble-maven",
+    runtime_deps = [
+        # Add your Cucumber Steps here
+    ],
+    data = [
+        ":debug.feature",
+    ],
+    size = "medium",
 )
 
 checkstyle_test(
     name = "checkstyle",
     targets = [
-        ":graql",
+        ":test"
     ],
 )

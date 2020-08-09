@@ -72,7 +72,7 @@ jobs:
             bazel run @graknlabs_dependencies//tool/sonarcloud:code-analysis -- \
             --project-key graknlabs_graql --branch=$CIRCLE_BRANCH --commit-id=$CIRCLE_SHA1
 
-  test-java:
+  test-java-query:
     machine:
       image: ubuntu-1604:201903-01
     working_directory: ~/graql
@@ -80,7 +80,19 @@ jobs:
       - install-bazel
       - checkout
       - run-bazel:
-          command: bazel test //... --test_output=errors
+          command: bazel test //java/parser... --test_output=errors
+      - run-bazel:
+          command: bazel test //java/query... --test_output=errors
+
+  test-java-behaviour:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/graql
+    steps:
+      - install-bazel
+      - checkout
+      - run-bazel:
+          command: bazel test //java/test/behaviour... --test_output=errors
 
   deploy-maven-snapshot:
     machine:
@@ -205,7 +217,11 @@ workflows:
           filters:
             branches:
               only: master
-      - test-java:
+      - test-java-query:
+          filters:
+            branches:
+              ignore: graql-release-branch
+      - test-java-behaviour:
           filters:
             branches:
               ignore: graql-release-branch
@@ -217,7 +233,8 @@ workflows:
             - build
             - build-checkstyle
             - build-analysis
-            - test-java
+            - test-java-query
+            - test-java-behaviour
       - test-deployment-maven:
           filters:
             branches:

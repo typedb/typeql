@@ -18,8 +18,9 @@
 workspace(name = "graknlabs_graql")
 
 ################################
-# Load @graknlabs_dependencies #
+# Load @graknlabs_dependencies # TODO: clean up this workspace
 ################################
+
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
@@ -135,11 +136,15 @@ bazelbuild_rules_pkg()
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
-##########################
-# Load @graknlabs_common #
-##########################
+################################
+# Load Grakn Labs Dependencies #
+################################
+
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_common")
 graknlabs_common()
+
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_verification")
+graknlabs_verification()
 
 ###############
 # Load @maven #

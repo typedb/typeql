@@ -15,46 +15,44 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-package(default_visibility = ["//visibility:public"])
-
+package(default_visibility = ["//visibility:__subpackages__"])
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
 
 java_library(
-    name = "graql",
-    srcs = glob(["*.java"], exclude = ["**/test/**"]),
+    name = "steps",
+    srcs = ["GraqlSteps.java"],
     deps = [
         # Internal Package Dependencies
-        "//java/common:common",
-        "//java/parser:parser",
-        "//java/pattern:pattern",
         "//java/query:query",
+        "//java:graql",
 
-        # Internal Repository Dependencies
-        "@graknlabs_common//:common",
-
-        # External dependencies
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:org_slf4j_slf4j_api",
+        # External dependencies from Maven
+        "@maven//:junit_junit",
+        "@maven//:io_cucumber_cucumber_java",
     ],
-    tags = ["maven_coordinates=io.graql:graql-lang:{pom_version}"],
 )
-
-assemble_maven(
-  name = "assemble-maven",
-  target = ":graql",
-  package = "java",
-  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
-)
-
-deploy_maven(
-    name = "deploy-maven",
-    target = ":assemble-maven",
+java_test(
+    name = "test",
+    srcs = ["GraqlTest.java"],
+    test_class = "graql.lang.test.behaviour.graql.GraqlTest",
+    deps = [
+        # External dependencies from Maven
+        "@maven//:io_cucumber_cucumber_junit",
+    ],
+    runtime_deps = [
+        ":steps",
+    ],
+    data = [
+        "@graknlabs_verification//behaviour/graql/explanation:features",
+        "@graknlabs_verification//behaviour/graql/language:features",
+        "@graknlabs_verification//behaviour/graql/reasoner:features",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 checkstyle_test(
     name = "checkstyle",
     targets = [
-        ":graql",
+        ":test",
     ],
 )
