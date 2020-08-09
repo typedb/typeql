@@ -48,6 +48,7 @@ java_test(
         "@graknlabs_verification//behaviour/graql/reasoner:features",
     ],
     visibility = ["//visibility:public"],
+    size = "small",
 )
 
 checkstyle_test(

@@ -29,7 +29,7 @@ java_test(
         "@graknlabs_common//:common",
         "@maven//:org_hamcrest_hamcrest_library",
     ],
-    size = "medium"
+    size = "small",
 )
 
 checkstyle_test(

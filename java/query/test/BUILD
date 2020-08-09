@@ -26,7 +26,7 @@ java_test(
         "//java/common:common",
         "//java/query:query",
     ],
-    size = "small"
+    size = "small",
 )
 
 
@@ -41,7 +41,7 @@ java_test(
         "//java/query:query",
         "@graknlabs_common//:common",
     ],
-    size = "small"
+    size = "small",
 )
 
 java_test(
@@ -54,7 +54,7 @@ java_test(
         "//java/query:query",
         "@graknlabs_common//:common",
     ],
-    size = "small"
+    size = "small",
 )
 
 checkstyle_test(
