@@ -37,10 +37,9 @@ java_test(
     runtime_deps = [
         # Add your Cucumber Steps here
     ],
-    data = [
-        ":debug.feature",
-    ],
+    data = [":debug.feature"],
     size = "medium",
+    tags = ["manual"]
 )
 
 checkstyle_test(

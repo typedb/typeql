@@ -22,7 +22,7 @@ load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", 
 
 java_library(
     name = "graql",
-    srcs = glob(["*.java"], exclude = ["**/test/**"]),
+    srcs = ["Graql.java"],
     deps = [
         # Internal Package Dependencies
         "//java/common:common",

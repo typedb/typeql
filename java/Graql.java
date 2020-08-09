@@ -41,10 +41,6 @@ import java.util.stream.Stream;
 import static grakn.common.collection.Collections.list;
 import static graql.lang.pattern.variable.UnscopedVariable.hidden;
 
-/**
- * Main class containing static methods for creating Graql queries.
- * It is recommended you statically import these methods.
- */
 public class Graql {
 
     private static final Parser parser = new Parser();
@@ -65,26 +61,14 @@ public class Graql {
         return parser.parsePatternListEOF(pattern);
     }
 
-    /**
-     * @param patterns an array of patterns to match in the graph
-     * @return a match clause that will find matches of the given patterns
-     */
     public static MatchClause match(Pattern... patterns) {
         return match(Arrays.asList(patterns));
     }
 
-    /**
-     * @param patterns a collection of patterns to match in the graph
-     * @return a match clause that will find matches of the given patterns
-     */
     public static MatchClause match(List<? extends Pattern> patterns) {
         return new MatchClause(patterns);
     }
 
-    /**
-     * @param things an array of variable patterns to insert into the graph
-     * @return an insert query that will insert the given variable patterns into the graph
-     */
     public static GraqlInsert insert(ThingVariable<?>... things) {
         return new GraqlInsert(list(things));
     }
@@ -93,10 +77,6 @@ public class Graql {
         return new GraqlInsert(things);
     }
 
-    /**
-     * @param types an array of of types to define the schema
-     * @return a define query that will apply the changes described in the {@code patterns}
-     */
     public static GraqlDefine define(TypeVariable... types) {
         return new GraqlDefine(list(types));
     }
@@ -105,10 +85,6 @@ public class Graql {
         return new GraqlDefine(types);
     }
 
-    /**
-     * @param types an array of types to undefine the schema
-     * @return an undefine query that will remove the changes described in the {@code patterns}
-     */
     public static GraqlUndefine undefine(TypeVariable... types) {
         return new GraqlUndefine(list(types));
     }
@@ -123,34 +99,18 @@ public class Graql {
 
     // Pattern Builder Methods
 
-    /**
-     * @param patterns an array of patterns to match
-     * @return a pattern that will match only when all contained patterns match
-     */
     public static Conjunction<? extends Pattern> and(Pattern... patterns) {
         return and(Arrays.asList(patterns));
     }
 
-    /**
-     * @param patterns a collection of patterns to match
-     * @return a pattern that will match only when all contained patterns match
-     */
     public static Conjunction<? extends Pattern> and(List<? extends Pattern> patterns) {
         return new Conjunction<>(patterns);
     }
 
-    /**
-     * @param patterns an array of patterns to match
-     * @return a pattern that will match when any contained pattern matches
-     */
     public static Pattern or(Pattern... patterns) {
         return or(Arrays.asList(patterns));
     }
 
-    /**
-     * @param patterns a collection of patterns to match
-     * @return a pattern that will match when any contained pattern matches
-     */
     public static Pattern or(List<Pattern> patterns) {
         // Simplify representation when there is only one alternative
         if (patterns.size() == 1) {
@@ -160,27 +120,16 @@ public class Graql {
         return new Disjunction<>(patterns);
     }
 
-    /**
-     * @param pattern a patterns to a negate
-     * @return a pattern that will match when no contained pattern matches
-     */
     public static Negation<Pattern> not(Pattern pattern) {
         return new Negation<>(pattern);
     }
 
     // Variable Builder Methods
 
-    /**
-     * @return a new variable with an anonymous Variable
-     */
     public static UnscopedVariable var() {
         return UnscopedVariable.anonymous();
     }
 
-    /**
-     * @param name the name of the variable
-     * @return a new variable with a variable of a given name
-     */
     public static UnscopedVariable var(String name) {
         return UnscopedVariable.named(name);
     }
