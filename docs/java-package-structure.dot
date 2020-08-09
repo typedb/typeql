@@ -1,0 +1,15 @@
+digraph mygraph {
+  node [shape=box];
+  "//java:graql"
+  "//java:graql" -> "//java/parser:parser"
+  "//java:graql" -> "//java/pattern:pattern"
+  "//java:graql" -> "//java/query:query"
+  "//java/parser:parser"
+  "//java/parser:parser" -> "//java/pattern:pattern"
+  "//java/parser:parser" -> "//java/query:query"
+  "//java/parser:parser" -> "//grammar:java"
+  "//java/query:query"
+  "//java/query:query" -> "//java/pattern:pattern"
+  "//java/pattern:pattern"
+  "//grammar:java"
+}
