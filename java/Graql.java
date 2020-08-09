@@ -78,7 +78,7 @@ public class Graql {
      * @return a match clause that will find matches of the given patterns
      */
     public static MatchClause match(List<? extends Pattern> patterns) {
-        return new MatchClause(and(patterns));
+        return new MatchClause(patterns);
     }
 
     /**

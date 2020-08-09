@@ -46,9 +46,9 @@ public class MatchClause {
     private List<Variable> vars;
     private List<Variable> varsNamedNoProps;
 
-    public MatchClause(Conjunction<? extends Pattern> pattern) {
-        if (pattern.patterns().size() == 0) throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
-        this.pattern = pattern;
+    public MatchClause(List<? extends Pattern> patterns) {
+        if (patterns.size() == 0) throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
+        this.pattern = new Conjunction<>(patterns);
         this.hash = Objects.hash(this.pattern);
     }
 
