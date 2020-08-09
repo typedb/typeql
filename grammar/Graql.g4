@@ -56,8 +56,8 @@ variables           :   ( VAR_ ( ',' VAR_ )* )? ';'     ;
 filters             :   ( sort ';' )? ( offset ';' )? ( limit ';' )?  ;
 
 sort                :   SORT        VAR_        ORDER_? ;
-offset              :   OFFSET      INTEGER_            ;
-limit               :   LIMIT       INTEGER_            ;
+offset              :   OFFSET      LONG_               ;
+limit               :   LIMIT       LONG_               ;
 
 
 // GET AGGREGATE QUERY =========================================================
@@ -193,9 +193,9 @@ compute_config      :   USING   compute_algorithm                               
 compute_algorithm   :   DEGREE | K_CORE | CONNECTED_COMPONENT ;                 // algorithm to determine how to compute
 compute_args        :   compute_arg | compute_args_array ;                      // single argument or array of arguments
 compute_args_array  :   '[' compute_arg (',' compute_arg)* ']' ;                // an array of arguments
-compute_arg         :   MIN_K     '=' INTEGER_                                  // a single argument for min-k=INTEGER
-                    |   K         '=' INTEGER_                                  // a single argument for k=INTEGER
-                    |   SIZE      '=' INTEGER_                                  // a single argument for size=INTEGER
+compute_arg         :   MIN_K     '=' LONG_                                  // a single argument for min-k=LONG
+                    |   K         '=' LONG_                                  // a single argument for k=LONG
+                    |   SIZE      '=' LONG_                                  // a single argument for size=LONG
                     |   CONTAINS  '=' ID_           ;                           // a single argument for contains=ID
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
@@ -210,11 +210,11 @@ type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
 
 type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
-type_name           :   TYPE_NAME_      |   ID_         ;
+type_name           :   TYPE_NAME_      |   ID_             ;
 
 value_type          :   LONG            |   DOUBLE          |   STRING
-                    |   BOOLEAN         |   DATETIME            ;
-literal               :   STRING_         |   INTEGER_        |   REAL_
+                    |   BOOLEAN         |   DATETIME        ;
+literal             :   STRING_         |   LONG_           |   DOUBLE_
                     |   BOOLEAN_        |   DATE_           |   DATETIME_   ;
 regex               :   STRING_         ;
 
@@ -300,8 +300,8 @@ TRUE            : 'true'        ;
 FALSE           : 'false'       ;
 STRING_         : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
                 | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''   ;
-INTEGER_        : ('+' | '-')? [0-9]+                   ;
-REAL_           : ('+' | '-')? [0-9]+ '.' [0-9]+        ;
+LONG_           : ('+' | '-')? [0-9]+                   ;
+DOUBLE_         : ('+' | '-')? [0-9]+ '.' [0-9]+        ;
 DATE_           : DATE_FRAGMENT_                        ;
 DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 

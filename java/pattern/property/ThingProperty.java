@@ -425,14 +425,9 @@ public abstract class ThingProperty extends Property {
                     super(comparator, value);
                 }
 
-                // TODO: remove INTEGER and FLOAT
                 public static Comparison<?> of(GraqlToken.Comparator comparator, Object value) {
-                    if (value instanceof Integer) {
-                        return new Comparison.Number<>(comparator, (Integer) value);
-                    } else if (value instanceof Long) {
+                    if (value instanceof Long) {
                         return new Comparison.Number<>(comparator, (Long) value);
-                    } else if (value instanceof Float) {
-                        return new Comparison.Number<>(comparator, (Float) value);
                     } else if (value instanceof Double) {
                         return new Comparison.Number<>(comparator, (Double) value);
                     } else if (value instanceof java.lang.Boolean) {

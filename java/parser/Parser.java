@@ -279,10 +279,10 @@ public class Parser extends GraqlBaseVisitor {
                     : new Filterable.Sorting(var, GraqlArg.Order.of(ctx.sort().ORDER_().getText()));
         }
         if (ctx.offset() != null) {
-            offset = getLong(ctx.offset().INTEGER_());
+            offset = getLong(ctx.offset().LONG_());
         }
         if (ctx.limit() != null) {
-            limit = getLong(ctx.limit().INTEGER_());
+            limit = getLong(ctx.limit().LONG_());
         }
 
         return triple(order, offset, limit);
@@ -477,13 +477,13 @@ public class Parser extends GraqlBaseVisitor {
 
         for (GraqlParser.Compute_argContext argContext : argContextList) {
             if (argContext.MIN_K() != null) {
-                argList.add(GraqlCompute.Argument.minK(getLong(argContext.INTEGER_())));
+                argList.add(GraqlCompute.Argument.minK(getLong(argContext.LONG_())));
 
             } else if (argContext.K() != null) {
-                argList.add(GraqlCompute.Argument.k(getLong(argContext.INTEGER_())));
+                argList.add(GraqlCompute.Argument.k(getLong(argContext.LONG_())));
 
             } else if (argContext.SIZE() != null) {
-                argList.add(GraqlCompute.Argument.size(getLong(argContext.INTEGER_())));
+                argList.add(GraqlCompute.Argument.size(getLong(argContext.LONG_())));
 
             } else if (argContext.CONTAINS() != null) {
                 argList.add(GraqlCompute.Argument.contains(argContext.ID_().getText()));
@@ -838,13 +838,8 @@ public class Parser extends GraqlBaseVisitor {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
 
-        // TODO: Remove INTEGER and FLOAT
-        if (value instanceof Integer) {
-            return new ThingProperty.Value.Operation.Comparison.Number<>(comparator, ((Integer) value));
-        } else if (value instanceof Long) {
+        if (value instanceof Long) {
             return new ThingProperty.Value.Operation.Comparison.Number<>(comparator, (Long) value);
-        } else if (value instanceof Float) {
-            return new ThingProperty.Value.Operation.Comparison.Number<>(comparator, (Float) value);
         } else if (value instanceof Double) {
             return new ThingProperty.Value.Operation.Comparison.Number<>(comparator, (Double) value);
         } else if (value instanceof Boolean) {
@@ -884,16 +879,16 @@ public class Parser extends GraqlBaseVisitor {
         }
     }
 
-    @Override // TODO: Rename INTEGER and REAL to LONG and DOUBLE
+    @Override
     public Object visitLiteral(GraqlParser.LiteralContext ctx) {
         if (ctx.STRING_() != null) {
             return getString(ctx.STRING_());
 
-        } else if (ctx.INTEGER_() != null) {
-            return getLong(ctx.INTEGER_());
+        } else if (ctx.LONG_() != null) {
+            return getLong(ctx.LONG_());
 
-        } else if (ctx.REAL_() != null) {
-            return getReal(ctx.REAL_());
+        } else if (ctx.DOUBLE_() != null) {
+            return getDouble(ctx.DOUBLE_());
 
         } else if (ctx.BOOLEAN_() != null) {
             return getBoolean(ctx.BOOLEAN_());
@@ -922,7 +917,7 @@ public class Parser extends GraqlBaseVisitor {
         return Long.parseLong(number.getText());
     }
 
-    private double getReal(TerminalNode real) {
+    private double getDouble(TerminalNode real) {
         return Double.parseDouble(real.getText());
     }
 
