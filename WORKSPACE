@@ -34,12 +34,6 @@ bazel_common()
 bazel_deps()
 bazel_toolchain()
 
-load("@graknlabs_dependencies//builder/grpc:deps.bzl", grpc_deps = "deps")
-grpc_deps()
-
-load("@stackb_rules_proto//java:deps.bzl", "java_grpc_compile")
-java_grpc_compile()
-
 load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
 java_deps()
 load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
