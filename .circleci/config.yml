@@ -185,7 +185,9 @@ workflows:
       - build-analysis:
           filters:
             branches:
-              only: master
+              only:
+              - master
+              - release-branch-1.0.8
       - test-java:
           filters:
             branches:
@@ -193,7 +195,9 @@ workflows:
       - deploy-maven-snapshot:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-1.0.8
           requires:
             - build
             - build-analysis
@@ -201,19 +205,25 @@ workflows:
       - test-deployment-maven:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-1.0.8
           requires:
             - deploy-maven-snapshot
       - sync-dependencies-snapshot:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-1.0.8
           requires:
             - test-deployment-maven
       - release-approval:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-1.0.8
           requires:
             - sync-dependencies-snapshot
   graql-release:
