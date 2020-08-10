@@ -935,7 +935,7 @@ public class ParserTest {
 
     @Test
     public void testParseKey() {
-        assertEquals("match $x key name; get $x;", parse("match $x key name; get $x;").toString());
+        assertEquals("match $x has name @key; get $x;", parse("match $x has name @key; get $x;").toString());
     }
 
     @Test

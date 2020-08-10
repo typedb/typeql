@@ -577,10 +577,8 @@ public class Parser extends GraqlBaseVisitor {
                 } else {
                     throw new IllegalArgumentException("Unrecognised SUB Property: " + property.type(0).getText());
                 }
-            } else if (property.KEY() != null) {
-                type = type.asTypeWith(new TypeProperty.Has(visitType(property.type(0)), true));
             } else if (property.HAS() != null) {
-                type = type.asTypeWith(new TypeProperty.Has(visitType(property.type(0)), false));
+                type = type.asTypeWith(new TypeProperty.Has(visitType(property.type(0)), property.IS_KEY() != null));
             } else if (property.PLAYS() != null) {
                 type = type.asTypeWith(new TypeProperty.Plays(visitType(property.type(0))));
             } else if (property.RELATES() != null) {

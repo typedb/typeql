@@ -38,7 +38,7 @@ import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Property.AS;
 import static graql.lang.common.GraqlToken.Property.HAS;
-import static graql.lang.common.GraqlToken.Property.KEY;
+import static graql.lang.common.GraqlToken.Property.IS_KEY;
 import static graql.lang.common.GraqlToken.Property.PLAYS;
 import static graql.lang.common.GraqlToken.Property.REGEX;
 import static graql.lang.common.GraqlToken.Property.RELATES;
@@ -541,7 +541,7 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            return (isKey ? KEY.toString() : HAS.toString()) + SPACE + attributeType;
+            return HAS.toString() + SPACE + attributeType + (isKey ? "" + SPACE + IS_KEY : "");
         }
 
         @Override
