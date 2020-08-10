@@ -67,9 +67,9 @@ public abstract class ThingProperty extends Property {
         ));
     }
 
-    public ThingProperty.ID asID() {
+    public IID asID() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), ID.class.getCanonicalName()
+                Singular.class.getCanonicalName(), IID.class.getCanonicalName()
         ));
     }
 
@@ -129,20 +129,19 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    // TODO: Rename to IID
-    public static class ID extends ThingProperty.Singular {
+    public static class IID extends ThingProperty.Singular {
 
-        private final String id;
+        private final String iid;
         private final int hash;
 
-        public ID(String id) {
-            if (id == null) throw new NullPointerException("Null id");
-            this.id = id;
-            this.hash = Objects.hash(this.id);
+        public IID(String iid) {
+            if (iid == null) throw new NullPointerException("Null IID");
+            this.iid = iid;
+            this.hash = Objects.hash(this.iid);
         }
 
         public String id() {
-            return id;
+            return iid;
         }
 
         @Override
@@ -151,21 +150,21 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.ID asID() {
+        public IID asID() {
             return this;
         }
 
         @Override
         public String toString() {
-            return GraqlToken.Property.ID.toString() + SPACE + id;
+            return GraqlToken.Property.IID.toString() + SPACE + iid;
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ThingProperty.ID that = (ThingProperty.ID) o;
-            return (this.id.equals(that.id));
+            IID that = (IID) o;
+            return (this.iid.equals(that.iid));
         }
 
         @Override

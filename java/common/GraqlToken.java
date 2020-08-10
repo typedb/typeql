@@ -201,7 +201,7 @@ public class GraqlToken {
         AS("as"),
         HAS("has"),
         KEY("key"),
-        ID("id"), // TODO: rename to 'IID'
+        IID("iid"),
         ISA("isa"),
         ISAX("isa!"),
         PLAYS("plays"),

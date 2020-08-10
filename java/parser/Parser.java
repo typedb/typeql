@@ -402,7 +402,7 @@ public class Parser extends GraqlBaseVisitor {
         for (GraqlParser.Input_pathContext pathCtx : ctx.input_path()) {
 
             if (pathCtx.compute_direction() != null) {
-                String id = pathCtx.compute_direction().ID_().getText();
+                String id = pathCtx.compute_direction().IID_().getText();
                 if (pathCtx.compute_direction().FROM() != null) {
                     compute = compute.from(id);
                 } else if (pathCtx.compute_direction().TO() != null) {
@@ -487,7 +487,7 @@ public class Parser extends GraqlBaseVisitor {
                 argList.add(GraqlCompute.Argument.size(getLong(argContext.LONG_())));
 
             } else if (argContext.CONTAINS() != null) {
-                argList.add(GraqlCompute.Argument.contains(argContext.ID_().getText()));
+                argList.add(GraqlCompute.Argument.contains(argContext.IID_().getText()));
             }
         }
 
@@ -635,8 +635,8 @@ public class Parser extends GraqlBaseVisitor {
 
         if (ctx.ISA_() != null) {
             thing = unscoped.asThingWith(getIsaProperty(ctx.ISA_(), ctx.type()));
-        } else if (ctx.ID() != null) {
-            thing = unscoped.iid(ctx.ID_().getText());
+        } else if (ctx.IID() != null) {
+            thing = unscoped.iid(ctx.IID_().getText());
         } else if (ctx.NEQ() != null) {
             thing = unscoped.not(getVar(ctx.VAR_(1)));
         }

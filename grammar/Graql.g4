@@ -118,7 +118,7 @@ variable_thing_any  :   variable_thing
                     |   variable_attribute
                     ;
 variable_thing      :   VAR_                ISA_ type   ( ',' attributes )?
-                    |   VAR_                ID   ID_    ( ',' attributes )?
+                    |   VAR_                IID  IID_    ( ',' attributes )?
                     |   VAR_                NEQ  VAR_
                     |   VAR_                attributes
                     ;
@@ -183,8 +183,8 @@ input_cluster       :   compute_scope                       | compute_config ;
 input_path          :   compute_scope | compute_direction   ;
 
 
-compute_direction   :   FROM    ID_                                             // an instance to start the compute from
-                    |   TO      ID_                 ;                           // an instance to end the compute at
+compute_direction   :   FROM    IID_                                             // an instance to start the compute from
+                    |   TO      IID_                 ;                           // an instance to end the compute at
 compute_target      :   OF      type_labels         ;                           // type(s) of instances to apply compute
 compute_scope       :   IN      type_labels         ;                           // type(s) to scope compute visibility
 compute_config      :   USING   compute_algorithm                               // algorithm to determine how to compute
@@ -196,7 +196,7 @@ compute_args_array  :   '[' compute_arg (',' compute_arg)* ']' ;                
 compute_arg         :   MIN_K     '=' LONG_                                  // a single argument for min-k=LONG
                     |   K         '=' LONG_                                  // a single argument for k=LONG
                     |   SIZE      '=' LONG_                                  // a single argument for size=LONG
-                    |   CONTAINS  '=' ID_           ;                           // a single argument for contains=ID
+                    |   CONTAINS  '=' IID_           ;                           // a single argument for contains=ID
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
@@ -210,7 +210,7 @@ type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
 
 type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
-type_name           :   TYPE_NAME_      |   ID_             ;
+type_name           :   TYPE_NAME_      |   IID_             ;
 
 value_type          :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME        ;
@@ -252,7 +252,7 @@ ASC             : 'asc'         ;   DESC            : 'desc'        ;
 // STATEMENT PROPERTY KEYWORDS
 
 ABSTRACT        : 'abstract'    ;   AS              : 'as'          ;
-ID              : 'id'          ;   TYPE            : 'type'        ;
+IID             : 'iid'         ;   TYPE            : 'type'        ;
 ISA_            : ISA | ISAX    ;   SUB_            : SUB | SUBX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
@@ -310,7 +310,7 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
 VAR_NAMED_      : '$' [a-zA-Z0-9][a-zA-Z0-9_-]* ;
-ID_             : ('V'|'E')[a-z0-9-]* ;
+IID_            : [0-9a-f]+ ;
 TYPE_NAME_      : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
 
 

@@ -73,8 +73,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
         return this;
     }
 
-    public Optional<ThingProperty.ID> idProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.ID.class)).map(ThingProperty::asID);
+    public Optional<ThingProperty.IID> idProperty() {
+        return Optional.ofNullable(singularProperties.get(ThingProperty.IID.class)).map(ThingProperty::asID);
     }
 
     public Optional<ThingProperty.Isa> isaProperty() {
