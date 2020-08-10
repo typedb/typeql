@@ -22,7 +22,7 @@ import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
@@ -42,7 +42,7 @@ import static graql.lang.common.GraqlToken.Property.HAS;
 import static graql.lang.common.GraqlToken.Property.ISA;
 import static graql.lang.common.GraqlToken.Property.ISAX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
-import static graql.lang.pattern.variable.UnscopedVariable.hidden;
+import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
 public abstract class ThingProperty extends Property {
@@ -184,12 +184,12 @@ public abstract class ThingProperty extends Property {
             this(hidden().type(type), isExplicit);
         }
 
-        public Isa(UnscopedVariable typeVar, boolean isExplicit) {
+        public Isa(UnboundVariable typeVar, boolean isExplicit) {
             this(typeVar.asType(), isExplicit);
         }
 
-        public Isa(Either<String, UnscopedVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(label -> hidden().type(label), UnscopedVariable::asType), isExplicit);
+        public Isa(Either<String, UnboundVariable> typeArg, boolean isExplicit) {
+            this(typeArg.apply(label -> hidden().type(label), UnboundVariable::asType), isExplicit);
         }
 
         private Isa(TypeVariable type, boolean isExplicit) {
@@ -239,7 +239,7 @@ public abstract class ThingProperty extends Property {
         private final ThingVariable<?> variable;
         private final int hash;
 
-        public NEQ(UnscopedVariable var) {
+        public NEQ(UnboundVariable var) {
             if (var == null) throw new NullPointerException("Null var");
             this.variable = var.asThing();
             this.hash = Objects.hash(var);
@@ -384,20 +384,20 @@ public abstract class ThingProperty extends Property {
             private final ThingVariable<?> player;
             private final int hash;
 
-            public RolePlayer(String roleType, UnscopedVariable playerVar) {
+            public RolePlayer(String roleType, UnboundVariable playerVar) {
                 this(roleType == null ? null : hidden().type(roleType), playerVar.asThing());
             }
 
-            public RolePlayer(UnscopedVariable roleTypeVar, UnscopedVariable playerVar) {
+            public RolePlayer(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
                 this(roleTypeVar == null ? null : roleTypeVar.asType(), playerVar.asThing());
             }
 
-            public RolePlayer(UnscopedVariable playerVar) {
+            public RolePlayer(UnboundVariable playerVar) {
                 this(null, playerVar.asThing());
             }
 
-            public RolePlayer(Either<String, UnscopedVariable> roleTypeArg, UnscopedVariable playerVar) {
-                this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnscopedVariable::asType), playerVar.asThing());
+            public RolePlayer(Either<String, UnboundVariable> roleTypeArg, UnboundVariable playerVar) {
+                this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType), playerVar.asThing());
             }
 
             private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
@@ -445,7 +445,7 @@ public abstract class ThingProperty extends Property {
             this(type, hidden().asAttributeWith(value));
         }
 
-        public Has(String type, UnscopedVariable var) {
+        public Has(String type, UnboundVariable var) {
             this(type, var.asThing());
         }
 

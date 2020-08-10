@@ -23,7 +23,7 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.pattern.variable.Variable;
 
 import java.util.ArrayList;
@@ -82,15 +82,15 @@ public class MatchClause {
      * @return a Get Query that selects the given variables
      */
     public GraqlGet.Unfiltered get(String var, String... vars) {
-        return get(concat(of(var), of(vars)).map(UnscopedVariable::named).collect(toList()));
+        return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
     }
 
     /**
      * @param vars an array of variables to select
      * @return a Get Query that selects the given variables
      */
-    public GraqlGet.Unfiltered get(UnscopedVariable var, UnscopedVariable... vars) {
-        List<UnscopedVariable> varList = new ArrayList<>();
+    public GraqlGet.Unfiltered get(UnboundVariable var, UnboundVariable... vars) {
+        List<UnboundVariable> varList = new ArrayList<>();
         varList.add(var);
         varList.addAll(Arrays.asList(vars));
         return get(varList);
@@ -100,7 +100,7 @@ public class MatchClause {
      * @param vars a set of variables to select
      * @return a Get Query that selects the given variables
      */
-    public GraqlGet.Unfiltered get(List<UnscopedVariable> vars) {
+    public GraqlGet.Unfiltered get(List<UnboundVariable> vars) {
         return new GraqlGet.Unfiltered(this, vars);
     }
 

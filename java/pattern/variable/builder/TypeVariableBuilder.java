@@ -22,7 +22,7 @@ import graql.lang.common.GraqlToken;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 
 public interface TypeVariableBuilder {
 
@@ -46,7 +46,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Sub(type, false));
     }
 
-    default TypeVariable sub(UnscopedVariable var) {
+    default TypeVariable sub(UnboundVariable var) {
         return asTypeWith(new TypeProperty.Sub(var, false));
     }
 
@@ -58,7 +58,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Sub(type, true));
     }
 
-    default TypeVariable subX(UnscopedVariable var) {
+    default TypeVariable subX(UnboundVariable var) {
         return asTypeWith(new TypeProperty.Sub(var, true));
     }
 
@@ -66,7 +66,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Has(type, true));
     }
 
-    default TypeVariable key(UnscopedVariable var) {
+    default TypeVariable key(UnboundVariable var) {
         return asTypeWith(new TypeProperty.Has(var, true));
     }
 
@@ -74,7 +74,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Has(type, false));
     }
 
-    default TypeVariable has(UnscopedVariable var) {
+    default TypeVariable has(UnboundVariable var) {
         return asTypeWith(new TypeProperty.Has(var, false));
     }
 
@@ -82,7 +82,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Plays(type));
     }
 
-    default TypeVariable plays(UnscopedVariable var) {
+    default TypeVariable plays(UnboundVariable var) {
         return asTypeWith(new TypeProperty.Plays(var));
     }
 
@@ -90,7 +90,7 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Relates(roleType));
     }
 
-    default TypeVariable relates(UnscopedVariable roleTypeVar) {
+    default TypeVariable relates(UnboundVariable roleTypeVar) {
         return asTypeWith(new TypeProperty.Relates(roleTypeVar));
     }
 
@@ -98,15 +98,15 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Relates(roleType, overriddenRoleType));
     }
 
-    default TypeVariable relates(String roleType, UnscopedVariable overriddenRoleTypeVar) {
+    default TypeVariable relates(String roleType, UnboundVariable overriddenRoleTypeVar) {
         return asTypeWith(new TypeProperty.Relates(roleType, overriddenRoleTypeVar));
     }
 
-    default TypeVariable relates(UnscopedVariable roleTypeVar, String overriddenRoleType) {
+    default TypeVariable relates(UnboundVariable roleTypeVar, String overriddenRoleType) {
         return asTypeWith(new TypeProperty.Relates(roleTypeVar, overriddenRoleType));
     }
 
-    default TypeVariable relates(UnscopedVariable roleTypeVar, UnscopedVariable overriddenRoleTypeVar) {
+    default TypeVariable relates(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
         return asTypeWith(new TypeProperty.Relates(roleTypeVar, overriddenRoleTypeVar));
     }
 

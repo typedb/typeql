@@ -27,7 +27,7 @@ import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.property.ValueOperation;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.pattern.variable.UnscopedVariable.hidden;
+import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
 public class Graql {
 
@@ -128,12 +128,12 @@ public class Graql {
 
     // Variable Builder Methods
 
-    public static UnscopedVariable var() {
-        return UnscopedVariable.anonymous();
+    public static UnboundVariable var() {
+        return UnboundVariable.anonymous();
     }
 
-    public static UnscopedVariable var(String name) {
-        return UnscopedVariable.named(name);
+    public static UnboundVariable var(String name) {
+        return UnboundVariable.named(name);
     }
 
     public static TypeVariable type(GraqlToken.Type type) {
@@ -148,7 +148,7 @@ public class Graql {
         return hidden().rel(playerVar);
     }
 
-    public static ThingVariable.Relation rel(UnscopedVariable playerVar) {
+    public static ThingVariable.Relation rel(UnboundVariable playerVar) {
         return hidden().rel(playerVar);
     }
 
@@ -156,11 +156,11 @@ public class Graql {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingVariable.Relation rel(String roleType, UnscopedVariable playerVar) {
+    public static ThingVariable.Relation rel(String roleType, UnboundVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingVariable.Relation rel(UnscopedVariable roleType, UnscopedVariable playerVar) {
+    public static ThingVariable.Relation rel(UnboundVariable roleType, UnboundVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
@@ -210,7 +210,7 @@ public class Graql {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.EQ, value));
     }
 
-    public static ThingProperty.Value<UnscopedVariable> eq(UnscopedVariable variable) {
+    public static ThingProperty.Value<UnboundVariable> eq(UnboundVariable variable) {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.EQ, variable));
     }
 
@@ -236,7 +236,7 @@ public class Graql {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.NEQ, value));
     }
 
-    public static ThingProperty.Value<UnscopedVariable> neq(UnscopedVariable variable) {
+    public static ThingProperty.Value<UnboundVariable> neq(UnboundVariable variable) {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.NEQ, variable));
     }
 
@@ -262,7 +262,7 @@ public class Graql {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.GT, value));
     }
 
-    public static ThingProperty.Value<UnscopedVariable> gt(UnscopedVariable variable) {
+    public static ThingProperty.Value<UnboundVariable> gt(UnboundVariable variable) {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.GT, variable));
     }
 
@@ -288,7 +288,7 @@ public class Graql {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.GTE, value));
     }
 
-    public static ThingProperty.Value<UnscopedVariable> gte(UnscopedVariable variable) {
+    public static ThingProperty.Value<UnboundVariable> gte(UnboundVariable variable) {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.GTE, variable));
     }
 
@@ -314,7 +314,7 @@ public class Graql {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.LT, value));
     }
 
-    public static ThingProperty.Value<UnscopedVariable> lt(UnscopedVariable variable) {
+    public static ThingProperty.Value<UnboundVariable> lt(UnboundVariable variable) {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.LT, variable));
     }
 
@@ -340,7 +340,7 @@ public class Graql {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.LTE, value));
     }
 
-    public static ThingProperty.Value<UnscopedVariable> lte(UnscopedVariable variable) {
+    public static ThingProperty.Value<UnboundVariable> lte(UnboundVariable variable) {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.LTE, variable));
     }
 
@@ -350,7 +350,7 @@ public class Graql {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.CONTAINS, value));
     }
 
-    public static ThingProperty.Value<UnscopedVariable> contains(UnscopedVariable variable) {
+    public static ThingProperty.Value<UnboundVariable> contains(UnboundVariable variable) {
         return new ThingProperty.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.CONTAINS, variable));
     }
 

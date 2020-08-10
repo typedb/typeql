@@ -24,7 +24,7 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
@@ -51,7 +51,7 @@ import static graql.lang.common.GraqlToken.Property.WHEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
-import static graql.lang.pattern.variable.UnscopedVariable.hidden;
+import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
 public abstract class TypeProperty extends Property {
@@ -216,12 +216,12 @@ public abstract class TypeProperty extends Property {
             this(hidden().type(type), isExplicit);
         }
 
-        public Sub(UnscopedVariable var, boolean isExplicit) {
+        public Sub(UnboundVariable var, boolean isExplicit) {
             this(var.asType(), isExplicit);
         }
 
-        public Sub(Either<String, UnscopedVariable> arg, boolean isExplicit) {
-            this(arg.apply(label -> hidden().type(label), UnscopedVariable::asType), isExplicit);
+        public Sub(Either<String, UnboundVariable> arg, boolean isExplicit) {
+            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType), isExplicit);
         }
 
         private Sub(TypeVariable type, boolean isExplicit) {
@@ -507,12 +507,12 @@ public abstract class TypeProperty extends Property {
             this(hidden().type(type), isKey);
         }
 
-        public Has(UnscopedVariable var, boolean isKey) {
+        public Has(UnboundVariable var, boolean isKey) {
             this(var.asType(), isKey);
         }
 
-        public Has(Either<String, UnscopedVariable> arg, boolean isKey) {
-            this(arg.apply(label -> hidden().type(label), UnscopedVariable::asType), isKey);
+        public Has(Either<String, UnboundVariable> arg, boolean isKey) {
+            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType), isKey);
         }
 
         private Has(TypeVariable attributeType, boolean isKey) {
@@ -567,12 +567,12 @@ public abstract class TypeProperty extends Property {
             this(hidden().type(roleType));
         }
 
-        public Plays(UnscopedVariable var) {
+        public Plays(UnboundVariable var) {
             this(var.asType());
         }
 
-        public Plays(Either<String, UnscopedVariable> arg) {
-            this(arg.apply(label -> hidden().type(label), UnscopedVariable::asType));
+        public Plays(Either<String, UnboundVariable> arg) {
+            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType));
         }
 
         private Plays(TypeVariable roleType) {
@@ -624,7 +624,7 @@ public abstract class TypeProperty extends Property {
             this(hidden().type(roleType), null);
         }
 
-        public Relates(UnscopedVariable roleTypeVar) {
+        public Relates(UnboundVariable roleTypeVar) {
             this(roleTypeVar.asType(), null);
         }
 
@@ -632,22 +632,22 @@ public abstract class TypeProperty extends Property {
             this(hidden().type(roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
         }
 
-        public Relates(UnscopedVariable roleTypeVar, String overriddenRoleType) {
+        public Relates(UnboundVariable roleTypeVar, String overriddenRoleType) {
             this(roleTypeVar.asType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
         }
 
-        public Relates(String roleType, UnscopedVariable overriddenRoleTypeVar) {
+        public Relates(String roleType, UnboundVariable overriddenRoleTypeVar) {
             this(hidden().type(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
         }
 
-        public Relates(UnscopedVariable roleTypeVar, UnscopedVariable overriddenRoleTypeVar) {
+        public Relates(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
             this(roleTypeVar.asType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
         }
 
-        public Relates(Either<String, UnscopedVariable> roleTypeArg,
-                       Either<String, UnscopedVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(label -> hidden().type(label), UnscopedVariable::asType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnscopedVariable::asType));
+        public Relates(Either<String, UnboundVariable> roleTypeArg,
+                       Either<String, UnboundVariable> overriddenRoleTypeArg) {
+            this(roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType));
         }
 
         private Relates(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {

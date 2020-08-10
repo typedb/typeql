@@ -21,7 +21,7 @@ import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
 import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -141,8 +141,8 @@ public abstract class ValueOperation<T> {
                 return new Comparison.String(comparator, (java.lang.String) value);
             } else if (value instanceof LocalDateTime) {
                 return new Comparison.DateTime(comparator, (LocalDateTime) value);
-            } else if (value instanceof UnscopedVariable) {
-                return new Comparison.Variable(comparator, (UnscopedVariable) value);
+            } else if (value instanceof UnboundVariable) {
+                return new Comparison.Variable(comparator, (UnboundVariable) value);
             } else {
                 throw new UnsupportedOperationException("Unsupported Value Comparison for class: " + value.getClass());
             }
@@ -190,9 +190,9 @@ public abstract class ValueOperation<T> {
             }
         }
 
-        public static class Variable extends Comparison<UnscopedVariable> {
+        public static class Variable extends Comparison<UnboundVariable> {
 
-            public Variable(GraqlToken.Comparator comparator, UnscopedVariable var) {
+            public Variable(GraqlToken.Comparator comparator, UnboundVariable var) {
                 super(comparator, var);
             }
 

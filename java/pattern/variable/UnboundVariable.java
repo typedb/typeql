@@ -27,29 +27,29 @@ import java.util.Set;
 
 import static grakn.common.collection.Collections.set;
 
-public class UnscopedVariable extends Variable implements TypeVariableBuilder,
-                                                          ThingVariableBuilder<ThingVariable.Thing>,
-                                                          ThingVariableBuilder.Thing,
-                                                          ThingVariableBuilder.Relation,
-                                                          ThingVariableBuilder.Attribute {
+public class UnboundVariable extends Variable implements TypeVariableBuilder,
+                                                         ThingVariableBuilder<ThingVariable.Thing>,
+                                                         ThingVariableBuilder.Thing,
+                                                         ThingVariableBuilder.Relation,
+                                                         ThingVariableBuilder.Attribute {
 
-    private UnscopedVariable(Identity identity) {
+    private UnboundVariable(Identity identity) {
         super(identity);
     }
 
-    public static UnscopedVariable of(Identity identity) {
-        return new UnscopedVariable(identity);
+    public static UnboundVariable of(Identity identity) {
+        return new UnboundVariable(identity);
     }
 
-    public static UnscopedVariable named(String name) {
+    public static UnboundVariable named(String name) {
         return of(Identity.named(name));
     }
 
-    public static UnscopedVariable anonymous() {
+    public static UnboundVariable anonymous() {
         return of(Identity.anonymous(true));
     }
 
-    public static UnscopedVariable hidden() {
+    public static UnboundVariable hidden() {
         return of(Identity.anonymous(false));
     }
 

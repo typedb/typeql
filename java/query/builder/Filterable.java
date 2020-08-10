@@ -20,7 +20,7 @@ package graql.lang.query.builder;
 
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -51,7 +51,7 @@ public interface Filterable {
     interface Unfiltered<S extends Sorted, O extends Offsetted, L extends Limited> extends Filterable {
 
         default S sort(String var) {
-            return sort(UnscopedVariable.named(var));
+            return sort(UnboundVariable.named(var));
         }
 
         default S sort(String var, String order) {
@@ -59,18 +59,18 @@ public interface Filterable {
             if (o == null) throw new IllegalArgumentException(
                     "Invalid sorting order. Valid options: '" + GraqlArg.Order.ASC + "' or '" + GraqlArg.Order.DESC
             );
-            return sort(UnscopedVariable.named(var), o);
+            return sort(UnboundVariable.named(var), o);
         }
 
         default S sort(String var, GraqlArg.Order order) {
-            return sort(UnscopedVariable.named(var), order);
+            return sort(UnboundVariable.named(var), order);
         }
 
-        default S sort(UnscopedVariable var) {
+        default S sort(UnboundVariable var) {
             return sort(new Sorting(var));
         }
 
-        default S sort(UnscopedVariable var, GraqlArg.Order order) {
+        default S sort(UnboundVariable var, GraqlArg.Order order) {
             return sort(new Sorting(var, order));
         }
 
@@ -99,21 +99,21 @@ public interface Filterable {
 
     class Sorting {
 
-        private final UnscopedVariable var;
+        private final UnboundVariable var;
         private final GraqlArg.Order order;
         private final int hash;
 
-        public Sorting(UnscopedVariable var) {
+        public Sorting(UnboundVariable var) {
             this(var, null);
         }
 
-        public Sorting(UnscopedVariable var, GraqlArg.Order order) {
+        public Sorting(UnboundVariable var, GraqlArg.Order order) {
             this.var = var;
             this.order = order;
             this.hash = Objects.hash(var(), order());
         }
 
-        public UnscopedVariable var() {
+        public UnboundVariable var() {
             return var;
         }
 

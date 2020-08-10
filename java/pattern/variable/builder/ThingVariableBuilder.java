@@ -21,7 +21,7 @@ import graql.lang.common.GraqlToken;
 import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.property.ValueOperation;
 import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
@@ -36,7 +36,7 @@ public interface ThingVariableBuilder<T> {
         return asSameThingWith(new ThingProperty.Isa(type, false));
     }
 
-    default T isa(UnscopedVariable var) {
+    default T isa(UnboundVariable var) {
         return asSameThingWith(new ThingProperty.Isa(var, false));
     }
 
@@ -48,7 +48,7 @@ public interface ThingVariableBuilder<T> {
         return asSameThingWith(new ThingProperty.Isa(type, true));
     }
 
-    default T isaX(UnscopedVariable var) {
+    default T isaX(UnboundVariable var) {
         return asSameThingWith(new ThingProperty.Isa(var, true));
     }
 
@@ -76,7 +76,7 @@ public interface ThingVariableBuilder<T> {
         return asSameThingWith(new ThingProperty.Has(type, value));
     }
 
-    default T has(String type, UnscopedVariable variable) {
+    default T has(String type, UnboundVariable variable) {
         return asSameThingWith(new ThingProperty.Has(type, variable));
     }
 
@@ -91,10 +91,10 @@ public interface ThingVariableBuilder<T> {
         }
 
         default ThingVariable.Thing not(String var) {
-            return not(UnscopedVariable.named(var));
+            return not(UnboundVariable.named(var));
         }
 
-        default ThingVariable.Thing not(UnscopedVariable var) {
+        default ThingVariable.Thing not(UnboundVariable var) {
             return asThingWith(new ThingProperty.NEQ(var));
         }
 
@@ -104,22 +104,22 @@ public interface ThingVariableBuilder<T> {
     interface Relation {
 
         default ThingVariable.Relation rel(String playerVar) {
-            return rel(UnscopedVariable.named(playerVar));
+            return rel(UnboundVariable.named(playerVar));
         }
 
-        default ThingVariable.Relation rel(UnscopedVariable playerVar) {
+        default ThingVariable.Relation rel(UnboundVariable playerVar) {
             return asRelationWith(new ThingProperty.Relation.RolePlayer(playerVar));
         }
 
         default ThingVariable.Relation rel(String roleType, String playerVar) {
-            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleType, UnscopedVariable.named(playerVar)));
+            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleType, UnboundVariable.named(playerVar)));
         }
 
-        default ThingVariable.Relation rel(String roleType, UnscopedVariable playerVar) {
+        default ThingVariable.Relation rel(String roleType, UnboundVariable playerVar) {
             return asRelationWith(new ThingProperty.Relation.RolePlayer(roleType, playerVar));
         }
 
-        default ThingVariable.Relation rel(UnscopedVariable roleTypeVar, UnscopedVariable playerVar) {
+        default ThingVariable.Relation rel(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
             return asRelationWith(new ThingProperty.Relation.RolePlayer(roleTypeVar, playerVar));
         }
 
@@ -172,7 +172,7 @@ public interface ThingVariableBuilder<T> {
             return eq(ValueOperation.Comparison.DateTime::new, value);
         }
 
-        default ThingVariable.Attribute eq(UnscopedVariable variable) {
+        default ThingVariable.Attribute eq(UnboundVariable variable) {
             return eq(ValueOperation.Comparison.Variable::new, variable);
         }
 
@@ -202,7 +202,7 @@ public interface ThingVariableBuilder<T> {
             return neq(ValueOperation.Comparison.DateTime::new, value);
         }
 
-        default ThingVariable.Attribute neq(UnscopedVariable variable) {
+        default ThingVariable.Attribute neq(UnboundVariable variable) {
             return neq(ValueOperation.Comparison.Variable::new, variable);
         }
 
@@ -232,7 +232,7 @@ public interface ThingVariableBuilder<T> {
             return gt(ValueOperation.Comparison.DateTime::new, value);
         }
 
-        default ThingVariable.Attribute gt(UnscopedVariable variable) {
+        default ThingVariable.Attribute gt(UnboundVariable variable) {
             return gt(ValueOperation.Comparison.Variable::new, variable);
         }
 
@@ -262,7 +262,7 @@ public interface ThingVariableBuilder<T> {
             return gte(ValueOperation.Comparison.DateTime::new, value);
         }
 
-        default ThingVariable.Attribute gte(UnscopedVariable variable) {
+        default ThingVariable.Attribute gte(UnboundVariable variable) {
             return gte(ValueOperation.Comparison.Variable::new, variable);
         }
 
@@ -292,7 +292,7 @@ public interface ThingVariableBuilder<T> {
             return lt(ValueOperation.Comparison.DateTime::new, value);
         }
 
-        default ThingVariable.Attribute lt(UnscopedVariable variable) {
+        default ThingVariable.Attribute lt(UnboundVariable variable) {
             return lt(ValueOperation.Comparison.Variable::new, variable);
         }
 
@@ -322,7 +322,7 @@ public interface ThingVariableBuilder<T> {
             return lte(ValueOperation.Comparison.DateTime::new, value);
         }
 
-        default ThingVariable.Attribute lte(UnscopedVariable variable) {
+        default ThingVariable.Attribute lte(UnboundVariable variable) {
             return lte(ValueOperation.Comparison.Variable::new, variable);
         }
 
@@ -336,7 +336,7 @@ public interface ThingVariableBuilder<T> {
             return contains(ValueOperation.Comparison.String::new, value);
         }
 
-        default ThingVariable.Attribute contains(UnscopedVariable variable) {
+        default ThingVariable.Attribute contains(UnboundVariable variable) {
             return contains(ValueOperation.Comparison.Variable::new, variable);
         }
 

@@ -18,7 +18,7 @@
 package graql.lang.query.builder;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.UnscopedVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlQuery;
 
 public interface Aggregatable<T extends GraqlQuery> {
@@ -28,52 +28,52 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T max(String var) {
-        return max(UnscopedVariable.named(var));
+        return max(UnboundVariable.named(var));
     }
 
-    default T max(UnscopedVariable var) {
+    default T max(UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MAX, var);
     }
 
     default T mean(String var) {
-        return mean(UnscopedVariable.named(var));
+        return mean(UnboundVariable.named(var));
     }
 
-    default T mean(UnscopedVariable var) {
+    default T mean(UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MEAN, var);
     }
 
     default T median(String var) {
-        return median(UnscopedVariable.named(var));
+        return median(UnboundVariable.named(var));
     }
 
-    default T median(UnscopedVariable var) {
+    default T median(UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MEDIAN, var);
     }
 
     default T min(String var) {
-        return min(UnscopedVariable.named(var));
+        return min(UnboundVariable.named(var));
     }
 
-    default T min(UnscopedVariable var) {
+    default T min(UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MIN, var);
     }
 
     default T std(String var) {
-        return std(UnscopedVariable.named(var));
+        return std(UnboundVariable.named(var));
     }
 
-    default T std(UnscopedVariable var) {
+    default T std(UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.STD, var);
     }
 
     default T sum(String var) {
-        return sum(UnscopedVariable.named(var));
+        return sum(UnboundVariable.named(var));
     }
 
-    default T sum(UnscopedVariable var) {
+    default T sum(UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.SUM, var);
     }
 
-    T aggregate(GraqlToken.Aggregate.Method method, UnscopedVariable var);
+    T aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var);
 }
