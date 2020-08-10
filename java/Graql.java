@@ -144,16 +144,24 @@ public class Graql {
         return hidden().type(label);
     }
 
-    public static ThingVariable.Relation rel(String player) {
-        return hidden().rel(player);
+    public static ThingVariable.Relation rel(String playerVar) {
+        return hidden().rel(playerVar);
     }
 
-    public static ThingVariable.Relation rel(String role, String player) {
-        return hidden().rel(role, player);
+    public static ThingVariable.Relation rel(UnscopedVariable playerVar) {
+        return hidden().rel(playerVar);
     }
 
-    public static ThingVariable.Relation rel(UnscopedVariable role, UnscopedVariable player) {
-        return hidden().rel(role, player);
+    public static ThingVariable.Relation rel(String roleType, String playerVar) {
+        return hidden().rel(roleType, playerVar);
+    }
+
+    public static ThingVariable.Relation rel(String roleType, UnscopedVariable playerVar) {
+        return hidden().rel(roleType, playerVar);
+    }
+
+    public static ThingVariable.Relation rel(UnscopedVariable roleType, UnscopedVariable playerVar) {
+        return hidden().rel(roleType, playerVar);
     }
 
     // Attribute Variable Builder Methods
