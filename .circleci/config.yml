@@ -152,8 +152,7 @@ jobs:
       - install-bazel
       - checkout
       - run: |
-          bazel run @graknlabs_dependencies//tool/release:validate-deps -- \
-            graknlabs_common
+          bazel run @graknlabs_dependencies//tool/release:validate-deps -- graknlabs_common
 
   deploy-github:
     machine:
