@@ -99,8 +99,8 @@ variable_types      : ( variable_type ';' )+ ;
 variable_type       :   type        type_property ( ',' type_property )*  ;
 type_property       :   ABSTRACT
                     |   SUB_        type
-                    |   OWNS        type ( IS_KEY )?
-                    |   PLAYS       type
+                    |   OWNS        type ( AS type )? ( IS_KEY )?
+                    |   PLAYS       type ( AS type )?
                     |   RELATES     type ( AS type )?
                     |   VALUE       value_type
                     |   REGEX       regex

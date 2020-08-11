@@ -62,28 +62,76 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Sub(var, true));
     }
 
-    default TypeVariable key(String type) {
-        return asTypeWith(new TypeProperty.Owns(type, true));
+    default TypeVariable owns(String attributeType) {
+        return asTypeWith(new TypeProperty.Owns(attributeType, false));
     }
 
-    default TypeVariable key(UnboundVariable var) {
-        return asTypeWith(new TypeProperty.Owns(var, true));
+    default TypeVariable owns(String attributeType, boolean isKey) {
+        return asTypeWith(new TypeProperty.Owns(attributeType, isKey));
     }
 
-    default TypeVariable owns(String type) {
-        return asTypeWith(new TypeProperty.Owns(type, false));
+    default TypeVariable owns(UnboundVariable attributeTypeVar) {
+        return asTypeWith(new TypeProperty.Owns(attributeTypeVar, false));
     }
 
-    default TypeVariable owns(UnboundVariable var) {
-        return asTypeWith(new TypeProperty.Owns(var, false));
+    default TypeVariable owns(UnboundVariable attributeTypeVar, boolean isKey) {
+        return asTypeWith(new TypeProperty.Owns(attributeTypeVar, isKey));
     }
 
-    default TypeVariable plays(String type) {
-        return asTypeWith(new TypeProperty.Plays(type));
+    default TypeVariable owns(String attributeType, String overriddenAttributeType) {
+        return asTypeWith(new TypeProperty.Owns(attributeType, overriddenAttributeType, false));
     }
 
-    default TypeVariable plays(UnboundVariable var) {
-        return asTypeWith(new TypeProperty.Plays(var));
+    default TypeVariable owns(String attributeType, String overriddenAttributeType, boolean isKey) {
+        return asTypeWith(new TypeProperty.Owns(attributeType, overriddenAttributeType, isKey));
+    }
+
+    default TypeVariable owns(String attributeType, UnboundVariable overriddenAttributeTypeVar) {
+        return asTypeWith(new TypeProperty.Owns(attributeType, overriddenAttributeTypeVar, false));
+    }
+
+    default TypeVariable owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+        return asTypeWith(new TypeProperty.Owns(attributeType, overriddenAttributeTypeVar, isKey));
+    }
+
+    default TypeVariable owns(UnboundVariable attributeTypeVar, String overriddenAttributeType) {
+        return asTypeWith(new TypeProperty.Owns(attributeTypeVar, overriddenAttributeType, false));
+    }
+
+    default TypeVariable owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, boolean isKey) {
+        return asTypeWith(new TypeProperty.Owns(attributeTypeVar, overriddenAttributeType, isKey));
+    }
+
+    default TypeVariable owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar) {
+        return asTypeWith(new TypeProperty.Owns(attributeTypeVar, overriddenAttributeTypeVar, false));
+    }
+
+    default TypeVariable owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+        return asTypeWith(new TypeProperty.Owns(attributeTypeVar, overriddenAttributeTypeVar, isKey));
+    }
+
+    default TypeVariable plays(String roleType) {
+        return asTypeWith(new TypeProperty.Plays(roleType));
+    }
+
+    default TypeVariable plays(UnboundVariable roleTypevar) {
+        return asTypeWith(new TypeProperty.Plays(roleTypevar));
+    }
+
+    default TypeVariable plays(String roleType, String overriddenRoleType) {
+        return asTypeWith(new TypeProperty.Plays(roleType, overriddenRoleType));
+    }
+
+    default TypeVariable plays(String roleType, UnboundVariable overriddenRoleTypeVar) {
+        return asTypeWith(new TypeProperty.Plays(roleType, overriddenRoleTypeVar));
+    }
+
+    default TypeVariable plays(UnboundVariable roleTypeVar, String overriddenRoleType) {
+        return asTypeWith(new TypeProperty.Plays(roleTypeVar, overriddenRoleType));
+    }
+
+    default TypeVariable plays(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
+        return asTypeWith(new TypeProperty.Plays(roleTypeVar, overriddenRoleTypeVar));
     }
 
     default TypeVariable relates(String roleType) {

@@ -500,29 +500,53 @@ public abstract class TypeProperty extends Property {
     public static class Owns extends TypeProperty.Repeatable {
 
         private final TypeVariable attributeType;
+        private final TypeVariable overriddenAttributeType;
         private final boolean isKey;
         private final int hash;
 
-        public Owns(String type, boolean isKey) {
-            this(hidden().type(type), isKey);
+        public Owns(String attributeType, boolean isKey) {
+            this(hidden().type(attributeType), null, isKey);
         }
 
-        public Owns(UnboundVariable var, boolean isKey) {
-            this(var.asType(), isKey);
+        public Owns(UnboundVariable attributeTypeVar, boolean isKey) {
+            this(attributeTypeVar.asType(), null, isKey);
         }
 
-        public Owns(Either<String, UnboundVariable> arg, boolean isKey) {
-            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType), isKey);
+        public Owns(String attributeType, String overriddenAttributeType, boolean isKey) {
+            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
         }
 
-        private Owns(TypeVariable attributeType, boolean isKey) {
+        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, boolean isKey) {
+            this(attributeTypeVar.asType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
+        }
+
+        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.asType(), isKey);
+        }
+
+        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+            this(attributeTypeVar.asType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.asType(), isKey);
+        }
+
+        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, boolean isKey) {
+            this(attributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
+                 overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
+                 isKey);
+        }
+
+        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, boolean isKey) {
             this.attributeType = attributeType;
+            this.overriddenAttributeType = overriddenAttributeType;
             this.isKey = isKey;
             this.hash = Objects.hash(attributeType, isKey);
         }
 
         public TypeVariable attribute() {
             return attributeType;
+        }
+
+        public Optional<TypeVariable> overridden() {
+            return Optional.ofNullable(overriddenAttributeType);
         }
 
         public boolean isKey() {
@@ -535,7 +559,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Owns asHas() {
+        public TypeProperty.Owns asHas() {
             return this;
         }
 
@@ -561,28 +585,51 @@ public abstract class TypeProperty extends Property {
     public static class Plays extends TypeProperty.Repeatable {
 
         private final TypeVariable roleType;
+        private final TypeVariable overriddenRoleType;
         private final int hash;
 
         public Plays(String roleType) {
-            this(hidden().type(roleType));
+            this(hidden().type(roleType), null);
         }
 
         public Plays(UnboundVariable var) {
-            this(var.asType());
+            this(var.asType(), null);
         }
 
-        public Plays(Either<String, UnboundVariable> arg) {
-            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType));
+        public Plays(String roleType, String overriddenRoleType) {
+            this(hidden().type(roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
         }
 
-        private Plays(TypeVariable roleType) {
+        public Plays(UnboundVariable roleTypeVar, String overriddenRoleType) {
+            this(roleTypeVar.asType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+        }
+
+        public Plays(String roleType, UnboundVariable overriddenRoleTypeVar) {
+            this(hidden().type(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
+        }
+
+        public Plays(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
+            this(roleTypeVar.asType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
+        }
+
+        public Plays(Either<String, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
+            this(roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType));
+        }
+
+        private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
-            this.hash = Objects.hash(roleType);
+            this.overriddenRoleType = overriddenRoleType;
+            this.hash = Objects.hash(roleType, overriddenRoleType);
         }
 
         public TypeVariable role() {
             return roleType;
+        }
+
+        public Optional<TypeVariable> overridden() {
+            return Optional.ofNullable(overriddenRoleType);
         }
 
         @Override
@@ -644,8 +691,7 @@ public abstract class TypeProperty extends Property {
             this(roleTypeVar.asType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
         }
 
-        public Relates(Either<String, UnboundVariable> roleTypeArg,
-                       Either<String, UnboundVariable> overriddenRoleTypeArg) {
+        public Relates(Either<String, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
             this(roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
                  overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType));
         }

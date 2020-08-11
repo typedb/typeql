@@ -578,15 +578,14 @@ public class Parser extends GraqlBaseVisitor {
                     throw new IllegalArgumentException("Unrecognised SUB Property: " + property.type(0).getText());
                 }
             } else if (property.OWNS() != null) {
-                type = type.asTypeWith(new TypeProperty.Owns(visitType(property.type(0)), property.IS_KEY() != null));
+                Either<String, UnboundVariable> overridden = property.AS() == null ? null : visitType(property.type(1));
+                type = type.asTypeWith(new TypeProperty.Owns(visitType(property.type(0)), overridden, property.IS_KEY() != null));
             } else if (property.PLAYS() != null) {
-                type = type.asTypeWith(new TypeProperty.Plays(visitType(property.type(0))));
+                Either<String, UnboundVariable> overridden = property.AS() == null ? null : visitType(property.type(1));
+                type = type.asTypeWith(new TypeProperty.Plays(visitType(property.type(0)), overridden));
             } else if (property.RELATES() != null) {
-                if (property.AS() != null) {
-                    type = type.asTypeWith(new TypeProperty.Relates(visitType(property.type(0)), visitType(property.type(1))));
-                } else {
-                    type = type.asTypeWith(new TypeProperty.Relates(visitType(property.type(0)), null));
-                }
+                Either<String, UnboundVariable> overridden = property.AS() == null ? null : visitType(property.type(1));
+                type = type.asTypeWith(new TypeProperty.Relates(visitType(property.type(0)), overridden));
             } else if (property.VALUE() != null) {
                 type = type.value(GraqlArg.ValueType.of(property.value_type().getText()));
             } else if (property.REGEX() != null) {
