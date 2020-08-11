@@ -88,18 +88,18 @@ pattern_conjunction :   '{' patterns '}'                            ;
 pattern_disjunction :   '{' patterns '}'  ( OR '{' patterns '}' )+  ;
 pattern_negation    :   NOT '{' patterns '}'                        ;
 
-// PATTERN STATEMENTS ==========================================================
+// VARIABLE PATTERNS ===========================================================
 
 pattern_variable    :   variable_type
                     |   variable_thing_any   ;
 
-// TYPE STATEMENTS =============================================================
+// TYPE VARIABLES ==============================================================
 
 variable_types      : ( variable_type ';' )+ ;
 variable_type       :   type        type_property ( ',' type_property )*  ;
 type_property       :   ABSTRACT
                     |   SUB_        type
-                    |   HAS         type ( IS_KEY )?
+                    |   OWNS        type ( IS_KEY )?
                     |   PLAYS       type
                     |   RELATES     type ( AS type )?
                     |   VALUE       value_type
@@ -109,7 +109,7 @@ type_property       :   ABSTRACT
                     |   TYPE        type_label
                     ;
 
-// INSTANCE STATEMENTS =========================================================
+// THING VARIABLES =============================================================
 
 variable_things     : ( variable_thing_any ';' )+ ;
 variable_thing_any  :   variable_thing
@@ -248,17 +248,21 @@ OFFSET          : 'offset'      ;   LIMIT           : 'limit'       ;
 SORT            : 'sort'        ;   ORDER_          : ASC | DESC    ;
 ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
-// STATEMENT PROPERTY KEYWORDS
+// TYPE VARIABLE PROPERTY KEYWORDS
 
-ABSTRACT        : 'abstract'    ;   AS              : 'as'          ;
-IID             : 'iid'         ;   TYPE            : 'type'        ;
-ISA_            : ISA | ISAX    ;   SUB_            : SUB | SUBX    ;
-ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
+TYPE            : 'type'        ;
+ABSTRACT        : 'abstract'    ;   SUB_            : SUB | SUBX    ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
-HAS             : 'has'         ;   IS_KEY          : '@key'        ;
+OWNS            : 'owns'        ;   IS_KEY          : '@key'        ;
+REGEX           : 'regex'       ;   AS              : 'as'          ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
-VALUE           : 'value'       ;   REGEX           : 'regex'       ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
+
+// THING VARIABLE PROPERTY KEYWORDS
+
+IID             : 'iid'         ;   ISA_            : ISA | ISAX    ;
+ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
+HAS             : 'has'         ;   VALUE           : 'value'       ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 

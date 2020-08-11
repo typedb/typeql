@@ -566,7 +566,7 @@ public class ParserTest {
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
                 "evolution relates evolves-from, relates evolves-to;\n" +
-                "pokemon plays evolves-from, plays evolves-to, has name;";
+                "pokemon plays evolves-from, plays evolves-to, owns name;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
 
         GraqlDefine expected = define(
@@ -575,7 +575,7 @@ public class ParserTest {
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
                 type("evolution").relates("evolves-from").relates("evolves-to"),
-                type("pokemon").plays("evolves-from").plays("evolves-to").has("name")
+                type("pokemon").plays("evolves-from").plays("evolves-to").owns("name")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -589,7 +589,7 @@ public class ParserTest {
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
                 "evolution relates evolves-from, relates evolves-to;\n" +
-                "pokemon plays evolves-from, plays evolves-to, has name;";
+                "pokemon plays evolves-from, plays evolves-to, owns name;";
         GraqlUndefine parsed = Graql.parse(query).asUndefine();
 
         GraqlUndefine expected = undefine(
@@ -598,7 +598,7 @@ public class ParserTest {
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
                 type("evolution").relates("evolves-from").relates("evolves-to"),
-                type("pokemon").plays("evolves-from").plays("evolves-to").has("name")
+                type("pokemon").plays("evolves-from").plays("evolves-to").owns("name")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -935,7 +935,7 @@ public class ParserTest {
 
     @Test
     public void testParseKey() {
-        assertEquals("match $x has name @key; get $x;", parse("match $x has name @key; get $x;").toString());
+        assertEquals("match $x owns name @key; get $x;", parse("match $x owns name @key; get $x;").toString());
     }
 
     @Test

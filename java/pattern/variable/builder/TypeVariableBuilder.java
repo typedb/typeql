@@ -63,19 +63,19 @@ public interface TypeVariableBuilder {
     }
 
     default TypeVariable key(String type) {
-        return asTypeWith(new TypeProperty.Has(type, true));
+        return asTypeWith(new TypeProperty.Owns(type, true));
     }
 
     default TypeVariable key(UnboundVariable var) {
-        return asTypeWith(new TypeProperty.Has(var, true));
+        return asTypeWith(new TypeProperty.Owns(var, true));
     }
 
-    default TypeVariable has(String type) {
-        return asTypeWith(new TypeProperty.Has(type, false));
+    default TypeVariable owns(String type) {
+        return asTypeWith(new TypeProperty.Owns(type, false));
     }
 
-    default TypeVariable has(UnboundVariable var) {
-        return asTypeWith(new TypeProperty.Has(var, false));
+    default TypeVariable owns(UnboundVariable var) {
+        return asTypeWith(new TypeProperty.Owns(var, false));
     }
 
     default TypeVariable plays(String type) {

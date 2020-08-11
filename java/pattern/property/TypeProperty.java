@@ -37,8 +37,8 @@ import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Property.AS;
-import static graql.lang.common.GraqlToken.Property.HAS;
 import static graql.lang.common.GraqlToken.Property.IS_KEY;
+import static graql.lang.common.GraqlToken.Property.OWNS;
 import static graql.lang.common.GraqlToken.Property.PLAYS;
 import static graql.lang.common.GraqlToken.Property.REGEX;
 import static graql.lang.common.GraqlToken.Property.RELATES;
@@ -118,9 +118,9 @@ public abstract class TypeProperty extends Property {
         ));
     }
 
-    public TypeProperty.Has asHas() {
+    public Owns asHas() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Has.class.getCanonicalName()
+                TypeProperty.class.getCanonicalName(), Owns.class.getCanonicalName()
         ));
     }
 
@@ -497,25 +497,25 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Has extends TypeProperty.Repeatable {
+    public static class Owns extends TypeProperty.Repeatable {
 
         private final TypeVariable attributeType;
         private final boolean isKey;
         private final int hash;
 
-        public Has(String type, boolean isKey) {
+        public Owns(String type, boolean isKey) {
             this(hidden().type(type), isKey);
         }
 
-        public Has(UnboundVariable var, boolean isKey) {
+        public Owns(UnboundVariable var, boolean isKey) {
             this(var.asType(), isKey);
         }
 
-        public Has(Either<String, UnboundVariable> arg, boolean isKey) {
+        public Owns(Either<String, UnboundVariable> arg, boolean isKey) {
             this(arg.apply(label -> hidden().type(label), UnboundVariable::asType), isKey);
         }
 
-        private Has(TypeVariable attributeType, boolean isKey) {
+        private Owns(TypeVariable attributeType, boolean isKey) {
             this.attributeType = attributeType;
             this.isKey = isKey;
             this.hash = Objects.hash(attributeType, isKey);
@@ -535,20 +535,20 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public TypeProperty.Has asHas() {
+        public Owns asHas() {
             return this;
         }
 
         @Override
         public String toString() {
-            return HAS.toString() + SPACE + attributeType + (isKey ? "" + SPACE + IS_KEY : "");
+            return OWNS.toString() + SPACE + attributeType + (isKey ? "" + SPACE + IS_KEY : "");
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Has that = (Has) o;
+            Owns that = (Owns) o;
             return (this.attributeType.equals(that.attributeType) && this.isKey == that.isKey);
         }
 

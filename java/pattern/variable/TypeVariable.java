@@ -122,8 +122,8 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
         return Optional.ofNullable(singularProperties.get(TypeProperty.When.class)).map(TypeProperty::asWhen);
     }
 
-    public List<TypeProperty.Has> hasProperty() {
-        return repeatingProperties.computeIfAbsent(TypeProperty.Has.class, c -> new ArrayList<>())
+    public List<TypeProperty.Owns> hasProperty() {
+        return repeatingProperties.computeIfAbsent(TypeProperty.Owns.class, c -> new ArrayList<>())
                 .stream().map(TypeProperty::asHas).collect(toList());
     }
 

@@ -204,6 +204,7 @@ public class GraqlToken {
         IS_KEY("@key"),
         ISA("isa"),
         ISAX("isa!"),
+        OWNS("owns"),
         PLAYS("plays"),
         REGEX("regex"),
         RELATES("relates"),
