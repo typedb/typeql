@@ -18,6 +18,7 @@
 package graql.lang.pattern.property;
 
 import grakn.common.collection.Either;
+import grakn.common.collection.Pair;
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
@@ -32,13 +33,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Property.AS;
-import static graql.lang.common.GraqlToken.Property.HAS;
-import static graql.lang.common.GraqlToken.Property.KEY;
+import static graql.lang.common.GraqlToken.Property.IS_KEY;
+import static graql.lang.common.GraqlToken.Property.OWNS;
 import static graql.lang.common.GraqlToken.Property.PLAYS;
 import static graql.lang.common.GraqlToken.Property.REGEX;
 import static graql.lang.common.GraqlToken.Property.RELATES;
@@ -118,9 +120,9 @@ public abstract class TypeProperty extends Property {
         ));
     }
 
-    public TypeProperty.Has asHas() {
+    public Owns asHas() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Has.class.getCanonicalName()
+                TypeProperty.class.getCanonicalName(), Owns.class.getCanonicalName()
         ));
     }
 
@@ -165,16 +167,31 @@ public abstract class TypeProperty extends Property {
     public static class Label extends TypeProperty.Singular {
 
         private final String label;
+        private final String scope;
         private final int hash;
 
         public Label(String label) {
+            this(null, label);
+        }
+
+        public Label(@Nullable String scope, String label) {
             if (label == null) throw new NullPointerException("Null label");
+            this.scope = scope;
             this.label = label;
-            this.hash = Objects.hash(label);
+            this.hash = Objects.hash(this.scope, this.label);
+        }
+
+        public Optional<String> scope() {
+            return Optional.ofNullable(scope);
         }
 
         public String label() {
             return label;
+        }
+
+        public String scopedLabel() {
+            if (scope != null) return scope + COLON + label;
+            else return label;
         }
 
         @Override
@@ -189,7 +206,7 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            return TYPE.toString() + SPACE + label();
+            return TYPE.toString() + SPACE + scopedLabel();
         }
 
         @Override
@@ -212,23 +229,28 @@ public abstract class TypeProperty extends Property {
         private final boolean isExplicit;
         private final int hash;
 
-        public Sub(String type, boolean isExplicit) {
-            this(hidden().type(type), isExplicit);
+        public Sub(String typeLabe, boolean isExplicit) {
+            this(hidden().type(typeLabe), isExplicit);
         }
 
-        public Sub(UnboundVariable var, boolean isExplicit) {
-            this(var.asType(), isExplicit);
+        public Sub(String typeScope, String typeLabel, boolean isExplicit) {
+            this(hidden().type(typeScope, typeLabel), isExplicit);
         }
 
-        public Sub(Either<String, UnboundVariable> arg, boolean isExplicit) {
-            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType), isExplicit);
+        public Sub(UnboundVariable typeVar, boolean isExplicit) {
+            this(typeVar.asType(), isExplicit);
         }
 
-        private Sub(TypeVariable type, boolean isExplicit) {
-            if (type == null) throw new NullPointerException("Null superType");
-            this.type = type;
+        public Sub(Either<Pair<String, String>, UnboundVariable> typeArg, boolean isExplicit) {
+            this(typeArg.apply(scoped -> hidden().asTypeWith(new TypeProperty.Label(scoped.first(), scoped.second())),
+                               UnboundVariable::asType), isExplicit);
+        }
+
+        private Sub(TypeVariable typeVar, boolean isExplicit) {
+            if (typeVar == null) throw new NullPointerException("Null superType");
+            this.type = typeVar;
             this.isExplicit = isExplicit;
-            this.hash = Objects.hash(type, isExplicit);
+            this.hash = Objects.hash(typeVar, isExplicit);
         }
 
         public TypeVariable type() {
@@ -497,32 +519,56 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Has extends TypeProperty.Repeatable {
+    public static class Owns extends TypeProperty.Repeatable {
 
         private final TypeVariable attributeType;
+        private final TypeVariable overriddenAttributeType;
         private final boolean isKey;
         private final int hash;
 
-        public Has(String type, boolean isKey) {
-            this(hidden().type(type), isKey);
+        public Owns(String attributeType, boolean isKey) {
+            this(hidden().type(attributeType), null, isKey);
         }
 
-        public Has(UnboundVariable var, boolean isKey) {
-            this(var.asType(), isKey);
+        public Owns(UnboundVariable attributeTypeVar, boolean isKey) {
+            this(attributeTypeVar.asType(), null, isKey);
         }
 
-        public Has(Either<String, UnboundVariable> arg, boolean isKey) {
-            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType), isKey);
+        public Owns(String attributeType, String overriddenAttributeType, boolean isKey) {
+            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
         }
 
-        private Has(TypeVariable attributeType, boolean isKey) {
+        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, boolean isKey) {
+            this(attributeTypeVar.asType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
+        }
+
+        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.asType(), isKey);
+        }
+
+        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+            this(attributeTypeVar.asType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.asType(), isKey);
+        }
+
+        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, boolean isKey) {
+            this(attributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
+                 overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
+                 isKey);
+        }
+
+        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, boolean isKey) {
             this.attributeType = attributeType;
+            this.overriddenAttributeType = overriddenAttributeType;
             this.isKey = isKey;
             this.hash = Objects.hash(attributeType, isKey);
         }
 
         public TypeVariable attribute() {
             return attributeType;
+        }
+
+        public Optional<TypeVariable> overridden() {
+            return Optional.ofNullable(overriddenAttributeType);
         }
 
         public boolean isKey() {
@@ -535,20 +581,20 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public TypeProperty.Has asHas() {
+        public TypeProperty.Owns asHas() {
             return this;
         }
 
         @Override
         public String toString() {
-            return (isKey ? KEY.toString() : HAS.toString()) + SPACE + attributeType;
+            return OWNS.toString() + SPACE + attributeType + (isKey ? "" + SPACE + IS_KEY : "");
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Has that = (Has) o;
+            Owns that = (Owns) o;
             return (this.attributeType.equals(that.attributeType) && this.isKey == that.isKey);
         }
 
@@ -561,28 +607,51 @@ public abstract class TypeProperty extends Property {
     public static class Plays extends TypeProperty.Repeatable {
 
         private final TypeVariable roleType;
+        private final TypeVariable overriddenRoleType;
         private final int hash;
 
-        public Plays(String roleType) {
-            this(hidden().type(roleType));
+        public Plays(String relationType, String roleType) {
+            this(hidden().type(relationType, roleType), null);
         }
 
         public Plays(UnboundVariable var) {
-            this(var.asType());
+            this(var.asType(), null);
         }
 
-        public Plays(Either<String, UnboundVariable> arg) {
-            this(arg.apply(label -> hidden().type(label), UnboundVariable::asType));
+        public Plays(String relationType, String roleType, String overriddenRoleType) {
+            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
         }
 
-        private Plays(TypeVariable roleType) {
+        public Plays(UnboundVariable roleTypeVar, String overriddenRoleType) {
+            this(roleTypeVar.asType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+        }
+
+        public Plays(String relationType, String roleType, UnboundVariable overriddenRoleTypeVar) {
+            this(hidden().type(relationType, roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
+        }
+
+        public Plays(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
+            this(roleTypeVar.asType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
+        }
+
+        public Plays(Either<Pair<String, String>, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
+            this(roleTypeArg.apply(scoped -> hidden().asTypeWith(new TypeProperty.Label(scoped.first(), scoped.second())), UnboundVariable::asType),
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType));
+        }
+
+        private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
-            this.hash = Objects.hash(roleType);
+            this.overriddenRoleType = overriddenRoleType;
+            this.hash = Objects.hash(roleType, overriddenRoleType);
         }
 
         public TypeVariable role() {
             return roleType;
+        }
+
+        public Optional<TypeVariable> overridden() {
+            return Optional.ofNullable(overriddenRoleType);
         }
 
         @Override
@@ -644,8 +713,7 @@ public abstract class TypeProperty extends Property {
             this(roleTypeVar.asType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.asType());
         }
 
-        public Relates(Either<String, UnboundVariable> roleTypeArg,
-                       Either<String, UnboundVariable> overriddenRoleTypeArg) {
+        public Relates(Either<String, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
             this(roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType),
                  overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType));
         }
@@ -677,11 +745,16 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append(RELATES).append(SPACE).append(roleType);
-            if (overriddenRoleType != null)
-                builder.append(SPACE).append(AS).append(SPACE).append(overriddenRoleType);
-            return builder.toString();
+            StringBuilder syntax = new StringBuilder();
+            syntax.append(RELATES).append(SPACE);
+            if (!roleType.labelProperty().isPresent()) syntax.append(roleType);
+            else syntax.append(roleType.labelProperty().get().label());
+            if (overriddenRoleType != null) {
+                syntax.append(SPACE).append(AS).append(SPACE);
+                if (!overriddenRoleType.labelProperty().isPresent()) syntax.append(overriddenRoleType);
+                else syntax.append(overriddenRoleType.labelProperty().get().label());
+            }
+            return syntax.toString();
         }
 
         @Override

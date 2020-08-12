@@ -88,29 +88,28 @@ pattern_conjunction :   '{' patterns '}'                            ;
 pattern_disjunction :   '{' patterns '}'  ( OR '{' patterns '}' )+  ;
 pattern_negation    :   NOT '{' patterns '}'                        ;
 
-// PATTERN STATEMENTS ==========================================================
+// VARIABLE PATTERNS ===========================================================
 
 pattern_variable    :   variable_type
                     |   variable_thing_any   ;
 
-// TYPE STATEMENTS =============================================================
+// TYPE VARIABLES ==============================================================
 
 variable_types      : ( variable_type ';' )+ ;
-variable_type       :   type        type_property ( ',' type_property )*  ;
+variable_type       :   type_any    type_property ( ',' type_property )*  ;
 type_property       :   ABSTRACT
-                    |   SUB_        type
-                    |   KEY         type
-                    |   HAS         type
-                    |   PLAYS       type
-                    |   RELATES     type ( AS type )?
+                    |   SUB_        type_any
+                    |   OWNS        type         ( AS type )? ( IS_KEY )?
+                    |   RELATES     type         ( AS type )?
+                    |   PLAYS       type_scoped  ( AS type )?
                     |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' patterns        '}'
                     |   THEN    '{' variable_things '}'
-                    |   TYPE        type_label
+                    |   TYPE        label_any
                     ;
 
-// INSTANCE STATEMENTS =========================================================
+// THING VARIABLES =============================================================
 
 variable_things     : ( variable_thing_any ';' )+ ;
 variable_thing_any  :   variable_thing
@@ -118,7 +117,7 @@ variable_thing_any  :   variable_thing
                     |   variable_attribute
                     ;
 variable_thing      :   VAR_                ISA_ type   ( ',' attributes )?
-                    |   VAR_                ID   ID_    ( ',' attributes )?
+                    |   VAR_                IID  IID_    ( ',' attributes )?
                     |   VAR_                NEQ  VAR_
                     |   VAR_                attributes
                     ;
@@ -139,7 +138,7 @@ player              :   VAR_ ;                                                  
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS type_label ( VAR_ | value ) ;                   // Attribute ownership by variable or a
+attribute           :   HAS label ( VAR_ | value ) ;                            // Attribute ownership by variable or a
                                                                                 // predicate
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
@@ -183,34 +182,37 @@ input_cluster       :   compute_scope                       | compute_config ;
 input_path          :   compute_scope | compute_direction   ;
 
 
-compute_direction   :   FROM    ID_                                             // an instance to start the compute from
-                    |   TO      ID_                 ;                           // an instance to end the compute at
-compute_target      :   OF      type_labels         ;                           // type(s) of instances to apply compute
-compute_scope       :   IN      type_labels         ;                           // type(s) to scope compute visibility
+compute_direction   :   FROM    IID_                                            // an instance to start the compute from
+                    |   TO      IID_                ;                           // an instance to end the compute at
+compute_target      :   OF      labels              ;                           // type(s) of instances to apply compute
+compute_scope       :   IN      labels              ;                           // type(s) to scope compute visibility
 compute_config      :   USING   compute_algorithm                               // algorithm to determine how to compute
                     |   WHERE   compute_args        ;                           // additional args for compute method
 
-compute_algorithm   :   DEGREE | K_CORE | CONNECTED_COMPONENT ;                 // algorithm to determine how to compute
+compute_algorithm   :   DEGREE | K_CORE | CONNECTED_COMPONENT   ;               // algorithm to determine how to compute
 compute_args        :   compute_arg | compute_args_array ;                      // single argument or array of arguments
-compute_args_array  :   '[' compute_arg (',' compute_arg)* ']' ;                // an array of arguments
-compute_arg         :   MIN_K     '=' LONG_                                  // a single argument for min-k=LONG
-                    |   K         '=' LONG_                                  // a single argument for k=LONG
-                    |   SIZE      '=' LONG_                                  // a single argument for size=LONG
-                    |   CONTAINS  '=' ID_           ;                           // a single argument for contains=ID
+compute_args_array  :   '[' compute_arg (',' compute_arg)* ']'  ;               // an array of arguments
+compute_arg         :   MIN_K     '=' LONG_                                     // a single argument for min-k=LONG
+                    |   K         '=' LONG_                                     // a single argument for k=LONG
+                    |   SIZE      '=' LONG_                                     // a single argument for size=LONG
+                    |   CONTAINS  '=' IID_           ;                          // a single argument for contains=ID
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type                :   type_label      | VAR_ ;                                // A type can be a label or variable
-type_label          :   type_native     | type_name         | unreserved    ;
-type_labels         :   type_label      | type_label_array  ;
+type_any            :   type_scoped   | type          | VAR_          ;
+type_scoped         :   label_scoped                  | VAR_          ;
+type                :   label                         | VAR_          ;         // A type can be a label or variable
 
-type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
+label_any           :   label_scoped  | label         ;
+label_scoped        :   LABEL_SCOPED_ ;
+label               :   LABEL_        | type_native   | unreserved    ;
+labels              :   label         | label_array   ;
+label_array         :   '[' label ( ',' label )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 
 type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
-type_name           :   TYPE_NAME_      |   ID_             ;
 
 value_type          :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME        ;
@@ -249,17 +251,21 @@ OFFSET          : 'offset'      ;   LIMIT           : 'limit'       ;
 SORT            : 'sort'        ;   ORDER_          : ASC | DESC    ;
 ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
-// STATEMENT PROPERTY KEYWORDS
+// TYPE VARIABLE PROPERTY KEYWORDS
 
-ABSTRACT        : 'abstract'    ;   AS              : 'as'          ;
-ID              : 'id'          ;   TYPE            : 'type'        ;
-ISA_            : ISA | ISAX    ;   SUB_            : SUB | SUBX    ;
-ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
+TYPE            : 'type'        ;
+ABSTRACT        : 'abstract'    ;   SUB_            : SUB | SUBX    ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
-KEY             : 'key'         ;   HAS             : 'has'         ;
+OWNS            : 'owns'        ;   IS_KEY          : '@key'        ;
+REGEX           : 'regex'       ;   AS              : 'as'          ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
-VALUE           : 'value'       ;   REGEX           : 'regex'       ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
+
+// THING VARIABLE PROPERTY KEYWORDS
+
+IID             : 'iid'         ;   ISA_            : ISA | ISAX    ;
+ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
+HAS             : 'has'         ;   VALUE           : 'value'       ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
@@ -310,8 +316,9 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
 VAR_NAMED_      : '$' [a-zA-Z0-9][a-zA-Z0-9_-]* ;
-ID_             : ('V'|'E')[a-z0-9-]* ;
-TYPE_NAME_      : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
+IID_            : '0x'[0-9a-f]+ ;
+LABEL_          : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
+LABEL_SCOPED_   : LABEL_ ':' LABEL_ ;
 
 
 // FRAGMENTS OF KEYWORDS =======================================================

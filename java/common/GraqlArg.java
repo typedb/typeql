@@ -19,6 +19,30 @@ package graql.lang.common;
 
 public class GraqlArg {
 
+    public enum Has {
+        IS_KEY("@key");
+
+        private final String annotation;
+
+        Has(String annotation) {
+            this.annotation = annotation;
+        }
+
+        @Override
+        public String toString() {
+            return annotation;
+        }
+
+        public static GraqlArg.Has of(String annotation) {
+            for (GraqlArg.Has ann : GraqlArg.Has.values()) {
+                if (ann.annotation.equals(annotation)) {
+                    return ann;
+                }
+            }
+            return null;
+        }
+    }
+
     public enum ValueType {
         BOOLEAN("boolean"),
         DATETIME("datetime"),

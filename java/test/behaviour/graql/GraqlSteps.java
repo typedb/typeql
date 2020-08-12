@@ -83,6 +83,7 @@ public class GraqlSteps {
     @Given("transaction is initialised")
     @Given("the integrity is validated")
     @Given("connection delete all databases")
+    @Given("transaction is closed and reopened")
     @Given("materialised database is completed")
     @Given("all answers are correct in reasoned database")
     @Given("materialised and reasoned databases are the same size")

@@ -200,10 +200,11 @@ public class GraqlToken {
         ABSTRACT("abstract"),
         AS("as"),
         HAS("has"),
-        KEY("key"),
-        ID("id"), // TODO: rename to 'IID'
+        IID("iid"),
+        IS_KEY("@key"),
         ISA("isa"),
         ISAX("isa!"),
+        OWNS("owns"),
         PLAYS("plays"),
         REGEX("regex"),
         RELATES("relates"),

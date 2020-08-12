@@ -127,8 +127,8 @@ public class GraqlQueryTest {
     }
 
     @Test
-    public void testHas() {
-        assertEquals("define $x has thingy;", Graql.define(var("x").has("thingy")).toString());
+    public void testOwns() {
+        assertEquals("define $x owns thingy;", Graql.define(var("x").owns("thingy")).toString());
     }
 
     @Test

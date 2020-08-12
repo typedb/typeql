@@ -87,7 +87,7 @@ public interface ThingVariableBuilder<T> {
     interface Thing {
 
         default ThingVariable.Thing iid(String iid) {
-            return asThingWith(new ThingProperty.ID(iid));
+            return asThingWith(new ThingProperty.IID(iid));
         }
 
         default ThingVariable.Thing not(String var) {
