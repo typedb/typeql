@@ -19,6 +19,7 @@ package graql.lang.pattern.property;
 
 import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
@@ -131,11 +133,15 @@ public abstract class ThingProperty extends Property {
 
     public static class IID extends ThingProperty.Singular {
 
+        private static final Pattern REGEX = Pattern.compile("0x[0-9a-f]+");
         private final String iid;
         private final int hash;
 
         public IID(String iid) {
             if (iid == null) throw new NullPointerException("Null IID");
+            if (!REGEX.matcher(iid).matches()) {
+                throw GraqlException.create(ErrorMessage.INVALID_IID_STRING.message(iid, REGEX.toString()));
+            }
             this.iid = iid;
             this.hash = Objects.hash(this.iid);
         }

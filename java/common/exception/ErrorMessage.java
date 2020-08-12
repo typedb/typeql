@@ -27,20 +27,22 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(3, "The class '%s' cannot be casted to '%s'.");
     public static final ErrorMessage MISSING_PATTERNS =
             new ErrorMessage(4, "The query has not been provided with any patterns.");
+    public static final ErrorMessage INVALID_IID_STRING =
+            new ErrorMessage(5, "Invalid IID: '%s'. IIDs must follow the regular expression: '%s'.");
     public static final ErrorMessage INVALID_VARIABLE_OUT_OF_SCOPE =
-            new ErrorMessage(5, "The variable '%s' is out of scope of the query.");
+            new ErrorMessage(6, "The variable '%s' is out of scope of the query.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
-            new ErrorMessage(6, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
+            new ErrorMessage(7, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
     public static final ErrorMessage ILLEGAL_PROPERTY_REPETITION =
-            new ErrorMessage(7, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
+            new ErrorMessage(8, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
     public static final ErrorMessage INVALID_PROPERTY_DATETIME_PRECISION =
-            new ErrorMessage(8, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
+            new ErrorMessage(9, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(9, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(10, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(10, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(11, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(11, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(12, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";
