@@ -30,8 +30,12 @@ public interface TypeVariableBuilder {
         return type(type.toString());
     }
 
-    default TypeVariable type(String name) {
-        return asTypeWith(new TypeProperty.Label(name));
+    default TypeVariable type(String label) {
+        return asTypeWith(new TypeProperty.Label(label));
+    }
+
+    default TypeVariable type(String scope, String label) {
+        return asTypeWith(new TypeProperty.Label(scope, label));
     }
 
     default TypeVariable isAbstract() {
@@ -42,24 +46,32 @@ public interface TypeVariableBuilder {
         return sub(type.toString());
     }
 
-    default TypeVariable sub(String type) {
-        return asTypeWith(new TypeProperty.Sub(type, false));
+    default TypeVariable sub(String typeLabel) {
+        return asTypeWith(new TypeProperty.Sub(typeLabel, false));
     }
 
-    default TypeVariable sub(UnboundVariable var) {
-        return asTypeWith(new TypeProperty.Sub(var, false));
+    default TypeVariable sub(String typeScope, String typeLabel) {
+        return asTypeWith(new TypeProperty.Sub(typeScope, typeLabel, false));
+    }
+
+    default TypeVariable sub(UnboundVariable typeVar) {
+        return asTypeWith(new TypeProperty.Sub(typeVar, false));
     }
 
     default TypeVariable subX(GraqlToken.Type type) {
         return subX(type.toString());
     }
 
-    default TypeVariable subX(String type) {
-        return asTypeWith(new TypeProperty.Sub(type, true));
+    default TypeVariable subX(String typeLabel) {
+        return asTypeWith(new TypeProperty.Sub(typeLabel, true));
     }
 
-    default TypeVariable subX(UnboundVariable var) {
-        return asTypeWith(new TypeProperty.Sub(var, true));
+    default TypeVariable subX(String typeScope, String typeLabel) {
+        return asTypeWith(new TypeProperty.Sub(typeScope, typeLabel, true));
+    }
+
+    default TypeVariable subX(UnboundVariable typeVar) {
+        return asTypeWith(new TypeProperty.Sub(typeVar, true));
     }
 
     default TypeVariable owns(String attributeType) {
@@ -110,20 +122,20 @@ public interface TypeVariableBuilder {
         return asTypeWith(new TypeProperty.Owns(attributeTypeVar, overriddenAttributeTypeVar, isKey));
     }
 
-    default TypeVariable plays(String roleType) {
-        return asTypeWith(new TypeProperty.Plays(roleType));
+    default TypeVariable plays(String relationType, String roleType) {
+        return asTypeWith(new TypeProperty.Plays(relationType, roleType));
     }
 
     default TypeVariable plays(UnboundVariable roleTypevar) {
         return asTypeWith(new TypeProperty.Plays(roleTypevar));
     }
 
-    default TypeVariable plays(String roleType, String overriddenRoleType) {
-        return asTypeWith(new TypeProperty.Plays(roleType, overriddenRoleType));
+    default TypeVariable plays(String relationType, String roleType, String overriddenRoleType) {
+        return asTypeWith(new TypeProperty.Plays(relationType, roleType, overriddenRoleType));
     }
 
-    default TypeVariable plays(String roleType, UnboundVariable overriddenRoleTypeVar) {
-        return asTypeWith(new TypeProperty.Plays(roleType, overriddenRoleTypeVar));
+    default TypeVariable plays(String relationType, String roleType, UnboundVariable overriddenRoleTypeVar) {
+        return asTypeWith(new TypeProperty.Plays(relationType, roleType, overriddenRoleTypeVar));
     }
 
     default TypeVariable plays(UnboundVariable roleTypeVar, String overriddenRoleType) {

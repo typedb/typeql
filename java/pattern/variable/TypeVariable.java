@@ -148,7 +148,7 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
                 syntax.append(orderedProperties.stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else if (labelProperty().isPresent()) {
-            syntax.append(labelProperty().get().label());
+            syntax.append(labelProperty().get().scopedLabel());
             if (orderedProperties.size() > 1) {
                 syntax.append(SPACE).append(orderedProperties.stream().filter(p -> !(p instanceof TypeProperty.Label))
                                                     .map(Property::toString).collect(joining(COMMA_SPACE.toString())));

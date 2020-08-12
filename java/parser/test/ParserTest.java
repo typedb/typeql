@@ -329,9 +329,9 @@ public class ParserTest {
 
     @Test
     public void testSchemaQuery() {
-        String query = "match $x plays actor; get; sort $x asc;";
+        String query = "match $x plays starring:actor; get; sort $x asc;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").plays("actor")).get().sort("x", "asc");
+        GraqlGet expected = match(var("x").plays("starring","actor")).get().sort("x", "asc");
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -565,8 +565,8 @@ public class ParserTest {
                 "evolution sub relation;\n" +
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
-                "evolution relates evolves-from, relates evolves-to;\n" +
-                "pokemon plays evolves-from, plays evolves-to, owns name;";
+                "evolves relates from, relates to;\n" +
+                "pokemon plays evolves:from, plays evolves:to, owns name;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
 
         GraqlDefine expected = define(
@@ -574,8 +574,8 @@ public class ParserTest {
                 type("evolution").sub("relation"),
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
-                type("evolution").relates("evolves-from").relates("evolves-to"),
-                type("pokemon").plays("evolves-from").plays("evolves-to").owns("name")
+                type("evolves").relates("from").relates("to"),
+                type("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -588,8 +588,8 @@ public class ParserTest {
                 "evolution sub relation;\n" +
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
-                "evolution relates evolves-from, relates evolves-to;\n" +
-                "pokemon plays evolves-from, plays evolves-to, owns name;";
+                "evolves relates from, relates to;\n" +
+                "pokemon plays evolves:from, plays evolves:to, owns name;";
         GraqlUndefine parsed = Graql.parse(query).asUndefine();
 
         GraqlUndefine expected = undefine(
@@ -597,8 +597,8 @@ public class ParserTest {
                 type("evolution").sub("relation"),
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
-                type("evolution").relates("evolves-from").relates("evolves-to"),
-                type("pokemon").plays("evolves-from").plays("evolves-to").owns("name")
+                type("evolves").relates("from").relates("to"),
+                type("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
         );
 
         assertQueryEquals(expected, parsed, query);

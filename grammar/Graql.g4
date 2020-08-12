@@ -96,17 +96,17 @@ pattern_variable    :   variable_type
 // TYPE VARIABLES ==============================================================
 
 variable_types      : ( variable_type ';' )+ ;
-variable_type       :   type        type_property ( ',' type_property )*  ;
+variable_type       :   type_any    type_property ( ',' type_property )*  ;
 type_property       :   ABSTRACT
-                    |   SUB_        type
-                    |   OWNS        type ( AS type )? ( IS_KEY )?
-                    |   PLAYS       type ( AS type )?
-                    |   RELATES     type ( AS type )?
+                    |   SUB_        type_any
+                    |   OWNS        type         ( AS type )? ( IS_KEY )?
+                    |   RELATES     type         ( AS type )?
+                    |   PLAYS       type_scoped  ( AS type )?
                     |   VALUE       value_type
                     |   REGEX       regex
                     |   WHEN    '{' patterns        '}'
                     |   THEN    '{' variable_things '}'
-                    |   TYPE        type_label
+                    |   TYPE        label_any
                     ;
 
 // THING VARIABLES =============================================================
@@ -138,7 +138,7 @@ player              :   VAR_ ;                                                  
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes          :   attribute ( ',' attribute )* ;
-attribute           :   HAS type_label ( VAR_ | value ) ;                   // Attribute ownership by variable or a
+attribute           :   HAS label ( VAR_ | value ) ;                            // Attribute ownership by variable or a
                                                                                 // predicate
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
@@ -182,34 +182,37 @@ input_cluster       :   compute_scope                       | compute_config ;
 input_path          :   compute_scope | compute_direction   ;
 
 
-compute_direction   :   FROM    IID_                                             // an instance to start the compute from
-                    |   TO      IID_                 ;                           // an instance to end the compute at
-compute_target      :   OF      type_labels         ;                           // type(s) of instances to apply compute
-compute_scope       :   IN      type_labels         ;                           // type(s) to scope compute visibility
+compute_direction   :   FROM    IID_                                            // an instance to start the compute from
+                    |   TO      IID_                ;                           // an instance to end the compute at
+compute_target      :   OF      labels              ;                           // type(s) of instances to apply compute
+compute_scope       :   IN      labels              ;                           // type(s) to scope compute visibility
 compute_config      :   USING   compute_algorithm                               // algorithm to determine how to compute
                     |   WHERE   compute_args        ;                           // additional args for compute method
 
-compute_algorithm   :   DEGREE | K_CORE | CONNECTED_COMPONENT ;                 // algorithm to determine how to compute
+compute_algorithm   :   DEGREE | K_CORE | CONNECTED_COMPONENT   ;               // algorithm to determine how to compute
 compute_args        :   compute_arg | compute_args_array ;                      // single argument or array of arguments
-compute_args_array  :   '[' compute_arg (',' compute_arg)* ']' ;                // an array of arguments
-compute_arg         :   MIN_K     '=' LONG_                                  // a single argument for min-k=LONG
-                    |   K         '=' LONG_                                  // a single argument for k=LONG
-                    |   SIZE      '=' LONG_                                  // a single argument for size=LONG
-                    |   CONTAINS  '=' IID_           ;                           // a single argument for contains=ID
+compute_args_array  :   '[' compute_arg (',' compute_arg)* ']'  ;               // an array of arguments
+compute_arg         :   MIN_K     '=' LONG_                                     // a single argument for min-k=LONG
+                    |   K         '=' LONG_                                     // a single argument for k=LONG
+                    |   SIZE      '=' LONG_                                     // a single argument for size=LONG
+                    |   CONTAINS  '=' IID_           ;                          // a single argument for contains=ID
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type                :   type_label      | VAR_ ;                                // A type can be a label or variable
-type_label          :   type_native     | type_name         | unreserved    ;
-type_labels         :   type_label      | type_label_array  ;
+type_any            :   type_scoped   | type          | VAR_          ;
+type_scoped         :   label_scoped                  | VAR_          ;
+type                :   label                         | VAR_          ;         // A type can be a label or variable
 
-type_label_array    :   '[' type_label ( ',' type_label )* ']'              ;
+label_any           :   label_scoped  | label         ;
+label_scoped        :   LABEL_SCOPED_ ;
+label               :   LABEL_        | type_native   | unreserved    ;
+labels              :   label         | label_array   ;
+label_array         :   '[' label ( ',' label )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 
 type_native         :   THING           |   ENTITY          |   ATTRIBUTE
                     |   RELATION        |   ROLE            |   RULE        ;
-type_name           :   TYPE_NAME_      |   IID_             ;
 
 value_type          :   LONG            |   DOUBLE          |   STRING
                     |   BOOLEAN         |   DATETIME        ;
@@ -313,8 +316,9 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;
 VAR_NAMED_      : '$' [a-zA-Z0-9][a-zA-Z0-9_-]* ;
-IID_            : [0-9a-f]+ ;
-TYPE_NAME_      : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
+IID_            : '0x'[0-9a-f]+ ;
+LABEL_          : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
+LABEL_SCOPED_   : LABEL_ ':' LABEL_ ;
 
 
 // FRAGMENTS OF KEYWORDS =======================================================
