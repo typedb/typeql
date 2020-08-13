@@ -20,6 +20,7 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.List;
@@ -43,11 +44,11 @@ public class GraqlDelete extends GraqlQuery {
             throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
 
         variables.forEach(var -> {
-            if (var.isNamed() && !match.variablesNamedNoProps().contains(var.withoutProperties())) {
+            if (var.isNamed() && !match.variablesNamedUnbound().contains(var.withoutProperties())) {
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.withoutProperties().toString()));
             }
             var.variables().forEach(nestedVar -> {
-                if (nestedVar.isNamed() && !match.variablesNamedNoProps().contains(nestedVar.withoutProperties())) {
+                if (nestedVar.isNamed() && !match.variablesNamedUnbound().contains(nestedVar.withoutProperties())) {
                     throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(nestedVar.withoutProperties().toString()));
                 }
             });
@@ -64,6 +65,10 @@ public class GraqlDelete extends GraqlQuery {
 
     public List<ThingVariable<?>> variables() {
         return variables;
+    }
+
+    public List<ThingVariable<?>> asGraph() {
+        return BoundVariable.asGraph(variables);
     }
 
     @Override

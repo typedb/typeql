@@ -18,6 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.List;
@@ -42,6 +43,10 @@ public class GraqlUndefine extends GraqlQuery {
 
     public List<TypeVariable> variables() {
         return variables;
+    }
+
+    public List<TypeVariable> asGraph() {
+        return BoundVariable.asGraph(variables);
     }
 
     @Override

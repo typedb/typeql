@@ -21,10 +21,10 @@ import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -151,7 +151,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<BoundVariable<?>> variables() {
             return Stream.of();
         }
 
@@ -211,7 +211,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<BoundVariable<?>> variables() {
             return Stream.of(type);
         }
 
@@ -255,7 +255,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<BoundVariable<?>> variables() {
             return Stream.of(variable());
         }
 
@@ -299,7 +299,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<BoundVariable<?>> variables() {
             return operation.variable() != null ? Stream.of(operation.variable()) : Stream.empty();
         }
 
@@ -351,9 +351,9 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<BoundVariable<?>> variables() {
             return players().stream().flatMap(player -> {
-                Stream.Builder<Variable> stream = Stream.builder();
+                Stream.Builder<BoundVariable<?>> stream = Stream.builder();
                 stream.add(player.player());
                 player.roleType().ifPresent(stream::add);
                 return stream.build();
@@ -470,7 +470,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<BoundVariable<?>> variables() {
             return Stream.of(variable);
         }
 

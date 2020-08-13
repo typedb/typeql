@@ -17,7 +17,9 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.property.Property;
 import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,10 +41,10 @@ import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITI
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable {
+public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable<ThingVariable<?>> {
 
     final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties;
-    private final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties;
+    final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties;
 
     public ThingVariable(Identity identity, ThingProperty property) {
         super(identity);
@@ -53,7 +56,17 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
         }
     }
 
+    ThingVariable(Identity identity,
+                  Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
+                  Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
+        super(identity);
+        this.singularProperties = singularProperties;
+        this.repeatingProperties = repeatingProperties;
+    }
+
     public abstract T getThis();
+
+    public abstract T withoutProperties();
 
     @Override
     public Set<ThingProperty> properties() {
@@ -98,7 +111,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
                 .stream().map(ThingProperty::asHas).collect(toList());
     }
 
-    public T asSameThingWith(ThingProperty.Singular property) {
+    void addSingularProperties(ThingProperty.Singular property) {
         if (singularProperties.containsKey(property.getClass())) {
             throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(
                     withoutProperties().toString(),
@@ -107,6 +120,20 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
             ));
         }
         singularProperties.put(property.getClass(), property);
+    }
+
+    @Override
+    ThingVariable.Merged merge(ThingVariable<?> variable) {
+        ThingVariable.Merged merged = new ThingVariable.Merged(identity, singularProperties, repeatingProperties);
+        variable.singularProperties.values().forEach(merged::addSingularProperties);
+        variable.repeatingProperties.forEach(
+                (clazz, list) -> merged.repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
+        );
+        return merged;
+    }
+
+    public T asSameThingWith(ThingProperty.Singular property) {
+        addSingularProperties(property);
         return getThis();
     }
 
@@ -127,15 +154,76 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
     @Override
     public abstract String toString();
 
+    static class Merged extends ThingVariable<Merged> {
+
+        Merged(Identity identity) {
+            super(identity, null);
+        }
+
+        @Override
+        ThingVariable<?> asAnonymousWithID(int id) {
+            throw GraqlException.create(ErrorMessage.INVALID_CONVERT_OPERATION.message());
+        }
+
+        Merged(Identity identity,
+               Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
+               Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
+            super(identity, singularProperties, repeatingProperties);
+        }
+
+        @Override
+        public Merged getThis() {
+            return this;
+        }
+
+        @Override
+        public Merged withoutProperties() {
+            return new ThingVariable.Merged(identity);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder syntax = new StringBuilder();
+            Predicate<ThingProperty> filter = p -> true;
+            if (isVisible()) {
+                syntax.append(identity.syntax());
+            } else if (relationProperty().isPresent()) {
+                syntax.append(SPACE).append(relationProperty().get());
+                filter = p -> !(p instanceof ThingProperty.Relation);
+            } else if (valueProperty().isPresent()) {
+                syntax.append(SPACE).append(valueProperty().get());
+                filter = p -> !(p instanceof ThingProperty.Value<?>);
+            } else {
+                assert false;
+                return null;
+            }
+
+            String properties = properties().stream().filter(filter).map(Property::toString).collect(joining(COMMA_SPACE.toString()));
+            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            return syntax.toString();
+        }
+    }
+
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder<Thing> {
 
         Thing(Identity identity, ThingProperty property) {
             super(identity, property);
         }
 
+        private Thing(Identity.AnonymousWithID identity,
+                      Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
+                      Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
+            super(identity, singularProperties, repeatingProperties);
+        }
+
         @Override
         public ThingVariable.Thing getThis() {
             return this;
+        }
+
+        @Override
+        ThingVariable.Thing asAnonymousWithID(int id) {
+            return new ThingVariable.Thing(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
         }
 
         @Override
@@ -173,9 +261,20 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
             this.relationProperty = property;
         }
 
+        public Relation(Identity.AnonymousWithID identity,
+                        Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
+                        Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
+            super(identity, singularProperties, repeatingProperties);
+        }
+
         @Override
         public ThingVariable.Relation getThis() {
             return this;
+        }
+
+        @Override
+        ThingVariable.Relation asAnonymousWithID(int id) {
+            return new ThingVariable.Relation(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
         }
 
         @Override
@@ -212,9 +311,20 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends Variable
             super(identity, property);
         }
 
+        public Attribute(Identity.AnonymousWithID identity,
+                         Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
+                         Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
+            super(identity, singularProperties, repeatingProperties);
+        }
+
         @Override
         public ThingVariable.Attribute getThis() {
             return this;
+        }
+
+        @Override
+        ThingVariable.Attribute asAnonymousWithID(int id) {
+            return new ThingVariable.Attribute(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
         }
 
         @Override

@@ -22,6 +22,7 @@ import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.pattern.variable.Variable;
@@ -43,8 +44,8 @@ public class MatchClause {
 
     private final Conjunction<? extends Pattern> pattern;
     private final int hash;
-    private List<Variable> vars;
-    private List<Variable> varsNamedNoProps;
+    private List<BoundVariable<?>> variables;
+    private List<UnboundVariable> variablesNamedUnbound;
 
     public MatchClause(List<? extends Pattern> patterns) {
         if (patterns.size() == 0) throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
@@ -56,18 +57,18 @@ public class MatchClause {
         return pattern;
     }
 
-    public final List<Variable> variables() {
-        if (vars == null) vars = pattern.variables().collect(toList());
-        return vars;
+    public final List<BoundVariable<?>> variables() {
+        if (variables == null) variables = pattern.variables().collect(toList());
+        return variables;
     }
 
-    final List<Variable> variablesNamedNoProps() {
-        if (varsNamedNoProps == null) {
-            varsNamedNoProps = pattern.variables().filter(Variable::isNamed)
-                    .map(Variable::withoutProperties)
+    final List<UnboundVariable> variablesNamedUnbound() {
+        if (variablesNamedUnbound == null) {
+            variablesNamedUnbound = pattern.variables().filter(Variable::isNamed)
+                    .map(v -> UnboundVariable.named(v.name()))
                     .distinct().collect(toList());
         }
-        return varsNamedNoProps;
+        return variablesNamedUnbound;
     }
 
     /**
@@ -108,7 +109,7 @@ public class MatchClause {
      * @param things an array of variables to insert for each result of this match clause
      * @return an insert query that will insert the given variables for each result of this match clause
      */
-    public final GraqlInsert insert(ThingVariable... things) {
+    public final GraqlInsert insert(ThingVariable<?>... things) {
         return new GraqlInsert(this, list(things));
     }
 

@@ -20,6 +20,7 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
@@ -56,6 +57,10 @@ public class GraqlInsert extends GraqlQuery {
 
     public List<ThingVariable<?>> variables() {
         return variables;
+    }
+
+    public List<ThingVariable<?>> asGraph() {
+        return BoundVariable.asGraph(variables);
     }
 
     @Override

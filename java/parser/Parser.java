@@ -33,10 +33,10 @@ import graql.lang.pattern.Pattern;
 import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.property.ValueOperation;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -550,7 +550,7 @@ public class Parser extends GraqlBaseVisitor {
     // VARIABLE PATTERNS =======================================================
 
     @Override
-    public Variable visitPattern_variable(GraqlParser.Pattern_variableContext ctx) {
+    public BoundVariable<?> visitPattern_variable(GraqlParser.Pattern_variableContext ctx) {
         if (ctx.variable_thing_any() != null) {
             return this.visitVariable_thing_any(ctx.variable_thing_any());
 
@@ -734,7 +734,8 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public Either<Pair<String, String>, UnboundVariable> visitType_any(GraqlParser.Type_anyContext ctx) {
         if (ctx.VAR_() != null) return Either.second(getVar(ctx.VAR_()));
-        else if (ctx.type() != null) return visitType(ctx.type()).apply(s -> Either.first(pair(null, s)), Either::second);
+        else if (ctx.type() != null)
+            return visitType(ctx.type()).apply(s -> Either.first(pair(null, s)), Either::second);
         else if (ctx.type_scoped() != null) return visitType_scoped(ctx.type_scoped());
         else return null;
     }

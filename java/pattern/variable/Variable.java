@@ -18,7 +18,6 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Pattern;
 import graql.lang.pattern.property.Property;
 
 import java.util.Objects;
@@ -27,7 +26,7 @@ import java.util.stream.Stream;
 
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 
-public abstract class Variable implements Pattern {
+public abstract class Variable<T extends Variable<T>> {
 
     final Identity identity;
 
@@ -35,7 +34,7 @@ public abstract class Variable implements Pattern {
         this.identity = identity;
     }
 
-    public abstract Variable withoutProperties();
+    public abstract T withoutProperties();
 
     public abstract Set<? extends Property> properties();
 
@@ -59,7 +58,7 @@ public abstract class Variable implements Pattern {
         ));
     }
 
-    public Stream<Variable> variables() {
+    public Stream<BoundVariable<?>> variables() {
         return properties().stream().flatMap(Property::variables);
     }
 
@@ -81,7 +80,7 @@ public abstract class Variable implements Pattern {
     }
 
     public String identifier() {
-        return identity.syntax();
+        return identity.identifier();
     }
 
     public boolean isNamed() {
@@ -107,7 +106,7 @@ public abstract class Variable implements Pattern {
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || o.getClass().isAssignableFrom(Variable.class)) return false;
-        Variable that = (Variable) o;
+        Variable<?> that = (Variable<?>) o;
         return (this.identity.equals(that.identity) &&
                 this.properties().equals(that.properties()));
     }

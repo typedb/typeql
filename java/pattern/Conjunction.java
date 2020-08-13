@@ -17,7 +17,7 @@
 
 package graql.lang.pattern;
 
-import graql.lang.pattern.variable.Variable;
+import graql.lang.pattern.variable.BoundVariable;
 
 import java.util.List;
 import java.util.Objects;
@@ -43,9 +43,10 @@ public class Conjunction<T extends Pattern> implements Pattern {
         this.hash = Objects.hash(this.patterns);
     }
 
-    public Stream<Variable> variables() {
+    public Stream<BoundVariable<?>> variables() {
         return patterns.stream().flatMap(pattern -> {
-            if (pattern instanceof Variable) return concat(of(((Variable) pattern)), ((Variable) pattern).variables());
+            if (pattern instanceof BoundVariable<?>)
+                return concat(of(((BoundVariable<?>) pattern)), ((BoundVariable<?>) pattern).variables());
             else if (pattern instanceof Conjunction) return ((Conjunction<?>) pattern).variables();
             else return of();
         });

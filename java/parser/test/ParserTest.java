@@ -331,7 +331,7 @@ public class ParserTest {
     public void testSchemaQuery() {
         String query = "match $x plays starring:actor; get; sort $x asc;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").plays("starring","actor")).get().sort("x", "asc");
+        GraqlGet expected = match(var("x").plays("starring", "actor")).get().sort("x", "asc");
 
         assertQueryEquals(expected, parsed, query);
     }

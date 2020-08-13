@@ -36,7 +36,7 @@ import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITI
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class TypeVariable extends Variable implements TypeVariableBuilder {
+public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVariableBuilder {
 
     private final Map<Class<? extends TypeProperty>, TypeProperty.Singular> singularProperties;
     private final Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeatingProperties;
@@ -51,6 +51,16 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
             if (property.isSingular()) asTypeWith(property.asSingular());
             else asTypeWith(property.asRepeatable());
         }
+    }
+
+    private TypeVariable(Identity.AnonymousWithID identity,
+                         Map<Class<? extends TypeProperty>, TypeProperty.Singular> singularProperties,
+                         Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeatingProperties,
+                         List<TypeProperty> orderedProperties) {
+        super(identity);
+        this.singularProperties = singularProperties;
+        this.repeatingProperties = repeatingProperties;
+        this.orderedProperties = orderedProperties;
     }
 
     @Override
@@ -74,7 +84,12 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeProperty.Singular property) {
+    TypeVariable asAnonymousWithID(int id) {
+        return new TypeVariable(Identity.anonymous(identity.isVisible, id), singularProperties,
+                                repeatingProperties, orderedProperties);
+    }
+
+    private void addSingularProperties(TypeProperty.Singular property) {
         if (singularProperties.containsKey(property.getClass())) {
             throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(
                     withoutProperties().toString(),
@@ -83,6 +98,21 @@ public class TypeVariable extends Variable implements TypeVariableBuilder {
             ));
         }
         singularProperties.put(property.getClass(), property);
+    }
+
+    @Override
+    TypeVariable merge(TypeVariable variable) {
+        variable.singularProperties.values().forEach(this::addSingularProperties);
+        variable.repeatingProperties.forEach(
+                (clazz, list) -> repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
+        );
+        orderedProperties.addAll(variable.orderedProperties);
+        return this;
+    }
+
+    @Override
+    public TypeVariable asTypeWith(TypeProperty.Singular property) {
+        addSingularProperties(property);
         orderedProperties.add(property);
         return this;
     }

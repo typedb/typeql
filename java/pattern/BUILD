@@ -25,6 +25,7 @@ java_library(
     srcs = glob([
         "*.java",
         "property/*.java",
+        "util/*.java",
         "variable/*.java",
         "variable/builder/*.java",
     ]),

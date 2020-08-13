@@ -20,7 +20,6 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Filterable;
 
@@ -59,10 +58,10 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         if (match == null) throw new NullPointerException("Null match");
         if (vars == null) throw new NullPointerException("Null vars");
         for (UnboundVariable var : vars) {
-            if (!match.variablesNamedNoProps().contains(var))
+            if (!match.variablesNamedUnbound().contains(var))
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
         }
-        List<? extends Variable> sortableVars = vars.isEmpty() ? match.variablesNamedNoProps() : vars;
+        List<UnboundVariable> sortableVars = vars.isEmpty() ? match.variablesNamedUnbound() : vars;
         if (sorting != null && !sortableVars.contains(sorting.var())) {
             throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
         }
@@ -91,8 +90,8 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         return new Group(this, var);
     }
 
-    public List<? extends Variable> variables() {
-        if (vars.isEmpty()) return match.variablesNamedNoProps();
+    public List<UnboundVariable> variables() {
+        if (vars.isEmpty()) return match.variablesNamedUnbound();
         else return vars;
     }
 

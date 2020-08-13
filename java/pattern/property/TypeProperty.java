@@ -26,7 +26,6 @@ import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -195,7 +194,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -258,7 +257,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of(type);
         }
 
@@ -295,7 +294,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -337,7 +336,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -381,7 +380,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -426,7 +425,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -481,7 +480,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -576,7 +575,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of(attributeType);
         }
 
@@ -655,7 +654,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of(roleType);
         }
 
@@ -734,7 +733,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<Variable> variables() {
+        public Stream<TypeVariable> variables() {
             return overriddenRoleType == null ? Stream.of(roleType) : Stream.of(roleType, overriddenRoleType);
         }
 

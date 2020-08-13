@@ -27,11 +27,11 @@ import java.util.Set;
 
 import static grakn.common.collection.Collections.set;
 
-public class UnboundVariable extends Variable implements TypeVariableBuilder,
-                                                         ThingVariableBuilder<ThingVariable.Thing>,
-                                                         ThingVariableBuilder.Thing,
-                                                         ThingVariableBuilder.Relation,
-                                                         ThingVariableBuilder.Attribute {
+public class UnboundVariable extends Variable<UnboundVariable> implements TypeVariableBuilder,
+                                                                          ThingVariableBuilder<ThingVariable.Thing>,
+                                                                          ThingVariableBuilder.Thing,
+                                                                          ThingVariableBuilder.Relation,
+                                                                          ThingVariableBuilder.Attribute {
 
     private UnboundVariable(Identity identity) {
         super(identity);
@@ -64,7 +64,7 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public Variable withoutProperties() {
+    public UnboundVariable withoutProperties() {
         return this;
     }
 

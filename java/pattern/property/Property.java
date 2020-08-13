@@ -17,13 +17,13 @@
 
 package graql.lang.pattern.property;
 
-import graql.lang.pattern.variable.Variable;
+import graql.lang.pattern.variable.BoundVariable;
 
 import java.util.stream.Stream;
 
 public abstract class Property {
 
-    public abstract Stream<Variable> variables();
+    public abstract Stream<? extends BoundVariable<?>> variables();
 
     @Override
     public abstract String toString();

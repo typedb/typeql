@@ -43,6 +43,8 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(11, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
             new ErrorMessage(12, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+    public static final ErrorMessage INVALID_CONVERT_OPERATION =
+            new ErrorMessage(13, "Invalid 'convert' operation. Only bound and unmerged variables can be converted.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";

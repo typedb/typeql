@@ -28,10 +28,10 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
 abstract class Identity {
 
-    protected final Type type;
-    protected final boolean isVisible;
+    final Type type;
+    final boolean isVisible;
 
-    enum Type {NAME, LABEL, ANONYMOUS}
+    enum Type {NAME, LABEL, ANONYMOUS;}
 
     Identity(Type type, boolean isVisible) {
         this.type = type;
@@ -50,11 +50,17 @@ abstract class Identity {
         return new Identity.Anonymous(isVisible);
     }
 
+    static Identity.AnonymousWithID anonymous(boolean isVisible, int id) {
+        return new Identity.AnonymousWithID(isVisible, id);
+    }
+
     Identity.Type type() {
         return type;
     }
 
     abstract String syntax();
+
+    abstract String identifier();
 
     boolean isVisible() {
         return isVisible;
@@ -117,6 +123,11 @@ abstract class Identity {
         }
 
         @Override
+        String identifier() {
+            return syntax();
+        }
+
+        @Override
         Name asNamed() {
             return this;
         }
@@ -158,6 +169,11 @@ abstract class Identity {
         }
 
         @Override
+        String identifier() {
+            return syntax();
+        }
+
+        @Override
         Identity.Label asLabel() {
             return this;
         }
@@ -193,6 +209,11 @@ abstract class Identity {
         }
 
         @Override
+        String identifier() {
+            return syntax();
+        }
+
+        @Override
         Identity.Anonymous asAnonymous() {
             return this;
         }
@@ -203,6 +224,41 @@ abstract class Identity {
             if (o == null || getClass() != o.getClass()) return false;
             Anonymous that = (Anonymous) o;
             return (this.type == that.type && this.isVisible == that.isVisible);
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+    }
+
+    static class AnonymousWithID extends Identity.Anonymous {
+
+        private final int id;
+        private final int hash;
+
+        private AnonymousWithID(boolean isVisible, int id) {
+            super(isVisible);
+            this.id = id;
+            this.hash = Objects.hash(this.type, this.isVisible, this.id);
+        }
+
+        @Override
+        String identifier() {
+            return syntax() + id;
+        }
+
+        @Override
+        Identity.AnonymousWithID asAnonymous() {
+            return this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            AnonymousWithID that = (AnonymousWithID) o;
+            return (this.type == that.type && this.isVisible == that.isVisible && this.id == that.id);
         }
 
         @Override
