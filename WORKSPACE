@@ -29,6 +29,9 @@ antlr_deps()
 load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
 antlr_dependencies()
 
+load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
+bazel_toolchain()
+
 load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
 java_deps()
 load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
