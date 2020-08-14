@@ -1,3 +1,5 @@
+@maven//:com_eclipsesource_minimal_json_minimal_json
+@maven//:com_eclipsesource_minimal_json_minimal_json_0_9_5
 @maven//:com_google_code_findbugs_jsr305
 @maven//:com_google_code_findbugs_jsr305_2_0_2
 @maven//:com_google_errorprone_error_prone_annotations
