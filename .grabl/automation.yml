@@ -12,8 +12,11 @@ build:
       build:
         machine: grabl-ubuntu-2004
         script: |
-          bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
+          curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/rbe.sh
+          sudo mkdir -p /home/grabl/.credentials/ && sudo chmod a+w /home/grabl/.credentials/ && bash ./rbe.sh && rm ./rbe.sh
           bazel build --config=rbe //...
+          bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
+          bazel test --config=rbe $(bazel query 'kind(checkstyle_test, //...)')
       build-dependency:
         machine: grabl-ubuntu-2004
         script: |
@@ -23,6 +26,8 @@ build:
       test-graql-java:
         machine: grabl-ubuntu-2004
         script: |
+          curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/rbe.sh
+          sudo mkdir -p /home/grabl/.credentials/ && sudo chmod a+w /home/grabl/.credentials/ && bash ./rbe.sh && rm ./rbe.sh
           bazel test --config=rbe //java/... --test_output=errors
       deploy-maven-snapshot:
         machine: grabl-ubuntu-2004
@@ -55,7 +60,7 @@ release:
       validate-dependencies:
         machine: grabl-ubuntu-2004
         script: |
-          bazel run @graknlabs_dependencies//tool/release:validate-deps -- graknlabs_common
+          bazel run @graknlabs_dependencies//tool/release:validate-deps -- @graknlabs_common
   deployment:
     jobs:
       deploy-github:
