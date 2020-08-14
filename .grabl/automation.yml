@@ -13,7 +13,7 @@ build:
         machine: grabl-ubuntu-2004
         script: |
           curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/rbe.sh
-          sudo mkdir -p /home/grabl/.credentials/ && sudo chmod a+w /home/grabl/.credentials/ && bash ./rbe.sh && rm ./rbe.sh
+          sudo mkdir -p /home/circleci/.credentials/ && sudo chmod a+w /home/circleci/.credentials/ && bash ./rbe.sh && rm ./rbe.sh
           bazel build --config=rbe //...
           bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
           bazel test --config=rbe $(bazel query 'kind(checkstyle_test, //...)')
@@ -27,7 +27,7 @@ build:
         machine: grabl-ubuntu-2004
         script: |
           curl -OL https://raw.githubusercontent.com/graknlabs/dependencies/master/tool/bazelinstall/rbe.sh
-          sudo mkdir -p /home/grabl/.credentials/ && sudo chmod a+w /home/grabl/.credentials/ && bash ./rbe.sh && rm ./rbe.sh
+          sudo mkdir -p /home/circleci/.credentials/ && sudo chmod a+w /home/circleci/.credentials/ && bash ./rbe.sh && rm ./rbe.sh
           bazel test --config=rbe //java/... --test_output=errors
       deploy-maven-snapshot:
         machine: grabl-ubuntu-2004
