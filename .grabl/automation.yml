@@ -59,8 +59,7 @@ release:
     job:
       validate-dependencies:
         machine: grabl-ubuntu-2004
-        script: |
-          bazel run @graknlabs_dependencies//tool/release:validate-deps -- @graknlabs_common
+        script: bazel test //:release-validate-deps --test_output=streamed
   deployment:
     jobs:
       deploy-github:
