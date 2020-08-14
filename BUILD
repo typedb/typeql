@@ -15,8 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-exports_files(["VERSION", "deployment.properties", "RELEASE_TEMPLATE.md"], visibility = ["//visibility:public"])
+load("@graknlabs_dependencies//tool/release:rules.bzl", "release_validate_deps")
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
+
+exports_files(
+    ["VERSION", "deployment.properties", "RELEASE_TEMPLATE.md"],
+    visibility = ["//visibility:public"]
+)
 
 deploy_github(
     name = "deploy-github",
@@ -24,4 +29,13 @@ deploy_github(
     title = "Graql",
     title_append_version = True,
     deployment_properties = "//:deployment.properties",
+)
+
+release_validate_deps(
+    name = "release-validate-deps",
+    refs = "@graknlabs_graql_workspace_refs//:refs.json",
+    tagged_deps = [
+        "@graknlabs_common",
+    ],
+    tags = ["manual"]  # in order for bazel test //... to not fail
 )

@@ -80,14 +80,24 @@ tcnksm_ghr()
 # Load Grakn Labs Dependencies #
 ################################
 
+
+load("@graknlabs_dependencies//dependencies/maven:artifacts.bzl",
+graknlabs_dependencies_artifacts = "artifacts")
+
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_common")
 graknlabs_common()
+load("@graknlabs_common//dependencies/maven:artifacts.bzl",
+graknlabs_common_artifacts = "artifacts")
 
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_verification")
 graknlabs_verification()
 
-load("//dependencies/maven:artifacts.bzl", "artifacts")
-maven(artifacts)
+load("//dependencies/maven:artifacts.bzl", graknlabs_graql_artifacts = "artifacts")
+maven(
+    graknlabs_dependencies_artifacts +
+    graknlabs_common_artifacts +
+    graknlabs_graql_artifacts
+)
 
 ############################################
 # Generate @graknlabs_graql_workspace_refs #
@@ -97,6 +107,4 @@ load("@graknlabs_bazel_distribution//common:dependencies.bzl", "bazelbuild_rules
 bazelbuild_rules_pkg()
 
 load("@graknlabs_bazel_distribution//common:rules.bzl", "workspace_refs")
-workspace_refs(
-    name = "graknlabs_graql_workspace_refs"
-)
+workspace_refs(name = "graknlabs_graql_workspace_refs")
