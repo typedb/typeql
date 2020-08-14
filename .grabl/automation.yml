@@ -43,7 +43,8 @@ build:
       test-deployment-maven:
         machine: grabl-ubuntu-2004
         script: |
-          sudo apt install maven
+          sudo apt-get update
+          sudo apt-get -y install maven
           sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$GRABL_COMMIT/g" java/test/deployment/pom.xml
           cd java/test/deployment/ && mvn test
     execution:
