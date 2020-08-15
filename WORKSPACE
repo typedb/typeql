@@ -20,7 +20,7 @@ workspace(name = "graknlabs_graql")
 ################################
 # Load @graknlabs_dependencies #
 ################################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_dependencies")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
 # Load Antlr
@@ -30,9 +30,7 @@ load("@rules_antlr//antlr:deps.bzl", "antlr_dependencies")
 antlr_dependencies()
 
 # Load Bazel
-load("@graknlabs_dependencies//builder/bazel:deps.bzl","bazel_common", "bazel_deps", "bazel_toolchain")
-bazel_common()
-bazel_deps()
+load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
 
 # Load gRPC
@@ -93,11 +91,12 @@ sonarcloud_dependencies()
 load("@graknlabs_dependencies//tool/unuseddeps:deps.bzl", unuseddeps_deps = "deps")
 unuseddeps_deps()
 
-#####################################################################
-# Load @graknlabs_bazel_distribution from (@graknlabs_dependencies) #
-#####################################################################
-load("@graknlabs_dependencies//distribution:deps.bzl", distribution_deps = "deps")
-distribution_deps()
+#######################################
+# Load @graknlabs_bazel_distribution  #
+#######################################
+
+load("//dependencies/graknlabs:repositories.bzl", graknlabs_bazel_distribution = "graknlabs_bazel_distribution")
+graknlabs_bazel_distribution()
 
 pip3_import(
     name = "graknlabs_bazel_distribution_pip",
@@ -138,7 +137,7 @@ rules_pkg_dependencies()
 ##########################
 # Load @graknlabs_common #
 ##########################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_common")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_common")
 graknlabs_common()
 
 ###############

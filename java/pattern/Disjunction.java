@@ -21,7 +21,7 @@ import com.google.common.collect.Sets;
 import graql.lang.Graql;
 import graql.lang.statement.Statement;
 import graql.lang.statement.Variable;
-import grakn.common.util.Collections;
+import grakn.common.collection.Collections;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Iterator;

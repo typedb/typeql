@@ -18,7 +18,8 @@
 package(default_visibility = ["//visibility:public"])
 
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_dependencies//library/maven:artifacts.bzl", "maven_overrides", maven_overrides_org = "artifacts")
 
 java_library(
     name = "graql",
@@ -39,12 +40,14 @@ assemble_maven(
   name = "assemble-maven",
   target = ":graql",
   package = "java",
+  version_overrides = maven_overrides(maven_overrides_org),
   workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
 )
 
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
+    deployment_properties = "@graknlabs_dependencies//distribution:deployment.properties",
 )
 
 checkstyle_test(

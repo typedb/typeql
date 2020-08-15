@@ -1,0 +1,32 @@
+<idea-plugin>
+  <id>com.intellij.lang.graql</id>
+  <name>Graql</name>
+  <version>2.0.0</version>
+  <vendor email="info@grakn.ai" url="https://grakn.ai">Grakn</vendor>
+  <description>
+      Graql language support
+    </description>
+  <change-notes>
+      Add change notes here.&lt;br&gt;
+      &lt;em&gt;most HTML tags may be used&lt;/em&gt;</change-notes>
+  <idea-version since-build="193.5662" until-build="193.*"/>
+  <depends>com.intellij.modules.lang</depends>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Graql" implementationClass="ai.graknlabs.graql.GraqlFileType" fieldName="INSTANCE" language="Graql" extensions="gql"/>
+    <fileTypeFactory implementation="ai.graknlabs.graql.GraqlFileTypeFactory"/>
+    <lang.syntaxHighlighterFactory language="Graql" implementationClass="ai.graknlabs.graql.highlighter.GraqlSyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="ai.graknlabs.graql.highlighter.GraqlColorSettingsPage"/>
+    <lang.parserDefinition language="Graql" implementationClass="ai.graknlabs.graql.GraqlParserDefinition"/>
+    <psi.referenceContributor language="Graql" implementation="ai.graknlabs.graql.reference.GraqlReferenceContributor"/>
+    <lang.findUsagesProvider language="Graql" implementationClass="ai.graknlabs.graql.usage.GraqlFindUsagesProvider"/>
+    <lang.refactoringSupport language="Graql" implementationClass="ai.graknlabs.graql.refactor.GraqlRefactoringSupportProvider"/>
+    <lang.namesValidator language="Graql" implementationClass="ai.graknlabs.graql.refactor.GraqlNamesValidator"/>
+    <completion.contributor language="Graql" implementationClass="ai.graknlabs.graql.completion.GraqlCompletionContributor"/>
+    <lang.commenter language="Graql" implementationClass="ai.graknlabs.graql.refactor.GraqlCommenter"/>
+    <inspectionToolProvider implementation="ai.graknlabs.graql.inspection.unusedDeclaration.GraqlUnusedDeclarationProvider"/>
+    <inspectionToolProvider implementation="ai.graknlabs.graql.inspection.undefinedDeclaration.GraqlUndefinedDeclarationProvider"/>
+    <inspectionToolProvider implementation="ai.graknlabs.graql.inspection.duplicateDeclaration.GraqlDuplicateDeclarationProvider"/>
+    <inspectionToolProvider implementation="ai.graknlabs.graql.inspection.unplayedRole.GraqlUnplayedRoleProvider"/>
+    <inspectionToolProvider implementation="ai.graknlabs.graql.inspection.invalidTypeUsage.GraqlInvalidTypeUsageProvider"/>
+  </extensions>
+</idea-plugin>

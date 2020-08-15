@@ -1,0 +1,5 @@
+<application>
+  <component name="CodeInsightSettings">
+    <option name="SHOW_PARAMETER_NAME_HINTS_ON_COMPLETION" value="true" />
+  </component>
+</application>

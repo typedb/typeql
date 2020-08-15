@@ -58,7 +58,7 @@ import static graql.lang.Graql.undefine;
 import static graql.lang.Graql.var;
 import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.size;
-import static grakn.common.util.Collections.list;
+import static grakn.common.collection.Collections.list;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;

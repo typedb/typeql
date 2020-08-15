@@ -17,7 +17,7 @@
 
 package graql.lang.query.test;
 
-import grakn.common.util.Collections;
+import grakn.common.collection.Collections;
 import graql.lang.Graql;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.MatchClause;
