@@ -60,8 +60,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
                   Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
                   Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
         super(identity);
-        this.singularProperties = singularProperties;
-        this.repeatingProperties = repeatingProperties;
+        this.singularProperties = new HashMap<>(singularProperties);
+        this.repeatingProperties = new HashMap<>(repeatingProperties);
     }
 
     public abstract T getThis();

@@ -53,14 +53,14 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         }
     }
 
-    private TypeVariable(Identity.AnonymousWithID identity,
+    private TypeVariable(Identity identity,
                          Map<Class<? extends TypeProperty>, TypeProperty.Singular> singularProperties,
                          Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeatingProperties,
                          List<TypeProperty> orderedProperties) {
         super(identity);
-        this.singularProperties = singularProperties;
-        this.repeatingProperties = repeatingProperties;
-        this.orderedProperties = orderedProperties;
+        this.singularProperties = new HashMap<>(singularProperties);
+        this.repeatingProperties = new HashMap<>(repeatingProperties);
+        this.orderedProperties = new ArrayList<>(orderedProperties);
     }
 
     @Override
@@ -102,12 +102,15 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
     @Override
     TypeVariable merge(TypeVariable variable) {
-        variable.singularProperties.values().forEach(this::addSingularProperties);
+        TypeVariable merged = new TypeVariable(identity, singularProperties, repeatingProperties, orderedProperties);
+        variable.singularProperties.values().stream()
+                .filter(p -> !(p instanceof TypeProperty.Label))
+                .forEach(merged::addSingularProperties);
         variable.repeatingProperties.forEach(
-                (clazz, list) -> repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
+                (clazz, list) -> merged.repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
         );
-        orderedProperties.addAll(variable.orderedProperties);
-        return this;
+        merged.orderedProperties.addAll(variable.orderedProperties);
+        return merged;
     }
 
     @Override

@@ -18,6 +18,8 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.TypeVariable;
 
@@ -37,6 +39,10 @@ public class GraqlUndefine extends GraqlQuery {
         if (variables == null || variables.isEmpty()) {
             throw new IllegalArgumentException("Undefine Query missing type variables");
         }
+        if (BoundVariable.asGraph(variables).parallelStream().anyMatch(v -> !v.isLabelled())) {
+            throw GraqlException.create(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
+        }
+
         this.variables = variables;
         this.hash = Objects.hash(this.variables);
     }

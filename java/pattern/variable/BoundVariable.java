@@ -41,7 +41,8 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         for (T variable : variables) {
             if (!variable.isAnonymous()) {
                 if (graph.containsKey(variable.withoutProperties())) {
-                    graph.get(variable.withoutProperties()).merge(variable);
+                    T merged = graph.get(variable.withoutProperties()).merge(variable);
+                    graph.put(variable.withoutProperties(), merged);
                 } else {
                     graph.put(variable.withoutProperties(), variable);
                 }

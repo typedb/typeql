@@ -87,7 +87,7 @@ public abstract class Variable<T extends Variable<T>> {
         return identity.type() == Identity.Type.NAME;
     }
 
-    public boolean isLabel() {
+    public boolean isLabelled() {
         return identity.type() == Identity.Type.LABEL;
     }
 

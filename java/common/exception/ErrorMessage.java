@@ -37,14 +37,16 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(8, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
     public static final ErrorMessage INVALID_PROPERTY_DATETIME_PRECISION =
             new ErrorMessage(9, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
+    public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
+            new ErrorMessage(10, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(10, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(11, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(11, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(12, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(12, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(13, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
     public static final ErrorMessage INVALID_CONVERT_OPERATION =
-            new ErrorMessage(13, "Invalid 'convert' operation. Only bound and unmerged variables can be converted.");
+            new ErrorMessage(14, "Invalid 'convert' operation. Only bound and unmerged variables can be converted.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";
