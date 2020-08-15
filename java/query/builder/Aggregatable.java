@@ -17,64 +17,63 @@
 
 package graql.lang.query.builder;
 
-import graql.lang.Graql;
+import graql.lang.common.GraqlToken;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlQuery;
-import graql.lang.statement.Variable;
 
 public interface Aggregatable<T extends GraqlQuery> {
 
     default T count() {
-        return aggregate(Graql.Token.Aggregate.Method.COUNT, null);
+        return aggregate(GraqlToken.Aggregate.Method.COUNT, null);
     }
 
     default T max(String var) {
-        return max(new Variable(var));
+        return max(UnboundVariable.named(var));
     }
 
-    default T max(Variable var) {
-        return aggregate(Graql.Token.Aggregate.Method.MAX, var);
+    default T max(UnboundVariable var) {
+        return aggregate(GraqlToken.Aggregate.Method.MAX, var);
     }
 
     default T mean(String var) {
-        return mean(new Variable(var));
+        return mean(UnboundVariable.named(var));
     }
 
-    default T mean(Variable var) {
-        return aggregate(Graql.Token.Aggregate.Method.MEAN, var);
+    default T mean(UnboundVariable var) {
+        return aggregate(GraqlToken.Aggregate.Method.MEAN, var);
     }
 
     default T median(String var) {
-        return median(new Variable(var));
+        return median(UnboundVariable.named(var));
     }
 
-    default T median(Variable var) {
-        return aggregate(Graql.Token.Aggregate.Method.MEDIAN, var);
+    default T median(UnboundVariable var) {
+        return aggregate(GraqlToken.Aggregate.Method.MEDIAN, var);
     }
 
     default T min(String var) {
-        return min(new Variable(var));
+        return min(UnboundVariable.named(var));
     }
 
-    default T min(Variable var) {
-        return aggregate(Graql.Token.Aggregate.Method.MIN, var);
+    default T min(UnboundVariable var) {
+        return aggregate(GraqlToken.Aggregate.Method.MIN, var);
     }
 
     default T std(String var) {
-        return std(new Variable(var));
+        return std(UnboundVariable.named(var));
     }
 
-    default T std(Variable var) {
-        return aggregate(Graql.Token.Aggregate.Method.STD, var);
+    default T std(UnboundVariable var) {
+        return aggregate(GraqlToken.Aggregate.Method.STD, var);
     }
 
     default T sum(String var) {
-        return sum(new Variable(var));
+        return sum(UnboundVariable.named(var));
     }
 
-    default T sum(Variable var) {
-        return aggregate(Graql.Token.Aggregate.Method.SUM, var);
+    default T sum(UnboundVariable var) {
+        return aggregate(GraqlToken.Aggregate.Method.SUM, var);
     }
 
-    // TODO: will be made "private" once we upgrade to Java 9 or higher
-    T aggregate(Graql.Token.Aggregate.Method method, Variable var);
+    T aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var);
 }

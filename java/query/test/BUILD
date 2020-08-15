@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_test(
     name = "graql-query-test",
@@ -23,8 +23,10 @@ java_test(
     srcs = ["GraqlQueryTest.java"],
     deps = [
         "//java:graql",
+        "//java/common:common",
+        "//java/query:query",
     ],
-    size = "small"
+    size = "small",
 )
 
 
@@ -34,8 +36,12 @@ java_test(
     srcs = ["GraqlDeleteTest.java"],
     deps = [
         "//java:graql",
+        "//java/common:common",
+        "//java/pattern:pattern",
+        "//java/query:query",
+        "@graknlabs_common//:common",
     ],
-    size = "small"
+    size = "small",
 )
 
 java_test(
@@ -44,9 +50,11 @@ java_test(
     srcs = ["GraqlInsertTest.java"],
     deps = [
         "//java:graql",
+        "//java/pattern:pattern",
+        "//java/query:query",
         "@graknlabs_common//:common",
     ],
-    size = "small"
+    size = "small",
 )
 
 checkstyle_test(

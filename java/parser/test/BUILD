@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_test(
     name = "parser-test",
@@ -23,10 +23,13 @@ java_test(
     srcs = ["ParserTest.java"],
     deps = [
         "//java:graql",
+        "//java/common:common",
+        "//java/pattern:pattern",
+        "//java/query:query",
         "@graknlabs_common//:common",
-        "//dependencies/maven/artifacts/org/hamcrest:hamcrest-library",
+        "@maven//:org_hamcrest_hamcrest_library",
     ],
-    size = "medium"
+    size = "small",
 )
 
 checkstyle_test(

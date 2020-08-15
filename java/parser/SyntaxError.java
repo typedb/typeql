@@ -17,7 +17,10 @@
 
 package graql.lang.parser;
 
-import graql.lang.exception.ErrorMessage;
+import java.util.Objects;
+
+import static graql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_DETAILED;
+import static graql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_NO_DETAILS;
 
 public class SyntaxError {
 
@@ -25,15 +28,15 @@ public class SyntaxError {
     private final int line;
     private final int charPositionInLine;
     private final String msg;
+    private final int hash;
 
     public SyntaxError(String queryLine, int line, int charPositionInLine, String msg) {
+        if (msg == null) throw new NullPointerException("Null msg");
         this.queryLine = queryLine;
         this.line = line;
         this.charPositionInLine = charPositionInLine;
-        if (msg == null) {
-            throw new NullPointerException("Null msg");
-        }
         this.msg = msg;
+        this.hash = Objects.hash(this.queryLine, this.line, this.charPositionInLine, this.msg);
     }
 
     private String spaces(int len) {
@@ -48,7 +51,7 @@ public class SyntaxError {
     @Override
     public String toString() {
         if (queryLine == null) {
-            return ErrorMessage.SYNTAX_ERROR_NO_POINTER.getMessage(line, msg);
+            return SYNTAX_ERROR_NO_DETAILS.message(line, msg);
         } else {
             // Error message appearance:
             //
@@ -57,7 +60,7 @@ public class SyntaxError {
             //       ^
             // blah blah antlr blah
             String pointer = spaces(charPositionInLine) + "^";
-            return ErrorMessage.SYNTAX_ERROR.getMessage(line, queryLine, pointer, msg);
+            return SYNTAX_ERROR_DETAILED.message(line, queryLine, pointer, msg);
         }
     }
 
@@ -68,25 +71,16 @@ public class SyntaxError {
         }
         if (o instanceof SyntaxError) {
             SyntaxError that = (SyntaxError) o;
-            return ((this.queryLine == null) ? (that.queryLine == null) : this.queryLine.equals(that.queryLine))
-                    && (this.line == that.line)
-                    && (this.charPositionInLine == that.charPositionInLine)
-                    && (this.msg.equals(that.msg));
+            return (Objects.equals(this.queryLine, that.queryLine) &&
+                    this.line == that.line &&
+                    this.charPositionInLine == that.charPositionInLine &&
+                    this.msg.equals(that.msg));
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        h ^= (queryLine == null) ? 0 : this.queryLine.hashCode();
-        h *= 1000003;
-        h ^= this.line;
-        h *= 1000003;
-        h ^= this.charPositionInLine;
-        h *= 1000003;
-        h ^= this.msg.hashCode();
-        return h;
+        return hash;
     }
 }

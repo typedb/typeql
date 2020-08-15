@@ -17,42 +17,48 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
-import graql.lang.statement.Statement;
+import graql.lang.common.GraqlToken;
+import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.List;
+import java.util.Objects;
 
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static java.util.stream.Collectors.joining;
 
 public class GraqlDefine extends GraqlQuery {
 
-    private final List<? extends Statement> statements;
+    private final List<TypeVariable> variables;
+    private final int hash;
 
-    public GraqlDefine(List<? extends Statement> statements) {
-        if (statements == null) {
-            throw new NullPointerException("Null statements");
-        } else if (statements.isEmpty()) {
-            throw new IllegalArgumentException("Define Statements could not be empty");
+    public GraqlDefine(List<TypeVariable> variables) {
+        if (variables == null || variables.isEmpty()) {
+            throw new IllegalArgumentException("Define Query missing type variables");
         }
-        this.statements = statements;
+        this.variables = variables;
+        this.hash = Objects.hash(this.variables);
     }
 
-    public List<? extends Statement> statements() {
-        return statements;
+    public List<TypeVariable> variables() {
+        return variables;
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    public List<TypeVariable> asGraph() {
+        return BoundVariable.asGraph(variables);
+    }
+
+    @Override
     public String toString() {
         StringBuilder query = new StringBuilder();
+        query.append(GraqlToken.Command.DEFINE);
 
-        query.append(Graql.Token.Command.DEFINE);
-        if (statements.size()>1) query.append(Graql.Token.Char.NEW_LINE);
-        else query.append(Graql.Token.Char.SPACE);
+        if (variables.size() > 1) query.append(NEW_LINE);
+        else query.append(GraqlToken.Char.SPACE);
 
-        query.append(statements().stream()
-                             .map(Statement::toString)
-                             .collect(joining(Graql.Token.Char.NEW_LINE.toString())));
-
+        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(SEMICOLON);
         return query.toString();
     }
 
@@ -60,16 +66,12 @@ public class GraqlDefine extends GraqlQuery {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         GraqlDefine that = (GraqlDefine) o;
-        return this.statements.equals(that.statements);
+        return this.variables.equals(that.variables);
     }
 
     @Override
     public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        h ^= this.statements.hashCode();
-        return h;
+        return hash;
     }
 }

@@ -17,80 +17,81 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Filterable;
-import graql.lang.statement.Variable;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
+import static grakn.common.collection.Collections.list;
+import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
 import static java.util.stream.Collectors.joining;
 
-/**
- * A query used for finding data in a knowledge base that matches the given patterns. The Get Query is a
- * pattern-matching query. The patterns are described in a declarative fashion, then the query will traverse
- * the knowledge base in an efficient fashion to find any matching answers.
- */
 public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<GraqlGet.Aggregate> {
 
-    private final LinkedHashSet<Variable> vars;
+    private final List<UnboundVariable> vars;
     private final MatchClause match;
     private final Sorting sorting;
-    private final long offset;
-    private final long limit;
+    private final Long offset;
+    private final Long limit;
+    private final int hash;
 
-
-    public GraqlGet(MatchClause match) {
-        this(match, new LinkedHashSet<>());
+    GraqlGet(MatchClause match) {
+        this(match, new ArrayList<>());
     }
 
-    public GraqlGet(MatchClause match, LinkedHashSet<Variable> vars) {
-        this(match, vars, null, -1, -1);
+    GraqlGet(MatchClause match, List<UnboundVariable> vars) {
+        this(match, vars, null, null, null);
     }
 
-    public GraqlGet(MatchClause match, LinkedHashSet<Variable> vars, Sorting sorting, long offset, long limit) {
-        if (match == null) {
-            throw new NullPointerException("Null match");
+    // We keep this contructor 'public' as it is more efficient for use during parsing
+    public GraqlGet(MatchClause match, List<UnboundVariable> vars, Sorting sorting, Long offset, Long limit) {
+        if (match == null) throw new NullPointerException("Null match");
+        if (vars == null) throw new NullPointerException("Null vars");
+        for (UnboundVariable var : vars) {
+            if (!match.variablesNamedUnbound().contains(var))
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
         }
+        List<UnboundVariable> sortableVars = vars.isEmpty() ? match.variablesNamedUnbound() : vars;
+        if (sorting != null && !sortableVars.contains(sorting.var())) {
+            throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
+        }
+
         this.match = match;
-
-        if (vars == null) {
-            throw new NullPointerException("Null vars");
-        }
-        for (Variable var : vars) {
-            if (!match.getSelectedNames().contains(var)) {
-                throw GraqlException.variableOutOfScope(var.toString());
-            }
-        }
-        this.vars = vars;
-
-        if (sorting != null && !vars().contains(sorting.var())) {
-            throw GraqlException.variableOutOfScope(sorting.var().toString());
-        }
+        this.vars = list(vars);
         this.sorting = sorting;
         this.offset = offset;
         this.limit = limit;
+
+        // It is important that we use vars() (the method) and not vars (the property)
+        // For reasons explained in the equals() method above
+        this.hash = Objects.hash(this.match, this.vars, this.sorting, this.offset, this.limit);
     }
 
     @Override
-    public Aggregate aggregate(Graql.Token.Aggregate.Method method, Variable var) {
+    public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var) {
         return new Aggregate(this, method, var);
     }
 
     public Group group(String var) {
-        return group(new Variable(var));
+        return group(UnboundVariable.named(var));
     }
 
-    public Group group(Variable var) {
+    public Group group(UnboundVariable var) {
         return new Group(this, var);
     }
 
-    // TODO: Return LinkedHashSet
-    public Set<Variable> vars() {
-        if (vars.isEmpty()) return match.getPatterns().variables();
+    public List<UnboundVariable> variables() {
+        if (vars.isEmpty()) return match.variablesNamedUnbound();
         else return vars;
     }
 
@@ -105,31 +106,28 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
     @Override
     public Optional<Long> offset() {
-        return offset < 0 ? Optional.empty() : Optional.of(offset);
+        return Optional.ofNullable(offset);
     }
 
     @Override
     public Optional<Long> limit() {
-        return limit < 0 ? Optional.empty() : Optional.of(limit);
+        return Optional.ofNullable(limit);
     }
 
-    @Override @SuppressWarnings("Duplicates")
+    @Override
     public String toString() {
         StringBuilder query = new StringBuilder(match().toString());
-        if (match().getPatterns().getPatterns().size()>1) query.append(Graql.Token.Char.NEW_LINE);
-        else query.append(Graql.Token.Char.SPACE);
+        if (match().getPatterns().patterns().size() > 1) query.append(NEW_LINE);
+        else query.append(SPACE);
 
-        query.append(Graql.Token.Command.GET);
+        query.append(GraqlToken.Command.GET);
         if (!vars.isEmpty()) { // Which is not equal to !vars().isEmpty()
-            query.append(Graql.Token.Char.SPACE).append(
-                    vars.stream().map(Variable::toString)
-                            .collect(joining(Graql.Token.Char.COMMA_SPACE.toString()))
-            );
+            String varsStr = vars.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
+            query.append(SPACE).append(varsStr);
         }
-        query.append(Graql.Token.Char.SEMICOLON);
-
+        query.append(SEMICOLON);
         if (sort().isPresent() || offset().isPresent() || limit().isPresent()) {
-            query.append(Graql.Token.Char.SPACE).append(printFilters());
+            query.append(SPACE).append(printFilters());
         }
 
         return query.toString();
@@ -149,7 +147,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         // vars (the property) stores the variables as the user defined
         // vars() (the method) returns match.vars() if vars (the property) is empty
         // we want to compare vars() (the method) which determines the final value
-        return (this.vars().equals(that.vars()) &&
+        return (this.variables().equals(that.variables()) &&
                 this.match().equals(that.match()) &&
                 this.sort().equals(that.sort()) &&
                 this.offset().equals(that.offset()) &&
@@ -158,20 +156,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
     @Override
     public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        // It is important that we use vars() (the method) and not vars (the property)
-        // For reasons explained in the equals() method above
-        h ^= this.vars().hashCode();
-        h *= 1000003;
-        h ^= this.match().hashCode();
-        h *= 1000003;
-        h ^= this.sort().hashCode();
-        h *= 1000003;
-        h ^= this.offset().hashCode();
-        h *= 1000003;
-        h ^= this.limit().hashCode();
-        return h;
+        return hash;
     }
 
     public static class Unfiltered extends GraqlGet
@@ -181,7 +166,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             super(match);
         }
 
-        Unfiltered(MatchClause match, LinkedHashSet<Variable> vars) {
+        Unfiltered(MatchClause match, List<UnboundVariable> vars) {
             super(match, vars);
         }
 
@@ -201,7 +186,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
     }
 
-    public class Sorted extends GraqlGet implements Filterable.Sorted<GraqlGet.Offsetted, GraqlGet.Limited> {
+    public static class Sorted extends GraqlGet implements Filterable.Sorted<GraqlGet.Offsetted, GraqlGet.Limited> {
 
         Sorted(GraqlGet graqlGet, Sorting sorting) {
             super(graqlGet.match, graqlGet.vars, sorting, graqlGet.offset, graqlGet.limit);
@@ -218,7 +203,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
     }
 
-    public class Offsetted extends GraqlGet implements Filterable.Offsetted<GraqlGet.Limited> {
+    public static class Offsetted extends GraqlGet implements Filterable.Offsetted<GraqlGet.Limited> {
 
         Offsetted(GraqlGet graqlGet, long offset) {
             super(graqlGet.match, graqlGet.vars, graqlGet.sorting, offset, graqlGet.limit);
@@ -230,7 +215,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
     }
 
-    public class Limited extends GraqlGet implements Filterable.Limited {
+    public static class Limited extends GraqlGet implements Filterable.Limited {
 
         Limited(GraqlGet graqlGet, long limit) {
             super(graqlGet.match, graqlGet.vars, graqlGet.sorting, graqlGet.offset, limit);
@@ -240,40 +225,38 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     public static class Aggregate extends GraqlQuery {
 
         private final GraqlGet query;
-        private final Graql.Token.Aggregate.Method method;
-        private final Variable var;
+        private final GraqlToken.Aggregate.Method method;
+        private final UnboundVariable var;
+        private final int hash;
 
-        public Aggregate(GraqlGet query, Graql.Token.Aggregate.Method method, Variable var) {
-            if (query == null) {
-                throw new NullPointerException("GetQuery is null");
-            }
-            this.query = query;
+        Aggregate(GraqlGet query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
+            if (query == null) throw new NullPointerException("GetQuery is null");
+            if (method == null) throw new NullPointerException("Method is null");
 
-            if (method == null) {
-                throw new NullPointerException("Method is null");
-            }
-            this.method = method;
 
-            if (var == null && !method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+            if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new NullPointerException("Variable is null");
-            } else if (var != null && method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+            } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
-            } else if (var != null && !query.vars().contains(var)) {
-                throw GraqlException.variableOutOfScope(var.toString());
+            } else if (var != null && !query.variables().contains(var)) {
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
             }
 
+            this.query = query;
+            this.method = method;
             this.var = var;
+            this.hash = Objects.hash(query, method, var);
         }
 
         public GraqlGet query() {
             return query;
         }
 
-        public Graql.Token.Aggregate.Method method() {
+        public GraqlToken.Aggregate.Method method() {
             return method;
         }
 
-        public Variable var() {
+        public UnboundVariable var() {
             return var;
         }
 
@@ -281,10 +264,9 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         public final String toString() {
             StringBuilder query = new StringBuilder();
 
-            query.append(query()).append(Graql.Token.Char.SPACE).append(method);
-
-            if (var != null) query.append(Graql.Token.Char.SPACE).append(var);
-            query.append(Graql.Token.Char.SEMICOLON);
+            query.append(query()).append(SPACE).append(method);
+            if (var != null) query.append(SPACE).append(var);
+            query.append(SEMICOLON);
 
             return query.toString();
         }
@@ -296,25 +278,14 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
             Aggregate that = (Aggregate) o;
 
-            return (this.query.equals(that.query()) &&
-                    this.method.equals(that.method()) &&
-                    this.var == null ?
-                        that.var() == null :
-                        this.var.equals(that.var()));
+            return (this.query.equals(that.query) &&
+                    this.method.equals(that.method) &&
+                    Objects.equals(this.var, that.var));
         }
 
         @Override
         public int hashCode() {
-            int h = 1;
-            h *= 1000003;
-            h ^= this.query.hashCode();
-            h *= 1000003;
-            h ^= this.method.hashCode();
-            h *= 1000003;
-            if (var != null) {
-                h ^= this.var.hashCode();
-            }
-            return h;
+            return hash;
         }
 
     }
@@ -322,32 +293,30 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     public static class Group extends GraqlQuery implements Aggregatable<Group.Aggregate> {
 
         private final GraqlGet query;
-        private final Variable var;
+        private final UnboundVariable var;
+        private final int hash;
 
-        public Group(GraqlGet query, Variable var) {
-            if (query == null) {
-                throw new NullPointerException("GetQuery is null");
-            }
+        Group(GraqlGet query, UnboundVariable var) {
+            if (query == null) throw new NullPointerException("GetQuery is null");
+            if (var == null) throw new NullPointerException("Variable is null");
+            else if (!query.variables().contains(var))
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
+
             this.query = query;
-
-            if (var == null) {
-                throw new NullPointerException("Variable is null");
-            } else if (!query.vars().contains(var)) {
-                throw GraqlException.variableOutOfScope(var.toString());
-            }
             this.var = var;
+            this.hash = Objects.hash(query, var);
         }
 
         public GraqlGet query() {
             return query;
         }
 
-        public Variable var() {
+        public UnboundVariable var() {
             return var;
         }
 
         @Override
-        public Aggregate aggregate(Graql.Token.Aggregate.Method method, Variable var) {
+        public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var) {
             return new Aggregate(this, method, var);
         }
 
@@ -355,9 +324,9 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         public String toString() {
             StringBuilder query = new StringBuilder();
 
-            query.append(query()).append(Graql.Token.Char.SPACE)
-                    .append(Graql.Token.Command.GROUP).append(Graql.Token.Char.SPACE)
-                    .append(var).append(Graql.Token.Char.SEMICOLON);
+            query.append(query()).append(SPACE)
+                    .append(GraqlToken.Command.GROUP).append(SPACE)
+                    .append(var).append(SEMICOLON);
 
             return query.toString();
         }
@@ -369,57 +338,48 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
             Group that = (Group) o;
 
-            return (this.query.equals(that.query()) &&
-                    this.var.equals(that.var()));
+            return (this.query.equals(that.query) &&
+                    this.var.equals(that.var));
         }
 
         @Override
         public int hashCode() {
-            int h = 1;
-            h *= 1000003;
-            h ^= this.query.hashCode();
-            h *= 1000003;
-            h ^= this.var.hashCode();
-            return h;
+            return hash;
         }
 
         public static class Aggregate extends GraqlQuery {
 
             private final GraqlGet.Group group;
-            private final Graql.Token.Aggregate.Method method;
-            private final Variable var;
+            private final GraqlToken.Aggregate.Method method;
+            private final UnboundVariable var;
+            private final int hash;
 
-            public Aggregate(GraqlGet.Group group, Graql.Token.Aggregate.Method method, Variable var) {
-
-                if (group == null) {
-                    throw new NullPointerException("GraqlGet.Group is null");
-                }
-                this.group = group;
-
-                if (method == null) {
-                    throw new NullPointerException("Method is null");
-                }
-                this.method = method;
-
-                if (var == null && !this.method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+            Aggregate(GraqlGet.Group group, GraqlToken.Aggregate.Method method, UnboundVariable var) {
+                if (group == null) throw new NullPointerException("GraqlGet.Group is null");
+                if (method == null) throw new NullPointerException("Method is null");
+                if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new NullPointerException("Variable is null");
-                } else if (var != null && this.method.equals(Graql.Token.Aggregate.Method.COUNT)) {
+                } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
-                } else if (var != null && !group.query().vars().contains(var)) {
-                    throw GraqlException.variableOutOfScope(var.toString());
+                } else if (var != null && !group.query().variables().contains(var)) {
+                    throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
                 }
+
+                this.group = group;
+                this.method = method;
                 this.var = var;
+                this.hash = Objects.hash(group, method, var);
             }
 
             public GraqlGet.Group group() {
                 return group;
             }
 
-            public Graql.Token.Aggregate.Method method() {
+            public GraqlToken.Aggregate.Method method() {
                 return method;
             }
 
-            public Variable var() {
+            public UnboundVariable var() {
                 return var;
             }
 
@@ -427,13 +387,13 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             public final String toString() {
                 StringBuilder query = new StringBuilder();
 
-                query.append(group().query()).append(Graql.Token.Char.SPACE)
-                        .append(Graql.Token.Command.GROUP).append(Graql.Token.Char.SPACE)
-                        .append(group().var()).append(Graql.Token.Char.SEMICOLON).append(Graql.Token.Char.SPACE)
+                query.append(group().query()).append(SPACE)
+                        .append(GraqlToken.Command.GROUP).append(SPACE)
+                        .append(group().var()).append(SEMICOLON).append(SPACE)
                         .append(method);
 
-                if (var != null) query.append(Graql.Token.Char.SPACE).append(var);
-                query.append(Graql.Token.Char.SEMICOLON);
+                if (var != null) query.append(SPACE).append(var);
+                query.append(SEMICOLON);
 
                 return query.toString();
             }
@@ -445,25 +405,14 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
                 Aggregate that = (Aggregate) o;
 
-                return (this.group().equals(that.group()) &&
-                        this.method().equals(that.method()) &&
-                        this.var() == null ?
-                            that.var() == null :
-                            this.var().equals(that.var()));
+                return (this.group.equals(that.group) &&
+                        this.method.equals(that.method) &&
+                        Objects.equals(this.var, that.var));
             }
 
             @Override
             public int hashCode() {
-                int h = 1;
-                h *= 1000003;
-                h ^= this.group.hashCode();
-                h *= 1000003;
-                h ^= this.method.hashCode();
-                h *= 1000003;
-                if (this.var != null) {
-                    h ^= this.var.hashCode();
-                }
-                return h;
+                return hash;
             }
         }
     }

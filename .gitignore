@@ -5,7 +5,7 @@
 bazel-*
 
 # Maven files #
-test/deployment/target
+target/
 
 # IDE files #
 .idea/

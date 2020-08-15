@@ -17,57 +17,63 @@
 
 package graql.lang.query;
 
-import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
-import graql.lang.statement.Statement;
-import graql.lang.statement.Variable;
+import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.UnboundVariable;
+import graql.lang.pattern.variable.Variable;
 
-import javax.annotation.CheckReturnValue;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Objects;
 
-/**
- * A part of a query used for finding data in a knowledge base that matches the given patterns.
- * The match clause is the pattern-matching part of a query. The patterns are described in a declarative fashion,
- * then the match clause will traverse the knowledge base in an efficient fashion to find any matching answers.
- */
+import static grakn.common.collection.Collections.list;
+import static graql.lang.common.GraqlToken.Char.NEW_LINE;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
+
 public class MatchClause {
 
-    // TODO: Fix this to be Conjunction<T extends Pattern>
-    //       You can verify that this is a bug by removing Collections.unmodfiableSet() wrapper
-    private final Conjunction<Pattern> pattern;
+    private final Conjunction<? extends Pattern> pattern;
+    private final int hash;
+    private List<BoundVariable<?>> variables;
+    private List<UnboundVariable> variablesNamedUnbound;
 
-    public MatchClause(Conjunction<Pattern> pattern) {
-        if (pattern.getPatterns().size() == 0) {
-            throw GraqlException.noPatterns();
-        }
-
-        this.pattern = pattern;
+    public MatchClause(List<? extends Pattern> patterns) {
+        if (patterns.size() == 0) throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
+        this.pattern = new Conjunction<>(patterns);
+        this.hash = Objects.hash(this.pattern);
     }
 
-    @CheckReturnValue
-    public final Conjunction<Pattern> getPatterns() {
+    public final Conjunction<? extends Pattern> getPatterns() {
         return pattern;
     }
 
-    @CheckReturnValue
-    public final Set<Variable> getSelectedNames() {
-        return pattern.variables();
+    public final List<BoundVariable<?>> variables() {
+        if (variables == null) variables = pattern.variables().collect(toList());
+        return variables;
+    }
+
+    final List<UnboundVariable> variablesNamedUnbound() {
+        if (variablesNamedUnbound == null) {
+            variablesNamedUnbound = pattern.variables().filter(Variable::isNamed)
+                    .map(v -> UnboundVariable.named(v.name()))
+                    .distinct().collect(toList());
+        }
+        return variablesNamedUnbound;
     }
 
     /**
      * Construct a get query with all all variables mentioned in the query
      */
-    @CheckReturnValue
     public GraqlGet.Unfiltered get() {
         return new GraqlGet.Unfiltered(this);
     }
@@ -76,94 +82,63 @@ public class MatchClause {
      * @param vars an array of variables to select
      * @return a Get Query that selects the given variables
      */
-    @CheckReturnValue
     public GraqlGet.Unfiltered get(String var, String... vars) {
-        LinkedHashSet<Variable> varSet = Stream
-                .concat(Stream.of(var), Stream.of(vars))
-                .map(Variable::new)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        return get(varSet);
+        return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
     }
 
     /**
      * @param vars an array of variables to select
      * @return a Get Query that selects the given variables
      */
-    @CheckReturnValue
-    public GraqlGet.Unfiltered get(Variable var, Variable... vars) {
-        LinkedHashSet<Variable> varSet = new LinkedHashSet<>();
-        varSet.add(var);
-        varSet.addAll(Arrays.asList(vars));
-        return get(varSet);
+    public GraqlGet.Unfiltered get(UnboundVariable var, UnboundVariable... vars) {
+        List<UnboundVariable> varList = new ArrayList<>();
+        varList.add(var);
+        varList.addAll(Arrays.asList(vars));
+        return get(varList);
     }
 
     /**
      * @param vars a set of variables to select
      * @return a Get Query that selects the given variables
      */
-    @CheckReturnValue
-    public GraqlGet.Unfiltered get(List<Variable> vars) {
-        return get(new LinkedHashSet<>(vars));
-    }
-
-    /**
-     * @param vars a set of variables to select
-     * @return a Get Query that selects the given variables
-     */
-    @CheckReturnValue
-    public GraqlGet.Unfiltered get(LinkedHashSet<Variable> vars) {
+    public GraqlGet.Unfiltered get(List<UnboundVariable> vars) {
         return new GraqlGet.Unfiltered(this, vars);
     }
 
     /**
-     * @param statements an array of variables to insert for each result of this match clause
+     * @param things an array of variables to insert for each result of this match clause
      * @return an insert query that will insert the given variables for each result of this match clause
      */
-    @CheckReturnValue
-    public final GraqlInsert insert(Statement... statements) {
-        return insert(Arrays.asList(statements));
+    public final GraqlInsert insert(ThingVariable<?>... things) {
+        return new GraqlInsert(this, list(things));
+    }
+
+    public final GraqlInsert insert(List<ThingVariable<?>> things) {
+        return new GraqlInsert(this, things);
     }
 
     /**
-     * @param statements a collection of variables to insert for each result of this match clause
-     * @return an insert query that will insert the given variables for each result of this match clause
-     */
-    @CheckReturnValue
-    public final GraqlInsert insert(Collection<? extends Statement> statements) {
-        MatchClause match = this;
-        return new GraqlInsert(match, Collections.unmodifiableList(new ArrayList<>(statements)));
-    }
-
-    /**
-     * @param statements, an array of statements that indicate properties to delete
+     * @param things, an array of things that indicate properties to delete
      * @return a delete query that will delete the given variables for each result of this match clause
      */
-    @CheckReturnValue
-    public final GraqlDelete delete(Statement... statements) {
-        return delete(Arrays.asList(statements));
+    public final GraqlDelete delete(ThingVariable<?>... things) {
+        return new GraqlDelete(this, list(things));
     }
 
-    /**
-     * @param statements a collection of statements that indicate properties to delete
-     * @return a delete query that will delete the given variables for each result of this match clause
-     */
-    @CheckReturnValue
-    public final GraqlDelete delete(Collection<? extends Statement> statements) {
-        return new GraqlDelete(this, new ArrayList<>(statements));
+    public final GraqlDelete delete(List<ThingVariable<?>> things) {
+        return new GraqlDelete(this, things);
     }
 
     @Override
     public final String toString() {
         StringBuilder query = new StringBuilder();
+        query.append(GraqlToken.Command.MATCH);
 
-        query.append(Graql.Token.Command.MATCH);
-        if (pattern.getPatterns().size()>1) query.append(Graql.Token.Char.NEW_LINE);
-        else query.append(Graql.Token.Char.SPACE);
+        if (pattern.patterns().size() > 1) query.append(NEW_LINE);
+        else query.append(GraqlToken.Char.SPACE);
 
-        query.append(pattern.getPatterns().stream()
-                             .map(Object::toString)
-                             .collect(Collectors.joining(Graql.Token.Char.NEW_LINE.toString())));
-
+        query.append(pattern.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(SEMICOLON);
         return query.toString();
     }
 
@@ -177,7 +152,7 @@ public class MatchClause {
     }
 
     @Override
-    public int hashCode() { // TODO: multiple with a large prime number
-        return pattern.hashCode();
+    public int hashCode() {
+        return hash;
     }
 }

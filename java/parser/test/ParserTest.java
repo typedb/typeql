@@ -18,9 +18,9 @@
 package graql.lang.parser.test;
 
 import graql.lang.Graql;
-import graql.lang.exception.GraqlException;
+import graql.lang.common.GraqlArg;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.property.ValueClassProperty;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -28,9 +28,7 @@ import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
-import graql.lang.statement.Statement;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -41,8 +39,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static graql.lang.Graql.Token.Compute.Algorithm.CONNECTED_COMPONENT;
-import static graql.lang.Graql.Token.Compute.Algorithm.K_CORE;
+import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.define;
 import static graql.lang.Graql.gte;
@@ -56,9 +53,10 @@ import static graql.lang.Graql.rel;
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.undefine;
 import static graql.lang.Graql.var;
+import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
+import static graql.lang.common.GraqlArg.Algorithm.K_CORE;
 import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.size;
-import static grakn.common.util.Collections.list;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -315,7 +313,7 @@ public class ParserTest {
     @Test
     public void whenParsingDateTime_ErrorWhenHandlingOverPreciseNanos() {
         exception.expect(GraqlException.class);
-        exception.expectMessage(Matchers.containsString("has sub-millisecond precision time"));
+        exception.expectMessage(Matchers.containsString("more precise than 1 millisecond"));
         GraqlGet apiQuery = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000))).get();
     }
 
@@ -330,19 +328,10 @@ public class ParserTest {
     }
 
     @Test
-    public void whenSearchingForImplicitType_EnsureQueryCanBeParsed() {
-        String query = "match $x plays @has-release-date-owner; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").plays("@has-release-date-owner")).get();
-
-        assertQueryEquals(expected, parsed, query);
-    }
-
-    @Test
     public void testSchemaQuery() {
-        String query = "match $x plays actor; get; sort $x asc;";
+        String query = "match $x plays starring:actor; get; sort $x asc;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").plays("actor")).get().sort("x", "asc");
+        GraqlGet expected = match(var("x").plays("starring", "actor")).get().sort("x", "asc");
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -508,7 +497,7 @@ public class ParserTest {
         GraqlDelete expected = match(
                 var("x").isa("movie").has("title", "The Title"),
                 var("y").isa("movie")
-        ).delete(Graql.parsePattern("{$x isa movie; $y isa movie;};").statements());
+        ).delete(var("x").isa("movie"), var("y").isa("movie"));
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -546,11 +535,11 @@ public class ParserTest {
                 type("parent").sub("role"),
                 type("child").sub("role"),
                 type("parenthood").sub("relation")
-                        .relates(type("parent"))
-                        .relates(type("child")),
+                        .relates("parent")
+                        .relates("child"),
                 type("fatherhood").sub("parenthood")
-                        .relates(type("father"), type("parent"))
-                        .relates(type("son"), type("child"))
+                        .relates("father", "parent")
+                        .relates("son", "child")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -562,8 +551,8 @@ public class ParserTest {
         GraqlGet parsed = Graql.parse(query).asGet();
         GraqlGet expected = match(
                 type("fatherhood").sub("parenthood")
-                        .relates(type("father"), type("parent"))
-                        .relates(type("son"), type("child"))
+                        .relates("father", "parent")
+                        .relates("son", "child")
         ).get();
 
         assertQueryEquals(expected, parsed, query);
@@ -576,8 +565,8 @@ public class ParserTest {
                 "evolution sub relation;\n" +
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
-                "evolution relates evolves-from, relates evolves-to;\n" +
-                "pokemon plays evolves-from, plays evolves-to, has name;";
+                "evolves relates from, relates to;\n" +
+                "pokemon plays evolves:from, plays evolves:to, owns name;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
 
         GraqlDefine expected = define(
@@ -585,8 +574,8 @@ public class ParserTest {
                 type("evolution").sub("relation"),
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
-                type("evolution").relates("evolves-from").relates("evolves-to"),
-                type("pokemon").plays("evolves-from").plays("evolves-to").has("name")
+                type("evolves").relates("from").relates("to"),
+                type("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -599,8 +588,8 @@ public class ParserTest {
                 "evolution sub relation;\n" +
                 "evolves-from sub role;\n" +
                 "evolves-to sub role;\n" +
-                "evolution relates evolves-from, relates evolves-to;\n" +
-                "pokemon plays evolves-from, plays evolves-to, has name;";
+                "evolves relates from, relates to;\n" +
+                "pokemon plays evolves:from, plays evolves:to, owns name;";
         GraqlUndefine parsed = Graql.parse(query).asUndefine();
 
         GraqlUndefine expected = undefine(
@@ -608,8 +597,8 @@ public class ParserTest {
                 type("evolution").sub("relation"),
                 type("evolves-from").sub("role"),
                 type("evolves-to").sub("role"),
-                type("evolution").relates("evolves-from").relates("evolves-to"),
-                type("pokemon").plays("evolves-from").plays("evolves-to").has("name")
+                type("evolves").relates("from").relates("to"),
+                type("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -641,10 +630,10 @@ public class ParserTest {
     }
 
     @Test
-    public void testMatchValueClassQuery() {
+    public void testMatchValueTypeQuery() {
         String query = "match $x value double; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DOUBLE)).get();
+        GraqlGet expected = match(var("x").value(GraqlArg.ValueType.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -659,19 +648,19 @@ public class ParserTest {
     }
 
     @Test
-    public void whenParsingDateKeyword_ParseAsTheCorrectValueClass() {
+    public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
         String query = "match $x value datetime; get;";
         GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(Graql.Token.ValueClass.DATETIME)).get();
+        GraqlGet expected = match(var("x").value(GraqlArg.ValueType.DATETIME)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
-    public void testDefineValueClassQuery() {
+    public void testDefineValueTypeQuery() {
         String query = "define my-type sub attribute, value long;";
         GraqlDefine parsed = Graql.parse(query).asDefine();
-        GraqlDefine expected = define(type("my-type").sub("attribute").value(Graql.Token.ValueClass.LONG));
+        GraqlDefine expected = define(type("my-type").sub("attribute").value(GraqlArg.ValueType.LONG));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -702,7 +691,7 @@ public class ParserTest {
 
     @Test
     public void testParsingPattern() {
-        String pattern = "{ (wife: $a, husband: $b) isa marriage; $a has gender 'male'; $b has gender 'female'; };";
+        String pattern = "{ (wife: $a, husband: $b) isa marriage; $a has gender 'male'; $b has gender 'female'; }";
         Pattern parsed = Graql.parsePattern(pattern);
         Pattern expected = Graql.and(
                 rel("wife", "a").rel("husband", "b").isa("marriage"),
@@ -869,12 +858,12 @@ public class ParserTest {
 
     @Test
     public void testParseComputePath() {
-        assertParseEquivalence("compute path from V1, to V2, in person;");
+        assertParseEquivalence("compute path from 0x83cb2, to 0x4ba92, in person;");
     }
 
     @Test
     public void testParseComputePathWithMultipleInTypes() {
-        assertParseEquivalence("compute path from V1, to V2, in [person, marriage];");
+        assertParseEquivalence("compute path from 0x83cb2, to 0x4ba92, in [person, marriage];");
     }
 
     @Test
@@ -945,20 +934,8 @@ public class ParserTest {
     }
 
     @Test
-    public void testParseBooleanType() {
-        GraqlGet query = parse("match $x value boolean; get;").asGet();
-
-        Statement var = query.match().getPatterns().statements().iterator().next();
-
-        //noinspection OptionalGetWithoutIsPresent
-        ValueClassProperty property = var.getProperty(ValueClassProperty.class).get();
-
-        Assert.assertEquals(Graql.Token.ValueClass.BOOLEAN, property.valueClass());
-    }
-
-    @Test
     public void testParseKey() {
-        assertEquals("match $x key name; get $x;", parse("match $x key name; get $x;").toString());
+        assertEquals("match $x owns name @key; get $x;", parse("match $x owns name @key; get $x;").toString());
     }
 
     @Test
