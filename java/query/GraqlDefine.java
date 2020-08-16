@@ -18,74 +18,13 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.property.TypeProperty;
-import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.TypeVariable;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
-import static graql.lang.common.GraqlToken.Char.NEW_LINE;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
-
-public class GraqlDefine extends GraqlQuery {
-
-    private List<TypeVariable> graph;
-    private final List<TypeVariable> variables;
-    private final int hash;
+public class GraqlDefine extends GraqlDefinable {
 
     public GraqlDefine(List<TypeVariable> variables) {
-        if (variables == null || variables.isEmpty()) {
-            throw new IllegalArgumentException("Define Query missing type variables");
-        }
-        LinkedList<TypeVariable> list = new LinkedList<>(variables);
-        while (!list.isEmpty()) {
-            TypeVariable v = list.removeFirst();
-            if (!v.isLabelled()) throw GraqlException.create(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else list.addAll(v.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
-        }
-
-        this.variables = variables;
-        this.hash = Objects.hash(this.variables);
-    }
-
-    public List<TypeVariable> variables() {
-        return variables;
-    }
-
-    public List<TypeVariable> asGraph() {
-        if (graph == null) graph = BoundVariable.asTypeGraph(variables);
-        return graph;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder query = new StringBuilder();
-        query.append(GraqlToken.Command.DEFINE);
-
-        if (variables.size() > 1) query.append(NEW_LINE);
-        else query.append(GraqlToken.Char.SPACE);
-
-        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON);
-        return query.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GraqlDefine that = (GraqlDefine) o;
-        return this.variables.equals(that.variables);
-    }
-
-    @Override
-    public int hashCode() {
-        return hash;
+        super(GraqlToken.Command.DEFINE, variables);
     }
 }

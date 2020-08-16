@@ -18,79 +18,30 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
-import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.NEW_LINE;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static java.util.stream.Collectors.joining;
 
-public class GraqlInsert extends GraqlQuery {
-
-    private List<BoundVariable<?>> graph;
-    private final MatchClause match;
-    private final List<ThingVariable<?>> variables;
-    private final int hash;
+public class GraqlInsert extends GraqlWritable {
 
     public GraqlInsert(List<ThingVariable<?>> variables) {
         this(null, variables);
     }
 
     GraqlInsert(@Nullable MatchClause match, List<ThingVariable<?>> variables) {
-        if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
-        this.match = match;
-        this.variables = list(variables);
-        this.hash = Objects.hash(this.match, this.variables);
+        super(GraqlToken.Command.INSERT, match, variables);
     }
 
-    @Nullable
-    public MatchClause match() {
-        return match;
-    }
-
-    public List<ThingVariable<?>> variables() {
-        return variables;
-    }
-
-    public List<BoundVariable<?>> asGraph() {
-        if (graph == null) graph = BoundVariable.asGraph(variables);
-        return graph;
-    }
-
-    @Override
-    public final String toString() {
-        StringBuilder query = new StringBuilder();
-
-        if (match() != null) query.append(match()).append(NEW_LINE);
-        query.append(GraqlToken.Command.INSERT);
-
-        if (variables.size() > 1) query.append(NEW_LINE);
-        else query.append(GraqlToken.Char.SPACE);
-
-        query.append(variables().stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON);
-        return query.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GraqlInsert that = (GraqlInsert) o;
-        return (Objects.equals(this.match, that.match) &&
-                this.variables.equals(that.variables));
-    }
-
-    @Override
-    public int hashCode() {
-        return hash;
+    public Optional<MatchClause> match() {
+        return Optional.ofNullable(super.nullableMatch());
     }
 }

@@ -49,8 +49,8 @@ public class GraqlInsertTest {
 
     @Test
     public void insertQueriesWithTheSameVarsAndGraphAreEqual() {
-        GraqlInsert query1 = new GraqlInsert(vars1);
-        GraqlInsert query2 = new GraqlInsert(vars1);
+        GraqlInsert query1 = Graql.insert(vars1);
+        GraqlInsert query2 = Graql.insert(vars1);
 
         assertEquals(query1, query2);
         assertEquals(query1.hashCode(), query2.hashCode());
