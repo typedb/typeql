@@ -32,6 +32,7 @@ import static java.util.stream.Collectors.joining;
 
 public class GraqlDefine extends GraqlQuery {
 
+    private List<TypeVariable> graph;
     private final List<TypeVariable> variables;
     private final int hash;
 
@@ -52,7 +53,8 @@ public class GraqlDefine extends GraqlQuery {
     }
 
     public List<TypeVariable> asGraph() {
-        return BoundVariable.asGraph(variables);
+        if (graph == null) graph = BoundVariable.asGraph(variables);
+        return graph;
     }
 
     @Override

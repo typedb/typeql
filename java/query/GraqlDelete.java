@@ -34,6 +34,7 @@ import static java.util.stream.Collectors.joining;
 
 public class GraqlDelete extends GraqlQuery {
 
+    private List<ThingVariable<?>> graph;
     private final MatchClause match;
     private final List<ThingVariable<?>> variables;
     private final int hash;
@@ -68,7 +69,8 @@ public class GraqlDelete extends GraqlQuery {
     }
 
     public List<ThingVariable<?>> asGraph() {
-        return BoundVariable.asGraph(variables);
+        if (graph == null) graph = BoundVariable.asGraph(variables);
+        return graph;
     }
 
     @Override
