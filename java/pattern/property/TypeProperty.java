@@ -57,6 +57,9 @@ import static java.util.stream.Collectors.joining;
 
 public abstract class TypeProperty extends Property {
 
+    @Override
+    public abstract Stream<TypeVariable> variables();
+
     public boolean isSingular() {
         return false;
     }

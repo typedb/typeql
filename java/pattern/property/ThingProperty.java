@@ -211,7 +211,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<BoundVariable<?>> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of(type);
         }
 
@@ -244,10 +244,14 @@ public abstract class ThingProperty extends Property {
         private final ThingVariable<?> variable;
         private final int hash;
 
-        public NEQ(UnboundVariable var) {
-            if (var == null) throw new NullPointerException("Null var");
-            this.variable = var.asThing();
-            this.hash = Objects.hash(var);
+        public NEQ(UnboundVariable variable) {
+            this(variable.asThing());
+        }
+
+        private NEQ(ThingVariable<?> variable) {
+            if (variable == null) throw new NullPointerException("Null var");
+            this.variable = variable;
+            this.hash = Objects.hash(variable);
         }
 
         public ThingVariable<?> variable() {
@@ -255,7 +259,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<BoundVariable<?>> variables() {
+        public Stream<ThingVariable<?>> variables() {
             return Stream.of(variable());
         }
 
@@ -299,7 +303,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<BoundVariable<?>> variables() {
+        public Stream<ThingVariable<?>> variables() {
             return operation.variable() != null ? Stream.of(operation.variable()) : Stream.empty();
         }
 
@@ -470,7 +474,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<BoundVariable<?>> variables() {
+        public Stream<ThingVariable<?>> variables() {
             return Stream.of(variable);
         }
 

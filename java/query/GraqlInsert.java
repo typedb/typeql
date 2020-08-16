@@ -30,11 +30,12 @@ import java.util.Objects;
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.NEW_LINE;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static java.util.stream.Collectors.joining;
 
 public class GraqlInsert extends GraqlQuery {
 
-    private List<ThingVariable<?>> graph;
+    private List<BoundVariable<?>> graph;
     private final MatchClause match;
     private final List<ThingVariable<?>> variables;
     private final int hash;
@@ -44,8 +45,7 @@ public class GraqlInsert extends GraqlQuery {
     }
 
     GraqlInsert(@Nullable MatchClause match, List<ThingVariable<?>> variables) {
-        if (variables == null || variables.isEmpty())
-            throw GraqlException.create(ErrorMessage.MISSING_PATTERNS.message());
+        if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
         this.match = match;
         this.variables = list(variables);
         this.hash = Objects.hash(this.match, this.variables);
@@ -60,7 +60,7 @@ public class GraqlInsert extends GraqlQuery {
         return variables;
     }
 
-    public List<ThingVariable<?>> asGraph() {
+    public List<BoundVariable<?>> asGraph() {
         if (graph == null) graph = BoundVariable.asGraph(variables);
         return graph;
     }
