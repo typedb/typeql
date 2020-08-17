@@ -31,7 +31,7 @@ public abstract class Identity {
     final Type type;
     final boolean isVisible;
 
-    enum Type {NAME, LABEL, ANONYMOUS;}
+    enum Type {NAME, LABEL, ANONYMOUS}
 
     Identity(Type type, boolean isVisible) {
         this.type = type;
