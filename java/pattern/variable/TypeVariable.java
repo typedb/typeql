@@ -160,9 +160,9 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         return Optional.ofNullable(singularProperties.get(TypeProperty.When.class)).map(TypeProperty::asWhen);
     }
 
-    public List<TypeProperty.Owns> hasProperty() {
+    public List<TypeProperty.Owns> ownsProperty() {
         return repeatingProperties.computeIfAbsent(TypeProperty.Owns.class, c -> new ArrayList<>())
-                .stream().map(TypeProperty::asHas).collect(toList());
+                .stream().map(TypeProperty::asOwns).collect(toList());
     }
 
     public List<TypeProperty.Plays> playsProperty() {

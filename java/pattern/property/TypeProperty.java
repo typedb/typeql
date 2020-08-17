@@ -122,7 +122,7 @@ public abstract class TypeProperty extends Property {
         ));
     }
 
-    public Owns asHas() {
+    public TypeProperty.Owns asOwns() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 TypeProperty.class.getCanonicalName(), Owns.class.getCanonicalName()
         ));
@@ -583,7 +583,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public TypeProperty.Owns asHas() {
+        public TypeProperty.Owns asOwns() {
             return this;
         }
 
