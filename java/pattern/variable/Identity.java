@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
-abstract class Identity {
+public abstract class Identity {
 
     final Type type;
     final boolean isVisible;
@@ -148,7 +148,7 @@ abstract class Identity {
         }
     }
 
-    static class Label extends Identity {
+    public static class Label extends Identity {
 
         private final String label;
         private final int hash;

@@ -22,10 +22,12 @@ import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.Identity;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static graql.lang.common.GraqlToken.Char.NEW_LINE;
@@ -37,7 +39,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 
 abstract class GraqlDefinable extends GraqlQuery {
-    private List<TypeVariable> graph;
+    private Map<Identity.Label, TypeVariable> graph;
     private final GraqlToken.Command keyword;
     private final List<TypeVariable> variables;
     private final int hash;
@@ -61,7 +63,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         return variables;
     }
 
-    public final List<TypeVariable> asGraph() {
+    public final Map<Identity.Label, TypeVariable> asGraph() {
         if (graph == null) graph = BoundVariable.asTypeGraph(variables);
         return graph;
     }
