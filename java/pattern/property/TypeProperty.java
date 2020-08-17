@@ -28,6 +28,8 @@ import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -579,7 +581,9 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public Stream<TypeVariable> variables() {
-            return Stream.of(attributeType);
+            return overriddenAttributeType == null
+                    ? Stream.of(attributeType)
+                    : Stream.of(attributeType, overriddenAttributeType);
         }
 
         @Override
@@ -664,7 +668,11 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public Stream<TypeVariable> variables() {
-            return Stream.of(roleType);
+            List<TypeVariable> variables = new ArrayList<>();
+            variables.add(roleType);
+            if (relationType != null) variables.add(relationType);
+            if (overriddenRoleType != null) variables.add(overriddenRoleType);
+            return variables.stream();
         }
 
         @Override
