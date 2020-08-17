@@ -110,11 +110,14 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         TypeVariable merged = new TypeVariable(identity, singularProperties, repeatingProperties, orderedProperties);
         variable.singularProperties.values().stream()
                 .filter(p -> !(p instanceof TypeProperty.Label))
-                .forEach(merged::addSingularProperties);
-        variable.repeatingProperties.forEach(
-                (clazz, list) -> merged.repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
-        );
-        merged.orderedProperties.addAll(variable.orderedProperties);
+                .forEach(property -> {
+                    merged.addSingularProperties(property);
+                    merged.orderedProperties.add(property);
+                });
+        variable.repeatingProperties.forEach((clazz, list) -> {
+            merged.repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list);
+            merged.orderedProperties.addAll(list);
+        });
         return merged;
     }
 

@@ -76,7 +76,7 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
     @Override
     public TypeVariable asTypeWith(TypeProperty.Singular property) {
         if (!isVisible() && property instanceof TypeProperty.Label) {
-            return new TypeVariable(Identity.label(((TypeProperty.Label) property).label()), property);
+            return new TypeVariable(Identity.label(((TypeProperty.Label) property).scopedLabel()), property);
         } else {
             return new TypeVariable(identity, property);
         }
