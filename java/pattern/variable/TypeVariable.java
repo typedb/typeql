@@ -64,6 +64,11 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
+    public Identity.Label identity() {
+        return identity.asLabel();
+    }
+
+    @Override
     public TypeVariable withoutProperties() {
         return new TypeVariable(identity, null);
     }

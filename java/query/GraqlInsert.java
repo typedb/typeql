@@ -18,18 +18,11 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.NEW_LINE;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static java.util.stream.Collectors.joining;
 
 public class GraqlInsert extends GraqlWritable {
 

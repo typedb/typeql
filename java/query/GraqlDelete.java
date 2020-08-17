@@ -18,14 +18,11 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.List;
-import java.util.Objects;
 
-import static grakn.common.collection.Collections.list;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
 import static java.util.Objects.requireNonNull;
 

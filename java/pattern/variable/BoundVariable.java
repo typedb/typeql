@@ -24,8 +24,8 @@ import graql.lang.pattern.property.TypeProperty;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import static grakn.common.collection.Collections.list;
 import static java.util.stream.Collectors.toSet;
 
 public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable<T> implements Pattern {
@@ -40,27 +40,27 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
 
     abstract T asAnonymousWithID(int id);
 
-    public static List<TypeVariable> asTypeGraph(List<TypeVariable> variables) {
-        LinkedHashMap<TypeVariable, TypeVariable> graph = new LinkedHashMap<>();
+    public static Map<Identity.Label, TypeVariable> asTypeGraph(List<TypeVariable> variables) {
+        LinkedHashMap<Identity.Label, TypeVariable> graph = new LinkedHashMap<>();
         LinkedList<TypeVariable> list = new LinkedList<>(variables);
 
         while (!list.isEmpty()) {
             TypeVariable variable = list.removeFirst();
             assert variable.isLabelled();
             list.addAll(variable.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
-            if (graph.containsKey(variable.withoutProperties())) {
-                TypeVariable merged = graph.get(variable.withoutProperties()).merge(variable);
-                graph.put(variable.withoutProperties(), merged);
+            if (graph.containsKey(variable.identity())) {
+                TypeVariable merged = graph.get(variable.identity()).merge(variable);
+                graph.put(variable.identity(), merged);
             } else {
-                graph.put(variable.withoutProperties(), variable);
+                graph.put(variable.identity(), variable);
             }
         }
 
-        return list(graph.values());
+        return graph;
     }
 
-    public static List<BoundVariable<?>> asGraph(List<ThingVariable<?>> variables) {
-        LinkedHashMap<BoundVariable<?>, BoundVariable<?>> graph = new LinkedHashMap<>();
+    public static Map<Identity, BoundVariable<?>> asGraph(List<ThingVariable<?>> variables) {
+        LinkedHashMap<Identity, BoundVariable<?>> graph = new LinkedHashMap<>();
         LinkedList<BoundVariable<?>> list = new LinkedList<>(variables);
         int id = 0;
 
@@ -68,21 +68,21 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
             BoundVariable<?> variable = list.removeFirst();
             list.addAll(variable.properties().stream().flatMap(Property::variables).collect(toSet()));
             if (!variable.isAnonymous()) {
-                if (graph.containsKey(variable.withoutProperties())) {
-                    BoundVariable<?> existing = graph.get(variable.withoutProperties());
+                if (graph.containsKey(variable.identity())) {
+                    BoundVariable<?> existing = graph.get(variable.identity());
                     BoundVariable<?> merged;
                     if (existing.isThing()) merged = existing.asThing().merge(variable.asThing());
                     else merged = existing.asType().merge(variable.asType());
-                    graph.put(variable.withoutProperties(), merged);
+                    graph.put(variable.identity(), merged);
                 } else {
-                    graph.put(variable.withoutProperties(), variable);
+                    graph.put(variable.identity(), variable);
                 }
             } else {
                 BoundVariable<?> convertedVar = variable.asAnonymousWithID(id++);
-                graph.put(convertedVar.withoutProperties(), convertedVar);
+                graph.put(convertedVar.identity(), convertedVar);
             }
         }
 
-        return list(graph.values());
+        return graph;
     }
 }

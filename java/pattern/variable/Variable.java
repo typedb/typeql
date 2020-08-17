@@ -79,6 +79,10 @@ public abstract class Variable<T extends Variable<T>> {
         }
     }
 
+    public Identity identity() {
+        return identity;
+    }
+
     public String identifier() {
         return identity.identifier();
     }
