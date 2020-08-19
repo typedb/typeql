@@ -18,6 +18,8 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.List;
@@ -25,6 +27,13 @@ import java.util.List;
 public class GraqlUndefine extends GraqlDefinable {
 
     public GraqlUndefine(List<TypeVariable> variables) {
-        super(GraqlToken.Command.UNDEFINE, variables);
+        super(GraqlToken.Command.UNDEFINE, validVariables(variables));
+    }
+
+    private static List<TypeVariable> validVariables(List<TypeVariable> variables) {
+        if (variables.stream().anyMatch(variable -> variable.valueTypeProperty().isPresent())) {
+            throw GraqlException.create(ErrorMessage.INVALID_UNDEFINE_VALID_TYPE_PROPERTY.message());
+        }
+        return variables;
     }
 }
