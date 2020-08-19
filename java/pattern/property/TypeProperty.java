@@ -702,7 +702,7 @@ public abstract class TypeProperty extends Property {
     public static class Relates extends TypeProperty.Repeatable {
 
         private TypeVariable roleType;
-        private final TypeVariable overriddenRoleType;
+        private TypeVariable overriddenRoleType;
 
         public Relates(String roleType) {
             this(hidden().type(roleType), null);
@@ -742,6 +742,9 @@ public abstract class TypeProperty extends Property {
         public void setScope(String relationLabel) {
             if (roleType.labelProperty().isPresent()) {
                 this.roleType = hidden().type(relationLabel, roleType.labelProperty().get().label());
+            }
+            if (overriddenRoleType != null && overriddenRoleType.labelProperty().isPresent()) {
+                this.overriddenRoleType = hidden().type(relationLabel, overriddenRoleType.labelProperty().get().label());
             }
         }
 
