@@ -701,9 +701,8 @@ public abstract class TypeProperty extends Property {
 
     public static class Relates extends TypeProperty.Repeatable {
 
-        private final TypeVariable roleType;
+        private TypeVariable roleType;
         private final TypeVariable overriddenRoleType;
-        private final int hash;
 
         public Relates(String roleType) {
             this(hidden().type(roleType), null);
@@ -738,7 +737,12 @@ public abstract class TypeProperty extends Property {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
-            this.hash = Objects.hash(roleType, overriddenRoleType);
+        }
+
+        public void setScope(String relationLabel) {
+            if (roleType.labelProperty().isPresent()) {
+                this.roleType = hidden().type(relationLabel, roleType.labelProperty().get().label());
+            }
         }
 
         public TypeVariable role() {
@@ -784,7 +788,7 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public int hashCode() {
-            return hash;
+            return Objects.hash(roleType, overriddenRoleType);
         }
     }
 }

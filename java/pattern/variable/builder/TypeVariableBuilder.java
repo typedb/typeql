@@ -151,6 +151,7 @@ public interface TypeVariableBuilder {
     }
 
     default TypeVariable relates(UnboundVariable roleTypeVar) {
+        System.out.println(this);
         return asTypeWith(new TypeProperty.Relates(roleTypeVar));
     }
 

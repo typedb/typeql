@@ -130,6 +130,10 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
     @Override
     public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
+        if (labelProperty().isPresent() && property instanceof TypeProperty.Relates) {
+            ((TypeProperty.Relates) property).setScope(labelProperty().get().label());
+        }
+
         repeatingProperties.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
         orderedProperties.add(property);
         return this;
