@@ -27,13 +27,6 @@ import java.util.List;
 public class GraqlUndefine extends GraqlDefinable {
 
     public GraqlUndefine(List<TypeVariable> variables) {
-        super(GraqlToken.Command.UNDEFINE, validVariables(variables));
-    }
-
-    private static List<TypeVariable> validVariables(List<TypeVariable> variables) {
-        if (variables.stream().anyMatch(variable -> variable.valueTypeProperty().isPresent())) {
-            throw GraqlException.create(ErrorMessage.INVALID_UNDEFINE_VALID_TYPE_PROPERTY.message());
-        }
-        return variables;
+        super(GraqlToken.Command.UNDEFINE, variables);
     }
 }
