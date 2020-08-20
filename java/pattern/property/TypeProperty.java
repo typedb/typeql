@@ -21,6 +21,7 @@ import grakn.common.collection.Either;
 import grakn.common.collection.Pair;
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 import static graql.lang.common.GraqlToken.Char.COLON;
@@ -51,6 +53,7 @@ import static graql.lang.common.GraqlToken.Property.THEN;
 import static graql.lang.common.GraqlToken.Property.TYPE;
 import static graql.lang.common.GraqlToken.Property.VALUE_TYPE;
 import static graql.lang.common.GraqlToken.Property.WHEN;
+import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
@@ -376,6 +379,11 @@ public abstract class TypeProperty extends Property {
 
         public Regex(String regex) {
             if (regex == null) throw new NullPointerException("Null regex");
+            try {
+                java.util.regex.Pattern.compile(regex);
+            } catch (PatternSyntaxException exception) {
+                throw GraqlException.create(INVALID_ATTRIBUTE_TYPE_REGEX.message());
+            }
             this.regex = regex;
             this.hash = Objects.hash(regex);
         }
