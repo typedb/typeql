@@ -18,7 +18,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+load(" @graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 
 java_library(
     name = "graql",
