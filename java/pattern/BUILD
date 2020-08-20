@@ -17,8 +17,9 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load(@graknlabs_bazel_distribution//maven:rules.bzl, "assemble_maven", "deploy_maven")
+load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
 
 java_library(
     name = "pattern",
@@ -52,6 +53,8 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
+    snapshot = deployment['maven.snapshot'],
+    release = deployment['maven.release']
 )
 
 checkstyle_test(
