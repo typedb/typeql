@@ -17,8 +17,9 @@
 
 package(default_visibility = ["//:__subpackages__"])
 
-load("@graknlabs_dependencies//distribution/maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@rules_antlr//antlr:antlr4.bzl", "antlr4")
+load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
 
 antlr4(
     name = "java-src",
@@ -47,4 +48,6 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
+    snapshot = deployment['maven.snapshot'],
+    release = deployment['maven.snapshot']
 )
