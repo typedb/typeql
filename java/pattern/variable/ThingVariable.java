@@ -105,7 +105,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return Optional.ofNullable(singularProperties.get(ThingProperty.Relation.class)).map(ThingProperty::asRelation);
     }
 
-    public List<ThingProperty.Has> hasProperty() {
+    public List<ThingProperty.Has> hasProperties() {
         return repeatingProperties.computeIfAbsent(ThingProperty.Has.class, c -> new ArrayList<>())
                 .stream().map(ThingProperty::asHas).collect(toList());
     }
@@ -151,7 +151,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     String hasSyntax() {
-        return hasProperty().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
+        return hasProperties().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
     }
 
     @Override
