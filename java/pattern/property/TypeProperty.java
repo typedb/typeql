@@ -21,7 +21,6 @@ import grakn.common.collection.Either;
 import grakn.common.collection.Pair;
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;

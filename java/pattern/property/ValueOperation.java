@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_PROPERTY_DATETIME_PRECISION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
@@ -49,6 +50,18 @@ public abstract class ValueOperation<T> {
 
     public T value() {
         return value;
+    }
+
+    public ValueOperation.Assignment<?> asAssignment() {
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                ValueOperation.class.getCanonicalName(), Assignment.class.getCanonicalName()
+        ));
+    }
+
+    public ValueOperation.Comparison<?> asComparison() {
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                ValueOperation.class.getCanonicalName(), Comparison.class.getCanonicalName()
+        ));
     }
 
     public boolean isAssignment() {
@@ -91,13 +104,25 @@ public abstract class ValueOperation<T> {
             super(GraqlToken.Comparator.EQV, value);
         }
 
+        @Override
+        public ValueOperation.Assignment<?> asAssignment() {
+            return this;
+        }
+
         public java.lang.String toString() {
             return Strings.valueToString(value());
         }
 
-        public static class Number<N extends java.lang.Number> extends Assignment<N> {
+        public static class Long extends Assignment<java.lang.Long> {
 
-            public Number(N value) {
+            public Long(long value) {
+                super(value);
+            }
+        }
+
+        public static class Double extends Assignment<java.lang.Double> {
+
+            public Double(double value) {
                 super(value);
             }
         }
@@ -138,27 +163,21 @@ public abstract class ValueOperation<T> {
             super(comparator, value);
         }
 
-        public static Comparison<?> of(GraqlToken.Comparator comparator, Object value) {
-            if (value instanceof Long) {
-                return new Comparison.Number<>(comparator, (Long) value);
-            } else if (value instanceof Double) {
-                return new Comparison.Number<>(comparator, (Double) value);
-            } else if (value instanceof java.lang.Boolean) {
-                return new Comparison.Boolean(comparator, (java.lang.Boolean) value);
-            } else if (value instanceof java.lang.String) {
-                return new Comparison.String(comparator, (java.lang.String) value);
-            } else if (value instanceof LocalDateTime) {
-                return new Comparison.DateTime(comparator, (LocalDateTime) value);
-            } else if (value instanceof UnboundVariable) {
-                return new Comparison.Variable(comparator, (UnboundVariable) value);
-            } else {
-                throw new UnsupportedOperationException("Unsupported Value Comparison for class: " + value.getClass());
+        @Override
+        public ValueOperation.Comparison<?> asComparison() {
+            return this;
+        }
+
+        public static class Long extends Comparison<java.lang.Long> {
+
+            public Long(GraqlToken.Comparator comparator, long value) {
+                super(comparator, value);
             }
         }
 
-        public static class Number<N extends java.lang.Number> extends Comparison<N> {
+        public static class Double extends Comparison<java.lang.Double> {
 
-            public Number(GraqlToken.Comparator comparator, N value) {
+            public Double(GraqlToken.Comparator comparator, double value) {
                 super(comparator, value);
             }
         }

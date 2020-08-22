@@ -792,14 +792,10 @@ public class Parser extends GraqlBaseVisitor {
     public ValueOperation.Assignment<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
         Object value = visitLiteral(ctx.literal());
 
-        if (value instanceof Integer) {
-            return new ValueOperation.Assignment.Number<>(((Integer) value));
-        } else if (value instanceof Long) {
-            return new ValueOperation.Assignment.Number<>((Long) value);
-        } else if (value instanceof Float) {
-            return new ValueOperation.Assignment.Number<>((Float) value);
+        if (value instanceof Long) {
+            return new ValueOperation.Assignment.Long((Long) value);
         } else if (value instanceof Double) {
-            return new ValueOperation.Assignment.Number<>((Double) value);
+            return new ValueOperation.Assignment.Double((Double) value);
         } else if (value instanceof Boolean) {
             return new ValueOperation.Assignment.Boolean((Boolean) value);
         } else if (value instanceof String) {
@@ -854,9 +850,9 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (value instanceof Long) {
-            return new ValueOperation.Comparison.Number<>(comparator, (Long) value);
+            return new ValueOperation.Comparison.Long(comparator, (Long) value);
         } else if (value instanceof Double) {
-            return new ValueOperation.Comparison.Number<>(comparator, (Double) value);
+            return new ValueOperation.Comparison.Double(comparator, (Double) value);
         } else if (value instanceof Boolean) {
             return new ValueOperation.Comparison.Boolean(comparator, (Boolean) value);
         } else if (value instanceof String) {

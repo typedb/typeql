@@ -53,11 +53,11 @@ public interface ThingVariableBuilder<T> {
     }
 
     default T has(String type, long value) {
-        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Number<>(value)));
+        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Long(value)));
     }
 
     default T has(String type, double value) {
-        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Number<>(value)));
+        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Double(value)));
     }
 
     default T has(String type, boolean value) {
@@ -131,11 +131,11 @@ public interface ThingVariableBuilder<T> {
         // Attribute value assignment property
 
         default ThingVariable.Attribute val(long value) {
-            return operation(new ValueOperation.Assignment.Number<>(value));
+            return operation(new ValueOperation.Assignment.Long(value));
         }
 
         default ThingVariable.Attribute val(double value) {
-            return operation(new ValueOperation.Assignment.Number<>(value));
+            return operation(new ValueOperation.Assignment.Double(value));
         }
 
         default ThingVariable.Attribute val(boolean value) {
@@ -153,11 +153,11 @@ public interface ThingVariableBuilder<T> {
         // Attribute value equality property
 
         default ThingVariable.Attribute eq(long value) {
-            return eq(ValueOperation.Comparison.Number::new, value);
+            return eq(ValueOperation.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute eq(double value) {
-            return eq(ValueOperation.Comparison.Number::new, value);
+            return eq(ValueOperation.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute eq(boolean value) {
@@ -183,11 +183,11 @@ public interface ThingVariableBuilder<T> {
         // Attribute value inequality property
 
         default ThingVariable.Attribute neq(long value) {
-            return neq(ValueOperation.Comparison.Number::new, value);
+            return neq(ValueOperation.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute neq(double value) {
-            return neq(ValueOperation.Comparison.Number::new, value);
+            return neq(ValueOperation.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute neq(boolean value) {
@@ -213,11 +213,11 @@ public interface ThingVariableBuilder<T> {
         // Attribute value greater-than property
 
         default ThingVariable.Attribute gt(long value) {
-            return gt(ValueOperation.Comparison.Number::new, value);
+            return gt(ValueOperation.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute gt(double value) {
-            return gt(ValueOperation.Comparison.Number::new, value);
+            return gt(ValueOperation.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute gt(boolean value) {
@@ -243,11 +243,11 @@ public interface ThingVariableBuilder<T> {
         // Attribute value greater-than-or-equals property
 
         default ThingVariable.Attribute gte(long value) {
-            return gte(ValueOperation.Comparison.Number::new, value);
+            return gte(ValueOperation.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute gte(double value) {
-            return gte(ValueOperation.Comparison.Number::new, value);
+            return gte(ValueOperation.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute gte(boolean value) {
@@ -273,11 +273,11 @@ public interface ThingVariableBuilder<T> {
         // Attribute value less-than property
 
         default ThingVariable.Attribute lt(long value) {
-            return lt(ValueOperation.Comparison.Number::new, value);
+            return lt(ValueOperation.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute lt(double value) {
-            return lt(ValueOperation.Comparison.Number::new, value);
+            return lt(ValueOperation.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute lt(boolean value) {
@@ -303,11 +303,11 @@ public interface ThingVariableBuilder<T> {
         // Attribute value less-than-or-equals property
 
         default ThingVariable.Attribute lte(long value) {
-            return lte(ValueOperation.Comparison.Number::new, value);
+            return lte(ValueOperation.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute lte(double value) {
-            return lte(ValueOperation.Comparison.Number::new, value);
+            return lte(ValueOperation.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute lte(boolean value) {

@@ -191,11 +191,11 @@ public class Graql {
     // Attribute value equality property
 
     public static ThingProperty.Value<Long> eq(long value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.EQ, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.EQ, value));
     }
 
     public static ThingProperty.Value<Double> eq(double value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.EQ, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.EQ, value));
     }
 
     public static ThingProperty.Value<Boolean> eq(boolean value) {
@@ -217,11 +217,11 @@ public class Graql {
     // Attribute value inequality property
 
     public static ThingProperty.Value<Long> neq(long value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.NEQ, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.NEQ, value));
     }
 
     public static ThingProperty.Value<Double> neq(double value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.NEQ, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.NEQ, value));
     }
 
     public static ThingProperty.Value<Boolean> neq(boolean value) {
@@ -243,11 +243,11 @@ public class Graql {
     // Attribute value greater-than property
 
     public static ThingProperty.Value<Long> gt(long value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GT, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.GT, value));
     }
 
     public static ThingProperty.Value<Double> gt(double value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GT, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.GT, value));
     }
 
     public static ThingProperty.Value<Boolean> gt(boolean value) {
@@ -269,11 +269,11 @@ public class Graql {
     // Attribute value greater-than-or-equals property
 
     public static ThingProperty.Value<Long> gte(long value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GTE, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.GTE, value));
     }
 
     public static ThingProperty.Value<Double> gte(double value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.GTE, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.GTE, value));
     }
 
     public static ThingProperty.Value<Boolean> gte(boolean value) {
@@ -295,11 +295,11 @@ public class Graql {
     // Attribute value less-than property
 
     public static ThingProperty.Value<Long> lt(long value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LT, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.LT, value));
     }
 
     public static ThingProperty.Value<Double> lt(double value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LT, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.LT, value));
     }
 
     public static ThingProperty.Value<Boolean> lt(boolean value) {
@@ -321,11 +321,11 @@ public class Graql {
     // Attribute value less-than-or-equals property
 
     public static ThingProperty.Value<Long> lte(long value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LTE, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.LTE, value));
     }
 
     public static ThingProperty.Value<Double> lte(double value) {
-        return new ThingProperty.Value<>(new ValueOperation.Comparison.Number<>(GraqlToken.Comparator.LTE, value));
+        return new ThingProperty.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.LTE, value));
     }
 
     public static ThingProperty.Value<Boolean> lte(boolean value) {
