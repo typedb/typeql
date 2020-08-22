@@ -40,19 +40,19 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
 
     abstract T asAnonymousWithID(int id);
 
-    public static Map<Identity.Label, TypeVariable> asTypeGraph(List<TypeVariable> variables) {
-        LinkedHashMap<Identity.Label, TypeVariable> graph = new LinkedHashMap<>();
+    public static Map<Identity, TypeVariable> asTypeGraph(List<TypeVariable> variables) {
+        LinkedHashMap<Identity, TypeVariable> graph = new LinkedHashMap<>();
         LinkedList<TypeVariable> list = new LinkedList<>(variables);
 
         while (!list.isEmpty()) {
             TypeVariable variable = list.removeFirst();
             assert variable.isLabelled();
             list.addAll(variable.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
-            if (graph.containsKey(variable.identity().asLabel())) {
-                TypeVariable merged = graph.get(variable.identity().asLabel()).merge(variable);
-                graph.put(variable.identity().asLabel(), merged);
+            if (graph.containsKey(variable.identity())) {
+                TypeVariable merged = graph.get(variable.identity()).merge(variable);
+                graph.put(variable.identity(), merged);
             } else {
-                graph.put(variable.identity().asLabel(), variable);
+                graph.put(variable.identity(), variable);
             }
         }
 

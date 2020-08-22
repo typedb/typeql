@@ -39,7 +39,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 
 abstract class GraqlDefinable extends GraqlQuery {
-    private Map<Identity.Label, TypeVariable> graph;
+
+    private Map<Identity, TypeVariable> graph;
     private final GraqlToken.Command keyword;
     private final List<TypeVariable> variables;
     private final int hash;
@@ -63,7 +64,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         return variables;
     }
 
-    public final Map<Identity.Label, TypeVariable> asGraph() {
+    public final Map<Identity, TypeVariable> asGraph() {
         if (graph == null) graph = BoundVariable.asTypeGraph(variables);
         return graph;
     }
