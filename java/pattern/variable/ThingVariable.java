@@ -86,8 +86,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return this;
     }
 
-    public Optional<ThingProperty.IID> idProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.IID.class)).map(ThingProperty::asID);
+    public Optional<ThingProperty.IID> iidProperty() {
+        return Optional.ofNullable(singularProperties.get(ThingProperty.IID.class)).map(ThingProperty::asIID);
     }
 
     public Optional<ThingProperty.Isa> isaProperty() {
@@ -233,7 +233,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         private String thingSyntax() {
             if (isaProperty().isPresent()) return isaSyntax();
-            else if (idProperty().isPresent()) return idProperty().get().toString();
+            else if (iidProperty().isPresent()) return iidProperty().get().toString();
             else if (neqProperty().isPresent()) return neqProperty().get().toString();
             else return "";
         }

@@ -69,7 +69,7 @@ public abstract class ThingProperty extends Property {
         ));
     }
 
-    public IID asID() {
+    public IID asIID() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Singular.class.getCanonicalName(), IID.class.getCanonicalName()
         ));
@@ -156,7 +156,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public IID asID() {
+        public IID asIID() {
             return this;
         }
 
