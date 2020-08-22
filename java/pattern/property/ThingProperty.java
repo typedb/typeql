@@ -146,7 +146,7 @@ public abstract class ThingProperty extends Property {
             this.hash = Objects.hash(this.iid);
         }
 
-        public String id() {
+        public String iid() {
             return iid;
         }
 
