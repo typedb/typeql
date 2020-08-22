@@ -51,6 +51,14 @@ public abstract class ValueOperation<T> {
         return value;
     }
 
+    public boolean isAssignment() {
+        return (this instanceof Assignment<?>);
+    }
+
+    public boolean isComparison() {
+        return (this instanceof Comparison<?>);
+    }
+
     public boolean isValueEquality() {
         return comparator.equals(GraqlToken.Comparator.EQV) && !hasVariable();
     }
