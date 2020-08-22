@@ -37,12 +37,12 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(8, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
     public static final ErrorMessage ILLEGAL_PROPERTY_REPETITION =
             new ErrorMessage(9, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
+    public static final ErrorMessage MISSING_PROPERTY_RELATION_PLAYER =
+            new ErrorMessage(10, "The relation variable has not been provided with role players.");
     public static final ErrorMessage INVALID_PROPERTY_DATETIME_PRECISION =
-            new ErrorMessage(10, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
+            new ErrorMessage(11, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
-            new ErrorMessage(11, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
-    public static final ErrorMessage INVALID_UNDEFINE_VALID_TYPE_PROPERTY =
-            new ErrorMessage(12, "Undefine queries do not accept 'value type' property.");
+            new ErrorMessage(12, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
             new ErrorMessage(13, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =

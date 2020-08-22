@@ -44,6 +44,7 @@ import static graql.lang.common.GraqlToken.Property.HAS;
 import static graql.lang.common.GraqlToken.Property.ISA;
 import static graql.lang.common.GraqlToken.Property.ISAX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.MISSING_PROPERTY_RELATION_PLAYER;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
@@ -341,13 +342,11 @@ public abstract class ThingProperty extends Property {
         }
 
         public Relation(List<RolePlayer> players) {
-            if (players == null) throw new NullPointerException("Null relationPlayers");
+            if (players == null || players.isEmpty()) {
+                throw GraqlException.create(MISSING_PROPERTY_RELATION_PLAYER.message());
+            }
             this.players = new ArrayList<>(players);
             this.hash = Objects.hash(this.players);
-        }
-
-        public void player(RolePlayer player) {
-            this.players.add(player);
         }
 
         public List<RolePlayer> players() {

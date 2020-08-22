@@ -254,11 +254,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
                                                                             ThingVariableBuilder<Relation> {
 
-        private ThingProperty.Relation relationProperty;
-
         Relation(Identity identity, ThingProperty.Relation property) {
             super(identity, property);
-            this.relationProperty = property;
         }
 
         public Relation(Identity.AnonymousWithID identity,
@@ -286,7 +283,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
             ThingProperty.Relation relProp = singularProperties.get(ThingProperty.Relation.class).asRelation();
             this.singularProperties.put(ThingProperty.Relation.class, new ThingProperty.Relation(list(relProp.players(), rolePlayer)));
-            this.relationProperty.player(rolePlayer);
             return this;
         }
 
