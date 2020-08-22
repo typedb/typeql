@@ -34,7 +34,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
@@ -118,6 +117,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
                     singularProperties.get(property.getClass()).toString(),
                     property.toString()
             ));
+        } else if (property.isIsa() && property.asIsa().type().labelProperty().isPresent() && relationProperty().isPresent()) {
+            relationProperty().get().setScope(property.asIsa().type().labelProperty().get().label());
+        } else if (property.isRelation() && isaProperty().isPresent() && isaProperty().get().type().labelProperty().isPresent()) {
+            property.asRelation().setScope(isaProperty().get().type().labelProperty().get().label());
         }
         singularProperties.put(property.getClass(), property);
     }
@@ -281,8 +284,12 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
-            ThingProperty.Relation relProp = singularProperties.get(ThingProperty.Relation.class).asRelation();
-            this.singularProperties.put(ThingProperty.Relation.class, new ThingProperty.Relation(list(relProp.players(), rolePlayer)));
+            ThingProperty.Relation relationProperty = singularProperties.get(ThingProperty.Relation.class).asRelation();
+            relationProperty.addPlayers(rolePlayer);
+            if (isaProperty().isPresent() && !relationProperty.hasScope()) {
+                relationProperty.setScope(isaProperty().get().type().labelProperty().get().label());
+            }
+            this.singularProperties.put(ThingProperty.Relation.class, relationProperty);
             return this;
         }
 

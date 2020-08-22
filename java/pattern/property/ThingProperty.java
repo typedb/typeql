@@ -58,6 +58,30 @@ public abstract class ThingProperty extends Property {
         return false;
     }
 
+    public boolean isIID() {
+        return false;
+    }
+
+    public boolean isIsa() {
+        return false;
+    }
+
+    public boolean isNEQ() {
+        return false;
+    }
+
+    public boolean isValue() {
+        return false;
+    }
+
+    public boolean isRelation() {
+        return false;
+    }
+
+    public boolean isHas() {
+        return false;
+    }
+
     public ThingProperty.Singular asSingular() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
@@ -157,6 +181,11 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
+        public boolean isIID() {
+            return true;
+        }
+
+        @Override
         public IID asIID() {
             return this;
         }
@@ -217,6 +246,11 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
+        public boolean isIsa() {
+            return true;
+        }
+
+        @Override
         public ThingProperty.Isa asIsa() {
             return this;
         }
@@ -265,6 +299,11 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
+        public boolean isNEQ() {
+            return true;
+        }
+
+        @Override
         public ThingProperty.NEQ asNEQ() {
             return this;
         }
@@ -309,6 +348,11 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
+        public boolean isValue() {
+            return true;
+        }
+
+        @Override
         public ThingProperty.Value<?> asValue() {
             return this;
         }
@@ -335,7 +379,7 @@ public abstract class ThingProperty extends Property {
     public static class Relation extends ThingProperty.Singular {
 
         private final List<RolePlayer> players;
-        private final int hash;
+        private String scope;
 
         public Relation(RolePlayer player) {
             this(list(player));
@@ -346,7 +390,20 @@ public abstract class ThingProperty extends Property {
                 throw GraqlException.create(MISSING_PROPERTY_RELATION_PLAYER.message());
             }
             this.players = new ArrayList<>(players);
-            this.hash = Objects.hash(this.players);
+        }
+
+        public void setScope(String relationLabel) {
+            this.scope = relationLabel;
+            players.forEach(player -> player.setScope(scope));
+        }
+
+        public boolean hasScope() {
+            return scope != null;
+        }
+
+        public void addPlayers(RolePlayer player) {
+            if (scope != null) player.setScope(scope);
+            players.add(player);
         }
 
         public List<RolePlayer> players() {
@@ -361,6 +418,11 @@ public abstract class ThingProperty extends Property {
                 player.roleType().ifPresent(stream::add);
                 return stream.build();
             });
+        }
+
+        @Override
+        public boolean isRelation() {
+            return true;
         }
 
         @Override
@@ -383,14 +445,13 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public int hashCode() {
-            return hash;
+            return Objects.hash(this.players);
         }
 
         public static class RolePlayer {
 
-            private final TypeVariable roleType;
+            private TypeVariable roleType;
             private final ThingVariable<?> player;
-            private final int hash;
 
             public RolePlayer(String roleType, UnboundVariable playerVar) {
                 this(roleType == null ? null : hidden().type(roleType), playerVar.asThing());
@@ -412,7 +473,12 @@ public abstract class ThingProperty extends Property {
                 if (player == null) throw new NullPointerException("Null player");
                 this.roleType = roleType;
                 this.player = player;
-                this.hash = Objects.hash(roleType, player);
+            }
+
+            public void setScope(String relationLabel) {
+                if (roleType != null && roleType.labelProperty().isPresent()) {
+                    this.roleType = hidden().type(relationLabel, roleType.labelProperty().get().label());
+                }
             }
 
             public Optional<TypeVariable> roleType() {
@@ -425,7 +491,15 @@ public abstract class ThingProperty extends Property {
 
             @Override
             public String toString() {
-                return (roleType == null ? "" : ("" + roleType + COLON + SPACE)) + player;
+                if (roleType == null) {
+                    return player.toString();
+                } else {
+                    StringBuilder syntax = new StringBuilder();
+                    if (roleType.isVisible()) syntax.append(roleType.identity().toString());
+                    else syntax.append(roleType.labelProperty().get().label());
+                    syntax.append(COLON).append(SPACE).append(player);
+                    return syntax.toString();
+                }
             }
 
             @Override
@@ -438,7 +512,7 @@ public abstract class ThingProperty extends Property {
 
             @Override
             public int hashCode() {
-                return hash;
+                return Objects.hash(roleType, player);
             }
         }
     }
@@ -475,6 +549,11 @@ public abstract class ThingProperty extends Property {
         @Override
         public Stream<ThingVariable<?>> variables() {
             return Stream.of(variable);
+        }
+
+        @Override
+        public boolean isHas() {
+            return true;
         }
 
         @Override

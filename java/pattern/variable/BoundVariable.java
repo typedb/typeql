@@ -48,11 +48,11 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
             TypeVariable variable = list.removeFirst();
             assert variable.isLabelled();
             list.addAll(variable.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
-            if (graph.containsKey(variable.identity())) {
-                TypeVariable merged = graph.get(variable.identity()).merge(variable);
-                graph.put(variable.identity(), merged);
+            if (graph.containsKey(variable.identity().asLabel())) {
+                TypeVariable merged = graph.get(variable.identity().asLabel()).merge(variable);
+                graph.put(variable.identity().asLabel(), merged);
             } else {
-                graph.put(variable.identity(), variable);
+                graph.put(variable.identity().asLabel(), variable);
             }
         }
 
