@@ -54,13 +54,13 @@ public abstract class ValueOperation<T> {
 
     public ValueOperation.Assignment<?> asAssignment() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                ValueOperation.class.getCanonicalName(), Assignment.class.getCanonicalName()
+                ValueOperation.class.getSimpleName(), Assignment.class.getSimpleName()
         ));
     }
 
     public ValueOperation.Comparison<?> asComparison() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                ValueOperation.class.getCanonicalName(), Comparison.class.getCanonicalName()
+                ValueOperation.class.getSimpleName(), Comparison.class.getSimpleName()
         ));
     }
 
@@ -109,6 +109,36 @@ public abstract class ValueOperation<T> {
             return this;
         }
 
+        public Assignment.Long asLong() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Assignment.class.getSimpleName(), Long.class.getSimpleName()
+            ));
+        }
+
+        public Assignment.Double asDouble() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Assignment.class.getSimpleName(), Double.class.getSimpleName()
+            ));
+        }
+
+        public Assignment.Boolean asBoolean() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Assignment.class.getSimpleName(), Boolean.class.getSimpleName()
+            ));
+        }
+
+        public Assignment.String asString() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Assignment.class.getSimpleName(), String.class.getSimpleName()
+            ));
+        }
+
+        public Assignment.DateTime asDateTime() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Assignment.class.getSimpleName(), DateTime.class.getSimpleName()
+            ));
+        }
+
         public java.lang.String toString() {
             return Strings.valueToString(value());
         }
@@ -118,12 +148,22 @@ public abstract class ValueOperation<T> {
             public Long(long value) {
                 super(value);
             }
+
+            @Override
+            public Assignment.Long asLong() {
+                return this;
+            }
         }
 
         public static class Double extends Assignment<java.lang.Double> {
 
             public Double(double value) {
                 super(value);
+            }
+
+            @Override
+            public Assignment.Double asDouble() {
+                return this;
             }
         }
 
@@ -132,12 +172,22 @@ public abstract class ValueOperation<T> {
             public Boolean(boolean value) {
                 super(value);
             }
+
+            @Override
+            public Assignment.Boolean asBoolean() {
+                return this;
+            }
         }
 
         public static class String extends Assignment<java.lang.String> {
 
             public String(java.lang.String value) {
                 super(value);
+            }
+
+            @Override
+            public Assignment.String asString() {
+                return this;
             }
         }
 
@@ -154,6 +204,11 @@ public abstract class ValueOperation<T> {
                     throw GraqlException.create(INVALID_PROPERTY_DATETIME_PRECISION.message(value));
                 }
             }
+
+            @Override
+            public Assignment.DateTime asDateTime() {
+                return this;
+            }
         }
     }
 
@@ -168,10 +223,51 @@ public abstract class ValueOperation<T> {
             return this;
         }
 
+        public Comparison.Long asLong() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Comparison.class.getSimpleName(), Long.class.getSimpleName()
+            ));
+        }
+
+        public Comparison.Double asDouble() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Comparison.class.getSimpleName(), Double.class.getSimpleName()
+            ));
+        }
+
+        public Comparison.Boolean asBoolean() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Comparison.class.getSimpleName(), Boolean.class.getSimpleName()
+            ));
+        }
+
+        public Comparison.String asString() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Comparison.class.getSimpleName(), String.class.getSimpleName()
+            ));
+        }
+
+        public Comparison.DateTime asDateTime() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Comparison.class.getSimpleName(), DateTime.class.getSimpleName()
+            ));
+        }
+
+        public Comparison.Variable asVariable() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    Comparison.class.getSimpleName(), Variable.class.getSimpleName()
+            ));
+        }
+
         public static class Long extends Comparison<java.lang.Long> {
 
             public Long(GraqlToken.Comparator comparator, long value) {
                 super(comparator, value);
+            }
+
+            @Override
+            public Comparison.Long asLong() {
+                return this;
             }
         }
 
@@ -180,12 +276,22 @@ public abstract class ValueOperation<T> {
             public Double(GraqlToken.Comparator comparator, double value) {
                 super(comparator, value);
             }
+
+            @Override
+            public Comparison.Double asDouble() {
+                return this;
+            }
         }
 
         public static class Boolean extends Comparison<java.lang.Boolean> {
 
             public Boolean(GraqlToken.Comparator comparator, boolean value) {
                 super(comparator, value);
+            }
+
+            @Override
+            public Comparison.Boolean asBoolean() {
+                return this;
             }
         }
 
@@ -208,12 +314,22 @@ public abstract class ValueOperation<T> {
 
                 return operation.toString();
             }
+
+            @Override
+            public Comparison.String asString() {
+                return this;
+            }
         }
 
         public static class DateTime extends Comparison<LocalDateTime> {
 
             public DateTime(GraqlToken.Comparator comparator, LocalDateTime value) {
                 super(comparator, value);
+            }
+
+            @Override
+            public Comparison.DateTime asDateTime() {
+                return this;
             }
         }
 
@@ -229,6 +345,11 @@ public abstract class ValueOperation<T> {
 
             @Override
             public ThingVariable<?> variable() { return value().asThing(); }
+
+            @Override
+            public Comparison.Variable asVariable() {
+                return this;
+            }
         }
     }
 }
