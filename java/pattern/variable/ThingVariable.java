@@ -17,7 +17,6 @@
 
 package graql.lang.pattern.variable;
 
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.property.Property;
 import graql.lang.pattern.property.ThingProperty;
@@ -37,18 +36,19 @@ import java.util.stream.Stream;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CONVERT_OPERATION;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable<ThingVariable<?>> {
 
-    final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties;
-    final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties;
+    final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular;
+    final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating;
 
     public ThingVariable(Identity identity, ThingProperty property) {
         super(identity);
-        this.singularProperties = new HashMap<>();
-        this.repeatingProperties = new HashMap<>();
+        this.singular = new HashMap<>();
+        this.repeating = new HashMap<>();
         if (property != null) {
             if (property.isSingular()) asSameThingWith(property.asSingular());
             else asSameThingWith(property.asRepeatable());
@@ -56,11 +56,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     ThingVariable(Identity identity,
-                  Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                  Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
+                  Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular,
+                  Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating) {
         super(identity);
-        this.singularProperties = new HashMap<>(singularProperties);
-        this.repeatingProperties = new HashMap<>(repeatingProperties);
+        this.singular = new HashMap<>(singular);
+        this.repeating = new HashMap<>(repeating);
     }
 
     abstract T getThis();
@@ -70,8 +70,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     @Override
     public Set<ThingProperty> properties() {
         return Stream.concat(
-                singularProperties.values().stream(),
-                repeatingProperties.values().stream().flatMap(Collection::stream)
+                singular.values().stream(),
+                repeating.values().stream().flatMap(Collection::stream)
         ).collect(Collectors.toSet());
     }
 
@@ -86,47 +86,50 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     public Optional<ThingProperty.IID> iidProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.IID.class)).map(ThingProperty::asIID);
+        return Optional.ofNullable(singular.get(ThingProperty.IID.class)).map(ThingProperty::asIID);
     }
 
     public Optional<ThingProperty.Isa> isaProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.Isa.class)).map(ThingProperty::asIsa);
+        return Optional.ofNullable(singular.get(ThingProperty.Isa.class)).map(ThingProperty::asIsa);
     }
 
     public Optional<ThingProperty.NEQ> neqProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.NEQ.class)).map(ThingProperty::asNEQ);
+        return Optional.ofNullable(singular.get(ThingProperty.NEQ.class)).map(ThingProperty::asNEQ);
     }
 
     public Optional<ThingProperty.Value> valueProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.Value.class)).map(ThingProperty::asValue);
+        return Optional.ofNullable(singular.get(ThingProperty.Value.class)).map(ThingProperty::asValue);
     }
 
     public Optional<ThingProperty.Relation> relationProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.Relation.class)).map(ThingProperty::asRelation);
+        return Optional.ofNullable(singular.get(ThingProperty.Relation.class)).map(ThingProperty::asRelation);
     }
 
     public List<ThingProperty.Has> hasProperties() {
-        return repeatingProperties.computeIfAbsent(ThingProperty.Has.class, c -> new ArrayList<>())
+        return repeating.computeIfAbsent(ThingProperty.Has.class, c -> new ArrayList<>())
                 .stream().map(ThingProperty::asHas).collect(toList());
     }
 
     void addSingularProperties(ThingProperty.Singular property) {
-        if (singularProperties.containsKey(property.getClass())) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(identity, singularProperties.get(property.getClass()), property));
+        if (singular.containsKey(property.getClass()) && !singular.get(property.getClass()).equals(property)) {
+            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(identity, singular.get(property.getClass()), property));
         } else if (property.isIsa() && property.asIsa().type().labelProperty().isPresent() && relationProperty().isPresent()) {
             relationProperty().get().setScope(property.asIsa().type().labelProperty().get().label());
         } else if (property.isRelation() && isaProperty().isPresent() && isaProperty().get().type().labelProperty().isPresent()) {
             property.asRelation().setScope(isaProperty().get().type().labelProperty().get().label());
         }
-        singularProperties.put(property.getClass(), property);
+
+        if (!singular.containsKey(property.getClass())) {
+            singular.put(property.getClass(), property);
+        }
     }
 
     @Override
     ThingVariable.Merged merge(ThingVariable<?> variable) {
-        ThingVariable.Merged merged = new ThingVariable.Merged(identity, singularProperties, repeatingProperties);
-        variable.singularProperties.values().forEach(merged::addSingularProperties);
-        variable.repeatingProperties.forEach(
-                (clazz, list) -> merged.repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
+        ThingVariable.Merged merged = new ThingVariable.Merged(identity, singular, repeating);
+        variable.singular.values().forEach(merged::addSingularProperties);
+        variable.repeating.forEach(
+                (clazz, list) -> merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
         );
         return merged;
     }
@@ -137,7 +140,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     public T asSameThingWith(ThingProperty.Repeatable property) {
-        repeatingProperties.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
+        repeating.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
         return getThis();
     }
 
@@ -161,7 +164,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         ThingVariable<?> setAnonymousWithID(int id) {
-            throw GraqlException.create(ErrorMessage.INVALID_CONVERT_OPERATION.message());
+            throw GraqlException.create(INVALID_CONVERT_OPERATION.message());
         }
 
         Merged(Identity identity,
@@ -258,12 +261,12 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
-            ThingProperty.Relation relationProperty = singularProperties.get(ThingProperty.Relation.class).asRelation();
+            ThingProperty.Relation relationProperty = singular.get(ThingProperty.Relation.class).asRelation();
             relationProperty.addPlayers(rolePlayer);
             if (isaProperty().isPresent() && !relationProperty.hasScope()) {
                 relationProperty.setScope(isaProperty().get().type().labelProperty().get().label());
             }
-            this.singularProperties.put(ThingProperty.Relation.class, relationProperty);
+            this.singular.put(ThingProperty.Relation.class, relationProperty);
             return this;
         }
 

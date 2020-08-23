@@ -38,15 +38,15 @@ import static java.util.stream.Collectors.toList;
 
 public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVariableBuilder {
 
-    private final Map<Class<? extends TypeProperty>, TypeProperty.Singular> singularProperties;
-    private final Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeatingProperties;
-    private final List<TypeProperty> orderedProperties;
+    private final Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular;
+    private final Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating;
+    private final List<TypeProperty> ordered;
 
     TypeVariable(Identity identity, TypeProperty property) {
         super(identity);
-        this.singularProperties = new HashMap<>();
-        this.repeatingProperties = new HashMap<>();
-        this.orderedProperties = new ArrayList<>();
+        this.singular = new HashMap<>();
+        this.repeating = new HashMap<>();
+        this.ordered = new ArrayList<>();
         if (property != null) {
             if (property.isSingular()) asTypeWith(property.asSingular());
             else asTypeWith(property.asRepeatable());
@@ -54,13 +54,13 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     private TypeVariable(Identity identity,
-                         Map<Class<? extends TypeProperty>, TypeProperty.Singular> singularProperties,
-                         Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeatingProperties,
-                         List<TypeProperty> orderedProperties) {
+                         Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular,
+                         Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating,
+                         List<TypeProperty> ordered) {
         super(identity);
-        this.singularProperties = new HashMap<>(singularProperties);
-        this.repeatingProperties = new HashMap<>(repeatingProperties);
-        this.orderedProperties = new ArrayList<>(orderedProperties);
+        this.singular = new HashMap<>(singular);
+        this.repeating = new HashMap<>(repeating);
+        this.ordered = new ArrayList<>(ordered);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
     @Override
     public Set<TypeProperty> properties() {
-        return set(orderedProperties);
+        return set(ordered);
     }
 
     @Override
@@ -89,26 +89,23 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     private void addSingularProperties(TypeProperty.Singular property) {
-        if (singularProperties.containsKey(property.getClass())) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(
-                    identity, singularProperties.get(property.getClass()), property
-            ));
+        if (singular.containsKey(property.getClass()) && !singular.get(property.getClass()).equals(property)) {
+            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(identity, singular.get(property.getClass()), property));
+        } else if (!singular.containsKey(property.getClass())) {
+            singular.put(property.getClass(), property);
         }
-        singularProperties.put(property.getClass(), property);
     }
 
     @Override
     TypeVariable merge(TypeVariable variable) {
-        TypeVariable merged = new TypeVariable(identity, singularProperties, repeatingProperties, orderedProperties);
-        variable.singularProperties.values().stream()
-                .filter(p -> !(p instanceof TypeProperty.Label))
-                .forEach(property -> {
-                    merged.addSingularProperties(property);
-                    merged.orderedProperties.add(property);
-                });
-        variable.repeatingProperties.forEach((clazz, list) -> {
-            merged.repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list);
-            merged.orderedProperties.addAll(list);
+        TypeVariable merged = new TypeVariable(identity, singular, repeating, ordered);
+        variable.singular.values().forEach(property -> {
+            merged.addSingularProperties(property);
+            merged.ordered.add(property);
+        });
+        variable.repeating.forEach((clazz, list) -> {
+            merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list);
+            merged.ordered.addAll(list);
         });
         return merged;
     }
@@ -116,7 +113,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     @Override
     public TypeVariable asTypeWith(TypeProperty.Singular property) {
         addSingularProperties(property);
-        orderedProperties.add(property);
+        ordered.add(property);
         return this;
     }
 
@@ -126,51 +123,51 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
             ((TypeProperty.Relates) property).setScope(labelProperty().get().label());
         }
 
-        repeatingProperties.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
-        orderedProperties.add(property);
+        repeating.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
+        ordered.add(property);
         return this;
     }
 
     public Optional<TypeProperty.Label> labelProperty() {
-        return Optional.ofNullable(singularProperties.get(TypeProperty.Label.class)).map(TypeProperty::asLabel);
+        return Optional.ofNullable(singular.get(TypeProperty.Label.class)).map(TypeProperty::asLabel);
     }
 
     public Optional<TypeProperty.Sub> subProperty() {
-        return Optional.ofNullable(singularProperties.get(TypeProperty.Sub.class)).map(TypeProperty::asSub);
+        return Optional.ofNullable(singular.get(TypeProperty.Sub.class)).map(TypeProperty::asSub);
     }
 
     public Optional<TypeProperty.Abstract> abstractProperty() {
-        return Optional.ofNullable(singularProperties.get(TypeProperty.Abstract.class)).map(TypeProperty::asAbstract);
+        return Optional.ofNullable(singular.get(TypeProperty.Abstract.class)).map(TypeProperty::asAbstract);
     }
 
     public Optional<TypeProperty.ValueType> valueTypeProperty() {
-        return Optional.ofNullable(singularProperties.get(TypeProperty.ValueType.class)).map(TypeProperty::asValueType);
+        return Optional.ofNullable(singular.get(TypeProperty.ValueType.class)).map(TypeProperty::asValueType);
     }
 
     public Optional<TypeProperty.Regex> regexProperty() {
-        return Optional.ofNullable(singularProperties.get(TypeProperty.Regex.class)).map(TypeProperty::asRegex);
+        return Optional.ofNullable(singular.get(TypeProperty.Regex.class)).map(TypeProperty::asRegex);
     }
 
     public Optional<TypeProperty.Then> thenProperty() {
-        return Optional.ofNullable(singularProperties.get(TypeProperty.Then.class)).map(TypeProperty::asThen);
+        return Optional.ofNullable(singular.get(TypeProperty.Then.class)).map(TypeProperty::asThen);
     }
 
     public Optional<TypeProperty.When> whenProperty() {
-        return Optional.ofNullable(singularProperties.get(TypeProperty.When.class)).map(TypeProperty::asWhen);
+        return Optional.ofNullable(singular.get(TypeProperty.When.class)).map(TypeProperty::asWhen);
     }
 
     public List<TypeProperty.Owns> ownsProperties() {
-        return repeatingProperties.computeIfAbsent(TypeProperty.Owns.class, c -> new ArrayList<>())
+        return repeating.computeIfAbsent(TypeProperty.Owns.class, c -> new ArrayList<>())
                 .stream().map(TypeProperty::asOwns).collect(toList());
     }
 
     public List<TypeProperty.Plays> playsProperties() {
-        return repeatingProperties.computeIfAbsent(TypeProperty.Plays.class, c -> new ArrayList<>())
+        return repeating.computeIfAbsent(TypeProperty.Plays.class, c -> new ArrayList<>())
                 .stream().map(TypeProperty::asPlays).collect(toList());
     }
 
     public List<TypeProperty.Relates> relatesProperties() {
-        return repeatingProperties.computeIfAbsent(TypeProperty.Relates.class, c -> new ArrayList<>())
+        return repeating.computeIfAbsent(TypeProperty.Relates.class, c -> new ArrayList<>())
                 .stream().map(TypeProperty::asRelates).collect(toList());
     }
 
@@ -180,14 +177,14 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
         if (isVisible()) {
             syntax.append(identity.syntax());
-            if (!orderedProperties.isEmpty()) {
+            if (!ordered.isEmpty()) {
                 syntax.append(SPACE);
-                syntax.append(orderedProperties.stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+                syntax.append(ordered.stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else if (labelProperty().isPresent()) {
             syntax.append(labelProperty().get().scopedLabel());
-            if (orderedProperties.size() > 1) {
-                syntax.append(SPACE).append(orderedProperties.stream().filter(p -> !(p instanceof TypeProperty.Label))
+            if (ordered.size() > 1) {
+                syntax.append(SPACE).append(ordered.stream().filter(p -> !(p instanceof TypeProperty.Label))
                                                     .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else {
