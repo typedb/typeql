@@ -63,7 +63,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         this.repeatingProperties = new HashMap<>(repeatingProperties);
     }
 
-    public abstract T getThis();
+    abstract T getThis();
 
     public abstract T withoutProperties();
 
@@ -112,11 +112,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     void addSingularProperties(ThingProperty.Singular property) {
         if (singularProperties.containsKey(property.getClass())) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(
-                    withoutProperties().toString(),
-                    singularProperties.get(property.getClass()).toString(),
-                    property.toString()
-            ));
+            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(identity, singularProperties.get(property.getClass()), property));
         } else if (property.isIsa() && property.asIsa().type().labelProperty().isPresent() && relationProperty().isPresent()) {
             relationProperty().get().setScope(property.asIsa().type().labelProperty().get().label());
         } else if (property.isRelation() && isaProperty().isPresent() && isaProperty().get().type().labelProperty().isPresent()) {
@@ -164,7 +160,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        ThingVariable<?> asAnonymousWithID(int id) {
+        ThingVariable<?> setAnonymousWithID(int id) {
             throw GraqlException.create(ErrorMessage.INVALID_CONVERT_OPERATION.message());
         }
 
@@ -175,12 +171,12 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public Merged getThis() {
+        ThingVariable.Merged getThis() {
             return this;
         }
 
         @Override
-        public Merged withoutProperties() {
+        public ThingVariable.Merged withoutProperties() {
             return new ThingVariable.Merged(identity);
         }
 
@@ -213,20 +209,9 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             super(identity, property);
         }
 
-        private Thing(Identity.AnonymousWithID identity,
-                      Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                      Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
-        }
-
         @Override
-        public ThingVariable.Thing getThis() {
+        ThingVariable.Thing getThis() {
             return this;
-        }
-
-        @Override
-        ThingVariable.Thing asAnonymousWithID(int id) {
-            return new ThingVariable.Thing(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
         }
 
         @Override
@@ -261,20 +246,9 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             super(identity, property);
         }
 
-        public Relation(Identity.AnonymousWithID identity,
-                        Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                        Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
-        }
-
         @Override
-        public ThingVariable.Relation getThis() {
+        ThingVariable.Relation getThis() {
             return this;
-        }
-
-        @Override
-        ThingVariable.Relation asAnonymousWithID(int id) {
-            return new ThingVariable.Relation(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
         }
 
         @Override
@@ -314,20 +288,9 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             super(identity, property);
         }
 
-        public Attribute(Identity.AnonymousWithID identity,
-                         Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                         Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
-        }
-
         @Override
-        public ThingVariable.Attribute getThis() {
+        ThingVariable.Attribute getThis() {
             return this;
-        }
-
-        @Override
-        ThingVariable.Attribute asAnonymousWithID(int id) {
-            return new ThingVariable.Attribute(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
         }
 
         @Override

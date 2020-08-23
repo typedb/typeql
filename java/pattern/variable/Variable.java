@@ -28,7 +28,7 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 
 public abstract class Variable<T extends Variable<T>> {
 
-    final Identity identity;
+    Identity identity;
 
     Variable(Identity identity) {
         this.identity = identity;

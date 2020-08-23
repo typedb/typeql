@@ -36,9 +36,14 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
 
     public abstract T withoutProperties();
 
+    abstract T getThis();
+
     abstract T merge(T variable);
 
-    abstract T asAnonymousWithID(int id);
+    T setAnonymousWithID(int id) {
+        this.identity = Identity.anonymous(identity.isVisible, id);
+        return getThis();
+    }
 
     public static Map<Identity, TypeVariable> asTypeGraph(List<TypeVariable> variables) {
         LinkedHashMap<Identity, TypeVariable> graph = new LinkedHashMap<>();
@@ -78,8 +83,8 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
                     graph.put(variable.identity(), variable);
                 }
             } else {
-                BoundVariable<?> convertedVar = variable.asAnonymousWithID(id++);
-                graph.put(convertedVar.identity(), convertedVar);
+                variable.setAnonymousWithID(id++);
+                graph.put(variable.identity(), variable);
             }
         }
 

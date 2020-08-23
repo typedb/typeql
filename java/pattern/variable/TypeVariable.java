@@ -64,6 +64,11 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
+    public TypeVariable getThis() {
+        return this;
+    }
+
+    @Override
     public TypeVariable withoutProperties() {
         return new TypeVariable(identity, null);
     }
@@ -83,18 +88,10 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         return this;
     }
 
-    @Override
-    TypeVariable asAnonymousWithID(int id) {
-        return new TypeVariable(Identity.anonymous(identity.isVisible, id), singularProperties,
-                                repeatingProperties, orderedProperties);
-    }
-
     private void addSingularProperties(TypeProperty.Singular property) {
         if (singularProperties.containsKey(property.getClass())) {
             throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(
-                    withoutProperties().toString(),
-                    singularProperties.get(property.getClass()).toString(),
-                    property.toString()
+                    identity, singularProperties.get(property.getClass()), property
             ));
         }
         singularProperties.put(property.getClass(), property);
