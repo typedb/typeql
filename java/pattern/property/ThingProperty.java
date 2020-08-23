@@ -519,27 +519,21 @@ public abstract class ThingProperty extends Property {
 
     public static class Has extends ThingProperty.Repeatable {
 
-        private final String type;
         private final ThingVariable<?> variable;
         private final int hash;
 
         public Has(String type, ThingProperty.Value<?> value) {
-            this(type, hidden().asAttributeWith(value));
+            this(hidden().type(type), hidden().asAttributeWith(value));
         }
 
         public Has(String type, UnboundVariable var) {
-            this(type, var.asThing());
+            this(hidden().type(type), var.asThing());
         }
 
-        private Has(String type, ThingVariable<?> variable) {
-            if (type == null || variable == null) throw new NullPointerException("Null type/attribute");
-            this.type = type;
-            this.variable = variable;
-            this.hash = Objects.hash(this.type, this.variable);
-        }
-
-        public String type() {
-            return type;
+        private Has(TypeVariable type, ThingVariable<?> attribute) {
+            if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
+            this.variable = attribute.asSameThingWith(new ThingProperty.Isa(type, false));
+            this.hash = Objects.hash(this.variable);
         }
 
         public ThingVariable<?> variable() {
@@ -563,7 +557,9 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public String toString() {
-            return String.valueOf(HAS) + SPACE + type + SPACE + variable;
+            return String.valueOf(HAS) + SPACE +
+                    variable.isaProperty().get().type().labelProperty().get().label() + SPACE +
+                    (variable.isNamed() ? variable.identity() : variable.valueProperty().get());
         }
 
         @Override
@@ -571,7 +567,7 @@ public abstract class ThingProperty extends Property {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Has that = (Has) o;
-            return (type.equals(that.type) && variable.equals(that.variable));
+            return variable.equals(that.variable);
         }
 
         @Override
