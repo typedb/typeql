@@ -565,7 +565,7 @@ public abstract class ThingProperty extends Property {
         @Override
         public String toString() {
             return String.valueOf(HAS) + SPACE +
-                    attribute.isa().get().type().label().get().label() + SPACE +
+                    type.label().get().label() + SPACE +
                     (attribute.isNamed() ? attribute.identity() : attribute.value().get());
         }
 
