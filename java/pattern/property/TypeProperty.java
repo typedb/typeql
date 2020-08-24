@@ -656,7 +656,7 @@ public abstract class TypeProperty extends Property {
         private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
-            this.relationType = roleType.labelProperty().map(l -> hidden().type(l.scope().get())).orElse(null);
+            this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
             this.overriddenRoleType = overriddenRoleType;
             this.hash = Objects.hash(roleType, overriddenRoleType);
         }
@@ -747,11 +747,11 @@ public abstract class TypeProperty extends Property {
         }
 
         public void setScope(String relationLabel) {
-            if (roleType.labelProperty().isPresent()) {
-                this.roleType = hidden().type(relationLabel, roleType.labelProperty().get().label());
+            if (roleType.label().isPresent()) {
+                this.roleType = hidden().type(relationLabel, roleType.label().get().label());
             }
-            if (overriddenRoleType != null && overriddenRoleType.labelProperty().isPresent()) {
-                this.overriddenRoleType = hidden().type(relationLabel, overriddenRoleType.labelProperty().get().label());
+            if (overriddenRoleType != null && overriddenRoleType.label().isPresent()) {
+                this.overriddenRoleType = hidden().type(relationLabel, overriddenRoleType.label().get().label());
             }
         }
 
@@ -777,12 +777,12 @@ public abstract class TypeProperty extends Property {
         public String toString() {
             StringBuilder syntax = new StringBuilder();
             syntax.append(RELATES).append(SPACE);
-            if (!roleType.labelProperty().isPresent()) syntax.append(roleType);
-            else syntax.append(roleType.labelProperty().get().label());
+            if (!roleType.label().isPresent()) syntax.append(roleType);
+            else syntax.append(roleType.label().get().label());
             if (overriddenRoleType != null) {
                 syntax.append(SPACE).append(AS).append(SPACE);
-                if (!overriddenRoleType.labelProperty().isPresent()) syntax.append(overriddenRoleType);
-                else syntax.append(overriddenRoleType.labelProperty().get().label());
+                if (!overriddenRoleType.label().isPresent()) syntax.append(overriddenRoleType);
+                else syntax.append(overriddenRoleType.label().get().label());
             }
             return syntax.toString();
         }

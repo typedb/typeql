@@ -119,8 +119,8 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
     @Override
     public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
-        if (labelProperty().isPresent() && property instanceof TypeProperty.Relates) {
-            ((TypeProperty.Relates) property).setScope(labelProperty().get().label());
+        if (label().isPresent() && property instanceof TypeProperty.Relates) {
+            ((TypeProperty.Relates) property).setScope(label().get().label());
         }
 
         repeating.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
@@ -128,45 +128,45 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         return this;
     }
 
-    public Optional<TypeProperty.Label> labelProperty() {
+    public Optional<TypeProperty.Label> label() {
         return Optional.ofNullable(singular.get(TypeProperty.Label.class)).map(TypeProperty::asLabel);
     }
 
-    public Optional<TypeProperty.Sub> subProperty() {
+    public Optional<TypeProperty.Sub> sub() {
         return Optional.ofNullable(singular.get(TypeProperty.Sub.class)).map(TypeProperty::asSub);
     }
 
-    public Optional<TypeProperty.Abstract> abstractProperty() {
+    public Optional<TypeProperty.Abstract> abstractFlag() {
         return Optional.ofNullable(singular.get(TypeProperty.Abstract.class)).map(TypeProperty::asAbstract);
     }
 
-    public Optional<TypeProperty.ValueType> valueTypeProperty() {
+    public Optional<TypeProperty.ValueType> valueType() {
         return Optional.ofNullable(singular.get(TypeProperty.ValueType.class)).map(TypeProperty::asValueType);
     }
 
-    public Optional<TypeProperty.Regex> regexProperty() {
+    public Optional<TypeProperty.Regex> regex() {
         return Optional.ofNullable(singular.get(TypeProperty.Regex.class)).map(TypeProperty::asRegex);
     }
 
-    public Optional<TypeProperty.Then> thenProperty() {
+    public Optional<TypeProperty.Then> then() {
         return Optional.ofNullable(singular.get(TypeProperty.Then.class)).map(TypeProperty::asThen);
     }
 
-    public Optional<TypeProperty.When> whenProperty() {
+    public Optional<TypeProperty.When> when() {
         return Optional.ofNullable(singular.get(TypeProperty.When.class)).map(TypeProperty::asWhen);
     }
 
-    public List<TypeProperty.Owns> ownsProperties() {
+    public List<TypeProperty.Owns> owns() {
         return repeating.computeIfAbsent(TypeProperty.Owns.class, c -> new ArrayList<>())
                 .stream().map(TypeProperty::asOwns).collect(toList());
     }
 
-    public List<TypeProperty.Plays> playsProperties() {
+    public List<TypeProperty.Plays> plays() {
         return repeating.computeIfAbsent(TypeProperty.Plays.class, c -> new ArrayList<>())
                 .stream().map(TypeProperty::asPlays).collect(toList());
     }
 
-    public List<TypeProperty.Relates> relatesProperties() {
+    public List<TypeProperty.Relates> relates() {
         return repeating.computeIfAbsent(TypeProperty.Relates.class, c -> new ArrayList<>())
                 .stream().map(TypeProperty::asRelates).collect(toList());
     }
@@ -181,8 +181,8 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
                 syntax.append(SPACE);
                 syntax.append(ordered.stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
             }
-        } else if (labelProperty().isPresent()) {
-            syntax.append(labelProperty().get().scopedLabel());
+        } else if (label().isPresent()) {
+            syntax.append(label().get().scopedLabel());
             if (ordered.size() > 1) {
                 syntax.append(SPACE).append(ordered.stream().filter(p -> !(p instanceof TypeProperty.Label))
                                                     .map(Property::toString).collect(joining(COMMA_SPACE.toString())));

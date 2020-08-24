@@ -476,8 +476,8 @@ public abstract class ThingProperty extends Property {
             }
 
             public void setScope(String relationLabel) {
-                if (roleType != null && roleType.labelProperty().isPresent()) {
-                    this.roleType = hidden().type(relationLabel, roleType.labelProperty().get().label());
+                if (roleType != null && roleType.label().isPresent()) {
+                    this.roleType = hidden().type(relationLabel, roleType.label().get().label());
                 }
             }
 
@@ -496,7 +496,7 @@ public abstract class ThingProperty extends Property {
                 } else {
                     StringBuilder syntax = new StringBuilder();
                     if (roleType.isVisible()) syntax.append(roleType.identity().toString());
-                    else syntax.append(roleType.labelProperty().get().label());
+                    else syntax.append(roleType.label().get().label());
                     syntax.append(COLON).append(SPACE).append(player);
                     return syntax.toString();
                 }
@@ -565,8 +565,8 @@ public abstract class ThingProperty extends Property {
         @Override
         public String toString() {
             return String.valueOf(HAS) + SPACE +
-                    attribute.isaProperty().get().type().labelProperty().get().label() + SPACE +
-                    (attribute.isNamed() ? attribute.identity() : attribute.valueProperty().get());
+                    attribute.isa().get().type().label().get().label() + SPACE +
+                    (attribute.isNamed() ? attribute.identity() : attribute.value().get());
         }
 
         @Override

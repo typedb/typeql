@@ -85,27 +85,27 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return this;
     }
 
-    public Optional<ThingProperty.IID> iidProperty() {
+    public Optional<ThingProperty.IID> iid() {
         return Optional.ofNullable(singular.get(ThingProperty.IID.class)).map(ThingProperty::asIID);
     }
 
-    public Optional<ThingProperty.Isa> isaProperty() {
+    public Optional<ThingProperty.Isa> isa() {
         return Optional.ofNullable(singular.get(ThingProperty.Isa.class)).map(ThingProperty::asIsa);
     }
 
-    public Optional<ThingProperty.NEQ> neqProperty() {
+    public Optional<ThingProperty.NEQ> neq() {
         return Optional.ofNullable(singular.get(ThingProperty.NEQ.class)).map(ThingProperty::asNEQ);
     }
 
-    public Optional<ThingProperty.Value> valueProperty() {
+    public Optional<ThingProperty.Value> value() {
         return Optional.ofNullable(singular.get(ThingProperty.Value.class)).map(ThingProperty::asValue);
     }
 
-    public Optional<ThingProperty.Relation> relationProperty() {
+    public Optional<ThingProperty.Relation> relation() {
         return Optional.ofNullable(singular.get(ThingProperty.Relation.class)).map(ThingProperty::asRelation);
     }
 
-    public List<ThingProperty.Has> hasProperties() {
+    public List<ThingProperty.Has> has() {
         return repeating.computeIfAbsent(ThingProperty.Has.class, c -> new ArrayList<>())
                 .stream().map(ThingProperty::asHas).collect(toList());
     }
@@ -113,10 +113,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     void addSingularProperties(ThingProperty.Singular property) {
         if (singular.containsKey(property.getClass()) && !singular.get(property.getClass()).equals(property)) {
             throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(identity, singular.get(property.getClass()), property));
-        } else if (property.isIsa() && property.asIsa().type().labelProperty().isPresent() && relationProperty().isPresent()) {
-            relationProperty().get().setScope(property.asIsa().type().labelProperty().get().label());
-        } else if (property.isRelation() && isaProperty().isPresent() && isaProperty().get().type().labelProperty().isPresent()) {
-            property.asRelation().setScope(isaProperty().get().type().labelProperty().get().label());
+        } else if (property.isIsa() && property.asIsa().type().label().isPresent() && relation().isPresent()) {
+            relation().get().setScope(property.asIsa().type().label().get().label());
+        } else if (property.isRelation() && isa().isPresent() && isa().get().type().label().isPresent()) {
+            property.asRelation().setScope(isa().get().type().label().get().label());
         }
 
         if (!singular.containsKey(property.getClass())) {
@@ -145,12 +145,12 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     String isaSyntax() {
-        if (isaProperty().isPresent()) return isaProperty().get().toString();
+        if (isa().isPresent()) return isa().get().toString();
         else return "";
     }
 
     String hasSyntax() {
-        return hasProperties().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
+        return has().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
     }
 
     @Override
@@ -189,11 +189,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             Predicate<ThingProperty> filter = p -> true;
             if (isVisible()) {
                 syntax.append(identity.syntax());
-            } else if (relationProperty().isPresent()) {
-                syntax.append(SPACE).append(relationProperty().get());
+            } else if (relation().isPresent()) {
+                syntax.append(SPACE).append(relation().get());
                 filter = p -> !(p instanceof ThingProperty.Relation);
-            } else if (valueProperty().isPresent()) {
-                syntax.append(SPACE).append(valueProperty().get());
+            } else if (value().isPresent()) {
+                syntax.append(SPACE).append(value().get());
                 filter = p -> !(p instanceof ThingProperty.Value<?>);
             } else {
                 assert false;
@@ -223,9 +223,9 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         private String thingSyntax() {
-            if (isaProperty().isPresent()) return isaSyntax();
-            else if (iidProperty().isPresent()) return iidProperty().get().toString();
-            else if (neqProperty().isPresent()) return neqProperty().get().toString();
+            if (isa().isPresent()) return isaSyntax();
+            else if (iid().isPresent()) return iid().get().toString();
+            else if (neq().isPresent()) return neq().get().toString();
             else return "";
         }
 
@@ -263,8 +263,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
             ThingProperty.Relation relationProperty = singular.get(ThingProperty.Relation.class).asRelation();
             relationProperty.addPlayers(rolePlayer);
-            if (isaProperty().isPresent() && !relationProperty.hasScope()) {
-                relationProperty.setScope(isaProperty().get().type().labelProperty().get().label());
+            if (isa().isPresent() && !relationProperty.hasScope()) {
+                relationProperty.setScope(isa().get().type().label().get().label());
             }
             this.singular.put(ThingProperty.Relation.class, relationProperty);
             return this;
@@ -272,10 +272,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public String toString() {
-            assert relationProperty().isPresent();
+            assert relation().isPresent();
             StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
-            syntax.append(relationProperty().get());
+            syntax.append(relation().get());
 
             String properties = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
@@ -303,10 +303,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public String toString() {
-            assert valueProperty().isPresent();
+            assert value().isPresent();
             StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
-            syntax.append(valueProperty().get());
+            syntax.append(value().get());
 
             String properties = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
