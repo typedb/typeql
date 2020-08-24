@@ -519,7 +519,8 @@ public abstract class ThingProperty extends Property {
 
     public static class Has extends ThingProperty.Repeatable {
 
-        private final ThingVariable<?> variable;
+        private final TypeVariable type;
+        private final ThingVariable<?> attribute;
         private final int hash;
 
         public Has(String type, ThingProperty.Value<?> value) {
@@ -532,17 +533,23 @@ public abstract class ThingProperty extends Property {
 
         private Has(TypeVariable type, ThingVariable<?> attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
-            this.variable = attribute.asSameThingWith(new ThingProperty.Isa(type, false));
-            this.hash = Objects.hash(this.variable);
+            this.type = type;
+            if (attribute.isNamed()) this.attribute = attribute;
+            else this.attribute = attribute.asSameThingWith(new Isa(type, false));
+            this.hash = Objects.hash(this.type, this.attribute);
         }
 
-        public ThingVariable<?> variable() {
-            return variable;
+        public TypeVariable type() {
+            return type;
+        }
+
+        public ThingVariable<?> attribute() {
+            return attribute;
         }
 
         @Override
         public Stream<ThingVariable<?>> variables() {
-            return Stream.of(variable);
+            return Stream.of(attribute);
         }
 
         @Override
@@ -558,8 +565,8 @@ public abstract class ThingProperty extends Property {
         @Override
         public String toString() {
             return String.valueOf(HAS) + SPACE +
-                    variable.isaProperty().get().type().labelProperty().get().label() + SPACE +
-                    (variable.isNamed() ? variable.identity() : variable.valueProperty().get());
+                    attribute.isaProperty().get().type().labelProperty().get().label() + SPACE +
+                    (attribute.isNamed() ? attribute.identity() : attribute.valueProperty().get());
         }
 
         @Override
@@ -567,7 +574,7 @@ public abstract class ThingProperty extends Property {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Has that = (Has) o;
-            return variable.equals(that.variable);
+            return attribute.equals(that.attribute);
         }
 
         @Override
