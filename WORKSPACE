@@ -36,8 +36,8 @@ kotlin_repositories()
 kt_register_toolchains()
 
 # Load //builder/python
-load("@graknlabs_dependencies//builder/python:deps.bzl", "rules_python")
-rules_python()
+load("@graknlabs_dependencies//builder/python:deps.bzl", python_deps = "deps")
+python_deps()
 load("@rules_python//python:pip.bzl", "pip_repositories")
 pip_repositories()
 
