@@ -15,19 +15,18 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-
 workspace(name = "graknlabs_graql")
 
 ################################
 # Load @graknlabs_dependencies #
 ################################
+
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
 # Load //builder/java
 load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
 java_deps()
-load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
 
 # Load //builder/kotlin
 load("@graknlabs_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
@@ -50,7 +49,7 @@ antlr_dependencies()
 
 # Load //tool/common
 load("@graknlabs_dependencies//tool/common:deps.bzl", "graknlabs_dependencies_ci_pip",
-    graknlabs_dependencies_tool_maven_artifacts = "maven_artifacts")
+graknlabs_dependencies_tool_maven_artifacts = "maven_artifacts")
 graknlabs_dependencies_ci_pip()
 load("@graknlabs_dependencies_ci_pip//:requirements.bzl", "pip_install")
 pip_install()
@@ -67,9 +66,10 @@ unuseddeps_deps()
 load("@graknlabs_dependencies//tool/sonarcloud:deps.bzl", "sonarcloud_dependencies")
 sonarcloud_dependencies()
 
-#####################################################################
-# Load @graknlabs_bazel_distribution (from @graknlabs_dependencies) #
-#####################################################################
+######################################
+# Load @graknlabs_bazel_distribution #
+######################################
+
 load("@graknlabs_dependencies//distribution:deps.bzl", "graknlabs_bazel_distribution")
 graknlabs_bazel_distribution()
 
@@ -80,35 +80,33 @@ load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
 # Load //github
-load("@graknlabs_bazel_distribution//github:deps.bzl", "tcnksm_ghr")
-tcnksm_ghr()
+load("@graknlabs_bazel_distribution//github:deps.bzl", github_deps = "deps")
+github_deps()
 
-##########################
-# Load @graknlabs_common #
-##########################
+################################
+# Load @graknlabs dependencies #
+################################
+
 # We don't load Maven artifacts for @graknlabs_common as they are only needed
 # if you depend on @graknlabs_common//test/server
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_common")
 graknlabs_common()
 
-################################
-# Load @graknlabs_verification #
-################################
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_verification")
 graknlabs_verification()
 
-#########################
-# Load @graknlabs_graql #
-#########################
 load("//dependencies/maven:artifacts.bzl", graknlabs_graql_artifacts = "artifacts")
 
-###############
-# Load @maven #
-###############
+############################
+# Load @maven dependencies #
+############################
+
+load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
 maven(graknlabs_dependencies_tool_maven_artifacts + graknlabs_graql_artifacts)
 
 ############################################
 # Generate @graknlabs_graql_workspace_refs #
 ############################################
+
 load("@graknlabs_bazel_distribution//common:rules.bzl", "workspace_refs")
 workspace_refs(name = "graknlabs_graql_workspace_refs")
