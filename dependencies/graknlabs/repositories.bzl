@@ -20,8 +20,8 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 def graknlabs_dependencies():
     git_repository(
         name = "graknlabs_dependencies",
-        remote = "https://github.com/lolski/dependencies",
-        commit = "4bd3e1da77d6156826f9ed319c44641bf48ed724", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
+        remote = "https://github.com/graknlabs/dependencies",
+        commit = "52f3161ec48fa207e814d27facffb2cf1ff50408", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
     )
 
 def graknlabs_common():
