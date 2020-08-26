@@ -24,6 +24,10 @@ workspace(name = "graknlabs_graql")
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
+# Load //builder/bazel for RBE
+load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
+bazel_toolchain()
+
 # Load //builder/java
 load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
 java_deps()
