@@ -34,7 +34,9 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         super(reference);
     }
 
-    public abstract T withoutProperties();
+    public UnboundVariable asUnbound() {
+        return new UnboundVariable(reference);
+    }
 
     abstract T getThis();
 

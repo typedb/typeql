@@ -53,7 +53,7 @@ public class MavenApplicationTest {
                         var("t").val("Spy")
                 ),
                 var("t").neq("Apocalypse Now")
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }

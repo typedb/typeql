@@ -28,17 +28,17 @@ import static java.util.Objects.requireNonNull;
 
 public class GraqlDelete extends GraqlWritable {
 
-    GraqlDelete(MatchClause match, List<ThingVariable<?>> variables) {
+    GraqlDelete(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         super(GraqlToken.Command.DELETE, requireNonNull(match), validVariables(match, variables));
     }
 
-    static List<ThingVariable<?>> validVariables(MatchClause match, List<ThingVariable<?>> variables) {
+    static List<ThingVariable<?>> validVariables(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
-            if (var.isNamed() && !match.variablesNamedUnbound().contains(var.withoutProperties())) {
+            if (var.isNamed() && !match.variablesNamedUnbound().contains(var.asUnbound())) {
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.reference()));
             }
             var.variables().forEach(nestedVar -> {
-                if (nestedVar.isNamed() && !match.variablesNamedUnbound().contains(nestedVar.withoutProperties())) {
+                if (nestedVar.isNamed() && !match.variablesNamedUnbound().contains(nestedVar.asUnbound())) {
                     throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(nestedVar.reference()));
                 }
             });
@@ -46,7 +46,7 @@ public class GraqlDelete extends GraqlWritable {
         return variables;
     }
 
-    public MatchClause match() {
+    public GraqlMatch.Unfiltered match() {
         assert super.nullableMatch() != null;
         return super.nullableMatch();
     }

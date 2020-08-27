@@ -69,11 +69,6 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
-    public TypeVariable withoutProperties() {
-        return new TypeVariable(reference, null);
-    }
-
-    @Override
     public Set<TypeProperty> properties() {
         return set(ordered);
     }

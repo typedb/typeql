@@ -18,12 +18,19 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Pattern;
+import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
+import graql.lang.pattern.variable.Variable;
 import graql.lang.query.builder.Aggregatable;
-import graql.lang.query.builder.Filterable;
+import graql.lang.query.builder.Sortable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,48 +40,59 @@ import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.NEW_LINE;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.GraqlToken.Command.GET;
+import static graql.lang.common.GraqlToken.Command.GROUP;
+import static graql.lang.common.GraqlToken.Filter.LIMIT;
+import static graql.lang.common.GraqlToken.Filter.OFFSET;
+import static graql.lang.common.GraqlToken.Filter.SORT;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
+import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
-public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<GraqlMatch.Aggregate> {
+public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Aggregate> {
 
-    private final List<UnboundVariable> vars;
-    private final MatchClause match;
-    private final Sorting sorting;
+    private final Conjunction<? extends Pattern> conjunction;
+    private final List<UnboundVariable> filter;
+    private final Sortable.Sorting sorting;
     private final Long offset;
     private final Long limit;
     private final int hash;
 
-    GraqlMatch(MatchClause match) {
-        this(match, new ArrayList<>());
+    private List<BoundVariable<?>> variables;
+    private List<UnboundVariable> variablesNamedUnbound;
+
+    GraqlMatch(Conjunction<? extends Pattern> conjunction) {
+        this(conjunction, new ArrayList<>());
     }
 
-    GraqlMatch(MatchClause match, List<UnboundVariable> vars) {
-        this(match, vars, null, null, null);
+    GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter) {
+        this(conjunction, filter, null, null, null);
     }
 
-    // We keep this contructor 'public' as it is more efficient for use during parsing
-    public GraqlMatch(MatchClause match, List<UnboundVariable> vars, Sorting sorting, Long offset, Long limit) {
-        if (match == null) throw new NullPointerException("Null match");
-        if (vars == null) throw new NullPointerException("Null vars");
-        for (UnboundVariable var : vars) {
-            if (!match.variablesNamedUnbound().contains(var))
-                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
-        }
-        List<UnboundVariable> sortableVars = vars.isEmpty() ? match.variablesNamedUnbound() : vars;
-        if (sorting != null && !sortableVars.contains(sorting.var())) {
-            throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
-        }
-
-        this.match = match;
-        this.vars = list(vars);
+    // We keep this contructor 'public' as it is more efficient for query parsing
+    public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
+        if (filter == null) throw GraqlException.create(ErrorMessage.MISSING_FILTER_VARIABLES.message());
+        this.conjunction = conjunction;
+        this.filter = list(filter);
         this.sorting = sorting;
         this.offset = offset;
         this.limit = limit;
 
+        for (UnboundVariable var : filter) {
+            if (!variablesNamedUnbound().contains(var))
+                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
+        }
+        List<UnboundVariable> sortableVars = filter.isEmpty() ? variablesNamedUnbound() : filter;
+        if (sorting != null && !sortableVars.contains(sorting.var())) {
+            throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
+        }
+
         // It is important that we use vars() (the method) and not vars (the property)
         // For reasons explained in the equals() method above
-        this.hash = Objects.hash(this.match, this.vars, this.sorting, this.offset, this.limit);
+        this.hash = Objects.hash(this.conjunction, this.filter, this.sorting, this.offset, this.limit);
     }
 
     @Override
@@ -90,47 +108,67 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
         return new Group(this, var);
     }
 
-    public List<UnboundVariable> variables() {
-        if (vars.isEmpty()) return match.variablesNamedUnbound();
-        else return vars;
+    public Conjunction<? extends Pattern> conjunction() {
+        return conjunction;
     }
 
-    public MatchClause match() {
-        return match;
+    public List<BoundVariable<?>> variables() {
+        if (variables == null) variables = conjunction.variables().collect(toList());
+        return variables;
     }
 
-    @Override
-    public Optional<Sorting> sort() {
+    List<UnboundVariable> variablesNamedUnbound() {
+        if (variablesNamedUnbound == null) {
+            variablesNamedUnbound = conjunction.variables().filter(Variable::isNamed)
+                    .map(v -> UnboundVariable.named(v.name()))
+                    .distinct().collect(toList());
+        }
+        return variablesNamedUnbound;
+    }
+
+    public List<UnboundVariable> filter() {
+        if (filter.isEmpty()) return variablesNamedUnbound();
+        else return filter;
+    }
+
+    public Optional<Sortable.Sorting> sort() {
         return Optional.ofNullable(sorting);
     }
 
-    @Override
     public Optional<Long> offset() {
         return Optional.ofNullable(offset);
     }
 
-    @Override
     public Optional<Long> limit() {
         return Optional.ofNullable(limit);
     }
 
     @Override
     public String toString() {
-        StringBuilder query = new StringBuilder(match().toString());
-        if (match().getPatterns().patterns().size() > 1) query.append(NEW_LINE);
+        StringBuilder query = new StringBuilder();
+        query.append(GraqlToken.Command.MATCH);
+
+        if (conjunction.patterns().size() > 1) query.append(NEW_LINE);
         else query.append(SPACE);
-
-        query.append(GraqlToken.Command.GET);
-        if (!vars.isEmpty()) { // Which is not equal to !vars().isEmpty()
-            String varsStr = vars.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
-            query.append(SPACE).append(varsStr);
-        }
+        query.append(conjunction.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
-        if (sort().isPresent() || offset().isPresent() || limit().isPresent()) {
-            query.append(SPACE).append(printFilters());
+
+        if (!filter.isEmpty() || sort().isPresent() || sort().isPresent() || offset().isPresent() || limit().isPresent()) {
+            if (conjunction.patterns().size() > 1) query.append(NEW_LINE);
+            else query.append(SPACE);
+
+            if (!filter.isEmpty()) { // Which is not equal to !vars().isEmpty()
+                query.append(GET);
+                String varsStr = filter.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
+                query.append(SPACE).append(varsStr);
+                query.append(SEMICOLON);
+            }
+            if (sort().isPresent()) query.append(SORT).append(SPACE).append(sorting).append(SEMICOLON).append(SPACE);
+            if (offset().isPresent()) query.append(OFFSET).append(SPACE).append(offset).append(SEMICOLON).append(SPACE);
+            if (limit().isPresent()) query.append(LIMIT).append(SPACE).append(limit).append(SEMICOLON).append(SPACE);
         }
 
-        return query.toString();
+        return query.toString().trim();
     }
 
     @Override
@@ -147,11 +185,11 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
         // vars (the property) stores the variables as the user defined
         // vars() (the method) returns match.vars() if vars (the property) is empty
         // we want to compare vars() (the method) which determines the final value
-        return (this.variables().equals(that.variables()) &&
-                this.match().equals(that.match()) &&
-                this.sort().equals(that.sort()) &&
-                this.offset().equals(that.offset()) &&
-                this.limit().equals(that.limit()));
+        return (Objects.equals(this.conjunction, that.conjunction) &&
+                Objects.equals(this.filter, that.filter) &&
+                Objects.equals(this.sorting, that.sorting) &&
+                Objects.equals(this.offset, that.offset) &&
+                Objects.equals(this.limit, that.limit));
     }
 
     @Override
@@ -159,15 +197,65 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
         return hash;
     }
 
-    public static class Unfiltered extends GraqlMatch
-            implements Filterable.Unfiltered<GraqlMatch.Sorted, GraqlMatch.Offsetted, GraqlMatch.Limited> {
+    public static class Unfiltered extends GraqlMatch implements Sortable<Sorted, Offsetted, Limited> {
 
-        Unfiltered(MatchClause match) {
-            super(match);
+        public Unfiltered(List<? extends Pattern> patterns) {
+            super(validConjunction(patterns));
         }
 
-        Unfiltered(MatchClause match, List<UnboundVariable> vars) {
-            super(match, vars);
+        static Conjunction<? extends Pattern> validConjunction(List<? extends Pattern> patterns) {
+            if (patterns.size() == 0) throw GraqlException.create(MISSING_PATTERNS.message());
+            return new Conjunction<>(patterns);
+        }
+
+        public GraqlMatch.Filtered get(String var, String... vars) {
+            return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
+        }
+
+        public GraqlMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {
+            List<UnboundVariable> varList = new ArrayList<>();
+            varList.add(var);
+            varList.addAll(Arrays.asList(vars));
+            return get(varList);
+        }
+
+        public GraqlMatch.Filtered get(List<UnboundVariable> vars) {
+            return new GraqlMatch.Filtered(this, vars);
+        }
+
+        public GraqlMatch.Sorted sort(Sorting sorting) {
+            return new GraqlMatch.Sorted(this, sorting);
+        }
+
+        public GraqlMatch.Offsetted offset(long offset) {
+            return new GraqlMatch.Offsetted(this, offset);
+        }
+
+        public GraqlMatch.Limited limit(long limit) {
+            return new GraqlMatch.Limited(this, limit);
+        }
+
+        public final GraqlInsert insert(ThingVariable<?>... things) {
+            return new GraqlInsert(this, list(things));
+        }
+
+        public final GraqlInsert insert(List<ThingVariable<?>> things) {
+            return new GraqlInsert(this, things);
+        }
+
+        public final GraqlDelete delete(ThingVariable<?>... things) {
+            return new GraqlDelete(this, list(things));
+        }
+
+        public final GraqlDelete delete(List<ThingVariable<?>> things) {
+            return new GraqlDelete(this, things);
+        }
+    }
+
+    public static class Filtered extends GraqlMatch implements Sortable<Sorted, Offsetted, Limited> {
+
+        Filtered(Unfiltered unfiltered, List<UnboundVariable> vars) {
+            super(unfiltered.conjunction(), vars, null, null, null);
         }
 
         @Override
@@ -186,39 +274,36 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
         }
     }
 
-    public static class Sorted extends GraqlMatch implements Filterable.Sorted<GraqlMatch.Offsetted, GraqlMatch.Limited> {
+    public static class Sorted extends GraqlMatch {
 
-        Sorted(GraqlMatch graqlGet, Sorting sorting) {
-            super(graqlGet.match, graqlGet.vars, sorting, graqlGet.offset, graqlGet.limit);
+        Sorted(GraqlMatch match, Sortable.Sorting sorting) {
+            super(match.conjunction, match.filter, sorting, match.offset, match.limit);
         }
 
-        @Override
         public GraqlMatch.Offsetted offset(long offset) {
             return new GraqlMatch.Offsetted(this, offset);
         }
 
-        @Override
         public GraqlMatch.Limited limit(long limit) {
             return new GraqlMatch.Limited(this, limit);
         }
     }
 
-    public static class Offsetted extends GraqlMatch implements Filterable.Offsetted<GraqlMatch.Limited> {
+    public static class Offsetted extends GraqlMatch {
 
-        Offsetted(GraqlMatch graqlGet, long offset) {
-            super(graqlGet.match, graqlGet.vars, graqlGet.sorting, offset, graqlGet.limit);
+        Offsetted(GraqlMatch match, long offset) {
+            super(match.conjunction, match.filter, match.sorting, offset, match.limit);
         }
 
-        @Override
         public GraqlMatch.Limited limit(long limit) {
             return new GraqlMatch.Limited(this, limit);
         }
     }
 
-    public static class Limited extends GraqlMatch implements Filterable.Limited {
+    public static class Limited extends GraqlMatch {
 
-        Limited(GraqlMatch graqlGet, long limit) {
-            super(graqlGet.match, graqlGet.vars, graqlGet.sorting, graqlGet.offset, limit);
+        Limited(GraqlMatch match, long limit) {
+            super(match.conjunction, match.filter, match.sorting, match.offset, limit);
         }
     }
 
@@ -238,7 +323,7 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
                 throw new NullPointerException("Variable is null");
             } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
-            } else if (var != null && !query.variables().contains(var)) {
+            } else if (var != null && !query.filter().contains(var)) {
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
             }
 
@@ -264,7 +349,11 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
         public final String toString() {
             StringBuilder query = new StringBuilder();
 
-            query.append(query()).append(SPACE).append(method);
+            if (query().filter.isEmpty() && query().conjunction().patterns().size() > 1) {
+                query.append(query()).append(NEW_LINE);
+            } else query.append(query()).append(SPACE);
+
+            query.append(method);
             if (var != null) query.append(SPACE).append(var);
             query.append(SEMICOLON);
 
@@ -299,7 +388,7 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
         Group(GraqlMatch query, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
-            else if (!query.variables().contains(var))
+            else if (!query.filter().contains(var))
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
 
             this.query = query;
@@ -324,10 +413,11 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
         public String toString() {
             StringBuilder query = new StringBuilder();
 
-            query.append(query()).append(SPACE)
-                    .append(GraqlToken.Command.GROUP).append(SPACE)
-                    .append(var).append(SEMICOLON);
+            if (query().filter.isEmpty() && query().conjunction().patterns().size() > 1) {
+                query.append(query()).append(NEW_LINE);
+            } else query.append(query()).append(SPACE);
 
+            query.append(GROUP).append(SPACE).append(var).append(SEMICOLON);
             return query.toString();
         }
 
@@ -361,7 +451,7 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
                     throw new NullPointerException("Variable is null");
                 } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
-                } else if (var != null && !group.query().variables().contains(var)) {
+                } else if (var != null && !group.query().filter().contains(var)) {
                     throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
                 }
 
@@ -387,10 +477,11 @@ public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<G
             public final String toString() {
                 StringBuilder query = new StringBuilder();
 
-                query.append(group().query()).append(SPACE)
-                        .append(GraqlToken.Command.GROUP).append(SPACE)
-                        .append(group().var()).append(SEMICOLON).append(SPACE)
-                        .append(method);
+                if (group().query().filter.isEmpty() && group().query().conjunction().patterns().size() > 1) {
+                    query.append(group().query()).append(NEW_LINE);
+                } else query.append(group().query()).append(SPACE);
+
+                query.append(GROUP).append(SPACE).append(group().var()).append(SEMICOLON).append(SPACE).append(method);
 
                 if (var != null) query.append(SPACE).append(var);
                 query.append(SEMICOLON);

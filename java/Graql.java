@@ -31,9 +31,9 @@ import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
-import graql.lang.query.MatchClause;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -63,12 +63,12 @@ public class Graql {
         return parser.parsePatternListEOF(pattern);
     }
 
-    public static MatchClause match(Pattern... patterns) {
+    public static GraqlMatch.Unfiltered match(Pattern... patterns) {
         return match(Arrays.asList(patterns));
     }
 
-    public static MatchClause match(List<? extends Pattern> patterns) {
-        return new MatchClause(patterns);
+    public static GraqlMatch.Unfiltered match(List<? extends Pattern> patterns) {
+        return new GraqlMatch.Unfiltered(patterns);
     }
 
     public static GraqlInsert insert(ThingVariable<?>... things) {

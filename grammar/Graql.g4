@@ -39,25 +39,23 @@ query_undefine        :   UNDEFINE    variable_types ;
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
 query_delete          :   MATCH       patterns      DELETE  variable_things     ;
-query_match           :   MATCH       patterns
-                      |   MATCH       patterns      GET     variables  filters  ;
+query_match           :   MATCH       patterns            ( filters )?          ;
 query_compute         :   COMPUTE     compute_conditions                        ;
 
-// GET QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ==============================
+// MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
 
 query_match_aggregate :   query_match   function_aggregate  ;
 query_match_group     :   query_match   function_group      ;
 query_match_group_agg :   query_match   function_group      function_aggregate  ;
 
-// DELETE AND GET QUERY MODIFIERS ==============================================
+// MATCH QUERY FILTERS =========================================================
 
-variables             :   ( VAR_ ( ',' VAR_ )* )? ';'     ;
+filters               : ( variables';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
 
-filters               :   ( sort ';' )? ( offset ';' )? ( limit ';' )?  ;
-
-sort                  :   SORT        VAR_        ORDER_? ;
-offset                :   OFFSET      LONG_               ;
-limit                 :   LIMIT       LONG_               ;
+variables             :   GET         VAR_  ( ',' VAR_ )*   ;
+sort                  :   SORT        VAR_        ORDER_?   ;
+offset                :   OFFSET      LONG_                 ;
+limit                 :   LIMIT       LONG_                 ;
 
 
 // GET AGGREGATE QUERY =========================================================

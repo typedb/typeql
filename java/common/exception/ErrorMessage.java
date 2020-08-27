@@ -27,30 +27,32 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(3, "The class '%s' cannot be casted to '%s'.");
     public static final ErrorMessage MISSING_PATTERNS =
             new ErrorMessage(4, "The query has not been provided with any patterns.");
+    public static final ErrorMessage MISSING_FILTER_VARIABLES =
+            new ErrorMessage(5, "The match query has not been provided with any filter variables.");
     public static final ErrorMessage INVALID_IID_STRING =
-            new ErrorMessage(5, "Invalid IID: '%s'. IIDs must follow the regular expression: '%s'.");
+            new ErrorMessage(6, "Invalid IID: '%s'. IIDs must follow the regular expression: '%s'.");
     public static final ErrorMessage INVALID_ATTRIBUTE_TYPE_REGEX =
-            new ErrorMessage(6, "Invalid regular expression '%s'.");
+            new ErrorMessage(7, "Invalid regular expression '%s'.");
     public static final ErrorMessage INVALID_VARIABLE_OUT_OF_SCOPE =
-            new ErrorMessage(7, "The variable '%s' is out of scope of the query.");
+            new ErrorMessage(8, "The variable '%s' is out of scope of the query.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
-            new ErrorMessage(8, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
+            new ErrorMessage(9, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
     public static final ErrorMessage ILLEGAL_PROPERTY_REPETITION =
-            new ErrorMessage(9, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
+            new ErrorMessage(10, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
     public static final ErrorMessage MISSING_PROPERTY_RELATION_PLAYER =
-            new ErrorMessage(10, "The relation variable has not been provided with role players.");
+            new ErrorMessage(11, "The relation variable has not been provided with role players.");
     public static final ErrorMessage INVALID_PROPERTY_DATETIME_PRECISION =
-            new ErrorMessage(11, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
+            new ErrorMessage(12, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
-            new ErrorMessage(12, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
+            new ErrorMessage(13, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(13, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(14, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(14, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(15, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(15, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(16, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
     public static final ErrorMessage INVALID_CONVERT_OPERATION =
-            new ErrorMessage(16, "Invalid 'convert' operation. Only bound and unmerged variables can be converted.");
+            new ErrorMessage(17, "Invalid 'convert' operation. Only bound and unmerged variables can be converted.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";

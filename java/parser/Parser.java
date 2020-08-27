@@ -19,7 +19,6 @@ package graql.lang.parser;
 
 import grakn.common.collection.Either;
 import grakn.common.collection.Pair;
-import grakn.common.collection.Triple;
 import graql.grammar.GraqlBaseVisitor;
 import graql.grammar.GraqlLexer;
 import graql.grammar.GraqlParser;
@@ -40,13 +39,12 @@ import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
-import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
-import graql.lang.query.MatchClause;
 import graql.lang.query.builder.Computable;
-import graql.lang.query.builder.Filterable;
+import graql.lang.query.builder.Sortable;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -70,7 +68,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.pair;
-import static grakn.common.collection.Collections.triple;
 import static graql.lang.common.util.Strings.unescapeRegex;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.toList;
@@ -246,7 +243,7 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public GraqlInsert visitQuery_insert(GraqlParser.Query_insertContext ctx) {
         if (ctx.patterns() != null) {
-            return new MatchClause(visitPatterns(ctx.patterns())).insert(visitVariable_things(ctx.variable_things()));
+            return new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns())).insert(visitVariable_things(ctx.variable_things()));
         } else {
             return new GraqlInsert(visitVariable_things(ctx.variable_things()));
         }
@@ -254,42 +251,31 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDelete visitQuery_delete(GraqlParser.Query_deleteContext ctx) {
-        return new MatchClause(visitPatterns(ctx.patterns())).delete(visitVariable_things(ctx.variable_things()));
+        return new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns())).delete(visitVariable_things(ctx.variable_things()));
     }
 
     @Override
     public GraqlMatch visitQuery_match(GraqlParser.Query_matchContext ctx) {
-        MatchClause match = new MatchClause(visitPatterns(ctx.patterns()));
-        List<UnboundVariable> vars = visitVariables(ctx.variables());
+        GraqlMatch match = new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns()));
 
-        if (ctx.filters().getChildCount() == 0) {
-            return match.get(vars);
-        } else {
-            Triple<Filterable.Sorting, Long, Long> filters = visitFilters(ctx.filters());
-            return new GraqlMatch(match, vars, filters.first(), filters.second(), filters.third());
-        }
-    }
+        if (ctx.filters() != null) {
+            List<UnboundVariable> variables = new ArrayList<>();
+            Sortable.Sorting sorting = null;
+            Long offset = null, limit = null;
 
-    @Override
-    public Triple<Filterable.Sorting, Long, Long> visitFilters(GraqlParser.FiltersContext ctx) {
-        Filterable.Sorting order = null;
-        Long offset = null;
-        Long limit = null;
-
-        if (ctx.sort() != null) {
-            UnboundVariable var = getVar(ctx.sort().VAR_());
-            order = ctx.sort().ORDER_() == null
-                    ? new Filterable.Sorting(var)
-                    : new Filterable.Sorting(var, GraqlArg.Order.of(ctx.sort().ORDER_().getText()));
-        }
-        if (ctx.offset() != null) {
-            offset = getLong(ctx.offset().LONG_());
-        }
-        if (ctx.limit() != null) {
-            limit = getLong(ctx.limit().LONG_());
+            if (ctx.filters().variables() != null) variables = visitVariables(ctx.filters().variables());
+            if (ctx.filters().sort() != null) {
+                UnboundVariable var = getVar(ctx.filters().sort().VAR_());
+                sorting = ctx.filters().sort().ORDER_() == null
+                        ? new Sortable.Sorting(var)
+                        : new Sortable.Sorting(var, GraqlArg.Order.of(ctx.filters().sort().ORDER_().getText()));
+            }
+            if (ctx.filters().offset() != null) offset = getLong(ctx.filters().offset().LONG_());
+            if (ctx.filters().limit() != null) limit = getLong(ctx.filters().limit().LONG_());
+            match = new GraqlMatch(match.conjunction(), variables, sorting, offset, limit);
         }
 
-        return triple(order, offset, limit);
+        return match;
     }
 
     /**

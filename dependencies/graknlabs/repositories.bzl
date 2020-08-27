@@ -31,9 +31,9 @@ def graknlabs_common():
         commit = "4b450017f39c5787c1102bab2407b57ca2f52135" # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_common
     )
 
-def graknlabs_verification():
+def graknlabs_behaviour():
     git_repository(
-        name = "graknlabs_verification",
-        remote = "https://github.com/graknlabs/verification",
-        commit = "086d3cccec2b94832b17cd271c54f6f1db5e7ac7", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_verification
+        name = "graknlabs_behaviour",
+        remote = "https://github.com/graknlabs/behaviour",
+        commit = "8cce144d698666b9aa1d0688b24c90339de366a0", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_behaviour
     )

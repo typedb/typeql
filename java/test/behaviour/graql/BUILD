@@ -43,9 +43,9 @@ java_test(
         ":steps",
     ],
     data = [
-        "@graknlabs_verification//behaviour/graql/explanation:features",
-        "@graknlabs_verification//behaviour/graql/language:features",
-        "@graknlabs_verification//behaviour/graql/reasoner:features",
+        "@graknlabs_behaviour//graql/explanation:features",
+        "@graknlabs_behaviour//graql/language:features",
+        "@graknlabs_behaviour//graql/reasoner:features",
     ],
     visibility = ["//visibility:public"],
     size = "small",

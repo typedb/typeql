@@ -65,8 +65,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     abstract T getThis();
 
-    public abstract T withoutProperties();
-
     @Override
     public Set<ThingProperty> properties() {
         return Stream.concat(
@@ -179,11 +177,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public ThingVariable.Merged withoutProperties() {
-            return new ThingVariable.Merged(reference);
-        }
-
-        @Override
         public String toString() {
             StringBuilder syntax = new StringBuilder();
             Predicate<ThingProperty> filter = p -> true;
@@ -217,11 +210,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             return this;
         }
 
-        @Override
-        public ThingVariable.Thing withoutProperties() {
-            return new ThingVariable.Thing(reference, null);
-        }
-
         private String thingSyntax() {
             if (isa().isPresent()) return isaSyntax();
             else if (iid().isPresent()) return iid().get().toString();
@@ -252,11 +240,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         ThingVariable.Relation getThis() {
             return this;
-        }
-
-        @Override
-        public ThingVariable.Relation withoutProperties() {
-            return new ThingVariable.Relation(reference, null);
         }
 
         @Override
@@ -294,11 +277,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         ThingVariable.Attribute getThis() {
             return this;
-        }
-
-        @Override
-        public ThingVariable.Attribute withoutProperties() {
-            return new ThingVariable.Attribute(reference, null);
         }
 
         @Override

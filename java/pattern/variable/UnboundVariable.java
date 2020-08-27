@@ -33,7 +33,7 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
                                                                           ThingVariableBuilder.Relation,
                                                                           ThingVariableBuilder.Attribute {
 
-    private UnboundVariable(Reference reference) {
+    UnboundVariable(Reference reference) {
         super(reference);
     }
 
@@ -61,11 +61,6 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
     @Override
     public ThingVariable<?> asThing() {
         return new ThingVariable.Thing(reference, null);
-    }
-
-    @Override
-    public UnboundVariable withoutProperties() {
-        return this;
     }
 
     @Override

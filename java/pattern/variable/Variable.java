@@ -34,8 +34,6 @@ public abstract class Variable<T extends Variable<T>> {
         this.reference = reference;
     }
 
-    public abstract T withoutProperties();
-
     public abstract Set<? extends Property> properties();
 
     public boolean isType() {

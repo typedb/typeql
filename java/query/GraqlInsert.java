@@ -30,11 +30,11 @@ public class GraqlInsert extends GraqlWritable {
         this(null, variables);
     }
 
-    GraqlInsert(@Nullable MatchClause match, List<ThingVariable<?>> variables) {
+    GraqlInsert(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         super(GraqlToken.Command.INSERT, match, variables);
     }
 
-    public Optional<MatchClause> match() {
+    public Optional<GraqlMatch.Unfiltered> match() {
         return Optional.ofNullable(super.nullableMatch());
     }
 }

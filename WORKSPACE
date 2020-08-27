@@ -96,8 +96,8 @@ github_deps()
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_common")
 graknlabs_common()
 
-load("//dependencies/graknlabs:repositories.bzl", "graknlabs_verification")
-graknlabs_verification()
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_behaviour")
+graknlabs_behaviour()
 
 load("//dependencies/maven:artifacts.bzl", graknlabs_graql_artifacts = "artifacts")
 

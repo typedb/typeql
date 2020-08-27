@@ -22,7 +22,7 @@ import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlDelete;
-import graql.lang.query.MatchClause;
+import graql.lang.query.GraqlMatch;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -39,8 +39,8 @@ public class GraqlDeleteTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private final MatchClause match1 = Graql.match(var("x").isa("movie"));
-    private final MatchClause match2 = Graql.match(var("y").isa("movie"));
+    private final GraqlMatch.Unfiltered match1 = Graql.match(var("x").isa("movie"));
+    private final GraqlMatch.Unfiltered match2 = Graql.match(var("y").isa("movie"));
 
     private final List<ThingVariable<?>> delete1 = list(var("x").isa("movie"));
     private final List<ThingVariable<?>> delete2 = list(var("y").isa("movie"));

@@ -40,11 +40,11 @@ abstract class GraqlWritable extends GraqlQuery {
 
     private Map<Reference, BoundVariable<?>> graph;
     private final GraqlToken.Command keyword;
-    private final MatchClause match;
+    private final GraqlMatch.Unfiltered match;
     private final List<ThingVariable<?>> variables;
     private final int hash;
 
-    GraqlWritable(GraqlToken.Command keyword, @Nullable MatchClause match, List<ThingVariable<?>> variables) {
+    GraqlWritable(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         assert keyword == INSERT || keyword == DELETE;
         if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
         this.keyword = keyword;
@@ -53,7 +53,7 @@ abstract class GraqlWritable extends GraqlQuery {
         this.hash = Objects.hash(this.match, this.variables);
     }
 
-    MatchClause nullableMatch() {
+    GraqlMatch.Unfiltered nullableMatch() {
         return match;
     }
 
