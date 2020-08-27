@@ -38,8 +38,7 @@ public class MavenApplicationTest {
         String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
-                "$t !== 'Apocalypse Now';\n" +
-                "get;";
+                "$t !== 'Apocalypse Now';";
         GraqlMatch parsed = Graql.parse(query).asMatch();
 
         GraqlMatch expected = match(
