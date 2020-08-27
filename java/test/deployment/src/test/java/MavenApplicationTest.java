@@ -1,5 +1,5 @@
 import graql.lang.Graql;
-import graql.lang.query.GraqlGet;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import org.junit.Test;
 
@@ -23,9 +23,9 @@ public class MavenApplicationTest {
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("brando").val("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
@@ -40,9 +40,9 @@ public class MavenApplicationTest {
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
                 "$t !== 'Apocalypse Now';\n" +
                 "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
                         var("t").val("Apocalypse Now"),

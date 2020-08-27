@@ -74,15 +74,15 @@ public class MatchClause {
     /**
      * Construct a get query with all all variables mentioned in the query
      */
-    public GraqlGet.Unfiltered get() {
-        return new GraqlGet.Unfiltered(this);
+    public GraqlMatch.Unfiltered get() {
+        return new GraqlMatch.Unfiltered(this);
     }
 
     /**
      * @param vars an array of variables to select
      * @return a Get Query that selects the given variables
      */
-    public GraqlGet.Unfiltered get(String var, String... vars) {
+    public GraqlMatch.Unfiltered get(String var, String... vars) {
         return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
     }
 
@@ -90,7 +90,7 @@ public class MatchClause {
      * @param vars an array of variables to select
      * @return a Get Query that selects the given variables
      */
-    public GraqlGet.Unfiltered get(UnboundVariable var, UnboundVariable... vars) {
+    public GraqlMatch.Unfiltered get(UnboundVariable var, UnboundVariable... vars) {
         List<UnboundVariable> varList = new ArrayList<>();
         varList.add(var);
         varList.addAll(Arrays.asList(vars));
@@ -101,8 +101,8 @@ public class MatchClause {
      * @param vars a set of variables to select
      * @return a Get Query that selects the given variables
      */
-    public GraqlGet.Unfiltered get(List<UnboundVariable> vars) {
-        return new GraqlGet.Unfiltered(this, vars);
+    public GraqlMatch.Unfiltered get(List<UnboundVariable> vars) {
+        return new GraqlMatch.Unfiltered(this, vars);
     }
 
     /**

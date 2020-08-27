@@ -40,7 +40,7 @@ import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
-import graql.lang.query.GraqlGet;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
@@ -208,17 +208,17 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.query_delete() != null) {
             return visitQuery_delete(ctx.query_delete());
 
-        } else if (ctx.query_get() != null) {
-            return visitQuery_get(ctx.query_get());
+        } else if (ctx.query_match() != null) {
+            return visitQuery_match(ctx.query_match());
 
-        } else if (ctx.query_get_aggregate() != null) {
-            return visitQuery_get_aggregate(ctx.query_get_aggregate());
+        } else if (ctx.query_match_aggregate() != null) {
+            return visitQuery_match_aggregate(ctx.query_match_aggregate());
 
-        } else if (ctx.query_get_group() != null) {
-            return visitQuery_get_group(ctx.query_get_group());
+        } else if (ctx.query_match_group() != null) {
+            return visitQuery_match_group(ctx.query_match_group());
 
-        } else if (ctx.query_get_group_agg() != null) {
-            return visitQuery_get_group_agg(ctx.query_get_group_agg());
+        } else if (ctx.query_match_group_agg() != null) {
+            return visitQuery_match_group_agg(ctx.query_match_group_agg());
 
         } else if (ctx.query_compute() != null) {
             return visitQuery_compute(ctx.query_compute());
@@ -258,7 +258,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlGet visitQuery_get(GraqlParser.Query_getContext ctx) {
+    public GraqlMatch visitQuery_match(GraqlParser.Query_matchContext ctx) {
         MatchClause match = new MatchClause(visitPatterns(ctx.patterns()));
         List<UnboundVariable> vars = visitVariables(ctx.variables());
 
@@ -266,7 +266,7 @@ public class Parser extends GraqlBaseVisitor {
             return match.get(vars);
         } else {
             Triple<Filterable.Sorting, Long, Long> filters = visitFilters(ctx.filters());
-            return new GraqlGet(match, vars, filters.first(), filters.second(), filters.third());
+            return new GraqlMatch(match, vars, filters.first(), filters.second(), filters.third());
         }
     }
 
@@ -300,27 +300,27 @@ public class Parser extends GraqlBaseVisitor {
      * @return An AggregateQuery object
      */
     @Override
-    public GraqlGet.Aggregate visitQuery_get_aggregate(GraqlParser.Query_get_aggregateContext ctx) {
+    public GraqlMatch.Aggregate visitQuery_match_aggregate(GraqlParser.Query_match_aggregateContext ctx) {
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
-        return visitQuery_get(ctx.query_get()).aggregate(
+        return visitQuery_match(ctx.query_match()).aggregate(
                 GraqlToken.Aggregate.Method.of(function.function_method().getText()),
                 function.VAR_() != null ? getVar(function.VAR_()) : null
         );
     }
 
     @Override
-    public GraqlGet.Group visitQuery_get_group(GraqlParser.Query_get_groupContext ctx) {
+    public GraqlMatch.Group visitQuery_match_group(GraqlParser.Query_match_groupContext ctx) {
         UnboundVariable var = getVar(ctx.function_group().VAR_());
-        return visitQuery_get(ctx.query_get()).group(var);
+        return visitQuery_match(ctx.query_match()).group(var);
     }
 
     @Override
-    public GraqlGet.Group.Aggregate visitQuery_get_group_agg(GraqlParser.Query_get_group_aggContext ctx) {
+    public GraqlMatch.Group.Aggregate visitQuery_match_group_agg(GraqlParser.Query_match_group_aggContext ctx) {
         UnboundVariable var = getVar(ctx.function_group().VAR_());
         GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
 
-        return visitQuery_get(ctx.query_get()).group(var).aggregate(
+        return visitQuery_match(ctx.query_match()).group(var).aggregate(
                 GraqlToken.Aggregate.Method.of(function.function_method().getText()),
                 function.VAR_() != null ? getVar(function.VAR_()) : null
         );

@@ -21,7 +21,7 @@ import graql.lang.Graql;
 import graql.lang.common.GraqlArg;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
-import graql.lang.query.GraqlGet;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.MatchClause;
@@ -52,7 +52,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testComplexQueryToString() {
-        GraqlGet query = match(
+        GraqlMatch query = match(
                 var("x").isa("movie"),
                 var().rel("x").rel("y"),
                 or(
@@ -212,7 +212,7 @@ public class GraqlQueryTest {
         assertEquals("match $x contains $y;", match.toString());
     }
 
-    private void assertSameStringRepresentation(GraqlGet query) {
+    private void assertSameStringRepresentation(GraqlMatch query) {
         assertEquals(query.toString(), Graql.parse(query.toString()).toString());
     }
 

@@ -62,42 +62,42 @@ public abstract class GraqlQuery {
         }
     }
 
-    public GraqlGet asGet() {
-        if (this instanceof GraqlGet) {
-            return (GraqlGet) this;
+    public GraqlMatch asMatch() {
+        if (this instanceof GraqlMatch) {
+            return (GraqlMatch) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlGet.class.getCanonicalName()
+                    GraqlQuery.class.getCanonicalName(), GraqlMatch.class.getCanonicalName()
             ));
         }
     }
 
-    public GraqlGet.Aggregate asGetAggregate() {
-        if (this instanceof GraqlGet.Aggregate) {
-            return (GraqlGet.Aggregate) this;
+    public GraqlMatch.Aggregate asMatchAggregate() {
+        if (this instanceof GraqlMatch.Aggregate) {
+            return (GraqlMatch.Aggregate) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlGet.Aggregate.class.getCanonicalName()
+                    GraqlQuery.class.getCanonicalName(), GraqlMatch.Aggregate.class.getCanonicalName()
             ));
         }
     }
 
-    public GraqlGet.Group asGetGroup() {
-        if (this instanceof GraqlGet.Group) {
-            return (GraqlGet.Group) this;
+    public GraqlMatch.Group asMatchGroup() {
+        if (this instanceof GraqlMatch.Group) {
+            return (GraqlMatch.Group) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlGet.Group.class.getCanonicalName()
+                    GraqlQuery.class.getCanonicalName(), GraqlMatch.Group.class.getCanonicalName()
             ));
         }
     }
 
-    public GraqlGet.Group.Aggregate asGetGroupAggregate() {
-        if (this instanceof GraqlGet.Group.Aggregate) {
-            return (GraqlGet.Group.Aggregate) this;
+    public GraqlMatch.Group.Aggregate asMatchGroupAggregate() {
+        if (this instanceof GraqlMatch.Group.Aggregate) {
+            return (GraqlMatch.Group.Aggregate) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlGet.Group.Aggregate.class.getCanonicalName()
+                    GraqlQuery.class.getCanonicalName(), GraqlMatch.Group.Aggregate.class.getCanonicalName()
             ));
         }
     }

@@ -36,7 +36,7 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
 import static java.util.stream.Collectors.joining;
 
-public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<GraqlGet.Aggregate> {
+public class GraqlMatch extends GraqlQuery implements Filterable, Aggregatable<GraqlMatch.Aggregate> {
 
     private final List<UnboundVariable> vars;
     private final MatchClause match;
@@ -45,16 +45,16 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
     private final Long limit;
     private final int hash;
 
-    GraqlGet(MatchClause match) {
+    GraqlMatch(MatchClause match) {
         this(match, new ArrayList<>());
     }
 
-    GraqlGet(MatchClause match, List<UnboundVariable> vars) {
+    GraqlMatch(MatchClause match, List<UnboundVariable> vars) {
         this(match, vars, null, null, null);
     }
 
     // We keep this contructor 'public' as it is more efficient for use during parsing
-    public GraqlGet(MatchClause match, List<UnboundVariable> vars, Sorting sorting, Long offset, Long limit) {
+    public GraqlMatch(MatchClause match, List<UnboundVariable> vars, Sorting sorting, Long offset, Long limit) {
         if (match == null) throw new NullPointerException("Null match");
         if (vars == null) throw new NullPointerException("Null vars");
         for (UnboundVariable var : vars) {
@@ -141,7 +141,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             return false;
         }
 
-        GraqlGet that = (GraqlGet) o;
+        GraqlMatch that = (GraqlMatch) o;
 
         // It is important that we use vars() (the method) and not vars (the property)
         // vars (the property) stores the variables as the user defined
@@ -159,8 +159,8 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         return hash;
     }
 
-    public static class Unfiltered extends GraqlGet
-            implements Filterable.Unfiltered<GraqlGet.Sorted, GraqlGet.Offsetted, GraqlGet.Limited> {
+    public static class Unfiltered extends GraqlMatch
+            implements Filterable.Unfiltered<GraqlMatch.Sorted, GraqlMatch.Offsetted, GraqlMatch.Limited> {
 
         Unfiltered(MatchClause match) {
             super(match);
@@ -171,65 +171,65 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
         }
 
         @Override
-        public GraqlGet.Sorted sort(Sorting sorting) {
-            return new GraqlGet.Sorted(this, sorting);
+        public GraqlMatch.Sorted sort(Sorting sorting) {
+            return new GraqlMatch.Sorted(this, sorting);
         }
 
         @Override
-        public GraqlGet.Offsetted offset(long offset) {
-            return new GraqlGet.Offsetted(this, offset);
+        public GraqlMatch.Offsetted offset(long offset) {
+            return new GraqlMatch.Offsetted(this, offset);
         }
 
         @Override
-        public GraqlGet.Limited limit(long limit) {
-            return new GraqlGet.Limited(this, limit);
+        public GraqlMatch.Limited limit(long limit) {
+            return new GraqlMatch.Limited(this, limit);
         }
     }
 
-    public static class Sorted extends GraqlGet implements Filterable.Sorted<GraqlGet.Offsetted, GraqlGet.Limited> {
+    public static class Sorted extends GraqlMatch implements Filterable.Sorted<GraqlMatch.Offsetted, GraqlMatch.Limited> {
 
-        Sorted(GraqlGet graqlGet, Sorting sorting) {
+        Sorted(GraqlMatch graqlGet, Sorting sorting) {
             super(graqlGet.match, graqlGet.vars, sorting, graqlGet.offset, graqlGet.limit);
         }
 
         @Override
-        public GraqlGet.Offsetted offset(long offset) {
-            return new GraqlGet.Offsetted(this, offset);
+        public GraqlMatch.Offsetted offset(long offset) {
+            return new GraqlMatch.Offsetted(this, offset);
         }
 
         @Override
-        public GraqlGet.Limited limit(long limit) {
-            return new GraqlGet.Limited(this, limit);
+        public GraqlMatch.Limited limit(long limit) {
+            return new GraqlMatch.Limited(this, limit);
         }
     }
 
-    public static class Offsetted extends GraqlGet implements Filterable.Offsetted<GraqlGet.Limited> {
+    public static class Offsetted extends GraqlMatch implements Filterable.Offsetted<GraqlMatch.Limited> {
 
-        Offsetted(GraqlGet graqlGet, long offset) {
+        Offsetted(GraqlMatch graqlGet, long offset) {
             super(graqlGet.match, graqlGet.vars, graqlGet.sorting, offset, graqlGet.limit);
         }
 
         @Override
-        public GraqlGet.Limited limit(long limit) {
-            return new GraqlGet.Limited(this, limit);
+        public GraqlMatch.Limited limit(long limit) {
+            return new GraqlMatch.Limited(this, limit);
         }
     }
 
-    public static class Limited extends GraqlGet implements Filterable.Limited {
+    public static class Limited extends GraqlMatch implements Filterable.Limited {
 
-        Limited(GraqlGet graqlGet, long limit) {
+        Limited(GraqlMatch graqlGet, long limit) {
             super(graqlGet.match, graqlGet.vars, graqlGet.sorting, graqlGet.offset, limit);
         }
     }
 
     public static class Aggregate extends GraqlQuery {
 
-        private final GraqlGet query;
+        private final GraqlMatch query;
         private final GraqlToken.Aggregate.Method method;
         private final UnboundVariable var;
         private final int hash;
 
-        Aggregate(GraqlGet query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
+        Aggregate(GraqlMatch query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
@@ -248,7 +248,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             this.hash = Objects.hash(query, method, var);
         }
 
-        public GraqlGet query() {
+        public GraqlMatch query() {
             return query;
         }
 
@@ -292,11 +292,11 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
     public static class Group extends GraqlQuery implements Aggregatable<Group.Aggregate> {
 
-        private final GraqlGet query;
+        private final GraqlMatch query;
         private final UnboundVariable var;
         private final int hash;
 
-        Group(GraqlGet query, UnboundVariable var) {
+        Group(GraqlMatch query, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.variables().contains(var))
@@ -307,7 +307,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
             this.hash = Objects.hash(query, var);
         }
 
-        public GraqlGet query() {
+        public GraqlMatch query() {
             return query;
         }
 
@@ -349,12 +349,12 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
 
         public static class Aggregate extends GraqlQuery {
 
-            private final GraqlGet.Group group;
+            private final GraqlMatch.Group group;
             private final GraqlToken.Aggregate.Method method;
             private final UnboundVariable var;
             private final int hash;
 
-            Aggregate(GraqlGet.Group group, GraqlToken.Aggregate.Method method, UnboundVariable var) {
+            Aggregate(GraqlMatch.Group group, GraqlToken.Aggregate.Method method, UnboundVariable var) {
                 if (group == null) throw new NullPointerException("GraqlGet.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
                 if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
@@ -371,7 +371,7 @@ public class GraqlGet extends GraqlQuery implements Filterable, Aggregatable<Gra
                 this.hash = Objects.hash(group, method, var);
             }
 
-            public GraqlGet.Group group() {
+            public GraqlMatch.Group group() {
                 return group;
             }
 
