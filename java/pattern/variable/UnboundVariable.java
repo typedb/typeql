@@ -33,34 +33,34 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
                                                                           ThingVariableBuilder.Relation,
                                                                           ThingVariableBuilder.Attribute {
 
-    private UnboundVariable(Identity identity) {
-        super(identity);
+    private UnboundVariable(Reference reference) {
+        super(reference);
     }
 
-    public static UnboundVariable of(Identity identity) {
-        return new UnboundVariable(identity);
+    public static UnboundVariable of(Reference reference) {
+        return new UnboundVariable(reference);
     }
 
     public static UnboundVariable named(String name) {
-        return of(Identity.named(name));
+        return of(Reference.named(name));
     }
 
     public static UnboundVariable anonymous() {
-        return of(Identity.anonymous(true));
+        return of(Reference.anonymous(true));
     }
 
     public static UnboundVariable hidden() {
-        return of(Identity.anonymous(false));
+        return of(Reference.anonymous(false));
     }
 
     @Override
     public TypeVariable asType() {
-        return new TypeVariable(identity, null);
+        return new TypeVariable(reference, null);
     }
 
     @Override
     public ThingVariable<?> asThing() {
-        return new ThingVariable.Thing(identity, null);
+        return new ThingVariable.Thing(reference, null);
     }
 
     @Override
@@ -76,35 +76,35 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
     @Override
     public TypeVariable asTypeWith(TypeProperty.Singular property) {
         if (!isVisible() && property instanceof TypeProperty.Label) {
-            return new TypeVariable(Identity.label(((TypeProperty.Label) property).scopedLabel()), property);
+            return new TypeVariable(Reference.label(((TypeProperty.Label) property).scopedLabel()), property);
         } else {
-            return new TypeVariable(identity, property);
+            return new TypeVariable(reference, property);
         }
     }
 
     @Override
     public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
-        return new TypeVariable(identity, property);
+        return new TypeVariable(reference, property);
     }
 
     @Override
     public ThingVariable.Thing asSameThingWith(ThingProperty.Singular property) {
-        return new ThingVariable.Thing(identity, property);
+        return new ThingVariable.Thing(reference, property);
     }
 
     @Override
     public ThingVariable.Thing asSameThingWith(ThingProperty.Repeatable property) {
-        return new ThingVariable.Thing(identity, property);
+        return new ThingVariable.Thing(reference, property);
     }
 
     @Override
     public ThingVariable.Thing asThingWith(ThingProperty.Singular property) {
-        return new ThingVariable.Thing(identity, property);
+        return new ThingVariable.Thing(reference, property);
     }
 
     @Override
     public ThingVariable.Attribute asAttributeWith(ThingProperty.Value<?> property) {
-        return new ThingVariable.Attribute(identity, property);
+        return new ThingVariable.Attribute(reference, property);
     }
 
     @Override
@@ -113,11 +113,11 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
     }
 
     public ThingVariable.Relation asRelationWith(ThingProperty.Relation property) {
-        return new ThingVariable.Relation(identity, property);
+        return new ThingVariable.Relation(reference, property);
     }
 
     @Override
     public String toString() {
-        return identity.syntax();
+        return reference.syntax();
     }
 }

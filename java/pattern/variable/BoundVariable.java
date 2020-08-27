@@ -30,8 +30,8 @@ import static java.util.stream.Collectors.toSet;
 
 public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable<T> implements Pattern {
 
-    BoundVariable(Identity identity) {
-        super(identity);
+    BoundVariable(Reference reference) {
+        super(reference);
     }
 
     public abstract T withoutProperties();
@@ -41,50 +41,50 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
     abstract T merge(T variable);
 
     T setAnonymousWithID(int id) {
-        this.identity = Identity.anonymous(identity.isVisible, id);
+        this.reference = Reference.anonymous(reference.isVisible, id);
         return getThis();
     }
 
-    public static Map<Identity, TypeVariable> asTypeGraph(List<TypeVariable> variables) {
-        LinkedHashMap<Identity, TypeVariable> graph = new LinkedHashMap<>();
+    public static Map<Reference, TypeVariable> asTypeGraph(List<TypeVariable> variables) {
+        LinkedHashMap<Reference, TypeVariable> graph = new LinkedHashMap<>();
         LinkedList<TypeVariable> list = new LinkedList<>(variables);
 
         while (!list.isEmpty()) {
             TypeVariable variable = list.removeFirst();
             assert variable.isLabelled();
             list.addAll(variable.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
-            if (graph.containsKey(variable.identity())) {
-                TypeVariable merged = graph.get(variable.identity()).merge(variable);
-                graph.put(variable.identity(), merged);
+            if (graph.containsKey(variable.reference())) {
+                TypeVariable merged = graph.get(variable.reference()).merge(variable);
+                graph.put(variable.reference(), merged);
             } else {
-                graph.put(variable.identity(), variable);
+                graph.put(variable.reference(), variable);
             }
         }
 
         return graph;
     }
 
-    public static Map<Identity, BoundVariable<?>> asGraph(List<ThingVariable<?>> variables) {
-        LinkedHashMap<Identity, BoundVariable<?>> graph = new LinkedHashMap<>();
+    public static Map<Reference, BoundVariable<?>> asGraph(List<ThingVariable<?>> variables) {
+        LinkedHashMap<Reference, BoundVariable<?>> graph = new LinkedHashMap<>();
         LinkedList<BoundVariable<?>> list = new LinkedList<>(variables);
         int id = 0;
 
         while (!list.isEmpty()) {
             BoundVariable<?> variable = list.removeFirst();
             list.addAll(variable.properties().stream().flatMap(Property::variables).collect(toSet()));
-            if (!variable.isAnonymous()) {
-                if (graph.containsKey(variable.identity())) {
-                    BoundVariable<?> existing = graph.get(variable.identity());
+            if (!variable.isAnonymised()) {
+                if (graph.containsKey(variable.reference())) {
+                    BoundVariable<?> existing = graph.get(variable.reference());
                     BoundVariable<?> merged;
                     if (existing.isThing()) merged = existing.asThing().merge(variable.asThing());
                     else merged = existing.asType().merge(variable.asType());
-                    graph.put(variable.identity(), merged);
+                    graph.put(variable.reference(), merged);
                 } else {
-                    graph.put(variable.identity(), variable);
+                    graph.put(variable.reference(), variable);
                 }
             } else {
                 variable.setAnonymousWithID(id++);
-                graph.put(variable.identity(), variable);
+                graph.put(variable.reference(), variable);
             }
         }
 

@@ -20,7 +20,7 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.Identity;
+import graql.lang.pattern.variable.Reference;
 import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.joining;
 
 abstract class GraqlWritable extends GraqlQuery {
 
-    private Map<Identity, BoundVariable<?>> graph;
+    private Map<Reference, BoundVariable<?>> graph;
     private final GraqlToken.Command keyword;
     private final MatchClause match;
     private final List<ThingVariable<?>> variables;
@@ -61,7 +61,7 @@ abstract class GraqlWritable extends GraqlQuery {
         return variables;
     }
 
-    public Map<Identity, BoundVariable<?>> asGraph() {
+    public Map<Reference, BoundVariable<?>> asGraph() {
         if (graph == null) graph = BoundVariable.asGraph(variables);
         return graph;
     }

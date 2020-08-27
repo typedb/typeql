@@ -45,8 +45,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular;
     final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating;
 
-    public ThingVariable(Identity identity, ThingProperty property) {
-        super(identity);
+    public ThingVariable(Reference reference, ThingProperty property) {
+        super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
         if (property != null) {
@@ -55,10 +55,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    ThingVariable(Identity identity,
+    ThingVariable(Reference reference,
                   Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular,
                   Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating) {
-        super(identity);
+        super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
     }
@@ -112,7 +112,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     void addSingularProperties(ThingProperty.Singular property) {
         if (singular.containsKey(property.getClass()) && !singular.get(property.getClass()).equals(property)) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(identity, singular.get(property.getClass()), property));
+            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(reference, singular.get(property.getClass()), property));
         } else if (property.isIsa() && property.asIsa().type().label().isPresent() && relation().isPresent()) {
             relation().get().setScope(property.asIsa().type().label().get().label());
         } else if (property.isRelation() && isa().isPresent() && isa().get().type().label().isPresent()) {
@@ -126,7 +126,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     @Override
     ThingVariable.Merged merge(ThingVariable<?> variable) {
-        ThingVariable.Merged merged = new ThingVariable.Merged(identity, singular, repeating);
+        ThingVariable.Merged merged = new ThingVariable.Merged(reference, singular, repeating);
         variable.singular.values().forEach(merged::addSingularProperties);
         variable.repeating.forEach(
                 (clazz, list) -> merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
@@ -158,8 +158,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     static class Merged extends ThingVariable<Merged> {
 
-        Merged(Identity identity) {
-            super(identity, null);
+        Merged(Reference reference) {
+            super(reference, null);
         }
 
         @Override
@@ -167,10 +167,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             throw GraqlException.create(INVALID_CONVERT_OPERATION.message());
         }
 
-        Merged(Identity identity,
+        Merged(Reference reference,
                Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
                Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
+            super(reference, singularProperties, repeatingProperties);
         }
 
         @Override
@@ -180,7 +180,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public ThingVariable.Merged withoutProperties() {
-            return new ThingVariable.Merged(identity);
+            return new ThingVariable.Merged(reference);
         }
 
         @Override
@@ -188,7 +188,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             StringBuilder syntax = new StringBuilder();
             Predicate<ThingProperty> filter = p -> true;
             if (isVisible()) {
-                syntax.append(identity.syntax());
+                syntax.append(reference.syntax());
             } else if (relation().isPresent()) {
                 syntax.append(SPACE).append(relation().get());
                 filter = p -> !(p instanceof ThingProperty.Relation);
@@ -208,8 +208,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder<Thing> {
 
-        Thing(Identity identity, ThingProperty property) {
-            super(identity, property);
+        Thing(Reference reference, ThingProperty property) {
+            super(reference, property);
         }
 
         @Override
@@ -219,7 +219,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public ThingVariable.Thing withoutProperties() {
-            return new ThingVariable.Thing(identity, null);
+            return new ThingVariable.Thing(reference, null);
         }
 
         private String thingSyntax() {
@@ -232,7 +232,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public String toString() {
             StringBuilder syntax = new StringBuilder();
-            if (isVisible()) syntax.append(identity.syntax());
+            if (isVisible()) syntax.append(reference.syntax());
 
             String properties = Stream.of(thingSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
@@ -245,8 +245,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
                                                                             ThingVariableBuilder<Relation> {
 
-        Relation(Identity identity, ThingProperty.Relation property) {
-            super(identity, property);
+        Relation(Reference reference, ThingProperty.Relation property) {
+            super(reference, property);
         }
 
         @Override
@@ -256,7 +256,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public ThingVariable.Relation withoutProperties() {
-            return new ThingVariable.Relation(identity, null);
+            return new ThingVariable.Relation(reference, null);
         }
 
         @Override
@@ -274,7 +274,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         public String toString() {
             assert relation().isPresent();
             StringBuilder syntax = new StringBuilder();
-            if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
+            if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(relation().get());
 
             String properties = Stream.of(isaSyntax(), hasSyntax())
@@ -287,8 +287,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder<Attribute> {
 
-        Attribute(Identity identity, ThingProperty property) {
-            super(identity, property);
+        Attribute(Reference reference, ThingProperty property) {
+            super(reference, property);
         }
 
         @Override
@@ -298,14 +298,14 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public ThingVariable.Attribute withoutProperties() {
-            return new ThingVariable.Attribute(identity, null);
+            return new ThingVariable.Attribute(reference, null);
         }
 
         @Override
         public String toString() {
             assert value().isPresent();
             StringBuilder syntax = new StringBuilder();
-            if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
+            if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(value().get());
 
             String properties = Stream.of(isaSyntax(), hasSyntax())

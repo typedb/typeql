@@ -495,7 +495,7 @@ public abstract class ThingProperty extends Property {
                     return player.toString();
                 } else {
                     StringBuilder syntax = new StringBuilder();
-                    if (roleType.isVisible()) syntax.append(roleType.identity().toString());
+                    if (roleType.isVisible()) syntax.append(roleType.reference().toString());
                     else syntax.append(roleType.label().get().label());
                     syntax.append(COLON).append(SPACE).append(player);
                     return syntax.toString();
@@ -566,7 +566,7 @@ public abstract class ThingProperty extends Property {
         public String toString() {
             return String.valueOf(HAS) + SPACE +
                     type.label().get().label() + SPACE +
-                    (attribute.isNamed() ? attribute.identity() : attribute.value().get());
+                    (attribute.isNamed() ? attribute.reference() : attribute.value().get());
         }
 
         @Override

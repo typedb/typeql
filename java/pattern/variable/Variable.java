@@ -28,10 +28,10 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 
 public abstract class Variable<T extends Variable<T>> {
 
-    Identity identity;
+    Reference reference;
 
-    Variable(Identity identity) {
-        this.identity = identity;
+    Variable(Reference reference) {
+        this.reference = reference;
     }
 
     public abstract T withoutProperties();
@@ -62,14 +62,14 @@ public abstract class Variable<T extends Variable<T>> {
         return properties().stream().flatMap(Property::variables);
     }
 
-    public Identity.Type type() {
-        return identity.type();
+    public Reference.Type type() {
+        return reference.type();
     }
 
     public String name() {
-        switch (identity.type()) {
+        switch (reference.type()) {
             case NAME:
-                return identity.asNamed().name();
+                return reference.asNamed().name();
             case LABEL:
             case ANONYMOUS:
                 return null;
@@ -79,28 +79,32 @@ public abstract class Variable<T extends Variable<T>> {
         }
     }
 
-    public Identity identity() {
-        return identity;
+    public Reference reference() {
+        return reference;
     }
 
     public String identifier() {
-        return identity.identifier();
+        return reference.identifier();
     }
 
     public boolean isNamed() {
-        return identity.type() == Identity.Type.NAME;
+        return reference.isName();
     }
 
     public boolean isLabelled() {
-        return identity.type() == Identity.Type.LABEL;
+        return reference.isLabel();
     }
 
-    public boolean isAnonymous() {
-        return identity.type() == Identity.Type.ANONYMOUS;
+    public boolean isAnonymised() {
+        return reference.isAnonymous();
+    }
+
+    public boolean isAnonymisedWithID() {
+        return reference.isAnonymous() && reference.asAnonymous().isWithID();
     }
 
     public boolean isVisible() {
-        return identity.isVisible();
+        return reference.isVisible();
     }
 
     @Override
@@ -111,12 +115,12 @@ public abstract class Variable<T extends Variable<T>> {
         if (this == o) return true;
         if (o == null || o.getClass().isAssignableFrom(Variable.class)) return false;
         Variable<?> that = (Variable<?>) o;
-        return (this.identity.equals(that.identity) &&
+        return (this.reference.equals(that.reference) &&
                 this.properties().equals(that.properties()));
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(this.identity, this.properties());
+        return Objects.hash(this.reference, this.properties());
     }
 }

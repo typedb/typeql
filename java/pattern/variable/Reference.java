@@ -26,35 +26,35 @@ import java.util.regex.Pattern;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
-public abstract class Identity {
+public abstract class Reference {
 
     final Type type;
     final boolean isVisible;
 
-    enum Type {NAME, LABEL, ANONYMOUS}
+    enum Type {NAME, LABEL, ANONYMOUS;}
 
-    Identity(Type type, boolean isVisible) {
+    Reference(Type type, boolean isVisible) {
         this.type = type;
         this.isVisible = isVisible;
     }
 
-    static Identity.Name named(String name) {
+    static Reference.Name named(String name) {
         return new Name(name);
     }
 
-    static Identity.Label label(String label) {
+    static Reference.Label label(String label) {
         return new Label(label);
     }
 
-    static Identity.Anonymous anonymous(boolean isVisible) {
-        return new Identity.Anonymous(isVisible);
+    static Reference.Anonymous anonymous(boolean isVisible) {
+        return new Reference.Anonymous(isVisible);
     }
 
-    static Identity.AnonymousWithID anonymous(boolean isVisible, int id) {
-        return new Identity.AnonymousWithID(isVisible, id);
+    static Reference.AnonymousWithID anonymous(boolean isVisible, int id) {
+        return new Reference.AnonymousWithID(isVisible, id);
     }
 
-    Identity.Type type() {
+    Reference.Type type() {
         return type;
     }
 
@@ -66,19 +66,31 @@ public abstract class Identity {
         return isVisible;
     }
 
-    Identity.Name asNamed() {
+    public boolean isName() {
+        return type == Type.NAME;
+    }
+
+    public boolean isLabel() {
+        return type == Type.LABEL;
+    }
+
+    public boolean isAnonymous() {
+        return type == Type.ANONYMOUS;
+    }
+
+    Reference.Name asNamed() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 this.getClass().getCanonicalName(), Name.class.getCanonicalName()
         ));
     }
 
-    Identity.Label asLabel() {
+    Reference.Label asLabel() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 this.getClass().getCanonicalName(), Label.class.getCanonicalName()
         ));
     }
 
-    Identity.Anonymous asAnonymous() {
+    Reference.Anonymous asAnonymous() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 this.getClass().getCanonicalName(), Anonymous.class.getCanonicalName()
         ));
@@ -95,7 +107,7 @@ public abstract class Identity {
     @Override
     public abstract int hashCode();
 
-    static class Name extends Identity {
+    static class Name extends Reference {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         protected final String name;
@@ -107,8 +119,9 @@ public abstract class Identity {
 
         private Name(String name, boolean isVisible) {
             super(Type.NAME, isVisible);
-            if (!REGEX.matcher(name).matches())
+            if (!REGEX.matcher(name).matches()) {
                 throw GraqlException.create(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
+            }
             this.name = name;
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }
@@ -148,7 +161,7 @@ public abstract class Identity {
         }
     }
 
-    public static class Label extends Identity {
+    public static class Label extends Reference {
 
         private final String label;
         private final int hash;
@@ -174,7 +187,7 @@ public abstract class Identity {
         }
 
         @Override
-        Identity.Label asLabel() {
+        Reference.Label asLabel() {
             return this;
         }
 
@@ -194,13 +207,23 @@ public abstract class Identity {
         }
     }
 
-    static class Anonymous extends Identity {
+    static class Anonymous extends Reference {
 
         private final int hash;
 
         private Anonymous(boolean isVisible) {
             super(Type.ANONYMOUS, isVisible);
             this.hash = Objects.hash(this.type, this.isVisible);
+        }
+
+        public boolean isWithID() {
+            return false;
+        }
+
+        Reference.AnonymousWithID asAnonymousWithID() {
+            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
+                    this.getClass().getCanonicalName(), AnonymousWithID.class.getCanonicalName()
+            ));
         }
 
         @Override
@@ -214,7 +237,7 @@ public abstract class Identity {
         }
 
         @Override
-        Identity.Anonymous asAnonymous() {
+        Reference.Anonymous asAnonymous() {
             return this;
         }
 
@@ -232,7 +255,7 @@ public abstract class Identity {
         }
     }
 
-    static class AnonymousWithID extends Identity.Anonymous {
+    static class AnonymousWithID extends Reference.Anonymous {
 
         private final int id;
         private final int hash;
@@ -243,13 +266,21 @@ public abstract class Identity {
             this.hash = Objects.hash(this.type, this.isVisible, this.id);
         }
 
+        public boolean isWithID() {
+            return true;
+        }
+
+        Reference.AnonymousWithID asAnonymousWithID() {
+            return this;
+        }
+
         @Override
         String identifier() {
             return syntax() + id;
         }
 
         @Override
-        Identity.AnonymousWithID asAnonymous() {
+        Reference.AnonymousWithID asAnonymous() {
             return this;
         }
 

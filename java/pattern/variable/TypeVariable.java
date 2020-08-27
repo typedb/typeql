@@ -42,8 +42,8 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     private final Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating;
     private final List<TypeProperty> ordered;
 
-    TypeVariable(Identity identity, TypeProperty property) {
-        super(identity);
+    TypeVariable(Reference reference, TypeProperty property) {
+        super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
         this.ordered = new ArrayList<>();
@@ -53,11 +53,11 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         }
     }
 
-    private TypeVariable(Identity identity,
+    private TypeVariable(Reference reference,
                          Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular,
                          Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating,
                          List<TypeProperty> ordered) {
-        super(identity);
+        super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
         this.ordered = new ArrayList<>(ordered);
@@ -70,7 +70,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
     @Override
     public TypeVariable withoutProperties() {
-        return new TypeVariable(identity, null);
+        return new TypeVariable(reference, null);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
     private void addSingularProperties(TypeProperty.Singular property) {
         if (singular.containsKey(property.getClass()) && !singular.get(property.getClass()).equals(property)) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(identity, singular.get(property.getClass()), property));
+            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(reference, singular.get(property.getClass()), property));
         } else if (!singular.containsKey(property.getClass())) {
             singular.put(property.getClass(), property);
         }
@@ -98,7 +98,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
 
     @Override
     TypeVariable merge(TypeVariable variable) {
-        TypeVariable merged = new TypeVariable(identity, singular, repeating, ordered);
+        TypeVariable merged = new TypeVariable(reference, singular, repeating, ordered);
         variable.singular.values().forEach(property -> {
             merged.addSingularProperties(property);
             merged.ordered.add(property);
@@ -176,7 +176,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         StringBuilder syntax = new StringBuilder();
 
         if (isVisible()) {
-            syntax.append(identity.syntax());
+            syntax.append(reference.syntax());
             if (!ordered.isEmpty()) {
                 syntax.append(SPACE);
                 syntax.append(ordered.stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
@@ -189,7 +189,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
             }
         } else {
             // This should only be called by debuggers trying to print nested variables
-            syntax.append(identity);
+            syntax.append(reference);
         }
         return syntax.toString();
     }
