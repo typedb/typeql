@@ -156,15 +156,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     static class Merged extends ThingVariable<Merged> {
 
-        Merged(Reference reference) {
-            super(reference, null);
-        }
-
-        @Override
-        ThingVariable<?> setAnonymousWithID(int id) {
-            throw GraqlException.create(INVALID_CONVERT_OPERATION.message());
-        }
-
         Merged(Reference reference,
                Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
                Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
@@ -174,6 +165,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         ThingVariable.Merged getThis() {
             return this;
+        }
+
+        @Override
+        ThingVariable<?> setAnonymousWithID(int id) {
+            throw GraqlException.create(INVALID_CONVERT_OPERATION.message());
         }
 
         @Override
