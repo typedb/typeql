@@ -344,7 +344,7 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
-            public ThingVariable<?> variable() { return value().asThing(); }
+            public ThingVariable<?> variable() { return value().toThing(); }
 
             @Override
             public Comparison.Variable asVariable() {

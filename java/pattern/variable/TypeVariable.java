@@ -79,7 +79,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
-    public TypeVariable asType() {
+    public TypeVariable toType() {
         return this;
     }
 

@@ -79,7 +79,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     @Override
-    public ThingVariable<?> asThing() {
+    public ThingVariable<?> toThing() {
         return this;
     }
 

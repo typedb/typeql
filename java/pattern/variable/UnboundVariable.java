@@ -54,12 +54,12 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
     }
 
     @Override
-    public TypeVariable asType() {
+    public TypeVariable toType() {
         return new TypeVariable(reference, null);
     }
 
     @Override
-    public ThingVariable<?> asThing() {
+    public ThingVariable<?> toThing() {
         return new ThingVariable.Thing(reference, null);
     }
 

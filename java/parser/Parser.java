@@ -554,7 +554,7 @@ public class Parser extends GraqlBaseVisitor {
     public TypeVariable visitVariable_type(GraqlParser.Variable_typeContext ctx) {
         TypeVariable type = visitType_any(ctx.type_any()).apply(
                 scopedLabel -> hidden().asTypeWith(new TypeProperty.Label(scopedLabel.first(), scopedLabel.second())),
-                UnboundVariable::asType
+                UnboundVariable::toType
         );
 
         for (GraqlParser.Type_propertyContext property : ctx.type_property()) {

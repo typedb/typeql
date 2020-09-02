@@ -34,7 +34,7 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         super(reference);
     }
 
-    public UnboundVariable asUnbound() {
+    public UnboundVariable toUnbound() {
         return new UnboundVariable(reference);
     }
 
@@ -47,7 +47,7 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         return getThis();
     }
 
-    public static Map<Reference, TypeVariable> asTypeGraph(List<TypeVariable> variables) {
+    public static Map<Reference, TypeVariable> toTypeGraph(List<TypeVariable> variables) {
         LinkedHashMap<Reference, TypeVariable> graph = new LinkedHashMap<>();
         LinkedList<TypeVariable> list = new LinkedList<>(variables);
 
@@ -66,7 +66,7 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         return graph;
     }
 
-    public static Map<Reference, BoundVariable<?>> asGraph(List<ThingVariable<?>> variables) {
+    public static Map<Reference, BoundVariable<?>> toGraph(List<ThingVariable<?>> variables) {
         LinkedHashMap<Reference, BoundVariable<?>> graph = new LinkedHashMap<>();
         LinkedList<BoundVariable<?>> list = new LinkedList<>(variables);
         int id = 0;
@@ -78,8 +78,8 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
                 if (graph.containsKey(variable.reference())) {
                     BoundVariable<?> existing = graph.get(variable.reference());
                     BoundVariable<?> merged;
-                    if (existing.isThing()) merged = existing.asThing().merge(variable.asThing());
-                    else merged = existing.asType().merge(variable.asType());
+                    if (existing.isThing()) merged = existing.toThing().merge(variable.toThing());
+                    else merged = existing.toType().merge(variable.toType());
                     graph.put(variable.reference(), merged);
                 } else {
                     graph.put(variable.reference(), variable);

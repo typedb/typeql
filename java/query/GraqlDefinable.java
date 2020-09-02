@@ -64,8 +64,8 @@ abstract class GraqlDefinable extends GraqlQuery {
         return variables;
     }
 
-    public final Map<Reference, TypeVariable> asGraph() {
-        if (graph == null) graph = BoundVariable.asTypeGraph(variables);
+    public final Map<Reference, TypeVariable> toGraph() {
+        if (graph == null) graph = BoundVariable.toTypeGraph(variables);
         return graph;
     }
 

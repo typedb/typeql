@@ -61,8 +61,8 @@ abstract class GraqlWritable extends GraqlQuery {
         return variables;
     }
 
-    public Map<Reference, BoundVariable<?>> asGraph() {
-        if (graph == null) graph = BoundVariable.asGraph(variables);
+    public Map<Reference, BoundVariable<?>> toGraph() {
+        if (graph == null) graph = BoundVariable.toGraph(variables);
         return graph;
     }
 

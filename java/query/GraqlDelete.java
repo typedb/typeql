@@ -34,11 +34,11 @@ public class GraqlDelete extends GraqlWritable {
 
     static List<ThingVariable<?>> validVariables(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
-            if (var.isNamed() && !match.variablesNamedUnbound().contains(var.asUnbound())) {
+            if (var.isNamed() && !match.variablesNamedUnbound().contains(var.toUnbound())) {
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.reference()));
             }
             var.variables().forEach(nestedVar -> {
-                if (nestedVar.isNamed() && !match.variablesNamedUnbound().contains(nestedVar.asUnbound())) {
+                if (nestedVar.isNamed() && !match.variablesNamedUnbound().contains(nestedVar.toUnbound())) {
                     throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(nestedVar.reference()));
                 }
             });

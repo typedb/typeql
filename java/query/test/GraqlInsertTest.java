@@ -35,8 +35,8 @@ public class GraqlInsertTest {
     private final GraqlMatch.Unfiltered match1 = Graql.match(var("x").isa("movie"));
     private final GraqlMatch.Unfiltered match2 = Graql.match(var("y").isa("movie"));
 
-    private final List<ThingVariable<?>> vars1 = list(var("x").asThing());
-    private final List<ThingVariable<?>> vars2 = list(var("y").asThing());
+    private final List<ThingVariable<?>> vars1 = list(var("x").toThing());
+    private final List<ThingVariable<?>> vars2 = list(var("y").toThing());
 
     @Test
     public void insertQueriesWithTheSameVarsAndQueryAreEqual() {

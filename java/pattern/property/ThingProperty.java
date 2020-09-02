@@ -220,11 +220,11 @@ public abstract class ThingProperty extends Property {
         }
 
         public Isa(UnboundVariable typeVar, boolean isExplicit) {
-            this(typeVar.asType(), isExplicit);
+            this(typeVar.toType(), isExplicit);
         }
 
         public Isa(Either<String, UnboundVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(label -> hidden().type(label), UnboundVariable::asType), isExplicit);
+            this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit);
         }
 
         private Isa(TypeVariable type, boolean isExplicit) {
@@ -280,7 +280,7 @@ public abstract class ThingProperty extends Property {
         private final int hash;
 
         public NEQ(UnboundVariable variable) {
-            this(variable.asThing());
+            this(variable.toThing());
         }
 
         private NEQ(ThingVariable<?> variable) {
@@ -454,19 +454,19 @@ public abstract class ThingProperty extends Property {
             private final ThingVariable<?> player;
 
             public RolePlayer(String roleType, UnboundVariable playerVar) {
-                this(roleType == null ? null : hidden().type(roleType), playerVar.asThing());
+                this(roleType == null ? null : hidden().type(roleType), playerVar.toThing());
             }
 
             public RolePlayer(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
-                this(roleTypeVar == null ? null : roleTypeVar.asType(), playerVar.asThing());
+                this(roleTypeVar == null ? null : roleTypeVar.toType(), playerVar.toThing());
             }
 
             public RolePlayer(UnboundVariable playerVar) {
-                this(null, playerVar.asThing());
+                this(null, playerVar.toThing());
             }
 
             public RolePlayer(Either<String, UnboundVariable> roleTypeArg, UnboundVariable playerVar) {
-                this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::asType), playerVar.asThing());
+                this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType), playerVar.toThing());
             }
 
             private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
@@ -528,7 +528,7 @@ public abstract class ThingProperty extends Property {
         }
 
         public Has(String type, UnboundVariable var) {
-            this(hidden().type(type), var.asThing());
+            this(hidden().type(type), var.toThing());
         }
 
         private Has(TypeVariable type, ThingVariable<?> attribute) {
