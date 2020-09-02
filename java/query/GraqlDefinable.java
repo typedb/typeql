@@ -23,7 +23,7 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.Reference;
-import graql.lang.pattern.variable.TypeVariable;
+import graql.lang.pattern.variable.TypeBoundVariable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,17 +40,17 @@ import static java.util.stream.Collectors.toSet;
 
 abstract class GraqlDefinable extends GraqlQuery {
 
-    private Map<Reference, TypeVariable> graph;
+    private Map<Reference, TypeBoundVariable> graph;
     private final GraqlToken.Command keyword;
-    private final List<TypeVariable> variables;
+    private final List<TypeBoundVariable> variables;
     private final int hash;
 
-    GraqlDefinable(GraqlToken.Command keyword, List<TypeVariable> variables) {
+    GraqlDefinable(GraqlToken.Command keyword, List<TypeBoundVariable> variables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
         if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
-        LinkedList<TypeVariable> list = new LinkedList<>(variables);
+        LinkedList<TypeBoundVariable> list = new LinkedList<>(variables);
         while (!list.isEmpty()) {
-            TypeVariable v = list.removeFirst();
+            TypeBoundVariable v = list.removeFirst();
             if (!v.isLabelled()) throw GraqlException.create(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
             else list.addAll(v.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
         }
@@ -60,11 +60,11 @@ abstract class GraqlDefinable extends GraqlQuery {
         this.hash = Objects.hash(this.keyword, this.variables);
     }
 
-    public final List<TypeVariable> variables() {
+    public final List<TypeBoundVariable> variables() {
         return variables;
     }
 
-    public final Map<Reference, TypeVariable> toGraph() {
+    public final Map<Reference, TypeBoundVariable> toGraph() {
         if (graph == null) graph = BoundVariable.toTypeGraph(variables);
         return graph;
     }
@@ -77,7 +77,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         if (variables.size() > 1) query.append(NEW_LINE);
         else query.append(GraqlToken.Char.SPACE);
 
-        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(variables().stream().map(TypeBoundVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
     }

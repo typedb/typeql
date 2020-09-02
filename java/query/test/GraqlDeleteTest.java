@@ -20,7 +20,7 @@ package graql.lang.query.test;
 import graql.lang.Graql;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.ThingBoundVariable;
 import graql.lang.query.GraqlDelete;
 import graql.lang.query.GraqlMatch;
 import org.junit.Rule;
@@ -42,8 +42,8 @@ public class GraqlDeleteTest {
     private final GraqlMatch.Unfiltered match1 = Graql.match(var("x").isa("movie"));
     private final GraqlMatch.Unfiltered match2 = Graql.match(var("y").isa("movie"));
 
-    private final List<ThingVariable<?>> delete1 = list(var("x").isa("movie"));
-    private final List<ThingVariable<?>> delete2 = list(var("y").isa("movie"));
+    private final List<ThingBoundVariable<?>> delete1 = list(var("x").isa("movie"));
+    private final List<ThingBoundVariable<?>> delete2 = list(var("y").isa("movie"));
 
     @Test
     public void deleteQueriesWithTheSameMatchAndVarsAreEqual() {

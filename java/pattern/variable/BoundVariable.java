@@ -47,16 +47,16 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         return getThis();
     }
 
-    public static Map<Reference, TypeVariable> toTypeGraph(List<TypeVariable> variables) {
-        LinkedHashMap<Reference, TypeVariable> graph = new LinkedHashMap<>();
-        LinkedList<TypeVariable> list = new LinkedList<>(variables);
+    public static Map<Reference, TypeBoundVariable> toTypeGraph(List<TypeBoundVariable> variables) {
+        LinkedHashMap<Reference, TypeBoundVariable> graph = new LinkedHashMap<>();
+        LinkedList<TypeBoundVariable> list = new LinkedList<>(variables);
 
         while (!list.isEmpty()) {
-            TypeVariable variable = list.removeFirst();
+            TypeBoundVariable variable = list.removeFirst();
             assert variable.isLabelled();
             list.addAll(variable.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
             if (graph.containsKey(variable.reference())) {
-                TypeVariable merged = graph.get(variable.reference()).merge(variable);
+                TypeBoundVariable merged = graph.get(variable.reference()).merge(variable);
                 graph.put(variable.reference(), merged);
             } else {
                 graph.put(variable.reference(), variable);
@@ -66,7 +66,7 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         return graph;
     }
 
-    public static Map<Reference, BoundVariable<?>> toGraph(List<ThingVariable<?>> variables) {
+    public static Map<Reference, BoundVariable<?>> toGraph(List<ThingBoundVariable<?>> variables) {
         LinkedHashMap<Reference, BoundVariable<?>> graph = new LinkedHashMap<>();
         LinkedList<BoundVariable<?>> list = new LinkedList<>(variables);
         int id = 0;

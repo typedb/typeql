@@ -44,15 +44,15 @@ public abstract class Variable<T extends Variable<T>> {
         return false;
     }
 
-    public TypeVariable toType() {
+    public TypeBoundVariable toType() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Variable.class.getCanonicalName(), TypeVariable.class.getCanonicalName()
+                Variable.class.getCanonicalName(), TypeBoundVariable.class.getCanonicalName()
         ));
     }
 
-    public ThingVariable<?> toThing() {
+    public ThingBoundVariable<?> toThing() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Variable.class.getCanonicalName(), ThingVariable.class.getCanonicalName()
+                Variable.class.getCanonicalName(), ThingBoundVariable.class.getCanonicalName()
         ));
     }
 

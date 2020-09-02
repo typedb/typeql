@@ -18,13 +18,13 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.TypeVariable;
+import graql.lang.pattern.variable.TypeBoundVariable;
 
 import java.util.List;
 
 public class GraqlDefine extends GraqlDefinable {
 
-    public GraqlDefine(List<TypeVariable> variables) {
+    public GraqlDefine(List<TypeBoundVariable> variables) {
         super(GraqlToken.Command.DEFINE, variables);
     }
 }

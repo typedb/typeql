@@ -28,7 +28,7 @@ import java.util.Set;
 import static grakn.common.collection.Collections.set;
 
 public class UnboundVariable extends Variable<UnboundVariable> implements TypeVariableBuilder,
-                                                                          ThingVariableBuilder.Common<ThingVariable.Thing>,
+                                                                          ThingVariableBuilder.Common<ThingBoundVariable.Thing>,
                                                                           ThingVariableBuilder.Thing,
                                                                           ThingVariableBuilder.Relation,
                                                                           ThingVariableBuilder.Attribute {
@@ -54,13 +54,13 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
     }
 
     @Override
-    public TypeVariable toType() {
-        return new TypeVariable(reference, null);
+    public TypeBoundVariable toType() {
+        return new TypeBoundVariable(reference, null);
     }
 
     @Override
-    public ThingVariable<?> toThing() {
-        return new ThingVariable.Thing(reference, null);
+    public ThingBoundVariable<?> toThing() {
+        return new ThingBoundVariable.Thing(reference, null);
     }
 
     @Override
@@ -69,46 +69,46 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeProperty.Singular property) {
+    public TypeBoundVariable asTypeWith(TypeProperty.Singular property) {
         if (!isVisible() && property instanceof TypeProperty.Label) {
-            return new TypeVariable(Reference.label(((TypeProperty.Label) property).scopedLabel()), property);
+            return new TypeBoundVariable(Reference.label(((TypeProperty.Label) property).scopedLabel()), property);
         } else {
-            return new TypeVariable(reference, property);
+            return new TypeBoundVariable(reference, property);
         }
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
-        return new TypeVariable(reference, property);
+    public TypeBoundVariable asTypeWith(TypeProperty.Repeatable property) {
+        return new TypeBoundVariable(reference, property);
     }
 
     @Override
-    public ThingVariable.Thing asSameThingWith(ThingProperty.Singular property) {
-        return new ThingVariable.Thing(reference, property);
+    public ThingBoundVariable.Thing asSameThingWith(ThingProperty.Singular property) {
+        return new ThingBoundVariable.Thing(reference, property);
     }
 
     @Override
-    public ThingVariable.Thing asSameThingWith(ThingProperty.Repeatable property) {
-        return new ThingVariable.Thing(reference, property);
+    public ThingBoundVariable.Thing asSameThingWith(ThingProperty.Repeatable property) {
+        return new ThingBoundVariable.Thing(reference, property);
     }
 
     @Override
-    public ThingVariable.Thing asThingWith(ThingProperty.Singular property) {
-        return new ThingVariable.Thing(reference, property);
+    public ThingBoundVariable.Thing asThingWith(ThingProperty.Singular property) {
+        return new ThingBoundVariable.Thing(reference, property);
     }
 
     @Override
-    public ThingVariable.Attribute asAttributeWith(ThingProperty.Value<?> property) {
-        return new ThingVariable.Attribute(reference, property);
+    public ThingBoundVariable.Attribute asAttributeWith(ThingProperty.Value<?> property) {
+        return new ThingBoundVariable.Attribute(reference, property);
     }
 
     @Override
-    public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
+    public ThingBoundVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
         return asRelationWith(new ThingProperty.Relation(rolePlayer));
     }
 
-    public ThingVariable.Relation asRelationWith(ThingProperty.Relation property) {
-        return new ThingVariable.Relation(reference, property);
+    public ThingBoundVariable.Relation asRelationWith(ThingProperty.Relation property) {
+        return new ThingBoundVariable.Relation(reference, property);
     }
 
     @Override

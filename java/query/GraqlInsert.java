@@ -18,7 +18,7 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.ThingBoundVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -26,11 +26,11 @@ import java.util.Optional;
 
 public class GraqlInsert extends GraqlWritable {
 
-    public GraqlInsert(List<ThingVariable<?>> variables) {
+    public GraqlInsert(List<ThingBoundVariable<?>> variables) {
         this(null, variables);
     }
 
-    GraqlInsert(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    GraqlInsert(@Nullable GraqlMatch.Unfiltered match, List<ThingBoundVariable<?>> variables) {
         super(GraqlToken.Command.INSERT, match, variables);
     }
 

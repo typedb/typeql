@@ -40,12 +40,12 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CONVERT_OPERATION
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable<ThingVariable<?>> {
+public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extends BoundVariable<ThingBoundVariable<?>> {
 
     final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular;
     final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating;
 
-    public ThingVariable(Reference reference, ThingProperty property) {
+    public ThingBoundVariable(Reference reference, ThingProperty property) {
         super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
@@ -55,9 +55,9 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    ThingVariable(Reference reference,
-                  Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular,
-                  Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating) {
+    ThingBoundVariable(Reference reference,
+                       Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular,
+                       Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating) {
         super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
@@ -79,7 +79,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     @Override
-    public ThingVariable<?> toThing() {
+    public ThingBoundVariable<?> toThing() {
         return this;
     }
 
@@ -123,8 +123,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     @Override
-    ThingVariable.Merged merge(ThingVariable<?> variable) {
-        ThingVariable.Merged merged = new ThingVariable.Merged(reference, singular, repeating);
+    ThingBoundVariable.Merged merge(ThingBoundVariable<?> variable) {
+        ThingBoundVariable.Merged merged = new ThingBoundVariable.Merged(reference, singular, repeating);
         variable.singular.values().forEach(merged::addSingularProperties);
         variable.repeating.forEach(
                 (clazz, list) -> merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
@@ -154,7 +154,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     @Override
     public abstract String toString();
 
-    static class Merged extends ThingVariable<Merged> {
+    static class Merged extends ThingBoundVariable<Merged> {
 
         Merged(Reference reference,
                Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
@@ -163,12 +163,12 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        ThingVariable.Merged getThis() {
+        ThingBoundVariable.Merged getThis() {
             return this;
         }
 
         @Override
-        ThingVariable<?> setAnonymousWithID(int id) {
+        ThingBoundVariable<?> setAnonymousWithID(int id) {
             throw GraqlException.create(INVALID_CONVERT_OPERATION.message());
         }
 
@@ -195,14 +195,14 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
+    public static class Thing extends ThingBoundVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
 
         Thing(Reference reference, ThingProperty property) {
             super(reference, property);
         }
 
         @Override
-        ThingVariable.Thing getThis() {
+        ThingBoundVariable.Thing getThis() {
             return this;
         }
 
@@ -226,20 +226,20 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
-                                                                            ThingVariableBuilder.Common<Relation> {
+    public static class Relation extends ThingBoundVariable<Relation> implements ThingVariableBuilder.Relation,
+                                                                                 ThingVariableBuilder.Common<Relation> {
 
         Relation(Reference reference, ThingProperty.Relation property) {
             super(reference, property);
         }
 
         @Override
-        ThingVariable.Relation getThis() {
+        ThingBoundVariable.Relation getThis() {
             return this;
         }
 
         @Override
-        public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
+        public ThingBoundVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
             ThingProperty.Relation relationProperty = singular.get(ThingProperty.Relation.class).asRelation();
             relationProperty.addPlayers(rolePlayer);
             if (isa().isPresent() && !relationProperty.hasScope()) {
@@ -264,14 +264,14 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
+    public static class Attribute extends ThingBoundVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
         Attribute(Reference reference, ThingProperty property) {
             super(reference, property);
         }
 
         @Override
-        ThingVariable.Attribute getThis() {
+        ThingBoundVariable.Attribute getThis() {
             return this;
         }
 

@@ -36,13 +36,13 @@ import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITI
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVariableBuilder {
+public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implements TypeVariableBuilder {
 
     private final Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular;
     private final Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating;
     private final List<TypeProperty> ordered;
 
-    TypeVariable(Reference reference, TypeProperty property) {
+    TypeBoundVariable(Reference reference, TypeProperty property) {
         super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
@@ -53,10 +53,10 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
         }
     }
 
-    private TypeVariable(Reference reference,
-                         Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular,
-                         Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating,
-                         List<TypeProperty> ordered) {
+    private TypeBoundVariable(Reference reference,
+                              Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular,
+                              Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating,
+                              List<TypeProperty> ordered) {
         super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
@@ -64,7 +64,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
-    public TypeVariable getThis() {
+    public TypeBoundVariable getThis() {
         return this;
     }
 
@@ -79,7 +79,7 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
-    public TypeVariable toType() {
+    public TypeBoundVariable toType() {
         return this;
     }
 
@@ -92,8 +92,8 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
-    TypeVariable merge(TypeVariable variable) {
-        TypeVariable merged = new TypeVariable(reference, singular, repeating, ordered);
+    TypeBoundVariable merge(TypeBoundVariable variable) {
+        TypeBoundVariable merged = new TypeBoundVariable(reference, singular, repeating, ordered);
         variable.singular.values().forEach(property -> {
             merged.addSingularProperties(property);
             merged.ordered.add(property);
@@ -106,14 +106,14 @@ public class TypeVariable extends BoundVariable<TypeVariable> implements TypeVar
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeProperty.Singular property) {
+    public TypeBoundVariable asTypeWith(TypeProperty.Singular property) {
         addSingularProperties(property);
         ordered.add(property);
         return this;
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
+    public TypeBoundVariable asTypeWith(TypeProperty.Repeatable property) {
         if (label().isPresent() && property instanceof TypeProperty.Relates) {
             ((TypeProperty.Relates) property).setScope(label().get().label());
         }

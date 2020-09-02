@@ -18,7 +18,7 @@
 package graql.lang.query.test;
 
 import graql.lang.Graql;
-import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.ThingBoundVariable;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
 import org.junit.Test;
@@ -35,8 +35,8 @@ public class GraqlInsertTest {
     private final GraqlMatch.Unfiltered match1 = Graql.match(var("x").isa("movie"));
     private final GraqlMatch.Unfiltered match2 = Graql.match(var("y").isa("movie"));
 
-    private final List<ThingVariable<?>> vars1 = list(var("x").toThing());
-    private final List<ThingVariable<?>> vars2 = list(var("y").toThing());
+    private final List<ThingBoundVariable<?>> vars1 = list(var("x").toThing());
+    private final List<ThingBoundVariable<?>> vars2 = list(var("y").toThing());
 
     @Test
     public void insertQueriesWithTheSameVarsAndQueryAreEqual() {
