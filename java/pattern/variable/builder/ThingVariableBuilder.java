@@ -26,63 +26,66 @@ import graql.lang.pattern.variable.UnboundVariable;
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 
-public interface ThingVariableBuilder<T> {
+public interface ThingVariableBuilder {
 
-    default T isa(GraqlToken.Type type) {
-        return isa(type.toString());
+    interface Common<T> {
+
+        default T isa(GraqlToken.Type type) {
+            return isa(type.toString());
+        }
+
+        default T isa(String type) {
+            return asSameThingWith(new ThingProperty.Isa(type, false));
+        }
+
+        default T isa(UnboundVariable var) {
+            return asSameThingWith(new ThingProperty.Isa(var, false));
+        }
+
+        default T isaX(GraqlToken.Type type) {
+            return isa(type.toString());
+        }
+
+        default T isaX(String type) {
+            return asSameThingWith(new ThingProperty.Isa(type, true));
+        }
+
+        default T isaX(UnboundVariable var) {
+            return asSameThingWith(new ThingProperty.Isa(var, true));
+        }
+
+        default T has(String type, long value) {
+            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Long(value)));
+        }
+
+        default T has(String type, double value) {
+            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Double(value)));
+        }
+
+        default T has(String type, boolean value) {
+            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Boolean(value)));
+        }
+
+        default T has(String type, String value) {
+            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.String(value)));
+        }
+
+        default T has(String type, LocalDateTime value) {
+            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.DateTime(value)));
+        }
+
+        default T has(String type, ThingProperty.Value<?> value) {
+            return asSameThingWith(new ThingProperty.Has(type, value));
+        }
+
+        default T has(String type, UnboundVariable variable) {
+            return asSameThingWith(new ThingProperty.Has(type, variable));
+        }
+
+        T asSameThingWith(ThingProperty.Singular property);
+
+        T asSameThingWith(ThingProperty.Repeatable property);
     }
-
-    default T isa(String type) {
-        return asSameThingWith(new ThingProperty.Isa(type, false));
-    }
-
-    default T isa(UnboundVariable var) {
-        return asSameThingWith(new ThingProperty.Isa(var, false));
-    }
-
-    default T isaX(GraqlToken.Type type) {
-        return isa(type.toString());
-    }
-
-    default T isaX(String type) {
-        return asSameThingWith(new ThingProperty.Isa(type, true));
-    }
-
-    default T isaX(UnboundVariable var) {
-        return asSameThingWith(new ThingProperty.Isa(var, true));
-    }
-
-    default T has(String type, long value) {
-        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Long(value)));
-    }
-
-    default T has(String type, double value) {
-        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Double(value)));
-    }
-
-    default T has(String type, boolean value) {
-        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Boolean(value)));
-    }
-
-    default T has(String type, String value) {
-        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.String(value)));
-    }
-
-    default T has(String type, LocalDateTime value) {
-        return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.DateTime(value)));
-    }
-
-    default T has(String type, ThingProperty.Value<?> value) {
-        return asSameThingWith(new ThingProperty.Has(type, value));
-    }
-
-    default T has(String type, UnboundVariable variable) {
-        return asSameThingWith(new ThingProperty.Has(type, variable));
-    }
-
-    T asSameThingWith(ThingProperty.Singular property);
-
-    T asSameThingWith(ThingProperty.Repeatable property);
 
     interface Thing {
 

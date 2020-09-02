@@ -28,7 +28,7 @@ import java.util.Set;
 import static grakn.common.collection.Collections.set;
 
 public class UnboundVariable extends Variable<UnboundVariable> implements TypeVariableBuilder,
-                                                                          ThingVariableBuilder<ThingVariable.Thing>,
+                                                                          ThingVariableBuilder.Common<ThingVariable.Thing>,
                                                                           ThingVariableBuilder.Thing,
                                                                           ThingVariableBuilder.Relation,
                                                                           ThingVariableBuilder.Attribute {

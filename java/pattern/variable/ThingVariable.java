@@ -195,7 +195,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder<Thing> {
+    public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
 
         Thing(Reference reference, ThingProperty property) {
             super(reference, property);
@@ -227,7 +227,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
-                                                                            ThingVariableBuilder<Relation> {
+                                                                            ThingVariableBuilder.Common<Relation> {
 
         Relation(Reference reference, ThingProperty.Relation property) {
             super(reference, property);
@@ -264,7 +264,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder<Attribute> {
+    public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
         Attribute(Reference reference, ThingProperty property) {
             super(reference, property);

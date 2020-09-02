@@ -51,5 +51,6 @@ filegroup(
         "@graknlabs_dependencies//tool/release:create-notes",
         "@graknlabs_dependencies//tool/sonarcloud:code-analysis",
         "@graknlabs_dependencies//tool/unuseddeps:unused-deps",
+        "@graknlabs_dependencies//image/rbe:ubuntu-1604",
     ],
 )
