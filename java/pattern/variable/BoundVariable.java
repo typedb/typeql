@@ -78,8 +78,8 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
                 if (graph.containsKey(variable.reference())) {
                     BoundVariable<?> existing = graph.get(variable.reference());
                     BoundVariable<?> merged;
-                    if (existing.isThing()) merged = existing.toThing().merge(variable.toThing());
-                    else merged = existing.toType().merge(variable.toType());
+                    if (existing.isThing()) merged = existing.asThing().merge(variable.asThing());
+                    else merged = existing.asType().merge(variable.asType());
                     graph.put(variable.reference(), merged);
                 } else {
                     graph.put(variable.reference(), variable);

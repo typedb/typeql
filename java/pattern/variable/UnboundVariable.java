@@ -53,12 +53,10 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
         return of(Reference.anonymous(false));
     }
 
-    @Override
     public TypeBoundVariable toType() {
         return new TypeBoundVariable(reference, null);
     }
 
-    @Override
     public ThingBoundVariable<?> toThing() {
         return new ThingBoundVariable.Thing(reference, null);
     }

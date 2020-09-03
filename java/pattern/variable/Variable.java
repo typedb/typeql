@@ -44,13 +44,13 @@ public abstract class Variable<T extends Variable<T>> {
         return false;
     }
 
-    public TypeBoundVariable toType() {
+    public TypeBoundVariable asType() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Variable.class.getCanonicalName(), TypeBoundVariable.class.getCanonicalName()
         ));
     }
 
-    public ThingBoundVariable<?> toThing() {
+    public ThingBoundVariable<?> asThing() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Variable.class.getCanonicalName(), ThingBoundVariable.class.getCanonicalName()
         ));

@@ -76,9 +76,13 @@ public abstract class ValueOperation<T> {
         return comparator.equals(GraqlToken.Comparator.EQV) && !hasVariable();
     }
 
-    public boolean hasVariable() { return variable() != null;}
+    public boolean hasVariable() {
+        return variable() != null;
+    }
 
-    public ThingBoundVariable<?> variable() { return null;}
+    public ThingBoundVariable<?> variable() {
+        return null;
+    }
 
     @Override
     public String toString() {
@@ -335,8 +339,11 @@ public abstract class ValueOperation<T> {
 
         public static class Variable extends Comparison<UnboundVariable> {
 
-            public Variable(GraqlToken.Comparator comparator, UnboundVariable var) {
-                super(comparator, var);
+            private final ThingBoundVariable<?> variable;
+
+            public Variable(GraqlToken.Comparator comparator, UnboundVariable variable) {
+                super(comparator, variable);
+                this.variable = variable.toThing();
             }
 
             public java.lang.String toString() {
@@ -344,7 +351,9 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
-            public ThingBoundVariable<?> variable() { return value().toThing(); }
+            public ThingBoundVariable<?> variable() {
+                return variable;
+            }
 
             @Override
             public Comparison.Variable asVariable() {

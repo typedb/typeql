@@ -79,7 +79,7 @@ public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implemen
     }
 
     @Override
-    public TypeBoundVariable toType() {
+    public TypeBoundVariable asType() {
         return this;
     }
 
