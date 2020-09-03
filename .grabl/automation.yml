@@ -1,5 +1,8 @@
 build:
   quality:
+    filter:
+      owner: graknlabs
+      branch: master
     job:
       build-analysis:
         machine: graknlabs-ubuntu-20.04
@@ -26,6 +29,9 @@ build:
         script: |
           bazel test --config=rbe //java/... --test_output=errors
       deploy-maven-snapshot:
+        filter:
+          owner: graknlabs
+          branch: master
         machine: graknlabs-ubuntu-20.04
         script: |
           export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
@@ -37,6 +43,9 @@ build:
           bazel run --define version=$(git rev-parse HEAD) //java/parser:deploy-maven -- snapshot
           bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
       test-deployment-maven:
+        filter:
+          owner: graknlabs
+          branch: master
         machine: graknlabs-ubuntu-20.04
         script: |
           sudo apt-get update
@@ -53,6 +62,9 @@ build:
           depends: [deploy-maven-snapshot]
 
 release:
+  filter:
+    owner: graknlabs
+    branch: master
   validation:
     job:
       validate-dependencies:
