@@ -27,25 +27,24 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CONVERT_OPERATION;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
-public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extends BoundVariable<ThingBoundVariable<?>> {
+public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable {
 
     final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular;
     final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating;
 
-    public ThingBoundVariable(Reference reference, ThingProperty property) {
+    public ThingVariable(Reference reference, ThingProperty property) {
         super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
@@ -55,9 +54,9 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
         }
     }
 
-    ThingBoundVariable(Reference reference,
-                       Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular,
-                       Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating) {
+    ThingVariable(Reference reference,
+                  Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular,
+                  Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating) {
         super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
@@ -66,11 +65,11 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
     abstract T getThis();
 
     @Override
-    public Set<ThingProperty> properties() {
+    public Stream<ThingProperty> properties() {
         return Stream.concat(
                 singular.values().stream(),
                 repeating.values().stream().flatMap(Collection::stream)
-        ).collect(Collectors.toSet());
+        );
     }
 
     @Override
@@ -79,7 +78,7 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
     }
 
     @Override
-    public ThingBoundVariable<?> asThing() {
+    public ThingVariable<?> asThing() {
         return this;
     }
 
@@ -122,9 +121,8 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
         }
     }
 
-    @Override
-    ThingBoundVariable.Merged merge(ThingBoundVariable<?> variable) {
-        ThingBoundVariable.Merged merged = new ThingBoundVariable.Merged(reference, singular, repeating);
+    ThingVariable.Merged merge(ThingVariable<?> variable) {
+        ThingVariable.Merged merged = new ThingVariable.Merged(reference, singular, repeating);
         variable.singular.values().forEach(merged::addSingularProperties);
         variable.repeating.forEach(
                 (clazz, list) -> merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
@@ -154,7 +152,22 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
     @Override
     public abstract String toString();
 
-    static class Merged extends ThingBoundVariable<Merged> {
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || o.getClass().isAssignableFrom(ThingVariable.class)) return false;
+        ThingVariable<?> that = (ThingVariable<?>) o;
+
+        return (this.reference.equals(that.reference) &&
+                this.properties().collect(toSet()).equals(that.properties().collect(toSet())));
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(reference, properties().collect(toSet()));
+    }
+
+    static class Merged extends ThingVariable<Merged> {
 
         Merged(Reference reference,
                Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
@@ -163,13 +176,8 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
         }
 
         @Override
-        ThingBoundVariable.Merged getThis() {
+        ThingVariable.Merged getThis() {
             return this;
-        }
-
-        @Override
-        ThingBoundVariable<?> setAnonymousWithID(int id) {
-            throw GraqlException.create(INVALID_CONVERT_OPERATION.message());
         }
 
         @Override
@@ -189,20 +197,20 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
                 return null;
             }
 
-            String properties = properties().stream().filter(filter).map(Property::toString).collect(joining(COMMA_SPACE.toString()));
+            String properties = properties().filter(filter).map(Property::toString).collect(joining(COMMA_SPACE.toString()));
             if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
             return syntax.toString();
         }
     }
 
-    public static class Thing extends ThingBoundVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
+    public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
 
         Thing(Reference reference, ThingProperty property) {
             super(reference, property);
         }
 
         @Override
-        ThingBoundVariable.Thing getThis() {
+        ThingVariable.Thing getThis() {
             return this;
         }
 
@@ -226,20 +234,20 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
         }
     }
 
-    public static class Relation extends ThingBoundVariable<Relation> implements ThingVariableBuilder.Relation,
-                                                                                 ThingVariableBuilder.Common<Relation> {
+    public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
+                                                                            ThingVariableBuilder.Common<Relation> {
 
         Relation(Reference reference, ThingProperty.Relation property) {
             super(reference, property);
         }
 
         @Override
-        ThingBoundVariable.Relation getThis() {
+        ThingVariable.Relation getThis() {
             return this;
         }
 
         @Override
-        public ThingBoundVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
+        public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
             ThingProperty.Relation relationProperty = singular.get(ThingProperty.Relation.class).asRelation();
             relationProperty.addPlayers(rolePlayer);
             if (isa().isPresent() && !relationProperty.hasScope()) {
@@ -264,14 +272,14 @@ public abstract class ThingBoundVariable<T extends ThingBoundVariable<T>> extend
         }
     }
 
-    public static class Attribute extends ThingBoundVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
+    public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
         Attribute(Reference reference, ThingProperty property) {
             super(reference, property);
         }
 
         @Override
-        ThingBoundVariable.Attribute getThis() {
+        ThingVariable.Attribute getThis() {
             return this;
         }
 

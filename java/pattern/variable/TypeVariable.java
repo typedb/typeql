@@ -26,8 +26,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.set;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
@@ -36,13 +37,13 @@ import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITI
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implements TypeVariableBuilder {
+public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
     private final Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular;
     private final Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating;
     private final List<TypeProperty> ordered;
 
-    TypeBoundVariable(Reference reference, TypeProperty property) {
+    TypeVariable(Reference reference, TypeProperty property) {
         super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
@@ -53,10 +54,10 @@ public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implemen
         }
     }
 
-    private TypeBoundVariable(Reference reference,
-                              Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular,
-                              Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating,
-                              List<TypeProperty> ordered) {
+    private TypeVariable(Reference reference,
+                         Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular,
+                         Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating,
+                         List<TypeProperty> ordered) {
         super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
@@ -64,13 +65,8 @@ public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implemen
     }
 
     @Override
-    public TypeBoundVariable getThis() {
-        return this;
-    }
-
-    @Override
-    public Set<TypeProperty> properties() {
-        return set(ordered);
+    public Stream<TypeProperty> properties() {
+        return ordered.stream();
     }
 
     @Override
@@ -79,7 +75,7 @@ public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implemen
     }
 
     @Override
-    public TypeBoundVariable asType() {
+    public TypeVariable asType() {
         return this;
     }
 
@@ -91,9 +87,8 @@ public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implemen
         }
     }
 
-    @Override
-    TypeBoundVariable merge(TypeBoundVariable variable) {
-        TypeBoundVariable merged = new TypeBoundVariable(reference, singular, repeating, ordered);
+    TypeVariable merge(TypeVariable variable) {
+        TypeVariable merged = new TypeVariable(reference, singular, repeating, ordered);
         variable.singular.values().forEach(property -> {
             merged.addSingularProperties(property);
             merged.ordered.add(property);
@@ -106,14 +101,14 @@ public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implemen
     }
 
     @Override
-    public TypeBoundVariable asTypeWith(TypeProperty.Singular property) {
+    public TypeVariable asTypeWith(TypeProperty.Singular property) {
         addSingularProperties(property);
         ordered.add(property);
         return this;
     }
 
     @Override
-    public TypeBoundVariable asTypeWith(TypeProperty.Repeatable property) {
+    public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
         if (label().isPresent() && property instanceof TypeProperty.Relates) {
             ((TypeProperty.Relates) property).setScope(label().get().label());
         }
@@ -187,5 +182,19 @@ public class TypeBoundVariable extends BoundVariable<TypeBoundVariable> implemen
             syntax.append(reference);
         }
         return syntax.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeVariable that = (TypeVariable) o;
+        return (this.reference.equals(that.reference) &&
+                set(this.ordered).equals(set(that.ordered)));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.reference, set(this.ordered));
     }
 }

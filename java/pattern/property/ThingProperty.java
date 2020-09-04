@@ -22,8 +22,8 @@ import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingBoundVariable;
-import graql.lang.pattern.variable.TypeBoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
@@ -176,7 +176,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<BoundVariable<?>> variables() {
+        public Stream<BoundVariable> variables() {
             return Stream.of();
         }
 
@@ -211,7 +211,7 @@ public abstract class ThingProperty extends Property {
 
     public static class Isa extends ThingProperty.Singular {
 
-        private final TypeBoundVariable type;
+        private final TypeVariable type;
         private final boolean isExplicit;
         private final int hash;
 
@@ -227,7 +227,7 @@ public abstract class ThingProperty extends Property {
             this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit);
         }
 
-        private Isa(TypeBoundVariable type, boolean isExplicit) {
+        private Isa(TypeVariable type, boolean isExplicit) {
             if (type == null) {
                 throw new NullPointerException("Null type");
             }
@@ -236,12 +236,12 @@ public abstract class ThingProperty extends Property {
             this.hash = Objects.hash(Isa.class, this.type, this.isExplicit);
         }
 
-        public TypeBoundVariable type() {
+        public TypeVariable type() {
             return type;
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of(type);
         }
 
@@ -276,25 +276,25 @@ public abstract class ThingProperty extends Property {
 
     public static class NEQ extends ThingProperty.Singular {
 
-        private final ThingBoundVariable<?> variable;
+        private final ThingVariable<?> variable;
         private final int hash;
 
         public NEQ(UnboundVariable variable) {
             this(variable.toThing());
         }
 
-        private NEQ(ThingBoundVariable<?> variable) {
+        private NEQ(ThingVariable<?> variable) {
             if (variable == null) throw new NullPointerException("Null var");
             this.variable = variable;
             this.hash = Objects.hash(variable);
         }
 
-        public ThingBoundVariable<?> variable() {
+        public ThingVariable<?> variable() {
             return variable;
         }
 
         @Override
-        public Stream<ThingBoundVariable<?>> variables() {
+        public Stream<ThingVariable<?>> variables() {
             return Stream.of(variable());
         }
 
@@ -343,7 +343,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<ThingBoundVariable<?>> variables() {
+        public Stream<ThingVariable<?>> variables() {
             return operation.variable() != null ? Stream.of(operation.variable()) : Stream.empty();
         }
 
@@ -411,9 +411,9 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<BoundVariable<?>> variables() {
+        public Stream<BoundVariable> variables() {
             return players().stream().flatMap(player -> {
-                Stream.Builder<BoundVariable<?>> stream = Stream.builder();
+                Stream.Builder<BoundVariable> stream = Stream.builder();
                 stream.add(player.player());
                 player.roleType().ifPresent(stream::add);
                 return stream.build();
@@ -450,8 +450,8 @@ public abstract class ThingProperty extends Property {
 
         public static class RolePlayer {
 
-            private TypeBoundVariable roleType;
-            private final ThingBoundVariable<?> player;
+            private TypeVariable roleType;
+            private final ThingVariable<?> player;
 
             public RolePlayer(String roleType, UnboundVariable playerVar) {
                 this(roleType == null ? null : hidden().type(roleType), playerVar.toThing());
@@ -469,7 +469,7 @@ public abstract class ThingProperty extends Property {
                 this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType), playerVar.toThing());
             }
 
-            private RolePlayer(@Nullable TypeBoundVariable roleType, ThingBoundVariable<?> player) {
+            private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
                 if (player == null) throw new NullPointerException("Null player");
                 this.roleType = roleType;
                 this.player = player;
@@ -481,11 +481,11 @@ public abstract class ThingProperty extends Property {
                 }
             }
 
-            public Optional<TypeBoundVariable> roleType() {
+            public Optional<TypeVariable> roleType() {
                 return Optional.ofNullable(roleType);
             }
 
-            public ThingBoundVariable<?> player() {
+            public ThingVariable<?> player() {
                 return player;
             }
 
@@ -519,8 +519,8 @@ public abstract class ThingProperty extends Property {
 
     public static class Has extends ThingProperty.Repeatable {
 
-        private final TypeBoundVariable type;
-        private final ThingBoundVariable<?> attribute;
+        private final TypeVariable type;
+        private final ThingVariable<?> attribute;
         private final int hash;
 
         public Has(String type, ThingProperty.Value<?> value) {
@@ -531,7 +531,7 @@ public abstract class ThingProperty extends Property {
             this(hidden().type(type), var.toThing());
         }
 
-        private Has(TypeBoundVariable type, ThingBoundVariable<?> attribute) {
+        private Has(TypeVariable type, ThingVariable<?> attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
             if (attribute.isNamed()) this.attribute = attribute;
@@ -539,16 +539,16 @@ public abstract class ThingProperty extends Property {
             this.hash = Objects.hash(this.type, this.attribute);
         }
 
-        public TypeBoundVariable type() {
+        public TypeVariable type() {
             return type;
         }
 
-        public ThingBoundVariable<?> attribute() {
+        public ThingVariable<?> attribute() {
             return attribute;
         }
 
         @Override
-        public Stream<ThingBoundVariable<?>> variables() {
+        public Stream<ThingVariable<?>> variables() {
             return Stream.of(attribute);
         }
 

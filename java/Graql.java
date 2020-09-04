@@ -25,8 +25,8 @@ import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.property.ValueOperation;
-import graql.lang.pattern.variable.ThingBoundVariable;
-import graql.lang.pattern.variable.TypeBoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
@@ -71,27 +71,27 @@ public class Graql {
         return new GraqlMatch.Unfiltered(patterns);
     }
 
-    public static GraqlInsert insert(ThingBoundVariable<?>... things) {
+    public static GraqlInsert insert(ThingVariable<?>... things) {
         return new GraqlInsert(list(things));
     }
 
-    public static GraqlInsert insert(List<ThingBoundVariable<?>> things) {
+    public static GraqlInsert insert(List<ThingVariable<?>> things) {
         return new GraqlInsert(things);
     }
 
-    public static GraqlDefine define(TypeBoundVariable... types) {
+    public static GraqlDefine define(TypeVariable... types) {
         return new GraqlDefine(list(types));
     }
 
-    public static GraqlDefine define(List<TypeBoundVariable> types) {
+    public static GraqlDefine define(List<TypeVariable> types) {
         return new GraqlDefine(types);
     }
 
-    public static GraqlUndefine undefine(TypeBoundVariable... types) {
+    public static GraqlUndefine undefine(TypeVariable... types) {
         return new GraqlUndefine(list(types));
     }
 
-    public static GraqlUndefine undefine(List<TypeBoundVariable> types) {
+    public static GraqlUndefine undefine(List<TypeVariable> types) {
         return new GraqlUndefine(types);
     }
 
@@ -136,31 +136,31 @@ public class Graql {
         return UnboundVariable.named(name);
     }
 
-    public static TypeBoundVariable type(GraqlToken.Type type) {
+    public static TypeVariable type(GraqlToken.Type type) {
         return type(type.toString());
     }
 
-    public static TypeBoundVariable type(String label) {
+    public static TypeVariable type(String label) {
         return hidden().type(label);
     }
 
-    public static ThingBoundVariable.Relation rel(String playerVar) {
+    public static ThingVariable.Relation rel(String playerVar) {
         return hidden().rel(playerVar);
     }
 
-    public static ThingBoundVariable.Relation rel(UnboundVariable playerVar) {
+    public static ThingVariable.Relation rel(UnboundVariable playerVar) {
         return hidden().rel(playerVar);
     }
 
-    public static ThingBoundVariable.Relation rel(String roleType, String playerVar) {
+    public static ThingVariable.Relation rel(String roleType, String playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingBoundVariable.Relation rel(String roleType, UnboundVariable playerVar) {
+    public static ThingVariable.Relation rel(String roleType, UnboundVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingBoundVariable.Relation rel(UnboundVariable roleType, UnboundVariable playerVar) {
+    public static ThingVariable.Relation rel(UnboundVariable roleType, UnboundVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
@@ -168,23 +168,23 @@ public class Graql {
 
     // Attribute value assignment property
 
-    public static ThingBoundVariable.Attribute val(long value) {
+    public static ThingVariable.Attribute val(long value) {
         return hidden().val(value);
     }
 
-    public static ThingBoundVariable.Attribute val(double value) {
+    public static ThingVariable.Attribute val(double value) {
         return hidden().val(value);
     }
 
-    public static ThingBoundVariable.Attribute val(boolean value) {
+    public static ThingVariable.Attribute val(boolean value) {
         return hidden().val(value);
     }
 
-    public static ThingBoundVariable.Attribute val(String value) {
+    public static ThingVariable.Attribute val(String value) {
         return hidden().val(value);
     }
 
-    public static ThingBoundVariable.Attribute val(LocalDateTime value) {
+    public static ThingVariable.Attribute val(LocalDateTime value) {
         return hidden().val(value);
     }
 

@@ -19,13 +19,10 @@ package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.Reference;
-import graql.lang.pattern.variable.ThingBoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static grakn.common.collection.Collections.list;
@@ -38,13 +35,12 @@ import static java.util.stream.Collectors.joining;
 
 abstract class GraqlWritable extends GraqlQuery {
 
-    private Map<Reference, BoundVariable<?>> graph;
     private final GraqlToken.Command keyword;
     private final GraqlMatch.Unfiltered match;
-    private final List<ThingBoundVariable<?>> variables;
+    private final List<ThingVariable<?>> variables;
     private final int hash;
 
-    GraqlWritable(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingBoundVariable<?>> variables) {
+    GraqlWritable(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         assert keyword == INSERT || keyword == DELETE;
         if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
         this.keyword = keyword;
@@ -57,13 +53,8 @@ abstract class GraqlWritable extends GraqlQuery {
         return match;
     }
 
-    public List<ThingBoundVariable<?>> variables() {
+    public List<ThingVariable<?>> variables() {
         return variables;
-    }
-
-    public Map<Reference, BoundVariable<?>> toGraph() {
-        if (graph == null) graph = BoundVariable.toGraph(variables);
-        return graph;
     }
 
     @Override
@@ -76,7 +67,7 @@ abstract class GraqlWritable extends GraqlQuery {
         if (variables.size() > 1) query.append(NEW_LINE);
         else query.append(GraqlToken.Char.SPACE);
 
-        query.append(variables().stream().map(ThingBoundVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(variables().stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
     }

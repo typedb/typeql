@@ -17,18 +17,13 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
-import graql.lang.pattern.property.Property;
-import graql.lang.pattern.property.TypeProperty;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 
-import static java.util.stream.Collectors.toSet;
-
-public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable<T> implements Pattern {
+public abstract class BoundVariable extends Variable implements Pattern {
 
     BoundVariable(Reference reference) {
         super(reference);
@@ -38,58 +33,11 @@ public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable
         return new UnboundVariable(reference);
     }
 
-    abstract T getThis();
-
-    abstract T merge(T variable);
-
-    T setAnonymousWithID(int id) {
-        this.reference = Reference.anonymous(reference.isVisible, id);
-        return getThis();
+    public TypeVariable asType() {
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(Variable.class), className(TypeVariable.class)));
     }
 
-    public static Map<Reference, TypeBoundVariable> toTypeGraph(List<TypeBoundVariable> variables) {
-        LinkedHashMap<Reference, TypeBoundVariable> graph = new LinkedHashMap<>();
-        LinkedList<TypeBoundVariable> list = new LinkedList<>(variables);
-
-        while (!list.isEmpty()) {
-            TypeBoundVariable variable = list.removeFirst();
-            assert variable.isLabelled();
-            list.addAll(variable.properties().stream().flatMap(TypeProperty::variables).collect(toSet()));
-            if (graph.containsKey(variable.reference())) {
-                TypeBoundVariable merged = graph.get(variable.reference()).merge(variable);
-                graph.put(variable.reference(), merged);
-            } else {
-                graph.put(variable.reference(), variable);
-            }
-        }
-
-        return graph;
-    }
-
-    public static Map<Reference, BoundVariable<?>> toGraph(List<ThingBoundVariable<?>> variables) {
-        LinkedHashMap<Reference, BoundVariable<?>> graph = new LinkedHashMap<>();
-        LinkedList<BoundVariable<?>> list = new LinkedList<>(variables);
-        int id = 0;
-
-        while (!list.isEmpty()) {
-            BoundVariable<?> variable = list.removeFirst();
-            list.addAll(variable.properties().stream().flatMap(Property::variables).collect(toSet()));
-            if (!variable.isAnonymised()) {
-                if (graph.containsKey(variable.reference())) {
-                    BoundVariable<?> existing = graph.get(variable.reference());
-                    BoundVariable<?> merged;
-                    if (existing.isThing()) merged = existing.asThing().merge(variable.asThing());
-                    else merged = existing.asType().merge(variable.asType());
-                    graph.put(variable.reference(), merged);
-                } else {
-                    graph.put(variable.reference(), variable);
-                }
-            } else {
-                variable.setAnonymousWithID(id++);
-                graph.put(variable.reference(), variable);
-            }
-        }
-
-        return graph;
+    public ThingVariable<?> asThing() {
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(Variable.class), className(ThingVariable.class)));
     }
 }

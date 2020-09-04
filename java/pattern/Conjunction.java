@@ -43,10 +43,10 @@ public class Conjunction<T extends Pattern> implements Pattern {
         this.hash = Objects.hash(this.patterns);
     }
 
-    public Stream<BoundVariable<?>> variables() {
+    public Stream<BoundVariable> variables() {
         return patterns.stream().flatMap(pattern -> {
-            if (pattern instanceof BoundVariable<?>)
-                return concat(of(((BoundVariable<?>) pattern)), ((BoundVariable<?>) pattern).variables());
+            if (pattern instanceof BoundVariable)
+                return concat(of(((BoundVariable) pattern)), ((BoundVariable) pattern).variables());
             else if (pattern instanceof Conjunction) return ((Conjunction<?>) pattern).variables();
             else return of();
         });

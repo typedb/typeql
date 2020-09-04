@@ -17,16 +17,12 @@
 
 package graql.lang.pattern.variable;
 
-import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.property.Property;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
-
-public abstract class Variable<T extends Variable<T>> {
+public abstract class Variable {
 
     Reference reference;
 
@@ -34,7 +30,7 @@ public abstract class Variable<T extends Variable<T>> {
         this.reference = reference;
     }
 
-    public abstract Set<? extends Property> properties();
+    public abstract Stream<? extends Property> properties();
 
     public boolean isType() {
         return false;
@@ -44,20 +40,8 @@ public abstract class Variable<T extends Variable<T>> {
         return false;
     }
 
-    public TypeBoundVariable asType() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Variable.class.getCanonicalName(), TypeBoundVariable.class.getCanonicalName()
-        ));
-    }
-
-    public ThingBoundVariable<?> asThing() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Variable.class.getCanonicalName(), ThingBoundVariable.class.getCanonicalName()
-        ));
-    }
-
-    public Stream<BoundVariable<?>> variables() {
-        return properties().stream().flatMap(Property::variables);
+    public Stream<BoundVariable> variables() {
+        return properties().flatMap(Property::variables);
     }
 
     public Reference.Type type() {
@@ -109,16 +93,8 @@ public abstract class Variable<T extends Variable<T>> {
     public abstract String toString();
 
     @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || o.getClass().isAssignableFrom(Variable.class)) return false;
-        Variable<?> that = (Variable<?>) o;
-        return (this.reference.equals(that.reference) &&
-                this.properties().equals(that.properties()));
-    }
+    public abstract boolean equals(Object o);
 
     @Override
-    public final int hashCode() {
-        return Objects.hash(this.reference, this.properties());
-    }
+    public abstract int hashCode();
 }

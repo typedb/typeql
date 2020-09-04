@@ -24,7 +24,7 @@ import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
-import graql.lang.pattern.variable.TypeBoundVariable;
+import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
@@ -62,7 +62,7 @@ import static java.util.stream.Collectors.joining;
 public abstract class TypeProperty extends Property {
 
     @Override
-    public abstract Stream<TypeBoundVariable> variables();
+    public abstract Stream<TypeVariable> variables();
 
     public boolean isSingular() {
         return false;
@@ -201,7 +201,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -231,7 +231,7 @@ public abstract class TypeProperty extends Property {
 
     public static class Sub extends TypeProperty.Singular {
 
-        private final TypeBoundVariable type;
+        private final TypeVariable type;
         private final boolean isExplicit;
         private final int hash;
 
@@ -252,19 +252,19 @@ public abstract class TypeProperty extends Property {
                                UnboundVariable::toType), isExplicit);
         }
 
-        private Sub(TypeBoundVariable typeVar, boolean isExplicit) {
+        private Sub(TypeVariable typeVar, boolean isExplicit) {
             if (typeVar == null) throw new NullPointerException("Null superType");
             this.type = typeVar;
             this.isExplicit = isExplicit;
             this.hash = Objects.hash(typeVar, isExplicit);
         }
 
-        public TypeBoundVariable type() {
+        public TypeVariable type() {
             return type;
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of(type);
         }
 
@@ -301,7 +301,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -343,7 +343,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -392,7 +392,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -437,7 +437,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -492,7 +492,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return Stream.of();
         }
 
@@ -532,8 +532,8 @@ public abstract class TypeProperty extends Property {
 
     public static class Owns extends TypeProperty.Repeatable {
 
-        private final TypeBoundVariable attributeType;
-        private final TypeBoundVariable overriddenAttributeType;
+        private final TypeVariable attributeType;
+        private final TypeVariable overriddenAttributeType;
         private final boolean isKey;
         private final int hash;
 
@@ -567,18 +567,18 @@ public abstract class TypeProperty extends Property {
                  isKey);
         }
 
-        private Owns(TypeBoundVariable attributeType, @Nullable TypeBoundVariable overriddenAttributeType, boolean isKey) {
+        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, boolean isKey) {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
             this.isKey = isKey;
             this.hash = Objects.hash(attributeType, isKey);
         }
 
-        public TypeBoundVariable attribute() {
+        public TypeVariable attribute() {
             return attributeType;
         }
 
-        public Optional<TypeBoundVariable> overridden() {
+        public Optional<TypeVariable> overridden() {
             return Optional.ofNullable(overriddenAttributeType);
         }
 
@@ -587,7 +587,7 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return overriddenAttributeType == null
                     ? Stream.of(attributeType)
                     : Stream.of(attributeType, overriddenAttributeType);
@@ -619,9 +619,9 @@ public abstract class TypeProperty extends Property {
 
     public static class Plays extends TypeProperty.Repeatable {
 
-        private final TypeBoundVariable roleType;
-        private final TypeBoundVariable relationType;
-        private final TypeBoundVariable overriddenRoleType;
+        private final TypeVariable roleType;
+        private final TypeVariable relationType;
+        private final TypeVariable overriddenRoleType;
         private final int hash;
 
         public Plays(String relationType, String roleType) {
@@ -653,7 +653,7 @@ public abstract class TypeProperty extends Property {
                  overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
         }
 
-        private Plays(TypeBoundVariable roleType, @Nullable TypeBoundVariable overriddenRoleType) {
+        private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
             this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
@@ -661,21 +661,21 @@ public abstract class TypeProperty extends Property {
             this.hash = Objects.hash(roleType, overriddenRoleType);
         }
 
-        public Optional<TypeBoundVariable> relation() {
+        public Optional<TypeVariable> relation() {
             return Optional.ofNullable(relationType);
         }
 
-        public TypeBoundVariable role() {
+        public TypeVariable role() {
             return roleType;
         }
 
-        public Optional<TypeBoundVariable> overridden() {
+        public Optional<TypeVariable> overridden() {
             return Optional.ofNullable(overriddenRoleType);
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
-            List<TypeBoundVariable> variables = new ArrayList<>();
+        public Stream<TypeVariable> variables() {
+            List<TypeVariable> variables = new ArrayList<>();
             variables.add(roleType);
             if (relationType != null) variables.add(relationType);
             if (overriddenRoleType != null) variables.add(overriddenRoleType);
@@ -708,8 +708,8 @@ public abstract class TypeProperty extends Property {
 
     public static class Relates extends TypeProperty.Repeatable {
 
-        private TypeBoundVariable roleType;
-        private TypeBoundVariable overriddenRoleType;
+        private TypeVariable roleType;
+        private TypeVariable overriddenRoleType;
 
         public Relates(String roleType) {
             this(hidden().type(roleType), null);
@@ -740,7 +740,7 @@ public abstract class TypeProperty extends Property {
                  overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
         }
 
-        private Relates(TypeBoundVariable roleType, @Nullable TypeBoundVariable overriddenRoleType) {
+        private Relates(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
@@ -755,16 +755,16 @@ public abstract class TypeProperty extends Property {
             }
         }
 
-        public TypeBoundVariable role() {
+        public TypeVariable role() {
             return roleType;
         }
 
-        public Optional<TypeBoundVariable> overridden() {
+        public Optional<TypeVariable> overridden() {
             return Optional.ofNullable(overriddenRoleType);
         }
 
         @Override
-        public Stream<TypeBoundVariable> variables() {
+        public Stream<TypeVariable> variables() {
             return overriddenRoleType == null ? Stream.of(roleType) : Stream.of(roleType, overriddenRoleType);
         }
 

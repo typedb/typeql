@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public abstract class Property {
 
-    public abstract Stream<? extends BoundVariable<?>> variables();
+    public abstract Stream<? extends BoundVariable> variables();
 
     @Override
     public abstract String toString();

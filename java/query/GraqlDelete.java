@@ -19,7 +19,7 @@ package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.ThingBoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.List;
 
@@ -28,11 +28,11 @@ import static java.util.Objects.requireNonNull;
 
 public class GraqlDelete extends GraqlWritable {
 
-    GraqlDelete(GraqlMatch.Unfiltered match, List<ThingBoundVariable<?>> variables) {
+    GraqlDelete(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         super(GraqlToken.Command.DELETE, requireNonNull(match), validVariables(match, variables));
     }
 
-    static List<ThingBoundVariable<?>> validVariables(GraqlMatch.Unfiltered match, List<ThingBoundVariable<?>> variables) {
+    static List<ThingVariable<?>> validVariables(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
             if (var.isNamed() && !match.variablesNamedUnbound().contains(var.toUnbound())) {
                 throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.reference()));

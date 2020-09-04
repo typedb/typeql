@@ -23,7 +23,7 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingBoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.pattern.variable.Variable;
 import graql.lang.query.builder.Aggregatable;
@@ -61,7 +61,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     private final Long limit;
     private final int hash;
 
-    private List<BoundVariable<?>> variables;
+    private List<BoundVariable> variables;
     private List<UnboundVariable> variablesNamedUnbound;
 
     GraqlMatch(Conjunction<? extends Pattern> conjunction) {
@@ -112,7 +112,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         return conjunction;
     }
 
-    public List<BoundVariable<?>> variables() {
+    public List<BoundVariable> variables() {
         if (variables == null) variables = conjunction.variables().collect(toList());
         return variables;
     }
@@ -235,19 +235,19 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             return new GraqlMatch.Limited(this, limit);
         }
 
-        public final GraqlInsert insert(ThingBoundVariable<?>... things) {
+        public final GraqlInsert insert(ThingVariable<?>... things) {
             return new GraqlInsert(this, list(things));
         }
 
-        public final GraqlInsert insert(List<ThingBoundVariable<?>> things) {
+        public final GraqlInsert insert(List<ThingVariable<?>> things) {
             return new GraqlInsert(this, things);
         }
 
-        public final GraqlDelete delete(ThingBoundVariable<?>... things) {
+        public final GraqlDelete delete(ThingVariable<?>... things) {
             return new GraqlDelete(this, list(things));
         }
 
-        public final GraqlDelete delete(List<ThingBoundVariable<?>> things) {
+        public final GraqlDelete delete(List<ThingVariable<?>> things) {
             return new GraqlDelete(this, things);
         }
     }

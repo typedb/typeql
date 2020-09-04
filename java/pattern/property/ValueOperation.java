@@ -20,7 +20,7 @@ package graql.lang.pattern.property;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
-import graql.lang.pattern.variable.ThingBoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import java.time.LocalDateTime;
@@ -80,7 +80,7 @@ public abstract class ValueOperation<T> {
         return variable() != null;
     }
 
-    public ThingBoundVariable<?> variable() {
+    public ThingVariable<?> variable() {
         return null;
     }
 
@@ -339,7 +339,7 @@ public abstract class ValueOperation<T> {
 
         public static class Variable extends Comparison<UnboundVariable> {
 
-            private final ThingBoundVariable<?> variable;
+            private final ThingVariable<?> variable;
 
             public Variable(GraqlToken.Comparator comparator, UnboundVariable variable) {
                 super(comparator, variable);
@@ -351,7 +351,7 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
-            public ThingBoundVariable<?> variable() {
+            public ThingVariable<?> variable() {
                 return variable;
             }
 

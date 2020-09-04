@@ -23,15 +23,13 @@ import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 import graql.lang.pattern.variable.builder.TypeVariableBuilder;
 
-import java.util.Set;
+import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.set;
-
-public class UnboundVariable extends Variable<UnboundVariable> implements TypeVariableBuilder,
-                                                                          ThingVariableBuilder.Common<ThingBoundVariable.Thing>,
-                                                                          ThingVariableBuilder.Thing,
-                                                                          ThingVariableBuilder.Relation,
-                                                                          ThingVariableBuilder.Attribute {
+public class UnboundVariable extends Variable implements TypeVariableBuilder,
+                                                         ThingVariableBuilder.Common<ThingVariable.Thing>,
+                                                         ThingVariableBuilder.Thing,
+                                                         ThingVariableBuilder.Relation,
+                                                         ThingVariableBuilder.Attribute {
 
     UnboundVariable(Reference reference) {
         super(reference);
@@ -53,64 +51,78 @@ public class UnboundVariable extends Variable<UnboundVariable> implements TypeVa
         return of(Reference.anonymous(false));
     }
 
-    public TypeBoundVariable toType() {
-        return new TypeBoundVariable(reference, null);
+    public TypeVariable toType() {
+        return new TypeVariable(reference, null);
     }
 
-    public ThingBoundVariable<?> toThing() {
-        return new ThingBoundVariable.Thing(reference, null);
-    }
-
-    @Override
-    public Set<Property> properties() {
-        return set();
+    public ThingVariable<?> toThing() {
+        return new ThingVariable.Thing(reference, null);
     }
 
     @Override
-    public TypeBoundVariable asTypeWith(TypeProperty.Singular property) {
+    public Stream<Property> properties() {
+        return Stream.of();
+    }
+
+    @Override
+    public TypeVariable asTypeWith(TypeProperty.Singular property) {
         if (!isVisible() && property instanceof TypeProperty.Label) {
-            return new TypeBoundVariable(Reference.label(((TypeProperty.Label) property).scopedLabel()), property);
+            return new TypeVariable(Reference.label(((TypeProperty.Label) property).scopedLabel()), property);
         } else {
-            return new TypeBoundVariable(reference, property);
+            return new TypeVariable(reference, property);
         }
     }
 
     @Override
-    public TypeBoundVariable asTypeWith(TypeProperty.Repeatable property) {
-        return new TypeBoundVariable(reference, property);
+    public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
+        return new TypeVariable(reference, property);
     }
 
     @Override
-    public ThingBoundVariable.Thing asSameThingWith(ThingProperty.Singular property) {
-        return new ThingBoundVariable.Thing(reference, property);
+    public ThingVariable.Thing asSameThingWith(ThingProperty.Singular property) {
+        return new ThingVariable.Thing(reference, property);
     }
 
     @Override
-    public ThingBoundVariable.Thing asSameThingWith(ThingProperty.Repeatable property) {
-        return new ThingBoundVariable.Thing(reference, property);
+    public ThingVariable.Thing asSameThingWith(ThingProperty.Repeatable property) {
+        return new ThingVariable.Thing(reference, property);
     }
 
     @Override
-    public ThingBoundVariable.Thing asThingWith(ThingProperty.Singular property) {
-        return new ThingBoundVariable.Thing(reference, property);
+    public ThingVariable.Thing asThingWith(ThingProperty.Singular property) {
+        return new ThingVariable.Thing(reference, property);
     }
 
     @Override
-    public ThingBoundVariable.Attribute asAttributeWith(ThingProperty.Value<?> property) {
-        return new ThingBoundVariable.Attribute(reference, property);
+    public ThingVariable.Attribute asAttributeWith(ThingProperty.Value<?> property) {
+        return new ThingVariable.Attribute(reference, property);
     }
 
     @Override
-    public ThingBoundVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
+    public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
         return asRelationWith(new ThingProperty.Relation(rolePlayer));
     }
 
-    public ThingBoundVariable.Relation asRelationWith(ThingProperty.Relation property) {
-        return new ThingBoundVariable.Relation(reference, property);
+    public ThingVariable.Relation asRelationWith(ThingProperty.Relation property) {
+        return new ThingVariable.Relation(reference, property);
     }
 
     @Override
     public String toString() {
         return reference.syntax();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UnboundVariable that = (UnboundVariable) o;
+        return this.reference.equals(that.reference);
+    }
+
+    @Override
+    public int hashCode() {
+        return reference.hashCode();
     }
 }

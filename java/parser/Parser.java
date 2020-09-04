@@ -33,8 +33,8 @@ import graql.lang.pattern.property.ThingProperty;
 import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.property.ValueOperation;
 import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingBoundVariable;
-import graql.lang.pattern.variable.TypeBoundVariable;
+import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
@@ -236,7 +236,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public List<TypeBoundVariable> visitVariable_types(GraqlParser.Variable_typesContext ctx) {
+    public List<TypeVariable> visitVariable_types(GraqlParser.Variable_typesContext ctx) {
         return ctx.variable_type().stream().map(this::visitVariable_type).collect(toList());
     }
 
@@ -536,7 +536,7 @@ public class Parser extends GraqlBaseVisitor {
     // VARIABLE PATTERNS =======================================================
 
     @Override
-    public BoundVariable<?> visitPattern_variable(GraqlParser.Pattern_variableContext ctx) {
+    public BoundVariable visitPattern_variable(GraqlParser.Pattern_variableContext ctx) {
         if (ctx.variable_thing_any() != null) {
             return this.visitVariable_thing_any(ctx.variable_thing_any());
 
@@ -551,8 +551,8 @@ public class Parser extends GraqlBaseVisitor {
     // TYPE VARIABLES ==========================================================
 
     @Override
-    public TypeBoundVariable visitVariable_type(GraqlParser.Variable_typeContext ctx) {
-        TypeBoundVariable type = visitType_any(ctx.type_any()).apply(
+    public TypeVariable visitVariable_type(GraqlParser.Variable_typeContext ctx) {
+        TypeVariable type = visitType_any(ctx.type_any()).apply(
                 scopedLabel -> hidden().asTypeWith(new TypeProperty.Label(scopedLabel.first(), scopedLabel.second())),
                 UnboundVariable::toType
         );
@@ -595,12 +595,12 @@ public class Parser extends GraqlBaseVisitor {
     // THING VARIABLES =========================================================
 
     @Override
-    public List<ThingBoundVariable<?>> visitVariable_things(GraqlParser.Variable_thingsContext ctx) {
+    public List<ThingVariable<?>> visitVariable_things(GraqlParser.Variable_thingsContext ctx) {
         return ctx.variable_thing_any().stream().map(this::visitVariable_thing_any).collect(toList());
     }
 
     @Override
-    public ThingBoundVariable<?> visitVariable_thing_any(GraqlParser.Variable_thing_anyContext ctx) {
+    public ThingVariable<?> visitVariable_thing_any(GraqlParser.Variable_thing_anyContext ctx) {
         if (ctx.variable_thing() != null) {
             return this.visitVariable_thing(ctx.variable_thing());
         } else if (ctx.variable_relation() != null) {
@@ -613,9 +613,9 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public ThingBoundVariable.Thing visitVariable_thing(GraqlParser.Variable_thingContext ctx) {
+    public ThingVariable.Thing visitVariable_thing(GraqlParser.Variable_thingContext ctx) {
         UnboundVariable unscoped = getVar(ctx.VAR_(0));
-        ThingBoundVariable.Thing thing = null;
+        ThingVariable.Thing thing = null;
 
         if (ctx.ISA_() != null) {
             thing = unscoped.asThingWith(getIsaProperty(ctx.ISA_(), ctx.type()));
@@ -635,12 +635,12 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public ThingBoundVariable.Relation visitVariable_relation(GraqlParser.Variable_relationContext ctx) {
+    public ThingVariable.Relation visitVariable_relation(GraqlParser.Variable_relationContext ctx) {
         UnboundVariable unscoped;
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
 
-        ThingBoundVariable.Relation relation = unscoped.asRelationWith(visitRelation(ctx.relation()));
+        ThingVariable.Relation relation = unscoped.asRelationWith(visitRelation(ctx.relation()));
         if (ctx.ISA_() != null) relation = relation.asSameThingWith(getIsaProperty(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
@@ -652,12 +652,12 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public ThingBoundVariable.Attribute visitVariable_attribute(GraqlParser.Variable_attributeContext ctx) {
+    public ThingVariable.Attribute visitVariable_attribute(GraqlParser.Variable_attributeContext ctx) {
         UnboundVariable unscoped;
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
 
-        ThingBoundVariable.Attribute attribute = unscoped.asAttributeWith(new ThingProperty.Value<>(visitValue(ctx.value())));
+        ThingVariable.Attribute attribute = unscoped.asAttributeWith(new ThingProperty.Value<>(visitValue(ctx.value())));
         if (ctx.ISA_() != null) attribute = attribute.asSameThingWith(getIsaProperty(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
