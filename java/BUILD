@@ -60,4 +60,5 @@ checkstyle_test(
     targets = [
         ":graql",
     ],
+    license_type = "agpl",
 )

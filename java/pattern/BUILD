@@ -62,4 +62,5 @@ checkstyle_test(
     targets = [
         ":pattern",
     ],
+    license_type = "agpl",
 )
