@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 
 import static grakn.common.collection.Collections.list;
 import static grakn.common.collection.Collections.set;
+import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
@@ -51,6 +52,9 @@ import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
 public abstract class ThingConstraint extends Constraint<BoundVariable> {
+
+    @Override
+    public abstract Set<BoundVariable> variables();
 
     @Override
     public boolean isThing() {
@@ -96,49 +100,49 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public ThingConstraint.Singular asSingular() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
+                className(Repeatable.class), className(Singular.class)
         ));
     }
 
     public ThingConstraint.Repeatable asRepeatable() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Repeatable.class.getCanonicalName()
+                className(Singular.class), className(Repeatable.class)
         ));
     }
 
     public IID asIID() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), IID.class.getCanonicalName()
+                className(Singular.class), className(IID.class)
         ));
     }
 
     public ThingConstraint.Isa asIsa() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Isa.class.getCanonicalName()
+                className(Singular.class), className(Isa.class)
         ));
     }
 
     public ThingConstraint.NEQ asNEQ() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), NEQ.class.getCanonicalName()
+                className(Singular.class), className(NEQ.class)
         ));
     }
 
     public ThingConstraint.Value<?> asValue() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Value.class.getCanonicalName()
+                className(Singular.class), className(Value.class)
         ));
     }
 
     public ThingConstraint.Relation asRelation() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Relation.class.getCanonicalName()
+                className(Singular.class), className(Relation.class)
         ));
     }
 
     public ThingConstraint.Has asHas() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Has.class.getCanonicalName()
+                className(Singular.class), className(Has.class)
         ));
     }
 

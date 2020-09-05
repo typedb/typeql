@@ -20,6 +20,8 @@ package graql.lang.query;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 
+import static grakn.common.util.Objects.className;
+
 public abstract class GraqlQuery {
 
     public GraqlDefine asDefine() {
@@ -27,7 +29,7 @@ public abstract class GraqlQuery {
             return (GraqlDefine) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlDefine.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlDefine.class)
             ));
         }
     }
@@ -37,7 +39,7 @@ public abstract class GraqlQuery {
             return (GraqlUndefine) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlUndefine.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlUndefine.class)
             ));
         }
     }
@@ -47,7 +49,7 @@ public abstract class GraqlQuery {
             return (GraqlInsert) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlInsert.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlInsert.class)
             ));
         }
     }
@@ -57,7 +59,7 @@ public abstract class GraqlQuery {
             return (GraqlDelete) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlDelete.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlDelete.class)
             ));
         }
     }
@@ -67,7 +69,7 @@ public abstract class GraqlQuery {
             return (GraqlMatch) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlMatch.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlMatch.class)
             ));
         }
     }
@@ -77,7 +79,7 @@ public abstract class GraqlQuery {
             return (GraqlMatch.Aggregate) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlMatch.Aggregate.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlMatch.Aggregate.class)
             ));
         }
     }
@@ -87,7 +89,7 @@ public abstract class GraqlQuery {
             return (GraqlMatch.Group) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlMatch.Group.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlMatch.Group.class)
             ));
         }
     }
@@ -97,7 +99,7 @@ public abstract class GraqlQuery {
             return (GraqlMatch.Group.Aggregate) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlMatch.Group.Aggregate.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlMatch.Group.Aggregate.class)
             ));
         }
     }
@@ -107,7 +109,7 @@ public abstract class GraqlQuery {
             return (GraqlCompute.Statistics) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Statistics.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlCompute.Statistics.class)
             ));
         }
     }
@@ -117,7 +119,7 @@ public abstract class GraqlQuery {
             return (GraqlCompute.Path) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Path.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlCompute.Path.class)
             ));
         }
     }
@@ -127,7 +129,7 @@ public abstract class GraqlQuery {
             return (GraqlCompute.Centrality) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Centrality.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlCompute.Centrality.class)
             ));
         }
     }
@@ -137,7 +139,7 @@ public abstract class GraqlQuery {
             return (GraqlCompute.Cluster) this;
         } else {
             throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    GraqlQuery.class.getCanonicalName(), GraqlCompute.Cluster.class.getCanonicalName()
+                    className(GraqlQuery.class), className(GraqlCompute.Cluster.class)
             ));
         }
     }

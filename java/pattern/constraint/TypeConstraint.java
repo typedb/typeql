@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 
 import static grakn.common.collection.Collections.set;
+import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
@@ -84,73 +85,73 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public TypeConstraint.Singular asSingular() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
+                className(Repeatable.class), className(Singular.class)
         ));
     }
 
     public TypeConstraint.Repeatable asRepeatable() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Repeatable.class.getCanonicalName()
+                className(Singular.class), className(Repeatable.class)
         ));
     }
 
     public TypeConstraint.Label asLabel() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Label.class.getCanonicalName()
+                className(TypeConstraint.class), className(Label.class)
         ));
     }
 
     public TypeConstraint.Sub asSub() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Sub.class.getCanonicalName()
+                className(TypeConstraint.class), className(Sub.class)
         ));
     }
 
     public TypeConstraint.Abstract asAbstract() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Abstract.class.getCanonicalName()
+                className(TypeConstraint.class), className(Abstract.class)
         ));
     }
 
     public TypeConstraint.ValueType asValueType() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), ValueType.class.getCanonicalName()
+                className(TypeConstraint.class), className(ValueType.class)
         ));
     }
 
     public TypeConstraint.Regex asRegex() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Regex.class.getCanonicalName()
+                className(TypeConstraint.class), className(Regex.class)
         ));
     }
 
     public TypeConstraint.Then asThen() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Then.class.getCanonicalName()
+                className(TypeConstraint.class), className(Then.class)
         ));
     }
 
     public TypeConstraint.When asWhen() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), When.class.getCanonicalName()
+                className(TypeConstraint.class), className(When.class)
         ));
     }
 
     public TypeConstraint.Owns asOwns() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Owns.class.getCanonicalName()
+                className(TypeConstraint.class), className(Owns.class)
         ));
     }
 
     public TypeConstraint.Plays asPlays() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Plays.class.getCanonicalName()
+                className(TypeConstraint.class), className(Plays.class)
         ));
     }
 
     public TypeConstraint.Relates asRelates() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeConstraint.class.getCanonicalName(), Relates.class.getCanonicalName()
+                className(TypeConstraint.class), className(Relates.class)
         ));
     }
 

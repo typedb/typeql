@@ -23,6 +23,7 @@ import graql.lang.common.exception.GraqlException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
@@ -80,19 +81,19 @@ public abstract class Reference {
 
     Reference.Name asNamed() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                this.getClass().getCanonicalName(), Name.class.getCanonicalName()
+                this.getClass().getCanonicalName(), className(Name.class)
         ));
     }
 
     Reference.Label asLabel() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                this.getClass().getCanonicalName(), Label.class.getCanonicalName()
+                this.getClass().getCanonicalName(), className(Label.class)
         ));
     }
 
     Reference.Anonymous asAnonymous() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                this.getClass().getCanonicalName(), Anonymous.class.getCanonicalName()
+                this.getClass().getCanonicalName(), className(Anonymous.class)
         ));
     }
 
@@ -222,7 +223,7 @@ public abstract class Reference {
 
         Reference.AnonymousWithID asAnonymousWithID() {
             throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    this.getClass().getCanonicalName(), AnonymousWithID.class.getCanonicalName()
+                    this.getClass().getCanonicalName(), className(AnonymousWithID.class)
             ));
         }
 
