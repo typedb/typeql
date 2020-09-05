@@ -60,7 +60,7 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public Stream<Constraint<?>> properties() {
+    public Stream<Constraint<?>> constraints() {
         return Stream.of();
     }
 

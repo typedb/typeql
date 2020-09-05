@@ -29,7 +29,7 @@ public abstract class Variable {
         this.reference = reference;
     }
 
-    public abstract Stream<? extends Constraint<?>> properties();
+    public abstract Stream<? extends Constraint<?>> constraints();
 
     public boolean isType() {
         return false;
@@ -40,7 +40,7 @@ public abstract class Variable {
     }
 
     public Stream<BoundVariable> variables() {
-        return properties().flatMap(constraint -> constraint.variables().stream());
+        return constraints().flatMap(constraint -> constraint.variables().stream());
     }
 
     public Reference.Type type() {

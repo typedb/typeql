@@ -50,7 +50,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     private GraqlToken.Compute.Method method;
     boolean includeAttributes;
 
-    // All these condition properties need to start off as NULL,
+    // All these condition constraints need to start off as NULL,
     // they will be initialised when the user provides input
     String fromID = null;
     String toID = null;

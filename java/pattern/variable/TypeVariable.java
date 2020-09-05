@@ -65,8 +65,8 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public Stream<TypeConstraint> properties() {
-        return ordered.stream();
+    public Stream<TypeConstraint> constraints() {
+        return ordered.stream().distinct();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         return this;
     }
 
-    private void addSingularProperties(TypeConstraint.Singular constraint) {
+    private void addSingularConstraints(TypeConstraint.Singular constraint) {
         if (singular.containsKey(constraint.getClass()) && !singular.get(constraint.getClass()).equals(constraint)) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
         } else if (!singular.containsKey(constraint.getClass())) {
@@ -90,7 +90,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     TypeVariable merge(TypeVariable variable) {
         TypeVariable merged = new TypeVariable(reference, singular, repeating, ordered);
         variable.singular.values().forEach(constraint -> {
-            merged.addSingularProperties(constraint);
+            merged.addSingularConstraints(constraint);
             merged.ordered.add(constraint);
         });
         variable.repeating.forEach((clazz, list) -> {
@@ -102,7 +102,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
     @Override
     public TypeVariable asTypeWith(TypeConstraint.Singular constraint) {
-        addSingularProperties(constraint);
+        addSingularConstraints(constraint);
         ordered.add(constraint);
         return this;
     }

@@ -46,7 +46,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         while (!list.isEmpty()) {
             TypeVariable v = list.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else v.properties().forEach(p -> list.addAll(p.variables()));
+            else v.constraints().forEach(p -> list.addAll(p.variables()));
         }
 
         this.keyword = keyword;

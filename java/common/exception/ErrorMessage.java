@@ -38,7 +38,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
     public static final ErrorMessage INVALID_VARIABLE_NAME =
             new ErrorMessage(9, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
     public static final ErrorMessage ILLEGAL_CONSTRAINT_REPETITION =
-            new ErrorMessage(10, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
+            new ErrorMessage(10, "The variable '%s' contains illegally repeating constraints: '%s' and '%s'.");
     public static final ErrorMessage MISSING_CONSTRAINT_RELATION_PLAYER =
             new ErrorMessage(11, "The relation variable has not been provided with role players.");
     public static final ErrorMessage INVALID_CONSTRAINT_DATETIME_PRECISION =
