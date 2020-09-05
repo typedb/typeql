@@ -17,13 +17,33 @@
 
 package graql.lang.pattern.constraint;
 
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 
 import java.util.Set;
 
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+
 public abstract class Constraint<VARIABLE extends BoundVariable> {
 
     public abstract Set<VARIABLE> variables();
+
+    public boolean isType() {
+        return false;
+    }
+
+    public boolean isThing() {
+        return false;
+    }
+
+    public TypeConstraint asType() {
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(this.getClass()), className(TypeConstraint.class)));
+    }
+
+    public ThingConstraint asThing() {
+        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(this.getClass()), className(ThingConstraint.class)));
+    }
 
     @Override
     public abstract String toString();

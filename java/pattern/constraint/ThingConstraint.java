@@ -52,6 +52,16 @@ import static java.util.stream.Collectors.joining;
 
 public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
+    @Override
+    public boolean isThing() {
+        return true;
+    }
+
+    @Override
+    public ThingConstraint asThing() {
+        return this;
+    }
+
     public boolean isSingular() {
         return false;
     }

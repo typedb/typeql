@@ -28,14 +28,11 @@ import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.set;
 import static graql.lang.common.GraqlToken.Char.COLON;
@@ -66,6 +63,16 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     @Override
     public abstract Set<TypeVariable> variables();
+
+    @Override
+    public boolean isType() {
+        return true;
+    }
+
+    @Override
+    public TypeConstraint asType() {
+        return this;
+    }
 
     public boolean isSingular() {
         return false;
