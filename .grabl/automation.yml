@@ -48,8 +48,6 @@ build:
           branch: master
         machine: graknlabs-ubuntu-20.04
         script: |
-          sudo apt-get update
-          sudo apt-get -y install maven
           sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$GRABL_COMMIT/g" java/test/deployment/pom.xml
           cd java/test/deployment/ && mvn test
     execution:
