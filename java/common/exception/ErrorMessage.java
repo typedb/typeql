@@ -37,11 +37,11 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(8, "The variable '%s' is out of scope of the query.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
             new ErrorMessage(9, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
-    public static final ErrorMessage ILLEGAL_PROPERTY_REPETITION =
+    public static final ErrorMessage ILLEGAL_CONSTRAINT_REPETITION =
             new ErrorMessage(10, "The variable '%s' contains illegally repeating properties: '%s' and '%s'.");
-    public static final ErrorMessage MISSING_PROPERTY_RELATION_PLAYER =
+    public static final ErrorMessage MISSING_CONSTRAINT_RELATION_PLAYER =
             new ErrorMessage(11, "The relation variable has not been provided with role players.");
-    public static final ErrorMessage INVALID_PROPERTY_DATETIME_PRECISION =
+    public static final ErrorMessage INVALID_CONSTRAINT_DATETIME_PRECISION =
             new ErrorMessage(12, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
             new ErrorMessage(13, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");

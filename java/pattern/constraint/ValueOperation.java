@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.property;
+package graql.lang.pattern.constraint;
 
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
@@ -28,7 +28,7 @@ import java.util.Objects;
 
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
-import static graql.lang.common.exception.ErrorMessage.INVALID_PROPERTY_DATETIME_PRECISION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 
@@ -205,7 +205,7 @@ public abstract class ValueOperation<T> {
                 long nanosPerMilli = 1000000L;
                 long remainder = nanos % nanosPerMilli;
                 if (remainder != 0) {
-                    throw GraqlException.create(INVALID_PROPERTY_DATETIME_PRECISION.message(value));
+                    throw GraqlException.create(INVALID_CONSTRAINT_DATETIME_PRECISION.message(value));
                 }
             }
 

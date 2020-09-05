@@ -20,7 +20,7 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.property.TypeProperty;
+import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.LinkedList;
@@ -48,7 +48,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         while (!list.isEmpty()) {
             TypeVariable v = list.removeFirst();
             if (!v.isLabelled()) throw GraqlException.create(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else list.addAll(v.properties().flatMap(TypeProperty::variables).collect(toSet()));
+            else list.addAll(v.properties().flatMap(TypeConstraint::variables).collect(toSet()));
         }
 
         this.keyword = keyword;

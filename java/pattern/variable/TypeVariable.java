@@ -18,8 +18,8 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.property.Property;
-import graql.lang.pattern.property.TypeProperty;
+import graql.lang.pattern.constraint.Constraint;
+import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.builder.TypeVariableBuilder;
 
 import java.util.ArrayList;
@@ -33,31 +33,31 @@ import java.util.stream.Stream;
 import static grakn.common.collection.Collections.set;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
-    private final Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular;
-    private final Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating;
-    private final List<TypeProperty> ordered;
+    private final Map<Class<? extends TypeConstraint>, TypeConstraint.Singular> singular;
+    private final Map<Class<? extends TypeConstraint>, List<TypeConstraint.Repeatable>> repeating;
+    private final List<TypeConstraint> ordered;
 
-    TypeVariable(Reference reference, TypeProperty property) {
+    TypeVariable(Reference reference, TypeConstraint constraint) {
         super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
         this.ordered = new ArrayList<>();
-        if (property != null) {
-            if (property.isSingular()) asTypeWith(property.asSingular());
-            else asTypeWith(property.asRepeatable());
+        if (constraint != null) {
+            if (constraint.isSingular()) asTypeWith(constraint.asSingular());
+            else asTypeWith(constraint.asRepeatable());
         }
     }
 
     private TypeVariable(Reference reference,
-                         Map<Class<? extends TypeProperty>, TypeProperty.Singular> singular,
-                         Map<Class<? extends TypeProperty>, List<TypeProperty.Repeatable>> repeating,
-                         List<TypeProperty> ordered) {
+                         Map<Class<? extends TypeConstraint>, TypeConstraint.Singular> singular,
+                         Map<Class<? extends TypeConstraint>, List<TypeConstraint.Repeatable>> repeating,
+                         List<TypeConstraint> ordered) {
         super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
@@ -65,7 +65,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public Stream<TypeProperty> properties() {
+    public Stream<TypeConstraint> properties() {
         return ordered.stream();
     }
 
@@ -79,19 +79,19 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         return this;
     }
 
-    private void addSingularProperties(TypeProperty.Singular property) {
-        if (singular.containsKey(property.getClass()) && !singular.get(property.getClass()).equals(property)) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(reference, singular.get(property.getClass()), property));
-        } else if (!singular.containsKey(property.getClass())) {
-            singular.put(property.getClass(), property);
+    private void addSingularProperties(TypeConstraint.Singular constraint) {
+        if (singular.containsKey(constraint.getClass()) && !singular.get(constraint.getClass()).equals(constraint)) {
+            throw GraqlException.create(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
+        } else if (!singular.containsKey(constraint.getClass())) {
+            singular.put(constraint.getClass(), constraint);
         }
     }
 
     TypeVariable merge(TypeVariable variable) {
         TypeVariable merged = new TypeVariable(reference, singular, repeating, ordered);
-        variable.singular.values().forEach(property -> {
-            merged.addSingularProperties(property);
-            merged.ordered.add(property);
+        variable.singular.values().forEach(constraint -> {
+            merged.addSingularProperties(constraint);
+            merged.ordered.add(constraint);
         });
         variable.repeating.forEach((clazz, list) -> {
             merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list);
@@ -101,64 +101,64 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeProperty.Singular property) {
-        addSingularProperties(property);
-        ordered.add(property);
+    public TypeVariable asTypeWith(TypeConstraint.Singular constraint) {
+        addSingularProperties(constraint);
+        ordered.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeProperty.Repeatable property) {
-        if (label().isPresent() && property instanceof TypeProperty.Relates) {
-            ((TypeProperty.Relates) property).setScope(label().get().label());
+    public TypeVariable asTypeWith(TypeConstraint.Repeatable constraint) {
+        if (label().isPresent() && constraint instanceof TypeConstraint.Relates) {
+            ((TypeConstraint.Relates) constraint).setScope(label().get().label());
         }
 
-        repeating.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
-        ordered.add(property);
+        repeating.computeIfAbsent(constraint.getClass(), c -> new ArrayList<>()).add(constraint);
+        ordered.add(constraint);
         return this;
     }
 
-    public Optional<TypeProperty.Label> label() {
-        return Optional.ofNullable(singular.get(TypeProperty.Label.class)).map(TypeProperty::asLabel);
+    public Optional<TypeConstraint.Label> label() {
+        return Optional.ofNullable(singular.get(TypeConstraint.Label.class)).map(TypeConstraint::asLabel);
     }
 
-    public Optional<TypeProperty.Sub> sub() {
-        return Optional.ofNullable(singular.get(TypeProperty.Sub.class)).map(TypeProperty::asSub);
+    public Optional<TypeConstraint.Sub> sub() {
+        return Optional.ofNullable(singular.get(TypeConstraint.Sub.class)).map(TypeConstraint::asSub);
     }
 
-    public Optional<TypeProperty.Abstract> abstractFlag() {
-        return Optional.ofNullable(singular.get(TypeProperty.Abstract.class)).map(TypeProperty::asAbstract);
+    public Optional<TypeConstraint.Abstract> abstractFlag() {
+        return Optional.ofNullable(singular.get(TypeConstraint.Abstract.class)).map(TypeConstraint::asAbstract);
     }
 
-    public Optional<TypeProperty.ValueType> valueType() {
-        return Optional.ofNullable(singular.get(TypeProperty.ValueType.class)).map(TypeProperty::asValueType);
+    public Optional<TypeConstraint.ValueType> valueType() {
+        return Optional.ofNullable(singular.get(TypeConstraint.ValueType.class)).map(TypeConstraint::asValueType);
     }
 
-    public Optional<TypeProperty.Regex> regex() {
-        return Optional.ofNullable(singular.get(TypeProperty.Regex.class)).map(TypeProperty::asRegex);
+    public Optional<TypeConstraint.Regex> regex() {
+        return Optional.ofNullable(singular.get(TypeConstraint.Regex.class)).map(TypeConstraint::asRegex);
     }
 
-    public Optional<TypeProperty.Then> then() {
-        return Optional.ofNullable(singular.get(TypeProperty.Then.class)).map(TypeProperty::asThen);
+    public Optional<TypeConstraint.Then> then() {
+        return Optional.ofNullable(singular.get(TypeConstraint.Then.class)).map(TypeConstraint::asThen);
     }
 
-    public Optional<TypeProperty.When> when() {
-        return Optional.ofNullable(singular.get(TypeProperty.When.class)).map(TypeProperty::asWhen);
+    public Optional<TypeConstraint.When> when() {
+        return Optional.ofNullable(singular.get(TypeConstraint.When.class)).map(TypeConstraint::asWhen);
     }
 
-    public List<TypeProperty.Owns> owns() {
-        return repeating.computeIfAbsent(TypeProperty.Owns.class, c -> new ArrayList<>())
-                .stream().map(TypeProperty::asOwns).collect(toList());
+    public List<TypeConstraint.Owns> owns() {
+        return repeating.computeIfAbsent(TypeConstraint.Owns.class, c -> new ArrayList<>())
+                .stream().map(TypeConstraint::asOwns).collect(toList());
     }
 
-    public List<TypeProperty.Plays> plays() {
-        return repeating.computeIfAbsent(TypeProperty.Plays.class, c -> new ArrayList<>())
-                .stream().map(TypeProperty::asPlays).collect(toList());
+    public List<TypeConstraint.Plays> plays() {
+        return repeating.computeIfAbsent(TypeConstraint.Plays.class, c -> new ArrayList<>())
+                .stream().map(TypeConstraint::asPlays).collect(toList());
     }
 
-    public List<TypeProperty.Relates> relates() {
-        return repeating.computeIfAbsent(TypeProperty.Relates.class, c -> new ArrayList<>())
-                .stream().map(TypeProperty::asRelates).collect(toList());
+    public List<TypeConstraint.Relates> relates() {
+        return repeating.computeIfAbsent(TypeConstraint.Relates.class, c -> new ArrayList<>())
+                .stream().map(TypeConstraint::asRelates).collect(toList());
     }
 
     @Override
@@ -169,13 +169,13 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
             syntax.append(reference.syntax());
             if (!ordered.isEmpty()) {
                 syntax.append(SPACE);
-                syntax.append(ordered.stream().map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+                syntax.append(ordered.stream().map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else if (label().isPresent()) {
             syntax.append(label().get().scopedLabel());
             if (ordered.size() > 1) {
-                syntax.append(SPACE).append(ordered.stream().filter(p -> !(p instanceof TypeProperty.Label))
-                                                    .map(Property::toString).collect(joining(COMMA_SPACE.toString())));
+                syntax.append(SPACE).append(ordered.stream().filter(p -> !(p instanceof TypeConstraint.Label))
+                                                    .map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else {
             // This should only be called by debuggers trying to print nested variables

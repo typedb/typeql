@@ -1099,7 +1099,7 @@ public class ParserTest {
     }
 
     @Test
-    public void regexAttributeProperty() {
+    public void regexAttributeConstraint() {
         String query = "define digit sub attribute, regex '\\d';";
         GraqlDefine parsed = parse(query);
         GraqlDefine expected = define(type("digit").sub("attribute").regex("\\d"));

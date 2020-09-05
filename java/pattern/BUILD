@@ -25,7 +25,7 @@ java_library(
     name = "pattern",
     srcs = glob([
         "*.java",
-        "property/*.java",
+        "constraint/*.java",
         "util/*.java",
         "variable/*.java",
         "variable/builder/*.java",

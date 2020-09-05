@@ -90,7 +90,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
         }
 
-        // It is important that we use vars() (the method) and not vars (the property)
+        // It is important that we use vars() (the method) and not vars (the constraint)
         // For reasons explained in the equals() method above
         this.hash = Objects.hash(this.conjunction, this.filter, this.sorting, this.offset, this.limit);
     }
@@ -181,9 +181,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
         GraqlMatch that = (GraqlMatch) o;
 
-        // It is important that we use vars() (the method) and not vars (the property)
-        // vars (the property) stores the variables as the user defined
-        // vars() (the method) returns match.vars() if vars (the property) is empty
+        // It is important that we use vars() (the method) and not vars (the constraint)
+        // vars (the constraint) stores the variables as the user defined
+        // vars() (the method) returns match.vars() if vars (the constraint) is empty
         // we want to compare vars() (the method) which determines the final value
         return (Objects.equals(this.conjunction, that.conjunction) &&
                 Objects.equals(this.filter, that.filter) &&

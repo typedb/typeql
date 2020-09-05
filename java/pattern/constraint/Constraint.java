@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.property;
+package graql.lang.pattern.constraint;
 
 import graql.lang.pattern.variable.BoundVariable;
 
 import java.util.stream.Stream;
 
-public abstract class Property {
+public abstract class Constraint {
 
     public abstract Stream<? extends BoundVariable> variables();
 

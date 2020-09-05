@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.property;
+package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
@@ -40,15 +40,15 @@ import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
 import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Property.HAS;
-import static graql.lang.common.GraqlToken.Property.ISA;
-import static graql.lang.common.GraqlToken.Property.ISAX;
+import static graql.lang.common.GraqlToken.Constraint.HAS;
+import static graql.lang.common.GraqlToken.Constraint.ISA;
+import static graql.lang.common.GraqlToken.Constraint.ISAX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PROPERTY_RELATION_PLAYER;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
-public abstract class ThingProperty extends Property {
+public abstract class ThingConstraint extends Constraint {
 
     public boolean isSingular() {
         return false;
@@ -82,13 +82,13 @@ public abstract class ThingProperty extends Property {
         return false;
     }
 
-    public ThingProperty.Singular asSingular() {
+    public ThingConstraint.Singular asSingular() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
         ));
     }
 
-    public ThingProperty.Repeatable asRepeatable() {
+    public ThingConstraint.Repeatable asRepeatable() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Singular.class.getCanonicalName(), Repeatable.class.getCanonicalName()
         ));
@@ -100,37 +100,37 @@ public abstract class ThingProperty extends Property {
         ));
     }
 
-    public ThingProperty.Isa asIsa() {
+    public ThingConstraint.Isa asIsa() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Singular.class.getCanonicalName(), Isa.class.getCanonicalName()
         ));
     }
 
-    public ThingProperty.NEQ asNEQ() {
+    public ThingConstraint.NEQ asNEQ() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Singular.class.getCanonicalName(), NEQ.class.getCanonicalName()
         ));
     }
 
-    public ThingProperty.Value<?> asValue() {
+    public ThingConstraint.Value<?> asValue() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Singular.class.getCanonicalName(), Value.class.getCanonicalName()
         ));
     }
 
-    public ThingProperty.Relation asRelation() {
+    public ThingConstraint.Relation asRelation() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Singular.class.getCanonicalName(), Relation.class.getCanonicalName()
         ));
     }
 
-    public ThingProperty.Has asHas() {
+    public ThingConstraint.Has asHas() {
         throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
                 Singular.class.getCanonicalName(), Has.class.getCanonicalName()
         ));
     }
 
-    public static abstract class Singular extends ThingProperty {
+    public static abstract class Singular extends ThingConstraint {
 
         @Override
         public boolean isSingular() {
@@ -138,12 +138,12 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Singular asSingular() {
+        public ThingConstraint.Singular asSingular() {
             return this;
         }
     }
 
-    public static abstract class Repeatable extends ThingProperty {
+    public static abstract class Repeatable extends ThingConstraint {
 
         @Override
         public boolean isRepeatable() {
@@ -151,12 +151,12 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Repeatable asRepeatable() {
+        public ThingConstraint.Repeatable asRepeatable() {
             return this;
         }
     }
 
-    public static class IID extends ThingProperty.Singular {
+    public static class IID extends ThingConstraint.Singular {
 
         private static final Pattern REGEX = Pattern.compile("0x[0-9a-f]+");
         private final String iid;
@@ -192,7 +192,7 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public String toString() {
-            return GraqlToken.Property.IID.toString() + SPACE + iid;
+            return GraqlToken.Constraint.IID.toString() + SPACE + iid;
         }
 
         @Override
@@ -209,7 +209,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class Isa extends ThingProperty.Singular {
+    public static class Isa extends ThingConstraint.Singular {
 
         private final TypeVariable type;
         private final boolean isExplicit;
@@ -251,7 +251,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Isa asIsa() {
+        public ThingConstraint.Isa asIsa() {
             return this;
         }
 
@@ -274,7 +274,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class NEQ extends ThingProperty.Singular {
+    public static class NEQ extends ThingConstraint.Singular {
 
         private final ThingVariable<?> variable;
         private final int hash;
@@ -304,7 +304,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.NEQ asNEQ() {
+        public ThingConstraint.NEQ asNEQ() {
             return this;
         }
 
@@ -327,7 +327,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class Value<T> extends ThingProperty.Singular {
+    public static class Value<T> extends ThingConstraint.Singular {
 
         private final ValueOperation<T> operation;
         private final int hash;
@@ -353,7 +353,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Value<?> asValue() {
+        public ThingConstraint.Value<?> asValue() {
             return this;
         }
 
@@ -376,7 +376,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class Relation extends ThingProperty.Singular {
+    public static class Relation extends ThingConstraint.Singular {
 
         private final List<RolePlayer> players;
         private String scope;
@@ -387,7 +387,7 @@ public abstract class ThingProperty extends Property {
 
         public Relation(List<RolePlayer> players) {
             if (players == null || players.isEmpty()) {
-                throw GraqlException.create(MISSING_PROPERTY_RELATION_PLAYER.message());
+                throw GraqlException.create(MISSING_CONSTRAINT_RELATION_PLAYER.message());
             }
             this.players = new ArrayList<>(players);
         }
@@ -426,7 +426,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Relation asRelation() {
+        public ThingConstraint.Relation asRelation() {
             return this;
         }
 
@@ -517,13 +517,13 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class Has extends ThingProperty.Repeatable {
+    public static class Has extends ThingConstraint.Repeatable {
 
         private final TypeVariable type;
         private final ThingVariable<?> attribute;
         private final int hash;
 
-        public Has(String type, ThingProperty.Value<?> value) {
+        public Has(String type, ThingConstraint.Value<?> value) {
             this(hidden().type(type), hidden().asAttributeWith(value));
         }
 
@@ -558,7 +558,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Has asHas() {
+        public ThingConstraint.Has asHas() {
             return this;
         }
 

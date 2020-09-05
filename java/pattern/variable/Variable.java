@@ -17,9 +17,8 @@
 
 package graql.lang.pattern.variable;
 
-import graql.lang.pattern.property.Property;
+import graql.lang.pattern.constraint.Constraint;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public abstract class Variable {
@@ -30,7 +29,7 @@ public abstract class Variable {
         this.reference = reference;
     }
 
-    public abstract Stream<? extends Property> properties();
+    public abstract Stream<? extends Constraint> properties();
 
     public boolean isType() {
         return false;
@@ -41,7 +40,7 @@ public abstract class Variable {
     }
 
     public Stream<BoundVariable> variables() {
-        return properties().flatMap(Property::variables);
+        return properties().flatMap(Constraint::variables);
     }
 
     public Reference.Type type() {
