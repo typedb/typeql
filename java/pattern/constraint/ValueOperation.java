@@ -26,8 +26,9 @@ import graql.lang.pattern.variable.UnboundVariable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
@@ -53,15 +54,11 @@ public abstract class ValueOperation<T> {
     }
 
     public ValueOperation.Assignment<?> asAssignment() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                ValueOperation.class.getSimpleName(), Assignment.class.getSimpleName()
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Assignment.class)));
     }
 
     public ValueOperation.Comparison<?> asComparison() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                ValueOperation.class.getSimpleName(), Comparison.class.getSimpleName()
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Comparison.class)));
     }
 
     public boolean isAssignment() {
@@ -114,33 +111,23 @@ public abstract class ValueOperation<T> {
         }
 
         public Assignment.Long asLong() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Assignment.class.getSimpleName(), Long.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
         }
 
         public Assignment.Double asDouble() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Assignment.class.getSimpleName(), Double.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
         }
 
         public Assignment.Boolean asBoolean() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Assignment.class.getSimpleName(), Boolean.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
         }
 
         public Assignment.String asString() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Assignment.class.getSimpleName(), String.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
         }
 
         public Assignment.DateTime asDateTime() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Assignment.class.getSimpleName(), DateTime.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
         }
 
         public java.lang.String toString() {
@@ -228,39 +215,27 @@ public abstract class ValueOperation<T> {
         }
 
         public Comparison.Long asLong() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Comparison.class.getSimpleName(), Long.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
         }
 
         public Comparison.Double asDouble() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Comparison.class.getSimpleName(), Double.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
         }
 
         public Comparison.Boolean asBoolean() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Comparison.class.getSimpleName(), Boolean.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
         }
 
         public Comparison.String asString() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Comparison.class.getSimpleName(), String.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
         }
 
         public Comparison.DateTime asDateTime() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Comparison.class.getSimpleName(), DateTime.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
         }
 
         public Comparison.Variable asVariable() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    Comparison.class.getSimpleName(), Variable.class.getSimpleName()
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
         }
 
         public static class Long extends Comparison<java.lang.Long> {

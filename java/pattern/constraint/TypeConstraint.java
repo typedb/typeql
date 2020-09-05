@@ -54,7 +54,7 @@ import static graql.lang.common.GraqlToken.Constraint.TYPE;
 import static graql.lang.common.GraqlToken.Constraint.VALUE_TYPE;
 import static graql.lang.common.GraqlToken.Constraint.WHEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
@@ -84,75 +84,51 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
     }
 
     public TypeConstraint.Singular asSingular() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Repeatable.class), className(Singular.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
     }
 
     public TypeConstraint.Repeatable asRepeatable() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(Repeatable.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
     }
 
     public TypeConstraint.Label asLabel() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Label.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
     }
 
     public TypeConstraint.Sub asSub() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Sub.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Sub.class)));
     }
 
     public TypeConstraint.Abstract asAbstract() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Abstract.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Abstract.class)));
     }
 
     public TypeConstraint.ValueType asValueType() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(ValueType.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(ValueType.class)));
     }
 
     public TypeConstraint.Regex asRegex() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Regex.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Regex.class)));
     }
 
     public TypeConstraint.Then asThen() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Then.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Then.class)));
     }
 
     public TypeConstraint.When asWhen() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(When.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(When.class)));
     }
 
     public TypeConstraint.Owns asOwns() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Owns.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Owns.class)));
     }
 
     public TypeConstraint.Plays asPlays() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Plays.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Plays.class)));
     }
 
     public TypeConstraint.Relates asRelates() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(TypeConstraint.class), className(Relates.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Relates.class)));
     }
 
     public static abstract class Singular extends TypeConstraint {

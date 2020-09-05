@@ -46,7 +46,7 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Constraint.HAS;
 import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
@@ -99,51 +99,35 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
     }
 
     public ThingConstraint.Singular asSingular() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Repeatable.class), className(Singular.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
     }
 
     public ThingConstraint.Repeatable asRepeatable() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(Repeatable.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
     }
 
     public IID asIID() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(IID.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(IID.class)));
     }
 
     public ThingConstraint.Isa asIsa() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(Isa.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Isa.class)));
     }
 
     public ThingConstraint.NEQ asNEQ() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(NEQ.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(NEQ.class)));
     }
 
     public ThingConstraint.Value<?> asValue() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(Value.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Value.class)));
     }
 
     public ThingConstraint.Relation asRelation() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(Relation.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Relation.class)));
     }
 
     public ThingConstraint.Has asHas() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                className(Singular.class), className(Has.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Has.class)));
     }
 
     public static abstract class Singular extends ThingConstraint {

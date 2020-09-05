@@ -17,10 +17,10 @@
 
 package graql.lang.query;
 
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 
 import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class GraqlQuery {
 
@@ -28,9 +28,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlDefine) {
             return (GraqlDefine) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlDefine.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlDefine.class)));
         }
     }
 
@@ -38,9 +36,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlUndefine) {
             return (GraqlUndefine) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlUndefine.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlUndefine.class)));
         }
     }
 
@@ -48,9 +44,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlInsert) {
             return (GraqlInsert) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlInsert.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlInsert.class)));
         }
     }
 
@@ -58,9 +52,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlDelete) {
             return (GraqlDelete) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlDelete.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlDelete.class)));
         }
     }
 
@@ -68,9 +60,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlMatch) {
             return (GraqlMatch) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlMatch.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlMatch.class)));
         }
     }
 
@@ -78,9 +68,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlMatch.Aggregate) {
             return (GraqlMatch.Aggregate) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlMatch.Aggregate.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlMatch.Aggregate.class)));
         }
     }
 
@@ -88,9 +76,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlMatch.Group) {
             return (GraqlMatch.Group) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlMatch.Group.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlMatch.Group.class)));
         }
     }
 
@@ -98,9 +84,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlMatch.Group.Aggregate) {
             return (GraqlMatch.Group.Aggregate) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlMatch.Group.Aggregate.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlMatch.Group.Aggregate.class)));
         }
     }
 
@@ -108,9 +92,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Statistics) {
             return (GraqlCompute.Statistics) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlCompute.Statistics.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlCompute.Statistics.class)));
         }
     }
 
@@ -118,9 +100,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Path) {
             return (GraqlCompute.Path) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlCompute.Path.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlCompute.Path.class)));
         }
     }
 
@@ -128,9 +108,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Centrality) {
             return (GraqlCompute.Centrality) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlCompute.Centrality.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlCompute.Centrality.class)));
         }
     }
 
@@ -138,9 +116,7 @@ public abstract class GraqlQuery {
         if (this instanceof GraqlCompute.Cluster) {
             return (GraqlCompute.Cluster) this;
         } else {
-            throw GraqlException.create(ErrorMessage.INVALID_CAST_EXCEPTION.message(
-                    className(GraqlQuery.class), className(GraqlCompute.Cluster.class)
-            ));
+            throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(GraqlCompute.Cluster.class)));
         }
     }
 

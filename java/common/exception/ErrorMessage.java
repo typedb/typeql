@@ -23,7 +23,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(1, "There is a syntax error at line %s:\n%s");
     public static final ErrorMessage SYNTAX_ERROR_DETAILED =
             new ErrorMessage(2, "There is a syntax error at line %s:\n%s\n%s\n%s");
-    public static final ErrorMessage INVALID_CAST_EXCEPTION =
+    public static final ErrorMessage INVALID_CASTING =
             new ErrorMessage(3, "The class '%s' cannot be casted to '%s'.");
     public static final ErrorMessage MISSING_PATTERNS =
             new ErrorMessage(4, "The query has not been provided with any patterns.");

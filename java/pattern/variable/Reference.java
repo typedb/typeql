@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
 public abstract class Reference {
@@ -80,21 +80,15 @@ public abstract class Reference {
     }
 
     Reference.Name asNamed() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                this.getClass().getCanonicalName(), className(Name.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
     }
 
     Reference.Label asLabel() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                this.getClass().getCanonicalName(), className(Label.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
     }
 
     Reference.Anonymous asAnonymous() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                this.getClass().getCanonicalName(), className(Anonymous.class)
-        ));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Anonymous.class)));
     }
 
     @Override
@@ -222,8 +216,8 @@ public abstract class Reference {
         }
 
         Reference.AnonymousWithID asAnonymousWithID() {
-            throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                    this.getClass().getCanonicalName(), className(AnonymousWithID.class)
+            throw GraqlException.create(INVALID_CASTING.message(
+                    className(this.getClass()), className(AnonymousWithID.class)
             ));
         }
 

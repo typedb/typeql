@@ -23,7 +23,7 @@ import graql.lang.pattern.variable.BoundVariable;
 import java.util.Set;
 
 import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class Constraint<VARIABLE extends BoundVariable> {
 
@@ -38,11 +38,11 @@ public abstract class Constraint<VARIABLE extends BoundVariable> {
     }
 
     public TypeConstraint asType() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(this.getClass()), className(TypeConstraint.class)));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(TypeConstraint.class)));
     }
 
     public ThingConstraint asThing() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(this.getClass()), className(ThingConstraint.class)));
+        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(ThingConstraint.class)));
     }
 
     @Override
