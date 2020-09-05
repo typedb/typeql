@@ -19,11 +19,11 @@ package graql.lang.pattern.constraint;
 
 import graql.lang.pattern.variable.BoundVariable;
 
-import java.util.stream.Stream;
+import java.util.Set;
 
-public abstract class Constraint {
+public abstract class Constraint<VARIABLE extends BoundVariable> {
 
-    public abstract Stream<? extends BoundVariable> variables();
+    public abstract Set<VARIABLE> variables();
 
     @Override
     public abstract String toString();

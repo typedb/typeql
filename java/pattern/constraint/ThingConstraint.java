@@ -28,13 +28,15 @@ import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
+import static grakn.common.collection.Collections.set;
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
@@ -48,7 +50,7 @@ import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATI
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
-public abstract class ThingConstraint extends Constraint {
+public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public boolean isSingular() {
         return false;
@@ -176,8 +178,8 @@ public abstract class ThingConstraint extends Constraint {
         }
 
         @Override
-        public Stream<BoundVariable> variables() {
-            return Stream.of();
+        public Set<BoundVariable> variables() {
+            return set();
         }
 
         @Override
@@ -241,8 +243,8 @@ public abstract class ThingConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of(type);
+        public Set<BoundVariable> variables() {
+            return set(type);
         }
 
         @Override
@@ -294,8 +296,8 @@ public abstract class ThingConstraint extends Constraint {
         }
 
         @Override
-        public Stream<ThingVariable<?>> variables() {
-            return Stream.of(variable());
+        public Set<BoundVariable> variables() {
+            return set(variable());
         }
 
         @Override
@@ -343,8 +345,8 @@ public abstract class ThingConstraint extends Constraint {
         }
 
         @Override
-        public Stream<ThingVariable<?>> variables() {
-            return operation.variable() != null ? Stream.of(operation.variable()) : Stream.empty();
+        public Set<BoundVariable> variables() {
+            return operation.variable() != null ? set(operation.variable()) : set();
         }
 
         @Override
@@ -411,13 +413,13 @@ public abstract class ThingConstraint extends Constraint {
         }
 
         @Override
-        public Stream<BoundVariable> variables() {
-            return players().stream().flatMap(player -> {
-                Stream.Builder<BoundVariable> stream = Stream.builder();
-                stream.add(player.player());
-                player.roleType().ifPresent(stream::add);
-                return stream.build();
+        public Set<BoundVariable> variables() {
+            Set<BoundVariable> variables = new HashSet<>();
+            players().forEach(player -> {
+                variables.add(player.player());
+                if (player.roleType().isPresent()) variables.add(player.roleType().get());
             });
+            return variables;
         }
 
         @Override
@@ -548,8 +550,8 @@ public abstract class ThingConstraint extends Constraint {
         }
 
         @Override
-        public Stream<ThingVariable<?>> variables() {
-            return Stream.of(attribute);
+        public Set<BoundVariable> variables() {
+            return set(attribute);
         }
 
         @Override

@@ -29,12 +29,15 @@ import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
+import static grakn.common.collection.Collections.set;
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
@@ -59,10 +62,10 @@ import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
-public abstract class TypeConstraint extends Constraint {
+public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     @Override
-    public abstract Stream<TypeVariable> variables();
+    public abstract Set<TypeVariable> variables();
 
     public boolean isSingular() {
         return false;
@@ -201,8 +204,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public Set<TypeVariable> variables() {
+            return set();
         }
 
         @Override
@@ -264,8 +267,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of(type);
+        public Set<TypeVariable> variables() {
+            return set(type);
         }
 
         @Override
@@ -301,8 +304,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public Set<TypeVariable> variables() {
+            return set();
         }
 
         @Override
@@ -343,8 +346,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public Set<TypeVariable> variables() {
+            return set();
         }
 
         @Override
@@ -392,8 +395,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public Set<TypeVariable> variables() {
+            return set();
         }
 
         @Override
@@ -437,8 +440,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public Set<TypeVariable> variables() {
+            return set();
         }
 
         @Override
@@ -492,8 +495,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public Set<TypeVariable> variables() {
+            return set();
         }
 
         @Override
@@ -587,10 +590,10 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
+        public Set<TypeVariable> variables() {
             return overriddenAttributeType == null
-                    ? Stream.of(attributeType)
-                    : Stream.of(attributeType, overriddenAttributeType);
+                    ? set(attributeType)
+                    : set(attributeType, overriddenAttributeType);
         }
 
         @Override
@@ -674,12 +677,12 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            List<TypeVariable> variables = new ArrayList<>();
+        public Set<TypeVariable> variables() {
+            Set<TypeVariable> variables = new HashSet<>();
             variables.add(roleType);
             if (relationType != null) variables.add(relationType);
             if (overriddenRoleType != null) variables.add(overriddenRoleType);
-            return variables.stream();
+            return variables;
         }
 
         @Override
@@ -764,8 +767,8 @@ public abstract class TypeConstraint extends Constraint {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return overriddenRoleType == null ? Stream.of(roleType) : Stream.of(roleType, overriddenRoleType);
+        public Set<TypeVariable> variables() {
+            return overriddenRoleType == null ? set(roleType) : set(roleType, overriddenRoleType);
         }
 
         @Override
