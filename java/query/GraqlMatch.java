@@ -74,7 +74,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     // We keep this contructor 'public' as it is more efficient for query parsing
     public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
-        if (filter == null) throw GraqlException.create(ErrorMessage.MISSING_FILTER_VARIABLES.message());
+        if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_FILTER_VARIABLES.message());
         this.conjunction = conjunction;
         this.filter = list(filter);
         this.sorting = sorting;
@@ -83,11 +83,11 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
         for (UnboundVariable var : filter) {
             if (!variablesNamedUnbound().contains(var))
-                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
+                throw GraqlException.of(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
         }
         List<UnboundVariable> sortableVars = filter.isEmpty() ? variablesNamedUnbound() : filter;
         if (sorting != null && !sortableVars.contains(sorting.var())) {
-            throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
+            throw GraqlException.of(INVALID_VARIABLE_OUT_OF_SCOPE.message(sorting.var().toString()));
         }
 
         // It is important that we use vars() (the method) and not vars (the constraint)
@@ -204,7 +204,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         static Conjunction<? extends Pattern> validConjunction(List<? extends Pattern> patterns) {
-            if (patterns.size() == 0) throw GraqlException.create(MISSING_PATTERNS.message());
+            if (patterns.size() == 0) throw GraqlException.of(MISSING_PATTERNS.message());
             return new Conjunction<>(patterns);
         }
 
@@ -324,7 +324,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
             } else if (var != null && !query.filter().contains(var)) {
-                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
+                throw GraqlException.of(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
             }
 
             this.query = query;
@@ -389,7 +389,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.filter().contains(var))
-                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
+                throw GraqlException.of(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
 
             this.query = query;
             this.var = var;
@@ -452,7 +452,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                 } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
                 } else if (var != null && !group.query().filter().contains(var)) {
-                    throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
+                    throw GraqlException.of(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.toString()));
                 }
 
                 this.group = group;

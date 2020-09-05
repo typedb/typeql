@@ -81,7 +81,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
     private void addSingularProperties(TypeConstraint.Singular constraint) {
         if (singular.containsKey(constraint.getClass()) && !singular.get(constraint.getClass()).equals(constraint)) {
-            throw GraqlException.create(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
         } else if (!singular.containsKey(constraint.getClass())) {
             singular.put(constraint.getClass(), constraint);
         }

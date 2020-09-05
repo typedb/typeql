@@ -24,7 +24,7 @@ public class GraqlException extends RuntimeException {
         super(error);
     }
 
-    public static GraqlException create(String error) {
+    public static GraqlException of(String error) {
         return new GraqlException(error);
     }
 }

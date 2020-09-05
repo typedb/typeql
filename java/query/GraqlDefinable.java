@@ -41,11 +41,11 @@ abstract class GraqlDefinable extends GraqlQuery {
 
     GraqlDefinable(GraqlToken.Command keyword, List<TypeVariable> variables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
-        if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
+        if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
         LinkedList<TypeVariable> list = new LinkedList<>(variables);
         while (!list.isEmpty()) {
             TypeVariable v = list.removeFirst();
-            if (!v.isLabelled()) throw GraqlException.create(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
+            if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
             else v.properties().forEach(p -> list.addAll(p.variables()));
         }
 

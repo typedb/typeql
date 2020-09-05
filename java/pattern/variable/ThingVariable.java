@@ -109,7 +109,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     void addSingularProperties(ThingConstraint.Singular constraint) {
         if (singular.containsKey(constraint.getClass()) && !singular.get(constraint.getClass()).equals(constraint)) {
-            throw GraqlException.create(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
         } else if (constraint.isIsa() && constraint.asIsa().type().label().isPresent() && relation().isPresent()) {
             relation().get().setScope(constraint.asIsa().type().label().get().label());
         } else if (constraint.isRelation() && isa().isPresent() && isa().get().type().label().isPresent()) {

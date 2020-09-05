@@ -38,11 +38,11 @@ public abstract class Constraint<VARIABLE extends BoundVariable> {
     }
 
     public TypeConstraint asType() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(TypeConstraint.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeConstraint.class)));
     }
 
     public ThingConstraint asThing() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(ThingConstraint.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingConstraint.class)));
     }
 
     @Override

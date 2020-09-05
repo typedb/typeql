@@ -34,10 +34,10 @@ public abstract class BoundVariable extends Variable implements Pattern {
     }
 
     public TypeVariable asType() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }
 
     public ThingVariable<?> asThing() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
     }
 }

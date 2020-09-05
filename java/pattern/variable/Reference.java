@@ -80,15 +80,15 @@ public abstract class Reference {
     }
 
     Reference.Name asNamed() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
     }
 
     Reference.Label asLabel() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
     }
 
     Reference.Anonymous asAnonymous() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Anonymous.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Anonymous.class)));
     }
 
     @Override
@@ -115,7 +115,7 @@ public abstract class Reference {
         private Name(String name, boolean isVisible) {
             super(Type.NAME, isVisible);
             if (!REGEX.matcher(name).matches()) {
-                throw GraqlException.create(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
+                throw GraqlException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
             }
             this.name = name;
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
@@ -216,7 +216,7 @@ public abstract class Reference {
         }
 
         Reference.AnonymousWithID asAnonymousWithID() {
-            throw GraqlException.create(INVALID_CASTING.message(
+            throw GraqlException.of(INVALID_CASTING.message(
                     className(this.getClass()), className(AnonymousWithID.class)
             ));
         }

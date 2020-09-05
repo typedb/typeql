@@ -84,51 +84,51 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
     }
 
     public TypeConstraint.Singular asSingular() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
     }
 
     public TypeConstraint.Repeatable asRepeatable() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
     }
 
     public TypeConstraint.Label asLabel() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
     }
 
     public TypeConstraint.Sub asSub() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Sub.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Sub.class)));
     }
 
     public TypeConstraint.Abstract asAbstract() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Abstract.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Abstract.class)));
     }
 
     public TypeConstraint.ValueType asValueType() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(ValueType.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ValueType.class)));
     }
 
     public TypeConstraint.Regex asRegex() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Regex.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Regex.class)));
     }
 
     public TypeConstraint.Then asThen() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Then.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Then.class)));
     }
 
     public TypeConstraint.When asWhen() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(When.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(When.class)));
     }
 
     public TypeConstraint.Owns asOwns() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Owns.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Owns.class)));
     }
 
     public TypeConstraint.Plays asPlays() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Plays.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Plays.class)));
     }
 
     public TypeConstraint.Relates asRelates() {
-        throw GraqlException.create(INVALID_CASTING.message(className(this.getClass()), className(Relates.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Relates.class)));
     }
 
     public static abstract class Singular extends TypeConstraint {
@@ -368,7 +368,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             try {
                 java.util.regex.Pattern.compile(regex);
             } catch (PatternSyntaxException exception) {
-                throw GraqlException.create(INVALID_ATTRIBUTE_TYPE_REGEX.message());
+                throw GraqlException.of(INVALID_ATTRIBUTE_TYPE_REGEX.message());
             }
             this.regex = regex;
             this.hash = Objects.hash(regex);

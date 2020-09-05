@@ -96,7 +96,7 @@ public class Parser extends GraqlBaseVisitor {
             String queryString, Function<GraqlParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
     ) {
         if (queryString == null || queryString.isEmpty()) {
-            throw GraqlException.create("Query String is NULL or Empty");
+            throw GraqlException.of("Query String is NULL or Empty");
         }
 
         ErrorListener errorListener = ErrorListener.of(queryString);
@@ -130,7 +130,7 @@ public class Parser extends GraqlBaseVisitor {
             parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
             queryContext = parserMethod.apply(parser);
 
-            throw GraqlException.create(errorListener.toString());
+            throw GraqlException.of(errorListener.toString());
         }
 
         return visitor.apply(queryContext);
