@@ -62,4 +62,5 @@ checkstyle_test(
     targets = [
         ":parser",
     ],
+    license_type = "agpl",
 )

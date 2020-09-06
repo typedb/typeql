@@ -57,4 +57,5 @@ checkstyle_test(
         ":test",
         ":steps",
     ],
+    license_type = "agpl",
 )

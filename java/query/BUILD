@@ -60,4 +60,5 @@ checkstyle_test(
     targets = [
         ":query",
     ],
+    license_type = "agpl",
 )

@@ -36,5 +36,6 @@ checkstyle_test(
     name = "checkstyle",
     targets = [
         ":parser-test",
-    ]
+    ],
+    license_type = "agpl",
 )

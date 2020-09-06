@@ -63,5 +63,6 @@ checkstyle_test(
         ":graql-query-test",
         ":graql-delete-test",
         ":graql-insert-test",
-    ]
+    ],
+    license_type = "agpl",
 )

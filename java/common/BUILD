@@ -54,4 +54,5 @@ checkstyle_test(
     targets = [
         ":common",
     ],
+    license_type = "agpl",
 )
