@@ -51,10 +51,6 @@ public abstract class Reference {
         return new Reference.Anonymous(isVisible);
     }
 
-    static Reference.AnonymousWithID anonymous(boolean isVisible, int id) {
-        return new Reference.AnonymousWithID(isVisible, id);
-    }
-
     Reference.Type type() {
         return type;
     }
@@ -79,7 +75,7 @@ public abstract class Reference {
         return type == Type.ANONYMOUS;
     }
 
-    Reference.Name asNamed() {
+    Reference.Name asName() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
     }
 
@@ -102,7 +98,7 @@ public abstract class Reference {
     @Override
     public abstract int hashCode();
 
-    static class Name extends Reference {
+    public static class Name extends Reference {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         protected final String name;
@@ -136,7 +132,7 @@ public abstract class Reference {
         }
 
         @Override
-        Name asNamed() {
+        Name asName() {
             return this;
         }
 
@@ -202,7 +198,7 @@ public abstract class Reference {
         }
     }
 
-    static class Anonymous extends Reference {
+    public static class Anonymous extends Reference {
 
         private final int hash;
 
@@ -213,12 +209,6 @@ public abstract class Reference {
 
         public boolean isWithID() {
             return false;
-        }
-
-        Reference.AnonymousWithID asAnonymousWithID() {
-            throw GraqlException.of(INVALID_CASTING.message(
-                    className(this.getClass()), className(AnonymousWithID.class)
-            ));
         }
 
         @Override
@@ -242,49 +232,6 @@ public abstract class Reference {
             if (o == null || getClass() != o.getClass()) return false;
             Anonymous that = (Anonymous) o;
             return (this.type == that.type && this.isVisible == that.isVisible);
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-    }
-
-    static class AnonymousWithID extends Reference.Anonymous {
-
-        private final int id;
-        private final int hash;
-
-        private AnonymousWithID(boolean isVisible, int id) {
-            super(isVisible);
-            this.id = id;
-            this.hash = Objects.hash(this.type, this.isVisible, this.id);
-        }
-
-        public boolean isWithID() {
-            return true;
-        }
-
-        Reference.AnonymousWithID asAnonymousWithID() {
-            return this;
-        }
-
-        @Override
-        String identifier() {
-            return syntax() + id;
-        }
-
-        @Override
-        Reference.AnonymousWithID asAnonymous() {
-            return this;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            AnonymousWithID that = (AnonymousWithID) o;
-            return (this.type == that.type && this.isVisible == that.isVisible && this.id == that.id);
         }
 
         @Override

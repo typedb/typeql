@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 public abstract class Variable {
 
-    Reference reference;
+    final Reference reference;
 
     Variable(Reference reference) {
         this.reference = reference;
@@ -50,7 +50,7 @@ public abstract class Variable {
     public String name() {
         switch (reference.type()) {
             case NAME:
-                return reference.asNamed().name();
+                return reference.asName().name();
             case LABEL:
             case ANONYMOUS:
                 return null;
