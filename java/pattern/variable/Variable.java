@@ -80,10 +80,6 @@ public abstract class Variable {
         return reference.isAnonymous();
     }
 
-    public boolean isAnonymisedWithID() {
-        return reference.isAnonymous() && reference.asAnonymous().isWithID();
-    }
-
     public boolean isVisible() {
         return reference.isVisible();
     }

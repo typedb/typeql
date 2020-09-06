@@ -32,7 +32,7 @@ public abstract class Reference {
     final Type type;
     final boolean isVisible;
 
-    enum Type {NAME, LABEL, ANONYMOUS;}
+    enum Type {NAME, LABEL, ANONYMOUS}
 
     Reference(Type type, boolean isVisible) {
         this.type = type;
@@ -55,12 +55,16 @@ public abstract class Reference {
         return type;
     }
 
-    abstract String syntax();
+    public abstract String syntax();
 
-    abstract String identifier();
+    public abstract String identifier();
 
     boolean isVisible() {
         return isVisible;
+    }
+
+    public boolean isReferrable() {
+        return !isAnonymous();
     }
 
     public boolean isName() {
@@ -75,15 +79,19 @@ public abstract class Reference {
         return type == Type.ANONYMOUS;
     }
 
-    Reference.Name asName() {
+    public Reference.Referrable asReferrable() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Referrable.class)));
+    }
+
+    public Reference.Name asName() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
     }
 
-    Reference.Label asLabel() {
+    public Reference.Label asLabel() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
     }
 
-    Reference.Anonymous asAnonymous() {
+    public Reference.Anonymous asAnonymous() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Anonymous.class)));
     }
 
@@ -98,18 +106,21 @@ public abstract class Reference {
     @Override
     public abstract int hashCode();
 
-    public static class Name extends Reference {
+    public static abstract class Referrable extends Reference {
+
+        Referrable(Type type, boolean isVisible) {
+            super(type, isVisible);
+        }
+    }
+
+    public static class Name extends Referrable {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         protected final String name;
         private final int hash;
 
         Name(String name) {
-            this(name, true);
-        }
-
-        private Name(String name, boolean isVisible) {
-            super(Type.NAME, isVisible);
+            super(Type.NAME, true);
             if (!REGEX.matcher(name).matches()) {
                 throw GraqlException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
             }
@@ -122,17 +133,17 @@ public abstract class Reference {
         }
 
         @Override
-        String syntax() {
+        public String syntax() {
             return GraqlToken.Char.$ + name;
         }
 
         @Override
-        String identifier() {
+        public String identifier() {
             return syntax();
         }
 
         @Override
-        Name asName() {
+        public Name asName() {
             return this;
         }
 
@@ -152,7 +163,7 @@ public abstract class Reference {
         }
     }
 
-    public static class Label extends Reference {
+    public static class Label extends Referrable {
 
         private final String label;
         private final int hash;
@@ -168,17 +179,17 @@ public abstract class Reference {
         }
 
         @Override
-        String syntax() {
+        public String syntax() {
             return GraqlToken.Char.$_ + label;
         }
 
         @Override
-        String identifier() {
+        public String identifier() {
             return syntax();
         }
 
         @Override
-        Reference.Label asLabel() {
+        public Reference.Label asLabel() {
             return this;
         }
 
@@ -207,22 +218,18 @@ public abstract class Reference {
             this.hash = Objects.hash(this.type, this.isVisible);
         }
 
-        public boolean isWithID() {
-            return false;
-        }
-
         @Override
-        String syntax() {
+        public String syntax() {
             return GraqlToken.Char.$_.toString();
         }
 
         @Override
-        String identifier() {
+        public String identifier() {
             return syntax();
         }
 
         @Override
-        Reference.Anonymous asAnonymous() {
+        public Reference.Anonymous asAnonymous() {
             return this;
         }
 
