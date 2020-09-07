@@ -17,9 +17,10 @@
 
 package(default_visibility = ["//:__subpackages__"])
 
-load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@rules_antlr//antlr:antlr4.bzl", "antlr4")
+load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 antlr4(
     name = "java-src",
@@ -50,4 +51,10 @@ deploy_maven(
     target = ":assemble-maven",
     snapshot = deployment['maven.snapshot'],
     release = deployment['maven.snapshot']
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    files = ["BUILD"],
+    license_type = "agpl",
 )

@@ -57,5 +57,6 @@ checkstyle_test(
         ":test",
         ":steps",
     ],
+    files = ["BUILD"],
     license_type = "agpl",
 )

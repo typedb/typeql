@@ -34,8 +34,7 @@ java_test(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [
-        ":parser-test",
-    ],
+    targets = [":parser-test"],
+    files = ["BUILD"],
     license_type = "agpl",
 )

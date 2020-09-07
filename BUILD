@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@graknlabs_dependencies//tool/release:rules.bzl", "release_validate_deps")
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 load("//:deployment.bzl", "deployment")
@@ -53,4 +54,10 @@ filegroup(
         "@graknlabs_dependencies//tool/sonarcloud:code-analysis",
         "@graknlabs_dependencies//tool/unuseddeps:unused-deps",
     ],
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    files = ["BUILD", "deployment.bzl"],
+    license_type = "agpl",
 )

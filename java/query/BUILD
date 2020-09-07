@@ -57,8 +57,7 @@ deploy_maven(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [
-        ":query",
-    ],
+    targets = [":query"],
+    files = ["BUILD"],
     license_type = "agpl",
 )
