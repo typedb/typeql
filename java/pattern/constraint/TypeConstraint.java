@@ -83,6 +83,46 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         return false;
     }
 
+    public boolean isLabel() {
+        return false;
+    }
+
+    public boolean isSub() {
+        return false;
+    }
+
+    public boolean isAbstract() {
+        return false;
+    }
+
+    public boolean isValueType() {
+        return false;
+    }
+
+    public boolean isRegex() {
+        return false;
+    }
+
+    public boolean isThen() {
+        return false;
+    }
+
+    public boolean isWhen() {
+        return false;
+    }
+
+    public boolean isOwns() {
+        return false;
+    }
+
+    public boolean isPlays() {
+        return false;
+    }
+
+    public boolean isRelates() {
+        return false;
+    }
+
     public TypeConstraint.Singular asSingular() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
     }
@@ -193,6 +233,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
+        public boolean isLabel() {
+            return true;
+        }
+
+        @Override
         public TypeConstraint.Label asLabel() {
             return this;
         }
@@ -243,16 +288,25 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (typeVar == null) throw new NullPointerException("Null superType");
             this.type = typeVar;
             this.isExplicit = isExplicit;
-            this.hash = Objects.hash(typeVar, isExplicit);
+            this.hash = Objects.hash(typeVar, this.isExplicit);
         }
 
         public TypeVariable type() {
             return type;
         }
 
+        public boolean isExplicit() {
+            return isExplicit;
+        }
+
         @Override
         public Set<TypeVariable> variables() {
             return set(type);
+        }
+
+        @Override
+        public boolean isSub() {
+            return true;
         }
 
         @Override
@@ -290,6 +344,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public Set<TypeVariable> variables() {
             return set();
+        }
+
+        @Override
+        public boolean isAbstract() {
+            return true;
         }
 
         @Override
@@ -332,6 +391,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public Set<TypeVariable> variables() {
             return set();
+        }
+
+        @Override
+        public boolean isValueType() {
+            return true;
         }
 
         @Override
@@ -384,6 +448,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
+        public boolean isRegex() {
+            return true;
+        }
+
+        @Override
         public TypeConstraint.Regex asRegex() {
             return this;
         }
@@ -426,6 +495,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public Set<TypeVariable> variables() {
             return set();
+        }
+
+        @Override
+        public boolean isThen() {
+            return true;
         }
 
         @Override
@@ -481,6 +555,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public Set<TypeVariable> variables() {
             return set();
+        }
+
+        @Override
+        public boolean isWhen() {
+            return true;
         }
 
         @Override
@@ -581,6 +660,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
+        public boolean isOwns() {
+            return true;
+        }
+
+        @Override
         public TypeConstraint.Owns asOwns() {
             return this;
         }
@@ -670,6 +754,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
+        public boolean isPlays() {
+            return true;
+        }
+
+        @Override
         public TypeConstraint.Plays asPlays() {
             return this;
         }
@@ -753,6 +842,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public Set<TypeVariable> variables() {
             return overriddenRoleType == null ? set(roleType) : set(roleType, overriddenRoleType);
+        }
+
+        @Override
+        public boolean isRelates() {
+            return true;
         }
 
         @Override

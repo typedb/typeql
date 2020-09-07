@@ -240,6 +240,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return type;
         }
 
+        public boolean isExplicit() {
+            return isExplicit;
+        }
+
         @Override
         public Set<BoundVariable> variables() {
             return set(type);
