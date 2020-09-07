@@ -63,7 +63,9 @@ import static java.util.stream.Collectors.joining;
 public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     @Override
-    public abstract Set<TypeVariable> variables();
+    public Set<TypeVariable> variables() {
+        return set();
+    }
 
     @Override
     public boolean isType() {
@@ -228,11 +230,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public Set<TypeVariable> variables() {
-            return set();
-        }
-
-        @Override
         public boolean isLabel() {
             return true;
         }
@@ -342,11 +339,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public Set<TypeVariable> variables() {
-            return set();
-        }
-
-        @Override
         public boolean isAbstract() {
             return true;
         }
@@ -389,11 +381,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public Set<TypeVariable> variables() {
-            return set();
-        }
-
-        @Override
         public boolean isValueType() {
             return true;
         }
@@ -424,27 +411,21 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public static class Regex extends TypeConstraint.Singular {
 
-        private final String regex;
+        private final java.util.regex.Pattern regex;
         private final int hash;
 
         public Regex(String regex) {
             if (regex == null) throw new NullPointerException("Null regex");
             try {
-                java.util.regex.Pattern.compile(regex);
+                this.regex = java.util.regex.Pattern.compile(regex);
             } catch (PatternSyntaxException exception) {
                 throw GraqlException.of(INVALID_ATTRIBUTE_TYPE_REGEX.message());
             }
-            this.regex = regex;
-            this.hash = Objects.hash(regex);
+            this.hash = Objects.hash(this.regex.pattern());
         }
 
-        public String regex() {
+        public java.util.regex.Pattern regex() {
             return regex;
-        }
-
-        @Override
-        public Set<TypeVariable> variables() {
-            return set();
         }
 
         @Override
@@ -459,7 +440,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return REGEX.toString() + SPACE + quoteString(escapeRegex(regex()));
+            return REGEX.toString() + SPACE + quoteString(escapeRegex(regex().pattern()));
         }
 
         @Override
@@ -467,7 +448,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Regex that = (Regex) o;
-            return (this.regex.equals(that.regex));
+            return (this.regex.pattern().equals(that.regex.pattern()));
         }
 
         @Override
@@ -490,11 +471,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Pattern pattern() {
             return pattern;
-        }
-
-        @Override
-        public Set<TypeVariable> variables() {
-            return set();
         }
 
         @Override
@@ -550,11 +526,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Pattern pattern() {
             return pattern;
-        }
-
-        @Override
-        public Set<TypeVariable> variables() {
-            return set();
         }
 
         @Override

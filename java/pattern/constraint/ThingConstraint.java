@@ -54,7 +54,9 @@ import static java.util.stream.Collectors.joining;
 public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     @Override
-    public abstract Set<BoundVariable> variables();
+    public Set<BoundVariable> variables() {
+        return set();
+    }
 
     @Override
     public boolean isThing() {
@@ -173,11 +175,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public String iid() {
             return iid;
-        }
-
-        @Override
-        public Set<BoundVariable> variables() {
-            return set();
         }
 
         @Override
