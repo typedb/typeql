@@ -59,7 +59,11 @@ deploy_maven(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [":pattern"],
-    files = ["BUILD"],
+    include = glob([
+        "*",
+        "constraint/*.java",
+        "variable/*.java",
+        "variable/builder/*.java",
+    ]),
     license_type = "agpl",
 )

@@ -39,6 +39,12 @@ java_library(
     tags = ["maven_coordinates=io.graql:graql-grammar:{pom_version}", "checkstyle_ignore"],
 )
 
+checkstyle_test(
+    name = "checkstyle",
+    include = glob(["*"]),
+    license_type = "agpl",
+)
+
 assemble_maven(
   name = "assemble-maven",
   target = ":java",
@@ -51,10 +57,4 @@ deploy_maven(
     target = ":assemble-maven",
     snapshot = deployment['maven.snapshot'],
     release = deployment['maven.snapshot']
-)
-
-checkstyle_test(
-    name = "checkstyle",
-    files = ["BUILD"],
-    license_type = "agpl",
 )

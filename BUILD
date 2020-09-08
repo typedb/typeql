@@ -43,6 +43,17 @@ release_validate_deps(
     tags = ["manual"]  # in order for bazel test //... to not fail
 )
 
+checkstyle_test(
+    name = "checkstyle",
+    include = glob([
+        "*",
+        ".grabl/automation.yml",
+        "docs/*",
+    ]),
+    exclude = ["docs/java-package-structure.png"],
+    license_type = "agpl",
+)
+
 # CI targets that are not declared in any BUILD file, but are called externally
 filegroup(
     name = "ci",
@@ -54,10 +65,4 @@ filegroup(
         "@graknlabs_dependencies//tool/sonarcloud:code-analysis",
         "@graknlabs_dependencies//tool/unuseddeps:unused-deps",
     ],
-)
-
-checkstyle_test(
-    name = "checkstyle",
-    files = ["BUILD", "deployment.bzl"],
-    license_type = "agpl",
 )

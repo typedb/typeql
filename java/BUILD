@@ -57,7 +57,6 @@ deploy_maven(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [":graql"],
-    files = ["BUILD"],
+    include = glob(["*"]),
     license_type = "agpl",
 )
