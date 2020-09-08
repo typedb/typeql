@@ -33,13 +33,13 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETI
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 
-public abstract class ValueOperation<T> {
+public abstract class ValueConstraint<T> {
 
     private final GraqlToken.Comparator comparator;
     private final T value;
     private final int hash;
 
-    ValueOperation(GraqlToken.Comparator comparator, T value) {
+    ValueConstraint(GraqlToken.Comparator comparator, T value) {
         this.comparator = comparator;
         this.value = value;
         this.hash = Objects.hash(this.comparator, this.value);
@@ -53,11 +53,11 @@ public abstract class ValueOperation<T> {
         return value;
     }
 
-    public ValueOperation.Assignment<?> asAssignment() {
+    public ValueConstraint.Assignment<?> asAssignment() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Assignment.class)));
     }
 
-    public ValueOperation.Comparison<?> asComparison() {
+    public ValueConstraint.Comparison<?> asComparison() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Comparison.class)));
     }
 
@@ -90,7 +90,7 @@ public abstract class ValueOperation<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ValueOperation that = (ValueOperation) o;
+        ValueConstraint that = (ValueConstraint) o;
         return (this.comparator.equals(that.comparator) && this.value.equals(that.value));
     }
 
@@ -99,14 +99,14 @@ public abstract class ValueOperation<T> {
         return hash;
     }
 
-    public abstract static class Assignment<T> extends ValueOperation<T> {
+    public abstract static class Assignment<T> extends ValueConstraint<T> {
 
         Assignment(T value) {
             super(GraqlToken.Comparator.EQV, value);
         }
 
         @Override
-        public ValueOperation.Assignment<?> asAssignment() {
+        public ValueConstraint.Assignment<?> asAssignment() {
             return this;
         }
 
@@ -203,14 +203,14 @@ public abstract class ValueOperation<T> {
         }
     }
 
-    public abstract static class Comparison<T> extends ValueOperation<T> {
+    public abstract static class Comparison<T> extends ValueConstraint<T> {
 
         Comparison(GraqlToken.Comparator comparator, T value) {
             super(comparator, value);
         }
 
         @Override
-        public ValueOperation.Comparison<?> asComparison() {
+        public ValueConstraint.Comparison<?> asComparison() {
             return this;
         }
 

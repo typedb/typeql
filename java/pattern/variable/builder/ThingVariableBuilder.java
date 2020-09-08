@@ -19,7 +19,7 @@ package graql.lang.pattern.variable.builder;
 
 import graql.lang.common.GraqlToken;
 import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.constraint.ValueOperation;
+import graql.lang.pattern.constraint.ValueConstraint;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
@@ -55,23 +55,23 @@ public interface ThingVariableBuilder {
         }
 
         default T has(String type, long value) {
-            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.Long(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueConstraint.Assignment.Long(value)));
         }
 
         default T has(String type, double value) {
-            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.Double(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueConstraint.Assignment.Double(value)));
         }
 
         default T has(String type, boolean value) {
-            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.Boolean(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueConstraint.Assignment.Boolean(value)));
         }
 
         default T has(String type, String value) {
-            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.String(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueConstraint.Assignment.String(value)));
         }
 
         default T has(String type, LocalDateTime value) {
-            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.DateTime(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueConstraint.Assignment.DateTime(value)));
         }
 
         default T has(String type, ThingConstraint.Value<?> value) {
@@ -134,226 +134,226 @@ public interface ThingVariableBuilder {
         // Attribute value assignment constraint
 
         default ThingVariable.Attribute val(long value) {
-            return operation(new ValueOperation.Assignment.Long(value));
+            return operation(new ValueConstraint.Assignment.Long(value));
         }
 
         default ThingVariable.Attribute val(double value) {
-            return operation(new ValueOperation.Assignment.Double(value));
+            return operation(new ValueConstraint.Assignment.Double(value));
         }
 
         default ThingVariable.Attribute val(boolean value) {
-            return operation(new ValueOperation.Assignment.Boolean(value));
+            return operation(new ValueConstraint.Assignment.Boolean(value));
         }
 
         default ThingVariable.Attribute val(String value) {
-            return operation(new ValueOperation.Assignment.String(value));
+            return operation(new ValueConstraint.Assignment.String(value));
         }
 
         default ThingVariable.Attribute val(LocalDateTime value) {
-            return operation(new ValueOperation.Assignment.DateTime(value));
+            return operation(new ValueConstraint.Assignment.DateTime(value));
         }
 
         // Attribute value equality constraint
 
         default ThingVariable.Attribute eq(long value) {
-            return eq(ValueOperation.Comparison.Long::new, value);
+            return eq(ValueConstraint.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute eq(double value) {
-            return eq(ValueOperation.Comparison.Double::new, value);
+            return eq(ValueConstraint.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute eq(boolean value) {
-            return eq(ValueOperation.Comparison.Boolean::new, value);
+            return eq(ValueConstraint.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute eq(String value) {
-            return eq(ValueOperation.Comparison.String::new, value);
+            return eq(ValueConstraint.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute eq(LocalDateTime value) {
-            return eq(ValueOperation.Comparison.DateTime::new, value);
+            return eq(ValueConstraint.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute eq(UnboundVariable variable) {
-            return eq(ValueOperation.Comparison.Variable::new, variable);
+            return eq(ValueConstraint.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Comparator, T, ValueConstraint.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.EQV, value));
         }
 
         // Attribute value inequality constraint
 
         default ThingVariable.Attribute neq(long value) {
-            return neq(ValueOperation.Comparison.Long::new, value);
+            return neq(ValueConstraint.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute neq(double value) {
-            return neq(ValueOperation.Comparison.Double::new, value);
+            return neq(ValueConstraint.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute neq(boolean value) {
-            return neq(ValueOperation.Comparison.Boolean::new, value);
+            return neq(ValueConstraint.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute neq(String value) {
-            return neq(ValueOperation.Comparison.String::new, value);
+            return neq(ValueConstraint.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute neq(LocalDateTime value) {
-            return neq(ValueOperation.Comparison.DateTime::new, value);
+            return neq(ValueConstraint.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute neq(UnboundVariable variable) {
-            return neq(ValueOperation.Comparison.Variable::new, variable);
+            return neq(ValueConstraint.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Comparator, T, ValueConstraint.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.NEQV, value));
         }
 
         // Attribute value greater-than constraint
 
         default ThingVariable.Attribute gt(long value) {
-            return gt(ValueOperation.Comparison.Long::new, value);
+            return gt(ValueConstraint.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute gt(double value) {
-            return gt(ValueOperation.Comparison.Double::new, value);
+            return gt(ValueConstraint.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute gt(boolean value) {
-            return gt(ValueOperation.Comparison.Boolean::new, value);
+            return gt(ValueConstraint.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute gt(String value) {
-            return gt(ValueOperation.Comparison.String::new, value);
+            return gt(ValueConstraint.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute gt(LocalDateTime value) {
-            return gt(ValueOperation.Comparison.DateTime::new, value);
+            return gt(ValueConstraint.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute gt(UnboundVariable variable) {
-            return gt(ValueOperation.Comparison.Variable::new, variable);
+            return gt(ValueConstraint.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Comparator, T, ValueConstraint.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.GT, value));
         }
 
         // Attribute value greater-than-or-equals constraint
 
         default ThingVariable.Attribute gte(long value) {
-            return gte(ValueOperation.Comparison.Long::new, value);
+            return gte(ValueConstraint.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute gte(double value) {
-            return gte(ValueOperation.Comparison.Double::new, value);
+            return gte(ValueConstraint.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute gte(boolean value) {
-            return gte(ValueOperation.Comparison.Boolean::new, value);
+            return gte(ValueConstraint.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute gte(String value) {
-            return gte(ValueOperation.Comparison.String::new, value);
+            return gte(ValueConstraint.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute gte(LocalDateTime value) {
-            return gte(ValueOperation.Comparison.DateTime::new, value);
+            return gte(ValueConstraint.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute gte(UnboundVariable variable) {
-            return gte(ValueOperation.Comparison.Variable::new, variable);
+            return gte(ValueConstraint.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Comparator, T, ValueConstraint.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.GTE, value));
         }
 
         // Attribute value less-than constraint
 
         default ThingVariable.Attribute lt(long value) {
-            return lt(ValueOperation.Comparison.Long::new, value);
+            return lt(ValueConstraint.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute lt(double value) {
-            return lt(ValueOperation.Comparison.Double::new, value);
+            return lt(ValueConstraint.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute lt(boolean value) {
-            return lt(ValueOperation.Comparison.Boolean::new, value);
+            return lt(ValueConstraint.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute lt(String value) {
-            return lt(ValueOperation.Comparison.String::new, value);
+            return lt(ValueConstraint.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute lt(LocalDateTime value) {
-            return lt(ValueOperation.Comparison.DateTime::new, value);
+            return lt(ValueConstraint.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute lt(UnboundVariable variable) {
-            return lt(ValueOperation.Comparison.Variable::new, variable);
+            return lt(ValueConstraint.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Comparator, T, ValueConstraint.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.LT, value));
         }
 
         // Attribute value less-than-or-equals constraint
 
         default ThingVariable.Attribute lte(long value) {
-            return lte(ValueOperation.Comparison.Long::new, value);
+            return lte(ValueConstraint.Comparison.Long::new, value);
         }
 
         default ThingVariable.Attribute lte(double value) {
-            return lte(ValueOperation.Comparison.Double::new, value);
+            return lte(ValueConstraint.Comparison.Double::new, value);
         }
 
         default ThingVariable.Attribute lte(boolean value) {
-            return lte(ValueOperation.Comparison.Boolean::new, value);
+            return lte(ValueConstraint.Comparison.Boolean::new, value);
         }
 
         default ThingVariable.Attribute lte(String value) {
-            return lte(ValueOperation.Comparison.String::new, value);
+            return lte(ValueConstraint.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute lte(LocalDateTime value) {
-            return lte(ValueOperation.Comparison.DateTime::new, value);
+            return lte(ValueConstraint.Comparison.DateTime::new, value);
         }
 
         default ThingVariable.Attribute lte(UnboundVariable variable) {
-            return lte(ValueOperation.Comparison.Variable::new, variable);
+            return lte(ValueConstraint.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Comparator, T, ValueConstraint.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.LTE, value));
         }
 
         // Attribute value contains (in String) constraint
 
         default ThingVariable.Attribute contains(String value) {
-            return contains(ValueOperation.Comparison.String::new, value);
+            return contains(ValueConstraint.Comparison.String::new, value);
         }
 
         default ThingVariable.Attribute contains(UnboundVariable variable) {
-            return contains(ValueOperation.Comparison.Variable::new, variable);
+            return contains(ValueConstraint.Comparison.Variable::new, variable);
         }
 
-        default <T> ThingVariable.Attribute contains(BiFunction<GraqlToken.Comparator, T, ValueOperation.Comparison<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute contains(BiFunction<GraqlToken.Comparator, T, ValueConstraint.Comparison<T>> constructor, T value) {
             return operation(constructor.apply(GraqlToken.Comparator.CONTAINS, value));
         }
 
         // Attribute value like (regex) constraint
 
         default ThingVariable.Attribute like(String value) {
-            return operation(new ValueOperation.Comparison.String(GraqlToken.Comparator.LIKE, value));
+            return operation(new ValueConstraint.Comparison.String(GraqlToken.Comparator.LIKE, value));
         }
 
-        default ThingVariable.Attribute operation(ValueOperation<?> operation) {
+        default ThingVariable.Attribute operation(ValueConstraint<?> operation) {
             return asAttributeWith(new ThingConstraint.Value<>(operation));
         }
 

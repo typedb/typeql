@@ -19,7 +19,6 @@ package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
@@ -331,16 +330,16 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Value<T> extends ThingConstraint.Singular {
 
-        private final ValueOperation<T> operation;
+        private final ValueConstraint<T> operation;
         private final int hash;
 
-        public Value(ValueOperation<T> operation) {
+        public Value(ValueConstraint<T> operation) {
             if (operation == null) throw new NullPointerException("Null operation");
             this.operation = operation;
             this.hash = Objects.hash(Value.class, this.operation);
         }
 
-        public ValueOperation<T> operation() {
+        public ValueConstraint<T> operation() {
             return operation;
         }
 
@@ -576,7 +575,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Has that = (Has) o;
-            return (this.type.equals(that.type) && attribute.equals(that.attribute));
+            return (this.type.equals(that.type) && this.attribute.equals(that.attribute));
         }
 
         @Override
