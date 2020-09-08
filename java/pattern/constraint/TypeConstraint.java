@@ -249,7 +249,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Label that = (Label) o;
-            return (this.label.equals(that.label));
+            return (Objects.equals(this.scope, that.scope) && this.label.equals(that.label));
         }
 
         @Override
@@ -697,8 +697,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
-            this.roleType = roleType;
             this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
+            this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
             this.hash = Objects.hash(roleType, overriddenRoleType);
         }
