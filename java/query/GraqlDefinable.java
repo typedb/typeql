@@ -20,7 +20,6 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.property.TypeProperty;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.LinkedList;
@@ -33,7 +32,6 @@ import static graql.lang.common.GraqlToken.Command.DEFINE;
 import static graql.lang.common.GraqlToken.Command.UNDEFINE;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 
 abstract class GraqlDefinable extends GraqlQuery {
 
@@ -43,12 +41,12 @@ abstract class GraqlDefinable extends GraqlQuery {
 
     GraqlDefinable(GraqlToken.Command keyword, List<TypeVariable> variables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
-        if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
+        if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
         LinkedList<TypeVariable> list = new LinkedList<>(variables);
         while (!list.isEmpty()) {
             TypeVariable v = list.removeFirst();
-            if (!v.isLabelled()) throw GraqlException.create(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else list.addAll(v.properties().flatMap(TypeProperty::variables).collect(toSet()));
+            if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
+            else v.constraints().forEach(p -> list.addAll(p.variables()));
         }
 
         this.keyword = keyword;

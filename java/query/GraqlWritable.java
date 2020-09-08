@@ -42,7 +42,7 @@ abstract class GraqlWritable extends GraqlQuery {
 
     GraqlWritable(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         assert keyword == INSERT || keyword == DELETE;
-        if (variables == null || variables.isEmpty()) throw GraqlException.create(MISSING_PATTERNS.message());
+        if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
         this.keyword = keyword;
         this.match = match;
         this.variables = list(variables);

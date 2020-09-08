@@ -66,3 +66,9 @@ filegroup(
         "@graknlabs_dependencies//tool/unuseddeps:unused-deps",
     ],
 )
+
+checkstyle_test(
+    name = "checkstyle",
+    files = ["BUILD", "deployment.bzl"],
+    license_type = "agpl",
+)

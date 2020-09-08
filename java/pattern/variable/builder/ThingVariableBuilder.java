@@ -18,8 +18,8 @@
 package graql.lang.pattern.variable.builder;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.property.ThingProperty;
-import graql.lang.pattern.property.ValueOperation;
+import graql.lang.pattern.constraint.ThingConstraint;
+import graql.lang.pattern.constraint.ValueOperation;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
@@ -35,11 +35,11 @@ public interface ThingVariableBuilder {
         }
 
         default T isa(String type) {
-            return asSameThingWith(new ThingProperty.Isa(type, false));
+            return asSameThingWith(new ThingConstraint.Isa(type, false));
         }
 
         default T isa(UnboundVariable var) {
-            return asSameThingWith(new ThingProperty.Isa(var, false));
+            return asSameThingWith(new ThingConstraint.Isa(var, false));
         }
 
         default T isaX(GraqlToken.Type type) {
@@ -47,50 +47,50 @@ public interface ThingVariableBuilder {
         }
 
         default T isaX(String type) {
-            return asSameThingWith(new ThingProperty.Isa(type, true));
+            return asSameThingWith(new ThingConstraint.Isa(type, true));
         }
 
         default T isaX(UnboundVariable var) {
-            return asSameThingWith(new ThingProperty.Isa(var, true));
+            return asSameThingWith(new ThingConstraint.Isa(var, true));
         }
 
         default T has(String type, long value) {
-            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Long(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.Long(value)));
         }
 
         default T has(String type, double value) {
-            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Double(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.Double(value)));
         }
 
         default T has(String type, boolean value) {
-            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.Boolean(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.Boolean(value)));
         }
 
         default T has(String type, String value) {
-            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.String(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.String(value)));
         }
 
         default T has(String type, LocalDateTime value) {
-            return has(type, new ThingProperty.Value<>(new ValueOperation.Assignment.DateTime(value)));
+            return has(type, new ThingConstraint.Value<>(new ValueOperation.Assignment.DateTime(value)));
         }
 
-        default T has(String type, ThingProperty.Value<?> value) {
-            return asSameThingWith(new ThingProperty.Has(type, value));
+        default T has(String type, ThingConstraint.Value<?> value) {
+            return asSameThingWith(new ThingConstraint.Has(type, value));
         }
 
         default T has(String type, UnboundVariable variable) {
-            return asSameThingWith(new ThingProperty.Has(type, variable));
+            return asSameThingWith(new ThingConstraint.Has(type, variable));
         }
 
-        T asSameThingWith(ThingProperty.Singular property);
+        T asSameThingWith(ThingConstraint.Singular constraint);
 
-        T asSameThingWith(ThingProperty.Repeatable property);
+        T asSameThingWith(ThingConstraint.Repeatable constraint);
     }
 
     interface Thing {
 
         default ThingVariable.Thing iid(String iid) {
-            return asThingWith(new ThingProperty.IID(iid));
+            return asThingWith(new ThingConstraint.IID(iid));
         }
 
         default ThingVariable.Thing not(String var) {
@@ -98,10 +98,10 @@ public interface ThingVariableBuilder {
         }
 
         default ThingVariable.Thing not(UnboundVariable var) {
-            return asThingWith(new ThingProperty.NEQ(var));
+            return asThingWith(new ThingConstraint.NEQ(var));
         }
 
-        ThingVariable.Thing asThingWith(ThingProperty.Singular property);
+        ThingVariable.Thing asThingWith(ThingConstraint.Singular constraint);
     }
 
     interface Relation {
@@ -111,27 +111,27 @@ public interface ThingVariableBuilder {
         }
 
         default ThingVariable.Relation rel(UnboundVariable playerVar) {
-            return asRelationWith(new ThingProperty.Relation.RolePlayer(playerVar));
+            return asRelationWith(new ThingConstraint.Relation.RolePlayer(playerVar));
         }
 
         default ThingVariable.Relation rel(String roleType, String playerVar) {
-            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleType, UnboundVariable.named(playerVar)));
+            return asRelationWith(new ThingConstraint.Relation.RolePlayer(roleType, UnboundVariable.named(playerVar)));
         }
 
         default ThingVariable.Relation rel(String roleType, UnboundVariable playerVar) {
-            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleType, playerVar));
+            return asRelationWith(new ThingConstraint.Relation.RolePlayer(roleType, playerVar));
         }
 
         default ThingVariable.Relation rel(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
-            return asRelationWith(new ThingProperty.Relation.RolePlayer(roleTypeVar, playerVar));
+            return asRelationWith(new ThingConstraint.Relation.RolePlayer(roleTypeVar, playerVar));
         }
 
-        ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer);
+        ThingVariable.Relation asRelationWith(ThingConstraint.Relation.RolePlayer rolePlayer);
     }
 
     interface Attribute {
 
-        // Attribute value assignment property
+        // Attribute value assignment constraint
 
         default ThingVariable.Attribute val(long value) {
             return operation(new ValueOperation.Assignment.Long(value));
@@ -153,7 +153,7 @@ public interface ThingVariableBuilder {
             return operation(new ValueOperation.Assignment.DateTime(value));
         }
 
-        // Attribute value equality property
+        // Attribute value equality constraint
 
         default ThingVariable.Attribute eq(long value) {
             return eq(ValueOperation.Comparison.Long::new, value);
@@ -183,7 +183,7 @@ public interface ThingVariableBuilder {
             return operation(constructor.apply(GraqlToken.Comparator.EQV, value));
         }
 
-        // Attribute value inequality property
+        // Attribute value inequality constraint
 
         default ThingVariable.Attribute neq(long value) {
             return neq(ValueOperation.Comparison.Long::new, value);
@@ -213,7 +213,7 @@ public interface ThingVariableBuilder {
             return operation(constructor.apply(GraqlToken.Comparator.NEQV, value));
         }
 
-        // Attribute value greater-than property
+        // Attribute value greater-than constraint
 
         default ThingVariable.Attribute gt(long value) {
             return gt(ValueOperation.Comparison.Long::new, value);
@@ -243,7 +243,7 @@ public interface ThingVariableBuilder {
             return operation(constructor.apply(GraqlToken.Comparator.GT, value));
         }
 
-        // Attribute value greater-than-or-equals property
+        // Attribute value greater-than-or-equals constraint
 
         default ThingVariable.Attribute gte(long value) {
             return gte(ValueOperation.Comparison.Long::new, value);
@@ -273,7 +273,7 @@ public interface ThingVariableBuilder {
             return operation(constructor.apply(GraqlToken.Comparator.GTE, value));
         }
 
-        // Attribute value less-than property
+        // Attribute value less-than constraint
 
         default ThingVariable.Attribute lt(long value) {
             return lt(ValueOperation.Comparison.Long::new, value);
@@ -303,7 +303,7 @@ public interface ThingVariableBuilder {
             return operation(constructor.apply(GraqlToken.Comparator.LT, value));
         }
 
-        // Attribute value less-than-or-equals property
+        // Attribute value less-than-or-equals constraint
 
         default ThingVariable.Attribute lte(long value) {
             return lte(ValueOperation.Comparison.Long::new, value);
@@ -333,7 +333,7 @@ public interface ThingVariableBuilder {
             return operation(constructor.apply(GraqlToken.Comparator.LTE, value));
         }
 
-        // Attribute value contains (in String) property
+        // Attribute value contains (in String) constraint
 
         default ThingVariable.Attribute contains(String value) {
             return contains(ValueOperation.Comparison.String::new, value);
@@ -347,16 +347,16 @@ public interface ThingVariableBuilder {
             return operation(constructor.apply(GraqlToken.Comparator.CONTAINS, value));
         }
 
-        // Attribute value like (regex) property
+        // Attribute value like (regex) constraint
 
         default ThingVariable.Attribute like(String value) {
             return operation(new ValueOperation.Comparison.String(GraqlToken.Comparator.LIKE, value));
         }
 
         default ThingVariable.Attribute operation(ValueOperation<?> operation) {
-            return asAttributeWith(new ThingProperty.Value<>(operation));
+            return asAttributeWith(new ThingConstraint.Value<>(operation));
         }
 
-        ThingVariable.Attribute asAttributeWith(ThingProperty.Value<?> property);
+        ThingVariable.Attribute asAttributeWith(ThingConstraint.Value<?> constraint);
     }
 }

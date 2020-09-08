@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.property;
+package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
@@ -28,27 +28,46 @@ import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
+import static grakn.common.collection.Collections.set;
+import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
 import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Property.HAS;
-import static graql.lang.common.GraqlToken.Property.ISA;
-import static graql.lang.common.GraqlToken.Property.ISAX;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PROPERTY_RELATION_PLAYER;
+import static graql.lang.common.GraqlToken.Constraint.HAS;
+import static graql.lang.common.GraqlToken.Constraint.ISA;
+import static graql.lang.common.GraqlToken.Constraint.ISAX;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
-public abstract class ThingProperty extends Property {
+public abstract class ThingConstraint extends Constraint<BoundVariable> {
+
+    @Override
+    public Set<BoundVariable> variables() {
+        return set();
+    }
+
+    @Override
+    public boolean isThing() {
+        return true;
+    }
+
+    @Override
+    public ThingConstraint asThing() {
+        return this;
+    }
 
     public boolean isSingular() {
         return false;
@@ -82,55 +101,39 @@ public abstract class ThingProperty extends Property {
         return false;
     }
 
-    public ThingProperty.Singular asSingular() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
-        ));
+    public ThingConstraint.Singular asSingular() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
     }
 
-    public ThingProperty.Repeatable asRepeatable() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Repeatable.class.getCanonicalName()
-        ));
+    public ThingConstraint.Repeatable asRepeatable() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
     }
 
     public IID asIID() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), IID.class.getCanonicalName()
-        ));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(IID.class)));
     }
 
-    public ThingProperty.Isa asIsa() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Isa.class.getCanonicalName()
-        ));
+    public ThingConstraint.Isa asIsa() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Isa.class)));
     }
 
-    public ThingProperty.NEQ asNEQ() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), NEQ.class.getCanonicalName()
-        ));
+    public ThingConstraint.NEQ asNEQ() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(NEQ.class)));
     }
 
-    public ThingProperty.Value<?> asValue() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Value.class.getCanonicalName()
-        ));
+    public ThingConstraint.Value<?> asValue() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Value.class)));
     }
 
-    public ThingProperty.Relation asRelation() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Relation.class.getCanonicalName()
-        ));
+    public ThingConstraint.Relation asRelation() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Relation.class)));
     }
 
-    public ThingProperty.Has asHas() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Has.class.getCanonicalName()
-        ));
+    public ThingConstraint.Has asHas() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Has.class)));
     }
 
-    public static abstract class Singular extends ThingProperty {
+    public static abstract class Singular extends ThingConstraint {
 
         @Override
         public boolean isSingular() {
@@ -138,12 +141,12 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Singular asSingular() {
+        public ThingConstraint.Singular asSingular() {
             return this;
         }
     }
 
-    public static abstract class Repeatable extends ThingProperty {
+    public static abstract class Repeatable extends ThingConstraint {
 
         @Override
         public boolean isRepeatable() {
@@ -151,12 +154,12 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Repeatable asRepeatable() {
+        public ThingConstraint.Repeatable asRepeatable() {
             return this;
         }
     }
 
-    public static class IID extends ThingProperty.Singular {
+    public static class IID extends ThingConstraint.Singular {
 
         private static final Pattern REGEX = Pattern.compile("0x[0-9a-f]+");
         private final String iid;
@@ -165,19 +168,14 @@ public abstract class ThingProperty extends Property {
         public IID(String iid) {
             if (iid == null) throw new NullPointerException("Null IID");
             if (!REGEX.matcher(iid).matches()) {
-                throw GraqlException.create(ErrorMessage.INVALID_IID_STRING.message(iid, REGEX.toString()));
+                throw GraqlException.of(INVALID_IID_STRING.message(iid, REGEX.toString()));
             }
             this.iid = iid;
-            this.hash = Objects.hash(this.iid);
+            this.hash = Objects.hash(IID.class, this.iid);
         }
 
         public String iid() {
             return iid;
-        }
-
-        @Override
-        public Stream<BoundVariable> variables() {
-            return Stream.of();
         }
 
         @Override
@@ -192,7 +190,7 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public String toString() {
-            return GraqlToken.Property.IID.toString() + SPACE + iid;
+            return GraqlToken.Constraint.IID.toString() + SPACE + iid;
         }
 
         @Override
@@ -209,7 +207,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class Isa extends ThingProperty.Singular {
+    public static class Isa extends ThingConstraint.Singular {
 
         private final TypeVariable type;
         private final boolean isExplicit;
@@ -240,9 +238,13 @@ public abstract class ThingProperty extends Property {
             return type;
         }
 
+        public boolean isExplicit() {
+            return isExplicit;
+        }
+
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of(type);
+        public Set<BoundVariable> variables() {
+            return set(type);
         }
 
         @Override
@@ -251,7 +253,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Isa asIsa() {
+        public ThingConstraint.Isa asIsa() {
             return this;
         }
 
@@ -274,7 +276,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class NEQ extends ThingProperty.Singular {
+    public static class NEQ extends ThingConstraint.Singular {
 
         private final ThingVariable<?> variable;
         private final int hash;
@@ -286,7 +288,7 @@ public abstract class ThingProperty extends Property {
         private NEQ(ThingVariable<?> variable) {
             if (variable == null) throw new NullPointerException("Null var");
             this.variable = variable;
-            this.hash = Objects.hash(variable);
+            this.hash = Objects.hash(NEQ.class, this.variable);
         }
 
         public ThingVariable<?> variable() {
@@ -294,8 +296,8 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<ThingVariable<?>> variables() {
-            return Stream.of(variable());
+        public Set<BoundVariable> variables() {
+            return set(variable());
         }
 
         @Override
@@ -304,7 +306,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.NEQ asNEQ() {
+        public ThingConstraint.NEQ asNEQ() {
             return this;
         }
 
@@ -327,7 +329,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class Value<T> extends ThingProperty.Singular {
+    public static class Value<T> extends ThingConstraint.Singular {
 
         private final ValueOperation<T> operation;
         private final int hash;
@@ -335,7 +337,7 @@ public abstract class ThingProperty extends Property {
         public Value(ValueOperation<T> operation) {
             if (operation == null) throw new NullPointerException("Null operation");
             this.operation = operation;
-            this.hash = Objects.hash(this.operation);
+            this.hash = Objects.hash(Value.class, this.operation);
         }
 
         public ValueOperation<T> operation() {
@@ -343,8 +345,8 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<ThingVariable<?>> variables() {
-            return operation.variable() != null ? Stream.of(operation.variable()) : Stream.empty();
+        public Set<BoundVariable> variables() {
+            return operation.variable() != null ? set(operation.variable()) : set();
         }
 
         @Override
@@ -353,7 +355,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Value<?> asValue() {
+        public ThingConstraint.Value<?> asValue() {
             return this;
         }
 
@@ -376,7 +378,7 @@ public abstract class ThingProperty extends Property {
         }
     }
 
-    public static class Relation extends ThingProperty.Singular {
+    public static class Relation extends ThingConstraint.Singular {
 
         private final List<RolePlayer> players;
         private String scope;
@@ -387,7 +389,7 @@ public abstract class ThingProperty extends Property {
 
         public Relation(List<RolePlayer> players) {
             if (players == null || players.isEmpty()) {
-                throw GraqlException.create(MISSING_PROPERTY_RELATION_PLAYER.message());
+                throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER.message());
             }
             this.players = new ArrayList<>(players);
         }
@@ -411,13 +413,13 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<BoundVariable> variables() {
-            return players().stream().flatMap(player -> {
-                Stream.Builder<BoundVariable> stream = Stream.builder();
-                stream.add(player.player());
-                player.roleType().ifPresent(stream::add);
-                return stream.build();
+        public Set<BoundVariable> variables() {
+            Set<BoundVariable> variables = new HashSet<>();
+            players().forEach(player -> {
+                variables.add(player.player());
+                if (player.roleType().isPresent()) variables.add(player.roleType().get());
             });
+            return variables;
         }
 
         @Override
@@ -426,7 +428,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Relation asRelation() {
+        public ThingConstraint.Relation asRelation() {
             return this;
         }
 
@@ -445,7 +447,7 @@ public abstract class ThingProperty extends Property {
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.players);
+            return Objects.hash(Relation.class, this.players);
         }
 
         public static class RolePlayer {
@@ -512,18 +514,18 @@ public abstract class ThingProperty extends Property {
 
             @Override
             public int hashCode() {
-                return Objects.hash(roleType, player);
+                return Objects.hash(RolePlayer.class, roleType, player);
             }
         }
     }
 
-    public static class Has extends ThingProperty.Repeatable {
+    public static class Has extends ThingConstraint.Repeatable {
 
         private final TypeVariable type;
         private final ThingVariable<?> attribute;
         private final int hash;
 
-        public Has(String type, ThingProperty.Value<?> value) {
+        public Has(String type, ThingConstraint.Value<?> value) {
             this(hidden().type(type), hidden().asAttributeWith(value));
         }
 
@@ -534,9 +536,9 @@ public abstract class ThingProperty extends Property {
         private Has(TypeVariable type, ThingVariable<?> attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
-            if (attribute.isNamed()) this.attribute = attribute;
+            if (attribute.isNamed()) this.attribute = attribute; // TODO: is this needed? Should we not always set the ISA type?
             else this.attribute = attribute.asSameThingWith(new Isa(type, false));
-            this.hash = Objects.hash(this.type, this.attribute);
+            this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 
         public TypeVariable type() {
@@ -548,8 +550,8 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public Stream<ThingVariable<?>> variables() {
-            return Stream.of(attribute);
+        public Set<BoundVariable> variables() {
+            return set(attribute);
         }
 
         @Override
@@ -558,7 +560,7 @@ public abstract class ThingProperty extends Property {
         }
 
         @Override
-        public ThingProperty.Has asHas() {
+        public ThingConstraint.Has asHas() {
             return this;
         }
 
@@ -574,7 +576,7 @@ public abstract class ThingProperty extends Property {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Has that = (Has) o;
-            return attribute.equals(that.attribute);
+            return (this.type.equals(that.type) && attribute.equals(that.attribute));
         }
 
         @Override

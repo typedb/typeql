@@ -94,8 +94,8 @@ pattern_variable      :   variable_type
 // TYPE VARIABLES ==============================================================
 
 variable_types        : ( variable_type ';' )+ ;
-variable_type         :   type_any    type_property ( ',' type_property )*  ;
-type_property         :   ABSTRACT
+variable_type         :   type_any    type_constraint ( ',' type_constraint )*  ;
+type_constraint       :   ABSTRACT
                       |   SUB_        type_any
                       |   OWNS        type         ( AS type )? ( IS_KEY )?
                       |   RELATES     type         ( AS type )?
@@ -249,7 +249,7 @@ OFFSET          : 'offset'      ;   LIMIT           : 'limit'       ;
 SORT            : 'sort'        ;   ORDER_          : ASC | DESC    ;
 ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
-// TYPE VARIABLE PROPERTY KEYWORDS
+// TYPE VARIABLE CONSTRAINT KEYWORDS
 
 TYPE            : 'type'        ;
 ABSTRACT        : 'abstract'    ;   SUB_            : SUB | SUBX    ;
@@ -259,7 +259,7 @@ REGEX           : 'regex'       ;   AS              : 'as'          ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
 
-// THING VARIABLE PROPERTY KEYWORDS
+// THING VARIABLE CONSTRAINT KEYWORDS
 
 IID             : 'iid'         ;   ISA_            : ISA | ISAX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;

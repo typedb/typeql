@@ -21,7 +21,7 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 
 import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class BoundVariable extends Variable implements Pattern {
 
@@ -34,10 +34,10 @@ public abstract class BoundVariable extends Variable implements Pattern {
     }
 
     public TypeVariable asType() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(Variable.class), className(TypeVariable.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }
 
     public ThingVariable<?> asThing() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(className(Variable.class), className(ThingVariable.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
     }
 }

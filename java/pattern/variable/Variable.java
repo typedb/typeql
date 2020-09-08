@@ -17,20 +17,19 @@
 
 package graql.lang.pattern.variable;
 
-import graql.lang.pattern.property.Property;
+import graql.lang.pattern.constraint.Constraint;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 public abstract class Variable {
 
-    Reference reference;
+    final Reference reference;
 
     Variable(Reference reference) {
         this.reference = reference;
     }
 
-    public abstract Stream<? extends Property> properties();
+    public abstract Stream<? extends Constraint<?>> constraints();
 
     public boolean isType() {
         return false;
@@ -41,7 +40,7 @@ public abstract class Variable {
     }
 
     public Stream<BoundVariable> variables() {
-        return properties().flatMap(Property::variables);
+        return constraints().flatMap(constraint -> constraint.variables().stream());
     }
 
     public Reference.Type type() {
@@ -51,7 +50,7 @@ public abstract class Variable {
     public String name() {
         switch (reference.type()) {
             case NAME:
-                return reference.asNamed().name();
+                return reference.asName().name();
             case LABEL:
             case ANONYMOUS:
                 return null;
@@ -79,10 +78,6 @@ public abstract class Variable {
 
     public boolean isAnonymised() {
         return reference.isAnonymous();
-    }
-
-    public boolean isAnonymisedWithID() {
-        return reference.isAnonymous() && reference.asAnonymous().isWithID();
     }
 
     public boolean isVisible() {

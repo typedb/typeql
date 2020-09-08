@@ -15,15 +15,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.property;
+package graql.lang.pattern.constraint;
 
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 
-import java.util.stream.Stream;
+import java.util.Set;
 
-public abstract class Property {
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-    public abstract Stream<? extends BoundVariable> variables();
+public abstract class Constraint<VARIABLE extends BoundVariable> {
+
+    public abstract Set<VARIABLE> variables();
+
+    public boolean isType() {
+        return false;
+    }
+
+    public boolean isThing() {
+        return false;
+    }
+
+    public TypeConstraint asType() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeConstraint.class)));
+    }
+
+    public ThingConstraint asThing() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingConstraint.class)));
+    }
 
     @Override
     public abstract String toString();

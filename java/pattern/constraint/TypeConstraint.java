@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.property;
+package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
 import grakn.common.collection.Pair;
@@ -28,41 +28,54 @@ import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Stream;
 
+import static grakn.common.collection.Collections.set;
+import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Property.AS;
-import static graql.lang.common.GraqlToken.Property.IS_KEY;
-import static graql.lang.common.GraqlToken.Property.OWNS;
-import static graql.lang.common.GraqlToken.Property.PLAYS;
-import static graql.lang.common.GraqlToken.Property.REGEX;
-import static graql.lang.common.GraqlToken.Property.RELATES;
-import static graql.lang.common.GraqlToken.Property.SUB;
-import static graql.lang.common.GraqlToken.Property.SUBX;
-import static graql.lang.common.GraqlToken.Property.THEN;
-import static graql.lang.common.GraqlToken.Property.TYPE;
-import static graql.lang.common.GraqlToken.Property.VALUE_TYPE;
-import static graql.lang.common.GraqlToken.Property.WHEN;
+import static graql.lang.common.GraqlToken.Constraint.AS;
+import static graql.lang.common.GraqlToken.Constraint.IS_KEY;
+import static graql.lang.common.GraqlToken.Constraint.OWNS;
+import static graql.lang.common.GraqlToken.Constraint.PLAYS;
+import static graql.lang.common.GraqlToken.Constraint.REGEX;
+import static graql.lang.common.GraqlToken.Constraint.RELATES;
+import static graql.lang.common.GraqlToken.Constraint.SUB;
+import static graql.lang.common.GraqlToken.Constraint.SUBX;
+import static graql.lang.common.GraqlToken.Constraint.THEN;
+import static graql.lang.common.GraqlToken.Constraint.TYPE;
+import static graql.lang.common.GraqlToken.Constraint.VALUE_TYPE;
+import static graql.lang.common.GraqlToken.Constraint.WHEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
-public abstract class TypeProperty extends Property {
+public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     @Override
-    public abstract Stream<TypeVariable> variables();
+    public Set<TypeVariable> variables() {
+        return set();
+    }
+
+    @Override
+    public boolean isType() {
+        return true;
+    }
+
+    @Override
+    public TypeConstraint asType() {
+        return this;
+    }
 
     public boolean isSingular() {
         return false;
@@ -72,79 +85,95 @@ public abstract class TypeProperty extends Property {
         return false;
     }
 
-    public TypeProperty.Singular asSingular() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Repeatable.class.getCanonicalName(), Singular.class.getCanonicalName()
-        ));
+    public boolean isLabel() {
+        return false;
     }
 
-    public TypeProperty.Repeatable asRepeatable() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                Singular.class.getCanonicalName(), Repeatable.class.getCanonicalName()
-        ));
+    public boolean isSub() {
+        return false;
     }
 
-    public TypeProperty.Label asLabel() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Label.class.getCanonicalName()
-        ));
+    public boolean isAbstract() {
+        return false;
     }
 
-    public TypeProperty.Sub asSub() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Sub.class.getCanonicalName()
-        ));
+    public boolean isValueType() {
+        return false;
     }
 
-    public TypeProperty.Abstract asAbstract() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Abstract.class.getCanonicalName()
-        ));
+    public boolean isRegex() {
+        return false;
     }
 
-    public TypeProperty.ValueType asValueType() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), ValueType.class.getCanonicalName()
-        ));
+    public boolean isThen() {
+        return false;
     }
 
-    public TypeProperty.Regex asRegex() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Regex.class.getCanonicalName()
-        ));
+    public boolean isWhen() {
+        return false;
     }
 
-    public TypeProperty.Then asThen() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Then.class.getCanonicalName()
-        ));
+    public boolean isOwns() {
+        return false;
     }
 
-    public TypeProperty.When asWhen() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), When.class.getCanonicalName()
-        ));
+    public boolean isPlays() {
+        return false;
     }
 
-    public TypeProperty.Owns asOwns() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Owns.class.getCanonicalName()
-        ));
+    public boolean isRelates() {
+        return false;
     }
 
-    public TypeProperty.Plays asPlays() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Plays.class.getCanonicalName()
-        ));
+    public TypeConstraint.Singular asSingular() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
     }
 
-    public TypeProperty.Relates asRelates() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeProperty.class.getCanonicalName(), Relates.class.getCanonicalName()
-        ));
+    public TypeConstraint.Repeatable asRepeatable() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
     }
 
-    public static abstract class Singular extends TypeProperty {
+    public TypeConstraint.Label asLabel() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
+    }
+
+    public TypeConstraint.Sub asSub() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Sub.class)));
+    }
+
+    public TypeConstraint.Abstract asAbstract() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Abstract.class)));
+    }
+
+    public TypeConstraint.ValueType asValueType() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ValueType.class)));
+    }
+
+    public TypeConstraint.Regex asRegex() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Regex.class)));
+    }
+
+    public TypeConstraint.Then asThen() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Then.class)));
+    }
+
+    public TypeConstraint.When asWhen() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(When.class)));
+    }
+
+    public TypeConstraint.Owns asOwns() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Owns.class)));
+    }
+
+    public TypeConstraint.Plays asPlays() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Plays.class)));
+    }
+
+    public TypeConstraint.Relates asRelates() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Relates.class)));
+    }
+
+    public static abstract class Singular extends TypeConstraint {
 
         @Override
         public boolean isSingular() {
@@ -152,12 +181,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public TypeProperty.Singular asSingular() {
+        public TypeConstraint.Singular asSingular() {
             return this;
         }
     }
 
-    public static abstract class Repeatable extends TypeProperty {
+    public static abstract class Repeatable extends TypeConstraint {
 
         @Override
         public boolean isRepeatable() {
@@ -165,12 +194,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public TypeProperty.Repeatable asRepeatable() {
+        public TypeConstraint.Repeatable asRepeatable() {
             return this;
         }
     }
 
-    public static class Label extends TypeProperty.Singular {
+    public static class Label extends TypeConstraint.Singular {
 
         private final String label;
         private final String scope;
@@ -184,7 +213,7 @@ public abstract class TypeProperty extends Property {
             if (label == null) throw new NullPointerException("Null label");
             this.scope = scope;
             this.label = label;
-            this.hash = Objects.hash(this.scope, this.label);
+            this.hash = Objects.hash(Label.class, this.scope, this.label);
         }
 
         public Optional<String> scope() {
@@ -201,12 +230,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public boolean isLabel() {
+            return true;
         }
 
         @Override
-        public TypeProperty.Label asLabel() {
+        public TypeConstraint.Label asLabel() {
             return this;
         }
 
@@ -220,7 +249,7 @@ public abstract class TypeProperty extends Property {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Label that = (Label) o;
-            return (this.label.equals(that.label));
+            return (Objects.equals(this.scope, that.scope) && this.label.equals(that.label));
         }
 
         @Override
@@ -229,7 +258,7 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Sub extends TypeProperty.Singular {
+    public static class Sub extends TypeConstraint.Singular {
 
         private final TypeVariable type;
         private final boolean isExplicit;
@@ -248,28 +277,37 @@ public abstract class TypeProperty extends Property {
         }
 
         public Sub(Either<Pair<String, String>, UnboundVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(scoped -> hidden().asTypeWith(new TypeProperty.Label(scoped.first(), scoped.second())),
+            this(typeArg.apply(scoped -> hidden().asTypeWith(new TypeConstraint.Label(scoped.first(), scoped.second())),
                                UnboundVariable::toType), isExplicit);
         }
 
-        private Sub(TypeVariable typeVar, boolean isExplicit) {
-            if (typeVar == null) throw new NullPointerException("Null superType");
-            this.type = typeVar;
+        private Sub(TypeVariable type, boolean isExplicit) {
+            if (type == null) throw new NullPointerException("Null superType");
+            this.type = type;
             this.isExplicit = isExplicit;
-            this.hash = Objects.hash(typeVar, isExplicit);
+            this.hash = Objects.hash(Sub.class, this.type, this.isExplicit);
         }
 
         public TypeVariable type() {
             return type;
         }
 
-        @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of(type);
+        public boolean isExplicit() {
+            return isExplicit;
         }
 
         @Override
-        public TypeProperty.Sub asSub() {
+        public Set<TypeVariable> variables() {
+            return set(type);
+        }
+
+        @Override
+        public boolean isSub() {
+            return true;
+        }
+
+        @Override
+        public TypeConstraint.Sub asSub() {
             return this;
         }
 
@@ -292,7 +330,7 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Abstract extends TypeProperty.Singular {
+    public static class Abstract extends TypeConstraint.Singular {
 
         private final int hash;
 
@@ -301,18 +339,18 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public boolean isAbstract() {
+            return true;
         }
 
         @Override
-        public TypeProperty.Abstract asAbstract() {
+        public TypeConstraint.Abstract asAbstract() {
             return this;
         }
 
         @Override
         public String toString() {
-            return GraqlToken.Property.ABSTRACT.toString();
+            return GraqlToken.Constraint.ABSTRACT.toString();
         }
 
         @Override
@@ -327,7 +365,7 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class ValueType extends TypeProperty.Singular {
+    public static class ValueType extends TypeConstraint.Singular {
 
         private final GraqlArg.ValueType valueType;
         private final int hash;
@@ -335,7 +373,7 @@ public abstract class TypeProperty extends Property {
         public ValueType(GraqlArg.ValueType valueType) {
             if (valueType == null) throw new NullPointerException("Null ValueType");
             this.valueType = valueType;
-            this.hash = Objects.hash(this.valueType);
+            this.hash = Objects.hash(ValueType.class, this.valueType);
         }
 
         public GraqlArg.ValueType valueType() {
@@ -343,12 +381,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public boolean isValueType() {
+            return true;
         }
 
         @Override
-        public TypeProperty.ValueType asValueType() {
+        public TypeConstraint.ValueType asValueType() {
             return this;
         }
 
@@ -371,39 +409,38 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Regex extends TypeProperty.Singular {
+    public static class Regex extends TypeConstraint.Singular {
 
-        private final String regex;
+        private final java.util.regex.Pattern regex;
         private final int hash;
 
         public Regex(String regex) {
             if (regex == null) throw new NullPointerException("Null regex");
             try {
-                java.util.regex.Pattern.compile(regex);
+                this.regex = java.util.regex.Pattern.compile(regex);
             } catch (PatternSyntaxException exception) {
-                throw GraqlException.create(INVALID_ATTRIBUTE_TYPE_REGEX.message());
+                throw GraqlException.of(INVALID_ATTRIBUTE_TYPE_REGEX.message());
             }
-            this.regex = regex;
-            this.hash = Objects.hash(regex);
+            this.hash = Objects.hash(Regex.class, this.regex.pattern());
         }
 
-        public String regex() {
+        public java.util.regex.Pattern regex() {
             return regex;
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public boolean isRegex() {
+            return true;
         }
 
         @Override
-        public TypeProperty.Regex asRegex() {
+        public TypeConstraint.Regex asRegex() {
             return this;
         }
 
         @Override
         public String toString() {
-            return REGEX.toString() + SPACE + quoteString(escapeRegex(regex()));
+            return REGEX.toString() + SPACE + quoteString(escapeRegex(regex().pattern()));
         }
 
         @Override
@@ -411,7 +448,7 @@ public abstract class TypeProperty extends Property {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Regex that = (Regex) o;
-            return (this.regex.equals(that.regex));
+            return (this.regex.pattern().equals(that.regex.pattern()));
         }
 
         @Override
@@ -420,8 +457,8 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    // TODO: Move this out of TypeProperty and create its own class
-    public static class Then extends TypeProperty.Singular {
+    // TODO: Move this out of TypeConstraint and create its own class
+    public static class Then extends TypeConstraint.Singular {
 
         private final Pattern pattern;
         private final int hash;
@@ -429,7 +466,7 @@ public abstract class TypeProperty extends Property {
         public Then(Pattern pattern) {
             if (pattern == null) throw new NullPointerException("Null pattern");
             this.pattern = pattern;
-            this.hash = Objects.hash(pattern);
+            this.hash = Objects.hash(Then.class, this.pattern);
         }
 
         public Pattern pattern() {
@@ -437,12 +474,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public boolean isThen() {
+            return true;
         }
 
         @Override
-        public TypeProperty.Then asThen() {
+        public TypeConstraint.Then asThen() {
             return this;
         }
 
@@ -475,8 +512,8 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    // TODO: Move this out of TypeProperty and create its own class
-    public static class When extends TypeProperty.Singular {
+    // TODO: Move this out of TypeConstraint and create its own class
+    public static class When extends TypeConstraint.Singular {
 
         private final Pattern pattern;
         private final int hash;
@@ -484,7 +521,7 @@ public abstract class TypeProperty extends Property {
         public When(Pattern pattern) {
             if (pattern == null) throw new NullPointerException("Null Pattern");
             this.pattern = pattern;
-            this.hash = Objects.hash(pattern);
+            this.hash = Objects.hash(When.class, this.pattern);
         }
 
         public Pattern pattern() {
@@ -492,12 +529,12 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return Stream.of();
+        public boolean isWhen() {
+            return true;
         }
 
         @Override
-        public TypeProperty.When asWhen() {
+        public TypeConstraint.When asWhen() {
             return this;
         }
 
@@ -530,7 +567,7 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Owns extends TypeProperty.Repeatable {
+    public static class Owns extends TypeConstraint.Repeatable {
 
         private final TypeVariable attributeType;
         private final TypeVariable overriddenAttributeType;
@@ -571,7 +608,7 @@ public abstract class TypeProperty extends Property {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
             this.isKey = isKey;
-            this.hash = Objects.hash(attributeType, isKey);
+            this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.isKey);
         }
 
         public TypeVariable attribute() {
@@ -587,14 +624,19 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
+        public Set<TypeVariable> variables() {
             return overriddenAttributeType == null
-                    ? Stream.of(attributeType)
-                    : Stream.of(attributeType, overriddenAttributeType);
+                    ? set(attributeType)
+                    : set(attributeType, overriddenAttributeType);
         }
 
         @Override
-        public TypeProperty.Owns asOwns() {
+        public boolean isOwns() {
+            return true;
+        }
+
+        @Override
+        public TypeConstraint.Owns asOwns() {
             return this;
         }
 
@@ -608,7 +650,9 @@ public abstract class TypeProperty extends Property {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Owns that = (Owns) o;
-            return (this.attributeType.equals(that.attributeType) && this.isKey == that.isKey);
+            return (this.attributeType.equals(that.attributeType) &&
+                    Objects.equals(this.overriddenAttributeType, that.overriddenAttributeType) &&
+                    this.isKey == that.isKey);
         }
 
         @Override
@@ -617,7 +661,7 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Plays extends TypeProperty.Repeatable {
+    public static class Plays extends TypeConstraint.Repeatable {
 
         private final TypeVariable roleType;
         private final TypeVariable relationType;
@@ -649,16 +693,16 @@ public abstract class TypeProperty extends Property {
         }
 
         public Plays(Either<Pair<String, String>, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(scoped -> hidden().asTypeWith(new TypeProperty.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
+            this(roleTypeArg.apply(scoped -> hidden().asTypeWith(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
                  overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
         }
 
         private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
-            this.roleType = roleType;
             this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
+            this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
-            this.hash = Objects.hash(roleType, overriddenRoleType);
+            this.hash = Objects.hash(Plays.class, this.relationType, this.roleType, this.overriddenRoleType);
         }
 
         public Optional<TypeVariable> relation() {
@@ -674,16 +718,21 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            List<TypeVariable> variables = new ArrayList<>();
+        public Set<TypeVariable> variables() {
+            Set<TypeVariable> variables = new HashSet<>();
             variables.add(roleType);
             if (relationType != null) variables.add(relationType);
             if (overriddenRoleType != null) variables.add(overriddenRoleType);
-            return variables.stream();
+            return variables;
         }
 
         @Override
-        public TypeProperty.Plays asPlays() {
+        public boolean isPlays() {
+            return true;
+        }
+
+        @Override
+        public TypeConstraint.Plays asPlays() {
             return this;
         }
 
@@ -697,7 +746,9 @@ public abstract class TypeProperty extends Property {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Plays that = (Plays) o;
-            return (this.roleType.equals(that.roleType));
+            return (this.roleType.equals(that.roleType) &&
+                    Objects.equals(this.relationType, that.relationType) &&
+                    Objects.equals(this.overriddenRoleType, that.overriddenRoleType));
         }
 
         @Override
@@ -706,7 +757,7 @@ public abstract class TypeProperty extends Property {
         }
     }
 
-    public static class Relates extends TypeProperty.Repeatable {
+    public static class Relates extends TypeConstraint.Repeatable {
 
         private TypeVariable roleType;
         private TypeVariable overriddenRoleType;
@@ -764,12 +815,17 @@ public abstract class TypeProperty extends Property {
         }
 
         @Override
-        public Stream<TypeVariable> variables() {
-            return overriddenRoleType == null ? Stream.of(roleType) : Stream.of(roleType, overriddenRoleType);
+        public Set<TypeVariable> variables() {
+            return overriddenRoleType == null ? set(roleType) : set(roleType, overriddenRoleType);
         }
 
         @Override
-        public TypeProperty.Relates asRelates() {
+        public boolean isRelates() {
+            return true;
+        }
+
+        @Override
+        public TypeConstraint.Relates asRelates() {
             return this;
         }
 
@@ -798,7 +854,7 @@ public abstract class TypeProperty extends Property {
 
         @Override
         public int hashCode() {
-            return Objects.hash(roleType, overriddenRoleType);
+            return Objects.hash(Relates.class, roleType, overriddenRoleType);
         }
     }
 }

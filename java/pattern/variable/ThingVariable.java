@@ -18,8 +18,8 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.property.Property;
-import graql.lang.pattern.property.ThingProperty;
+import graql.lang.pattern.constraint.Constraint;
+import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 
 import java.util.ArrayList;
@@ -34,29 +34,29 @@ import java.util.stream.Stream;
 
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable {
 
-    final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular;
-    final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating;
+    final Map<Class<? extends ThingConstraint.Singular>, ThingConstraint.Singular> singular;
+    final Map<Class<? extends ThingConstraint.Repeatable>, List<ThingConstraint.Repeatable>> repeating;
 
-    public ThingVariable(Reference reference, ThingProperty property) {
+    public ThingVariable(Reference reference, ThingConstraint constraint) {
         super(reference);
         this.singular = new HashMap<>();
         this.repeating = new HashMap<>();
-        if (property != null) {
-            if (property.isSingular()) asSameThingWith(property.asSingular());
-            else asSameThingWith(property.asRepeatable());
+        if (constraint != null) {
+            if (constraint.isSingular()) asSameThingWith(constraint.asSingular());
+            else asSameThingWith(constraint.asRepeatable());
         }
     }
 
     ThingVariable(Reference reference,
-                  Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singular,
-                  Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeating) {
+                  Map<Class<? extends ThingConstraint.Singular>, ThingConstraint.Singular> singular,
+                  Map<Class<? extends ThingConstraint.Repeatable>, List<ThingConstraint.Repeatable>> repeating) {
         super(reference);
         this.singular = new HashMap<>(singular);
         this.repeating = new HashMap<>(repeating);
@@ -65,11 +65,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     abstract T getThis();
 
     @Override
-    public Stream<ThingProperty> properties() {
+    public Stream<ThingConstraint> constraints() {
         return Stream.concat(
                 singular.values().stream(),
                 repeating.values().stream().flatMap(Collection::stream)
-        );
+        ).distinct();
     }
 
     @Override
@@ -82,61 +82,61 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return this;
     }
 
-    public Optional<ThingProperty.IID> iid() {
-        return Optional.ofNullable(singular.get(ThingProperty.IID.class)).map(ThingProperty::asIID);
+    public Optional<ThingConstraint.IID> iid() {
+        return Optional.ofNullable(singular.get(ThingConstraint.IID.class)).map(ThingConstraint::asIID);
     }
 
-    public Optional<ThingProperty.Isa> isa() {
-        return Optional.ofNullable(singular.get(ThingProperty.Isa.class)).map(ThingProperty::asIsa);
+    public Optional<ThingConstraint.Isa> isa() {
+        return Optional.ofNullable(singular.get(ThingConstraint.Isa.class)).map(ThingConstraint::asIsa);
     }
 
-    public Optional<ThingProperty.NEQ> neq() {
-        return Optional.ofNullable(singular.get(ThingProperty.NEQ.class)).map(ThingProperty::asNEQ);
+    public Optional<ThingConstraint.NEQ> neq() {
+        return Optional.ofNullable(singular.get(ThingConstraint.NEQ.class)).map(ThingConstraint::asNEQ);
     }
 
-    public Optional<ThingProperty.Value> value() {
-        return Optional.ofNullable(singular.get(ThingProperty.Value.class)).map(ThingProperty::asValue);
+    public Optional<ThingConstraint.Value> value() {
+        return Optional.ofNullable(singular.get(ThingConstraint.Value.class)).map(ThingConstraint::asValue);
     }
 
-    public Optional<ThingProperty.Relation> relation() {
-        return Optional.ofNullable(singular.get(ThingProperty.Relation.class)).map(ThingProperty::asRelation);
+    public Optional<ThingConstraint.Relation> relation() {
+        return Optional.ofNullable(singular.get(ThingConstraint.Relation.class)).map(ThingConstraint::asRelation);
     }
 
-    public List<ThingProperty.Has> has() {
-        return repeating.computeIfAbsent(ThingProperty.Has.class, c -> new ArrayList<>())
-                .stream().map(ThingProperty::asHas).collect(toList());
+    public List<ThingConstraint.Has> has() {
+        return repeating.computeIfAbsent(ThingConstraint.Has.class, c -> new ArrayList<>())
+                .stream().map(ThingConstraint::asHas).collect(toList());
     }
 
-    void addSingularProperties(ThingProperty.Singular property) {
-        if (singular.containsKey(property.getClass()) && !singular.get(property.getClass()).equals(property)) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(reference, singular.get(property.getClass()), property));
-        } else if (property.isIsa() && property.asIsa().type().label().isPresent() && relation().isPresent()) {
-            relation().get().setScope(property.asIsa().type().label().get().label());
-        } else if (property.isRelation() && isa().isPresent() && isa().get().type().label().isPresent()) {
-            property.asRelation().setScope(isa().get().type().label().get().label());
+    void addSingularConstraints(ThingConstraint.Singular constraint) {
+        if (singular.containsKey(constraint.getClass()) && !singular.get(constraint.getClass()).equals(constraint)) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
+        } else if (constraint.isIsa() && constraint.asIsa().type().label().isPresent() && relation().isPresent()) {
+            relation().get().setScope(constraint.asIsa().type().label().get().label());
+        } else if (constraint.isRelation() && isa().isPresent() && isa().get().type().label().isPresent()) {
+            constraint.asRelation().setScope(isa().get().type().label().get().label());
         }
 
-        if (!singular.containsKey(property.getClass())) {
-            singular.put(property.getClass(), property);
+        if (!singular.containsKey(constraint.getClass())) {
+            singular.put(constraint.getClass(), constraint);
         }
     }
 
     ThingVariable.Merged merge(ThingVariable<?> variable) {
         ThingVariable.Merged merged = new ThingVariable.Merged(reference, singular, repeating);
-        variable.singular.values().forEach(merged::addSingularProperties);
+        variable.singular.values().forEach(merged::addSingularConstraints);
         variable.repeating.forEach(
                 (clazz, list) -> merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
         );
         return merged;
     }
 
-    public T asSameThingWith(ThingProperty.Singular property) {
-        addSingularProperties(property);
+    public T asSameThingWith(ThingConstraint.Singular constraint) {
+        addSingularConstraints(constraint);
         return getThis();
     }
 
-    public T asSameThingWith(ThingProperty.Repeatable property) {
-        repeating.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
+    public T asSameThingWith(ThingConstraint.Repeatable constraint) {
+        repeating.computeIfAbsent(constraint.getClass(), c -> new ArrayList<>()).add(constraint);
         return getThis();
     }
 
@@ -146,7 +146,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     String hasSyntax() {
-        return has().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
+        return has().stream().map(ThingConstraint.Has::toString).collect(joining(COMMA_SPACE.toString()));
     }
 
     @Override
@@ -159,20 +159,20 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         ThingVariable<?> that = (ThingVariable<?>) o;
 
         return (this.reference.equals(that.reference) &&
-                this.properties().collect(toSet()).equals(that.properties().collect(toSet())));
+                this.constraints().collect(toSet()).equals(that.constraints().collect(toSet())));
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(reference, properties().collect(toSet()));
+        return Objects.hash(reference, constraints().collect(toSet()));
     }
 
     static class Merged extends ThingVariable<Merged> {
 
         Merged(Reference reference,
-               Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-               Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(reference, singularProperties, repeatingProperties);
+               Map<Class<? extends ThingConstraint.Singular>, ThingConstraint.Singular> singularConstraints,
+               Map<Class<? extends ThingConstraint.Repeatable>, List<ThingConstraint.Repeatable>> repeatingConstraints) {
+            super(reference, singularConstraints, repeatingConstraints);
         }
 
         @Override
@@ -183,30 +183,30 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public String toString() {
             StringBuilder syntax = new StringBuilder();
-            Predicate<ThingProperty> filter = p -> true;
+            Predicate<ThingConstraint> filter = p -> true;
             if (isVisible()) {
                 syntax.append(reference.syntax());
             } else if (relation().isPresent()) {
                 syntax.append(SPACE).append(relation().get());
-                filter = p -> !(p instanceof ThingProperty.Relation);
+                filter = p -> !(p instanceof ThingConstraint.Relation);
             } else if (value().isPresent()) {
                 syntax.append(SPACE).append(value().get());
-                filter = p -> !(p instanceof ThingProperty.Value<?>);
+                filter = p -> !(p instanceof ThingConstraint.Value<?>);
             } else {
                 assert false;
                 return null;
             }
 
-            String properties = properties().filter(filter).map(Property::toString).collect(joining(COMMA_SPACE.toString()));
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            String constraints = constraints().filter(filter).map(Constraint::toString).collect(joining(COMMA_SPACE.toString()));
+            if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
             return syntax.toString();
         }
     }
 
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
 
-        Thing(Reference reference, ThingProperty property) {
-            super(reference, property);
+        Thing(Reference reference, ThingConstraint constraint) {
+            super(reference, constraint);
         }
 
         @Override
@@ -226,10 +226,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(reference.syntax());
 
-            String properties = Stream.of(thingSyntax(), hasSyntax())
+            String constraints = Stream.of(thingSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
             return syntax.toString();
         }
     }
@@ -237,8 +237,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
                                                                             ThingVariableBuilder.Common<Relation> {
 
-        Relation(Reference reference, ThingProperty.Relation property) {
-            super(reference, property);
+        Relation(Reference reference, ThingConstraint.Relation constraint) {
+            super(reference, constraint);
         }
 
         @Override
@@ -247,13 +247,13 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
-            ThingProperty.Relation relationProperty = singular.get(ThingProperty.Relation.class).asRelation();
-            relationProperty.addPlayers(rolePlayer);
-            if (isa().isPresent() && !relationProperty.hasScope()) {
-                relationProperty.setScope(isa().get().type().label().get().label());
+        public ThingVariable.Relation asRelationWith(ThingConstraint.Relation.RolePlayer rolePlayer) {
+            ThingConstraint.Relation relationConstraint = singular.get(ThingConstraint.Relation.class).asRelation();
+            relationConstraint.addPlayers(rolePlayer);
+            if (isa().isPresent() && !relationConstraint.hasScope()) {
+                relationConstraint.setScope(isa().get().type().label().get().label());
             }
-            this.singular.put(ThingProperty.Relation.class, relationProperty);
+            this.singular.put(ThingConstraint.Relation.class, relationConstraint);
             return this;
         }
 
@@ -264,18 +264,18 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(relation().get());
 
-            String properties = Stream.of(isaSyntax(), hasSyntax())
+            String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
             return syntax.toString();
         }
     }
 
     public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
-        Attribute(Reference reference, ThingProperty property) {
-            super(reference, property);
+        Attribute(Reference reference, ThingConstraint constraint) {
+            super(reference, constraint);
         }
 
         @Override
@@ -290,10 +290,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(value().get());
 
-            String properties = Stream.of(isaSyntax(), hasSyntax())
+            String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
             return syntax.toString();
         }
     }

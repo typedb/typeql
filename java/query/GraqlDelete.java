@@ -23,7 +23,7 @@ import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.List;
 
-import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_OUT_OF_SCOPE;
+import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
 import static java.util.Objects.requireNonNull;
 
 public class GraqlDelete extends GraqlWritable {
@@ -35,11 +35,11 @@ public class GraqlDelete extends GraqlWritable {
     static List<ThingVariable<?>> validVariables(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
             if (var.isNamed() && !match.variablesNamedUnbound().contains(var.toUnbound())) {
-                throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(var.reference()));
+                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var.reference()));
             }
             var.variables().forEach(nestedVar -> {
                 if (nestedVar.isNamed() && !match.variablesNamedUnbound().contains(nestedVar.toUnbound())) {
-                    throw GraqlException.create(INVALID_VARIABLE_OUT_OF_SCOPE.message(nestedVar.reference()));
+                    throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(nestedVar.reference()));
                 }
             });
         });
