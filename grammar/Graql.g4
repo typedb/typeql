@@ -321,38 +321,38 @@ LABEL_SCOPED_   : LABEL_ ':' LABEL_ ;
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
-fragment TYPE_CHAR_H_   : 'A'..'Z' | 'a'..'z'
-                        | '\u00C0'..'\u00D6'
-                        | '\u00D8'..'\u00F6'
-                        | '\u00F8'..'\u02FF'
-                        | '\u0370'..'\u037D'
-                        | '\u037F'..'\u1FFF'
-                        | '\u200C'..'\u200D'
-                        | '\u2070'..'\u218F'
-                        | '\u2C00'..'\u2FEF'
-                        | '\u3001'..'\uD7FF'
-                        | '\uF900'..'\uFDCF'
-                        | '\uFDF0'..'\uFFFD'
-                        ;
-fragment TYPE_CHAR_T_   : TYPE_CHAR_H_
-                        | '0'..'9'
-                        | '_'
-                        | '-'
-                        | '\u00B7'
-                        | '\u0300'..'\u036F'
-                        | '\u203F'..'\u2040'
-                        ;
-fragment DATE_FRAGMENT_ : YEAR_ '-' MONTH_ '-' DAY_ ;
-fragment MONTH_         : [0-1][0-9] ;
-fragment DAY_           : [0-3][0-9] ;
-fragment YEAR_          : [0-9][0-9][0-9][0-9] | ('+' | '-') [0-9]+ ;
-fragment TIME_          : HOUR_ ':' MINUTE_ (':' SECOND_ ('.' SECOND_FRACTION_)? )? ;
-fragment HOUR_          : [0-2][0-9] ;
-fragment MINUTE_        : [0-6][0-9] ;
-fragment SECOND_        : [0-6][0-9] ;
+fragment TYPE_CHAR_H_     : 'A'..'Z' | 'a'..'z'
+                          | '\u00C0'..'\u00D6'
+                          | '\u00D8'..'\u00F6'
+                          | '\u00F8'..'\u02FF'
+                          | '\u0370'..'\u037D'
+                          | '\u037F'..'\u1FFF'
+                          | '\u200C'..'\u200D'
+                          | '\u2070'..'\u218F'
+                          | '\u2C00'..'\u2FEF'
+                          | '\u3001'..'\uD7FF'
+                          | '\uF900'..'\uFDCF'
+                          | '\uFDF0'..'\uFFFD'
+                          ;
+fragment TYPE_CHAR_T_     : TYPE_CHAR_H_
+                          | '0'..'9'
+                          | '_'
+                          | '-'
+                          | '\u00B7'
+                          | '\u0300'..'\u036F'
+                          | '\u203F'..'\u2040'
+                          ;
+fragment DATE_FRAGMENT_   : YEAR_ '-' MONTH_ '-' DAY_ ;
+fragment MONTH_           : [0-1][0-9] ;
+fragment DAY_             : [0-3][0-9] ;
+fragment YEAR_            : [0-9][0-9][0-9][0-9] | ('+' | '-') [0-9]+ ;
+fragment TIME_            : HOUR_ ':' MINUTE_ (':' SECOND_ ('.' SECOND_FRACTION_)? )? ;
+fragment HOUR_            : [0-2][0-9] ;
+fragment MINUTE_          : [0-6][0-9] ;
+fragment SECOND_          : [0-6][0-9] ;
 fragment SECOND_FRACTION_   : [0-9] ([0-9] ([0-9])?)?; // between 1 and 3 digits
-fragment ESCAPE_SEQ_    : '\\' . ;
+fragment ESCAPE_SEQ_      : '\\' . ;
 
-COMMENT         : '#' .*? '\r'? ('\n' | EOF)    -> channel(HIDDEN) ;
-WS              : [ \t\r\n]+                    -> channel(HIDDEN) ;
-UNRECOGNISED    : . ;
+COMMENT                   : '#' .*? '\r'? ('\n' | EOF)    -> channel(HIDDEN) ;
+WS                        : [ \t\r\n]+                    -> channel(HIDDEN) ;
+UNRECOGNISED              : . ;

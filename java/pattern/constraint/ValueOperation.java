@@ -25,6 +25,7 @@ import graql.lang.pattern.variable.UnboundVariable;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.SPACE;
@@ -33,13 +34,13 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETI
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 
-public abstract class ValueConstraint<T> {
+public abstract class ValueOperation<T> {
 
     private final GraqlToken.Comparator comparator;
     private final T value;
     private final int hash;
 
-    ValueConstraint(GraqlToken.Comparator comparator, T value) {
+    ValueOperation(GraqlToken.Comparator comparator, T value) {
         this.comparator = comparator;
         this.value = value;
         this.hash = Objects.hash(this.comparator, this.value);
@@ -53,32 +54,24 @@ public abstract class ValueConstraint<T> {
         return value;
     }
 
-    public ValueConstraint.Assignment<?> asAssignment() {
+    public ValueOperation.Assignment<?> asAssignment() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Assignment.class)));
     }
 
-    public ValueConstraint.Comparison<?> asComparison() {
+    public ValueOperation.Comparison<?> asComparison() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Comparison.class)));
     }
 
     public boolean isAssignment() {
-        return (this instanceof Assignment<?>);
+        return false;
     }
 
     public boolean isComparison() {
-        return (this instanceof Comparison<?>);
+        return false;
     }
 
-    public boolean isValueEquality() {
-        return comparator.equals(GraqlToken.Comparator.EQV) && !hasVariable();
-    }
-
-    public boolean hasVariable() {
-        return variable() != null;
-    }
-
-    public ThingVariable<?> variable() {
-        return null;
+    public Optional<ThingVariable<?>> variable() {
+        return Optional.empty();
     }
 
     @Override
@@ -90,7 +83,7 @@ public abstract class ValueConstraint<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ValueConstraint that = (ValueConstraint) o;
+        ValueOperation that = (ValueOperation) o;
         return (this.comparator.equals(that.comparator) && this.value.equals(that.value));
     }
 
@@ -99,14 +92,19 @@ public abstract class ValueConstraint<T> {
         return hash;
     }
 
-    public abstract static class Assignment<T> extends ValueConstraint<T> {
+    public abstract static class Assignment<T> extends ValueOperation<T> {
 
         Assignment(T value) {
             super(GraqlToken.Comparator.EQV, value);
         }
 
         @Override
-        public ValueConstraint.Assignment<?> asAssignment() {
+        public boolean isAssignment() {
+            return true;
+        }
+
+        @Override
+        public ValueOperation.Assignment<?> asAssignment() {
             return this;
         }
 
@@ -203,14 +201,19 @@ public abstract class ValueConstraint<T> {
         }
     }
 
-    public abstract static class Comparison<T> extends ValueConstraint<T> {
+    public abstract static class Comparison<T> extends ValueOperation<T> {
 
         Comparison(GraqlToken.Comparator comparator, T value) {
             super(comparator, value);
         }
 
         @Override
-        public ValueConstraint.Comparison<?> asComparison() {
+        public boolean isComparison() {
+            return true;
+        }
+
+        @Override
+        public ValueOperation.Comparison<?> asComparison() {
             return this;
         }
 
@@ -326,8 +329,8 @@ public abstract class ValueConstraint<T> {
             }
 
             @Override
-            public ThingVariable<?> variable() {
-                return variable;
+            public Optional<ThingVariable<?>> variable() {
+                return Optional.of(variable);
             }
 
             @Override

@@ -330,22 +330,22 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Value<T> extends ThingConstraint.Singular {
 
-        private final ValueConstraint<T> operation;
+        private final ValueOperation<T> operation;
         private final int hash;
 
-        public Value(ValueConstraint<T> operation) {
+        public Value(ValueOperation<T> operation) {
             if (operation == null) throw new NullPointerException("Null operation");
             this.operation = operation;
             this.hash = Objects.hash(Value.class, this.operation);
         }
 
-        public ValueConstraint<T> operation() {
+        public ValueOperation<T> operation() {
             return operation;
         }
 
         @Override
         public Set<BoundVariable> variables() {
-            return operation.variable() != null ? set(operation.variable()) : set();
+            return operation.variable().isPresent() ? set(operation.variable().get()) : set();
         }
 
         @Override

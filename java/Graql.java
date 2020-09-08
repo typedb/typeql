@@ -24,7 +24,7 @@ import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.constraint.ValueConstraint;
+import graql.lang.pattern.constraint.ValueOperation;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -191,173 +191,173 @@ public class Graql {
     // Attribute value equality constraint
 
     public static ThingConstraint.Value<Long> eq(long value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Long(GraqlToken.Comparator.EQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.EQ, value));
     }
 
     public static ThingConstraint.Value<Double> eq(double value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Double(GraqlToken.Comparator.EQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.EQ, value));
     }
 
     public static ThingConstraint.Value<Boolean> eq(boolean value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Boolean(GraqlToken.Comparator.EQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.EQ, value));
     }
 
     public static ThingConstraint.Value<String> eq(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.EQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.EQ, value));
     }
 
     public static ThingConstraint.Value<LocalDateTime> eq(LocalDateTime value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.DateTime(GraqlToken.Comparator.EQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.EQ, value));
     }
 
     public static ThingConstraint.Value<UnboundVariable> eq(UnboundVariable variable) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Variable(GraqlToken.Comparator.EQ, variable));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.EQ, variable));
     }
 
     // Attribute value inequality constraint
 
     public static ThingConstraint.Value<Long> neq(long value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Long(GraqlToken.Comparator.NEQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.NEQ, value));
     }
 
     public static ThingConstraint.Value<Double> neq(double value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Double(GraqlToken.Comparator.NEQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.NEQ, value));
     }
 
     public static ThingConstraint.Value<Boolean> neq(boolean value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Boolean(GraqlToken.Comparator.NEQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.NEQ, value));
     }
 
     public static ThingConstraint.Value<String> neq(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.NEQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.NEQ, value));
     }
 
     public static ThingConstraint.Value<LocalDateTime> neq(LocalDateTime value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.DateTime(GraqlToken.Comparator.NEQ, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.NEQ, value));
     }
 
     public static ThingConstraint.Value<UnboundVariable> neq(UnboundVariable variable) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Variable(GraqlToken.Comparator.NEQ, variable));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.NEQ, variable));
     }
 
     // Attribute value greater-than constraint
 
     public static ThingConstraint.Value<Long> gt(long value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Long(GraqlToken.Comparator.GT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.GT, value));
     }
 
     public static ThingConstraint.Value<Double> gt(double value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Double(GraqlToken.Comparator.GT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.GT, value));
     }
 
     public static ThingConstraint.Value<Boolean> gt(boolean value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Boolean(GraqlToken.Comparator.GT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.GT, value));
     }
 
     public static ThingConstraint.Value<String> gt(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.GT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.GT, value));
     }
 
     public static ThingConstraint.Value<LocalDateTime> gt(LocalDateTime value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.DateTime(GraqlToken.Comparator.GT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.GT, value));
     }
 
     public static ThingConstraint.Value<UnboundVariable> gt(UnboundVariable variable) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Variable(GraqlToken.Comparator.GT, variable));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.GT, variable));
     }
 
     // Attribute value greater-than-or-equals constraint
 
     public static ThingConstraint.Value<Long> gte(long value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Long(GraqlToken.Comparator.GTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.GTE, value));
     }
 
     public static ThingConstraint.Value<Double> gte(double value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Double(GraqlToken.Comparator.GTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.GTE, value));
     }
 
     public static ThingConstraint.Value<Boolean> gte(boolean value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Boolean(GraqlToken.Comparator.GTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.GTE, value));
     }
 
     public static ThingConstraint.Value<String> gte(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.GTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.GTE, value));
     }
 
     public static ThingConstraint.Value<LocalDateTime> gte(LocalDateTime value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.DateTime(GraqlToken.Comparator.GTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.GTE, value));
     }
 
     public static ThingConstraint.Value<UnboundVariable> gte(UnboundVariable variable) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Variable(GraqlToken.Comparator.GTE, variable));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.GTE, variable));
     }
 
     // Attribute value less-than constraint
 
     public static ThingConstraint.Value<Long> lt(long value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Long(GraqlToken.Comparator.LT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.LT, value));
     }
 
     public static ThingConstraint.Value<Double> lt(double value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Double(GraqlToken.Comparator.LT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.LT, value));
     }
 
     public static ThingConstraint.Value<Boolean> lt(boolean value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Boolean(GraqlToken.Comparator.LT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.LT, value));
     }
 
     public static ThingConstraint.Value<String> lt(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.LT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.LT, value));
     }
 
     public static ThingConstraint.Value<LocalDateTime> lt(LocalDateTime value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.DateTime(GraqlToken.Comparator.LT, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.LT, value));
     }
 
     public static ThingConstraint.Value<UnboundVariable> lt(UnboundVariable variable) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Variable(GraqlToken.Comparator.LT, variable));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.LT, variable));
     }
 
     // Attribute value less-than-or-equals constraint
 
     public static ThingConstraint.Value<Long> lte(long value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Long(GraqlToken.Comparator.LTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Long(GraqlToken.Comparator.LTE, value));
     }
 
     public static ThingConstraint.Value<Double> lte(double value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Double(GraqlToken.Comparator.LTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Double(GraqlToken.Comparator.LTE, value));
     }
 
     public static ThingConstraint.Value<Boolean> lte(boolean value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Boolean(GraqlToken.Comparator.LTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Boolean(GraqlToken.Comparator.LTE, value));
     }
 
     public static ThingConstraint.Value<String> lte(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.LTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.LTE, value));
     }
 
     public static ThingConstraint.Value<LocalDateTime> lte(LocalDateTime value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.DateTime(GraqlToken.Comparator.LTE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.DateTime(GraqlToken.Comparator.LTE, value));
     }
 
     public static ThingConstraint.Value<UnboundVariable> lte(UnboundVariable variable) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Variable(GraqlToken.Comparator.LTE, variable));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.LTE, variable));
     }
 
     // Attribute value contains (in String) constraint
 
     public static ThingConstraint.Value<String> contains(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.CONTAINS, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.CONTAINS, value));
     }
 
     public static ThingConstraint.Value<UnboundVariable> contains(UnboundVariable variable) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.Variable(GraqlToken.Comparator.CONTAINS, variable));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.Variable(GraqlToken.Comparator.CONTAINS, variable));
     }
 
     // Attribute value regex constraint
 
     public static ThingConstraint.Value<String> like(String value) {
-        return new ThingConstraint.Value<>(new ValueConstraint.Comparison.String(GraqlToken.Comparator.LIKE, value));
+        return new ThingConstraint.Value<>(new ValueOperation.Comparison.String(GraqlToken.Comparator.LIKE, value));
     }
 
 }

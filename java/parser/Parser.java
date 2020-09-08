@@ -31,7 +31,7 @@ import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
-import graql.lang.pattern.constraint.ValueConstraint;
+import graql.lang.pattern.constraint.ValueOperation;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
@@ -764,7 +764,7 @@ public class Parser extends GraqlBaseVisitor {
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
 
     @Override
-    public ValueConstraint<?> visitValue(GraqlParser.ValueContext ctx) {
+    public ValueOperation<?> visitValue(GraqlParser.ValueContext ctx) {
         if (ctx.assignment() != null) {
             return visitAssignment(ctx.assignment());
         } else if (ctx.comparison() != null) {
@@ -775,26 +775,26 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public ValueConstraint.Assignment<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
+    public ValueOperation.Assignment<?> visitAssignment(GraqlParser.AssignmentContext ctx) {
         Object value = visitLiteral(ctx.literal());
 
         if (value instanceof Long) {
-            return new ValueConstraint.Assignment.Long((Long) value);
+            return new ValueOperation.Assignment.Long((Long) value);
         } else if (value instanceof Double) {
-            return new ValueConstraint.Assignment.Double((Double) value);
+            return new ValueOperation.Assignment.Double((Double) value);
         } else if (value instanceof Boolean) {
-            return new ValueConstraint.Assignment.Boolean((Boolean) value);
+            return new ValueOperation.Assignment.Boolean((Boolean) value);
         } else if (value instanceof String) {
-            return new ValueConstraint.Assignment.String((String) value);
+            return new ValueOperation.Assignment.String((String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ValueConstraint.Assignment.DateTime((LocalDateTime) value);
+            return new ValueOperation.Assignment.DateTime((LocalDateTime) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Assignment: " + ctx.getText());
         }
     }
 
     @Override
-    public ValueConstraint.Comparison<?> visitComparison(GraqlParser.ComparisonContext ctx) {
+    public ValueOperation.Comparison<?> visitComparison(GraqlParser.ComparisonContext ctx) {
         String comparatorStr;
         Object value;
 
@@ -836,17 +836,17 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (value instanceof Long) {
-            return new ValueConstraint.Comparison.Long(comparator, (Long) value);
+            return new ValueOperation.Comparison.Long(comparator, (Long) value);
         } else if (value instanceof Double) {
-            return new ValueConstraint.Comparison.Double(comparator, (Double) value);
+            return new ValueOperation.Comparison.Double(comparator, (Double) value);
         } else if (value instanceof Boolean) {
-            return new ValueConstraint.Comparison.Boolean(comparator, (Boolean) value);
+            return new ValueOperation.Comparison.Boolean(comparator, (Boolean) value);
         } else if (value instanceof String) {
-            return new ValueConstraint.Comparison.String(comparator, (String) value);
+            return new ValueOperation.Comparison.String(comparator, (String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ValueConstraint.Comparison.DateTime(comparator, (LocalDateTime) value);
+            return new ValueOperation.Comparison.DateTime(comparator, (LocalDateTime) value);
         } else if (value instanceof UnboundVariable) {
-            return new ValueConstraint.Comparison.Variable(comparator, (UnboundVariable) value);
+            return new ValueOperation.Comparison.Variable(comparator, (UnboundVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
