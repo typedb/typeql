@@ -58,9 +58,3 @@ deploy_maven(
     snapshot = deployment['maven.snapshot'],
     release = deployment['maven.snapshot']
 )
-
-checkstyle_test(
-    name = "checkstyle",
-    files = ["BUILD"],
-    license_type = "agpl",
-)

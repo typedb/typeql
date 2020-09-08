@@ -61,8 +61,7 @@ checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
-        "property/*.java",
-        "util/*.java",
+        "constraint/*.java",
         "variable/*.java",
         "variable/builder/*.java",
     ]),
