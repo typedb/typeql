@@ -54,20 +54,44 @@ public abstract class ValueOperation<T> {
         return value;
     }
 
-    public ValueOperation.Assignment<?> asAssignment() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Assignment.class)));
-    }
-
-    public ValueOperation.Comparison<?> asComparison() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Comparison.class)));
-    }
-
     public boolean isAssignment() {
         return false;
     }
 
     public boolean isComparison() {
         return false;
+    }
+
+    public boolean isLong() {
+        return false;
+    }
+
+    public boolean isDouble() {
+        return false;
+    }
+
+    public boolean isBoolean() {
+        return false;
+    }
+
+    public boolean isString() {
+        return false;
+    }
+
+    public boolean isDateTime() {
+        return false;
+    }
+
+    public boolean isVariable() {
+        return false;
+    }
+
+    public ValueOperation.Assignment<?> asAssignment() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Assignment.class)));
+    }
+
+    public ValueOperation.Comparison<?> asComparison() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Comparison.class)));
     }
 
     public Optional<ThingVariable<?>> variable() {
@@ -139,6 +163,11 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
+            public boolean isLong() {
+                return true;
+            }
+
+            @Override
             public Assignment.Long asLong() {
                 return this;
             }
@@ -148,6 +177,11 @@ public abstract class ValueOperation<T> {
 
             public Double(double value) {
                 super(value);
+            }
+
+            @Override
+            public boolean isDouble() {
+                return true;
             }
 
             @Override
@@ -163,6 +197,11 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
+            public boolean isBoolean() {
+                return true;
+            }
+
+            @Override
             public Assignment.Boolean asBoolean() {
                 return this;
             }
@@ -172,6 +211,11 @@ public abstract class ValueOperation<T> {
 
             public String(java.lang.String value) {
                 super(value);
+            }
+
+            @Override
+            public boolean isString() {
+                return true;
             }
 
             @Override
@@ -192,6 +236,11 @@ public abstract class ValueOperation<T> {
                 if (remainder != 0) {
                     throw GraqlException.of(INVALID_CONSTRAINT_DATETIME_PRECISION.message(value));
                 }
+            }
+
+            @Override
+            public boolean isDateTime() {
+                return true;
             }
 
             @Override
@@ -248,6 +297,11 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
+            public boolean isLong() {
+                return true;
+            }
+
+            @Override
             public Comparison.Long asLong() {
                 return this;
             }
@@ -257,6 +311,11 @@ public abstract class ValueOperation<T> {
 
             public Double(GraqlToken.Comparator comparator, double value) {
                 super(comparator, value);
+            }
+
+            @Override
+            public boolean isDouble() {
+                return true;
             }
 
             @Override
@@ -272,6 +331,11 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
+            public boolean isBoolean() {
+                return true;
+            }
+
+            @Override
             public Comparison.Boolean asBoolean() {
                 return this;
             }
@@ -281,6 +345,11 @@ public abstract class ValueOperation<T> {
 
             public String(GraqlToken.Comparator comparator, java.lang.String value) {
                 super(comparator, value);
+            }
+
+            @Override
+            public boolean isString() {
+                return true;
             }
 
             @Override
@@ -310,6 +379,11 @@ public abstract class ValueOperation<T> {
             }
 
             @Override
+            public boolean isDateTime() {
+                return true;
+            }
+
+            @Override
             public Comparison.DateTime asDateTime() {
                 return this;
             }
@@ -324,18 +398,24 @@ public abstract class ValueOperation<T> {
                 this.variable = variable.toThing();
             }
 
-            public java.lang.String toString() {
-                return comparator().toString() + SPACE + value();
-            }
-
             @Override
             public Optional<ThingVariable<?>> variable() {
                 return Optional.of(variable);
             }
 
             @Override
+            public boolean isVariable() {
+                return true;
+            }
+
+            @Override
             public Comparison.Variable asVariable() {
                 return this;
+            }
+
+            @Override
+            public java.lang.String toString() {
+                return comparator().toString() + SPACE + value();
             }
         }
     }
