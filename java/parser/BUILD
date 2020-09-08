@@ -59,8 +59,6 @@ deploy_maven(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [
-        ":parser",
-    ],
+    include = glob(["*"]),
     license_type = "agpl",
 )

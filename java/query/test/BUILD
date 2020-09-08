@@ -59,10 +59,6 @@ java_test(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [
-        ":graql-query-test",
-        ":graql-delete-test",
-        ":graql-insert-test",
-    ],
+    include = glob(["*"]),
     license_type = "agpl",
 )
