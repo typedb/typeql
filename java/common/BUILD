@@ -51,6 +51,10 @@ deploy_maven(
 
 checkstyle_test(
     name = "checkstyle",
-    include = glob(["*"]),
+    include = glob([
+        "*",
+        "exception/*.java",
+        "util/*.java",
+    ]),
     license_type = "agpl",
 )

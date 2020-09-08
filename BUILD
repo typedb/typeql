@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@graknlabs_dependencies//tool/release:rules.bzl", "release_validate_deps")
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 load("//:deployment.bzl", "deployment")
@@ -40,6 +41,17 @@ release_validate_deps(
         "@graknlabs_common",
     ],
     tags = ["manual"]  # in order for bazel test //... to not fail
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob([
+        "*",
+        ".grabl/automation.yml",
+        "docs/*",
+    ]),
+    exclude = ["docs/java-package-structure.png"],
+    license_type = "agpl",
 )
 
 # CI targets that are not declared in any BUILD file, but are called externally

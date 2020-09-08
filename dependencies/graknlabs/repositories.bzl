@@ -18,10 +18,14 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 def graknlabs_dependencies():
-    git_repository(
+#    git_repository(
+#        name = "graknlabs_dependencies",
+#        remote = "https://github.com/graknlabs/dependencies",
+#        commit = "bf21f7089c811d25b9254309cdc4cdebc8bc53b0", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
+#    )
+    native.local_repository(
         name = "graknlabs_dependencies",
-        remote = "https://github.com/graknlabs/dependencies",
-        commit = "bf21f7089c811d25b9254309cdc4cdebc8bc53b0", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
+        path = "../dependencies",
     )
 
 def graknlabs_common():
