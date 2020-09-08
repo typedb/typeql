@@ -213,7 +213,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (label == null) throw new NullPointerException("Null label");
             this.scope = scope;
             this.label = label;
-            this.hash = Objects.hash(this.scope, this.label);
+            this.hash = Objects.hash(Label.class, this.scope, this.label);
         }
 
         public Optional<String> scope() {
@@ -285,7 +285,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (type == null) throw new NullPointerException("Null superType");
             this.type = type;
             this.isExplicit = isExplicit;
-            this.hash = Objects.hash(this.type, this.isExplicit);
+            this.hash = Objects.hash(Sub.class, this.type, this.isExplicit);
         }
 
         public TypeVariable type() {
@@ -373,7 +373,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public ValueType(GraqlArg.ValueType valueType) {
             if (valueType == null) throw new NullPointerException("Null ValueType");
             this.valueType = valueType;
-            this.hash = Objects.hash(this.valueType);
+            this.hash = Objects.hash(ValueType.class, this.valueType);
         }
 
         public GraqlArg.ValueType valueType() {
@@ -421,7 +421,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             } catch (PatternSyntaxException exception) {
                 throw GraqlException.of(INVALID_ATTRIBUTE_TYPE_REGEX.message());
             }
-            this.hash = Objects.hash(this.regex.pattern());
+            this.hash = Objects.hash(Regex.class, this.regex.pattern());
         }
 
         public java.util.regex.Pattern regex() {
@@ -466,7 +466,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public Then(Pattern pattern) {
             if (pattern == null) throw new NullPointerException("Null pattern");
             this.pattern = pattern;
-            this.hash = Objects.hash(this.pattern);
+            this.hash = Objects.hash(Then.class, this.pattern);
         }
 
         public Pattern pattern() {
@@ -521,7 +521,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public When(Pattern pattern) {
             if (pattern == null) throw new NullPointerException("Null Pattern");
             this.pattern = pattern;
-            this.hash = Objects.hash(this.pattern);
+            this.hash = Objects.hash(When.class, this.pattern);
         }
 
         public Pattern pattern() {
@@ -608,7 +608,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
             this.isKey = isKey;
-            this.hash = Objects.hash(this.attributeType, this.overriddenAttributeType, this.isKey);
+            this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.isKey);
         }
 
         public TypeVariable attribute() {
@@ -702,7 +702,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
-            this.hash = Objects.hash(roleType, overriddenRoleType);
+            this.hash = Objects.hash(Plays.class, this.relationType, this.roleType, this.overriddenRoleType);
         }
 
         public Optional<TypeVariable> relation() {
@@ -854,7 +854,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public int hashCode() {
-            return Objects.hash(roleType, overriddenRoleType);
+            return Objects.hash(Relates.class, roleType, overriddenRoleType);
         }
     }
 }

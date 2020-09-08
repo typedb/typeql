@@ -47,6 +47,7 @@ import static graql.lang.common.GraqlToken.Constraint.HAS;
 import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
 import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
@@ -167,10 +168,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public IID(String iid) {
             if (iid == null) throw new NullPointerException("Null IID");
             if (!REGEX.matcher(iid).matches()) {
-                throw GraqlException.of(ErrorMessage.INVALID_IID_STRING.message(iid, REGEX.toString()));
+                throw GraqlException.of(INVALID_IID_STRING.message(iid, REGEX.toString()));
             }
             this.iid = iid;
-            this.hash = Objects.hash(this.iid);
+            this.hash = Objects.hash(IID.class, this.iid);
         }
 
         public String iid() {
@@ -287,7 +288,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private NEQ(ThingVariable<?> variable) {
             if (variable == null) throw new NullPointerException("Null var");
             this.variable = variable;
-            this.hash = Objects.hash(variable);
+            this.hash = Objects.hash(NEQ.class, this.variable);
         }
 
         public ThingVariable<?> variable() {
@@ -336,7 +337,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public Value(ValueOperation<T> operation) {
             if (operation == null) throw new NullPointerException("Null operation");
             this.operation = operation;
-            this.hash = Objects.hash(this.operation);
+            this.hash = Objects.hash(Value.class, this.operation);
         }
 
         public ValueOperation<T> operation() {
@@ -446,7 +447,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.players);
+            return Objects.hash(Relation.class, this.players);
         }
 
         public static class RolePlayer {
@@ -513,7 +514,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
             @Override
             public int hashCode() {
-                return Objects.hash(roleType, player);
+                return Objects.hash(RolePlayer.class, roleType, player);
             }
         }
     }
@@ -535,9 +536,9 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private Has(TypeVariable type, ThingVariable<?> attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
-            if (attribute.isNamed()) this.attribute = attribute;
+            if (attribute.isNamed()) this.attribute = attribute; // TODO: is this needed? Should we not always set the ISA type?
             else this.attribute = attribute.asSameThingWith(new Isa(type, false));
-            this.hash = Objects.hash(this.type, this.attribute);
+            this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 
         public TypeVariable type() {
@@ -575,7 +576,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Has that = (Has) o;
-            return attribute.equals(that.attribute);
+            return (this.type.equals(that.type) && attribute.equals(that.attribute));
         }
 
         @Override
