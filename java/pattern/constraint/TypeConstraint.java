@@ -281,11 +281,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
                                UnboundVariable::toType), isExplicit);
         }
 
-        private Sub(TypeVariable typeVar, boolean isExplicit) {
-            if (typeVar == null) throw new NullPointerException("Null superType");
-            this.type = typeVar;
+        private Sub(TypeVariable type, boolean isExplicit) {
+            if (type == null) throw new NullPointerException("Null superType");
+            this.type = type;
             this.isExplicit = isExplicit;
-            this.hash = Objects.hash(typeVar, this.isExplicit);
+            this.hash = Objects.hash(this.type, this.isExplicit);
         }
 
         public TypeVariable type() {
@@ -466,7 +466,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public Then(Pattern pattern) {
             if (pattern == null) throw new NullPointerException("Null pattern");
             this.pattern = pattern;
-            this.hash = Objects.hash(pattern);
+            this.hash = Objects.hash(this.pattern);
         }
 
         public Pattern pattern() {
@@ -521,7 +521,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public When(Pattern pattern) {
             if (pattern == null) throw new NullPointerException("Null Pattern");
             this.pattern = pattern;
-            this.hash = Objects.hash(pattern);
+            this.hash = Objects.hash(this.pattern);
         }
 
         public Pattern pattern() {
@@ -608,7 +608,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
             this.isKey = isKey;
-            this.hash = Objects.hash(attributeType, isKey);
+            this.hash = Objects.hash(this.attributeType, this.overriddenAttributeType, this.isKey);
         }
 
         public TypeVariable attribute() {
@@ -650,7 +650,9 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Owns that = (Owns) o;
-            return (this.attributeType.equals(that.attributeType) && this.isKey == that.isKey);
+            return (this.attributeType.equals(that.attributeType) &&
+                    Objects.equals(this.overriddenAttributeType, that.overriddenAttributeType) &&
+                    this.isKey == that.isKey);
         }
 
         @Override
@@ -744,7 +746,9 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Plays that = (Plays) o;
-            return (this.roleType.equals(that.roleType));
+            return (this.roleType.equals(that.roleType) &&
+                    Objects.equals(this.relationType, that.relationType) &&
+                    Objects.equals(this.overriddenRoleType, that.overriddenRoleType));
         }
 
         @Override
