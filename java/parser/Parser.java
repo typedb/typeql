@@ -553,7 +553,7 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public TypeVariable visitVariable_type(GraqlParser.Variable_typeContext ctx) {
         TypeVariable type = visitType_any(ctx.type_any()).apply(
-                scopedLabel -> hidden().asTypeWith(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second())),
+                scopedLabel -> hidden().constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second())),
                 UnboundVariable::toType
         );
 
@@ -562,16 +562,16 @@ public class Parser extends GraqlBaseVisitor {
                 type = type.isAbstract();
             } else if (constraint.SUB_() != null) {
                 GraqlToken.Constraint sub = GraqlToken.Constraint.of(constraint.SUB_().getText());
-                type = type.asTypeWith(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == GraqlToken.Constraint.SUBX));
+                type = type.constrain(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == GraqlToken.Constraint.SUBX));
             } else if (constraint.OWNS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
-                type = type.asTypeWith(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, constraint.IS_KEY() != null));
+                type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, constraint.IS_KEY() != null));
             } else if (constraint.PLAYS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
-                type = type.asTypeWith(new TypeConstraint.Plays(visitType_scoped(constraint.type_scoped()), overridden));
+                type = type.constrain(new TypeConstraint.Plays(visitType_scoped(constraint.type_scoped()), overridden));
             } else if (constraint.RELATES() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
-                type = type.asTypeWith(new TypeConstraint.Relates(visitType(constraint.type(0)), overridden));
+                type = type.constrain(new TypeConstraint.Relates(visitType(constraint.type(0)), overridden));
             } else if (constraint.VALUE() != null) {
                 type = type.value(GraqlArg.ValueType.of(constraint.value_type().getText()));
             } else if (constraint.REGEX() != null) {
@@ -582,7 +582,7 @@ public class Parser extends GraqlBaseVisitor {
                 type = type.then(new Conjunction<>(visitVariable_things(constraint.variable_things())));
             } else if (constraint.TYPE() != null) {
                 Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
-                type = type.asTypeWith(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
+                type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
 
             } else {
                 throw new IllegalArgumentException("Unrecognised Type Statement: " + constraint.getText());
@@ -618,7 +618,7 @@ public class Parser extends GraqlBaseVisitor {
         ThingVariable.Thing thing = null;
 
         if (ctx.ISA_() != null) {
-            thing = unscoped.asThingWith(getIsaConstraint(ctx.ISA_(), ctx.type()));
+            thing = unscoped.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
         } else if (ctx.IID() != null) {
             thing = unscoped.iid(ctx.IID_().getText());
         } else if (ctx.NEQ() != null) {
@@ -627,8 +627,8 @@ public class Parser extends GraqlBaseVisitor {
 
         if (ctx.attributes() != null) {
             for (ThingConstraint.Has hasAttribute : visitAttributes(ctx.attributes())) {
-                if (thing == null) thing = unscoped.asSameThingWith(hasAttribute);
-                else thing = thing.asSameThingWith(hasAttribute);
+                if (thing == null) thing = unscoped.constrain(hasAttribute);
+                else thing = thing.constrain(hasAttribute);
             }
         }
         return thing;
@@ -640,12 +640,12 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
 
-        ThingVariable.Relation relation = unscoped.asRelationWith(visitRelation(ctx.relation()));
-        if (ctx.ISA_() != null) relation = relation.asSameThingWith(getIsaConstraint(ctx.ISA_(), ctx.type()));
+        ThingVariable.Relation relation = unscoped.constrain(visitRelation(ctx.relation()));
+        if (ctx.ISA_() != null) relation = relation.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
             for (ThingConstraint.Has hasAttribute : visitAttributes(ctx.attributes())) {
-                relation = relation.asSameThingWith(hasAttribute);
+                relation = relation.constrain(hasAttribute);
             }
         }
         return relation;
@@ -657,12 +657,12 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
 
-        ThingVariable.Attribute attribute = unscoped.asAttributeWith(new ThingConstraint.Value<>(visitValue(ctx.value())));
-        if (ctx.ISA_() != null) attribute = attribute.asSameThingWith(getIsaConstraint(ctx.ISA_(), ctx.type()));
+        ThingVariable.Attribute attribute = unscoped.constrain(new ThingConstraint.Value<>(visitValue(ctx.value())));
+        if (ctx.ISA_() != null) attribute = attribute.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
             for (ThingConstraint.Has hasAttribute : visitAttributes(ctx.attributes())) {
-                attribute = attribute.asSameThingWith(hasAttribute);
+                attribute = attribute.constrain(hasAttribute);
             }
         }
         return attribute;

@@ -24,6 +24,10 @@ public class GraqlException extends RuntimeException {
         super(error);
     }
 
+    public static GraqlException of(ErrorMessage errorMessage) {
+        return new GraqlException(errorMessage.message());
+    }
+
     public static GraqlException of(String error) {
         return new GraqlException(error);
     }

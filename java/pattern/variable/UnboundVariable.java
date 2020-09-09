@@ -23,7 +23,8 @@ import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 import graql.lang.pattern.variable.builder.TypeVariableBuilder;
 
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.List;
 
 public class UnboundVariable extends Variable implements TypeVariableBuilder,
                                                          ThingVariableBuilder.Common<ThingVariable.Thing>,
@@ -52,58 +53,99 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     public TypeVariable toType() {
-        return new TypeVariable(reference, null);
+        return new TypeVariable(reference);
     }
 
     public ThingVariable<?> toThing() {
-        return new ThingVariable.Thing(reference, null);
+        return new ThingVariable.Thing(reference);
     }
 
     @Override
-    public Stream<Constraint<?>> constraints() {
-        return Stream.of();
+    public List<Constraint<?>> constraints() {
+        return Collections.emptyList();
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeConstraint.Singular constraint) {
-        if (!isVisible() && constraint instanceof TypeConstraint.Label) {
-            return new TypeVariable(Reference.label(((TypeConstraint.Label) constraint).scopedLabel()), constraint);
-        } else {
-            return new TypeVariable(reference, constraint);
-        }
+    public TypeVariable constrain(TypeConstraint.Label constraint) {
+        return new TypeVariable(Reference.label(constraint.scopedLabel())).constrain(constraint);
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeConstraint.Repeatable constraint) {
-        return new TypeVariable(reference, constraint);
+    public TypeVariable constrain(TypeConstraint.Sub constraint) {
+        return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public ThingVariable.Thing asSameThingWith(ThingConstraint.Singular constraint) {
+    public TypeVariable constrain(TypeConstraint.Abstract constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.ValueType constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Regex constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Then constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.When constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Owns constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Plays constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Relates constraint) {
+        return new TypeVariable(reference).constrain(constraint);
+    }
+
+    @Override
+    public ThingVariable.Thing constrain(ThingConstraint.Isa constraint) {
+        return new ThingVariable.Thing(reference).constrain(constraint);
+    }
+
+    @Override
+    public ThingVariable.Thing constrain(ThingConstraint.Has constraint) {
+        return new ThingVariable.Thing(reference).constrain(constraint);
+    }
+
+    @Override
+    public ThingVariable.Thing constrain(ThingConstraint.IID constraint) {
         return new ThingVariable.Thing(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Thing asSameThingWith(ThingConstraint.Repeatable constraint) {
+    public ThingVariable.Thing constrain(ThingConstraint.NEQ constraint) {
         return new ThingVariable.Thing(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Thing asThingWith(ThingConstraint.Singular constraint) {
-        return new ThingVariable.Thing(reference, constraint);
-    }
-
-    @Override
-    public ThingVariable.Attribute asAttributeWith(ThingConstraint.Value<?> constraint) {
+    public ThingVariable.Attribute constrain(ThingConstraint.Value<?> constraint) {
         return new ThingVariable.Attribute(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Relation asRelationWith(ThingConstraint.Relation.RolePlayer rolePlayer) {
-        return asRelationWith(new ThingConstraint.Relation(rolePlayer));
+    public ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
+        return constrain(new ThingConstraint.Relation(rolePlayer));
     }
 
-    public ThingVariable.Relation asRelationWith(ThingConstraint.Relation constraint) {
+    public ThingVariable.Relation constrain(ThingConstraint.Relation constraint) {
         return new ThingVariable.Relation(reference, constraint);
     }
 

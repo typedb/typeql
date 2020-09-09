@@ -22,10 +22,8 @@ import graql.lang.pattern.constraint.Constraint;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.builder.TypeVariableBuilder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -35,38 +33,34 @@ import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
-    private final Map<Class<? extends TypeConstraint>, TypeConstraint.Singular> singular;
-    private final Map<Class<? extends TypeConstraint>, List<TypeConstraint.Repeatable>> repeating;
-    private final List<TypeConstraint> ordered;
+    private TypeConstraint.Label labelConstraint;
+    private TypeConstraint.Sub subConstraint;
+    private TypeConstraint.Abstract abstractConstraint;
+    private TypeConstraint.ValueType valueTypeConstraint;
+    private TypeConstraint.Regex regexConstraint;
+    private TypeConstraint.Then thenConstraint;
+    private TypeConstraint.When whenConstraint;
 
-    TypeVariable(Reference reference, TypeConstraint constraint) {
-        super(reference);
-        this.singular = new HashMap<>();
-        this.repeating = new HashMap<>();
-        this.ordered = new ArrayList<>();
-        if (constraint != null) {
-            if (constraint.isSingular()) asTypeWith(constraint.asSingular());
-            else asTypeWith(constraint.asRepeatable());
-        }
-    }
+    private final List<TypeConstraint.Owns> ownsConstraints;
+    private final List<TypeConstraint.Plays> playsConstraints;
+    private final List<TypeConstraint.Relates> relatesConstraints;
 
-    private TypeVariable(Reference reference,
-                         Map<Class<? extends TypeConstraint>, TypeConstraint.Singular> singular,
-                         Map<Class<? extends TypeConstraint>, List<TypeConstraint.Repeatable>> repeating,
-                         List<TypeConstraint> ordered) {
+    private final List<TypeConstraint> constraints;
+
+    TypeVariable(Reference reference) {
         super(reference);
-        this.singular = new HashMap<>(singular);
-        this.repeating = new HashMap<>(repeating);
-        this.ordered = new ArrayList<>(ordered);
+        this.ownsConstraints = new LinkedList<>();
+        this.playsConstraints = new LinkedList<>();
+        this.relatesConstraints = new LinkedList<>();
+        this.constraints = new LinkedList<>();
     }
 
     @Override
-    public Stream<TypeConstraint> constraints() {
-        return ordered.stream().distinct();
+    public List<TypeConstraint> constraints() {
+        return constraints;
     }
 
     @Override
@@ -79,86 +73,138 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         return this;
     }
 
-    private void addSingularConstraints(TypeConstraint.Singular constraint) {
-        if (singular.containsKey(constraint.getClass()) && !singular.get(constraint.getClass()).equals(constraint)) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, singular.get(constraint.getClass()), constraint));
-        } else if (!singular.containsKey(constraint.getClass())) {
-            singular.put(constraint.getClass(), constraint);
-        }
-    }
-
-    TypeVariable merge(TypeVariable variable) {
-        TypeVariable merged = new TypeVariable(reference, singular, repeating, ordered);
-        variable.singular.values().forEach(constraint -> {
-            merged.addSingularConstraints(constraint);
-            merged.ordered.add(constraint);
-        });
-        variable.repeating.forEach((clazz, list) -> {
-            merged.repeating.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list);
-            merged.ordered.addAll(list);
-        });
-        return merged;
-    }
-
     @Override
-    public TypeVariable asTypeWith(TypeConstraint.Singular constraint) {
-        addSingularConstraints(constraint);
-        ordered.add(constraint);
+    public TypeVariable constrain(TypeConstraint.Label constraint) {
+        if (labelConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Label.class, constraint));
+        }
+        labelConstraint = constraint;
+        constraints.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable asTypeWith(TypeConstraint.Repeatable constraint) {
-        if (label().isPresent() && constraint instanceof TypeConstraint.Relates) {
-            ((TypeConstraint.Relates) constraint).setScope(label().get().label());
+    public TypeVariable constrain(TypeConstraint.Sub constraint) {
+        if (subConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Sub.class, constraint));
         }
+        subConstraint = constraint;
+        constraints.add(constraint);
+        return this;
+    }
 
-        repeating.computeIfAbsent(constraint.getClass(), c -> new ArrayList<>()).add(constraint);
-        ordered.add(constraint);
+    @Override
+    public TypeVariable constrain(TypeConstraint.Abstract constraint) {
+        if (abstractConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Abstract.class, constraint));
+        }
+        abstractConstraint = constraint;
+        constraints.add(constraint);
+        return this;
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.ValueType constraint) {
+        if (valueTypeConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.ValueType.class, constraint));
+        }
+        valueTypeConstraint = constraint;
+        constraints.add(constraint);
+        return this;
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Regex constraint) {
+        if (regexConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Regex.class, constraint));
+        }
+        regexConstraint = constraint;
+        constraints.add(constraint);
+        return this;
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Then constraint) {
+        if (thenConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Then.class, constraint));
+        }
+        thenConstraint = constraint;
+        constraints.add(constraint);
+        return this;
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.When constraint) {
+        if (whenConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.When.class, constraint));
+        }
+        whenConstraint = constraint;
+        constraints.add(constraint);
+        return this;
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Owns constraint) {
+        ownsConstraints.add(constraint);
+        constraints.add(constraint);
+        return this;
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Plays constraint) {
+        playsConstraints.add(constraint);
+        constraints.add(constraint);
+        return this;
+    }
+
+    @Override
+    public TypeVariable constrain(TypeConstraint.Relates constraint) {
+        if (label().isPresent()) {
+            constraint.setScope(label().get().label());
+        }
+        relatesConstraints.add(constraint);
+        constraints.add(constraint);
         return this;
     }
 
     public Optional<TypeConstraint.Label> label() {
-        return Optional.ofNullable(singular.get(TypeConstraint.Label.class)).map(TypeConstraint::asLabel);
+        return Optional.ofNullable(labelConstraint);
     }
 
     public Optional<TypeConstraint.Sub> sub() {
-        return Optional.ofNullable(singular.get(TypeConstraint.Sub.class)).map(TypeConstraint::asSub);
+        return Optional.ofNullable(subConstraint);
     }
 
     public Optional<TypeConstraint.Abstract> abstractFlag() {
-        return Optional.ofNullable(singular.get(TypeConstraint.Abstract.class)).map(TypeConstraint::asAbstract);
+        return Optional.ofNullable(abstractConstraint);
     }
 
     public Optional<TypeConstraint.ValueType> valueType() {
-        return Optional.ofNullable(singular.get(TypeConstraint.ValueType.class)).map(TypeConstraint::asValueType);
+        return Optional.ofNullable(valueTypeConstraint);
     }
 
     public Optional<TypeConstraint.Regex> regex() {
-        return Optional.ofNullable(singular.get(TypeConstraint.Regex.class)).map(TypeConstraint::asRegex);
+        return Optional.ofNullable(regexConstraint);
     }
 
     public Optional<TypeConstraint.Then> then() {
-        return Optional.ofNullable(singular.get(TypeConstraint.Then.class)).map(TypeConstraint::asThen);
+        return Optional.ofNullable(thenConstraint);
     }
 
     public Optional<TypeConstraint.When> when() {
-        return Optional.ofNullable(singular.get(TypeConstraint.When.class)).map(TypeConstraint::asWhen);
+        return Optional.ofNullable(whenConstraint);
     }
 
     public List<TypeConstraint.Owns> owns() {
-        return repeating.computeIfAbsent(TypeConstraint.Owns.class, c -> new ArrayList<>())
-                .stream().map(TypeConstraint::asOwns).collect(toList());
+        return ownsConstraints;
     }
 
     public List<TypeConstraint.Plays> plays() {
-        return repeating.computeIfAbsent(TypeConstraint.Plays.class, c -> new ArrayList<>())
-                .stream().map(TypeConstraint::asPlays).collect(toList());
+        return playsConstraints;
     }
 
     public List<TypeConstraint.Relates> relates() {
-        return repeating.computeIfAbsent(TypeConstraint.Relates.class, c -> new ArrayList<>())
-                .stream().map(TypeConstraint::asRelates).collect(toList());
+        return relatesConstraints;
     }
 
     @Override
@@ -167,14 +213,14 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
         if (isVisible()) {
             syntax.append(reference.syntax());
-            if (!ordered.isEmpty()) {
+            if (!constraints.isEmpty()) {
                 syntax.append(SPACE);
-                syntax.append(ordered.stream().map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
+                syntax.append(constraints.stream().map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else if (label().isPresent()) {
             syntax.append(label().get().scopedLabel());
-            if (ordered.size() > 1) {
-                syntax.append(SPACE).append(ordered.stream().filter(p -> !(p instanceof TypeConstraint.Label))
+            if (constraints.size() > 1) {
+                syntax.append(SPACE).append(constraints.stream().filter(p -> !(p instanceof TypeConstraint.Label))
                                                     .map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else {
@@ -190,11 +236,11 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         if (o == null || getClass() != o.getClass()) return false;
         TypeVariable that = (TypeVariable) o;
         return (this.reference.equals(that.reference) &&
-                set(this.ordered).equals(set(that.ordered)));
+                set(this.constraints).equals(set(that.constraints)));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.reference, set(this.ordered));
+        return Objects.hash(this.reference, set(this.constraints));
     }
 }

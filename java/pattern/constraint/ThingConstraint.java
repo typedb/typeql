@@ -525,7 +525,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final int hash;
 
         public Has(String type, ThingConstraint.Value<?> value) {
-            this(hidden().type(type), hidden().asAttributeWith(value));
+            this(hidden().type(type), hidden().constrain(value));
         }
 
         public Has(String type, UnboundVariable var) {
@@ -536,7 +536,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
             if (attribute.isNamed()) this.attribute = attribute; // TODO: is this needed? Should we not always set the ISA type?
-            else this.attribute = attribute.asSameThingWith(new Isa(type, false));
+            else this.attribute = attribute.constrain(new Isa(type, false));
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 

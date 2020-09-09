@@ -19,6 +19,7 @@ package graql.lang.pattern.variable;
 
 import graql.lang.pattern.constraint.Constraint;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class Variable {
@@ -29,7 +30,7 @@ public abstract class Variable {
         this.reference = reference;
     }
 
-    public abstract Stream<? extends Constraint<?>> constraints();
+    public abstract List<? extends Constraint<?>> constraints();
 
     public boolean isType() {
         return false;
@@ -40,7 +41,7 @@ public abstract class Variable {
     }
 
     public Stream<BoundVariable> variables() {
-        return constraints().flatMap(constraint -> constraint.variables().stream());
+        return constraints().stream().flatMap(constraint -> constraint.variables().stream());
     }
 
     public Reference.Type type() {

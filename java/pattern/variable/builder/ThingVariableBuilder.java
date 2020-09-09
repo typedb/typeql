@@ -35,11 +35,11 @@ public interface ThingVariableBuilder {
         }
 
         default T isa(String type) {
-            return asSameThingWith(new ThingConstraint.Isa(type, false));
+            return constrain(new ThingConstraint.Isa(type, false));
         }
 
         default T isa(UnboundVariable var) {
-            return asSameThingWith(new ThingConstraint.Isa(var, false));
+            return constrain(new ThingConstraint.Isa(var, false));
         }
 
         default T isaX(GraqlToken.Type type) {
@@ -47,11 +47,11 @@ public interface ThingVariableBuilder {
         }
 
         default T isaX(String type) {
-            return asSameThingWith(new ThingConstraint.Isa(type, true));
+            return constrain(new ThingConstraint.Isa(type, true));
         }
 
         default T isaX(UnboundVariable var) {
-            return asSameThingWith(new ThingConstraint.Isa(var, true));
+            return constrain(new ThingConstraint.Isa(var, true));
         }
 
         default T has(String type, long value) {
@@ -75,22 +75,22 @@ public interface ThingVariableBuilder {
         }
 
         default T has(String type, ThingConstraint.Value<?> value) {
-            return asSameThingWith(new ThingConstraint.Has(type, value));
+            return constrain(new ThingConstraint.Has(type, value));
         }
 
         default T has(String type, UnboundVariable variable) {
-            return asSameThingWith(new ThingConstraint.Has(type, variable));
+            return constrain(new ThingConstraint.Has(type, variable));
         }
 
-        T asSameThingWith(ThingConstraint.Singular constraint);
+        T constrain(ThingConstraint.Isa constraint);
 
-        T asSameThingWith(ThingConstraint.Repeatable constraint);
+        T constrain(ThingConstraint.Has constraint);
     }
 
     interface Thing {
 
         default ThingVariable.Thing iid(String iid) {
-            return asThingWith(new ThingConstraint.IID(iid));
+            return constrain(new ThingConstraint.IID(iid));
         }
 
         default ThingVariable.Thing not(String var) {
@@ -98,10 +98,12 @@ public interface ThingVariableBuilder {
         }
 
         default ThingVariable.Thing not(UnboundVariable var) {
-            return asThingWith(new ThingConstraint.NEQ(var));
+            return constrain(new ThingConstraint.NEQ(var));
         }
 
-        ThingVariable.Thing asThingWith(ThingConstraint.Singular constraint);
+        ThingVariable.Thing constrain(ThingConstraint.IID constraint);
+
+        ThingVariable.Thing constrain(ThingConstraint.NEQ constraint);
     }
 
     interface Relation {
@@ -111,22 +113,22 @@ public interface ThingVariableBuilder {
         }
 
         default ThingVariable.Relation rel(UnboundVariable playerVar) {
-            return asRelationWith(new ThingConstraint.Relation.RolePlayer(playerVar));
+            return constrain(new ThingConstraint.Relation.RolePlayer(playerVar));
         }
 
         default ThingVariable.Relation rel(String roleType, String playerVar) {
-            return asRelationWith(new ThingConstraint.Relation.RolePlayer(roleType, UnboundVariable.named(playerVar)));
+            return constrain(new ThingConstraint.Relation.RolePlayer(roleType, UnboundVariable.named(playerVar)));
         }
 
         default ThingVariable.Relation rel(String roleType, UnboundVariable playerVar) {
-            return asRelationWith(new ThingConstraint.Relation.RolePlayer(roleType, playerVar));
+            return constrain(new ThingConstraint.Relation.RolePlayer(roleType, playerVar));
         }
 
         default ThingVariable.Relation rel(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
-            return asRelationWith(new ThingConstraint.Relation.RolePlayer(roleTypeVar, playerVar));
+            return constrain(new ThingConstraint.Relation.RolePlayer(roleTypeVar, playerVar));
         }
 
-        ThingVariable.Relation asRelationWith(ThingConstraint.Relation.RolePlayer rolePlayer);
+        ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer);
     }
 
     interface Attribute {
@@ -354,9 +356,9 @@ public interface ThingVariableBuilder {
         }
 
         default ThingVariable.Attribute operation(ValueOperation<?> operation) {
-            return asAttributeWith(new ThingConstraint.Value<>(operation));
+            return constrain(new ThingConstraint.Value<>(operation));
         }
 
-        ThingVariable.Attribute asAttributeWith(ThingConstraint.Value<?> constraint);
+        ThingVariable.Attribute constrain(ThingConstraint.Value<?> constraint);
     }
 }

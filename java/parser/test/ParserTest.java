@@ -528,9 +528,9 @@ public class ParserTest {
                 "(evolves-from: $y, evolves-to: $z) isa evolution;";
         GraqlInsert parsed = Graql.parse(query).asInsert();
         GraqlInsert expected = insert(
-                var("x").has("name", "Pichu").isa("pokemon"),
-                var("y").has("name", "Pikachu").isa("pokemon"),
-                var("z").has("name", "Raichu").isa("pokemon"),
+                var("x").isa("pokemon").has("name", "Pichu"),
+                var("y").isa("pokemon").has("name", "Pikachu"),
+                var("z").isa("pokemon").has("name", "Raichu"),
                 rel("evolves-from", "x").rel("evolves-to", "y").isa("evolution"),
                 rel("evolves-from", "y").rel("evolves-to", "z").isa("evolution")
         );

@@ -277,7 +277,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         public Sub(Either<Pair<String, String>, UnboundVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(scoped -> hidden().asTypeWith(new TypeConstraint.Label(scoped.first(), scoped.second())),
+            this(typeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())),
                                UnboundVariable::toType), isExplicit);
         }
 
@@ -693,7 +693,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         public Plays(Either<Pair<String, String>, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(scoped -> hidden().asTypeWith(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
+            this(roleTypeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
                  overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
         }
 
