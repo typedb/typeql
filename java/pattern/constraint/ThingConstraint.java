@@ -68,14 +68,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         return this;
     }
 
-    public boolean isSingular() {
-        return false;
-    }
-
-    public boolean isRepeatable() {
-        return false;
-    }
-
     public boolean isIID() {
         return false;
     }
@@ -98,14 +90,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public boolean isHas() {
         return false;
-    }
-
-    public ThingConstraint.Singular asSingular() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
-    }
-
-    public ThingConstraint.Repeatable asRepeatable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
     }
 
     public IID asIID() {
@@ -132,33 +116,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Has.class)));
     }
 
-    public static abstract class Singular extends ThingConstraint {
-
-        @Override
-        public boolean isSingular() {
-            return true;
-        }
-
-        @Override
-        public ThingConstraint.Singular asSingular() {
-            return this;
-        }
-    }
-
-    public static abstract class Repeatable extends ThingConstraint {
-
-        @Override
-        public boolean isRepeatable() {
-            return true;
-        }
-
-        @Override
-        public ThingConstraint.Repeatable asRepeatable() {
-            return this;
-        }
-    }
-
-    public static class IID extends ThingConstraint.Singular {
+    public static class IID extends ThingConstraint {
 
         private static final Pattern REGEX = Pattern.compile("0x[0-9a-f]+");
         private final String iid;
@@ -206,7 +164,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
     }
 
-    public static class Isa extends ThingConstraint.Singular {
+    public static class Isa extends ThingConstraint {
 
         private final TypeVariable type;
         private final boolean isExplicit;
@@ -275,7 +233,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
     }
 
-    public static class NEQ extends ThingConstraint.Singular {
+    public static class NEQ extends ThingConstraint {
 
         private final ThingVariable<?> variable;
         private final int hash;
@@ -328,7 +286,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
     }
 
-    public static class Value<T> extends ThingConstraint.Singular {
+    public static class Value<T> extends ThingConstraint {
 
         private final ValueOperation<T> operation;
         private final int hash;
@@ -377,7 +335,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
     }
 
-    public static class Relation extends ThingConstraint.Singular {
+    public static class Relation extends ThingConstraint {
 
         private final List<RolePlayer> players;
         private String scope;
@@ -518,7 +476,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
     }
 
-    public static class Has extends ThingConstraint.Repeatable {
+    public static class Has extends ThingConstraint {
 
         private final TypeVariable type;
         private final ThingVariable<?> attribute;
@@ -535,7 +493,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private Has(TypeVariable type, ThingVariable<?> attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
-            if (attribute.isNamed()) this.attribute = attribute; // TODO: is this needed? Should we not always set the ISA type?
+            if (attribute.isNamed())
+                this.attribute = attribute; // TODO: is this needed? Should we not always set the ISA type?
             else this.attribute = attribute.constrain(new Isa(type, false));
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }

@@ -31,7 +31,6 @@ import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 
 public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable {
 

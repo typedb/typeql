@@ -77,14 +77,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         return this;
     }
 
-    public boolean isSingular() {
-        return false;
-    }
-
-    public boolean isRepeatable() {
-        return false;
-    }
-
     public boolean isLabel() {
         return false;
     }
@@ -123,14 +115,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public boolean isRelates() {
         return false;
-    }
-
-    public TypeConstraint.Singular asSingular() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Singular.class)));
-    }
-
-    public TypeConstraint.Repeatable asRepeatable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Repeatable.class)));
     }
 
     public TypeConstraint.Label asLabel() {
@@ -173,33 +157,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Relates.class)));
     }
 
-    public static abstract class Singular extends TypeConstraint {
-
-        @Override
-        public boolean isSingular() {
-            return true;
-        }
-
-        @Override
-        public TypeConstraint.Singular asSingular() {
-            return this;
-        }
-    }
-
-    public static abstract class Repeatable extends TypeConstraint {
-
-        @Override
-        public boolean isRepeatable() {
-            return true;
-        }
-
-        @Override
-        public TypeConstraint.Repeatable asRepeatable() {
-            return this;
-        }
-    }
-
-    public static class Label extends TypeConstraint.Singular {
+    public static class Label extends TypeConstraint {
 
         private final String label;
         private final String scope;
@@ -258,7 +216,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
     }
 
-    public static class Sub extends TypeConstraint.Singular {
+    public static class Sub extends TypeConstraint {
 
         private final TypeVariable type;
         private final boolean isExplicit;
@@ -330,7 +288,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
     }
 
-    public static class Abstract extends TypeConstraint.Singular {
+    public static class Abstract extends TypeConstraint {
 
         private final int hash;
 
@@ -365,7 +323,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
     }
 
-    public static class ValueType extends TypeConstraint.Singular {
+    public static class ValueType extends TypeConstraint {
 
         private final GraqlArg.ValueType valueType;
         private final int hash;
@@ -409,7 +367,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
     }
 
-    public static class Regex extends TypeConstraint.Singular {
+    public static class Regex extends TypeConstraint {
 
         private final java.util.regex.Pattern regex;
         private final int hash;
@@ -458,7 +416,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
     }
 
     // TODO: Move this out of TypeConstraint and create its own class
-    public static class Then extends TypeConstraint.Singular {
+    public static class Then extends TypeConstraint {
 
         private final Pattern pattern;
         private final int hash;
@@ -513,7 +471,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
     }
 
     // TODO: Move this out of TypeConstraint and create its own class
-    public static class When extends TypeConstraint.Singular {
+    public static class When extends TypeConstraint {
 
         private final Pattern pattern;
         private final int hash;
@@ -567,7 +525,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
     }
 
-    public static class Owns extends TypeConstraint.Repeatable {
+    public static class Owns extends TypeConstraint {
 
         private final TypeVariable attributeType;
         private final TypeVariable overriddenAttributeType;
@@ -661,7 +619,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
     }
 
-    public static class Plays extends TypeConstraint.Repeatable {
+    public static class Plays extends TypeConstraint {
 
         private final TypeVariable roleType;
         private final TypeVariable relationType;
@@ -757,7 +715,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
     }
 
-    public static class Relates extends TypeConstraint.Repeatable {
+    public static class Relates extends TypeConstraint {
 
         private TypeVariable roleType;
         private TypeVariable overriddenRoleType;
