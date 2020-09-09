@@ -175,7 +175,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         return Optional.ofNullable(subConstraint);
     }
 
-    public Optional<TypeConstraint.Abstract> abstractFlag() {
+    public Optional<TypeConstraint.Abstract> abstractConstraint() {
         return Optional.ofNullable(abstractConstraint);
     }
 
