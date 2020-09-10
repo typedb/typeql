@@ -111,6 +111,11 @@ public abstract class Reference {
         Referrable(Type type, boolean isVisible) {
             super(type, isVisible);
         }
+
+        @Override
+        public Reference.Referrable asReferrable() {
+            return this;
+        }
     }
 
     public static class Name extends Referrable {
