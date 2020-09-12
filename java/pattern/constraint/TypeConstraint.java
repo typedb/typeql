@@ -97,14 +97,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         return false;
     }
 
-    public boolean isThen() {
-        return false;
-    }
-
-    public boolean isWhen() {
-        return false;
-    }
-
     public boolean isOwns() {
         return false;
     }
@@ -135,14 +127,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public TypeConstraint.Regex asRegex() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Regex.class)));
-    }
-
-    public TypeConstraint.Then asThen() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Then.class)));
-    }
-
-    public TypeConstraint.When asWhen() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(When.class)));
     }
 
     public TypeConstraint.Owns asOwns() {
@@ -222,8 +206,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final boolean isExplicit;
         private final int hash;
 
-        public Sub(String typeLabe, boolean isExplicit) {
-            this(hidden().type(typeLabe), isExplicit);
+        public Sub(String typeLabel, boolean isExplicit) {
+            this(hidden().type(typeLabel), isExplicit);
         }
 
         public Sub(String typeScope, String typeLabel, boolean isExplicit) {
@@ -407,116 +391,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (o == null || getClass() != o.getClass()) return false;
             Regex that = (Regex) o;
             return (this.regex.pattern().equals(that.regex.pattern()));
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-    }
-
-    // TODO: Move this out of TypeConstraint and create its own class
-    public static class Then extends TypeConstraint {
-
-        private final Pattern pattern;
-        private final int hash;
-
-        public Then(Pattern pattern) {
-            if (pattern == null) throw new NullPointerException("Null pattern");
-            this.pattern = pattern;
-            this.hash = Objects.hash(Then.class, this.pattern);
-        }
-
-        public Pattern pattern() {
-            return pattern;
-        }
-
-        @Override
-        public boolean isThen() {
-            return true;
-        }
-
-        @Override
-        public TypeConstraint.Then asThen() {
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder syntax = new StringBuilder();
-            syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-            if (pattern instanceof Conjunction) {
-                syntax.append(((Conjunction<?>) pattern).patterns()
-                                      .stream().map(Object::toString)
-                                      .collect(joining("" + SEMICOLON + SPACE)));
-            } else {
-                syntax.append(pattern.toString());
-            }
-            syntax.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
-            return syntax.toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == this) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Then that = (Then) o;
-            return (this.pattern.equals(that.pattern));
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-    }
-
-    // TODO: Move this out of TypeConstraint and create its own class
-    public static class When extends TypeConstraint {
-
-        private final Pattern pattern;
-        private final int hash;
-
-        public When(Pattern pattern) {
-            if (pattern == null) throw new NullPointerException("Null Pattern");
-            this.pattern = pattern;
-            this.hash = Objects.hash(When.class, this.pattern);
-        }
-
-        public Pattern pattern() {
-            return pattern;
-        }
-
-        @Override
-        public boolean isWhen() {
-            return true;
-        }
-
-        @Override
-        public TypeConstraint.When asWhen() {
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder syntax = new StringBuilder();
-            syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-            if (pattern instanceof Conjunction) {
-                syntax.append(((Conjunction<?>) pattern).patterns()
-                                      .stream().map(Object::toString)
-                                      .collect(joining("" + SEMICOLON + SPACE)));
-            } else {
-                syntax.append(pattern);
-            }
-            syntax.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
-            return syntax.toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == this) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            When that = (When) o;
-            return (this.pattern.equals(that.pattern));
         }
 
         @Override

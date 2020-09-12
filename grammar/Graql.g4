@@ -39,7 +39,7 @@ query_undefine        :   UNDEFINE    schema_patterns  ;
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
 query_delete          :   MATCH       patterns      DELETE  variable_things     ;
-query_match           :   MATCH       patterns            ( filters )?          ;
+query_match           :   MATCH       patterns            ( filters )           ;
 query_compute         :   COMPUTE     compute_conditions                        ;
 
 // MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================

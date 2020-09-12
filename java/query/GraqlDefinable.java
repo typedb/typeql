@@ -20,6 +20,7 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.SchemaVariable;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.LinkedList;
@@ -36,15 +37,15 @@ import static java.util.stream.Collectors.joining;
 abstract class GraqlDefinable extends GraqlQuery {
 
     private final GraqlToken.Command keyword;
-    private final List<TypeVariable> variables;
+    private final List<SchemaVariable> variables;
     private final int hash;
 
-    GraqlDefinable(GraqlToken.Command keyword, List<TypeVariable> variables) {
+    GraqlDefinable(GraqlToken.Command keyword, List<SchemaVariable> variables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
         if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
-        LinkedList<TypeVariable> list = new LinkedList<>(variables);
+        LinkedList<SchemaVariable> list = new LinkedList<>(variables);
         while (!list.isEmpty()) {
-            TypeVariable v = list.removeFirst();
+            SchemaVariable v = list.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
             else v.constraints().forEach(c -> list.addAll(c.variables()));
         }
@@ -54,7 +55,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         this.hash = Objects.hash(this.keyword, this.variables);
     }
 
-    public final List<TypeVariable> variables() {
+    public final List<SchemaVariable> variables() {
         return variables;
     }
 
@@ -66,7 +67,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         if (variables.size() > 1) query.append(NEW_LINE);
         else query.append(GraqlToken.Char.SPACE);
 
-        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(variables().stream().map(SchemaVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
     }

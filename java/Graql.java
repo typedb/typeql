@@ -25,6 +25,7 @@ import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.ValueOperation;
+import graql.lang.pattern.variable.SchemaVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -79,19 +80,19 @@ public class Graql {
         return new GraqlInsert(things);
     }
 
-    public static GraqlDefine define(TypeVariable... types) {
+    public static GraqlDefine define(SchemaVariable... types) {
         return new GraqlDefine(list(types));
     }
 
-    public static GraqlDefine define(List<TypeVariable> types) {
+    public static GraqlDefine define(List<SchemaVariable> types) {
         return new GraqlDefine(types);
     }
 
-    public static GraqlUndefine undefine(TypeVariable... types) {
+    public static GraqlUndefine undefine(SchemaVariable... types) {
         return new GraqlUndefine(list(types));
     }
 
-    public static GraqlUndefine undefine(List<TypeVariable> types) {
+    public static GraqlUndefine undefine(List<SchemaVariable> types) {
         return new GraqlUndefine(types);
     }
 

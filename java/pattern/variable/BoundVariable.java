@@ -33,6 +33,10 @@ public abstract class BoundVariable extends Variable implements Pattern {
         return new UnboundVariable(reference);
     }
 
+    public SchemaVariable asSchema() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(SchemaVariable.class)));
+    }
+
     public TypeVariable asType() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }

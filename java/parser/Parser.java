@@ -33,6 +33,7 @@ import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.constraint.ValueOperation;
 import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.SchemaVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -227,19 +228,29 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDefine visitQuery_define(GraqlParser.Query_defineContext ctx) {
-        return new GraqlDefine(visitVariable_types(ctx.schema()));
+        return new GraqlDefine(visitSchema_patterns(ctx.schema_patterns()));
     }
 
     @Override
     public GraqlUndefine visitQuery_undefine(GraqlParser.Query_undefineContext ctx) {
-        return new GraqlUndefine(visitVariable_types(ctx.schema()));
+        return new GraqlUndefine(visitSchema_patterns(ctx.schema_patterns()));
     }
 
     @Override
-    public List<TypeVariable> visitSchemaPatterns(GraqlParser.Pattern)
+    public List<SchemaVariable> visitSchema_patterns(GraqlParser.Schema_patternsContext ctx) {
+        List<SchemaVariable> schemaVariables = new ArrayList<>();
+        for (GraqlParser.SchemaContext schema : ctx.schema()) {
+            if (schema.variable_type() != null) {
+                schemaVariables.add(visitVariable_type(schema.variable_type()));
+            } else {
+                schemaVariables.add(visitRule_(schema.rule_()));
+            }
+        }
+        return schemaVariables;
+    }
 
     @Override
-    public List<TypeVariable> visitSchema(GraqlParser.SchemaContext ctx) {
+    public SchemaVariable visitSchema(GraqlParser.SchemaContext ctx) {
         if (ctx.variable_type() != null) {
             return visitVariable_type(ctx.variable_type());
         } else {
@@ -248,8 +259,9 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public List<TypeVariable> visitVariable_types(GraqlParser.SchemaContext ctx) {
-        return ctx.variable_type().stream().map(this::visitVariable_type).collect(toList());
+    public SchemaVariable visitRule_(GraqlParser.Rule_Context ctx) {
+        // TODO
+        return null;
     }
 
     @Override
@@ -588,10 +600,10 @@ public class Parser extends GraqlBaseVisitor {
                 type = type.value(GraqlArg.ValueType.of(constraint.value_type().getText()));
             } else if (constraint.REGEX() != null) {
                 type = type.regex(visitRegex(constraint.regex()));
-            } else if (constraint.WHEN() != null) {
-                type = type.when(new Conjunction<>(visitPatterns(constraint.patterns())));
-            } else if (constraint.THEN() != null) {
-                type = type.then(new Conjunction<>(visitVariable_things(constraint.variable_things())));
+//            } else if (constraint.WHEN() != null) {
+//                type = type.when(new Conjunction<>(visitPatterns(constraint.patterns())));
+//            } else if (constraint.THEN() != null) {
+//                type = type.then(new Conjunction<>(visitVariable_things(constraint.variable_things())));
             } else if (constraint.TYPE() != null) {
                 Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
                 type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));

@@ -18,6 +18,7 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.pattern.constraint.Constraint;
+import graql.lang.pattern.constraint.SchemaConstraint;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
@@ -90,14 +91,16 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
         return new TypeVariable(reference).constrain(constraint);
     }
 
-    @Override
-    public TypeVariable constrain(TypeConstraint.Then constraint) {
-        return new TypeVariable(reference).constrain(constraint);
+//    TODO these overrides need to come from a new builder
+//    @Override
+    public SchemaVariable constrain(SchemaConstraint.Then constraint) {
+        return new SchemaVariable(reference).constrain(constraint);
     }
 
-    @Override
-    public TypeVariable constrain(TypeConstraint.When constraint) {
-        return new TypeVariable(reference).constrain(constraint);
+//    TODO these overrides need to come from a new builder
+//    @Override
+    public SchemaVariable constrain(SchemaConstraint.When constraint) {
+        return new SchemaVariable(reference).constrain(constraint);
     }
 
     @Override

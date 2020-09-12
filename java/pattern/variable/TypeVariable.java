@@ -33,15 +33,13 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
 
-public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
+public class TypeVariable extends SchemaVariable implements TypeVariableBuilder {
 
     private TypeConstraint.Label labelConstraint;
     private TypeConstraint.Sub subConstraint;
     private TypeConstraint.Abstract abstractConstraint;
     private TypeConstraint.ValueType valueTypeConstraint;
     private TypeConstraint.Regex regexConstraint;
-    private TypeConstraint.Then thenConstraint;
-    private TypeConstraint.When whenConstraint;
 
     private final List<TypeConstraint.Owns> ownsConstraints;
     private final List<TypeConstraint.Plays> playsConstraints;
@@ -57,10 +55,11 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         this.constraints = new LinkedList<>();
     }
 
-    @Override
-    public List<TypeConstraint> constraints() {
-        return constraints;
-    }
+    // TODO this won't quite work
+//    @Override
+//    public List<SchemaVariable> constraints() {
+//        return constraints;
+//    }
 
     @Override
     public boolean isType() {
@@ -122,25 +121,6 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         return this;
     }
 
-    @Override
-    public TypeVariable constrain(TypeConstraint.Then constraint) {
-        if (thenConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Then.class, constraint));
-        }
-        thenConstraint = constraint;
-        constraints.add(constraint);
-        return this;
-    }
-
-    @Override
-    public TypeVariable constrain(TypeConstraint.When constraint) {
-        if (whenConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.When.class, constraint));
-        }
-        whenConstraint = constraint;
-        constraints.add(constraint);
-        return this;
-    }
 
     @Override
     public TypeVariable constrain(TypeConstraint.Owns constraint) {
@@ -184,14 +164,6 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
     public Optional<TypeConstraint.Regex> regex() {
         return Optional.ofNullable(regexConstraint);
-    }
-
-    public Optional<TypeConstraint.Then> then() {
-        return Optional.ofNullable(thenConstraint);
-    }
-
-    public Optional<TypeConstraint.When> when() {
-        return Optional.ofNullable(whenConstraint);
     }
 
     public List<TypeConstraint.Owns> owns() {

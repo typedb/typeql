@@ -18,13 +18,14 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.pattern.variable.SchemaVariable;
 import graql.lang.pattern.variable.TypeVariable;
 
 import java.util.List;
 
 public class GraqlUndefine extends GraqlDefinable {
 
-    public GraqlUndefine(List<TypeVariable> variables) {
+    public GraqlUndefine(List<SchemaVariable> variables) {
         super(GraqlToken.Command.UNDEFINE, variables);
     }
 }
