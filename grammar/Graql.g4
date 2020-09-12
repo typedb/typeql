@@ -33,8 +33,8 @@ query                 :   query_define    |   query_undefine
                       |   query_match_group |   query_match_group_agg
                       |   query_compute   ;
 
-query_define          :   DEFINE      schema_patterns  ;
-query_undefine        :   UNDEFINE    schema_patterns  ;
+query_define          :   DEFINE      schema+  ;
+query_undefine        :   UNDEFINE    schema+  ;
 
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
@@ -76,10 +76,10 @@ function_group        :   GROUP   VAR_    ';' ;
 
 // SCHEMA QUERY ===============================================================
 
-schema_patterns       : (schema)+            ;
-
 schema                :  variable_type
-                      |  rule_               ;
+                      |  variable_schema     ;
+
+variable_schema       :  rule_               ;
 
 // QUERY PATTERNS ==============================================================
 
