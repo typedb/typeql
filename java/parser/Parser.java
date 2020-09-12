@@ -227,16 +227,28 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDefine visitQuery_define(GraqlParser.Query_defineContext ctx) {
-        return new GraqlDefine(visitVariable_types(ctx.variable_types()));
+        return new GraqlDefine(visitVariable_types(ctx.schema()));
     }
 
     @Override
     public GraqlUndefine visitQuery_undefine(GraqlParser.Query_undefineContext ctx) {
-        return new GraqlUndefine(visitVariable_types(ctx.variable_types()));
+        return new GraqlUndefine(visitVariable_types(ctx.schema()));
     }
 
     @Override
-    public List<TypeVariable> visitVariable_types(GraqlParser.Variable_typesContext ctx) {
+    public List<TypeVariable> visitSchemaPatterns(GraqlParser.Pattern)
+
+    @Override
+    public List<TypeVariable> visitSchema(GraqlParser.SchemaContext ctx) {
+        if (ctx.variable_type() != null) {
+            return visitVariable_type(ctx.variable_type());
+        } else {
+            return visitRule_(ctx.rule_());
+        }
+    }
+
+    @Override
+    public List<TypeVariable> visitVariable_types(GraqlParser.SchemaContext ctx) {
         return ctx.variable_type().stream().map(this::visitVariable_type).collect(toList());
     }
 

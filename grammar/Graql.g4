@@ -33,8 +33,8 @@ query                 :   query_define    |   query_undefine
                       |   query_match_group |   query_match_group_agg
                       |   query_compute   ;
 
-query_define          :   DEFINE      variable_types ;
-query_undefine        :   UNDEFINE    variable_types ;
+query_define          :   DEFINE      schema_patterns  ;
+query_undefine        :   UNDEFINE    schema_patterns  ;
 
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
@@ -74,6 +74,13 @@ function_method       :   COUNT   |   MAX     |   MEAN    |   MEDIAN            
 
 function_group        :   GROUP   VAR_    ';' ;
 
+// SCHEMA QUERY ===============================================================
+
+schema_patterns       : (schema)+            ;
+
+schema                :  variable_type
+                      |  rule_               ;
+
 // QUERY PATTERNS ==============================================================
 
 patterns              : ( pattern ';' )+      ;
@@ -93,7 +100,6 @@ pattern_variable      :   variable_type
 
 // TYPE VARIABLES ==============================================================
 
-variable_types        : ( variable_type ';' )+ ;
 variable_type         :   type_any    type_constraint ( ',' type_constraint )*  ;
 type_constraint       :   ABSTRACT
                       |   SUB_        type_any
@@ -152,6 +158,9 @@ comparator            :   EQV | NEQV | GT | GTE | LT | LTE ;
 comparable            :   literal | VAR_  ;
 containable           :   STRING_ | VAR_  ;
 
+// SCHEMA CONSTRUCT =============================================================
+
+rule_                  :   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
 
 // COMPUTE QUERY ===============================================================
 //
@@ -203,14 +212,16 @@ type                  :   label                         | VAR_          ;       
 
 label_any             :   label_scoped  | label         ;
 label_scoped          :   LABEL_SCOPED_ ;
-label                 :   LABEL_        | type_native   | unreserved    ;
+label                 :   LABEL_        | schema_native | type_native   | unreserved    ;
 labels                :   label         | label_array   ;
 label_array           :   '[' label ( ',' label )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 
+schema_native         : RULE              ;
+
 type_native           :   THING           |   ENTITY          |   ATTRIBUTE
-                      |   RELATION        |   ROLE            |   RULE          ;
+                      |   RELATION        |   ROLE            ;
 
 value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;
