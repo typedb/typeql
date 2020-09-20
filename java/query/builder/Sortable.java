@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package graql.lang.query.builder;
 
 import graql.lang.common.GraqlArg;
@@ -23,79 +22,38 @@ import graql.lang.common.GraqlToken;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import java.util.Objects;
-import java.util.Optional;
 
-public interface Filterable {
+public interface Sortable<S, O, L> {
 
-    Optional<Sorting> sort();
-
-    Optional<Long> offset();
-
-    Optional<Long> limit();
-
-    default String printFilters() {
-        StringBuilder filters = new StringBuilder();
-
-        sort().ifPresent(sort -> filters.append(GraqlToken.Filter.SORT).append(GraqlToken.Char.SPACE)
-                .append(sort).append(GraqlToken.Char.SEMICOLON).append(GraqlToken.Char.SPACE));
-
-        offset().ifPresent(offset -> filters.append(GraqlToken.Filter.OFFSET).append(GraqlToken.Char.SPACE)
-                .append(offset).append(GraqlToken.Char.SEMICOLON).append(GraqlToken.Char.SPACE));
-
-        limit().ifPresent(limit -> filters.append(GraqlToken.Filter.LIMIT).append(GraqlToken.Char.SPACE)
-                .append(limit).append(GraqlToken.Char.SEMICOLON).append(GraqlToken.Char.SPACE));
-
-        return filters.toString().trim();
+    default S sort(String var) {
+        return sort(UnboundVariable.named(var));
     }
 
-    interface Unfiltered<S extends Sorted, O extends Offsetted, L extends Limited> extends Filterable {
-
-        default S sort(String var) {
-            return sort(UnboundVariable.named(var));
-        }
-
-        default S sort(String var, String order) {
-            GraqlArg.Order o = GraqlArg.Order.of(order);
-            if (o == null) throw new IllegalArgumentException(
-                    "Invalid sorting order. Valid options: '" + GraqlArg.Order.ASC + "' or '" + GraqlArg.Order.DESC
-            );
-            return sort(UnboundVariable.named(var), o);
-        }
-
-        default S sort(String var, GraqlArg.Order order) {
-            return sort(UnboundVariable.named(var), order);
-        }
-
-        default S sort(UnboundVariable var) {
-            return sort(new Sorting(var));
-        }
-
-        default S sort(UnboundVariable var, GraqlArg.Order order) {
-            return sort(new Sorting(var, order));
-        }
-
-        S sort(Sorting sorting);
-
-        O offset(long offset);
-
-        L limit(long limit);
+    default S sort(String var, String order) {
+        GraqlArg.Order o = GraqlArg.Order.of(order);
+        if (o == null) throw new IllegalArgumentException(
+                "Invalid sorting order. Valid options: '" + GraqlArg.Order.ASC + "' or '" + GraqlArg.Order.DESC
+        );
+        return sort(UnboundVariable.named(var), o);
     }
 
-    interface Sorted<O extends Offsetted, L extends Limited> extends Filterable {
-
-        O offset(long offset);
-
-        L limit(long limit);
+    default S sort(String var, GraqlArg.Order order) {
+        return sort(UnboundVariable.named(var), order);
     }
 
-    interface Offsetted<L extends Limited> extends Filterable {
-
-        L limit(long limit);
+    default S sort(UnboundVariable var) {
+        return sort(new Sorting(var));
     }
 
-    interface Limited extends Filterable {
-
+    default S sort(UnboundVariable var, GraqlArg.Order order) {
+        return sort(new Sorting(var, order));
     }
+
+    S sort(Sorting sorting);
+
+    O offset(long offset);
+
+    L limit(long limit);
 
     class Sorting {
 

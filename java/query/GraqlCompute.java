@@ -50,7 +50,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     private GraqlToken.Compute.Method method;
     boolean includeAttributes;
 
-    // All these condition properties need to start off as NULL,
+    // All these condition constraints need to start off as NULL,
     // they will be initialised when the user provides input
     String fromID = null;
     String toID = null;
@@ -227,7 +227,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this instanceof GraqlCompute.Statistics.Count) {
                 return (GraqlCompute.Statistics.Count) this;
             } else {
-                throw GraqlException.create("This is not a GraqlCompute.Statistics.Count query");
+                throw GraqlException.of("This is not a GraqlCompute.Statistics.Count query");
             }
         }
 
@@ -235,7 +235,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this instanceof GraqlCompute.Statistics.Value) {
                 return (GraqlCompute.Statistics.Value) this;
             } else {
-                throw GraqlException.create("This is not a GraqlCompute.Statistics.Value query");
+                throw GraqlException.of("This is not a GraqlCompute.Statistics.Value query");
             }
         }
 
@@ -326,7 +326,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             @Override
             public Optional<GraqlException> getException() {
                 if (ofTypes == null) {
-                    return Optional.of(GraqlException.create(MISSING_COMPUTE_CONDITION.message(
+                    return Optional.of(GraqlException.of(MISSING_COMPUTE_CONDITION.message(
                             this.method(), conditionsRequired()
                     )));
                 } else {
@@ -407,7 +407,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         @Override
         public Optional<GraqlException> getException() {
             if (fromID == null || toID == null) {
-                return Optional.of(GraqlException.create(MISSING_COMPUTE_CONDITION.message(
+                return Optional.of(GraqlException.of(MISSING_COMPUTE_CONDITION.message(
                         this.method(), conditionsRequired()
                 )));
             } else {
@@ -505,13 +505,13 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         @Override
         public Optional<GraqlException> getException() {
             if (!algorithmsAccepted().contains(using())) {
-                return Optional.of(GraqlException.create(INVALID_COMPUTE_METHOD_ALGORITHM.message(method(), algorithmsAccepted())));
+                return Optional.of(GraqlException.of(INVALID_COMPUTE_METHOD_ALGORITHM.message(method(), algorithmsAccepted())));
             }
 
             // Check that the provided arguments are accepted for the current query method and algorithm
             for (GraqlToken.Compute.Param param : this.where().getParameters()) {
                 if (!argumentsAccepted().get(this.using()).contains(param)) {
-                    return Optional.of(GraqlException.create(INVALID_COMPUTE_ARGUMENT.message(
+                    return Optional.of(GraqlException.of(INVALID_COMPUTE_ARGUMENT.message(
                             this.method(), this.using(), argumentsAccepted().get(this.using())
                     )));
                 }

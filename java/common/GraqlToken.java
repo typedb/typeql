@@ -196,7 +196,7 @@ public class GraqlToken {
         }
     }
 
-    public enum Property {
+    public enum Constraint {
         ABSTRACT("abstract"),
         AS("as"),
         HAS("has"),
@@ -218,7 +218,7 @@ public class GraqlToken {
 
         private final String name;
 
-        Property(String name) {
+        Constraint(String name) {
             this.name = name;
         }
 
@@ -227,8 +227,8 @@ public class GraqlToken {
             return this.name;
         }
 
-        public static Property of(String value) {
-            for (Property c : Property.values()) {
+        public static Constraint of(String value) {
+            for (Constraint c : Constraint.values()) {
                 if (c.name.equals(value)) {
                     return c;
                 }

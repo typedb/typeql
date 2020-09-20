@@ -1,3 +1,20 @@
+#
+# Copyright (C) 2020 Grakn Labs
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
 build --incompatible_strict_action_env
 run --incompatible_strict_action_env
 test --incompatible_strict_action_env
@@ -9,8 +26,8 @@ build:rbe --remote_cache=cloud.buildbuddy.io
 build:rbe --remote_executor=cloud.buildbuddy.io
 build:rbe --bes_backend=cloud.buildbuddy.io
 build:rbe --bes_results_url=https://app.buildbuddy.io/invocation/
-build:rbe --tls_client_certificate=/home/circleci/.credentials/buildbuddy-cert.pem
-build:rbe --tls_client_key=/home/circleci/.credentials/buildbuddy-key.pem
+build:rbe --tls_client_certificate=/opt/credentials/buildbuddy-cert.pem
+build:rbe --tls_client_key=/opt/credentials/buildbuddy-key.pem
 build:rbe --host_platform=@graknlabs_dependencies//image/rbe:ubuntu-1604
 build:rbe --platforms=@graknlabs_dependencies//image/rbe:ubuntu-1604
 build:rbe --extra_execution_platforms=@graknlabs_dependencies//image/rbe:ubuntu-1604

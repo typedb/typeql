@@ -24,8 +24,8 @@ import graql.lang.pattern.Pattern;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
-import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
 import org.hamcrest.Matchers;
@@ -83,18 +83,18 @@ public class ParserTest {
 
     @Test
     public void testSimpleQuery() {
-        String query = "match $x isa movie; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").isa("movie")).get();
+        String query = "match $x isa movie;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").isa("movie"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseStringWithSlash() {
-        String query = "match $x isa person, has name 'alice/bob'; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").isa("person").has("name", "alice/bob")).get();
+        String query = "match $x isa person, has name 'alice/bob';";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").isa("person").has("name", "alice/bob"));
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -105,9 +105,9 @@ public class ParserTest {
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("brando").val("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
@@ -120,11 +120,10 @@ public class ParserTest {
         String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
-                "$t !== 'Apocalypse Now';\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+                "$t !== 'Apocalypse Now';";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
                         var("t").val("Apocalypse Now"),
@@ -135,7 +134,7 @@ public class ParserTest {
                         var("t").val("Spy")
                 ),
                 var("t").neq("Apocalypse Now")
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -144,11 +143,10 @@ public class ParserTest {
     public void testPredicateQuery2() {
         String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
-                "{ $t <= 'Juno'; $t >= 'Godfather'; $t !== 'Heat'; } or { $t 'The Muppets'; };\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+                "{ $t <= 'Juno'; $t >= 'Godfather'; $t !== 'Heat'; } or { $t 'The Muppets'; };";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
                         and(
@@ -158,7 +156,7 @@ public class ParserTest {
                         ),
                         var("t").val("The Muppets")
                 )
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -168,15 +166,14 @@ public class ParserTest {
         String query = "match\n" +
                 "($x, $y);\n" +
                 "$y isa person, has name $n;\n" +
-                "{ $n contains 'ar'; } or { $n like '^M.*$'; };\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+                "{ $n contains 'ar'; } or { $n like '^M.*$'; };";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 rel("x").rel("y"),
                 var("y").isa("person").has("name", var("n")),
                 or(var("n").contains("ar"), var("n").like("^M.*$"))
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -186,33 +183,32 @@ public class ParserTest {
         String query = "match\n" +
                 "$x has age $y;\n" +
                 "$y >= $z;\n" +
-                "$z 18 isa age;\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+                "$z 18 isa age;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("x").has("age", var("y")),
                 var("y").gte(var("z")),
                 var("z").val(18).isa("age")
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingContainsPredicateWithAVariable_ResultMatchesJavaGraql() {
-        String query = "match $x contains $y; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").contains(var("y"))).get();
+        String query = "match $x contains $y;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").contains(var("y")));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testValueEqualsVariableQuery() {
-        String query = "match $s1 == $s2; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("s1").eq(var("s2"))).get();
+        String query = "match $s1 == $s2;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("s1").eq(var("s2")));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -221,161 +217,160 @@ public class ParserTest {
     public void testMoviesReleasedAfterOrAtTheSameTimeAsSpy() {
         String query = "match\n" +
                 "$x has release-date >= $r;\n" +
-                "$_ has title 'Spy', has release-date $r;\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+                "$_ has title 'Spy', has release-date $r;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("x").has("release-date", gte(var("r"))),
                 var().has("title", "Spy").has("release-date", var("r"))
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testPredicates() {
-        String query = "match $x has release-date < 1986-03-03T00:00, has tmdb-vote-count 100, has tmdb-vote-average <= 9.0; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+        String query = "match $x has release-date < 1986-03-03T00:00, has tmdb-vote-count 100, has tmdb-vote-average <= 9.0;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlGet expected = match(
+        GraqlMatch expected = match(
                 var("x")
                         .has("release-date", lt(LocalDate.of(1986, 3, 3).atStartOfDay()))
                         .has("tmdb-vote-count", 100)
                         .has("tmdb-vote-average", lte(9.0))
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleTime() {
-        String query = "match $x has release-date 1000-11-12T13:14:15; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15))).get();
+        String query = "match $x has release-date 1000-11-12T13:14:15;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15)));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleBigYears() {
-        GraqlGet expected = match(var("x").has("release-date", LocalDate.of(12345, 12, 25).atStartOfDay())).get();
-        String query = "match $x has release-date +12345-12-25T00:00; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
+        GraqlMatch expected = match(var("x").has("release-date", LocalDate.of(12345, 12, 25).atStartOfDay()));
+        String query = "match $x has release-date +12345-12-25T00:00;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleSmallYears() {
-        String query = "match $x has release-date 0867-01-01T00:00; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").has("release-date", LocalDate.of(867, 1, 1).atStartOfDay())).get();
+        String query = "match $x has release-date 0867-01-01T00:00;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").has("release-date", LocalDate.of(867, 1, 1).atStartOfDay()));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleNegativeYears() {
-        String query = "match $x has release-date -3200-01-01T00:00; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").has("release-date", LocalDate.of(-3200, 1, 1).atStartOfDay())).get();
+        String query = "match $x has release-date -3200-01-01T00:00;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").has("release-date", LocalDate.of(-3200, 1, 1).atStartOfDay()));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleMillis() {
-        String query = "match $x has release-date 1000-11-12T13:14:15.123; get;";
-        GraqlGet expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123000000))).get();
-        GraqlGet parsed = Graql.parse(query).asGet();
+        String query = "match $x has release-date 1000-11-12T13:14:15.123;";
+        GraqlMatch expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123000000)));
+        GraqlMatch parsed = Graql.parse(query).asMatch();
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleMillisShorthand() {
-        String query = "match $x has release-date 1000-11-12T13:14:15.1; get;";
-        String parsedQueryString = "match $x has release-date 1000-11-12T13:14:15.100; get;";
-        GraqlGet expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 100000000))).get();
-        GraqlGet parsed = Graql.parse(query).asGet();
+        String query = "match $x has release-date 1000-11-12T13:14:15.1;";
+        String parsedQueryString = "match $x has release-date 1000-11-12T13:14:15.100;";
+        GraqlMatch expected = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 100000000)));
+        GraqlMatch parsed = Graql.parse(query).asMatch();
         assertQueryEquals(expected, parsed, parsedQueryString);
     }
 
 
     @Test
     public void whenParsingDate_ErrorWhenHandlingOverPreciseDecimalSeconds() {
-        String query = "match $x has release-date 1000-11-12T13:14:15.000123456; get;";
+        String query = "match $x has release-date 1000-11-12T13:14:15.000123456;";
         exception.expect(GraqlException.class);
         exception.expectMessage(Matchers.containsString("no viable alternative"));
-        GraqlGet parsed = Graql.parse(query).asGet();
+        GraqlMatch parsed = Graql.parse(query).asMatch();
     }
 
     @Test
     public void whenParsingDateTime_ErrorWhenHandlingOverPreciseNanos() {
         exception.expect(GraqlException.class);
         exception.expectMessage(Matchers.containsString("more precise than 1 millisecond"));
-        GraqlGet apiQuery = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000))).get();
+        GraqlMatch apiQuery = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000)));
     }
 
 
     @Test
     public void testLongComparatorQuery() {
-        String query = "match $x isa movie, has tmdb-vote-count <= 400; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").isa("movie").has("tmdb-vote-count", lte(400))).get();
+        String query = "match $x isa movie, has tmdb-vote-count <= 400;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").isa("movie").has("tmdb-vote-count", lte(400)));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testSchemaQuery() {
-        String query = "match $x plays starring:actor; get; sort $x asc;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").plays("starring", "actor")).get().sort("x", "asc");
+        String query = "match $x plays starring:actor; sort $x asc;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").plays("starring", "actor")).sort("x", "asc");
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetSort() {
-        String query = "match $x isa movie, has rating $r; get; sort $r desc;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(
+        String query = "match $x isa movie, has rating $r; sort $r desc;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).get().sort("r", "desc");
+        ).sort("r", "desc");
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetSortLimit() {
-        String query = "match $x isa movie, has rating $r; get; sort $r; limit 10;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(
+        String query = "match $x isa movie, has rating $r; sort $r; limit 10;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).get().sort("r").limit(10);
+        ).sort("r").limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetSortOffsetLimit() {
-        String query = "match $x isa movie, has rating $r; get; sort $r desc; offset 10; limit 10;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(
+        String query = "match $x isa movie, has rating $r; sort $r desc; offset 10; limit 10;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).get().sort("r", "desc").offset(10).limit(10);
+        ).sort("r", "desc").offset(10).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetOffsetLimit() {
-        String query = "match $y isa movie, has title $n; get; offset 2; limit 4;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(
+        String query = "match $y isa movie, has title $n; offset 2; limit 4;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(
                 var("y").isa("movie").has("title", var("n"))
-        ).get().offset(2).limit(4);
+        ).offset(2).limit(4);
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -387,16 +382,15 @@ public class ParserTest {
                 "$x isa $z;\n" +
                 "$y 'crime';\n" +
                 "$z sub production;\n" +
-                "has-genre relates $p;\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(
+                "has-genre relates $p;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(
                 rel(var("p"), var("x")).rel("y"),
                 var("x").isa(var("z")),
                 var("y").val("crime"),
                 var("z").sub("production"),
                 type("has-genre").relates(var("p"))
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -405,10 +399,9 @@ public class ParserTest {
     public void testParseRelatesTypeVariable() {
         String query = "match\n" +
                 "$x isa $type;\n" +
-                "$type relates someRole;\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").isa(var("type")), var("type").relates("someRole")).get();
+                "$type relates someRole;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").isa(var("type")), var("type").relates("someRole"));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -417,10 +410,9 @@ public class ParserTest {
     public void testOrQuery() {
         String query = "match\n" +
                 "$x isa movie;\n" +
-                "{ $y 'drama' isa genre; ($x, $y); } or { $x 'The Muppets'; };\n" +
-                "get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(
+                "{ $y 'drama' isa genre; ($x, $y); } or { $x 'The Muppets'; };";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(
                 var("x").isa("movie"),
                 or(
                         and(
@@ -429,7 +421,7 @@ public class ParserTest {
                         ),
                         var("x").val("The Muppets")
                 )
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -437,8 +429,8 @@ public class ParserTest {
     @Test
     public void testAggregateCountQuery() {
         String query = "match ($x, $y) isa friendship; get $x, $y; count;";
-        GraqlGet.Aggregate parsed = parse(query).asGetAggregate();
-        GraqlGet.Aggregate expected = match(rel("x").rel("y").isa("friendship")).get("x", "y").count();
+        GraqlMatch.Aggregate parsed = parse(query).asMatchAggregate();
+        GraqlMatch.Aggregate expected = match(rel("x").rel("y").isa("friendship")).get("x", "y").count();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -446,32 +438,56 @@ public class ParserTest {
     @Test
     public void testAggregateGroupCountQuery() {
         String query = "match ($x, $y) isa friendship; get $x, $y; group $x; count;";
-        GraqlGet.Group.Aggregate parsed = parse(query).asGetGroupAggregate();
-        GraqlGet.Group.Aggregate expected = match(rel("x").rel("y").isa("friendship")).get("x", "y").group("x").count();
+        GraqlMatch.Group.Aggregate parsed = parse(query).asMatchGroupAggregate();
+        GraqlMatch.Group.Aggregate expected = match(rel("x").rel("y").isa("friendship")).get("x", "y").group("x").count();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
-    public void testAggregateGroupMaxQuery() {
+    public void testSingleLineGroupAggregateMaxQuery() {
+        String query = "match $x has age $a; group $x; max $a;";
+        GraqlMatch.Group.Aggregate parsed = parse(query).asMatchGroupAggregate();
+        GraqlMatch.Group.Aggregate expected = match(var("x").has("age", var("a"))).group("x").max("a");
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testMultiLineGroupAggregateMaxQuery() {
         String query = "match\n" +
                 "($x, $y) isa friendship;\n" +
                 "$y has age $z;\n" +
-                "get; group $x; max $z;";
-        GraqlGet.Group.Aggregate parsed = parse(query).asGetGroupAggregate();
-        GraqlGet.Group.Aggregate expected = match(
+                "group $x; max $z;";
+        GraqlMatch.Group.Aggregate parsed = parse(query).asMatchGroupAggregate();
+        GraqlMatch.Group.Aggregate expected = match(
                 rel("x").rel("y").isa("friendship"),
                 var("y").has("age", var("z"))
-        ).get().group("x").max("z");
+        ).group("x").max("z");
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testMultiLineFilteredGroupAggregateMaxQuery() {
+        String query = "match\n" +
+                "($x, $y) isa friendship;\n" +
+                "$y has age $z;\n" +
+                "get $x, $y, $z; group $x; max $z;";
+        GraqlMatch.Group.Aggregate parsed = parse(query).asMatchGroupAggregate();
+        GraqlMatch.Group.Aggregate expected = match(
+                rel("x").rel("y").isa("friendship"),
+                var("y").has("age", var("z"))
+        ).get("x", "y", "z").group("x").max("z");
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenComparingCountQueryUsingGraqlAndJavaGraql_TheyAreEquivalent() {
-        String query = "match $x isa movie, has title \"Godfather\"; get; count;";
-        GraqlGet.Aggregate parsed = parse(query).asGetAggregate();
-        GraqlGet.Aggregate expected = match(var("x").isa("movie").has("title", "Godfather")).get().count();
+        String query = "match $x isa movie, has title \"Godfather\"; count;";
+        GraqlMatch.Aggregate parsed = parse(query).asMatchAggregate();
+        GraqlMatch.Aggregate expected = match(var("x").isa("movie").has("title", "Godfather")).count();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -512,9 +528,9 @@ public class ParserTest {
                 "(evolves-from: $y, evolves-to: $z) isa evolution;";
         GraqlInsert parsed = Graql.parse(query).asInsert();
         GraqlInsert expected = insert(
-                var("x").has("name", "Pichu").isa("pokemon"),
-                var("y").has("name", "Pikachu").isa("pokemon"),
-                var("z").has("name", "Raichu").isa("pokemon"),
+                var("x").isa("pokemon").has("name", "Pichu"),
+                var("y").isa("pokemon").has("name", "Pikachu"),
+                var("z").isa("pokemon").has("name", "Raichu"),
                 rel("evolves-from", "x").rel("evolves-to", "y").isa("evolution"),
                 rel("evolves-from", "y").rel("evolves-to", "z").isa("evolution")
         );
@@ -547,13 +563,13 @@ public class ParserTest {
 
     @Test
     public void whenParsingAsInMatch_ResultIsSameAsSub() {
-        String query = "match fatherhood sub parenthood, relates father as parent, relates son as child; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(
+        String query = "match fatherhood sub parenthood, relates father as parent, relates son as child;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(
                 type("fatherhood").sub("parenthood")
                         .relates("father", "parent")
                         .relates("son", "child")
-        ).get();
+        );
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -631,27 +647,27 @@ public class ParserTest {
 
     @Test
     public void testMatchValueTypeQuery() {
-        String query = "match $x value double; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(GraqlArg.ValueType.DOUBLE)).get();
+        String query = "match $x value double;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").value(GraqlArg.ValueType.DOUBLE));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseWithoutVar() {
-        String query = "match $_ isa person; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var().isa("person")).get();
+        String query = "match $_ isa person;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var().isa("person"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
-        String query = "match $x value datetime; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").value(GraqlArg.ValueType.DATETIME)).get();
+        String query = "match $x value datetime;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").value(GraqlArg.ValueType.DATETIME));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -681,9 +697,9 @@ public class ParserTest {
 
     @Test
     public void whenParsingQueryWithComments_TheyAreIgnored() {
-        String query = "match \n# there's a comment here\n$x isa###WOW HERES ANOTHER###\r\nmovie; get; count;";
-        GraqlGet.Aggregate parsed = parse(query).asGetAggregate();
-        GraqlGet.Aggregate expected = match(var("x").isa("movie")).get().count();
+        String query = "match \n# there's a comment here\n$x isa###WOW HERES ANOTHER###\r\nmovie; count;";
+        GraqlMatch.Aggregate parsed = parse(query).asMatchAggregate();
+        GraqlMatch.Aggregate expected = match(var("x").isa("movie")).count();
 
         assertEquals(expected, parsed);
         assertEquals(expected, parse(parsed.toString()));
@@ -719,7 +735,7 @@ public class ParserTest {
     @Test
     public void testQueryParserWithoutGraph() {
         String queryString = "match $x isa movie; get $x;";
-        GraqlGet query = parse("match $x isa movie; get $x;").asGet();
+        GraqlMatch query = parse("match $x isa movie; get $x;").asMatch();
         assertEquals(queryString, query.toString());
     }
 
@@ -734,27 +750,27 @@ public class ParserTest {
 
     @Test
     public void testParseAggregateGroup() {
-        String query = "match $x isa movie; get; group $x;";
-        GraqlGet.Group parsed = parse(query).asGetGroup();
-        GraqlGet.Group expected = match(var("x").isa("movie")).get().group("x");
+        String query = "match $x isa movie; group $x;";
+        GraqlMatch.Group parsed = parse(query).asMatchGroup();
+        GraqlMatch.Group expected = match(var("x").isa("movie")).group("x");
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseAggregateGroupCount() {
-        String query = "match $x isa movie; get; group $x; count;";
-        GraqlGet.Group.Aggregate parsed = parse(query).asGetGroupAggregate();
-        GraqlGet.Group.Aggregate expected = match(var("x").isa("movie")).get().group("x").count();
+        String query = "match $x isa movie; group $x; count;";
+        GraqlMatch.Group.Aggregate parsed = parse(query).asMatchGroupAggregate();
+        GraqlMatch.Group.Aggregate expected = match(var("x").isa("movie")).group("x").count();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseAggregateStd() {
-        String query = "match $x isa movie; get; std $x;";
-        GraqlGet.Aggregate parsed = parse(query).asGetAggregate();
-        GraqlGet.Aggregate expected = match(var("x").isa("movie")).get().std("x");
+        String query = "match $x isa movie; std $x;";
+        GraqlMatch.Aggregate parsed = parse(query).asMatchAggregate();
+        GraqlMatch.Aggregate expected = match(var("x").isa("movie")).std("x");
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -912,25 +928,25 @@ public class ParserTest {
 
     @Test
     public void testHasVariable() {
-        String query = "match $_ has title 'Godfather', has tmdb-vote-count $x; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var().has("title", "Godfather").has("tmdb-vote-count", var("x"))).get();
+        String query = "match $_ has title 'Godfather', has tmdb-vote-count $x;";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var().has("title", "Godfather").has("tmdb-vote-count", var("x")));
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testRegexAttributeType() {
-        String query = "match $x regex '(fe)?male'; get;";
-        GraqlGet parsed = Graql.parse(query).asGet();
-        GraqlGet expected = match(var("x").regex("(fe)?male")).get();
+        String query = "match $x regex '(fe)?male';";
+        GraqlMatch parsed = Graql.parse(query).asMatch();
+        GraqlMatch expected = match(var("x").regex("(fe)?male"));
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testGraqlParseQuery() {
-        assertTrue(parse("match $x isa movie; get;") instanceof GraqlGet);
+        assertTrue(parse("match $x isa movie;") instanceof GraqlMatch);
     }
 
     @Test
@@ -946,10 +962,10 @@ public class ParserTest {
 
     @Test
     public void testParseListOneMatch() {
-        String getString = "match $y isa movie; get;";
+        String getString = "match $y isa movie;";
         List<GraqlQuery> queries = Graql.parseList(getString).collect(toList());
 
-        assertEquals(Arrays.asList(match(var("y").isa("movie")).get()), queries);
+        assertEquals(Arrays.asList(match(var("y").isa("movie"))), queries);
     }
 
     @Test
@@ -979,10 +995,10 @@ public class ParserTest {
     @Test
     public void testParseList() {
         String insertString = "insert $x isa movie;";
-        String getString = "match $y isa movie; get;";
+        String getString = "match $y isa movie;";
         List<GraqlQuery> queries = Graql.parseList(insertString + getString).collect(toList());
 
-        assertEquals(Arrays.asList(insert(var("x").isa("movie")), match(var("y").isa("movie")).get()), queries);
+        assertEquals(Arrays.asList(insert(var("x").isa("movie")), match(var("y").isa("movie"))), queries);
     }
 
     @Test
@@ -998,13 +1014,12 @@ public class ParserTest {
     public void testParseMatchInsertBeforeAndAfter() {
         String matchString = "match $y isa movie;";
         String insertString = "insert $x isa movie;";
-        String getString = matchString + " get;";
         String matchInsert = matchString + insertString;
 
         List<String> options = list(
-                getString + matchInsert,
+                matchString + matchInsert,
                 insertString + matchInsert,
-                matchInsert + getString,
+                matchInsert + matchString,
                 matchInsert + insertString
         );
 
@@ -1051,14 +1066,14 @@ public class ParserTest {
     public void testMissingColon() {
         exception.expect(GraqlException.class);
         //noinspection ResultOfMethodCallIgnored
-        parse("match (actor $x, $y) isa has-cast; get;");
+        parse("match (actor $x, $y) isa has-cast;");
     }
 
     @Test
     public void testMissingComma() {
         exception.expect(GraqlException.class);
         //noinspection ResultOfMethodCallIgnored
-        parse("match ($x $y) isa has-cast; get;");
+        parse("match ($x $y) isa has-cast;");
     }
 
     @Test
@@ -1073,18 +1088,18 @@ public class ParserTest {
     public void whenParsingAggregateWithWrongVariableArgumentNumber_Throw() {
         exception.expect(GraqlException.class);
         //noinspection ResultOfMethodCallIgnored
-        parse("match $x isa name; get; group;");
+        parse("match $x isa name; group;");
     }
 
     @Test
     public void whenParsingAggregateWithWrongName_Throw() {
         exception.expect(GraqlException.class);
         //noinspection ResultOfMethodCallIgnored
-        parse("match $x isa name; get; hello $x;");
+        parse("match $x isa name; hello $x;");
     }
 
     @Test
-    public void regexAttributeProperty() {
+    public void regexAttributeConstraint() {
         String query = "define digit sub attribute, regex '\\d';";
         GraqlDefine parsed = parse(query);
         GraqlDefine expected = define(type("digit").sub("attribute").regex("\\d"));
@@ -1093,48 +1108,48 @@ public class ParserTest {
 
     @Test
     public void regexPredicateParsesCharacterClassesCorrectly() {
-        String query = "match $x like '\\d'; get;";
-        GraqlGet parsed = parse(query);
-        GraqlGet expected = match(var("x").like("\\d")).get();
+        String query = "match $x like '\\d';";
+        GraqlMatch parsed = parse(query);
+        GraqlMatch expected = match(var("x").like("\\d"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesQuotesCorrectly() {
-        String query = "match $x like '\\\"'; get;";
-        GraqlGet parsed = parse(query);
-        GraqlGet expected = match(var("x").like("\\\"")).get();
+        String query = "match $x like '\\\"';";
+        GraqlMatch parsed = parse(query);
+        GraqlMatch expected = match(var("x").like("\\\""));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesBackslashesCorrectly() {
-        String query = "match $x like '\\\\'; get;";
-        GraqlGet parsed = parse(query);
-        GraqlGet expected = match(var("x").like("\\\\")).get();
+        String query = "match $x like '\\\\';";
+        GraqlMatch parsed = parse(query);
+        GraqlMatch expected = match(var("x").like("\\\\"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesNewlineCorrectly() {
-        String query = "match $x like '\\n'; get;";
-        GraqlGet parsed = parse(query);
-        GraqlGet expected = match(var("x").like("\\n")).get();
+        String query = "match $x like '\\n';";
+        GraqlMatch parsed = parse(query);
+        GraqlMatch expected = match(var("x").like("\\n"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesForwardSlashesCorrectly() {
-        String query = "match $x like '\\/'; get;";
-        GraqlGet parsed = parse(query);
-        GraqlGet expected = match(var("x").like("/")).get();
+        String query = "match $x like '\\/';";
+        GraqlMatch parsed = parse(query);
+        GraqlMatch expected = match(var("x").like("/"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void whenValueEqualityToString_CreateValidQueryString() {
-        GraqlGet expected = match(var("x").eq(var("y"))).get();
-        GraqlGet parsed = Graql.parse(expected.toString());
+        GraqlMatch expected = match(var("x").eq(var("y")));
+        GraqlMatch parsed = Graql.parse(expected.toString());
         assertEquals(expected, parsed);
     }
 

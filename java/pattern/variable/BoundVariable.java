@@ -17,40 +17,27 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Pattern;
 
-import java.util.LinkedHashMap;
-import java.util.List;
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-import static grakn.common.collection.Collections.list;
+public abstract class BoundVariable extends Variable implements Pattern {
 
-public abstract class BoundVariable<T extends BoundVariable<T>> extends Variable<T> implements Pattern {
-
-    BoundVariable(Identity identity) {
-        super(identity);
+    BoundVariable(Reference reference) {
+        super(reference);
     }
 
-    abstract T merge(T variable);
+    public UnboundVariable toUnbound() {
+        return new UnboundVariable(reference);
+    }
 
-    abstract T asAnonymousWithID(int id);
+    public TypeVariable asType() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
+    }
 
-    public static <T extends BoundVariable<T>> List<T> asGraph(List<T> variables) {
-        LinkedHashMap<T, T> graph = new LinkedHashMap<>();
-        int id = 0;
-
-        for (T variable : variables) {
-            if (!variable.isAnonymous()) {
-                if (graph.containsKey(variable.withoutProperties())) {
-                    graph.get(variable.withoutProperties()).merge(variable);
-                } else {
-                    graph.put(variable.withoutProperties(), variable);
-                }
-            } else {
-                T convertedVar = variable.asAnonymousWithID(id++);
-                graph.put(convertedVar.withoutProperties(), convertedVar);
-            }
-        }
-
-        return list(graph.values());
+    public ThingVariable<?> asThing() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
     }
 }

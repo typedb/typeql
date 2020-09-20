@@ -20,7 +20,7 @@ package graql.lang.query.test;
 import graql.lang.Graql;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlInsert;
-import graql.lang.query.MatchClause;
+import graql.lang.query.GraqlMatch;
 import org.junit.Test;
 
 import java.util.List;
@@ -32,11 +32,11 @@ import static org.junit.Assert.assertNotEquals;
 
 public class GraqlInsertTest {
 
-    private final MatchClause match1 = Graql.match(var("x").isa("movie"));
-    private final MatchClause match2 = Graql.match(var("y").isa("movie"));
+    private final GraqlMatch.Unfiltered match1 = Graql.match(var("x").isa("movie"));
+    private final GraqlMatch.Unfiltered match2 = Graql.match(var("y").isa("movie"));
 
-    private final List<ThingVariable<?>> vars1 = list(var("x").asThing());
-    private final List<ThingVariable<?>> vars2 = list(var("y").asThing());
+    private final List<ThingVariable<?>> vars1 = list(var("x").toThing());
+    private final List<ThingVariable<?>> vars2 = list(var("y").toThing());
 
     @Test
     public void insertQueriesWithTheSameVarsAndQueryAreEqual() {
@@ -49,8 +49,8 @@ public class GraqlInsertTest {
 
     @Test
     public void insertQueriesWithTheSameVarsAndGraphAreEqual() {
-        GraqlInsert query1 = new GraqlInsert(vars1);
-        GraqlInsert query2 = new GraqlInsert(vars1);
+        GraqlInsert query1 = Graql.insert(vars1);
+        GraqlInsert query2 = Graql.insert(vars1);
 
         assertEquals(query1, query2);
         assertEquals(query1.hashCode(), query2.hashCode());
