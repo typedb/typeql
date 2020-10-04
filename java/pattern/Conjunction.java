@@ -30,7 +30,6 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 
 public class Conjunction<T extends Pattern> implements Pattern {
 
@@ -45,15 +44,19 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     public Stream<BoundVariable> variables() {
         return patterns.stream().flatMap(pattern -> {
-            if (pattern instanceof BoundVariable)
-                return concat(of(((BoundVariable) pattern)), ((BoundVariable) pattern).variables());
-            else if (pattern instanceof Conjunction) return ((Conjunction<?>) pattern).variables();
-            else return of();
+            if (pattern.isVariable()) return concat(Stream.of(pattern.asVariable()), pattern.asVariable().variables());
+            else if (pattern.isConjunction()) return pattern.asConjunction().variables();
+            else return Stream.of();
         });
     }
 
     public List<T> patterns() {
         return patterns;
+    }
+
+    @Override
+    public Disjunction<Conjunction<Conjunctable>> normalise() {
+        return null;
     }
 
     @Override

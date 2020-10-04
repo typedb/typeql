@@ -445,7 +445,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             StringBuilder syntax = new StringBuilder();
             syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-            if (pattern instanceof Conjunction) {
+            if (pattern.isConjunction()) {
                 syntax.append(((Conjunction<?>) pattern).patterns()
                                       .stream().map(Object::toString)
                                       .collect(joining("" + SEMICOLON + SPACE)));
@@ -500,8 +500,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             StringBuilder syntax = new StringBuilder();
             syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-            if (pattern instanceof Conjunction) {
-                syntax.append(((Conjunction<?>) pattern).patterns()
+            if (pattern.isConjunction()) {
+                syntax.append(pattern.asConjunction().patterns()
                                       .stream().map(Object::toString)
                                       .collect(joining("" + SEMICOLON + SPACE)));
             } else {

@@ -20,6 +20,7 @@ package graql.lang.pattern;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
@@ -45,6 +46,11 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
+    public Disjunction<Conjunction<Conjunctable>> normalise() {
+        return null;
+    }
+
+    @Override
     public boolean isDisjunction() { return true; }
 
     @Override
@@ -59,9 +65,9 @@ public class Disjunction<T extends Pattern> implements Pattern {
             Pattern pattern = patternIter.next();
             syntax.append(CURLY_OPEN).append(SPACE);
 
-            if (pattern instanceof Conjunction<?>) {
-                Conjunction<?> conjunction = (Conjunction<? extends Pattern>) pattern;
-                syntax.append(conjunction.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
+            if (pattern.isConjunction()) {
+                Stream<? extends Pattern> patterns = pattern.asConjunction().patterns().stream();
+                syntax.append(patterns.map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
             } else {
                 syntax.append(pattern);
             }

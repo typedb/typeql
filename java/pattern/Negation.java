@@ -18,6 +18,7 @@
 package graql.lang.pattern;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.pattern.variable.BoundVariable;
 
 import java.util.Objects;
 
@@ -31,7 +32,7 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
  *
  * @param <T> the type of patterns in this negation
  */
-public class Negation<T extends Pattern> implements Pattern {
+public class Negation<T extends Pattern> implements Conjunctable {
 
     private final T pattern;
 
@@ -56,6 +57,11 @@ public class Negation<T extends Pattern> implements Pattern {
     public T getPattern() { return pattern;}
 
     @Override
+    public Negation<Disjunction<Conjunction<BoundVariable>>> normalise() {
+        return null;
+    }
+
+    @Override
     public boolean isNegation() { return true; }
 
     @Override
@@ -66,7 +72,7 @@ public class Negation<T extends Pattern> implements Pattern {
         StringBuilder negation = new StringBuilder();
         negation.append(GraqlToken.Operator.NOT).append(SPACE);
 
-        if (pattern instanceof Conjunction<?>) {
+        if (pattern.isConjunction()) {
             negation.append(pattern.toString());
         } else {
             negation.append(CURLY_OPEN).append(SPACE);

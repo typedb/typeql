@@ -219,7 +219,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
         } else if (label().isPresent()) {
             syntax.append(label().get().scopedLabel());
             if (constraints.size() > 1) {
-                syntax.append(SPACE).append(constraints.stream().filter(p -> !(p instanceof TypeConstraint.Label))
+                syntax.append(SPACE).append(constraints.stream().filter(p -> !p.isLabel())
                                                     .map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
             }
         } else {
