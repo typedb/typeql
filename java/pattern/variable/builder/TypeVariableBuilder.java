@@ -26,15 +26,15 @@ import graql.lang.pattern.variable.UnboundVariable;
 
 public interface TypeVariableBuilder {
 
-    default TypeVariable type(GraqlToken.Type type) {
+    default TypeVariable type(final GraqlToken.Type type) {
         return type(type.toString());
     }
 
-    default TypeVariable type(String label) {
+    default TypeVariable type(final String label) {
         return constrain(new TypeConstraint.Label(label));
     }
 
-    default TypeVariable type(String scope, String label) {
+    default TypeVariable type(final String scope, final String label) {
         return constrain(new TypeConstraint.Label(scope, label));
     }
 
@@ -42,150 +42,150 @@ public interface TypeVariableBuilder {
         return constrain(new TypeConstraint.Abstract());
     }
 
-    default TypeVariable sub(GraqlToken.Type type) {
+    default TypeVariable sub(final GraqlToken.Type type) {
         return sub(type.toString());
     }
 
-    default TypeVariable sub(String typeLabel) {
+    default TypeVariable sub(final String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeLabel, false));
     }
 
-    default TypeVariable sub(String typeScope, String typeLabel) {
+    default TypeVariable sub(final String typeScope, final String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeScope, typeLabel, false));
     }
 
-    default TypeVariable sub(UnboundVariable typeVar) {
+    default TypeVariable sub(final UnboundVariable typeVar) {
         return constrain(new TypeConstraint.Sub(typeVar, false));
     }
 
-    default TypeVariable subX(GraqlToken.Type type) {
+    default TypeVariable subX(final GraqlToken.Type type) {
         return subX(type.toString());
     }
 
-    default TypeVariable subX(String typeLabel) {
+    default TypeVariable subX(final String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeLabel, true));
     }
 
-    default TypeVariable subX(String typeScope, String typeLabel) {
+    default TypeVariable subX(final String typeScope, final String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeScope, typeLabel, true));
     }
 
-    default TypeVariable subX(UnboundVariable typeVar) {
+    default TypeVariable subX(final UnboundVariable typeVar) {
         return constrain(new TypeConstraint.Sub(typeVar, true));
     }
 
-    default TypeVariable owns(String attributeType) {
+    default TypeVariable owns(final String attributeType) {
         return constrain(new TypeConstraint.Owns(attributeType, false));
     }
 
-    default TypeVariable owns(String attributeType, boolean isKey) {
+    default TypeVariable owns(final String attributeType, final boolean isKey) {
         return constrain(new TypeConstraint.Owns(attributeType, isKey));
     }
 
-    default TypeVariable owns(UnboundVariable attributeTypeVar) {
+    default TypeVariable owns(final UnboundVariable attributeTypeVar) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, false));
     }
 
-    default TypeVariable owns(UnboundVariable attributeTypeVar, boolean isKey) {
+    default TypeVariable owns(final UnboundVariable attributeTypeVar, final boolean isKey) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, isKey));
     }
 
-    default TypeVariable owns(String attributeType, String overriddenAttributeType) {
+    default TypeVariable owns(final String attributeType, final String overriddenAttributeType) {
         return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeType, false));
     }
 
-    default TypeVariable owns(String attributeType, String overriddenAttributeType, boolean isKey) {
+    default TypeVariable owns(final String attributeType, final String overriddenAttributeType, final boolean isKey) {
         return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeType, isKey));
     }
 
-    default TypeVariable owns(String attributeType, UnboundVariable overriddenAttributeTypeVar) {
+    default TypeVariable owns(final String attributeType, final UnboundVariable overriddenAttributeTypeVar) {
         return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeTypeVar, false));
     }
 
-    default TypeVariable owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+    default TypeVariable owns(final String attributeType, final UnboundVariable overriddenAttributeTypeVar, final boolean isKey) {
         return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeTypeVar, isKey));
     }
 
-    default TypeVariable owns(UnboundVariable attributeTypeVar, String overriddenAttributeType) {
+    default TypeVariable owns(final UnboundVariable attributeTypeVar, final String overriddenAttributeType) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeType, false));
     }
 
-    default TypeVariable owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, boolean isKey) {
+    default TypeVariable owns(final UnboundVariable attributeTypeVar, final String overriddenAttributeType, final boolean isKey) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeType, isKey));
     }
 
-    default TypeVariable owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar) {
+    default TypeVariable owns(final UnboundVariable attributeTypeVar, final UnboundVariable overriddenAttributeTypeVar) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeTypeVar, false));
     }
 
-    default TypeVariable owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
+    default TypeVariable owns(final UnboundVariable attributeTypeVar, final UnboundVariable overriddenAttributeTypeVar, final boolean isKey) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeTypeVar, isKey));
     }
 
-    default TypeVariable plays(String relationType, String roleType) {
+    default TypeVariable plays(final String relationType, final String roleType) {
         return constrain(new TypeConstraint.Plays(relationType, roleType));
     }
 
-    default TypeVariable plays(UnboundVariable roleTypevar) {
+    default TypeVariable plays(final UnboundVariable roleTypevar) {
         return constrain(new TypeConstraint.Plays(roleTypevar));
     }
 
-    default TypeVariable plays(String relationType, String roleType, String overriddenRoleType) {
+    default TypeVariable plays(final String relationType, final String roleType, final String overriddenRoleType) {
         return constrain(new TypeConstraint.Plays(relationType, roleType, overriddenRoleType));
     }
 
-    default TypeVariable plays(String relationType, String roleType, UnboundVariable overriddenRoleTypeVar) {
+    default TypeVariable plays(final String relationType, final String roleType, final UnboundVariable overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Plays(relationType, roleType, overriddenRoleTypeVar));
     }
 
-    default TypeVariable plays(UnboundVariable roleTypeVar, String overriddenRoleType) {
+    default TypeVariable plays(final UnboundVariable roleTypeVar, final String overriddenRoleType) {
         return constrain(new TypeConstraint.Plays(roleTypeVar, overriddenRoleType));
     }
 
-    default TypeVariable plays(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
+    default TypeVariable plays(final UnboundVariable roleTypeVar, final UnboundVariable overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Plays(roleTypeVar, overriddenRoleTypeVar));
     }
 
-    default TypeVariable relates(String roleType) {
+    default TypeVariable relates(final String roleType) {
         return constrain(new TypeConstraint.Relates(roleType));
     }
 
-    default TypeVariable relates(UnboundVariable roleTypeVar) {
+    default TypeVariable relates(final UnboundVariable roleTypeVar) {
         System.out.println(this);
         return constrain(new TypeConstraint.Relates(roleTypeVar));
     }
 
-    default TypeVariable relates(String roleType, String overriddenRoleType) {
+    default TypeVariable relates(final String roleType, final String overriddenRoleType) {
         return constrain(new TypeConstraint.Relates(roleType, overriddenRoleType));
     }
 
-    default TypeVariable relates(String roleType, UnboundVariable overriddenRoleTypeVar) {
+    default TypeVariable relates(final String roleType, final UnboundVariable overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Relates(roleType, overriddenRoleTypeVar));
     }
 
-    default TypeVariable relates(UnboundVariable roleTypeVar, String overriddenRoleType) {
+    default TypeVariable relates(final UnboundVariable roleTypeVar, final String overriddenRoleType) {
         return constrain(new TypeConstraint.Relates(roleTypeVar, overriddenRoleType));
     }
 
-    default TypeVariable relates(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
+    default TypeVariable relates(final UnboundVariable roleTypeVar, final UnboundVariable overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Relates(roleTypeVar, overriddenRoleTypeVar));
     }
 
-    default TypeVariable value(GraqlArg.ValueType ValueType) {
+    default TypeVariable value(final GraqlArg.ValueType ValueType) {
         return constrain(new TypeConstraint.ValueType(ValueType));
     }
 
-    default TypeVariable regex(String regex) {
+    default TypeVariable regex(final String regex) {
         return constrain(new TypeConstraint.Regex(regex));
     }
 
     // TODO: make when() method take a more strict sub type of pattern
-    default TypeVariable when(Pattern when) {
+    default TypeVariable when(final Pattern when) {
         return constrain(new TypeConstraint.When(when));
     }
 
     // TODO: make then() method take a more strict sub type of pattern
-    default TypeVariable then(Pattern then) {
+    default TypeVariable then(final Pattern then) {
         return constrain(new TypeConstraint.Then(then));
     }
 

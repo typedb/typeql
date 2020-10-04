@@ -26,7 +26,7 @@ public abstract class Variable {
 
     final Reference reference;
 
-    Variable(Reference reference) {
+    Variable(final Reference reference) {
         this.reference = reference;
     }
 

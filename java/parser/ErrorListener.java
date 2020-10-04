@@ -36,7 +36,7 @@ public class ErrorListener extends BaseErrorListener {
     private final List<String> query;
     private final List<SyntaxError> errors = new ArrayList<>();
 
-    private ErrorListener(List<String> query) {
+    private ErrorListener(final List<String> query) {
         this.query = query;
     }
 
@@ -49,15 +49,15 @@ public class ErrorListener extends BaseErrorListener {
         return new ErrorListener(null);
     }
 
-    public static ErrorListener of(String query) {
-        List<String> queryList = Arrays.asList(query.split("\n"));
+    public static ErrorListener of(final String query) {
+        final List<String> queryList = Arrays.asList(query.split("\n"));
         return new ErrorListener(queryList);
     }
 
     @Override
     public void syntaxError(
-            Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg,
-            RecognitionException e) {
+            final Recognizer<?, ?> recognizer, final Object offendingSymbol, final int line, final int charPositionInLine, final String msg,
+            final RecognitionException e) {
 
         if (query == null) {
             errors.add(new SyntaxError(null, line, 0, msg));

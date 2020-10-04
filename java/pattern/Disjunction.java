@@ -35,7 +35,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     private final List<T> patterns;
     private final int hash;
 
-    public Disjunction(List<T> patterns) {
+    public Disjunction(final List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
@@ -58,15 +58,15 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     @Override
     public String toString() {
-        StringBuilder syntax = new StringBuilder();
+        final StringBuilder syntax = new StringBuilder();
 
-        Iterator<T> patternIter = patterns.iterator();
+        final Iterator<T> patternIter = patterns.iterator();
         while (patternIter.hasNext()) {
-            Pattern pattern = patternIter.next();
+            final Pattern pattern = patternIter.next();
             syntax.append(CURLY_OPEN).append(SPACE);
 
             if (pattern.isConjunction()) {
-                Stream<? extends Pattern> patterns = pattern.asConjunction().patterns().stream();
+                final Stream<? extends Pattern> patterns = pattern.asConjunction().patterns().stream();
                 syntax.append(patterns.map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
             } else {
                 syntax.append(pattern);
@@ -78,10 +78,10 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Disjunction<?> that = (Disjunction<?>) o;
+        final Disjunction<?> that = (Disjunction<?>) o;
         return Objects.equals(patterns, that.patterns);
     }
 

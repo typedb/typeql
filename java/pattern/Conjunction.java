@@ -36,7 +36,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
     private final List<T> patterns;
     private final int hash;
 
-    public Conjunction(List<T> patterns) {
+    public Conjunction(final List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
@@ -67,7 +67,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     @Override
     public String toString() {
-        StringBuilder pattern = new StringBuilder();
+        final StringBuilder pattern = new StringBuilder();
         pattern.append(CURLY_OPEN).append(SPACE);
         pattern.append(patterns.stream().map(Objects::toString).collect(joining("" + SEMICOLON + SPACE)));
         pattern.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
@@ -75,10 +75,10 @@ public class Conjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Conjunction<?> that = (Conjunction<?>) o;
+        final Conjunction<?> that = (Conjunction<?>) o;
         return Objects.equals(patterns, that.patterns);
     }
 

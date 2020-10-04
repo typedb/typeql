@@ -34,20 +34,20 @@ public abstract class Reference {
 
     enum Type {NAME, LABEL, ANONYMOUS}
 
-    Reference(Type type, boolean isVisible) {
+    Reference(final Type type, final boolean isVisible) {
         this.type = type;
         this.isVisible = isVisible;
     }
 
-    static Reference.Name named(String name) {
+    static Reference.Name named(final String name) {
         return new Name(name);
     }
 
-    static Reference.Label label(String label) {
+    static Reference.Label label(final String label) {
         return new Label(label);
     }
 
-    static Reference.Anonymous anonymous(boolean isVisible) {
+    static Reference.Anonymous anonymous(final boolean isVisible) {
         return new Reference.Anonymous(isVisible);
     }
 
@@ -108,7 +108,7 @@ public abstract class Reference {
 
     public static abstract class Referrable extends Reference {
 
-        Referrable(Type type, boolean isVisible) {
+        Referrable(final Type type, final boolean isVisible) {
             super(type, isVisible);
         }
 
@@ -124,7 +124,7 @@ public abstract class Reference {
         protected final String name;
         private final int hash;
 
-        Name(String name) {
+        Name(final String name) {
             super(Type.NAME, true);
             if (!REGEX.matcher(name).matches()) {
                 throw GraqlException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
@@ -153,10 +153,10 @@ public abstract class Reference {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Name that = (Name) o;
+            final Name that = (Name) o;
             return (this.type == that.type &&
                     this.isVisible == that.isVisible &&
                     this.name.equals(that.name));
@@ -173,7 +173,7 @@ public abstract class Reference {
         private final String label;
         private final int hash;
 
-        Label(String label) {
+        Label(final String label) {
             super(Type.LABEL, false);
             this.label = label;
             this.hash = Objects.hash(this.type, this.isVisible, this.label);
@@ -199,10 +199,10 @@ public abstract class Reference {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Label that = (Label) o;
+            final Label that = (Label) o;
             return (this.type == that.type &&
                     this.isVisible == that.isVisible &&
                     this.label.equals(that.label));
@@ -218,7 +218,7 @@ public abstract class Reference {
 
         private final int hash;
 
-        private Anonymous(boolean isVisible) {
+        private Anonymous(final boolean isVisible) {
             super(Type.ANONYMOUS, isVisible);
             this.hash = Objects.hash(this.type, this.isVisible);
         }
@@ -239,10 +239,10 @@ public abstract class Reference {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Anonymous that = (Anonymous) o;
+            final Anonymous that = (Anonymous) o;
             return (this.type == that.type && this.isVisible == that.isVisible);
         }
 

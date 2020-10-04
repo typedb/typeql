@@ -30,7 +30,7 @@ import static graql.lang.Graql.var;
 import static org.junit.Assert.assertEquals;
 
 public class MavenApplicationTest {
-    private void assertQueryEquals(GraqlQuery expected, GraqlQuery parsed, String query) {
+    private void assertQueryEquals(final GraqlQuery expected, final GraqlQuery parsed, final String query) {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parse(parsed.toString()));
         assertEquals(query, expected.toString());
@@ -38,13 +38,13 @@ public class MavenApplicationTest {
 
     @Test
     public void testRelationQuery() {
-        String query = "match\n" +
+        final String query = "match\n" +
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        GraqlMatch parsed = Graql.parse(query).asMatch();
+        final GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlMatch expected = match(
+        final GraqlMatch expected = match(
                 var("brando").val("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
@@ -54,13 +54,13 @@ public class MavenApplicationTest {
 
     @Test
     public void testPredicateQuery1() {
-        String query = "match\n" +
+        final String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
                 "$t !== 'Apocalypse Now';";
-        GraqlMatch parsed = Graql.parse(query).asMatch();
+        final GraqlMatch parsed = Graql.parse(query).asMatch();
 
-        GraqlMatch expected = match(
+        final GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
                         var("t").val("Apocalypse Now"),

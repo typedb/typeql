@@ -24,7 +24,7 @@ import java.util.List;
 
 public class GraqlDefine extends GraqlDefinable {
 
-    public GraqlDefine(List<TypeVariable> variables) {
+    public GraqlDefine(final List<TypeVariable> variables) {
         super(GraqlToken.Command.DEFINE, variables);
     }
 }

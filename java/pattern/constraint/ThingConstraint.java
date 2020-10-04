@@ -122,7 +122,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final String iid;
         private final int hash;
 
-        public IID(String iid) {
+        public IID(final String iid) {
             if (iid == null) throw new NullPointerException("Null IID");
             if (!REGEX.matcher(iid).matches()) {
                 throw GraqlException.of(INVALID_IID_STRING.message(iid, REGEX.toString()));
@@ -151,10 +151,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            IID that = (IID) o;
+            final IID that = (IID) o;
             return (this.iid.equals(that.iid));
         }
 
@@ -170,19 +170,19 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final boolean isExplicit;
         private final int hash;
 
-        public Isa(String type, boolean isExplicit) {
+        public Isa(final String type, final boolean isExplicit) {
             this(hidden().type(type), isExplicit);
         }
 
-        public Isa(UnboundVariable typeVar, boolean isExplicit) {
+        public Isa(final UnboundVariable typeVar, final boolean isExplicit) {
             this(typeVar.toType(), isExplicit);
         }
 
-        public Isa(Either<String, UnboundVariable> typeArg, boolean isExplicit) {
+        public Isa(final Either<String, UnboundVariable> typeArg, final boolean isExplicit) {
             this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit);
         }
 
-        private Isa(TypeVariable type, boolean isExplicit) {
+        private Isa(final TypeVariable type, final boolean isExplicit) {
             if (type == null) {
                 throw new NullPointerException("Null type");
             }
@@ -220,10 +220,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Isa that = (Isa) o;
+            final Isa that = (Isa) o;
             return (this.type.equals(that.type) && this.isExplicit == that.isExplicit);
         }
 
@@ -238,11 +238,11 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final ThingVariable<?> variable;
         private final int hash;
 
-        public NEQ(UnboundVariable variable) {
+        public NEQ(final UnboundVariable variable) {
             this(variable.toThing());
         }
 
-        private NEQ(ThingVariable<?> variable) {
+        private NEQ(final ThingVariable<?> variable) {
             if (variable == null) throw new NullPointerException("Null var");
             this.variable = variable;
             this.hash = Objects.hash(NEQ.class, this.variable);
@@ -273,10 +273,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            NEQ that = (NEQ) o;
+            final NEQ that = (NEQ) o;
             return (this.variable.equals(that.variable));
         }
 
@@ -291,7 +291,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final ValueOperation<T> operation;
         private final int hash;
 
-        public Value(ValueOperation<T> operation) {
+        public Value(final ValueOperation<T> operation) {
             if (operation == null) throw new NullPointerException("Null operation");
             this.operation = operation;
             this.hash = Objects.hash(Value.class, this.operation);
@@ -322,10 +322,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Value<?> that = (Value<?>) o;
+            final Value<?> that = (Value<?>) o;
             return (this.operation.equals(that.operation));
         }
 
@@ -340,18 +340,18 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final List<RolePlayer> players;
         private String scope;
 
-        public Relation(RolePlayer player) {
+        public Relation(final RolePlayer player) {
             this(list(player));
         }
 
-        public Relation(List<RolePlayer> players) {
+        public Relation(final List<RolePlayer> players) {
             if (players == null || players.isEmpty()) {
                 throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER.message());
             }
             this.players = new ArrayList<>(players);
         }
 
-        public void setScope(String relationLabel) {
+        public void setScope(final String relationLabel) {
             this.scope = relationLabel;
             players.forEach(player -> player.setScope(scope));
         }
@@ -360,7 +360,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return scope != null;
         }
 
-        public void addPlayers(RolePlayer player) {
+        public void addPlayers(final RolePlayer player) {
             if (scope != null) player.setScope(scope);
             players.add(player);
         }
@@ -371,7 +371,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         @Override
         public Set<BoundVariable> variables() {
-            Set<BoundVariable> variables = new HashSet<>();
+            final Set<BoundVariable> variables = new HashSet<>();
             players().forEach(player -> {
                 variables.add(player.player());
                 if (player.roleType().isPresent()) variables.add(player.roleType().get());
@@ -395,10 +395,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Relation that = (Relation) o;
+            final Relation that = (Relation) o;
             return (this.players.equals(that.players));
         }
 
@@ -412,29 +412,29 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             private TypeVariable roleType;
             private final ThingVariable<?> player;
 
-            public RolePlayer(String roleType, UnboundVariable playerVar) {
+            public RolePlayer(final String roleType, final UnboundVariable playerVar) {
                 this(roleType == null ? null : hidden().type(roleType), playerVar.toThing());
             }
 
-            public RolePlayer(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
+            public RolePlayer(final UnboundVariable roleTypeVar, final UnboundVariable playerVar) {
                 this(roleTypeVar == null ? null : roleTypeVar.toType(), playerVar.toThing());
             }
 
-            public RolePlayer(UnboundVariable playerVar) {
+            public RolePlayer(final UnboundVariable playerVar) {
                 this(null, playerVar.toThing());
             }
 
-            public RolePlayer(Either<String, UnboundVariable> roleTypeArg, UnboundVariable playerVar) {
+            public RolePlayer(final Either<String, UnboundVariable> roleTypeArg, final UnboundVariable playerVar) {
                 this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType), playerVar.toThing());
             }
 
-            private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
+            private RolePlayer(@Nullable final TypeVariable roleType, final ThingVariable<?> player) {
                 if (player == null) throw new NullPointerException("Null player");
                 this.roleType = roleType;
                 this.player = player;
             }
 
-            public void setScope(String relationLabel) {
+            public void setScope(final String relationLabel) {
                 if (roleType != null && roleType.label().isPresent()) {
                     this.roleType = hidden().type(relationLabel, roleType.label().get().label());
                 }
@@ -453,7 +453,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
                 if (roleType == null) {
                     return player.toString();
                 } else {
-                    StringBuilder syntax = new StringBuilder();
+                    final StringBuilder syntax = new StringBuilder();
                     if (roleType.isVisible()) syntax.append(roleType.reference().toString());
                     else syntax.append(roleType.label().get().label());
                     syntax.append(COLON).append(SPACE).append(player);
@@ -462,10 +462,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             }
 
             @Override
-            public boolean equals(Object o) {
+            public boolean equals(final Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
-                RolePlayer that = (RolePlayer) o;
+                final RolePlayer that = (RolePlayer) o;
                 return (Objects.equals(this.roleType, that.roleType)) && (this.player.equals(that.player));
             }
 
@@ -482,15 +482,15 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final ThingVariable<?> attribute;
         private final int hash;
 
-        public Has(String type, ThingConstraint.Value<?> value) {
+        public Has(final String type, final ThingConstraint.Value<?> value) {
             this(hidden().type(type), hidden().constrain(value));
         }
 
-        public Has(String type, UnboundVariable var) {
+        public Has(final String type, final UnboundVariable var) {
             this(hidden().type(type), var.toThing());
         }
 
-        private Has(TypeVariable type, ThingVariable<?> attribute) {
+        private Has(final TypeVariable type, final ThingVariable<?> attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
             if (attribute.isNamed())
@@ -530,10 +530,10 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Has that = (Has) o;
+            final Has that = (Has) o;
             return (this.type.equals(that.type) && this.attribute.equals(that.attribute));
         }
 

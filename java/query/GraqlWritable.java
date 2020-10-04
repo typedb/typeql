@@ -40,7 +40,7 @@ abstract class GraqlWritable extends GraqlQuery {
     private final List<ThingVariable<?>> variables;
     private final int hash;
 
-    GraqlWritable(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    GraqlWritable(final GraqlToken.Command keyword, @Nullable final GraqlMatch.Unfiltered match, final List<ThingVariable<?>> variables) {
         assert keyword == INSERT || keyword == DELETE;
         if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
         this.keyword = keyword;
@@ -59,7 +59,7 @@ abstract class GraqlWritable extends GraqlQuery {
 
     @Override
     public final String toString() {
-        StringBuilder query = new StringBuilder();
+        final StringBuilder query = new StringBuilder();
 
         if (match != null) query.append(match).append(NEW_LINE);
         query.append(keyword);
@@ -73,10 +73,10 @@ abstract class GraqlWritable extends GraqlQuery {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GraqlWritable that = (GraqlWritable) o;
+        final GraqlWritable that = (GraqlWritable) o;
         return (this.keyword.equals(that.keyword) &&
                 Objects.equals(this.match, that.match) &&
                 this.variables.equals(that.variables));

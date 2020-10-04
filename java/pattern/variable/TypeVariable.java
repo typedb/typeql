@@ -49,7 +49,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
     private final List<TypeConstraint> constraints;
 
-    TypeVariable(Reference reference) {
+    TypeVariable(final Reference reference) {
         super(reference);
         this.ownsConstraints = new LinkedList<>();
         this.playsConstraints = new LinkedList<>();
@@ -73,7 +73,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Label constraint) {
+    public TypeVariable constrain(final TypeConstraint.Label constraint) {
         if (labelConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Label.class, constraint));
         }
@@ -83,7 +83,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Sub constraint) {
+    public TypeVariable constrain(final TypeConstraint.Sub constraint) {
         if (subConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Sub.class, constraint));
         }
@@ -93,7 +93,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Abstract constraint) {
+    public TypeVariable constrain(final TypeConstraint.Abstract constraint) {
         if (abstractConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Abstract.class, constraint));
         }
@@ -103,7 +103,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.ValueType constraint) {
+    public TypeVariable constrain(final TypeConstraint.ValueType constraint) {
         if (valueTypeConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.ValueType.class, constraint));
         }
@@ -113,7 +113,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Regex constraint) {
+    public TypeVariable constrain(final TypeConstraint.Regex constraint) {
         if (regexConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Regex.class, constraint));
         }
@@ -123,7 +123,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Then constraint) {
+    public TypeVariable constrain(final TypeConstraint.Then constraint) {
         if (thenConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Then.class, constraint));
         }
@@ -133,7 +133,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.When constraint) {
+    public TypeVariable constrain(final TypeConstraint.When constraint) {
         if (whenConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.When.class, constraint));
         }
@@ -143,21 +143,21 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Owns constraint) {
+    public TypeVariable constrain(final TypeConstraint.Owns constraint) {
         ownsConstraints.add(constraint);
         constraints.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Plays constraint) {
+    public TypeVariable constrain(final TypeConstraint.Plays constraint) {
         playsConstraints.add(constraint);
         constraints.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Relates constraint) {
+    public TypeVariable constrain(final TypeConstraint.Relates constraint) {
         if (label().isPresent()) {
             constraint.setScope(label().get().label());
         }
@@ -208,7 +208,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
 
     @Override
     public String toString() {
-        StringBuilder syntax = new StringBuilder();
+        final StringBuilder syntax = new StringBuilder();
 
         if (isVisible()) {
             syntax.append(reference.syntax());
@@ -230,10 +230,10 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TypeVariable that = (TypeVariable) o;
+        final TypeVariable that = (TypeVariable) o;
         return (this.reference.equals(that.reference) &&
                 set(this.constraints).equals(set(that.constraints)));
     }

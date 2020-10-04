@@ -29,7 +29,7 @@ public class GraqlToken {
 
         private final String type;
 
-        Type(String type) {
+        Type(final String type) {
             this.type = type;
         }
 
@@ -38,7 +38,7 @@ public class GraqlToken {
             return this.type;
         }
 
-        public static Type of(String value) {
+        public static Type of(final String value) {
             for (Type c : Type.values()) {
                 if (c.type.equals(value)) {
                     return c;
@@ -61,7 +61,7 @@ public class GraqlToken {
 
         private final String command;
 
-        Command(String command) {
+        Command(final String command) {
             this.command = command;
         }
 
@@ -70,7 +70,7 @@ public class GraqlToken {
             return this.command;
         }
 
-        public static Command of(String value) {
+        public static Command of(final String value) {
             for (Command c : Command.values()) {
                 if (c.command.equals(value)) {
                     return c;
@@ -87,7 +87,7 @@ public class GraqlToken {
 
         private final String filter;
 
-        Filter(String filter) {
+        Filter(final String filter) {
             this.filter = filter;
         }
 
@@ -96,7 +96,7 @@ public class GraqlToken {
             return this.filter;
         }
 
-        public static Filter of(String value) {
+        public static Filter of(final String value) {
             for (Filter c : Filter.values()) {
                 if (c.filter.equals(value)) {
                     return c;
@@ -127,7 +127,7 @@ public class GraqlToken {
 
         private final String character;
 
-        Char(String character) {
+        Char(final String character) {
             this.character = character;
         }
 
@@ -144,7 +144,7 @@ public class GraqlToken {
 
         private final String operator;
 
-        Operator(String operator) {
+        Operator(final String operator) {
             this.operator = operator;
         }
 
@@ -153,7 +153,7 @@ public class GraqlToken {
             return this.operator;
         }
 
-        public static Operator of(String value) {
+        public static Operator of(final String value) {
             for (Operator c : Operator.values()) {
                 if (c.operator.equals(value)) {
                     return c;
@@ -177,7 +177,7 @@ public class GraqlToken {
 
         private final String comparator;
 
-        Comparator(String comparator) {
+        Comparator(final String comparator) {
             this.comparator = comparator;
         }
 
@@ -186,7 +186,7 @@ public class GraqlToken {
             return this.comparator;
         }
 
-        public static Comparator of(String value) {
+        public static Comparator of(final String value) {
             for (Comparator c : Comparator.values()) {
                 if (c.comparator.equals(value)) {
                     return c;
@@ -218,7 +218,7 @@ public class GraqlToken {
 
         private final String name;
 
-        Constraint(String name) {
+        Constraint(final String name) {
             this.name = name;
         }
 
@@ -227,7 +227,7 @@ public class GraqlToken {
             return this.name;
         }
 
-        public static Constraint of(String value) {
+        public static Constraint of(final String value) {
             for (Constraint c : Constraint.values()) {
                 if (c.name.equals(value)) {
                     return c;
@@ -243,7 +243,7 @@ public class GraqlToken {
 
         private final String literal;
 
-        Literal(String type) {
+        Literal(final String type) {
             this.literal = type;
         }
 
@@ -252,7 +252,7 @@ public class GraqlToken {
             return this.literal;
         }
 
-        public static Literal of(String value) {
+        public static Literal of(final String value) {
             for (Literal c : Literal.values()) {
                 if (c.literal.equals(value)) {
                     return c;
@@ -275,7 +275,7 @@ public class GraqlToken {
 
             private final String method;
 
-            Method(String method) {
+            Method(final String method) {
                 this.method = method;
             }
 
@@ -284,7 +284,7 @@ public class GraqlToken {
                 return this.method;
             }
 
-            public static Aggregate.Method of(String value) {
+            public static Aggregate.Method of(final String value) {
                 for (Aggregate.Method m : Aggregate.Method.values()) {
                     if (m.method.equals(value)) {
                         return m;
@@ -311,7 +311,7 @@ public class GraqlToken {
 
             private final String method;
 
-            Method(String method) {
+            Method(final String method) {
                 this.method = method;
             }
 
@@ -320,7 +320,7 @@ public class GraqlToken {
                 return this.method;
             }
 
-            public static Compute.Method of(String name) {
+            public static Compute.Method of(final String name) {
                 for (Compute.Method m : Compute.Method.values()) {
                     if (m.method.equals(name)) {
                         return m;
@@ -343,7 +343,7 @@ public class GraqlToken {
 
             private final String condition;
 
-            Condition(String algorithm) {
+            Condition(final String algorithm) {
                 this.condition = algorithm;
             }
 
@@ -352,7 +352,7 @@ public class GraqlToken {
                 return this.condition;
             }
 
-            public static Compute.Condition of(String value) {
+            public static Compute.Condition of(final String value) {
                 for (Compute.Condition c : Compute.Condition.values()) {
                     if (c.condition.equals(value)) {
                         return c;
@@ -373,7 +373,7 @@ public class GraqlToken {
 
             private final String param;
 
-            Param(String param) {
+            Param(final String param) {
                 this.param = param;
             }
 
@@ -382,7 +382,7 @@ public class GraqlToken {
                 return this.param;
             }
 
-            public static Compute.Param of(String value) {
+            public static Compute.Param of(final String value) {
                 for (Compute.Param p : Compute.Param.values()) {
                     if (p.param.equals(value)) {
                         return p;

@@ -36,16 +36,16 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     private final T pattern;
 
-    public Negation(T pattern) {
+    public Negation(final T pattern) {
         if (pattern == null) throw new NullPointerException("Null patterns");
         this.pattern = pattern;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Negation<?> negation = (Negation<?>) o;
+        final Negation<?> negation = (Negation<?>) o;
         return Objects.equals(pattern, negation.pattern);
     }
 
@@ -69,7 +69,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     @Override
     public String toString() {
-        StringBuilder negation = new StringBuilder();
+        final StringBuilder negation = new StringBuilder();
         negation.append(GraqlToken.Operator.NOT).append(SPACE);
 
         if (pattern.isConjunction()) {
