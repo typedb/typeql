@@ -18,6 +18,7 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 
 import static grakn.common.util.Objects.className;
@@ -40,4 +41,10 @@ public abstract class BoundVariable extends Variable implements Pattern {
     public ThingVariable<?> asThing() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
     }
+
+    @Override
+    public boolean isVariable() { return true; }
+
+    @Override
+    public BoundVariable asVariable() { return this; }
 }

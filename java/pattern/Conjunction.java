@@ -57,6 +57,12 @@ public class Conjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
+    public boolean isConjunction() { return true; }
+
+    @Override
+    public Conjunction<?> asConjunction() { return this; }
+
+    @Override
     public String toString() {
         StringBuilder pattern = new StringBuilder();
         pattern.append(CURLY_OPEN).append(SPACE);

@@ -17,11 +17,37 @@
 
 package graql.lang.pattern;
 
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.BoundVariable;
+
+import static grakn.common.util.Objects.className;
+
 public interface Pattern {
+
+    default boolean isVariable() { return false; }
+
+    default boolean isConjunction() { return false; }
+
+    default boolean isDisjunction() { return false; }
 
     default boolean isNegation() { return false; }
 
-    default Negation<?> asNegation() { throw new UnsupportedOperationException(); }
+    default BoundVariable asVariable() {
+        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
+    }
+
+    default Conjunction<?> asConjunction() {
+        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Conjunction.class)));
+    }
+
+    default Disjunction<?> asDisjunction() {
+        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Disjunction.class)));
+    }
+
+    default Negation<?> asNegation() {
+        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
+    }
 
     @Override
     String toString();

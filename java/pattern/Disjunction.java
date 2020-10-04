@@ -45,6 +45,12 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
+    public boolean isDisjunction() { return true; }
+
+    @Override
+    public Disjunction<?> asDisjunction() { return this; }
+
+    @Override
     public String toString() {
         StringBuilder syntax = new StringBuilder();
 
