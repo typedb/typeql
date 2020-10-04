@@ -325,7 +325,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Value that = (Value) o;
+            Value<?> that = (Value<?>) o;
             return (this.operation.equals(that.operation));
         }
 

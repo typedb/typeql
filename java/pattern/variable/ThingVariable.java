@@ -77,7 +77,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return Optional.ofNullable(neqConstraint);
     }
 
-    public Optional<ThingConstraint.Value> value() {
+    public Optional<ThingConstraint.Value<?>> value() {
         return Optional.ofNullable(valueConstraint);
     }
 
