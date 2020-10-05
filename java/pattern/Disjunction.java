@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
@@ -34,6 +35,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     private final List<T> patterns;
     private final int hash;
+    private Disjunction<Conjunction<Conjunctable>> normalised;
 
     public Disjunction(final List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
@@ -47,7 +49,15 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     @Override
     public Disjunction<Conjunction<Conjunctable>> normalise() {
-        return null;
+        if (normalised == null) {
+            List<Conjunction<Conjunctable>> conjunctions = patterns.stream().flatMap(p -> {
+                if (p.isConjunction()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
+                else if (p.isConjunction()) return p.asConjunction().normalise().patterns().stream();
+                else return p.asDisjunction().normalise().patterns().stream();
+            }).collect(toList());
+            normalised = new Disjunction<>(conjunctions);
+        }
+        return normalised;
     }
 
     @Override

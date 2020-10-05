@@ -17,12 +17,19 @@
 
 package graql.lang.pattern;
 
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
@@ -35,6 +42,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     private final List<T> patterns;
     private final int hash;
+    private Disjunction<Conjunction<Conjunctable>> normalised;
 
     public Conjunction(final List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
@@ -54,9 +62,29 @@ public class Conjunction<T extends Pattern> implements Pattern {
         return patterns;
     }
 
+    public static <U extends Pattern> Conjunction<U> merge(List<Conjunction<U>> conjunctions) {
+        return new Conjunction<>(conjunctions.stream().flatMap(p -> p.patterns().stream()).collect(toList()));
+    }
+
     @Override
     public Disjunction<Conjunction<Conjunctable>> normalise() {
-        return null;
+        if (normalised == null) {
+            List<Conjunctable> conjunctables = new ArrayList<>();
+            List<List<Conjunction<Conjunctable>>> listOfDisjunctions = new ArrayList<>();
+            patterns.forEach(pattern -> {
+                if (pattern.isVariable()) conjunctables.add(pattern.asVariable().normalise());
+                else if (pattern.isNegation()) conjunctables.add(pattern.asNegation().normalise());
+                else if (pattern.isConjunction())
+                    listOfDisjunctions.add(pattern.asConjunction().normalise().patterns());
+                else listOfDisjunctions.add(pattern.asDisjunction().normalise().patterns());
+            });
+            listOfDisjunctions.add(list(new Conjunction<>(conjunctables)));
+            List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisjunctions)
+                    .stream().map(Conjunction::merge)
+                    .collect(toList());
+            normalised = new Disjunction<>(listOfConjunctions);
+        }
+        return normalised;
     }
 
     @Override
@@ -85,5 +113,51 @@ public class Conjunction<T extends Pattern> implements Pattern {
     @Override
     public int hashCode() {
         return hash;
+    }
+
+    private static class CartesianList<E> extends AbstractList<List<E>> {
+
+        private final transient List<List<E>> axes;
+        private final transient int[] axesSizeProduct;
+        private final Map<Integer, List<E>> computed;
+
+        CartesianList(List<List<E>> axes) {
+            this.axes = axes;
+            axesSizeProduct = new int[axes.size() + 1];
+            axesSizeProduct[axes.size()] = 1;
+            for (int i = axes.size() - 1; i >= 0; i--) {
+                axesSizeProduct[i] = axesSizeProduct[i + 1] * axes.get(i).size();
+            }
+            if (axesSizeProduct[0] == 0) throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+            computed = new HashMap<>();
+        }
+
+        private int getAxisIndexForProductIndex(int index, int axis) {
+            return (index / axesSizeProduct[axis + 1]) % axes.get(axis).size();
+        }
+
+        @Override
+        public List<E> get(final int index) {
+            if (index >= size()) throw new IndexOutOfBoundsException();
+
+            return computed.computeIfAbsent(index, i -> new AbstractList<E>() {
+
+                @Override
+                public int size() {
+                    return axes.size();
+                }
+
+                @Override
+                public E get(int axis) {
+                    if (axis >= size()) throw new IndexOutOfBoundsException();
+                    return axes.get(axis).get(getAxisIndexForProductIndex(i, axis));
+                }
+            });
+        }
+
+        @Override
+        public int size() {
+            return axesSizeProduct[0];
+        }
     }
 }

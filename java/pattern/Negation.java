@@ -18,10 +18,12 @@
 package graql.lang.pattern;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
 
 import java.util.Objects;
 
+import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
@@ -35,9 +37,11 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 public class Negation<T extends Pattern> implements Conjunctable {
 
     private final T pattern;
+    private Negation<Disjunction<Conjunction<Conjunctable>>> normalised;
 
     public Negation(final T pattern) {
         if (pattern == null) throw new NullPointerException("Null patterns");
+        else if (pattern.isNegation()) throw GraqlException.of(ErrorMessage.REDUNDANT_NESTED_NEGATION);
         this.pattern = pattern;
     }
 
@@ -57,8 +61,18 @@ public class Negation<T extends Pattern> implements Conjunctable {
     public T getPattern() { return pattern;}
 
     @Override
-    public Negation<Disjunction<Conjunction<BoundVariable>>> normalise() {
-        return null;
+    public Negation<Disjunction<Conjunction<Conjunctable>>> normalise() {
+        if (normalised == null) {
+            if (pattern.isNegation()) {
+                throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+            } else if (pattern.isVariable()) {
+                normalised = new Negation<>(new Disjunction<>(list(new Conjunction<>(list(pattern.asVariable())))));
+            } else {
+                if (pattern.isConjunction()) normalised = new Negation<>(pattern.asConjunction().normalise());
+                else normalised = new Negation<>(pattern.asDisjunction().normalise());
+            }
+        }
+        return normalised;
     }
 
     @Override

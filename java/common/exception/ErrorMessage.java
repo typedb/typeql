@@ -49,12 +49,14 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(14, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
             new ErrorMessage(15, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
+    public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
+            new ErrorMessage(16, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(16, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(17, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(17, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(18, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(18, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(19, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";
