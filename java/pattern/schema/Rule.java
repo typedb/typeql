@@ -30,9 +30,9 @@ import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Constraint.THEN;
-import static graql.lang.common.GraqlToken.Constraint.WHEN;
-import static graql.lang.common.GraqlToken.Type.RULE;
+import static graql.lang.common.GraqlToken.Schema.RULE;
+import static graql.lang.common.GraqlToken.Schema.THEN;
+import static graql.lang.common.GraqlToken.Schema.WHEN;
 import static java.util.stream.Collectors.toList;
 
 public class Rule implements Definable {
