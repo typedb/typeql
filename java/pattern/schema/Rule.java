@@ -50,6 +50,9 @@ public class Rule implements Definable {
         return true;
     }
 
+    @Override
+    public Rule asRule() { return this; }
+
     public Rule when(final List<? extends Pattern> patterns) {
         if (patterns == null) throw new NullPointerException("Null when pattern");
         this.when = new Conjunction<>(patterns.stream().map(Objects::requireNonNull).collect(toList()));

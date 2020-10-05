@@ -219,4 +219,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     public boolean isTypeVariable() {
         return true;
     }
+
+    @Override
+    public TypeVariable asTypeVariable() { return this; }
 }

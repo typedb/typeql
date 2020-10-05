@@ -30,7 +30,6 @@ java_library(
         "variable/*.java",
         "variable/builder/*.java",
         "schema/*.java",
-        "schema/builder/*.java"
     ]),
     deps = [
         # Internal Package Dependencies

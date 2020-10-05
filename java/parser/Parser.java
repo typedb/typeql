@@ -628,14 +628,9 @@ public class Parser extends GraqlBaseVisitor {
                 type = type.value(GraqlArg.ValueType.of(constraint.value_type().getText()));
             } else if (constraint.REGEX() != null) {
                 type = type.regex(visitRegex(constraint.regex()));
-//            } else if (constraint.WHEN() != null) {
-//                type = type.when(new Conjunction<>(visitPatterns(constraint.patterns())));
-//            } else if (constraint.THEN() != null) {
-//                type = type.then(new Conjunction<>(visitVariable_things(constraint.variable_things())));
             } else if (constraint.TYPE() != null) {
                 final Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
                 type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
-
             } else {
                 throw new IllegalArgumentException("Unrecognised Type Statement: " + constraint.getText());
             }

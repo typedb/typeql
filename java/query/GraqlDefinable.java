@@ -62,7 +62,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         this.hash = Objects.hash(this.keyword, this.typeVariables, this.rules);
     }
 
-    public final List<TypeVariable> variables() {
+    public final List<TypeVariable> typeVariables() {
         return typeVariables;
     }
     public final List<Rule> rules() {
@@ -77,7 +77,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         if (typeVariables.size() + rules.size() > 1) query.append(NEW_LINE);
         else query.append(GraqlToken.Char.SPACE);
 
-        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(typeVariables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(rules().stream().map(Rule::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
