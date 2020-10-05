@@ -20,7 +20,9 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.common.GraqlArg;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
@@ -50,6 +52,7 @@ import static graql.lang.Graql.match;
 import static graql.lang.Graql.or;
 import static graql.lang.Graql.parse;
 import static graql.lang.Graql.rel;
+import static graql.lang.Graql.rule;
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.undefine;
 import static graql.lang.Graql.var;
@@ -722,10 +725,10 @@ public class ParserTest {
     public void testDefineRules() {
         String when = "$x isa movie;";
         String then = "$x has genre 'drama';";
-        Pattern whenPattern = and(var("x").isa("movie"));
-        Pattern thenPattern = and(var("x").has("genre", "drama"));
+        Conjunction<?> whenPattern = and(var("x").isa("movie"));
+        ThingVariable<?> thenPattern = var("x").has("genre", "drama");
 
-        GraqlDefine expected = define(type("all-movies-are-drama").sub("rule").when(whenPattern).then(thenPattern));
+        GraqlDefine expected = define(rule("all-movies-are-drama").when(whenPattern).then(thenPattern));
         String query = "define all-movies-are-drama sub rule, when { " + when + " }, then { " + then + " };";
         GraqlDefine parsed = Graql.parse(query).asDefine();
 

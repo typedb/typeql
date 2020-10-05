@@ -24,6 +24,8 @@ eof_query             :   query       EOF ;
 eof_query_list        :   query+      EOF ;
 eof_pattern           :   pattern     EOF ;
 eof_pattern_list      :   patterns    EOF ;
+eof_definable         :   definable   EOF ;
+eof_definable_list    :   definable+  EOF ;
 
 // GRAQL QUERY LANGUAGE ========================================================
 
@@ -33,8 +35,8 @@ query                 :   query_define    |   query_undefine
                       |   query_match_group |   query_match_group_agg
                       |   query_compute   ;
 
-query_define          :   DEFINE      schema+  ;
-query_undefine        :   UNDEFINE    schema+  ;
+query_define          :   DEFINE      definable+  ;
+query_undefine        :   UNDEFINE    definable+  ;
 
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
@@ -76,10 +78,9 @@ function_group        :   GROUP   VAR_    ';' ;
 
 // SCHEMA QUERY ===============================================================
 
-schema                :  variable_type
-                      |  variable_schema     ;
+definable             :  variable_type
+                      |  schema_rule          ;
 
-variable_schema       :  rule_               ;
 
 // QUERY PATTERNS ==============================================================
 
@@ -160,7 +161,7 @@ containable           :   STRING_ | VAR_  ;
 
 // SCHEMA CONSTRUCT =============================================================
 
-rule_                  :   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
+schema_rule           :   RULE label ':' WHEN '{' pattern_conjunction '}' THEN '{' variable_thing_any ';' '}' ;
 
 // COMPUTE QUERY ===============================================================
 //

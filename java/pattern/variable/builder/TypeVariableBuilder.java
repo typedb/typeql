@@ -19,7 +19,6 @@ package graql.lang.pattern.variable.builder;
 
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;

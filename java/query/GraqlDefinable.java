@@ -20,9 +20,11 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.SchemaVariable;
+import graql.lang.pattern.Definable;
+import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.TypeVariable;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -31,32 +33,40 @@ import static graql.lang.common.GraqlToken.Char.NEW_LINE;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Command.DEFINE;
 import static graql.lang.common.GraqlToken.Command.UNDEFINE;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static graql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
 import static java.util.stream.Collectors.joining;
 
 abstract class GraqlDefinable extends GraqlQuery {
 
     private final GraqlToken.Command keyword;
-    private final List<SchemaVariable> variables;
+    private final List<TypeVariable> typeVariables = new ArrayList<>();
+    private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
-    GraqlDefinable(GraqlToken.Command keyword, List<SchemaVariable> variables) {
+    GraqlDefinable(GraqlToken.Command keyword, List<Definable> definables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
-        if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
-        LinkedList<SchemaVariable> list = new LinkedList<>(variables);
-        while (!list.isEmpty()) {
-            SchemaVariable v = list.removeFirst();
+        if (definables == null || definables.isEmpty()) throw GraqlException.of(MISSING_DEFINABLES.message());
+        LinkedList<TypeVariable> typeVars = new LinkedList<>();
+        for (Definable definable : definables) {
+            if (definable.isRule()) rules.add(definable.asRule());
+            if (definable.isTypeVariable()) typeVars.add(definable.asTypeVariable());
+        }
+        while (!typeVars.isEmpty()) {
+            TypeVariable v = typeVars.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else v.constraints().forEach(c -> list.addAll(c.variables()));
+            else v.constraints().forEach(c -> typeVars.addAll(c.variables()));
+            typeVariables.add(v);
         }
 
         this.keyword = keyword;
-        this.variables = variables;
-        this.hash = Objects.hash(this.keyword, this.variables);
+        this.hash = Objects.hash(this.keyword, this.typeVariables, this.rules);
     }
 
-    public final List<SchemaVariable> variables() {
-        return variables;
+    public final List<TypeVariable> variables() {
+        return typeVariables;
+    }
+    public final List<Rule> rules() {
+        return rules;
     }
 
     @Override
@@ -64,10 +74,11 @@ abstract class GraqlDefinable extends GraqlQuery {
         StringBuilder query = new StringBuilder();
         query.append(keyword);
 
-        if (variables.size() > 1) query.append(NEW_LINE);
+        if (typeVariables.size() + rules.size() > 1) query.append(NEW_LINE);
         else query.append(GraqlToken.Char.SPACE);
 
-        query.append(variables().stream().map(SchemaVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(rules().stream().map(Rule::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
     }
@@ -77,7 +88,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GraqlDefinable that = (GraqlDefinable) o;
-        return this.keyword.equals(that.keyword) && this.variables.equals(that.variables);
+        return this.keyword.equals(that.keyword) && this.typeVariables.equals(that.typeVariables) && this.rules.equals(that.rules);
     }
 
     @Override

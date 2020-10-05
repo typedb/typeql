@@ -26,14 +26,15 @@ import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Definable;
 import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.constraint.ValueOperation;
+import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.SchemaVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -155,6 +156,14 @@ public class Parser extends GraqlBaseVisitor {
         return parseQuery(patternsString, GraqlParser::eof_pattern_list, this::visitEof_pattern_list);
     }
 
+    public Definable parseDefinableEOF(String definableString) {
+        return parseQuery(definableString, GraqlParser::eof_definable, this::visitEof_definable);
+    }
+
+    public List<Definable> parseDefinableListEOF(String definablesString) {
+        return parseQuery(definablesString, GraqlParser::eof_definable_list, this::visitEof_definable_list);
+    }
+
     // GLOBAL HELPER METHODS ===================================================
 
     private UnboundVariable getVar(TerminalNode variable) {
@@ -190,6 +199,15 @@ public class Parser extends GraqlBaseVisitor {
         return visitPatterns(ctx.patterns());
     }
 
+    @Override
+    public Definable visitEof_definable(GraqlParser.Eof_definableContext ctx) {
+        return visitDefinable(ctx.definable());
+    }
+
+    @Override
+    public List<Definable> visitEof_definable_list(GraqlParser.Eof_definable_listContext ctx) {
+        return visitDefinableList(ctx.definable());
+    }
     // GRAQL QUERIES ===========================================================
 
     @Override
@@ -228,40 +246,28 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDefine visitQuery_define(GraqlParser.Query_defineContext ctx) {
-        return new GraqlDefine(visitSchema_patterns(ctx.schema_patterns()));
+        List<Definable> definables = new ArrayList<>();
+        for (GraqlParser.DefinableContext definableCtx : ctx.definable()) {
+            definables.add(visitDefinable(definableCtx));
+        }
+        return new GraqlDefine(definables);
     }
 
     @Override
     public GraqlUndefine visitQuery_undefine(GraqlParser.Query_undefineContext ctx) {
-        return new GraqlUndefine(visitSchema_patterns(ctx.schema_patterns()));
-    }
-
-    @Override
-    public List<SchemaVariable> visitSchema_patterns(GraqlParser.Schema_patternsContext ctx) {
-        List<SchemaVariable> schemaVariables = new ArrayList<>();
-        for (GraqlParser.SchemaContext schema : ctx.schema()) {
-            if (schema.variable_type() != null) {
-                schemaVariables.add(visitVariable_type(schema.variable_type()));
-            } else {
-                schemaVariables.add(visitRule_(schema.rule_()));
-            }
+        List<Definable> definables = new ArrayList<>();
+        for (GraqlParser.DefinableContext definableCtx : ctx.definable()) {
+            definables.add(visitDefinable(definableCtx));
         }
-        return schemaVariables;
+        return new GraqlUndefine(definables);
     }
 
     @Override
-    public SchemaVariable visitSchema(GraqlParser.SchemaContext ctx) {
-        if (ctx.variable_type() != null) {
-            return visitVariable_type(ctx.variable_type());
-        } else {
-            return visitRule_(ctx.rule_());
-        }
-    }
-
-    @Override
-    public SchemaVariable visitRule_(GraqlParser.Rule_Context ctx) {
-        // TODO
-        return null;
+    public Rule visitSchema_rule(GraqlParser.Schema_ruleContext ctx) {
+        String label = ctx.label().getText();
+        Conjunction<? extends Pattern> when = visitPattern_conjunction(ctx.pattern_conjunction());
+        ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
+        return new Rule(label).when(when).then(then);
     }
 
     @Override
@@ -530,32 +536,49 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Pattern visitPattern_disjunction(GraqlParser.Pattern_disjunctionContext ctx) {
+    public Disjunction<? extends Pattern> visitPattern_disjunction(GraqlParser.Pattern_disjunctionContext ctx) {
         List<Pattern> patterns = ctx.patterns().stream().map(patternsContext -> {
             List<Pattern> nested = visitPatterns(patternsContext);
             if (nested.size() > 1) return new Conjunction<>(nested);
             else return nested.get(0);
         }).collect(toList());
 
-        // Simplify representation when there is only one alternative
-        if (patterns.size() == 1) {
-            return patterns.iterator().next();
-        }
+        // TODO do we want this?
+//        // Simplify representation when there is only one alternative
+//        if (patterns.size() == 1) {
+//            return patterns.iterator().next();
+//        }
 
         return new Disjunction<>(patterns);
     }
 
     @Override
-    public Pattern visitPattern_conjunction(GraqlParser.Pattern_conjunctionContext ctx) {
+    public Conjunction<? extends Pattern> visitPattern_conjunction(GraqlParser.Pattern_conjunctionContext ctx) {
         return new Conjunction<>(visitPatterns(ctx.patterns()));
     }
 
     @Override
-    public Pattern visitPattern_negation(GraqlParser.Pattern_negationContext ctx) {
+    public Negation<? extends Pattern> visitPattern_negation(GraqlParser.Pattern_negationContext ctx) {
         List<Pattern> patterns = visitPatterns(ctx.patterns());
         if (patterns.size() == 1) return new Negation<>(patterns.get(0));
         else return new Negation<>(new Conjunction<>(patterns));
     }
+
+    // QUERY DEFINABLES ========================================================
+
+    @Override
+    public Definable visitDefinable(GraqlParser.DefinableContext ctx) {
+        if (ctx.variable_type() != null) {
+            return visitVariable_type(ctx.variable_type());
+        } else {
+            return visitSchema_rule(ctx.schema_rule());
+        }
+    }
+
+    public List<Definable> visitDefinableList(List<GraqlParser.DefinableContext> ctx) {
+        return ctx.stream().map(this::visitDefinable).collect(toList());
+    }
+
 
     // VARIABLE PATTERNS =======================================================
 

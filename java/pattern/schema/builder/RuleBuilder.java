@@ -13,18 +13,17 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
-package graql.lang.query;
+package graql.lang.pattern.schema.builder;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.pattern.Definable;
+import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Pattern;
+import graql.lang.pattern.schema.Rule;
+import graql.lang.pattern.variable.ThingVariable;
 
-import java.util.List;
-
-public class GraqlUndefine extends GraqlDefinable {
-
-    public GraqlUndefine(List<Definable> definables) {
-        super(GraqlToken.Command.UNDEFINE, definables);
-    }
+public interface RuleBuilder {
+    Rule when(Conjunction<? extends Pattern> pattern);
+    Rule then(ThingVariable<?> pattern);
 }

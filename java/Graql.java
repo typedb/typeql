@@ -20,12 +20,13 @@ package graql.lang;
 import graql.lang.common.GraqlToken;
 import graql.lang.parser.Parser;
 import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Definable;
 import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.ValueOperation;
-import graql.lang.pattern.variable.SchemaVariable;
+import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -64,6 +65,10 @@ public class Graql {
         return parser.parsePatternListEOF(pattern);
     }
 
+    public static Definable parseDefinable(String pattern) { return parser.parseDefinableEOF(pattern); }
+
+    public static List<Definable> parseDefinableList(String pattern) { return parser.parseDefinableListEOF(pattern); }
+
     public static GraqlMatch.Unfiltered match(Pattern... patterns) {
         return match(Arrays.asList(patterns));
     }
@@ -80,20 +85,20 @@ public class Graql {
         return new GraqlInsert(things);
     }
 
-    public static GraqlDefine define(SchemaVariable... types) {
-        return new GraqlDefine(list(types));
+    public static GraqlDefine define(Definable... definables) {
+        return new GraqlDefine(list(definables));
     }
 
-    public static GraqlDefine define(List<SchemaVariable> types) {
-        return new GraqlDefine(types);
+    public static GraqlDefine define(List<Definable> definables) {
+        return new GraqlDefine(definables);
     }
 
-    public static GraqlUndefine undefine(SchemaVariable... types) {
-        return new GraqlUndefine(list(types));
+    public static GraqlUndefine undefine(Definable... definables) {
+        return new GraqlUndefine(list(definables));
     }
 
-    public static GraqlUndefine undefine(List<SchemaVariable> types) {
-        return new GraqlUndefine(types);
+    public static GraqlUndefine undefine(List<Definable> definables) {
+        return new GraqlUndefine(definables);
     }
 
     public static GraqlCompute.Builder compute() {
@@ -126,6 +131,8 @@ public class Graql {
     public static Negation<Pattern> not(Pattern pattern) {
         return new Negation<>(pattern);
     }
+
+    public static Rule rule(String label) { return new Rule(label); }
 
     // Variable Builder Methods
 

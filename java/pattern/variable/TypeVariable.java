@@ -18,6 +18,7 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.Definable;
 import graql.lang.pattern.constraint.Constraint;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.builder.TypeVariableBuilder;
@@ -33,7 +34,7 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
 
-public class TypeVariable extends SchemaVariable implements TypeVariableBuilder {
+public class TypeVariable extends BoundVariable implements TypeVariableBuilder, Definable {
 
     private TypeConstraint.Label labelConstraint;
     private TypeConstraint.Sub subConstraint;
@@ -55,11 +56,10 @@ public class TypeVariable extends SchemaVariable implements TypeVariableBuilder 
         this.constraints = new LinkedList<>();
     }
 
-    // TODO this won't quite work
-//    @Override
-//    public List<SchemaVariable> constraints() {
-//        return constraints;
-//    }
+    @Override
+    public List<TypeConstraint> constraints() {
+        return constraints;
+    }
 
     @Override
     public boolean isType() {
@@ -213,5 +213,10 @@ public class TypeVariable extends SchemaVariable implements TypeVariableBuilder 
     @Override
     public int hashCode() {
         return Objects.hash(this.reference, set(this.constraints));
+    }
+
+    @Override
+    public boolean isTypeVariable() {
+        return true;
     }
 }

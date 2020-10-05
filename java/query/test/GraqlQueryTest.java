@@ -31,6 +31,7 @@ import static graql.lang.Graql.lte;
 import static graql.lang.Graql.match;
 import static graql.lang.Graql.or;
 import static graql.lang.Graql.rel;
+import static graql.lang.Graql.rule;
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.var;
 import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
@@ -99,13 +100,13 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithThenToString() {
-        GraqlDefine query = Graql.define(type("a-rule").sub("rule").then(and(Graql.parsePatternList("$x isa movie;"))));
+        GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parsePatternList("$x isa movie;")));
         assertValidToString(query);
     }
 
     @Test
     public void testQueryWithWhenToString() {
-        assertValidToString(Graql.define(type("a-rule").sub("rule").when(and(Graql.parsePatternList("$x isa movie;")))));
+        assertValidToString(Graql.define(rule("a-rule").when(and(Graql.parsePatternList("$x isa movie;")))));
     }
 
     private void assertValidToString(GraqlQuery query) {

@@ -22,8 +22,6 @@ import grakn.common.collection.Pair;
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
@@ -37,9 +35,6 @@ import java.util.regex.PatternSyntaxException;
 import static grakn.common.collection.Collections.set;
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.COLON;
-import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
-import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Constraint.AS;
 import static graql.lang.common.GraqlToken.Constraint.IS_KEY;
@@ -49,16 +44,13 @@ import static graql.lang.common.GraqlToken.Constraint.REGEX;
 import static graql.lang.common.GraqlToken.Constraint.RELATES;
 import static graql.lang.common.GraqlToken.Constraint.SUB;
 import static graql.lang.common.GraqlToken.Constraint.SUBX;
-import static graql.lang.common.GraqlToken.Constraint.THEN;
 import static graql.lang.common.GraqlToken.Constraint.TYPE;
 import static graql.lang.common.GraqlToken.Constraint.VALUE_TYPE;
-import static graql.lang.common.GraqlToken.Constraint.WHEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
-import static java.util.stream.Collectors.joining;
 
 public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
