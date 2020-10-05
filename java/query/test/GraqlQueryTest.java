@@ -100,18 +100,18 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithThenToString() {
-        GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parsePattern("$x isa movie;"));
+        GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parseVariable("$x isa movie;").asThing()));
         assertValidToString(query);
     }
 
     @Test
     public void testQueryWithWhenToString() {
-        assertValidToString(Graql.define(rule("a-rule").when(and(Graql.parsePatternList("$x isa movie;")))));
+        assertValidToString(Graql.define(rule("a-rule").when(Graql.parsePatterns("$x isa movie;"))));
     }
 
     private void assertValidToString(GraqlQuery query) {
         //No need to execute the insert query
-        GraqlQuery parsedQuery = Graql.parse(query.toString());
+        GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
     }
 
@@ -202,7 +202,7 @@ public class GraqlQueryTest {
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
         String query = "match $x isa movie;\n" +
                 "delete $x isa movie;";
-        assertEquals(query, Graql.parse(query).toString());
+        assertEquals(query, Graql.parseQuery(query).toString());
     }
 
     @Test
@@ -213,11 +213,11 @@ public class GraqlQueryTest {
     }
 
     private void assertSameStringRepresentation(GraqlMatch query) {
-        assertEquals(query.toString(), Graql.parse(query.toString()).toString());
+        assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
     }
 
     private void assertEquivalent(GraqlQuery query, String queryString) {
         assertEquals(queryString, query.toString());
-        assertEquals(query.toString(), Graql.parse(queryString).toString());
+        assertEquals(query.toString(), Graql.parseQuery(queryString).toString());
     }
 }

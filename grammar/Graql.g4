@@ -20,13 +20,13 @@ grammar Graql;
 // Graql end-of-file (aka. end-of-string) query parser
 // Needed by Graql's Parser to ensure that it parses till end of string
 
-eof_query             :   query       EOF ;
-eof_query_list        :   query+      EOF ;
-eof_pattern           :   pattern     EOF ;
-eof_pattern_list      :   patterns    EOF ;
-eof_definable         :   definable   EOF ;
-eof_definable_list    :   definable+  EOF ;
-eof_variable          :
+eof_query             :   query            EOF ;
+eof_queries           :   query+           EOF ;
+eof_pattern           :   pattern          EOF ;
+eof_patterns          :   patterns         EOF ;
+eof_definables        :   definables       EOF ;
+eof_variable          :   pattern_variable EOF ;
+eof_schema_rule       :   schema_rule      EOF ;
 
 // GRAQL QUERY LANGUAGE ========================================================
 
@@ -79,9 +79,9 @@ function_group        :   GROUP   VAR_    ';' ;
 
 // SCHEMA QUERY ===============================================================
 
-definable             :  variable_type
-                      |  schema_rule          ;
-
+definables            : ( definable ';' )+    ;
+definable             :   variable_type
+                      |   schema_rule         ;
 
 // QUERY PATTERNS ==============================================================
 
@@ -162,7 +162,7 @@ containable           :   STRING_ | VAR_  ;
 
 // SCHEMA CONSTRUCT =============================================================
 
-schema_rule           :   RULE label ':' WHEN '{' pattern_conjunction '}' THEN '{' variable_thing_any ';' '}' ;
+schema_rule           :   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
 
 // COMPUTE QUERY ===============================================================
 //

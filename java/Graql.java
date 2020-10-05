@@ -27,6 +27,7 @@ import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.ValueOperation;
 import graql.lang.pattern.schema.Rule;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -49,11 +50,11 @@ public class Graql {
 
     private static final Parser parser = new Parser();
 
-    public static <T extends GraqlQuery> T parse(String queryString) {
+    public static <T extends GraqlQuery> T parseQuery(String queryString) {
         return parser.parseQueryEOF(queryString);
     }
 
-    public static <T extends GraqlQuery> Stream<T> parseList(String queryString) {
+    public static <T extends GraqlQuery> Stream<T> parseQueries(String queryString) {
         return parser.parseQueryListEOF(queryString);
     }
 
@@ -61,13 +62,17 @@ public class Graql {
         return parser.parsePatternEOF(pattern);
     }
 
-    public static List<? extends Pattern> parsePatternList(String pattern) {
+    public static List<? extends Pattern> parsePatterns(String pattern) {
         return parser.parsePatternListEOF(pattern);
     }
 
-    public static Definable parseDefinable(String pattern) { return parser.parseDefinableEOF(pattern); }
+    public static List<Definable> parseDefinables(String pattern) { return parser.parseDefinableListEOF(pattern); }
 
-    public static List<Definable> parseDefinableList(String pattern) { return parser.parseDefinableListEOF(pattern); }
+    public static Rule parseRule(String pattern) { return parser.parseSchemaRuleEOF(pattern).asRule(); }
+
+    public static BoundVariable parseVariable(String variable) {
+        return parser.parseVariableEOF(variable);
+    }
 
     public static GraqlMatch.Unfiltered match(Pattern... patterns) {
         return match(Arrays.asList(patterns));

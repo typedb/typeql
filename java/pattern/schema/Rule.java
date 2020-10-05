@@ -20,9 +20,9 @@ package graql.lang.pattern.schema;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Definable;
 import graql.lang.pattern.Pattern;
-import graql.lang.pattern.schema.builder.RuleBuilder;
 import graql.lang.pattern.variable.ThingVariable;
 
+import java.util.List;
 import java.util.Objects;
 
 import static graql.lang.common.GraqlToken.Char.COLON;
@@ -33,8 +33,9 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Constraint.THEN;
 import static graql.lang.common.GraqlToken.Constraint.WHEN;
 import static graql.lang.common.GraqlToken.Type.RULE;
+import static java.util.stream.Collectors.toList;
 
-public class Rule implements Definable, RuleBuilder {
+public class Rule implements Definable {
     private final String label;
     private Conjunction<? extends Pattern> when;
     private ThingVariable<?> then;
@@ -49,14 +50,12 @@ public class Rule implements Definable, RuleBuilder {
         return true;
     }
 
-    @Override
-    public Rule when(Conjunction<? extends Pattern> pattern) {
-        if (pattern == null) throw new NullPointerException("Null when pattern");
-        this.when = pattern;
+    public Rule when(List<? extends Pattern> patterns) {
+        if (patterns == null) throw new NullPointerException("Null when pattern");
+        this.when = new Conjunction<>(patterns.stream().map(Objects::requireNonNull).collect(toList()));
         return this;
     }
 
-    @Override
     public Rule then(ThingVariable<?> pattern) {
         if (pattern == null) throw new NullPointerException("Null then pattern");
         this.then = pattern;

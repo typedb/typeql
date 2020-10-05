@@ -37,15 +37,15 @@ public class GraqlSteps {
     @Given("graql define without commit")
     @Given("for each session, graql define")
     public void graql_define(String query) {
-        GraqlDefine parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        GraqlDefine parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql undefine")
     @Given("graql undefine without commit")
     public void graql_undefine(String query) {
-        GraqlUndefine parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        GraqlUndefine parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql insert")
@@ -53,22 +53,22 @@ public class GraqlSteps {
     @Given("graql insert without commit")
     @Given("for each session, graql insert")
     public void graql_insert(String query) {
-        GraqlInsert parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        GraqlInsert parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql delete")
     public void graql_delete(String query) {
-        GraqlDelete parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        GraqlDelete parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("for graql query")
     @Given("get answers of graql query")
     @Given("answer set is equivalent for graql query")
     public void graql_get(String query) {
-        GraqlQuery parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        GraqlQuery parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql get throws")
