@@ -52,7 +52,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testComplexQueryToString() {
-        GraqlMatch query = match(
+        final GraqlMatch query = match(
                 var("x").isa("movie"),
                 var().rel("x").rel("y"),
                 or(
@@ -100,7 +100,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithThenToString() {
-        GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parseVariable("$x isa movie;").asThing()));
+        final GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parseVariable("$x isa movie;").asThing()));
         assertValidToString(query);
     }
 
@@ -109,9 +109,9 @@ public class GraqlQueryTest {
         assertValidToString(Graql.define(rule("a-rule").when(Graql.parsePatterns("$x isa movie;"))));
     }
 
-    private void assertValidToString(GraqlQuery query) {
+    private void assertValidToString(final GraqlQuery query) {
         //No need to execute the insert query
-        GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
+        final GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
     }
 
@@ -138,28 +138,28 @@ public class GraqlQueryTest {
 
     @Test
     public void testComputeQuerySubgraphToString() {
-        GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
+        final GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
         assertEquivalent(query, "compute centrality in [movie, person], using degree;");
     }
 
     @Test
     public void testClusterToString() {
-        GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
+        final GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
         assertEquivalent(connectedcomponent, "compute cluster in [movie, person], using connected-component;");
 
-        GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
+        final GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
         assertEquivalent(kcore, "compute cluster in [movie, person], using k-core;");
     }
 
     @Test
     public void testCCSizeToString() {
-        GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
+        final GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
         assertEquivalent(query, "compute cluster in [movie, person], using connected-component, where size=10;");
     }
 
     @Test
     public void testKCoreToString() {
-        GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
+        final GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
         assertEquivalent(query, "compute cluster in [movie, person], using k-core, where k=10;");
     }
 
@@ -179,7 +179,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testMatchInsertToString() {
-        GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
+        final GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
         assertEquals("match $x isa movie;\ninsert $x has title \"hello\";", query.toString());
     }
 
@@ -200,23 +200,23 @@ public class GraqlQueryTest {
 
     @Test
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
-        String query = "match $x isa movie;\n" +
+        final String query = "match $x isa movie;\n" +
                 "delete $x isa movie;";
         assertEquals(query, Graql.parseQuery(query).toString());
     }
 
     @Test
     public void whenCallingToStringOnAQueryWithAContainsPredicate_ResultIsCorrect() {
-        GraqlMatch.Unfiltered match = match(var("x").contains(var("y")));
+        final GraqlMatch.Unfiltered match = match(var("x").contains(var("y")));
 
         assertEquals("match $x contains $y;", match.toString());
     }
 
-    private void assertSameStringRepresentation(GraqlMatch query) {
+    private void assertSameStringRepresentation(final GraqlMatch query) {
         assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
     }
 
-    private void assertEquivalent(GraqlQuery query, String queryString) {
+    private void assertEquivalent(final GraqlQuery query, final String queryString) {
         assertEquals(queryString, query.toString());
         assertEquals(query.toString(), Graql.parseQuery(queryString).toString());
     }

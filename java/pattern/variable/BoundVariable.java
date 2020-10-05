@@ -18,14 +18,14 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Pattern;
+import graql.lang.pattern.Conjunctable;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-public abstract class BoundVariable extends Variable implements Pattern {
+public abstract class BoundVariable extends Variable implements Conjunctable {
 
-    BoundVariable(Reference reference) {
+    BoundVariable(final Reference reference) {
         super(reference);
     }
 
@@ -40,4 +40,13 @@ public abstract class BoundVariable extends Variable implements Pattern {
     public ThingVariable<?> asThing() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
     }
+
+    @Override
+    public BoundVariable normalise() { return this; }
+
+    @Override
+    public boolean isVariable() { return true; }
+
+    @Override
+    public BoundVariable asVariable() { return this; }
 }

@@ -42,7 +42,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     List<ThingConstraint.Has> hasConstraints;
     List<ThingConstraint> constraints;
 
-    public ThingVariable(Reference reference) {
+    public ThingVariable(final Reference reference) {
         super(reference);
         this.hasConstraints = new LinkedList<>();
         this.constraints = new LinkedList<>();
@@ -77,7 +77,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return Optional.ofNullable(neqConstraint);
     }
 
-    public Optional<ThingConstraint.Value> value() {
+    public Optional<ThingConstraint.Value<?>> value() {
         return Optional.ofNullable(valueConstraint);
     }
 
@@ -89,7 +89,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return hasConstraints;
     }
 
-    public T constrain(ThingConstraint.Isa constraint) {
+    public T constrain(final ThingConstraint.Isa constraint) {
         if (isaConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ThingConstraint.Isa.class, constraint));
         } else if (constraint.type().label().isPresent() && relation().isPresent()) {
@@ -100,7 +100,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return getThis();
     }
 
-    public T constrain(ThingConstraint.Has constraint) {
+    public T constrain(final ThingConstraint.Has constraint) {
         hasConstraints.add(constraint);
         constraints.add(constraint);
         return getThis();
@@ -119,10 +119,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public abstract String toString();
 
     @Override
-    public final boolean equals(Object o) {
+    public final boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || o.getClass().isAssignableFrom(ThingVariable.class)) return false;
-        ThingVariable<?> that = (ThingVariable<?>) o;
+        final ThingVariable<?> that = (ThingVariable<?>) o;
 
         return (this.reference.equals(that.reference) && this.constraints.equals(that.constraints));
     }
@@ -134,17 +134,17 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
 
-        Thing(Reference reference) {
+        Thing(final Reference reference) {
             super(reference);
         }
 
-        Thing(Reference reference, ThingConstraint.IID iidConstraint) {
+        Thing(final Reference reference, final ThingConstraint.IID iidConstraint) {
             super(reference);
             this.iidConstraint = iidConstraint;
             constraints.add(iidConstraint);
         }
 
-        Thing(Reference reference, ThingConstraint.NEQ neqConstraint) {
+        Thing(final Reference reference, final ThingConstraint.NEQ neqConstraint) {
             super(reference);
             this.neqConstraint = neqConstraint;
             constraints.add(neqConstraint);
@@ -164,10 +164,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public String toString() {
-            StringBuilder syntax = new StringBuilder();
+            final StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(reference.syntax());
 
-            String constraints = Stream.of(thingSyntax(), hasSyntax())
+            final String constraints = Stream.of(thingSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
             if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
@@ -178,7 +178,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
                                                                             ThingVariableBuilder.Common<Relation> {
 
-        Relation(Reference reference, ThingConstraint.Relation relationConstraint) {
+        Relation(final Reference reference, final ThingConstraint.Relation relationConstraint) {
             super(reference);
             this.relationConstraint = relationConstraint;
             constraints.add(relationConstraint);
@@ -190,7 +190,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
+        public ThingVariable.Relation constrain(final ThingConstraint.Relation.RolePlayer rolePlayer) {
             relationConstraint.addPlayers(rolePlayer);
             if (isa().isPresent() && !relationConstraint.hasScope()) {
                 relationConstraint.setScope(isa().get().type().label().get().label());
@@ -201,11 +201,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public String toString() {
             assert relation().isPresent();
-            StringBuilder syntax = new StringBuilder();
+            final StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(relation().get());
 
-            String constraints = Stream.of(isaSyntax(), hasSyntax())
+            final String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
             if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
@@ -215,7 +215,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
-        Attribute(Reference reference, ThingConstraint.Value<?> valueConstraint) {
+        Attribute(final Reference reference, final ThingConstraint.Value<?> valueConstraint) {
             super(reference);
             this.valueConstraint = valueConstraint;
             constraints.add(valueConstraint);
@@ -229,11 +229,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public String toString() {
             assert value().isPresent();
-            StringBuilder syntax = new StringBuilder();
+            final StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(value().get());
 
-            String constraints = Stream.of(isaSyntax(), hasSyntax())
+            final String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
             if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);

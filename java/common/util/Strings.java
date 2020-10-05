@@ -23,11 +23,11 @@ import java.util.Locale;
 
 public class Strings {
 
-    public static String unescapeRegex(String regex) {
+    public static String unescapeRegex(final String regex) {
         return regex.replaceAll("\\\\/", "/");
     }
 
-    public static String escapeRegex(String regex) {
+    public static String escapeRegex(final String regex) {
         return regex.replaceAll("/", "\\\\/");
     }
 
@@ -35,7 +35,7 @@ public class Strings {
      * @param string a string to quote and escape
      * @return a string, surrounded with double quotes and escaped
      */
-    public static String quoteString(String string) {
+    public static String quoteString(final String string) {
         return "\"" + string + "\"";
     }
 
@@ -43,11 +43,11 @@ public class Strings {
      * @param value a value in the graph
      * @return the string representation of the value (using quotes if it is already a string)
      */
-    public static String valueToString(Object value) {
+    public static String valueToString(final Object value) {
         if (value instanceof String) {
             return quoteString((String) value);
         } else if (value instanceof Double) {
-            DecimalFormat df = new DecimalFormat("#", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+            final DecimalFormat df = new DecimalFormat("#", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
             df.setMinimumFractionDigits(1);
             df.setMaximumFractionDigits(12);
             df.setMinimumIntegerDigits(1);

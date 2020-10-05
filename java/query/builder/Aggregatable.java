@@ -27,51 +27,51 @@ public interface Aggregatable<T extends GraqlQuery> {
         return aggregate(GraqlToken.Aggregate.Method.COUNT, null);
     }
 
-    default T max(String var) {
+    default T max(final String var) {
         return max(UnboundVariable.named(var));
     }
 
-    default T max(UnboundVariable var) {
+    default T max(final UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MAX, var);
     }
 
-    default T mean(String var) {
+    default T mean(final String var) {
         return mean(UnboundVariable.named(var));
     }
 
-    default T mean(UnboundVariable var) {
+    default T mean(final UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MEAN, var);
     }
 
-    default T median(String var) {
+    default T median(final String var) {
         return median(UnboundVariable.named(var));
     }
 
-    default T median(UnboundVariable var) {
+    default T median(final UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MEDIAN, var);
     }
 
-    default T min(String var) {
+    default T min(final String var) {
         return min(UnboundVariable.named(var));
     }
 
-    default T min(UnboundVariable var) {
+    default T min(final UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.MIN, var);
     }
 
-    default T std(String var) {
+    default T std(final String var) {
         return std(UnboundVariable.named(var));
     }
 
-    default T std(UnboundVariable var) {
+    default T std(final UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.STD, var);
     }
 
-    default T sum(String var) {
+    default T sum(final String var) {
         return sum(UnboundVariable.named(var));
     }
 
-    default T sum(UnboundVariable var) {
+    default T sum(final UnboundVariable var) {
         return aggregate(GraqlToken.Aggregate.Method.SUM, var);
     }
 

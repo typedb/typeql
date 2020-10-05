@@ -25,27 +25,27 @@ import java.util.Objects;
 
 public interface Sortable<S, O, L> {
 
-    default S sort(String var) {
+    default S sort(final String var) {
         return sort(UnboundVariable.named(var));
     }
 
-    default S sort(String var, String order) {
-        GraqlArg.Order o = GraqlArg.Order.of(order);
+    default S sort(final String var, final String order) {
+        final GraqlArg.Order o = GraqlArg.Order.of(order);
         if (o == null) throw new IllegalArgumentException(
                 "Invalid sorting order. Valid options: '" + GraqlArg.Order.ASC + "' or '" + GraqlArg.Order.DESC
         );
         return sort(UnboundVariable.named(var), o);
     }
 
-    default S sort(String var, GraqlArg.Order order) {
+    default S sort(final String var, final GraqlArg.Order order) {
         return sort(UnboundVariable.named(var), order);
     }
 
-    default S sort(UnboundVariable var) {
+    default S sort(final UnboundVariable var) {
         return sort(new Sorting(var));
     }
 
-    default S sort(UnboundVariable var, GraqlArg.Order order) {
+    default S sort(final UnboundVariable var, final GraqlArg.Order order) {
         return sort(new Sorting(var, order));
     }
 
@@ -61,11 +61,11 @@ public interface Sortable<S, O, L> {
         private final GraqlArg.Order order;
         private final int hash;
 
-        public Sorting(UnboundVariable var) {
+        public Sorting(final UnboundVariable var) {
             this(var, null);
         }
 
-        public Sorting(UnboundVariable var, GraqlArg.Order order) {
+        public Sorting(final UnboundVariable var, final GraqlArg.Order order) {
             this.var = var;
             this.order = order;
             this.hash = Objects.hash(var(), order());
@@ -81,7 +81,7 @@ public interface Sortable<S, O, L> {
 
         @Override
         public String toString() {
-            StringBuilder sort = new StringBuilder();
+            final StringBuilder sort = new StringBuilder();
 
             sort.append(var);
             if (order != null) {
@@ -92,11 +92,11 @@ public interface Sortable<S, O, L> {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Sorting that = (Sorting) o;
+            final Sorting that = (Sorting) o;
 
             return (this.var().equals(that.var()) &&
                     this.order().equals(that.order()));

@@ -26,11 +26,11 @@ import java.util.Optional;
 
 public class GraqlInsert extends GraqlWritable {
 
-    public GraqlInsert(List<ThingVariable<?>> variables) {
+    public GraqlInsert(final List<ThingVariable<?>> variables) {
         this(null, variables);
     }
 
-    GraqlInsert(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    GraqlInsert(@Nullable final GraqlMatch.Unfiltered match, final List<ThingVariable<?>> variables) {
         super(GraqlToken.Command.INSERT, match, variables);
     }
 

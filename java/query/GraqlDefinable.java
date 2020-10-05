@@ -43,16 +43,16 @@ abstract class GraqlDefinable extends GraqlQuery {
     private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
-    GraqlDefinable(GraqlToken.Command keyword, List<Definable> definables) {
+    GraqlDefinable(final GraqlToken.Command keyword, final List<Definable> definables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
         if (definables == null || definables.isEmpty()) throw GraqlException.of(MISSING_DEFINABLES.message());
-        LinkedList<TypeVariable> typeVars = new LinkedList<>();
+        final LinkedList<TypeVariable> typeVars = new LinkedList<>();
         for (Definable definable : definables) {
             if (definable.isRule()) rules.add(definable.asRule());
             if (definable.isTypeVariable()) typeVars.add(definable.asTypeVariable());
         }
         while (!typeVars.isEmpty()) {
-            TypeVariable v = typeVars.removeFirst();
+            final TypeVariable v = typeVars.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
             else v.constraints().forEach(c -> typeVars.addAll(c.variables()));
             typeVariables.add(v);
@@ -71,7 +71,7 @@ abstract class GraqlDefinable extends GraqlQuery {
 
     @Override
     public final String toString() {
-        StringBuilder query = new StringBuilder();
+        final StringBuilder query = new StringBuilder();
         query.append(keyword);
 
         if (typeVariables.size() + rules.size() > 1) query.append(NEW_LINE);
@@ -84,10 +84,10 @@ abstract class GraqlDefinable extends GraqlQuery {
     }
 
     @Override
-    public final boolean equals(Object o) {
+    public final boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GraqlDefinable that = (GraqlDefinable) o;
+        final GraqlDefinable that = (GraqlDefinable) o;
         return this.keyword.equals(that.keyword) && this.typeVariables.equals(that.typeVariables) && this.rules.equals(that.rules);
     }
 

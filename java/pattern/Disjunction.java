@@ -20,7 +20,9 @@ package graql.lang.pattern;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
+import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
@@ -33,8 +35,9 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     private final List<T> patterns;
     private final int hash;
+    private Disjunction<Conjunction<Conjunctable>> normalised;
 
-    public Disjunction(List<T> patterns) {
+    public Disjunction(final List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
@@ -45,17 +48,36 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public String toString() {
-        StringBuilder syntax = new StringBuilder();
+    public Disjunction<Conjunction<Conjunctable>> normalise() {
+        if (normalised == null) {
+            List<Conjunction<Conjunctable>> conjunctions = patterns.stream().flatMap(p -> {
+                if (p.isConjunction()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
+                else if (p.isConjunction()) return p.asConjunction().normalise().patterns().stream();
+                else return p.asDisjunction().normalise().patterns().stream();
+            }).collect(toList());
+            normalised = new Disjunction<>(conjunctions);
+        }
+        return normalised;
+    }
 
-        Iterator<T> patternIter = patterns.iterator();
+    @Override
+    public boolean isDisjunction() { return true; }
+
+    @Override
+    public Disjunction<?> asDisjunction() { return this; }
+
+    @Override
+    public String toString() {
+        final StringBuilder syntax = new StringBuilder();
+
+        final Iterator<T> patternIter = patterns.iterator();
         while (patternIter.hasNext()) {
-            Pattern pattern = patternIter.next();
+            final Pattern pattern = patternIter.next();
             syntax.append(CURLY_OPEN).append(SPACE);
 
-            if (pattern instanceof Conjunction<?>) {
-                Conjunction<?> conjunction = (Conjunction<? extends Pattern>) pattern;
-                syntax.append(conjunction.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
+            if (pattern.isConjunction()) {
+                final Stream<? extends Pattern> patterns = pattern.asConjunction().patterns().stream();
+                syntax.append(patterns.map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
             } else {
                 syntax.append(pattern);
             }
@@ -66,10 +88,10 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Disjunction<?> that = (Disjunction<?>) o;
+        final Disjunction<?> that = (Disjunction<?>) o;
         return Objects.equals(patterns, that.patterns);
     }
 
