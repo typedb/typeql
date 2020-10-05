@@ -94,15 +94,15 @@ public class Parser extends GraqlBaseVisitor {
         return Collections.unmodifiableSet(keywords);
     }
 
-    private <CONTEXT extends ParserRuleContext, RETURN> RETURN parseQuery(
-            final String queryString, final Function<GraqlParser, CONTEXT> parserMethod, final Function<CONTEXT, RETURN> visitor
+    private <CONTEXT extends ParserRuleContext, RETURN> RETURN parse(
+            final String graqlString, final Function<GraqlParser, CONTEXT> parserMethod, final Function<CONTEXT, RETURN> visitor
     ) {
-        if (queryString == null || queryString.isEmpty()) {
+        if (graqlString == null || graqlString.isEmpty()) {
             throw GraqlException.of("Query String is NULL or Empty");
         }
 
-        final ErrorListener errorListener = ErrorListener.of(queryString);
-        final CharStream charStream = CharStreams.fromString(queryString);
+        final ErrorListener errorListener = ErrorListener.of(graqlString);
+        final CharStream charStream = CharStreams.fromString(graqlString);
         final GraqlLexer lexer = new GraqlLexer(charStream);
 
         lexer.removeErrorListeners();
@@ -140,32 +140,32 @@ public class Parser extends GraqlBaseVisitor {
 
     @SuppressWarnings("unchecked")
     public <T extends GraqlQuery> T parseQueryEOF(final String queryString) {
-        return (T) parseQuery(queryString, GraqlParser::eof_query, this::visitEof_query);
+        return (T) parse(queryString, GraqlParser::eof_query, this::visitEof_query);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends GraqlQuery> Stream<T> parseQueryListEOF(final String queryString) {
-        return (Stream<T>) parseQuery(queryString, GraqlParser::eof_queries, this::visitEof_queries);
+    public <T extends GraqlQuery> Stream<T> parseQueriesEOF(final String queryString) {
+        return (Stream<T>) parse(queryString, GraqlParser::eof_queries, this::visitEof_queries);
     }
 
     public Pattern parsePatternEOF(final String patternString) {
-        return parseQuery(patternString, GraqlParser::eof_pattern, this::visitEof_pattern);
+        return parse(patternString, GraqlParser::eof_pattern, this::visitEof_pattern);
     }
 
-    public List<? extends Pattern> parsePatternListEOF(final String patternsString) {
-        return parseQuery(patternsString, GraqlParser::eof_patterns, this::visitEof_patterns);
+    public List<? extends Pattern> parsePatternsEOF(final String patternsString) {
+        return parse(patternsString, GraqlParser::eof_patterns, this::visitEof_patterns);
     }
 
-    public List<Definable> parseDefinableListEOF(String definablesString) {
-        return parseQuery(definablesString, GraqlParser::eof_definables, this::visitEof_definables);
+    public List<Definable> parseDefinablesEOF(final String definablesString) {
+        return parse(definablesString, GraqlParser::eof_definables, this::visitEof_definables);
     }
 
-    public BoundVariable parseVariableEOF(String variableString) {
-        return parseQuery(variableString, GraqlParser::eof_variable, this::visitEof_variable);
+    public BoundVariable parseVariableEOF(final String variableString) {
+        return parse(variableString, GraqlParser::eof_variable, this::visitEof_variable);
     }
 
-    public Definable parseSchemaRuleEOF(String ruleString) {
-        return parseQuery(ruleString, GraqlParser::eof_schema_rule, this::visitEof_schema_rule);
+    public Definable parseSchemaRuleEOF(final String ruleString) {
+        return parse(ruleString, GraqlParser::eof_schema_rule, this::visitEof_schema_rule);
     }
 
     // GLOBAL HELPER METHODS ===================================================
@@ -204,17 +204,17 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public List<Definable> visitEof_definables(GraqlParser.Eof_definablesContext ctx) {
+    public List<Definable> visitEof_definables(final GraqlParser.Eof_definablesContext ctx) {
         return ctx.definables().definable().stream().map(this::visitDefinable).collect(toList());
     }
 
     @Override
-    public BoundVariable visitEof_variable(GraqlParser.Eof_variableContext ctx) {
+    public BoundVariable visitEof_variable(final GraqlParser.Eof_variableContext ctx) {
         return visitPattern_variable(ctx.pattern_variable());
     }
 
     @Override
-    public Rule visitEof_schema_rule(GraqlParser.Eof_schema_ruleContext ctx) {
+    public Rule visitEof_schema_rule(final GraqlParser.Eof_schema_ruleContext ctx) {
         return visitSchema_rule(ctx.schema_rule());
     }
 
@@ -256,27 +256,21 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDefine visitQuery_define(final GraqlParser.Query_defineContext ctx) {
-        List<Definable> definables = new ArrayList<>();
-        for (GraqlParser.DefinableContext definableCtx : ctx.definable()) {
-            definables.add(visitDefinable(definableCtx));
-        }
+        final List<Definable> definables = visitDefinables(ctx.definables());
         return new GraqlDefine(definables);
     }
 
     @Override
     public GraqlUndefine visitQuery_undefine(final GraqlParser.Query_undefineContext ctx) {
-        List<Definable> definables = new ArrayList<>();
-        for (GraqlParser.DefinableContext definableCtx : ctx.definable()) {
-            definables.add(visitDefinable(definableCtx));
-        }
+        final List<Definable> definables = visitDefinables(ctx.definables());
         return new GraqlUndefine(definables);
     }
 
     @Override
-    public Rule visitSchema_rule(GraqlParser.Schema_ruleContext ctx) {
-        String label = ctx.label().getText();
-        List<? extends Pattern> when = visitPatterns(ctx.patterns());
-        ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
+    public Rule visitSchema_rule(final GraqlParser.Schema_ruleContext ctx) {
+        final String label = ctx.label().getText();
+        final List<? extends Pattern> when = visitPatterns(ctx.patterns());
+        final ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
         return new Rule(label).when(when).then(then);
     }
 
@@ -577,7 +571,7 @@ public class Parser extends GraqlBaseVisitor {
     // QUERY DEFINABLES ========================================================
 
     @Override
-    public Definable visitDefinable(GraqlParser.DefinableContext ctx) {
+    public Definable visitDefinable(final GraqlParser.DefinableContext ctx) {
         if (ctx.variable_type() != null) {
             return visitVariable_type(ctx.variable_type());
         } else {
@@ -585,8 +579,9 @@ public class Parser extends GraqlBaseVisitor {
         }
     }
 
-    public List<Definable> visitDefinableList(List<GraqlParser.DefinableContext> ctx) {
-        return ctx.stream().map(this::visitDefinable).collect(toList());
+    @Override
+    public List<Definable> visitDefinables(final GraqlParser.DefinablesContext ctx) {
+        return ctx.definable().stream().map(this::visitDefinable).collect(toList());
     }
 
 

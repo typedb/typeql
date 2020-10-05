@@ -55,7 +55,7 @@ public class Graql {
     }
 
     public static <T extends GraqlQuery> Stream<T> parseQueries(final String queryString) {
-        return parser.parseQueryListEOF(queryString);
+        return parser.parseQueriesEOF(queryString);
     }
 
     public static Pattern parsePattern(final String pattern) {
@@ -63,14 +63,14 @@ public class Graql {
     }
 
     public static List<? extends Pattern> parsePatterns(final String pattern) {
-        return parser.parsePatternListEOF(pattern);
+        return parser.parsePatternsEOF(pattern);
     }
 
-    public static List<Definable> parseDefinables(String pattern) { return parser.parseDefinableListEOF(pattern); }
+    public static List<Definable> parseDefinables(final String pattern) { return parser.parseDefinablesEOF(pattern); }
 
-    public static Rule parseRule(String pattern) { return parser.parseSchemaRuleEOF(pattern).asRule(); }
+    public static Rule parseRule(final String pattern) { return parser.parseSchemaRuleEOF(pattern).asRule(); }
 
-    public static BoundVariable parseVariable(String variable) {
+    public static BoundVariable parseVariable(final String variable) {
         return parser.parseVariableEOF(variable);
     }
 
@@ -137,7 +137,7 @@ public class Graql {
         return new Negation<>(pattern);
     }
 
-    public static Rule rule(String label) { return new Rule(label); }
+    public static Rule rule(final String label) { return new Rule(label); }
 
     // Variable Builder Methods
 

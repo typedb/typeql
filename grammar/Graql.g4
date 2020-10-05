@@ -36,8 +36,8 @@ query                 :   query_define    |   query_undefine
                       |   query_match_group |   query_match_group_agg
                       |   query_compute   ;
 
-query_define          :   DEFINE      definable+  ;
-query_undefine        :   UNDEFINE    definable+  ;
+query_define          :   DEFINE      definables  ;
+query_undefine        :   UNDEFINE    definables  ;
 
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;

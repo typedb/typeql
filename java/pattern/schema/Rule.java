@@ -41,7 +41,7 @@ public class Rule implements Definable {
     private ThingVariable<?> then;
     private int hash = 0;
 
-    public Rule(String label) {
+    public Rule(final String label) {
         this.label = label;
     }
 
@@ -50,13 +50,13 @@ public class Rule implements Definable {
         return true;
     }
 
-    public Rule when(List<? extends Pattern> patterns) {
+    public Rule when(final List<? extends Pattern> patterns) {
         if (patterns == null) throw new NullPointerException("Null when pattern");
         this.when = new Conjunction<>(patterns.stream().map(Objects::requireNonNull).collect(toList()));
         return this;
     }
 
-    public Rule then(ThingVariable<?> pattern) {
+    public Rule then(final ThingVariable<?> pattern) {
         if (pattern == null) throw new NullPointerException("Null then pattern");
         this.then = pattern;
         return this;
@@ -64,7 +64,7 @@ public class Rule implements Definable {
 
     @Override
     public String toString() {
-        StringBuilder syntax = new StringBuilder();
+        final StringBuilder syntax = new StringBuilder();
         syntax.append(RULE).append(SPACE).append(label).append(COLON);
 
         // when
@@ -89,12 +89,12 @@ public class Rule implements Definable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == this) {
             return true;
         }
         if (o instanceof Rule) {
-            Rule that = (Rule) o;
+            final Rule that = (Rule) o;
             return this.label.equals(that.label) && this.when.equals(that.when) && this.then.equals(that.then);
         }
         return false;

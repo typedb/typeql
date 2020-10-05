@@ -62,15 +62,15 @@ public class Conjunction<T extends Pattern> implements Pattern {
         return patterns;
     }
 
-    public static <U extends Pattern> Conjunction<U> merge(List<Conjunction<U>> conjunctions) {
+    public static <U extends Pattern> Conjunction<U> merge(final List<Conjunction<U>> conjunctions) {
         return new Conjunction<>(conjunctions.stream().flatMap(p -> p.patterns().stream()).collect(toList()));
     }
 
     @Override
     public Disjunction<Conjunction<Conjunctable>> normalise() {
         if (normalised == null) {
-            List<Conjunctable> conjunctables = new ArrayList<>();
-            List<List<Conjunction<Conjunctable>>> listOfDisjunctions = new ArrayList<>();
+            final List<Conjunctable> conjunctables = new ArrayList<>();
+            final List<List<Conjunction<Conjunctable>>> listOfDisjunctions = new ArrayList<>();
             patterns.forEach(pattern -> {
                 if (pattern.isVariable()) conjunctables.add(pattern.asVariable().normalise());
                 else if (pattern.isNegation()) conjunctables.add(pattern.asNegation().normalise());
@@ -79,7 +79,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
                 else listOfDisjunctions.add(pattern.asDisjunction().normalise().patterns());
             });
             listOfDisjunctions.add(list(new Conjunction<>(conjunctables)));
-            List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisjunctions)
+            final List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisjunctions)
                     .stream().map(Conjunction::merge)
                     .collect(toList());
             normalised = new Disjunction<>(listOfConjunctions);
@@ -121,7 +121,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
         private final transient int[] axesSizeProduct;
         private final Map<Integer, List<E>> computed;
 
-        CartesianList(List<List<E>> axes) {
+        CartesianList(final List<List<E>> axes) {
             this.axes = axes;
             axesSizeProduct = new int[axes.size() + 1];
             axesSizeProduct[axes.size()] = 1;
@@ -132,7 +132,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
             computed = new HashMap<>();
         }
 
-        private int getAxisIndexForProductIndex(int index, int axis) {
+        private int getAxisIndexForProductIndex(final int index, final int axis) {
             return (index / axesSizeProduct[axis + 1]) % axes.get(axis).size();
         }
 
@@ -148,7 +148,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
                 }
 
                 @Override
-                public E get(int axis) {
+                public E get(final int axis) {
                     if (axis >= size()) throw new IndexOutOfBoundsException();
                     return axes.get(axis).get(getAxisIndexForProductIndex(i, axis));
                 }

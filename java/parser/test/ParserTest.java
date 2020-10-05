@@ -722,10 +722,10 @@ public class ParserTest {
 
     @Test
     public void testDefineRules() {
-        String when = "$x isa movie;";
-        String then = "$x has genre 'drama';";
-        List<? extends Pattern> whenPattern = list((var("x").isa("movie")));
-        ThingVariable<?> thenPattern = var("x").has("genre", "drama");
+        final String when = "$x isa movie;";
+        final String then = "$x has genre 'drama';";
+        final List<? extends Pattern> whenPattern = list((var("x").isa("movie")));
+        final ThingVariable<?> thenPattern = var("x").has("genre", "drama");
 
         final GraqlDefine expected = define(rule("all-movies-are-drama").when(whenPattern).then(thenPattern));
         final String query = "define all-movies-are-drama sub rule, when { " + when + " }, then { " + then + " };";
