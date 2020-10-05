@@ -45,20 +45,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
         this.pattern = pattern;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final Negation<?> negation = (Negation<?>) o;
-        return Objects.equals(pattern, negation.pattern);
-    }
-
-    @Override
-    public int hashCode() {
-        return pattern.hashCode();
-    }
-
-    public T getPattern() { return pattern;}
+    public T pattern() { return pattern; }
 
     @Override
     public Negation<Disjunction<Conjunction<Conjunctable>>> normalise() {
@@ -95,6 +82,19 @@ public class Negation<T extends Pattern> implements Conjunctable {
         }
 
         return negation.toString();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Negation<?> negation = (Negation<?>) o;
+        return Objects.equals(pattern, negation.pattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return pattern.hashCode();
     }
 }
 
