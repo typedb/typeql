@@ -100,7 +100,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithThenToString() {
-        GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parsePatternList("$x isa movie;")));
+        GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parsePattern("$x isa movie;"));
         assertValidToString(query);
     }
 

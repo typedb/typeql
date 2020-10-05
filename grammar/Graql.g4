@@ -26,6 +26,7 @@ eof_pattern           :   pattern     EOF ;
 eof_pattern_list      :   patterns    EOF ;
 eof_definable         :   definable   EOF ;
 eof_definable_list    :   definable+  EOF ;
+eof_variable          :
 
 // GRAQL QUERY LANGUAGE ========================================================
 

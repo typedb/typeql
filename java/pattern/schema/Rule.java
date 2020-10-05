@@ -96,7 +96,7 @@ public class Rule implements Definable, RuleBuilder {
         }
         if (o instanceof Rule) {
             Rule that = (Rule) o;
-            return this.label.equals(that.label);
+            return this.label.equals(that.label) && this.when.equals(that.when) && this.then.equals(that.then);
         }
         return false;
     }

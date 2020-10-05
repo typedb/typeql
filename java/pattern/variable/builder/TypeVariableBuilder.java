@@ -178,17 +178,6 @@ public interface TypeVariableBuilder {
         return constrain(new TypeConstraint.Regex(regex));
     }
 
-    // TODO move out to new builder for schema
-//    // TODO: make when() method take a more strict sub type of pattern
-//    default TypeVariable when(Pattern when) {
-//        return constrain(new TypeConstraint.When(when));
-//    }
-//
-//    // TODO: make then() method take a more strict sub type of pattern
-//    default TypeVariable then(Pattern then) {
-//        return constrain(new TypeConstraint.Then(then));
-//    }
-
     TypeVariable constrain(TypeConstraint.Label constraint);
 
     TypeVariable constrain(TypeConstraint.Sub constraint);
