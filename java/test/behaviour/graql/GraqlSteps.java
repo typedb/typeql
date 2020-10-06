@@ -76,15 +76,23 @@ public class GraqlSteps {
     @Given("graql delete throws")
     @Given("graql define throws")
     @Given("graql undefine throws")
+    @Given("graql match; throws exception")
+    @Given("graql insert; throws exception")
+    @Given("graql delete; throws exception")
+    @Given("graql define; throws exception")
+    @Given("graql undefine; throws exception")
     public void do_nothing_with_throws(final String query) {}
 
+    @Given("transaction commits")
     @Given("aggregate answer is empty")
     @Given("connection has been opened")
     @Given("transaction is initialised")
     @Given("the integrity is validated")
+    @Given("connection close all sessions")
     @Given("connection delete all databases")
-    @Given("transaction is closed and reopened")
     @Given("materialised database is completed")
+    @Given("transaction commits; throws exception")
+    @Given("connection does not have any database")
     @Given("all answers are correct in reasoned database")
     @Given("materialised and reasoned databases are the same size")
     public void do_nothing() {}
@@ -94,8 +102,12 @@ public class GraqlSteps {
     @Given("aggregate value is: {}")
     @Given("number of groups is: {}")
     @Given("reasoned database is named: {}")
+    @Given("connection create database: {}")
     @Given("materialised database is named: {}")
+    @Given("session opens transaction of type: {}")
     @Given("answer size in reasoned database is: {}")
+    @Given("connection open data session for database: {}")
+    @Given("connection open schema session for database: {}")
     @Given("answers are consistent across {} executions in reasoned database")
     public void do_nothing_with_arg(final String ignored) {}
 
