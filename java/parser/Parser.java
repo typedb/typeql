@@ -297,7 +297,7 @@ public class Parser extends GraqlBaseVisitor {
             Sortable.Sorting sorting = null;
             Long offset = null, limit = null;
 
-            if (ctx.filters().variables() != null) variables = visitVariables(ctx.filters().variables());
+            if (ctx.filters().get() != null) variables = visitGet(ctx.filters().get());
             if (ctx.filters().sort() != null) {
                 final UnboundVariable var = getVar(ctx.filters().sort().VAR_());
                 sorting = ctx.filters().sort().ORDER_() == null
@@ -349,7 +349,7 @@ public class Parser extends GraqlBaseVisitor {
     // GET QUERY MODIFIERS ==========================================
 
     @Override
-    public List<UnboundVariable> visitVariables(final GraqlParser.VariablesContext ctx) {
+    public List<UnboundVariable> visitGet(final GraqlParser.GetContext ctx) {
         return ctx.VAR_().stream().map(this::getVar).collect(toList());
     }
 

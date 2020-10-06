@@ -37,7 +37,7 @@ java_library(
 
 assemble_maven(
   name = "assemble-maven",
-  target = ":commongraql",
+  target = ":common",
   package = "java",
   workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
 )
