@@ -65,6 +65,7 @@ checkstyle_test(
         "constraint/*.java",
         "variable/*.java",
         "variable/builder/*.java",
+        "schema/*.java"
     ]),
     license_type = "agpl",
 )
