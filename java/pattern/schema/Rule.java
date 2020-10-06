@@ -35,7 +35,6 @@ import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static java.util.stream.Collectors.toList;
 
 public class Rule implements Definable {
     private final String label;
@@ -53,7 +52,9 @@ public class Rule implements Definable {
     }
 
     @Override
-    public Rule asRule() { return this; }
+    public Rule asRule() {
+        return this;
+    }
 
     public Rule when(final Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
@@ -71,21 +72,25 @@ public class Rule implements Definable {
     @Override
     public String toString() {
         final StringBuilder syntax = new StringBuilder();
-        syntax.append(RULE).append(SPACE).append(label).append(COLON).append(SPACE);
+        syntax.append(RULE).append(SPACE).append(label);
+
+        if (when != null || then != null) syntax.append(COLON).append(SPACE);
 
         // when
-        syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
         if (when != null) {
+            syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
             for (Pattern p : when.patterns()) {
                 syntax.append(p).append(SEMICOLON).append(SPACE);
             }
+            syntax.append(CURLY_CLOSE).append(SPACE);
         }
-        syntax.append(CURLY_CLOSE).append(SPACE);
 
         // then
-        syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-        if (then != null) syntax.append(then).append(SEMICOLON).append(SPACE);
-        syntax.append(CURLY_CLOSE);
+        if (then != null) {
+            syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
+            syntax.append(then).append(SEMICOLON).append(SPACE);
+            syntax.append(CURLY_CLOSE);
+        }
 
         return syntax.toString();
     }
@@ -100,13 +105,11 @@ public class Rule implements Definable {
 
     @Override
     public boolean equals(final Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (o instanceof Rule) {
-            final Rule that = (Rule) o;
-            return this.label.equals(that.label) && this.when.equals(that.when) && this.then.equals(that.then);
-        }
-        return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Rule that = (Rule) o;
+        return (this.label.equals(that.label) &&
+                Objects.equals(this.when, that.when) &&
+                Objects.equals(this.then, that.then));
     }
 }

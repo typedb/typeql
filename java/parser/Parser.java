@@ -269,9 +269,16 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public Rule visitSchema_rule(final GraqlParser.Schema_ruleContext ctx) {
         final String label = ctx.label().getText();
-        final List<? extends Pattern> when = visitPatterns(ctx.patterns());
-        final ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
-        return new Rule(label).when(new Conjunction<>(when)).then(then);
+        final Rule rule = new Rule(label);
+        if (ctx.patterns() != null) {
+            final List<? extends Pattern> when = visitPatterns(ctx.patterns());
+            rule.when(new Conjunction<>(when));
+        }
+        if (ctx.variable_thing_any() != null) {
+            final ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
+            rule.then(then);
+        }
+        return rule;
     }
 
     @Override
