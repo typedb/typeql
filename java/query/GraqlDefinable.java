@@ -88,7 +88,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final GraqlDefinable that = (GraqlDefinable) o;
-        return this.keyword.equals(that.keyword) && this.variables.equals(that.variables) && this.rules.equals(that.rules);
+        return this.keyword.equals(that.keyword) && this.definables.equals(that.definables);
     }
 
     @Override
