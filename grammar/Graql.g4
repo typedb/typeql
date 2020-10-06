@@ -53,9 +53,9 @@ query_match_group_agg :   query_match   function_group      function_aggregate  
 
 // MATCH QUERY FILTERS =========================================================
 
-filters               : ( variables';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
+filters               : ( get';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
 
-variables             :   GET         VAR_  ( ',' VAR_ )*   ;
+get                   :   GET         VAR_  ( ',' VAR_ )*   ;
 sort                  :   SORT        VAR_        ORDER_?   ;
 offset                :   OFFSET      LONG_                 ;
 limit                 :   LIMIT       LONG_                 ;
@@ -220,7 +220,7 @@ label_array           :   '[' label ( ',' label )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 
-schema_native         : RULE              ;
+schema_native         :   RULE            ;
 
 type_native           :   THING           |   ENTITY          |   ATTRIBUTE
                       |   RELATION        |   ROLE            ;

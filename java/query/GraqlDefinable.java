@@ -39,30 +39,32 @@ import static java.util.stream.Collectors.joining;
 abstract class GraqlDefinable extends GraqlQuery {
 
     private final GraqlToken.Command keyword;
-    private final List<TypeVariable> typeVariables = new ArrayList<>();
+    private final List<Definable> definables;
+    private final List<TypeVariable> variables = new ArrayList<>();
     private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
     GraqlDefinable(final GraqlToken.Command keyword, final List<Definable> definables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
         if (definables == null || definables.isEmpty()) throw GraqlException.of(MISSING_DEFINABLES.message());
+        this.definables = new ArrayList<>(definables);
         for (Definable definable : definables) {
             if (definable.isRule()) rules.add(definable.asRule());
-            if (definable.isTypeVariable()) typeVariables.add(definable.asTypeVariable());
+            if (definable.isTypeVariable()) variables.add(definable.asTypeVariable());
         }
-        final LinkedList<TypeVariable> typeVarsVerify = new LinkedList<>(typeVariables);
-        while (!typeVarsVerify.isEmpty()) {
-            final TypeVariable v = typeVarsVerify.removeFirst();
+        final LinkedList<TypeVariable> typeVarsToVerify = new LinkedList<>(variables);
+        while (!typeVarsToVerify.isEmpty()) {
+            final TypeVariable v = typeVarsToVerify.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else v.constraints().forEach(c -> typeVarsVerify.addAll(c.variables()));
+            else v.constraints().forEach(c -> typeVarsToVerify.addAll(c.variables()));
         }
 
         this.keyword = keyword;
-        this.hash = Objects.hash(this.keyword, this.typeVariables, this.rules);
+        this.hash = Objects.hash(this.keyword, this.variables, this.rules);
     }
 
-    public final List<TypeVariable> typeVariables() {
-        return typeVariables;
+    public final List<TypeVariable> variables() {
+        return variables;
     }
     public final List<Rule> rules() {
         return rules;
@@ -73,11 +75,10 @@ abstract class GraqlDefinable extends GraqlQuery {
         final StringBuilder query = new StringBuilder();
         query.append(keyword);
 
-        if (typeVariables.size() + rules.size() > 1) query.append(NEW_LINE);
+        if (definables.size() > 1) query.append(NEW_LINE);
         else query.append(GraqlToken.Char.SPACE);
 
-        query.append(typeVariables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(rules().stream().map(Rule::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(definables.stream().map(Definable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
     }
@@ -87,7 +88,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final GraqlDefinable that = (GraqlDefinable) o;
-        return this.keyword.equals(that.keyword) && this.typeVariables.equals(that.typeVariables) && this.rules.equals(that.rules);
+        return this.keyword.equals(that.keyword) && this.variables.equals(that.variables) && this.rules.equals(that.rules);
     }
 
     @Override
