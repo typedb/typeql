@@ -17,6 +17,7 @@
 
 package graql.lang.pattern.schema;
 
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Definable;
 import graql.lang.pattern.Pattern;
@@ -33,6 +34,7 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
+import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static java.util.stream.Collectors.toList;
 
 public class Rule implements Definable {
@@ -53,9 +55,10 @@ public class Rule implements Definable {
     @Override
     public Rule asRule() { return this; }
 
-    public Rule when(final List<? extends Pattern> patterns) {
-        if (patterns == null) throw new NullPointerException("Null when pattern");
-        this.when = new Conjunction<>(patterns.stream().map(Objects::requireNonNull).collect(toList()));
+    public Rule when(final Conjunction<? extends Pattern> when) {
+        if (when == null) throw new NullPointerException("Null when pattern");
+        if (when.patterns().size() == 0) throw GraqlException.of(MISSING_PATTERNS.message());
+        this.when = when;
         return this;
     }
 
@@ -68,15 +71,19 @@ public class Rule implements Definable {
     @Override
     public String toString() {
         final StringBuilder syntax = new StringBuilder();
-        syntax.append(RULE).append(SPACE).append(label).append(COLON);
+        syntax.append(RULE).append(SPACE).append(label).append(COLON).append(SPACE);
 
         // when
-        syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-        if (when != null) syntax.append(then).append(SEMICOLON);
-        syntax.append(CURLY_CLOSE);
+        syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
+        if (when != null) {
+            for (Pattern p : when.patterns()) {
+                syntax.append(p).append(SEMICOLON).append(SPACE);
+            }
+        }
+        syntax.append(CURLY_CLOSE).append(SPACE);
 
         // then
-        syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
+        syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
         if (then != null) syntax.append(then).append(SEMICOLON).append(SPACE);
         syntax.append(CURLY_CLOSE);
 

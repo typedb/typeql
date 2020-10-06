@@ -271,7 +271,7 @@ public class Parser extends GraqlBaseVisitor {
         final String label = ctx.label().getText();
         final List<? extends Pattern> when = visitPatterns(ctx.patterns());
         final ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
-        return new Rule(label).when(when).then(then);
+        return new Rule(label).when(new Conjunction<>(when)).then(then);
     }
 
     @Override
@@ -547,11 +547,7 @@ public class Parser extends GraqlBaseVisitor {
             else return nested.get(0);
         }).collect(toList());
 
-        // TODO do we want this?
-//        // Simplify representation when there is only one alternative
-//        if (patterns.size() == 1) {
-//            return patterns.iterator().next();
-//        }
+        assert patterns.size() > 1;
 
         return new Disjunction<>(patterns);
     }

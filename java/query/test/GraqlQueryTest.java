@@ -106,7 +106,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithWhenToString() {
-        assertValidToString(Graql.define(rule("a-rule").when(Graql.parsePatterns("$x isa movie;"))));
+        assertValidToString(Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;")))));
     }
 
     private void assertValidToString(final GraqlQuery query) {

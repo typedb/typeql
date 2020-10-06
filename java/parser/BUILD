@@ -34,7 +34,7 @@ java_library(
         "//java/pattern:pattern",
         "//java/query:query",
 
-        # Internal Repository Dependencies
+#         Internal Repository Dependencies
         "@graknlabs_common//:common",
 
         # External dependencies

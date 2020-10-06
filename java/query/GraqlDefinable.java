@@ -46,16 +46,15 @@ abstract class GraqlDefinable extends GraqlQuery {
     GraqlDefinable(final GraqlToken.Command keyword, final List<Definable> definables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
         if (definables == null || definables.isEmpty()) throw GraqlException.of(MISSING_DEFINABLES.message());
-        final LinkedList<TypeVariable> typeVars = new LinkedList<>();
         for (Definable definable : definables) {
             if (definable.isRule()) rules.add(definable.asRule());
-            if (definable.isTypeVariable()) typeVars.add(definable.asTypeVariable());
+            if (definable.isTypeVariable()) typeVariables.add(definable.asTypeVariable());
         }
-        while (!typeVars.isEmpty()) {
-            final TypeVariable v = typeVars.removeFirst();
+        final LinkedList<TypeVariable> typeVarsVerify = new LinkedList<>(typeVariables);
+        while (!typeVarsVerify.isEmpty()) {
+            final TypeVariable v = typeVarsVerify.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else v.constraints().forEach(c -> typeVars.addAll(c.variables()));
-            typeVariables.add(v);
+            else v.constraints().forEach(c -> typeVarsVerify.addAll(c.variables()));
         }
 
         this.keyword = keyword;

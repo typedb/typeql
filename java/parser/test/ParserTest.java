@@ -20,6 +20,7 @@ package graql.lang.parser.test;
 import graql.lang.Graql;
 import graql.lang.common.GraqlArg;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlCompute;
@@ -724,11 +725,11 @@ public class ParserTest {
     public void testDefineRules() {
         final String when = "$x isa movie;";
         final String then = "$x has genre 'drama';";
-        final List<? extends Pattern> whenPattern = list((var("x").isa("movie")));
+        final Conjunction<? extends Pattern> whenPattern = and((var("x").isa("movie")));
         final ThingVariable<?> thenPattern = var("x").has("genre", "drama");
 
         final GraqlDefine expected = define(rule("all-movies-are-drama").when(whenPattern).then(thenPattern));
-        final String query = "define all-movies-are-drama sub rule, when { " + when + " }, then { " + then + " };";
+        final String query = "define rule all-movies-are-drama: when { " + when + " } then { " + then + " };";
         final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
