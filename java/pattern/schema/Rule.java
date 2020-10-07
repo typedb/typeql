@@ -21,10 +21,17 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Definable;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.Reference;
 import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.Variable;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
@@ -72,7 +79,44 @@ public class Rule implements Definable {
 
     public Rule then(final ThingVariable<?> variable) {
         if (variable == null) throw new NullPointerException("Null then pattern");
-        if (variable.constraints().size() != 1) throw GraqlException.of(INVALID_RULE_THEN_MUST_BE_ONE_CONSTRAINT.message(label, variable));
+
+        int numConstraints = variable.constraints().size();
+
+
+        if (numConstraints == 0     ||
+            numConstraints > 2      ||
+            numConstraints == 1 && !(variable.relation().isPresent() || variable.has().size() == 1 || variable.isa().isPresent())) {
+            throw new RuntimeException(String.format("In rule '%s', 'then' may only conclude one new or extended relation, one attribute ownership, or one 'isa' downcast: " +variable, label()));
+        }
+
+        if (variable.constraints().size() == 2) {
+            if (!variable.relation().isPresent() && !variable.isa().isPresent()) {
+                // rule concludes a relation or additional role players
+                throw new RuntimeException("Rule 'then' with two constraints must consist of a relation and isa constraint." + variable); // TODO improve
+            }
+        }
+
+        if (when() != null){
+            // TODO and all user-written variables must be present in the when clause, if it exists
+            Set<Reference> thenReferences = new HashSet<>();
+            if (variable.isNamed()) thenReferences.add(variable.reference());
+            variable.constraints().stream().flatMap(c -> c.variables().stream()).filter(Variable::isNamed).map(Variable::reference).forEach(thenReferences::add);
+
+            Set<Reference> whenReferences = new HashSet<>();
+            when().patterns().forEach(p -> {
+                BoundVariable var = p.asVariable();
+                if (var.isNamed()) whenReferences.add(var.reference());
+                var.constraints().forEach(c -> {
+                    c.variables().stream().filter(Variable::isNamed).map(Variable::reference).forEach(whenReferences::add);
+                });
+            });
+
+            if (!whenReferences.containsAll(thenReferences)) {
+                throw new RuntimeException("All variables in rule 'then' must be present in rule 'when'");
+            }
+        }
+
+
         this.then = variable;
         return this;
     }
