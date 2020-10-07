@@ -34,6 +34,7 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_MUST_BE_ONE_CONSTRAINT;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 
 public class Rule implements Definable {
@@ -56,6 +57,12 @@ public class Rule implements Definable {
         return this;
     }
 
+    public String label() { return label; }
+
+    public Conjunction<? extends Pattern> when() { return when; }
+
+    public ThingVariable<?> then() { return then; }
+
     public Rule when(final Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
         if (when.patterns().size() == 0) throw GraqlException.of(MISSING_PATTERNS.message());
@@ -63,9 +70,10 @@ public class Rule implements Definable {
         return this;
     }
 
-    public Rule then(final ThingVariable<?> pattern) {
-        if (pattern == null) throw new NullPointerException("Null then pattern");
-        this.then = pattern;
+    public Rule then(final ThingVariable<?> variable) {
+        if (variable == null) throw new NullPointerException("Null then pattern");
+        if (variable.constraints().size() != 1) throw GraqlException.of(INVALID_RULE_THEN_MUST_BE_ONE_CONSTRAINT.message(label, variable));
+        this.then = variable;
         return this;
     }
 
