@@ -20,11 +20,14 @@ package graql.lang;
 import graql.lang.common.GraqlToken;
 import graql.lang.parser.Parser;
 import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Definable;
 import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.ValueOperation;
+import graql.lang.pattern.schema.Rule;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -47,20 +50,28 @@ public class Graql {
 
     private static final Parser parser = new Parser();
 
-    public static <T extends GraqlQuery> T parse(final String queryString) {
+    public static <T extends GraqlQuery> T parseQuery(final String queryString) {
         return parser.parseQueryEOF(queryString);
     }
 
-    public static <T extends GraqlQuery> Stream<T> parseList(final String queryString) {
-        return parser.parseQueryListEOF(queryString);
+    public static <T extends GraqlQuery> Stream<T> parseQueries(final String queryString) {
+        return parser.parseQueriesEOF(queryString);
     }
 
     public static Pattern parsePattern(final String pattern) {
         return parser.parsePatternEOF(pattern);
     }
 
-    public static List<? extends Pattern> parsePatternList(final String pattern) {
-        return parser.parsePatternListEOF(pattern);
+    public static List<? extends Pattern> parsePatterns(final String pattern) {
+        return parser.parsePatternsEOF(pattern);
+    }
+
+    public static List<Definable> parseDefinables(final String pattern) { return parser.parseDefinablesEOF(pattern); }
+
+    public static Rule parseRule(final String pattern) { return parser.parseSchemaRuleEOF(pattern).asRule(); }
+
+    public static BoundVariable parseVariable(final String variable) {
+        return parser.parseVariableEOF(variable);
     }
 
     public static GraqlMatch.Unfiltered match(final Pattern... patterns) {
@@ -79,20 +90,20 @@ public class Graql {
         return new GraqlInsert(things);
     }
 
-    public static GraqlDefine define(final TypeVariable... types) {
-        return new GraqlDefine(list(types));
+    public static GraqlDefine define(final Definable... definables) {
+        return new GraqlDefine(list(definables));
     }
 
-    public static GraqlDefine define(final List<TypeVariable> types) {
-        return new GraqlDefine(types);
+    public static GraqlDefine define(final List<Definable> definables) {
+        return new GraqlDefine(definables);
     }
 
     public static GraqlUndefine undefine(final TypeVariable... types) {
         return new GraqlUndefine(list(types));
     }
 
-    public static GraqlUndefine undefine(final List<TypeVariable> types) {
-        return new GraqlUndefine(types);
+    public static GraqlUndefine undefine(final List<Definable> definables) {
+        return new GraqlUndefine(definables);
     }
 
     public static GraqlCompute.Builder compute() {
@@ -125,6 +136,8 @@ public class Graql {
     public static Negation<Pattern> not(final Pattern pattern) {
         return new Negation<>(pattern);
     }
+
+    public static Rule rule(final String label) { return new Rule(label); }
 
     // Variable Builder Methods
 

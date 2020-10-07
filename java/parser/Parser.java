@@ -26,12 +26,14 @@ import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Definable;
 import graql.lang.pattern.Disjunction;
 import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.constraint.ValueOperation;
+import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
@@ -92,15 +94,15 @@ public class Parser extends GraqlBaseVisitor {
         return Collections.unmodifiableSet(keywords);
     }
 
-    private <CONTEXT extends ParserRuleContext, RETURN> RETURN parseQuery(
-            final String queryString, final Function<GraqlParser, CONTEXT> parserMethod, final Function<CONTEXT, RETURN> visitor
+    private <CONTEXT extends ParserRuleContext, RETURN> RETURN parse(
+            final String graqlString, final Function<GraqlParser, CONTEXT> parserMethod, final Function<CONTEXT, RETURN> visitor
     ) {
-        if (queryString == null || queryString.isEmpty()) {
+        if (graqlString == null || graqlString.isEmpty()) {
             throw GraqlException.of("Query String is NULL or Empty");
         }
 
-        final ErrorListener errorListener = ErrorListener.of(queryString);
-        final CharStream charStream = CharStreams.fromString(queryString);
+        final ErrorListener errorListener = ErrorListener.of(graqlString);
+        final CharStream charStream = CharStreams.fromString(graqlString);
         final GraqlLexer lexer = new GraqlLexer(charStream);
 
         lexer.removeErrorListeners();
@@ -138,20 +140,32 @@ public class Parser extends GraqlBaseVisitor {
 
     @SuppressWarnings("unchecked")
     public <T extends GraqlQuery> T parseQueryEOF(final String queryString) {
-        return (T) parseQuery(queryString, GraqlParser::eof_query, this::visitEof_query);
+        return (T) parse(queryString, GraqlParser::eof_query, this::visitEof_query);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends GraqlQuery> Stream<T> parseQueryListEOF(final String queryString) {
-        return (Stream<T>) parseQuery(queryString, GraqlParser::eof_query_list, this::visitEof_query_list);
+    public <T extends GraqlQuery> Stream<T> parseQueriesEOF(final String queryString) {
+        return (Stream<T>) parse(queryString, GraqlParser::eof_queries, this::visitEof_queries);
     }
 
     public Pattern parsePatternEOF(final String patternString) {
-        return parseQuery(patternString, GraqlParser::eof_pattern, this::visitEof_pattern);
+        return parse(patternString, GraqlParser::eof_pattern, this::visitEof_pattern);
     }
 
-    public List<? extends Pattern> parsePatternListEOF(final String patternsString) {
-        return parseQuery(patternsString, GraqlParser::eof_pattern_list, this::visitEof_pattern_list);
+    public List<? extends Pattern> parsePatternsEOF(final String patternsString) {
+        return parse(patternsString, GraqlParser::eof_patterns, this::visitEof_patterns);
+    }
+
+    public List<Definable> parseDefinablesEOF(final String definablesString) {
+        return parse(definablesString, GraqlParser::eof_definables, this::visitEof_definables);
+    }
+
+    public BoundVariable parseVariableEOF(final String variableString) {
+        return parse(variableString, GraqlParser::eof_variable, this::visitEof_variable);
+    }
+
+    public Definable parseSchemaRuleEOF(final String ruleString) {
+        return parse(ruleString, GraqlParser::eof_schema_rule, this::visitEof_schema_rule);
     }
 
     // GLOBAL HELPER METHODS ===================================================
@@ -175,7 +189,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Stream<? extends GraqlQuery> visitEof_query_list(final GraqlParser.Eof_query_listContext ctx) {
+    public Stream<? extends GraqlQuery> visitEof_queries(final GraqlParser.Eof_queriesContext ctx) {
         return ctx.query().stream().map(this::visitQuery);
     }
 
@@ -185,8 +199,23 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public List<? extends Pattern> visitEof_pattern_list(final GraqlParser.Eof_pattern_listContext ctx) {
+    public List<? extends Pattern> visitEof_patterns(final GraqlParser.Eof_patternsContext ctx) {
         return visitPatterns(ctx.patterns());
+    }
+
+    @Override
+    public List<Definable> visitEof_definables(final GraqlParser.Eof_definablesContext ctx) {
+        return ctx.definables().definable().stream().map(this::visitDefinable).collect(toList());
+    }
+
+    @Override
+    public BoundVariable visitEof_variable(final GraqlParser.Eof_variableContext ctx) {
+        return visitPattern_variable(ctx.pattern_variable());
+    }
+
+    @Override
+    public Rule visitEof_schema_rule(final GraqlParser.Eof_schema_ruleContext ctx) {
+        return visitSchema_rule(ctx.schema_rule());
     }
 
     // GRAQL QUERIES ===========================================================
@@ -227,17 +256,29 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public GraqlDefine visitQuery_define(final GraqlParser.Query_defineContext ctx) {
-        return new GraqlDefine(visitVariable_types(ctx.variable_types()));
+        final List<Definable> definables = visitDefinables(ctx.definables());
+        return new GraqlDefine(definables);
     }
 
     @Override
     public GraqlUndefine visitQuery_undefine(final GraqlParser.Query_undefineContext ctx) {
-        return new GraqlUndefine(visitVariable_types(ctx.variable_types()));
+        final List<Definable> definables = visitDefinables(ctx.definables());
+        return new GraqlUndefine(definables);
     }
 
     @Override
-    public List<TypeVariable> visitVariable_types(final GraqlParser.Variable_typesContext ctx) {
-        return ctx.variable_type().stream().map(this::visitVariable_type).collect(toList());
+    public Rule visitSchema_rule(final GraqlParser.Schema_ruleContext ctx) {
+        final String label = ctx.label().getText();
+        final Rule rule = new Rule(label);
+        if (ctx.patterns() != null) {
+            final List<? extends Pattern> when = visitPatterns(ctx.patterns());
+            rule.when(new Conjunction<>(when));
+        }
+        if (ctx.variable_thing_any() != null) {
+            final ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
+            rule.then(then);
+        }
+        return rule;
     }
 
     @Override
@@ -263,7 +304,7 @@ public class Parser extends GraqlBaseVisitor {
             Sortable.Sorting sorting = null;
             Long offset = null, limit = null;
 
-            if (ctx.filters().variables() != null) variables = visitVariables(ctx.filters().variables());
+            if (ctx.filters().get() != null) variables = visitGet(ctx.filters().get());
             if (ctx.filters().sort() != null) {
                 final UnboundVariable var = getVar(ctx.filters().sort().VAR_());
                 sorting = ctx.filters().sort().ORDER_() == null
@@ -315,7 +356,7 @@ public class Parser extends GraqlBaseVisitor {
     // GET QUERY MODIFIERS ==========================================
 
     @Override
-    public List<UnboundVariable> visitVariables(final GraqlParser.VariablesContext ctx) {
+    public List<UnboundVariable> visitGet(final GraqlParser.GetContext ctx) {
         return ctx.VAR_().stream().map(this::getVar).collect(toList());
     }
 
@@ -506,32 +547,46 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Pattern visitPattern_disjunction(final GraqlParser.Pattern_disjunctionContext ctx) {
+    public Disjunction<? extends Pattern> visitPattern_disjunction(final GraqlParser.Pattern_disjunctionContext ctx) {
         final List<Pattern> patterns = ctx.patterns().stream().map(patternsContext -> {
             final List<Pattern> nested = visitPatterns(patternsContext);
             if (nested.size() > 1) return new Conjunction<>(nested);
             else return nested.get(0);
         }).collect(toList());
 
-        // Simplify representation when there is only one alternative
-        if (patterns.size() == 1) {
-            return patterns.iterator().next();
-        }
+        assert patterns.size() > 1;
 
         return new Disjunction<>(patterns);
     }
 
     @Override
-    public Pattern visitPattern_conjunction(final GraqlParser.Pattern_conjunctionContext ctx) {
+    public Conjunction<? extends Pattern> visitPattern_conjunction(final GraqlParser.Pattern_conjunctionContext ctx) {
         return new Conjunction<>(visitPatterns(ctx.patterns()));
     }
 
     @Override
-    public Pattern visitPattern_negation(final GraqlParser.Pattern_negationContext ctx) {
+    public Negation<? extends Pattern> visitPattern_negation(final GraqlParser.Pattern_negationContext ctx) {
         final List<Pattern> patterns = visitPatterns(ctx.patterns());
         if (patterns.size() == 1) return new Negation<>(patterns.get(0));
         else return new Negation<>(new Conjunction<>(patterns));
     }
+
+    // QUERY DEFINABLES ========================================================
+
+    @Override
+    public Definable visitDefinable(final GraqlParser.DefinableContext ctx) {
+        if (ctx.variable_type() != null) {
+            return visitVariable_type(ctx.variable_type());
+        } else {
+            return visitSchema_rule(ctx.schema_rule());
+        }
+    }
+
+    @Override
+    public List<Definable> visitDefinables(final GraqlParser.DefinablesContext ctx) {
+        return ctx.definable().stream().map(this::visitDefinable).collect(toList());
+    }
+
 
     // VARIABLE PATTERNS =======================================================
 
@@ -576,14 +631,9 @@ public class Parser extends GraqlBaseVisitor {
                 type = type.value(GraqlArg.ValueType.of(constraint.value_type().getText()));
             } else if (constraint.REGEX() != null) {
                 type = type.regex(visitRegex(constraint.regex()));
-            } else if (constraint.WHEN() != null) {
-                type = type.when(new Conjunction<>(visitPatterns(constraint.patterns())));
-            } else if (constraint.THEN() != null) {
-                type = type.then(new Conjunction<>(visitVariable_things(constraint.variable_things())));
             } else if (constraint.TYPE() != null) {
                 final Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
                 type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
-
             } else {
                 throw new IllegalArgumentException("Unrecognised Type Statement: " + constraint.getText());
             }

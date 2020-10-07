@@ -24,8 +24,7 @@ public class GraqlToken {
         ENTITY("entity"),
         ATTRIBUTE("attribute"),
         RELATION("relation"),
-        ROLE("role"),
-        RULE("rule");
+        ROLE("role");
 
         private final String type;
 
@@ -196,6 +195,32 @@ public class GraqlToken {
         }
     }
 
+    public enum Schema {
+        RULE("rule"),
+        THEN("then"),
+        WHEN("when");
+
+        private final String name;
+
+        Schema(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+
+        public static Schema of(final String value) {
+            for (Schema c : Schema.values()) {
+                if (c.name.equals(value)) {
+                    return c;
+                }
+            }
+            return null;
+        }
+    }
+
     public enum Constraint {
         ABSTRACT("abstract"),
         AS("as"),
@@ -210,11 +235,9 @@ public class GraqlToken {
         RELATES("relates"),
         SUB("sub"),
         SUBX("sub!"),
-        THEN("then"),
         TYPE("type"),
         VALUE(""),
-        VALUE_TYPE("value"),
-        WHEN("when");
+        VALUE_TYPE("value");
 
         private final String name;
 

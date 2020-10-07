@@ -19,7 +19,6 @@ package graql.lang.pattern.variable.builder;
 
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -179,16 +178,6 @@ public interface TypeVariableBuilder {
         return constrain(new TypeConstraint.Regex(regex));
     }
 
-    // TODO: make when() method take a more strict sub type of pattern
-    default TypeVariable when(final Pattern when) {
-        return constrain(new TypeConstraint.When(when));
-    }
-
-    // TODO: make then() method take a more strict sub type of pattern
-    default TypeVariable then(final Pattern then) {
-        return constrain(new TypeConstraint.Then(then));
-    }
-
     TypeVariable constrain(TypeConstraint.Label constraint);
 
     TypeVariable constrain(TypeConstraint.Sub constraint);
@@ -198,10 +187,6 @@ public interface TypeVariableBuilder {
     TypeVariable constrain(TypeConstraint.ValueType constraint);
 
     TypeVariable constrain(TypeConstraint.Regex constraint);
-
-    TypeVariable constrain(TypeConstraint.Then constraint);
-
-    TypeVariable constrain(TypeConstraint.When constraint);
 
     TypeVariable constrain(TypeConstraint.Owns constraint);
 

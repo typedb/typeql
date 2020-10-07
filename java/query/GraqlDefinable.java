@@ -20,8 +20,11 @@ package graql.lang.query;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.Definable;
+import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.TypeVariable;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -30,32 +33,41 @@ import static graql.lang.common.GraqlToken.Char.NEW_LINE;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Command.DEFINE;
 import static graql.lang.common.GraqlToken.Command.UNDEFINE;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static graql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
 import static java.util.stream.Collectors.joining;
 
 abstract class GraqlDefinable extends GraqlQuery {
 
     private final GraqlToken.Command keyword;
-    private final List<TypeVariable> variables;
+    private final List<Definable> definables;
+    private final List<TypeVariable> variables = new ArrayList<>();
+    private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
-    GraqlDefinable(final GraqlToken.Command keyword, final List<TypeVariable> variables) {
+    GraqlDefinable(final GraqlToken.Command keyword, final List<Definable> definables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
-        if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
-        final LinkedList<TypeVariable> list = new LinkedList<>(variables);
-        while (!list.isEmpty()) {
-            final TypeVariable v = list.removeFirst();
+        if (definables == null || definables.isEmpty()) throw GraqlException.of(MISSING_DEFINABLES.message());
+        this.definables = new ArrayList<>(definables);
+        for (Definable definable : definables) {
+            if (definable.isRule()) rules.add(definable.asRule());
+            if (definable.isTypeVariable()) variables.add(definable.asTypeVariable());
+        }
+        final LinkedList<TypeVariable> typeVarsToVerify = new LinkedList<>(variables);
+        while (!typeVarsToVerify.isEmpty()) {
+            final TypeVariable v = typeVarsToVerify.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else v.constraints().forEach(c -> list.addAll(c.variables()));
+            else v.constraints().forEach(c -> typeVarsToVerify.addAll(c.variables()));
         }
 
         this.keyword = keyword;
-        this.variables = variables;
-        this.hash = Objects.hash(this.keyword, this.variables);
+        this.hash = Objects.hash(this.keyword, this.variables, this.rules);
     }
 
     public final List<TypeVariable> variables() {
         return variables;
+    }
+    public final List<Rule> rules() {
+        return rules;
     }
 
     @Override
@@ -63,10 +75,10 @@ abstract class GraqlDefinable extends GraqlQuery {
         final StringBuilder query = new StringBuilder();
         query.append(keyword);
 
-        if (variables.size() > 1) query.append(NEW_LINE);
+        if (definables.size() > 1) query.append(NEW_LINE);
         else query.append(GraqlToken.Char.SPACE);
 
-        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+        query.append(definables.stream().map(Definable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
         return query.toString();
     }
@@ -76,7 +88,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final GraqlDefinable that = (GraqlDefinable) o;
-        return this.keyword.equals(that.keyword) && this.variables.equals(that.variables);
+        return this.keyword.equals(that.keyword) && this.definables.equals(that.definables);
     }
 
     @Override

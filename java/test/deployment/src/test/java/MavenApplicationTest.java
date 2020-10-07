@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 public class MavenApplicationTest {
     private void assertQueryEquals(final GraqlQuery expected, final GraqlQuery parsed, final String query) {
         assertEquals(expected, parsed);
-        assertEquals(expected, Graql.parse(parsed.toString()));
+        assertEquals(expected, Graql.parseQuery(parsed.toString()));
         assertEquals(query, expected.toString());
     }
 
@@ -42,7 +42,7 @@ public class MavenApplicationTest {
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        final GraqlMatch parsed = Graql.parse(query).asMatch();
+        final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
                 var("brando").val("Marl B").isa("name"),
@@ -58,7 +58,7 @@ public class MavenApplicationTest {
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
                 "$t !== 'Apocalypse Now';";
-        final GraqlMatch parsed = Graql.parse(query).asMatch();
+        final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),

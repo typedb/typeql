@@ -37,15 +37,15 @@ public class GraqlSteps {
     @Given("graql define without commit")
     @Given("for each session, graql define")
     public void graql_define(final String query) {
-        final GraqlDefine parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        final GraqlDefine parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql undefine")
     @Given("graql undefine without commit")
     public void graql_undefine(final String query) {
-        final GraqlUndefine parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        final GraqlUndefine parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql insert")
@@ -53,22 +53,22 @@ public class GraqlSteps {
     @Given("graql insert without commit")
     @Given("for each session, graql insert")
     public void graql_insert(final String query) {
-        final GraqlInsert parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        final GraqlInsert parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql delete")
     public void graql_delete(final String query) {
-        final GraqlDelete parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        final GraqlDelete parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("for graql query")
     @Given("get answers of graql query")
     @Given("answer set is equivalent for graql query")
     public void graql_get(final String query) {
-        final GraqlQuery parsed = Graql.parse(query);
-        assertEquals(parsed, Graql.parse(parsed.toString()));
+        final GraqlQuery parsed = Graql.parseQuery(query);
+        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql get throws")

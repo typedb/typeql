@@ -91,16 +91,6 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Then constraint) {
-        return new TypeVariable(reference).constrain(constraint);
-    }
-
-    @Override
-    public TypeVariable constrain(final TypeConstraint.When constraint) {
-        return new TypeVariable(reference).constrain(constraint);
-    }
-
-    @Override
     public TypeVariable constrain(final TypeConstraint.Owns constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }

@@ -31,6 +31,7 @@ import static graql.lang.Graql.lte;
 import static graql.lang.Graql.match;
 import static graql.lang.Graql.or;
 import static graql.lang.Graql.rel;
+import static graql.lang.Graql.rule;
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.var;
 import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
@@ -99,18 +100,18 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithThenToString() {
-        final GraqlDefine query = Graql.define(type("a-rule").sub("rule").then(and(Graql.parsePatternList("$x isa movie;"))));
+        final GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parseVariable("$x isa movie").asThing()));
         assertValidToString(query);
     }
 
     @Test
     public void testQueryWithWhenToString() {
-        assertValidToString(Graql.define(type("a-rule").sub("rule").when(and(Graql.parsePatternList("$x isa movie;")))));
+        assertValidToString(Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;")))));
     }
 
     private void assertValidToString(final GraqlQuery query) {
         //No need to execute the insert query
-        final GraqlQuery parsedQuery = Graql.parse(query.toString());
+        final GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
     }
 
@@ -201,7 +202,7 @@ public class GraqlQueryTest {
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
         final String query = "match $x isa movie;\n" +
                 "delete $x isa movie;";
-        assertEquals(query, Graql.parse(query).toString());
+        assertEquals(query, Graql.parseQuery(query).toString());
     }
 
     @Test
@@ -212,11 +213,11 @@ public class GraqlQueryTest {
     }
 
     private void assertSameStringRepresentation(final GraqlMatch query) {
-        assertEquals(query.toString(), Graql.parse(query.toString()).toString());
+        assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
     }
 
     private void assertEquivalent(final GraqlQuery query, final String queryString) {
         assertEquals(queryString, query.toString());
-        assertEquals(query.toString(), Graql.parse(queryString).toString());
+        assertEquals(query.toString(), Graql.parseQuery(queryString).toString());
     }
 }
