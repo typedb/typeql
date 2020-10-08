@@ -51,20 +51,22 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(15, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
             new ErrorMessage(16, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
+    public static final ErrorMessage INVALID_RULE_WHEN_MISSING_PATTERNS =
+            new ErrorMessage(17, "Rule '%s' 'when' has not been provided with any patterns.");
     public static final ErrorMessage INVALID_RULE_THEN_ONE_CONSTRAINT =
-            new ErrorMessage(17, "Rule '%s' 'then' with one constraint must be a new (or extended) relation, attribute ownership, or 'isa' downcast: '%s'.");
+            new ErrorMessage(18, "Rule '%s' 'then' with one constraint must be a new (or extended) relation, attribute ownership, or 'isa' downcast: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_TWO_CONSTRAINTS =
-            new ErrorMessage(18, "Rule '%s' 'then' with two constraints must must be a relation and an isa constraint: '%s'.");
+            new ErrorMessage(19, "Rule '%s' 'then' with two constraints must must be a relation and an isa constraint: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
-            new ErrorMessage(19, "Rule '%s' 'then' variables must be present in rule 'when'.");
+            new ErrorMessage(20, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(20, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(21, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(21, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(22, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(22, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(23, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(23, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(24, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";
