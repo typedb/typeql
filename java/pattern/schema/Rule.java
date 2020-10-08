@@ -21,14 +21,10 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Definable;
 import graql.lang.pattern.Pattern;
-import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.Reference;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.Variable;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,7 +38,9 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_MUST_BE_ONE_CONSTRAINT;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ONE_CONSTRAINT;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_TWO_CONSTRAINTS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 
 public class Rule implements Definable {
@@ -92,12 +90,12 @@ public class Rule implements Definable {
         // rules may only conclude one 'has', 'relation', or 'isa' constraint
         if (numConstraints == 0 || numConstraints > 2 || numConstraints == 1 &&
                 !(variable.relation().isPresent() || variable.has().size() == 1 || variable.isa().isPresent())) {
-            throw new RuntimeException(String.format("In rule '%s', 'then' may only conclude one new or extended relation, one attribute ownership, or one 'isa' downcast: " + variable, label()));
+            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label(), then));
         }
 
         // rules with 'relation' conclusions may also have a explicit 'isa' constraint
         if (variable.constraints().size() == 2 && !variable.relation().isPresent() && !variable.isa().isPresent()) {
-            throw new RuntimeException("Rule 'then' with two constraints must consist of a relation and isa constraint." + variable); // TODO improve
+            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label(), then));
         }
 
         // all user-written variables in the 'then' must be present in the 'when', if it exists
@@ -109,7 +107,7 @@ public class Rule implements Definable {
                     .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
 
             if (!whenReferences.containsAll(thenReferences)) {
-                throw new RuntimeException("All variables in rule 'then' must be present in rule 'when'");
+                throw GraqlException.of(INVALID_RULE_THEN_VARIABLES.message(label()));
             }
         }
 

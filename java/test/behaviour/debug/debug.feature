@@ -17,16 +17,5 @@
 
 Feature: Debugging Space
 
-  Scenario: test
-    Given graql define
-      """
-      define
-      rule tesco-sells-all-soft-drinks: when {
-        $x isa soft-drink;
-      } then {
-        $x has retailer 'Tesco';
-      };
-      """
-
   # Paste any scenarios below for debugging.
   # Do not commit any changes to this file.
