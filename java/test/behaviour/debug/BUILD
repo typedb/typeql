@@ -27,19 +27,17 @@ java_test(
     deps = [
         # Internal Package Dependencies
 
-        # Add your additional debugging dependencies here
-        # e.g. "//test/behaviour/connection/session:steps",
-
         # External Maven Dependencies
         "@maven//:io_cucumber_cucumber_java",
         "@maven//:io_cucumber_cucumber_junit",
     ],
     runtime_deps = [
         # Add your Cucumber Steps here
+        "//java/test/behaviour/graql:steps",
     ],
     data = [":debug.feature"],
     size = "medium",
-    tags = ["manual"]
+#    tags = ["manual"]
 )
 
 checkstyle_test(
