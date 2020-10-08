@@ -21,10 +21,15 @@ import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Definable;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.variable.Reference;
 import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.Variable;
 
-import java.util.List;
+import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static graql.lang.common.GraqlToken.Char.COLON;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
@@ -34,7 +39,10 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ONE_CONSTRAINT;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_TWO_CONSTRAINTS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 
 public class Rule implements Definable {
     private final String label;
@@ -56,17 +64,62 @@ public class Rule implements Definable {
         return this;
     }
 
+    public String label() {
+        return label;
+    }
+
+    public Conjunction<? extends Pattern> when() {
+        return when;
+    }
+
+    public ThingVariable<?> then() {
+        return then;
+    }
+
     public Rule when(final Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
-        if (when.patterns().size() == 0) throw GraqlException.of(MISSING_PATTERNS.message());
+        validateWhen(label, when);
         this.when = when;
         return this;
     }
 
-    public Rule then(final ThingVariable<?> pattern) {
-        if (pattern == null) throw new NullPointerException("Null then pattern");
-        this.then = pattern;
+    public Rule then(final ThingVariable<?> variable) {
+        if (variable == null) throw new NullPointerException("Null then pattern");
+        validateThen(label(), when(), variable);
+        this.then = variable;
         return this;
+    }
+
+    public static void validateWhen(String label, Conjunction<? extends Pattern> when) {
+        if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
+    }
+
+    public static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
+        int numConstraints = then.constraints().size();
+
+        // rules may only conclude one 'has', 'relation', or 'isa' constraint
+        if (numConstraints == 0 || numConstraints > 2 || numConstraints == 1 &&
+                !(then.relation().isPresent() || then.has().size() == 1 || then.isa().isPresent())) {
+            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label, then));
+        }
+
+        // rules with 'relation' conclusions may also have a explicit 'isa' constraint
+        if (then.constraints().size() == 2 && !then.relation().isPresent() && !then.isa().isPresent()) {
+            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label, then));
+        }
+
+        // all user-written variables in the 'then' must be present in the 'when', if it exists
+        if (when != null) {
+            Set<Reference> thenReferences = Stream.concat(Stream.of(then), then.variables())
+                    .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
+
+            Set<Reference> whenReferences = when.variables()
+                    .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
+
+            if (!whenReferences.containsAll(thenReferences)) {
+                throw GraqlException.of(INVALID_RULE_THEN_VARIABLES.message(label));
+            }
+        }
     }
 
     @Override
