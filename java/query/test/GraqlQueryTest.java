@@ -99,14 +99,9 @@ public class GraqlQueryTest {
     }
 
     @Test
-    public void testQueryWithThenToString() {
-        final GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parseVariable("$x isa movie").asThing()));
+    public void testQueryWithRuleThenToString() {
+        final GraqlDefine query = Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;"))).then(Graql.parseVariable("$x isa movie").asThing()));
         assertValidToString(query);
-    }
-
-    @Test
-    public void testQueryWithWhenToString() {
-        assertValidToString(Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;")))));
     }
 
     private void assertValidToString(final GraqlQuery query) {
