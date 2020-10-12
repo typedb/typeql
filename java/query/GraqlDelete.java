@@ -28,11 +28,11 @@ import static java.util.Objects.requireNonNull;
 
 public class GraqlDelete extends GraqlWritable {
 
-    GraqlDelete(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    GraqlDelete(final GraqlMatch.Unfiltered match, final List<ThingVariable<?>> variables) {
         super(GraqlToken.Command.DELETE, requireNonNull(match), validVariables(match, variables));
     }
 
-    static List<ThingVariable<?>> validVariables(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    static List<ThingVariable<?>> validVariables(final GraqlMatch.Unfiltered match, final List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
             if (var.isNamed() && !match.variablesNamedUnbound().contains(var.toUnbound())) {
                 throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var.reference()));

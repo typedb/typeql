@@ -52,8 +52,8 @@ public interface Computable {
 
         Set<String> of();
 
-        default T of(String type, String... types) {
-            ArrayList<String> typeList = new ArrayList<>(types.length + 1);
+        default T of(final String type, final String... types) {
+            final ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
             typeList.addAll(Arrays.asList(types));
 
@@ -69,8 +69,8 @@ public interface Computable {
 
         boolean includesAttributes();
 
-        default T in(String type, String... types) {
-            ArrayList<String> typeList = new ArrayList<>(types.length + 1);
+        default T in(final String type, final String... types) {
+            final ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
             typeList.addAll(Arrays.asList(types));
 
@@ -92,8 +92,8 @@ public interface Computable {
         T using(GraqlArg.Algorithm algorithm);
 
         @SuppressWarnings("unchecked")
-        default T where(U arg, U... args) {
-            ArrayList<U> argList = new ArrayList<>(args.length + 1);
+        default T where(final U arg, final U... args) {
+            final ArrayList<U> argList = new ArrayList<>(args.length + 1);
             argList.add(arg);
             argList.addAll(Arrays.asList(args));
 
