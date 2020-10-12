@@ -136,11 +136,12 @@ public class GraqlParserDefinition implements ParserDefinition {
         if (node.getTreePrev() != null && node.getTreePrev().getTreePrev() != null
                 && node.getTreePrev().getTreePrev().getText().equals("as")) {
             return new PsiRelatesSuperRoleTypeProperty(node);
-        } else if (node.getTreeNext() != null && node.getTreeNext().getTreeNext() != null
-                && node.getTreeNext().getTreeNext().getFirstChildNode() != null
-                && node.getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")
+        } else if (node.getTreeParent() != null && node.getTreeParent().getTreeNext() != null
+                && node.getTreeParent().getTreeNext().getTreeNext() != null
+                && node.getTreeParent().getTreeNext().getTreeNext().getFirstChildNode() != null
+                && node.getTreeParent().getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")
                 && node.getFirstChildNode() != null
-                && node.getFirstChildNode().getElementType() == RULE_ELEMENT_TYPES.get(GraqlParser.RULE_label_any)) {
+                && node.getFirstChildNode().getElementType() == RULE_ELEMENT_TYPES.get(GraqlParser.RULE_label)) {
             return new PsiTypeProperty(node);
         }
         return null;

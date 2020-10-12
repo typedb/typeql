@@ -204,7 +204,12 @@ public class GraqlPsiUtils {
 
     @Nullable
     public static String determineDeclarationType(@NotNull PsiGraqlNamedElement identifier) {
-        String subType = ((PsiStatementType) identifier.getParent()).getSubType();
+        String subType;
+        if (identifier.getParent() instanceof PsiStatementType) {
+            subType = ((PsiStatementType) identifier.getParent()).getSubType();
+        } else {
+            subType = ((PsiStatementType) identifier.getParent().getParent()).getSubType();
+        }
         if (identifier instanceof PsiRelatesTypeProperty) {
             return "role";
         } else if (GRAQL_TYPES.contains(subType)) {
