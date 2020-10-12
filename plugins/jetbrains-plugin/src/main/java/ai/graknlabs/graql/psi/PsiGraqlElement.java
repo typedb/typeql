@@ -1,10 +1,10 @@
 package ai.graknlabs.graql.psi;
 
 import ai.graknlabs.graql.GraqlParserDefinition;
-import ai.graknlabs.graql.psi.property.PsiHasTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiOwnsTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiPlaysTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiRelatesTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiSubTypeConstraint;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.impl.source.tree.CompositeElement;
@@ -28,19 +28,19 @@ public class PsiGraqlElement extends ANTLRPsiNode {
 
     @Override
     public String getName() {
-        if (this instanceof PsiSubTypeProperty) {
-            return ((PsiSubTypeProperty) this).getSubType();
-        } else if (this instanceof PsiPlaysTypeProperty) {
-            return ((PsiPlaysTypeProperty) this).getPlaysType();
-        } else if (this instanceof PsiHasTypeProperty) {
-            return ((PsiHasTypeProperty) this).getHasType();
+        if (this instanceof PsiSubTypeConstraint) {
+            return ((PsiSubTypeConstraint) this).getSubType();
+        } else if (this instanceof PsiPlaysTypeConstraint) {
+            return ((PsiPlaysTypeConstraint) this).getPlaysType();
+        } else if (this instanceof PsiOwnsTypeConstraint) {
+            return ((PsiOwnsTypeConstraint) this).getHasType();
         } else {
             return super.getName();
         }
     }
 
     public String getScopedName() {
-        if (this instanceof PsiRelatesTypeProperty) {
+        if (this instanceof PsiRelatesTypeConstraint) {
             PsiStatementType statementType = (PsiStatementType) getParent();
             return statementType.getName() + ":" + getName();
         } else {

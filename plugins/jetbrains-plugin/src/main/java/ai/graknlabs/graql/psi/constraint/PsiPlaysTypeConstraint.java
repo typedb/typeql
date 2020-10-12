@@ -1,4 +1,4 @@
-package ai.graknlabs.graql.psi.property;
+package ai.graknlabs.graql.psi.constraint;
 
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import com.intellij.lang.ASTNode;
@@ -12,9 +12,9 @@ import java.util.Objects;
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
-public class PsiPlaysTypeProperty extends PsiGraqlElement {
+public class PsiPlaysTypeConstraint extends PsiGraqlElement {
 
-    public PsiPlaysTypeProperty(@NotNull ASTNode node) {
+    public PsiPlaysTypeConstraint(@NotNull ASTNode node) {
         super(node);
     }
 

@@ -1,9 +1,9 @@
 package ai.graknlabs.graql.reference;
 
-import ai.graknlabs.graql.psi.property.PsiHasTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiRelatesSuperRoleTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiOwnsTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiPlaysTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiRelatesSuperRoleTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiSubTypeConstraint;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.*;
@@ -17,42 +17,42 @@ public class GraqlReferenceContributor extends PsiReferenceContributor {
 
     @Override
     public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
-        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiHasTypeProperty.class), new PsiReferenceProvider() {
+        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiOwnsTypeConstraint.class), new PsiReferenceProvider() {
             @NotNull
             @Override
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-                PsiHasTypeProperty hasElement = (PsiHasTypeProperty) element;
+                PsiOwnsTypeConstraint hasElement = (PsiOwnsTypeConstraint) element;
                 return new PsiReference[]{
                         new GraqlReference(hasElement, hasElement.getHasTypeTextRange())
                 };
             }
         });
-        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiPlaysTypeProperty.class), new PsiReferenceProvider() {
+        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiPlaysTypeConstraint.class), new PsiReferenceProvider() {
             @NotNull
             @Override
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-                PsiPlaysTypeProperty playsElement = (PsiPlaysTypeProperty) element;
+                PsiPlaysTypeConstraint playsElement = (PsiPlaysTypeConstraint) element;
                 return new PsiReference[]{
                         new GraqlReference(playsElement, playsElement.getPlaysTypeTextRange())
                 };
             }
         });
-        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiRelatesSuperRoleTypeProperty.class), new PsiReferenceProvider() {
+        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiRelatesSuperRoleTypeConstraint.class), new PsiReferenceProvider() {
             @NotNull
             @Override
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-                PsiRelatesSuperRoleTypeProperty relatesSuperRoleElement = (PsiRelatesSuperRoleTypeProperty) element;
+                PsiRelatesSuperRoleTypeConstraint relatesSuperRoleElement = (PsiRelatesSuperRoleTypeConstraint) element;
                 return new PsiReference[]{
                         new GraqlReference(relatesSuperRoleElement,
                                 new TextRange(0, relatesSuperRoleElement.getText().length()))
                 };
             }
         });
-        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiSubTypeProperty.class), new PsiReferenceProvider() {
+        registrar.registerReferenceProvider(PlatformPatterns.psiElement(PsiSubTypeConstraint.class), new PsiReferenceProvider() {
             @NotNull
             @Override
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-                PsiSubTypeProperty subTypeElement = (PsiSubTypeProperty) element;
+                PsiSubTypeConstraint subTypeElement = (PsiSubTypeConstraint) element;
                 return new PsiReference[]{
                         new GraqlReference(subTypeElement, subTypeElement.getSubTypeTextRange())
                 };

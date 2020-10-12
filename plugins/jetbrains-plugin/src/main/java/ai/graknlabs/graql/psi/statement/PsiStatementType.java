@@ -2,7 +2,7 @@ package ai.graknlabs.graql.psi.statement;
 
 import ai.graknlabs.graql.GraqlParserDefinition;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
-import ai.graknlabs.graql.psi.property.*;
+import ai.graknlabs.graql.psi.constraint.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
@@ -34,56 +34,56 @@ public class PsiStatementType extends PsiGraqlElement {
         return getNode().getFirstChildNode().getTreeNext().getTreeNext().getLastChildNode().getText();
     }
 
-    public List<PsiRelatesTypeProperty> findRelatesTypeProperties() {
-        List<PsiRelatesTypeProperty> relatesTypes = new ArrayList<>();
+    public List<PsiRelatesTypeConstraint> findRelatesTypeProperties() {
+        List<PsiRelatesTypeConstraint> relatesTypes = new ArrayList<>();
         for (PsiElement child : getChildren()) {
             PsiElement element = GraqlParserDefinition.getRuleTypePropertyElement(child.getNode());
-            if (element instanceof PsiRelatesTypeProperty) {
-                relatesTypes.add((PsiRelatesTypeProperty) element);
+            if (element instanceof PsiRelatesTypeConstraint) {
+                relatesTypes.add((PsiRelatesTypeConstraint) element);
             }
         }
         return relatesTypes;
     }
 
-    public List<PsiPlaysTypeProperty> findPlaysTypeProperties() {
-        List<PsiPlaysTypeProperty> playsTypes = new ArrayList<>();
+    public List<PsiPlaysTypeConstraint> findPlaysTypeProperties() {
+        List<PsiPlaysTypeConstraint> playsTypes = new ArrayList<>();
         for (PsiElement child : getChildren()) {
             PsiElement element = GraqlParserDefinition.getRuleTypePropertyElement(child.getNode());
-            if (element instanceof PsiPlaysTypeProperty) {
-                playsTypes.add((PsiPlaysTypeProperty) element);
+            if (element instanceof PsiPlaysTypeConstraint) {
+                playsTypes.add((PsiPlaysTypeConstraint) element);
             }
         }
         return playsTypes;
     }
 
-    public List<PsiHasTypeProperty> findHasTypeProperties() {
-        List<PsiHasTypeProperty> hasTypes = new ArrayList<>();
+    public List<PsiOwnsTypeConstraint> findHasTypeProperties() {
+        List<PsiOwnsTypeConstraint> hasTypes = new ArrayList<>();
         for (PsiElement child : getChildren()) {
             PsiElement element = GraqlParserDefinition.getRuleTypePropertyElement(child.getNode());
-            if (element instanceof PsiHasTypeProperty) {
-                hasTypes.add((PsiHasTypeProperty) element);
+            if (element instanceof PsiOwnsTypeConstraint) {
+                hasTypes.add((PsiOwnsTypeConstraint) element);
             }
         }
         return hasTypes;
     }
 
-    public List<PsiSubTypeProperty> findSubTypeProperties() {
-        List<PsiSubTypeProperty> subTypes = new ArrayList<>();
+    public List<PsiSubTypeConstraint> findSubTypeProperties() {
+        List<PsiSubTypeConstraint> subTypes = new ArrayList<>();
         for (PsiElement child : getChildren()) {
             PsiElement element = GraqlParserDefinition.getRuleTypePropertyElement(child.getNode());
-            if (element instanceof PsiSubTypeProperty) {
-                subTypes.add((PsiSubTypeProperty) element);
+            if (element instanceof PsiSubTypeConstraint) {
+                subTypes.add((PsiSubTypeConstraint) element);
             }
         }
         return subTypes;
     }
 
-    public List<PsiTypeProperty> findTypeProperties() {
-        List<PsiTypeProperty> relatesTypes = new ArrayList<>();
+    public List<PsiTypeConstraint> findTypeProperties() {
+        List<PsiTypeConstraint> relatesTypes = new ArrayList<>();
         for (PsiElement child : getChildren()) {
             PsiElement element = GraqlParserDefinition.getRuleTypeElement(child.getNode());
-            if (element instanceof PsiTypeProperty) {
-                relatesTypes.add((PsiTypeProperty) element);
+            if (element instanceof PsiTypeConstraint) {
+                relatesTypes.add((PsiTypeConstraint) element);
             }
         }
         return relatesTypes;

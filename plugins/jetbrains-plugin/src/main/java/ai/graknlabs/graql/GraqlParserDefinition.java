@@ -3,7 +3,7 @@ package ai.graknlabs.graql;
 import ai.graknlabs.graql.completion.GraqlCompletionErrorListener;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.PsiGraqlFileBase;
-import ai.graknlabs.graql.psi.property.*;
+import ai.graknlabs.graql.psi.constraint.*;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
@@ -135,14 +135,14 @@ public class GraqlParserDefinition implements ParserDefinition {
     public static PsiGraqlElement getRuleTypeElement(ASTNode node) {
         if (node.getTreePrev() != null && node.getTreePrev().getTreePrev() != null
                 && node.getTreePrev().getTreePrev().getText().equals("as")) {
-            return new PsiRelatesSuperRoleTypeProperty(node);
+            return new PsiRelatesSuperRoleTypeConstraint(node);
         } else if (node.getTreeParent() != null && node.getTreeParent().getTreeNext() != null
                 && node.getTreeParent().getTreeNext().getTreeNext() != null
                 && node.getTreeParent().getTreeNext().getTreeNext().getFirstChildNode() != null
                 && node.getTreeParent().getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")
                 && node.getFirstChildNode() != null
                 && node.getFirstChildNode().getElementType() == RULE_ELEMENT_TYPES.get(GraqlParser.RULE_label)) {
-            return new PsiTypeProperty(node);
+            return new PsiTypeConstraint(node);
         }
         return null;
     }
@@ -153,22 +153,22 @@ public class GraqlParserDefinition implements ParserDefinition {
                 || node.getFirstChildNode().getText().equals("key"))) {
             String hasTo = node.getLastChildNode().getText();
             if (!hasTo.isEmpty()) {
-                return new PsiHasTypeProperty(node);
+                return new PsiOwnsTypeConstraint(node);
             }
         } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("plays")) {
             String playsTo = node.getLastChildNode().getText();
             if (!playsTo.isEmpty()) {
-                return new PsiPlaysTypeProperty(node);
+                return new PsiPlaysTypeConstraint(node);
             }
         } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("relates")) {
             String relatesTo = node.getLastChildNode().getText();
             if (!relatesTo.isEmpty()) {
-                return new PsiRelatesTypeProperty(node);
+                return new PsiRelatesTypeConstraint(node);
             }
         } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("sub")) {
             String subsTo = node.getLastChildNode().getText();
             if (!subsTo.isEmpty() && !GRAQL_TYPES.contains(subsTo)) {
-                return new PsiSubTypeProperty(node);
+                return new PsiSubTypeConstraint(node);
             }
         }
         return null;
