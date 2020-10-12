@@ -29,7 +29,7 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new PsiElementVisitor() {
             @Override
-            public void visitElement(PsiElement element) {
+            public void visitElement(@NotNull PsiElement element) {
                 if (element instanceof PsiStatementType) {
                     ensureGraqlElementsUpToDate(element.getContainingFile());
 
