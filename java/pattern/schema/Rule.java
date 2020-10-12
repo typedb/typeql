@@ -55,8 +55,7 @@ public class Rule implements Definable {
     }
 
     public Rule(final String label, final Conjunction<? extends Pattern> when, final ThingVariable<?> variable) {
-        validateWhen(label, when);
-        validateThen(label, when, variable);
+        validate(label, when, variable);
         this.label = label;
         this.when = when;
         this.then = variable;
@@ -84,12 +83,17 @@ public class Rule implements Definable {
         return then;
     }
 
-    public static void validateWhen(String label, Conjunction<? extends Pattern> when) {
+    public static void validate(String label, Conjunction<? extends Pattern> when, ThingVariable<?> then) {
+        validateWhen(label, when);
+        validateThen(label, when, then);
+    }
+
+    private static void validateWhen(String label, Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
         if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
     }
 
-    public static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
+    private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
 
