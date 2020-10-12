@@ -163,8 +163,6 @@ containable           :   STRING_ | VAR_  ;
 // SCHEMA CONSTRUCT =============================================================
 
 schema_rule           :   RULE label
-                      |   RULE label ':' WHEN '{' patterns '}'
-                      |   RULE label ':' THEN '{' variable_thing_any ';' '}'
                       |   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
 
 // COMPUTE QUERY ===============================================================
