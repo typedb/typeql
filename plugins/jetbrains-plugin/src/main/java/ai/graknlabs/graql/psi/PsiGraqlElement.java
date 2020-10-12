@@ -3,13 +3,13 @@ package ai.graknlabs.graql.psi;
 import ai.graknlabs.graql.GraqlParserDefinition;
 import ai.graknlabs.graql.psi.property.PsiHasTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
+import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
 import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
+import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.impl.source.tree.CompositeElement;
 import org.antlr.intellij.adaptor.psi.ANTLRPsiNode;
 import org.jetbrains.annotations.NotNull;
-
-import static ai.graknlabs.graql.GraqlParserDefinition.WRAPPER_SET;
 
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
@@ -36,6 +36,15 @@ public class PsiGraqlElement extends ANTLRPsiNode {
             return ((PsiHasTypeProperty) this).getHasType();
         } else {
             return super.getName();
+        }
+    }
+
+    public String getScopedName() {
+        if (this instanceof PsiRelatesTypeProperty) {
+            PsiStatementType statementType = (PsiStatementType) getParent();
+            return statementType.getName() + ":" + getName();
+        } else {
+            return getName();
         }
     }
 

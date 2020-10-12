@@ -60,10 +60,11 @@ public class GraqlPsiUtils {
     public static List<PsiGraqlElement> findUsages(@NotNull PsiGraqlElement identifier) {
         VirtualFile identifierFile = identifier.getNode().getPsi().getContainingFile().getVirtualFile();
         if (ScratchUtil.isScratch(identifierFile)) {
-            return findUsages(identifier.getProject(), identifier, identifier.getName(), Collections.singletonList(identifierFile));
+            return findUsages(identifier.getProject(), identifier, identifier.getScopedName(),
+                    Collections.singletonList(identifierFile));
         } else {
-            return findUsages(identifier.getProject(), identifier, identifier.getName(), FileTypeIndex.getFiles(
-                    GraqlFileType.INSTANCE, GlobalSearchScope.allScope(identifier.getProject())));
+            return findUsages(identifier.getProject(), identifier, identifier.getScopedName(),
+                    FileTypeIndex.getFiles(GraqlFileType.INSTANCE, GlobalSearchScope.allScope(identifier.getProject())));
         }
     }
 
@@ -172,9 +173,9 @@ public class GraqlPsiUtils {
                                                               @NotNull PsiGraqlElement identifier) {
         VirtualFile identifierFile = identifier.getNode().getPsi().getContainingFile().getVirtualFile();
         if (ScratchUtil.isScratch(identifierFile)) {
-            return findDeclarations(project, identifier.getName(), Collections.singletonList(identifierFile));
+            return findDeclarations(project, identifier.getScopedName(), Collections.singletonList(identifierFile));
         } else {
-            return findDeclarations(project, identifier.getName(), FileTypeIndex.getFiles(
+            return findDeclarations(project, identifier.getScopedName(), FileTypeIndex.getFiles(
                     GraqlFileType.INSTANCE, GlobalSearchScope.allScope(project)));
         }
     }
@@ -193,7 +194,7 @@ public class GraqlPsiUtils {
                 Collection<PsiGraqlNamedElement> identifiers = PsiTreeUtil.collectElementsOfType(
                         graqlFile, PsiGraqlNamedElement.class);
                 for (PsiGraqlNamedElement identifier : identifiers) {
-                    if (name.equals(identifier.getName())) {
+                    if (name.equals(identifier.getScopedName())) {
                         declarations.add(identifier);
                     }
                 }

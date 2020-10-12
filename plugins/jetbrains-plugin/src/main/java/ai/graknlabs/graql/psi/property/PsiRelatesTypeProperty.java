@@ -2,7 +2,6 @@ package ai.graknlabs.graql.psi.property;
 
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
-import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
@@ -36,11 +35,5 @@ public class PsiRelatesTypeProperty extends PsiGraqlNamedElement {
     @Override
     public PsiElement setName(@NotNull String name) throws IncorrectOperationException {
         return GraqlPsiUtils.setName(this, name);
-    }
-
-    @Override
-    public String getName() {
-        PsiStatementType statementType = (PsiStatementType) getParent();
-        return statementType.getName() + ":" + super.getName();
     }
 }
