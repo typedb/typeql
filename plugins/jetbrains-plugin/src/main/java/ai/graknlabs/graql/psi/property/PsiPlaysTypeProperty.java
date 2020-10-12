@@ -19,7 +19,8 @@ public class PsiPlaysTypeProperty extends PsiGraqlElement {
     }
 
     public TextRange getPlaysTypeTextRange() {
-        return new TextRange(6, 6 + getPlaysType().length());
+        int scopeIndex = getText().indexOf(":") + 1;
+        return new TextRange(scopeIndex, 6 + getPlaysType().length());
     }
 
     public String getPlaysType() {
