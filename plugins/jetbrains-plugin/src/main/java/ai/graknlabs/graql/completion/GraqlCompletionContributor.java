@@ -4,10 +4,10 @@ import ai.graknlabs.graql.GraqlFileType;
 import ai.graknlabs.graql.GraqlLanguage;
 import ai.graknlabs.graql.GraqlParser;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
-import ai.graknlabs.graql.psi.property.PsiHasTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiOwnsTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiPlaysTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiRelatesTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiSubTypeConstraint;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.intellij.codeInsight.completion.*;
@@ -54,25 +54,25 @@ public class GraqlCompletionContributor extends CompletionContributor {
                                                @NotNull CompletionResultSet resultSet) {
                         boolean includeKeywords = true;
                         PsiGraqlElement ruleType = findParentByType(parameters.getPosition(),
-                                RULE_ELEMENT_TYPES.get(GraqlParser.RULE_type_property));
+                                RULE_ELEMENT_TYPES.get(GraqlParser.RULE_type_constraint));
                         if (ruleType != null) {
-                            if (ruleType instanceof PsiHasTypeProperty) {
+                            if (ruleType instanceof PsiOwnsTypeConstraint) {
                                 //has, include all attributes
                                 PsiGraqlElement statementType = findParentByType(parameters.getPosition(),
-                                        RULE_ELEMENT_TYPES.get(GraqlParser.RULE_statement_type));
+                                        RULE_ELEMENT_TYPES.get(GraqlParser.RULE_variable_type));
                                 includeAttributeTypes(resultSet, ruleType, parameters.getOriginalFile().getVirtualFile(),
                                         requireNonNull(statementType).getName());
-                            } else if (ruleType instanceof PsiSubTypeProperty) {
+                            } else if (ruleType instanceof PsiSubTypeConstraint) {
                                 //sub, include all declarations & base types
                                 PsiGraqlElement statementType = findParentByType(parameters.getPosition(),
-                                        RULE_ELEMENT_TYPES.get(GraqlParser.RULE_statement_type));
+                                        RULE_ELEMENT_TYPES.get(GraqlParser.RULE_variable_type));
                                 includeAllTypes(resultSet, ruleType, parameters.getOriginalFile().getVirtualFile(),
                                         statementType.getName());
                                 includeBaseTypes(resultSet);
-                            } else if (ruleType instanceof PsiRelatesTypeProperty) {
+                            } else if (ruleType instanceof PsiRelatesTypeConstraint) {
                                 //relates, include all plays (roles)
                                 includePlayRoles(parameters, resultSet);
-                            } else if (ruleType instanceof PsiPlaysTypeProperty) {
+                            } else if (ruleType instanceof PsiPlaysTypeConstraint) {
                                 //plays, include all relates (roles)
                                 includeRelateRoles(parameters, resultSet);
                             } else {
@@ -87,7 +87,7 @@ public class GraqlCompletionContributor extends CompletionContributor {
                             //if looking for TYPE_NAME_ don't include keywords
                             if (parameters.getPosition() instanceof LeafPsiElement) {
                                 if (((LeafPsiElement) parameters.getPosition()).getElementType() ==
-                                        TOKEN_ELEMENT_TYPES.get(GraqlParser.TYPE_NAME_)) {
+                                        TOKEN_ELEMENT_TYPES.get(GraqlParser.LABEL_)) {
                                     includeKeywords = false;
                                 }
                             }
@@ -176,7 +176,7 @@ public class GraqlCompletionContributor extends CompletionContributor {
     }
 
     private void includePlayRoles(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet resultSet) {
-        PsiTreeUtil.collectElementsOfType(parameters.getOriginalFile(), PsiPlaysTypeProperty.class)
+        PsiTreeUtil.collectElementsOfType(parameters.getOriginalFile(), PsiPlaysTypeConstraint.class)
                 .forEach(it -> resultSet.addElement(LookupElementBuilder.create(it.getPlaysType())
                         .withIcon(GraqlFileType.INSTANCE.getIcon())
                         .withTypeText("role")
@@ -184,7 +184,7 @@ public class GraqlCompletionContributor extends CompletionContributor {
     }
 
     private void includeRelateRoles(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet resultSet) {
-        PsiTreeUtil.collectElementsOfType(parameters.getOriginalFile(), PsiRelatesTypeProperty.class)
+        PsiTreeUtil.collectElementsOfType(parameters.getOriginalFile(), PsiRelatesTypeConstraint.class)
                 .forEach(it -> resultSet.addElement(LookupElementBuilder.create(requireNonNull(it.getName()))
                         .withIcon(GraqlFileType.INSTANCE.getIcon())
                         .withTypeText("role")
@@ -221,10 +221,10 @@ public class GraqlCompletionContributor extends CompletionContributor {
                     switch (s) {
                         case "SUB_":
                             return Arrays.asList("sub", "sub!");
-                        case "ID_":
+                        case "IDD_":
                             return new ArrayList<String>(); //todo: return IDs found
                         case "VAR_":
-                        case "TYPE_NAME_":
+                        case "LABEL_":
                         case "TYPE_IMPLICIT_":
                             return new ArrayList<String>();
                     }

@@ -18,60 +18,13 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.TypeVariable;
+import graql.lang.pattern.Definable;
 
 import java.util.List;
-import java.util.Objects;
 
-import static graql.lang.common.GraqlToken.Char.NEW_LINE;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static java.util.stream.Collectors.joining;
+public class GraqlDefine extends GraqlDefinable {
 
-public class GraqlDefine extends GraqlQuery {
-
-    private final List<TypeVariable> variables;
-    private final int hash;
-
-    public GraqlDefine(List<TypeVariable> variables) {
-        if (variables == null || variables.isEmpty()) {
-            throw new IllegalArgumentException("Define Query missing type variables");
-        }
-        this.variables = variables;
-        this.hash = Objects.hash(this.variables);
-    }
-
-    public List<TypeVariable> variables() {
-        return variables;
-    }
-
-    public List<TypeVariable> asGraph() {
-        return BoundVariable.asGraph(variables);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder query = new StringBuilder();
-        query.append(GraqlToken.Command.DEFINE);
-
-        if (variables.size() > 1) query.append(NEW_LINE);
-        else query.append(GraqlToken.Char.SPACE);
-
-        query.append(variables().stream().map(TypeVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON);
-        return query.toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GraqlDefine that = (GraqlDefine) o;
-        return this.variables.equals(that.variables);
-    }
-
-    @Override
-    public int hashCode() {
-        return hash;
+    public GraqlDefine(final List<Definable> definables) {
+        super(GraqlToken.Command.DEFINE, definables);
     }
 }

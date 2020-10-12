@@ -15,11 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@graknlabs_dependencies//tool/release:rules.bzl", "release_validate_deps")
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
+load("//:deployment.bzl", "deployment")
 
 exports_files(
-    ["VERSION", "deployment.properties", "RELEASE_TEMPLATE.md"],
+    ["VERSION", "RELEASE_TEMPLATE.md"],
     visibility = ["//visibility:public"]
 )
 
@@ -28,7 +30,8 @@ deploy_github(
     release_description = "//:RELEASE_TEMPLATE.md",
     title = "Graql",
     title_append_version = True,
-    deployment_properties = "//:deployment.properties",
+    organisation = deployment['github.organisation'],
+    repository = deployment['github.repository'],
 )
 
 release_validate_deps(
@@ -38,4 +41,28 @@ release_validate_deps(
         "@graknlabs_common",
     ],
     tags = ["manual"]  # in order for bazel test //... to not fail
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob([
+        "*",
+        ".grabl/automation.yml",
+        "docs/*",
+    ]),
+    exclude = ["docs/java-package-structure.png"],
+    license_type = "agpl",
+)
+
+# CI targets that are not declared in any BUILD file, but are called externally
+filegroup(
+    name = "ci",
+    data = [
+        "@graknlabs_dependencies//image/rbe:ubuntu-1604",
+        "@graknlabs_dependencies//library/maven:update",
+        "@graknlabs_dependencies//tool/checkstyle:test-coverage",
+        "@graknlabs_dependencies//tool/release:create-notes",
+        "@graknlabs_dependencies//tool/sonarcloud:code-analysis",
+        "@graknlabs_dependencies//tool/unuseddeps:unused-deps",
+    ],
 )

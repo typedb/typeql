@@ -18,9 +18,12 @@
 package graql.lang.pattern;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
+import graql.lang.common.exception.GraqlException;
 
 import java.util.Objects;
 
+import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
@@ -31,29 +34,33 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
  *
  * @param <T> the type of patterns in this negation
  */
-public class Negation<T extends Pattern> implements Pattern {
+public class Negation<T extends Pattern> implements Conjunctable {
 
     private final T pattern;
+    private Negation<Disjunction<Conjunction<Conjunctable>>> normalised;
 
-    public Negation(T pattern) {
+    public Negation(final T pattern) {
         if (pattern == null) throw new NullPointerException("Null patterns");
+        else if (pattern.isNegation()) throw GraqlException.of(ErrorMessage.REDUNDANT_NESTED_NEGATION);
         this.pattern = pattern;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Negation<?> negation = (Negation<?>) o;
-        return Objects.equals(pattern, negation.pattern);
-    }
+    public T pattern() { return pattern; }
 
     @Override
-    public int hashCode() {
-        return pattern.hashCode();
+    public Negation<Disjunction<Conjunction<Conjunctable>>> normalise() {
+        if (normalised == null) {
+            if (pattern.isNegation()) {
+                throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+            } else if (pattern.isVariable()) {
+                normalised = new Negation<>(new Disjunction<>(list(new Conjunction<>(list(pattern.asVariable())))));
+            } else {
+                if (pattern.isConjunction()) normalised = new Negation<>(pattern.asConjunction().normalise());
+                else normalised = new Negation<>(pattern.asDisjunction().normalise());
+            }
+        }
+        return normalised;
     }
-
-    public T getPattern() { return pattern;}
 
     @Override
     public boolean isNegation() { return true; }
@@ -63,10 +70,10 @@ public class Negation<T extends Pattern> implements Pattern {
 
     @Override
     public String toString() {
-        StringBuilder negation = new StringBuilder();
+        final StringBuilder negation = new StringBuilder();
         negation.append(GraqlToken.Operator.NOT).append(SPACE);
 
-        if (pattern instanceof Conjunction<?>) {
+        if (pattern.isConjunction()) {
             negation.append(pattern.toString());
         } else {
             negation.append(CURLY_OPEN).append(SPACE);
@@ -75,6 +82,19 @@ public class Negation<T extends Pattern> implements Pattern {
         }
 
         return negation.toString();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Negation<?> negation = (Negation<?>) o;
+        return Objects.equals(pattern, negation.pattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return pattern.hashCode();
     }
 }
 

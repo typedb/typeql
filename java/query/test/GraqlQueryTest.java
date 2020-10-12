@@ -21,10 +21,9 @@ import graql.lang.Graql;
 import graql.lang.common.GraqlArg;
 import graql.lang.query.GraqlCompute;
 import graql.lang.query.GraqlDefine;
-import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
-import graql.lang.query.MatchClause;
 import org.junit.Test;
 
 import static graql.lang.Graql.and;
@@ -32,6 +31,7 @@ import static graql.lang.Graql.lte;
 import static graql.lang.Graql.match;
 import static graql.lang.Graql.or;
 import static graql.lang.Graql.rel;
+import static graql.lang.Graql.rule;
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.var;
 import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
@@ -47,12 +47,12 @@ public class GraqlQueryTest {
 
     @Test
     public void testSimpleGetQueryToString() {
-        assertSameStringRepresentation(match(var("x").isa("movie").has("title", "Godfather")).get());
+        assertSameStringRepresentation(match(var("x").isa("movie").has("title", "Godfather")));
     }
 
     @Test
     public void testComplexQueryToString() {
-        GraqlGet query = match(
+        final GraqlMatch query = match(
                 var("x").isa("movie"),
                 var().rel("x").rel("y"),
                 or(
@@ -70,48 +70,48 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithResourcesToString() {
-        assertSameStringRepresentation(match(var("x").has("tmdb-vote-count", lte(400))).get());
+        assertSameStringRepresentation(match(var("x").has("tmdb-vote-count", lte(400))));
     }
 
     @Test
     public void testQueryWithSubToString() {
-        assertSameStringRepresentation(match(var("x").sub(var("y"))).get());
+        assertSameStringRepresentation(match(var("x").sub(var("y"))));
     }
 
     @Test
     public void testQueryWithPlaysToString() {
-        assertSameStringRepresentation(match(var("x").plays(var("y"))).get());
+        assertSameStringRepresentation(match(var("x").plays(var("y"))));
     }
 
     @Test
     public void testQueryWithRelatesToString() {
-        assertSameStringRepresentation(match(var("x").relates(var("y"))).get());
+        assertSameStringRepresentation(match(var("x").relates(var("y"))));
     }
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(match(var("x").value(GraqlArg.ValueType.LONG)).get());
+        assertSameStringRepresentation(match(var("x").value(GraqlArg.ValueType.LONG)));
     }
 
     @Test
     public void testQueryIsAbstractToString() {
-        assertSameStringRepresentation(match(var("x").isAbstract()).get());
+        assertSameStringRepresentation(match(var("x").isAbstract()));
     }
 
     @Test
     public void testQueryWithThenToString() {
-        GraqlDefine query = Graql.define(type("a-rule").sub("rule").then(and(Graql.parsePatternList("$x isa movie;"))));
+        final GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parseVariable("$x isa movie").asThing()));
         assertValidToString(query);
     }
 
     @Test
     public void testQueryWithWhenToString() {
-        assertValidToString(Graql.define(type("a-rule").sub("rule").when(and(Graql.parsePatternList("$x isa movie;")))));
+        assertValidToString(Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;")))));
     }
 
-    private void assertValidToString(GraqlQuery query) {
+    private void assertValidToString(final GraqlQuery query) {
         //No need to execute the insert query
-        GraqlQuery parsedQuery = Graql.parse(query.toString());
+        final GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
     }
 
@@ -128,7 +128,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testOwns() {
-        assertEquals("define $x owns thingy;", Graql.define(var("x").owns("thingy")).toString());
+        assertEquals("define person owns thingy;", Graql.define(type("person").owns("thingy")).toString());
     }
 
     @Test
@@ -138,28 +138,28 @@ public class GraqlQueryTest {
 
     @Test
     public void testComputeQuerySubgraphToString() {
-        GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
+        final GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
         assertEquivalent(query, "compute centrality in [movie, person], using degree;");
     }
 
     @Test
     public void testClusterToString() {
-        GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
+        final GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
         assertEquivalent(connectedcomponent, "compute cluster in [movie, person], using connected-component;");
 
-        GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
+        final GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
         assertEquivalent(kcore, "compute cluster in [movie, person], using k-core;");
     }
 
     @Test
     public void testCCSizeToString() {
-        GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
+        final GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
         assertEquivalent(query, "compute cluster in [movie, person], using connected-component, where size=10;");
     }
 
     @Test
     public void testKCoreToString() {
-        GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
+        final GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
         assertEquivalent(query, "compute cluster in [movie, person], using k-core, where k=10;");
     }
 
@@ -179,7 +179,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testMatchInsertToString() {
-        GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
+        final GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
         assertEquals("match $x isa movie;\ninsert $x has title \"hello\";", query.toString());
     }
 
@@ -200,24 +200,24 @@ public class GraqlQueryTest {
 
     @Test
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
-        String query = "match $x isa movie;\n" +
+        final String query = "match $x isa movie;\n" +
                 "delete $x isa movie;";
-        assertEquals(query, Graql.parse(query).toString());
+        assertEquals(query, Graql.parseQuery(query).toString());
     }
 
     @Test
     public void whenCallingToStringOnAQueryWithAContainsPredicate_ResultIsCorrect() {
-        MatchClause match = match(var("x").contains(var("y")));
+        final GraqlMatch.Unfiltered match = match(var("x").contains(var("y")));
 
         assertEquals("match $x contains $y;", match.toString());
     }
 
-    private void assertSameStringRepresentation(GraqlGet query) {
-        assertEquals(query.toString(), Graql.parse(query.toString()).toString());
+    private void assertSameStringRepresentation(final GraqlMatch query) {
+        assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
     }
 
-    private void assertEquivalent(GraqlQuery query, String queryString) {
+    private void assertEquivalent(final GraqlQuery query, final String queryString) {
         assertEquals(queryString, query.toString());
-        assertEquals(query.toString(), Graql.parse(queryString).toString());
+        assertEquals(query.toString(), Graql.parseQuery(queryString).toString());
     }
 }

@@ -3,9 +3,9 @@ package ai.graknlabs.graql.inspection.invalidTypeUsage;
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
-import ai.graknlabs.graql.psi.property.PsiHasTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiOwnsTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiPlaysTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiSubTypeConstraint;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
@@ -53,11 +53,11 @@ public class GraqlInvalidTypeUsageInspection extends LocalInspectionTool {
                     if (declaration != null) {
                         String declarationType = GraqlPsiUtils.determineDeclarationType(declaration);
                         String usageType;
-                        if (identifier instanceof PsiPlaysTypeProperty) {
+                        if (identifier instanceof PsiPlaysTypeConstraint) {
                             usageType = "plays";
-                        } else if (identifier instanceof PsiHasTypeProperty) {
-                            usageType = "has";
-                        } else if (identifier instanceof PsiSubTypeProperty) {
+                        } else if (identifier instanceof PsiOwnsTypeConstraint) {
+                            usageType = "owns";
+                        } else if (identifier instanceof PsiSubTypeConstraint) {
                             return; //all types can be sub-typed
                         } else {
                             throw new UnsupportedOperationException();

@@ -58,10 +58,11 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
         int type = myType.getANTLRTokenType();
         TextAttributesKey attrKey;
         switch (type) {
-            case GraqlLexer.ID_:
+            case GraqlLexer.IID_:
             case GraqlLexer.VAR_:
             case GraqlLexer.VAR_NAMED_:
-            case GraqlLexer.TYPE_NAME_:
+            case GraqlLexer.LABEL_:
+            case GraqlLexer.LABEL_SCOPED_:
                 attrKey = ID;
                 break;
             case GraqlLexer.THING:
@@ -96,8 +97,8 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
             case GraqlLexer.SUB:
             case GraqlLexer.SUBX:
             case GraqlLexer.SUB_:
-            case GraqlLexer.KEY:
             case GraqlLexer.HAS:
+            case GraqlLexer.OWNS:
             case GraqlLexer.PLAYS:
             case GraqlLexer.RELATES:
             case GraqlLexer.VALUE:
@@ -114,10 +115,11 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
             case GraqlLexer.COMMENT:
                 attrKey = LINE_COMMENT;
                 break;
-            case GraqlLexer.INTEGER_:
-            case GraqlLexer.REAL_:
+            case GraqlLexer.LONG_:
+            case GraqlLexer.DOUBLE_:
             case GraqlLexer.BOOLEAN_:
             case GraqlLexer.DATE_:
+            case GraqlLexer.DATETIME_:
                 attrKey = NUMBER;
                 break;
             case GraqlLexer.STRING_:

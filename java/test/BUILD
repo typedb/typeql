@@ -15,5 +15,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 package(default_visibility = ["//visibility:public"])
+
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob([
+        "*",
+        "deployment/pom.xml",
+        "deployment/src/test/java/MavenApplicationTest.java"
+    ]),
+    license_type = "agpl",
+)

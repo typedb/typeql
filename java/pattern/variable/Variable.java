@@ -17,26 +17,20 @@
 
 package graql.lang.pattern.variable;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.property.Property;
+import graql.lang.pattern.constraint.Constraint;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Stream;
 
-import static graql.lang.common.exception.ErrorMessage.INVALID_CAST_EXCEPTION;
+public abstract class Variable {
 
-public abstract class Variable<T extends Variable<T>> {
+    final Reference reference;
 
-    final Identity identity;
-
-    Variable(Identity identity) {
-        this.identity = identity;
+    Variable(final Reference reference) {
+        this.reference = reference;
     }
 
-    public abstract T withoutProperties();
-
-    public abstract Set<? extends Property> properties();
+    public abstract List<? extends Constraint<?>> constraints();
 
     public boolean isType() {
         return false;
@@ -46,30 +40,18 @@ public abstract class Variable<T extends Variable<T>> {
         return false;
     }
 
-    public TypeVariable asType() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                ThingVariable.class.getCanonicalName(), TypeVariable.class.getCanonicalName()
-        ));
+    public Stream<BoundVariable> variables() {
+        return constraints().stream().flatMap(constraint -> constraint.variables().stream());
     }
 
-    public ThingVariable<?> asThing() {
-        throw GraqlException.create(INVALID_CAST_EXCEPTION.message(
-                TypeVariable.class.getCanonicalName(), ThingVariable.class.getCanonicalName()
-        ));
-    }
-
-    public Stream<BoundVariable<?>> variables() {
-        return properties().stream().flatMap(Property::variables);
-    }
-
-    public Identity.Type type() {
-        return identity.type();
+    public Reference.Type type() {
+        return reference.type();
     }
 
     public String name() {
-        switch (identity.type()) {
+        switch (reference.type()) {
             case NAME:
-                return identity.asNamed().name();
+                return reference.asName().name();
             case LABEL:
             case ANONYMOUS:
                 return null;
@@ -79,40 +61,36 @@ public abstract class Variable<T extends Variable<T>> {
         }
     }
 
+    public Reference reference() {
+        return reference;
+    }
+
     public String identifier() {
-        return identity.identifier();
+        return reference.identifier();
     }
 
     public boolean isNamed() {
-        return identity.type() == Identity.Type.NAME;
+        return reference.isName();
     }
 
-    public boolean isLabel() {
-        return identity.type() == Identity.Type.LABEL;
+    public boolean isLabelled() {
+        return reference.isLabel();
     }
 
-    public boolean isAnonymous() {
-        return identity.type() == Identity.Type.ANONYMOUS;
+    public boolean isAnonymised() {
+        return reference.isAnonymous();
     }
 
     public boolean isVisible() {
-        return identity.isVisible();
+        return reference.isVisible();
     }
 
     @Override
     public abstract String toString();
 
     @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || o.getClass().isAssignableFrom(Variable.class)) return false;
-        Variable<?> that = (Variable<?>) o;
-        return (this.identity.equals(that.identity) &&
-                this.properties().equals(that.properties()));
-    }
+    public abstract boolean equals(Object o);
 
     @Override
-    public final int hashCode() {
-        return Objects.hash(this.identity, this.properties());
-    }
+    public abstract int hashCode();
 }

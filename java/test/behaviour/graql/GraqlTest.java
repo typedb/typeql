@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
         strict = true,
         plugin = "pretty",
         glue = "graql.lang.test.behaviour",
-        features = "external/graknlabs_verification/behaviour/graql",
+        features = "external/graknlabs_behaviour/graql",
         tags = "not @ignore and not @ignore-graql"
 )
 public class GraqlTest {

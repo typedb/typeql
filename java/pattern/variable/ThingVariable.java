@@ -17,63 +17,42 @@
 
 package graql.lang.pattern.variable;
 
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.property.Property;
-import graql.lang.pattern.property.ThingProperty;
+import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_PROPERTY_REPETITION;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
-public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable<ThingVariable<?>> {
+public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable {
 
-    final Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties;
-    final Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties;
+    ThingConstraint.IID iidConstraint;
+    ThingConstraint.Isa isaConstraint;
+    ThingConstraint.NEQ neqConstraint;
+    ThingConstraint.Value<?> valueConstraint;
+    ThingConstraint.Relation relationConstraint;
+    List<ThingConstraint.Has> hasConstraints;
+    List<ThingConstraint> constraints;
 
-    public ThingVariable(Identity identity, ThingProperty property) {
-        super(identity);
-        this.singularProperties = new HashMap<>();
-        this.repeatingProperties = new HashMap<>();
-        if (property != null) {
-            if (property.isSingular()) asSameThingWith(property.asSingular());
-            else asSameThingWith(property.asRepeatable());
-        }
+    public ThingVariable(final Reference reference) {
+        super(reference);
+        this.hasConstraints = new LinkedList<>();
+        this.constraints = new LinkedList<>();
     }
 
-    ThingVariable(Identity identity,
-                  Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                  Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-        super(identity);
-        this.singularProperties = singularProperties;
-        this.repeatingProperties = repeatingProperties;
-    }
-
-    public abstract T getThis();
-
-    public abstract T withoutProperties();
+    abstract T getThis();
 
     @Override
-    public Set<ThingProperty> properties() {
-        return Stream.concat(
-                singularProperties.values().stream(),
-                repeatingProperties.values().stream().flatMap(Collection::stream)
-        ).collect(Collectors.toSet());
+    public List<ThingConstraint> constraints() {
+        return constraints;
     }
 
     @Override
@@ -86,263 +65,178 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return this;
     }
 
-    public Optional<ThingProperty.IID> idProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.IID.class)).map(ThingProperty::asID);
+    public Optional<ThingConstraint.IID> iid() {
+        return Optional.ofNullable(iidConstraint);
     }
 
-    public Optional<ThingProperty.Isa> isaProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.Isa.class)).map(ThingProperty::asIsa);
+    public Optional<ThingConstraint.Isa> isa() {
+        return Optional.ofNullable(isaConstraint);
     }
 
-    public Optional<ThingProperty.NEQ> neqProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.NEQ.class)).map(ThingProperty::asNEQ);
+    public Optional<ThingConstraint.NEQ> neq() {
+        return Optional.ofNullable(neqConstraint);
     }
 
-    public Optional<ThingProperty.Value> valueProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.Value.class)).map(ThingProperty::asValue);
+    public Optional<ThingConstraint.Value<?>> value() {
+        return Optional.ofNullable(valueConstraint);
     }
 
-    public Optional<ThingProperty.Relation> relationProperty() {
-        return Optional.ofNullable(singularProperties.get(ThingProperty.Relation.class)).map(ThingProperty::asRelation);
+    public Optional<ThingConstraint.Relation> relation() {
+        return Optional.ofNullable(relationConstraint);
     }
 
-    public List<ThingProperty.Has> hasProperty() {
-        return repeatingProperties.computeIfAbsent(ThingProperty.Has.class, c -> new ArrayList<>())
-                .stream().map(ThingProperty::asHas).collect(toList());
+    public List<ThingConstraint.Has> has() {
+        return hasConstraints;
     }
 
-    void addSingularProperties(ThingProperty.Singular property) {
-        if (singularProperties.containsKey(property.getClass())) {
-            throw GraqlException.create(ILLEGAL_PROPERTY_REPETITION.message(
-                    withoutProperties().toString(),
-                    singularProperties.get(property.getClass()).toString(),
-                    property.toString()
-            ));
+    public T constrain(final ThingConstraint.Isa constraint) {
+        if (isaConstraint != null) {
+            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ThingConstraint.Isa.class, constraint));
+        } else if (constraint.type().label().isPresent() && relation().isPresent()) {
+            relationConstraint.setScope(constraint.type().label().get().label());
         }
-        singularProperties.put(property.getClass(), property);
-    }
-
-    @Override
-    ThingVariable.Merged merge(ThingVariable<?> variable) {
-        ThingVariable.Merged merged = new ThingVariable.Merged(identity, singularProperties, repeatingProperties);
-        variable.singularProperties.values().forEach(merged::addSingularProperties);
-        variable.repeatingProperties.forEach(
-                (clazz, list) -> merged.repeatingProperties.computeIfAbsent(clazz, c -> new ArrayList<>()).addAll(list)
-        );
-        return merged;
-    }
-
-    public T asSameThingWith(ThingProperty.Singular property) {
-        addSingularProperties(property);
+        isaConstraint = constraint;
+        constraints.add(constraint);
         return getThis();
     }
 
-    public T asSameThingWith(ThingProperty.Repeatable property) {
-        repeatingProperties.computeIfAbsent(property.getClass(), c -> new ArrayList<>()).add(property);
+    public T constrain(final ThingConstraint.Has constraint) {
+        hasConstraints.add(constraint);
+        constraints.add(constraint);
         return getThis();
     }
 
     String isaSyntax() {
-        if (isaProperty().isPresent()) return isaProperty().get().toString();
+        if (isa().isPresent()) return isa().get().toString();
         else return "";
     }
 
     String hasSyntax() {
-        return hasProperty().stream().map(ThingProperty.Has::toString).collect(joining(COMMA_SPACE.toString()));
+        return has().stream().map(ThingConstraint.Has::toString).collect(joining(COMMA_SPACE.toString()));
     }
 
     @Override
     public abstract String toString();
 
-    static class Merged extends ThingVariable<Merged> {
+    @Override
+    public final boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || o.getClass().isAssignableFrom(ThingVariable.class)) return false;
+        final ThingVariable<?> that = (ThingVariable<?>) o;
 
-        Merged(Identity identity) {
-            super(identity, null);
-        }
-
-        @Override
-        ThingVariable<?> asAnonymousWithID(int id) {
-            throw GraqlException.create(ErrorMessage.INVALID_CONVERT_OPERATION.message());
-        }
-
-        Merged(Identity identity,
-               Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-               Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
-        }
-
-        @Override
-        public Merged getThis() {
-            return this;
-        }
-
-        @Override
-        public Merged withoutProperties() {
-            return new ThingVariable.Merged(identity);
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder syntax = new StringBuilder();
-            Predicate<ThingProperty> filter = p -> true;
-            if (isVisible()) {
-                syntax.append(identity.syntax());
-            } else if (relationProperty().isPresent()) {
-                syntax.append(SPACE).append(relationProperty().get());
-                filter = p -> !(p instanceof ThingProperty.Relation);
-            } else if (valueProperty().isPresent()) {
-                syntax.append(SPACE).append(valueProperty().get());
-                filter = p -> !(p instanceof ThingProperty.Value<?>);
-            } else {
-                assert false;
-                return null;
-            }
-
-            String properties = properties().stream().filter(filter).map(Property::toString).collect(joining(COMMA_SPACE.toString()));
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
-            return syntax.toString();
-        }
+        return (this.reference.equals(that.reference) && this.constraints.equals(that.constraints));
     }
 
-    public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder<Thing> {
+    @Override
+    public final int hashCode() {
+        return Objects.hash(reference, constraints);
+    }
 
-        Thing(Identity identity, ThingProperty property) {
-            super(identity, property);
+    public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
+
+        Thing(final Reference reference) {
+            super(reference);
         }
 
-        private Thing(Identity.AnonymousWithID identity,
-                      Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                      Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
+        Thing(final Reference reference, final ThingConstraint.IID iidConstraint) {
+            super(reference);
+            this.iidConstraint = iidConstraint;
+            constraints.add(iidConstraint);
+        }
+
+        Thing(final Reference reference, final ThingConstraint.NEQ neqConstraint) {
+            super(reference);
+            this.neqConstraint = neqConstraint;
+            constraints.add(neqConstraint);
         }
 
         @Override
-        public ThingVariable.Thing getThis() {
+        ThingVariable.Thing getThis() {
             return this;
-        }
-
-        @Override
-        ThingVariable.Thing asAnonymousWithID(int id) {
-            return new ThingVariable.Thing(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
-        }
-
-        @Override
-        public ThingVariable.Thing withoutProperties() {
-            return new ThingVariable.Thing(identity, null);
         }
 
         private String thingSyntax() {
-            if (isaProperty().isPresent()) return isaSyntax();
-            else if (idProperty().isPresent()) return idProperty().get().toString();
-            else if (neqProperty().isPresent()) return neqProperty().get().toString();
+            if (isa().isPresent()) return isaSyntax();
+            else if (iid().isPresent()) return iid().get().toString();
+            else if (neq().isPresent()) return neq().get().toString();
             else return "";
         }
 
         @Override
         public String toString() {
-            StringBuilder syntax = new StringBuilder();
-            if (isVisible()) syntax.append(identity.syntax());
+            final StringBuilder syntax = new StringBuilder();
+            if (isVisible()) syntax.append(reference.syntax());
 
-            String properties = Stream.of(thingSyntax(), hasSyntax())
+            final String constraints = Stream.of(thingSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
             return syntax.toString();
         }
     }
 
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
-                                                                            ThingVariableBuilder<Relation> {
+                                                                            ThingVariableBuilder.Common<Relation> {
 
-        private ThingProperty.Relation relationProperty;
-
-        Relation(Identity identity, ThingProperty.Relation property) {
-            super(identity, property);
-            this.relationProperty = property;
-        }
-
-        public Relation(Identity.AnonymousWithID identity,
-                        Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                        Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
+        Relation(final Reference reference, final ThingConstraint.Relation relationConstraint) {
+            super(reference);
+            this.relationConstraint = relationConstraint;
+            constraints.add(relationConstraint);
         }
 
         @Override
-        public ThingVariable.Relation getThis() {
+        ThingVariable.Relation getThis() {
             return this;
         }
 
         @Override
-        ThingVariable.Relation asAnonymousWithID(int id) {
-            return new ThingVariable.Relation(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
-        }
-
-        @Override
-        public ThingVariable.Relation withoutProperties() {
-            return new ThingVariable.Relation(identity, null);
-        }
-
-        @Override
-        public ThingVariable.Relation asRelationWith(ThingProperty.Relation.RolePlayer rolePlayer) {
-            ThingProperty.Relation relProp = singularProperties.get(ThingProperty.Relation.class).asRelation();
-            this.singularProperties.put(ThingProperty.Relation.class, new ThingProperty.Relation(list(relProp.players(), rolePlayer)));
-            this.relationProperty.player(rolePlayer);
+        public ThingVariable.Relation constrain(final ThingConstraint.Relation.RolePlayer rolePlayer) {
+            relationConstraint.addPlayers(rolePlayer);
+            if (isa().isPresent() && !relationConstraint.hasScope()) {
+                relationConstraint.setScope(isa().get().type().label().get().label());
+            }
             return this;
         }
 
         @Override
         public String toString() {
-            assert relationProperty().isPresent();
-            StringBuilder syntax = new StringBuilder();
-            if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
-            syntax.append(relationProperty().get());
+            assert relation().isPresent();
+            final StringBuilder syntax = new StringBuilder();
+            if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
+            syntax.append(relation().get());
 
-            String properties = Stream.of(isaSyntax(), hasSyntax())
+            final String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
             return syntax.toString();
         }
     }
 
-    public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder<Attribute> {
+    public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
-        Attribute(Identity identity, ThingProperty property) {
-            super(identity, property);
-        }
-
-        public Attribute(Identity.AnonymousWithID identity,
-                         Map<Class<? extends ThingProperty.Singular>, ThingProperty.Singular> singularProperties,
-                         Map<Class<? extends ThingProperty.Repeatable>, List<ThingProperty.Repeatable>> repeatingProperties) {
-            super(identity, singularProperties, repeatingProperties);
+        Attribute(final Reference reference, final ThingConstraint.Value<?> valueConstraint) {
+            super(reference);
+            this.valueConstraint = valueConstraint;
+            constraints.add(valueConstraint);
         }
 
         @Override
-        public ThingVariable.Attribute getThis() {
+        ThingVariable.Attribute getThis() {
             return this;
         }
 
         @Override
-        ThingVariable.Attribute asAnonymousWithID(int id) {
-            return new ThingVariable.Attribute(Identity.anonymous(identity.isVisible, id), singularProperties, repeatingProperties);
-        }
-
-        @Override
-        public ThingVariable.Attribute withoutProperties() {
-            return new ThingVariable.Attribute(identity, null);
-        }
-
-        @Override
         public String toString() {
-            assert valueProperty().isPresent();
-            StringBuilder syntax = new StringBuilder();
-            if (isVisible()) syntax.append(identity.syntax()).append(SPACE);
-            syntax.append(valueProperty().get());
+            assert value().isPresent();
+            final StringBuilder syntax = new StringBuilder();
+            if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
+            syntax.append(value().get());
 
-            String properties = Stream.of(isaSyntax(), hasSyntax())
+            final String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
-            if (!properties.isEmpty()) syntax.append(SPACE).append(properties);
+            if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
             return syntax.toString();
         }
     }

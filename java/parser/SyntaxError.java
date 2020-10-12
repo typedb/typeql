@@ -30,7 +30,7 @@ public class SyntaxError {
     private final String msg;
     private final int hash;
 
-    public SyntaxError(String queryLine, int line, int charPositionInLine, String msg) {
+    public SyntaxError(final String queryLine, final int line, final int charPositionInLine, final String msg) {
         if (msg == null) throw new NullPointerException("Null msg");
         this.queryLine = queryLine;
         this.line = line;
@@ -39,9 +39,9 @@ public class SyntaxError {
         this.hash = Objects.hash(this.queryLine, this.line, this.charPositionInLine, this.msg);
     }
 
-    private String spaces(int len) {
-        char ch = ' ';
-        char[] output = new char[len];
+    private String spaces(final int len) {
+        final char ch = ' ';
+        final char[] output = new char[len];
         for (int i = len - 1; i >= 0; i--) {
             output[i] = ch;
         }
@@ -59,18 +59,18 @@ public class SyntaxError {
             // match $
             //       ^
             // blah blah antlr blah
-            String pointer = spaces(charPositionInLine) + "^";
+            final String pointer = spaces(charPositionInLine) + "^";
             return SYNTAX_ERROR_DETAILED.message(line, queryLine, pointer, msg);
         }
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == this) {
             return true;
         }
         if (o instanceof SyntaxError) {
-            SyntaxError that = (SyntaxError) o;
+            final SyntaxError that = (SyntaxError) o;
             return (Objects.equals(this.queryLine, that.queryLine) &&
                     this.line == that.line &&
                     this.charPositionInLine == that.charPositionInLine &&

@@ -20,11 +20,15 @@ package graql.lang.common.exception;
 
 public class GraqlException extends RuntimeException {
 
-    protected GraqlException(String error) {
+    protected GraqlException(final String error) {
         super(error);
     }
 
-    public static GraqlException create(String error) {
+    public static GraqlException of(final ErrorMessage errorMessage) {
+        return new GraqlException(errorMessage.message());
+    }
+
+    public static GraqlException of(final String error) {
         return new GraqlException(error);
     }
 }

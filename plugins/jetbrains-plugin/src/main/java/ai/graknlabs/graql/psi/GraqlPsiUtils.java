@@ -1,7 +1,7 @@
 package ai.graknlabs.graql.psi;
 
 import ai.graknlabs.graql.GraqlFileType;
-import ai.graknlabs.graql.psi.property.*;
+import ai.graknlabs.graql.psi.constraint.*;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.ide.scratch.ScratchUtil;
 import com.intellij.openapi.project.Project;
@@ -60,10 +60,11 @@ public class GraqlPsiUtils {
     public static List<PsiGraqlElement> findUsages(@NotNull PsiGraqlElement identifier) {
         VirtualFile identifierFile = identifier.getNode().getPsi().getContainingFile().getVirtualFile();
         if (ScratchUtil.isScratch(identifierFile)) {
-            return findUsages(identifier.getProject(), identifier, identifier.getName(), Collections.singletonList(identifierFile));
+            return findUsages(identifier.getProject(), identifier, identifier.getScopedName(),
+                    Collections.singletonList(identifierFile));
         } else {
-            return findUsages(identifier.getProject(), identifier, identifier.getName(), FileTypeIndex.getFiles(
-                    GraqlFileType.INSTANCE, GlobalSearchScope.allScope(identifier.getProject())));
+            return findUsages(identifier.getProject(), identifier, identifier.getScopedName(),
+                    FileTypeIndex.getFiles(GraqlFileType.INSTANCE, GlobalSearchScope.allScope(identifier.getProject())));
         }
     }
 
@@ -79,63 +80,63 @@ public class GraqlPsiUtils {
         for (VirtualFile virtualFile : searchScope) {
             PsiGraqlFileBase graqlFile = (PsiGraqlFileBase) PsiManager.getInstance(project).findFile(virtualFile);
             if (graqlFile != null) {
-                if (element instanceof PsiHasTypeProperty) {
-                    Collection<PsiHasTypeProperty> hasIdentifiers = PsiTreeUtil.collectElementsOfType(
-                            graqlFile, PsiHasTypeProperty.class);
-                    for (PsiHasTypeProperty identifier : hasIdentifiers) {
+                if (element instanceof PsiOwnsTypeConstraint) {
+                    Collection<PsiOwnsTypeConstraint> hasIdentifiers = PsiTreeUtil.collectElementsOfType(
+                            graqlFile, PsiOwnsTypeConstraint.class);
+                    for (PsiOwnsTypeConstraint identifier : hasIdentifiers) {
                         if (name.equals(identifier.getHasType())) {
                             result.add(identifier);
                         }
                     }
-                } else if (element instanceof PsiSubTypeProperty) {
-                    Collection<PsiSubTypeProperty> subTypeIdentifiers = PsiTreeUtil.collectElementsOfType(
-                            graqlFile, PsiSubTypeProperty.class);
-                    for (PsiSubTypeProperty identifier : subTypeIdentifiers) {
+                } else if (element instanceof PsiSubTypeConstraint) {
+                    Collection<PsiSubTypeConstraint> subTypeIdentifiers = PsiTreeUtil.collectElementsOfType(
+                            graqlFile, PsiSubTypeConstraint.class);
+                    for (PsiSubTypeConstraint identifier : subTypeIdentifiers) {
                         if (name.equals(identifier.getSubType())) {
                             result.add(identifier);
                         }
                     }
-                } else if (element instanceof PsiPlaysTypeProperty
-                        || element instanceof PsiRelatesSuperRoleTypeProperty) {
-                    Collection<PsiPlaysTypeProperty> playsIdentifiers = PsiTreeUtil.collectElementsOfType(
-                            graqlFile, PsiPlaysTypeProperty.class);
-                    for (PsiPlaysTypeProperty identifier : playsIdentifiers) {
+                } else if (element instanceof PsiPlaysTypeConstraint
+                        || element instanceof PsiRelatesSuperRoleTypeConstraint) {
+                    Collection<PsiPlaysTypeConstraint> playsIdentifiers = PsiTreeUtil.collectElementsOfType(
+                            graqlFile, PsiPlaysTypeConstraint.class);
+                    for (PsiPlaysTypeConstraint identifier : playsIdentifiers) {
                         if (name.equals(identifier.getPlaysType())) {
                             result.add(identifier);
                         }
                     }
-                    Collection<PsiRelatesSuperRoleTypeProperty> relatesSuperRoleIdentifiers =
-                            PsiTreeUtil.collectElementsOfType(graqlFile, PsiRelatesSuperRoleTypeProperty.class);
-                    for (PsiRelatesSuperRoleTypeProperty identifier : relatesSuperRoleIdentifiers) {
+                    Collection<PsiRelatesSuperRoleTypeConstraint> relatesSuperRoleIdentifiers =
+                            PsiTreeUtil.collectElementsOfType(graqlFile, PsiRelatesSuperRoleTypeConstraint.class);
+                    for (PsiRelatesSuperRoleTypeConstraint identifier : relatesSuperRoleIdentifiers) {
                         if (name.equals(identifier.getText())) {
                             result.add(identifier);
                         }
                     }
                 } else {
-                    Collection<PsiHasTypeProperty> hasIdentifiers = PsiTreeUtil.collectElementsOfType(
-                            graqlFile, PsiHasTypeProperty.class);
-                    for (PsiHasTypeProperty identifier : hasIdentifiers) {
+                    Collection<PsiOwnsTypeConstraint> hasIdentifiers = PsiTreeUtil.collectElementsOfType(
+                            graqlFile, PsiOwnsTypeConstraint.class);
+                    for (PsiOwnsTypeConstraint identifier : hasIdentifiers) {
                         if (name.equals(identifier.getHasType())) {
                             result.add(identifier);
                         }
                     }
-                    Collection<PsiSubTypeProperty> subTypeIdentifiers = PsiTreeUtil.collectElementsOfType(
-                            graqlFile, PsiSubTypeProperty.class);
-                    for (PsiSubTypeProperty identifier : subTypeIdentifiers) {
+                    Collection<PsiSubTypeConstraint> subTypeIdentifiers = PsiTreeUtil.collectElementsOfType(
+                            graqlFile, PsiSubTypeConstraint.class);
+                    for (PsiSubTypeConstraint identifier : subTypeIdentifiers) {
                         if (name.equals(identifier.getSubType())) {
                             result.add(identifier);
                         }
                     }
-                    Collection<PsiPlaysTypeProperty> playsIdentifiers = PsiTreeUtil.collectElementsOfType(
-                            graqlFile, PsiPlaysTypeProperty.class);
-                    for (PsiPlaysTypeProperty identifier : playsIdentifiers) {
+                    Collection<PsiPlaysTypeConstraint> playsIdentifiers = PsiTreeUtil.collectElementsOfType(
+                            graqlFile, PsiPlaysTypeConstraint.class);
+                    for (PsiPlaysTypeConstraint identifier : playsIdentifiers) {
                         if (name.equals(identifier.getPlaysType())) {
                             result.add(identifier);
                         }
                     }
-                    Collection<PsiRelatesSuperRoleTypeProperty> relatesSuperRoleIdentifiers =
-                            PsiTreeUtil.collectElementsOfType(graqlFile, PsiRelatesSuperRoleTypeProperty.class);
-                    for (PsiRelatesSuperRoleTypeProperty identifier : relatesSuperRoleIdentifiers) {
+                    Collection<PsiRelatesSuperRoleTypeConstraint> relatesSuperRoleIdentifiers =
+                            PsiTreeUtil.collectElementsOfType(graqlFile, PsiRelatesSuperRoleTypeConstraint.class);
+                    for (PsiRelatesSuperRoleTypeConstraint identifier : relatesSuperRoleIdentifiers) {
                         if (name.equals(identifier.getText())) {
                             result.add(identifier);
                         }
@@ -172,9 +173,9 @@ public class GraqlPsiUtils {
                                                               @NotNull PsiGraqlElement identifier) {
         VirtualFile identifierFile = identifier.getNode().getPsi().getContainingFile().getVirtualFile();
         if (ScratchUtil.isScratch(identifierFile)) {
-            return findDeclarations(project, identifier.getName(), Collections.singletonList(identifierFile));
+            return findDeclarations(project, identifier.getScopedName(), Collections.singletonList(identifierFile));
         } else {
-            return findDeclarations(project, identifier.getName(), FileTypeIndex.getFiles(
+            return findDeclarations(project, identifier.getScopedName(), FileTypeIndex.getFiles(
                     GraqlFileType.INSTANCE, GlobalSearchScope.allScope(project)));
         }
     }
@@ -193,7 +194,7 @@ public class GraqlPsiUtils {
                 Collection<PsiGraqlNamedElement> identifiers = PsiTreeUtil.collectElementsOfType(
                         graqlFile, PsiGraqlNamedElement.class);
                 for (PsiGraqlNamedElement identifier : identifiers) {
-                    if (name.equals(identifier.getName())) {
+                    if (name.equals(identifier.getScopedName())) {
                         declarations.add(identifier);
                     }
                 }
@@ -204,8 +205,13 @@ public class GraqlPsiUtils {
 
     @Nullable
     public static String determineDeclarationType(@NotNull PsiGraqlNamedElement identifier) {
-        String subType = ((PsiStatementType) identifier.getParent()).getSubType();
-        if (identifier instanceof PsiRelatesTypeProperty) {
+        String subType;
+        if (identifier.getParent() instanceof PsiStatementType) {
+            subType = ((PsiStatementType) identifier.getParent()).getSubType();
+        } else {
+            subType = ((PsiStatementType) identifier.getParent().getParent()).getSubType();
+        }
+        if (identifier instanceof PsiRelatesTypeConstraint) {
             return "role";
         } else if (GRAQL_TYPES.contains(subType)) {
             return subType;
@@ -228,17 +234,17 @@ public class GraqlPsiUtils {
 
     @NotNull
     public static PsiElement setName(@NotNull PsiGraqlElement element, @NotNull String newName) {
-        if (element instanceof PsiTypeProperty) {
+        if (element instanceof PsiTypeConstraint) {
             PsiGraqlNamedElement typeProperty = GraqlPsiElementFactory.createTypeProperty(element.getProject(), newName);
             element.getParent().getNode().replaceChild(element.getNode(), typeProperty.getNode());
-        } else if (element instanceof PsiSubTypeProperty) {
+        } else if (element instanceof PsiSubTypeConstraint) {
             PsiGraqlElement subTypeProperty = GraqlPsiElementFactory.createSubTypeProperty(element.getProject(), newName);
             element.getParent().getNode().replaceChild(element.getNode(), subTypeProperty.getNode());
-        } else if (element instanceof PsiRelatesTypeProperty) {
+        } else if (element instanceof PsiRelatesTypeConstraint) {
             PsiGraqlNamedElement typeProperty = GraqlPsiElementFactory.createRelatesTypeProperty(element.getProject(), newName);
             element.getNode().replaceChild(element.getFirstChild().getNextSibling().getNextSibling().getNode(),
                     typeProperty.getFirstChild().getNextSibling().getNextSibling().getNode());
-        } else if (element instanceof PsiPlaysTypeProperty) {
+        } else if (element instanceof PsiPlaysTypeConstraint) {
             PsiGraqlElement playsTypeProperty = GraqlPsiElementFactory.createPlaysTypeProperty(element.getProject(), newName);
             element.getParent().getNode().replaceChild(element.getNode(), playsTypeProperty.getNode());
         } else {
