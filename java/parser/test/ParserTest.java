@@ -728,7 +728,7 @@ public class ParserTest {
         final Conjunction<? extends Pattern> whenPattern = and((var("x").isa("movie")));
         final ThingVariable<?> thenPattern = var("x").has("genre", "drama");
 
-        final GraqlDefine expected = define(rule("all-movies-are-drama", whenPattern, thenPattern));
+        final GraqlDefine expected = define(rule("all-movies-are-drama").when(whenPattern).then(thenPattern));
         final String query = "define rule all-movies-are-drama: when { " + when + " } then { " + then + " };";
         final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
 

@@ -83,6 +83,10 @@ public class Rule implements Definable {
         return then;
     }
 
+    public IncompleteRule when(Conjunction<? extends Pattern> when) {
+        return new IncompleteRule(label, when);
+    }
+
     public static void validate(String label, Conjunction<? extends Pattern> when, ThingVariable<?> then) {
         validateWhen(label, when);
         validateThen(label, when, then);
@@ -164,5 +168,19 @@ public class Rule implements Definable {
         return (this.label.equals(that.label) &&
                 Objects.equals(this.when, that.when) &&
                 Objects.equals(this.then, that.then));
+    }
+
+    public static class IncompleteRule {
+        private final String label;
+        private final Conjunction<? extends Pattern> when;
+
+        public IncompleteRule(String label, Conjunction<? extends Pattern> when) {
+            this.label = label;
+            this.when = when;
+        }
+
+        public Rule then(ThingVariable<?> then) {
+            return new Rule(label, when, then);
+        }
     }
 }

@@ -139,10 +139,6 @@ public class Graql {
 
     public static Rule rule(final String label) { return new Rule(label); }
 
-    public static Rule rule(final String label, Conjunction<? extends Pattern> when, ThingVariable<?> then) {
-        return new Rule(label, when, then);
-    }
-
     // Variable Builder Methods
 
     public static UnboundVariable var() {
