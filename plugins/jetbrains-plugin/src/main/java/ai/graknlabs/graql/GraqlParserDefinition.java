@@ -47,7 +47,7 @@ public class GraqlParserDefinition implements ParserDefinition {
 
     public static final IFileElementType FILE = new IFileElementType(GraqlLanguage.INSTANCE);
     public static final TokenSet IDS =
-            PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlParser.TYPE_NAME_);
+            PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlParser.LABEL_);
     public static final TokenSet COMMENTS =
             PSIElementTypeFactory.createTokenSet(GraqlLanguage.INSTANCE, GraqlLexer.COMMENT);
     public static final TokenSet WHITESPACE =
@@ -94,7 +94,7 @@ public class GraqlParserDefinition implements ParserDefinition {
             protected ParseTree parse(Parser parser, IElementType root) {
                 parser.addErrorListener(completionErrorListener);
                 if (root instanceof IFileElementType) {
-                    return ((GraqlParser) parser).eof_query_list();
+                    return ((GraqlParser) parser).eof_queries();
                 }
                 throw new UnsupportedOperationException();
             }
@@ -114,9 +114,9 @@ public class GraqlParserDefinition implements ParserDefinition {
     public PsiElement createElement(ASTNode node) {
         RuleIElementType ruleElType = (RuleIElementType) node.getElementType();
         switch (ruleElType.getRuleIndex()) {
-            case GraqlParser.RULE_statement_type:
+            case GraqlParser.RULE_variable_type:
                 return updateWrappedTypeIfNecessary(node, new PsiStatementType(node));
-            case GraqlParser.RULE_type_property:
+            case GraqlParser.RULE_type_constraint:
                 PsiGraqlElement ruleTypePropertyElement = getRuleTypePropertyElement(node);
                 if (ruleTypePropertyElement != null) {
                     return updateWrappedTypeIfNecessary(node, ruleTypePropertyElement);
@@ -140,7 +140,7 @@ public class GraqlParserDefinition implements ParserDefinition {
                 && node.getTreeNext().getTreeNext().getFirstChildNode() != null
                 && node.getTreeNext().getTreeNext().getFirstChildNode().getText().equals("sub")
                 && node.getFirstChildNode() != null
-                && node.getFirstChildNode().getElementType() == RULE_ELEMENT_TYPES.get(GraqlParser.RULE_type_label)) {
+                && node.getFirstChildNode().getElementType() == RULE_ELEMENT_TYPES.get(GraqlParser.RULE_label_any)) {
             return new PsiTypeProperty(node);
         }
         return null;
