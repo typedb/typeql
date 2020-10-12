@@ -54,6 +54,14 @@ public class Rule implements Definable {
         this.label = label;
     }
 
+    public Rule(final String label, final Conjunction<? extends Pattern> when, final ThingVariable<?> variable) {
+        validateWhen(label, when);
+        validateThen(label, when, variable);
+        this.label = label;
+        this.when = when;
+        this.then = variable;
+    }
+
     @Override
     public boolean isRule() {
         return true;
@@ -76,25 +84,13 @@ public class Rule implements Definable {
         return then;
     }
 
-    public Rule when(final Conjunction<? extends Pattern> when) {
-        if (when == null) throw new NullPointerException("Null when pattern");
-        validateWhen(label, when);
-        this.when = when;
-        return this;
-    }
-
-    public Rule then(final ThingVariable<?> variable) {
-        if (variable == null) throw new NullPointerException("Null then pattern");
-        validateThen(label(), when(), variable);
-        this.then = variable;
-        return this;
-    }
-
     public static void validateWhen(String label, Conjunction<? extends Pattern> when) {
+        if (when == null) throw new NullPointerException("Null when pattern");
         if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
     }
 
     public static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
+        if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
 
         // rules may only conclude one 'has', 'relation', or 'isa' constraint
