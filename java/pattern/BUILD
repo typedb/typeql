@@ -29,6 +29,7 @@ java_library(
         "util/*.java",
         "variable/*.java",
         "variable/builder/*.java",
+        "schema/*.java",
     ]),
     deps = [
         # Internal Package Dependencies
@@ -64,6 +65,7 @@ checkstyle_test(
         "constraint/*.java",
         "variable/*.java",
         "variable/builder/*.java",
+        "schema/*.java"
     ]),
     license_type = "agpl",
 )

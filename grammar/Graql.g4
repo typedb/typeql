@@ -20,10 +20,13 @@ grammar Graql;
 // Graql end-of-file (aka. end-of-string) query parser
 // Needed by Graql's Parser to ensure that it parses till end of string
 
-eof_query             :   query       EOF ;
-eof_query_list        :   query+      EOF ;
-eof_pattern           :   pattern     EOF ;
-eof_pattern_list      :   patterns    EOF ;
+eof_query             :   query            EOF ;
+eof_queries           :   query+           EOF ;
+eof_pattern           :   pattern          EOF ;
+eof_patterns          :   patterns         EOF ;
+eof_definables        :   definables       EOF ;
+eof_variable          :   pattern_variable EOF ;
+eof_schema_rule       :   schema_rule      EOF ;
 
 // GRAQL QUERY LANGUAGE ========================================================
 
@@ -33,13 +36,13 @@ query                 :   query_define    |   query_undefine
                       |   query_match_group |   query_match_group_agg
                       |   query_compute   ;
 
-query_define          :   DEFINE      variable_types ;
-query_undefine        :   UNDEFINE    variable_types ;
+query_define          :   DEFINE      definables  ;
+query_undefine        :   UNDEFINE    definables  ;
 
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
 query_delete          :   MATCH       patterns      DELETE  variable_things     ;
-query_match           :   MATCH       patterns            ( filters )?          ;
+query_match           :   MATCH       patterns            ( filters )           ;
 query_compute         :   COMPUTE     compute_conditions                        ;
 
 // MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
@@ -50,9 +53,9 @@ query_match_group_agg :   query_match   function_group      function_aggregate  
 
 // MATCH QUERY FILTERS =========================================================
 
-filters               : ( variables';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
+filters               : ( get';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
 
-variables             :   GET         VAR_  ( ',' VAR_ )*   ;
+get                   :   GET         VAR_  ( ',' VAR_ )*   ;
 sort                  :   SORT        VAR_        ORDER_?   ;
 offset                :   OFFSET      LONG_                 ;
 limit                 :   LIMIT       LONG_                 ;
@@ -74,6 +77,12 @@ function_method       :   COUNT   |   MAX     |   MEAN    |   MEDIAN            
 
 function_group        :   GROUP   VAR_    ';' ;
 
+// SCHEMA QUERY ===============================================================
+
+definables            : ( definable ';' )+    ;
+definable             :   variable_type
+                      |   schema_rule         ;
+
 // QUERY PATTERNS ==============================================================
 
 patterns              : ( pattern ';' )+      ;
@@ -93,7 +102,6 @@ pattern_variable      :   variable_type
 
 // TYPE VARIABLES ==============================================================
 
-variable_types        : ( variable_type ';' )+ ;
 variable_type         :   type_any    type_constraint ( ',' type_constraint )*  ;
 type_constraint       :   ABSTRACT
                       |   SUB_        type_any
@@ -152,6 +160,12 @@ comparator            :   EQV | NEQV | GT | GTE | LT | LTE ;
 comparable            :   literal | VAR_  ;
 containable           :   STRING_ | VAR_  ;
 
+// SCHEMA CONSTRUCT =============================================================
+
+schema_rule           :   RULE label
+                      |   RULE label ':' WHEN '{' patterns '}'
+                      |   RULE label ':' THEN '{' variable_thing_any ';' '}'
+                      |   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
 
 // COMPUTE QUERY ===============================================================
 //
@@ -203,14 +217,16 @@ type                  :   label                         | VAR_          ;       
 
 label_any             :   label_scoped  | label         ;
 label_scoped          :   LABEL_SCOPED_ ;
-label                 :   LABEL_        | type_native   | unreserved    ;
+label                 :   LABEL_        | schema_native | type_native   | unreserved    ;
 labels                :   label         | label_array   ;
 label_array           :   '[' label ( ',' label )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 
+schema_native         :   RULE            ;
+
 type_native           :   THING           |   ENTITY          |   ATTRIBUTE
-                      |   RELATION        |   ROLE            |   RULE          ;
+                      |   RELATION        |   ROLE            ;
 
 value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;

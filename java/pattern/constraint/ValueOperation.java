@@ -40,7 +40,7 @@ public abstract class ValueOperation<T> {
     private final T value;
     private final int hash;
 
-    ValueOperation(GraqlToken.Comparator comparator, T value) {
+    ValueOperation(final GraqlToken.Comparator comparator, final T value) {
         this.comparator = comparator;
         this.value = value;
         this.hash = Objects.hash(this.comparator, this.value);
@@ -104,10 +104,10 @@ public abstract class ValueOperation<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ValueOperation that = (ValueOperation) o;
+        final ValueOperation<?> that = (ValueOperation<?>) o;
         return (this.comparator.equals(that.comparator) && this.value.equals(that.value));
     }
 
@@ -118,7 +118,7 @@ public abstract class ValueOperation<T> {
 
     public abstract static class Assignment<T> extends ValueOperation<T> {
 
-        Assignment(T value) {
+        Assignment(final T value) {
             super(GraqlToken.Comparator.EQV, value);
         }
 
@@ -158,7 +158,7 @@ public abstract class ValueOperation<T> {
 
         public static class Long extends Assignment<java.lang.Long> {
 
-            public Long(long value) {
+            public Long(final long value) {
                 super(value);
             }
 
@@ -175,7 +175,7 @@ public abstract class ValueOperation<T> {
 
         public static class Double extends Assignment<java.lang.Double> {
 
-            public Double(double value) {
+            public Double(final double value) {
                 super(value);
             }
 
@@ -192,7 +192,7 @@ public abstract class ValueOperation<T> {
 
         public static class Boolean extends Assignment<java.lang.Boolean> {
 
-            public Boolean(boolean value) {
+            public Boolean(final boolean value) {
                 super(value);
             }
 
@@ -209,7 +209,7 @@ public abstract class ValueOperation<T> {
 
         public static class String extends Assignment<java.lang.String> {
 
-            public String(java.lang.String value) {
+            public String(final java.lang.String value) {
                 super(value);
             }
 
@@ -226,13 +226,13 @@ public abstract class ValueOperation<T> {
 
         public static class DateTime extends Assignment<LocalDateTime> {
 
-            public DateTime(LocalDateTime value) {
+            public DateTime(final LocalDateTime value) {
                 super(value);
 
                 // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
-                int nanos = value.toLocalTime().getNano();
-                long nanosPerMilli = 1000000L;
-                long remainder = nanos % nanosPerMilli;
+                final int nanos = value.toLocalTime().getNano();
+                final long nanosPerMilli = 1000000L;
+                final long remainder = nanos % nanosPerMilli;
                 if (remainder != 0) {
                     throw GraqlException.of(INVALID_CONSTRAINT_DATETIME_PRECISION.message(value));
                 }
@@ -252,7 +252,7 @@ public abstract class ValueOperation<T> {
 
     public abstract static class Comparison<T> extends ValueOperation<T> {
 
-        Comparison(GraqlToken.Comparator comparator, T value) {
+        Comparison(final GraqlToken.Comparator comparator, final T value) {
             super(comparator, value);
         }
 
@@ -292,7 +292,7 @@ public abstract class ValueOperation<T> {
 
         public static class Long extends Comparison<java.lang.Long> {
 
-            public Long(GraqlToken.Comparator comparator, long value) {
+            public Long(final GraqlToken.Comparator comparator, final long value) {
                 super(comparator, value);
             }
 
@@ -309,7 +309,7 @@ public abstract class ValueOperation<T> {
 
         public static class Double extends Comparison<java.lang.Double> {
 
-            public Double(GraqlToken.Comparator comparator, double value) {
+            public Double(final GraqlToken.Comparator comparator, final double value) {
                 super(comparator, value);
             }
 
@@ -326,7 +326,7 @@ public abstract class ValueOperation<T> {
 
         public static class Boolean extends Comparison<java.lang.Boolean> {
 
-            public Boolean(GraqlToken.Comparator comparator, boolean value) {
+            public Boolean(final GraqlToken.Comparator comparator, final boolean value) {
                 super(comparator, value);
             }
 
@@ -343,7 +343,7 @@ public abstract class ValueOperation<T> {
 
         public static class String extends Comparison<java.lang.String> {
 
-            public String(GraqlToken.Comparator comparator, java.lang.String value) {
+            public String(final GraqlToken.Comparator comparator, final java.lang.String value) {
                 super(comparator, value);
             }
 
@@ -354,7 +354,7 @@ public abstract class ValueOperation<T> {
 
             @Override
             public java.lang.String toString() {
-                StringBuilder operation = new StringBuilder();
+                final StringBuilder operation = new StringBuilder();
 
                 operation.append(comparator()).append(SPACE);
                 if (comparator().equals(GraqlToken.Comparator.LIKE)) {
@@ -374,7 +374,7 @@ public abstract class ValueOperation<T> {
 
         public static class DateTime extends Comparison<LocalDateTime> {
 
-            public DateTime(GraqlToken.Comparator comparator, LocalDateTime value) {
+            public DateTime(final GraqlToken.Comparator comparator, final LocalDateTime value) {
                 super(comparator, value);
             }
 
@@ -393,7 +393,7 @@ public abstract class ValueOperation<T> {
 
             private final ThingVariable<?> variable;
 
-            public Variable(GraqlToken.Comparator comparator, UnboundVariable variable) {
+            public Variable(final GraqlToken.Comparator comparator, final UnboundVariable variable) {
                 super(comparator, variable);
                 this.variable = variable.toThing();
             }

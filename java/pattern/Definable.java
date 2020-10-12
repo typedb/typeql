@@ -13,40 +13,28 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
-package graql.lang.pattern.variable;
+package graql.lang.pattern;
 
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Conjunctable;
+import graql.lang.pattern.schema.Rule;
+import graql.lang.pattern.variable.TypeVariable;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-public abstract class BoundVariable extends Variable implements Conjunctable {
+public interface Definable {
 
-    BoundVariable(final Reference reference) {
-        super(reference);
+    default boolean isRule() { return false; };
+    default boolean isTypeVariable() { return false; };
+
+    default Rule asRule() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Rule.class)));
     }
 
-    public UnboundVariable toUnbound() {
-        return new UnboundVariable(reference);
-    }
-
-    public TypeVariable asType() {
+    default TypeVariable asTypeVariable() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }
-
-    public ThingVariable<?> asThing() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
-    }
-
-    @Override
-    public BoundVariable normalise() { return this; }
-
-    @Override
-    public boolean isVariable() { return true; }
-
-    @Override
-    public BoundVariable asVariable() { return this; }
 }

@@ -23,40 +23,29 @@ import graql.lang.pattern.variable.BoundVariable;
 
 import static grakn.common.util.Objects.className;
 
-public interface Pattern {
+public interface Conjunctable extends Pattern {
 
-    Pattern normalise();
-
+    @Override
     default boolean isVariable() { return false; }
 
-    default boolean isConjunction() { return false; }
-
-    default boolean isDisjunction() { return false; }
-
+    @Override
     default boolean isNegation() { return false; }
 
-    default boolean isConjunctable() { return false; }
+    @Override
+    default boolean isConjunctable() { return true; }
 
+    @Override
     default BoundVariable asVariable() {
         throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
     }
 
-    default Conjunction<? extends Pattern> asConjunction() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Conjunction.class)));
-    }
-
-    default Disjunction<? extends Pattern> asDisjunction() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Disjunction.class)));
-    }
-
+    @Override
     default Negation<? extends Pattern> asNegation() {
         throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
     }
 
-    default Conjunctable asConjunctable() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
-    }
-
     @Override
-    String toString();
+    default Conjunctable asConjunctable() {
+        return this;
+    }
 }
