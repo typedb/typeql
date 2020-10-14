@@ -22,6 +22,7 @@ import graql.lang.Graql;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlDelete;
 import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
 import io.cucumber.java.en.Given;
@@ -55,12 +56,14 @@ public class GraqlSteps {
     public void graql_insert(final String query) {
         final GraqlInsert parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
+        parsed.match().ifPresent(match -> match.conjunction().normalise());
     }
 
     @Given("graql delete")
     public void graql_delete(final String query) {
         final GraqlDelete parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
+        parsed.match().conjunction().normalise();
     }
 
     @Given("for graql query")
@@ -69,6 +72,9 @@ public class GraqlSteps {
     public void graql_get(final String query) {
         final GraqlQuery parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
+        if (parsed instanceof GraqlMatch) {
+            parsed.asMatch().conjunction().normalise();
+        }
     }
 
     @Given("graql get throws")
