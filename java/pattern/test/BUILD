@@ -36,7 +36,6 @@ java_test(
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",
     ],
-    tags = ["maven_coordinates=io.graql:graql-pattern:{pom_version}"],
 )
 
 checkstyle_test(
