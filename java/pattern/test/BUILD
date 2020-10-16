@@ -23,8 +23,8 @@ load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
 
 java_test(
     name = "normalisation",
-    srcs = ["Normalisation.java"],
-    test_class = "graql.lang.pattern.test.Normalisation",
+    srcs = ["NormalisationTest.java"],
+    test_class = "graql.lang.pattern.test.NormalisationTest",
     deps = [
         # Internal Package Dependencies
         "//java:graql",

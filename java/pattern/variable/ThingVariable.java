@@ -121,7 +121,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     @Override
     public final boolean equals(final Object o) {
         if (this == o) return true;
-        if (o == null || o.getClass().isAssignableFrom(ThingVariable.class)) return false;
+        if (o == null || !ThingVariable.class.isAssignableFrom(o.getClass())) return false;
         final ThingVariable<?> that = (ThingVariable<?>) o;
 
         return (this.reference.equals(that.reference) && this.constraints.equals(that.constraints));
