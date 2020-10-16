@@ -29,11 +29,9 @@ java_test(
         # Internal Package Dependencies
         "//java:graql",
         "//java/query",
-        "//java/common:common",
         "//java/pattern",
 
         # Internal Repository Dependencies
-        "@graknlabs_common//:common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",
