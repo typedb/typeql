@@ -65,10 +65,6 @@ public abstract class Variable {
         return reference;
     }
 
-    public String identifier() {
-        return reference.identifier();
-    }
-
     public boolean isNamed() {
         return reference.isName();
     }

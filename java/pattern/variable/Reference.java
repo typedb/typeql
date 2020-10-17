@@ -57,8 +57,6 @@ public abstract class Reference {
 
     public abstract String syntax();
 
-    public abstract String identifier();
-
     boolean isVisible() {
         return isVisible;
     }
@@ -143,11 +141,6 @@ public abstract class Reference {
         }
 
         @Override
-        public String identifier() {
-            return syntax();
-        }
-
-        @Override
         public Name asName() {
             return this;
         }
@@ -189,11 +182,6 @@ public abstract class Reference {
         }
 
         @Override
-        public String identifier() {
-            return syntax();
-        }
-
-        @Override
         public Reference.Label asLabel() {
             return this;
         }
@@ -226,11 +214,6 @@ public abstract class Reference {
         @Override
         public String syntax() {
             return GraqlToken.Char.$_.toString();
-        }
-
-        @Override
-        public String identifier() {
-            return syntax();
         }
 
         @Override
