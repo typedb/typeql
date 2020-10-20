@@ -32,7 +32,6 @@ import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
-import graql.lang.pattern.constraint.ValueConstraint;
 import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
@@ -704,7 +703,7 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
 
-        ThingVariable.Attribute attribute = unscoped.constrain(new ThingConstraint.Value<>(visitValue(ctx.value())));
+        ThingVariable.Attribute attribute = unscoped.constrain(visitValue(ctx.value()));
         if (ctx.ISA_() != null) attribute = attribute.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
@@ -739,9 +738,7 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.VAR_() != null) {
             return new ThingConstraint.Has(ctx.label().getText(), getVar(ctx.VAR_()));
         } else if (ctx.value() != null) {
-            return new ThingConstraint.Has(
-                    ctx.label().getText(), new ThingConstraint.Value<>(visitValue(ctx.value()))
-            );
+            return new ThingConstraint.Has(ctx.label().getText(), visitValue(ctx.value()));
         } else {
             throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
         }
@@ -813,7 +810,7 @@ public class Parser extends GraqlBaseVisitor {
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
 
     @Override
-    public ValueConstraint<?> visitValue(final GraqlParser.ValueContext ctx) {
+    public ThingConstraint.Value<?> visitValue(final GraqlParser.ValueContext ctx) {
         final GraqlToken.Comparator comparator;
         final Object value;
 
@@ -858,17 +855,17 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (value instanceof Long) {
-            return new ValueConstraint.Long(comparator, (Long) value);
+            return new ThingConstraint.Value.Long(comparator, (Long) value);
         } else if (value instanceof Double) {
-            return new ValueConstraint.Double(comparator, (Double) value);
+            return new ThingConstraint.Value.Double(comparator, (Double) value);
         } else if (value instanceof Boolean) {
-            return new ValueConstraint.Boolean(comparator, (Boolean) value);
+            return new ThingConstraint.Value.Boolean(comparator, (Boolean) value);
         } else if (value instanceof String) {
-            return new ValueConstraint.String(comparator, (String) value);
+            return new ThingConstraint.Value.String(comparator, (String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ValueConstraint.DateTime(comparator, (LocalDateTime) value);
+            return new ThingConstraint.Value.DateTime(comparator, (LocalDateTime) value);
         } else if (value instanceof UnboundVariable) {
-            return new ValueConstraint.Variable(comparator, (UnboundVariable) value);
+            return new ThingConstraint.Value.Variable(comparator, (UnboundVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
