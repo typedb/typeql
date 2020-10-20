@@ -121,7 +121,7 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.NEQ constraint) {
+    public ThingVariable.Thing constrain(final ThingConstraint.Is constraint) {
         return new ThingVariable.Thing(reference, constraint);
     }
 

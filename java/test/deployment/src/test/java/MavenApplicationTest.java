@@ -45,7 +45,7 @@ public class MavenApplicationTest {
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
-                var("brando").val("Marl B").isa("name"),
+                var("brando").eq("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
 
@@ -63,12 +63,12 @@ public class MavenApplicationTest {
         final GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
-                        var("t").val("Apocalypse Now"),
+                        var("t").eq("Apocalypse Now"),
                         and(
                                 var("t").lt("Juno"),
                                 var("t").gt("Godfather")
                         ),
-                        var("t").val("Spy")
+                        var("t").eq("Spy")
                 ),
                 var("t").neq("Apocalypse Now")
         );

@@ -348,6 +348,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final java.util.regex.Pattern regex;
         private final int hash;
 
+        public Regex() {
+            regex = null;
+            this.hash = Objects.hash(Regex.class);
+        }
+
         public Regex(final String regex) {
             if (regex == null) throw new NullPointerException("Null regex");
             try {
@@ -374,7 +379,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return REGEX.toString() + SPACE + quoteString(escapeRegex(regex().pattern()));
+            return REGEX.toString() + (regex != null ? SPACE + quoteString(escapeRegex(regex().pattern())) : "");
         }
 
         @Override
@@ -382,6 +387,9 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Regex that = (Regex) o;
+
+            if (this.regex == null && that.regex == null) return true;
+            if (this.regex == null || that.regex == null) return false;
             return (this.regex.pattern().equals(that.regex.pattern()));
         }
 

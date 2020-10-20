@@ -76,7 +76,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         return false;
     }
 
-    public boolean isNEQ() {
+    public boolean isIs() {
         return false;
     }
 
@@ -100,8 +100,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Isa.class)));
     }
 
-    public ThingConstraint.NEQ asNEQ() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(NEQ.class)));
+    public ThingConstraint.Is asIs() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Is.class)));
     }
 
     public ThingConstraint.Value<?> asValue() {
@@ -233,19 +233,19 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
     }
 
-    public static class NEQ extends ThingConstraint {
+    public static class Is extends ThingConstraint {
 
         private final ThingVariable<?> variable;
         private final int hash;
 
-        public NEQ(final UnboundVariable variable) {
+        public Is(final UnboundVariable variable) {
             this(variable.toThing());
         }
 
-        private NEQ(final ThingVariable<?> variable) {
+        private Is(final ThingVariable<?> variable) {
             if (variable == null) throw new NullPointerException("Null var");
             this.variable = variable;
-            this.hash = Objects.hash(NEQ.class, this.variable);
+            this.hash = Objects.hash(Is.class, this.variable);
         }
 
         public ThingVariable<?> variable() {
@@ -258,25 +258,25 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean isNEQ() {
+        public boolean isIs() {
             return true;
         }
 
         @Override
-        public ThingConstraint.NEQ asNEQ() {
+        public ThingConstraint.Is asIs() {
             return this;
         }
 
         @Override
         public String toString() {
-            return GraqlToken.Comparator.NEQ.toString() + SPACE + variable();
+            return GraqlToken.Constraint.IS.toString() + SPACE + variable();
         }
 
         @Override
         public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final NEQ that = (NEQ) o;
+            final Is that = (Is) o;
             return (this.variable.equals(that.variable));
         }
 
@@ -288,16 +288,16 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Value<T> extends ThingConstraint {
 
-        private final ValueOperation<T> operation;
+        private final ValueConstraint<T> operation;
         private final int hash;
 
-        public Value(final ValueOperation<T> operation) {
+        public Value(final ValueConstraint<T> operation) {
             if (operation == null) throw new NullPointerException("Null operation");
             this.operation = operation;
             this.hash = Objects.hash(Value.class, this.operation);
         }
 
-        public ValueOperation<T> operation() {
+        public ValueConstraint<T> operation() {
             return operation;
         }
 
