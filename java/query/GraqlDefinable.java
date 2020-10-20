@@ -66,6 +66,7 @@ abstract class GraqlDefinable extends GraqlQuery {
     public final List<TypeVariable> variables() {
         return variables;
     }
+
     public final List<Rule> rules() {
         return rules;
     }

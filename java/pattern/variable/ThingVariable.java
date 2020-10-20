@@ -36,7 +36,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     ThingConstraint.IID iidConstraint;
     ThingConstraint.Isa isaConstraint;
-    ThingConstraint.NEQ neqConstraint;
+    ThingConstraint.Is isConstraint;
     ThingConstraint.Value<?> valueConstraint;
     ThingConstraint.Relation relationConstraint;
     List<ThingConstraint.Has> hasConstraints;
@@ -73,8 +73,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return Optional.ofNullable(isaConstraint);
     }
 
-    public Optional<ThingConstraint.NEQ> neq() {
-        return Optional.ofNullable(neqConstraint);
+    public Optional<ThingConstraint.Is> is() {
+        return Optional.ofNullable(isConstraint);
     }
 
     public Optional<ThingConstraint.Value<?>> value() {
@@ -144,10 +144,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             constraints.add(iidConstraint);
         }
 
-        Thing(final Reference reference, final ThingConstraint.NEQ neqConstraint) {
+        Thing(final Reference reference, final ThingConstraint.Is isConstraint) {
             super(reference);
-            this.neqConstraint = neqConstraint;
-            constraints.add(neqConstraint);
+            this.isConstraint = isConstraint;
+            constraints.add(isConstraint);
         }
 
         @Override
@@ -158,7 +158,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         private String thingSyntax() {
             if (isa().isPresent()) return isaSyntax();
             else if (iid().isPresent()) return iid().get().toString();
-            else if (neq().isPresent()) return neq().get().toString();
+            else if (is().isPresent()) return is().get().toString();
             else return "";
         }
 

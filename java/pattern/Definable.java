@@ -27,8 +27,13 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Definable {
 
-    default boolean isRule() { return false; };
-    default boolean isTypeVariable() { return false; };
+    default boolean isRule() {
+        return false;
+    }
+
+    default boolean isTypeVariable() {
+        return false;
+    }
 
     default Rule asRule() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Rule.class)));

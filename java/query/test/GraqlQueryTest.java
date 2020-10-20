@@ -117,8 +117,8 @@ public class GraqlQueryTest {
 
     @Test
     public void testEscapeStrings() {
-        assertEquals("insert $x \"hello\nworld\";", Graql.insert(var("x").val("hello\nworld")).toString());
-        assertEquals("insert $x \"hello\\nworld\";", Graql.insert(var("x").val("hello\\nworld")).toString());
+        assertEquals("insert $x \"hello\nworld\";", Graql.insert(var("x").eq("hello\nworld")).toString());
+        assertEquals("insert $x \"hello\\nworld\";", Graql.insert(var("x").eq("hello\\nworld")).toString());
     }
 
     @Test
@@ -180,17 +180,17 @@ public class GraqlQueryTest {
 
     @Test
     public void testZeroToString() {
-        assertEquals("match $x 0.0;", match(var("x").val(0.0)).toString());
+        assertEquals("match $x 0.0;", match(var("x").eq(0.0)).toString());
     }
 
     @Test
     public void testExponentsToString() {
-        assertEquals("match $x 1000000000.0;", match(var("x").val(1_000_000_000.0)).toString());
+        assertEquals("match $x 1000000000.0;", match(var("x").eq(1_000_000_000.0)).toString());
     }
 
     @Test
     public void testDecimalToString() {
-        assertEquals("match $x 0.0001;", match(var("x").val(0.0001)).toString());
+        assertEquals("match $x 0.0001;", match(var("x").eq(0.0001)).toString());
     }
 
     @Test

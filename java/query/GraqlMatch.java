@@ -74,7 +74,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     // We keep this contructor 'public' as it is more efficient for query parsing
-    public GraqlMatch(final Conjunction<? extends Pattern> conjunction, final List<UnboundVariable> filter, final Sortable.Sorting sorting, final Long offset, final Long limit) {
+    public GraqlMatch(final Conjunction<? extends Pattern> conjunction, final List<UnboundVariable> filter,
+                      final Sortable.Sorting sorting, final Long offset, final Long limit) {
         if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_FILTER_VARIABLES.message());
         this.conjunction = conjunction;
         this.filter = list(filter);
@@ -91,8 +92,6 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(sorting.var()));
         }
 
-        // It is important that we use vars() (the method) and not vars (the constraint)
-        // For reasons explained in the equals() method above
         this.hash = Objects.hash(this.conjunction, this.filter, this.sorting, this.offset, this.limit);
     }
 
@@ -182,10 +181,6 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
         final GraqlMatch that = (GraqlMatch) o;
 
-        // It is important that we use vars() (the method) and not vars (the constraint)
-        // vars (the constraint) stores the variables as the user defined
-        // vars() (the method) returns match.vars() if vars (the constraint) is empty
-        // we want to compare vars() (the method) which determines the final value
         return (Objects.equals(this.conjunction, that.conjunction) &&
                 Objects.equals(this.filter, that.filter) &&
                 Objects.equals(this.sorting, that.sorting) &&

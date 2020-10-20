@@ -122,13 +122,13 @@ variable_thing_any    :   variable_thing
                       |   variable_relation
                       |   variable_attribute
                       ;
-variable_thing        :   VAR_                ISA_ type   ( ',' attributes )?
-                      |   VAR_                IID  IID_    ( ',' attributes )?
-                      |   VAR_                NEQ  VAR_
-                      |   VAR_                attributes
+variable_thing        :   VAR_            ISA_ type   ( ',' attributes )?
+                      |   VAR_            IID  IID_   ( ',' attributes )?
+                      |   VAR_            IS   VAR_
+                      |   VAR_            attributes
                       ;
-variable_relation     :   VAR_? relation      ISA_ type   ( ',' attributes )?
-                      |   VAR_? relation      attributes?
+variable_relation     :   VAR_? relation  ISA_ type   ( ',' attributes )?
+                      |   VAR_? relation  attributes?
                       ;
 variable_attribute    :   VAR_? value     ISA_ type   ( ',' attributes )?
                       |   VAR_? value     attributes?
@@ -148,15 +148,12 @@ attribute             :   HAS label ( VAR_ | value ) ;                          
                                                                                 // predicate
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
-value                 :   assignment
-                      |   comparison
-                      ;
-assignment            :   literal ;
-comparison            :   comparator  comparable
+value                 :   literal
+                      |   comparator  comparable
                       |   CONTAINS    containable
                       |   LIKE        regex
                       ;
-comparator            :   EQV | NEQV | GT | GTE | LT | LTE ;
+comparator            :   EQ | NEQ | GT | GTE | LT | LTE ;
 comparable            :   literal | VAR_  ;
 containable           :   STRING_ | VAR_  ;
 
@@ -278,6 +275,18 @@ WHEN            : 'when'        ;   THEN            : 'then'        ;
 IID             : 'iid'         ;   ISA_            : ISA | ISAX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 HAS             : 'has'         ;   VALUE           : 'value'       ;
+IS              : 'is'          ;
+
+// OPERATOR KEYWORDS
+
+OR              : 'or'          ;   NOT             : 'not'         ;
+
+// COMPARATOR KEYWORDS
+
+EQ              : '='           ;   NEQ             : '!='          ;
+GT              : '>'           ;   GTE             : '>='          ;
+LT              : '<'           ;   LTE             : '<='          ;
+LIKE            : 'like'        ;   CONTAINS        : 'contains'    ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
@@ -295,29 +304,20 @@ FROM            : 'from'        ;   TO              : 'to'          ;
 OF              : 'of'          ;   IN              : 'in'          ;
 USING           : 'using'       ;   WHERE           : 'where'       ;
 MIN_K           : 'min-k'       ;   K               : 'k'           ;
-SIZE            : 'size'        ;   CONTAINS        : 'contains'    ;
-
-
-// OPERATOR KEYWORDS
-
-OR              : 'or'          ;   NOT             : 'not'         ;
-LIKE            : 'like'        ;   NEQ             : '!='          ;
-EQV             : '=='          ;   NEQV            : '!=='         ;
-GT              : '>'           ;   GTE             : '>='          ;
-LT              : '<'           ;   LTE             : '<='          ;
+SIZE            : 'size'        ;
 
 // VALUE TYPE KEYWORDS
 
 LONG            : 'long'        ;   DOUBLE          : 'double'      ;
 STRING          : 'string'      ;   BOOLEAN         : 'boolean'     ;
-DATETIME        : 'datetime'        ;
+DATETIME        : 'datetime'    ;
 
 // LITERAL VALUE KEYWORDS
 BOOLEAN_        : TRUE | FALSE  ; // order of lexer declaration matters
 TRUE            : 'true'        ;
 FALSE           : 'false'       ;
 STRING_         : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
-                | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''   ;
+                | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''    ;
 LONG_           : ('+' | '-')? [0-9]+                   ;
 DOUBLE_         : ('+' | '-')? [0-9]+ '.' [0-9]+        ;
 DATE_           : DATE_FRAGMENT_                        ;

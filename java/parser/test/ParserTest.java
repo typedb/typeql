@@ -111,7 +111,7 @@ public class ParserTest {
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
-                var("brando").val("Marl B").isa("name"),
+                var("brando").eq("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
 
@@ -123,18 +123,18 @@ public class ParserTest {
         final String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
-                "$t !== 'Apocalypse Now';";
+                "$t != 'Apocalypse Now';";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
-                        var("t").val("Apocalypse Now"),
+                        var("t").eq("Apocalypse Now"),
                         and(
                                 var("t").lt("Juno"),
                                 var("t").gt("Godfather")
                         ),
-                        var("t").val("Spy")
+                        var("t").eq("Spy")
                 ),
                 var("t").neq("Apocalypse Now")
         );
@@ -146,7 +146,7 @@ public class ParserTest {
     public void testPredicateQuery2() {
         final String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
-                "{ $t <= 'Juno'; $t >= 'Godfather'; $t !== 'Heat'; } or { $t 'The Muppets'; };";
+                "{ $t <= 'Juno'; $t >= 'Godfather'; $t != 'Heat'; } or { $t 'The Muppets'; };";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
@@ -157,7 +157,7 @@ public class ParserTest {
                                 var("t").gte("Godfather"),
                                 var("t").neq("Heat")
                         ),
-                        var("t").val("The Muppets")
+                        var("t").eq("The Muppets")
                 )
         );
 
@@ -192,7 +192,7 @@ public class ParserTest {
         final GraqlMatch expected = match(
                 var("x").has("age", var("y")),
                 var("y").gte(var("z")),
-                var("z").val(18).isa("age")
+                var("z").eq(18).isa("age")
         );
 
         assertQueryEquals(expected, parsed, query);
@@ -209,7 +209,7 @@ public class ParserTest {
 
     @Test
     public void testValueEqualsVariableQuery() {
-        final String query = "match $s1 == $s2;";
+        final String query = "match $s1 = $s2;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(var("s1").eq(var("s2")));
 
@@ -390,7 +390,7 @@ public class ParserTest {
         final GraqlMatch expected = match(
                 rel(var("p"), var("x")).rel("y"),
                 var("x").isa(var("z")),
-                var("y").val("crime"),
+                var("y").eq("crime"),
                 var("z").sub("production"),
                 type("has-genre").relates(var("p"))
         );
@@ -419,10 +419,10 @@ public class ParserTest {
                 var("x").isa("movie"),
                 or(
                         and(
-                                var("y").val("drama").isa("genre"),
+                                var("y").eq("drama").isa("genre"),
                                 rel("x").rel("y")
                         ),
-                        var("x").val("The Muppets")
+                        var("x").eq("The Muppets")
                 )
         );
 
@@ -922,11 +922,11 @@ public class ParserTest {
     public void testSyntaxErrorPointer() {
         exception.expect(GraqlException.class);
         exception.expectMessage(allOf(
-                containsString("\nmatch $x is"),
+                containsString("\nmatch $x of"),
                 containsString("\n         ^")
         ));
         //noinspection ResultOfMethodCallIgnored
-        parseQuery("match $x is");
+        parseQuery("match $x of");
     }
 
     @Test
@@ -1102,10 +1102,18 @@ public class ParserTest {
     }
 
     @Test
-    public void regexAttributeConstraint() {
+    public void defineAttributeTypeRegex() {
         final String query = "define digit sub attribute, regex '\\d';";
         final GraqlDefine parsed = parseQuery(query);
         final GraqlDefine expected = define(type("digit").sub("attribute").regex("\\d"));
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
+    }
+
+    @Test
+    public void undefineAttributeTypeRegex() {
+        final String query = "undefine digit regex '\\d';";
+        final GraqlUndefine parsed = parseQuery(query);
+        final GraqlUndefine expected = undefine(type("digit").regex("\\d"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 

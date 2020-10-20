@@ -35,7 +35,7 @@ java_test(
         "@maven//:io_cucumber_cucumber_junit",
     ],
     runtime_deps = [
-        # Add your Cucumber Steps here
+        "//java/test/behaviour/graql:steps",
     ],
     data = [":debug.feature"],
     size = "medium",

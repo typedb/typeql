@@ -165,8 +165,6 @@ public class GraqlToken {
     public enum Comparator {
         EQ("="),
         NEQ("!="),
-        EQV("=="),
-        NEQV("!=="),
         GT(">"),
         GTE(">="),
         LT("<"),
@@ -226,6 +224,7 @@ public class GraqlToken {
         AS("as"),
         HAS("has"),
         IID("iid"),
+        IS("is"),
         IS_KEY("@key"),
         ISA("isa"),
         ISAX("isa!"),

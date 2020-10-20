@@ -32,7 +32,7 @@ import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
-import graql.lang.pattern.constraint.ValueOperation;
+import graql.lang.pattern.constraint.ValueConstraint;
 import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
@@ -668,8 +668,8 @@ public class Parser extends GraqlBaseVisitor {
             thing = unscoped.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
         } else if (ctx.IID() != null) {
             thing = unscoped.iid(ctx.IID_().getText());
-        } else if (ctx.NEQ() != null) {
-            thing = unscoped.not(getVar(ctx.VAR_(1)));
+        } else if (ctx.IS() != null) {
+            thing = unscoped.is(getVar(ctx.VAR_(1)));
         }
 
         if (ctx.attributes() != null) {
@@ -739,7 +739,9 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.VAR_() != null) {
             return new ThingConstraint.Has(ctx.label().getText(), getVar(ctx.VAR_()));
         } else if (ctx.value() != null) {
-            return new ThingConstraint.Has(ctx.label().getText(), new ThingConstraint.Value<>(visitValue(ctx.value())));
+            return new ThingConstraint.Has(
+                    ctx.label().getText(), new ThingConstraint.Value<>(visitValue(ctx.value()))
+            );
         } else {
             throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
         }
@@ -811,56 +813,29 @@ public class Parser extends GraqlBaseVisitor {
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
 
     @Override
-    public ValueOperation<?> visitValue(final GraqlParser.ValueContext ctx) {
-        if (ctx.assignment() != null) {
-            return visitAssignment(ctx.assignment());
-        } else if (ctx.comparison() != null) {
-            return visitComparison(ctx.comparison());
-        } else {
-            throw new IllegalArgumentException("Unreconigsed Attribute Operation: " + ctx.getText());
-        }
-    }
-
-    @Override
-    public ValueOperation.Assignment<?> visitAssignment(final GraqlParser.AssignmentContext ctx) {
-        final Object value = visitLiteral(ctx.literal());
-
-        if (value instanceof Long) {
-            return new ValueOperation.Assignment.Long((Long) value);
-        } else if (value instanceof Double) {
-            return new ValueOperation.Assignment.Double((Double) value);
-        } else if (value instanceof Boolean) {
-            return new ValueOperation.Assignment.Boolean((Boolean) value);
-        } else if (value instanceof String) {
-            return new ValueOperation.Assignment.String((String) value);
-        } else if (value instanceof LocalDateTime) {
-            return new ValueOperation.Assignment.DateTime((LocalDateTime) value);
-        } else {
-            throw new IllegalArgumentException("Unrecognised Value Assignment: " + ctx.getText());
-        }
-    }
-
-    @Override
-    public ValueOperation.Comparison<?> visitComparison(final GraqlParser.ComparisonContext ctx) {
-        final String comparatorStr;
+    public ValueConstraint<?> visitValue(final GraqlParser.ValueContext ctx) {
+        final GraqlToken.Comparator comparator;
         final Object value;
 
-        if (ctx.comparator() != null) {
-            comparatorStr = ctx.comparator().getText();
+        if (ctx.literal() != null) {
+            comparator = GraqlToken.Comparator.EQ;
+        } else if (ctx.comparator() != null) {
+            comparator = GraqlToken.Comparator.of(ctx.comparator().getText());
         } else if (ctx.CONTAINS() != null) {
-            comparatorStr = ctx.CONTAINS().getText();
+            comparator = GraqlToken.Comparator.of(ctx.CONTAINS().getText());
         } else if (ctx.LIKE() != null) {
-            comparatorStr = ctx.LIKE().getText();
+            comparator = GraqlToken.Comparator.of(ctx.LIKE().getText());
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
 
-        final GraqlToken.Comparator comparator = GraqlToken.Comparator.of(comparatorStr);
         if (comparator == null) {
-            throw new IllegalArgumentException("Unrecognised Value Comparator: " + comparatorStr);
+            throw new IllegalArgumentException("Unrecognised Value Comparator: " + ctx.getText());
         }
 
-        if (ctx.comparable() != null) {
+        if (ctx.literal() != null) {
+            value = visitLiteral(ctx.literal());
+        } else if (ctx.comparable() != null) {
             if (ctx.comparable().literal() != null) {
                 value = visitLiteral(ctx.comparable().literal());
             } else if (ctx.comparable().VAR_() != null) {
@@ -883,17 +858,17 @@ public class Parser extends GraqlBaseVisitor {
         }
 
         if (value instanceof Long) {
-            return new ValueOperation.Comparison.Long(comparator, (Long) value);
+            return new ValueConstraint.Long(comparator, (Long) value);
         } else if (value instanceof Double) {
-            return new ValueOperation.Comparison.Double(comparator, (Double) value);
+            return new ValueConstraint.Double(comparator, (Double) value);
         } else if (value instanceof Boolean) {
-            return new ValueOperation.Comparison.Boolean(comparator, (Boolean) value);
+            return new ValueConstraint.Boolean(comparator, (Boolean) value);
         } else if (value instanceof String) {
-            return new ValueOperation.Comparison.String(comparator, (String) value);
+            return new ValueConstraint.String(comparator, (String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ValueOperation.Comparison.DateTime(comparator, (LocalDateTime) value);
+            return new ValueConstraint.DateTime(comparator, (LocalDateTime) value);
         } else if (value instanceof UnboundVariable) {
-            return new ValueOperation.Comparison.Variable(comparator, (UnboundVariable) value);
+            return new ValueConstraint.Variable(comparator, (UnboundVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
