@@ -382,7 +382,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Regex that = (Regex) o;
-
             return (this.regex.pattern().equals(that.regex.pattern()));
         }
 
