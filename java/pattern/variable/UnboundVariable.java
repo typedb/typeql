@@ -17,16 +17,19 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.pattern.constraint.ConceptConstraint;
 import graql.lang.pattern.constraint.Constraint;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
+import graql.lang.pattern.variable.builder.ConceptVariableBuilder;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 import graql.lang.pattern.variable.builder.TypeVariableBuilder;
 
 import java.util.Collections;
 import java.util.List;
 
-public class UnboundVariable extends Variable implements TypeVariableBuilder,
+public class UnboundVariable extends Variable implements ConceptVariableBuilder,
+                                                         TypeVariableBuilder,
                                                          ThingVariableBuilder.Common<ThingVariable.Thing>,
                                                          ThingVariableBuilder.Thing,
                                                          ThingVariableBuilder.Relation,
@@ -50,6 +53,20 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
 
     public static UnboundVariable hidden() {
         return of(Reference.anonymous(false));
+    }
+
+    @Override
+    public boolean isUnbound() {
+        return true;
+    }
+
+    @Override
+    public UnboundVariable asUnbound() {
+        return this;
+    }
+
+    public ConceptVariable toConcept() {
+        return new ConceptVariable(reference);
     }
 
     public TypeVariable toType() {
@@ -121,8 +138,8 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.Is constraint) {
-        return new ThingVariable.Thing(reference, constraint);
+    public ConceptVariable constrain(final ConceptConstraint.Is constraint) {
+        return new ConceptVariable(reference, constraint);
     }
 
     @Override

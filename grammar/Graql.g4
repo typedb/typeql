@@ -97,8 +97,13 @@ pattern_negation      :   NOT '{' patterns '}'                        ;
 
 // VARIABLE PATTERNS ===========================================================
 
-pattern_variable      :   variable_type
+pattern_variable      :   variable_concept
+                      |   variable_type
                       |   variable_thing_any   ;
+
+// CONCEPT VARAIBLES ===========================================================
+
+variable_concept      :   VAR_  IS  VAR_  ;
 
 // TYPE VARIABLES ==============================================================
 
@@ -124,7 +129,6 @@ variable_thing_any    :   variable_thing
                       ;
 variable_thing        :   VAR_            ISA_ type   ( ',' attributes )?
                       |   VAR_            IID  IID_   ( ',' attributes )?
-                      |   VAR_            IS   VAR_
                       |   VAR_            attributes
                       ;
 variable_relation     :   VAR_? relation  ISA_ type   ( ',' attributes )?

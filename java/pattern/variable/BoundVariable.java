@@ -29,8 +29,22 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
         super(reference);
     }
 
+    @Override
+    public boolean isBound() {
+        return true;
+    }
+
+    @Override
+    public BoundVariable asBound() {
+        return this;
+    }
+
     public UnboundVariable toUnbound() {
         return new UnboundVariable(reference);
+    }
+
+    public ConceptVariable asConcept() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptVariable.class)));
     }
 
     public TypeVariable asType() {

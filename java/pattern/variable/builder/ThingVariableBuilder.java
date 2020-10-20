@@ -94,17 +94,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.IID(iid));
         }
 
-        default ThingVariable.Thing is(final String var) {
-            return is(UnboundVariable.named(var));
-        }
-
-        default ThingVariable.Thing is(final UnboundVariable var) {
-            return constrain(new ThingConstraint.Is(var));
-        }
-
         ThingVariable.Thing constrain(ThingConstraint.IID constraint);
-
-        ThingVariable.Thing constrain(ThingConstraint.Is constraint);
     }
 
     interface Relation {

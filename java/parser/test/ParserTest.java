@@ -49,6 +49,7 @@ import static graql.lang.Graql.insert;
 import static graql.lang.Graql.lt;
 import static graql.lang.Graql.lte;
 import static graql.lang.Graql.match;
+import static graql.lang.Graql.not;
 import static graql.lang.Graql.or;
 import static graql.lang.Graql.parseQuery;
 import static graql.lang.Graql.rel;
@@ -62,7 +63,6 @@ import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.size;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -196,6 +196,27 @@ public class ParserTest {
         );
 
         assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testConceptVariable() {
+        final String query = "match\n" +
+                "$x sub $z;\n" +
+                "$y sub $z;\n" +
+                "$a isa $x;\n" +
+                "$b isa $y;\n" +
+                "not { $x is $y; };\n" +
+                "not { $a is $b; };";
+        final GraqlMatch parsed = Graql.parseQuery(query);
+
+        final GraqlMatch exepcted = match(
+                var("x").sub(var("z")), var("y").sub(var("z")),
+                var("a").isa(var("x")), var("b").isa(var("y")),
+                not(var("x").is("y")),
+                not(var("a").is("b"))
+        );
+
+        assertQueryEquals(exepcted, parsed, query);
     }
 
     @Test
@@ -913,7 +934,7 @@ public class ParserTest {
     @Test
     public void whenParseIncorrectSyntax_ErrorMessageShouldRetainWhitespace() {
         exception.expect(GraqlException.class);
-        exception.expectMessage(not(containsString("match$xisa")));
+        exception.expectMessage(Matchers.not(containsString("match$xisa")));
         //noinspection ResultOfMethodCallIgnored
         parseQuery("match $x isa ");
     }

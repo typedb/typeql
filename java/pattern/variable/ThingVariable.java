@@ -18,6 +18,7 @@
 package graql.lang.pattern.variable;
 
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.constraint.ConceptConstraint;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 
@@ -36,13 +37,13 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     ThingConstraint.IID iidConstraint;
     ThingConstraint.Isa isaConstraint;
-    ThingConstraint.Is isConstraint;
+    ConceptConstraint.Is isConstraint;
     ThingConstraint.Value<?> valueConstraint;
     ThingConstraint.Relation relationConstraint;
     List<ThingConstraint.Has> hasConstraints;
     List<ThingConstraint> constraints;
 
-    public ThingVariable(final Reference reference) {
+    ThingVariable(final Reference reference) {
         super(reference);
         this.hasConstraints = new LinkedList<>();
         this.constraints = new LinkedList<>();
@@ -73,7 +74,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return Optional.ofNullable(isaConstraint);
     }
 
-    public Optional<ThingConstraint.Is> is() {
+    public Optional<ConceptConstraint.Is> is() {
         return Optional.ofNullable(isConstraint);
     }
 
@@ -142,12 +143,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             super(reference);
             this.iidConstraint = iidConstraint;
             constraints.add(iidConstraint);
-        }
-
-        Thing(final Reference reference, final ThingConstraint.Is isConstraint) {
-            super(reference);
-            this.isConstraint = isConstraint;
-            constraints.add(isConstraint);
         }
 
         @Override

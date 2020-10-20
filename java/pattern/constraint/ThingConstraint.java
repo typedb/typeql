@@ -83,10 +83,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         return false;
     }
 
-    public boolean isIs() {
-        return false;
-    }
-
     public boolean isValue() {
         return false;
     }
@@ -105,10 +101,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public ThingConstraint.Isa asIsa() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Isa.class)));
-    }
-
-    public ThingConstraint.Is asIs() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Is.class)));
     }
 
     public Value<?> asValue() {
@@ -232,59 +224,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (o == null || getClass() != o.getClass()) return false;
             final Isa that = (Isa) o;
             return (this.type.equals(that.type) && this.isExplicit == that.isExplicit);
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-    }
-
-    public static class Is extends ThingConstraint {
-
-        private final ThingVariable<?> variable;
-        private final int hash;
-
-        public Is(final UnboundVariable variable) {
-            this(variable.toThing());
-        }
-
-        private Is(final ThingVariable<?> variable) {
-            if (variable == null) throw new NullPointerException("Null var");
-            this.variable = variable;
-            this.hash = Objects.hash(Is.class, this.variable);
-        }
-
-        public ThingVariable<?> variable() {
-            return variable;
-        }
-
-        @Override
-        public Set<BoundVariable> variables() {
-            return set(variable());
-        }
-
-        @Override
-        public boolean isIs() {
-            return true;
-        }
-
-        @Override
-        public ThingConstraint.Is asIs() {
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return GraqlToken.Constraint.IS.toString() + SPACE + variable();
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            final Is that = (Is) o;
-            return (this.variable.equals(that.variable));
         }
 
         @Override

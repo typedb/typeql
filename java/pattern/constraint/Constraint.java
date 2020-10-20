@@ -29,12 +29,20 @@ public abstract class Constraint<VARIABLE extends BoundVariable> {
 
     public abstract Set<VARIABLE> variables();
 
+    public boolean isConcept() {
+        return false;
+    }
+
     public boolean isType() {
         return false;
     }
 
     public boolean isThing() {
         return false;
+    }
+
+    public ConceptConstraint asConcept() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptConstraint.class)));
     }
 
     public TypeConstraint asType() {

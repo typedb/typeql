@@ -52,7 +52,8 @@ public class Disjunction<T extends Pattern> implements Pattern {
         if (normalised == null) {
             final List<Conjunction<Conjunctable>> conjunctions = patterns.stream().flatMap(p -> {
                 if (p.isVariable()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
-                else if (p.isNegation()) return Stream.of(new Conjunction<>(list(p.asNegation().normalise().asConjunctable())));
+                else if (p.isNegation())
+                    return Stream.of(new Conjunction<>(list(p.asNegation().normalise().asConjunctable())));
                 else if (p.isConjunction()) return p.asConjunction().normalise().patterns().stream();
                 else return p.asDisjunction().normalise().patterns().stream();
             }).collect(toList());

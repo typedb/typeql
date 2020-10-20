@@ -34,6 +34,7 @@ import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
 import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.ConceptVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -590,13 +591,20 @@ public class Parser extends GraqlBaseVisitor {
     public BoundVariable visitPattern_variable(final GraqlParser.Pattern_variableContext ctx) {
         if (ctx.variable_thing_any() != null) {
             return this.visitVariable_thing_any(ctx.variable_thing_any());
-
         } else if (ctx.variable_type() != null) {
             return visitVariable_type(ctx.variable_type());
-
+        } else if (ctx.variable_concept() != null) {
+            return visitVariable_concept(ctx.variable_concept());
         } else {
             throw new IllegalArgumentException("Unrecognised Statement class: " + ctx.getText());
         }
+    }
+
+    // CONCEPT VARIABLES =======================================================
+
+    @Override
+    public ConceptVariable visitVariable_concept(final GraqlParser.Variable_conceptContext ctx) {
+        return getVar(ctx.VAR_(0)).is(getVar(ctx.VAR_(1)));
     }
 
     // TYPE VARIABLES ==========================================================
@@ -660,15 +668,13 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public ThingVariable.Thing visitVariable_thing(final GraqlParser.Variable_thingContext ctx) {
-        final UnboundVariable unscoped = getVar(ctx.VAR_(0));
+        final UnboundVariable unscoped = getVar(ctx.VAR_());
         ThingVariable.Thing thing = null;
 
         if (ctx.ISA_() != null) {
             thing = unscoped.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
         } else if (ctx.IID() != null) {
             thing = unscoped.iid(ctx.IID_().getText());
-        } else if (ctx.IS() != null) {
-            thing = unscoped.is(getVar(ctx.VAR_(1)));
         }
 
         if (ctx.attributes() != null) {

@@ -17,10 +17,14 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.constraint.Constraint;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class Variable {
 
@@ -32,12 +36,32 @@ public abstract class Variable {
 
     public abstract List<? extends Constraint<?>> constraints();
 
+    public boolean isUnbound() {
+        return false;
+    }
+
+    public boolean isBound() {
+        return false;
+    }
+
+    public boolean isConcept() {
+        return false;
+    }
+
     public boolean isType() {
         return false;
     }
 
     public boolean isThing() {
         return false;
+    }
+
+    public UnboundVariable asUnbound() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundVariable.class)));
+    }
+
+    public BoundVariable asBound() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
     }
 
     public Stream<BoundVariable> variables() {
