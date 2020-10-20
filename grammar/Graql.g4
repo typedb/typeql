@@ -277,20 +277,23 @@ ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 HAS             : 'has'         ;   VALUE           : 'value'       ;
 IS              : 'is'          ;
 
+// OPERATOR KEYWORDS
+
+OR              : 'or'          ;   NOT             : 'not'         ;
+
+// COMPARATOR KEYWORDS
+
+EQ              : '='           ;   NEQ             : '!='          ;
+GT              : '>'           ;   GTE             : '>='          ;
+LT              : '<'           ;   LTE             : '<='          ;
+LIKE            : 'like'        ;   CONTAINS        : 'contains'    ;
+
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
 GROUP           : 'group'       ;   COUNT           : 'count'       ;
 MAX             : 'max'         ;   MIN             : 'min'         ;
 MEAN            : 'mean'        ;   MEDIAN          : 'median'      ;
 STD             : 'std'         ;   SUM             : 'sum'         ;
-
-// OPERATOR KEYWORDS
-
-EQ              : '='           ;   NEQ             : '!='          ;
-GT              : '>'           ;   GTE             : '>='          ;
-LT              : '<'           ;   LTE             : '<='          ;
-LIKE            : 'like'        ;   CONTAINS        : 'contains'    ;
-OR              : 'or'          ;   NOT             : 'not'         ;
 
 // COMPUTE QUERY KEYWORDS
 

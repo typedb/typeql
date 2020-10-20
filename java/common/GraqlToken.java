@@ -163,7 +163,6 @@ public class GraqlToken {
     }
 
     public enum Comparator {
-        NOT("not"),
         EQ("="),
         NEQ("!="),
         GT(">"),
