@@ -648,18 +648,19 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             }
         }
 
-        public static class Variable extends Value<UnboundVariable> {
-
-            private final ThingVariable<?> variable;
+        public static class Variable extends Value<ThingVariable<?>> {
 
             public Variable(final GraqlToken.Comparator comparator, final UnboundVariable variable) {
+                this(comparator, variable.toThing());
+            }
+
+            private Variable(final GraqlToken.Comparator comparator, final ThingVariable<?> variable) {
                 super(comparator, variable);
-                this.variable = variable.toThing();
             }
 
             @Override
             public Set<BoundVariable> variables() {
-                return set(variable);
+                return set(value());
             }
 
             @Override
