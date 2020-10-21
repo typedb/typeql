@@ -17,15 +17,16 @@
 
 package graql.lang.pattern.schema;
 
+import com.sun.org.apache.xpath.internal.operations.Neg;
+import com.sun.tools.corba.se.idl.constExpr.Negative;
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Definable;
-import graql.lang.pattern.Pattern;
+import graql.lang.pattern.*;
 import graql.lang.pattern.variable.Reference;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,10 +40,7 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ONE_CONSTRAINT;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_TWO_CONSTRAINTS;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
+import static graql.lang.common.exception.ErrorMessage.*;
 
 public class Rule implements Definable {
     private final String label;
@@ -95,6 +93,15 @@ public class Rule implements Definable {
     private static void validateWhen(String label, Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
         if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
+        if (findNegations(when).stream().anyMatch(negation -> !findNegations(negation).isEmpty())) {
+            throw GraqlException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
+        }
+    }
+
+    private static Set<Negation> findNegations(Pattern pattern) {
+        Set<? extends Pattern> innerPatterns = pattern.patterns();
+        Set<Negation> negations = innerPatterns.stream().filter(Pattern::isNegation).map(Pattern::asNegation).collect(Collectors.toSet());
+        return negations;
     }
 
     private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
