@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.SPACE;
@@ -55,6 +56,10 @@ public class ConceptVariable extends BoundVariable {
     @Override
     public List<ConceptConstraint> constraints() {
         return (isConstraint != null) ? list(isConstraint) : Collections.emptyList();
+    }
+
+    public Optional<ConceptConstraint.Is> is() {
+        return Optional.ofNullable(isConstraint);
     }
 
     @Override
