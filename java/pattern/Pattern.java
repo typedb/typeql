@@ -21,11 +21,15 @@ import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 
+import java.util.Set;
+
 import static grakn.common.util.Objects.className;
 
 public interface Pattern {
 
     Pattern normalise();
+
+    Set<? extends Pattern> patterns();
 
     default boolean isVariable() { return false; }
 
