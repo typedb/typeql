@@ -17,13 +17,13 @@
 
 package graql.lang.pattern;
 
-import grakn.common.collection.Collections;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
@@ -49,9 +49,8 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     public T pattern() { return pattern; }
 
-    @Override
-    public Set<? extends Pattern> patterns() {
-        return Collections.set(pattern);
+    public List<? extends Pattern> patterns() {
+        return Arrays.asList(pattern);
     }
 
     @Override
