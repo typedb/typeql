@@ -22,23 +22,11 @@ import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.query.builder.Computable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
-import static grakn.common.collection.Collections.map;
-import static grakn.common.collection.Collections.pair;
-import static grakn.common.collection.Collections.set;
-import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
-import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
-import static graql.lang.common.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
+import static grakn.common.collection.Collections.*;
+import static graql.lang.common.exception.ErrorMessage.*;
 import static java.util.stream.Collectors.joining;
 
 
