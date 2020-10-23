@@ -57,20 +57,24 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(18, "Rule '%s' 'when' contains a nested negation.");
     public static final ErrorMessage INVALID_RULE_WHEN_CONTAINS_DISJUNCTION=
             new ErrorMessage(19, "Rule '%s' 'when' contains a disjunction.");
-    public static final ErrorMessage INVALID_RULE_THEN_ONE_CONSTRAINT =
-            new ErrorMessage(20, "Rule '%s' 'then' with one constraint must be a new relation or attribute ownership.");
+    public static final ErrorMessage INVALID_RULE_THEN_ZERO_CONSTRAINTS=
+            new ErrorMessage(20, "Rule '%s' 'then' must contain at least one constraint: '%s'.");
+    public static final ErrorMessage  INVALID_RULE_THEN_ONE_CONSTRAINT =
+            new ErrorMessage(21, "Rule '%s' 'then' with one constraint must be an attribute ownership: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_TWO_CONSTRAINTS =
-            new ErrorMessage(21, "Rule '%s' 'then' with two constraints must must be a relation and an isa constraint: '%s'.");
+            new ErrorMessage(22, "Rule '%s' 'then' with two constraints must must be a relation and an isa constraint: '%s'.");
+    public static final ErrorMessage INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT=
+            new ErrorMessage(23, "Rule '%s' 'then' must cannot contain more than three constraint: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
-            new ErrorMessage(22, "Rule '%s' 'then' variables must be present in rule 'when'.");
+            new ErrorMessage(24, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(23, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(25, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(24, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(26, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(25, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(27, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(26, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(28, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";

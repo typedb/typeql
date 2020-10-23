@@ -26,10 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
-import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.GraqlToken.Char.*;
 
 /**
  * A class representing a negation of patterns. All inner patterns must not match in a query.
