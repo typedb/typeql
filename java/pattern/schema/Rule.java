@@ -95,23 +95,25 @@ public class Rule implements Definable {
     private static void validateWhen(String label, Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
         if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
-        if (findNegations(when).stream().anyMatch(negation -> findNegations(negation.pattern()).isEmpty())) {
+        if (findNegations(when).anyMatch(negation -> findNegations(negation.pattern()).findAny().isPresent())) {
             throw GraqlException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
         }
-
-    }
-
-    private static Set<Negation> findNegations(Pattern pattern) {
-        if (pattern.isNegation()){
-            return Collections.singleton(pattern.asNegation());
-        } else if (pattern.isVariable()) {
-            return Collections.emptySet();
+        if (findDisjunctions(when).findAny().isPresent()) {
+            throw GraqlException.of(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.message(label));
         }
-        Set<? extends Pattern> innerPatterns = pattern.patterns();
-        return innerPatterns.stream().flatMap(patt -> findNegations(patt).stream()).collect(Collectors.toSet());
     }
 
+    private static Stream<Negation> findNegations(Pattern pattern) {
+        if (pattern.isNegation()) return Stream.of(pattern.asNegation());
+        if (pattern.isVariable()) return Stream.empty();
+        return pattern.patterns().stream().flatMap(Rule::findNegations);
+    }
 
+    private static Stream<Disjunction> findDisjunctions(Pattern pattern) {
+        if (pattern.isDisjunction()) return Stream.of(pattern.asDisjunction())
+        if (pattern.isVariable()) return Stream.empty();
+        return pattern.patterns().stream().anyMatch(Rule::findDisjunctions);
+    }
 
     //TODO check if the change in INVALID_RULE_THEN_ONE_CONSTRAINT validation requires reworking of logic here or elsewhere
     private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
