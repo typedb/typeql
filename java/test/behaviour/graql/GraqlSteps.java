@@ -19,12 +19,7 @@
 package graql.lang.test.behaviour.graql;
 
 import graql.lang.Graql;
-import graql.lang.query.GraqlDefine;
-import graql.lang.query.GraqlDelete;
-import graql.lang.query.GraqlInsert;
-import graql.lang.query.GraqlMatch;
-import graql.lang.query.GraqlQuery;
-import graql.lang.query.GraqlUndefine;
+import graql.lang.query.*;
 import io.cucumber.java.en.Given;
 
 import java.util.List;

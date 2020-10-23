@@ -25,13 +25,7 @@ import graql.lang.pattern.variable.UnboundVariable;
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 
-import static graql.lang.common.GraqlToken.Comparator.CONTAINS;
-import static graql.lang.common.GraqlToken.Comparator.EQ;
-import static graql.lang.common.GraqlToken.Comparator.GT;
-import static graql.lang.common.GraqlToken.Comparator.GTE;
-import static graql.lang.common.GraqlToken.Comparator.LT;
-import static graql.lang.common.GraqlToken.Comparator.LTE;
-import static graql.lang.common.GraqlToken.Comparator.NEQ;
+import static graql.lang.common.GraqlToken.Comparator.*;
 
 public interface ThingVariableBuilder {
 

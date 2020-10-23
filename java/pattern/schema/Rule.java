@@ -17,8 +17,6 @@
 
 package graql.lang.pattern.schema;
 
-import com.sun.org.apache.xpath.internal.operations.Neg;
-import com.sun.tools.corba.se.idl.constExpr.Negative;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.*;
 import graql.lang.pattern.variable.Reference;
@@ -26,22 +24,13 @@ import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static graql.lang.common.GraqlToken.Char.COLON;
-import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
-import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Schema.RULE;
-import static graql.lang.common.GraqlToken.Schema.THEN;
-import static graql.lang.common.GraqlToken.Schema.WHEN;
+import static graql.lang.common.GraqlToken.Char.*;
+import static graql.lang.common.GraqlToken.Schema.*;
 import static graql.lang.common.exception.ErrorMessage.*;
 
 public class Rule implements Definable {
@@ -120,21 +109,18 @@ public class Rule implements Definable {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
 
-        // rules may only conclude one 'has', 'relation', or 'isa' constraint
-        if (numConstraints == 0 || numConstraints > 2) {
-            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label, then));
+        // rules must contain contain either 1 has constraint, or a isa and relation constraint.
+        if (numConstraints == 0) {
+            throw GraqlException.of(INVALID_RULE_THEN_ZERO_CONSTRAINTS.message(label));
+        } else if (numConstraints == 1 && then.has().size()!=1) {
+            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label));
+        } else if (numConstraints == 2 && !(then.relation().isPresent() && then.isa().isPresent())) {
+            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label));
+        } else if (numConstraints > 2) {
+            throw GraqlException.of(INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT.message(label));
         }
 
-
-
-        if (numConstraints == 1 && !(then.relation().isPresent() || then.has().size() == 1 || then.isa().isPresent())) {
-            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label, then));
-        }
-
-        // rules with 'relation' conclusions may also have a explicit 'isa' constraint
-        if (then.constraints().size() == 2 && !then.relation().isPresent() && !then.isa().isPresent()) {
-            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label, then));
-        }
+        //TODO: Make sure an attribute is of the correct form
 
         // all user-written variables in the 'then' must be present in the 'when', if it exists
         if (when != null) {
