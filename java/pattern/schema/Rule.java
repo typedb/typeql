@@ -26,9 +26,11 @@ import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,17 +95,25 @@ public class Rule implements Definable {
     private static void validateWhen(String label, Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
         if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
-        if (findNegations(when).stream().anyMatch(negation -> !findNegations(negation).isEmpty())) {
+        if (findNegations(when).stream().anyMatch(negation -> findNegations(negation.pattern()).isEmpty())) {
             throw GraqlException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
         }
+
     }
 
     private static Set<Negation> findNegations(Pattern pattern) {
+        if (pattern.isNegation()){
+            return Collections.singleton(pattern.asNegation());
+        } else if (pattern.isVariable()) {
+            return Collections.emptySet();
+        }
         Set<? extends Pattern> innerPatterns = pattern.patterns();
-        Set<Negation> negations = innerPatterns.stream().filter(Pattern::isNegation).map(Pattern::asNegation).collect(Collectors.toSet());
-        return negations;
+        return innerPatterns.stream().flatMap(patt -> findNegations(patt).stream()).collect(Collectors.toSet());
     }
 
+
+
+    //TODO check if the change in INVALID_RULE_THEN_ONE_CONSTRAINT validation requires reworking of logic here or elsewhere
     private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();

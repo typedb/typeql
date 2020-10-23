@@ -56,7 +56,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
     public static final ErrorMessage INVALID_RULE_WHEN_NESTED_NEGATION =
             new ErrorMessage(18, "Rule '%s' 'when' contains a nested negation.");
     public static final ErrorMessage INVALID_RULE_THEN_ONE_CONSTRAINT =
-            new ErrorMessage(19, "Rule '%s' 'then' with one constraint must be a new (or extended) relation, attribute ownership, or 'isa' downcast: '%s'.");
+            new ErrorMessage(19, "Rule '%s' 'then' with one constraint must be a new relation or attribute ownership.");
     public static final ErrorMessage INVALID_RULE_THEN_TWO_CONSTRAINTS =
             new ErrorMessage(20, "Rule '%s' 'then' with two constraints must must be a relation and an isa constraint: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
