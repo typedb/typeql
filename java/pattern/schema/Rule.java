@@ -110,9 +110,9 @@ public class Rule implements Definable {
     }
 
     private static Stream<Disjunction> findDisjunctions(Pattern pattern) {
-        if (pattern.isDisjunction()) return Stream.of(pattern.asDisjunction())
+        if (pattern.isDisjunction()) return Stream.of(pattern.asDisjunction());
         if (pattern.isVariable()) return Stream.empty();
-        return pattern.patterns().stream().anyMatch(Rule::findDisjunctions);
+        return pattern.patterns().stream().flatMap(Rule::findDisjunctions);
     }
 
     //TODO check if the change in INVALID_RULE_THEN_ONE_CONSTRAINT validation requires reworking of logic here or elsewhere
@@ -121,8 +121,13 @@ public class Rule implements Definable {
         int numConstraints = then.constraints().size();
 
         // rules may only conclude one 'has', 'relation', or 'isa' constraint
-        if (numConstraints == 0 || numConstraints > 2 || numConstraints == 1 &&
-                !(then.relation().isPresent() || then.has().size() == 1 || then.isa().isPresent())) {
+        if (numConstraints == 0 || numConstraints > 2) {
+            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label, then));
+        }
+
+
+
+        if (numConstraints == 1 && !(then.relation().isPresent() || then.has().size() == 1 || then.isa().isPresent())) {
             throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label, then));
         }
 

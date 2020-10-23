@@ -17,12 +17,12 @@
 
 package graql.lang.pattern.variable;
 
-import grakn.common.collection.Collections;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunctable;
 import graql.lang.pattern.Pattern;
 
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
@@ -68,8 +68,7 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
     @Override
     public BoundVariable asVariable() { return this; }
 
-    @Override
-    public Set<? extends Pattern> patterns() {
-        return Collections.set(this);
+    public List<? extends Pattern> patterns() {
+        return Arrays.asList(this);
     }
 }
