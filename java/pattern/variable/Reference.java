@@ -39,15 +39,15 @@ public abstract class Reference {
         this.isVisible = isVisible;
     }
 
-    static Reference.Name named(final String name) {
+    public static Reference.Name named(final String name) {
         return new Name(name);
     }
 
-    static Reference.Label label(final String label) {
+    public static Reference.Label label(final String label) {
         return new Label(label);
     }
 
-    static Reference.Anonymous anonymous(final boolean isVisible) {
+    public static Reference.Anonymous anonymous(final boolean isVisible) {
         return new Reference.Anonymous(isVisible);
     }
 
