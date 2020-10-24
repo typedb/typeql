@@ -390,13 +390,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private Has(final TypeVariable type, final ThingVariable<?> attribute) {
             if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
             this.type = type;
-            if (attribute.isNamed()) this.attribute = attribute; // TODO: Should we not always set the ISA type?
-            else this.attribute = attribute.constrain(new Isa(type, false));
+            this.attribute = attribute.constrain(new Isa(type, false));
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
-        }
-
-        public TypeVariable type() {
-            return type;
         }
 
         public ThingVariable<?> attribute() {
