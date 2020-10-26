@@ -63,7 +63,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(21, "Rule '%s' 'then' with one constraint must be an attribute ownership: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_TWO_CONSTRAINTS =
             new ErrorMessage(22, "Rule '%s' 'then' with two constraints must must be a relation and an isa constraint: '%s'.");
-    public static final ErrorMessage INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT=
+    public static final ErrorMessage INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT =
             new ErrorMessage(23, "Rule '%s' 'then' must cannot contain more than three constraint: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
             new ErrorMessage(24, "Rule '%s' 'then' variables must be present in rule 'when'.");
