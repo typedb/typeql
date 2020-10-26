@@ -23,7 +23,10 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.*;
+import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
+import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Operator.OR;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
