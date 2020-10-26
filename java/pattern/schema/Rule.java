@@ -121,7 +121,6 @@ public class Rule implements Definable {
         return pattern.patterns().stream().flatMap(Rule::findDisjunctions);
     }
 
-    //TODO check if the change in INVALID_RULE_THEN_ONE_CONSTRAINT validation requires reworking of logic here or elsewhere
     private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
@@ -136,8 +135,6 @@ public class Rule implements Definable {
         } else if (numConstraints > 2) {
             throw GraqlException.of(INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT.message(label));
         }
-
-        //TODO: Make sure an attribute is of the correct form
 
         // all user-written variables in the 'then' must be present in the 'when', if it exists
         if (when != null) {

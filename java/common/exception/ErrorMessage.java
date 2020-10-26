@@ -55,11 +55,11 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(17, "Rule '%s' 'when' has not been provided with any patterns.");
     public static final ErrorMessage INVALID_RULE_WHEN_NESTED_NEGATION =
             new ErrorMessage(18, "Rule '%s' 'when' contains a nested negation.");
-    public static final ErrorMessage INVALID_RULE_WHEN_CONTAINS_DISJUNCTION=
+    public static final ErrorMessage INVALID_RULE_WHEN_CONTAINS_DISJUNCTION =
             new ErrorMessage(19, "Rule '%s' 'when' contains a disjunction.");
-    public static final ErrorMessage INVALID_RULE_THEN_ZERO_CONSTRAINTS=
+    public static final ErrorMessage INVALID_RULE_THEN_ZERO_CONSTRAINTS =
             new ErrorMessage(20, "Rule '%s' 'then' must contain at least one constraint: '%s'.");
-    public static final ErrorMessage  INVALID_RULE_THEN_ONE_CONSTRAINT =
+    public static final ErrorMessage INVALID_RULE_THEN_ONE_CONSTRAINT =
             new ErrorMessage(21, "Rule '%s' 'then' with one constraint must be an attribute ownership: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_TWO_CONSTRAINTS =
             new ErrorMessage(22, "Rule '%s' 'then' with two constraints must must be a relation and an isa constraint: '%s'.");
