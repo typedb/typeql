@@ -127,13 +127,13 @@ public class Rule implements Definable {
 
         // rules must contain contain either 1 has constraint, or a isa and relation constraint.
         if (numConstraints == 0) {
-            throw GraqlException.of(INVALID_RULE_THEN_ZERO_CONSTRAINTS.message(label));
+            throw GraqlException.of(INVALID_RULE_THEN_ZERO_CONSTRAINTS.message(label, then));
         } else if (numConstraints == 1 && then.has().size()!=1) {
-            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label));
+            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label, then));
         } else if (numConstraints == 2 && !(then.relation().isPresent() && then.isa().isPresent())) {
-            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label));
+            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label, then));
         } else if (numConstraints > 2) {
-            throw GraqlException.of(INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT.message(label));
+            throw GraqlException.of(INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT.message(label, then));
         }
 
         // all user-written variables in the 'then' must be present in the 'when', if it exists.

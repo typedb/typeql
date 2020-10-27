@@ -24,6 +24,7 @@ import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static graql.lang.Graql.and;
@@ -100,7 +101,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithRuleThenToString() {
-        final GraqlDefine query = Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;"))).then(Graql.parseVariable("$x isa movie").asThing()));
+        final GraqlDefine query = Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;"))).then(Graql.parseVariable("$x has name 'Ghostbusters'").asThing()));
         assertValidToString(query);
     }
 
