@@ -136,7 +136,7 @@ public class Rule implements Definable {
             throw GraqlException.of(INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT.message(label));
         }
 
-        // all user-written variables in the 'then' must be present in the 'when', if it exists
+        // all user-written variables in the 'then' must be present in the 'when', if it exists.
         if (when != null) {
             Set<Reference> thenReferences = Stream.concat(Stream.of(then), then.variables())
                     .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
