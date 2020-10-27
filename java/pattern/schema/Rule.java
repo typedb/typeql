@@ -20,6 +20,8 @@ package graql.lang.pattern.schema;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Definable;
+import graql.lang.pattern.Disjunction;
+import graql.lang.pattern.Negation;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.Reference;
 import graql.lang.pattern.variable.ThingVariable;
@@ -39,10 +41,11 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ONE_CONSTRAINT;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_TWO_CONSTRAINTS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
 
 public class Rule implements Definable {
     private final String label;
@@ -95,24 +98,36 @@ public class Rule implements Definable {
     private static void validateWhen(String label, Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
         if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
+        if (findNegations(when).anyMatch(negation -> findNegations(negation.pattern()).findAny().isPresent())) {
+            throw GraqlException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
+        }
+        if (findDisjunctions(when).findAny().isPresent()) {
+            throw GraqlException.of(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.message(label));
+        }
+    }
+
+    private static Stream<Negation> findNegations(Pattern pattern) {
+        if (pattern.isNegation()) return Stream.of(pattern.asNegation());
+        if (pattern.isVariable()) return Stream.empty();
+        return pattern.patterns().stream().flatMap(Rule::findNegations);
+    }
+
+    private static Stream<Disjunction> findDisjunctions(Pattern pattern) {
+        if (pattern.isDisjunction()) return Stream.of(pattern.asDisjunction());
+        if (pattern.isVariable()) return Stream.empty();
+        return pattern.patterns().stream().flatMap(Rule::findDisjunctions);
     }
 
     private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
 
-        // rules may only conclude one 'has', 'relation', or 'isa' constraint
-        if (numConstraints == 0 || numConstraints > 2 || numConstraints == 1 &&
-                !(then.relation().isPresent() || then.has().size() == 1 || then.isa().isPresent())) {
-            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label, then));
+        // rules must contain contain either 1 has constraint, or a isa and relation constrain
+        if (!((numConstraints == 1 && then.has().size()==1) || (numConstraints == 2 && then.relation().isPresent() && then.isa().isPresent()))) {
+            throw GraqlException.of(INVALID_RULE_THEN.message(label, then));
         }
 
-        // rules with 'relation' conclusions may also have a explicit 'isa' constraint
-        if (then.constraints().size() == 2 && !then.relation().isPresent() && !then.isa().isPresent()) {
-            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label, then));
-        }
-
-        // all user-written variables in the 'then' must be present in the 'when', if it exists
+        // all user-written variables in the 'then' must be present in the 'when', if it exists.
         if (when != null) {
             Set<Reference> thenReferences = Stream.concat(Stream.of(then), then.variables())
                     .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
