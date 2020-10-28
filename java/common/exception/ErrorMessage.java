@@ -58,17 +58,20 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
     public static final ErrorMessage INVALID_RULE_WHEN_CONTAINS_DISJUNCTION =
             new ErrorMessage(19, "Rule '%s' 'when' contains a disjunction.");
     public static final ErrorMessage INVALID_RULE_THEN =
-            new ErrorMessage(20, "Rule '%s' 'then' must strictly be either an attribute ownership, or a relation: '%s'.");
+            new ErrorMessage(20, "Rule '%s' 'then' must strictly be a single of either an attribute ownership, or a relation");
+    public static final ErrorMessage INVALID_RULE_THEN_HAS =
+            new ErrorMessage(21, "Rule '%s' 'then' is trying to assign both an attribute type and a variable attribute value: '%s'." +
+                    " Either make the attribute value concrete, or remove the attribute type.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
-            new ErrorMessage(21, "Rule '%s' 'then' variables must be present in rule 'when'.");
+            new ErrorMessage(22, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(22, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(23, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(23, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(24, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(24, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(25, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(25, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(26, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";

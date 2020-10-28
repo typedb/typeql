@@ -24,7 +24,6 @@ import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static graql.lang.Graql.and;

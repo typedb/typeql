@@ -42,6 +42,7 @@ import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
@@ -126,6 +127,11 @@ public class Rule implements Definable {
         // rules must contain contain either 1 has constraint, or a isa and relation constrain
         if (!((numConstraints == 1 && then.has().size()==1) || (numConstraints == 2 && then.relation().isPresent() && then.isa().isPresent()))) {
             throw GraqlException.of(INVALID_RULE_THEN.message(label, then));
+        }
+
+        // rule 'has' cannot assign both an attribute type and a variable
+        if (numConstraints == 1 && then.has().size()==1 && then.has().get(0).type().isNamed() && then.has().get(0).attribute().isVariable()) {
+            throw GraqlException.of(INVALID_RULE_THEN_HAS.message(label, then));
         }
 
         // all user-written variables in the 'then' must be present in the 'when', if it exists.

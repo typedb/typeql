@@ -741,13 +741,11 @@ public class Parser extends GraqlBaseVisitor {
 
     @Override
     public ThingConstraint.Has visitAttribute(final GraqlParser.AttributeContext ctx) {
-        if (ctx.VAR_() != null) {
-            return new ThingConstraint.Has(ctx.label().getText(), getVar(ctx.VAR_()));
-        } else if (ctx.value() != null) {
-            return new ThingConstraint.Has(ctx.label().getText(), visitValue(ctx.value()));
-        } else {
-            throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
-        }
+        if (ctx.label() != null) {
+            if (ctx.VAR_() != null) return new ThingConstraint.Has(ctx.label().getText(), getVar(ctx.VAR_()));
+            if (ctx.value() != null) return new ThingConstraint.Has(ctx.label().getText(), visitValue(ctx.value()));
+        } else if (ctx.VAR_() != null) return new ThingConstraint.Has(getVar(ctx.VAR_()));
+        throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
     }
 
     // RELATION STATEMENT CONSTRUCT ============================================
