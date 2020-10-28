@@ -41,11 +41,8 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Schema.RULE;
 import static graql.lang.common.GraqlToken.Schema.THEN;
 import static graql.lang.common.GraqlToken.Schema.WHEN;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ONE_CONSTRAINT;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_TWO_CONSTRAINTS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ZERO_CONSTRAINTS;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
@@ -126,20 +123,12 @@ public class Rule implements Definable {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
 
-        // rules must contain contain either 1 has constraint, or a isa and relation constraint.
-        if (numConstraints == 0) {
-            throw GraqlException.of(INVALID_RULE_THEN_ZERO_CONSTRAINTS.message(label));
-        } else if (numConstraints == 1 && then.has().size()!=1) {
-            throw GraqlException.of(INVALID_RULE_THEN_ONE_CONSTRAINT.message(label));
-        } else if (numConstraints == 2 && !(then.relation().isPresent() && then.isa().isPresent())) {
-            throw GraqlException.of(INVALID_RULE_THEN_TWO_CONSTRAINTS.message(label));
-        } else if (numConstraints > 2) {
-            throw GraqlException.of(INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT.message(label));
+        // rules must contain contain either 1 has constraint, or a isa and relation constrain
+        if (!((numConstraints == 1 && then.has().size()==1) || (numConstraints == 2 && then.relation().isPresent() && then.isa().isPresent()))) {
+            throw GraqlException.of(INVALID_RULE_THEN.message(label, then));
         }
 
-        //TODO: Make sure an attribute is of the correct form
-
-        // all user-written variables in the 'then' must be present in the 'when', if it exists
+        // all user-written variables in the 'then' must be present in the 'when', if it exists.
         if (when != null) {
             Set<Reference> thenReferences = Stream.concat(Stream.of(then), then.variables())
                     .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
