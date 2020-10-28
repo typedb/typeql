@@ -18,7 +18,11 @@
 package graql.lang.pattern.schema;
 
 import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.*;
+import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Definable;
+import graql.lang.pattern.Disjunction;
+import graql.lang.pattern.Negation;
+import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.Reference;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.Variable;
@@ -29,9 +33,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static graql.lang.common.GraqlToken.Char.*;
-import static graql.lang.common.GraqlToken.Schema.*;
-import static graql.lang.common.exception.ErrorMessage.*;
+import static graql.lang.common.GraqlToken.Char.COLON;
+import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
+import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
+import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.GraqlToken.Schema.RULE;
+import static graql.lang.common.GraqlToken.Schema.THEN;
+import static graql.lang.common.GraqlToken.Schema.WHEN;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ONE_CONSTRAINT;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_THREE_OR_MORE_CONSTRAINT;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_TWO_CONSTRAINTS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ZERO_CONSTRAINTS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
+import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
 
 public class Rule implements Definable {
     private final String label;

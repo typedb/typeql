@@ -19,14 +19,23 @@ package graql.lang;
 
 import graql.lang.common.GraqlToken;
 import graql.lang.parser.Parser;
-import graql.lang.pattern.*;
+import graql.lang.pattern.Conjunction;
+import graql.lang.pattern.Definable;
+import graql.lang.pattern.Disjunction;
+import graql.lang.pattern.Negation;
+import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.schema.Rule;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.query.*;
+import graql.lang.query.GraqlCompute;
+import graql.lang.query.GraqlDefine;
+import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
+import graql.lang.query.GraqlQuery;
+import graql.lang.query.GraqlUndefine;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -34,7 +43,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Comparator.*;
+import static graql.lang.common.GraqlToken.Comparator.CONTAINS;
+import static graql.lang.common.GraqlToken.Comparator.EQ;
+import static graql.lang.common.GraqlToken.Comparator.GT;
+import static graql.lang.common.GraqlToken.Comparator.GTE;
+import static graql.lang.common.GraqlToken.Comparator.LIKE;
+import static graql.lang.common.GraqlToken.Comparator.LT;
+import static graql.lang.common.GraqlToken.Comparator.LTE;
+import static graql.lang.common.GraqlToken.Comparator.NEQ;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
 public class Graql {

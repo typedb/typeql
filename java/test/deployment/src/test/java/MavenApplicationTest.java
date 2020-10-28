@@ -22,7 +22,11 @@ import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import org.junit.Test;
 
-import static graql.lang.Graql.*;
+import static graql.lang.Graql.and;
+import static graql.lang.Graql.match;
+import static graql.lang.Graql.or;
+import static graql.lang.Graql.rel;
+import static graql.lang.Graql.var;
 import static org.junit.Assert.assertEquals;
 
 public class MavenApplicationTest {

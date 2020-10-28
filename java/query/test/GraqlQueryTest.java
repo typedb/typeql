@@ -19,12 +19,27 @@ package graql.lang.query.test;
 
 import graql.lang.Graql;
 import graql.lang.common.GraqlArg;
-import graql.lang.query.*;
+import graql.lang.query.GraqlCompute;
+import graql.lang.query.GraqlDefine;
+import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
+import graql.lang.query.GraqlQuery;
 import org.junit.Test;
 
-import static graql.lang.Graql.*;
-import static graql.lang.common.GraqlArg.Algorithm.*;
-import static graql.lang.query.GraqlCompute.Argument.*;
+import static graql.lang.Graql.and;
+import static graql.lang.Graql.lte;
+import static graql.lang.Graql.match;
+import static graql.lang.Graql.or;
+import static graql.lang.Graql.rel;
+import static graql.lang.Graql.rule;
+import static graql.lang.Graql.type;
+import static graql.lang.Graql.var;
+import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
+import static graql.lang.common.GraqlArg.Algorithm.DEGREE;
+import static graql.lang.common.GraqlArg.Algorithm.K_CORE;
+import static graql.lang.query.GraqlCompute.Argument.k;
+import static graql.lang.query.GraqlCompute.Argument.minK;
+import static graql.lang.query.GraqlCompute.Argument.size;
 import static org.junit.Assert.assertEquals;
 
 // TODO: This test should be split into one Graql query test class each
