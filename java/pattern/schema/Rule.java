@@ -119,7 +119,6 @@ public class Rule implements Definable {
         return pattern.patterns().stream().flatMap(Rule::findDisjunctions);
     }
 
-    //TODO check if the change in INVALID_RULE_THEN_ONE_CONSTRAINT validation requires reworking of logic here or elsewhere
     private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
@@ -130,7 +129,7 @@ public class Rule implements Definable {
         }
 
         // rule 'has' cannot assign both an attribute type and a variable
-        if (numConstraints == 1 && then.has().size()==1 && then.has().get(0).type().isNamed() && then.has().get(0).attribute().isVariable()) {
+        if (then.has().size() == 1 && then.has().get(0).type() != null && then.has().get(0).attribute().isVariable()) {
             throw GraqlException.of(INVALID_RULE_THEN_HAS.message(label, then));
         }
 

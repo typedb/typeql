@@ -400,6 +400,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public ThingVariable<?> attribute() { return attribute; }
 
+        @Nullable
         public TypeVariable type() { return type; }
 
         @Override
