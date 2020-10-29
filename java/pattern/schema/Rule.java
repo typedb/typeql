@@ -128,8 +128,8 @@ public class Rule implements Definable {
             throw GraqlException.of(INVALID_RULE_THEN.message(label, then));
         }
 
-        // rule 'has' cannot assign both an attribute type and a variable
-        if (then.has().size() == 1 && then.has().get(0).type() != null && then.has().get(0).attribute().isVariable()) {
+        // rule 'has' cannot assign both an attribute type and a named variable
+        if (then.has().size() == 1 && then.has().get(0).type() != null && then.has().get(0).attribute().isNamed()) {
             throw GraqlException.of(INVALID_RULE_THEN_HAS.message(label, then));
         }
 
