@@ -44,8 +44,8 @@ import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
 import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Comparator.EQ;
-import static graql.lang.common.GraqlToken.Comparator.LIKE;
+import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
+import static graql.lang.common.GraqlToken.Comparator.Pattern.LIKE;
 import static graql.lang.common.GraqlToken.Constraint.HAS;
 import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
@@ -538,7 +538,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Long extends Value<java.lang.Long> {
 
-            public Long(final GraqlToken.Comparator comparator, final long value) {
+            public Long(final GraqlToken.Comparator.Equality comparator, final long value) {
                 super(comparator, value);
             }
 
@@ -555,7 +555,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Double extends Value<java.lang.Double> {
 
-            public Double(final GraqlToken.Comparator comparator, final double value) {
+            public Double(final GraqlToken.Comparator.Equality comparator, final double value) {
                 super(comparator, value);
             }
 
@@ -572,7 +572,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Boolean extends Value<java.lang.Boolean> {
 
-            public Boolean(final GraqlToken.Comparator comparator, final boolean value) {
+            public Boolean(final GraqlToken.Comparator.Equality comparator, final boolean value) {
                 super(comparator, value);
             }
 
@@ -621,7 +621,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class DateTime extends Value<LocalDateTime> {
 
-            public DateTime(final GraqlToken.Comparator comparator, final LocalDateTime value) {
+            public DateTime(final GraqlToken.Comparator.Equality comparator, final LocalDateTime value) {
                 super(comparator, value);
                 // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
                 final int nanos = value.toLocalTime().getNano();
@@ -645,11 +645,11 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Variable extends Value<ThingVariable<?>> {
 
-            public Variable(final GraqlToken.Comparator comparator, final UnboundVariable variable) {
+            public Variable(final GraqlToken.Comparator.Equality comparator, final UnboundVariable variable) {
                 this(comparator, variable.toThing());
             }
 
-            private Variable(final GraqlToken.Comparator comparator, final ThingVariable<?> variable) {
+            private Variable(final GraqlToken.Comparator.Equality comparator, final ThingVariable<?> variable) {
                 super(comparator, variable);
             }
 

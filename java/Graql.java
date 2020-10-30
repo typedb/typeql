@@ -43,14 +43,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Comparator.CONTAINS;
-import static graql.lang.common.GraqlToken.Comparator.EQ;
-import static graql.lang.common.GraqlToken.Comparator.GT;
-import static graql.lang.common.GraqlToken.Comparator.GTE;
-import static graql.lang.common.GraqlToken.Comparator.LIKE;
-import static graql.lang.common.GraqlToken.Comparator.LT;
-import static graql.lang.common.GraqlToken.Comparator.LTE;
-import static graql.lang.common.GraqlToken.Comparator.NEQ;
+import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
+import static graql.lang.common.GraqlToken.Comparator.Equality.GT;
+import static graql.lang.common.GraqlToken.Comparator.Equality.GTE;
+import static graql.lang.common.GraqlToken.Comparator.Equality.LT;
+import static graql.lang.common.GraqlToken.Comparator.Equality.LTE;
+import static graql.lang.common.GraqlToken.Comparator.Equality.NEQ;
+import static graql.lang.common.GraqlToken.Comparator.Pattern.CONTAINS;
+import static graql.lang.common.GraqlToken.Comparator.Pattern.LIKE;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
 public class Graql {
@@ -133,10 +133,7 @@ public class Graql {
 
     public static Pattern or(final List<Pattern> patterns) {
         // Simplify representation when there is only one alternative
-        if (patterns.size() == 1) {
-            return patterns.iterator().next();
-        }
-
+        if (patterns.size() == 1) return patterns.iterator().next();
         return new Disjunction<>(patterns);
     }
 
@@ -144,9 +141,9 @@ public class Graql {
         return new Negation<>(pattern);
     }
 
-    public static Rule rule(final String label) { return new Rule(label); }
-
-    // Variable Builder Methods
+    public static Rule rule(final String label) {
+        return new Rule(label);
+    }
 
     public static UnboundVariable var() {
         return UnboundVariable.anonymous();
@@ -184,8 +181,6 @@ public class Graql {
         return hidden().rel(roleType, playerVar);
     }
 
-    // Attribute value equality constraint
-
     public static ThingConstraint.Value.Long eq(final long value) {
         return new ThingConstraint.Value.Long(EQ, value);
     }
@@ -209,8 +204,6 @@ public class Graql {
     public static ThingConstraint.Value.Variable eq(final UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(EQ, variable);
     }
-
-    // Attribute value inequality constraint
 
     public static ThingConstraint.Value.Long neq(final long value) {
         return new ThingConstraint.Value.Long(NEQ, value);
@@ -236,8 +229,6 @@ public class Graql {
         return new ThingConstraint.Value.Variable(NEQ, variable);
     }
 
-    // Attribute value greater-than constraint
-
     public static ThingConstraint.Value.Long gt(final long value) {
         return new ThingConstraint.Value.Long(GT, value);
     }
@@ -261,8 +252,6 @@ public class Graql {
     public static ThingConstraint.Value.Variable gt(final UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(GT, variable);
     }
-
-    // Attribute value greater-than-or-equals constraint
 
     public static ThingConstraint.Value.Long gte(final long value) {
         return new ThingConstraint.Value.Long(GTE, value);
@@ -288,8 +277,6 @@ public class Graql {
         return new ThingConstraint.Value.Variable(GTE, variable);
     }
 
-    // Attribute value less-than constraint
-
     public static ThingConstraint.Value.Long lt(final long value) {
         return new ThingConstraint.Value.Long(LT, value);
     }
@@ -313,8 +300,6 @@ public class Graql {
     public static ThingConstraint.Value.Variable lt(final UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(LT, variable);
     }
-
-    // Attribute value less-than-or-equals constraint
 
     public static ThingConstraint.Value.Long lte(final long value) {
         return new ThingConstraint.Value.Long(LTE, value);
@@ -340,17 +325,9 @@ public class Graql {
         return new ThingConstraint.Value.Variable(LTE, variable);
     }
 
-    // Attribute value contains (in String) constraint
-
     public static ThingConstraint.Value.String contains(final String value) {
         return new ThingConstraint.Value.String(CONTAINS, value);
     }
-
-    public static ThingConstraint.Value.Variable contains(final UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(CONTAINS, variable);
-    }
-
-    // Attribute value regex constraint
 
     public static ThingConstraint.Value.String like(final String value) {
         return new ThingConstraint.Value.String(LIKE, value);

@@ -36,6 +36,7 @@ import java.util.function.Supplier;
 import static grakn.common.collection.Collections.map;
 import static grakn.common.collection.Collections.pair;
 import static grakn.common.collection.Collections.set;
+import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
 import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
 import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
 import static graql.lang.common.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
@@ -151,7 +152,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         final StringBuilder argumentsString = new StringBuilder();
 
         for (GraqlToken.Compute.Param param : arguments.getParameters()) {
-            argumentsList.add(str(param, GraqlToken.Comparator.EQ, arguments.getArgument(param).get()));
+            argumentsList.add(str(param, EQ, arguments.getArgument(param).get()));
         }
 
         if (!argumentsList.isEmpty()) {

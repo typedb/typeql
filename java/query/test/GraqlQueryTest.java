@@ -201,13 +201,6 @@ public class GraqlQueryTest {
         assertEquals(query, Graql.parseQuery(query).toString());
     }
 
-    @Test
-    public void whenCallingToStringOnAQueryWithAContainsPredicate_ResultIsCorrect() {
-        final GraqlMatch.Unfiltered match = match(var("x").contains(var("y")));
-
-        assertEquals("match $x contains $y;", match.toString());
-    }
-
     private void assertSameStringRepresentation(final GraqlMatch query) {
         assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
     }

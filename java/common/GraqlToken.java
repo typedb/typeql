@@ -17,6 +17,11 @@
 
 package graql.lang.common;
 
+import graql.lang.common.exception.GraqlException;
+
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+
 public class GraqlToken {
 
     public enum Type {
@@ -162,34 +167,92 @@ public class GraqlToken {
         }
     }
 
-    public enum Comparator {
-        EQ("="),
-        NEQ("!="),
-        GT(">"),
-        GTE(">="),
-        LT("<"),
-        LTE("<="),
-        CONTAINS("contains"),
-        LIKE("like");
+    public interface Comparator {
 
-        private final String comparator;
-
-        Comparator(final String comparator) {
-            this.comparator = comparator;
+        default boolean isEquality() {
+            return false;
         }
 
-        @Override
-        public String toString() {
-            return this.comparator;
+        default boolean isPattern() {
+            return false;
         }
 
-        public static Comparator of(final String value) {
-            for (Comparator c : Comparator.values()) {
-                if (c.comparator.equals(value)) {
-                    return c;
-                }
+        default Equality asEquality() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Equality.class)));
+        }
+
+        default Pattern asPattern() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Pattern.class)));
+        }
+
+        enum Equality implements Comparator {
+            EQ("="),
+            NEQ("!="),
+            GT(">"),
+            GTE(">="),
+            LT("<"),
+            LTE("<=");
+
+            private final String comparator;
+
+            Equality(final String comparator) {
+                this.comparator = comparator;
             }
-            return null;
+
+            public boolean isEquality() {
+                return true;
+            }
+
+            public Equality asEquality() {
+                return this;
+            }
+
+            @Override
+            public String toString() {
+                return this.comparator;
+            }
+
+            public static Equality of(final String value) {
+                for (Equality c : Equality.values()) {
+                    if (c.comparator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
+        }
+
+        enum Pattern implements Comparator {
+            CONTAINS("contains"),
+            LIKE("like");
+
+            private final String comparator;
+
+            Pattern(final String comparator) {
+                this.comparator = comparator;
+            }
+
+            public boolean isPattern() {
+                return true;
+            }
+
+            public Pattern asPattern() {
+                return this;
+            }
+
+            @Override
+            public String toString() {
+                return this.comparator;
+            }
+
+            public static Pattern of(final String value) {
+                for (Pattern c : Pattern.values()) {
+                    if (c.comparator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
         }
     }
 
