@@ -24,7 +24,6 @@ import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static graql.lang.Graql.and;
@@ -199,6 +198,12 @@ public class GraqlQueryTest {
         final String query = "match $x isa movie;\n" +
                 "delete $x isa movie;";
         assertEquals(query, Graql.parseQuery(query).toString());
+    }
+
+    @Test
+    public void whenCallingToStringOnAQueryWithAContainsPredicate_ResultIsCorrect() {
+        final GraqlMatch.Unfiltered match = match(var("x").contains(var("y")));
+        assertEquals("match $x contains $y;", match.toString());
     }
 
     private void assertSameStringRepresentation(final GraqlMatch query) {

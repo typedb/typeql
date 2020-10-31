@@ -589,7 +589,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class String extends Value<java.lang.String> {
 
-            public String(final GraqlToken.Comparator comparator, final java.lang.String value) {
+            public String(final GraqlToken.Comparator.String comparator, final java.lang.String value) {
                 super(comparator, value);
             }
 
@@ -645,12 +645,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Variable extends Value<ThingVariable<?>> {
 
-            public Variable(final GraqlToken.Comparator.Equality comparator, final UnboundVariable variable) {
-                this(comparator, variable.toThing());
-            }
-
-            private Variable(final GraqlToken.Comparator.Equality comparator, final ThingVariable<?> variable) {
-                super(comparator, variable);
+            public Variable(final GraqlToken.Comparator.Variable comparator, final UnboundVariable variable) {
+                super(comparator, variable.toThing());
             }
 
             @Override

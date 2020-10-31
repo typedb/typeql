@@ -31,8 +31,7 @@ import static graql.lang.common.GraqlToken.Comparator.Equality.GTE;
 import static graql.lang.common.GraqlToken.Comparator.Equality.LT;
 import static graql.lang.common.GraqlToken.Comparator.Equality.LTE;
 import static graql.lang.common.GraqlToken.Comparator.Equality.NEQ;
-import static graql.lang.common.GraqlToken.Comparator.Pattern.CONTAINS;
-import static graql.lang.common.GraqlToken.Comparator.Pattern.LIKE;
+import static graql.lang.common.GraqlToken.Comparator.SubString.CONTAINS;
 
 public interface ThingVariableBuilder {
 
@@ -311,16 +310,16 @@ public interface ThingVariableBuilder {
             return constrain(constructor.apply(LTE, value));
         }
 
-        // Attribute value contains (in String) constraint
-
         default ThingVariable.Attribute contains(final String value) {
             return constrain(new ThingConstraint.Value.String(CONTAINS, value));
         }
 
-        // Attribute value like (regex) constraint
+        default ThingVariable.Attribute contains(final UnboundVariable variable) {
+            return constrain(new ThingConstraint.Value.Variable(CONTAINS, variable));
+        }
 
-        default ThingVariable.Attribute like(final String value) {
-            return constrain(new ThingConstraint.Value.String(LIKE, value));
+        default ThingVariable.Attribute like(final String regex) {
+            return constrain(new ThingConstraint.Value.String(GraqlToken.Comparator.Pattern.LIKE, regex));
         }
 
         ThingVariable.Attribute constrain(final ThingConstraint.Value<?> constraint);

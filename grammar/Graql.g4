@@ -114,7 +114,7 @@ type_constraint       :   ABSTRACT
                       |   RELATES     type         ( AS type )?
                       |   PLAYS       type_scoped  ( AS type )?
                       |   VALUE       value_type
-                      |   REGEX       STRING_
+                      |   REGEX       regex
                       |   WHEN    '{' patterns        '}'
                       |   THEN    '{' variable_things '}'
                       |   TYPE        label_any
@@ -153,12 +153,16 @@ attribute             :   HAS label ( VAR_ | value ) ;                          
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
 value                 :   literal
-                      |   comparator_equality  comparable
-                      |   comparator_pattern   STRING_
+                      |   comparator_equality   comparable_literal
+                      |   comparator_substring  comparable_string
+                      |   comparator_pattern    regex
                       ;
 comparator_equality   :   EQ | NEQ | GT | GTE | LT | LTE ;
-comparator_pattern    :   CONTAINS | LIKE ;
-comparable            :   literal | VAR_  ;
+comparator_substring  :   CONTAINS ;
+comparator_pattern    :   LIKE     ;
+
+comparable_literal    :   literal | VAR_  ;
+comparable_string     :   STRING_ | VAR_  ;
 
 // SCHEMA CONSTRUCT =============================================================
 
@@ -230,6 +234,7 @@ value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;
 literal               :   STRING_         |   LONG_           |   DOUBLE_
                       |   BOOLEAN_        |   DATE_           |   DATETIME_     ;
+regex                 :   STRING_         ;
 
 // UNRESERVED KEYWORDS =========================================================
 // Most of Graql syntax should not be reserved from being used as identifiers

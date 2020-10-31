@@ -169,7 +169,19 @@ public class GraqlToken {
 
     public interface Comparator {
 
+        default boolean isVariable() {
+            return false;
+        }
+
+        default boolean isString() {
+            return false;
+        }
+
         default boolean isEquality() {
+            return false;
+        }
+
+        default boolean isSubString() {
             return false;
         }
 
@@ -177,15 +189,53 @@ public class GraqlToken {
             return false;
         }
 
+        default Variable asVariable() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
+        }
+
+        default String asString() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
+        }
+
         default Equality asEquality() {
             throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Equality.class)));
+        }
+
+        default SubString asSubString() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(SubString.class)));
         }
 
         default Pattern asPattern() {
             throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Pattern.class)));
         }
 
-        enum Equality implements Comparator {
+        interface Variable extends Comparator {
+
+            @Override
+            default boolean isVariable() {
+                return true;
+            }
+
+            @Override
+            default Variable asVariable() {
+                return this;
+            }
+        }
+
+        interface String extends Comparator {
+
+            @Override
+            default boolean isString() {
+                return true;
+            }
+
+            @Override
+            default String asString() {
+                return this;
+            }
+        }
+
+        enum Equality implements Variable, String {
             EQ("="),
             NEQ("!="),
             GT(">"),
@@ -193,26 +243,28 @@ public class GraqlToken {
             LT("<"),
             LTE("<=");
 
-            private final String comparator;
+            private final java.lang.String comparator;
 
-            Equality(final String comparator) {
+            Equality(final java.lang.String comparator) {
                 this.comparator = comparator;
             }
 
+            @Override
             public boolean isEquality() {
                 return true;
             }
 
+            @Override
             public Equality asEquality() {
                 return this;
             }
 
             @Override
-            public String toString() {
+            public java.lang.String toString() {
                 return this.comparator;
             }
 
-            public static Equality of(final String value) {
+            public static Equality of(final java.lang.String value) {
                 for (Equality c : Equality.values()) {
                     if (c.comparator.equals(value)) {
                         return c;
@@ -222,30 +274,65 @@ public class GraqlToken {
             }
         }
 
-        enum Pattern implements Comparator {
-            CONTAINS("contains"),
-            LIKE("like");
+        enum SubString implements Variable, String {
+            CONTAINS("contains");
 
-            private final String comparator;
+            private final java.lang.String comparator;
 
-            Pattern(final String comparator) {
+            SubString(final java.lang.String comparator) {
                 this.comparator = comparator;
             }
 
+            @Override
+            public boolean isSubString() {
+                return true;
+            }
+
+            @Override
+            public SubString asSubString() {
+                return this;
+            }
+
+            @Override
+            public java.lang.String toString() {
+                return this.comparator;
+            }
+
+            public static SubString of(final java.lang.String value) {
+                for (SubString c : SubString.values()) {
+                    if (c.comparator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
+        }
+
+        enum Pattern implements String {
+            LIKE("like");
+
+            private final java.lang.String comparator;
+
+            Pattern(final java.lang.String comparator) {
+                this.comparator = comparator;
+            }
+
+            @Override
             public boolean isPattern() {
                 return true;
             }
 
+            @Override
             public Pattern asPattern() {
                 return this;
             }
 
             @Override
-            public String toString() {
+            public java.lang.String toString() {
                 return this.comparator;
             }
 
-            public static Pattern of(final String value) {
+            public static Pattern of(final java.lang.String value) {
                 for (Pattern c : Pattern.values()) {
                     if (c.comparator.equals(value)) {
                         return c;

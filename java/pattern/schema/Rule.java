@@ -123,7 +123,7 @@ public class Rule implements Definable {
         int numConstraints = then.constraints().size();
 
         // rules must contain contain either 1 has constraint, or a isa and relation constrain
-        if (!((numConstraints == 1 && then.has().size()==1) || (numConstraints == 2 && then.relation().isPresent() && then.isa().isPresent()))) {
+        if (!((numConstraints == 1 && then.has().size() == 1) || (numConstraints == 2 && then.relation().isPresent() && then.isa().isPresent()))) {
             throw GraqlException.of(INVALID_RULE_THEN.message(label, then));
         }
 

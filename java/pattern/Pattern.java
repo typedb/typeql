@@ -17,7 +17,6 @@
 
 package graql.lang.pattern;
 
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
 
