@@ -53,7 +53,9 @@ import static graql.lang.common.GraqlToken.Constraint.ISAX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_COMPARATOR;
 import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
@@ -243,9 +245,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         public Relation(final List<RolePlayer> players) {
-            if (players == null || players.isEmpty()) {
-                throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER.message());
-            }
+            if (players == null || players.isEmpty()) throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
             this.players = new ArrayList<>(players);
         }
 
@@ -445,7 +445,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             assert !comparator.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
             assert !comparator.isSubString() || value instanceof java.lang.String || value instanceof ThingVariable<?>;
             assert !comparator.isPattern() || value instanceof java.lang.String;
-            if (value == null) throw GraqlException.of(ErrorMessage.MISSING_CONSTRAINT_VALUE);
+            if (comparator == null) throw GraqlException.of(MISSING_CONSTRAINT_COMPARATOR);
+            else if (value == null) throw GraqlException.of(MISSING_CONSTRAINT_VALUE);
             this.comparator = comparator;
             this.value = value;
             this.hash = Objects.hash(Value.class, this.comparator, this.value);
