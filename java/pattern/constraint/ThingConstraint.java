@@ -19,6 +19,7 @@ package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
 import graql.lang.pattern.variable.BoundVariable;
@@ -441,9 +442,18 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final int hash;
 
         Value(final GraqlToken.Comparator comparator, final T value) {
+            assert !comparator.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
+            assert !comparator.isSubString() || value instanceof java.lang.String || value instanceof ThingVariable<?>;
+            assert !comparator.isPattern() || value instanceof java.lang.String;
+            if (value == null) throw GraqlException.of(ErrorMessage.MISSING_CONSTRAINT_VALUE);
             this.comparator = comparator;
             this.value = value;
             this.hash = Objects.hash(Value.class, this.comparator, this.value);
+        }
+
+        @Override
+        public Set<BoundVariable> variables() {
+            return set();
         }
 
         @Override
@@ -454,30 +464,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         @Override
         public Value<?> asValue() {
             return this;
-        }
-
-        public Long asLong() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
-        }
-
-        public Double asDouble() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
-        }
-
-        public Boolean asBoolean() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
-        }
-
-        public String asString() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
-        }
-
-        public DateTime asDateTime() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
-        }
-
-        public Variable asVariable() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
         }
 
         public GraqlToken.Comparator comparator() {
@@ -512,9 +498,28 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return false;
         }
 
-        @Override
-        public Set<BoundVariable> variables() {
-            return set();
+        public Long asLong() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
+        }
+
+        public Double asDouble() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
+        }
+
+        public Boolean asBoolean() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
+        }
+
+        public String asString() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
+        }
+
+        public DateTime asDateTime() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
+        }
+
+        public Variable asVariable() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
         }
 
         @Override
