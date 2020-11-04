@@ -26,6 +26,7 @@ import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -376,7 +377,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Has extends ThingConstraint {
 
-        @Nullable
         private final TypeVariable type;
         private final ThingVariable<?> attribute;
         private final int hash;
@@ -391,7 +391,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public Has(final UnboundVariable var) {this(null, var.toThing());}
 
-        private Has(final TypeVariable type, final ThingVariable<?> attribute) {
+        private Has(@Nullable final TypeVariable type, final ThingVariable<?> attribute) {
             if (attribute == null) throw new NullPointerException("Null attribute");
             this.type = type;
             if (type == null) this.attribute = attribute;
@@ -399,11 +399,9 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 
-
         public ThingVariable<?> attribute() { return attribute; }
 
-        @Nullable
-        public TypeVariable type() { return type; }
+        public Optional<TypeVariable> type() { return Optional.ofNullable(type); }
 
         @Override
         public Set<BoundVariable> variables() {
@@ -432,7 +430,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Has that = (Has) o;
-            return Objects.equals(this.type, that.type) && Objects.equals(this.attribute, that.attribute);
+            return Objects.equals(this.type, that.type) && this.attribute.equals(that.attribute);
         }
 
         @Override

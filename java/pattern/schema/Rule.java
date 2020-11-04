@@ -107,13 +107,13 @@ public class Rule implements Definable {
         }
     }
 
-    private static Stream<Negation> findNegations(Pattern pattern) {
+    private static Stream<Negation<?>> findNegations(Pattern pattern) {
         if (pattern.isNegation()) return Stream.of(pattern.asNegation());
         if (pattern.isVariable()) return Stream.empty();
         return pattern.patterns().stream().flatMap(Rule::findNegations);
     }
 
-    private static Stream<Disjunction> findDisjunctions(Pattern pattern) {
+    private static Stream<Disjunction<?>> findDisjunctions(Pattern pattern) {
         if (pattern.isDisjunction()) return Stream.of(pattern.asDisjunction());
         if (pattern.isVariable()) return Stream.empty();
         return pattern.patterns().stream().flatMap(Rule::findDisjunctions);
@@ -129,7 +129,7 @@ public class Rule implements Definable {
         }
 
         // rule 'has' cannot assign both an attribute type and a named variable
-        if (then.has().size() == 1 && then.has().get(0).type() != null && then.has().get(0).attribute().isNamed()) {
+        if (then.has().size() == 1 && then.has().get(0).type().isPresent() && then.has().get(0).attribute().isNamed()) {
             throw GraqlException.of(INVALID_RULE_THEN_HAS.message(label, then));
         }
 
