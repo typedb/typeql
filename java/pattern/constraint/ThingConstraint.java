@@ -26,6 +26,7 @@ import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -388,16 +389,19 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             this(hidden().type(type), var.toThing());
         }
 
-        private Has(final TypeVariable type, final ThingVariable<?> attribute) {
-            if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
+        public Has(final UnboundVariable var) {this(null, var.toThing());}
+
+        private Has(@Nullable final TypeVariable type, final ThingVariable<?> attribute) {
+            if (attribute == null) throw new NullPointerException("Null attribute");
             this.type = type;
-            this.attribute = attribute.constrain(new Isa(type, false));
+            if (type == null) this.attribute = attribute;
+            else this.attribute = attribute.constrain(new Isa(type, false));
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 
-        public ThingVariable<?> attribute() {
-            return attribute;
-        }
+        public ThingVariable<?> attribute() { return attribute; }
+
+        public Optional<TypeVariable> type() { return Optional.ofNullable(type); }
 
         @Override
         public Set<BoundVariable> variables() {
@@ -417,7 +421,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         @Override
         public String toString() {
             return String.valueOf(HAS) + SPACE +
-                    type.label().get().label() + SPACE +
+                    (type != null ? type.label().get().label() + SPACE: "") +
                     (attribute.isNamed() ? attribute.reference() : attribute.value().get());
         }
 
@@ -426,7 +430,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Has that = (Has) o;
-            return (this.type.equals(that.type) && this.attribute.equals(that.attribute));
+            return Objects.equals(this.type, that.type) && this.attribute.equals(that.attribute);
         }
 
         @Override

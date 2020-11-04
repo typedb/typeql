@@ -148,8 +148,8 @@ player                :   VAR_ ;                                                
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes            :   attribute ( ',' attribute )* ;
-attribute             :   HAS label ( VAR_ | value ) ;                          // Attribute ownership by variable or a
-                                                                                // predicate
+attribute             :   HAS label ( VAR_ | value )                            // ownership by labeled variable or value
+                      |   HAS VAR_ ;                                            // or just value
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
 value                 :   literal
