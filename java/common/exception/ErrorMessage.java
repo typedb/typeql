@@ -62,9 +62,9 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
     public static final ErrorMessage INVALID_RULE_WHEN_CONTAINS_DISJUNCTION =
             new ErrorMessage(21, "Rule '%s' 'when' contains a disjunction.");
     public static final ErrorMessage INVALID_RULE_THEN =
-            new ErrorMessage(22, "Rule '%s' 'then' must be exactly one attribute ownership, or exactly one relation: '%s'.");
+            new ErrorMessage(22, "Rule '%s' 'then' '%s': must be exactly one attribute ownership, or exactly one relation.");
     public static final ErrorMessage INVALID_RULE_THEN_HAS =
-            new ErrorMessage(23, "Rule '%s' 'then' is trying to assign both an attribute type and a variable attribute value: '%s'.");
+            new ErrorMessage(23, "Rule '%s' 'then' '%s': is trying to assign both an attribute type and a variable attribute value.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
             new ErrorMessage(24, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
