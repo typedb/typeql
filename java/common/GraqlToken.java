@@ -17,6 +17,11 @@
 
 package graql.lang.common;
 
+import graql.lang.common.exception.GraqlException;
+
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+
 public class GraqlToken {
 
     public enum Type {
@@ -162,34 +167,179 @@ public class GraqlToken {
         }
     }
 
-    public enum Comparator {
-        EQ("="),
-        NEQ("!="),
-        GT(">"),
-        GTE(">="),
-        LT("<"),
-        LTE("<="),
-        CONTAINS("contains"),
-        LIKE("like");
+    public interface Comparator {
 
-        private final String comparator;
-
-        Comparator(final String comparator) {
-            this.comparator = comparator;
+        default boolean isVariable() {
+            return false;
         }
 
-        @Override
-        public String toString() {
-            return this.comparator;
+        default boolean isString() {
+            return false;
         }
 
-        public static Comparator of(final String value) {
-            for (Comparator c : Comparator.values()) {
-                if (c.comparator.equals(value)) {
-                    return c;
-                }
+        default boolean isEquality() {
+            return false;
+        }
+
+        default boolean isSubString() {
+            return false;
+        }
+
+        default boolean isPattern() {
+            return false;
+        }
+
+        default Variable asVariable() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
+        }
+
+        default String asString() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
+        }
+
+        default Equality asEquality() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Equality.class)));
+        }
+
+        default SubString asSubString() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(SubString.class)));
+        }
+
+        default Pattern asPattern() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Pattern.class)));
+        }
+
+        interface Variable extends Comparator {
+
+            @Override
+            default boolean isVariable() {
+                return true;
             }
-            return null;
+
+            @Override
+            default Variable asVariable() {
+                return this;
+            }
+        }
+
+        interface String extends Comparator {
+
+            @Override
+            default boolean isString() {
+                return true;
+            }
+
+            @Override
+            default String asString() {
+                return this;
+            }
+        }
+
+        enum Equality implements Variable, String {
+            EQ("="),
+            NEQ("!="),
+            GT(">"),
+            GTE(">="),
+            LT("<"),
+            LTE("<=");
+
+            private final java.lang.String comparator;
+
+            Equality(final java.lang.String comparator) {
+                this.comparator = comparator;
+            }
+
+            @Override
+            public boolean isEquality() {
+                return true;
+            }
+
+            @Override
+            public Equality asEquality() {
+                return this;
+            }
+
+            @Override
+            public java.lang.String toString() {
+                return this.comparator;
+            }
+
+            public static Equality of(final java.lang.String value) {
+                for (Equality c : Equality.values()) {
+                    if (c.comparator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
+        }
+
+        enum SubString implements Variable, String {
+            CONTAINS("contains");
+
+            private final java.lang.String comparator;
+
+            SubString(final java.lang.String comparator) {
+                this.comparator = comparator;
+            }
+
+            @Override
+            public boolean isSubString() {
+                return true;
+            }
+
+            @Override
+            public SubString asSubString() {
+                return this;
+            }
+
+            @Override
+            public java.lang.String toString() {
+                return this.comparator;
+            }
+
+            public static SubString of(final java.lang.String value) {
+                for (SubString c : SubString.values()) {
+                    if (c.comparator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
+        }
+
+        enum Pattern implements String {
+            LIKE("like");
+
+            private final java.lang.String comparator;
+
+            Pattern(final java.lang.String comparator) {
+                this.comparator = comparator;
+            }
+
+            @Override
+            public boolean isPattern() {
+                return true;
+            }
+
+            @Override
+            public Pattern asPattern() {
+                return this;
+            }
+
+            @Override
+            public java.lang.String toString() {
+                return this.comparator;
+            }
+
+            public static Pattern of(final java.lang.String value) {
+                for (Pattern c : Pattern.values()) {
+                    if (c.comparator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
         }
     }
 

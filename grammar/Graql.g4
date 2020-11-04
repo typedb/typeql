@@ -153,13 +153,16 @@ attribute             :   HAS label ( VAR_ | value )                            
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
 value                 :   literal
-                      |   comparator  comparable
-                      |   CONTAINS    containable
-                      |   LIKE        regex
+                      |   comparator_equality   comparable_literal
+                      |   comparator_substring  comparable_string
+                      |   comparator_pattern    regex
                       ;
-comparator            :   EQ | NEQ | GT | GTE | LT | LTE ;
-comparable            :   literal | VAR_  ;
-containable           :   STRING_ | VAR_  ;
+comparator_equality   :   EQ | NEQ | GT | GTE | LT | LTE ;
+comparator_substring  :   CONTAINS ;
+comparator_pattern    :   LIKE     ;
+
+comparable_literal    :   literal | VAR_  ;
+comparable_string     :   STRING_ | VAR_  ;
 
 // SCHEMA CONSTRUCT =============================================================
 

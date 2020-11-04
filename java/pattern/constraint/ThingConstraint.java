@@ -19,6 +19,7 @@ package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
 import graql.lang.pattern.variable.BoundVariable;
@@ -44,15 +45,17 @@ import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
 import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Comparator.EQ;
-import static graql.lang.common.GraqlToken.Comparator.LIKE;
+import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
+import static graql.lang.common.GraqlToken.Comparator.Pattern.LIKE;
 import static graql.lang.common.GraqlToken.Constraint.HAS;
 import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_COMPARATOR;
 import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
@@ -242,9 +245,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         public Relation(final List<RolePlayer> players) {
-            if (players == null || players.isEmpty()) {
-                throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER.message());
-            }
+            if (players == null || players.isEmpty()) throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
             this.players = new ArrayList<>(players);
         }
 
@@ -447,9 +448,19 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final int hash;
 
         Value(final GraqlToken.Comparator comparator, final T value) {
+            assert !comparator.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
+            assert !comparator.isSubString() || value instanceof java.lang.String || value instanceof ThingVariable<?>;
+            assert !comparator.isPattern() || value instanceof java.lang.String;
+            if (comparator == null) throw GraqlException.of(MISSING_CONSTRAINT_COMPARATOR);
+            else if (value == null) throw GraqlException.of(MISSING_CONSTRAINT_VALUE);
             this.comparator = comparator;
             this.value = value;
             this.hash = Objects.hash(Value.class, this.comparator, this.value);
+        }
+
+        @Override
+        public Set<BoundVariable> variables() {
+            return set();
         }
 
         @Override
@@ -460,30 +471,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         @Override
         public Value<?> asValue() {
             return this;
-        }
-
-        public Long asLong() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
-        }
-
-        public Double asDouble() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
-        }
-
-        public Boolean asBoolean() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
-        }
-
-        public String asString() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
-        }
-
-        public DateTime asDateTime() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
-        }
-
-        public Variable asVariable() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
         }
 
         public GraqlToken.Comparator comparator() {
@@ -518,9 +505,28 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return false;
         }
 
-        @Override
-        public Set<BoundVariable> variables() {
-            return set();
+        public Long asLong() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
+        }
+
+        public Double asDouble() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
+        }
+
+        public Boolean asBoolean() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
+        }
+
+        public String asString() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
+        }
+
+        public DateTime asDateTime() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
+        }
+
+        public Variable asVariable() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
         }
 
         @Override
@@ -544,7 +550,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Long extends Value<java.lang.Long> {
 
-            public Long(final GraqlToken.Comparator comparator, final long value) {
+            public Long(final GraqlToken.Comparator.Equality comparator, final long value) {
                 super(comparator, value);
             }
 
@@ -561,7 +567,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Double extends Value<java.lang.Double> {
 
-            public Double(final GraqlToken.Comparator comparator, final double value) {
+            public Double(final GraqlToken.Comparator.Equality comparator, final double value) {
                 super(comparator, value);
             }
 
@@ -578,7 +584,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Boolean extends Value<java.lang.Boolean> {
 
-            public Boolean(final GraqlToken.Comparator comparator, final boolean value) {
+            public Boolean(final GraqlToken.Comparator.Equality comparator, final boolean value) {
                 super(comparator, value);
             }
 
@@ -595,7 +601,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class String extends Value<java.lang.String> {
 
-            public String(final GraqlToken.Comparator comparator, final java.lang.String value) {
+            public String(final GraqlToken.Comparator.String comparator, final java.lang.String value) {
                 super(comparator, value);
             }
 
@@ -627,7 +633,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class DateTime extends Value<LocalDateTime> {
 
-            public DateTime(final GraqlToken.Comparator comparator, final LocalDateTime value) {
+            public DateTime(final GraqlToken.Comparator.Equality comparator, final LocalDateTime value) {
                 super(comparator, value);
                 // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
                 final int nanos = value.toLocalTime().getNano();
@@ -651,12 +657,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Variable extends Value<ThingVariable<?>> {
 
-            public Variable(final GraqlToken.Comparator comparator, final UnboundVariable variable) {
-                this(comparator, variable.toThing());
-            }
-
-            private Variable(final GraqlToken.Comparator comparator, final ThingVariable<?> variable) {
-                super(comparator, variable);
+            public Variable(final GraqlToken.Comparator.Variable comparator, final UnboundVariable variable) {
+                super(comparator, variable.toThing());
             }
 
             @Override

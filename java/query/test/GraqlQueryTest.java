@@ -203,7 +203,6 @@ public class GraqlQueryTest {
     @Test
     public void whenCallingToStringOnAQueryWithAContainsPredicate_ResultIsCorrect() {
         final GraqlMatch.Unfiltered match = match(var("x").contains(var("y")));
-
         assertEquals("match $x contains $y;", match.toString());
     }
 

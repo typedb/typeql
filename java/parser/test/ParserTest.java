@@ -1067,7 +1067,7 @@ public class ParserTest {
 
         assertEquals(Collections.nCopies(numQueries, matchInsert), queries);
     }
-
+r
     @Test
     public void whenParsingAListOfQueriesWithASyntaxError_ReportError() {
         final String queryText = "define person sub entity has name;"; // note no semicolon

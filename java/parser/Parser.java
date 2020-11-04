@@ -70,6 +70,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.pair;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
 import static graql.lang.common.util.Strings.unescapeRegex;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.toList;
@@ -819,57 +820,39 @@ public class Parser extends GraqlBaseVisitor {
         final Object value;
 
         if (ctx.literal() != null) {
-            comparator = GraqlToken.Comparator.EQ;
-        } else if (ctx.comparator() != null) {
-            comparator = GraqlToken.Comparator.of(ctx.comparator().getText());
-        } else if (ctx.CONTAINS() != null) {
-            comparator = GraqlToken.Comparator.of(ctx.CONTAINS().getText());
-        } else if (ctx.LIKE() != null) {
-            comparator = GraqlToken.Comparator.of(ctx.LIKE().getText());
-        } else {
-            throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
-        }
-
-        if (comparator == null) {
-            throw new IllegalArgumentException("Unrecognised Value Comparator: " + ctx.getText());
-        }
-
-        if (ctx.literal() != null) {
+            comparator = GraqlToken.Comparator.Equality.EQ;
             value = visitLiteral(ctx.literal());
-        } else if (ctx.comparable() != null) {
-            if (ctx.comparable().literal() != null) {
-                value = visitLiteral(ctx.comparable().literal());
-            } else if (ctx.comparable().VAR_() != null) {
-                value = getVar(ctx.comparable().VAR_());
-            } else {
-                throw new IllegalArgumentException("Unrecognised Comparable value: " + ctx.comparable().getText());
-            }
-        } else if (ctx.containable() != null) {
-            if (ctx.containable().STRING_() != null) {
-                value = getString(ctx.containable().STRING_());
-            } else if (ctx.containable().VAR_() != null) {
-                value = getVar(ctx.containable().VAR_());
-            } else {
-                throw new IllegalArgumentException("Unrecognised Containable value: " + ctx.containable().getText());
-            }
-        } else if (ctx.regex() != null) {
+        } else if (ctx.comparator_equality() != null) {
+            comparator = GraqlToken.Comparator.Equality.of(ctx.comparator_equality().getText());
+            if (ctx.comparable_literal().literal() != null) value = visitLiteral(ctx.comparable_literal().literal());
+            else if (ctx.comparable_literal().VAR_() != null) value = getVar(ctx.comparable_literal().VAR_());
+            else throw GraqlException.of(ILLEGAL_STATE);
+        } else if (ctx.comparator_substring() != null) {
+            comparator = GraqlToken.Comparator.SubString.CONTAINS;
+            assert comparator == GraqlToken.Comparator.SubString.of(ctx.comparator_substring().getText());
+            if (ctx.comparable_string().STRING_() != null) value = getString(ctx.comparable_string().STRING_());
+            else if (ctx.comparable_string().VAR_() != null) value = getVar(ctx.comparable_string().VAR_());
+            else throw GraqlException.of(ILLEGAL_STATE);
+        } else if (ctx.comparator_pattern() != null) {
+            comparator = GraqlToken.Comparator.Pattern.LIKE;
+            assert comparator == GraqlToken.Comparator.Pattern.of(ctx.comparator_pattern().getText());
             value = visitRegex(ctx.regex());
-        } else {
-            throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
-        }
+        } else throw GraqlException.of(ILLEGAL_STATE);
+
+        assert comparator != null;
 
         if (value instanceof Long) {
-            return new ThingConstraint.Value.Long(comparator, (Long) value);
+            return new ThingConstraint.Value.Long(comparator.asEquality(), (Long) value);
         } else if (value instanceof Double) {
-            return new ThingConstraint.Value.Double(comparator, (Double) value);
+            return new ThingConstraint.Value.Double(comparator.asEquality(), (Double) value);
         } else if (value instanceof Boolean) {
-            return new ThingConstraint.Value.Boolean(comparator, (Boolean) value);
+            return new ThingConstraint.Value.Boolean(comparator.asEquality(), (Boolean) value);
         } else if (value instanceof String) {
-            return new ThingConstraint.Value.String(comparator, (String) value);
+            return new ThingConstraint.Value.String(comparator.asString(), (String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ThingConstraint.Value.DateTime(comparator, (LocalDateTime) value);
+            return new ThingConstraint.Value.DateTime(comparator.asEquality(), (LocalDateTime) value);
         } else if (value instanceof UnboundVariable) {
-            return new ThingConstraint.Value.Variable(comparator, (UnboundVariable) value);
+            return new ThingConstraint.Value.Variable(comparator.asVariable(), (UnboundVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }

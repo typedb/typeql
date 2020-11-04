@@ -46,31 +46,33 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
     public static final ErrorMessage ILLEGAL_CONSTRAINT_REPETITION =
             new ErrorMessage(13, "The variable '%s' contains illegally repeating constraints: '%s' and '%s'.");
     public static final ErrorMessage MISSING_CONSTRAINT_RELATION_PLAYER =
-            new ErrorMessage(14, "The relation variable has not been provided with role players.");
+            new ErrorMessage(14, "A relation variable has not been provided with role players.");
+    public static final ErrorMessage MISSING_CONSTRAINT_VALUE =
+            new ErrorMessage(15, "A value constraint has not been provided with a variable or literal value.");
+    public static final ErrorMessage MISSING_CONSTRAINT_COMPARATOR =
+            new ErrorMessage(16, "A value constraint has not been provided with a comparator.");
     public static final ErrorMessage INVALID_CONSTRAINT_DATETIME_PRECISION =
-            new ErrorMessage(15, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
+            new ErrorMessage(17, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
-            new ErrorMessage(16, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
+            new ErrorMessage(18, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
     public static final ErrorMessage INVALID_RULE_WHEN_MISSING_PATTERNS =
-            new ErrorMessage(17, "Rule '%s' 'when' has not been provided with any patterns.");
+            new ErrorMessage(19, "Rule '%s' 'when' has not been provided with any patterns.");
     public static final ErrorMessage INVALID_RULE_WHEN_NESTED_NEGATION =
-            new ErrorMessage(18, "Rule '%s' 'when' contains a nested negation.");
+            new ErrorMessage(20, "Rule '%s' 'when' contains a nested negation.");
     public static final ErrorMessage INVALID_RULE_WHEN_CONTAINS_DISJUNCTION =
-            new ErrorMessage(19, "Rule '%s' 'when' contains a disjunction.");
+            new ErrorMessage(21, "Rule '%s' 'when' contains a disjunction.");
     public static final ErrorMessage INVALID_RULE_THEN =
-            new ErrorMessage(20, "Rule '%s' 'then' must strictly be a single of either an attribute ownership, or a relation");
-    public static final ErrorMessage INVALID_RULE_THEN_HAS =
-            new ErrorMessage(21, "Rule '%s' 'then' is trying to assign both an attribute type and a variable attribute value: '%s'. Either make the attribute value concrete, or remove the attribute type.");
+            new ErrorMessage(22, "Rule '%s' 'then' must strictly be either an attribute ownership, or a relation: '%s'.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
-            new ErrorMessage(22, "Rule '%s' 'then' variables must be present in rule 'when'.");
+            new ErrorMessage(23, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(23, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(24, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(24, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(25, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(25, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(26, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(26, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(27, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";
