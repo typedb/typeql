@@ -599,6 +599,66 @@ public class ParserTest {
     }
 
     @Test
+    public void whenParsingDefineQueryWithOwnsOverrides_ResultIsSameAsJavaGraql() {
+        final String query = "define\n" +
+                "triangle sub entity;\n" +
+                "triangle owns side-length;\n" +
+                "triangle-right-angled sub triangle;\n" +
+                "triangle-right-angled owns hypotenuse-length as side-length;";
+        final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
+
+        final GraqlDefine expected = define(
+                type("triangle").sub("entity"),
+                type("triangle").owns("side-length"),
+                type("triangle-right-angled").sub("triangle"),
+                type("triangle-right-angled").owns("hypotenuse-length", "side-length")
+        );
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void whenParsingDefineQueryWithRelatesOverrides_ResultIsSameAsJavaGraql() {
+        final String query = "define\n" +
+                "pokemon sub entity;\n" +
+                "evolves sub relation;\n" +
+                "evolves relates from, relates to;\n" +
+                "evolves-final sub evolves;\n" +
+                "evolves-final relates from-final as from;";
+        final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
+
+        final GraqlDefine expected = define(
+                type("pokemon").sub("entity"),
+                type("evolves").sub("relation"),
+                type("evolves").relates("from").relates("to"),
+                type("evolves-final").sub("evolves"),
+                type("evolves-final").relates("from-final", "from")
+        );
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void whenParsingDefineQueryWithPlaysOverrides_ResultIsSameAsJavaGraql() {
+        final String query = "define\n" +
+                "pokemon sub entity;\n" +
+                "evolves sub relation;\n" +
+                "evolves relates from, relates to;\n" +
+                "evolves-final sub evolves;\n" +
+                "evolves-final relates from-final as from;\n" +
+                "pokemon plays evolves-final:from-final as from;";
+        final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
+
+        final GraqlDefine expected = define(
+                type("pokemon").sub("entity"),
+                type("evolves").sub("relation"),
+                type("evolves").relates("from").relates("to"),
+                type("evolves-final").sub("evolves"),
+                type("evolves-final").relates("from-final", "from"),
+                type("pokemon").plays("evolves-final", "from-final", "from")
+        );
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
     public void whenParsingDefineQuery_ResultIsSameAsJavaGraql() {
         final String query = "define\n" +
                 "pokemon sub entity;\n" +

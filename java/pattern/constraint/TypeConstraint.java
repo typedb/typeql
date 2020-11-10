@@ -466,7 +466,17 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return OWNS.toString() + SPACE + attributeType + (isKey ? "" + SPACE + IS_KEY : "");
+            StringBuilder syntax = new StringBuilder();
+            syntax.append(OWNS).append(SPACE);
+            if (!attributeType.label().isPresent()) syntax.append(attributeType);
+            else syntax.append(attributeType.label().get().label());
+            if (isKey) syntax.append(SPACE).append(IS_KEY);
+            if (overriddenAttributeType!=null) {
+                syntax.append(SPACE).append(AS).append(SPACE);
+                if (!overriddenAttributeType.label().isPresent()) syntax.append(overriddenAttributeType);
+                else syntax.append(overriddenAttributeType.label().get().label());
+            }
+            return syntax.toString();
         }
 
         @Override
@@ -562,7 +572,24 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return PLAYS.toString() + SPACE + roleType;
+            StringBuilder syntax = new StringBuilder();
+
+            syntax.append(PLAYS).append(SPACE);
+            if (relationType!=null) {
+                if (!relationType.label().isPresent()) syntax.append(relationType);
+                else syntax.append(relationType.label().get().label());
+                syntax.append(COLON);
+            }
+
+            if (!roleType.label().isPresent()) syntax.append(roleType);
+            else syntax.append(roleType.label().get().label());
+
+            if (overriddenRoleType != null) {
+                syntax.append(SPACE).append(AS).append(SPACE);
+                if (!overriddenRoleType.label().isPresent()) syntax.append(overriddenRoleType);
+                else syntax.append(overriddenRoleType.label().get().label());
+            }
+            return syntax.toString();
         }
 
         @Override
