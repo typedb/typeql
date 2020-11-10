@@ -104,7 +104,7 @@ public class GraqlQueryTest {
         assertValidToString(query);
     }
 
-    private void assertValidToString(final GraqlQuery query) {
+    private void assertValidToString(GraqlQuery query) {
         //No need to execute the insert query
         final GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
@@ -200,11 +200,11 @@ public class GraqlQueryTest {
         assertEquals(query, Graql.parseQuery(query).toString());
     }
 
-    private void assertSameStringRepresentation(final GraqlMatch query) {
+    private void assertSameStringRepresentation(GraqlMatch query) {
         assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
     }
 
-    private void assertEquivalent(final GraqlQuery query, final String queryString) {
+    private void assertEquivalent(GraqlQuery query, String queryString) {
         assertEquals(queryString, query.toString());
         assertEquals(query.toString(), Graql.parseQuery(queryString).toString());
     }

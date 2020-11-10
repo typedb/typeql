@@ -30,7 +30,7 @@ import static graql.lang.Graql.var;
 import static org.junit.Assert.assertEquals;
 
 public class MavenApplicationTest {
-    private void assertQueryEquals(final GraqlQuery expected, final GraqlQuery parsed, final String query) {
+    private void assertQueryEquals(GraqlQuery expected, GraqlQuery parsed, String query) {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parseQuery(parsed.toString()));
         assertEquals(query, expected.toString());

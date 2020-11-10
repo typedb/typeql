@@ -23,11 +23,11 @@ import graql.lang.pattern.variable.UnboundVariable;
 
 public interface ConceptVariableBuilder {
 
-    default ConceptVariable is(final String var) {
+    default ConceptVariable is(String var) {
         return is(UnboundVariable.named(var));
     }
 
-    default ConceptVariable is(final UnboundVariable var) {
+    default ConceptVariable is(UnboundVariable var) {
         return constrain(new ConceptConstraint.Is(var));
     }
 

@@ -24,7 +24,7 @@ import java.util.List;
 
 public class GraqlUndefine extends GraqlDefinable {
 
-    public GraqlUndefine(final List<Definable> definables) {
+    public GraqlUndefine(List<Definable> definables) {
         super(GraqlToken.Command.UNDEFINE, definables);
     }
 }

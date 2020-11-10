@@ -41,7 +41,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     private final T pattern;
     private Negation<Disjunction<Conjunction<Conjunctable>>> normalised;
 
-    public Negation(final T pattern) {
+    public Negation(T pattern) {
         if (pattern == null) throw new NullPointerException("Null patterns");
         else if (pattern.isNegation()) throw GraqlException.of(ErrorMessage.REDUNDANT_NESTED_NEGATION);
         this.pattern = pattern;
@@ -91,7 +91,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Negation<?> negation = (Negation<?>) o;

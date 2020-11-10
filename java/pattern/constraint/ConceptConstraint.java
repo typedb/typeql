@@ -60,11 +60,11 @@ public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
         private final ConceptVariable variable;
         private final int hash;
 
-        public Is(final UnboundVariable variable) {
+        public Is(UnboundVariable variable) {
             this(variable.toConcept());
         }
 
-        private Is(final ConceptVariable variable) {
+        private Is(ConceptVariable variable) {
             if (variable == null) throw new NullPointerException("Null var");
             this.variable = variable;
             this.hash = Objects.hash(Is.class, this.variable);
@@ -95,7 +95,7 @@ public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Is that = (Is) o;

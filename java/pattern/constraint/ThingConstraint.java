@@ -123,7 +123,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final String iid;
         private final int hash;
 
-        public IID(final String iid) {
+        public IID(String iid) {
             if (iid == null) throw new NullPointerException("Null IID");
             if (!REGEX.matcher(iid).matches()) {
                 throw GraqlException.of(INVALID_IID_STRING.message(iid, REGEX.toString()));
@@ -152,7 +152,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final IID that = (IID) o;
@@ -171,19 +171,19 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final boolean isExplicit;
         private final int hash;
 
-        public Isa(final String type, final boolean isExplicit) {
+        public Isa(String type, boolean isExplicit) {
             this(hidden().type(type), isExplicit);
         }
 
-        public Isa(final UnboundVariable typeVar, final boolean isExplicit) {
+        public Isa(UnboundVariable typeVar, boolean isExplicit) {
             this(typeVar.toType(), isExplicit);
         }
 
-        public Isa(final Either<String, UnboundVariable> typeArg, final boolean isExplicit) {
+        public Isa(Either<String, UnboundVariable> typeArg, boolean isExplicit) {
             this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit);
         }
 
-        private Isa(final TypeVariable type, final boolean isExplicit) {
+        private Isa(TypeVariable type, boolean isExplicit) {
             if (type == null) {
                 throw new NullPointerException("Null type");
             }
@@ -221,7 +221,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Isa that = (Isa) o;
@@ -239,16 +239,16 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final List<RolePlayer> players;
         private String scope;
 
-        public Relation(final RolePlayer player) {
+        public Relation(RolePlayer player) {
             this(list(player));
         }
 
-        public Relation(final List<RolePlayer> players) {
+        public Relation(List<RolePlayer> players) {
             if (players == null || players.isEmpty()) throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
             this.players = new ArrayList<>(players);
         }
 
-        public void setScope(final String relationLabel) {
+        public void setScope(String relationLabel) {
             this.scope = relationLabel;
             players.forEach(player -> player.setScope(scope));
         }
@@ -257,7 +257,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return scope != null;
         }
 
-        public void addPlayers(final RolePlayer player) {
+        public void addPlayers(RolePlayer player) {
             if (scope != null) player.setScope(scope);
             players.add(player);
         }
@@ -292,7 +292,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Relation that = (Relation) o;
@@ -309,29 +309,29 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             private TypeVariable roleType;
             private final ThingVariable<?> player;
 
-            public RolePlayer(final String roleType, final UnboundVariable playerVar) {
+            public RolePlayer(String roleType, UnboundVariable playerVar) {
                 this(roleType == null ? null : hidden().type(roleType), playerVar.toThing());
             }
 
-            public RolePlayer(final UnboundVariable roleTypeVar, final UnboundVariable playerVar) {
+            public RolePlayer(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
                 this(roleTypeVar == null ? null : roleTypeVar.toType(), playerVar.toThing());
             }
 
-            public RolePlayer(final UnboundVariable playerVar) {
+            public RolePlayer(UnboundVariable playerVar) {
                 this(null, playerVar.toThing());
             }
 
-            public RolePlayer(final Either<String, UnboundVariable> roleTypeArg, final UnboundVariable playerVar) {
+            public RolePlayer(Either<String, UnboundVariable> roleTypeArg, UnboundVariable playerVar) {
                 this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType), playerVar.toThing());
             }
 
-            private RolePlayer(@Nullable final TypeVariable roleType, final ThingVariable<?> player) {
+            private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
                 if (player == null) throw new NullPointerException("Null player");
                 this.roleType = roleType;
                 this.player = player;
             }
 
-            public void setScope(final String relationLabel) {
+            public void setScope(String relationLabel) {
                 if (roleType != null && roleType.label().isPresent()) {
                     this.roleType = hidden().type(relationLabel, roleType.label().get().label());
                 }
@@ -359,7 +359,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             }
 
             @Override
-            public boolean equals(final Object o) {
+            public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 final RolePlayer that = (RolePlayer) o;
@@ -379,17 +379,17 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final ThingVariable<?> attribute;
         private final int hash;
 
-        public Has(final String type, final ThingConstraint.Value<?> value) {
+        public Has(String type, ThingConstraint.Value<?> value) {
             this(hidden().type(type), hidden().constrain(value));
         }
 
-        public Has(final String type, final UnboundVariable var) {
+        public Has(String type, UnboundVariable var) {
             this(hidden().type(type), var.toThing());
         }
 
-        public Has(final UnboundVariable var) {this(null, var.toThing());}
+        public Has(UnboundVariable var) {this(null, var.toThing());}
 
-        private Has(@Nullable final TypeVariable type, final ThingVariable<?> attribute) {
+        private Has(@Nullable TypeVariable type, ThingVariable<?> attribute) {
             if (attribute == null) throw new NullPointerException("Null attribute");
             this.type = type;
             if (type == null) this.attribute = attribute;
@@ -424,7 +424,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Has that = (Has) o;
@@ -443,7 +443,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final T value;
         private final int hash;
 
-        Value(final GraqlToken.Comparator comparator, final T value) {
+        Value(GraqlToken.Comparator comparator, T value) {
             assert !comparator.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
             assert !comparator.isSubString() || value instanceof java.lang.String || value instanceof ThingVariable<?>;
             assert !comparator.isPattern() || value instanceof java.lang.String;
@@ -532,7 +532,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Value<?> that = (Value<?>) o;
@@ -546,7 +546,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Long extends Value<java.lang.Long> {
 
-            public Long(final GraqlToken.Comparator.Equality comparator, final long value) {
+            public Long(GraqlToken.Comparator.Equality comparator, long value) {
                 super(comparator, value);
             }
 
@@ -563,7 +563,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Double extends Value<java.lang.Double> {
 
-            public Double(final GraqlToken.Comparator.Equality comparator, final double value) {
+            public Double(GraqlToken.Comparator.Equality comparator, double value) {
                 super(comparator, value);
             }
 
@@ -580,7 +580,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Boolean extends Value<java.lang.Boolean> {
 
-            public Boolean(final GraqlToken.Comparator.Equality comparator, final boolean value) {
+            public Boolean(GraqlToken.Comparator.Equality comparator, boolean value) {
                 super(comparator, value);
             }
 
@@ -597,7 +597,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class String extends Value<java.lang.String> {
 
-            public String(final GraqlToken.Comparator.String comparator, final java.lang.String value) {
+            public String(GraqlToken.Comparator.String comparator, java.lang.String value) {
                 super(comparator, value);
             }
 
@@ -629,7 +629,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class DateTime extends Value<LocalDateTime> {
 
-            public DateTime(final GraqlToken.Comparator.Equality comparator, final LocalDateTime value) {
+            public DateTime(GraqlToken.Comparator.Equality comparator, LocalDateTime value) {
                 super(comparator, value);
                 // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
                 final int nanos = value.toLocalTime().getNano();
@@ -653,7 +653,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Variable extends Value<ThingVariable<?>> {
 
-            public Variable(final GraqlToken.Comparator.Variable comparator, final UnboundVariable variable) {
+            public Variable(GraqlToken.Comparator.Variable comparator, UnboundVariable variable) {
                 super(comparator, variable.toThing());
             }
 

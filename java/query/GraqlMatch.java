@@ -65,17 +65,17 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     private List<BoundVariable> variables;
     private List<UnboundVariable> variablesNamedUnbound;
 
-    GraqlMatch(final Conjunction<? extends Pattern> conjunction) {
+    GraqlMatch(Conjunction<? extends Pattern> conjunction) {
         this(conjunction, new ArrayList<>());
     }
 
-    GraqlMatch(final Conjunction<? extends Pattern> conjunction, final List<UnboundVariable> filter) {
+    GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter) {
         this(conjunction, filter, null, null, null);
     }
 
     // We keep this contructor 'public' as it is more efficient for query parsing
-    public GraqlMatch(final Conjunction<? extends Pattern> conjunction, final List<UnboundVariable> filter,
-                      final Sortable.Sorting sorting, final Long offset, final Long limit) {
+    public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter,
+                      Sortable.Sorting sorting, Long offset, Long limit) {
         if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_FILTER_VARIABLES.message());
         this.conjunction = conjunction;
         this.filter = list(filter);
@@ -96,15 +96,15 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     @Override
-    public Aggregate aggregate(final GraqlToken.Aggregate.Method method, final UnboundVariable var) {
+    public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var) {
         return new Aggregate(this, method, var);
     }
 
-    public Group group(final String var) {
+    public Group group(String var) {
         return group(UnboundVariable.named(var));
     }
 
-    public Group group(final UnboundVariable var) {
+    public Group group(UnboundVariable var) {
         return new Group(this, var);
     }
 
@@ -172,7 +172,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null) return false;
         if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
@@ -195,110 +195,110 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public static class Unfiltered extends GraqlMatch implements Sortable<Sorted, Offsetted, Limited> {
 
-        public Unfiltered(final List<? extends Pattern> patterns) {
+        public Unfiltered(List<? extends Pattern> patterns) {
             super(validConjunction(patterns));
         }
 
-        static Conjunction<? extends Pattern> validConjunction(final List<? extends Pattern> patterns) {
+        static Conjunction<? extends Pattern> validConjunction(List<? extends Pattern> patterns) {
             if (patterns.size() == 0) throw GraqlException.of(MISSING_PATTERNS.message());
             return new Conjunction<>(patterns);
         }
 
-        public GraqlMatch.Filtered get(final String var, final String... vars) {
+        public GraqlMatch.Filtered get(String var, String... vars) {
             return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
         }
 
-        public GraqlMatch.Filtered get(final UnboundVariable var, final UnboundVariable... vars) {
+        public GraqlMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {
             final List<UnboundVariable> varList = new ArrayList<>();
             varList.add(var);
             varList.addAll(Arrays.asList(vars));
             return get(varList);
         }
 
-        public GraqlMatch.Filtered get(final List<UnboundVariable> vars) {
+        public GraqlMatch.Filtered get(List<UnboundVariable> vars) {
             return new GraqlMatch.Filtered(this, vars);
         }
 
-        public GraqlMatch.Sorted sort(final Sorting sorting) {
+        public GraqlMatch.Sorted sort(Sorting sorting) {
             return new GraqlMatch.Sorted(this, sorting);
         }
 
-        public GraqlMatch.Offsetted offset(final long offset) {
+        public GraqlMatch.Offsetted offset(long offset) {
             return new GraqlMatch.Offsetted(this, offset);
         }
 
-        public GraqlMatch.Limited limit(final long limit) {
+        public GraqlMatch.Limited limit(long limit) {
             return new GraqlMatch.Limited(this, limit);
         }
 
-        public final GraqlInsert insert(final ThingVariable<?>... things) {
+        public final GraqlInsert insert(ThingVariable<?>... things) {
             return new GraqlInsert(this, list(things));
         }
 
-        public final GraqlInsert insert(final List<ThingVariable<?>> things) {
+        public final GraqlInsert insert(List<ThingVariable<?>> things) {
             return new GraqlInsert(this, things);
         }
 
-        public final GraqlDelete delete(final ThingVariable<?>... things) {
+        public final GraqlDelete delete(ThingVariable<?>... things) {
             return new GraqlDelete(this, list(things));
         }
 
-        public final GraqlDelete delete(final List<ThingVariable<?>> things) {
+        public final GraqlDelete delete(List<ThingVariable<?>> things) {
             return new GraqlDelete(this, things);
         }
     }
 
     public static class Filtered extends GraqlMatch implements Sortable<Sorted, Offsetted, Limited> {
 
-        Filtered(final Unfiltered unfiltered, final List<UnboundVariable> vars) {
+        Filtered(Unfiltered unfiltered, List<UnboundVariable> vars) {
             super(unfiltered.conjunction(), vars, null, null, null);
         }
 
         @Override
-        public GraqlMatch.Sorted sort(final Sorting sorting) {
+        public GraqlMatch.Sorted sort(Sorting sorting) {
             return new GraqlMatch.Sorted(this, sorting);
         }
 
         @Override
-        public GraqlMatch.Offsetted offset(final long offset) {
+        public GraqlMatch.Offsetted offset(long offset) {
             return new GraqlMatch.Offsetted(this, offset);
         }
 
         @Override
-        public GraqlMatch.Limited limit(final long limit) {
+        public GraqlMatch.Limited limit(long limit) {
             return new GraqlMatch.Limited(this, limit);
         }
     }
 
     public static class Sorted extends GraqlMatch {
 
-        Sorted(final GraqlMatch match, final Sortable.Sorting sorting) {
+        Sorted(GraqlMatch match, Sortable.Sorting sorting) {
             super(match.conjunction, match.filter, sorting, match.offset, match.limit);
         }
 
-        public GraqlMatch.Offsetted offset(final long offset) {
+        public GraqlMatch.Offsetted offset(long offset) {
             return new GraqlMatch.Offsetted(this, offset);
         }
 
-        public GraqlMatch.Limited limit(final long limit) {
+        public GraqlMatch.Limited limit(long limit) {
             return new GraqlMatch.Limited(this, limit);
         }
     }
 
     public static class Offsetted extends GraqlMatch {
 
-        Offsetted(final GraqlMatch match, final long offset) {
+        Offsetted(GraqlMatch match, long offset) {
             super(match.conjunction, match.filter, match.sorting, offset, match.limit);
         }
 
-        public GraqlMatch.Limited limit(final long limit) {
+        public GraqlMatch.Limited limit(long limit) {
             return new GraqlMatch.Limited(this, limit);
         }
     }
 
     public static class Limited extends GraqlMatch {
 
-        Limited(final GraqlMatch match, final long limit) {
+        Limited(GraqlMatch match, long limit) {
             super(match.conjunction, match.filter, match.sorting, match.offset, limit);
         }
     }
@@ -310,7 +310,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         private final UnboundVariable var;
         private final int hash;
 
-        Aggregate(final GraqlMatch query, final GraqlToken.Aggregate.Method method, final UnboundVariable var) {
+        Aggregate(GraqlMatch query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
@@ -357,7 +357,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -381,7 +381,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         private final UnboundVariable var;
         private final int hash;
 
-        Group(final GraqlMatch query, final UnboundVariable var) {
+        Group(GraqlMatch query, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.filter().contains(var))
@@ -401,7 +401,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public Aggregate aggregate(final GraqlToken.Aggregate.Method method, final UnboundVariable var) {
+        public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var) {
             return new Aggregate(this, method, var);
         }
 
@@ -418,7 +418,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -440,7 +440,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             private final UnboundVariable var;
             private final int hash;
 
-            Aggregate(final GraqlMatch.Group group, final GraqlToken.Aggregate.Method method, final UnboundVariable var) {
+            Aggregate(GraqlMatch.Group group, GraqlToken.Aggregate.Method method, UnboundVariable var) {
                 if (group == null) throw new NullPointerException("GraqlGet.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
                 if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
@@ -486,7 +486,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             }
 
             @Override
-            public boolean equals(final Object o) {
+            public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 

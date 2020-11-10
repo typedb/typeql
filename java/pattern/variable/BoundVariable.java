@@ -29,7 +29,7 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class BoundVariable extends Variable implements Conjunctable {
 
-    BoundVariable(final Reference reference) {
+    BoundVariable(Reference reference) {
         super(reference);
     }
 

@@ -24,7 +24,7 @@ public class GraqlArg {
 
         private final String annotation;
 
-        Has(final String annotation) {
+        Has(String annotation) {
             this.annotation = annotation;
         }
 
@@ -33,7 +33,7 @@ public class GraqlArg {
             return annotation;
         }
 
-        public static GraqlArg.Has of(final String annotation) {
+        public static GraqlArg.Has of(String annotation) {
             for (GraqlArg.Has ann : GraqlArg.Has.values()) {
                 if (ann.annotation.equals(annotation)) {
                     return ann;
@@ -52,7 +52,7 @@ public class GraqlArg {
 
         private final String type;
 
-        ValueType(final String type) {
+        ValueType(String type) {
             this.type = type;
         }
 
@@ -61,7 +61,7 @@ public class GraqlArg {
             return this.type;
         }
 
-        public static ValueType of(final String value) {
+        public static ValueType of(String value) {
             for (ValueType c : ValueType.values()) {
                 if (c.type.equals(value)) {
                     return c;
@@ -77,7 +77,7 @@ public class GraqlArg {
 
         private final String order;
 
-        Order(final String order) {
+        Order(String order) {
             this.order = order;
         }
 
@@ -86,7 +86,7 @@ public class GraqlArg {
             return this.order;
         }
 
-        public static Order of(final String value) {
+        public static Order of(String value) {
             for (Order c : Order.values()) {
                 if (c.order.equals(value)) {
                     return c;
@@ -106,7 +106,7 @@ public class GraqlArg {
 
         private final String algorithm;
 
-        Algorithm(final String algorithm) {
+        Algorithm(String algorithm) {
             this.algorithm = algorithm;
         }
 
@@ -115,7 +115,7 @@ public class GraqlArg {
             return this.algorithm;
         }
 
-        public static Algorithm of(final String value) {
+        public static Algorithm of(String value) {
             for (Algorithm a : Algorithm.values()) {
                 if (a.algorithm.equals(value)) {
                     return a;

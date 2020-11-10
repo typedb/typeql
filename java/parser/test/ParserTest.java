@@ -72,13 +72,13 @@ public class ParserTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private void assertQueryEquals(final GraqlQuery expected, final GraqlQuery parsed, final String query) {
+    private void assertQueryEquals(GraqlQuery expected, GraqlQuery parsed, String query) {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parseQuery(parsed.toString()));
         assertEquals(query, expected.toString());
     }
 
-    private void assertQueryEquals(final Pattern expected, final Pattern parsed, final String query) {
+    private void assertQueryEquals(Pattern expected, Pattern parsed, String query) {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parsePattern(parsed.toString()));
         assertEquals(query, expected.toString());
@@ -1176,7 +1176,7 @@ public class ParserTest {
         assertEquals(expected, parsed);
     }
 
-    private static void assertParseEquivalence(final String query) {
+    private static void assertParseEquivalence(String query) {
         assertEquals(query, parseQuery(query).toString());
     }
 }

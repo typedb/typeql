@@ -44,7 +44,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
     private final int hash;
     private Disjunction<Conjunction<Conjunctable>> normalised;
 
-    public Conjunction(final List<T> patterns) {
+    public Conjunction(List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
@@ -62,7 +62,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
         return patterns;
     }
 
-    public static <U extends Pattern> Conjunction<U> merge(final List<Conjunction<U>> conjunctions) {
+    public static <U extends Pattern> Conjunction<U> merge(List<Conjunction<U>> conjunctions) {
         return new Conjunction<>(conjunctions.stream().flatMap(p -> p.patterns().stream()).collect(toList()));
     }
 
@@ -103,7 +103,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Conjunction<?> that = (Conjunction<?>) o;
@@ -121,7 +121,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
         private final transient int[] axesSizeProduct;
         private final Map<Integer, List<E>> computed;
 
-        CartesianList(final List<List<E>> axes) {
+        CartesianList(List<List<E>> axes) {
             this.axes = axes;
             axesSizeProduct = new int[axes.size() + 1];
             axesSizeProduct[axes.size()] = 1;
@@ -132,12 +132,12 @@ public class Conjunction<T extends Pattern> implements Pattern {
             computed = new HashMap<>();
         }
 
-        private int getAxisIndexForProductIndex(final int index, final int axis) {
+        private int getAxisIndexForProductIndex(int index, int axis) {
             return (index / axesSizeProduct[axis + 1]) % axes.get(axis).size();
         }
 
         @Override
-        public List<E> get(final int index) {
+        public List<E> get(int index) {
             if (index >= size()) throw new IndexOutOfBoundsException();
 
             return computed.computeIfAbsent(index, i -> new AbstractList<E>() {
@@ -148,7 +148,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
                 }
 
                 @Override
-                public E get(final int axis) {
+                public E get(int axis) {
                     if (axis >= size()) throw new IndexOutOfBoundsException();
                     return axes.get(axis).get(getAxisIndexForProductIndex(i, axis));
                 }

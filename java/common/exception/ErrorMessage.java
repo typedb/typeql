@@ -79,7 +79,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";
 
-    public ErrorMessage(final int codeNumber, final String messageBody) {
+    public ErrorMessage(int codeNumber, String messageBody) {
         super(codePrefix, codeNumber, messagePrefix, messageBody);
     }
 }

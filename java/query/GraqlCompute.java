@@ -61,7 +61,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     Arguments arguments = null;
     // But 'arguments' will also be set when where() is called for cluster/centrality
 
-    GraqlCompute(final GraqlToken.Compute.Method method, final boolean includeAttributes) {
+    GraqlCompute(GraqlToken.Compute.Method method, boolean includeAttributes) {
         this.method = method;
         this.includeAttributes = includeAttributes;
     }
@@ -123,7 +123,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         return "";
     }
 
-    private String printTypes(final Set<String> types) {
+    private String printTypes(Set<String> types) {
         final StringBuilder inTypesString = new StringBuilder();
 
         if (!types.isEmpty()) {
@@ -168,7 +168,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         return argumentsString.toString();
     }
 
-    private String str(final Object... objects) {
+    private String str(Object... objects) {
         final StringBuilder builder = new StringBuilder();
         for (Object obj : objects) builder.append(obj.toString());
         return builder.toString();
@@ -220,7 +220,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
     public static abstract class Statistics extends GraqlCompute {
 
-        Statistics(final GraqlToken.Compute.Method method, final boolean includeAttributes) {
+        Statistics(GraqlToken.Compute.Method method, boolean includeAttributes) {
             super(method, includeAttributes);
         }
 
@@ -248,13 +248,13 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
 
             @Override
-            public GraqlCompute.Statistics.Count in(final Collection<String> types) {
+            public GraqlCompute.Statistics.Count in(Collection<String> types) {
                 this.inTypes = set(types);
                 return this;
             }
 
             @Override
-            public GraqlCompute.Statistics.Count attributes(final boolean include) {
+            public GraqlCompute.Statistics.Count attributes(boolean include) {
                 return this;
             }
 
@@ -269,7 +269,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
 
             @Override
-            public boolean equals(final Object o) {
+            public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
@@ -294,7 +294,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 implements Computable.Targetable<Value>,
                            Computable.Scopeable<Value> {
 
-            Value(final GraqlToken.Compute.Method method) {
+            Value(GraqlToken.Compute.Method method) {
                 super(method, true);
             }
 
@@ -303,19 +303,19 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
 
             @Override
-            public GraqlCompute.Statistics.Value of(final Collection<String> types) {
+            public GraqlCompute.Statistics.Value of(Collection<String> types) {
                 this.ofTypes = set(types);
                 return this;
             }
 
             @Override
-            public GraqlCompute.Statistics.Value in(final Collection<String> types) {
+            public GraqlCompute.Statistics.Value in(Collection<String> types) {
                 this.inTypes = set(types);
                 return this;
             }
 
             @Override
-            public GraqlCompute.Statistics.Value attributes(final boolean include) {
+            public GraqlCompute.Statistics.Value attributes(boolean include) {
                 return this;
             }
 
@@ -336,7 +336,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
 
             @Override
-            public boolean equals(final Object o) {
+            public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
@@ -377,25 +377,25 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public GraqlCompute.Path from(final String fromID) {
+        public GraqlCompute.Path from(String fromID) {
             this.fromID = fromID;
             return this;
         }
 
         @Override
-        public GraqlCompute.Path to(final String toID) {
+        public GraqlCompute.Path to(String toID) {
             this.toID = toID;
             return this;
         }
 
         @Override
-        public GraqlCompute.Path in(final Collection<String> types) {
+        public GraqlCompute.Path in(Collection<String> types) {
             this.inTypes = set(types);
             return this;
         }
 
         @Override
-        public GraqlCompute.Path attributes(final boolean include) {
+        public GraqlCompute.Path attributes(boolean include) {
             this.includeAttributes = include;
             return this;
         }
@@ -417,7 +417,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -446,7 +446,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             implements Computable.Scopeable<T>,
                        Computable.Configurable<T, GraqlCompute.Argument, GraqlCompute.Arguments> {
 
-        Configurable(final GraqlToken.Compute.Method method, final boolean includeAttributes) {
+        Configurable(GraqlToken.Compute.Method method, boolean includeAttributes) {
             super(method, includeAttributes);
         }
 
@@ -473,25 +473,25 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public T in(final Collection<String> types) {
+        public T in(Collection<String> types) {
             this.inTypes = set(types);
             return self();
         }
 
         @Override
-        public T attributes(final boolean include) {
+        public T attributes(boolean include) {
             this.includeAttributes = include;
             return self();
         }
 
         @Override
-        public T using(final GraqlArg.Algorithm algorithm) {
+        public T using(GraqlArg.Algorithm algorithm) {
             this.algorithm = algorithm;
             return self();
         }
 
         @Override
-        public T where(final List<GraqlCompute.Argument> args) {
+        public T where(List<GraqlCompute.Argument> args) {
             if (this.arguments == null) this.arguments = new GraqlCompute.Arguments();
             for (GraqlCompute.Argument<?> arg : args) this.arguments.setArgument(arg);
             return self();
@@ -540,7 +540,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public GraqlCompute.Centrality of(final Collection<String> types) {
+        public GraqlCompute.Centrality of(Collection<String> types) {
             this.ofTypes = set(types);
             return this;
         }
@@ -561,7 +561,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -625,7 +625,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -660,7 +660,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         private GraqlToken.Compute.Param param;
         private T value;
 
-        private Argument(final GraqlToken.Compute.Param param, final T value) {
+        private Argument(GraqlToken.Compute.Param param, T value) {
             this.param = param;
             this.value = value;
         }
@@ -673,24 +673,24 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             return this.value;
         }
 
-        public static Argument<Long> minK(final long minK) {
+        public static Argument<Long> minK(long minK) {
             return new Argument<>(GraqlToken.Compute.Param.MIN_K, minK);
         }
 
-        public static Argument<Long> k(final long k) {
+        public static Argument<Long> k(long k) {
             return new Argument<>(GraqlToken.Compute.Param.K, k);
         }
 
-        public static Argument<Long> size(final long size) {
+        public static Argument<Long> size(long size) {
             return new Argument<>(GraqlToken.Compute.Param.SIZE, size);
         }
 
-        public static Argument<String> contains(final String conceptId) {
+        public static Argument<String> contains(String conceptId) {
             return new Argument<>(GraqlToken.Compute.Param.CONTAINS, conceptId);
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -729,16 +729,16 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             return arguments;
         }
 
-        private void setArgument(final Argument<?> arg) {
+        private void setArgument(Argument<?> arg) {
             argumentsOrdered.remove(arg.type());
             argumentsOrdered.put(arg.type(), arg);
         }
 
-        private void setDefaults(final Map<GraqlToken.Compute.Param, Object> defaults) {
+        private void setDefaults(Map<GraqlToken.Compute.Param, Object> defaults) {
             this.defaults = defaults;
         }
 
-        Optional<?> getArgument(final GraqlToken.Compute.Param param) {
+        Optional<?> getArgument(GraqlToken.Compute.Param param) {
             return argumentsMap.get(param).get();
         }
 
@@ -784,12 +784,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             return Optional.ofNullable((String) getArgumentValue(GraqlToken.Compute.Param.CONTAINS));
         }
 
-        private Object getArgumentValue(final GraqlToken.Compute.Param param) {
+        private Object getArgumentValue(GraqlToken.Compute.Param param) {
             return argumentsOrdered.get(param) != null ? argumentsOrdered.get(param).value() : null;
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
