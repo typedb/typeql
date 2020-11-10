@@ -468,14 +468,19 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             StringBuilder syntax = new StringBuilder();
             syntax.append(OWNS).append(SPACE);
+
             if (!attributeType.label().isPresent()) syntax.append(attributeType);
             else syntax.append(attributeType.label().get().label());
+
             if (isKey) syntax.append(SPACE).append(IS_KEY);
+
             if (overriddenAttributeType!=null) {
                 syntax.append(SPACE).append(AS).append(SPACE);
+
                 if (!overriddenAttributeType.label().isPresent()) syntax.append(overriddenAttributeType);
                 else syntax.append(overriddenAttributeType.label().get().label());
             }
+
             return syntax.toString();
         }
 
