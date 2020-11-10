@@ -205,10 +205,6 @@ public class GraqlToken {
             throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(SubString.class)));
         }
 
-        default Pattern asPattern() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Pattern.class)));
-        }
-
         interface Variable extends Comparator {
 
             @Override
@@ -274,8 +270,9 @@ public class GraqlToken {
             }
         }
 
-        enum SubString implements Variable, String {
-            CONTAINS("contains");
+        enum SubString implements String {
+            CONTAINS("contains"),
+            LIKE("like");
 
             private final java.lang.String comparator;
 
@@ -300,40 +297,6 @@ public class GraqlToken {
 
             public static SubString of(final java.lang.String value) {
                 for (SubString c : SubString.values()) {
-                    if (c.comparator.equals(value)) {
-                        return c;
-                    }
-                }
-                return null;
-            }
-        }
-
-        enum Pattern implements String {
-            LIKE("like");
-
-            private final java.lang.String comparator;
-
-            Pattern(final java.lang.String comparator) {
-                this.comparator = comparator;
-            }
-
-            @Override
-            public boolean isPattern() {
-                return true;
-            }
-
-            @Override
-            public Pattern asPattern() {
-                return this;
-            }
-
-            @Override
-            public java.lang.String toString() {
-                return this.comparator;
-            }
-
-            public static Pattern of(final java.lang.String value) {
-                for (Pattern c : Pattern.values()) {
                     if (c.comparator.equals(value)) {
                         return c;
                     }

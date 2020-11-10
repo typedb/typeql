@@ -635,7 +635,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (constraint.VALUE() != null) {
                 type = type.value(GraqlArg.ValueType.of(constraint.value_type().getText()));
             } else if (constraint.REGEX() != null) {
-                type = type.regex(visitRegex(constraint.regex()));
+                type = type.regex(getRegex(constraint.STRING_()));
             } else if (constraint.TYPE() != null) {
                 final Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
                 type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
@@ -828,15 +828,9 @@ public class Parser extends GraqlBaseVisitor {
             else if (ctx.comparable_literal().VAR_() != null) value = getVar(ctx.comparable_literal().VAR_());
             else throw GraqlException.of(ILLEGAL_STATE);
         } else if (ctx.comparator_substring() != null) {
-            comparator = GraqlToken.Comparator.SubString.CONTAINS;
-            assert comparator == GraqlToken.Comparator.SubString.of(ctx.comparator_substring().getText());
-            if (ctx.comparable_string().STRING_() != null) value = getString(ctx.comparable_string().STRING_());
-            else if (ctx.comparable_string().VAR_() != null) value = getVar(ctx.comparable_string().VAR_());
-            else throw GraqlException.of(ILLEGAL_STATE);
-        } else if (ctx.comparator_pattern() != null) {
-            comparator = GraqlToken.Comparator.Pattern.LIKE;
-            assert comparator == GraqlToken.Comparator.Pattern.of(ctx.comparator_pattern().getText());
-            value = visitRegex(ctx.regex());
+            comparator = GraqlToken.Comparator.SubString.of(ctx.comparator_substring().getText());
+            if (ctx.comparator_substring().LIKE() != null) value = getRegex(ctx.STRING_());
+            else value = getString(ctx.STRING_());
         } else throw GraqlException.of(ILLEGAL_STATE);
 
         assert comparator != null;
@@ -860,9 +854,8 @@ public class Parser extends GraqlBaseVisitor {
 
     // LITERAL INPUT VALUES ====================================================
 
-    @Override
-    public String visitRegex(final GraqlParser.RegexContext ctx) {
-        return unescapeRegex(unquoteString(ctx.STRING_()));
+    public String getRegex(final TerminalNode string) {
+        return unescapeRegex(unquoteString(string));
     }
 
     @Override

@@ -49,7 +49,7 @@ import static graql.lang.common.GraqlToken.Comparator.Equality.GTE;
 import static graql.lang.common.GraqlToken.Comparator.Equality.LT;
 import static graql.lang.common.GraqlToken.Comparator.Equality.LTE;
 import static graql.lang.common.GraqlToken.Comparator.Equality.NEQ;
-import static graql.lang.common.GraqlToken.Comparator.Pattern.LIKE;
+import static graql.lang.common.GraqlToken.Comparator.SubString.LIKE;
 import static graql.lang.common.GraqlToken.Comparator.SubString.CONTAINS;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
@@ -327,10 +327,6 @@ public class Graql {
 
     public static ThingConstraint.Value.String contains(final String value) {
         return new ThingConstraint.Value.String(CONTAINS, value);
-    }
-
-    public static ThingConstraint.Value.Variable contains(final UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(CONTAINS, variable);
     }
 
     public static ThingConstraint.Value.String like(final String value) {

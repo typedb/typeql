@@ -19,14 +19,12 @@ package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
 import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -47,7 +45,7 @@ import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
 import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
 import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
-import static graql.lang.common.GraqlToken.Comparator.Pattern.LIKE;
+import static graql.lang.common.GraqlToken.Comparator.SubString.LIKE;
 import static graql.lang.common.GraqlToken.Constraint.HAS;
 import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
@@ -421,7 +419,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         @Override
         public String toString() {
             return String.valueOf(HAS) + SPACE +
-                    (type != null ? type.label().get().label() + SPACE: "") +
+                    (type != null ? type.label().get().label() + SPACE : "") +
                     (attribute.isNamed() ? attribute.reference() : attribute.value().get());
         }
 
