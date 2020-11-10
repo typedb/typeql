@@ -445,8 +445,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         Value(GraqlToken.Comparator comparator, T value) {
             assert !comparator.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
-            assert !comparator.isSubString() || value instanceof java.lang.String || value instanceof ThingVariable<?>;
-            assert !comparator.isPattern() || value instanceof java.lang.String;
+            assert !comparator.isSubString() || value instanceof java.lang.String;
             if (comparator == null) throw GraqlException.of(MISSING_CONSTRAINT_COMPARATOR);
             else if (value == null) throw GraqlException.of(MISSING_CONSTRAINT_VALUE);
             this.comparator = comparator;
@@ -597,7 +596,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class String extends Value<java.lang.String> {
 
-            public String(GraqlToken.Comparator.String comparator, java.lang.String value) {
+            public String(GraqlToken.Comparator comparator, java.lang.String value) {
                 super(comparator, value);
             }
 
@@ -653,7 +652,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Variable extends Value<ThingVariable<?>> {
 
-            public Variable(GraqlToken.Comparator.Variable comparator, UnboundVariable variable) {
+            public Variable(GraqlToken.Comparator.Equality comparator, UnboundVariable variable) {
                 super(comparator, variable.toThing());
             }
 

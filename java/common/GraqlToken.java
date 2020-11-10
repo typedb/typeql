@@ -169,32 +169,12 @@ public class GraqlToken {
 
     public interface Comparator {
 
-        default boolean isVariable() {
-            return false;
-        }
-
-        default boolean isString() {
-            return false;
-        }
-
         default boolean isEquality() {
             return false;
         }
 
         default boolean isSubString() {
             return false;
-        }
-
-        default boolean isPattern() {
-            return false;
-        }
-
-        default Variable asVariable() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
-        }
-
-        default String asString() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
         }
 
         default Equality asEquality() {
@@ -205,33 +185,7 @@ public class GraqlToken {
             throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(SubString.class)));
         }
 
-        interface Variable extends Comparator {
-
-            @Override
-            default boolean isVariable() {
-                return true;
-            }
-
-            @Override
-            default Variable asVariable() {
-                return this;
-            }
-        }
-
-        interface String extends Comparator {
-
-            @Override
-            default boolean isString() {
-                return true;
-            }
-
-            @Override
-            default String asString() {
-                return this;
-            }
-        }
-
-        enum Equality implements Variable, String {
+        enum Equality implements Comparator {
             EQ("="),
             NEQ("!="),
             GT(">"),
@@ -239,9 +193,9 @@ public class GraqlToken {
             LT("<"),
             LTE("<=");
 
-            private final java.lang.String comparator;
+            private final String comparator;
 
-            Equality(java.lang.String comparator) {
+            Equality(String comparator) {
                 this.comparator = comparator;
             }
 
@@ -256,11 +210,11 @@ public class GraqlToken {
             }
 
             @Override
-            public java.lang.String toString() {
+            public String toString() {
                 return this.comparator;
             }
 
-            public static Equality of(java.lang.String value) {
+            public static Equality of(String value) {
                 for (Equality c : Equality.values()) {
                     if (c.comparator.equals(value)) {
                         return c;
@@ -270,13 +224,13 @@ public class GraqlToken {
             }
         }
 
-        enum SubString implements String {
+        enum SubString implements Comparator {
             CONTAINS("contains"),
             LIKE("like");
 
-            private final java.lang.String comparator;
+            private final String comparator;
 
-            SubString(java.lang.String comparator) {
+            SubString(String comparator) {
                 this.comparator = comparator;
             }
 
@@ -291,11 +245,11 @@ public class GraqlToken {
             }
 
             @Override
-            public java.lang.String toString() {
+            public String toString() {
                 return this.comparator;
             }
 
-            public static SubString of(java.lang.String value) {
+            public static SubString of(String value) {
                 for (SubString c : SubString.values()) {
                     if (c.comparator.equals(value)) {
                         return c;

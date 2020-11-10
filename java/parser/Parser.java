@@ -842,11 +842,11 @@ public class Parser extends GraqlBaseVisitor {
         } else if (value instanceof Boolean) {
             return new ThingConstraint.Value.Boolean(comparator.asEquality(), (Boolean) value);
         } else if (value instanceof String) {
-            return new ThingConstraint.Value.String(comparator.asString(), (String) value);
+            return new ThingConstraint.Value.String(comparator, (String) value);
         } else if (value instanceof LocalDateTime) {
             return new ThingConstraint.Value.DateTime(comparator.asEquality(), (LocalDateTime) value);
         } else if (value instanceof UnboundVariable) {
-            return new ThingConstraint.Value.Variable(comparator.asVariable(), (UnboundVariable) value);
+            return new ThingConstraint.Value.Variable(comparator.asEquality(), (UnboundVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
