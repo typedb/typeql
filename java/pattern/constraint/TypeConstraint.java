@@ -466,7 +466,9 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return OWNS.toString() + SPACE + attributeType + (isKey ? "" + SPACE + IS_KEY : "");
+            return "" + OWNS + SPACE + attributeType +
+                    (overriddenAttributeType != null ? "" + SPACE + AS + SPACE + overriddenAttributeType : "") +
+                    (isKey ? "" + SPACE + IS_KEY : "");
         }
 
         @Override
@@ -562,7 +564,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return PLAYS.toString() + SPACE + roleType;
+            return PLAYS.toString() + SPACE + roleType +
+                    (overriddenRoleType!=null ? "" + SPACE + AS + SPACE +  overriddenRoleType : "");
         }
 
         @Override

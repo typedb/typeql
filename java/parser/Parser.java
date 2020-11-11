@@ -627,7 +627,7 @@ public class Parser extends GraqlBaseVisitor {
                 final Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
                 type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, constraint.IS_KEY() != null));
             } else if (constraint.PLAYS() != null) {
-                final Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
+                final Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(0));
                 type = type.constrain(new TypeConstraint.Plays(visitType_scoped(constraint.type_scoped()), overridden));
             } else if (constraint.RELATES() != null) {
                 final Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
