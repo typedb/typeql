@@ -39,20 +39,16 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
         super(reference);
     }
 
-    public static UnboundVariable of(Reference reference) {
-        return new UnboundVariable(reference);
-    }
-
     public static UnboundVariable named(String name) {
-        return of(Reference.named(name));
+        return new UnboundVariable(Reference.named(name));
     }
 
     public static UnboundVariable anonymous() {
-        return of(Reference.anonymous(true));
+        return new UnboundVariable(Reference.anonymous(true));
     }
 
     public static UnboundVariable hidden() {
-        return of(Reference.anonymous(false));
+        return new UnboundVariable(Reference.anonymous(false));
     }
 
     @Override
