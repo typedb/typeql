@@ -43,7 +43,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     List<ThingConstraint.Has> hasConstraints;
     List<ThingConstraint> constraints;
 
-    ThingVariable(final Reference reference) {
+    ThingVariable(Reference reference) {
         super(reference);
         this.hasConstraints = new LinkedList<>();
         this.constraints = new LinkedList<>();
@@ -90,7 +90,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return hasConstraints;
     }
 
-    public T constrain(final ThingConstraint.Isa constraint) {
+    public T constrain(ThingConstraint.Isa constraint) {
         if (isaConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ThingConstraint.Isa.class, constraint));
         } else if (constraint.type().label().isPresent() && relation().isPresent()) {
@@ -101,7 +101,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return getThis();
     }
 
-    public T constrain(final ThingConstraint.Has constraint) {
+    public T constrain(ThingConstraint.Has constraint) {
         hasConstraints.add(constraint);
         constraints.add(constraint);
         return getThis();
@@ -120,7 +120,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public abstract String toString();
 
     @Override
-    public final boolean equals(final Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !ThingVariable.class.isAssignableFrom(o.getClass())) return false;
         final ThingVariable<?> that = (ThingVariable<?>) o;
@@ -135,11 +135,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
 
-        Thing(final Reference reference) {
+        Thing(Reference reference) {
             super(reference);
         }
 
-        Thing(final Reference reference, final ThingConstraint.IID iidConstraint) {
+        Thing(Reference reference, ThingConstraint.IID iidConstraint) {
             super(reference);
             this.iidConstraint = iidConstraint;
             constraints.add(iidConstraint);
@@ -173,7 +173,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
                                                                             ThingVariableBuilder.Common<Relation> {
 
-        Relation(final Reference reference, final ThingConstraint.Relation relationConstraint) {
+        Relation(Reference reference, ThingConstraint.Relation relationConstraint) {
             super(reference);
             this.relationConstraint = relationConstraint;
             constraints.add(relationConstraint);
@@ -185,7 +185,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public ThingVariable.Relation constrain(final ThingConstraint.Relation.RolePlayer rolePlayer) {
+        public ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
             relationConstraint.addPlayers(rolePlayer);
             if (isa().isPresent() && !relationConstraint.hasScope()) {
                 relationConstraint.setScope(isa().get().type().label().get().label());
@@ -210,7 +210,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
-        Attribute(final Reference reference, final ThingConstraint.Value<?> valueConstraint) {
+        Attribute(Reference reference, ThingConstraint.Value<?> valueConstraint) {
             super(reference);
             this.valueConstraint = valueConstraint;
             constraints.add(valueConstraint);

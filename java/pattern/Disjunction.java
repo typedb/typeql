@@ -37,7 +37,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     private final int hash;
     private Disjunction<Conjunction<Conjunctable>> normalised;
 
-    public Disjunction(final List<T> patterns) {
+    public Disjunction(List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
@@ -90,7 +90,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Disjunction<?> that = (Disjunction<?>) o;

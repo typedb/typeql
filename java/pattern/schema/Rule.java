@@ -54,11 +54,11 @@ public class Rule implements Definable {
     private ThingVariable<?> then;
     private int hash = 0;
 
-    public Rule(final String label) {
+    public Rule(String label) {
         this.label = label;
     }
 
-    public Rule(final String label, final Conjunction<? extends Pattern> when, final ThingVariable<?> variable) {
+    public Rule(String label, Conjunction<? extends Pattern> when, ThingVariable<?> variable) {
         validate(label, when, variable);
         this.label = label;
         this.when = when;
@@ -182,7 +182,7 @@ public class Rule implements Definable {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Rule that = (Rule) o;

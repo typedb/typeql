@@ -35,24 +35,20 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
                                                          ThingVariableBuilder.Relation,
                                                          ThingVariableBuilder.Attribute {
 
-    UnboundVariable(final Reference reference) {
+    UnboundVariable(Reference reference) {
         super(reference);
     }
 
-    public static UnboundVariable of(final Reference reference) {
-        return new UnboundVariable(reference);
-    }
-
-    public static UnboundVariable named(final String name) {
-        return of(Reference.named(name));
+    public static UnboundVariable named(String name) {
+        return new UnboundVariable(Reference.named(name));
     }
 
     public static UnboundVariable anonymous() {
-        return of(Reference.anonymous(true));
+        return new UnboundVariable(Reference.anonymous(true));
     }
 
     public static UnboundVariable hidden() {
-        return of(Reference.anonymous(false));
+        return new UnboundVariable(Reference.anonymous(false));
     }
 
     @Override
@@ -83,76 +79,76 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Label constraint) {
+    public TypeVariable constrain(TypeConstraint.Label constraint) {
         return new TypeVariable(Reference.label(constraint.scopedLabel())).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Sub constraint) {
+    public TypeVariable constrain(TypeConstraint.Sub constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Abstract constraint) {
+    public TypeVariable constrain(TypeConstraint.Abstract constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.ValueType constraint) {
+    public TypeVariable constrain(TypeConstraint.ValueType constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Regex constraint) {
+    public TypeVariable constrain(TypeConstraint.Regex constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Owns constraint) {
+    public TypeVariable constrain(TypeConstraint.Owns constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Plays constraint) {
+    public TypeVariable constrain(TypeConstraint.Plays constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Relates constraint) {
+    public TypeVariable constrain(TypeConstraint.Relates constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.Isa constraint) {
+    public ThingVariable.Thing constrain(ThingConstraint.Isa constraint) {
         return new ThingVariable.Thing(reference).constrain(constraint);
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.Has constraint) {
+    public ThingVariable.Thing constrain(ThingConstraint.Has constraint) {
         return new ThingVariable.Thing(reference).constrain(constraint);
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.IID constraint) {
+    public ThingVariable.Thing constrain(ThingConstraint.IID constraint) {
         return new ThingVariable.Thing(reference, constraint);
     }
 
     @Override
-    public ConceptVariable constrain(final ConceptConstraint.Is constraint) {
+    public ConceptVariable constrain(ConceptConstraint.Is constraint) {
         return new ConceptVariable(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Attribute constrain(final ThingConstraint.Value<?> constraint) {
+    public ThingVariable.Attribute constrain(ThingConstraint.Value<?> constraint) {
         return new ThingVariable.Attribute(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Relation constrain(final ThingConstraint.Relation.RolePlayer rolePlayer) {
+    public ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
         return constrain(new ThingConstraint.Relation(rolePlayer));
     }
 
-    public ThingVariable.Relation constrain(final ThingConstraint.Relation constraint) {
+    public ThingVariable.Relation constrain(ThingConstraint.Relation constraint) {
         return new ThingVariable.Relation(reference, constraint);
     }
 
@@ -162,7 +158,7 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

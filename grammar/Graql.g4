@@ -114,7 +114,7 @@ type_constraint       :   ABSTRACT
                       |   RELATES     type         ( AS type )?
                       |   PLAYS       type_scoped  ( AS type )?
                       |   VALUE       value_type
-                      |   REGEX       regex
+                      |   REGEX       STRING_
                       |   WHEN    '{' patterns        '}'
                       |   THEN    '{' variable_things '}'
                       |   TYPE        label_any
@@ -154,15 +154,12 @@ attribute             :   HAS label ( VAR_ | value )                            
 
 value                 :   literal
                       |   comparator_equality   comparable_literal
-                      |   comparator_substring  comparable_string
-                      |   comparator_pattern    regex
+                      |   comparator_substring  STRING_
                       ;
 comparator_equality   :   EQ | NEQ | GT | GTE | LT | LTE ;
-comparator_substring  :   CONTAINS ;
-comparator_pattern    :   LIKE     ;
+comparator_substring  :   CONTAINS | LIKE ;
 
 comparable_literal    :   literal | VAR_  ;
-comparable_string     :   STRING_ | VAR_  ;
 
 // SCHEMA CONSTRUCT =============================================================
 

@@ -33,11 +33,11 @@ public class ConceptVariable extends BoundVariable {
     private final ConceptConstraint.Is isConstraint;
     private final int hash;
 
-    ConceptVariable(final Reference reference) {
+    ConceptVariable(Reference reference) {
         this(reference, null);
     }
 
-    ConceptVariable(final Reference reference, @Nullable final ConceptConstraint.Is isConstraint) {
+    ConceptVariable(Reference reference, @Nullable ConceptConstraint.Is isConstraint) {
         super(reference);
         this.isConstraint = isConstraint;
         this.hash = Objects.hash(this.reference, this.isConstraint);
@@ -69,7 +69,7 @@ public class ConceptVariable extends BoundVariable {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final ConceptVariable that = (ConceptVariable) o;

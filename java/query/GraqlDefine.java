@@ -24,7 +24,7 @@ import java.util.List;
 
 public class GraqlDefine extends GraqlDefinable {
 
-    public GraqlDefine(final List<Definable> definables) {
+    public GraqlDefine(List<Definable> definables) {
         super(GraqlToken.Command.DEFINE, definables);
     }
 }

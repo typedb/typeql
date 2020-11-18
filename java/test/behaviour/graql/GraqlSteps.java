@@ -37,14 +37,14 @@ public class GraqlSteps {
     @Given("graql define")
     @Given("graql define without commit")
     @Given("for each session, graql define")
-    public void graql_define(final String query) {
+    public void graql_define(String query) {
         final GraqlDefine parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql undefine")
     @Given("graql undefine without commit")
-    public void graql_undefine(final String query) {
+    public void graql_undefine(String query) {
         final GraqlUndefine parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
@@ -53,14 +53,14 @@ public class GraqlSteps {
     @Given("get answers of graql insert")
     @Given("graql insert without commit")
     @Given("for each session, graql insert")
-    public void graql_insert(final String query) {
+    public void graql_insert(String query) {
         final GraqlInsert parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
         parsed.match().ifPresent(match -> match.conjunction().normalise());
     }
 
     @Given("graql delete")
-    public void graql_delete(final String query) {
+    public void graql_delete(String query) {
         final GraqlDelete parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
         parsed.match().conjunction().normalise();
@@ -69,7 +69,7 @@ public class GraqlSteps {
     @Given("for graql query")
     @Given("get answers of graql query")
     @Given("answer set is equivalent for graql query")
-    public void graql_get(final String query) {
+    public void graql_get(String query) {
         final GraqlQuery parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
         if (parsed instanceof GraqlMatch) {
@@ -87,7 +87,7 @@ public class GraqlSteps {
     @Given("graql delete; throws exception")
     @Given("graql define; throws exception")
     @Given("graql undefine; throws exception")
-    public void do_nothing_with_throws(final String query) {}
+    public void do_nothing_with_throws(String query) {}
 
     @Given("transaction commits")
     @Given("aggregate answer is empty")
@@ -115,20 +115,20 @@ public class GraqlSteps {
     @Given("connection open data session for database: {}")
     @Given("connection open schema session for database: {}")
     @Given("answers are consistent across {} executions in reasoned database")
-    public void do_nothing_with_arg(final String ignored) {}
+    public void do_nothing_with_arg(String ignored) {}
 
     @Given("connection open sessions for databases:")
-    public void do_nothing_with_list(final List<String> ignored) {}
+    public void do_nothing_with_list(List<String> ignored) {}
 
     @Given("answer groups are")
     @Given("group aggregate values are")
     @Given("order of answer concepts is")
     @Given("uniquely identify answer concepts")
-    public void do_nothing_with_list_of_map(final List<Map<String, String>> ignored) {}
+    public void do_nothing_with_list_of_map(List<Map<String, String>> ignored) {}
 
     @Given("rules are")
     @Given("group identifiers are")
     @Given("concept identifiers are")
     @Given("answers contain explanation tree")
-    public void do_nothing_with_map_of_map(final Map<String, Map<String, String>> ignored) {}
+    public void do_nothing_with_map_of_map(Map<String, Map<String, String>> ignored) {}
 }

@@ -49,7 +49,7 @@ import static graql.lang.common.GraqlToken.Comparator.Equality.GTE;
 import static graql.lang.common.GraqlToken.Comparator.Equality.LT;
 import static graql.lang.common.GraqlToken.Comparator.Equality.LTE;
 import static graql.lang.common.GraqlToken.Comparator.Equality.NEQ;
-import static graql.lang.common.GraqlToken.Comparator.Pattern.LIKE;
+import static graql.lang.common.GraqlToken.Comparator.SubString.LIKE;
 import static graql.lang.common.GraqlToken.Comparator.SubString.CONTAINS;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
@@ -57,59 +57,59 @@ public class Graql {
 
     private static final Parser parser = new Parser();
 
-    public static <T extends GraqlQuery> T parseQuery(final String queryString) {
+    public static <T extends GraqlQuery> T parseQuery(String queryString) {
         return parser.parseQueryEOF(queryString);
     }
 
-    public static <T extends GraqlQuery> Stream<T> parseQueries(final String queryString) {
+    public static <T extends GraqlQuery> Stream<T> parseQueries(String queryString) {
         return parser.parseQueriesEOF(queryString);
     }
 
-    public static Pattern parsePattern(final String pattern) {
+    public static Pattern parsePattern(String pattern) {
         return parser.parsePatternEOF(pattern);
     }
 
-    public static List<? extends Pattern> parsePatterns(final String pattern) {
+    public static List<? extends Pattern> parsePatterns(String pattern) {
         return parser.parsePatternsEOF(pattern);
     }
 
-    public static List<Definable> parseDefinables(final String pattern) { return parser.parseDefinablesEOF(pattern); }
+    public static List<Definable> parseDefinables(String pattern) { return parser.parseDefinablesEOF(pattern); }
 
-    public static Rule parseRule(final String pattern) { return parser.parseSchemaRuleEOF(pattern).asRule(); }
+    public static Rule parseRule(String pattern) { return parser.parseSchemaRuleEOF(pattern).asRule(); }
 
-    public static BoundVariable parseVariable(final String variable) {
+    public static BoundVariable parseVariable(String variable) {
         return parser.parseVariableEOF(variable);
     }
 
-    public static GraqlMatch.Unfiltered match(final Pattern... patterns) {
+    public static GraqlMatch.Unfiltered match(Pattern... patterns) {
         return match(Arrays.asList(patterns));
     }
 
-    public static GraqlMatch.Unfiltered match(final List<? extends Pattern> patterns) {
+    public static GraqlMatch.Unfiltered match(List<? extends Pattern> patterns) {
         return new GraqlMatch.Unfiltered(patterns);
     }
 
-    public static GraqlInsert insert(final ThingVariable<?>... things) {
+    public static GraqlInsert insert(ThingVariable<?>... things) {
         return new GraqlInsert(list(things));
     }
 
-    public static GraqlInsert insert(final List<ThingVariable<?>> things) {
+    public static GraqlInsert insert(List<ThingVariable<?>> things) {
         return new GraqlInsert(things);
     }
 
-    public static GraqlDefine define(final Definable... definables) {
+    public static GraqlDefine define(Definable... definables) {
         return new GraqlDefine(list(definables));
     }
 
-    public static GraqlDefine define(final List<Definable> definables) {
+    public static GraqlDefine define(List<Definable> definables) {
         return new GraqlDefine(definables);
     }
 
-    public static GraqlUndefine undefine(final TypeVariable... types) {
+    public static GraqlUndefine undefine(TypeVariable... types) {
         return new GraqlUndefine(list(types));
     }
 
-    public static GraqlUndefine undefine(final List<Definable> definables) {
+    public static GraqlUndefine undefine(List<Definable> definables) {
         return new GraqlUndefine(definables);
     }
 
@@ -119,29 +119,29 @@ public class Graql {
 
     // Pattern Builder Methods
 
-    public static Conjunction<? extends Pattern> and(final Pattern... patterns) {
+    public static Conjunction<? extends Pattern> and(Pattern... patterns) {
         return and(Arrays.asList(patterns));
     }
 
-    public static Conjunction<? extends Pattern> and(final List<? extends Pattern> patterns) {
+    public static Conjunction<? extends Pattern> and(List<? extends Pattern> patterns) {
         return new Conjunction<>(patterns);
     }
 
-    public static Pattern or(final Pattern... patterns) {
+    public static Pattern or(Pattern... patterns) {
         return or(Arrays.asList(patterns));
     }
 
-    public static Pattern or(final List<Pattern> patterns) {
+    public static Pattern or(List<Pattern> patterns) {
         // Simplify representation when there is only one alternative
         if (patterns.size() == 1) return patterns.iterator().next();
         return new Disjunction<>(patterns);
     }
 
-    public static Negation<Pattern> not(final Pattern pattern) {
+    public static Negation<Pattern> not(Pattern pattern) {
         return new Negation<>(pattern);
     }
 
-    public static Rule rule(final String label) {
+    public static Rule rule(String label) {
         return new Rule(label);
     }
 
@@ -149,191 +149,187 @@ public class Graql {
         return UnboundVariable.anonymous();
     }
 
-    public static UnboundVariable var(final String name) {
+    public static UnboundVariable var(String name) {
         return UnboundVariable.named(name);
     }
 
-    public static TypeVariable type(final GraqlToken.Type type) {
+    public static TypeVariable type(GraqlToken.Type type) {
         return type(type.toString());
     }
 
-    public static TypeVariable type(final String label) {
+    public static TypeVariable type(String label) {
         return hidden().type(label);
     }
 
-    public static ThingVariable.Relation rel(final String playerVar) {
+    public static ThingVariable.Relation rel(String playerVar) {
         return hidden().rel(playerVar);
     }
 
-    public static ThingVariable.Relation rel(final UnboundVariable playerVar) {
+    public static ThingVariable.Relation rel(UnboundVariable playerVar) {
         return hidden().rel(playerVar);
     }
 
-    public static ThingVariable.Relation rel(final String roleType, final String playerVar) {
+    public static ThingVariable.Relation rel(String roleType, String playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingVariable.Relation rel(final String roleType, final UnboundVariable playerVar) {
+    public static ThingVariable.Relation rel(String roleType, UnboundVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingVariable.Relation rel(final UnboundVariable roleType, final UnboundVariable playerVar) {
+    public static ThingVariable.Relation rel(UnboundVariable roleType, UnboundVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingConstraint.Value.Long eq(final long value) {
+    public static ThingConstraint.Value.Long eq(long value) {
         return new ThingConstraint.Value.Long(EQ, value);
     }
 
-    public static ThingConstraint.Value.Double eq(final double value) {
+    public static ThingConstraint.Value.Double eq(double value) {
         return new ThingConstraint.Value.Double(EQ, value);
     }
 
-    public static ThingConstraint.Value.Boolean eq(final boolean value) {
+    public static ThingConstraint.Value.Boolean eq(boolean value) {
         return new ThingConstraint.Value.Boolean(EQ, value);
     }
 
-    public static ThingConstraint.Value.String eq(final String value) {
+    public static ThingConstraint.Value.String eq(String value) {
         return new ThingConstraint.Value.String(EQ, value);
     }
 
-    public static ThingConstraint.Value.DateTime eq(final LocalDateTime value) {
+    public static ThingConstraint.Value.DateTime eq(LocalDateTime value) {
         return new ThingConstraint.Value.DateTime(EQ, value);
     }
 
-    public static ThingConstraint.Value.Variable eq(final UnboundVariable variable) {
+    public static ThingConstraint.Value.Variable eq(UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(EQ, variable);
     }
 
-    public static ThingConstraint.Value.Long neq(final long value) {
+    public static ThingConstraint.Value.Long neq(long value) {
         return new ThingConstraint.Value.Long(NEQ, value);
     }
 
-    public static ThingConstraint.Value.Double neq(final double value) {
+    public static ThingConstraint.Value.Double neq(double value) {
         return new ThingConstraint.Value.Double(NEQ, value);
     }
 
-    public static ThingConstraint.Value.Boolean neq(final boolean value) {
+    public static ThingConstraint.Value.Boolean neq(boolean value) {
         return new ThingConstraint.Value.Boolean(NEQ, value);
     }
 
-    public static ThingConstraint.Value.String neq(final String value) {
+    public static ThingConstraint.Value.String neq(String value) {
         return new ThingConstraint.Value.String(NEQ, value);
     }
 
-    public static ThingConstraint.Value.DateTime neq(final LocalDateTime value) {
+    public static ThingConstraint.Value.DateTime neq(LocalDateTime value) {
         return new ThingConstraint.Value.DateTime(NEQ, value);
     }
 
-    public static ThingConstraint.Value.Variable neq(final UnboundVariable variable) {
+    public static ThingConstraint.Value.Variable neq(UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(NEQ, variable);
     }
 
-    public static ThingConstraint.Value.Long gt(final long value) {
+    public static ThingConstraint.Value.Long gt(long value) {
         return new ThingConstraint.Value.Long(GT, value);
     }
 
-    public static ThingConstraint.Value.Double gt(final double value) {
+    public static ThingConstraint.Value.Double gt(double value) {
         return new ThingConstraint.Value.Double(GT, value);
     }
 
-    public static ThingConstraint.Value.Boolean gt(final boolean value) {
+    public static ThingConstraint.Value.Boolean gt(boolean value) {
         return new ThingConstraint.Value.Boolean(GT, value);
     }
 
-    public static ThingConstraint.Value.String gt(final String value) {
+    public static ThingConstraint.Value.String gt(String value) {
         return new ThingConstraint.Value.String(GT, value);
     }
 
-    public static ThingConstraint.Value.DateTime gt(final LocalDateTime value) {
+    public static ThingConstraint.Value.DateTime gt(LocalDateTime value) {
         return new ThingConstraint.Value.DateTime(GT, value);
     }
 
-    public static ThingConstraint.Value.Variable gt(final UnboundVariable variable) {
+    public static ThingConstraint.Value.Variable gt(UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(GT, variable);
     }
 
-    public static ThingConstraint.Value.Long gte(final long value) {
+    public static ThingConstraint.Value.Long gte(long value) {
         return new ThingConstraint.Value.Long(GTE, value);
     }
 
-    public static ThingConstraint.Value.Double gte(final double value) {
+    public static ThingConstraint.Value.Double gte(double value) {
         return new ThingConstraint.Value.Double(GTE, value);
     }
 
-    public static ThingConstraint.Value.Boolean gte(final boolean value) {
+    public static ThingConstraint.Value.Boolean gte(boolean value) {
         return new ThingConstraint.Value.Boolean(GTE, value);
     }
 
-    public static ThingConstraint.Value.String gte(final String value) {
+    public static ThingConstraint.Value.String gte(String value) {
         return new ThingConstraint.Value.String(GTE, value);
     }
 
-    public static ThingConstraint.Value.DateTime gte(final LocalDateTime value) {
+    public static ThingConstraint.Value.DateTime gte(LocalDateTime value) {
         return new ThingConstraint.Value.DateTime(GTE, value);
     }
 
-    public static ThingConstraint.Value.Variable gte(final UnboundVariable variable) {
+    public static ThingConstraint.Value.Variable gte(UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(GTE, variable);
     }
 
-    public static ThingConstraint.Value.Long lt(final long value) {
+    public static ThingConstraint.Value.Long lt(long value) {
         return new ThingConstraint.Value.Long(LT, value);
     }
 
-    public static ThingConstraint.Value.Double lt(final double value) {
+    public static ThingConstraint.Value.Double lt(double value) {
         return new ThingConstraint.Value.Double(LT, value);
     }
 
-    public static ThingConstraint.Value.Boolean lt(final boolean value) {
+    public static ThingConstraint.Value.Boolean lt(boolean value) {
         return new ThingConstraint.Value.Boolean(LT, value);
     }
 
-    public static ThingConstraint.Value.String lt(final String value) {
+    public static ThingConstraint.Value.String lt(String value) {
         return new ThingConstraint.Value.String(LT, value);
     }
 
-    public static ThingConstraint.Value.DateTime lt(final LocalDateTime value) {
+    public static ThingConstraint.Value.DateTime lt(LocalDateTime value) {
         return new ThingConstraint.Value.DateTime(LT, value);
     }
 
-    public static ThingConstraint.Value.Variable lt(final UnboundVariable variable) {
+    public static ThingConstraint.Value.Variable lt(UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(LT, variable);
     }
 
-    public static ThingConstraint.Value.Long lte(final long value) {
+    public static ThingConstraint.Value.Long lte(long value) {
         return new ThingConstraint.Value.Long(LTE, value);
     }
 
-    public static ThingConstraint.Value.Double lte(final double value) {
+    public static ThingConstraint.Value.Double lte(double value) {
         return new ThingConstraint.Value.Double(LTE, value);
     }
 
-    public static ThingConstraint.Value.Boolean lte(final boolean value) {
+    public static ThingConstraint.Value.Boolean lte(boolean value) {
         return new ThingConstraint.Value.Boolean(LTE, value);
     }
 
-    public static ThingConstraint.Value.String lte(final String value) {
+    public static ThingConstraint.Value.String lte(String value) {
         return new ThingConstraint.Value.String(LTE, value);
     }
 
-    public static ThingConstraint.Value.DateTime lte(final LocalDateTime value) {
+    public static ThingConstraint.Value.DateTime lte(LocalDateTime value) {
         return new ThingConstraint.Value.DateTime(LTE, value);
     }
 
-    public static ThingConstraint.Value.Variable lte(final UnboundVariable variable) {
+    public static ThingConstraint.Value.Variable lte(UnboundVariable variable) {
         return new ThingConstraint.Value.Variable(LTE, variable);
     }
 
-    public static ThingConstraint.Value.String contains(final String value) {
+    public static ThingConstraint.Value.String contains(String value) {
         return new ThingConstraint.Value.String(CONTAINS, value);
     }
 
-    public static ThingConstraint.Value.Variable contains(final UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(CONTAINS, variable);
-    }
-
-    public static ThingConstraint.Value.String like(final String value) {
+    public static ThingConstraint.Value.String like(String value) {
         return new ThingConstraint.Value.String(LIKE, value);
     }
 
