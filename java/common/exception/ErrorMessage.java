@@ -49,8 +49,8 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(14, "A relation variable has not been provided with role players.");
     public static final ErrorMessage MISSING_CONSTRAINT_VALUE =
             new ErrorMessage(15, "A value constraint has not been provided with a variable or literal value.");
-    public static final ErrorMessage MISSING_CONSTRAINT_COMPARATOR =
-            new ErrorMessage(16, "A value constraint has not been provided with a comparator.");
+    public static final ErrorMessage MISSING_CONSTRAINT_PREDICATE =
+            new ErrorMessage(16, "A value constraint has not been provided with a predicate.");
     public static final ErrorMessage INVALID_CONSTRAINT_DATETIME_PRECISION =
             new ErrorMessage(17, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =

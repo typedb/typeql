@@ -167,7 +167,7 @@ public class GraqlToken {
         }
     }
 
-    public interface Comparator {
+    public interface Predicate {
 
         default boolean isEquality() {
             return false;
@@ -185,7 +185,7 @@ public class GraqlToken {
             throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(SubString.class)));
         }
 
-        enum Equality implements Comparator {
+        enum Equality implements Predicate {
             EQ("="),
             NEQ("!="),
             GT(">"),
@@ -193,10 +193,10 @@ public class GraqlToken {
             LT("<"),
             LTE("<=");
 
-            private final String comparator;
+            private final String predicate;
 
-            Equality(String comparator) {
-                this.comparator = comparator;
+            Equality(String predicate) {
+                this.predicate = predicate;
             }
 
             @Override
@@ -211,12 +211,12 @@ public class GraqlToken {
 
             @Override
             public String toString() {
-                return this.comparator;
+                return this.predicate;
             }
 
             public static Equality of(String value) {
                 for (Equality c : Equality.values()) {
-                    if (c.comparator.equals(value)) {
+                    if (c.predicate.equals(value)) {
                         return c;
                     }
                 }
@@ -224,14 +224,14 @@ public class GraqlToken {
             }
         }
 
-        enum SubString implements Comparator {
+        enum SubString implements Predicate {
             CONTAINS("contains"),
             LIKE("like");
 
-            private final String comparator;
+            private final String predicate;
 
-            SubString(String comparator) {
-                this.comparator = comparator;
+            SubString(String predicate) {
+                this.predicate = predicate;
             }
 
             @Override
@@ -246,12 +246,12 @@ public class GraqlToken {
 
             @Override
             public String toString() {
-                return this.comparator;
+                return this.predicate;
             }
 
             public static SubString of(String value) {
                 for (SubString c : SubString.values()) {
-                    if (c.comparator.equals(value)) {
+                    if (c.predicate.equals(value)) {
                         return c;
                     }
                 }

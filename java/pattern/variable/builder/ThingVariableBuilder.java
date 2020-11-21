@@ -25,14 +25,14 @@ import graql.lang.pattern.variable.UnboundVariable;
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 
-import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
-import static graql.lang.common.GraqlToken.Comparator.Equality.GT;
-import static graql.lang.common.GraqlToken.Comparator.Equality.GTE;
-import static graql.lang.common.GraqlToken.Comparator.Equality.LT;
-import static graql.lang.common.GraqlToken.Comparator.Equality.LTE;
-import static graql.lang.common.GraqlToken.Comparator.Equality.NEQ;
-import static graql.lang.common.GraqlToken.Comparator.SubString.CONTAINS;
-import static graql.lang.common.GraqlToken.Comparator.SubString.LIKE;
+import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
+import static graql.lang.common.GraqlToken.Predicate.Equality.GT;
+import static graql.lang.common.GraqlToken.Predicate.Equality.GTE;
+import static graql.lang.common.GraqlToken.Predicate.Equality.LT;
+import static graql.lang.common.GraqlToken.Predicate.Equality.LTE;
+import static graql.lang.common.GraqlToken.Predicate.Equality.NEQ;
+import static graql.lang.common.GraqlToken.Predicate.SubString.CONTAINS;
+import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
 
 public interface ThingVariableBuilder {
 
@@ -157,7 +157,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(EQ, variable));
         }
 
-        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Comparator.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(EQ, value));
         }
 
@@ -187,7 +187,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(NEQ, variable));
         }
 
-        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Comparator.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(NEQ, value));
         }
 
@@ -217,7 +217,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(GT, variable));
         }
 
-        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Comparator.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(GT, value));
         }
 
@@ -247,7 +247,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(GTE, variable));
         }
 
-        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Comparator.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(GTE, value));
         }
 
@@ -277,7 +277,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(LT, variable));
         }
 
-        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Comparator.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(LT, value));
         }
 
@@ -307,7 +307,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(LTE, variable));
         }
 
-        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Comparator.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(LTE, value));
         }
 

@@ -43,14 +43,14 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
-import static graql.lang.common.GraqlToken.Comparator.Equality.GT;
-import static graql.lang.common.GraqlToken.Comparator.Equality.GTE;
-import static graql.lang.common.GraqlToken.Comparator.Equality.LT;
-import static graql.lang.common.GraqlToken.Comparator.Equality.LTE;
-import static graql.lang.common.GraqlToken.Comparator.Equality.NEQ;
-import static graql.lang.common.GraqlToken.Comparator.SubString.LIKE;
-import static graql.lang.common.GraqlToken.Comparator.SubString.CONTAINS;
+import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
+import static graql.lang.common.GraqlToken.Predicate.Equality.GT;
+import static graql.lang.common.GraqlToken.Predicate.Equality.GTE;
+import static graql.lang.common.GraqlToken.Predicate.Equality.LT;
+import static graql.lang.common.GraqlToken.Predicate.Equality.LTE;
+import static graql.lang.common.GraqlToken.Predicate.Equality.NEQ;
+import static graql.lang.common.GraqlToken.Predicate.SubString.CONTAINS;
+import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
 public class Graql {

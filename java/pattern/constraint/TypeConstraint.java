@@ -565,7 +565,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public String toString() {
             return PLAYS.toString() + SPACE + roleType +
-                    (overriddenRoleType!=null ? "" + SPACE + AS + SPACE +  overriddenRoleType : "");
+                    (overriddenRoleType != null ? "" + SPACE + AS + SPACE + overriddenRoleType : "");
         }
 
         @Override

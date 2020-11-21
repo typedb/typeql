@@ -134,8 +134,8 @@ variable_thing        :   VAR_            ISA_ type   ( ',' attributes )?
 variable_relation     :   VAR_? relation  ISA_ type   ( ',' attributes )?
                       |   VAR_? relation  attributes?
                       ;
-variable_attribute    :   VAR_? value     ISA_ type   ( ',' attributes )?
-                      |   VAR_? value     attributes?
+variable_attribute    :   VAR_? predicate ISA_ type   ( ',' attributes )?
+                      |   VAR_? predicate attributes?
                       ;
 
 // RELATION CONSTRUCT ==========================================================
@@ -148,18 +148,18 @@ player                :   VAR_ ;                                                
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes            :   attribute ( ',' attribute )* ;
-attribute             :   HAS label ( VAR_ | value )                            // ownership by labeled variable or value
+attribute             :   HAS label ( VAR_ | predicate )                            // ownership by labeled variable or value
                       |   HAS VAR_ ;                                            // or just value
 // ATTRIBUTE OPERATION CONSTRUCTS ==============================================
 
-value                 :   literal
-                      |   comparator_equality   comparable_literal
-                      |   comparator_substring  STRING_
+predicate             :   value
+                      |   predicate_equality   predicate_value
+                      |   predicate_substring  STRING_
                       ;
-comparator_equality   :   EQ | NEQ | GT | GTE | LT | LTE ;
-comparator_substring  :   CONTAINS | LIKE ;
+predicate_equality    :   EQ | NEQ | GT | GTE | LT | LTE ;
+predicate_substring   :   CONTAINS | LIKE ;
 
-comparable_literal    :   literal | VAR_  ;
+predicate_value       :   value | VAR_  ;
 
 // SCHEMA CONSTRUCT =============================================================
 
@@ -229,7 +229,7 @@ type_native           :   THING           |   ENTITY          |   ATTRIBUTE
 
 value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;
-literal               :   STRING_         |   LONG_           |   DOUBLE_
+value                 :   STRING_         |   LONG_           |   DOUBLE_
                       |   BOOLEAN_        |   DATE_           |   DATETIME_     ;
 regex                 :   STRING_         ;
 
@@ -285,7 +285,7 @@ IS              : 'is'          ;
 
 OR              : 'or'          ;   NOT             : 'not'         ;
 
-// COMPARATOR KEYWORDS
+// PREDICATE KEYWORDS
 
 EQ              : '='           ;   NEQ             : '!='          ;
 GT              : '>'           ;   GTE             : '>='          ;
