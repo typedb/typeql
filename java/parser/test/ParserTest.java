@@ -329,7 +329,7 @@ public class ParserTest {
 
 
     @Test
-    public void testLongComparatorQuery() {
+    public void testLongPredicateQuery() {
         final String query = "match $x isa movie, has tmdb-vote-count <= 400;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(var("x").isa("movie").has("tmdb-vote-count", lte(400)));

@@ -44,15 +44,15 @@ import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
 import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
 import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
 import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
-import static graql.lang.common.GraqlToken.Comparator.SubString.LIKE;
 import static graql.lang.common.GraqlToken.Constraint.HAS;
 import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
+import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
+import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
-import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_COMPARATOR;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_PREDICATE;
 import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
 import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
 import static graql.lang.common.util.Strings.escapeRegex;
@@ -439,18 +439,18 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public abstract static class Value<T> extends ThingConstraint {
 
-        private final GraqlToken.Comparator comparator;
+        private final GraqlToken.Predicate predicate;
         private final T value;
         private final int hash;
 
-        Value(GraqlToken.Comparator comparator, T value) {
-            assert !comparator.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
-            assert !comparator.isSubString() || value instanceof java.lang.String;
-            if (comparator == null) throw GraqlException.of(MISSING_CONSTRAINT_COMPARATOR);
+        Value(GraqlToken.Predicate predicate, T value) {
+            assert !predicate.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
+            assert !predicate.isSubString() || value instanceof java.lang.String;
+            if (predicate == null) throw GraqlException.of(MISSING_CONSTRAINT_PREDICATE);
             else if (value == null) throw GraqlException.of(MISSING_CONSTRAINT_VALUE);
-            this.comparator = comparator;
+            this.predicate = predicate;
             this.value = value;
-            this.hash = Objects.hash(Value.class, this.comparator, this.value);
+            this.hash = Objects.hash(Value.class, this.predicate, this.value);
         }
 
         @Override
@@ -468,8 +468,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return this;
         }
 
-        public GraqlToken.Comparator comparator() {
-            return comparator;
+        public GraqlToken.Predicate predicate() {
+            return predicate;
         }
 
         public T value() {
@@ -526,8 +526,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         @Override
         public java.lang.String toString() {
-            if (comparator.equals(EQ) && !isVariable()) return Strings.valueToString(value);
-            else return comparator.toString() + SPACE + Strings.valueToString(value);
+            if (predicate.equals(EQ) && !isVariable()) return Strings.valueToString(value);
+            else return predicate.toString() + SPACE + Strings.valueToString(value);
         }
 
         @Override
@@ -535,7 +535,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Value<?> that = (Value<?>) o;
-            return (this.comparator.equals(that.comparator) && this.value.equals(that.value));
+            return (this.predicate.equals(that.predicate) && this.value.equals(that.value));
         }
 
         @Override
@@ -545,8 +545,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Long extends Value<java.lang.Long> {
 
-            public Long(GraqlToken.Comparator.Equality comparator, long value) {
-                super(comparator, value);
+            public Long(GraqlToken.Predicate.Equality predicate, long value) {
+                super(predicate, value);
             }
 
             @Override
@@ -562,8 +562,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Double extends Value<java.lang.Double> {
 
-            public Double(GraqlToken.Comparator.Equality comparator, double value) {
-                super(comparator, value);
+            public Double(GraqlToken.Predicate.Equality predicate, double value) {
+                super(predicate, value);
             }
 
             @Override
@@ -579,8 +579,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Boolean extends Value<java.lang.Boolean> {
 
-            public Boolean(GraqlToken.Comparator.Equality comparator, boolean value) {
-                super(comparator, value);
+            public Boolean(GraqlToken.Predicate.Equality predicate, boolean value) {
+                super(predicate, value);
             }
 
             @Override
@@ -596,8 +596,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class String extends Value<java.lang.String> {
 
-            public String(GraqlToken.Comparator comparator, java.lang.String value) {
-                super(comparator, value);
+            public String(GraqlToken.Predicate predicate, java.lang.String value) {
+                super(predicate, value);
             }
 
             @Override
@@ -609,12 +609,12 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             public java.lang.String toString() {
                 final StringBuilder operation = new StringBuilder();
 
-                if (comparator().equals(LIKE)) {
+                if (predicate().equals(LIKE)) {
                     operation.append(LIKE).append(SPACE).append(quoteString(escapeRegex(value())));
-                } else if (comparator().equals(EQ)) {
+                } else if (predicate().equals(EQ)) {
                     operation.append(quoteString(value()));
                 } else {
-                    operation.append(comparator()).append(SPACE).append(quoteString(value()));
+                    operation.append(predicate()).append(SPACE).append(quoteString(value()));
                 }
 
                 return operation.toString();
@@ -628,8 +628,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class DateTime extends Value<LocalDateTime> {
 
-            public DateTime(GraqlToken.Comparator.Equality comparator, LocalDateTime value) {
-                super(comparator, value);
+            public DateTime(GraqlToken.Predicate.Equality predicate, LocalDateTime value) {
+                super(predicate, value);
                 // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
                 final int nanos = value.toLocalTime().getNano();
                 final long nanosPerMilli = 1000000L;
@@ -652,8 +652,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Variable extends Value<ThingVariable<?>> {
 
-            public Variable(GraqlToken.Comparator.Equality comparator, UnboundVariable variable) {
-                super(comparator, variable.toThing());
+            public Variable(GraqlToken.Predicate.Equality predicate, UnboundVariable variable) {
+                super(predicate, variable.toThing());
             }
 
             @Override

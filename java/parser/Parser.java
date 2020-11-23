@@ -710,7 +710,7 @@ public class Parser extends GraqlBaseVisitor {
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
 
-        ThingVariable.Attribute attribute = unscoped.constrain(visitValue(ctx.value()));
+        ThingVariable.Attribute attribute = unscoped.constrain(visitPredicate(ctx.predicate()));
         if (ctx.ISA_() != null) attribute = attribute.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
@@ -744,7 +744,8 @@ public class Parser extends GraqlBaseVisitor {
     public ThingConstraint.Has visitAttribute(GraqlParser.AttributeContext ctx) {
         if (ctx.label() != null) {
             if (ctx.VAR_() != null) return new ThingConstraint.Has(ctx.label().getText(), getVar(ctx.VAR_()));
-            if (ctx.value() != null) return new ThingConstraint.Has(ctx.label().getText(), visitValue(ctx.value()));
+            if (ctx.predicate() != null)
+                return new ThingConstraint.Has(ctx.label().getText(), visitPredicate(ctx.predicate()));
         } else if (ctx.VAR_() != null) return new ThingConstraint.Has(getVar(ctx.VAR_()));
         throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
     }
@@ -815,38 +816,38 @@ public class Parser extends GraqlBaseVisitor {
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
 
     @Override
-    public ThingConstraint.Value<?> visitValue(GraqlParser.ValueContext ctx) {
-        final GraqlToken.Comparator comparator;
+    public ThingConstraint.Value<?> visitPredicate(GraqlParser.PredicateContext ctx) {
+        final GraqlToken.Predicate predicate;
         final Object value;
 
-        if (ctx.literal() != null) {
-            comparator = GraqlToken.Comparator.Equality.EQ;
-            value = visitLiteral(ctx.literal());
-        } else if (ctx.comparator_equality() != null) {
-            comparator = GraqlToken.Comparator.Equality.of(ctx.comparator_equality().getText());
-            if (ctx.comparable_literal().literal() != null) value = visitLiteral(ctx.comparable_literal().literal());
-            else if (ctx.comparable_literal().VAR_() != null) value = getVar(ctx.comparable_literal().VAR_());
+        if (ctx.value() != null) {
+            predicate = GraqlToken.Predicate.Equality.EQ;
+            value = visitValue(ctx.value());
+        } else if (ctx.predicate_equality() != null) {
+            predicate = GraqlToken.Predicate.Equality.of(ctx.predicate_equality().getText());
+            if (ctx.predicate_value().value() != null) value = visitValue(ctx.predicate_value().value());
+            else if (ctx.predicate_value().VAR_() != null) value = getVar(ctx.predicate_value().VAR_());
             else throw GraqlException.of(ILLEGAL_STATE);
-        } else if (ctx.comparator_substring() != null) {
-            comparator = GraqlToken.Comparator.SubString.of(ctx.comparator_substring().getText());
-            if (ctx.comparator_substring().LIKE() != null) value = getRegex(ctx.STRING_());
+        } else if (ctx.predicate_substring() != null) {
+            predicate = GraqlToken.Predicate.SubString.of(ctx.predicate_substring().getText());
+            if (ctx.predicate_substring().LIKE() != null) value = getRegex(ctx.STRING_());
             else value = getString(ctx.STRING_());
         } else throw GraqlException.of(ILLEGAL_STATE);
 
-        assert comparator != null;
+        assert predicate != null;
 
         if (value instanceof Long) {
-            return new ThingConstraint.Value.Long(comparator.asEquality(), (Long) value);
+            return new ThingConstraint.Value.Long(predicate.asEquality(), (Long) value);
         } else if (value instanceof Double) {
-            return new ThingConstraint.Value.Double(comparator.asEquality(), (Double) value);
+            return new ThingConstraint.Value.Double(predicate.asEquality(), (Double) value);
         } else if (value instanceof Boolean) {
-            return new ThingConstraint.Value.Boolean(comparator.asEquality(), (Boolean) value);
+            return new ThingConstraint.Value.Boolean(predicate.asEquality(), (Boolean) value);
         } else if (value instanceof String) {
-            return new ThingConstraint.Value.String(comparator, (String) value);
+            return new ThingConstraint.Value.String(predicate, (String) value);
         } else if (value instanceof LocalDateTime) {
-            return new ThingConstraint.Value.DateTime(comparator.asEquality(), (LocalDateTime) value);
+            return new ThingConstraint.Value.DateTime(predicate.asEquality(), (LocalDateTime) value);
         } else if (value instanceof UnboundVariable) {
-            return new ThingConstraint.Value.Variable(comparator.asEquality(), (UnboundVariable) value);
+            return new ThingConstraint.Value.Variable(predicate.asEquality(), (UnboundVariable) value);
         } else {
             throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
         }
@@ -876,7 +877,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Object visitLiteral(GraqlParser.LiteralContext ctx) {
+    public Object visitValue(GraqlParser.ValueContext ctx) {
         if (ctx.STRING_() != null) {
             return getString(ctx.STRING_());
 

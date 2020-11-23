@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 import static grakn.common.collection.Collections.map;
 import static grakn.common.collection.Collections.pair;
 import static grakn.common.collection.Collections.set;
-import static graql.lang.common.GraqlToken.Comparator.Equality.EQ;
+import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
 import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
 import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
 import static graql.lang.common.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
