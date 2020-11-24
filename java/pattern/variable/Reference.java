@@ -51,13 +51,13 @@ public abstract class Reference {
         return new Reference.Anonymous(isVisible);
     }
 
-    Reference.Type type() {
+    protected Reference.Type type() {
         return type;
     }
 
     public abstract String syntax();
 
-    boolean isVisible() {
+    protected boolean isVisible() {
         return isVisible;
     }
 
@@ -122,7 +122,7 @@ public abstract class Reference {
         protected final String name;
         private final int hash;
 
-        Name(String name) {
+        protected Name(String name) {
             super(Type.NAME, true);
             if (!REGEX.matcher(name).matches()) {
                 throw GraqlException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
@@ -131,7 +131,7 @@ public abstract class Reference {
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }
 
-        String name() {
+        protected String name() {
             return name;
         }
 
