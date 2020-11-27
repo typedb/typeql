@@ -90,6 +90,7 @@ release:
         bazel run --define version=$(cat VERSION) //:deploy-github -- $GRABL_COMMIT
     deploy-maven-release:
       machine: graknlabs-ubuntu-20.04
+      dependencies: [deploy-github]
       script: |
         export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
