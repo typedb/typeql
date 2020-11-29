@@ -32,6 +32,7 @@ deploy_github(
     title_append_version = True,
     organisation = deployment['github.organisation'],
     repository = deployment['github.repository'],
+    draft = False
 )
 
 release_validate_deps(
