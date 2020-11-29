@@ -95,4 +95,8 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/common:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/pattern:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/query:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/parser:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java:deploy-maven -- release
