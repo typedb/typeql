@@ -131,7 +131,7 @@ public abstract class Reference {
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }
 
-        protected String name() {
+        public String name() {
             return name;
         }
 
