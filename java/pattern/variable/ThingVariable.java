@@ -17,6 +17,7 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.constraint.ConceptConstraint;
 import graql.lang.pattern.constraint.ThingConstraint;
@@ -189,6 +190,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
             relationConstraint.addPlayers(rolePlayer);
             if (isa().isPresent() && !relationConstraint.hasScope()) {
                 relationConstraint.setScope(isa().get().type().label().get().label());
+            } else if (!relationConstraint.hasScope()) {
+                relationConstraint.setScope(GraqlToken.Type.RELATION.toString());
             }
             return this;
         }
