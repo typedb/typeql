@@ -188,11 +188,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
             relationConstraint.addPlayers(rolePlayer);
-            if (isa().isPresent() && !relationConstraint.hasScope()) {
-                relationConstraint.setScope(isa().get().type().label().get().label());
-            } else if (!relationConstraint.hasScope()) {
-                relationConstraint.setScope(GraqlToken.Type.RELATION.toString());
-            }
             return this;
         }
 

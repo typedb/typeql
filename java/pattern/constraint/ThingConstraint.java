@@ -49,6 +49,7 @@ import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
 import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
 import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
+import static graql.lang.common.GraqlToken.Type.RELATION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
@@ -246,15 +247,12 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public Relation(List<RolePlayer> players) {
             if (players == null || players.isEmpty()) throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
             this.players = new ArrayList<>(players);
+            setScope(RELATION.toString());
         }
 
         public void setScope(String relationLabel) {
             this.scope = relationLabel;
             players.forEach(player -> player.setScope(scope));
-        }
-
-        public boolean hasScope() {
-            return scope != null;
         }
 
         public void addPlayers(RolePlayer player) {
