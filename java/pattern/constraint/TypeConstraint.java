@@ -46,6 +46,7 @@ import static graql.lang.common.GraqlToken.Constraint.SUB;
 import static graql.lang.common.GraqlToken.Constraint.SUBX;
 import static graql.lang.common.GraqlToken.Constraint.TYPE;
 import static graql.lang.common.GraqlToken.Constraint.VALUE_TYPE;
+import static graql.lang.common.GraqlToken.Type.RELATION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static graql.lang.common.util.Strings.escapeRegex;
@@ -590,7 +591,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private TypeVariable overriddenRoleType;
 
         public Relates(String roleType) {
-            this(hidden().type(roleType), null);
+            this(scopedType(roleType), null);
         }
 
         public Relates(UnboundVariable roleTypeVar) {
@@ -598,15 +599,15 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         public Relates(String roleType, String overriddenRoleType) {
-            this(hidden().type(roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+            this(scopedType(roleType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
         public Relates(UnboundVariable roleTypeVar, String overriddenRoleType) {
-            this(roleTypeVar.toType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+            this(roleTypeVar.toType(), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
         public Relates(String roleType, UnboundVariable overriddenRoleTypeVar) {
-            this(hidden().type(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
+            this(scopedType(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
         }
 
         public Relates(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
@@ -614,14 +615,18 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         public Relates(Either<String, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
+            this(roleTypeArg.apply(Relates::scopedType, UnboundVariable::toType),
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Relates::scopedType, UnboundVariable::toType));
         }
 
         private Relates(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
+        }
+
+        private static TypeVariable scopedType(String roleType) {
+            return hidden().type(RELATION.toString(), roleType);
         }
 
         public void setScope(String relationLabel) {

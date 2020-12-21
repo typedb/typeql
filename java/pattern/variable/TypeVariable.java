@@ -78,6 +78,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
         }
         labelConstraint = constraint;
         constraints.add(constraint);
+        relatesConstraints.forEach(rel -> rel.setScope(constraint.label()));
         return this;
     }
 

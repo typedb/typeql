@@ -119,6 +119,33 @@ public class ParserTest {
     }
 
     @Test
+    public void testRoleTypeScopedGlobally() {
+        String query = "match $x relates spouse;";
+        GraqlMatch parsed  = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(var("x").relates("spouse"));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testRoleTypeScopedSpecifically() {
+        String query = "match marriage relates spouse;";
+        GraqlMatch parsed  = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(type("marriage").relates("spouse"));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testRoleTypeNotScoped() {
+        String query = "match marriage relates $s;";
+        GraqlMatch parsed  = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(type("marriage").relates(var("s")));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
     public void testPredicateQuery1() {
         final String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
