@@ -28,37 +28,37 @@ build:
       owner: graknlabs
       branch: master
     build-analysis:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
           bazel run @graknlabs_dependencies//tool/sonarcloud:code-analysis -- \
           --project-key graknlabs_graql --branch=$GRABL_BRANCH --commit-id=$GRABL_COMMIT
     dependency-analysis:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         bazel run @graknlabs_dependencies//grabl/analysis:dependency-analysis
   correctness:
     build:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         bazel build //... --test_output=errors
         bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
     build-dependency:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
     test-graql-java:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         bazel test //java/... --test_output=errors
     deploy-maven-snapshot:
       filter:
         owner: graknlabs
         branch: master
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       dependencies: [build, build-dependency, test-graql-java]
       script: |
         export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
@@ -73,7 +73,7 @@ build:
       filter:
         owner: graknlabs
         branch: master
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       dependencies: [deploy-maven-snapshot]
       script: |
         sed -i -e "s/GRAQL_LANG_VERSION_MARKER/$GRABL_COMMIT/g" java/test/deployment/pom.xml
@@ -85,11 +85,11 @@ release:
     branch: master
   validation:
     validate-dependencies:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: bazel test //:release-validate-deps --test_output=streamed
   deployment:
     deploy-github:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       script: |
         pip install certifi
         export RELEASE_NOTES_TOKEN=$REPO_GITHUB_TOKEN
@@ -97,7 +97,7 @@ release:
         export DEPLOY_GITHUB_TOKEN=$REPO_GITHUB_TOKEN
         bazel run --define version=$(cat VERSION) //:deploy-github -- $GRABL_COMMIT
     deploy-maven-release:
-      machine: graknlabs-ubuntu-20.04
+      image: graknlabs-ubuntu-20.04
       dependencies: [deploy-github]
       script: |
         export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
