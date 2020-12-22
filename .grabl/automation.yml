@@ -19,7 +19,7 @@ config:
   version-candidate: VERSION
   dependencies:
     dependencies: [build]
-    common: [build, release]
+    common: [build] # TODO: add 'release' once dependency-analysis works with tags
     behaviour: [build]
 
 build:
