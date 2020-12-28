@@ -127,8 +127,7 @@ public class GraqlToken {
         NEW_LINE("\n"),
         UNDERSCORE("_"),
         $_("$_"),
-        $("$"),
-        $SYS("$/");
+        $("$");
 
         private final String character;
 
