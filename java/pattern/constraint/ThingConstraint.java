@@ -18,6 +18,7 @@
 package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
+import grakn.common.collection.Pair;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.common.util.Strings;
@@ -29,14 +30,20 @@ import graql.lang.pattern.variable.UnboundVariable;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import static grakn.common.collection.Collections.list;
+import static grakn.common.collection.Collections.pair;
 import static grakn.common.collection.Collections.set;
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.COLON;
@@ -237,6 +244,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Relation extends ThingConstraint {
 
+        private final Map<Pair<TypeVariable, ThingVariable<?>>, AtomicInteger> repetitions;
         private final List<RolePlayer> players;
         private String scope;
 
@@ -246,8 +254,23 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public Relation(List<RolePlayer> players) {
             if (players == null || players.isEmpty()) throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
-            this.players = new ArrayList<>(players);
-            setScope(RELATION.toString());
+            this.repetitions = new HashMap<>();
+            this.players = new ArrayList<>();
+            this.scope = RELATION.toString();
+            registerPlayers(players);
+        }
+
+        private void registerPlayers(List<RolePlayer> players) {
+            for (RolePlayer player : players) {
+                player.setScope(scope);
+                player.setRepetition(incrementRepetition(player));
+                this.players.add(player);
+            }
+        }
+
+        private int incrementRepetition(RolePlayer player) {
+            return repetitions.computeIfAbsent(pair(player.roleType, player.player),
+                                               k -> new AtomicInteger(0)).incrementAndGet();
         }
 
         public void setScope(String relationLabel) {
@@ -257,6 +280,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public void addPlayers(RolePlayer player) {
             if (scope != null) player.setScope(scope);
+            player.setRepetition(incrementRepetition(player));
             players.add(player);
         }
 
@@ -293,8 +317,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Relation that = (Relation) o;
-            return (this.players.equals(that.players));
+            Relation that = (Relation) o;
+            return this.players.equals(that.players);
         }
 
         @Override
@@ -306,6 +330,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
             private TypeVariable roleType;
             private final ThingVariable<?> player;
+            private int repetition;
 
             public RolePlayer(String roleType, UnboundVariable playerVar) {
                 this(roleType == null ? null : hidden().type(roleType), playerVar.toThing());
@@ -329,18 +354,26 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
                 this.player = player;
             }
 
-            public void setScope(String relationLabel) {
-                if (roleType != null && roleType.label().isPresent()) {
-                    this.roleType = hidden().type(relationLabel, roleType.label().get().label());
-                }
-            }
-
             public Optional<TypeVariable> roleType() {
                 return Optional.ofNullable(roleType);
             }
 
             public ThingVariable<?> player() {
                 return player;
+            }
+
+            public int repetition() {
+                return repetition;
+            }
+
+            private void setScope(String relationLabel) {
+                if (roleType != null && roleType.label().isPresent()) {
+                    this.roleType = hidden().type(relationLabel, roleType.label().get().label());
+                }
+            }
+
+            private void setRepetition(int repetition) {
+                this.repetition = repetition;
             }
 
             @Override
@@ -361,12 +394,14 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 final RolePlayer that = (RolePlayer) o;
-                return (Objects.equals(this.roleType, that.roleType)) && (this.player.equals(that.player));
+                return (Objects.equals(this.roleType, that.roleType) &&
+                        this.player.equals(that.player) &&
+                        this.repetition == that.repetition);
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(RolePlayer.class, roleType, player);
+                return Objects.hash(RolePlayer.class, roleType, player, repetition);
             }
         }
     }
