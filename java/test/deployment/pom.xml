@@ -36,11 +36,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <url>https://repo.grakn.ai/repository/maven-snapshot/</url>
         </repository>
     </repositories>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>io.graql</groupId>
             <artifactId>graql-lang</artifactId>
-            <version>GRAQL_LANG_VERSION_MARKER</version>
+            <version>326f21034851430045379c46acf855d0bfdc7e05</version>
             <scope>test</scope>
         </dependency>
         <dependency>
