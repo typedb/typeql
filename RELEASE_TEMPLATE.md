@@ -1,4 +1,4 @@
-### Distribution (for Java)
+## Distribution (for Java)
 
 ```xml
 <repositories>
@@ -18,3 +18,5 @@
 ```
 
 { release notes }
+
+**Please refer to [full release notes of 2.0.0-alpha](https://github.com/graknlabs/graql/releases/tag/2.0.0-alpha) to see the changes contained in 2.0.0.**
