@@ -32,7 +32,7 @@ public abstract class Reference {
     final Type type;
     final boolean isVisible;
 
-    enum Type {NAME, LABEL, ANONYMOUS}
+    public enum Type {NAME, LABEL, ANONYMOUS, SYSTEM}
 
     Reference(Type type, boolean isVisible) {
         this.type = type;
@@ -106,7 +106,7 @@ public abstract class Reference {
 
     public static abstract class Referrable extends Reference {
 
-        Referrable(Type type, boolean isVisible) {
+        public Referrable(Type type, boolean isVisible) {
             super(type, isVisible);
         }
 
