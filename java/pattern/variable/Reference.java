@@ -61,7 +61,7 @@ public abstract class Reference {
         return isVisible;
     }
 
-    public boolean isReferrable() {
+    public boolean isReferable() {
         return !isAnonymous();
     }
 
@@ -77,8 +77,8 @@ public abstract class Reference {
         return type == Type.ANONYMOUS;
     }
 
-    public Reference.Referrable asReferrable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Referrable.class)));
+    public Referable asReferable() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Referable.class)));
     }
 
     public Reference.Name asName() {
@@ -104,19 +104,19 @@ public abstract class Reference {
     @Override
     public abstract int hashCode();
 
-    public static abstract class Referrable extends Reference {
+    public static abstract class Referable extends Reference {
 
-        Referrable(Type type, boolean isVisible) {
+        Referable(Type type, boolean isVisible) {
             super(type, isVisible);
         }
 
         @Override
-        public Reference.Referrable asReferrable() {
+        public Referable asReferable() {
             return this;
         }
     }
 
-    public static class Name extends Referrable {
+    public static class Name extends Referable {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         protected final String name;
@@ -161,7 +161,7 @@ public abstract class Reference {
         }
     }
 
-    public static class Label extends Referrable {
+    public static class Label extends Referable {
 
         private final String label;
         private final int hash;
