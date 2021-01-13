@@ -67,7 +67,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(23, "Rule '%s' 'then' '%s': is trying to assign both an attribute type and a variable attribute value.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
             new ErrorMessage(24, "Rule '%s' 'then' variables must be present in rule 'when'.");
-    public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
+    public static final ErrorMessage INVALID_REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(25, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
             new ErrorMessage(26, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
@@ -75,6 +75,56 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(27, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
             new ErrorMessage(28, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+    public static final ErrorMessage INVALID_SORTING_ORDER =
+            new ErrorMessage(29, "Invalid sorting order. Valid options: '%s' or '%s'.");
+    public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
+            new ErrorMessage(30, "Aggregate COUNT does not accept a Variable.");
+    public static final ErrorMessage PARSING_ERROR_QUERY =
+            new ErrorMessage(31, "Unrecognised Graql Query: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_COMPUTE_QUERY =
+            new ErrorMessage(32, "Unrecognised Graql Compute Query: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_COMPUTE_STATISTICS_METHOD =
+            new ErrorMessage(33, "Unrecognised Graql Compute Statistics method: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_COMPUTE_PATH_CONDITION =
+            new ErrorMessage(34, "Unrecognised Graql Compute Path condition: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_COMPUTE_STATISTICS_CONDITION =
+            new ErrorMessage(35, "Unrecognised Graql Compute Statistics condition: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_COMPUTE_CENTRALITY_CONDITION =
+            new ErrorMessage(36, "Unrecognised Graql Compute Centrality condition: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_COMPUTE_CLUSTER_CONDITION =
+            new ErrorMessage(37, "Unrecognised Graql Compute Cluster condition: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_PATTERN =
+            new ErrorMessage(38, "Unrecognised Pattern: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_STATEMENT_CLASS =
+            new ErrorMessage(39, "Unrecognised Statement class: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_TYPE_STATEMENT =
+            new ErrorMessage(40, "Unrecognised Type Statement: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_INSTANCE_STATEMENT =
+            new ErrorMessage(41, "Unrecognised Instance Statement: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_ISA_CONSTRAINT =
+            new ErrorMessage(42, "Unrecognised ISA constraint: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_MATCH_HAS_STATEMENT =
+            new ErrorMessage(43, "Unrecognised MATCH HAS statement: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_VALUE_COMPARISON =
+            new ErrorMessage(44, "Unrecognised Value Comparison: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_VALUE_CLASS =
+            new ErrorMessage(45, "Unrecognised Value Class: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_LITERAL_TOKEN =
+            new ErrorMessage(46, "Unrecognised Literal token: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_BOOLEAN_TOKEN =
+            new ErrorMessage(47, "Unrecognised Boolean token: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_DATE_TOKEN =
+            new ErrorMessage(48, "Unrecognised Date token: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_DATETIME_TOKEN =
+            new ErrorMessage(49, "Unrecognised DateTime token: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_LONG_TOKEN =
+            new ErrorMessage(50, "Unrecognised Long token: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_DOUBLE_TOKEN =
+            new ErrorMessage(51, "Unrecognised Double token: '%s'.");
+    public static final ErrorMessage PARSING_ERROR_QUOTEDSTRING_TOKEN =
+            new ErrorMessage(52, "Unrecognised QuotedString token: '%s'.");
+
+
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";

@@ -139,6 +139,15 @@ public class GraqlToken {
         public String toString() {
             return this.character;
         }
+
+        public static Char of(String value) {
+            for (Char c : Char.values()) {
+                if (c.character.equals(value)) {
+                    return c;
+                }
+            }
+            return null;
+        }
     }
 
     public enum Operator {

@@ -61,6 +61,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -70,7 +71,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.pair;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
+
+import static graql.lang.common.exception.ErrorMessage.*;
 import static graql.lang.common.util.Strings.unescapeRegex;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.toList;
@@ -251,7 +253,7 @@ public class Parser extends GraqlBaseVisitor {
             return visitQuery_compute(ctx.query_compute());
 
         } else {
-            throw new IllegalArgumentException("Unrecognised Graql Query: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_QUERY.message(ctx.getText()));
         }
     }
 
@@ -374,7 +376,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.compute_conditions().conditions_cluster() != null) {
             return visitConditions_cluster(ctx.compute_conditions().conditions_cluster());
         } else {
-            throw new IllegalArgumentException("Unrecognised Graql Compute Query: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_COMPUTE_QUERY.message(ctx.getText()));
         }
     }
 
@@ -393,7 +395,7 @@ public class Parser extends GraqlBaseVisitor {
         final GraqlToken.Compute.Method method = GraqlToken.Compute.Method.of(ctx.compute_method().getText());
 
         if (method == null) {
-            throw new IllegalArgumentException("Unrecognised Graql Compute Statistics method: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_COMPUTE_STATISTICS_METHOD.message(ctx.getText()));
         } else if (method.equals(GraqlToken.Compute.Method.MAX)) {
             compute = new GraqlCompute.Builder().max();
         } else if (method.equals(GraqlToken.Compute.Method.MIN)) {
@@ -407,7 +409,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (method.equals(GraqlToken.Compute.Method.STD)) {
             compute = new GraqlCompute.Builder().std();
         } else {
-            throw new IllegalArgumentException("Unrecognised Graql Compute Statistics method: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_COMPUTE_STATISTICS_METHOD.message(ctx.getText()));
         }
 
         for (GraqlParser.Input_valueContext valueCtx : ctx.input_value()) {
@@ -416,7 +418,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (valueCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(valueCtx.compute_scope().labels()));
             } else {
-                throw new IllegalArgumentException("Unrecognised Graql Compute Statistics condition: " + ctx.getText());
+                throw GraqlException.of(PARSING_ERROR_COMPUTE_STATISTICS_CONDITION.message(ctx.getText()));
             }
         }
 
@@ -439,7 +441,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (pathCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(pathCtx.compute_scope().labels()));
             } else {
-                throw new IllegalArgumentException("Unrecognised Graql Compute Path condition: " + ctx.getText());
+                throw GraqlException.of(PARSING_ERROR_COMPUTE_PATH_CONDITION.message(ctx.getText()));
             }
         }
 
@@ -458,7 +460,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (centralityCtx.compute_config() != null) {
                 compute = (GraqlCompute.Centrality) setComputeConfig(compute, centralityCtx.compute_config());
             } else {
-                throw new IllegalArgumentException("Unrecognised Graql Compute Centrality condition: " + ctx.getText());
+                throw GraqlException.of(PARSING_ERROR_COMPUTE_CENTRALITY_CONDITION.message(ctx.getText()));
             }
         }
 
@@ -475,7 +477,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (clusterCtx.compute_config() != null) {
                 compute = (GraqlCompute.Cluster) setComputeConfig(compute, clusterCtx.compute_config());
             } else {
-                throw new IllegalArgumentException("Unrecognised Graql Compute Cluster condition: " + ctx.getText());
+                throw GraqlException.of(PARSING_ERROR_COMPUTE_CLUSTER_CONDITION.message(ctx.getText()));
             }
         }
 
@@ -540,7 +542,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.pattern_negation() != null) {
             return visitPattern_negation(ctx.pattern_negation());
         } else {
-            throw new IllegalArgumentException("Unrecognised Pattern: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_PATTERN.message(ctx.getText()));
         }
     }
 
@@ -597,7 +599,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.variable_concept() != null) {
             return visitVariable_concept(ctx.variable_concept());
         } else {
-            throw new IllegalArgumentException("Unrecognised Statement class: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_STATEMENT_CLASS.message(ctx.getText()));
         }
     }
 
@@ -640,7 +642,7 @@ public class Parser extends GraqlBaseVisitor {
                 final Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
                 type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
             } else {
-                throw new IllegalArgumentException("Unrecognised Type Statement: " + constraint.getText());
+                throw GraqlException.of(PARSING_ERROR_TYPE_STATEMENT.message(constraint.getText()));
             }
         }
 
@@ -663,7 +665,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.variable_attribute() != null) {
             return this.visitVariable_attribute(ctx.variable_attribute());
         } else {
-            throw new IllegalArgumentException("Unrecognised Instance Statement: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_INSTANCE_STATEMENT.message(ctx.getText()));
         }
     }
 
@@ -729,7 +731,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (isa != null && isa.equals(GraqlToken.Constraint.ISAX)) {
             return new ThingConstraint.Isa(visitType(ctx), true);
         } else {
-            throw new IllegalArgumentException("Unrecognised ISA constraint: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_ISA_CONSTRAINT.message(ctx.getText()));
         }
     }
 
@@ -747,7 +749,7 @@ public class Parser extends GraqlBaseVisitor {
             if (ctx.predicate() != null)
                 return new ThingConstraint.Has(ctx.label().getText(), visitPredicate(ctx.predicate()));
         } else if (ctx.VAR_() != null) return new ThingConstraint.Has(getVar(ctx.VAR_()));
-        throw new IllegalArgumentException("Unrecognised MATCH HAS statement: " + ctx.getText());
+        throw GraqlException.of(PARSING_ERROR_MATCH_HAS_STATEMENT.message(ctx.getText()));
     }
 
     // RELATION STATEMENT CONSTRUCT ============================================
@@ -849,7 +851,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (value instanceof UnboundVariable) {
             return new ThingConstraint.Value.Variable(predicate.asEquality(), (UnboundVariable) value);
         } else {
-            throw new IllegalArgumentException("Unrecognised Value Comparison: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_VALUE_COMPARISON.message(ctx.getText()));
         }
     }
 
@@ -872,7 +874,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (valueClass.STRING() != null) {
             return GraqlArg.ValueType.STRING;
         } else {
-            throw new IllegalArgumentException("Unrecognised Value Class: " + valueClass);
+            throw GraqlException.of(PARSING_ERROR_VALUE_CLASS.message(valueClass));
         }
     }
 
@@ -897,13 +899,21 @@ public class Parser extends GraqlBaseVisitor {
             return getDateTime(ctx.DATETIME_());
 
         } else {
-            throw new IllegalArgumentException("Unrecognised Literal token: " + ctx.getText());
+            throw GraqlException.of(PARSING_ERROR_LITERAL_TOKEN.message(ctx.getText()));
         }
     }
 
     private String getString(TerminalNode string) {
-        // Remove surrounding quotes
-        return unquoteString(string);
+        if (string.getText().length() >= 2) {
+            final GraqlToken.Char literalFirstSymbol = GraqlToken.Char.of(string.getText().substring(0,1));
+            final GraqlToken.Char literalLastSymbol = GraqlToken.Char.of(string.getText().substring(string.getText().length() - 1));
+            if (literalFirstSymbol != null && literalFirstSymbol.equals(GraqlToken.Char.QUOTE) &&
+                literalLastSymbol != null && literalLastSymbol.equals(GraqlToken.Char.QUOTE)) {
+                // Remove surrounding quotes
+                return unquoteString(string);
+            }
+        }
+        throw GraqlException.of(PARSING_ERROR_QUOTEDSTRING_TOKEN.message(string.getText()));
     }
 
     private String unquoteString(TerminalNode string) {
@@ -911,11 +921,20 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     private long getLong(TerminalNode number) {
-        return Long.parseLong(number.getText());
+        try {
+            return Long.parseLong(number.getText());
+        }
+        catch (NumberFormatException e) {
+            throw GraqlException.of(PARSING_ERROR_LONG_TOKEN.message(number.getText()));
+        }
     }
 
     private double getDouble(TerminalNode real) {
-        return Double.parseDouble(real.getText());
+        try {
+            return Double.parseDouble(real.getText());
+        } catch (NumberFormatException e) {
+            throw GraqlException.of(PARSING_ERROR_DOUBLE_TOKEN.message(real.getText()));
+        }
     }
 
     private boolean getBoolean(TerminalNode bool) {
@@ -928,15 +947,23 @@ public class Parser extends GraqlBaseVisitor {
             return false;
 
         } else {
-            throw new IllegalArgumentException("Unrecognised Boolean token: " + bool.getText());
+            throw GraqlException.of(PARSING_ERROR_BOOLEAN_TOKEN.message(bool.getText()));
         }
     }
 
     private LocalDateTime getDate(TerminalNode date) {
-        return LocalDate.parse(date.getText(), DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+        try {
+            return LocalDate.parse(date.getText(), DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+        } catch (DateTimeParseException e) {
+            throw GraqlException.of(PARSING_ERROR_DATE_TOKEN.message(date.getText()));
+        }
     }
 
     private LocalDateTime getDateTime(TerminalNode dateTime) {
-        return LocalDateTime.parse(dateTime.getText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        try {
+            return LocalDateTime.parse(dateTime.getText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            throw GraqlException.of(PARSING_ERROR_DATETIME_TOKEN.message(dateTime.getText()));
+        }
     }
 }
