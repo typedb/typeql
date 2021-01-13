@@ -126,7 +126,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
             axesSizeProduct = new int[axes.size() + 1];
             axesSizeProduct[axes.size()] = 1;
             for (int i = axes.size() - 1; i >= 0; i--) {
-                axesSizeProduct[i] = axesSizeProduct[i + 1] * axes.get(i).size(); // note: this can grow very fast. Overflow?
+                axesSizeProduct[i] = axesSizeProduct[i + 1] * axes.get(i).size();
             }
             if (axesSizeProduct[0] == 0) throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
             computed = new HashMap<>();
