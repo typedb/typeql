@@ -56,5 +56,5 @@ deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
     snapshot = deployment['maven.snapshot'],
-    release = deployment['maven.snapshot']
+    release = deployment['maven.release']
 )
