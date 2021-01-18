@@ -851,7 +851,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (value instanceof UnboundVariable) {
             return new ThingConstraint.Value.Variable(predicate.asEquality(), (UnboundVariable) value);
         } else {
-            throw GraqlException.of(PARSING_ERROR_VALUE_COMPARISON.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -874,7 +874,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (valueClass.STRING() != null) {
             return GraqlArg.ValueType.STRING;
         } else {
-            throw GraqlException.of(PARSING_ERROR_VALUE_CLASS.message(valueClass));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(valueClass));
         }
     }
 
@@ -899,21 +899,21 @@ public class Parser extends GraqlBaseVisitor {
             return getDateTime(ctx.DATETIME_());
 
         } else {
-            throw GraqlException.of(PARSING_ERROR_LITERAL_TOKEN.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     private String getString(TerminalNode string) {
-        if (string.getText().length() >= 2) {
-            final GraqlToken.Char literalFirstSymbol = GraqlToken.Char.of(string.getText().substring(0,1));
-            final GraqlToken.Char literalLastSymbol = GraqlToken.Char.of(string.getText().substring(string.getText().length() - 1));
-            if (literalFirstSymbol != null && literalFirstSymbol.equals(GraqlToken.Char.QUOTE) &&
-                literalLastSymbol != null && literalLastSymbol.equals(GraqlToken.Char.QUOTE)) {
-                // Remove surrounding quotes
-                return unquoteString(string);
-            }
-        }
-        throw GraqlException.of(PARSING_ERROR_QUOTEDSTRING_TOKEN.message(string.getText()));
+        String str = string.getText();
+        assert str.length() >= 2;
+        GraqlToken.Char start = GraqlToken.Char.of(str.substring(0, 1));
+        GraqlToken.Char end = GraqlToken.Char.of(str.substring(str.length() - 1));
+        assert start != null && end != null;
+        assert start.equals(GraqlToken.Char.QUOTE) || start.equals(GraqlToken.Char.SINGLE_QUOTE);
+        assert end.equals(GraqlToken.Char.QUOTE) || end.equals(GraqlToken.Char.SINGLE_QUOTE);
+
+        // Remove surrounding quotes
+        return unquoteString(string);
     }
 
     private String unquoteString(TerminalNode string) {
@@ -925,7 +925,7 @@ public class Parser extends GraqlBaseVisitor {
             return Long.parseLong(number.getText());
         }
         catch (NumberFormatException e) {
-            throw GraqlException.of(PARSING_ERROR_LONG_TOKEN.message(number.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(number.getText()));
         }
     }
 
@@ -933,7 +933,7 @@ public class Parser extends GraqlBaseVisitor {
         try {
             return Double.parseDouble(real.getText());
         } catch (NumberFormatException e) {
-            throw GraqlException.of(PARSING_ERROR_DOUBLE_TOKEN.message(real.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(real.getText()));
         }
     }
 
@@ -947,7 +947,7 @@ public class Parser extends GraqlBaseVisitor {
             return false;
 
         } else {
-            throw GraqlException.of(PARSING_ERROR_BOOLEAN_TOKEN.message(bool.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(bool.getText()));
         }
     }
 
@@ -955,7 +955,7 @@ public class Parser extends GraqlBaseVisitor {
         try {
             return LocalDate.parse(date.getText(), DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
         } catch (DateTimeParseException e) {
-            throw GraqlException.of(PARSING_ERROR_DATE_TOKEN.message(date.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(date.getText()));
         }
     }
 
@@ -963,7 +963,7 @@ public class Parser extends GraqlBaseVisitor {
         try {
             return LocalDateTime.parse(dateTime.getText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException e) {
-            throw GraqlException.of(PARSING_ERROR_DATETIME_TOKEN.message(dateTime.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(dateTime.getText()));
         }
     }
 }

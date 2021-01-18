@@ -124,6 +124,7 @@ public class GraqlToken {
         SQUARE_OPEN("["),
         SQUARE_CLOSE("]"),
         QUOTE("\""),
+        SINGLE_QUOTE("'"),
         NEW_LINE("\n"),
         UNDERSCORE("_"),
         $_("$_"),

@@ -67,7 +67,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(23, "Rule '%s' 'then' '%s': is trying to assign both an attribute type and a variable attribute value.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
             new ErrorMessage(24, "Rule '%s' 'then' variables must be present in rule 'when'.");
-    public static final ErrorMessage INVALID_REDUNDANT_NESTED_NEGATION =
+    public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(25, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
             new ErrorMessage(26, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
@@ -105,24 +105,8 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(42, "Unrecognised ISA constraint: '%s'.");
     public static final ErrorMessage PARSING_ERROR_MATCH_HAS_STATEMENT =
             new ErrorMessage(43, "Unrecognised MATCH HAS statement: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_VALUE_COMPARISON =
-            new ErrorMessage(44, "Unrecognised Value Comparison: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_VALUE_CLASS =
-            new ErrorMessage(45, "Unrecognised Value Class: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_LITERAL_TOKEN =
-            new ErrorMessage(46, "Unrecognised Literal token: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_BOOLEAN_TOKEN =
-            new ErrorMessage(47, "Unrecognised Boolean token: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_DATE_TOKEN =
-            new ErrorMessage(48, "Unrecognised Date token: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_DATETIME_TOKEN =
-            new ErrorMessage(49, "Unrecognised DateTime token: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_LONG_TOKEN =
-            new ErrorMessage(50, "Unrecognised Long token: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_DOUBLE_TOKEN =
-            new ErrorMessage(51, "Unrecognised Double token: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_QUOTEDSTRING_TOKEN =
-            new ErrorMessage(52, "Unrecognised QuotedString token: '%s'.");
+    public static final ErrorMessage ILLEGAL_GRAMMAR =
+            new ErrorMessage(44, "Illegal grammar!");
 
 
 

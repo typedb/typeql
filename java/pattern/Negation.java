@@ -43,7 +43,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     public Negation(T pattern) {
         if (pattern == null) throw new NullPointerException("Null patterns");
-        else if (pattern.isNegation()) throw GraqlException.of(ErrorMessage.INVALID_REDUNDANT_NESTED_NEGATION);
+        else if (pattern.isNegation()) throw GraqlException.of(ErrorMessage.REDUNDANT_NESTED_NEGATION);
         this.pattern = pattern;
     }
 
