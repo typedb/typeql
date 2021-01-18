@@ -72,7 +72,8 @@ import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.pair;
 
-import static graql.lang.common.exception.ErrorMessage.*;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
 import static graql.lang.common.util.Strings.unescapeRegex;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.toList;
