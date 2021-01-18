@@ -40,7 +40,7 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
     }
 
     public static UnboundVariable named(String name) {
-        return new UnboundVariable(Reference.named(name));
+        return new UnboundVariable(Reference.name(name));
     }
 
     public static UnboundVariable anonymous() {

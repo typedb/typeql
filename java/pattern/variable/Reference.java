@@ -39,7 +39,7 @@ public abstract class Reference {
         this.isVisible = isVisible;
     }
 
-    public static Reference.Name named(String name) {
+    public static Reference.Name name(String name) {
         return new Name(name);
     }
 
