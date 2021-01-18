@@ -74,7 +74,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         this(conjunction, filter, null, null, null);
     }
 
-    // We keep this contructor 'public' as it is more efficient for query parsing
+    // We keep this constructor 'public' as it is more efficient for query parsing
     public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter,
                       Sortable.Sorting sorting, Long offset, Long limit) {
         if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_FILTER_VARIABLES.message());
@@ -330,7 +330,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             this.hash = Objects.hash(query, method, var);
         }
 
-        public GraqlMatch query() {
+        public GraqlMatch match() {
             return query;
         }
 
@@ -346,9 +346,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         public final String toString() {
             final StringBuilder query = new StringBuilder();
 
-            if (query().filter.isEmpty() && query().conjunction().patterns().size() > 1) {
-                query.append(query()).append(NEW_LINE);
-            } else query.append(query()).append(SPACE);
+            if (match().filter.isEmpty() && match().conjunction().patterns().size() > 1) {
+                query.append(match()).append(NEW_LINE);
+            } else query.append(match()).append(SPACE);
 
             query.append(method);
             if (var != null) query.append(SPACE).append(var);
@@ -393,7 +393,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             this.hash = Objects.hash(query, var);
         }
 
-        public GraqlMatch query() {
+        public GraqlMatch match() {
             return query;
         }
 
@@ -410,9 +410,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         public String toString() {
             final StringBuilder query = new StringBuilder();
 
-            if (query().filter.isEmpty() && query().conjunction().patterns().size() > 1) {
-                query.append(query()).append(NEW_LINE);
-            } else query.append(query()).append(SPACE);
+            if (match().filter.isEmpty() && match().conjunction().patterns().size() > 1) {
+                query.append(match()).append(NEW_LINE);
+            } else query.append(match()).append(SPACE);
 
             query.append(GROUP).append(SPACE).append(var).append(SEMICOLON);
             return query.toString();
@@ -447,8 +447,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                 if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new NullPointerException("Variable is null");
                 } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
-                    throw GraqlException.of(INVALID_COUNT_VARIABLE_ARGUMENT.message());
-                } else if (var != null && !group.query().filter().contains(var)) {
+                    throw new IllegalArgumentException(INVALID_COUNT_VARIABLE_ARGUMENT.message());
+                } else if (var != null && !group.match().filter().contains(var)) {
                     throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var.toString()));
                 }
 
@@ -474,9 +474,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             public final String toString() {
                 final StringBuilder query = new StringBuilder();
 
-                if (group().query().filter.isEmpty() && group().query().conjunction().patterns().size() > 1) {
-                    query.append(group().query()).append(NEW_LINE);
-                } else query.append(group().query()).append(SPACE);
+                if (group().match().filter.isEmpty() && group().match().conjunction().patterns().size() > 1) {
+                    query.append(group().match()).append(NEW_LINE);
+                } else query.append(group().match()).append(SPACE);
 
                 query.append(GROUP).append(SPACE).append(group().var()).append(SEMICOLON).append(SPACE).append(method);
 
