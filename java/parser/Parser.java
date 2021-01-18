@@ -909,8 +909,8 @@ public class Parser extends GraqlBaseVisitor {
         GraqlToken.Char start = GraqlToken.Char.of(str.substring(0, 1));
         GraqlToken.Char end = GraqlToken.Char.of(str.substring(str.length() - 1));
         assert start != null && end != null;
-        assert start.equals(GraqlToken.Char.QUOTE) || start.equals(GraqlToken.Char.SINGLE_QUOTE);
-        assert end.equals(GraqlToken.Char.QUOTE) || end.equals(GraqlToken.Char.SINGLE_QUOTE);
+        assert start.equals(GraqlToken.Char.QUOTE_DOUBLE) || start.equals(GraqlToken.Char.QUOTE_SINGLE);
+        assert end.equals(GraqlToken.Char.QUOTE_DOUBLE) || end.equals(GraqlToken.Char.QUOTE_SINGLE);
 
         // Remove surrounding quotes
         return unquoteString(string);
