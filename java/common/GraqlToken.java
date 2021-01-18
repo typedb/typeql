@@ -123,7 +123,8 @@ public class GraqlToken {
         PARAN_CLOSE(")"),
         SQUARE_OPEN("["),
         SQUARE_CLOSE("]"),
-        QUOTE("\""),
+        QUOTE_DOUBLE("\""),
+        QUOTE_SINGLE("'"),
         NEW_LINE("\n"),
         UNDERSCORE("_"),
         $_("$_"),
@@ -138,6 +139,15 @@ public class GraqlToken {
         @Override
         public String toString() {
             return this.character;
+        }
+
+        public static Char of(String value) {
+            for (Char c : Char.values()) {
+                if (c.character.equals(value)) {
+                    return c;
+                }
+            }
+            return null;
         }
     }
 

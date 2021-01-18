@@ -19,7 +19,9 @@ package graql.lang.query.builder;
 
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.UnboundVariable;
+import static graql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
 
 import java.util.Objects;
 
@@ -31,8 +33,8 @@ public interface Sortable<S, O, L> {
 
     default S sort(String var, String order) {
         final GraqlArg.Order o = GraqlArg.Order.of(order);
-        if (o == null) throw new IllegalArgumentException(
-                "Invalid sorting order. Valid options: '" + GraqlArg.Order.ASC + "' or '" + GraqlArg.Order.DESC
+        if (o == null) throw GraqlException.of(
+                INVALID_SORTING_ORDER.message(GraqlArg.Order.ASC, GraqlArg.Order.DESC)
         );
         return sort(UnboundVariable.named(var), o);
     }

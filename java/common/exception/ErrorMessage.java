@@ -75,6 +75,14 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(27, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
             new ErrorMessage(28, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+    public static final ErrorMessage INVALID_SORTING_ORDER =
+            new ErrorMessage(29, "Invalid sorting order. Valid options: '%s' or '%s'.");
+    public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
+            new ErrorMessage(30, "Aggregate COUNT does not accept a Variable.");
+    public static final ErrorMessage ILLEGAL_GRAMMAR =
+            new ErrorMessage(31, "Illegal grammar!");
+
+
 
     private static final String codePrefix = "GQL";
     private static final String messagePrefix = "Graql Error";

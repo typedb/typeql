@@ -48,6 +48,7 @@ import static graql.lang.common.GraqlToken.Filter.SORT;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static graql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
 import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
+import static graql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -318,7 +319,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new NullPointerException("Variable is null");
             } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
-                throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
+                throw GraqlException.of(INVALID_COUNT_VARIABLE_ARGUMENT.message());
             } else if (var != null && !query.filter().contains(var)) {
                 throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var.toString()));
             }
@@ -446,7 +447,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                 if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new NullPointerException("Variable is null");
                 } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
-                    throw new IllegalArgumentException("Aggregate COUNT does not accept a Variable");
+                    throw new IllegalArgumentException(INVALID_COUNT_VARIABLE_ARGUMENT.message());
                 } else if (var != null && !group.match().filter().contains(var)) {
                     throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var.toString()));
                 }
