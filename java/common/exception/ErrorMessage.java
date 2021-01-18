@@ -79,34 +79,8 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(29, "Invalid sorting order. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
             new ErrorMessage(30, "Aggregate COUNT does not accept a Variable.");
-    public static final ErrorMessage PARSING_ERROR_QUERY =
-            new ErrorMessage(31, "Unrecognised Graql Query: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_COMPUTE_QUERY =
-            new ErrorMessage(32, "Unrecognised Graql Compute Query: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_COMPUTE_STATISTICS_METHOD =
-            new ErrorMessage(33, "Unrecognised Graql Compute Statistics method: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_COMPUTE_PATH_CONDITION =
-            new ErrorMessage(34, "Unrecognised Graql Compute Path condition: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_COMPUTE_STATISTICS_CONDITION =
-            new ErrorMessage(35, "Unrecognised Graql Compute Statistics condition: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_COMPUTE_CENTRALITY_CONDITION =
-            new ErrorMessage(36, "Unrecognised Graql Compute Centrality condition: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_COMPUTE_CLUSTER_CONDITION =
-            new ErrorMessage(37, "Unrecognised Graql Compute Cluster condition: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_PATTERN =
-            new ErrorMessage(38, "Unrecognised Pattern: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_STATEMENT_CLASS =
-            new ErrorMessage(39, "Unrecognised Statement class: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_TYPE_STATEMENT =
-            new ErrorMessage(40, "Unrecognised Type Statement: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_INSTANCE_STATEMENT =
-            new ErrorMessage(41, "Unrecognised Instance Statement: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_ISA_CONSTRAINT =
-            new ErrorMessage(42, "Unrecognised ISA constraint: '%s'.");
-    public static final ErrorMessage PARSING_ERROR_MATCH_HAS_STATEMENT =
-            new ErrorMessage(43, "Unrecognised MATCH HAS statement: '%s'.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(44, "Illegal grammar!");
+            new ErrorMessage(31, "Illegal grammar!");
 
 
 

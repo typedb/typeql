@@ -253,7 +253,7 @@ public class Parser extends GraqlBaseVisitor {
             return visitQuery_compute(ctx.query_compute());
 
         } else {
-            throw GraqlException.of(PARSING_ERROR_QUERY.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -376,7 +376,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.compute_conditions().conditions_cluster() != null) {
             return visitConditions_cluster(ctx.compute_conditions().conditions_cluster());
         } else {
-            throw GraqlException.of(PARSING_ERROR_COMPUTE_QUERY.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -395,7 +395,7 @@ public class Parser extends GraqlBaseVisitor {
         final GraqlToken.Compute.Method method = GraqlToken.Compute.Method.of(ctx.compute_method().getText());
 
         if (method == null) {
-            throw GraqlException.of(PARSING_ERROR_COMPUTE_STATISTICS_METHOD.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         } else if (method.equals(GraqlToken.Compute.Method.MAX)) {
             compute = new GraqlCompute.Builder().max();
         } else if (method.equals(GraqlToken.Compute.Method.MIN)) {
@@ -409,7 +409,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (method.equals(GraqlToken.Compute.Method.STD)) {
             compute = new GraqlCompute.Builder().std();
         } else {
-            throw GraqlException.of(PARSING_ERROR_COMPUTE_STATISTICS_METHOD.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
 
         for (GraqlParser.Input_valueContext valueCtx : ctx.input_value()) {
@@ -418,7 +418,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (valueCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(valueCtx.compute_scope().labels()));
             } else {
-                throw GraqlException.of(PARSING_ERROR_COMPUTE_STATISTICS_CONDITION.message(ctx.getText()));
+                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
@@ -441,7 +441,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (pathCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(pathCtx.compute_scope().labels()));
             } else {
-                throw GraqlException.of(PARSING_ERROR_COMPUTE_PATH_CONDITION.message(ctx.getText()));
+                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
@@ -460,7 +460,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (centralityCtx.compute_config() != null) {
                 compute = (GraqlCompute.Centrality) setComputeConfig(compute, centralityCtx.compute_config());
             } else {
-                throw GraqlException.of(PARSING_ERROR_COMPUTE_CENTRALITY_CONDITION.message(ctx.getText()));
+                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
@@ -477,7 +477,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (clusterCtx.compute_config() != null) {
                 compute = (GraqlCompute.Cluster) setComputeConfig(compute, clusterCtx.compute_config());
             } else {
-                throw GraqlException.of(PARSING_ERROR_COMPUTE_CLUSTER_CONDITION.message(ctx.getText()));
+                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
@@ -542,7 +542,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.pattern_negation() != null) {
             return visitPattern_negation(ctx.pattern_negation());
         } else {
-            throw GraqlException.of(PARSING_ERROR_PATTERN.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -599,7 +599,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.variable_concept() != null) {
             return visitVariable_concept(ctx.variable_concept());
         } else {
-            throw GraqlException.of(PARSING_ERROR_STATEMENT_CLASS.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -642,7 +642,7 @@ public class Parser extends GraqlBaseVisitor {
                 final Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
                 type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
             } else {
-                throw GraqlException.of(PARSING_ERROR_TYPE_STATEMENT.message(constraint.getText()));
+                throw GraqlException.of(ILLEGAL_GRAMMAR.message(constraint.getText()));
             }
         }
 
@@ -665,7 +665,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.variable_attribute() != null) {
             return this.visitVariable_attribute(ctx.variable_attribute());
         } else {
-            throw GraqlException.of(PARSING_ERROR_INSTANCE_STATEMENT.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -731,7 +731,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (isa != null && isa.equals(GraqlToken.Constraint.ISAX)) {
             return new ThingConstraint.Isa(visitType(ctx), true);
         } else {
-            throw GraqlException.of(PARSING_ERROR_ISA_CONSTRAINT.message(ctx.getText()));
+            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -749,7 +749,7 @@ public class Parser extends GraqlBaseVisitor {
             if (ctx.predicate() != null)
                 return new ThingConstraint.Has(ctx.label().getText(), visitPredicate(ctx.predicate()));
         } else if (ctx.VAR_() != null) return new ThingConstraint.Has(getVar(ctx.VAR_()));
-        throw GraqlException.of(PARSING_ERROR_MATCH_HAS_STATEMENT.message(ctx.getText()));
+        throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
     }
 
     // RELATION STATEMENT CONSTRUCT ============================================
