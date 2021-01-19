@@ -39,8 +39,8 @@ public class GraqlInsert extends GraqlWritable {
 
     private static List<ThingVariable<?>> validVariables(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         if (match != null) {
-            if (variables.stream().noneMatch(var -> var.isNamed() && match.variablesNamedUnbound().contains(var.toUnbound()) || var.variables().anyMatch(nestedVar -> match.variablesNamedUnbound().contains(nestedVar.toUnbound())))) {
-                throw GraqlException.of(INVALID_MATCH_INSERT_UNSCOPED.message(variables, match.variablesNamedUnbound()));
+            if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound()) || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
+                throw GraqlException.of(INVALID_MATCH_INSERT_UNSCOPED.message(variables, match.namedVariablesUnbound()));
             }
         }
         return variables;
