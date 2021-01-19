@@ -18,11 +18,14 @@
 package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+
+import static graql.lang.common.exception.ErrorMessage.INVALID_MATCH_INSERT_UNSCOPED;
 
 public class GraqlInsert extends GraqlWritable {
 
@@ -31,7 +34,16 @@ public class GraqlInsert extends GraqlWritable {
     }
 
     GraqlInsert(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
-        super(GraqlToken.Command.INSERT, match, variables);
+        super(GraqlToken.Command.INSERT, match, validVariables(match, variables));
+    }
+
+    private static List<ThingVariable<?>> validVariables(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+        if (match != null) {
+            if (variables.stream().noneMatch(var -> var.isNamed() && match.variablesNamedUnbound().contains(var.toUnbound()) || var.variables().anyMatch(nestedVar -> match.variablesNamedUnbound().contains(nestedVar.toUnbound())))) {
+                throw GraqlException.of(INVALID_MATCH_INSERT_UNSCOPED.message(variables, match.variablesNamedUnbound()));
+            }
+        }
+        return variables;
     }
 
     public Optional<GraqlMatch.Unfiltered> match() {

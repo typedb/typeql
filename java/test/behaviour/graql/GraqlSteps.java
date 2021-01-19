@@ -67,9 +67,12 @@ public class GraqlSteps {
     }
 
     @Given("for graql query")
-    @Given("get answers of graql query")
+    @Given("get answers of graql match")
+    @Given("get answer of graql match aggregate")
+    @Given("get answers of graql match group")
+    @Given("get answers of graql match group aggregate")
     @Given("answer set is equivalent for graql query")
-    public void graql_get(String query) {
+    public void graql_match(String query) {
         final GraqlQuery parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
         if (parsed instanceof GraqlMatch) {
@@ -77,7 +80,7 @@ public class GraqlSteps {
         }
     }
 
-    @Given("graql get throws")
+    @Given("graql match throws")
     @Given("graql insert throws")
     @Given("graql delete throws")
     @Given("graql define throws")
@@ -90,7 +93,7 @@ public class GraqlSteps {
     public void do_nothing_with_throws(String query) {}
 
     @Given("transaction commits")
-    @Given("aggregate answer is empty")
+    @Given("aggregate answer is not a number")
     @Given("connection has been opened")
     @Given("transaction is initialised")
     @Given("the integrity is validated")
@@ -109,6 +112,7 @@ public class GraqlSteps {
     @Given("number of groups is: {}")
     @Given("reasoned database is named: {}")
     @Given("connection create database: {}")
+    @Given("session transaction is open: {}")
     @Given("materialised database is named: {}")
     @Given("session opens transaction of type: {}")
     @Given("answer size in reasoned database is: {}")

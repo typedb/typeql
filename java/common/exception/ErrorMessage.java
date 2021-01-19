@@ -69,18 +69,20 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(24, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(25, "Invalid query containing redundant nested negations.");
+    public static final ErrorMessage INVALID_MATCH_INSERT_UNSCOPED =
+            new ErrorMessage(26, "Invalid match-insert query. None of the variables in 'insert' ('%s') is within scope of 'match' ('%s')");
     public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(26, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
+            new ErrorMessage(27, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(27, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
+            new ErrorMessage(28, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
     public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(28, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
+            new ErrorMessage(29, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
-            new ErrorMessage(29, "Invalid sorting order. Valid options: '%s' or '%s'.");
+            new ErrorMessage(30, "Invalid sorting order. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
-            new ErrorMessage(30, "Aggregate COUNT does not accept a Variable.");
+            new ErrorMessage(31, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(31, "Illegal grammar!");
+            new ErrorMessage(32, "Illegal grammar!");
 
 
 
