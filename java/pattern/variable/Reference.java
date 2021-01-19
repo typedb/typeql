@@ -73,6 +73,10 @@ public abstract class Reference {
         return type == Type.LABEL;
     }
 
+    public boolean isSystemReference() {
+        return false;
+    }
+
     public boolean isAnonymous() {
         return type == Type.ANONYMOUS;
     }
