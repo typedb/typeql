@@ -85,10 +85,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         this.limit = limit;
 
         for (UnboundVariable var : filter) {
-            if (!variablesNamedUnbound().contains(var)) throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var));
+            if (!namedVariablesUnbound().contains(var)) throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var));
             if (!var.isNamed()) throw GraqlException.of(VARIABLE_NOT_NAMED.message(var));
         }
-        final List<UnboundVariable> sortableVars = filter.isEmpty() ? variablesNamedUnbound() : filter;
+        final List<UnboundVariable> sortableVars = filter.isEmpty() ? namedVariablesUnbound() : filter;
         if (sorting != null && !sortableVars.contains(sorting.var())) {
             throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(sorting.var()));
         }
@@ -118,7 +118,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         return variables;
     }
 
-    List<UnboundVariable> variablesNamedUnbound() {
+    public List<UnboundVariable> namedVariablesUnbound() {
         if (variablesNamedUnbound == null) {
             variablesNamedUnbound = conjunction.variables().filter(Variable::isNamed)
                     .map(v -> UnboundVariable.named(v.name()))
@@ -128,7 +128,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     public List<UnboundVariable> filter() {
-        if (filter.isEmpty()) return variablesNamedUnbound();
+        if (filter.isEmpty()) return namedVariablesUnbound();
         else return filter;
     }
 

@@ -1104,43 +1104,15 @@ public class ParserTest {
     }
 
     @Test
-    public void testParseListMatchInsert() {
-        final String matchString = "match $y isa movie;";
-        final String insertString = "insert $x isa movie;";
-        final List<GraqlQuery> queries = Graql.parseQueries(matchString + insertString).collect(toList());
-
-        assertEquals(Arrays.asList(match(var("y").isa("movie")).insert(var("x").isa("movie"))), queries);
-    }
-
-    @Test
-    public void testParseMatchInsertBeforeAndAfter() {
-        final String matchString = "match $y isa movie;";
-        final String insertString = "insert $x isa movie;";
-        final String matchInsert = matchString + insertString;
-
-        final List<String> options = list(
-                matchString + matchInsert,
-                insertString + matchInsert,
-                matchInsert + matchString,
-                matchInsert + insertString
-        );
-
-        options.forEach(option -> {
-            final List<GraqlQuery> queries = Graql.parseQueries(option).collect(toList());
-            assertEquals(option, 2, queries.size());
-        });
-    }
-
-    @Test
     public void testParseManyMatchInsertWithoutStackOverflow() {
         final int numQueries = 10_000;
-        final String matchInsertString = "match $x isa person; insert $y isa person;\n";
+        final String matchInsertString = "match $x isa person; insert $x has name 'bob';\n";
         final StringBuilder longQuery = new StringBuilder();
         for (int i = 0; i < numQueries; i++) {
             longQuery.append(matchInsertString);
         }
 
-        final GraqlInsert matchInsert = match(var("x").isa("person")).insert(var("y").isa("person"));
+        final GraqlInsert matchInsert = match(var("x").isa("person")).insert(var("x").has("name", "bob"));
         final List<GraqlInsert> queries = Graql.<GraqlInsert>parseQueries(longQuery.toString()).collect(toList());
 
         assertEquals(Collections.nCopies(numQueries, matchInsert), queries);

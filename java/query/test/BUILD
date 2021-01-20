@@ -44,19 +44,6 @@ java_test(
     size = "small",
 )
 
-java_test(
-    name = "graql-insert-test",
-    test_class = "graql.lang.query.test.GraqlInsertTest",
-    srcs = ["GraqlInsertTest.java"],
-    deps = [
-        "//java:graql",
-        "//java/pattern:pattern",
-        "//java/query:query",
-        "@graknlabs_common//:common",
-    ],
-    size = "small",
-)
-
 checkstyle_test(
     name = "checkstyle",
     include = glob(["*"]),
