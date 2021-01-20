@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.define;
 import static graql.lang.Graql.gte;
@@ -89,6 +88,15 @@ public class ParserTest {
         final String query = "match $x isa movie;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(var("x").isa("movie"));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testNamedTypeVariable() {
+        String query = "match $a type attribute_label; get $a;";
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(var("a").type("attribute_label")).get("a");
 
         assertQueryEquals(expected, parsed, query);
     }

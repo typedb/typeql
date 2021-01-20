@@ -80,7 +80,9 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
 
     @Override
     public TypeVariable constrain(TypeConstraint.Label constraint) {
-        return new TypeVariable(Reference.label(constraint.scopedLabel())).constrain(constraint);
+        Reference ref = reference;
+        if (reference.isAnonymous()) ref = Reference.label(constraint.scopedLabel());
+        return new TypeVariable(ref).constrain(constraint);
     }
 
     @Override
