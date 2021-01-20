@@ -49,6 +49,7 @@ import static graql.lang.common.GraqlToken.Constraint.VALUE_TYPE;
 import static graql.lang.common.GraqlToken.Type.RELATION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
@@ -504,11 +505,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         public Plays(String relationType, String roleType, String overriddenRoleType) {
-            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
         public Plays(UnboundVariable roleTypeVar, String overriddenRoleType) {
-            this(roleTypeVar.toType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+            this(roleTypeVar.toType(), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
         public Plays(String relationType, String roleType, UnboundVariable overriddenRoleTypeVar) {
@@ -521,11 +522,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Plays(Either<Pair<String, String>, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
             this(roleTypeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Plays::scopedType, UnboundVariable::toType));
         }
 
         private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
-            if (roleType == null) throw new NullPointerException("Null role");
+            if (roleType == null) throw GraqlException.of(MISSING_PATTERNS.message());
             this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
@@ -542,6 +543,10 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Optional<TypeVariable> overridden() {
             return Optional.ofNullable(overriddenRoleType);
+        }
+
+        private static TypeVariable scopedType(String roleType) {
+            return hidden().type(RELATION.toString(), roleType);
         }
 
         @Override
@@ -565,8 +570,14 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return PLAYS.toString() + SPACE + roleType +
-                    (overriddenRoleType != null ? "" + SPACE + AS + SPACE + overriddenRoleType : "");
+            String syntax = PLAYS.toString() + SPACE + roleType;
+            if (overriddenRoleType != null) {
+                String overriddenRoleTypeString = overriddenRoleType.label().isPresent() ?
+                    overriddenRoleType.label().get().label() :
+                    overriddenRoleType.reference().syntax();
+                syntax += "" + SPACE + AS + SPACE + overriddenRoleTypeString;
+            }
+            return syntax;
         }
 
         @Override
