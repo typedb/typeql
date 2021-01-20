@@ -505,11 +505,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         public Plays(String relationType, String roleType, String overriddenRoleType) {
-            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : hidden().type(RELATION.toString(), overriddenRoleType));
+            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
         public Plays(UnboundVariable roleTypeVar, String overriddenRoleType) {
-            this(roleTypeVar.toType(), overriddenRoleType == null ? null : hidden().type(RELATION.toString(), overriddenRoleType));
+            this(roleTypeVar.toType(), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
         public Plays(String relationType, String roleType, UnboundVariable overriddenRoleTypeVar) {
@@ -522,7 +522,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Plays(Either<Pair<String, String>, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
             this(roleTypeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(RELATION.toString(), label), UnboundVariable::toType));
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Plays::scopedType, UnboundVariable::toType));
         }
 
         private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
@@ -543,6 +543,10 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Optional<TypeVariable> overridden() {
             return Optional.ofNullable(overriddenRoleType);
+        }
+
+        private static TypeVariable scopedType(String roleType) {
+            return hidden().type(RELATION.toString(), roleType);
         }
 
         @Override
@@ -566,17 +570,14 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            String returnString = PLAYS.toString() + SPACE + roleType;
+            String syntax = PLAYS.toString() + SPACE + roleType;
             if (overriddenRoleType != null) {
-                String overriddenRoleTypeString;
-                if (overriddenRoleType.label().isPresent()) {
-                    overriddenRoleTypeString = overriddenRoleType.label().get().label();
-                } else {
-                    overriddenRoleTypeString = overriddenRoleType.reference().syntax();
-                }
-                returnString += "" + SPACE + AS + SPACE + overriddenRoleTypeString;
+                String overriddenRoleTypeString = overriddenRoleType.label().isPresent() ?
+                    overriddenRoleType.label().get().label() :
+                    overriddenRoleType.reference().syntax();
+                syntax += "" + SPACE + AS + SPACE + overriddenRoleTypeString;
             }
-            return returnString;
+            return syntax;
         }
 
         @Override
