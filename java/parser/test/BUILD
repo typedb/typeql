@@ -26,7 +26,6 @@ java_test(
         "//java/common:common",
         "//java/pattern:pattern",
         "//java/query:query",
-        "@graknlabs_common//:common",
         "@maven//:org_hamcrest_hamcrest_library",
     ],
     size = "small",
