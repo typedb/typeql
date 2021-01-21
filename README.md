@@ -51,12 +51,12 @@ With the expressivity of the schema, inference through OLTP, and distributed alg
     <dependency>
         <groupId>io.graql</groupId>
         <artifactId>lang</artifactId>
-        <version>2.0.0-alpha</version>
+        <version>{version}</version>
     </dependency>
 </dependencies>
 ```
 
-Further documentation: http://dev.grakn.ai/docs/client-api/java#client-api-title-graql
+Replace `{version}` with the version number, in which you can find the latest on [Graql's Maven Repository](https://repo.grakn.ai/#browse/browse:maven:io%2Fgraql%2Fgraql-lang). Further documentation: http://dev.docs.grakn.ai/docs/client-api/java#graql
 
 ## Building Graql from Source
 
