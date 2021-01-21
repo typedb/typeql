@@ -194,7 +194,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         return hash;
     }
 
-    public static class Unfiltered extends GraqlMatch implements Sortable<Sorted, Offsetted, Limited> {
+    public static class Unfiltered extends GraqlMatch implements Sortable<Sorted, Offset, Limited> {
 
         public Unfiltered(List<? extends Pattern> patterns) {
             super(validConjunction(patterns));
@@ -224,8 +224,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             return new GraqlMatch.Sorted(this, sorting);
         }
 
-        public GraqlMatch.Offsetted offset(long offset) {
-            return new GraqlMatch.Offsetted(this, offset);
+        public Offset offset(long offset) {
+            return new Offset(this, offset);
         }
 
         public GraqlMatch.Limited limit(long limit) {
@@ -249,7 +249,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
     }
 
-    public static class Filtered extends GraqlMatch implements Sortable<Sorted, Offsetted, Limited> {
+    public static class Filtered extends GraqlMatch implements Sortable<Sorted, Offset, Limited> {
 
         Filtered(Unfiltered unfiltered, List<UnboundVariable> vars) {
             super(unfiltered.conjunction(), vars, null, null, null);
@@ -261,8 +261,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public GraqlMatch.Offsetted offset(long offset) {
-            return new GraqlMatch.Offsetted(this, offset);
+        public Offset offset(long offset) {
+            return new Offset(this, offset);
         }
 
         @Override
@@ -277,8 +277,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             super(match.conjunction, match.filter, sorting, match.offset, match.limit);
         }
 
-        public GraqlMatch.Offsetted offset(long offset) {
-            return new GraqlMatch.Offsetted(this, offset);
+        public Offset offset(long offset) {
+            return new Offset(this, offset);
         }
 
         public GraqlMatch.Limited limit(long limit) {
@@ -286,9 +286,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
     }
 
-    public static class Offsetted extends GraqlMatch {
+    public static class Offset extends GraqlMatch {
 
-        Offsetted(GraqlMatch match, long offset) {
+        Offset(GraqlMatch match, long offset) {
             super(match.conjunction, match.filter, match.sorting, offset, match.limit);
         }
 
