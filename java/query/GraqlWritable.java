@@ -19,11 +19,16 @@ package graql.lang.query;
 
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
+import graql.lang.pattern.variable.UnboundVariable;
+import graql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.NEW_LINE;
@@ -32,6 +37,8 @@ import static graql.lang.common.GraqlToken.Command.DELETE;
 import static graql.lang.common.GraqlToken.Command.INSERT;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 
 abstract class GraqlWritable extends GraqlQuery {
 
@@ -39,6 +46,7 @@ abstract class GraqlWritable extends GraqlQuery {
     private final GraqlMatch.Unfiltered match;
     private final List<ThingVariable<?>> variables;
     private final int hash;
+    private List<UnboundVariable> namedVariablesUnbound;
 
     GraqlWritable(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         assert keyword == INSERT || keyword == DELETE;
@@ -53,8 +61,14 @@ abstract class GraqlWritable extends GraqlQuery {
         return match;
     }
 
-    public List<ThingVariable<?>> variables() {
-        return variables;
+    public List<ThingVariable<?>> variables() { return variables; }
+
+    public List<UnboundVariable> namedVariablesUnbound() {
+        if (namedVariablesUnbound == null) {
+            namedVariablesUnbound = variables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
+                    .filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct().collect(toList());
+        }
+        return namedVariablesUnbound;
     }
 
     @Override
