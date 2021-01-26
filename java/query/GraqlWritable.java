@@ -17,6 +17,7 @@
 
 package graql.lang.query;
 
+import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
@@ -59,6 +60,10 @@ abstract class GraqlWritable extends GraqlQuery {
 
     GraqlMatch.Unfiltered nullableMatch() {
         return match;
+    }
+
+    public GraqlArg.QueryType type() {
+        return GraqlArg.QueryType.WRITE;
     }
 
     public List<ThingVariable<?>> variables() { return variables; }

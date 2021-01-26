@@ -19,28 +19,28 @@ package graql.lang.common;
 
 public class GraqlArg {
 
-    public enum Has {
-        IS_KEY("@key");
+    public enum QueryType {
+        READ(0),
+        WRITE(1);
 
-        private final String annotation;
+        private final int id;
+        private final boolean isWrite;
 
-        Has(String annotation) {
-            this.annotation = annotation;
+        QueryType(int id) {
+            this.id = id;
+            this.isWrite = id == 1;
         }
 
-        @Override
-        public String toString() {
-            return annotation;
-        }
-
-        public static GraqlArg.Has of(String annotation) {
-            for (GraqlArg.Has ann : GraqlArg.Has.values()) {
-                if (ann.annotation.equals(annotation)) {
-                    return ann;
-                }
+        public static QueryType of(int value) {
+            for (QueryType t : values()) {
+                if (t.id == value) return t;
             }
             return null;
         }
+
+        public boolean isRead() { return !isWrite; }
+
+        public boolean isWrite() { return isWrite; }
     }
 
     public enum ValueType {

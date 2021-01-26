@@ -66,6 +66,10 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         this.includeAttributes = includeAttributes;
     }
 
+    public GraqlArg.QueryType type() {
+        return GraqlArg.QueryType.WRITE;
+    }
+
     public final GraqlToken.Compute.Method method() {
         return method;
     }

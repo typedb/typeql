@@ -17,6 +17,7 @@
 
 package graql.lang.query;
 
+import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
@@ -61,6 +62,10 @@ abstract class GraqlDefinable extends GraqlQuery {
 
         this.keyword = keyword;
         this.hash = Objects.hash(this.keyword, this.variables, this.rules);
+    }
+
+    public GraqlArg.QueryType type() {
+        return GraqlArg.QueryType.WRITE;
     }
 
     public final List<TypeVariable> variables() {

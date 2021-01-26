@@ -17,6 +17,7 @@
 
 package graql.lang.query;
 
+import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
@@ -107,6 +108,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public Group group(UnboundVariable var) {
         return new Group(this, var);
+    }
+
+    public GraqlArg.QueryType type() {
+        return GraqlArg.QueryType.READ;
     }
 
     public Conjunction<? extends Pattern> conjunction() {
@@ -330,6 +335,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             this.hash = Objects.hash(query, method, var);
         }
 
+        public GraqlArg.QueryType type() {
+            return GraqlArg.QueryType.READ;
+        }
+
         public GraqlMatch match() {
             return query;
         }
@@ -373,7 +382,6 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         public int hashCode() {
             return hash;
         }
-
     }
 
     public static class Group extends GraqlQuery implements Aggregatable<Group.Aggregate> {
@@ -391,6 +399,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             this.query = query;
             this.var = var;
             this.hash = Objects.hash(query, var);
+        }
+
+        public GraqlArg.QueryType type() {
+            return GraqlArg.QueryType.READ;
         }
 
         public GraqlMatch match() {
@@ -458,6 +470,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                 this.hash = Objects.hash(group, method, var);
             }
 
+            public GraqlArg.QueryType type() {
+                return GraqlArg.QueryType.READ;
+            }
+            
             public GraqlMatch.Group group() {
                 return group;
             }
