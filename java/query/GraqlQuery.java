@@ -17,12 +17,15 @@
 
 package graql.lang.query;
 
+import graql.lang.common.GraqlArg;
 import graql.lang.common.exception.GraqlException;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class GraqlQuery {
+
+    public abstract GraqlArg.QueryType type();
 
     public GraqlDefine asDefine() {
         if (this instanceof GraqlDefine) {

@@ -66,10 +66,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         this.includeAttributes = includeAttributes;
     }
 
+    @Override
     public GraqlArg.QueryType type() {
         return GraqlArg.QueryType.WRITE;
     }
 
+    @Override
     public final GraqlToken.Compute.Method method() {
         return method;
     }
@@ -302,6 +304,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 super(method, true);
             }
 
+            @Override
             public final Set<String> of() {
                 return ofTypes == null ? set() : ofTypes;
             }
@@ -372,10 +375,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             super(GraqlToken.Compute.Method.PATH, false);
         }
 
+        @Override
         public final String from() {
             return fromID;
         }
 
+        @Override
         public final String to() {
             return toID;
         }
@@ -456,6 +461,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         protected abstract T self();
 
+        @Override
         public GraqlCompute.Arguments where() {
             GraqlCompute.Arguments args = arguments;
             if (args == null) {
@@ -468,6 +474,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
 
+        @Override
         public GraqlArg.Algorithm using() {
             if (algorithm == null) {
                 return GraqlArg.Algorithm.DEGREE;
@@ -535,10 +542,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             super(GraqlToken.Compute.Method.CENTRALITY, true);
         }
 
+        @Override
         protected GraqlCompute.Centrality self() {
             return this;
         }
 
+        @Override
         public final Set<String> of() {
             return ofTypes == null ? set() : ofTypes;
         }
@@ -600,10 +609,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             super(GraqlToken.Compute.Method.CLUSTER, false);
         }
 
+        @Override
         protected GraqlCompute.Cluster self() {
             return this;
         }
 
+        @Override
         public GraqlArg.Algorithm using() {
             if (algorithm == null) {
                 return GraqlArg.Algorithm.CONNECTED_COMPONENT;
@@ -669,10 +680,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             this.value = value;
         }
 
+        @Override
         public final GraqlToken.Compute.Param type() {
             return this.param;
         }
 
+        @Override
         public final T value() {
             return this.value;
         }

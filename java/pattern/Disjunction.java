@@ -43,6 +43,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
         this.hash = Objects.hash(this.patterns);
     }
 
+    @Override
     public List<T> patterns() {
         return patterns;
     }

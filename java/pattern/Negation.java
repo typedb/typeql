@@ -49,6 +49,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     public T pattern() { return pattern; }
 
+    @Override
     public List<? extends Pattern> patterns() {
         return Arrays.asList(pattern);
     }

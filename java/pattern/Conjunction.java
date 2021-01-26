@@ -58,6 +58,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
         });
     }
 
+    @Override
     public List<T> patterns() {
         return patterns;
     }

@@ -68,6 +68,7 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
     @Override
     public BoundVariable asVariable() { return this; }
 
+    @Override
     public List<? extends Pattern> patterns() {
         return Arrays.asList(this);
     }

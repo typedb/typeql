@@ -755,6 +755,7 @@ public class Parser extends GraqlBaseVisitor {
 
     // RELATION STATEMENT CONSTRUCT ============================================
 
+    @Override
     public ThingConstraint.Relation visitRelation(GraqlParser.RelationContext ctx) {
         final List<ThingConstraint.Relation.RolePlayer> rolePlayers = new ArrayList<>();
 

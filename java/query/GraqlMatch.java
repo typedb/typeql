@@ -110,6 +110,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         return new Group(this, var);
     }
 
+    @Override
     public GraqlArg.QueryType type() {
         return GraqlArg.QueryType.READ;
     }
@@ -225,14 +226,17 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             return new GraqlMatch.Filtered(this, vars);
         }
 
+        @Override
         public GraqlMatch.Sorted sort(Sorting sorting) {
             return new GraqlMatch.Sorted(this, sorting);
         }
 
+        @Override
         public Offset offset(long offset) {
             return new Offset(this, offset);
         }
 
+        @Override
         public GraqlMatch.Limited limit(long limit) {
             return new GraqlMatch.Limited(this, limit);
         }
@@ -335,6 +339,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             this.hash = Objects.hash(query, method, var);
         }
 
+        @Override
         public GraqlArg.QueryType type() {
             return GraqlArg.QueryType.READ;
         }
@@ -401,6 +406,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             this.hash = Objects.hash(query, var);
         }
 
+        @Override
         public GraqlArg.QueryType type() {
             return GraqlArg.QueryType.READ;
         }
@@ -470,6 +476,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                 this.hash = Objects.hash(group, method, var);
             }
 
+            @Override
             public GraqlArg.QueryType type() {
                 return GraqlArg.QueryType.READ;
             }

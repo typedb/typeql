@@ -62,6 +62,7 @@ abstract class GraqlWritable extends GraqlQuery {
         return match;
     }
 
+    @Override
     public GraqlArg.QueryType type() {
         return GraqlArg.QueryType.WRITE;
     }

@@ -64,6 +64,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         this.hash = Objects.hash(this.keyword, this.variables, this.rules);
     }
 
+    @Override
     public GraqlArg.QueryType type() {
         return GraqlArg.QueryType.WRITE;
     }
