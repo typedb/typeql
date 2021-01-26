@@ -175,27 +175,29 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         private final TypeVariable type;
         private final boolean isExplicit;
+        private final boolean isDerived;
         private final int hash;
 
         public Isa(String type, boolean isExplicit) {
-            this(hidden().type(type), isExplicit);
+            this(hidden().type(type), isExplicit, false);
         }
 
         public Isa(UnboundVariable typeVar, boolean isExplicit) {
-            this(typeVar.toType(), isExplicit);
+            this(typeVar.toType(), isExplicit, false);
         }
 
         public Isa(Either<String, UnboundVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit);
+            this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit, false);
         }
 
-        private Isa(TypeVariable type, boolean isExplicit) {
+        private Isa(TypeVariable type, boolean isExplicit, boolean isDerived) {
             if (type == null) {
                 throw new NullPointerException("Null type");
             }
             this.type = type;
             this.isExplicit = isExplicit;
-            this.hash = Objects.hash(Isa.class, this.type, this.isExplicit);
+            this.isDerived = isDerived;
+            this.hash = Objects.hash(Isa.class, this.type, this.isExplicit, this.isDerived);
         }
 
         public TypeVariable type() {
@@ -205,6 +207,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean isExplicit() {
             return isExplicit;
         }
+
+        public boolean isDerived() { return isDerived; }
 
         @Override
         public Set<BoundVariable> variables() {
@@ -231,7 +235,9 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Isa that = (Isa) o;
-            return (this.type.equals(that.type) && this.isExplicit == that.isExplicit);
+            return (this.type.equals(that.type) &&
+                    this.isExplicit == that.isExplicit &&
+                    this.isDerived == that.isDerived);
         }
 
         @Override
@@ -424,7 +430,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             if (attribute == null) throw new NullPointerException("Null attribute");
             this.type = type;
             if (type == null) this.attribute = attribute;
-            else this.attribute = attribute.constrain(new Isa(type, false));
+            else this.attribute = attribute.constrain(new Isa(type, false, true));
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 
