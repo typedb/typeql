@@ -90,6 +90,10 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Has(type, variable));
         }
 
+        default T has(UnboundVariable variable) {
+            return constrain(new ThingConstraint.Has(variable));
+        }
+
         T constrain(ThingConstraint.Isa constraint);
 
         T constrain(ThingConstraint.Has constraint);
