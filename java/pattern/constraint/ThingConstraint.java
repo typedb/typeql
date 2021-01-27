@@ -424,7 +424,9 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             this(hidden().type(type), var.toThing());
         }
 
-        public Has(UnboundVariable var) {this(null, var.toThing());}
+        public Has(UnboundVariable var) {
+            this(null, var.toThing());
+        }
 
         private Has(@Nullable TypeVariable type, ThingVariable<?> attribute) {
             if (attribute == null) throw new NullPointerException("Null attribute");
