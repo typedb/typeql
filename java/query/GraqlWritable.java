@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.NEW_LINE;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
@@ -44,13 +43,9 @@ import static java.util.stream.Stream.concat;
 public abstract class GraqlWritable extends GraqlQuery {
 
     protected final GraqlMatch.Unfiltered match;
-    protected final List<ThingVariable<?>> variables;
 
-    private List<UnboundVariable> namedVariablesUnbound;
-
-    GraqlWritable(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    GraqlWritable(@Nullable GraqlMatch.Unfiltered match) {
         this.match = match;
-        this.variables = list(variables);
     }
 
     @Override
@@ -58,25 +53,28 @@ public abstract class GraqlWritable extends GraqlQuery {
         return GraqlArg.QueryType.WRITE;
     }
 
-    public List<UnboundVariable> namedVariablesUnbound() {
-        if (namedVariablesUnbound == null) {
-            namedVariablesUnbound = variables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
-                    .filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct().collect(toList());
-        }
-        return namedVariablesUnbound;
-    }
-
     abstract static class InsertOrDelete extends GraqlWritable {
 
+        private List<UnboundVariable> namedVariablesUnbound;
         private final GraqlToken.Command keyword;
+        protected final List<ThingVariable<?>> variables;
         private final int hash;
 
         InsertOrDelete(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
-            super(match, variables);
+            super(match);
             assert keyword == INSERT || keyword == DELETE;
             if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
             this.keyword = keyword;
+            this.variables = variables;
             this.hash = Objects.hash(this.keyword, this.match, this.variables);
+        }
+
+        public List<UnboundVariable> namedVariablesUnbound() {
+            if (namedVariablesUnbound == null) {
+                namedVariablesUnbound = variables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
+                        .filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct().collect(toList());
+            }
+            return namedVariablesUnbound;
         }
 
         @Override
