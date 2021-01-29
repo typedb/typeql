@@ -17,29 +17,30 @@
 
 package graql.lang.query;
 
-import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.List;
 
-import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
+import static grakn.common.collection.Collections.list;
+import static graql.lang.common.GraqlToken.Command.DELETE;
+import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_DELETE;
 import static java.util.Objects.requireNonNull;
 
-public class GraqlDelete extends GraqlWritable {
+public class GraqlDelete extends GraqlWritable.InsertOrDelete {
 
     GraqlDelete(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
-        super(GraqlToken.Command.DELETE, requireNonNull(match), validVariables(match, variables));
+        super(DELETE, requireNonNull(match), validDeleteVars(match, variables));
     }
 
-    static List<ThingVariable<?>> validVariables(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    static List<ThingVariable<?>> validDeleteVars(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
             if (var.isNamed() && !match.namedVariablesUnbound().contains(var.toUnbound())) {
-                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(var.reference()));
+                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(var.reference()));
             }
             var.variables().forEach(nestedVar -> {
                 if (nestedVar.isNamed() && !match.namedVariablesUnbound().contains(nestedVar.toUnbound())) {
-                    throw GraqlException.of(VARIABLE_OUT_OF_SCOPE.message(nestedVar.reference()));
+                    throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(nestedVar.reference()));
                 }
             });
         });
@@ -47,7 +48,17 @@ public class GraqlDelete extends GraqlWritable {
     }
 
     public GraqlMatch.Unfiltered match() {
-        assert super.nullableMatch() != null;
-        return super.nullableMatch();
+        assert match != null;
+        return match;
+    }
+
+    public List<ThingVariable<?>> variables() { return variables; }
+
+    public GraqlUpdate insert(ThingVariable<?>... things) {
+        return insert(list(things));
+    }
+
+    public GraqlUpdate insert(List<ThingVariable<?>> things) {
+        return new GraqlUpdate(this.match(), variables, things);
     }
 }

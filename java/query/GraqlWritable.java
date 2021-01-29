@@ -28,12 +28,12 @@ import graql.lang.pattern.variable.Variable;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.NEW_LINE;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
+import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Command.DELETE;
 import static graql.lang.common.GraqlToken.Command.INSERT;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
@@ -41,33 +41,22 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
-abstract class GraqlWritable extends GraqlQuery {
+public abstract class GraqlWritable extends GraqlQuery {
 
-    private final GraqlToken.Command keyword;
-    private final GraqlMatch.Unfiltered match;
-    private final List<ThingVariable<?>> variables;
-    private final int hash;
+    protected final GraqlMatch.Unfiltered match;
+    protected final List<ThingVariable<?>> variables;
+
     private List<UnboundVariable> namedVariablesUnbound;
 
-    GraqlWritable(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
-        assert keyword == INSERT || keyword == DELETE;
-        if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
-        this.keyword = keyword;
+    GraqlWritable(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         this.match = match;
         this.variables = list(variables);
-        this.hash = Objects.hash(this.match, this.variables);
-    }
-
-    GraqlMatch.Unfiltered nullableMatch() {
-        return match;
     }
 
     @Override
     public GraqlArg.QueryType type() {
         return GraqlArg.QueryType.WRITE;
     }
-
-    public List<ThingVariable<?>> variables() { return variables; }
 
     public List<UnboundVariable> namedVariablesUnbound() {
         if (namedVariablesUnbound == null) {
@@ -77,33 +66,47 @@ abstract class GraqlWritable extends GraqlQuery {
         return namedVariablesUnbound;
     }
 
-    @Override
-    public final String toString() {
-        final StringBuilder query = new StringBuilder();
+    abstract static class InsertOrDelete extends GraqlWritable {
 
-        if (match != null) query.append(match).append(NEW_LINE);
-        query.append(keyword);
+        private final GraqlToken.Command keyword;
+        private final int hash;
 
-        if (variables.size() > 1) query.append(NEW_LINE);
-        else query.append(GraqlToken.Char.SPACE);
+        InsertOrDelete(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+            super(match, variables);
+            assert keyword == INSERT || keyword == DELETE;
+            if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
+            this.keyword = keyword;
+            this.hash = Objects.hash(this.keyword, this.match, this.variables);
+        }
 
-        query.append(variables().stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON);
-        return query.toString();
-    }
+        @Override
+        public String toString() {
+            final StringBuilder query = new StringBuilder();
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final GraqlWritable that = (GraqlWritable) o;
-        return (this.keyword.equals(that.keyword) &&
-                Objects.equals(this.match, that.match) &&
-                this.variables.equals(that.variables));
-    }
+            if (match != null) query.append(match).append(NEW_LINE);
+            query.append(keyword);
 
-    @Override
-    public int hashCode() {
-        return hash;
+            if (variables.size() > 1) query.append(NEW_LINE);
+            else query.append(SPACE);
+
+            query.append(variables.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
+            query.append(SEMICOLON);
+            return query.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final InsertOrDelete that = (InsertOrDelete) o;
+            return (this.keyword.equals(that.keyword) &&
+                    Objects.equals(this.match, that.match) &&
+                    this.variables.equals(that.variables));
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
     }
 }

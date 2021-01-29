@@ -59,6 +59,14 @@ public abstract class GraqlQuery {
         }
     }
 
+    public GraqlUpdate asUpdate() {
+        if (this instanceof GraqlUpdate) {
+            return (GraqlUpdate) this;
+        } else {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(GraqlUpdate.class)));
+        }
+    }
+
     public GraqlMatch asMatch() {
         if (this instanceof GraqlMatch) {
             return (GraqlMatch) this;

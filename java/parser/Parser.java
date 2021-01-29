@@ -45,6 +45,7 @@ import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
+import graql.lang.query.GraqlUpdate;
 import graql.lang.query.builder.Computable;
 import graql.lang.query.builder.Sortable;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -71,7 +72,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.pair;
-
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
 import static graql.lang.common.util.Strings.unescapeRegex;
@@ -235,9 +235,8 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.query_insert() != null) {
             return visitQuery_insert(ctx.query_insert());
 
-        } else if (ctx.query_delete() != null) {
-            return visitQuery_delete(ctx.query_delete());
-
+        } else if (ctx.query_delete_or_update() != null) {
+            return visitQuery_delete_or_update(ctx.query_delete_or_update()).apply(q -> q, q -> q);
         } else if (ctx.query_match() != null) {
             return visitQuery_match(ctx.query_match());
 
@@ -285,15 +284,23 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public GraqlInsert visitQuery_insert(GraqlParser.Query_insertContext ctx) {
         if (ctx.patterns() != null) {
-            return new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns())).insert(visitVariable_things(ctx.variable_things()));
+            return new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns()))
+                    .insert(visitVariable_things(ctx.variable_things()));
         } else {
             return new GraqlInsert(visitVariable_things(ctx.variable_things()));
         }
     }
 
     @Override
-    public GraqlDelete visitQuery_delete(GraqlParser.Query_deleteContext ctx) {
-        return new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns())).delete(visitVariable_things(ctx.variable_things()));
+    public Either<GraqlDelete, GraqlUpdate> visitQuery_delete_or_update(GraqlParser.Query_delete_or_updateContext ctx) {
+        GraqlDelete delete = new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns()))
+                .delete(visitVariable_things(ctx.variable_things(0)));
+        if (ctx.INSERT() == null) {
+            return Either.first(delete);
+        } else {
+            assert ctx.variable_things().size() == 2;
+            return Either.second(delete.insert(visitVariable_things(ctx.variable_things(1))));
+        }
     }
 
     @Override

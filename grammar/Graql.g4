@@ -30,9 +30,9 @@ eof_schema_rule       :   schema_rule      EOF ;
 
 // GRAQL QUERY LANGUAGE ========================================================
 
-query                 :   query_define    |   query_undefine
-                      |   query_insert    |   query_delete
-                      |   query_match     |   query_match_aggregate
+query                 :   query_define      |   query_undefine
+                      |   query_insert      |   query_delete_or_update
+                      |   query_match       |   query_match_aggregate
                       |   query_match_group |   query_match_group_agg
                       |   query_compute   ;
 
@@ -41,7 +41,8 @@ query_undefine        :   UNDEFINE    definables  ;
 
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
-query_delete          :   MATCH       patterns      DELETE  variable_things     ;
+query_delete_or_update:   MATCH       patterns      DELETE  variable_things
+                                                  ( INSERT  variable_things )?  ;
 query_match           :   MATCH       patterns            ( filters )           ;
 query_compute         :   COMPUTE     compute_conditions                        ;
 

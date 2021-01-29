@@ -30,6 +30,7 @@ import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
+import graql.lang.query.GraqlUpdate;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -585,6 +586,18 @@ public class ParserTest {
                 rel("evolves-from", "y").rel("evolves-to", "z").isa("evolution")
         );
 
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
+    }
+
+    @Test
+    public void whenParsingUpdateQuery_ResultIssameAsJavaGraql() {
+        String query = "match $x isa person, has name 'alice', has age $a;\n" +
+                "delete $x has $a;\n" +
+                "insert $x has age 25;";
+        GraqlUpdate parsed = Graql.parseQuery(query).asUpdate();
+        GraqlUpdate expected = match(var("x").isa("person").has("name", "alice").has("age", var("a")))
+                .delete(var("x").has(var("a")))
+                .insert(var("x").has("age", 25));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 

@@ -54,12 +54,11 @@ public class GraqlToken {
 
     public enum Command {
         COMPUTE("compute"),
-        MATCH("match"),
         DEFINE("define"),
         UNDEFINE("undefine"),
         INSERT("insert"),
         DELETE("delete"),
-        GET("get"),
+        MATCH("match"),
         AGGREGATE("aggregate"),
         GROUP("group");
 
@@ -85,6 +84,7 @@ public class GraqlToken {
     }
 
     public enum Filter {
+        GET("get"),
         SORT("sort"),
         OFFSET("offset"),
         LIMIT("limit");
