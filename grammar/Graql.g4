@@ -50,9 +50,9 @@ query_compute         :   COMPUTE     compute_conditions                        
 
 // MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
 
-query_match_aggregate :   query_match   function_aggregate  ;
-query_match_group     :   query_match   function_group      ;
-query_match_group_agg :   query_match   function_group      function_aggregate  ;
+query_match_aggregate :   query_match   match_aggregate   ;
+query_match_group     :   query_match   match_group       ;
+query_match_group_agg :   query_match   match_group       match_aggregate  ;
 
 // MATCH QUERY FILTERS =========================================================
 
@@ -69,8 +69,8 @@ limit                 :   LIMIT       LONG_                 ;
 // An aggregate function is composed of 2 things:
 // The aggregate method name, followed by the variable to apply the function to
 
-function_aggregate    :   function_method    VAR_?   ';';                       // method and, optionally, a variable
-function_method       :   COUNT   |   MAX     |   MEAN    |   MEDIAN            // calculate statistical values
+match_aggregate       :   aggregate_method    VAR_?   ';';                      // method and, optionally, a variable
+aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN            // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
 
 // GET GROUP QUERY =============================================================
@@ -78,7 +78,7 @@ function_method       :   COUNT   |   MAX     |   MEAN    |   MEDIAN            
 // An group function is composed of 2 things:
 // The 'GROUP' method name, followed by the variable to group the results by
 
-function_group        :   GROUP   VAR_    ';' ;
+match_group           :   GROUP   VAR_    ';' ;
 
 // SCHEMA QUERY ===============================================================
 
@@ -151,9 +151,10 @@ player                :   VAR_ ;                                                
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes            :   attribute ( ',' attribute )* ;
-attribute             :   HAS label ( VAR_ | predicate )                            // ownership by labeled variable or value
+attribute             :   HAS label ( VAR_ | predicate )                        // ownership by labeled variable or value
                       |   HAS VAR_ ;                                            // or just value
-// ATTRIBUTE OPERATION CONSTRUCTS ==============================================
+
+// ATTRIBUTE VALUATION CONSTRUCTS ==============================================
 
 predicate             :   value
                       |   predicate_equality   predicate_value
@@ -205,7 +206,7 @@ compute_config        :   USING   compute_algorithm                             
 
 compute_algorithm     :   DEGREE | K_CORE | CONNECTED_COMPONENT   ;             // algorithm to determine how to compute
 compute_args          :   compute_arg | compute_args_array ;                    // single argument or array of arguments
-compute_args_array    :   '[' compute_arg (',' compute_arg)* ']'  ;             // an array of arguments
+compute_args_array    :   '[' compute_arg ( ',' compute_arg )* ']';             // an array of arguments
 compute_arg           :   MIN_K     '=' LONG_                                   // a single argument for min-k=LONG
                       |   K         '=' LONG_                                   // a single argument for k=LONG
                       |   SIZE      '=' LONG_                                   // a single argument for size=LONG

@@ -32,9 +32,11 @@ import graql.lang.query.builder.Sortable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
@@ -46,6 +48,7 @@ import static graql.lang.common.GraqlToken.Filter.GET;
 import static graql.lang.common.GraqlToken.Filter.LIMIT;
 import static graql.lang.common.GraqlToken.Filter.OFFSET;
 import static graql.lang.common.GraqlToken.Filter.SORT;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static graql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
@@ -85,10 +88,13 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         this.offset = offset;
         this.limit = limit;
 
+        Set<UnboundVariable> filterSet = new HashSet<>();
         for (UnboundVariable var : filter) {
             if (!namedVariablesUnbound().contains(var))
                 throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (!var.isNamed()) throw GraqlException.of(VARIABLE_NOT_NAMED.message(var));
+            if (filterSet.contains(var)) throw GraqlException.of(ILLEGAL_FILTER_VARIABLE_REPEATING);
+            else filterSet.add(var);
         }
         final List<UnboundVariable> sortableVars = filter.isEmpty() ? namedVariablesUnbound() : filter;
         if (sorting != null && !sortableVars.contains(sorting.var())) {

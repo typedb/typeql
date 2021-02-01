@@ -336,27 +336,27 @@ public class Parser extends GraqlBaseVisitor {
      */
     @Override
     public GraqlMatch.Aggregate visitQuery_match_aggregate(GraqlParser.Query_match_aggregateContext ctx) {
-        final GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
+        final GraqlParser.Match_aggregateContext function = ctx.match_aggregate();
 
         return visitQuery_match(ctx.query_match()).aggregate(
-                GraqlToken.Aggregate.Method.of(function.function_method().getText()),
+                GraqlToken.Aggregate.Method.of(function.aggregate_method().getText()),
                 function.VAR_() != null ? getVar(function.VAR_()) : null
         );
     }
 
     @Override
     public GraqlMatch.Group visitQuery_match_group(GraqlParser.Query_match_groupContext ctx) {
-        final UnboundVariable var = getVar(ctx.function_group().VAR_());
+        final UnboundVariable var = getVar(ctx.match_group().VAR_());
         return visitQuery_match(ctx.query_match()).group(var);
     }
 
     @Override
     public GraqlMatch.Group.Aggregate visitQuery_match_group_agg(GraqlParser.Query_match_group_aggContext ctx) {
-        final UnboundVariable var = getVar(ctx.function_group().VAR_());
-        final GraqlParser.Function_aggregateContext function = ctx.function_aggregate();
+        final UnboundVariable var = getVar(ctx.match_group().VAR_());
+        final GraqlParser.Match_aggregateContext function = ctx.match_aggregate();
 
         return visitQuery_match(ctx.query_match()).group(var).aggregate(
-                GraqlToken.Aggregate.Method.of(function.function_method().getText()),
+                GraqlToken.Aggregate.Method.of(function.aggregate_method().getText()),
                 function.VAR_() != null ? getVar(function.VAR_()) : null
         );
     }
