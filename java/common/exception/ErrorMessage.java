@@ -31,8 +31,12 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(5, "The query has not been provided with any patterns.");
     public static final ErrorMessage MISSING_DEFINABLES =
             new ErrorMessage(6, "The query has not been provided with any definables.");
+    public static final ErrorMessage MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE =
+            new ErrorMessage(37, "The match query does not have named variables to bound the nested disjunction/negation pattern(s).");
     public static final ErrorMessage MATCH_HAS_NO_NAMED_VARIABLE =
             new ErrorMessage(7, "The match query has no named variables to retrieve.");
+    public static final ErrorMessage MATCH_HAS_UNBOUNDED_NESTED_PATTERN =
+            new ErrorMessage(38, "The match query contains a nested pattern is not bounded: '%s'.");
     public static final ErrorMessage MISSING_MATCH_FILTER =
             new ErrorMessage(8, "The match query cannot be constructed with NULL filter variable collection.");
     public static final ErrorMessage EMPTY_MATCH_FILTER =

@@ -23,14 +23,24 @@ import graql.lang.pattern.Pattern;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
 
 public abstract class BoundVariable extends Variable implements Conjunctable {
 
     BoundVariable(Reference reference) {
         super(reference);
+    }
+
+    @Override
+    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+        if (Stream.concat(Stream.of(this), variables()).noneMatch(v -> bounds.contains(v.toUnbound()))) {
+            throw GraqlException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(toString()));
+        }
     }
 
     @Override

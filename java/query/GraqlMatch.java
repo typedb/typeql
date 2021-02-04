@@ -26,7 +26,6 @@ import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Sortable;
 
@@ -50,12 +49,14 @@ import static graql.lang.common.GraqlToken.Filter.OFFSET;
 import static graql.lang.common.GraqlToken.Filter.SORT;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
+import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE;
 import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static graql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
 import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
@@ -89,20 +90,47 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         this.offset = offset;
         this.limit = limit;
 
-        Set<UnboundVariable> duplicates = new HashSet<>();
+        hasBoundingConjunction();
+        nestedPatternsAreBounded();
+        hasNamedVariable();
+        filtersAreInScope();
+        sortVarsArInScope();
+
+        this.hash = Objects.hash(this.conjunction, this.filter, this.sorting, this.offset, this.limit);
+    }
+
+    private void hasBoundingConjunction() {
+        if (conjunction.patterns().stream().noneMatch(v -> v.isVariable() && v.asVariable().isNamed())) {
+            throw GraqlException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
+        }
+    }
+
+    private void nestedPatternsAreBounded() {
+        conjunction.patterns().stream().filter(pattern -> !pattern.isVariable()).forEach(pattern -> {
+            pattern.validateIsBoundedBy(conjunction.namedVariablesUnbound().collect(toSet()));
+        });
+    }
+
+    private void hasNamedVariable() {
         if (namedVariablesUnbound().isEmpty()) throw GraqlException.of(MATCH_HAS_NO_NAMED_VARIABLE);
+    }
+
+    private void filtersAreInScope() {
+        Set<UnboundVariable> duplicates = new HashSet<>();
         for (UnboundVariable var : filter) {
-            if (!namedVariablesUnbound().contains(var)) throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
+            if (!namedVariablesUnbound().contains(var))
+                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (!var.isNamed()) throw GraqlException.of(VARIABLE_NOT_NAMED.message(var));
             if (duplicates.contains(var)) throw GraqlException.of(ILLEGAL_FILTER_VARIABLE_REPEATING);
             else duplicates.add(var);
         }
+    }
+
+    private void sortVarsArInScope() {
         final List<UnboundVariable> sortableVars = filter.isEmpty() ? namedVariablesUnbound() : filter;
         if (sorting != null && !sortableVars.contains(sorting.var())) {
             throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(sorting.var()));
         }
-
-        this.hash = Objects.hash(this.conjunction, this.filter, this.sorting, this.offset, this.limit);
     }
 
     @Override
@@ -134,9 +162,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public List<UnboundVariable> namedVariablesUnbound() {
         if (variablesNamedUnbound == null) {
-            variablesNamedUnbound = conjunction.variables().filter(Variable::isNamed)
-                    .map(v -> UnboundVariable.named(v.name()))
-                    .distinct().collect(toList());
+            variablesNamedUnbound = conjunction.namedVariablesUnbound().collect(toList());
         }
         return variablesNamedUnbound;
     }

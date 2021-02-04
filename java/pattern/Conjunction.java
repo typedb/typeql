@@ -20,13 +20,18 @@ package graql.lang.pattern;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.UnboundVariable;
+import graql.lang.pattern.variable.Variable;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
@@ -34,6 +39,7 @@ import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
 import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
 import static graql.lang.common.GraqlToken.Char.SEMICOLON;
 import static graql.lang.common.GraqlToken.Char.SPACE;
+import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -58,9 +64,26 @@ public class Conjunction<T extends Pattern> implements Pattern {
         });
     }
 
+    public Stream<UnboundVariable> namedVariablesUnbound() {
+        return variables().filter(Variable::isNamed).map(v -> UnboundVariable.named(v.name())).distinct();
+    }
+
     @Override
     public List<T> patterns() {
         return patterns;
+    }
+
+    @Override
+    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+        if (variables().noneMatch(v -> bounds.contains(v.toUnbound()))) {
+            String str = toString().replace("\n", " ");
+            throw GraqlException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(str));
+        }
+        HashSet<UnboundVariable> union = new HashSet<>(bounds);
+        union.addAll(variables().map(BoundVariable::toUnbound).collect(Collectors.toSet()));
+        patterns.stream().filter(pattern -> !pattern.isVariable()).forEach(pattern -> {
+            pattern.validateIsBoundedBy(union);
+        });
     }
 
     public static <U extends Pattern> Conjunction<U> merge(List<Conjunction<U>> conjunctions) {
@@ -71,16 +94,15 @@ public class Conjunction<T extends Pattern> implements Pattern {
     public Disjunction<Conjunction<Conjunctable>> normalise() {
         if (normalised == null) {
             final List<Conjunctable> conjunctables = new ArrayList<>();
-            final List<List<Conjunction<Conjunctable>>> listOfDisjunctions = new ArrayList<>();
+            final List<List<Conjunction<Conjunctable>>> listOfDisj = new ArrayList<>();
             patterns.forEach(pattern -> {
                 if (pattern.isVariable()) conjunctables.add(pattern.asVariable().normalise());
                 else if (pattern.isNegation()) conjunctables.add(pattern.asNegation().normalise());
-                else if (pattern.isConjunction())
-                    listOfDisjunctions.add(pattern.asConjunction().normalise().patterns());
-                else listOfDisjunctions.add(pattern.asDisjunction().normalise().patterns());
+                else if (pattern.isConjunction()) listOfDisj.add(pattern.asConjunction().normalise().patterns());
+                else listOfDisj.add(pattern.asDisjunction().normalise().patterns());
             });
-            listOfDisjunctions.add(list(new Conjunction<>(conjunctables)));
-            final List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisjunctions)
+            listOfDisj.add(list(new Conjunction<>(conjunctables)));
+            final List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisj)
                     .stream().map(Conjunction::merge)
                     .collect(toList());
             normalised = new Disjunction<>(listOfConjunctions);

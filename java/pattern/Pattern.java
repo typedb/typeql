@@ -19,8 +19,10 @@ package graql.lang.pattern;
 
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 
 import java.util.List;
+import java.util.Set;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
@@ -30,6 +32,8 @@ public interface Pattern {
     Pattern normalise();
 
     List<? extends Pattern> patterns();
+
+    void validateIsBoundedBy(Set<UnboundVariable> bounds);
 
     default boolean isVariable() { return false; }
 

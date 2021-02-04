@@ -488,6 +488,36 @@ public class ParserTest {
     }
 
     @Test
+    public void testDisjunctionNotInConjunction() {
+        String query = "match {$x isa person;} or {$x isa company;};";
+        assertThrows(() -> parseQuery(query).asMatch());
+    }
+
+
+    @Test
+    public void testNestedConjunctionAndDisjunction() {
+        String query = "match\n" +
+                "$y isa $p;\n" +
+                "{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $x has last-name $z; }; };";
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(
+                var("y").isa(var("p")),
+                or(rel("y").rel("q"),
+                   and(var("x").isa(var("p")),
+                       or(var("x").has("first-name", var("y")),
+                          var("x").has("last-name", var("z"))))));
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testDisjunctionNotBindingConjunction() {
+        String query = "match\n" +
+                "$y isa $p;\n" +
+                "{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $q has last-name $z; }; };";
+        assertThrows(() -> parseQuery(query).asMatch());
+    }
+
+    @Test
     public void testAggregateCountQuery() {
         final String query = "match ($x, $y) isa friendship; get $x, $y; count;";
         final GraqlMatch.Aggregate parsed = parseQuery(query).asMatchAggregate();

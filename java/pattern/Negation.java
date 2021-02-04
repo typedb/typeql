@@ -20,10 +20,12 @@ package graql.lang.pattern;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.UnboundVariable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
@@ -52,6 +54,15 @@ public class Negation<T extends Pattern> implements Conjunctable {
     @Override
     public List<? extends Pattern> patterns() {
         return Arrays.asList(pattern);
+    }
+
+    @Override
+    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+        if (pattern.isNegation()) {
+            throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+        } else {
+            pattern.validateIsBoundedBy(bounds);
+        }
     }
 
     @Override

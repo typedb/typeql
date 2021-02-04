@@ -17,9 +17,12 @@
 
 package graql.lang.pattern;
 
+import graql.lang.pattern.variable.UnboundVariable;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
@@ -46,6 +49,11 @@ public class Disjunction<T extends Pattern> implements Pattern {
     @Override
     public List<T> patterns() {
         return patterns;
+    }
+
+    @Override
+    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+        patterns.forEach(pattern -> pattern.validateIsBoundedBy(bounds));
     }
 
     @Override
