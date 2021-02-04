@@ -100,7 +100,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     private void hasBoundingConjunction() {
-        if (conjunction.patterns().stream().noneMatch(v -> v.isVariable() && v.asVariable().isNamed())) {
+        if (!conjunction.namedVariablesUnbound().findAny().isPresent()) {
             throw GraqlException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
         }
     }
