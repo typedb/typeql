@@ -66,6 +66,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ParserTest {
 
@@ -82,6 +83,15 @@ public class ParserTest {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parsePattern(parsed.toString()));
         assertEquals(query, expected.toString());
+    }
+
+    private void assertThrows(Runnable function) {
+        try {
+            function.run();
+            fail();
+        } catch (Throwable e) {
+            assertTrue(true);
+        }
     }
 
     @Test
@@ -138,9 +148,9 @@ public class ParserTest {
 
     @Test
     public void testRoleTypeScopedSpecifically() {
-        String query = "match marriage relates spouse;";
+        String query = "match $m relates spouse;";
         GraqlMatch parsed = Graql.parseQuery(query).asMatch();
-        GraqlMatch expected = match(type("marriage").relates("spouse"));
+        GraqlMatch expected = match(var("m").relates("spouse"));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -626,10 +636,10 @@ public class ParserTest {
 
     @Test
     public void whenParsingAsInMatch_ResultIsSameAsSub() {
-        final String query = "match fatherhood sub parenthood, relates father as parent, relates son as child;";
+        final String query = "match $f sub parenthood, relates father as parent, relates son as child;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(
-                type("fatherhood").sub("parenthood")
+                var("f").sub("parenthood")
                         .relates("father", "parent")
                         .relates("son", "child")
         );
@@ -779,11 +789,9 @@ public class ParserTest {
 
     @Test
     public void testParseWithoutVar() {
-        final String query = "match $_ isa person;";
-        final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
-        final GraqlMatch expected = match(var().isa("person"));
-
-        assertQueryEquals(expected, parsed, query);
+        String query = "match $_ isa person;";
+        assertThrows(() -> Graql.parseQuery(query).asMatch());
+        assertThrows(() -> match(var().isa("person")));
     }
 
     @Test

@@ -50,6 +50,7 @@ import static graql.lang.common.GraqlToken.Filter.OFFSET;
 import static graql.lang.common.GraqlToken.Filter.SORT;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
 import static graql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
+import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
 import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static graql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
 import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
@@ -81,20 +82,20 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     // We keep this constructor 'public' as it is more efficient for query parsing
     public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter,
                       Sortable.Sorting sorting, Long offset, Long limit) {
-        if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_FILTER_VARIABLES.message());
+        if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_MATCH_FILTER.message());
         this.conjunction = conjunction;
         this.filter = list(filter);
         this.sorting = sorting;
         this.offset = offset;
         this.limit = limit;
 
-        Set<UnboundVariable> filterSet = new HashSet<>();
+        Set<UnboundVariable> duplicates = new HashSet<>();
+        if (namedVariablesUnbound().isEmpty()) throw GraqlException.of(MATCH_HAS_NO_NAMED_VARIABLE);
         for (UnboundVariable var : filter) {
-            if (!namedVariablesUnbound().contains(var))
-                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
+            if (!namedVariablesUnbound().contains(var)) throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (!var.isNamed()) throw GraqlException.of(VARIABLE_NOT_NAMED.message(var));
-            if (filterSet.contains(var)) throw GraqlException.of(ILLEGAL_FILTER_VARIABLE_REPEATING);
-            else filterSet.add(var);
+            if (duplicates.contains(var)) throw GraqlException.of(ILLEGAL_FILTER_VARIABLE_REPEATING);
+            else duplicates.add(var);
         }
         final List<UnboundVariable> sortableVars = filter.isEmpty() ? namedVariablesUnbound() : filter;
         if (sorting != null && !sortableVars.contains(sorting.var())) {
@@ -267,8 +268,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public static class Filtered extends GraqlMatch implements Sortable<Sorted, Offset, Limited> {
 
-        Filtered(Unfiltered unfiltered, List<UnboundVariable> vars) {
-            super(unfiltered.conjunction(), vars, null, null, null);
+        Filtered(Unfiltered unfiltered, List<UnboundVariable> filter) {
+            super(unfiltered.conjunction(), filter, null, null, null);
+            if (filter.isEmpty()) throw GraqlException.of(ErrorMessage.EMPTY_MATCH_FILTER);
         }
 
         @Override

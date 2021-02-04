@@ -100,16 +100,20 @@ public class GraqlSteps {
     @Given("connection close all sessions")
     @Given("connection delete all databases")
     @Given("materialised database is completed")
+    @Given("for each session, transaction closes")
     @Given("transaction commits; throws exception")
     @Given("connection does not have any database")
+    @Given("for each session, transaction commits")
     @Given("all answers are correct in reasoned database")
     @Given("materialised and reasoned databases are the same size")
     public void do_nothing() {}
 
+    @Given("rules contain: {}")
     @Given("answer size is: {}")
     @Given("each answer satisfies")
     @Given("aggregate value is: {}")
     @Given("number of groups is: {}")
+    @Given("rules do not contain: {}")
     @Given("reasoned database is named: {}")
     @Given("connection create database: {}")
     @Given("session transaction is open: {}")
@@ -118,10 +122,13 @@ public class GraqlSteps {
     @Given("answer size in reasoned database is: {}")
     @Given("connection open data session for database: {}")
     @Given("connection open schema session for database: {}")
+    @Given("for each session, open transactions of type: {}")
+    @Given("for each session, open transactions with reasoning of type: {}")
     @Given("answers are consistent across {} executions in reasoned database")
     public void do_nothing_with_arg(String ignored) {}
 
-    @Given("connection open sessions for databases:")
+    @Given("connection open data sessions for databases:")
+    @Given("connection open schema sessions for databases:")
     public void do_nothing_with_list(List<String> ignored) {}
 
     @Given("answer groups are")
