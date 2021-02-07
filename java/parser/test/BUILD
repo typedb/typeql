@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020 Grakn Labs
+# Copyright (C) 2021 Grakn Labs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,6 @@ java_test(
         "//java/common:common",
         "//java/pattern:pattern",
         "//java/query:query",
-        "@graknlabs_common//:common",
         "@maven//:org_hamcrest_hamcrest_library",
     ],
     size = "small",

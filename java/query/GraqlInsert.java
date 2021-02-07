@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,24 +17,39 @@
 
 package graql.lang.query;
 
-import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class GraqlInsert extends GraqlWritable {
+import static graql.lang.common.GraqlToken.Command.INSERT;
+import static graql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
 
-    public GraqlInsert(final List<ThingVariable<?>> variables) {
+public class GraqlInsert extends GraqlWritable.InsertOrDelete {
+
+    public GraqlInsert(List<ThingVariable<?>> variables) {
         this(null, variables);
     }
 
-    GraqlInsert(@Nullable final GraqlMatch.Unfiltered match, final List<ThingVariable<?>> variables) {
-        super(GraqlToken.Command.INSERT, match, variables);
+    GraqlInsert(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+        super(INSERT, match, validInsertVars(match, variables));
+    }
+
+    static List<ThingVariable<?>> validInsertVars(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+        if (match != null) {
+            if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound())
+                    || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
+                throw GraqlException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.namedVariablesUnbound()));
+            }
+        }
+        return variables;
     }
 
     public Optional<GraqlMatch.Unfiltered> match() {
-        return Optional.ofNullable(super.nullableMatch());
+        return Optional.ofNullable(match);
     }
+
+    public List<ThingVariable<?>> variables() { return variables; }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,28 +19,28 @@ package graql.lang.common;
 
 public class GraqlArg {
 
-    public enum Has {
-        IS_KEY("@key");
+    public enum QueryType {
+        READ(0),
+        WRITE(1);
 
-        private final String annotation;
+        private final int id;
+        private final boolean isWrite;
 
-        Has(final String annotation) {
-            this.annotation = annotation;
+        QueryType(int id) {
+            this.id = id;
+            this.isWrite = id == 1;
         }
 
-        @Override
-        public String toString() {
-            return annotation;
-        }
-
-        public static GraqlArg.Has of(final String annotation) {
-            for (GraqlArg.Has ann : GraqlArg.Has.values()) {
-                if (ann.annotation.equals(annotation)) {
-                    return ann;
-                }
+        public static QueryType of(int value) {
+            for (QueryType t : values()) {
+                if (t.id == value) return t;
             }
             return null;
         }
+
+        public boolean isRead() { return !isWrite; }
+
+        public boolean isWrite() { return isWrite; }
     }
 
     public enum ValueType {
@@ -52,7 +52,7 @@ public class GraqlArg {
 
         private final String type;
 
-        ValueType(final String type) {
+        ValueType(String type) {
             this.type = type;
         }
 
@@ -61,7 +61,7 @@ public class GraqlArg {
             return this.type;
         }
 
-        public static ValueType of(final String value) {
+        public static ValueType of(String value) {
             for (ValueType c : ValueType.values()) {
                 if (c.type.equals(value)) {
                     return c;
@@ -77,7 +77,7 @@ public class GraqlArg {
 
         private final String order;
 
-        Order(final String order) {
+        Order(String order) {
             this.order = order;
         }
 
@@ -86,7 +86,7 @@ public class GraqlArg {
             return this.order;
         }
 
-        public static Order of(final String value) {
+        public static Order of(String value) {
             for (Order c : Order.values()) {
                 if (c.order.equals(value)) {
                     return c;
@@ -106,7 +106,7 @@ public class GraqlArg {
 
         private final String algorithm;
 
-        Algorithm(final String algorithm) {
+        Algorithm(String algorithm) {
             this.algorithm = algorithm;
         }
 
@@ -115,7 +115,7 @@ public class GraqlArg {
             return this.algorithm;
         }
 
-        public static Algorithm of(final String value) {
+        public static Algorithm of(String value) {
             for (Algorithm a : Algorithm.values()) {
                 if (a.algorithm.equals(value)) {
                     return a;

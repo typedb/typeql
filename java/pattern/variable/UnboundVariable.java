@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,39 +17,52 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.pattern.constraint.ConceptConstraint;
 import graql.lang.pattern.constraint.Constraint;
 import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.constraint.TypeConstraint;
+import graql.lang.pattern.variable.builder.ConceptVariableBuilder;
 import graql.lang.pattern.variable.builder.ThingVariableBuilder;
 import graql.lang.pattern.variable.builder.TypeVariableBuilder;
 
 import java.util.Collections;
 import java.util.List;
 
-public class UnboundVariable extends Variable implements TypeVariableBuilder,
+public class UnboundVariable extends Variable implements ConceptVariableBuilder,
+                                                         TypeVariableBuilder,
                                                          ThingVariableBuilder.Common<ThingVariable.Thing>,
                                                          ThingVariableBuilder.Thing,
                                                          ThingVariableBuilder.Relation,
                                                          ThingVariableBuilder.Attribute {
 
-    UnboundVariable(final Reference reference) {
+    UnboundVariable(Reference reference) {
         super(reference);
     }
 
-    public static UnboundVariable of(final Reference reference) {
-        return new UnboundVariable(reference);
-    }
-
-    public static UnboundVariable named(final String name) {
-        return of(Reference.named(name));
+    public static UnboundVariable named(String name) {
+        return new UnboundVariable(Reference.name(name));
     }
 
     public static UnboundVariable anonymous() {
-        return of(Reference.anonymous(true));
+        return new UnboundVariable(Reference.anonymous(true));
     }
 
     public static UnboundVariable hidden() {
-        return of(Reference.anonymous(false));
+        return new UnboundVariable(Reference.anonymous(false));
+    }
+
+    @Override
+    public boolean isUnbound() {
+        return true;
+    }
+
+    @Override
+    public UnboundVariable asUnbound() {
+        return this;
+    }
+
+    public ConceptVariable toConcept() {
+        return new ConceptVariable(reference);
     }
 
     public TypeVariable toType() {
@@ -66,76 +79,78 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Label constraint) {
-        return new TypeVariable(Reference.label(constraint.scopedLabel())).constrain(constraint);
+    public TypeVariable constrain(TypeConstraint.Label constraint) {
+        Reference ref = reference;
+        if (reference.isAnonymous()) ref = Reference.label(constraint.scopedLabel());
+        return new TypeVariable(ref).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Sub constraint) {
+    public TypeVariable constrain(TypeConstraint.Sub constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Abstract constraint) {
+    public TypeVariable constrain(TypeConstraint.Abstract constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.ValueType constraint) {
+    public TypeVariable constrain(TypeConstraint.ValueType constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Regex constraint) {
+    public TypeVariable constrain(TypeConstraint.Regex constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Owns constraint) {
+    public TypeVariable constrain(TypeConstraint.Owns constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Plays constraint) {
+    public TypeVariable constrain(TypeConstraint.Plays constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Relates constraint) {
+    public TypeVariable constrain(TypeConstraint.Relates constraint) {
         return new TypeVariable(reference).constrain(constraint);
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.Isa constraint) {
+    public ThingVariable.Thing constrain(ThingConstraint.Isa constraint) {
         return new ThingVariable.Thing(reference).constrain(constraint);
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.Has constraint) {
+    public ThingVariable.Thing constrain(ThingConstraint.Has constraint) {
         return new ThingVariable.Thing(reference).constrain(constraint);
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.IID constraint) {
+    public ThingVariable.Thing constrain(ThingConstraint.IID constraint) {
         return new ThingVariable.Thing(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Thing constrain(final ThingConstraint.NEQ constraint) {
-        return new ThingVariable.Thing(reference, constraint);
+    public ConceptVariable constrain(ConceptConstraint.Is constraint) {
+        return new ConceptVariable(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Attribute constrain(final ThingConstraint.Value<?> constraint) {
+    public ThingVariable.Attribute constrain(ThingConstraint.Value<?> constraint) {
         return new ThingVariable.Attribute(reference, constraint);
     }
 
     @Override
-    public ThingVariable.Relation constrain(final ThingConstraint.Relation.RolePlayer rolePlayer) {
+    public ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
         return constrain(new ThingConstraint.Relation(rolePlayer));
     }
 
-    public ThingVariable.Relation constrain(final ThingConstraint.Relation constraint) {
+    public ThingVariable.Relation constrain(ThingConstraint.Relation constraint) {
         return new ThingVariable.Relation(reference, constraint);
     }
 
@@ -145,7 +160,7 @@ public class UnboundVariable extends Variable implements TypeVariableBuilder,
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

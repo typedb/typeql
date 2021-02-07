@@ -21,51 +21,27 @@ load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
 
-java_library(
-    name = "pattern",
-    srcs = glob([
-        "*.java",
-        "constraint/*.java",
-        "util/*.java",
-        "variable/*.java",
-        "variable/builder/*.java",
-        "schema/*.java",
-    ]),
+java_test(
+    name = "normalisation",
+    srcs = ["NormalisationTest.java"],
+    test_class = "graql.lang.pattern.test.NormalisationTest",
     deps = [
         # Internal Package Dependencies
-        "//java/common:common",
+        "//java:graql",
+        "//java/query",
+        "//java/pattern",
 
         # Internal Repository Dependencies
-        "@graknlabs_common//:common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",
     ],
-    tags = ["maven_coordinates=io.graql:graql-pattern:{pom_version}"],
-)
-
-assemble_maven(
-  name = "assemble-maven",
-  target = ":pattern",
-  package = "java",
-  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
-)
-
-deploy_maven(
-    name = "deploy-maven",
-    target = ":assemble-maven",
-    snapshot = deployment['maven.snapshot'],
-    release = deployment['maven.release']
 )
 
 checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
-        "constraint/*.java",
-        "variable/*.java",
-        "variable/builder/*.java",
-        "schema/*.java"
     ]),
     license_type = "agpl",
 )

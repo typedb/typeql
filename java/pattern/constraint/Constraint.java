@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -29,12 +29,20 @@ public abstract class Constraint<VARIABLE extends BoundVariable> {
 
     public abstract Set<VARIABLE> variables();
 
+    public boolean isConcept() {
+        return false;
+    }
+
     public boolean isType() {
         return false;
     }
 
     public boolean isThing() {
         return false;
+    }
+
+    public ConceptConstraint asConcept() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptConstraint.class)));
     }
 
     public TypeConstraint asType() {

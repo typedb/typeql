@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@ public class SyntaxError {
     private final String msg;
     private final int hash;
 
-    public SyntaxError(final String queryLine, final int line, final int charPositionInLine, final String msg) {
+    public SyntaxError(String queryLine, int line, int charPositionInLine, String msg) {
         if (msg == null) throw new NullPointerException("Null msg");
         this.queryLine = queryLine;
         this.line = line;
@@ -39,7 +39,7 @@ public class SyntaxError {
         this.hash = Objects.hash(this.queryLine, this.line, this.charPositionInLine, this.msg);
     }
 
-    private String spaces(final int len) {
+    private String spaces(int len) {
         final char ch = ' ';
         final char[] output = new char[len];
         for (int i = len - 1; i >= 0; i--) {
@@ -65,7 +65,7 @@ public class SyntaxError {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (o == this) {
             return true;
         }

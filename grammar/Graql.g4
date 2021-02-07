@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -30,9 +30,9 @@ eof_schema_rule       :   schema_rule      EOF ;
 
 // GRAQL QUERY LANGUAGE ========================================================
 
-query                 :   query_define    |   query_undefine
-                      |   query_insert    |   query_delete
-                      |   query_match     |   query_match_aggregate
+query                 :   query_define      |   query_undefine
+                      |   query_insert      |   query_delete_or_update
+                      |   query_match       |   query_match_aggregate
                       |   query_match_group |   query_match_group_agg
                       |   query_compute   ;
 
@@ -41,15 +41,18 @@ query_undefine        :   UNDEFINE    definables  ;
 
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
-query_delete          :   MATCH       patterns      DELETE  variable_things     ;
+query_delete_or_update:   MATCH       patterns      DELETE  variable_things
+                                                  ( INSERT  variable_things )?  ;
+// TODO: The above feels like a hack. Find a clean way to split delete and update
+
 query_match           :   MATCH       patterns            ( filters )           ;
 query_compute         :   COMPUTE     compute_conditions                        ;
 
 // MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
 
-query_match_aggregate :   query_match   function_aggregate  ;
-query_match_group     :   query_match   function_group      ;
-query_match_group_agg :   query_match   function_group      function_aggregate  ;
+query_match_aggregate :   query_match   match_aggregate   ;
+query_match_group     :   query_match   match_group       ;
+query_match_group_agg :   query_match   match_group       match_aggregate  ;
 
 // MATCH QUERY FILTERS =========================================================
 
@@ -66,8 +69,8 @@ limit                 :   LIMIT       LONG_                 ;
 // An aggregate function is composed of 2 things:
 // The aggregate method name, followed by the variable to apply the function to
 
-function_aggregate    :   function_method    VAR_?   ';';                       // method and, optionally, a variable
-function_method       :   COUNT   |   MAX     |   MEAN    |   MEDIAN            // calculate statistical values
+match_aggregate       :   aggregate_method    VAR_?   ';';                      // method and, optionally, a variable
+aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN            // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
 
 // GET GROUP QUERY =============================================================
@@ -75,7 +78,7 @@ function_method       :   COUNT   |   MAX     |   MEAN    |   MEDIAN            
 // An group function is composed of 2 things:
 // The 'GROUP' method name, followed by the variable to group the results by
 
-function_group        :   GROUP   VAR_    ';' ;
+match_group           :   GROUP   VAR_    ';' ;
 
 // SCHEMA QUERY ===============================================================
 
@@ -97,8 +100,13 @@ pattern_negation      :   NOT '{' patterns '}'                        ;
 
 // VARIABLE PATTERNS ===========================================================
 
-pattern_variable      :   variable_type
+pattern_variable      :   variable_concept
+                      |   variable_type
                       |   variable_thing_any   ;
+
+// CONCEPT VARAIBLES ===========================================================
+
+variable_concept      :   VAR_  IS  VAR_  ;
 
 // TYPE VARIABLES ==============================================================
 
@@ -109,7 +117,7 @@ type_constraint       :   ABSTRACT
                       |   RELATES     type         ( AS type )?
                       |   PLAYS       type_scoped  ( AS type )?
                       |   VALUE       value_type
-                      |   REGEX       regex
+                      |   REGEX       STRING_
                       |   WHEN    '{' patterns        '}'
                       |   THEN    '{' variable_things '}'
                       |   TYPE        label_any
@@ -122,16 +130,15 @@ variable_thing_any    :   variable_thing
                       |   variable_relation
                       |   variable_attribute
                       ;
-variable_thing        :   VAR_                ISA_ type   ( ',' attributes )?
-                      |   VAR_                IID  IID_    ( ',' attributes )?
-                      |   VAR_                NEQ  VAR_
-                      |   VAR_                attributes
+variable_thing        :   VAR_            ISA_ type   ( ',' attributes )?
+                      |   VAR_            IID  IID_   ( ',' attributes )?
+                      |   VAR_            attributes
                       ;
-variable_relation     :   VAR_? relation      ISA_ type   ( ',' attributes )?
-                      |   VAR_? relation      attributes?
+variable_relation     :   VAR_? relation  ISA_ type   ( ',' attributes )?
+                      |   VAR_? relation  attributes?
                       ;
-variable_attribute    :   VAR_? value     ISA_ type   ( ',' attributes )?
-                      |   VAR_? value     attributes?
+variable_attribute    :   VAR_? predicate ISA_ type   ( ',' attributes )?
+                      |   VAR_? predicate attributes?
                       ;
 
 // RELATION CONSTRUCT ==========================================================
@@ -144,27 +151,23 @@ player                :   VAR_ ;                                                
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes            :   attribute ( ',' attribute )* ;
-attribute             :   HAS label ( VAR_ | value ) ;                          // Attribute ownership by variable or a
-                                                                                // predicate
-// ATTRIBUTE OPERATION CONSTRUCTS ==============================================
+attribute             :   HAS label ( VAR_ | predicate )                        // ownership by labeled variable or value
+                      |   HAS VAR_ ;                                            // or just value
 
-value                 :   assignment
-                      |   comparison
+// ATTRIBUTE VALUATION CONSTRUCTS ==============================================
+
+predicate             :   value
+                      |   predicate_equality   predicate_value
+                      |   predicate_substring  STRING_
                       ;
-assignment            :   literal ;
-comparison            :   comparator  comparable
-                      |   CONTAINS    containable
-                      |   LIKE        regex
-                      ;
-comparator            :   EQV | NEQV | GT | GTE | LT | LTE ;
-comparable            :   literal | VAR_  ;
-containable           :   STRING_ | VAR_  ;
+predicate_equality    :   EQ | NEQ | GT | GTE | LT | LTE ;
+predicate_substring   :   CONTAINS | LIKE ;
+
+predicate_value       :   value | VAR_  ;
 
 // SCHEMA CONSTRUCT =============================================================
 
 schema_rule           :   RULE label
-                      |   RULE label ':' WHEN '{' patterns '}'
-                      |   RULE label ':' THEN '{' variable_thing_any ';' '}'
                       |   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
 
 // COMPUTE QUERY ===============================================================
@@ -203,7 +206,7 @@ compute_config        :   USING   compute_algorithm                             
 
 compute_algorithm     :   DEGREE | K_CORE | CONNECTED_COMPONENT   ;             // algorithm to determine how to compute
 compute_args          :   compute_arg | compute_args_array ;                    // single argument or array of arguments
-compute_args_array    :   '[' compute_arg (',' compute_arg)* ']'  ;             // an array of arguments
+compute_args_array    :   '[' compute_arg ( ',' compute_arg )* ']';             // an array of arguments
 compute_arg           :   MIN_K     '=' LONG_                                   // a single argument for min-k=LONG
                       |   K         '=' LONG_                                   // a single argument for k=LONG
                       |   SIZE      '=' LONG_                                   // a single argument for size=LONG
@@ -230,7 +233,7 @@ type_native           :   THING           |   ENTITY          |   ATTRIBUTE
 
 value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;
-literal               :   STRING_         |   LONG_           |   DOUBLE_
+value                 :   STRING_         |   LONG_           |   DOUBLE_
                       |   BOOLEAN_        |   DATE_           |   DATETIME_     ;
 regex                 :   STRING_         ;
 
@@ -280,6 +283,18 @@ WHEN            : 'when'        ;   THEN            : 'then'        ;
 IID             : 'iid'         ;   ISA_            : ISA | ISAX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
 HAS             : 'has'         ;   VALUE           : 'value'       ;
+IS              : 'is'          ;
+
+// OPERATOR KEYWORDS
+
+OR              : 'or'          ;   NOT             : 'not'         ;
+
+// PREDICATE KEYWORDS
+
+EQ              : '='           ;   NEQ             : '!='          ;
+GT              : '>'           ;   GTE             : '>='          ;
+LT              : '<'           ;   LTE             : '<='          ;
+LIKE            : 'like'        ;   CONTAINS        : 'contains'    ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
@@ -297,29 +312,20 @@ FROM            : 'from'        ;   TO              : 'to'          ;
 OF              : 'of'          ;   IN              : 'in'          ;
 USING           : 'using'       ;   WHERE           : 'where'       ;
 MIN_K           : 'min-k'       ;   K               : 'k'           ;
-SIZE            : 'size'        ;   CONTAINS        : 'contains'    ;
-
-
-// OPERATOR KEYWORDS
-
-OR              : 'or'          ;   NOT             : 'not'         ;
-LIKE            : 'like'        ;   NEQ             : '!='          ;
-EQV             : '=='          ;   NEQV            : '!=='         ;
-GT              : '>'           ;   GTE             : '>='          ;
-LT              : '<'           ;   LTE             : '<='          ;
+SIZE            : 'size'        ;
 
 // VALUE TYPE KEYWORDS
 
 LONG            : 'long'        ;   DOUBLE          : 'double'      ;
 STRING          : 'string'      ;   BOOLEAN         : 'boolean'     ;
-DATETIME        : 'datetime'        ;
+DATETIME        : 'datetime'    ;
 
 // LITERAL VALUE KEYWORDS
 BOOLEAN_        : TRUE | FALSE  ; // order of lexer declaration matters
 TRUE            : 'true'        ;
 FALSE           : 'false'       ;
 STRING_         : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
-                | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''   ;
+                | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''    ;
 LONG_           : ('+' | '-')? [0-9]+                   ;
 DOUBLE_         : ('+' | '-')? [0-9]+ '.' [0-9]+        ;
 DATE_           : DATE_FRAGMENT_                        ;

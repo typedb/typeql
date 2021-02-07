@@ -15,16 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package graql.lang.pattern.variable.builder;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.pattern.Definable;
+import graql.lang.pattern.constraint.ConceptConstraint;
+import graql.lang.pattern.variable.ConceptVariable;
+import graql.lang.pattern.variable.UnboundVariable;
 
-import java.util.List;
+public interface ConceptVariableBuilder {
 
-public class GraqlUndefine extends GraqlDefinable {
-
-    public GraqlUndefine(List<Definable> definables) {
-        super(GraqlToken.Command.UNDEFINE, definables);
+    default ConceptVariable is(String var) {
+        return is(UnboundVariable.named(var));
     }
+
+    default ConceptVariable is(UnboundVariable var) {
+        return constrain(new ConceptConstraint.Is(var));
+    }
+
+    ConceptVariable constrain(ConceptConstraint.Is constraint);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,12 +17,15 @@
 
 package graql.lang.query;
 
+import graql.lang.common.GraqlArg;
 import graql.lang.common.exception.GraqlException;
 
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class GraqlQuery {
+
+    public abstract GraqlArg.QueryType type();
 
     public GraqlDefine asDefine() {
         if (this instanceof GraqlDefine) {
@@ -53,6 +56,14 @@ public abstract class GraqlQuery {
             return (GraqlDelete) this;
         } else {
             throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(GraqlDelete.class)));
+        }
+    }
+
+    public GraqlUpdate asUpdate() {
+        if (this instanceof GraqlUpdate) {
+            return (GraqlUpdate) this;
+        } else {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(GraqlUpdate.class)));
         }
     }
 

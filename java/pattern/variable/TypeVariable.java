@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -48,7 +48,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
 
     private final List<TypeConstraint> constraints;
 
-    TypeVariable(final Reference reference) {
+    TypeVariable(Reference reference) {
         super(reference);
         this.ownsConstraints = new LinkedList<>();
         this.playsConstraints = new LinkedList<>();
@@ -72,17 +72,18 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Label constraint) {
+    public TypeVariable constrain(TypeConstraint.Label constraint) {
         if (labelConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Label.class, constraint));
         }
         labelConstraint = constraint;
         constraints.add(constraint);
+        relatesConstraints.forEach(rel -> rel.setScope(constraint.label()));
         return this;
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Sub constraint) {
+    public TypeVariable constrain(TypeConstraint.Sub constraint) {
         if (subConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Sub.class, constraint));
         }
@@ -92,7 +93,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Abstract constraint) {
+    public TypeVariable constrain(TypeConstraint.Abstract constraint) {
         if (abstractConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Abstract.class, constraint));
         }
@@ -102,7 +103,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.ValueType constraint) {
+    public TypeVariable constrain(TypeConstraint.ValueType constraint) {
         if (valueTypeConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.ValueType.class, constraint));
         }
@@ -112,7 +113,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Regex constraint) {
+    public TypeVariable constrain(TypeConstraint.Regex constraint) {
         if (regexConstraint != null) {
             throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Regex.class, constraint));
         }
@@ -123,21 +124,21 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
 
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Owns constraint) {
+    public TypeVariable constrain(TypeConstraint.Owns constraint) {
         ownsConstraints.add(constraint);
         constraints.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Plays constraint) {
+    public TypeVariable constrain(TypeConstraint.Plays constraint) {
         playsConstraints.add(constraint);
         constraints.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable constrain(final TypeConstraint.Relates constraint) {
+    public TypeVariable constrain(TypeConstraint.Relates constraint) {
         if (label().isPresent()) {
             constraint.setScope(label().get().label());
         }
@@ -202,7 +203,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final TypeVariable that = (TypeVariable) o;

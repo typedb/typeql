@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,7 @@ public class ErrorListener extends BaseErrorListener {
     private final List<String> query;
     private final List<SyntaxError> errors = new ArrayList<>();
 
-    private ErrorListener(final List<String> query) {
+    private ErrorListener(List<String> query) {
         this.query = query;
     }
 
@@ -49,15 +49,15 @@ public class ErrorListener extends BaseErrorListener {
         return new ErrorListener(null);
     }
 
-    public static ErrorListener of(final String query) {
+    public static ErrorListener of(String query) {
         final List<String> queryList = Arrays.asList(query.split("\n"));
         return new ErrorListener(queryList);
     }
 
     @Override
     public void syntaxError(
-            final Recognizer<?, ?> recognizer, final Object offendingSymbol, final int line, final int charPositionInLine, final String msg,
-            final RecognitionException e) {
+            Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg,
+            RecognitionException e) {
 
         if (query == null) {
             errors.add(new SyntaxError(null, line, 0, msg));
