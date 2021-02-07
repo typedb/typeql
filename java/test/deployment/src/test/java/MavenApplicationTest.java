@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@ import static graql.lang.Graql.var;
 import static org.junit.Assert.assertEquals;
 
 public class MavenApplicationTest {
-    private void assertQueryEquals(final GraqlQuery expected, final GraqlQuery parsed, final String query) {
+    private void assertQueryEquals(GraqlQuery expected, GraqlQuery parsed, String query) {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parseQuery(parsed.toString()));
         assertEquals(query, expected.toString());
@@ -45,7 +45,7 @@ public class MavenApplicationTest {
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
-                var("brando").val("Marl B").isa("name"),
+                var("brando").eq("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
 
@@ -57,18 +57,18 @@ public class MavenApplicationTest {
         final String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
-                "$t !== 'Apocalypse Now';";
+                "$t != 'Apocalypse Now';";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
-                        var("t").val("Apocalypse Now"),
+                        var("t").eq("Apocalypse Now"),
                         and(
                                 var("t").lt("Juno"),
                                 var("t").gt("Godfather")
                         ),
-                        var("t").val("Spy")
+                        var("t").eq("Spy")
                 ),
                 var("t").neq("Apocalypse Now")
         );

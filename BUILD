@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020 Grakn Labs
+# Copyright (C) 2021 Grakn Labs
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,6 +32,7 @@ deploy_github(
     title_append_version = True,
     organisation = deployment['github.organisation'],
     repository = deployment['github.repository'],
+    draft = False
 )
 
 release_validate_deps(

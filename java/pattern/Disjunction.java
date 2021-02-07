@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,12 @@
 
 package graql.lang.pattern;
 
+import graql.lang.pattern.variable.UnboundVariable;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static grakn.common.collection.Collections.list;
@@ -37,21 +40,29 @@ public class Disjunction<T extends Pattern> implements Pattern {
     private final int hash;
     private Disjunction<Conjunction<Conjunctable>> normalised;
 
-    public Disjunction(final List<T> patterns) {
+    public Disjunction(List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
     }
 
+    @Override
     public List<T> patterns() {
         return patterns;
+    }
+
+    @Override
+    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+        patterns.forEach(pattern -> pattern.validateIsBoundedBy(bounds));
     }
 
     @Override
     public Disjunction<Conjunction<Conjunctable>> normalise() {
         if (normalised == null) {
             final List<Conjunction<Conjunctable>> conjunctions = patterns.stream().flatMap(p -> {
-                if (p.isConjunction()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
+                if (p.isVariable()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
+                else if (p.isNegation())
+                    return Stream.of(new Conjunction<>(list(p.asNegation().normalise().asConjunctable())));
                 else if (p.isConjunction()) return p.asConjunction().normalise().patterns().stream();
                 else return p.asDisjunction().normalise().patterns().stream();
             }).collect(toList());
@@ -88,7 +99,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Disjunction<?> that = (Disjunction<?>) o;

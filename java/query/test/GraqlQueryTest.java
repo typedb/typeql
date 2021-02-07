@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -99,17 +99,12 @@ public class GraqlQueryTest {
     }
 
     @Test
-    public void testQueryWithThenToString() {
-        final GraqlDefine query = Graql.define(rule("a-rule").then(Graql.parseVariable("$x isa movie").asThing()));
+    public void testQueryWithRuleThenToString() {
+        final GraqlDefine query = Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;"))).then(Graql.parseVariable("$x has name 'Ghostbusters'").asThing()));
         assertValidToString(query);
     }
 
-    @Test
-    public void testQueryWithWhenToString() {
-        assertValidToString(Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;")))));
-    }
-
-    private void assertValidToString(final GraqlQuery query) {
+    private void assertValidToString(GraqlQuery query) {
         //No need to execute the insert query
         final GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
@@ -122,8 +117,8 @@ public class GraqlQueryTest {
 
     @Test
     public void testEscapeStrings() {
-        assertEquals("insert $x \"hello\nworld\";", Graql.insert(var("x").val("hello\nworld")).toString());
-        assertEquals("insert $x \"hello\\nworld\";", Graql.insert(var("x").val("hello\\nworld")).toString());
+        assertEquals("insert $x \"hello\nworld\";", Graql.insert(var("x").eq("hello\nworld")).toString());
+        assertEquals("insert $x \"hello\\nworld\";", Graql.insert(var("x").eq("hello\\nworld")).toString());
     }
 
     @Test
@@ -185,17 +180,17 @@ public class GraqlQueryTest {
 
     @Test
     public void testZeroToString() {
-        assertEquals("match $x 0.0;", match(var("x").val(0.0)).toString());
+        assertEquals("match $x 0.0;", match(var("x").eq(0.0)).toString());
     }
 
     @Test
     public void testExponentsToString() {
-        assertEquals("match $x 1000000000.0;", match(var("x").val(1_000_000_000.0)).toString());
+        assertEquals("match $x 1000000000.0;", match(var("x").eq(1_000_000_000.0)).toString());
     }
 
     @Test
     public void testDecimalToString() {
-        assertEquals("match $x 0.0001;", match(var("x").val(0.0001)).toString());
+        assertEquals("match $x 0.0001;", match(var("x").eq(0.0001)).toString());
     }
 
     @Test
@@ -205,18 +200,11 @@ public class GraqlQueryTest {
         assertEquals(query, Graql.parseQuery(query).toString());
     }
 
-    @Test
-    public void whenCallingToStringOnAQueryWithAContainsPredicate_ResultIsCorrect() {
-        final GraqlMatch.Unfiltered match = match(var("x").contains(var("y")));
-
-        assertEquals("match $x contains $y;", match.toString());
-    }
-
-    private void assertSameStringRepresentation(final GraqlMatch query) {
+    private void assertSameStringRepresentation(GraqlMatch query) {
         assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
     }
 
-    private void assertEquivalent(final GraqlQuery query, final String queryString) {
+    private void assertEquivalent(GraqlQuery query, String queryString) {
         assertEquals(queryString, query.toString());
         assertEquals(query.toString(), Graql.parseQuery(queryString).toString());
     }

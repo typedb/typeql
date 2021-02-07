@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,15 +17,23 @@
 
 package graql.lang.pattern;
 
-import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.BoundVariable;
+import graql.lang.pattern.variable.UnboundVariable;
+
+import java.util.List;
+import java.util.Set;
 
 import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Pattern {
 
     Pattern normalise();
+
+    List<? extends Pattern> patterns();
+
+    void validateIsBoundedBy(Set<UnboundVariable> bounds);
 
     default boolean isVariable() { return false; }
 
@@ -38,23 +46,23 @@ public interface Pattern {
     default boolean isConjunctable() { return false; }
 
     default BoundVariable asVariable() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
     }
 
     default Conjunction<? extends Pattern> asConjunction() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Conjunction.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Conjunction.class)));
     }
 
     default Disjunction<? extends Pattern> asDisjunction() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Disjunction.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Disjunction.class)));
     }
 
     default Negation<? extends Pattern> asNegation() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
     }
 
     default Conjunctable asConjunctable() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
     }
 
     @Override

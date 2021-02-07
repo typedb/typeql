@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,20 +17,36 @@
 
 package graql.lang.pattern.variable;
 
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.constraint.Constraint;
 
 import java.util.List;
 import java.util.stream.Stream;
 
+import static grakn.common.util.Objects.className;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+
 public abstract class Variable {
 
     final Reference reference;
 
-    Variable(final Reference reference) {
+    Variable(Reference reference) {
         this.reference = reference;
     }
 
     public abstract List<? extends Constraint<?>> constraints();
+
+    public boolean isUnbound() {
+        return false;
+    }
+
+    public boolean isBound() {
+        return false;
+    }
+
+    public boolean isConcept() {
+        return false;
+    }
 
     public boolean isType() {
         return false;
@@ -38,6 +54,14 @@ public abstract class Variable {
 
     public boolean isThing() {
         return false;
+    }
+
+    public UnboundVariable asUnbound() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundVariable.class)));
+    }
+
+    public BoundVariable asBound() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
     }
 
     public Stream<BoundVariable> variables() {
@@ -63,10 +87,6 @@ public abstract class Variable {
 
     public Reference reference() {
         return reference;
-    }
-
-    public String identifier() {
-        return reference.identifier();
     }
 
     public boolean isNamed() {

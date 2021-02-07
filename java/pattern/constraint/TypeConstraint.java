@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -46,8 +46,10 @@ import static graql.lang.common.GraqlToken.Constraint.SUB;
 import static graql.lang.common.GraqlToken.Constraint.SUBX;
 import static graql.lang.common.GraqlToken.Constraint.TYPE;
 import static graql.lang.common.GraqlToken.Constraint.VALUE_TYPE;
+import static graql.lang.common.GraqlToken.Type.RELATION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static graql.lang.common.util.Strings.escapeRegex;
 import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
@@ -139,11 +141,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final String scope;
         private final int hash;
 
-        public Label(final String label) {
+        public Label(String label) {
             this(null, label);
         }
 
-        public Label(@Nullable final String scope, final String label) {
+        public Label(@Nullable String scope, String label) {
             if (label == null) throw new NullPointerException("Null label");
             this.scope = scope;
             this.label = label;
@@ -179,7 +181,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Label that = (Label) o;
@@ -198,24 +200,24 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final boolean isExplicit;
         private final int hash;
 
-        public Sub(final String typeLabel, final boolean isExplicit) {
+        public Sub(String typeLabel, boolean isExplicit) {
             this(hidden().type(typeLabel), isExplicit);
         }
 
-        public Sub(final String typeScope, final String typeLabel, final boolean isExplicit) {
+        public Sub(String typeScope, String typeLabel, boolean isExplicit) {
             this(hidden().type(typeScope, typeLabel), isExplicit);
         }
 
-        public Sub(final UnboundVariable typeVar, final boolean isExplicit) {
+        public Sub(UnboundVariable typeVar, boolean isExplicit) {
             this(typeVar.toType(), isExplicit);
         }
 
-        public Sub(final Either<Pair<String, String>, UnboundVariable> typeArg, final boolean isExplicit) {
+        public Sub(Either<Pair<String, String>, UnboundVariable> typeArg, boolean isExplicit) {
             this(typeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())),
                                UnboundVariable::toType), isExplicit);
         }
 
-        private Sub(final TypeVariable type, final boolean isExplicit) {
+        private Sub(TypeVariable type, boolean isExplicit) {
             if (type == null) throw new NullPointerException("Null superType");
             this.type = type;
             this.isExplicit = isExplicit;
@@ -251,7 +253,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Sub that = (Sub) o;
@@ -288,7 +290,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (o == this) return true;
             return o != null && getClass() == o.getClass();
         }
@@ -304,7 +306,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final GraqlArg.ValueType valueType;
         private final int hash;
 
-        public ValueType(final GraqlArg.ValueType valueType) {
+        public ValueType(GraqlArg.ValueType valueType) {
             if (valueType == null) throw new NullPointerException("Null ValueType");
             this.valueType = valueType;
             this.hash = Objects.hash(ValueType.class, this.valueType);
@@ -330,7 +332,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final ValueType that = (ValueType) o;
@@ -348,7 +350,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final java.util.regex.Pattern regex;
         private final int hash;
 
-        public Regex(final String regex) {
+        public Regex(String regex) {
             if (regex == null) throw new NullPointerException("Null regex");
             try {
                 this.regex = java.util.regex.Pattern.compile(regex);
@@ -378,7 +380,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Regex that = (Regex) o;
@@ -398,37 +400,37 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final boolean isKey;
         private final int hash;
 
-        public Owns(final String attributeType, final boolean isKey) {
+        public Owns(String attributeType, boolean isKey) {
             this(hidden().type(attributeType), null, isKey);
         }
 
-        public Owns(final UnboundVariable attributeTypeVar, final boolean isKey) {
+        public Owns(UnboundVariable attributeTypeVar, boolean isKey) {
             this(attributeTypeVar.toType(), null, isKey);
         }
 
-        public Owns(final String attributeType, final String overriddenAttributeType, final boolean isKey) {
+        public Owns(String attributeType, String overriddenAttributeType, boolean isKey) {
             this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
         }
 
-        public Owns(final UnboundVariable attributeTypeVar, final String overriddenAttributeType, final boolean isKey) {
+        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, boolean isKey) {
             this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
         }
 
-        public Owns(final String attributeType, final UnboundVariable overriddenAttributeTypeVar, final boolean isKey) {
+        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
             this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), isKey);
         }
 
-        public Owns(final UnboundVariable attributeTypeVar, final UnboundVariable overriddenAttributeTypeVar, final boolean isKey) {
+        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
             this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), isKey);
         }
 
-        public Owns(final Either<String, UnboundVariable> attributeTypeArg, final Either<String, UnboundVariable> overriddenAttributeTypeArg, final boolean isKey) {
+        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, boolean isKey) {
             this(attributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
                  overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
                  isKey);
         }
 
-        private Owns(final TypeVariable attributeType, @Nullable final TypeVariable overriddenAttributeType, final boolean isKey) {
+        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, boolean isKey) {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
             this.isKey = isKey;
@@ -466,11 +468,13 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return OWNS.toString() + SPACE + attributeType + (isKey ? "" + SPACE + IS_KEY : "");
+            return "" + OWNS + SPACE + attributeType +
+                    (overriddenAttributeType != null ? "" + SPACE + AS + SPACE + overriddenAttributeType : "") +
+                    (isKey ? "" + SPACE + IS_KEY : "");
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Owns that = (Owns) o;
@@ -492,37 +496,37 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final TypeVariable overriddenRoleType;
         private final int hash;
 
-        public Plays(final String relationType, final String roleType) {
+        public Plays(String relationType, String roleType) {
             this(hidden().type(relationType, roleType), null);
         }
 
-        public Plays(final UnboundVariable var) {
+        public Plays(UnboundVariable var) {
             this(var.toType(), null);
         }
 
-        public Plays(final String relationType, final String roleType, final String overriddenRoleType) {
-            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+        public Plays(String relationType, String roleType, String overriddenRoleType) {
+            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Plays(final UnboundVariable roleTypeVar, final String overriddenRoleType) {
-            this(roleTypeVar.toType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+        public Plays(UnboundVariable roleTypeVar, String overriddenRoleType) {
+            this(roleTypeVar.toType(), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Plays(final String relationType, final String roleType, final UnboundVariable overriddenRoleTypeVar) {
+        public Plays(String relationType, String roleType, UnboundVariable overriddenRoleTypeVar) {
             this(hidden().type(relationType, roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
         }
 
-        public Plays(final UnboundVariable roleTypeVar, final UnboundVariable overriddenRoleTypeVar) {
+        public Plays(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
             this(roleTypeVar.toType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
         }
 
-        public Plays(final Either<Pair<String, String>, UnboundVariable> roleTypeArg, final Either<String, UnboundVariable> overriddenRoleTypeArg) {
+        public Plays(Either<Pair<String, String>, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
             this(roleTypeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Plays::scopedType, UnboundVariable::toType));
         }
 
-        private Plays(final TypeVariable roleType, @Nullable final TypeVariable overriddenRoleType) {
-            if (roleType == null) throw new NullPointerException("Null role");
+        private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
+            if (roleType == null) throw GraqlException.of(MISSING_PATTERNS.message());
             this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
@@ -539,6 +543,10 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Optional<TypeVariable> overridden() {
             return Optional.ofNullable(overriddenRoleType);
+        }
+
+        private static TypeVariable scopedType(String roleType) {
+            return hidden().type(RELATION.toString(), roleType);
         }
 
         @Override
@@ -562,11 +570,18 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return PLAYS.toString() + SPACE + roleType;
+            String syntax = PLAYS.toString() + SPACE + roleType;
+            if (overriddenRoleType != null) {
+                String overriddenRoleTypeString = overriddenRoleType.label().isPresent() ?
+                    overriddenRoleType.label().get().label() :
+                    overriddenRoleType.reference().syntax();
+                syntax += "" + SPACE + AS + SPACE + overriddenRoleTypeString;
+            }
+            return syntax;
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Plays that = (Plays) o;
@@ -586,42 +601,46 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private TypeVariable roleType;
         private TypeVariable overriddenRoleType;
 
-        public Relates(final String roleType) {
-            this(hidden().type(roleType), null);
+        public Relates(String roleType) {
+            this(scopedType(roleType), null);
         }
 
-        public Relates(final UnboundVariable roleTypeVar) {
+        public Relates(UnboundVariable roleTypeVar) {
             this(roleTypeVar.toType(), null);
         }
 
-        public Relates(final String roleType, final String overriddenRoleType) {
-            this(hidden().type(roleType), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+        public Relates(String roleType, String overriddenRoleType) {
+            this(scopedType(roleType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Relates(final UnboundVariable roleTypeVar, final String overriddenRoleType) {
-            this(roleTypeVar.toType(), overriddenRoleType == null ? null : hidden().type(overriddenRoleType));
+        public Relates(UnboundVariable roleTypeVar, String overriddenRoleType) {
+            this(roleTypeVar.toType(), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Relates(final String roleType, final UnboundVariable overriddenRoleTypeVar) {
-            this(hidden().type(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
+        public Relates(String roleType, UnboundVariable overriddenRoleTypeVar) {
+            this(scopedType(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
         }
 
-        public Relates(final UnboundVariable roleTypeVar, final UnboundVariable overriddenRoleTypeVar) {
+        public Relates(UnboundVariable roleTypeVar, UnboundVariable overriddenRoleTypeVar) {
             this(roleTypeVar.toType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
         }
 
-        public Relates(final Either<String, UnboundVariable> roleTypeArg, final Either<String, UnboundVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType));
+        public Relates(Either<String, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
+            this(roleTypeArg.apply(Relates::scopedType, UnboundVariable::toType),
+                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Relates::scopedType, UnboundVariable::toType));
         }
 
-        private Relates(final TypeVariable roleType, @Nullable final TypeVariable overriddenRoleType) {
+        private Relates(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
         }
 
-        public void setScope(final String relationLabel) {
+        private static TypeVariable scopedType(String roleType) {
+            return hidden().type(RELATION.toString(), roleType);
+        }
+
+        public void setScope(String relationLabel) {
             if (roleType.label().isPresent()) {
                 this.roleType = hidden().type(relationLabel, roleType.label().get().label());
             }
@@ -668,7 +687,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Relates that = (Relates) o;

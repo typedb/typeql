@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -63,7 +63,7 @@ public class GraqlDeleteTest {
     @Test
     public void deleteQueryWithNewUnboundVariablesThrows() {
         exception.expect(GraqlException.class);
-        exception.expectMessage("The variable '$y' is out of scope of the query.");
+        exception.expectMessage("The deleted variable '$y' is out of scope of the match query.");
         final GraqlDelete query = match1.delete(delete2);
     }
 

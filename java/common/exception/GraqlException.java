@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,15 +20,15 @@ package graql.lang.common.exception;
 
 public class GraqlException extends RuntimeException {
 
-    protected GraqlException(final String error) {
+    protected GraqlException(String error) {
         super(error);
     }
 
-    public static GraqlException of(final ErrorMessage errorMessage) {
+    public static GraqlException of(ErrorMessage errorMessage) {
         return new GraqlException(errorMessage.message());
     }
 
-    public static GraqlException of(final String error) {
+    public static GraqlException of(String error) {
         return new GraqlException(error);
     }
 }

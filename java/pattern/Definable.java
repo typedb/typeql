@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -27,8 +27,13 @@ import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Definable {
 
-    default boolean isRule() { return false; };
-    default boolean isTypeVariable() { return false; };
+    default boolean isRule() {
+        return false;
+    }
+
+    default boolean isTypeVariable() {
+        return false;
+    }
 
     default Rule asRule() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Rule.class)));

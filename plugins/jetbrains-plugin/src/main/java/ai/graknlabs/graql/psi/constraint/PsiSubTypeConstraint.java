@@ -1,4 +1,4 @@
-package ai.graknlabs.graql.psi.property;
+package ai.graknlabs.graql.psi.constraint;
 
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import com.intellij.lang.ASTNode;
@@ -7,37 +7,32 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
-public class PsiPlaysTypeProperty extends PsiGraqlElement {
+public class PsiSubTypeConstraint extends PsiGraqlElement {
 
-    public PsiPlaysTypeProperty(@NotNull ASTNode node) {
+    public PsiSubTypeConstraint(@NotNull ASTNode node) {
         super(node);
     }
 
-    public TextRange getPlaysTypeTextRange() {
-        return new TextRange(6, 6 + getPlaysType().length());
+    public TextRange getSubTypeTextRange() {
+        return new TextRange(4, 4 + getSubType().length());
     }
 
-    public String getPlaysType() {
+    public String getSubType() {
         if (getLastChild() != null) {
             return getLastChild().getText();
         }
         return null;
     }
 
-    public boolean isAbstractType() {
-        return Objects.equals(getPlaysType(), "abstract");
-    }
-
     @Override
     public PsiReference getReference() {
-        if (getPlaysType() == null || isAbstractType()) {
+        if (getSubType() == null) {
             return null;
         }
-        return ReferenceProvidersRegistry.getReferencesFromProviders(this)[0];
+        PsiReference[] references = ReferenceProvidersRegistry.getReferencesFromProviders(this);
+        return references.length > 0 ? references[0] : null;
     }
 }

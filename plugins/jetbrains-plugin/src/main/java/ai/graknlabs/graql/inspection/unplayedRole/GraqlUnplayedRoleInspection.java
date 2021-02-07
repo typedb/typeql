@@ -3,7 +3,7 @@ package ai.graknlabs.graql.inspection.unplayedRole;
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
-import ai.graknlabs.graql.psi.property.PsiPlaysTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiPlaysTypeConstraint;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -41,7 +41,7 @@ public class GraqlUnplayedRoleInspection extends LocalInspectionTool {
                             boolean isPlayed = false;
                             List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(identifierElement);
                             for (PsiGraqlElement usage : usages) {
-                                if (usage instanceof PsiPlaysTypeProperty) {
+                                if (usage instanceof PsiPlaysTypeConstraint) {
                                     isPlayed = true;
                                     break;
                                 }

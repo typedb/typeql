@@ -2,8 +2,8 @@ package ai.graknlabs.graql.inspection.duplicateDeclaration;
 
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
-import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiRelatesTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiTypeConstraint;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
@@ -33,10 +33,10 @@ public class GraqlDuplicateDeclarationInspection extends LocalInspectionTool {
                     PsiGraqlNamedElement namedElement = (PsiGraqlNamedElement) identifier;
                     List<String> declarationTypes = GraqlPsiUtils.findDeclarations(
                             identifier.getProject(), namedElement).stream()
-                            .map(it -> it instanceof PsiRelatesTypeProperty ? "relation" : GraqlPsiUtils.determineDeclarationType(it))
+                            .map(it -> it instanceof PsiRelatesTypeConstraint ? "relation" : GraqlPsiUtils.determineDeclarationType(it))
                             .distinct().collect(Collectors.toList());
                     if (declarationTypes.size() > 1) {
-                        if (identifier instanceof PsiTypeProperty) {
+                        if (identifier instanceof PsiTypeConstraint) {
                             holder.registerProblem(identifier.getFirstChild(),
                                     "Concept <code>#ref</code> has been defined more than once",
                                     ProblemHighlightType.GENERIC_ERROR);

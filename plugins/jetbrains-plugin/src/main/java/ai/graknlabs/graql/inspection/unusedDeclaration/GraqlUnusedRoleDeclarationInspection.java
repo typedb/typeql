@@ -3,7 +3,7 @@ package ai.graknlabs.graql.inspection.unusedDeclaration;
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
-import ai.graknlabs.graql.psi.property.PsiTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiTypeConstraint;
 import ai.graknlabs.graql.psi.statement.PsiStatementType;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
@@ -39,7 +39,7 @@ public class GraqlUnusedRoleDeclarationInspection extends LocalInspectionTool {
                         if ("role".equals(type)) {
                             List<PsiGraqlElement> usages = GraqlPsiUtils.findUsages(declaration);
                             if (usages.isEmpty()) {
-                                if (declaration instanceof PsiTypeProperty) {
+                                if (declaration instanceof PsiTypeConstraint) {
                                     holder.registerProblem(declaration.getFirstChild(),
                                             "Role <code>#ref</code> is never used");
                                 } else {

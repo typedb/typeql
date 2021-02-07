@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,23 +18,30 @@
 package graql.lang.pattern.constraint;
 
 import grakn.common.collection.Either;
+import grakn.common.collection.Pair;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.common.util.Strings;
 import graql.lang.pattern.variable.BoundVariable;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.TypeVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import static grakn.common.collection.Collections.list;
+import static grakn.common.collection.Collections.pair;
 import static grakn.common.collection.Collections.set;
 import static grakn.common.util.Objects.className;
 import static graql.lang.common.GraqlToken.Char.COLON;
@@ -45,9 +52,17 @@ import static graql.lang.common.GraqlToken.Char.SPACE;
 import static graql.lang.common.GraqlToken.Constraint.HAS;
 import static graql.lang.common.GraqlToken.Constraint.ISA;
 import static graql.lang.common.GraqlToken.Constraint.ISAX;
+import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
+import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
+import static graql.lang.common.GraqlToken.Type.RELATION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_PREDICATE;
 import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
+import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
+import static graql.lang.common.util.Strings.escapeRegex;
+import static graql.lang.common.util.Strings.quoteString;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
@@ -76,10 +91,6 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         return false;
     }
 
-    public boolean isNEQ() {
-        return false;
-    }
-
     public boolean isValue() {
         return false;
     }
@@ -100,11 +111,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Isa.class)));
     }
 
-    public ThingConstraint.NEQ asNEQ() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(NEQ.class)));
-    }
-
-    public ThingConstraint.Value<?> asValue() {
+    public Value<?> asValue() {
         throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Value.class)));
     }
 
@@ -122,7 +129,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final String iid;
         private final int hash;
 
-        public IID(final String iid) {
+        public IID(String iid) {
             if (iid == null) throw new NullPointerException("Null IID");
             if (!REGEX.matcher(iid).matches()) {
                 throw GraqlException.of(INVALID_IID_STRING.message(iid, REGEX.toString()));
@@ -151,7 +158,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final IID that = (IID) o;
@@ -168,27 +175,29 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         private final TypeVariable type;
         private final boolean isExplicit;
+        private final boolean isDerived;
         private final int hash;
 
-        public Isa(final String type, final boolean isExplicit) {
-            this(hidden().type(type), isExplicit);
+        public Isa(String type, boolean isExplicit) {
+            this(hidden().type(type), isExplicit, false);
         }
 
-        public Isa(final UnboundVariable typeVar, final boolean isExplicit) {
-            this(typeVar.toType(), isExplicit);
+        public Isa(UnboundVariable typeVar, boolean isExplicit) {
+            this(typeVar.toType(), isExplicit, false);
         }
 
-        public Isa(final Either<String, UnboundVariable> typeArg, final boolean isExplicit) {
-            this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit);
+        public Isa(Either<String, UnboundVariable> typeArg, boolean isExplicit) {
+            this(typeArg.apply(label -> hidden().type(label), UnboundVariable::toType), isExplicit, false);
         }
 
-        private Isa(final TypeVariable type, final boolean isExplicit) {
+        private Isa(TypeVariable type, boolean isExplicit, boolean isDerived) {
             if (type == null) {
                 throw new NullPointerException("Null type");
             }
             this.type = type;
             this.isExplicit = isExplicit;
-            this.hash = Objects.hash(Isa.class, this.type, this.isExplicit);
+            this.isDerived = isDerived;
+            this.hash = Objects.hash(Isa.class, this.type, this.isExplicit, this.isDerived);
         }
 
         public TypeVariable type() {
@@ -198,6 +207,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean isExplicit() {
             return isExplicit;
         }
+
+        public boolean isDerived() { return isDerived; }
 
         @Override
         public Set<BoundVariable> variables() {
@@ -220,113 +231,13 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Isa that = (Isa) o;
-            return (this.type.equals(that.type) && this.isExplicit == that.isExplicit);
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-    }
-
-    public static class NEQ extends ThingConstraint {
-
-        private final ThingVariable<?> variable;
-        private final int hash;
-
-        public NEQ(final UnboundVariable variable) {
-            this(variable.toThing());
-        }
-
-        private NEQ(final ThingVariable<?> variable) {
-            if (variable == null) throw new NullPointerException("Null var");
-            this.variable = variable;
-            this.hash = Objects.hash(NEQ.class, this.variable);
-        }
-
-        public ThingVariable<?> variable() {
-            return variable;
-        }
-
-        @Override
-        public Set<BoundVariable> variables() {
-            return set(variable());
-        }
-
-        @Override
-        public boolean isNEQ() {
-            return true;
-        }
-
-        @Override
-        public ThingConstraint.NEQ asNEQ() {
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return GraqlToken.Comparator.NEQ.toString() + SPACE + variable();
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            final NEQ that = (NEQ) o;
-            return (this.variable.equals(that.variable));
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-    }
-
-    public static class Value<T> extends ThingConstraint {
-
-        private final ValueOperation<T> operation;
-        private final int hash;
-
-        public Value(final ValueOperation<T> operation) {
-            if (operation == null) throw new NullPointerException("Null operation");
-            this.operation = operation;
-            this.hash = Objects.hash(Value.class, this.operation);
-        }
-
-        public ValueOperation<T> operation() {
-            return operation;
-        }
-
-        @Override
-        public Set<BoundVariable> variables() {
-            return operation.variable().isPresent() ? set(operation.variable().get()) : set();
-        }
-
-        @Override
-        public boolean isValue() {
-            return true;
-        }
-
-        @Override
-        public ThingConstraint.Value<?> asValue() {
-            return this;
-        }
-
-        @Override
-        public String toString() {
-            return operation().toString();
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            final Value<?> that = (Value<?>) o;
-            return (this.operation.equals(that.operation));
+            return (this.type.equals(that.type) &&
+                    this.isExplicit == that.isExplicit &&
+                    this.isDerived == that.isDerived);
         }
 
         @Override
@@ -337,31 +248,43 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Relation extends ThingConstraint {
 
+        private final Map<Pair<TypeVariable, ThingVariable<?>>, AtomicInteger> repetitions;
         private final List<RolePlayer> players;
         private String scope;
 
-        public Relation(final RolePlayer player) {
+        public Relation(RolePlayer player) {
             this(list(player));
         }
 
-        public Relation(final List<RolePlayer> players) {
-            if (players == null || players.isEmpty()) {
-                throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER.message());
-            }
-            this.players = new ArrayList<>(players);
+        public Relation(List<RolePlayer> players) {
+            if (players == null || players.isEmpty()) throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
+            this.repetitions = new HashMap<>();
+            this.players = new ArrayList<>();
+            this.scope = RELATION.toString();
+            registerPlayers(players);
         }
 
-        public void setScope(final String relationLabel) {
+        private void registerPlayers(List<RolePlayer> players) {
+            for (RolePlayer player : players) {
+                player.setScope(scope);
+                player.setRepetition(incrementRepetition(player));
+                this.players.add(player);
+            }
+        }
+
+        private int incrementRepetition(RolePlayer player) {
+            return repetitions.computeIfAbsent(pair(player.roleType, player.player),
+                                               k -> new AtomicInteger(0)).incrementAndGet();
+        }
+
+        public void setScope(String relationLabel) {
             this.scope = relationLabel;
             players.forEach(player -> player.setScope(scope));
         }
 
-        public boolean hasScope() {
-            return scope != null;
-        }
-
-        public void addPlayers(final RolePlayer player) {
+        public void addPlayers(RolePlayer player) {
             if (scope != null) player.setScope(scope);
+            player.setRepetition(incrementRepetition(player));
             players.add(player);
         }
 
@@ -395,11 +318,11 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Relation that = (Relation) o;
-            return (this.players.equals(that.players));
+            Relation that = (Relation) o;
+            return this.players.equals(that.players);
         }
 
         @Override
@@ -411,33 +334,28 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
             private TypeVariable roleType;
             private final ThingVariable<?> player;
+            private int repetition;
 
-            public RolePlayer(final String roleType, final UnboundVariable playerVar) {
+            public RolePlayer(String roleType, UnboundVariable playerVar) {
                 this(roleType == null ? null : hidden().type(roleType), playerVar.toThing());
             }
 
-            public RolePlayer(final UnboundVariable roleTypeVar, final UnboundVariable playerVar) {
+            public RolePlayer(UnboundVariable roleTypeVar, UnboundVariable playerVar) {
                 this(roleTypeVar == null ? null : roleTypeVar.toType(), playerVar.toThing());
             }
 
-            public RolePlayer(final UnboundVariable playerVar) {
+            public RolePlayer(UnboundVariable playerVar) {
                 this(null, playerVar.toThing());
             }
 
-            public RolePlayer(final Either<String, UnboundVariable> roleTypeArg, final UnboundVariable playerVar) {
+            public RolePlayer(Either<String, UnboundVariable> roleTypeArg, UnboundVariable playerVar) {
                 this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType), playerVar.toThing());
             }
 
-            private RolePlayer(@Nullable final TypeVariable roleType, final ThingVariable<?> player) {
+            private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
                 if (player == null) throw new NullPointerException("Null player");
                 this.roleType = roleType;
                 this.player = player;
-            }
-
-            public void setScope(final String relationLabel) {
-                if (roleType != null && roleType.label().isPresent()) {
-                    this.roleType = hidden().type(relationLabel, roleType.label().get().label());
-                }
             }
 
             public Optional<TypeVariable> roleType() {
@@ -446,6 +364,20 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
             public ThingVariable<?> player() {
                 return player;
+            }
+
+            public int repetition() {
+                return repetition;
+            }
+
+            private void setScope(String relationLabel) {
+                if (roleType != null && roleType.label().isPresent()) {
+                    this.roleType = hidden().type(relationLabel, roleType.label().get().label());
+                }
+            }
+
+            private void setRepetition(int repetition) {
+                this.repetition = repetition;
             }
 
             @Override
@@ -462,16 +394,18 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             }
 
             @Override
-            public boolean equals(final Object o) {
+            public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 final RolePlayer that = (RolePlayer) o;
-                return (Objects.equals(this.roleType, that.roleType)) && (this.player.equals(that.player));
+                return (Objects.equals(this.roleType, that.roleType) &&
+                        this.player.equals(that.player) &&
+                        this.repetition == that.repetition);
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(RolePlayer.class, roleType, player);
+                return Objects.hash(RolePlayer.class, roleType, player, repetition);
             }
         }
     }
@@ -482,30 +416,29 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final ThingVariable<?> attribute;
         private final int hash;
 
-        public Has(final String type, final ThingConstraint.Value<?> value) {
+        public Has(String type, ThingConstraint.Value<?> value) {
             this(hidden().type(type), hidden().constrain(value));
         }
 
-        public Has(final String type, final UnboundVariable var) {
+        public Has(String type, UnboundVariable var) {
             this(hidden().type(type), var.toThing());
         }
 
-        private Has(final TypeVariable type, final ThingVariable<?> attribute) {
-            if (type == null || attribute == null) throw new NullPointerException("Null type/attribute");
+        public Has(UnboundVariable var) {
+            this(null, var.toThing());
+        }
+
+        private Has(@Nullable TypeVariable type, ThingVariable<?> attribute) {
+            if (attribute == null) throw new NullPointerException("Null attribute");
             this.type = type;
-            if (attribute.isNamed())
-                this.attribute = attribute; // TODO: is this needed? Should we not always set the ISA type?
-            else this.attribute = attribute.constrain(new Isa(type, false));
+            if (type == null) this.attribute = attribute;
+            else this.attribute = attribute.constrain(new Isa(type, false, true));
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 
-        public TypeVariable type() {
-            return type;
-        }
+        public ThingVariable<?> attribute() { return attribute; }
 
-        public ThingVariable<?> attribute() {
-            return attribute;
-        }
+        public Optional<TypeVariable> type() { return Optional.ofNullable(type); }
 
         @Override
         public Set<BoundVariable> variables() {
@@ -525,21 +458,257 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         @Override
         public String toString() {
             return String.valueOf(HAS) + SPACE +
-                    type.label().get().label() + SPACE +
+                    (type != null ? type.label().get().label() + SPACE : "") +
                     (attribute.isNamed() ? attribute.reference() : attribute.value().get());
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Has that = (Has) o;
-            return (this.type.equals(that.type) && this.attribute.equals(that.attribute));
+            return Objects.equals(this.type, that.type) && this.attribute.equals(that.attribute);
         }
 
         @Override
         public int hashCode() {
             return hash;
+        }
+    }
+
+    public abstract static class Value<T> extends ThingConstraint {
+
+        private final GraqlToken.Predicate predicate;
+        private final T value;
+        private final int hash;
+
+        Value(GraqlToken.Predicate predicate, T value) {
+            assert !predicate.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
+            assert !predicate.isSubString() || value instanceof java.lang.String;
+            if (predicate == null) throw GraqlException.of(MISSING_CONSTRAINT_PREDICATE);
+            else if (value == null) throw GraqlException.of(MISSING_CONSTRAINT_VALUE);
+            this.predicate = predicate;
+            this.value = value;
+            this.hash = Objects.hash(Value.class, this.predicate, this.value);
+        }
+
+        @Override
+        public Set<BoundVariable> variables() {
+            return set();
+        }
+
+        @Override
+        public boolean isValue() {
+            return true;
+        }
+
+        @Override
+        public Value<?> asValue() {
+            return this;
+        }
+
+        public GraqlToken.Predicate predicate() {
+            return predicate;
+        }
+
+        public T value() {
+            return value;
+        }
+
+        public boolean isLong() {
+            return false;
+        }
+
+        public boolean isDouble() {
+            return false;
+        }
+
+        public boolean isBoolean() {
+            return false;
+        }
+
+        public boolean isString() {
+            return false;
+        }
+
+        public boolean isDateTime() {
+            return false;
+        }
+
+        public boolean isVariable() {
+            return false;
+        }
+
+        public Long asLong() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
+        }
+
+        public Double asDouble() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
+        }
+
+        public Boolean asBoolean() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
+        }
+
+        public String asString() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
+        }
+
+        public DateTime asDateTime() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
+        }
+
+        public Variable asVariable() {
+            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
+        }
+
+        @Override
+        public java.lang.String toString() {
+            if (predicate.equals(EQ) && !isVariable()) return Strings.valueToString(value);
+            else return predicate.toString() + SPACE + Strings.valueToString(value);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final Value<?> that = (Value<?>) o;
+            return (this.predicate.equals(that.predicate) && this.value.equals(that.value));
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        public static class Long extends Value<java.lang.Long> {
+
+            public Long(GraqlToken.Predicate.Equality predicate, long value) {
+                super(predicate, value);
+            }
+
+            @Override
+            public boolean isLong() {
+                return true;
+            }
+
+            @Override
+            public Long asLong() {
+                return this;
+            }
+        }
+
+        public static class Double extends Value<java.lang.Double> {
+
+            public Double(GraqlToken.Predicate.Equality predicate, double value) {
+                super(predicate, value);
+            }
+
+            @Override
+            public boolean isDouble() {
+                return true;
+            }
+
+            @Override
+            public Double asDouble() {
+                return this;
+            }
+        }
+
+        public static class Boolean extends Value<java.lang.Boolean> {
+
+            public Boolean(GraqlToken.Predicate.Equality predicate, boolean value) {
+                super(predicate, value);
+            }
+
+            @Override
+            public boolean isBoolean() {
+                return true;
+            }
+
+            @Override
+            public Boolean asBoolean() {
+                return this;
+            }
+        }
+
+        public static class String extends Value<java.lang.String> {
+
+            public String(GraqlToken.Predicate predicate, java.lang.String value) {
+                super(predicate, value);
+            }
+
+            @Override
+            public boolean isString() {
+                return true;
+            }
+
+            @Override
+            public java.lang.String toString() {
+                final StringBuilder operation = new StringBuilder();
+
+                if (predicate().equals(LIKE)) {
+                    operation.append(LIKE).append(SPACE).append(quoteString(escapeRegex(value())));
+                } else if (predicate().equals(EQ)) {
+                    operation.append(quoteString(value()));
+                } else {
+                    operation.append(predicate()).append(SPACE).append(quoteString(value()));
+                }
+
+                return operation.toString();
+            }
+
+            @Override
+            public String asString() {
+                return this;
+            }
+        }
+
+        public static class DateTime extends Value<LocalDateTime> {
+
+            public DateTime(GraqlToken.Predicate.Equality predicate, LocalDateTime value) {
+                super(predicate, value);
+                // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
+                final int nanos = value.toLocalTime().getNano();
+                final long nanosPerMilli = 1000000L;
+                final long remainder = nanos % nanosPerMilli;
+                if (remainder != 0) {
+                    throw GraqlException.of(INVALID_CONSTRAINT_DATETIME_PRECISION.message(value));
+                }
+            }
+
+            @Override
+            public boolean isDateTime() {
+                return true;
+            }
+
+            @Override
+            public DateTime asDateTime() {
+                return this;
+            }
+        }
+
+        public static class Variable extends Value<ThingVariable<?>> {
+
+            public Variable(GraqlToken.Predicate.Equality predicate, UnboundVariable variable) {
+                super(predicate, variable.toThing());
+            }
+
+            @Override
+            public Set<BoundVariable> variables() {
+                return set(value());
+            }
+
+            @Override
+            public boolean isVariable() {
+                return true;
+            }
+
+            @Override
+            public Variable asVariable() {
+                return this;
+            }
         }
     }
 }

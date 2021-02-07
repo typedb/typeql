@@ -1,4 +1,4 @@
-package ai.graknlabs.graql.psi.property;
+package ai.graknlabs.graql.psi.constraint;
 
 import ai.graknlabs.graql.psi.PsiGraqlElement;
 import com.intellij.lang.ASTNode;
@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
-public class PsiRelatesSuperRoleTypeProperty extends PsiGraqlElement {
+public class PsiRelatesSuperRoleTypeConstraint extends PsiGraqlElement {
 
-    public PsiRelatesSuperRoleTypeProperty(@NotNull ASTNode node) {
+    public PsiRelatesSuperRoleTypeConstraint(@NotNull ASTNode node) {
         super(node);
     }
 

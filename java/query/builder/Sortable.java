@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,33 +19,35 @@ package graql.lang.query.builder;
 
 import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.UnboundVariable;
+import static graql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
 
 import java.util.Objects;
 
 public interface Sortable<S, O, L> {
 
-    default S sort(final String var) {
+    default S sort(String var) {
         return sort(UnboundVariable.named(var));
     }
 
-    default S sort(final String var, final String order) {
+    default S sort(String var, String order) {
         final GraqlArg.Order o = GraqlArg.Order.of(order);
-        if (o == null) throw new IllegalArgumentException(
-                "Invalid sorting order. Valid options: '" + GraqlArg.Order.ASC + "' or '" + GraqlArg.Order.DESC
+        if (o == null) throw GraqlException.of(
+                INVALID_SORTING_ORDER.message(GraqlArg.Order.ASC, GraqlArg.Order.DESC)
         );
         return sort(UnboundVariable.named(var), o);
     }
 
-    default S sort(final String var, final GraqlArg.Order order) {
+    default S sort(String var, GraqlArg.Order order) {
         return sort(UnboundVariable.named(var), order);
     }
 
-    default S sort(final UnboundVariable var) {
+    default S sort(UnboundVariable var) {
         return sort(new Sorting(var));
     }
 
-    default S sort(final UnboundVariable var, final GraqlArg.Order order) {
+    default S sort(UnboundVariable var, GraqlArg.Order order) {
         return sort(new Sorting(var, order));
     }
 
@@ -61,11 +63,11 @@ public interface Sortable<S, O, L> {
         private final GraqlArg.Order order;
         private final int hash;
 
-        public Sorting(final UnboundVariable var) {
+        public Sorting(UnboundVariable var) {
             this(var, null);
         }
 
-        public Sorting(final UnboundVariable var, final GraqlArg.Order order) {
+        public Sorting(UnboundVariable var, GraqlArg.Order order) {
             this.var = var;
             this.order = order;
             this.hash = Objects.hash(var(), order());
@@ -92,7 +94,7 @@ public interface Sortable<S, O, L> {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 

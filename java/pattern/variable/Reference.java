@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -34,36 +34,34 @@ public abstract class Reference {
 
     enum Type {NAME, LABEL, ANONYMOUS}
 
-    Reference(final Type type, final boolean isVisible) {
+    Reference(Type type, boolean isVisible) {
         this.type = type;
         this.isVisible = isVisible;
     }
 
-    static Reference.Name named(final String name) {
+    public static Reference.Name name(String name) {
         return new Name(name);
     }
 
-    static Reference.Label label(final String label) {
+    public static Reference.Label label(String label) {
         return new Label(label);
     }
 
-    static Reference.Anonymous anonymous(final boolean isVisible) {
+    public static Reference.Anonymous anonymous(boolean isVisible) {
         return new Reference.Anonymous(isVisible);
     }
 
-    Reference.Type type() {
+    protected Reference.Type type() {
         return type;
     }
 
     public abstract String syntax();
 
-    public abstract String identifier();
-
-    boolean isVisible() {
+    protected boolean isVisible() {
         return isVisible;
     }
 
-    public boolean isReferrable() {
+    public boolean isReferable() {
         return !isAnonymous();
     }
 
@@ -79,8 +77,8 @@ public abstract class Reference {
         return type == Type.ANONYMOUS;
     }
 
-    public Reference.Referrable asReferrable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Referrable.class)));
+    public Referable asReferable() {
+        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Referable.class)));
     }
 
     public Reference.Name asName() {
@@ -106,25 +104,25 @@ public abstract class Reference {
     @Override
     public abstract int hashCode();
 
-    public static abstract class Referrable extends Reference {
+    public static abstract class Referable extends Reference {
 
-        Referrable(final Type type, final boolean isVisible) {
+        Referable(Type type, boolean isVisible) {
             super(type, isVisible);
         }
 
         @Override
-        public Reference.Referrable asReferrable() {
+        public Referable asReferable() {
             return this;
         }
     }
 
-    public static class Name extends Referrable {
+    public static class Name extends Referable {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         protected final String name;
         private final int hash;
 
-        Name(final String name) {
+        protected Name(String name) {
             super(Type.NAME, true);
             if (!REGEX.matcher(name).matches()) {
                 throw GraqlException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
@@ -133,7 +131,7 @@ public abstract class Reference {
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }
 
-        String name() {
+        public String name() {
             return name;
         }
 
@@ -143,17 +141,12 @@ public abstract class Reference {
         }
 
         @Override
-        public String identifier() {
-            return syntax();
-        }
-
-        @Override
         public Name asName() {
             return this;
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Name that = (Name) o;
@@ -168,12 +161,12 @@ public abstract class Reference {
         }
     }
 
-    public static class Label extends Referrable {
+    public static class Label extends Referable {
 
         private final String label;
         private final int hash;
 
-        Label(final String label) {
+        Label(String label) {
             super(Type.LABEL, false);
             this.label = label;
             this.hash = Objects.hash(this.type, this.isVisible, this.label);
@@ -189,17 +182,12 @@ public abstract class Reference {
         }
 
         @Override
-        public String identifier() {
-            return syntax();
-        }
-
-        @Override
         public Reference.Label asLabel() {
             return this;
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Label that = (Label) o;
@@ -218,7 +206,7 @@ public abstract class Reference {
 
         private final int hash;
 
-        private Anonymous(final boolean isVisible) {
+        private Anonymous(boolean isVisible) {
             super(Type.ANONYMOUS, isVisible);
             this.hash = Objects.hash(this.type, this.isVisible);
         }
@@ -229,17 +217,12 @@ public abstract class Reference {
         }
 
         @Override
-        public String identifier() {
-            return syntax();
-        }
-
-        @Override
         public Reference.Anonymous asAnonymous() {
             return this;
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             final Anonymous that = (Anonymous) o;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -30,6 +30,7 @@ import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
 import graql.lang.query.GraqlQuery;
 import graql.lang.query.GraqlUndefine;
+import graql.lang.query.GraqlUpdate;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static grakn.common.collection.Collections.list;
 import static graql.lang.Graql.and;
 import static graql.lang.Graql.define;
 import static graql.lang.Graql.gte;
@@ -49,6 +49,7 @@ import static graql.lang.Graql.insert;
 import static graql.lang.Graql.lt;
 import static graql.lang.Graql.lte;
 import static graql.lang.Graql.match;
+import static graql.lang.Graql.not;
 import static graql.lang.Graql.or;
 import static graql.lang.Graql.parseQuery;
 import static graql.lang.Graql.rel;
@@ -62,26 +63,35 @@ import static graql.lang.query.GraqlCompute.Argument.k;
 import static graql.lang.query.GraqlCompute.Argument.size;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ParserTest {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private void assertQueryEquals(final GraqlQuery expected, final GraqlQuery parsed, final String query) {
+    private void assertQueryEquals(GraqlQuery expected, GraqlQuery parsed, String query) {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parseQuery(parsed.toString()));
         assertEquals(query, expected.toString());
     }
 
-    private void assertQueryEquals(final Pattern expected, final Pattern parsed, final String query) {
+    private void assertQueryEquals(Pattern expected, Pattern parsed, String query) {
         assertEquals(expected, parsed);
         assertEquals(expected, Graql.parsePattern(parsed.toString()));
         assertEquals(query, expected.toString());
+    }
+
+    private void assertThrows(Runnable function) {
+        try {
+            function.run();
+            fail();
+        } catch (Throwable e) {
+            assertTrue(true);
+        }
     }
 
     @Test
@@ -89,6 +99,15 @@ public class ParserTest {
         final String query = "match $x isa movie;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(var("x").isa("movie"));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testNamedTypeVariable() {
+        String query = "match $a type attribute_label; get $a;";
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(var("a").type("attribute_label")).get("a");
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -111,7 +130,7 @@ public class ParserTest {
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
-                var("brando").val("Marl B").isa("name"),
+                var("brando").eq("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
 
@@ -119,22 +138,49 @@ public class ParserTest {
     }
 
     @Test
+    public void testRoleTypeScopedGlobally() {
+        String query = "match $x relates spouse;";
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(var("x").relates("spouse"));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testRoleTypeScopedSpecifically() {
+        String query = "match $m relates spouse;";
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(var("m").relates("spouse"));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testRoleTypeNotScoped() {
+        String query = "match marriage relates $s;";
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(type("marriage").relates(var("s")));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
     public void testPredicateQuery1() {
         final String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
-                "$t !== 'Apocalypse Now';";
+                "$t != 'Apocalypse Now';";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
-                        var("t").val("Apocalypse Now"),
+                        var("t").eq("Apocalypse Now"),
                         and(
                                 var("t").lt("Juno"),
                                 var("t").gt("Godfather")
                         ),
-                        var("t").val("Spy")
+                        var("t").eq("Spy")
                 ),
                 var("t").neq("Apocalypse Now")
         );
@@ -146,7 +192,7 @@ public class ParserTest {
     public void testPredicateQuery2() {
         final String query = "match\n" +
                 "$x isa movie, has title $t;\n" +
-                "{ $t <= 'Juno'; $t >= 'Godfather'; $t !== 'Heat'; } or { $t 'The Muppets'; };";
+                "{ $t <= 'Juno'; $t >= 'Godfather'; $t != 'Heat'; } or { $t 'The Muppets'; };";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
         final GraqlMatch expected = match(
@@ -157,7 +203,7 @@ public class ParserTest {
                                 var("t").gte("Godfather"),
                                 var("t").neq("Heat")
                         ),
-                        var("t").val("The Muppets")
+                        var("t").eq("The Muppets")
                 )
         );
 
@@ -192,24 +238,36 @@ public class ParserTest {
         final GraqlMatch expected = match(
                 var("x").has("age", var("y")),
                 var("y").gte(var("z")),
-                var("z").val(18).isa("age")
+                var("z").eq(18).isa("age")
         );
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
-    public void whenParsingContainsPredicateWithAVariable_ResultMatchesJavaGraql() {
-        final String query = "match $x contains $y;";
-        final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
-        final GraqlMatch expected = match(var("x").contains(var("y")));
+    public void testConceptVariable() {
+        final String query = "match\n" +
+                "$x sub $z;\n" +
+                "$y sub $z;\n" +
+                "$a isa $x;\n" +
+                "$b isa $y;\n" +
+                "not { $x is $y; };\n" +
+                "not { $a is $b; };";
+        final GraqlMatch parsed = Graql.parseQuery(query);
 
-        assertQueryEquals(expected, parsed, query);
+        final GraqlMatch exepcted = match(
+                var("x").sub(var("z")), var("y").sub(var("z")),
+                var("a").isa(var("x")), var("b").isa(var("y")),
+                not(var("x").is("y")),
+                not(var("a").is("b"))
+        );
+
+        assertQueryEquals(exepcted, parsed, query);
     }
 
     @Test
     public void testValueEqualsVariableQuery() {
-        final String query = "match $s1 == $s2;";
+        final String query = "match $s1 = $s2;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(var("s1").eq(var("s2")));
 
@@ -317,7 +375,7 @@ public class ParserTest {
 
 
     @Test
-    public void testLongComparatorQuery() {
+    public void testLongPredicateQuery() {
         final String query = "match $x isa movie, has tmdb-vote-count <= 400;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(var("x").isa("movie").has("tmdb-vote-count", lte(400)));
@@ -390,7 +448,7 @@ public class ParserTest {
         final GraqlMatch expected = match(
                 rel(var("p"), var("x")).rel("y"),
                 var("x").isa(var("z")),
-                var("y").val("crime"),
+                var("y").eq("crime"),
                 var("z").sub("production"),
                 type("has-genre").relates(var("p"))
         );
@@ -419,14 +477,44 @@ public class ParserTest {
                 var("x").isa("movie"),
                 or(
                         and(
-                                var("y").val("drama").isa("genre"),
+                                var("y").eq("drama").isa("genre"),
                                 rel("x").rel("y")
                         ),
-                        var("x").val("The Muppets")
+                        var("x").eq("The Muppets")
                 )
         );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
+    }
+
+    @Test
+    public void testDisjunctionNotInConjunction() {
+        String query = "match {$x isa person;} or {$x isa company;};";
+        assertThrows(() -> parseQuery(query).asMatch());
+    }
+
+
+    @Test
+    public void testNestedConjunctionAndDisjunction() {
+        String query = "match\n" +
+                "$y isa $p;\n" +
+                "{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $x has last-name $z; }; };";
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch expected = match(
+                var("y").isa(var("p")),
+                or(rel("y").rel("q"),
+                   and(var("x").isa(var("p")),
+                       or(var("x").has("first-name", var("y")),
+                          var("x").has("last-name", var("z"))))));
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testDisjunctionNotBindingConjunction() {
+        String query = "match\n" +
+                "$y isa $p;\n" +
+                "{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $q has last-name $z; }; };";
+        assertThrows(() -> parseQuery(query).asMatch());
     }
 
     @Test
@@ -542,6 +630,18 @@ public class ParserTest {
     }
 
     @Test
+    public void whenParsingUpdateQuery_ResultIssameAsJavaGraql() {
+        String query = "match $x isa person, has name 'alice', has age $a;\n" +
+                "delete $x has $a;\n" +
+                "insert $x has age 25;";
+        GraqlUpdate parsed = Graql.parseQuery(query).asUpdate();
+        GraqlUpdate expected = match(var("x").isa("person").has("name", "alice").has("age", var("a")))
+                .delete(var("x").has(var("a")))
+                .insert(var("x").has("age", 25));
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
+    }
+
+    @Test
     public void whenParsingAsInDefine_ResultIsSameAsSub() {
         final String query = "define\n" +
                 "parent sub role;\n" +
@@ -566,14 +666,74 @@ public class ParserTest {
 
     @Test
     public void whenParsingAsInMatch_ResultIsSameAsSub() {
-        final String query = "match fatherhood sub parenthood, relates father as parent, relates son as child;";
+        final String query = "match $f sub parenthood, relates father as parent, relates son as child;";
         final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
         final GraqlMatch expected = match(
-                type("fatherhood").sub("parenthood")
+                var("f").sub("parenthood")
                         .relates("father", "parent")
                         .relates("son", "child")
         );
 
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void whenParsingDefineQueryWithOwnsOverrides_ResultIsSameAsJavaGraql() {
+        final String query = "define\n" +
+                "triangle sub entity;\n" +
+                "triangle owns side-length;\n" +
+                "triangle-right-angled sub triangle;\n" +
+                "triangle-right-angled owns hypotenuse-length as side-length;";
+        final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
+
+        final GraqlDefine expected = define(
+                type("triangle").sub("entity"),
+                type("triangle").owns("side-length"),
+                type("triangle-right-angled").sub("triangle"),
+                type("triangle-right-angled").owns("hypotenuse-length", "side-length")
+        );
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void whenParsingDefineQueryWithRelatesOverrides_ResultIsSameAsJavaGraql() {
+        final String query = "define\n" +
+                "pokemon sub entity;\n" +
+                "evolves sub relation;\n" +
+                "evolves relates from, relates to;\n" +
+                "evolves-final sub evolves;\n" +
+                "evolves-final relates from-final as from;";
+        final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
+
+        final GraqlDefine expected = define(
+                type("pokemon").sub("entity"),
+                type("evolves").sub("relation"),
+                type("evolves").relates("from").relates("to"),
+                type("evolves-final").sub("evolves"),
+                type("evolves-final").relates("from-final", "from")
+        );
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void whenParsingDefineQueryWithPlaysOverrides_ResultIsSameAsJavaGraql() {
+        final String query = "define\n" +
+                "pokemon sub entity;\n" +
+                "evolves sub relation;\n" +
+                "evolves relates from, relates to;\n" +
+                "evolves-final sub evolves;\n" +
+                "evolves-final relates from-final as from;\n" +
+                "pokemon plays evolves-final:from-final as from;";
+        final GraqlDefine parsed = Graql.parseQuery(query).asDefine();
+
+        final GraqlDefine expected = define(
+                type("pokemon").sub("entity"),
+                type("evolves").sub("relation"),
+                type("evolves").relates("from").relates("to"),
+                type("evolves-final").sub("evolves"),
+                type("evolves-final").relates("from-final", "from"),
+                type("pokemon").plays("evolves-final", "from-final", "from")
+        );
         assertQueryEquals(expected, parsed, query);
     }
 
@@ -659,11 +819,9 @@ public class ParserTest {
 
     @Test
     public void testParseWithoutVar() {
-        final String query = "match $_ isa person;";
-        final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
-        final GraqlMatch expected = match(var().isa("person"));
-
-        assertQueryEquals(expected, parsed, query);
+        String query = "match $_ isa person;";
+        assertThrows(() -> Graql.parseQuery(query).asMatch());
+        assertThrows(() -> match(var().isa("person")));
     }
 
     @Test
@@ -913,7 +1071,7 @@ public class ParserTest {
     @Test
     public void whenParseIncorrectSyntax_ErrorMessageShouldRetainWhitespace() {
         exception.expect(GraqlException.class);
-        exception.expectMessage(not(containsString("match$xisa")));
+        exception.expectMessage(Matchers.not(containsString("match$xisa")));
         //noinspection ResultOfMethodCallIgnored
         parseQuery("match $x isa ");
     }
@@ -922,11 +1080,11 @@ public class ParserTest {
     public void testSyntaxErrorPointer() {
         exception.expect(GraqlException.class);
         exception.expectMessage(allOf(
-                containsString("\nmatch $x is"),
+                containsString("\nmatch $x of"),
                 containsString("\n         ^")
         ));
         //noinspection ResultOfMethodCallIgnored
-        parseQuery("match $x is");
+        parseQuery("match $x of");
     }
 
     @Test
@@ -1005,43 +1163,15 @@ public class ParserTest {
     }
 
     @Test
-    public void testParseListMatchInsert() {
-        final String matchString = "match $y isa movie;";
-        final String insertString = "insert $x isa movie;";
-        final List<GraqlQuery> queries = Graql.parseQueries(matchString + insertString).collect(toList());
-
-        assertEquals(Arrays.asList(match(var("y").isa("movie")).insert(var("x").isa("movie"))), queries);
-    }
-
-    @Test
-    public void testParseMatchInsertBeforeAndAfter() {
-        final String matchString = "match $y isa movie;";
-        final String insertString = "insert $x isa movie;";
-        final String matchInsert = matchString + insertString;
-
-        final List<String> options = list(
-                matchString + matchInsert,
-                insertString + matchInsert,
-                matchInsert + matchString,
-                matchInsert + insertString
-        );
-
-        options.forEach(option -> {
-            final List<GraqlQuery> queries = Graql.parseQueries(option).collect(toList());
-            assertEquals(option, 2, queries.size());
-        });
-    }
-
-    @Test
     public void testParseManyMatchInsertWithoutStackOverflow() {
         final int numQueries = 10_000;
-        final String matchInsertString = "match $x isa person; insert $y isa person;\n";
+        final String matchInsertString = "match $x isa person; insert $x has name 'bob';\n";
         final StringBuilder longQuery = new StringBuilder();
         for (int i = 0; i < numQueries; i++) {
             longQuery.append(matchInsertString);
         }
 
-        final GraqlInsert matchInsert = match(var("x").isa("person")).insert(var("y").isa("person"));
+        final GraqlInsert matchInsert = match(var("x").isa("person")).insert(var("x").has("name", "bob"));
         final List<GraqlInsert> queries = Graql.<GraqlInsert>parseQueries(longQuery.toString()).collect(toList());
 
         assertEquals(Collections.nCopies(numQueries, matchInsert), queries);
@@ -1102,10 +1232,18 @@ public class ParserTest {
     }
 
     @Test
-    public void regexAttributeConstraint() {
+    public void defineAttributeTypeRegex() {
         final String query = "define digit sub attribute, regex '\\d';";
         final GraqlDefine parsed = parseQuery(query);
         final GraqlDefine expected = define(type("digit").sub("attribute").regex("\\d"));
+        assertQueryEquals(expected, parsed, query.replace("'", "\""));
+    }
+
+    @Test
+    public void undefineAttributeTypeRegex() {
+        final String query = "undefine digit regex '\\d';";
+        final GraqlUndefine parsed = parseQuery(query);
+        final GraqlUndefine expected = undefine(type("digit").regex("\\d"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
@@ -1156,7 +1294,7 @@ public class ParserTest {
         assertEquals(expected, parsed);
     }
 
-    private static void assertParseEquivalence(final String query) {
+    private static void assertParseEquivalence(String query) {
         assertEquals(query, parseQuery(query).toString());
     }
 }

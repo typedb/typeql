@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,8 +20,12 @@ package graql.lang.pattern;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
+import graql.lang.pattern.variable.UnboundVariable;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static grakn.common.collection.Collections.list;
 import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
@@ -39,13 +43,27 @@ public class Negation<T extends Pattern> implements Conjunctable {
     private final T pattern;
     private Negation<Disjunction<Conjunction<Conjunctable>>> normalised;
 
-    public Negation(final T pattern) {
+    public Negation(T pattern) {
         if (pattern == null) throw new NullPointerException("Null patterns");
         else if (pattern.isNegation()) throw GraqlException.of(ErrorMessage.REDUNDANT_NESTED_NEGATION);
         this.pattern = pattern;
     }
 
     public T pattern() { return pattern; }
+
+    @Override
+    public List<? extends Pattern> patterns() {
+        return Arrays.asList(pattern);
+    }
+
+    @Override
+    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+        if (pattern.isNegation()) {
+            throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+        } else {
+            pattern.validateIsBoundedBy(bounds);
+        }
+    }
 
     @Override
     public Negation<Disjunction<Conjunction<Conjunctable>>> normalise() {
@@ -85,7 +103,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Negation<?> negation = (Negation<?>) o;

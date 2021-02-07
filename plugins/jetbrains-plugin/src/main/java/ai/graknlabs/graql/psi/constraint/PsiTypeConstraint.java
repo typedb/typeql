@@ -1,4 +1,4 @@
-package ai.graknlabs.graql.psi.property;
+package ai.graknlabs.graql.psi.constraint;
 
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
@@ -11,9 +11,9 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author <a href="mailto:bfergerson@apache.org">Brandon Fergerson</a>
  */
-public class PsiRelatesTypeProperty extends PsiGraqlNamedElement {
+public class PsiTypeConstraint extends PsiGraqlNamedElement {
 
-    public PsiRelatesTypeProperty(@NotNull ASTNode node) {
+    public PsiTypeConstraint(@NotNull ASTNode node) {
         super(node);
     }
 
@@ -21,15 +21,7 @@ public class PsiRelatesTypeProperty extends PsiGraqlNamedElement {
     @Override
     public PsiElement getNameIdentifier() {
         //todo: seems wrong
-        if (getNode().getFirstChildNode() != null
-                && getNode().getFirstChildNode().getTreeNext() != null
-                && getNode().getFirstChildNode().getTreeNext().getTreeNext() != null) {
-            ASTNode idNode = getNode().getFirstChildNode().getTreeNext().getTreeNext();
-            if (idNode != null) {
-                return idNode.getPsi();
-            }
-        }
-        return null;
+        return getNode().getFirstChildNode().getPsi();
     }
 
     @Override

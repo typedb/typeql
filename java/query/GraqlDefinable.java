@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Grakn Labs
+ * Copyright (C) 2021 Grakn Labs
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -17,6 +17,7 @@
 
 package graql.lang.query;
 
+import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.ErrorMessage;
 import graql.lang.common.exception.GraqlException;
@@ -44,7 +45,7 @@ abstract class GraqlDefinable extends GraqlQuery {
     private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
-    GraqlDefinable(final GraqlToken.Command keyword, final List<Definable> definables) {
+    GraqlDefinable(GraqlToken.Command keyword, List<Definable> definables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
         if (definables == null || definables.isEmpty()) throw GraqlException.of(MISSING_DEFINABLES.message());
         this.definables = new ArrayList<>(definables);
@@ -63,9 +64,15 @@ abstract class GraqlDefinable extends GraqlQuery {
         this.hash = Objects.hash(this.keyword, this.variables, this.rules);
     }
 
+    @Override
+    public GraqlArg.QueryType type() {
+        return GraqlArg.QueryType.WRITE;
+    }
+
     public final List<TypeVariable> variables() {
         return variables;
     }
+
     public final List<Rule> rules() {
         return rules;
     }
@@ -84,7 +91,7 @@ abstract class GraqlDefinable extends GraqlQuery {
     }
 
     @Override
-    public final boolean equals(final Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final GraqlDefinable that = (GraqlDefinable) o;

@@ -62,6 +62,7 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
             case GraqlLexer.VAR_:
             case GraqlLexer.VAR_NAMED_:
             case GraqlLexer.LABEL_:
+            case GraqlLexer.LABEL_SCOPED_:
                 attrKey = ID;
                 break;
             case GraqlLexer.THING:

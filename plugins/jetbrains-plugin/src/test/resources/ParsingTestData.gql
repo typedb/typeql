@@ -11,15 +11,15 @@ approved-date sub event-date;
 ## an abstract relation, only to be subtyped by other relations
 request sub relation,
   abstract,
-  has approved-date,
+  owns approved-date,
   relates approved-subject,
   relates requester,
   relates respondent;
 
 friendship sub relation,
     relates friend,
-    plays approved-friendship,
-    plays listed-friendship;
+    plays friend-request:approved-friendship,
+    plays friends-list:listed-friendship;
 
 ## an example of subtyping in Grakn
 friend-request sub request,
@@ -28,12 +28,12 @@ friend-request sub request,
     relates friendship-respondent as respondent;
 
 friends-list sub relation,
-    has title,
+    owns title,
     relates list-owner,
     relates listed-friendship;
 
 person sub entity,
-    plays friend,
-    plays friendship-requester,
-    plays friendship-respondent,
-    plays list-owner;
+    plays friendship:friend,
+    plays friend-request:friendship-requester,
+    plays friend-request:friendship-respondent,
+    plays friends-list:list-owner;

@@ -5,9 +5,9 @@ import ai.graknlabs.graql.GraqlLexer;
 import ai.graknlabs.graql.GraqlParserDefinition;
 import ai.graknlabs.graql.psi.GraqlPsiUtils;
 import ai.graknlabs.graql.psi.PsiGraqlNamedElement;
-import ai.graknlabs.graql.psi.property.PsiRelatesTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiSubTypeProperty;
-import ai.graknlabs.graql.psi.property.PsiTypeProperty;
+import ai.graknlabs.graql.psi.constraint.PsiRelatesTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiSubTypeConstraint;
+import ai.graknlabs.graql.psi.constraint.PsiTypeConstraint;
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner;
 import com.intellij.lang.cacheBuilder.WordsScanner;
 import com.intellij.lang.findUsages.FindUsagesProvider;
@@ -34,9 +34,9 @@ public class GraqlFindUsagesProvider implements FindUsagesProvider {
 
     @Override
     public boolean canFindUsagesFor(@NotNull PsiElement psiElement) {
-        return psiElement instanceof PsiTypeProperty
-                || psiElement instanceof PsiSubTypeProperty
-                || psiElement instanceof PsiRelatesTypeProperty;
+        return psiElement instanceof PsiTypeConstraint
+                || psiElement instanceof PsiSubTypeConstraint
+                || psiElement instanceof PsiRelatesTypeConstraint;
     }
 
     @Nullable
