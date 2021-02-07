@@ -43,7 +43,7 @@ public class GraqlCompletionContributor extends CompletionContributor {
     final String DUMMY_IDENTIFIER = "IntellijIdeaRulezzz";
 
     private static final Set<String> TYPE_PROPERTY_MODIFIERS = ImmutableSet.copyOf(
-            new String[]{"abstract", "sub", "key", "has", "plays", "relates"}
+            new String[]{"abstract", "sub", "key", "owns", "plays", "relates"}
     );
 
     public GraqlCompletionContributor() {
@@ -57,7 +57,7 @@ public class GraqlCompletionContributor extends CompletionContributor {
                                 RULE_ELEMENT_TYPES.get(GraqlParser.RULE_type_constraint));
                         if (ruleType != null) {
                             if (ruleType instanceof PsiOwnsTypeConstraint) {
-                                //has, include all attributes
+                                //owns, include all attributes
                                 PsiGraqlElement statementType = findParentByType(parameters.getPosition(),
                                         RULE_ELEMENT_TYPES.get(GraqlParser.RULE_variable_type));
                                 includeAttributeTypes(resultSet, ruleType, parameters.getOriginalFile().getVirtualFile(),

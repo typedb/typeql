@@ -151,8 +151,8 @@ public class GraqlParserDefinition implements ParserDefinition {
     public static PsiGraqlElement getRuleTypePropertyElement(ASTNode node) {
         if (node.getFirstChildNode() != null && (node.getFirstChildNode().getText().equals("owns")
                 || node.getFirstChildNode().getText().equals("key"))) {
-            String hasTo = node.getLastChildNode().getText();
-            if (!hasTo.isEmpty()) {
+            String ownsTo = node.getLastChildNode().getText();
+            if (!ownsTo.isEmpty()) {
                 return new PsiOwnsTypeConstraint(node);
             }
         } else if (node.getFirstChildNode() != null && node.getFirstChildNode().getText().equals("plays")) {

@@ -81,10 +81,10 @@ public class GraqlPsiUtils {
             PsiGraqlFileBase graqlFile = (PsiGraqlFileBase) PsiManager.getInstance(project).findFile(virtualFile);
             if (graqlFile != null) {
                 if (element instanceof PsiOwnsTypeConstraint) {
-                    Collection<PsiOwnsTypeConstraint> hasIdentifiers = PsiTreeUtil.collectElementsOfType(
+                    Collection<PsiOwnsTypeConstraint> ownsIdentifiers = PsiTreeUtil.collectElementsOfType(
                             graqlFile, PsiOwnsTypeConstraint.class);
-                    for (PsiOwnsTypeConstraint identifier : hasIdentifiers) {
-                        if (name.equals(identifier.getHasType())) {
+                    for (PsiOwnsTypeConstraint identifier : ownsIdentifiers) {
+                        if (name.equals(identifier.getOwnsType())) {
                             result.add(identifier);
                         }
                     }
@@ -113,10 +113,10 @@ public class GraqlPsiUtils {
                         }
                     }
                 } else {
-                    Collection<PsiOwnsTypeConstraint> hasIdentifiers = PsiTreeUtil.collectElementsOfType(
+                    Collection<PsiOwnsTypeConstraint> ownsIdentifiers = PsiTreeUtil.collectElementsOfType(
                             graqlFile, PsiOwnsTypeConstraint.class);
-                    for (PsiOwnsTypeConstraint identifier : hasIdentifiers) {
-                        if (name.equals(identifier.getHasType())) {
+                    for (PsiOwnsTypeConstraint identifier : ownsIdentifiers) {
+                        if (name.equals(identifier.getOwnsType())) {
                             result.add(identifier);
                         }
                     }

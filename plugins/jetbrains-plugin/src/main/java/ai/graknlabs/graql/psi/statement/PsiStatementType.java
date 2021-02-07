@@ -56,15 +56,15 @@ public class PsiStatementType extends PsiGraqlElement {
         return playsTypes;
     }
 
-    public List<PsiOwnsTypeConstraint> findHasTypeProperties() {
-        List<PsiOwnsTypeConstraint> hasTypes = new ArrayList<>();
+    public List<PsiOwnsTypeConstraint> findOwnsTypeProperties() {
+        List<PsiOwnsTypeConstraint> ownsTypes = new ArrayList<>();
         for (PsiElement child : getChildren()) {
             PsiElement element = GraqlParserDefinition.getRuleTypePropertyElement(child.getNode());
             if (element instanceof PsiOwnsTypeConstraint) {
-                hasTypes.add((PsiOwnsTypeConstraint) element);
+                ownsTypes.add((PsiOwnsTypeConstraint) element);
             }
         }
-        return hasTypes;
+        return ownsTypes;
     }
 
     public List<PsiSubTypeConstraint> findSubTypeProperties() {

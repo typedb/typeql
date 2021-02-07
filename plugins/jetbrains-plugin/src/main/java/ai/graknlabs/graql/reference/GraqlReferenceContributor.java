@@ -21,9 +21,9 @@ public class GraqlReferenceContributor extends PsiReferenceContributor {
             @NotNull
             @Override
             public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-                PsiOwnsTypeConstraint hasElement = (PsiOwnsTypeConstraint) element;
+                PsiOwnsTypeConstraint ownsElement = (PsiOwnsTypeConstraint) element;
                 return new PsiReference[]{
-                        new GraqlReference(hasElement, hasElement.getHasTypeTextRange())
+                        new GraqlReference(ownsElement, ownsElement.getOwnsTypeTextRange())
                 };
             }
         });

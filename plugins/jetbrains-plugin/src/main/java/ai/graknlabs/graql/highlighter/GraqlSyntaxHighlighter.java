@@ -97,7 +97,6 @@ public class GraqlSyntaxHighlighter extends SyntaxHighlighterBase {
             case GraqlLexer.SUB:
             case GraqlLexer.SUBX:
             case GraqlLexer.SUB_:
-            case GraqlLexer.HAS:
             case GraqlLexer.OWNS:
             case GraqlLexer.PLAYS:
             case GraqlLexer.RELATES:

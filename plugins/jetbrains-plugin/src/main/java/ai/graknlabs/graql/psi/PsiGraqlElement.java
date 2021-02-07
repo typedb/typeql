@@ -33,7 +33,7 @@ public class PsiGraqlElement extends ANTLRPsiNode {
         } else if (this instanceof PsiPlaysTypeConstraint) {
             return ((PsiPlaysTypeConstraint) this).getPlaysType();
         } else if (this instanceof PsiOwnsTypeConstraint) {
-            return ((PsiOwnsTypeConstraint) this).getHasType();
+            return ((PsiOwnsTypeConstraint) this).getOwnsType();
         } else {
             return super.getName();
         }

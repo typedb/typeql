@@ -34,7 +34,7 @@ public class GraqlUndefinedDeclarationInspection extends LocalInspectionTool {
                     ensureGraqlElementsUpToDate(element.getContainingFile());
 
                     List<PsiGraqlElement> identifiers = new ArrayList<>();
-                    identifiers.addAll(((PsiStatementType) element).findHasTypeProperties());
+                    identifiers.addAll(((PsiStatementType) element).findOwnsTypeProperties());
                     identifiers.addAll(((PsiStatementType) element).findPlaysTypeProperties());
                     identifiers.addAll(((PsiStatementType) element).findSubTypeProperties());
 

@@ -18,11 +18,11 @@ public class PsiOwnsTypeConstraint extends PsiGraqlElement {
         super(node);
     }
 
-    public TextRange getHasTypeTextRange() {
-        return new TextRange(4, 4 + getHasType().length());
+    public TextRange getOwnsTypeTextRange() {
+        return new TextRange(4, 4 + getOwnsType().length());
     }
 
-    public String getHasType() {
+    public String getOwnsType() {
         if (getLastChild() != null) {
             return getLastChild().getText();
         }
@@ -30,7 +30,7 @@ public class PsiOwnsTypeConstraint extends PsiGraqlElement {
     }
 
     public boolean isAbstractType() {
-        return Objects.equals(getHasType(), "abstract");
+        return Objects.equals(getOwnsType(), "abstract");
     }
 
     public boolean isKey() {
@@ -39,7 +39,7 @@ public class PsiOwnsTypeConstraint extends PsiGraqlElement {
 
     @Override
     public PsiReference getReference() {
-        if (getHasType() == null || isAbstractType()) {
+        if (getOwnsType() == null || isAbstractType()) {
             return null;
         }
         return ReferenceProvidersRegistry.getReferencesFromProviders(this)[0];
