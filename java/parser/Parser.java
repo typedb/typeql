@@ -307,20 +307,20 @@ public class Parser extends GraqlBaseVisitor {
     public GraqlMatch visitQuery_match(GraqlParser.Query_matchContext ctx) {
         GraqlMatch match = new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns()));
 
-        if (ctx.modifier() != null) {
+        if (ctx.modifiers() != null) {
             List<UnboundVariable> variables = new ArrayList<>();
             Sortable.Sorting sorting = null;
             Long offset = null, limit = null;
 
-            if (ctx.modifier().filter() != null) variables = this.visitFilter(ctx.modifier().filter());
-            if (ctx.modifier().sort() != null) {
-                final UnboundVariable var = getVar(ctx.modifier().sort().VAR_());
-                sorting = ctx.modifier().sort().ORDER_() == null
+            if (ctx.modifiers().filter() != null) variables = this.visitFilter(ctx.modifiers().filter());
+            if (ctx.modifiers().sort() != null) {
+                final UnboundVariable var = getVar(ctx.modifiers().sort().VAR_());
+                sorting = ctx.modifiers().sort().ORDER_() == null
                         ? new Sortable.Sorting(var)
-                        : new Sortable.Sorting(var, GraqlArg.Order.of(ctx.modifier().sort().ORDER_().getText()));
+                        : new Sortable.Sorting(var, GraqlArg.Order.of(ctx.modifiers().sort().ORDER_().getText()));
             }
-            if (ctx.modifier().offset() != null) offset = getLong(ctx.modifier().offset().LONG_());
-            if (ctx.modifier().limit() != null) limit = getLong(ctx.modifier().limit().LONG_());
+            if (ctx.modifiers().offset() != null) offset = getLong(ctx.modifiers().offset().LONG_());
+            if (ctx.modifiers().limit() != null) limit = getLong(ctx.modifiers().limit().LONG_());
             match = new GraqlMatch(match.conjunction(), variables, sorting, offset, limit);
         }
 
