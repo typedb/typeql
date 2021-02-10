@@ -56,9 +56,9 @@ query_match_group_agg :   query_match   match_group       match_aggregate  ;
 
 // MATCH QUERY FILTERS =========================================================
 
-modifier              : ( get';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
+modifier              : ( filter';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
 
-get                   :   GET         VAR_  ( ',' VAR_ )*   ;
+filter                :   FILTER      VAR_  ( ',' VAR_ )*   ;
 sort                  :   SORT        VAR_        ORDER_?   ;
 offset                :   OFFSET      LONG_                 ;
 limit                 :   LIMIT       LONG_                 ;
@@ -251,7 +251,7 @@ unreserved            : VALUE
 
 // QUERY COMMAND KEYWORDS
 
-MATCH           : 'match'       ;   GET             : 'get'         ;
+MATCH           : 'match'       ;   FILTER             : 'get'         ;
 DEFINE          : 'define'      ;   UNDEFINE        : 'undefine'    ;
 INSERT          : 'insert'      ;   DELETE          : 'delete'      ;
 COMPUTE         : 'compute'     ;
