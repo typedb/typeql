@@ -162,7 +162,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
     }
 
-    public List<UnboundVariable> retrievedVars() {
+    private List<UnboundVariable> retrievedVars() {
         if (modifier.filter.isEmpty()) return variablesNamedUnbound;
         else return modifier.filter;
     }
