@@ -45,7 +45,7 @@ query_delete_or_update:   MATCH       patterns      DELETE  variable_things
                                                   ( INSERT  variable_things )?  ;
 // TODO: The above feels like a hack. Find a clean way to split delete and update
 
-query_match           :   MATCH       patterns            ( modifiers )          ;
+query_match           :   MATCH       patterns            ( modifiers )         ;
 query_compute         :   COMPUTE     compute_conditions                        ;
 
 // MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
