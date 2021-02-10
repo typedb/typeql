@@ -29,12 +29,12 @@ import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.builder.Aggregatable;
 import graql.lang.query.builder.Sortable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import static grakn.common.collection.Collections.list;
@@ -63,10 +63,8 @@ import static java.util.stream.Stream.of;
 public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Aggregate> {
 
     private final Conjunction<? extends Pattern> conjunction;
-    private final List<UnboundVariable> filter;
-    private final Sortable.Sorting sorting;
-    private final Long offset;
-    private final Long limit;
+    private final Modifier modifier;
+
     private final int hash;
 
     private List<BoundVariable> variables;
@@ -81,14 +79,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     // We keep this constructor 'public' as it is more efficient for query parsing
-    public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter,
-                      Sortable.Sorting sorting, Long offset, Long limit) {
+    public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
         if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_MATCH_FILTER.message());
         this.conjunction = conjunction;
-        this.filter = list(filter);
-        this.sorting = sorting;
-        this.offset = offset;
-        this.limit = limit;
+        this.modifier = new Modifier(filter, sorting, offset, limit);
 
         hasBoundingConjunction();
         nestedPatternsAreBounded();
@@ -96,7 +90,63 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         filtersAreInScope();
         sortVarsArInScope();
 
-        this.hash = Objects.hash(this.conjunction, this.filter, this.sorting, this.offset, this.limit);
+        this.hash = Objects.hash(this.conjunction, this.modifier);
+    }
+
+    public static class Modifier {
+
+        private final List<UnboundVariable> filter;
+        private final Sortable.Sorting sorting;
+        private final Long offset;
+        private final Long limit;
+
+        private final int hash;
+
+        public Modifier(List<UnboundVariable> filter, @Nullable Sortable.Sorting sorting, @Nullable Long offset,
+                        @Nullable Long limit) {
+            this.filter = list(filter);
+            this.sorting = sorting;
+            this.offset = offset;
+            this.limit = limit;
+            this.hash = Objects.hash(this.filter, this.sorting, this.offset, this.limit);
+        }
+
+        public List<UnboundVariable> filter() {
+            return filter;
+        }
+
+        public boolean isEmpty() {
+            return !filter.isEmpty() || sorting != null|| offset != null || limit != null;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder syntax = new StringBuilder();
+            if (!filter.isEmpty()) {
+                syntax.append(GET);
+                final String varsStr = filter.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
+                syntax.append(SPACE).append(varsStr);
+                syntax.append(SEMICOLON);
+            }
+            if (sorting != null) syntax.append(SORT).append(SPACE).append(sorting).append(SEMICOLON).append(SPACE);
+            if (offset != null) syntax.append(OFFSET).append(SPACE).append(offset).append(SEMICOLON).append(SPACE);
+            if (limit != null) syntax.append(LIMIT).append(SPACE).append(limit).append(SEMICOLON).append(SPACE);
+            return syntax.toString();
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final Modifier modifier = (Modifier) o;
+            return Objects.equals(filter, modifier.filter) && Objects.equals(sorting, modifier.sorting)
+                    && Objects.equals(offset, modifier.offset) && Objects.equals(limit, modifier.limit);
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
     }
 
     private void hasBoundingConjunction() {
@@ -117,7 +167,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     private void filtersAreInScope() {
         Set<UnboundVariable> duplicates = new HashSet<>();
-        for (UnboundVariable var : filter) {
+        for (UnboundVariable var : modifier.filter) {
             if (!namedVariablesUnbound().contains(var))
                 throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (!var.isNamed()) throw GraqlException.of(VARIABLE_NOT_NAMED.message(var));
@@ -127,9 +177,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     private void sortVarsArInScope() {
-        final List<UnboundVariable> sortableVars = filter.isEmpty() ? namedVariablesUnbound() : filter;
-        if (sorting != null && !sortableVars.contains(sorting.var())) {
-            throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(sorting.var()));
+        final List<UnboundVariable> sortableVars = modifier.filter.isEmpty() ? namedVariablesUnbound() : modifier.filter;
+        if (modifier.sorting != null && !sortableVars.contains(modifier.sorting.var())) {
+            throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifier.sorting.var()));
         }
     }
 
@@ -167,21 +217,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         return variablesNamedUnbound;
     }
 
-    public List<UnboundVariable> filter() {
-        if (filter.isEmpty()) return namedVariablesUnbound();
-        else return filter;
-    }
-
-    public Optional<Sortable.Sorting> sort() {
-        return Optional.ofNullable(sorting);
-    }
-
-    public Optional<Long> offset() {
-        return Optional.ofNullable(offset);
-    }
-
-    public Optional<Long> limit() {
-        return Optional.ofNullable(limit);
+    public Modifier modifier() {
+        return modifier;
     }
 
     @Override
@@ -194,19 +231,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         query.append(conjunction.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
 
-        if (!filter.isEmpty() || sort().isPresent() || sort().isPresent() || offset().isPresent() || limit().isPresent()) {
+        if (!modifier.isEmpty()) {
             if (conjunction.patterns().size() > 1) query.append(NEW_LINE);
             else query.append(SPACE);
-
-            if (!filter.isEmpty()) { // Which is not equal to !vars().isEmpty()
-                query.append(GET);
-                final String varsStr = filter.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
-                query.append(SPACE).append(varsStr);
-                query.append(SEMICOLON);
-            }
-            if (sort().isPresent()) query.append(SORT).append(SPACE).append(sorting).append(SEMICOLON).append(SPACE);
-            if (offset().isPresent()) query.append(OFFSET).append(SPACE).append(offset).append(SEMICOLON).append(SPACE);
-            if (limit().isPresent()) query.append(LIMIT).append(SPACE).append(limit).append(SEMICOLON).append(SPACE);
+            query.append(modifier.toString());
         }
 
         return query.toString().trim();
@@ -214,19 +242,12 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null) return false;
+        if (this == o) return true; if (o == null) return false;
         if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
         }
-
         final GraqlMatch that = (GraqlMatch) o;
-
-        return (Objects.equals(this.conjunction, that.conjunction) &&
-                Objects.equals(this.filter, that.filter) &&
-                Objects.equals(this.sorting, that.sorting) &&
-                Objects.equals(this.offset, that.offset) &&
-                Objects.equals(this.limit, that.limit));
+        return Objects.equals(this.conjunction, that.conjunction) && Objects.equals(this.modifier, that.modifier);
     }
 
     @Override
@@ -318,7 +339,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     public static class Sorted extends GraqlMatch {
 
         Sorted(GraqlMatch match, Sortable.Sorting sorting) {
-            super(match.conjunction, match.filter, sorting, match.offset, match.limit);
+            super(match.conjunction, match.modifier.filter, sorting, match.modifier.offset, match.modifier.limit);
         }
 
         public Offset offset(long offset) {
@@ -333,7 +354,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     public static class Offset extends GraqlMatch {
 
         Offset(GraqlMatch match, long offset) {
-            super(match.conjunction, match.filter, match.sorting, offset, match.limit);
+            super(match.conjunction, match.modifier.filter, match.modifier.sorting, offset, match.modifier.limit);
         }
 
         public GraqlMatch.Limited limit(long limit) {
@@ -344,7 +365,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     public static class Limited extends GraqlMatch {
 
         Limited(GraqlMatch match, long limit) {
-            super(match.conjunction, match.filter, match.sorting, match.offset, limit);
+            super(match.conjunction, match.modifier.filter, match.modifier.sorting, match.modifier.offset, limit);
         }
     }
 
@@ -356,15 +377,14 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         private final int hash;
 
         Aggregate(GraqlMatch query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
-            if (query == null) throw new NullPointerException("GetQuery is null");
+            if (query == null) throw new NullPointerException("MatchQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
-
 
             if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw new NullPointerException("Variable is null");
             } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                 throw GraqlException.of(INVALID_COUNT_VARIABLE_ARGUMENT.message());
-            } else if (var != null && !query.filter().contains(var)) {
+            } else if (var != null && !query.modifier().filter().contains(var)) {
                 throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
             }
 
@@ -395,7 +415,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         public final String toString() {
             final StringBuilder query = new StringBuilder();
 
-            if (match().filter.isEmpty() && match().conjunction().patterns().size() > 1) {
+            if (match().modifier().filter().isEmpty() && match().conjunction().patterns().size() > 1) {
                 query.append(match()).append(NEW_LINE);
             } else query.append(match()).append(SPACE);
 
@@ -412,10 +432,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             if (o == null || getClass() != o.getClass()) return false;
 
             final Aggregate that = (Aggregate) o;
-
-            return (this.query.equals(that.query) &&
-                    this.method.equals(that.method) &&
-                    Objects.equals(this.var, that.var));
+            return this.query.equals(that.query) && this.method.equals(that.method) && Objects.equals(this.var, that.var);
         }
 
         @Override
@@ -433,8 +450,9 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         Group(GraqlMatch query, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
-            else if (!query.filter().contains(var))
+            else if (!query.modifier().filter().contains(var)) {
                 throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
+            }
 
             this.query = query;
             this.var = var;
@@ -463,7 +481,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         public String toString() {
             final StringBuilder query = new StringBuilder();
 
-            if (match().filter.isEmpty() && match().conjunction().patterns().size() > 1) {
+            if (match().modifier().filter.isEmpty() && match().conjunction().patterns().size() > 1) {
                 query.append(match()).append(NEW_LINE);
             } else query.append(match()).append(SPACE);
 
@@ -477,9 +495,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             if (o == null || getClass() != o.getClass()) return false;
 
             final Group that = (Group) o;
-
-            return (this.query.equals(that.query) &&
-                    this.var.equals(that.var));
+            return this.query.equals(that.query) && this.var.equals(that.var);
         }
 
         @Override
@@ -501,7 +517,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                     throw new NullPointerException("Variable is null");
                 } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException(INVALID_COUNT_VARIABLE_ARGUMENT.message());
-                } else if (var != null && !group.match().filter().contains(var)) {
+                } else if (var != null && !group.match().modifier().filter().contains(var)) {
                     throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
                 }
 
@@ -515,7 +531,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             public GraqlArg.QueryType type() {
                 return GraqlArg.QueryType.READ;
             }
-            
+
             public GraqlMatch.Group group() {
                 return group;
             }
@@ -532,7 +548,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             public final String toString() {
                 final StringBuilder query = new StringBuilder();
 
-                if (group().match().filter.isEmpty() && group().match().conjunction().patterns().size() > 1) {
+                if (group().match().modifier().filter.isEmpty() && group().match().conjunction().patterns().size() > 1) {
                     query.append(group().match()).append(NEW_LINE);
                 } else query.append(group().match()).append(SPACE);
 
@@ -550,10 +566,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                 if (o == null || getClass() != o.getClass()) return false;
 
                 final Aggregate that = (Aggregate) o;
-
-                return (this.group.equals(that.group) &&
-                        this.method.equals(that.method) &&
-                        Objects.equals(this.var, that.var));
+                return this.group.equals(that.group) && this.method.equals(that.method)
+                        && Objects.equals(this.var, that.var);
             }
 
             @Override
