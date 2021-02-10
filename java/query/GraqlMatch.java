@@ -116,7 +116,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         public boolean isEmpty() {
-            return !filter.isEmpty() || sorting != null|| offset != null || limit != null;
+            return filter.isEmpty() && sorting == null && offset == null && limit == null;
         }
 
         @Override
@@ -168,8 +168,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     private void filtersAreInScope() {
         Set<UnboundVariable> duplicates = new HashSet<>();
         for (UnboundVariable var : modifier.filter) {
-            if (!namedVariablesUnbound().contains(var))
-                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
+            if (!namedVariablesUnbound().contains(var)) throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (!var.isNamed()) throw GraqlException.of(VARIABLE_NOT_NAMED.message(var));
             if (duplicates.contains(var)) throw GraqlException.of(ILLEGAL_FILTER_VARIABLE_REPEATING);
             else duplicates.add(var);
@@ -242,7 +241,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true; if (o == null) return false;
+        if (this == o) return true;
+        if (o == null) return false;
         if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
         }
