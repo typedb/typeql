@@ -79,7 +79,6 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         this(conjunction, filter, null, null, null);
     }
 
-    // We keep this constructor 'public' as it is more efficient for query parsing
     public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
         if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_MATCH_FILTER.message());
         this.conjunction = conjunction;
@@ -329,7 +328,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public static class Filtered extends GraqlMatch implements Sortable<Sorted, Offset, Limited> {
 
-        Filtered(Unfiltered unfiltered, List<UnboundVariable> filter) {
+        public Filtered(Unfiltered unfiltered, List<UnboundVariable> filter) {
             super(unfiltered.conjunction(), filter, null, null, null);
             if (filter.isEmpty()) throw GraqlException.of(ErrorMessage.EMPTY_MATCH_FILTER);
         }
@@ -352,7 +351,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public static class Sorted extends GraqlMatch {
 
-        Sorted(GraqlMatch match, Sortable.Sorting sorting) {
+        public Sorted(GraqlMatch match, Sortable.Sorting sorting) {
             super(match.conjunction, match.modifiers.filter, sorting, match.modifiers.offset, match.modifiers.limit);
         }
 
@@ -367,7 +366,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public static class Offset extends GraqlMatch {
 
-        Offset(GraqlMatch match, long offset) {
+        public Offset(GraqlMatch match, long offset) {
             super(match.conjunction, match.modifiers.filter, match.modifiers.sorting, offset, match.modifiers.limit);
         }
 
@@ -378,7 +377,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     public static class Limited extends GraqlMatch {
 
-        Limited(GraqlMatch match, long limit) {
+        public Limited(GraqlMatch match, long limit) {
             super(match.conjunction, match.modifiers.filter, match.modifiers.sorting, match.modifiers.offset, limit);
         }
     }
@@ -390,7 +389,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         private final UnboundVariable var;
         private final int hash;
 
-        Aggregate(GraqlMatch query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
+        public Aggregate(GraqlMatch query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
             if (query == null) throw new NullPointerException("MatchQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
@@ -461,7 +460,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         private final UnboundVariable var;
         private final int hash;
 
-        Group(GraqlMatch query, UnboundVariable var) {
+        public Group(GraqlMatch query, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.modifiers.filter().contains(var)) {
@@ -524,7 +523,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             private final UnboundVariable var;
             private final int hash;
 
-            Aggregate(GraqlMatch.Group group, GraqlToken.Aggregate.Method method, UnboundVariable var) {
+            public Aggregate(GraqlMatch.Group group, GraqlToken.Aggregate.Method method, UnboundVariable var) {
                 if (group == null) throw new NullPointerException("GraqlGet.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
                 if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
