@@ -53,7 +53,7 @@ public interface Computable {
         Set<String> of();
 
         default T of(String type, String... types) {
-            final ArrayList<String> typeList = new ArrayList<>(types.length + 1);
+            ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
             typeList.addAll(Arrays.asList(types));
 
@@ -70,7 +70,7 @@ public interface Computable {
         boolean includesAttributes();
 
         default T in(String type, String... types) {
-            final ArrayList<String> typeList = new ArrayList<>(types.length + 1);
+            ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
             typeList.addAll(Arrays.asList(types));
 
@@ -93,7 +93,7 @@ public interface Computable {
 
         @SuppressWarnings("unchecked")
         default T where(U arg, U... args) {
-            final ArrayList<U> argList = new ArrayList<>(args.length + 1);
+            ArrayList<U> argList = new ArrayList<>(args.length + 1);
             argList.add(arg);
             argList.addAll(Arrays.asList(args));
 

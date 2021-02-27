@@ -21,9 +21,10 @@ import graql.lang.common.GraqlArg;
 import graql.lang.common.GraqlToken;
 import graql.lang.common.exception.GraqlException;
 import graql.lang.pattern.variable.UnboundVariable;
-import static graql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
 
 import java.util.Objects;
+
+import static graql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
 
 public interface Sortable<S, O, L> {
 
@@ -32,7 +33,7 @@ public interface Sortable<S, O, L> {
     }
 
     default S sort(String var, String order) {
-        final GraqlArg.Order o = GraqlArg.Order.of(order);
+        GraqlArg.Order o = GraqlArg.Order.of(order);
         if (o == null) throw GraqlException.of(
                 INVALID_SORTING_ORDER.message(GraqlArg.Order.ASC, GraqlArg.Order.DESC)
         );
@@ -83,7 +84,7 @@ public interface Sortable<S, O, L> {
 
         @Override
         public String toString() {
-            final StringBuilder sort = new StringBuilder();
+            StringBuilder sort = new StringBuilder();
 
             sort.append(var);
             if (order != null) {
@@ -98,7 +99,7 @@ public interface Sortable<S, O, L> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final Sorting that = (Sorting) o;
+            Sorting that = (Sorting) o;
 
             return (this.var().equals(that.var()) &&
                     this.order().equals(that.order()));

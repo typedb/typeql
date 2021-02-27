@@ -41,7 +41,7 @@ public class SyntaxError {
 
     private String spaces(int len) {
         final char ch = ' ';
-        final char[] output = new char[len];
+        char[] output = new char[len];
         for (int i = len - 1; i >= 0; i--) {
             output[i] = ch;
         }
@@ -59,7 +59,7 @@ public class SyntaxError {
             // match $
             //       ^
             // blah blah antlr blah
-            final String pointer = spaces(charPositionInLine) + "^";
+            String pointer = spaces(charPositionInLine) + "^";
             return SYNTAX_ERROR_DETAILED.message(line, queryLine, pointer, msg);
         }
     }
@@ -70,7 +70,7 @@ public class SyntaxError {
             return true;
         }
         if (o instanceof SyntaxError) {
-            final SyntaxError that = (SyntaxError) o;
+            SyntaxError that = (SyntaxError) o;
             return (Objects.equals(this.queryLine, that.queryLine) &&
                     this.line == that.line &&
                     this.charPositionInLine == that.charPositionInLine &&

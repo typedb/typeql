@@ -86,7 +86,7 @@ public class GraqlUpdate extends GraqlWritable {
 
     @Override
     public String toString() {
-        final StringBuilder query = new StringBuilder();
+        StringBuilder query = new StringBuilder();
         query.append(match).append(NEW_LINE);
 
         query.append(DELETE);

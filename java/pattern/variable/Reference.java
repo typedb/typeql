@@ -149,7 +149,7 @@ public abstract class Reference {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Name that = (Name) o;
+            Name that = (Name) o;
             return (this.type == that.type &&
                     this.isVisible == that.isVisible &&
                     this.name.equals(that.name));
@@ -190,7 +190,7 @@ public abstract class Reference {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Label that = (Label) o;
+            Label that = (Label) o;
             return (this.type == that.type &&
                     this.isVisible == that.isVisible &&
                     this.label.equals(that.label));
@@ -225,7 +225,7 @@ public abstract class Reference {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Anonymous that = (Anonymous) o;
+            Anonymous that = (Anonymous) o;
             return (this.type == that.type && this.isVisible == that.isVisible);
         }
 

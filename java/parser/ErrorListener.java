@@ -50,7 +50,7 @@ public class ErrorListener extends BaseErrorListener {
     }
 
     public static ErrorListener of(String query) {
-        final List<String> queryList = Arrays.asList(query.split("\n"));
+        List<String> queryList = Arrays.asList(query.split("\n"));
         return new ErrorListener(queryList);
     }
 

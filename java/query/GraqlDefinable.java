@@ -53,9 +53,9 @@ abstract class GraqlDefinable extends GraqlQuery {
             if (definable.isRule()) rules.add(definable.asRule());
             if (definable.isTypeVariable()) variables.add(definable.asTypeVariable());
         }
-        final LinkedList<TypeVariable> typeVarsToVerify = new LinkedList<>(variables);
+        LinkedList<TypeVariable> typeVarsToVerify = new LinkedList<>(variables);
         while (!typeVarsToVerify.isEmpty()) {
-            final TypeVariable v = typeVarsToVerify.removeFirst();
+            TypeVariable v = typeVarsToVerify.removeFirst();
             if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
             else v.constraints().forEach(c -> typeVarsToVerify.addAll(c.variables()));
         }
@@ -79,7 +79,7 @@ abstract class GraqlDefinable extends GraqlQuery {
 
     @Override
     public final String toString() {
-        final StringBuilder query = new StringBuilder();
+        StringBuilder query = new StringBuilder();
         query.append(keyword);
 
         if (definables.size() > 1) query.append(NEW_LINE);
@@ -94,7 +94,7 @@ abstract class GraqlDefinable extends GraqlQuery {
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final GraqlDefinable that = (GraqlDefinable) o;
+        GraqlDefinable that = (GraqlDefinable) o;
         return this.keyword.equals(that.keyword) && this.definables.equals(that.definables);
     }
 

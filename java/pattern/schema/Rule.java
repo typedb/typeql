@@ -149,7 +149,7 @@ public class Rule implements Definable {
 
     @Override
     public String toString() {
-        final StringBuilder syntax = new StringBuilder();
+        StringBuilder syntax = new StringBuilder();
         syntax.append(RULE).append(SPACE).append(label);
 
         if (when != null || then != null) syntax.append(COLON).append(SPACE);
@@ -185,7 +185,7 @@ public class Rule implements Definable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final Rule that = (Rule) o;
+        Rule that = (Rule) o;
         return (this.label.equals(that.label) &&
                 Objects.equals(this.when, that.when) &&
                 Objects.equals(this.then, that.then));

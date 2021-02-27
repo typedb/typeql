@@ -88,7 +88,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     @Override
     public String toString() {
-        final StringBuilder negation = new StringBuilder();
+        StringBuilder negation = new StringBuilder();
         negation.append(GraqlToken.Operator.NOT).append(SPACE);
 
         if (pattern.isConjunction()) {
@@ -106,7 +106,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final Negation<?> negation = (Negation<?>) o;
+        Negation<?> negation = (Negation<?>) o;
         return Objects.equals(pattern, negation.pattern);
     }
 

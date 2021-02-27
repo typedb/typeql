@@ -91,7 +91,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
     @Override
     public final String toString() {
-        final StringBuilder query = new StringBuilder();
+        StringBuilder query = new StringBuilder();
 
         query.append(GraqlToken.Command.COMPUTE).append(GraqlToken.Char.SPACE).append(method);
         if (!printConditions().isEmpty()) query.append(GraqlToken.Char.SPACE).append(printConditions());
@@ -101,7 +101,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     }
 
     private String printConditions() {
-        final List<String> conditionsList = new ArrayList<>();
+        List<String> conditionsList = new ArrayList<>();
 
         // It is important that we check for whether each condition is NULL, rather than using the getters.
         // Because, we want to know the user provided conditions, rather than the default conditions from the getters.
@@ -130,7 +130,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     }
 
     private String printTypes(Set<String> types) {
-        final StringBuilder inTypesString = new StringBuilder();
+        StringBuilder inTypesString = new StringBuilder();
 
         if (!types.isEmpty()) {
             if (types.size() == 1) {
@@ -154,8 +154,8 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     private String printArguments() {
         if (arguments == null) return "";
 
-        final List<String> argumentsList = new ArrayList<>();
-        final StringBuilder argumentsString = new StringBuilder();
+        List<String> argumentsList = new ArrayList<>();
+        StringBuilder argumentsString = new StringBuilder();
 
         for (GraqlToken.Compute.Param param : arguments.getParameters()) {
             argumentsList.add(str(param, EQ, arguments.getArgument(param).get()));
@@ -175,7 +175,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     }
 
     private String str(Object... objects) {
-        final StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         for (Object obj : objects) builder.append(obj.toString());
         return builder.toString();
     }
@@ -279,7 +279,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
-                final GraqlCompute.Statistics.Count that = (GraqlCompute.Statistics.Count) o;
+                GraqlCompute.Statistics.Count that = (GraqlCompute.Statistics.Count) o;
 
                 return (this.method().equals(that.method()) &&
                         this.in().equals(that.in()) &&
@@ -347,7 +347,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
-                final GraqlCompute.Statistics.Value that = (GraqlCompute.Statistics.Value) o;
+                GraqlCompute.Statistics.Value that = (GraqlCompute.Statistics.Value) o;
 
                 return (this.method().equals(that.method()) &&
                         this.of().equals(that.of()) &&
@@ -430,7 +430,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final GraqlCompute.Path that = (GraqlCompute.Path) o;
+            GraqlCompute.Path that = (GraqlCompute.Path) o;
 
             return (this.method().equals(that.method()) &&
                     this.from().equals(that.from()) &&
@@ -578,7 +578,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final GraqlCompute.Centrality that = (GraqlCompute.Centrality) o;
+            GraqlCompute.Centrality that = (GraqlCompute.Centrality) o;
 
             return (this.method().equals(that.method()) &&
                     this.of().equals(that.of()) &&
@@ -644,7 +644,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final GraqlCompute.Cluster that = (GraqlCompute.Cluster) o;
+            GraqlCompute.Cluster that = (GraqlCompute.Cluster) o;
 
             return (this.method().equals(that.method()) &&
                     this.in().equals(that.in()) &&
@@ -711,7 +711,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final Argument<?> that = (Argument<?>) o;
+            Argument<?> that = (Argument<?>) o;
 
             return (this.type().equals(that.type()) &&
                     this.value().equals(that.value()));
@@ -737,7 +737,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         private final Map<GraqlToken.Compute.Param, Supplier<Optional<?>>> argumentsMap = argumentsMap();
 
         private Map<GraqlToken.Compute.Param, Supplier<Optional<?>>> argumentsMap() {
-            final Map<GraqlToken.Compute.Param, Supplier<Optional<?>>> arguments = new HashMap<>();
+            Map<GraqlToken.Compute.Param, Supplier<Optional<?>>> arguments = new HashMap<>();
             arguments.put(GraqlToken.Compute.Param.MIN_K, this::minK);
             arguments.put(GraqlToken.Compute.Param.K, this::k);
             arguments.put(GraqlToken.Compute.Param.SIZE, this::size);
@@ -765,7 +765,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         @Override
         public Optional<Long> minK() {
-            final Long minK = (Long) getArgumentValue(GraqlToken.Compute.Param.MIN_K);
+            Long minK = (Long) getArgumentValue(GraqlToken.Compute.Param.MIN_K);
             if (minK != null) {
                 return Optional.of(minK);
 
@@ -779,7 +779,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         @Override
         public Optional<Long> k() {
-            final Long minK = (Long) getArgumentValue(GraqlToken.Compute.Param.K);
+            Long minK = (Long) getArgumentValue(GraqlToken.Compute.Param.K);
             if (minK != null) {
                 return Optional.of(minK);
 
@@ -810,7 +810,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final Arguments that = (Arguments) o;
+            Arguments that = (Arguments) o;
 
             return (this.minK().equals(that.minK()) &&
                     this.k().equals(that.k()) &&

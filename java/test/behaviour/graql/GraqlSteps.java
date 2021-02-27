@@ -38,14 +38,14 @@ public class GraqlSteps {
     @Given("graql define without commit")
     @Given("for each session, graql define")
     public void graql_define(String query) {
-        final GraqlDefine parsed = Graql.parseQuery(query);
+        GraqlDefine parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
     @Given("graql undefine")
     @Given("graql undefine without commit")
     public void graql_undefine(String query) {
-        final GraqlUndefine parsed = Graql.parseQuery(query);
+        GraqlUndefine parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
     }
 
@@ -54,14 +54,14 @@ public class GraqlSteps {
     @Given("graql insert without commit")
     @Given("for each session, graql insert")
     public void graql_insert(String query) {
-        final GraqlInsert parsed = Graql.parseQuery(query);
+        GraqlInsert parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
         parsed.match().ifPresent(match -> match.conjunction().normalise());
     }
 
     @Given("graql delete")
     public void graql_delete(String query) {
-        final GraqlDelete parsed = Graql.parseQuery(query);
+        GraqlDelete parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
         parsed.match().conjunction().normalise();
     }
@@ -73,7 +73,7 @@ public class GraqlSteps {
     @Given("get answers of graql match group aggregate")
     @Given("answer set is equivalent for graql query")
     public void graql_match(String query) {
-        final GraqlQuery parsed = Graql.parseQuery(query);
+        GraqlQuery parsed = Graql.parseQuery(query);
         assertEquals(parsed, Graql.parseQuery(parsed.toString()));
         if (parsed instanceof GraqlMatch) {
             parsed.asMatch().conjunction().normalise();

@@ -98,7 +98,7 @@ public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Is that = (Is) o;
+            Is that = (Is) o;
             return (this.variable.equals(that.variable));
         }
 

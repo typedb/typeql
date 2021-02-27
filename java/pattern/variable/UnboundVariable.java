@@ -164,7 +164,7 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final UnboundVariable that = (UnboundVariable) o;
+        UnboundVariable that = (UnboundVariable) o;
         return this.reference.equals(that.reference);
     }
 

@@ -93,8 +93,8 @@ public class Conjunction<T extends Pattern> implements Pattern {
     @Override
     public Disjunction<Conjunction<Conjunctable>> normalise() {
         if (normalised == null) {
-            final List<Conjunctable> conjunctables = new ArrayList<>();
-            final List<List<Conjunction<Conjunctable>>> listOfDisj = new ArrayList<>();
+            List<Conjunctable> conjunctables = new ArrayList<>();
+            List<List<Conjunction<Conjunctable>>> listOfDisj = new ArrayList<>();
             patterns.forEach(pattern -> {
                 if (pattern.isVariable()) conjunctables.add(pattern.asVariable().normalise());
                 else if (pattern.isNegation()) conjunctables.add(pattern.asNegation().normalise());
@@ -102,7 +102,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
                 else listOfDisj.add(pattern.asDisjunction().normalise().patterns());
             });
             listOfDisj.add(list(new Conjunction<>(conjunctables)));
-            final List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisj)
+            List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisj)
                     .stream().map(Conjunction::merge)
                     .collect(toList());
             normalised = new Disjunction<>(listOfConjunctions);
@@ -118,7 +118,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     @Override
     public String toString() {
-        final StringBuilder pattern = new StringBuilder();
+        StringBuilder pattern = new StringBuilder();
         pattern.append(CURLY_OPEN).append(SPACE);
         pattern.append(patterns.stream().map(Objects::toString).collect(joining("" + SEMICOLON + SPACE)));
         pattern.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
@@ -129,7 +129,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final Conjunction<?> that = (Conjunction<?>) o;
+        Conjunction<?> that = (Conjunction<?>) o;
         return Objects.equals(patterns, that.patterns);
     }
 

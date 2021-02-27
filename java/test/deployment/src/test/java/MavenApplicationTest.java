@@ -42,9 +42,9 @@ public class MavenApplicationTest {
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
-        final GraqlMatch expected = match(
+        GraqlMatch expected = match(
                 var("brando").eq("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
@@ -58,9 +58,9 @@ public class MavenApplicationTest {
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
                 "$t != 'Apocalypse Now';";
-        final GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
 
-        final GraqlMatch expected = match(
+        GraqlMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
                         var("t").eq("Apocalypse Now"),

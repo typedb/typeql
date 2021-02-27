@@ -161,7 +161,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final IID that = (IID) o;
+            IID that = (IID) o;
             return (this.iid.equals(that.iid));
         }
 
@@ -234,7 +234,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Isa that = (Isa) o;
+            Isa that = (Isa) o;
             return (this.type.equals(that.type) &&
                     this.isExplicit == that.isExplicit &&
                     this.isDerived == that.isDerived);
@@ -294,7 +294,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         @Override
         public Set<BoundVariable> variables() {
-            final Set<BoundVariable> variables = new HashSet<>();
+            Set<BoundVariable> variables = new HashSet<>();
             players().forEach(player -> {
                 variables.add(player.player());
                 if (player.roleType().isPresent()) variables.add(player.roleType().get());
@@ -385,7 +385,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
                 if (roleType == null) {
                     return player.toString();
                 } else {
-                    final StringBuilder syntax = new StringBuilder();
+                    StringBuilder syntax = new StringBuilder();
                     if (roleType.isVisible()) syntax.append(roleType.reference().toString());
                     else syntax.append(roleType.label().get().label());
                     syntax.append(COLON).append(SPACE).append(player);
@@ -397,7 +397,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
-                final RolePlayer that = (RolePlayer) o;
+                RolePlayer that = (RolePlayer) o;
                 return (Objects.equals(this.roleType, that.roleType) &&
                         this.player.equals(that.player) &&
                         this.repetition == that.repetition);
@@ -466,7 +466,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Has that = (Has) o;
+            Has that = (Has) o;
             return Objects.equals(this.type, that.type) && this.attribute.equals(that.attribute);
         }
 
@@ -573,7 +573,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Value<?> that = (Value<?>) o;
+            Value<?> that = (Value<?>) o;
             return (this.predicate.equals(that.predicate) && this.value.equals(that.value));
         }
 
@@ -646,7 +646,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
             @Override
             public java.lang.String toString() {
-                final StringBuilder operation = new StringBuilder();
+                StringBuilder operation = new StringBuilder();
 
                 if (predicate().equals(LIKE)) {
                     operation.append(LIKE).append(SPACE).append(quoteString(escapeRegex(value())));
@@ -670,9 +670,9 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             public DateTime(GraqlToken.Predicate.Equality predicate, LocalDateTime value) {
                 super(predicate, value);
                 // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
-                final int nanos = value.toLocalTime().getNano();
+                int nanos = value.toLocalTime().getNano();
                 final long nanosPerMilli = 1000000L;
-                final long remainder = nanos % nanosPerMilli;
+                long remainder = nanos % nanosPerMilli;
                 if (remainder != 0) {
                     throw GraqlException.of(INVALID_CONSTRAINT_DATETIME_PRECISION.message(value));
                 }

@@ -181,7 +181,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
 
     @Override
     public String toString() {
-        final StringBuilder syntax = new StringBuilder();
+        StringBuilder syntax = new StringBuilder();
 
         if (isVisible()) {
             syntax.append(reference.syntax());
@@ -206,7 +206,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final TypeVariable that = (TypeVariable) o;
+        TypeVariable that = (TypeVariable) o;
         return (this.reference.equals(that.reference) &&
                 set(this.constraints).equals(set(that.constraints)));
     }

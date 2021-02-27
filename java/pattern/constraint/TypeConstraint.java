@@ -184,7 +184,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Label that = (Label) o;
+            Label that = (Label) o;
             return (Objects.equals(this.scope, that.scope) && this.label.equals(that.label));
         }
 
@@ -256,7 +256,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Sub that = (Sub) o;
+            Sub that = (Sub) o;
             return (this.type.equals(that.type) && this.isExplicit == that.isExplicit);
         }
 
@@ -335,7 +335,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final ValueType that = (ValueType) o;
+            ValueType that = (ValueType) o;
             return (this.valueType.equals(that.valueType));
         }
 
@@ -383,7 +383,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public boolean equals(Object o) {
             if (o == this) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Regex that = (Regex) o;
+            Regex that = (Regex) o;
             return (this.regex.pattern().equals(that.regex.pattern()));
         }
 
@@ -477,7 +477,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Owns that = (Owns) o;
+            Owns that = (Owns) o;
             return (this.attributeType.equals(that.attributeType) &&
                     Objects.equals(this.overriddenAttributeType, that.overriddenAttributeType) &&
                     this.isKey == that.isKey);
@@ -551,7 +551,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public Set<TypeVariable> variables() {
-            final Set<TypeVariable> variables = new HashSet<>();
+            Set<TypeVariable> variables = new HashSet<>();
             variables.add(roleType);
             if (relationType != null) variables.add(relationType);
             if (overriddenRoleType != null) variables.add(overriddenRoleType);
@@ -584,7 +584,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Plays that = (Plays) o;
+            Plays that = (Plays) o;
             return (this.roleType.equals(that.roleType) &&
                     Objects.equals(this.relationType, that.relationType) &&
                     Objects.equals(this.overriddenRoleType, that.overriddenRoleType));
@@ -674,7 +674,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            final StringBuilder syntax = new StringBuilder();
+            StringBuilder syntax = new StringBuilder();
             syntax.append(RELATES).append(SPACE);
             if (!roleType.label().isPresent()) syntax.append(roleType);
             else syntax.append(roleType.label().get().label());
@@ -690,7 +690,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Relates that = (Relates) o;
+            Relates that = (Relates) o;
             return (this.roleType.equals(that.roleType) &&
                     Objects.equals(this.overriddenRoleType, that.overriddenRoleType));
         }

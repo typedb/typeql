@@ -52,7 +52,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testComplexQueryToString() {
-        final GraqlMatch query = match(
+        GraqlMatch query = match(
                 var("x").isa("movie"),
                 var().rel("x").rel("y"),
                 or(
@@ -100,13 +100,13 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithRuleThenToString() {
-        final GraqlDefine query = Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;"))).then(Graql.parseVariable("$x has name 'Ghostbusters'").asThing()));
+        GraqlDefine query = Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;"))).then(Graql.parseVariable("$x has name 'Ghostbusters'").asThing()));
         assertValidToString(query);
     }
 
     private void assertValidToString(GraqlQuery query) {
         //No need to execute the insert query
-        final GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
+        GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
     }
 
@@ -133,28 +133,28 @@ public class GraqlQueryTest {
 
     @Test
     public void testComputeQuerySubgraphToString() {
-        final GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
+        GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
         assertEquivalent(query, "compute centrality in [movie, person], using degree;");
     }
 
     @Test
     public void testClusterToString() {
-        final GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
+        GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
         assertEquivalent(connectedcomponent, "compute cluster in [movie, person], using connected-component;");
 
-        final GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
+        GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
         assertEquivalent(kcore, "compute cluster in [movie, person], using k-core;");
     }
 
     @Test
     public void testCCSizeToString() {
-        final GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
+        GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
         assertEquivalent(query, "compute cluster in [movie, person], using connected-component, where size=10;");
     }
 
     @Test
     public void testKCoreToString() {
-        final GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
+        GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
         assertEquivalent(query, "compute cluster in [movie, person], using k-core, where k=10;");
     }
 
@@ -174,7 +174,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testMatchInsertToString() {
-        final GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
+        GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
         assertEquals("match $x isa movie;\ninsert $x has title \"hello\";", query.toString());
     }
 

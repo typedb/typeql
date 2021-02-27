@@ -79,7 +79,7 @@ public abstract class GraqlWritable extends GraqlQuery {
 
         @Override
         public String toString() {
-            final StringBuilder query = new StringBuilder();
+            StringBuilder query = new StringBuilder();
 
             if (match != null) query.append(match).append(NEW_LINE);
             query.append(keyword);
@@ -96,7 +96,7 @@ public abstract class GraqlWritable extends GraqlQuery {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final InsertOrDelete that = (InsertOrDelete) o;
+            InsertOrDelete that = (InsertOrDelete) o;
             return (this.keyword.equals(that.keyword) &&
                     Objects.equals(this.match, that.match) &&
                     this.variables.equals(that.variables));

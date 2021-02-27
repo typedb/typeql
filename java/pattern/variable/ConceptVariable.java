@@ -72,7 +72,7 @@ public class ConceptVariable extends BoundVariable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final ConceptVariable that = (ConceptVariable) o;
+        ConceptVariable that = (ConceptVariable) o;
         return (this.reference.equals(that.reference) &&
                 Objects.equals(this.isConstraint, that.isConstraint));
     }

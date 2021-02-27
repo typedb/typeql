@@ -47,7 +47,7 @@ public class Strings {
         if (value instanceof String) {
             return quoteString((String) value);
         } else if (value instanceof Double) {
-            final DecimalFormat df = new DecimalFormat("#", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+            DecimalFormat df = new DecimalFormat("#", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
             df.setMinimumFractionDigits(1);
             df.setMaximumFractionDigits(12);
             df.setMinimumIntegerDigits(1);

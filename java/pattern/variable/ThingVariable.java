@@ -123,7 +123,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !ThingVariable.class.isAssignableFrom(o.getClass())) return false;
-        final ThingVariable<?> that = (ThingVariable<?>) o;
+        ThingVariable<?> that = (ThingVariable<?>) o;
 
         return (this.reference.equals(that.reference) && this.constraints.equals(that.constraints));
     }
@@ -159,10 +159,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public String toString() {
-            final StringBuilder syntax = new StringBuilder();
+            StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(reference.syntax());
 
-            final String constraints = Stream.of(thingSyntax(), hasSyntax())
+            String constraints = Stream.of(thingSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
             if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
@@ -193,11 +193,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public String toString() {
             assert relation().isPresent();
-            final StringBuilder syntax = new StringBuilder();
+            StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(relation().get());
 
-            final String constraints = Stream.of(isaSyntax(), hasSyntax())
+            String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
             if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);
@@ -221,11 +221,11 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public String toString() {
             assert value().isPresent();
-            final StringBuilder syntax = new StringBuilder();
+            StringBuilder syntax = new StringBuilder();
             if (isVisible()) syntax.append(reference.syntax()).append(SPACE);
             syntax.append(value().get());
 
-            final String constraints = Stream.of(isaSyntax(), hasSyntax())
+            String constraints = Stream.of(isaSyntax(), hasSyntax())
                     .filter(s -> !s.isEmpty()).collect(joining(COMMA_SPACE.toString()));
 
             if (!constraints.isEmpty()) syntax.append(SPACE).append(constraints);

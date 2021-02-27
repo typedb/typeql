@@ -59,7 +59,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     @Override
     public Disjunction<Conjunction<Conjunctable>> normalise() {
         if (normalised == null) {
-            final List<Conjunction<Conjunctable>> conjunctions = patterns.stream().flatMap(p -> {
+            List<Conjunction<Conjunctable>> conjunctions = patterns.stream().flatMap(p -> {
                 if (p.isVariable()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
                 else if (p.isNegation())
                     return Stream.of(new Conjunction<>(list(p.asNegation().normalise().asConjunctable())));
@@ -79,15 +79,15 @@ public class Disjunction<T extends Pattern> implements Pattern {
 
     @Override
     public String toString() {
-        final StringBuilder syntax = new StringBuilder();
+        StringBuilder syntax = new StringBuilder();
 
-        final Iterator<T> patternIter = patterns.iterator();
+        Iterator<T> patternIter = patterns.iterator();
         while (patternIter.hasNext()) {
-            final Pattern pattern = patternIter.next();
+            Pattern pattern = patternIter.next();
             syntax.append(CURLY_OPEN).append(SPACE);
 
             if (pattern.isConjunction()) {
-                final Stream<? extends Pattern> patterns = pattern.asConjunction().patterns().stream();
+                Stream<? extends Pattern> patterns = pattern.asConjunction().patterns().stream();
                 syntax.append(patterns.map(Object::toString).collect(joining("" + SEMICOLON + SPACE)));
             } else {
                 syntax.append(pattern);
@@ -102,7 +102,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final Disjunction<?> that = (Disjunction<?>) o;
+        Disjunction<?> that = (Disjunction<?>) o;
         return Objects.equals(patterns, that.patterns);
     }
 

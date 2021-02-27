@@ -137,7 +137,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             StringBuilder syntax = new StringBuilder();
             if (!filter.isEmpty()) {
                 syntax.append(GET);
-                final String varsStr = filter.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
+                String varsStr = filter.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
                 syntax.append(SPACE).append(varsStr);
                 syntax.append(SEMICOLON);
             }
@@ -148,10 +148,10 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            final Modifiers modifiers = (Modifiers) o;
+            Modifiers modifiers = (Modifiers) o;
             return Objects.equals(filter, modifiers.filter) && Objects.equals(sorting, modifiers.sorting)
                     && Objects.equals(offset, modifiers.offset) && Objects.equals(limit, modifiers.limit);
         }
@@ -189,7 +189,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     private void sortVarsArInScope() {
-        final List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
+        List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
         if (modifiers.sorting != null && !sortableVars.contains(modifiers.sorting.var())) {
             throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.var()));
         }
@@ -235,7 +235,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     @Override
     public String toString() {
-        final StringBuilder query = new StringBuilder();
+        StringBuilder query = new StringBuilder();
         query.append(GraqlToken.Command.MATCH);
 
         if (conjunction.patterns().size() > 1) query.append(NEW_LINE);
@@ -259,7 +259,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
         }
-        final GraqlMatch that = (GraqlMatch) o;
+        GraqlMatch that = (GraqlMatch) o;
         return Objects.equals(this.conjunction, that.conjunction) && Objects.equals(this.modifiers, that.modifiers);
     }
 
@@ -284,7 +284,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         public GraqlMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {
-            final List<UnboundVariable> varList = new ArrayList<>();
+            List<UnboundVariable> varList = new ArrayList<>();
             varList.add(var);
             varList.addAll(Arrays.asList(vars));
             return get(varList);
@@ -426,7 +426,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
         @Override
         public final String toString() {
-            final StringBuilder query = new StringBuilder();
+            StringBuilder query = new StringBuilder();
 
             if (match().modifiers().filter().isEmpty() && match().conjunction().patterns().size() > 1) {
                 query.append(match()).append(NEW_LINE);
@@ -444,7 +444,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final Aggregate that = (Aggregate) o;
+            Aggregate that = (Aggregate) o;
             return this.query.equals(that.query) && this.method.equals(that.method) && Objects.equals(this.var, that.var);
         }
 
@@ -492,7 +492,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
         @Override
         public String toString() {
-            final StringBuilder query = new StringBuilder();
+            StringBuilder query = new StringBuilder();
 
             if (match().modifiers().filter.isEmpty() && match().conjunction().patterns().size() > 1) {
                 query.append(match()).append(NEW_LINE);
@@ -507,7 +507,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            final Group that = (Group) o;
+            Group that = (Group) o;
             return this.query.equals(that.query) && this.var.equals(that.var);
         }
 
@@ -559,7 +559,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
             @Override
             public final String toString() {
-                final StringBuilder query = new StringBuilder();
+                StringBuilder query = new StringBuilder();
 
                 if (group().match().modifiers().filter.isEmpty() && group().match().conjunction().patterns().size() > 1) {
                     query.append(group().match()).append(NEW_LINE);
@@ -578,7 +578,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
-                final Aggregate that = (Aggregate) o;
+                Aggregate that = (Aggregate) o;
                 return this.group.equals(that.group) && this.method.equals(that.method)
                         && Objects.equals(this.var, that.var);
             }
