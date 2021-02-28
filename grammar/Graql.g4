@@ -54,9 +54,9 @@ query_match_aggregate :   query_match   match_aggregate   ;
 query_match_group     :   query_match   match_group       ;
 query_match_group_agg :   query_match   match_group       match_aggregate  ;
 
-// MATCH QUERY FILTERS =========================================================
+// MATCH QUERY MODIFIERS =======================================================
 
-modifiers             : ( filter';' )? ( sort';' )? ( offset';' )? ( limit';' )?  ;
+modifiers             : ( filter';' )? ( sort';' )? ( offset';' )? ( limit';' )?;
 
 filter                :   FILTER      VAR_  ( ',' VAR_ )*   ;
 sort                  :   SORT        VAR_        ORDER_?   ;
