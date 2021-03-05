@@ -127,47 +127,6 @@ public class GraqlQueryTest {
     }
 
     @Test
-    public void testComputeQueryToString() {
-        assertEquals("compute count;", Graql.compute().count().toString());
-    }
-
-    @Test
-    public void testComputeQuerySubgraphToString() {
-        GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
-        assertEquivalent(query, "compute centrality in [movie, person], using degree;");
-    }
-
-    @Test
-    public void testClusterToString() {
-        GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
-        assertEquivalent(connectedcomponent, "compute cluster in [movie, person], using connected-component;");
-
-        GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
-        assertEquivalent(kcore, "compute cluster in [movie, person], using k-core;");
-    }
-
-    @Test
-    public void testCCSizeToString() {
-        GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
-        assertEquivalent(query, "compute cluster in [movie, person], using connected-component, where size=10;");
-    }
-
-    @Test
-    public void testKCoreToString() {
-        GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
-        assertEquivalent(query, "compute cluster in [movie, person], using k-core, where k=10;");
-    }
-
-    @Test
-    public void testCentralityOf() {
-        GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person").of("person");
-        assertEquivalent(query, "compute centrality of person, in [movie, person], using degree;");
-
-        query = Graql.compute().centrality().using(K_CORE).in("movie", "person").of("person").where(minK(5));
-        assertEquivalent(query, "compute centrality of person, in [movie, person], using k-core, where min-k=5;");
-    }
-
-    @Test
     public void testRepeatRoleplayerToString() {
         assertEquals("match ($x, $x);", match(rel("x").rel("x")).toString());
     }

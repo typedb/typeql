@@ -50,10 +50,10 @@ build:
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
-    test-graql-java:
+    test-graql:
       image: graknlabs-ubuntu-20.04
       command: |
-        bazel test //java/... --test_output=errors
+        bazel test //... --test_output=errors
     deploy-maven-snapshot:
       filter:
         owner: graknlabs
