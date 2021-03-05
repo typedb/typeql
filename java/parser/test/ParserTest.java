@@ -113,15 +113,6 @@ public class ParserTest {
     }
 
     @Test
-    public void testLabesWithSpecialCharacters() {
-        String query = "define col_a+123_0x[abc]_0b/(1100) sub entity;";
-        GraqlDefine parsed = Graql.parseQuery(query).asDefine();
-        GraqlDefine expected = Graql.define(type("col_a+123_0x[abc]_0b/(1100)").sub("entity"));
-
-        assertQueryEquals(expected, parsed, query);
-    }
-
-    @Test
     public void testParseStringWithSlash() {
         final String query = "match $x isa person, has name 'alice/bob';";
         GraqlMatch parsed = Graql.parseQuery(query).asMatch();
@@ -952,6 +943,118 @@ public class ParserTest {
     }
 
     // ===============================================================================================================//
+    // Test Graql Compute queries
+    // ===============================================================================================================//
+    @Test
+    public void testParseComputeCount() {
+        assertParseEquivalence("compute count;");
+    }
+
+    @Test
+    public void testParseComputeCountWithSubgraph() {
+        assertParseEquivalence("compute count in [movie, person];");
+    }
+
+    @Test
+    public void testParseComputeClusterUsingCC() {
+        assertParseEquivalence("compute cluster in [movie, person], using connected-component;");
+    }
+
+    @Test
+    public void testParseComputeClusterUsingCCWithSize() {
+        GraqlCompute expected = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
+        GraqlCompute parsed = Graql.parseQuery(
+                "compute cluster in [movie, person], using connected-component, where [size = 10];").asComputeCluster();
+
+        assertEquals(expected, parsed);
+    }
+
+    @Test
+    public void testParseComputeClusterUsingCCWithSizeTwice() {
+        GraqlCompute expected =
+                Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10), size(15));
+
+        GraqlCompute parsed = Graql.parseQuery(
+                "compute cluster in [movie, person], using connected-component, where [size = 10, size = 15];").asComputeCluster();
+
+        assertEquals(expected, parsed);
+    }
+
+    @Test
+    public void testParseComputeClusterUsingKCore() {
+        assertParseEquivalence("compute cluster in [movie, person], using k-core;");
+    }
+
+    @Test
+    public void testParseComputeClusterUsingKCoreWithK() {
+        GraqlCompute expected = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
+        GraqlCompute parsed = Graql.parseQuery(
+                "compute cluster in [movie, person], using k-core, where k = 10;").asComputeCluster();
+
+        assertEquals(expected, parsed);
+    }
+
+    @Test
+    public void testParseComputeClusterUsingKCoreWithKTwice() {
+        GraqlCompute expected = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
+        GraqlCompute parsed = Graql.parseQuery(
+                "compute cluster in [movie, person], using k-core, where [k = 5, k = 10];").asComputeCluster();
+
+        assertEquals(expected, parsed);
+    }
+
+    @Test
+    public void testParseComputeDegree() {
+        assertParseEquivalence("compute centrality in movie, using degree;");
+    }
+
+    @Test
+    public void testParseComputeCoreness() {
+        assertParseEquivalence("compute centrality in movie, using k-core, where min-k=3;");
+    }
+
+    @Test
+    public void testParseComputeMax() {
+        assertParseEquivalence("compute max of person, in movie;");
+    }
+
+    @Test
+    public void testParseComputeMean() {
+        assertParseEquivalence("compute mean of person, in movie;");
+    }
+
+    @Test
+    public void testParseComputeMedian() {
+        assertParseEquivalence("compute median of person, in movie;");
+    }
+
+    @Test
+    public void testParseComputeMin() {
+        assertParseEquivalence("compute min of movie, in person;");
+    }
+
+    @Test
+    public void testParseComputePath() {
+        assertParseEquivalence("compute path from 0x83cb2, to 0x4ba92, in person;");
+    }
+
+    @Test
+    public void testParseComputePathWithMultipleInTypes() {
+        assertParseEquivalence("compute path from 0x83cb2, to 0x4ba92, in [person, marriage];");
+    }
+
+    @Test
+    public void testParseComputeStd() {
+        assertParseEquivalence("compute std of movie;");
+    }
+
+    @Test
+    public void testParseComputeSum() {
+        assertParseEquivalence("compute sum of movie, in person;");
+    }
+
+    // ===============================================================================================================//
+
 
     @Test
     public void whenParseIncorrectSyntax_ThrowGraqlSyntaxExceptionWithHelpfulError() {

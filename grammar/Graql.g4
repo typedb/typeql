@@ -359,7 +359,6 @@ fragment TYPE_CHAR_H_     : 'A'..'Z' | 'a'..'z'
 fragment TYPE_CHAR_T_     : TYPE_CHAR_H_
                           | '0'..'9'
                           | '_' | '-' | '+' | '/'
-                          | '[' | ']' | '(' | ')'
                           | '\u00B7'
                           | '\u0300'..'\u036F'
                           | '\u203F'..'\u2040'
