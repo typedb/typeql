@@ -113,6 +113,15 @@ public class ParserTest {
     }
 
     @Test
+    public void testLabesWithSpecialCharacters() {
+        String query = "define col_a+123_0x[abc]_0b/(1100) sub entity;";
+        GraqlDefine parsed = Graql.parseQuery(query).asDefine();
+        GraqlDefine expected = Graql.define(type("col_a+123_0x[abc]_0b/(1100)").sub("entity"));
+
+        assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
     public void testParseStringWithSlash() {
         final String query = "match $x isa person, has name 'alice/bob';";
         GraqlMatch parsed = Graql.parseQuery(query).asMatch();
