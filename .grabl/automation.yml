@@ -53,7 +53,7 @@ build:
     test-graql:
       image: graknlabs-ubuntu-20.04
       command: |
-        bazel test //... --test_output=errors
+        bazel test //java/... --test_output=errors
     deploy-maven-snapshot:
       filter:
         owner: graknlabs
