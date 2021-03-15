@@ -81,6 +81,10 @@ public class Graql {
         return parser.parseVariableEOF(variable);
     }
 
+    public static String parseLabel(String label) {
+        return parser.parseLabelEOF(label);
+    }
+
     public static GraqlMatch.Unfiltered match(Pattern... patterns) {
         return match(Arrays.asList(patterns));
     }

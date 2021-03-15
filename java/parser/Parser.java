@@ -168,6 +168,10 @@ public class Parser extends GraqlBaseVisitor {
         return parse(variableString, GraqlParser::eof_variable, this::visitEof_variable);
     }
 
+    public String parseLabelEOF(String labelString) {
+        return parse(labelString, GraqlParser::eof_label, this::visitEof_label);
+    }
+
     public Definable parseSchemaRuleEOF(String ruleString) {
         return parse(ruleString, GraqlParser::eof_schema_rule, this::visitEof_schema_rule);
     }
@@ -215,6 +219,11 @@ public class Parser extends GraqlBaseVisitor {
     @Override
     public BoundVariable visitEof_variable(GraqlParser.Eof_variableContext ctx) {
         return visitPattern_variable(ctx.pattern_variable());
+    }
+
+    @Override
+    public String visitEof_label(GraqlParser.Eof_labelContext ctx) {
+        return ctx.label().getText();
     }
 
     @Override
