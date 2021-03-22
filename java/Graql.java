@@ -53,7 +53,6 @@ import static graql.lang.common.GraqlToken.Predicate.Equality.NEQ;
 import static graql.lang.common.GraqlToken.Predicate.SubString.CONTAINS;
 import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
 import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CHAR_IN_LABEL;
-import static graql.lang.common.exception.ErrorMessage.PARSED_LABEL_DIFFERS_FROM_RAW;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
 public class Graql {
@@ -91,7 +90,7 @@ public class Graql {
         } catch (GraqlException e) {
             throw GraqlException.of(ILLEGAL_CHAR_IN_LABEL.message(label));
         }
-        if (!parsedLabel.equals(label)) throw GraqlException.of(PARSED_LABEL_DIFFERS_FROM_RAW.message(label, parsedLabel));
+        if (!parsedLabel.equals(label)) throw GraqlException.of(ILLEGAL_CHAR_IN_LABEL.message(label)); // e.g: 'abc#123'
         return parsedLabel;
     }
 

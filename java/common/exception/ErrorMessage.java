@@ -97,8 +97,6 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
             new ErrorMessage(38, "Illegal grammar!");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
             new ErrorMessage(39, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
-    public static final ErrorMessage PARSED_LABEL_DIFFERS_FROM_RAW =
-            new ErrorMessage(40, "'%s' is not a valid Type label, because it mutates when parsed. The parsed value is '%s'.");
 
 
     private static final String codePrefix = "GQL";
