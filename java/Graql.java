@@ -18,6 +18,7 @@
 package graql.lang;
 
 import graql.lang.common.GraqlToken;
+import graql.lang.common.exception.GraqlException;
 import graql.lang.parser.Parser;
 import graql.lang.pattern.Conjunction;
 import graql.lang.pattern.Definable;
@@ -51,6 +52,8 @@ import static graql.lang.common.GraqlToken.Predicate.Equality.LTE;
 import static graql.lang.common.GraqlToken.Predicate.Equality.NEQ;
 import static graql.lang.common.GraqlToken.Predicate.SubString.CONTAINS;
 import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
+import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CHAR_IN_LABEL;
+import static graql.lang.common.exception.ErrorMessage.PARSED_LABEL_DIFFERS_FROM_RAW;
 import static graql.lang.pattern.variable.UnboundVariable.hidden;
 
 public class Graql {
@@ -82,7 +85,14 @@ public class Graql {
     }
 
     public static String parseLabel(String label) {
-        return parser.parseLabelEOF(label);
+        String parsedLabel;
+        try {
+            parsedLabel = parser.parseLabelEOF(label);
+        } catch (GraqlException e) {
+            throw GraqlException.of(ILLEGAL_CHAR_IN_LABEL.message(label));
+        }
+        if (!parsedLabel.equals(label)) throw GraqlException.of(PARSED_LABEL_DIFFERS_FROM_RAW.message(label, parsedLabel));
+        return parsedLabel;
     }
 
     public static GraqlMatch.Unfiltered match(Pattern... patterns) {
