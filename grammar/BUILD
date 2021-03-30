@@ -48,7 +48,7 @@ checkstyle_test(
 assemble_maven(
   name = "assemble-maven",
   target = ":java",
-  package = "grammar",
+  source_jar_prefix = "graql/grammar/",
   workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
 )
 

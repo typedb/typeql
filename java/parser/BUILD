@@ -46,7 +46,7 @@ java_library(
 assemble_maven(
   name = "assemble-maven",
   target = ":parser",
-  package = "java",
+  source_jar_prefix = "graql/java/parser/",
   workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
 )
 

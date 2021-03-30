@@ -44,7 +44,7 @@ java_library(
 assemble_maven(
   name = "assemble-maven",
   target = ":query",
-  package = "java",
+  source_jar_prefix = "graql/java/query/",
   workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
 )
 
