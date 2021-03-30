@@ -55,7 +55,11 @@ public abstract class Reference {
         return type;
     }
 
-    public abstract String syntax();
+    public abstract String name();
+
+    public String syntax() {
+        return GraqlToken.Char.$_ + name();
+    }
 
     protected boolean isVisible() {
         return isVisible;
@@ -136,11 +140,6 @@ public abstract class Reference {
         }
 
         @Override
-        public String syntax() {
-            return GraqlToken.Char.$ + name;
-        }
-
-        @Override
         public Name asName() {
             return this;
         }
@@ -172,13 +171,8 @@ public abstract class Reference {
             this.hash = Objects.hash(this.type, this.isVisible, this.label);
         }
 
-        String label() {
+        public String name() {
             return label;
-        }
-
-        @Override
-        public String syntax() {
-            return GraqlToken.Char.$_ + label;
         }
 
         @Override
@@ -211,9 +205,8 @@ public abstract class Reference {
             this.hash = Objects.hash(this.type, this.isVisible);
         }
 
-        @Override
-        public String syntax() {
-            return GraqlToken.Char.$_.toString();
+        public String name() {
+            return GraqlToken.Char.UNDERSCORE.toString();
         }
 
         @Override
