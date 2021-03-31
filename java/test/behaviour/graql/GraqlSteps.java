@@ -86,6 +86,8 @@ public class GraqlSteps {
     @Given("graql define throws")
     @Given("graql undefine throws")
     @Given("graql match; throws exception")
+    @Given("graql match group; throws exception")
+    @Given("graql match aggregate; throws exception")
     @Given("graql insert; throws exception")
     @Given("graql delete; throws exception")
     @Given("graql define; throws exception")
