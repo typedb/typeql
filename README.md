@@ -1,4 +1,4 @@
-[![Grabl](https://grabl.io/api/status/graknlabs/graql/badge.svg)](https://grabl.io/graknlabs/graql)
+[![Grabl](https://grabl.io/api/status/vaticle/typeql/badge.svg)](https://grabl.io/vaticle/typeql)
 [![GitHub release](https://img.shields.io/github/release/graknlabs/graql.svg)](https://github.com/graknlabs/graql/releases/latest)
 [![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff)](https://grakn.ai/discord)
 [![Discussion Forum](https://img.shields.io/discourse/https/discuss.grakn.ai/topics.svg)](https://discuss.grakn.ai)
