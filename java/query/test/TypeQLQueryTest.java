@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,35 +15,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query.test;
+package com.vaticle.typeql.lang.query.test;
 
-import graql.lang.Graql;
-import graql.lang.common.GraqlArg;
-import graql.lang.query.GraqlCompute;
-import graql.lang.query.GraqlDefine;
-import graql.lang.query.GraqlInsert;
-import graql.lang.query.GraqlMatch;
-import graql.lang.query.GraqlQuery;
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.query.TypeQLCompute;
+import com.vaticle.typeql.lang.query.TypeQLDefine;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
-import static graql.lang.Graql.and;
-import static graql.lang.Graql.lte;
-import static graql.lang.Graql.match;
-import static graql.lang.Graql.or;
-import static graql.lang.Graql.rel;
-import static graql.lang.Graql.rule;
-import static graql.lang.Graql.type;
-import static graql.lang.Graql.var;
-import static graql.lang.common.GraqlArg.Algorithm.CONNECTED_COMPONENT;
-import static graql.lang.common.GraqlArg.Algorithm.DEGREE;
-import static graql.lang.common.GraqlArg.Algorithm.K_CORE;
-import static graql.lang.query.GraqlCompute.Argument.k;
-import static graql.lang.query.GraqlCompute.Argument.minK;
-import static graql.lang.query.GraqlCompute.Argument.size;
+import static com.vaticle.typeql.lang.TypeQL.and;
+import static com.vaticle.typeql.lang.TypeQL.lte;
+import static com.vaticle.typeql.lang.TypeQL.match;
+import static com.vaticle.typeql.lang.TypeQL.or;
+import static com.vaticle.typeql.lang.TypeQL.rel;
+import static com.vaticle.typeql.lang.TypeQL.rule;
+import static com.vaticle.typeql.lang.TypeQL.type;
+import static com.vaticle.typeql.lang.TypeQL.var;
+import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.CONNECTED_COMPONENT;
+import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.DEGREE;
+import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.K_CORE;
+import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.k;
+import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.minK;
+import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.size;
 import static org.junit.Assert.assertEquals;
 
-// TODO: This test should be split into one Graql query test class each
-public class GraqlQueryTest {
+// TODO: This test should be split into one TypeQL query test class each
+public class TypeQLQueryTest {
 
     @Test
     public void testSimpleGetQueryToString() {
@@ -52,7 +52,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testComplexQueryToString() {
-        GraqlMatch query = match(
+        TypeQLMatch query = match(
                 var("x").isa("movie"),
                 var().rel("x").rel("y"),
                 or(
@@ -90,7 +90,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(match(var("x").value(GraqlArg.ValueType.LONG)));
+        assertSameStringRepresentation(match(var("x").value(TypeQLArg.ValueType.LONG)));
     }
 
     @Test
@@ -100,70 +100,70 @@ public class GraqlQueryTest {
 
     @Test
     public void testQueryWithRuleThenToString() {
-        GraqlDefine query = Graql.define(rule("a-rule").when(and(Graql.parsePatterns("$x isa movie;"))).then(Graql.parseVariable("$x has name 'Ghostbusters'").asThing()));
+        TypeQLDefine query = TypeQL.define(rule("a-rule").when(and(TypeQL.parsePatterns("$x isa movie;"))).then(TypeQL.parseVariable("$x has name 'Ghostbusters'").asThing()));
         assertValidToString(query);
     }
 
-    private void assertValidToString(GraqlQuery query) {
+    private void assertValidToString(TypeQLQuery query) {
         //No need to execute the insert query
-        GraqlQuery parsedQuery = Graql.parseQuery(query.toString());
+        TypeQLQuery parsedQuery = TypeQL.parseQuery(query.toString());
         assertEquals(query.toString(), parsedQuery.toString());
     }
 
     @Test
     public void testInsertQueryToString() {
-        assertEquals("insert $x isa movie;", Graql.insert(var("x").isa("movie")).toString());
+        assertEquals("insert $x isa movie;", TypeQL.insert(var("x").isa("movie")).toString());
     }
 
     @Test
     public void testEscapeStrings() {
-        assertEquals("insert $x \"hello\nworld\";", Graql.insert(var("x").eq("hello\nworld")).toString());
-        assertEquals("insert $x \"hello\\nworld\";", Graql.insert(var("x").eq("hello\\nworld")).toString());
+        assertEquals("insert $x \"hello\nworld\";", TypeQL.insert(var("x").eq("hello\nworld")).toString());
+        assertEquals("insert $x \"hello\\nworld\";", TypeQL.insert(var("x").eq("hello\\nworld")).toString());
     }
 
     @Test
     public void testOwns() {
-        assertEquals("define person owns thingy;", Graql.define(type("person").owns("thingy")).toString());
+        assertEquals("define person owns thingy;", TypeQL.define(type("person").owns("thingy")).toString());
     }
 
     @Test
     public void testComputeQueryToString() {
-        assertEquals("compute count;", Graql.compute().count().toString());
+        assertEquals("compute count;", TypeQL.compute().count().toString());
     }
 
     @Test
     public void testComputeQuerySubgraphToString() {
-        GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person");
+        TypeQLCompute query = TypeQL.compute().centrality().using(DEGREE).in("movie", "person");
         assertEquivalent(query, "compute centrality in [movie, person], using degree;");
     }
 
     @Test
     public void testClusterToString() {
-        GraqlCompute connectedcomponent = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
+        TypeQLCompute connectedcomponent = TypeQL.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
         assertEquivalent(connectedcomponent, "compute cluster in [movie, person], using connected-component;");
 
-        GraqlCompute kcore = Graql.compute().cluster().using(K_CORE).in("movie", "person");
+        TypeQLCompute kcore = TypeQL.compute().cluster().using(K_CORE).in("movie", "person");
         assertEquivalent(kcore, "compute cluster in [movie, person], using k-core;");
     }
 
     @Test
     public void testCCSizeToString() {
-        GraqlCompute query = Graql.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
+        TypeQLCompute query = TypeQL.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
         assertEquivalent(query, "compute cluster in [movie, person], using connected-component, where size=10;");
     }
 
     @Test
     public void testKCoreToString() {
-        GraqlCompute query = Graql.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
+        TypeQLCompute query = TypeQL.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
         assertEquivalent(query, "compute cluster in [movie, person], using k-core, where k=10;");
     }
 
     @Test
     public void testCentralityOf() {
-        GraqlCompute query = Graql.compute().centrality().using(DEGREE).in("movie", "person").of("person");
+        TypeQLCompute query = TypeQL.compute().centrality().using(DEGREE).in("movie", "person").of("person");
         assertEquivalent(query, "compute centrality of person, in [movie, person], using degree;");
 
-        query = Graql.compute().centrality().using(K_CORE).in("movie", "person").of("person").where(minK(5));
+        query = TypeQL.compute().centrality().using(K_CORE).in("movie", "person").of("person").where(minK(5));
         assertEquivalent(query, "compute centrality of person, in [movie, person], using k-core, where min-k=5;");
     }
 
@@ -174,7 +174,7 @@ public class GraqlQueryTest {
 
     @Test
     public void testMatchInsertToString() {
-        GraqlInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
+        TypeQLInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
         assertEquals("match $x isa movie;\ninsert $x has title \"hello\";", query.toString());
     }
 
@@ -197,15 +197,15 @@ public class GraqlQueryTest {
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
         final String query = "match $x isa movie;\n" +
                 "delete $x isa movie;";
-        assertEquals(query, Graql.parseQuery(query).toString());
+        assertEquals(query, TypeQL.parseQuery(query).toString());
     }
 
-    private void assertSameStringRepresentation(GraqlMatch query) {
-        assertEquals(query.toString(), Graql.parseQuery(query.toString()).toString());
+    private void assertSameStringRepresentation(TypeQLMatch query) {
+        assertEquals(query.toString(), TypeQL.parseQuery(query.toString()).toString());
     }
 
-    private void assertEquivalent(GraqlQuery query, String queryString) {
+    private void assertEquivalent(TypeQLQuery query, String queryString) {
         assertEquals(queryString, query.toString());
-        assertEquals(query.toString(), Graql.parseQuery(queryString).toString());
+        assertEquals(query.toString(), TypeQL.parseQuery(queryString).toString());
     }
 }

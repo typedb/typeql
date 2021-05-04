@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,55 +15,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang;
+package com.vaticle.typeql.lang;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.parser.Parser;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Definable;
-import graql.lang.pattern.Disjunction;
-import graql.lang.pattern.Negation;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.schema.Rule;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.query.GraqlCompute;
-import graql.lang.query.GraqlDefine;
-import graql.lang.query.GraqlInsert;
-import graql.lang.query.GraqlMatch;
-import graql.lang.query.GraqlQuery;
-import graql.lang.query.GraqlUndefine;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.parser.Parser;
+import com.vaticle.typeql.lang.pattern.Conjunction;
+import com.vaticle.typeql.lang.pattern.Definable;
+import com.vaticle.typeql.lang.pattern.Disjunction;
+import com.vaticle.typeql.lang.pattern.Negation;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.schema.Rule;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.query.TypeQLCompute;
+import com.vaticle.typeql.lang.query.TypeQLDefine;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLQuery;
+import com.vaticle.typeql.lang.query.TypeQLUndefine;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
-import static graql.lang.common.GraqlToken.Predicate.Equality.GT;
-import static graql.lang.common.GraqlToken.Predicate.Equality.GTE;
-import static graql.lang.common.GraqlToken.Predicate.Equality.LT;
-import static graql.lang.common.GraqlToken.Predicate.Equality.LTE;
-import static graql.lang.common.GraqlToken.Predicate.Equality.NEQ;
-import static graql.lang.common.GraqlToken.Predicate.SubString.CONTAINS;
-import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CHAR_IN_LABEL;
-import static graql.lang.pattern.variable.UnboundVariable.hidden;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GTE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LTE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CHAR_IN_LABEL;
+import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
 
-public class Graql {
+public class TypeQL {
 
     private static final Parser parser = new Parser();
 
-    public static <T extends GraqlQuery> T parseQuery(String queryString) {
+    public static <T extends TypeQLQuery> T parseQuery(String queryString) {
         return parser.parseQueryEOF(queryString);
     }
 
-    public static <T extends GraqlQuery> Stream<T> parseQueries(String queryString) {
+    public static <T extends TypeQLQuery> Stream<T> parseQueries(String queryString) {
         return parser.parseQueriesEOF(queryString);
     }
 
@@ -87,47 +87,48 @@ public class Graql {
         String parsedLabel;
         try {
             parsedLabel = parser.parseLabelEOF(label);
-        } catch (GraqlException e) {
-            throw GraqlException.of(ILLEGAL_CHAR_IN_LABEL.message(label));
+        } catch (TypeQLException e) {
+            throw TypeQLException.of(ILLEGAL_CHAR_IN_LABEL.message(label));
         }
-        if (!parsedLabel.equals(label)) throw GraqlException.of(ILLEGAL_CHAR_IN_LABEL.message(label)); // e.g: 'abc#123'
+        if (!parsedLabel.equals(label))
+            throw TypeQLException.of(ILLEGAL_CHAR_IN_LABEL.message(label)); // e.g: 'abc#123'
         return parsedLabel;
     }
 
-    public static GraqlMatch.Unfiltered match(Pattern... patterns) {
+    public static TypeQLMatch.Unfiltered match(Pattern... patterns) {
         return match(Arrays.asList(patterns));
     }
 
-    public static GraqlMatch.Unfiltered match(List<? extends Pattern> patterns) {
-        return new GraqlMatch.Unfiltered(patterns);
+    public static TypeQLMatch.Unfiltered match(List<? extends Pattern> patterns) {
+        return new TypeQLMatch.Unfiltered(patterns);
     }
 
-    public static GraqlInsert insert(ThingVariable<?>... things) {
-        return new GraqlInsert(list(things));
+    public static TypeQLInsert insert(ThingVariable<?>... things) {
+        return new TypeQLInsert(list(things));
     }
 
-    public static GraqlInsert insert(List<ThingVariable<?>> things) {
-        return new GraqlInsert(things);
+    public static TypeQLInsert insert(List<ThingVariable<?>> things) {
+        return new TypeQLInsert(things);
     }
 
-    public static GraqlDefine define(Definable... definables) {
-        return new GraqlDefine(list(definables));
+    public static TypeQLDefine define(Definable... definables) {
+        return new TypeQLDefine(list(definables));
     }
 
-    public static GraqlDefine define(List<Definable> definables) {
-        return new GraqlDefine(definables);
+    public static TypeQLDefine define(List<Definable> definables) {
+        return new TypeQLDefine(definables);
     }
 
-    public static GraqlUndefine undefine(TypeVariable... types) {
-        return new GraqlUndefine(list(types));
+    public static TypeQLUndefine undefine(TypeVariable... types) {
+        return new TypeQLUndefine(list(types));
     }
 
-    public static GraqlUndefine undefine(List<Definable> definables) {
-        return new GraqlUndefine(definables);
+    public static TypeQLUndefine undefine(List<Definable> definables) {
+        return new TypeQLUndefine(definables);
     }
 
-    public static GraqlCompute.Builder compute() {
-        return new GraqlCompute.Builder();
+    public static TypeQLCompute.Builder compute() {
+        return new TypeQLCompute.Builder();
     }
 
     // Pattern Builder Methods
@@ -166,7 +167,7 @@ public class Graql {
         return UnboundVariable.named(name);
     }
 
-    public static TypeVariable type(GraqlToken.Type type) {
+    public static TypeVariable type(TypeQLToken.Type type) {
         return type(type.toString());
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.pattern.Definable;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.pattern.Definable;
 
 import java.util.List;
 
-public class GraqlDefine extends GraqlDefinable {
+public class TypeQLDefine extends TypeQLDefinable {
 
-    public GraqlDefine(List<Definable> definables) {
-        super(GraqlToken.Command.DEFINE, definables);
+    public TypeQLDefine(List<Definable> definables) {
+        super(TypeQLToken.Command.DEFINE, definables);
     }
 }

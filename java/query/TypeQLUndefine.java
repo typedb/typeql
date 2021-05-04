@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.common.exception;
+package com.vaticle.typeql.lang.query;
 
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.pattern.Definable;
 
-public class GraqlException extends RuntimeException {
+import java.util.List;
 
-    protected GraqlException(String error) {
-        super(error);
-    }
+public class TypeQLUndefine extends TypeQLDefinable {
 
-    public static GraqlException of(ErrorMessage errorMessage) {
-        return new GraqlException(errorMessage.message());
-    }
-
-    public static GraqlException of(String error) {
-        return new GraqlException(error);
+    public TypeQLUndefine(List<Definable> definables) {
+        super(TypeQLToken.Command.UNDEFINE, definables);
     }
 }

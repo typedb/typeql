@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,9 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
+load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
 
 java_library(
     name = "query",
@@ -33,19 +33,19 @@ java_library(
         "//java/pattern:pattern",
 
         # Internal Repository Dependencies
-        "@graknlabs_common//:common",
+        "@vaticle_typedb_common//:common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",
     ],
-    tags = ["maven_coordinates=io.graql:graql-query:{pom_version}"],
+    tags = ["maven_coordinates=com.vaticle.typeql:typeql-query:{pom_version}"],
 )
 
 assemble_maven(
   name = "assemble-maven",
   target = ":query",
-  source_jar_prefix = "graql/java/query/",
-  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
+  source_jar_prefix = "com/vaticle/typeql/java/query/",
+  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(

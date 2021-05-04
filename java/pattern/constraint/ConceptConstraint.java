@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.constraint;
+package com.vaticle.typeql.lang.pattern.constraint;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.ConceptVariable;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.Objects;
 import java.util.Set;
 
-import static grakn.common.collection.Collections.set;
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Constraint.IS;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.IS;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
 
@@ -52,7 +52,7 @@ public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
     }
 
     public ConceptConstraint.Is asIs() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptConstraint.Is.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptConstraint.Is.class)));
     }
 
     public static class Is extends ConceptConstraint {

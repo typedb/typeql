@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.test.deployment.src.test.java;
+package com.vaticle.typeql.lang.test.deployment.src.test.java;
 
-import graql.lang.Graql;
-import graql.lang.query.GraqlMatch;
-import graql.lang.query.GraqlQuery;
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
-import static graql.lang.Graql.and;
-import static graql.lang.Graql.match;
-import static graql.lang.Graql.or;
-import static graql.lang.Graql.rel;
-import static graql.lang.Graql.var;
+import static com.vaticle.typeql.lang.TypeQL.and;
+import static com.vaticle.typeql.lang.TypeQL.match;
+import static com.vaticle.typeql.lang.TypeQL.or;
+import static com.vaticle.typeql.lang.TypeQL.rel;
+import static com.vaticle.typeql.lang.TypeQL.var;
 import static org.junit.Assert.assertEquals;
 
 public class MavenApplicationTest {
-    private void assertQueryEquals(GraqlQuery expected, GraqlQuery parsed, String query) {
+    private void assertQueryEquals(TypeQLQuery expected, TypeQLQuery parsed, String query) {
         assertEquals(expected, parsed);
-        assertEquals(expected, Graql.parseQuery(parsed.toString()));
+        assertEquals(expected, TypeQL.parseQuery(parsed.toString()));
         assertEquals(query, expected.toString());
     }
 
@@ -42,9 +42,9 @@ public class MavenApplicationTest {
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
 
-        GraqlMatch expected = match(
+        TypeQLMatch expected = match(
                 var("brando").eq("Marl B").isa("name"),
                 rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
         ).get("char", "prod");
@@ -58,9 +58,9 @@ public class MavenApplicationTest {
                 "$x isa movie, has title $t;\n" +
                 "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
                 "$t != 'Apocalypse Now';";
-        GraqlMatch parsed = Graql.parseQuery(query).asMatch();
+        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
 
-        GraqlMatch expected = match(
+        TypeQLMatch expected = match(
                 var("x").isa("movie").has("title", var("t")),
                 or(
                         var("t").eq("Apocalypse Now"),

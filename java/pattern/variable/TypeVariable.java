@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.variable;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Definable;
-import graql.lang.pattern.constraint.Constraint;
-import graql.lang.pattern.constraint.TypeConstraint;
-import graql.lang.pattern.variable.builder.TypeVariableBuilder;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.Definable;
+import com.vaticle.typeql.lang.pattern.constraint.Constraint;
+import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
+import com.vaticle.typeql.lang.pattern.variable.builder.TypeVariableBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static grakn.common.collection.Collections.set;
-import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
+import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
 
 public class TypeVariable extends BoundVariable implements TypeVariableBuilder, Definable {
@@ -74,7 +74,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     @Override
     public TypeVariable constrain(TypeConstraint.Label constraint) {
         if (labelConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Label.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Label.class, constraint));
         }
         labelConstraint = constraint;
         constraints.add(constraint);
@@ -85,7 +85,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     @Override
     public TypeVariable constrain(TypeConstraint.Sub constraint) {
         if (subConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Sub.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Sub.class, constraint));
         }
         subConstraint = constraint;
         constraints.add(constraint);
@@ -95,7 +95,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     @Override
     public TypeVariable constrain(TypeConstraint.Abstract constraint) {
         if (abstractConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Abstract.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Abstract.class, constraint));
         }
         abstractConstraint = constraint;
         constraints.add(constraint);
@@ -105,7 +105,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     @Override
     public TypeVariable constrain(TypeConstraint.ValueType constraint) {
         if (valueTypeConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.ValueType.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.ValueType.class, constraint));
         }
         valueTypeConstraint = constraint;
         constraints.add(constraint);
@@ -115,7 +115,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     @Override
     public TypeVariable constrain(TypeConstraint.Regex constraint) {
         if (regexConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Regex.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Regex.class, constraint));
         }
         regexConstraint = constraint;
         constraints.add(constraint);

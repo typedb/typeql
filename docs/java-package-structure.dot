@@ -1,5 +1,5 @@
 #
- # Copyright (C) 2021 Grakn Labs
+ # Copyright (C) 2021 Vaticle
  #
  # This program is free software: you can redistribute it and/or modify
  # it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,10 @@
 
 digraph mygraph {
     node [shape = box];
-    "//java:graql"
-    "//java:graql" -> "//java/parser:parser"
-    "//java:graql" -> "//java/pattern:pattern"
-    "//java:graql" -> "//java/query:query"
+    "//java:typeql"
+    "//java:typeql" -> "//java/parser:parser"
+    "//java:typeql" -> "//java/pattern:pattern"
+    "//java:typeql" -> "//java/query:query"
     "//java/parser:parser"
     "//java/parser:parser" -> "//java/pattern:pattern"
     "//java/parser:parser" -> "//java/query:query"

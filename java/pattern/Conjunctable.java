@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern;
+package com.vaticle.typeql.lang.pattern;
 
-import graql.lang.common.exception.ErrorMessage;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.common.exception.ErrorMessage;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 
-import static grakn.common.util.Objects.className;
+import static com.vaticle.typedb.common.util.Objects.className;
 
 public interface Conjunctable extends Pattern {
 
@@ -36,12 +36,12 @@ public interface Conjunctable extends Pattern {
 
     @Override
     default BoundVariable asVariable() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
+        throw TypeQLException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
     }
 
     @Override
     default Negation<? extends Pattern> asNegation() {
-        throw GraqlException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
+        throw TypeQLException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.variable;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Conjunctable;
-import graql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.Conjunctable;
+import com.vaticle.typeql.lang.pattern.Pattern;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
 
 public abstract class BoundVariable extends Variable implements Conjunctable {
 
@@ -39,7 +39,7 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
     @Override
     public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
         if (Stream.concat(Stream.of(this), variables()).noneMatch(v -> bounds.contains(v.toUnbound()))) {
-            throw GraqlException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(toString()));
+            throw TypeQLException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(toString()));
         }
     }
 
@@ -58,15 +58,15 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
     }
 
     public ConceptVariable asConcept() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptVariable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptVariable.class)));
     }
 
     public TypeVariable asType() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }
 
     public ThingVariable<?> asThing() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
     }
 
     @Override

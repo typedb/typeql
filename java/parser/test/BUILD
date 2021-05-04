@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_test(
     name = "parser-test",
-    test_class = "graql.lang.parser.test.ParserTest",
+    test_class = "com.vaticle.typeql.lang.parser.test.ParserTest",
     srcs = ["ParserTest.java"],
     deps = [
-        "//java:graql",
+        "//java:typeql",
         "//java/common:common",
         "//java/pattern:pattern",
         "//java/query:query",

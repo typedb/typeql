@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.variable;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.constraint.ConceptConstraint;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.variable.builder.ThingVariableBuilder;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.variable.builder.ThingVariableBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,9 +28,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static java.util.stream.Collectors.joining;
 
 public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable {
@@ -92,7 +92,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public T constrain(ThingConstraint.Isa constraint) {
         if (isaConstraint != null) {
-            throw GraqlException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ThingConstraint.Isa.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ThingConstraint.Isa.class, constraint));
         } else if (constraint.type().label().isPresent() && relation().isPresent()) {
             relationConstraint.setScope(constraint.type().label().get().label());
         }

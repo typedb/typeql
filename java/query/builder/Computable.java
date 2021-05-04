@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query.builder;
+package com.vaticle.typeql.lang.query.builder;
 
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,11 +31,11 @@ import java.util.Set;
 
 public interface Computable {
 
-    GraqlToken.Compute.Method method();
+    TypeQLToken.Compute.Method method();
 
-    Set<GraqlToken.Compute.Condition> conditionsRequired();
+    Set<TypeQLToken.Compute.Condition> conditionsRequired();
 
-    Optional<GraqlException> getException();
+    Optional<TypeQLException> getException();
 
     interface Directional<T extends Computable.Directional> extends Computable {
 
@@ -85,11 +85,11 @@ public interface Computable {
     interface Configurable<T extends Computable.Configurable,
             U extends Computable.Argument, V extends Computable.Arguments> extends Computable {
 
-        GraqlArg.Algorithm using();
+        TypeQLArg.Algorithm using();
 
         V where();
 
-        T using(GraqlArg.Algorithm algorithm);
+        T using(TypeQLArg.Algorithm algorithm);
 
         @SuppressWarnings("unchecked")
         default T where(U arg, U... args) {
@@ -102,16 +102,16 @@ public interface Computable {
 
         T where(List<U> args);
 
-        Set<GraqlArg.Algorithm> algorithmsAccepted();
+        Set<TypeQLArg.Algorithm> algorithmsAccepted();
 
-        Map<GraqlArg.Algorithm, Set<GraqlToken.Compute.Param>> argumentsAccepted();
+        Map<TypeQLArg.Algorithm, Set<TypeQLToken.Compute.Param>> argumentsAccepted();
 
-        Map<GraqlArg.Algorithm, Map<GraqlToken.Compute.Param, Object>> argumentsDefault();
+        Map<TypeQLArg.Algorithm, Map<TypeQLToken.Compute.Param, Object>> argumentsDefault();
     }
 
     interface Argument<T> {
 
-        GraqlToken.Compute.Param type();
+        TypeQLToken.Compute.Param type();
 
         T value();
     }

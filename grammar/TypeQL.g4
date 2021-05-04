@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-grammar Graql;
+grammar TypeQL;
 
-// Graql end-of-file (aka. end-of-string) query parser
-// Needed by Graql's Parser to ensure that it parses till end of string
+// TypeQL end-of-file (aka. end-of-string) query parser
+// Needed by TypeQL's Parser to ensure that it parses till end of string
 
 eof_query             :   query            EOF ;
 eof_queries           :   query+           EOF ;
@@ -29,7 +29,7 @@ eof_variable          :   pattern_variable EOF ;
 eof_label             :   label            EOF ;
 eof_schema_rule       :   schema_rule      EOF ;
 
-// GRAQL QUERY LANGUAGE ========================================================
+// TYPEQL QUERY LANGUAGE ========================================================
 
 query                 :   query_define      |   query_undefine
                       |   query_insert      |   query_delete_or_update
@@ -239,7 +239,7 @@ value                 :   STRING_         |   LONG_           |   DOUBLE_
 regex                 :   STRING_         ;
 
 // UNRESERVED KEYWORDS =========================================================
-// Most of Graql syntax should not be reserved from being used as identifiers
+// Most of TypeQL syntax should not be reserved from being used as identifiers
 
 unreserved            : VALUE
                       | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
@@ -249,7 +249,7 @@ unreserved            : VALUE
                       | MIN_K | K | CONTAINS | SIZE | WHERE
                       ;
 
-// GRAQL SYNTAX KEYWORDS =======================================================
+// TYPEQL SYNTAX KEYWORDS =======================================================
 
 // QUERY COMMAND KEYWORDS
 
@@ -333,7 +333,7 @@ DOUBLE_         : ('+' | '-')? [0-9]+ '.' [0-9]+        ;
 DATE_           : DATE_FRAGMENT_                        ;
 DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 
-// GRAQL INPUT TOKEN PATTERNS
+// TYPEQL INPUT TOKEN PATTERNS
 // All token names must end with an underscore ('_')
 VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
 VAR_ANONYMOUS_  : '$_' ;

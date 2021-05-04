@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.query.builder.Computable;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.query.builder.Computable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,22 +33,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static grakn.common.collection.Collections.map;
-import static grakn.common.collection.Collections.pair;
-import static grakn.common.collection.Collections.set;
-import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
-import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
-import static graql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
-import static graql.lang.common.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
+import static com.vaticle.typedb.common.collection.Collections.map;
+import static com.vaticle.typedb.common.collection.Collections.pair;
+import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_ARGUMENT;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_COMPUTE_METHOD_ALGORITHM;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_COMPUTE_CONDITION;
 import static java.util.stream.Collectors.joining;
 
 
 /**
- * Graql Compute Query: to perform distributed analytics OLAP computation on Grakn
+ * TypeQL Compute Query: to perform distributed analytics OLAP computation on TypeDB
  */
-public abstract class GraqlCompute extends GraqlQuery implements Computable {
+public abstract class TypeQLCompute extends TypeQLQuery implements Computable {
 
-    private GraqlToken.Compute.Method method;
+    private TypeQLToken.Compute.Method method;
     boolean includeAttributes;
 
     // All these condition constraints need to start off as NULL,
@@ -57,22 +57,22 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     String toID = null;
     Set<String> ofTypes = null;
     Set<String> inTypes = null;
-    GraqlArg.Algorithm algorithm = null;
+    TypeQLArg.Algorithm algorithm = null;
     Arguments arguments = null;
     // But 'arguments' will also be set when where() is called for cluster/centrality
 
-    GraqlCompute(GraqlToken.Compute.Method method, boolean includeAttributes) {
+    TypeQLCompute(TypeQLToken.Compute.Method method, boolean includeAttributes) {
         this.method = method;
         this.includeAttributes = includeAttributes;
     }
 
     @Override
-    public GraqlArg.QueryType type() {
-        return GraqlArg.QueryType.WRITE;
+    public TypeQLArg.QueryType type() {
+        return TypeQLArg.QueryType.WRITE;
     }
 
     @Override
-    public final GraqlToken.Compute.Method method() {
+    public final TypeQLToken.Compute.Method method() {
         return method;
     }
 
@@ -93,9 +93,9 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     public final String toString() {
         StringBuilder query = new StringBuilder();
 
-        query.append(GraqlToken.Command.COMPUTE).append(GraqlToken.Char.SPACE).append(method);
-        if (!printConditions().isEmpty()) query.append(GraqlToken.Char.SPACE).append(printConditions());
-        query.append(GraqlToken.Char.SEMICOLON);
+        query.append(TypeQLToken.Command.COMPUTE).append(TypeQLToken.Char.SPACE).append(method);
+        if (!printConditions().isEmpty()) query.append(TypeQLToken.Char.SPACE).append(printConditions());
+        query.append(TypeQLToken.Char.SEMICOLON);
 
         return query.toString();
     }
@@ -107,24 +107,24 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         // Because, we want to know the user provided conditions, rather than the default conditions from the getters.
         // The exception is for arguments. It needs to be set internally for the query object to have default argument
         // values. However, we can query for .getParameters() to get user provided argument parameters.
-        if (fromID != null) conditionsList.add(str(GraqlToken.Compute.Condition.FROM, GraqlToken.Char.SPACE, fromID));
-        if (toID != null) conditionsList.add(str(GraqlToken.Compute.Condition.TO, GraqlToken.Char.SPACE, toID));
+        if (fromID != null) conditionsList.add(str(TypeQLToken.Compute.Condition.FROM, TypeQLToken.Char.SPACE, fromID));
+        if (toID != null) conditionsList.add(str(TypeQLToken.Compute.Condition.TO, TypeQLToken.Char.SPACE, toID));
         if (ofTypes != null) conditionsList.add(printOf());
         if (inTypes != null) conditionsList.add(printIn());
         if (algorithm != null) conditionsList.add(printAlgorithm());
         if (arguments != null && !arguments.getParameters().isEmpty()) conditionsList.add(printArguments());
 
-        return conditionsList.stream().collect(joining(GraqlToken.Char.COMMA_SPACE.toString()));
+        return conditionsList.stream().collect(joining(TypeQLToken.Char.COMMA_SPACE.toString()));
     }
 
     private String printOf() {
-        if (ofTypes != null) return str(GraqlToken.Compute.Condition.OF, GraqlToken.Char.SPACE, printTypes(ofTypes));
+        if (ofTypes != null) return str(TypeQLToken.Compute.Condition.OF, TypeQLToken.Char.SPACE, printTypes(ofTypes));
 
         return "";
     }
 
     private String printIn() {
-        if (inTypes != null) return str(GraqlToken.Compute.Condition.IN, GraqlToken.Char.SPACE, printTypes(inTypes));
+        if (inTypes != null) return str(TypeQLToken.Compute.Condition.IN, TypeQLToken.Char.SPACE, printTypes(inTypes));
 
         return "";
     }
@@ -136,9 +136,9 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (types.size() == 1) {
                 inTypesString.append(types.iterator().next());
             } else {
-                inTypesString.append(GraqlToken.Char.SQUARE_OPEN);
-                inTypesString.append(inTypes.stream().collect(joining(GraqlToken.Char.COMMA_SPACE.toString())));
-                inTypesString.append(GraqlToken.Char.SQUARE_CLOSE);
+                inTypesString.append(TypeQLToken.Char.SQUARE_OPEN);
+                inTypesString.append(inTypes.stream().collect(joining(TypeQLToken.Char.COMMA_SPACE.toString())));
+                inTypesString.append(TypeQLToken.Char.SQUARE_CLOSE);
             }
         }
 
@@ -146,7 +146,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     }
 
     private String printAlgorithm() {
-        if (algorithm != null) return str(GraqlToken.Compute.Condition.USING, GraqlToken.Char.SPACE, algorithm);
+        if (algorithm != null) return str(TypeQLToken.Compute.Condition.USING, TypeQLToken.Char.SPACE, algorithm);
 
         return "";
     }
@@ -157,17 +157,17 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         List<String> argumentsList = new ArrayList<>();
         StringBuilder argumentsString = new StringBuilder();
 
-        for (GraqlToken.Compute.Param param : arguments.getParameters()) {
+        for (TypeQLToken.Compute.Param param : arguments.getParameters()) {
             argumentsList.add(str(param, EQ, arguments.getArgument(param).get()));
         }
 
         if (!argumentsList.isEmpty()) {
-            argumentsString.append(str(GraqlToken.Compute.Condition.WHERE, GraqlToken.Char.SPACE));
+            argumentsString.append(str(TypeQLToken.Compute.Condition.WHERE, TypeQLToken.Char.SPACE));
             if (argumentsList.size() == 1) argumentsString.append(argumentsList.get(0));
             else {
-                argumentsString.append(GraqlToken.Char.SQUARE_OPEN);
-                argumentsString.append(argumentsList.stream().collect(joining(GraqlToken.Char.COMMA_SPACE.toString())));
-                argumentsString.append(GraqlToken.Char.SQUARE_CLOSE);
+                argumentsString.append(TypeQLToken.Char.SQUARE_OPEN);
+                argumentsString.append(argumentsList.stream().collect(joining(TypeQLToken.Char.COMMA_SPACE.toString())));
+                argumentsString.append(TypeQLToken.Char.SQUARE_CLOSE);
             }
         }
 
@@ -182,95 +182,95 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
     public static class Builder {
 
-        public GraqlCompute.Statistics.Count count() {
-            return new GraqlCompute.Statistics.Count();
+        public TypeQLCompute.Statistics.Count count() {
+            return new TypeQLCompute.Statistics.Count();
         }
 
-        public GraqlCompute.Statistics.Value max() {
-            return new GraqlCompute.Statistics.Value(GraqlToken.Compute.Method.MAX);
+        public TypeQLCompute.Statistics.Value max() {
+            return new TypeQLCompute.Statistics.Value(TypeQLToken.Compute.Method.MAX);
         }
 
-        public GraqlCompute.Statistics.Value min() {
-            return new GraqlCompute.Statistics.Value(GraqlToken.Compute.Method.MIN);
+        public TypeQLCompute.Statistics.Value min() {
+            return new TypeQLCompute.Statistics.Value(TypeQLToken.Compute.Method.MIN);
         }
 
-        public GraqlCompute.Statistics.Value mean() {
-            return new GraqlCompute.Statistics.Value(GraqlToken.Compute.Method.MEAN);
+        public TypeQLCompute.Statistics.Value mean() {
+            return new TypeQLCompute.Statistics.Value(TypeQLToken.Compute.Method.MEAN);
         }
 
-        public GraqlCompute.Statistics.Value median() {
-            return new GraqlCompute.Statistics.Value(GraqlToken.Compute.Method.MEDIAN);
+        public TypeQLCompute.Statistics.Value median() {
+            return new TypeQLCompute.Statistics.Value(TypeQLToken.Compute.Method.MEDIAN);
         }
 
-        public GraqlCompute.Statistics.Value sum() {
-            return new GraqlCompute.Statistics.Value(GraqlToken.Compute.Method.SUM);
+        public TypeQLCompute.Statistics.Value sum() {
+            return new TypeQLCompute.Statistics.Value(TypeQLToken.Compute.Method.SUM);
         }
 
-        public GraqlCompute.Statistics.Value std() {
-            return new GraqlCompute.Statistics.Value(GraqlToken.Compute.Method.STD);
+        public TypeQLCompute.Statistics.Value std() {
+            return new TypeQLCompute.Statistics.Value(TypeQLToken.Compute.Method.STD);
         }
 
-        public GraqlCompute.Path path() {
-            return new GraqlCompute.Path();
+        public TypeQLCompute.Path path() {
+            return new TypeQLCompute.Path();
         }
 
-        public GraqlCompute.Centrality centrality() {
-            return new GraqlCompute.Centrality();
+        public TypeQLCompute.Centrality centrality() {
+            return new TypeQLCompute.Centrality();
         }
 
-        public GraqlCompute.Cluster cluster() {
-            return new GraqlCompute.Cluster();
+        public TypeQLCompute.Cluster cluster() {
+            return new TypeQLCompute.Cluster();
         }
 
     }
 
-    public static abstract class Statistics extends GraqlCompute {
+    public static abstract class Statistics extends TypeQLCompute {
 
-        Statistics(GraqlToken.Compute.Method method, boolean includeAttributes) {
+        Statistics(TypeQLToken.Compute.Method method, boolean includeAttributes) {
             super(method, includeAttributes);
         }
 
-        public GraqlCompute.Statistics.Count asCount() {
-            if (this instanceof GraqlCompute.Statistics.Count) {
-                return (GraqlCompute.Statistics.Count) this;
+        public TypeQLCompute.Statistics.Count asCount() {
+            if (this instanceof TypeQLCompute.Statistics.Count) {
+                return (TypeQLCompute.Statistics.Count) this;
             } else {
-                throw GraqlException.of("This is not a GraqlCompute.Statistics.Count query");
+                throw TypeQLException.of("This is not a TypeQLCompute.Statistics.Count query");
             }
         }
 
-        public GraqlCompute.Statistics.Value asValue() {
-            if (this instanceof GraqlCompute.Statistics.Value) {
-                return (GraqlCompute.Statistics.Value) this;
+        public TypeQLCompute.Statistics.Value asValue() {
+            if (this instanceof TypeQLCompute.Statistics.Value) {
+                return (TypeQLCompute.Statistics.Value) this;
             } else {
-                throw GraqlException.of("This is not a GraqlCompute.Statistics.Value query");
+                throw TypeQLException.of("This is not a TypeQLCompute.Statistics.Value query");
             }
         }
 
-        public static class Count extends GraqlCompute.Statistics
-                implements Computable.Scopeable<GraqlCompute.Statistics.Count> {
+        public static class Count extends TypeQLCompute.Statistics
+                implements Computable.Scopeable<TypeQLCompute.Statistics.Count> {
 
             Count() {
-                super(GraqlToken.Compute.Method.COUNT, true);
+                super(TypeQLToken.Compute.Method.COUNT, true);
             }
 
             @Override
-            public GraqlCompute.Statistics.Count in(Collection<String> types) {
+            public TypeQLCompute.Statistics.Count in(Collection<String> types) {
                 this.inTypes = set(types);
                 return this;
             }
 
             @Override
-            public GraqlCompute.Statistics.Count attributes(boolean include) {
+            public TypeQLCompute.Statistics.Count attributes(boolean include) {
                 return this;
             }
 
             @Override
-            public Set<GraqlToken.Compute.Condition> conditionsRequired() {
+            public Set<TypeQLToken.Compute.Condition> conditionsRequired() {
                 return set();
             }
 
             @Override
-            public Optional<GraqlException> getException() {
+            public Optional<TypeQLException> getException() {
                 return Optional.empty();
             }
 
@@ -279,7 +279,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
-                GraqlCompute.Statistics.Count that = (GraqlCompute.Statistics.Count) o;
+                TypeQLCompute.Statistics.Count that = (TypeQLCompute.Statistics.Count) o;
 
                 return (this.method().equals(that.method()) &&
                         this.in().equals(that.in()) &&
@@ -296,11 +296,11 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
         }
 
-        public static class Value extends GraqlCompute.Statistics
+        public static class Value extends TypeQLCompute.Statistics
                 implements Computable.Targetable<Value>,
                            Computable.Scopeable<Value> {
 
-            Value(GraqlToken.Compute.Method method) {
+            Value(TypeQLToken.Compute.Method method) {
                 super(method, true);
             }
 
@@ -310,31 +310,31 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             }
 
             @Override
-            public GraqlCompute.Statistics.Value of(Collection<String> types) {
+            public TypeQLCompute.Statistics.Value of(Collection<String> types) {
                 this.ofTypes = set(types);
                 return this;
             }
 
             @Override
-            public GraqlCompute.Statistics.Value in(Collection<String> types) {
+            public TypeQLCompute.Statistics.Value in(Collection<String> types) {
                 this.inTypes = set(types);
                 return this;
             }
 
             @Override
-            public GraqlCompute.Statistics.Value attributes(boolean include) {
+            public TypeQLCompute.Statistics.Value attributes(boolean include) {
                 return this;
             }
 
             @Override
-            public Set<GraqlToken.Compute.Condition> conditionsRequired() {
-                return set(GraqlToken.Compute.Condition.OF);
+            public Set<TypeQLToken.Compute.Condition> conditionsRequired() {
+                return set(TypeQLToken.Compute.Condition.OF);
             }
 
             @Override
-            public Optional<GraqlException> getException() {
+            public Optional<TypeQLException> getException() {
                 if (ofTypes == null) {
-                    return Optional.of(GraqlException.of(MISSING_COMPUTE_CONDITION.message(
+                    return Optional.of(TypeQLException.of(MISSING_COMPUTE_CONDITION.message(
                             this.method(), conditionsRequired()
                     )));
                 } else {
@@ -347,7 +347,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
-                GraqlCompute.Statistics.Value that = (GraqlCompute.Statistics.Value) o;
+                TypeQLCompute.Statistics.Value that = (TypeQLCompute.Statistics.Value) o;
 
                 return (this.method().equals(that.method()) &&
                         this.of().equals(that.of()) &&
@@ -367,12 +367,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
     }
 
-    public static class Path extends GraqlCompute
-            implements Computable.Directional<GraqlCompute.Path>,
-                       Computable.Scopeable<GraqlCompute.Path> {
+    public static class Path extends TypeQLCompute
+            implements Computable.Directional<TypeQLCompute.Path>,
+                       Computable.Scopeable<TypeQLCompute.Path> {
 
         Path() {
-            super(GraqlToken.Compute.Method.PATH, false);
+            super(TypeQLToken.Compute.Method.PATH, false);
         }
 
         @Override
@@ -386,38 +386,38 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public GraqlCompute.Path from(String fromID) {
+        public TypeQLCompute.Path from(String fromID) {
             this.fromID = fromID;
             return this;
         }
 
         @Override
-        public GraqlCompute.Path to(String toID) {
+        public TypeQLCompute.Path to(String toID) {
             this.toID = toID;
             return this;
         }
 
         @Override
-        public GraqlCompute.Path in(Collection<String> types) {
+        public TypeQLCompute.Path in(Collection<String> types) {
             this.inTypes = set(types);
             return this;
         }
 
         @Override
-        public GraqlCompute.Path attributes(boolean include) {
+        public TypeQLCompute.Path attributes(boolean include) {
             this.includeAttributes = include;
             return this;
         }
 
         @Override
-        public Set<GraqlToken.Compute.Condition> conditionsRequired() {
-            return set(GraqlToken.Compute.Condition.FROM, GraqlToken.Compute.Condition.TO);
+        public Set<TypeQLToken.Compute.Condition> conditionsRequired() {
+            return set(TypeQLToken.Compute.Condition.FROM, TypeQLToken.Compute.Condition.TO);
         }
 
         @Override
-        public Optional<GraqlException> getException() {
+        public Optional<TypeQLException> getException() {
             if (fromID == null || toID == null) {
-                return Optional.of(GraqlException.of(MISSING_COMPUTE_CONDITION.message(
+                return Optional.of(TypeQLException.of(MISSING_COMPUTE_CONDITION.message(
                         this.method(), conditionsRequired()
                 )));
             } else {
@@ -430,7 +430,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            GraqlCompute.Path that = (GraqlCompute.Path) o;
+            TypeQLCompute.Path that = (TypeQLCompute.Path) o;
 
             return (this.method().equals(that.method()) &&
                     this.from().equals(that.from()) &&
@@ -451,21 +451,21 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
     }
 
-    private static abstract class Configurable<T extends Configurable> extends GraqlCompute
+    private static abstract class Configurable<T extends Configurable> extends TypeQLCompute
             implements Computable.Scopeable<T>,
-                       Computable.Configurable<T, GraqlCompute.Argument, GraqlCompute.Arguments> {
+                       Computable.Configurable<T, TypeQLCompute.Argument, TypeQLCompute.Arguments> {
 
-        Configurable(GraqlToken.Compute.Method method, boolean includeAttributes) {
+        Configurable(TypeQLToken.Compute.Method method, boolean includeAttributes) {
             super(method, includeAttributes);
         }
 
         protected abstract T self();
 
         @Override
-        public GraqlCompute.Arguments where() {
-            GraqlCompute.Arguments args = arguments;
+        public TypeQLCompute.Arguments where() {
+            TypeQLCompute.Arguments args = arguments;
             if (args == null) {
-                args = new GraqlCompute.Arguments();
+                args = new TypeQLCompute.Arguments();
             }
             if (argumentsDefault().containsKey(using())) {
                 args.setDefaults(argumentsDefault().get(using()));
@@ -475,9 +475,9 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
 
         @Override
-        public GraqlArg.Algorithm using() {
+        public TypeQLArg.Algorithm using() {
             if (algorithm == null) {
-                return GraqlArg.Algorithm.DEGREE;
+                return TypeQLArg.Algorithm.DEGREE;
             } else {
                 return algorithm;
             }
@@ -496,34 +496,34 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public T using(GraqlArg.Algorithm algorithm) {
+        public T using(TypeQLArg.Algorithm algorithm) {
             this.algorithm = algorithm;
             return self();
         }
 
         @Override
-        public T where(List<GraqlCompute.Argument> args) {
-            if (this.arguments == null) this.arguments = new GraqlCompute.Arguments();
-            for (GraqlCompute.Argument<?> arg : args) this.arguments.setArgument(arg);
+        public T where(List<TypeQLCompute.Argument> args) {
+            if (this.arguments == null) this.arguments = new TypeQLCompute.Arguments();
+            for (TypeQLCompute.Argument<?> arg : args) this.arguments.setArgument(arg);
             return self();
         }
 
 
         @Override
-        public Set<GraqlToken.Compute.Condition> conditionsRequired() {
-            return set(GraqlToken.Compute.Condition.USING);
+        public Set<TypeQLToken.Compute.Condition> conditionsRequired() {
+            return set(TypeQLToken.Compute.Condition.USING);
         }
 
         @Override
-        public Optional<GraqlException> getException() {
+        public Optional<TypeQLException> getException() {
             if (!algorithmsAccepted().contains(using())) {
-                return Optional.of(GraqlException.of(INVALID_COMPUTE_METHOD_ALGORITHM.message(method(), algorithmsAccepted())));
+                return Optional.of(TypeQLException.of(INVALID_COMPUTE_METHOD_ALGORITHM.message(method(), algorithmsAccepted())));
             }
 
             // Check that the provided arguments are accepted for the current query method and algorithm
-            for (GraqlToken.Compute.Param param : this.where().getParameters()) {
+            for (TypeQLToken.Compute.Param param : this.where().getParameters()) {
                 if (!argumentsAccepted().get(this.using()).contains(param)) {
-                    return Optional.of(GraqlException.of(INVALID_COMPUTE_ARGUMENT.message(
+                    return Optional.of(TypeQLException.of(INVALID_COMPUTE_ARGUMENT.message(
                             this.method(), this.using(), argumentsAccepted().get(this.using())
                     )));
                 }
@@ -533,17 +533,17 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
     }
 
-    public static class Centrality extends GraqlCompute.Configurable<GraqlCompute.Centrality>
-            implements Computable.Targetable<GraqlCompute.Centrality> {
+    public static class Centrality extends TypeQLCompute.Configurable<TypeQLCompute.Centrality>
+            implements Computable.Targetable<TypeQLCompute.Centrality> {
 
         final static long DEFAULT_MIN_K = 2L;
 
         Centrality() {
-            super(GraqlToken.Compute.Method.CENTRALITY, true);
+            super(TypeQLToken.Compute.Method.CENTRALITY, true);
         }
 
         @Override
-        protected GraqlCompute.Centrality self() {
+        protected TypeQLCompute.Centrality self() {
             return this;
         }
 
@@ -553,24 +553,24 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         @Override
-        public GraqlCompute.Centrality of(Collection<String> types) {
+        public TypeQLCompute.Centrality of(Collection<String> types) {
             this.ofTypes = set(types);
             return this;
         }
 
         @Override
-        public Set<GraqlArg.Algorithm> algorithmsAccepted() {
-            return set(GraqlArg.Algorithm.DEGREE, GraqlArg.Algorithm.K_CORE);
+        public Set<TypeQLArg.Algorithm> algorithmsAccepted() {
+            return set(TypeQLArg.Algorithm.DEGREE, TypeQLArg.Algorithm.K_CORE);
         }
 
         @Override
-        public Map<GraqlArg.Algorithm, Set<GraqlToken.Compute.Param>> argumentsAccepted() {
-            return map(pair(GraqlArg.Algorithm.K_CORE, set(GraqlToken.Compute.Param.MIN_K)));
+        public Map<TypeQLArg.Algorithm, Set<TypeQLToken.Compute.Param>> argumentsAccepted() {
+            return map(pair(TypeQLArg.Algorithm.K_CORE, set(TypeQLToken.Compute.Param.MIN_K)));
         }
 
         @Override
-        public Map<GraqlArg.Algorithm, Map<GraqlToken.Compute.Param, Object>> argumentsDefault() {
-            return map(pair(GraqlArg.Algorithm.K_CORE, map(pair(GraqlToken.Compute.Param.MIN_K, DEFAULT_MIN_K))));
+        public Map<TypeQLArg.Algorithm, Map<TypeQLToken.Compute.Param, Object>> argumentsDefault() {
+            return map(pair(TypeQLArg.Algorithm.K_CORE, map(pair(TypeQLToken.Compute.Param.MIN_K, DEFAULT_MIN_K))));
         }
 
         @Override
@@ -578,7 +578,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            GraqlCompute.Centrality that = (GraqlCompute.Centrality) o;
+            TypeQLCompute.Centrality that = (TypeQLCompute.Centrality) o;
 
             return (this.method().equals(that.method()) &&
                     this.of().equals(that.of()) &&
@@ -601,42 +601,42 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
     }
 
-    public static class Cluster extends GraqlCompute.Configurable<GraqlCompute.Cluster> {
+    public static class Cluster extends TypeQLCompute.Configurable<TypeQLCompute.Cluster> {
 
         final static long DEFAULT_K = 2L;
 
         Cluster() {
-            super(GraqlToken.Compute.Method.CLUSTER, false);
+            super(TypeQLToken.Compute.Method.CLUSTER, false);
         }
 
         @Override
-        protected GraqlCompute.Cluster self() {
+        protected TypeQLCompute.Cluster self() {
             return this;
         }
 
         @Override
-        public GraqlArg.Algorithm using() {
+        public TypeQLArg.Algorithm using() {
             if (algorithm == null) {
-                return GraqlArg.Algorithm.CONNECTED_COMPONENT;
+                return TypeQLArg.Algorithm.CONNECTED_COMPONENT;
             } else {
                 return algorithm;
             }
         }
 
         @Override
-        public Set<GraqlArg.Algorithm> algorithmsAccepted() {
-            return set(GraqlArg.Algorithm.CONNECTED_COMPONENT, GraqlArg.Algorithm.K_CORE);
+        public Set<TypeQLArg.Algorithm> algorithmsAccepted() {
+            return set(TypeQLArg.Algorithm.CONNECTED_COMPONENT, TypeQLArg.Algorithm.K_CORE);
         }
 
         @Override
-        public Map<GraqlArg.Algorithm, Set<GraqlToken.Compute.Param>> argumentsAccepted() {
-            return map(pair(GraqlArg.Algorithm.K_CORE, set(GraqlToken.Compute.Param.K)),
-                       pair(GraqlArg.Algorithm.CONNECTED_COMPONENT, set(GraqlToken.Compute.Param.SIZE, GraqlToken.Compute.Param.CONTAINS)));
+        public Map<TypeQLArg.Algorithm, Set<TypeQLToken.Compute.Param>> argumentsAccepted() {
+            return map(pair(TypeQLArg.Algorithm.K_CORE, set(TypeQLToken.Compute.Param.K)),
+                       pair(TypeQLArg.Algorithm.CONNECTED_COMPONENT, set(TypeQLToken.Compute.Param.SIZE, TypeQLToken.Compute.Param.CONTAINS)));
         }
 
         @Override
-        public Map<GraqlArg.Algorithm, Map<GraqlToken.Compute.Param, Object>> argumentsDefault() {
-            return map(pair(GraqlArg.Algorithm.K_CORE, map(pair(GraqlToken.Compute.Param.K, DEFAULT_K))));
+        public Map<TypeQLArg.Algorithm, Map<TypeQLToken.Compute.Param, Object>> argumentsDefault() {
+            return map(pair(TypeQLArg.Algorithm.K_CORE, map(pair(TypeQLToken.Compute.Param.K, DEFAULT_K))));
         }
 
         @Override
@@ -644,7 +644,7 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            GraqlCompute.Cluster that = (GraqlCompute.Cluster) o;
+            TypeQLCompute.Cluster that = (TypeQLCompute.Cluster) o;
 
             return (this.method().equals(that.method()) &&
                     this.in().equals(that.in()) &&
@@ -666,22 +666,22 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
     }
 
     /**
-     * Graql Compute argument objects to be passed into the query
+     * TypeQL Compute argument objects to be passed into the query
      *
      * @param <T>
      */
     public static class Argument<T> implements Computable.Argument<T> {
 
-        private GraqlToken.Compute.Param param;
+        private TypeQLToken.Compute.Param param;
         private T value;
 
-        private Argument(GraqlToken.Compute.Param param, T value) {
+        private Argument(TypeQLToken.Compute.Param param, T value) {
             this.param = param;
             this.value = value;
         }
 
         @Override
-        public final GraqlToken.Compute.Param type() {
+        public final TypeQLToken.Compute.Param type() {
             return this.param;
         }
 
@@ -691,19 +691,19 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
         }
 
         public static Argument<Long> minK(long minK) {
-            return new Argument<>(GraqlToken.Compute.Param.MIN_K, minK);
+            return new Argument<>(TypeQLToken.Compute.Param.MIN_K, minK);
         }
 
         public static Argument<Long> k(long k) {
-            return new Argument<>(GraqlToken.Compute.Param.K, k);
+            return new Argument<>(TypeQLToken.Compute.Param.K, k);
         }
 
         public static Argument<Long> size(long size) {
-            return new Argument<>(GraqlToken.Compute.Param.SIZE, size);
+            return new Argument<>(TypeQLToken.Compute.Param.SIZE, size);
         }
 
         public static Argument<String> contains(String conceptId) {
-            return new Argument<>(GraqlToken.Compute.Param.CONTAINS, conceptId);
+            return new Argument<>(TypeQLToken.Compute.Param.CONTAINS, conceptId);
         }
 
         @Override
@@ -731,17 +731,17 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
      */
     public static class Arguments implements Computable.Arguments {
 
-        private LinkedHashMap<GraqlToken.Compute.Param, Argument> argumentsOrdered = new LinkedHashMap<>();
-        private Map<GraqlToken.Compute.Param, Object> defaults = new HashMap<>();
+        private LinkedHashMap<TypeQLToken.Compute.Param, Argument> argumentsOrdered = new LinkedHashMap<>();
+        private Map<TypeQLToken.Compute.Param, Object> defaults = new HashMap<>();
 
-        private final Map<GraqlToken.Compute.Param, Supplier<Optional<?>>> argumentsMap = argumentsMap();
+        private final Map<TypeQLToken.Compute.Param, Supplier<Optional<?>>> argumentsMap = argumentsMap();
 
-        private Map<GraqlToken.Compute.Param, Supplier<Optional<?>>> argumentsMap() {
-            Map<GraqlToken.Compute.Param, Supplier<Optional<?>>> arguments = new HashMap<>();
-            arguments.put(GraqlToken.Compute.Param.MIN_K, this::minK);
-            arguments.put(GraqlToken.Compute.Param.K, this::k);
-            arguments.put(GraqlToken.Compute.Param.SIZE, this::size);
-            arguments.put(GraqlToken.Compute.Param.CONTAINS, this::contains);
+        private Map<TypeQLToken.Compute.Param, Supplier<Optional<?>>> argumentsMap() {
+            Map<TypeQLToken.Compute.Param, Supplier<Optional<?>>> arguments = new HashMap<>();
+            arguments.put(TypeQLToken.Compute.Param.MIN_K, this::minK);
+            arguments.put(TypeQLToken.Compute.Param.K, this::k);
+            arguments.put(TypeQLToken.Compute.Param.SIZE, this::size);
+            arguments.put(TypeQLToken.Compute.Param.CONTAINS, this::contains);
 
             return arguments;
         }
@@ -751,26 +751,26 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
             argumentsOrdered.put(arg.type(), arg);
         }
 
-        private void setDefaults(Map<GraqlToken.Compute.Param, Object> defaults) {
+        private void setDefaults(Map<TypeQLToken.Compute.Param, Object> defaults) {
             this.defaults = defaults;
         }
 
-        Optional<?> getArgument(GraqlToken.Compute.Param param) {
+        Optional<?> getArgument(TypeQLToken.Compute.Param param) {
             return argumentsMap.get(param).get();
         }
 
-        public Set<GraqlToken.Compute.Param> getParameters() {
+        public Set<TypeQLToken.Compute.Param> getParameters() {
             return argumentsOrdered.keySet();
         }
 
         @Override
         public Optional<Long> minK() {
-            Long minK = (Long) getArgumentValue(GraqlToken.Compute.Param.MIN_K);
+            Long minK = (Long) getArgumentValue(TypeQLToken.Compute.Param.MIN_K);
             if (minK != null) {
                 return Optional.of(minK);
 
-            } else if (defaults.containsKey(GraqlToken.Compute.Param.MIN_K)) {
-                return Optional.of((Long) defaults.get(GraqlToken.Compute.Param.MIN_K));
+            } else if (defaults.containsKey(TypeQLToken.Compute.Param.MIN_K)) {
+                return Optional.of((Long) defaults.get(TypeQLToken.Compute.Param.MIN_K));
 
             } else {
                 return Optional.empty();
@@ -779,12 +779,12 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         @Override
         public Optional<Long> k() {
-            Long minK = (Long) getArgumentValue(GraqlToken.Compute.Param.K);
+            Long minK = (Long) getArgumentValue(TypeQLToken.Compute.Param.K);
             if (minK != null) {
                 return Optional.of(minK);
 
-            } else if (defaults.containsKey(GraqlToken.Compute.Param.K)) {
-                return Optional.of((Long) defaults.get(GraqlToken.Compute.Param.K));
+            } else if (defaults.containsKey(TypeQLToken.Compute.Param.K)) {
+                return Optional.of((Long) defaults.get(TypeQLToken.Compute.Param.K));
 
             } else {
                 return Optional.empty();
@@ -793,15 +793,15 @@ public abstract class GraqlCompute extends GraqlQuery implements Computable {
 
         @Override
         public Optional<Long> size() {
-            return Optional.ofNullable((Long) getArgumentValue(GraqlToken.Compute.Param.SIZE));
+            return Optional.ofNullable((Long) getArgumentValue(TypeQLToken.Compute.Param.SIZE));
         }
 
         @Override
         public Optional<String> contains() {
-            return Optional.ofNullable((String) getArgumentValue(GraqlToken.Compute.Param.CONTAINS));
+            return Optional.ofNullable((String) getArgumentValue(TypeQLToken.Compute.Param.CONTAINS));
         }
 
-        private Object getArgumentValue(GraqlToken.Compute.Param param) {
+        private Object getArgumentValue(TypeQLToken.Compute.Param param) {
             return argumentsOrdered.get(param) != null ? argumentsOrdered.get(param).value() : null;
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,39 +15,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.parser;
+package com.vaticle.typeql.lang.parser;
 
-import grakn.common.collection.Either;
-import grakn.common.collection.Pair;
-import graql.grammar.GraqlBaseVisitor;
-import graql.grammar.GraqlLexer;
-import graql.grammar.GraqlParser;
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Definable;
-import graql.lang.pattern.Disjunction;
-import graql.lang.pattern.Negation;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.constraint.TypeConstraint;
-import graql.lang.pattern.schema.Rule;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ConceptVariable;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.query.GraqlCompute;
-import graql.lang.query.GraqlDefine;
-import graql.lang.query.GraqlDelete;
-import graql.lang.query.GraqlInsert;
-import graql.lang.query.GraqlMatch;
-import graql.lang.query.GraqlQuery;
-import graql.lang.query.GraqlUndefine;
-import graql.lang.query.GraqlUpdate;
-import graql.lang.query.builder.Computable;
-import graql.lang.query.builder.Sortable;
+import com.vaticle.typedb.common.collection.Either;
+import com.vaticle.typedb.common.collection.Pair;
+import com.vaticle.typeql.grammar.TypeQLBaseVisitor;
+import com.vaticle.typeql.grammar.TypeQLLexer;
+import com.vaticle.typeql.grammar.TypeQLParser;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.Conjunction;
+import com.vaticle.typeql.lang.pattern.Definable;
+import com.vaticle.typeql.lang.pattern.Disjunction;
+import com.vaticle.typeql.lang.pattern.Negation;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
+import com.vaticle.typeql.lang.pattern.schema.Rule;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.query.TypeQLCompute;
+import com.vaticle.typeql.lang.query.TypeQLDefine;
+import com.vaticle.typeql.lang.query.TypeQLDelete;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLQuery;
+import com.vaticle.typeql.lang.query.TypeQLUndefine;
+import com.vaticle.typeql.lang.query.TypeQLUpdate;
+import com.vaticle.typeql.lang.query.builder.Computable;
+import com.vaticle.typeql.lang.query.builder.Sortable;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -71,26 +71,26 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.pair;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
-import static graql.lang.common.util.Strings.unescapeRegex;
-import static graql.lang.pattern.variable.UnboundVariable.hidden;
+import static com.vaticle.typedb.common.collection.Collections.pair;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
+import static com.vaticle.typeql.lang.common.util.Strings.unescapeRegex;
+import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Graql query string parser to produce Graql Java objects
+ * TypeQL query string parser to produce TypeQL Java objects
  */
-public class Parser extends GraqlBaseVisitor {
+public class Parser extends TypeQLBaseVisitor {
 
-    private static final Set<String> GRAQL_KEYWORDS = getKeywords();
+    private static final Set<String> TYPEQL_KEYWORDS = getKeywords();
 
     private static Set<String> getKeywords() {
         HashSet<String> keywords = new HashSet<>();
 
-        for (int i = 1; i <= GraqlLexer.VOCABULARY.getMaxTokenType(); i++) {
-            if (GraqlLexer.VOCABULARY.getLiteralName(i) != null) {
-                String name = GraqlLexer.VOCABULARY.getLiteralName(i);
+        for (int i = 1; i <= TypeQLLexer.VOCABULARY.getMaxTokenType(); i++) {
+            if (TypeQLLexer.VOCABULARY.getLiteralName(i) != null) {
+                String name = TypeQLLexer.VOCABULARY.getLiteralName(i);
                 keywords.add(name.replaceAll("'", ""));
             }
         }
@@ -99,21 +99,21 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     private <CONTEXT extends ParserRuleContext, RETURN> RETURN parse(
-            String graqlString, Function<GraqlParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
+            String typeqlString, Function<TypeQLParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
     ) {
-        if (graqlString == null || graqlString.isEmpty()) {
-            throw GraqlException.of("Query String is NULL or Empty");
+        if (typeqlString == null || typeqlString.isEmpty()) {
+            throw TypeQLException.of("Query String is NULL or Empty");
         }
 
-        ErrorListener errorListener = ErrorListener.of(graqlString);
-        CharStream charStream = CharStreams.fromString(graqlString);
-        GraqlLexer lexer = new GraqlLexer(charStream);
+        ErrorListener errorListener = ErrorListener.of(typeqlString);
+        CharStream charStream = CharStreams.fromString(typeqlString);
+        TypeQLLexer lexer = new TypeQLLexer(charStream);
 
         lexer.removeErrorListeners();
         lexer.addErrorListener(errorListener);
 
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        GraqlParser parser = new GraqlParser(tokens);
+        TypeQLParser parser = new TypeQLParser(tokens);
 
         parser.removeErrorListeners();
         parser.addErrorListener(errorListener);
@@ -136,44 +136,44 @@ public class Parser extends GraqlBaseVisitor {
             parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
             queryContext = parserMethod.apply(parser);
 
-            throw GraqlException.of(errorListener.toString());
+            throw TypeQLException.of(errorListener.toString());
         }
 
         return visitor.apply(queryContext);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends GraqlQuery> T parseQueryEOF(String queryString) {
-        return (T) parse(queryString, GraqlParser::eof_query, this::visitEof_query);
+    public <T extends TypeQLQuery> T parseQueryEOF(String queryString) {
+        return (T) parse(queryString, TypeQLParser::eof_query, this::visitEof_query);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends GraqlQuery> Stream<T> parseQueriesEOF(String queryString) {
-        return (Stream<T>) parse(queryString, GraqlParser::eof_queries, this::visitEof_queries);
+    public <T extends TypeQLQuery> Stream<T> parseQueriesEOF(String queryString) {
+        return (Stream<T>) parse(queryString, TypeQLParser::eof_queries, this::visitEof_queries);
     }
 
     public Pattern parsePatternEOF(String patternString) {
-        return parse(patternString, GraqlParser::eof_pattern, this::visitEof_pattern);
+        return parse(patternString, TypeQLParser::eof_pattern, this::visitEof_pattern);
     }
 
     public List<? extends Pattern> parsePatternsEOF(String patternsString) {
-        return parse(patternsString, GraqlParser::eof_patterns, this::visitEof_patterns);
+        return parse(patternsString, TypeQLParser::eof_patterns, this::visitEof_patterns);
     }
 
     public List<Definable> parseDefinablesEOF(String definablesString) {
-        return parse(definablesString, GraqlParser::eof_definables, this::visitEof_definables);
+        return parse(definablesString, TypeQLParser::eof_definables, this::visitEof_definables);
     }
 
     public BoundVariable parseVariableEOF(String variableString) {
-        return parse(variableString, GraqlParser::eof_variable, this::visitEof_variable);
+        return parse(variableString, TypeQLParser::eof_variable, this::visitEof_variable);
     }
 
     public String parseLabelEOF(String labelString) {
-        return parse(labelString, GraqlParser::eof_label, this::visitEof_label);
+        return parse(labelString, TypeQLParser::eof_label, this::visitEof_label);
     }
 
     public Definable parseSchemaRuleEOF(String ruleString) {
-        return parse(ruleString, GraqlParser::eof_schema_rule, this::visitEof_schema_rule);
+        return parse(ruleString, TypeQLParser::eof_schema_rule, this::visitEof_schema_rule);
     }
 
     // GLOBAL HELPER METHODS ===================================================
@@ -182,7 +182,7 @@ public class Parser extends GraqlBaseVisitor {
         // Remove '$' prefix
         String name = variable.getSymbol().getText().substring(1);
 
-        if (name.equals(GraqlToken.Char.UNDERSCORE.toString())) {
+        if (name.equals(TypeQLToken.Char.UNDERSCORE.toString())) {
             return UnboundVariable.anonymous();
         } else {
             return UnboundVariable.named(name);
@@ -192,49 +192,49 @@ public class Parser extends GraqlBaseVisitor {
     // PARSER VISITORS =========================================================
 
     @Override
-    public GraqlQuery visitEof_query(GraqlParser.Eof_queryContext ctx) {
+    public TypeQLQuery visitEof_query(TypeQLParser.Eof_queryContext ctx) {
         return visitQuery(ctx.query());
     }
 
     @Override
-    public Stream<? extends GraqlQuery> visitEof_queries(GraqlParser.Eof_queriesContext ctx) {
+    public Stream<? extends TypeQLQuery> visitEof_queries(TypeQLParser.Eof_queriesContext ctx) {
         return ctx.query().stream().map(this::visitQuery);
     }
 
     @Override
-    public Pattern visitEof_pattern(GraqlParser.Eof_patternContext ctx) {
+    public Pattern visitEof_pattern(TypeQLParser.Eof_patternContext ctx) {
         return visitPattern(ctx.pattern());
     }
 
     @Override
-    public List<? extends Pattern> visitEof_patterns(GraqlParser.Eof_patternsContext ctx) {
+    public List<? extends Pattern> visitEof_patterns(TypeQLParser.Eof_patternsContext ctx) {
         return visitPatterns(ctx.patterns());
     }
 
     @Override
-    public List<Definable> visitEof_definables(GraqlParser.Eof_definablesContext ctx) {
+    public List<Definable> visitEof_definables(TypeQLParser.Eof_definablesContext ctx) {
         return ctx.definables().definable().stream().map(this::visitDefinable).collect(toList());
     }
 
     @Override
-    public BoundVariable visitEof_variable(GraqlParser.Eof_variableContext ctx) {
+    public BoundVariable visitEof_variable(TypeQLParser.Eof_variableContext ctx) {
         return visitPattern_variable(ctx.pattern_variable());
     }
 
     @Override
-    public String visitEof_label(GraqlParser.Eof_labelContext ctx) {
+    public String visitEof_label(TypeQLParser.Eof_labelContext ctx) {
         return ctx.label().getText();
     }
 
     @Override
-    public Rule visitEof_schema_rule(GraqlParser.Eof_schema_ruleContext ctx) {
+    public Rule visitEof_schema_rule(TypeQLParser.Eof_schema_ruleContext ctx) {
         return visitSchema_rule(ctx.schema_rule());
     }
 
-    // GRAQL QUERIES ===========================================================
+    // TYPEQL QUERIES ===========================================================
 
     @Override
-    public GraqlQuery visitQuery(GraqlParser.QueryContext ctx) {
+    public TypeQLQuery visitQuery(TypeQLParser.QueryContext ctx) {
         if (ctx.query_define() != null) {
             return visitQuery_define(ctx.query_define());
 
@@ -262,24 +262,24 @@ public class Parser extends GraqlBaseVisitor {
             return visitQuery_compute(ctx.query_compute());
 
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     @Override
-    public GraqlDefine visitQuery_define(GraqlParser.Query_defineContext ctx) {
+    public TypeQLDefine visitQuery_define(TypeQLParser.Query_defineContext ctx) {
         List<Definable> definables = visitDefinables(ctx.definables());
-        return new GraqlDefine(definables);
+        return new TypeQLDefine(definables);
     }
 
     @Override
-    public GraqlUndefine visitQuery_undefine(GraqlParser.Query_undefineContext ctx) {
+    public TypeQLUndefine visitQuery_undefine(TypeQLParser.Query_undefineContext ctx) {
         List<Definable> definables = visitDefinables(ctx.definables());
-        return new GraqlUndefine(definables);
+        return new TypeQLUndefine(definables);
     }
 
     @Override
-    public Rule visitSchema_rule(GraqlParser.Schema_ruleContext ctx) {
+    public Rule visitSchema_rule(TypeQLParser.Schema_ruleContext ctx) {
         String label = ctx.label().getText();
         if (ctx.patterns() != null && ctx.variable_thing_any() != null) {
             List<? extends Pattern> when = visitPatterns(ctx.patterns());
@@ -291,18 +291,18 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlInsert visitQuery_insert(GraqlParser.Query_insertContext ctx) {
+    public TypeQLInsert visitQuery_insert(TypeQLParser.Query_insertContext ctx) {
         if (ctx.patterns() != null) {
-            return new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns()))
+            return new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()))
                     .insert(visitVariable_things(ctx.variable_things()));
         } else {
-            return new GraqlInsert(visitVariable_things(ctx.variable_things()));
+            return new TypeQLInsert(visitVariable_things(ctx.variable_things()));
         }
     }
 
     @Override
-    public Either<GraqlDelete, GraqlUpdate> visitQuery_delete_or_update(GraqlParser.Query_delete_or_updateContext ctx) {
-        GraqlDelete delete = new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns()))
+    public Either<TypeQLDelete, TypeQLUpdate> visitQuery_delete_or_update(TypeQLParser.Query_delete_or_updateContext ctx) {
+        TypeQLDelete delete = new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()))
                 .delete(visitVariable_things(ctx.variable_things(0)));
         if (ctx.INSERT() == null) {
             return Either.first(delete);
@@ -313,8 +313,8 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlMatch visitQuery_match(GraqlParser.Query_matchContext ctx) {
-        GraqlMatch match = new GraqlMatch.Unfiltered(visitPatterns(ctx.patterns()));
+    public TypeQLMatch visitQuery_match(TypeQLParser.Query_matchContext ctx) {
+        TypeQLMatch match = new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()));
 
         if (ctx.modifiers() != null) {
             List<UnboundVariable> variables = new ArrayList<>();
@@ -326,11 +326,11 @@ public class Parser extends GraqlBaseVisitor {
                 UnboundVariable var = getVar(ctx.modifiers().sort().VAR_());
                 sorting = ctx.modifiers().sort().ORDER_() == null
                         ? new Sortable.Sorting(var)
-                        : new Sortable.Sorting(var, GraqlArg.Order.of(ctx.modifiers().sort().ORDER_().getText()));
+                        : new Sortable.Sorting(var, TypeQLArg.Order.of(ctx.modifiers().sort().ORDER_().getText()));
             }
             if (ctx.modifiers().offset() != null) offset = getLong(ctx.modifiers().offset().LONG_());
             if (ctx.modifiers().limit() != null) limit = getLong(ctx.modifiers().limit().LONG_());
-            match = new GraqlMatch(match.conjunction(), variables, sorting, offset, limit);
+            match = new TypeQLMatch(match.conjunction(), variables, sorting, offset, limit);
         }
 
         return match;
@@ -344,28 +344,28 @@ public class Parser extends GraqlBaseVisitor {
      * @return An AggregateQuery object
      */
     @Override
-    public GraqlMatch.Aggregate visitQuery_match_aggregate(GraqlParser.Query_match_aggregateContext ctx) {
-        GraqlParser.Match_aggregateContext function = ctx.match_aggregate();
+    public TypeQLMatch.Aggregate visitQuery_match_aggregate(TypeQLParser.Query_match_aggregateContext ctx) {
+        TypeQLParser.Match_aggregateContext function = ctx.match_aggregate();
 
         return visitQuery_match(ctx.query_match()).aggregate(
-                GraqlToken.Aggregate.Method.of(function.aggregate_method().getText()),
+                TypeQLToken.Aggregate.Method.of(function.aggregate_method().getText()),
                 function.VAR_() != null ? getVar(function.VAR_()) : null
         );
     }
 
     @Override
-    public GraqlMatch.Group visitQuery_match_group(GraqlParser.Query_match_groupContext ctx) {
+    public TypeQLMatch.Group visitQuery_match_group(TypeQLParser.Query_match_groupContext ctx) {
         UnboundVariable var = getVar(ctx.match_group().VAR_());
         return visitQuery_match(ctx.query_match()).group(var);
     }
 
     @Override
-    public GraqlMatch.Group.Aggregate visitQuery_match_group_agg(GraqlParser.Query_match_group_aggContext ctx) {
+    public TypeQLMatch.Group.Aggregate visitQuery_match_group_agg(TypeQLParser.Query_match_group_aggContext ctx) {
         UnboundVariable var = getVar(ctx.match_group().VAR_());
-        GraqlParser.Match_aggregateContext function = ctx.match_aggregate();
+        TypeQLParser.Match_aggregateContext function = ctx.match_aggregate();
 
         return visitQuery_match(ctx.query_match()).group(var).aggregate(
-                GraqlToken.Aggregate.Method.of(function.aggregate_method().getText()),
+                TypeQLToken.Aggregate.Method.of(function.aggregate_method().getText()),
                 function.VAR_() != null ? getVar(function.VAR_()) : null
         );
     }
@@ -373,14 +373,14 @@ public class Parser extends GraqlBaseVisitor {
     // GET QUERY MODIFIERS ==========================================
 
     @Override
-    public List<UnboundVariable> visitFilter(GraqlParser.FilterContext ctx) {
+    public List<UnboundVariable> visitFilter(TypeQLParser.FilterContext ctx) {
         return ctx.VAR_().stream().map(this::getVar).collect(toList());
     }
 
     // COMPUTE QUERY ===========================================================
 
     @Override
-    public GraqlCompute visitQuery_compute(GraqlParser.Query_computeContext ctx) {
+    public TypeQLCompute visitQuery_compute(TypeQLParser.Query_computeContext ctx) {
 
         if (ctx.compute_conditions().conditions_count() != null) {
             return visitConditions_count(ctx.compute_conditions().conditions_count());
@@ -393,13 +393,13 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.compute_conditions().conditions_cluster() != null) {
             return visitConditions_cluster(ctx.compute_conditions().conditions_cluster());
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     @Override
-    public GraqlCompute.Statistics.Count visitConditions_count(GraqlParser.Conditions_countContext ctx) {
-        GraqlCompute.Statistics.Count compute = new GraqlCompute.Builder().count();
+    public TypeQLCompute.Statistics.Count visitConditions_count(TypeQLParser.Conditions_countContext ctx) {
+        TypeQLCompute.Statistics.Count compute = new TypeQLCompute.Builder().count();
         if (ctx.input_count() != null) {
             compute = compute.in(visitLabels(ctx.input_count().compute_scope().labels()));
         }
@@ -407,35 +407,35 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlCompute.Statistics.Value visitConditions_value(GraqlParser.Conditions_valueContext ctx) {
-        GraqlCompute.Statistics.Value compute;
-        GraqlToken.Compute.Method method = GraqlToken.Compute.Method.of(ctx.compute_method().getText());
+    public TypeQLCompute.Statistics.Value visitConditions_value(TypeQLParser.Conditions_valueContext ctx) {
+        TypeQLCompute.Statistics.Value compute;
+        TypeQLToken.Compute.Method method = TypeQLToken.Compute.Method.of(ctx.compute_method().getText());
 
         if (method == null) {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-        } else if (method.equals(GraqlToken.Compute.Method.MAX)) {
-            compute = new GraqlCompute.Builder().max();
-        } else if (method.equals(GraqlToken.Compute.Method.MIN)) {
-            compute = new GraqlCompute.Builder().min();
-        } else if (method.equals(GraqlToken.Compute.Method.MEAN)) {
-            compute = new GraqlCompute.Builder().mean();
-        } else if (method.equals(GraqlToken.Compute.Method.MEDIAN)) {
-            compute = new GraqlCompute.Builder().median();
-        } else if (method.equals(GraqlToken.Compute.Method.SUM)) {
-            compute = new GraqlCompute.Builder().sum();
-        } else if (method.equals(GraqlToken.Compute.Method.STD)) {
-            compute = new GraqlCompute.Builder().std();
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+        } else if (method.equals(TypeQLToken.Compute.Method.MAX)) {
+            compute = new TypeQLCompute.Builder().max();
+        } else if (method.equals(TypeQLToken.Compute.Method.MIN)) {
+            compute = new TypeQLCompute.Builder().min();
+        } else if (method.equals(TypeQLToken.Compute.Method.MEAN)) {
+            compute = new TypeQLCompute.Builder().mean();
+        } else if (method.equals(TypeQLToken.Compute.Method.MEDIAN)) {
+            compute = new TypeQLCompute.Builder().median();
+        } else if (method.equals(TypeQLToken.Compute.Method.SUM)) {
+            compute = new TypeQLCompute.Builder().sum();
+        } else if (method.equals(TypeQLToken.Compute.Method.STD)) {
+            compute = new TypeQLCompute.Builder().std();
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
 
-        for (GraqlParser.Input_valueContext valueCtx : ctx.input_value()) {
+        for (TypeQLParser.Input_valueContext valueCtx : ctx.input_value()) {
             if (valueCtx.compute_target() != null) {
                 compute = compute.of(visitLabels(valueCtx.compute_target().labels()));
             } else if (valueCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(valueCtx.compute_scope().labels()));
             } else {
-                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
@@ -443,10 +443,10 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlCompute.Path visitConditions_path(GraqlParser.Conditions_pathContext ctx) {
-        GraqlCompute.Path compute = new GraqlCompute.Builder().path();
+    public TypeQLCompute.Path visitConditions_path(TypeQLParser.Conditions_pathContext ctx) {
+        TypeQLCompute.Path compute = new TypeQLCompute.Builder().path();
 
-        for (GraqlParser.Input_pathContext pathCtx : ctx.input_path()) {
+        for (TypeQLParser.Input_pathContext pathCtx : ctx.input_path()) {
 
             if (pathCtx.compute_direction() != null) {
                 String id = pathCtx.compute_direction().IID_().getText();
@@ -458,7 +458,7 @@ public class Parser extends GraqlBaseVisitor {
             } else if (pathCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(pathCtx.compute_scope().labels()));
             } else {
-                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
@@ -466,18 +466,18 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlCompute.Centrality visitConditions_central(GraqlParser.Conditions_centralContext ctx) {
-        GraqlCompute.Centrality compute = new GraqlCompute.Builder().centrality();
+    public TypeQLCompute.Centrality visitConditions_central(TypeQLParser.Conditions_centralContext ctx) {
+        TypeQLCompute.Centrality compute = new TypeQLCompute.Builder().centrality();
 
-        for (GraqlParser.Input_centralContext centralityCtx : ctx.input_central()) {
+        for (TypeQLParser.Input_centralContext centralityCtx : ctx.input_central()) {
             if (centralityCtx.compute_target() != null) {
                 compute = compute.of(visitLabels(centralityCtx.compute_target().labels()));
             } else if (centralityCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(centralityCtx.compute_scope().labels()));
             } else if (centralityCtx.compute_config() != null) {
-                compute = (GraqlCompute.Centrality) setComputeConfig(compute, centralityCtx.compute_config());
+                compute = (TypeQLCompute.Centrality) setComputeConfig(compute, centralityCtx.compute_config());
             } else {
-                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
@@ -485,25 +485,25 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlCompute.Cluster visitConditions_cluster(GraqlParser.Conditions_clusterContext ctx) {
-        GraqlCompute.Cluster compute = new GraqlCompute.Builder().cluster();
+    public TypeQLCompute.Cluster visitConditions_cluster(TypeQLParser.Conditions_clusterContext ctx) {
+        TypeQLCompute.Cluster compute = new TypeQLCompute.Builder().cluster();
 
-        for (GraqlParser.Input_clusterContext clusterCtx : ctx.input_cluster()) {
+        for (TypeQLParser.Input_clusterContext clusterCtx : ctx.input_cluster()) {
             if (clusterCtx.compute_scope() != null) {
                 compute = compute.in(visitLabels(clusterCtx.compute_scope().labels()));
             } else if (clusterCtx.compute_config() != null) {
-                compute = (GraqlCompute.Cluster) setComputeConfig(compute, clusterCtx.compute_config());
+                compute = (TypeQLCompute.Cluster) setComputeConfig(compute, clusterCtx.compute_config());
             } else {
-                throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
         }
 
         return compute;
     }
 
-    private Computable.Configurable setComputeConfig(Computable.Configurable compute, GraqlParser.Compute_configContext ctx) {
+    private Computable.Configurable setComputeConfig(Computable.Configurable compute, TypeQLParser.Compute_configContext ctx) {
         if (ctx.USING() != null) {
-            compute = compute.using(GraqlArg.Algorithm.of(ctx.compute_algorithm().getText()));
+            compute = compute.using(TypeQLArg.Algorithm.of(ctx.compute_algorithm().getText()));
         } else if (ctx.WHERE() != null) {
             compute = compute.where(visitCompute_args(ctx.compute_args()));
         }
@@ -512,10 +512,10 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public List<GraqlCompute.Argument> visitCompute_args(GraqlParser.Compute_argsContext ctx) {
+    public List<TypeQLCompute.Argument> visitCompute_args(TypeQLParser.Compute_argsContext ctx) {
 
-        List<GraqlParser.Compute_argContext> argContextList = new ArrayList<>();
-        List<GraqlCompute.Argument> argList = new ArrayList<>();
+        List<TypeQLParser.Compute_argContext> argContextList = new ArrayList<>();
+        List<TypeQLCompute.Argument> argList = new ArrayList<>();
 
         if (ctx.compute_arg() != null) {
             argContextList.add(ctx.compute_arg());
@@ -523,18 +523,18 @@ public class Parser extends GraqlBaseVisitor {
             argContextList.addAll(ctx.compute_args_array().compute_arg());
         }
 
-        for (GraqlParser.Compute_argContext argContext : argContextList) {
+        for (TypeQLParser.Compute_argContext argContext : argContextList) {
             if (argContext.MIN_K() != null) {
-                argList.add(GraqlCompute.Argument.minK(getLong(argContext.LONG_())));
+                argList.add(TypeQLCompute.Argument.minK(getLong(argContext.LONG_())));
 
             } else if (argContext.K() != null) {
-                argList.add(GraqlCompute.Argument.k(getLong(argContext.LONG_())));
+                argList.add(TypeQLCompute.Argument.k(getLong(argContext.LONG_())));
 
             } else if (argContext.SIZE() != null) {
-                argList.add(GraqlCompute.Argument.size(getLong(argContext.LONG_())));
+                argList.add(TypeQLCompute.Argument.size(getLong(argContext.LONG_())));
 
             } else if (argContext.CONTAINS() != null) {
-                argList.add(GraqlCompute.Argument.contains(argContext.IID_().getText()));
+                argList.add(TypeQLCompute.Argument.contains(argContext.IID_().getText()));
             }
         }
 
@@ -544,12 +544,12 @@ public class Parser extends GraqlBaseVisitor {
     // QUERY PATTERNS ==========================================================
 
     @Override
-    public List<Pattern> visitPatterns(GraqlParser.PatternsContext ctx) {
+    public List<Pattern> visitPatterns(TypeQLParser.PatternsContext ctx) {
         return ctx.pattern().stream().map(this::visitPattern).collect(toList());
     }
 
     @Override
-    public Pattern visitPattern(GraqlParser.PatternContext ctx) {
+    public Pattern visitPattern(TypeQLParser.PatternContext ctx) {
         if (ctx.pattern_variable() != null) {
             return visitPattern_variable(ctx.pattern_variable());
         } else if (ctx.pattern_disjunction() != null) {
@@ -559,12 +559,12 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.pattern_negation() != null) {
             return visitPattern_negation(ctx.pattern_negation());
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     @Override
-    public Disjunction<? extends Pattern> visitPattern_disjunction(GraqlParser.Pattern_disjunctionContext ctx) {
+    public Disjunction<? extends Pattern> visitPattern_disjunction(TypeQLParser.Pattern_disjunctionContext ctx) {
         List<Pattern> patterns = ctx.patterns().stream().map(patternsContext -> {
             List<Pattern> nested = visitPatterns(patternsContext);
             if (nested.size() > 1) return new Conjunction<>(nested);
@@ -577,12 +577,12 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Conjunction<? extends Pattern> visitPattern_conjunction(GraqlParser.Pattern_conjunctionContext ctx) {
+    public Conjunction<? extends Pattern> visitPattern_conjunction(TypeQLParser.Pattern_conjunctionContext ctx) {
         return new Conjunction<>(visitPatterns(ctx.patterns()));
     }
 
     @Override
-    public Negation<? extends Pattern> visitPattern_negation(GraqlParser.Pattern_negationContext ctx) {
+    public Negation<? extends Pattern> visitPattern_negation(TypeQLParser.Pattern_negationContext ctx) {
         List<Pattern> patterns = visitPatterns(ctx.patterns());
         if (patterns.size() == 1) return new Negation<>(patterns.get(0));
         else return new Negation<>(new Conjunction<>(patterns));
@@ -591,7 +591,7 @@ public class Parser extends GraqlBaseVisitor {
     // QUERY DEFINABLES ========================================================
 
     @Override
-    public Definable visitDefinable(GraqlParser.DefinableContext ctx) {
+    public Definable visitDefinable(TypeQLParser.DefinableContext ctx) {
         if (ctx.variable_type() != null) {
             return visitVariable_type(ctx.variable_type());
         } else {
@@ -600,7 +600,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public List<Definable> visitDefinables(GraqlParser.DefinablesContext ctx) {
+    public List<Definable> visitDefinables(TypeQLParser.DefinablesContext ctx) {
         return ctx.definable().stream().map(this::visitDefinable).collect(toList());
     }
 
@@ -608,7 +608,7 @@ public class Parser extends GraqlBaseVisitor {
     // VARIABLE PATTERNS =======================================================
 
     @Override
-    public BoundVariable visitPattern_variable(GraqlParser.Pattern_variableContext ctx) {
+    public BoundVariable visitPattern_variable(TypeQLParser.Pattern_variableContext ctx) {
         if (ctx.variable_thing_any() != null) {
             return this.visitVariable_thing_any(ctx.variable_thing_any());
         } else if (ctx.variable_type() != null) {
@@ -616,32 +616,32 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.variable_concept() != null) {
             return visitVariable_concept(ctx.variable_concept());
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     // CONCEPT VARIABLES =======================================================
 
     @Override
-    public ConceptVariable visitVariable_concept(GraqlParser.Variable_conceptContext ctx) {
+    public ConceptVariable visitVariable_concept(TypeQLParser.Variable_conceptContext ctx) {
         return getVar(ctx.VAR_(0)).is(getVar(ctx.VAR_(1)));
     }
 
     // TYPE VARIABLES ==========================================================
 
     @Override
-    public TypeVariable visitVariable_type(GraqlParser.Variable_typeContext ctx) {
+    public TypeVariable visitVariable_type(TypeQLParser.Variable_typeContext ctx) {
         TypeVariable type = visitType_any(ctx.type_any()).apply(
                 scopedLabel -> hidden().constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second())),
                 UnboundVariable::toType
         );
 
-        for (GraqlParser.Type_constraintContext constraint : ctx.type_constraint()) {
+        for (TypeQLParser.Type_constraintContext constraint : ctx.type_constraint()) {
             if (constraint.ABSTRACT() != null) {
                 type = type.isAbstract();
             } else if (constraint.SUB_() != null) {
-                GraqlToken.Constraint sub = GraqlToken.Constraint.of(constraint.SUB_().getText());
-                type = type.constrain(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == GraqlToken.Constraint.SUBX));
+                TypeQLToken.Constraint sub = TypeQLToken.Constraint.of(constraint.SUB_().getText());
+                type = type.constrain(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == TypeQLToken.Constraint.SUBX));
             } else if (constraint.OWNS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
                 type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, constraint.IS_KEY() != null));
@@ -652,14 +652,14 @@ public class Parser extends GraqlBaseVisitor {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
                 type = type.constrain(new TypeConstraint.Relates(visitType(constraint.type(0)), overridden));
             } else if (constraint.VALUE() != null) {
-                type = type.value(GraqlArg.ValueType.of(constraint.value_type().getText()));
+                type = type.value(TypeQLArg.ValueType.of(constraint.value_type().getText()));
             } else if (constraint.REGEX() != null) {
                 type = type.regex(getRegex(constraint.STRING_()));
             } else if (constraint.TYPE() != null) {
                 Pair<String, String> scopedLabel = visitLabel_any(constraint.label_any());
                 type = type.constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second()));
             } else {
-                throw GraqlException.of(ILLEGAL_GRAMMAR.message(constraint.getText()));
+                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(constraint.getText()));
             }
         }
 
@@ -669,12 +669,12 @@ public class Parser extends GraqlBaseVisitor {
     // THING VARIABLES =========================================================
 
     @Override
-    public List<ThingVariable<?>> visitVariable_things(GraqlParser.Variable_thingsContext ctx) {
+    public List<ThingVariable<?>> visitVariable_things(TypeQLParser.Variable_thingsContext ctx) {
         return ctx.variable_thing_any().stream().map(this::visitVariable_thing_any).collect(toList());
     }
 
     @Override
-    public ThingVariable<?> visitVariable_thing_any(GraqlParser.Variable_thing_anyContext ctx) {
+    public ThingVariable<?> visitVariable_thing_any(TypeQLParser.Variable_thing_anyContext ctx) {
         if (ctx.variable_thing() != null) {
             return this.visitVariable_thing(ctx.variable_thing());
         } else if (ctx.variable_relation() != null) {
@@ -682,12 +682,12 @@ public class Parser extends GraqlBaseVisitor {
         } else if (ctx.variable_attribute() != null) {
             return this.visitVariable_attribute(ctx.variable_attribute());
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     @Override
-    public ThingVariable.Thing visitVariable_thing(GraqlParser.Variable_thingContext ctx) {
+    public ThingVariable.Thing visitVariable_thing(TypeQLParser.Variable_thingContext ctx) {
         UnboundVariable unscoped = getVar(ctx.VAR_());
         ThingVariable.Thing thing = null;
 
@@ -707,7 +707,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public ThingVariable.Relation visitVariable_relation(GraqlParser.Variable_relationContext ctx) {
+    public ThingVariable.Relation visitVariable_relation(TypeQLParser.Variable_relationContext ctx) {
         UnboundVariable unscoped;
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
@@ -724,7 +724,7 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public ThingVariable.Attribute visitVariable_attribute(GraqlParser.Variable_attributeContext ctx) {
+    public ThingVariable.Attribute visitVariable_attribute(TypeQLParser.Variable_attributeContext ctx) {
         UnboundVariable unscoped;
         if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
         else unscoped = hidden();
@@ -740,42 +740,42 @@ public class Parser extends GraqlBaseVisitor {
         return attribute;
     }
 
-    private ThingConstraint.Isa getIsaConstraint(TerminalNode isaToken, GraqlParser.TypeContext ctx) {
-        GraqlToken.Constraint isa = GraqlToken.Constraint.of(isaToken.getText());
+    private ThingConstraint.Isa getIsaConstraint(TerminalNode isaToken, TypeQLParser.TypeContext ctx) {
+        TypeQLToken.Constraint isa = TypeQLToken.Constraint.of(isaToken.getText());
 
-        if (isa != null && isa.equals(GraqlToken.Constraint.ISA)) {
+        if (isa != null && isa.equals(TypeQLToken.Constraint.ISA)) {
             return new ThingConstraint.Isa(visitType(ctx), false);
-        } else if (isa != null && isa.equals(GraqlToken.Constraint.ISAX)) {
+        } else if (isa != null && isa.equals(TypeQLToken.Constraint.ISAX)) {
             return new ThingConstraint.Isa(visitType(ctx), true);
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     // ATTRIBUTE STATEMENT CONSTRUCT ===============================================
 
     @Override
-    public List<ThingConstraint.Has> visitAttributes(GraqlParser.AttributesContext ctx) {
+    public List<ThingConstraint.Has> visitAttributes(TypeQLParser.AttributesContext ctx) {
         return ctx.attribute().stream().map(this::visitAttribute).collect(toList());
     }
 
     @Override
-    public ThingConstraint.Has visitAttribute(GraqlParser.AttributeContext ctx) {
+    public ThingConstraint.Has visitAttribute(TypeQLParser.AttributeContext ctx) {
         if (ctx.label() != null) {
             if (ctx.VAR_() != null) return new ThingConstraint.Has(ctx.label().getText(), getVar(ctx.VAR_()));
             if (ctx.predicate() != null)
                 return new ThingConstraint.Has(ctx.label().getText(), visitPredicate(ctx.predicate()));
         } else if (ctx.VAR_() != null) return new ThingConstraint.Has(getVar(ctx.VAR_()));
-        throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+        throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
     }
 
     // RELATION STATEMENT CONSTRUCT ============================================
 
     @Override
-    public ThingConstraint.Relation visitRelation(GraqlParser.RelationContext ctx) {
+    public ThingConstraint.Relation visitRelation(TypeQLParser.RelationContext ctx) {
         List<ThingConstraint.Relation.RolePlayer> rolePlayers = new ArrayList<>();
 
-        for (GraqlParser.Role_playerContext rolePlayerCtx : ctx.role_player()) {
+        for (TypeQLParser.Role_playerContext rolePlayerCtx : ctx.role_player()) {
             UnboundVariable player = getVar(rolePlayerCtx.player().VAR_());
             if (rolePlayerCtx.type() != null) {
                 Either<String, UnboundVariable> roleType = visitType(rolePlayerCtx.type());
@@ -790,7 +790,7 @@ public class Parser extends GraqlBaseVisitor {
     // TYPE, LABEL, AND IDENTIFIER CONSTRUCTS ==================================
 
     @Override
-    public Either<Pair<String, String>, UnboundVariable> visitType_any(GraqlParser.Type_anyContext ctx) {
+    public Either<Pair<String, String>, UnboundVariable> visitType_any(TypeQLParser.Type_anyContext ctx) {
         if (ctx.VAR_() != null) return Either.second(getVar(ctx.VAR_()));
         else if (ctx.type() != null)
             return visitType(ctx.type()).apply(s -> Either.first(pair(null, s)), Either::second);
@@ -799,35 +799,35 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public Either<Pair<String, String>, UnboundVariable> visitType_scoped(GraqlParser.Type_scopedContext ctx) {
+    public Either<Pair<String, String>, UnboundVariable> visitType_scoped(TypeQLParser.Type_scopedContext ctx) {
         if (ctx.label_scoped() != null) return Either.first(visitLabel_scoped(ctx.label_scoped()));
         else if (ctx.VAR_() != null) return Either.second(getVar(ctx.VAR_()));
         else return null;
     }
 
     @Override
-    public Either<String, UnboundVariable> visitType(GraqlParser.TypeContext ctx) {
+    public Either<String, UnboundVariable> visitType(TypeQLParser.TypeContext ctx) {
         if (ctx.label() != null) return Either.first(ctx.label().getText());
         else if (ctx.VAR_() != null) return Either.second(getVar(ctx.VAR_()));
         else return null;
     }
 
     @Override
-    public Pair<String, String> visitLabel_any(GraqlParser.Label_anyContext ctx) {
+    public Pair<String, String> visitLabel_any(TypeQLParser.Label_anyContext ctx) {
         if (ctx.label() != null) return pair(null, ctx.label().getText());
         else if (ctx.label_scoped() != null) return visitLabel_scoped(ctx.label_scoped());
         else return null;
     }
 
     @Override
-    public Pair<String, String> visitLabel_scoped(GraqlParser.Label_scopedContext ctx) {
+    public Pair<String, String> visitLabel_scoped(TypeQLParser.Label_scopedContext ctx) {
         String[] scopedLabel = ctx.getText().split(":");
         return pair(scopedLabel[0], scopedLabel[1]);
     }
 
     @Override
-    public List<String> visitLabels(GraqlParser.LabelsContext ctx) {
-        List<GraqlParser.LabelContext> labelsList = new ArrayList<>();
+    public List<String> visitLabels(TypeQLParser.LabelsContext ctx) {
+        List<TypeQLParser.LabelContext> labelsList = new ArrayList<>();
         if (ctx.label() != null) labelsList.add(ctx.label());
         else if (ctx.label_array() != null) labelsList.addAll(ctx.label_array().label());
         return labelsList.stream().map(RuleContext::getText).collect(toList());
@@ -836,23 +836,23 @@ public class Parser extends GraqlBaseVisitor {
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
 
     @Override
-    public ThingConstraint.Value<?> visitPredicate(GraqlParser.PredicateContext ctx) {
-        GraqlToken.Predicate predicate;
+    public ThingConstraint.Value<?> visitPredicate(TypeQLParser.PredicateContext ctx) {
+        TypeQLToken.Predicate predicate;
         Object value;
 
         if (ctx.value() != null) {
-            predicate = GraqlToken.Predicate.Equality.EQ;
+            predicate = TypeQLToken.Predicate.Equality.EQ;
             value = visitValue(ctx.value());
         } else if (ctx.predicate_equality() != null) {
-            predicate = GraqlToken.Predicate.Equality.of(ctx.predicate_equality().getText());
+            predicate = TypeQLToken.Predicate.Equality.of(ctx.predicate_equality().getText());
             if (ctx.predicate_value().value() != null) value = visitValue(ctx.predicate_value().value());
             else if (ctx.predicate_value().VAR_() != null) value = getVar(ctx.predicate_value().VAR_());
-            else throw GraqlException.of(ILLEGAL_STATE);
+            else throw TypeQLException.of(ILLEGAL_STATE);
         } else if (ctx.predicate_substring() != null) {
-            predicate = GraqlToken.Predicate.SubString.of(ctx.predicate_substring().getText());
+            predicate = TypeQLToken.Predicate.SubString.of(ctx.predicate_substring().getText());
             if (ctx.predicate_substring().LIKE() != null) value = getRegex(ctx.STRING_());
             else value = getString(ctx.STRING_());
-        } else throw GraqlException.of(ILLEGAL_STATE);
+        } else throw TypeQLException.of(ILLEGAL_STATE);
 
         assert predicate != null;
 
@@ -869,7 +869,7 @@ public class Parser extends GraqlBaseVisitor {
         } else if (value instanceof UnboundVariable) {
             return new ThingConstraint.Value.Variable(predicate.asEquality(), (UnboundVariable) value);
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
@@ -880,24 +880,24 @@ public class Parser extends GraqlBaseVisitor {
     }
 
     @Override
-    public GraqlArg.ValueType visitValue_type(GraqlParser.Value_typeContext valueClass) {
+    public TypeQLArg.ValueType visitValue_type(TypeQLParser.Value_typeContext valueClass) {
         if (valueClass.BOOLEAN() != null) {
-            return GraqlArg.ValueType.BOOLEAN;
+            return TypeQLArg.ValueType.BOOLEAN;
         } else if (valueClass.DATETIME() != null) {
-            return GraqlArg.ValueType.DATETIME;
+            return TypeQLArg.ValueType.DATETIME;
         } else if (valueClass.DOUBLE() != null) {
-            return GraqlArg.ValueType.DOUBLE;
+            return TypeQLArg.ValueType.DOUBLE;
         } else if (valueClass.LONG() != null) {
-            return GraqlArg.ValueType.LONG;
+            return TypeQLArg.ValueType.LONG;
         } else if (valueClass.STRING() != null) {
-            return GraqlArg.ValueType.STRING;
+            return TypeQLArg.ValueType.STRING;
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(valueClass));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(valueClass));
         }
     }
 
     @Override
-    public Object visitValue(GraqlParser.ValueContext ctx) {
+    public Object visitValue(TypeQLParser.ValueContext ctx) {
         if (ctx.STRING_() != null) {
             return getString(ctx.STRING_());
 
@@ -917,18 +917,18 @@ public class Parser extends GraqlBaseVisitor {
             return getDateTime(ctx.DATETIME_());
 
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     private String getString(TerminalNode string) {
         String str = string.getText();
         assert str.length() >= 2;
-        GraqlToken.Char start = GraqlToken.Char.of(str.substring(0, 1));
-        GraqlToken.Char end = GraqlToken.Char.of(str.substring(str.length() - 1));
+        TypeQLToken.Char start = TypeQLToken.Char.of(str.substring(0, 1));
+        TypeQLToken.Char end = TypeQLToken.Char.of(str.substring(str.length() - 1));
         assert start != null && end != null;
-        assert start.equals(GraqlToken.Char.QUOTE_DOUBLE) || start.equals(GraqlToken.Char.QUOTE_SINGLE);
-        assert end.equals(GraqlToken.Char.QUOTE_DOUBLE) || end.equals(GraqlToken.Char.QUOTE_SINGLE);
+        assert start.equals(TypeQLToken.Char.QUOTE_DOUBLE) || start.equals(TypeQLToken.Char.QUOTE_SINGLE);
+        assert end.equals(TypeQLToken.Char.QUOTE_DOUBLE) || end.equals(TypeQLToken.Char.QUOTE_SINGLE);
 
         // Remove surrounding quotes
         return unquoteString(string);
@@ -941,9 +941,8 @@ public class Parser extends GraqlBaseVisitor {
     private long getLong(TerminalNode number) {
         try {
             return Long.parseLong(number.getText());
-        }
-        catch (NumberFormatException e) {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(number.getText()));
+        } catch (NumberFormatException e) {
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(number.getText()));
         }
     }
 
@@ -951,21 +950,21 @@ public class Parser extends GraqlBaseVisitor {
         try {
             return Double.parseDouble(real.getText());
         } catch (NumberFormatException e) {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(real.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(real.getText()));
         }
     }
 
     private boolean getBoolean(TerminalNode bool) {
-        GraqlToken.Literal literal = GraqlToken.Literal.of(bool.getText());
+        TypeQLToken.Literal literal = TypeQLToken.Literal.of(bool.getText());
 
-        if (literal != null && literal.equals(GraqlToken.Literal.TRUE)) {
+        if (literal != null && literal.equals(TypeQLToken.Literal.TRUE)) {
             return true;
 
-        } else if (literal != null && literal.equals(GraqlToken.Literal.FALSE)) {
+        } else if (literal != null && literal.equals(TypeQLToken.Literal.FALSE)) {
             return false;
 
         } else {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(bool.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(bool.getText()));
         }
     }
 
@@ -973,7 +972,7 @@ public class Parser extends GraqlBaseVisitor {
         try {
             return LocalDate.parse(date.getText(), DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
         } catch (DateTimeParseException e) {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(date.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(date.getText()));
         }
     }
 
@@ -981,7 +980,7 @@ public class Parser extends GraqlBaseVisitor {
         try {
             return LocalDateTime.parse(dateTime.getText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException e) {
-            throw GraqlException.of(ILLEGAL_GRAMMAR.message(dateTime.getText()));
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(dateTime.getText()));
         }
     }
 }

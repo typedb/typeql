@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.constraint;
+package com.vaticle.typeql.lang.pattern.constraint;
 
-import grakn.common.collection.Either;
-import grakn.common.collection.Pair;
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typedb.common.collection.Either;
+import com.vaticle.typedb.common.collection.Pair;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -32,27 +32,27 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 
-import static grakn.common.collection.Collections.set;
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.GraqlToken.Char.COLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Constraint.AS;
-import static graql.lang.common.GraqlToken.Constraint.IS_KEY;
-import static graql.lang.common.GraqlToken.Constraint.OWNS;
-import static graql.lang.common.GraqlToken.Constraint.PLAYS;
-import static graql.lang.common.GraqlToken.Constraint.REGEX;
-import static graql.lang.common.GraqlToken.Constraint.RELATES;
-import static graql.lang.common.GraqlToken.Constraint.SUB;
-import static graql.lang.common.GraqlToken.Constraint.SUBX;
-import static graql.lang.common.GraqlToken.Constraint.TYPE;
-import static graql.lang.common.GraqlToken.Constraint.VALUE_TYPE;
-import static graql.lang.common.GraqlToken.Type.RELATION;
-import static graql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static graql.lang.common.util.Strings.escapeRegex;
-import static graql.lang.common.util.Strings.quoteString;
-import static graql.lang.pattern.variable.UnboundVariable.hidden;
+import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.AS;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.IS_KEY;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.OWNS;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.PLAYS;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.REGEX;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.RELATES;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.SUB;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.SUBX;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.TYPE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.VALUE_TYPE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Type.RELATION;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
+import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
+import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
 
 public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
@@ -104,35 +104,35 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
     }
 
     public TypeConstraint.Label asLabel() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
     }
 
     public TypeConstraint.Sub asSub() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Sub.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Sub.class)));
     }
 
     public TypeConstraint.Abstract asAbstract() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Abstract.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Abstract.class)));
     }
 
     public TypeConstraint.ValueType asValueType() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(ValueType.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ValueType.class)));
     }
 
     public TypeConstraint.Regex asRegex() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Regex.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Regex.class)));
     }
 
     public TypeConstraint.Owns asOwns() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Owns.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Owns.class)));
     }
 
     public TypeConstraint.Plays asPlays() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Plays.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Plays.class)));
     }
 
     public TypeConstraint.Relates asRelates() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Relates.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Relates.class)));
     }
 
     public static class Label extends TypeConstraint {
@@ -286,7 +286,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         @Override
         public String toString() {
-            return GraqlToken.Constraint.ABSTRACT.toString();
+            return TypeQLToken.Constraint.ABSTRACT.toString();
         }
 
         @Override
@@ -303,16 +303,16 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public static class ValueType extends TypeConstraint {
 
-        private final GraqlArg.ValueType valueType;
+        private final TypeQLArg.ValueType valueType;
         private final int hash;
 
-        public ValueType(GraqlArg.ValueType valueType) {
+        public ValueType(TypeQLArg.ValueType valueType) {
             if (valueType == null) throw new NullPointerException("Null ValueType");
             this.valueType = valueType;
             this.hash = Objects.hash(ValueType.class, this.valueType);
         }
 
-        public GraqlArg.ValueType valueType() {
+        public TypeQLArg.ValueType valueType() {
             return valueType;
         }
 
@@ -355,7 +355,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             try {
                 this.regex = java.util.regex.Pattern.compile(regex);
             } catch (PatternSyntaxException exception) {
-                throw GraqlException.of(INVALID_ATTRIBUTE_TYPE_REGEX.message());
+                throw TypeQLException.of(INVALID_ATTRIBUTE_TYPE_REGEX.message());
             }
             this.hash = Objects.hash(Regex.class, this.regex.pattern());
         }
@@ -526,7 +526,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
-            if (roleType == null) throw GraqlException.of(MISSING_PATTERNS.message());
+            if (roleType == null) throw TypeQLException.of(MISSING_PATTERNS.message());
             this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
@@ -573,8 +573,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             String syntax = PLAYS.toString() + SPACE + roleType;
             if (overriddenRoleType != null) {
                 String overriddenRoleTypeString = overriddenRoleType.label().isPresent() ?
-                    overriddenRoleType.label().get().label() :
-                    overriddenRoleType.reference().syntax();
+                        overriddenRoleType.label().get().label() :
+                        overriddenRoleType.reference().syntax();
                 syntax += "" + SPACE + AS + SPACE + overriddenRoleTypeString;
             }
             return syntax;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable.builder;
+package com.vaticle.typeql.lang.pattern.variable.builder;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 
-import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
-import static graql.lang.common.GraqlToken.Predicate.Equality.GT;
-import static graql.lang.common.GraqlToken.Predicate.Equality.GTE;
-import static graql.lang.common.GraqlToken.Predicate.Equality.LT;
-import static graql.lang.common.GraqlToken.Predicate.Equality.LTE;
-import static graql.lang.common.GraqlToken.Predicate.Equality.NEQ;
-import static graql.lang.common.GraqlToken.Predicate.SubString.CONTAINS;
-import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GTE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LTE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
 
 public interface ThingVariableBuilder {
 
     interface Common<T> {
 
-        default T isa(GraqlToken.Type type) {
+        default T isa(TypeQLToken.Type type) {
             return isa(type.toString());
         }
 
@@ -50,7 +50,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Isa(var, false));
         }
 
-        default T isaX(GraqlToken.Type type) {
+        default T isaX(TypeQLToken.Type type) {
             return isa(type.toString());
         }
 
@@ -161,7 +161,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(EQ, variable));
         }
 
-        default <T> ThingVariable.Attribute eq(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute eq(BiFunction<TypeQLToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(EQ, value));
         }
 
@@ -191,7 +191,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(NEQ, variable));
         }
 
-        default <T> ThingVariable.Attribute neq(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute neq(BiFunction<TypeQLToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(NEQ, value));
         }
 
@@ -221,7 +221,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(GT, variable));
         }
 
-        default <T> ThingVariable.Attribute gt(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gt(BiFunction<TypeQLToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(GT, value));
         }
 
@@ -251,7 +251,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(GTE, variable));
         }
 
-        default <T> ThingVariable.Attribute gte(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute gte(BiFunction<TypeQLToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(GTE, value));
         }
 
@@ -281,7 +281,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(LT, variable));
         }
 
-        default <T> ThingVariable.Attribute lt(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lt(BiFunction<TypeQLToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(LT, value));
         }
 
@@ -311,7 +311,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Value.Variable(LTE, variable));
         }
 
-        default <T> ThingVariable.Attribute lte(BiFunction<GraqlToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
+        default <T> ThingVariable.Attribute lte(BiFunction<TypeQLToken.Predicate.Equality, T, ThingConstraint.Value<T>> constructor, T value) {
             return constrain(constructor.apply(LTE, value));
         }
 

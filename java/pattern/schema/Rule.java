@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.schema;
+package com.vaticle.typeql.lang.pattern.schema;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Definable;
-import graql.lang.pattern.Disjunction;
-import graql.lang.pattern.Negation;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.variable.Reference;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.Conjunction;
+import com.vaticle.typeql.lang.pattern.Definable;
+import com.vaticle.typeql.lang.pattern.Disjunction;
+import com.vaticle.typeql.lang.pattern.Negation;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.variable.Reference;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -33,20 +33,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static graql.lang.common.GraqlToken.Char.COLON;
-import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
-import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Schema.RULE;
-import static graql.lang.common.GraqlToken.Schema.THEN;
-import static graql.lang.common.GraqlToken.Schema.WHEN;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
-import static graql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.RULE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.THEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.WHEN;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
 
 public class Rule implements Definable {
     private final String label;
@@ -98,12 +98,12 @@ public class Rule implements Definable {
 
     private static void validateWhen(String label, Conjunction<? extends Pattern> when) {
         if (when == null) throw new NullPointerException("Null when pattern");
-        if (when.patterns().size() == 0) throw GraqlException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
+        if (when.patterns().size() == 0) throw TypeQLException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
         if (findNegations(when).anyMatch(negation -> findNegations(negation.pattern()).findAny().isPresent())) {
-            throw GraqlException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
+            throw TypeQLException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
         }
         if (findDisjunctions(when).findAny().isPresent()) {
-            throw GraqlException.of(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.message(label));
+            throw TypeQLException.of(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.message(label));
         }
     }
 
@@ -125,12 +125,12 @@ public class Rule implements Definable {
 
         // rules must contain contain either 1 has constraint, or a isa and relation constrain
         if (!((numConstraints == 1 && then.has().size() == 1) || (numConstraints == 2 && then.relation().isPresent() && then.isa().isPresent()))) {
-            throw GraqlException.of(INVALID_RULE_THEN.message(label, then));
+            throw TypeQLException.of(INVALID_RULE_THEN.message(label, then));
         }
 
         // rule 'has' cannot assign both an attribute type and a named variable
         if (then.has().size() == 1 && then.has().get(0).type().isPresent() && then.has().get(0).attribute().isNamed()) {
-            throw GraqlException.of(INVALID_RULE_THEN_HAS.message(label, then));
+            throw TypeQLException.of(INVALID_RULE_THEN_HAS.message(label, then));
         }
 
         // all user-written variables in the 'then' must be present in the 'when', if it exists.
@@ -142,7 +142,7 @@ public class Rule implements Definable {
                     .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
 
             if (!whenReferences.containsAll(thenReferences)) {
-                throw GraqlException.of(INVALID_RULE_THEN_VARIABLES.message(label));
+                throw TypeQLException.of(INVALID_RULE_THEN_VARIABLES.message(label));
             }
         }
     }

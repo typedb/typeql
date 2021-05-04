@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.variable;
 
-import graql.lang.pattern.constraint.ConceptConstraint;
-import graql.lang.pattern.constraint.Constraint;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.constraint.TypeConstraint;
-import graql.lang.pattern.variable.builder.ConceptVariableBuilder;
-import graql.lang.pattern.variable.builder.ThingVariableBuilder;
-import graql.lang.pattern.variable.builder.TypeVariableBuilder;
+import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
+import com.vaticle.typeql.lang.pattern.constraint.Constraint;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
+import com.vaticle.typeql.lang.pattern.variable.builder.ConceptVariableBuilder;
+import com.vaticle.typeql.lang.pattern.variable.builder.ThingVariableBuilder;
+import com.vaticle.typeql.lang.pattern.variable.builder.TypeVariableBuilder;
 
 import java.util.Collections;
 import java.util.List;

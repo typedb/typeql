@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.variable;
 
-import graql.lang.pattern.constraint.ConceptConstraint;
+import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.SPACE;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 
 public class ConceptVariable extends BoundVariable {
 

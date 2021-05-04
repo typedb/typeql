@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,39 +15,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-import static graql.lang.common.GraqlToken.Command.INSERT;
-import static graql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
 
-public class GraqlInsert extends GraqlWritable.InsertOrDelete {
+public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
 
-    public GraqlInsert(List<ThingVariable<?>> variables) {
+    public TypeQLInsert(List<ThingVariable<?>> variables) {
         this(null, variables);
     }
 
-    GraqlInsert(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    TypeQLInsert(@Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         super(INSERT, match, validInsertVars(match, variables));
     }
 
-    static List<ThingVariable<?>> validInsertVars(@Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    static List<ThingVariable<?>> validInsertVars(@Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         if (match != null) {
             if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound())
                     || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
-                throw GraqlException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.namedVariablesUnbound()));
+                throw TypeQLException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.namedVariablesUnbound()));
             }
         }
         return variables;
     }
 
-    public Optional<GraqlMatch.Unfiltered> match() {
+    public Optional<TypeQLMatch.Unfiltered> match() {
         return Optional.ofNullable(match);
     }
 

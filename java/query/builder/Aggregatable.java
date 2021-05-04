@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query.builder;
+package com.vaticle.typeql.lang.query.builder;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.query.GraqlQuery;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.query.TypeQLQuery;
 
-public interface Aggregatable<T extends GraqlQuery> {
+public interface Aggregatable<T extends TypeQLQuery> {
 
     default T count() {
-        return aggregate(GraqlToken.Aggregate.Method.COUNT, null);
+        return aggregate(TypeQLToken.Aggregate.Method.COUNT, null);
     }
 
     default T max(String var) {
@@ -32,7 +32,7 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T max(UnboundVariable var) {
-        return aggregate(GraqlToken.Aggregate.Method.MAX, var);
+        return aggregate(TypeQLToken.Aggregate.Method.MAX, var);
     }
 
     default T mean(String var) {
@@ -40,7 +40,7 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T mean(UnboundVariable var) {
-        return aggregate(GraqlToken.Aggregate.Method.MEAN, var);
+        return aggregate(TypeQLToken.Aggregate.Method.MEAN, var);
     }
 
     default T median(String var) {
@@ -48,7 +48,7 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T median(UnboundVariable var) {
-        return aggregate(GraqlToken.Aggregate.Method.MEDIAN, var);
+        return aggregate(TypeQLToken.Aggregate.Method.MEDIAN, var);
     }
 
     default T min(String var) {
@@ -56,7 +56,7 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T min(UnboundVariable var) {
-        return aggregate(GraqlToken.Aggregate.Method.MIN, var);
+        return aggregate(TypeQLToken.Aggregate.Method.MIN, var);
     }
 
     default T std(String var) {
@@ -64,7 +64,7 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T std(UnboundVariable var) {
-        return aggregate(GraqlToken.Aggregate.Method.STD, var);
+        return aggregate(TypeQLToken.Aggregate.Method.STD, var);
     }
 
     default T sum(String var) {
@@ -72,8 +72,8 @@ public interface Aggregatable<T extends GraqlQuery> {
     }
 
     default T sum(UnboundVariable var) {
-        return aggregate(GraqlToken.Aggregate.Method.SUM, var);
+        return aggregate(TypeQLToken.Aggregate.Method.SUM, var);
     }
 
-    T aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var);
+    T aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var);
 }

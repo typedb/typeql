@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.query.builder.Aggregatable;
-import graql.lang.query.builder.Sortable;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.ErrorMessage;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.Conjunction;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.query.builder.Aggregatable;
+import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -38,30 +38,30 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
-import static graql.lang.common.GraqlToken.Char.NEW_LINE;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Command.GROUP;
-import static graql.lang.common.GraqlToken.Filter.GET;
-import static graql.lang.common.GraqlToken.Filter.LIMIT;
-import static graql.lang.common.GraqlToken.Filter.OFFSET;
-import static graql.lang.common.GraqlToken.Filter.SORT;
-import static graql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
-import static graql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
-import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE;
-import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static graql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
-import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.GROUP;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.GET;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
-public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Aggregate> {
+public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch.Aggregate> {
 
     private final Conjunction<? extends Pattern> conjunction;
     private final Modifiers modifiers;
@@ -71,16 +71,16 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     private List<BoundVariable> variables;
     private List<UnboundVariable> variablesNamedUnbound;
 
-    GraqlMatch(Conjunction<? extends Pattern> conjunction) {
+    TypeQLMatch(Conjunction<? extends Pattern> conjunction) {
         this(conjunction, new ArrayList<>());
     }
 
-    GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter) {
+    TypeQLMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter) {
         this(conjunction, filter, null, null, null);
     }
 
-    public GraqlMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
-        if (filter == null) throw GraqlException.of(ErrorMessage.MISSING_MATCH_FILTER.message());
+    public TypeQLMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
+        if (filter == null) throw TypeQLException.of(ErrorMessage.MISSING_MATCH_FILTER.message());
         this.conjunction = conjunction;
         this.modifiers = new Modifiers(filter, sorting, offset, limit);
 
@@ -164,7 +164,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
 
     private void hasBoundingConjunction() {
         if (!conjunction.namedVariablesUnbound().findAny().isPresent()) {
-            throw GraqlException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
+            throw TypeQLException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
         }
     }
 
@@ -175,15 +175,16 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     private void hasNamedVariable() {
-        if (namedVariablesUnbound().isEmpty()) throw GraqlException.of(MATCH_HAS_NO_NAMED_VARIABLE);
+        if (namedVariablesUnbound().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
     }
 
     private void filtersAreInScope() {
         Set<UnboundVariable> duplicates = new HashSet<>();
         for (UnboundVariable var : modifiers.filter) {
-            if (!namedVariablesUnbound().contains(var)) throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
-            if (!var.isNamed()) throw GraqlException.of(VARIABLE_NOT_NAMED.message(var));
-            if (duplicates.contains(var)) throw GraqlException.of(ILLEGAL_FILTER_VARIABLE_REPEATING);
+            if (!namedVariablesUnbound().contains(var))
+                throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
+            if (!var.isNamed()) throw TypeQLException.of(VARIABLE_NOT_NAMED.message(var));
+            if (duplicates.contains(var)) throw TypeQLException.of(ILLEGAL_FILTER_VARIABLE_REPEATING);
             else duplicates.add(var);
         }
     }
@@ -191,12 +192,12 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     private void sortVarsArInScope() {
         List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
         if (modifiers.sorting != null && !sortableVars.contains(modifiers.sorting.var())) {
-            throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.var()));
+            throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.var()));
         }
     }
 
     @Override
-    public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var) {
+    public Aggregate aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var) {
         return new Aggregate(this, method, var);
     }
 
@@ -209,8 +210,8 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     }
 
     @Override
-    public GraqlArg.QueryType type() {
-        return GraqlArg.QueryType.READ;
+    public TypeQLArg.QueryType type() {
+        return TypeQLArg.QueryType.READ;
     }
 
     public Conjunction<? extends Pattern> conjunction() {
@@ -236,7 +237,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
     @Override
     public String toString() {
         StringBuilder query = new StringBuilder();
-        query.append(GraqlToken.Command.MATCH);
+        query.append(TypeQLToken.Command.MATCH);
 
         if (conjunction.patterns().size() > 1) query.append(NEW_LINE);
         else query.append(SPACE);
@@ -259,7 +260,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
         }
-        GraqlMatch that = (GraqlMatch) o;
+        TypeQLMatch that = (TypeQLMatch) o;
         return Objects.equals(this.conjunction, that.conjunction) && Objects.equals(this.modifiers, that.modifiers);
     }
 
@@ -268,35 +269,35 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         return hash;
     }
 
-    public static class Unfiltered extends GraqlMatch implements Sortable<Sorted, Offset, Limited> {
+    public static class Unfiltered extends TypeQLMatch implements Sortable<Sorted, Offset, Limited> {
 
         public Unfiltered(List<? extends Pattern> patterns) {
             super(validConjunction(patterns));
         }
 
         static Conjunction<? extends Pattern> validConjunction(List<? extends Pattern> patterns) {
-            if (patterns.size() == 0) throw GraqlException.of(MISSING_PATTERNS.message());
+            if (patterns.size() == 0) throw TypeQLException.of(MISSING_PATTERNS.message());
             return new Conjunction<>(patterns);
         }
 
-        public GraqlMatch.Filtered get(String var, String... vars) {
+        public TypeQLMatch.Filtered get(String var, String... vars) {
             return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
         }
 
-        public GraqlMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {
+        public TypeQLMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {
             List<UnboundVariable> varList = new ArrayList<>();
             varList.add(var);
             varList.addAll(Arrays.asList(vars));
             return get(varList);
         }
 
-        public GraqlMatch.Filtered get(List<UnboundVariable> vars) {
-            return new GraqlMatch.Filtered(this, vars);
+        public TypeQLMatch.Filtered get(List<UnboundVariable> vars) {
+            return new TypeQLMatch.Filtered(this, vars);
         }
 
         @Override
-        public GraqlMatch.Sorted sort(Sorting sorting) {
-            return new GraqlMatch.Sorted(this, sorting);
+        public TypeQLMatch.Sorted sort(Sorting sorting) {
+            return new TypeQLMatch.Sorted(this, sorting);
         }
 
         @Override
@@ -305,37 +306,37 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public GraqlMatch.Limited limit(long limit) {
-            return new GraqlMatch.Limited(this, limit);
+        public TypeQLMatch.Limited limit(long limit) {
+            return new TypeQLMatch.Limited(this, limit);
         }
 
-        public GraqlInsert insert(ThingVariable<?>... things) {
+        public TypeQLInsert insert(ThingVariable<?>... things) {
             return insert(list(things));
         }
 
-        public GraqlInsert insert(List<ThingVariable<?>> things) {
-            return new GraqlInsert(this, things);
+        public TypeQLInsert insert(List<ThingVariable<?>> things) {
+            return new TypeQLInsert(this, things);
         }
 
-        public GraqlDelete delete(ThingVariable<?>... things) {
+        public TypeQLDelete delete(ThingVariable<?>... things) {
             return delete(list(things));
         }
 
-        public GraqlDelete delete(List<ThingVariable<?>> things) {
-            return new GraqlDelete(this, things);
+        public TypeQLDelete delete(List<ThingVariable<?>> things) {
+            return new TypeQLDelete(this, things);
         }
     }
 
-    public static class Filtered extends GraqlMatch implements Sortable<Sorted, Offset, Limited> {
+    public static class Filtered extends TypeQLMatch implements Sortable<Sorted, Offset, Limited> {
 
         public Filtered(Unfiltered unfiltered, List<UnboundVariable> filter) {
             super(unfiltered.conjunction(), filter, null, null, null);
-            if (filter.isEmpty()) throw GraqlException.of(ErrorMessage.EMPTY_MATCH_FILTER);
+            if (filter.isEmpty()) throw TypeQLException.of(ErrorMessage.EMPTY_MATCH_FILTER);
         }
 
         @Override
-        public GraqlMatch.Sorted sort(Sorting sorting) {
-            return new GraqlMatch.Sorted(this, sorting);
+        public TypeQLMatch.Sorted sort(Sorting sorting) {
+            return new TypeQLMatch.Sorted(this, sorting);
         }
 
         @Override
@@ -344,14 +345,14 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public GraqlMatch.Limited limit(long limit) {
-            return new GraqlMatch.Limited(this, limit);
+        public TypeQLMatch.Limited limit(long limit) {
+            return new TypeQLMatch.Limited(this, limit);
         }
     }
 
-    public static class Sorted extends GraqlMatch {
+    public static class Sorted extends TypeQLMatch {
 
-        public Sorted(GraqlMatch match, Sortable.Sorting sorting) {
+        public Sorted(TypeQLMatch match, Sortable.Sorting sorting) {
             super(match.conjunction, match.modifiers.filter, sorting, match.modifiers.offset, match.modifiers.limit);
         }
 
@@ -359,46 +360,46 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             return new Offset(this, offset);
         }
 
-        public GraqlMatch.Limited limit(long limit) {
-            return new GraqlMatch.Limited(this, limit);
+        public TypeQLMatch.Limited limit(long limit) {
+            return new TypeQLMatch.Limited(this, limit);
         }
     }
 
-    public static class Offset extends GraqlMatch {
+    public static class Offset extends TypeQLMatch {
 
-        public Offset(GraqlMatch match, long offset) {
+        public Offset(TypeQLMatch match, long offset) {
             super(match.conjunction, match.modifiers.filter, match.modifiers.sorting, offset, match.modifiers.limit);
         }
 
-        public GraqlMatch.Limited limit(long limit) {
-            return new GraqlMatch.Limited(this, limit);
+        public TypeQLMatch.Limited limit(long limit) {
+            return new TypeQLMatch.Limited(this, limit);
         }
     }
 
-    public static class Limited extends GraqlMatch {
+    public static class Limited extends TypeQLMatch {
 
-        public Limited(GraqlMatch match, long limit) {
+        public Limited(TypeQLMatch match, long limit) {
             super(match.conjunction, match.modifiers.filter, match.modifiers.sorting, match.modifiers.offset, limit);
         }
     }
 
-    public static class Aggregate extends GraqlQuery {
+    public static class Aggregate extends TypeQLQuery {
 
-        private final GraqlMatch query;
-        private final GraqlToken.Aggregate.Method method;
+        private final TypeQLMatch query;
+        private final TypeQLToken.Aggregate.Method method;
         private final UnboundVariable var;
         private final int hash;
 
-        public Aggregate(GraqlMatch query, GraqlToken.Aggregate.Method method, UnboundVariable var) {
+        public Aggregate(TypeQLMatch query, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
             if (query == null) throw new NullPointerException("MatchQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
-            if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
+            if (var == null && !method.equals(TypeQLToken.Aggregate.Method.COUNT)) {
                 throw new NullPointerException("Variable is null");
-            } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
-                throw GraqlException.of(INVALID_COUNT_VARIABLE_ARGUMENT.message());
+            } else if (var != null && method.equals(TypeQLToken.Aggregate.Method.COUNT)) {
+                throw TypeQLException.of(INVALID_COUNT_VARIABLE_ARGUMENT.message());
             } else if (var != null && !query.modifiers.filter().contains(var)) {
-                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
+                throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
             }
 
             this.query = query;
@@ -408,15 +409,15 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public GraqlArg.QueryType type() {
-            return GraqlArg.QueryType.READ;
+        public TypeQLArg.QueryType type() {
+            return TypeQLArg.QueryType.READ;
         }
 
-        public GraqlMatch match() {
+        public TypeQLMatch match() {
             return query;
         }
 
-        public GraqlToken.Aggregate.Method method() {
+        public TypeQLToken.Aggregate.Method method() {
             return method;
         }
 
@@ -454,17 +455,17 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
     }
 
-    public static class Group extends GraqlQuery implements Aggregatable<Group.Aggregate> {
+    public static class Group extends TypeQLQuery implements Aggregatable<Group.Aggregate> {
 
-        private final GraqlMatch query;
+        private final TypeQLMatch query;
         private final UnboundVariable var;
         private final int hash;
 
-        public Group(GraqlMatch query, UnboundVariable var) {
+        public Group(TypeQLMatch query, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.modifiers.filter().contains(var)) {
-                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
+                throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
             }
 
             this.query = query;
@@ -473,11 +474,11 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public GraqlArg.QueryType type() {
-            return GraqlArg.QueryType.READ;
+        public TypeQLArg.QueryType type() {
+            return TypeQLArg.QueryType.READ;
         }
 
-        public GraqlMatch match() {
+        public TypeQLMatch match() {
             return query;
         }
 
@@ -486,7 +487,7 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
         }
 
         @Override
-        public Aggregate aggregate(GraqlToken.Aggregate.Method method, UnboundVariable var) {
+        public Aggregate aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var) {
             return new Aggregate(this, method, var);
         }
 
@@ -516,22 +517,22 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             return hash;
         }
 
-        public static class Aggregate extends GraqlQuery {
+        public static class Aggregate extends TypeQLQuery {
 
-            private final GraqlMatch.Group group;
-            private final GraqlToken.Aggregate.Method method;
+            private final TypeQLMatch.Group group;
+            private final TypeQLToken.Aggregate.Method method;
             private final UnboundVariable var;
             private final int hash;
 
-            public Aggregate(GraqlMatch.Group group, GraqlToken.Aggregate.Method method, UnboundVariable var) {
-                if (group == null) throw new NullPointerException("GraqlGet.Group is null");
+            public Aggregate(TypeQLMatch.Group group, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
+                if (group == null) throw new NullPointerException("TypeQLMatch.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
-                if (var == null && !method.equals(GraqlToken.Aggregate.Method.COUNT)) {
+                if (var == null && !method.equals(TypeQLToken.Aggregate.Method.COUNT)) {
                     throw new NullPointerException("Variable is null");
-                } else if (var != null && method.equals(GraqlToken.Aggregate.Method.COUNT)) {
+                } else if (var != null && method.equals(TypeQLToken.Aggregate.Method.COUNT)) {
                     throw new IllegalArgumentException(INVALID_COUNT_VARIABLE_ARGUMENT.message());
                 } else if (var != null && !group.query.modifiers.filter().contains(var)) {
-                    throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
+                    throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var.toString()));
                 }
 
                 this.group = group;
@@ -541,15 +542,15 @@ public class GraqlMatch extends GraqlQuery implements Aggregatable<GraqlMatch.Ag
             }
 
             @Override
-            public GraqlArg.QueryType type() {
-                return GraqlArg.QueryType.READ;
+            public TypeQLArg.QueryType type() {
+                return TypeQLArg.QueryType.READ;
             }
 
-            public GraqlMatch.Group group() {
+            public TypeQLMatch.Group group() {
                 return group;
             }
 
-            public GraqlToken.Aggregate.Method method() {
+            public TypeQLToken.Aggregate.Method method() {
                 return method;
             }
 

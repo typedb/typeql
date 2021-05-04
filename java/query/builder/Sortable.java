@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query.builder;
+package com.vaticle.typeql.lang.query.builder;
 
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.Objects;
 
-import static graql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
 
 public interface Sortable<S, O, L> {
 
@@ -33,14 +33,14 @@ public interface Sortable<S, O, L> {
     }
 
     default S sort(String var, String order) {
-        GraqlArg.Order o = GraqlArg.Order.of(order);
-        if (o == null) throw GraqlException.of(
-                INVALID_SORTING_ORDER.message(GraqlArg.Order.ASC, GraqlArg.Order.DESC)
+        TypeQLArg.Order o = TypeQLArg.Order.of(order);
+        if (o == null) throw TypeQLException.of(
+                INVALID_SORTING_ORDER.message(TypeQLArg.Order.ASC, TypeQLArg.Order.DESC)
         );
         return sort(UnboundVariable.named(var), o);
     }
 
-    default S sort(String var, GraqlArg.Order order) {
+    default S sort(String var, TypeQLArg.Order order) {
         return sort(UnboundVariable.named(var), order);
     }
 
@@ -48,7 +48,7 @@ public interface Sortable<S, O, L> {
         return sort(new Sorting(var));
     }
 
-    default S sort(UnboundVariable var, GraqlArg.Order order) {
+    default S sort(UnboundVariable var, TypeQLArg.Order order) {
         return sort(new Sorting(var, order));
     }
 
@@ -61,14 +61,14 @@ public interface Sortable<S, O, L> {
     class Sorting {
 
         private final UnboundVariable var;
-        private final GraqlArg.Order order;
+        private final TypeQLArg.Order order;
         private final int hash;
 
         public Sorting(UnboundVariable var) {
             this(var, null);
         }
 
-        public Sorting(UnboundVariable var, GraqlArg.Order order) {
+        public Sorting(UnboundVariable var, TypeQLArg.Order order) {
             this.var = var;
             this.order = order;
             this.hash = Objects.hash(var(), order());
@@ -78,8 +78,8 @@ public interface Sortable<S, O, L> {
             return var;
         }
 
-        public GraqlArg.Order order() {
-            return order == null ? GraqlArg.Order.ASC : order;
+        public TypeQLArg.Order order() {
+            return order == null ? TypeQLArg.Order.ASC : order;
         }
 
         @Override
@@ -88,7 +88,7 @@ public interface Sortable<S, O, L> {
 
             sort.append(var);
             if (order != null) {
-                sort.append(GraqlToken.Char.SPACE).append(order);
+                sort.append(TypeQLToken.Char.SPACE).append(order);
             }
 
             return sort.toString();

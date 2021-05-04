@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.constraint;
+package com.vaticle.typeql.lang.pattern.constraint;
 
-import grakn.common.collection.Either;
-import grakn.common.collection.Pair;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.common.util.Strings;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typedb.common.collection.Either;
+import com.vaticle.typedb.common.collection.Pair;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.common.util.Strings;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -40,30 +40,30 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-import static grakn.common.collection.Collections.list;
-import static grakn.common.collection.Collections.pair;
-import static grakn.common.collection.Collections.set;
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.GraqlToken.Char.COLON;
-import static graql.lang.common.GraqlToken.Char.COMMA_SPACE;
-import static graql.lang.common.GraqlToken.Char.PARAN_CLOSE;
-import static graql.lang.common.GraqlToken.Char.PARAN_OPEN;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Constraint.HAS;
-import static graql.lang.common.GraqlToken.Constraint.ISA;
-import static graql.lang.common.GraqlToken.Constraint.ISAX;
-import static graql.lang.common.GraqlToken.Predicate.Equality.EQ;
-import static graql.lang.common.GraqlToken.Predicate.SubString.LIKE;
-import static graql.lang.common.GraqlToken.Type.RELATION;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
-import static graql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
-import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_PREDICATE;
-import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
-import static graql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
-import static graql.lang.common.util.Strings.escapeRegex;
-import static graql.lang.common.util.Strings.quoteString;
-import static graql.lang.pattern.variable.UnboundVariable.hidden;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typedb.common.collection.Collections.pair;
+import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.PARAN_CLOSE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.PARAN_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.HAS;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.ISA;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.ISAX;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Type.RELATION;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_PREDICATE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
+import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
+import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
+import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.joining;
 
 public abstract class ThingConstraint extends Constraint<BoundVariable> {
@@ -104,23 +104,23 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
     }
 
     public IID asIID() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(IID.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(IID.class)));
     }
 
     public ThingConstraint.Isa asIsa() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Isa.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Isa.class)));
     }
 
     public Value<?> asValue() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Value.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Value.class)));
     }
 
     public ThingConstraint.Relation asRelation() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Relation.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Relation.class)));
     }
 
     public ThingConstraint.Has asHas() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Has.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Has.class)));
     }
 
     public static class IID extends ThingConstraint {
@@ -132,7 +132,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public IID(String iid) {
             if (iid == null) throw new NullPointerException("Null IID");
             if (!REGEX.matcher(iid).matches()) {
-                throw GraqlException.of(INVALID_IID_STRING.message(iid, REGEX.toString()));
+                throw TypeQLException.of(INVALID_IID_STRING.message(iid, REGEX.toString()));
             }
             this.iid = iid;
             this.hash = Objects.hash(IID.class, this.iid);
@@ -154,7 +154,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         @Override
         public String toString() {
-            return GraqlToken.Constraint.IID.toString() + SPACE + iid;
+            return TypeQLToken.Constraint.IID.toString() + SPACE + iid;
         }
 
         @Override
@@ -257,7 +257,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         public Relation(List<RolePlayer> players) {
-            if (players == null || players.isEmpty()) throw GraqlException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
+            if (players == null || players.isEmpty()) throw TypeQLException.of(MISSING_CONSTRAINT_RELATION_PLAYER);
             this.repetitions = new HashMap<>();
             this.players = new ArrayList<>();
             this.scope = RELATION.toString();
@@ -478,15 +478,15 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public abstract static class Value<T> extends ThingConstraint {
 
-        private final GraqlToken.Predicate predicate;
+        private final TypeQLToken.Predicate predicate;
         private final T value;
         private final int hash;
 
-        Value(GraqlToken.Predicate predicate, T value) {
+        Value(TypeQLToken.Predicate predicate, T value) {
             assert !predicate.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
             assert !predicate.isSubString() || value instanceof java.lang.String;
-            if (predicate == null) throw GraqlException.of(MISSING_CONSTRAINT_PREDICATE);
-            else if (value == null) throw GraqlException.of(MISSING_CONSTRAINT_VALUE);
+            if (predicate == null) throw TypeQLException.of(MISSING_CONSTRAINT_PREDICATE);
+            else if (value == null) throw TypeQLException.of(MISSING_CONSTRAINT_VALUE);
             this.predicate = predicate;
             this.value = value;
             this.hash = Objects.hash(Value.class, this.predicate, this.value);
@@ -507,7 +507,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return this;
         }
 
-        public GraqlToken.Predicate predicate() {
+        public TypeQLToken.Predicate predicate() {
             return predicate;
         }
 
@@ -540,27 +540,27 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         public Long asLong() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Long.class)));
         }
 
         public Double asDouble() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Double.class)));
         }
 
         public Boolean asBoolean() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Boolean.class)));
         }
 
         public String asString() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(String.class)));
         }
 
         public DateTime asDateTime() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(DateTime.class)));
         }
 
         public Variable asVariable() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
         }
 
         @Override
@@ -584,7 +584,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Long extends Value<java.lang.Long> {
 
-            public Long(GraqlToken.Predicate.Equality predicate, long value) {
+            public Long(TypeQLToken.Predicate.Equality predicate, long value) {
                 super(predicate, value);
             }
 
@@ -601,7 +601,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Double extends Value<java.lang.Double> {
 
-            public Double(GraqlToken.Predicate.Equality predicate, double value) {
+            public Double(TypeQLToken.Predicate.Equality predicate, double value) {
                 super(predicate, value);
             }
 
@@ -618,7 +618,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Boolean extends Value<java.lang.Boolean> {
 
-            public Boolean(GraqlToken.Predicate.Equality predicate, boolean value) {
+            public Boolean(TypeQLToken.Predicate.Equality predicate, boolean value) {
                 super(predicate, value);
             }
 
@@ -635,7 +635,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class String extends Value<java.lang.String> {
 
-            public String(GraqlToken.Predicate predicate, java.lang.String value) {
+            public String(TypeQLToken.Predicate predicate, java.lang.String value) {
                 super(predicate, value);
             }
 
@@ -667,14 +667,14 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class DateTime extends Value<LocalDateTime> {
 
-            public DateTime(GraqlToken.Predicate.Equality predicate, LocalDateTime value) {
+            public DateTime(TypeQLToken.Predicate.Equality predicate, LocalDateTime value) {
                 super(predicate, value);
                 // validate precision of fractional seconds, which are stored as nanos in LocalDateTime
                 int nanos = value.toLocalTime().getNano();
                 final long nanosPerMilli = 1000000L;
                 long remainder = nanos % nanosPerMilli;
                 if (remainder != 0) {
-                    throw GraqlException.of(INVALID_CONSTRAINT_DATETIME_PRECISION.message(value));
+                    throw TypeQLException.of(INVALID_CONSTRAINT_DATETIME_PRECISION.message(value));
                 }
             }
 
@@ -691,7 +691,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class Variable extends Value<ThingVariable<?>> {
 
-            public Variable(GraqlToken.Predicate.Equality predicate, UnboundVariable variable) {
+            public Variable(TypeQLToken.Predicate.Equality predicate, UnboundVariable variable) {
                 super(predicate, variable.toThing());
             }
 

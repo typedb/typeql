@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,39 +15,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.Definable;
-import graql.lang.pattern.schema.Rule;
-import graql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.ErrorMessage;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.Definable;
+import com.vaticle.typeql.lang.pattern.schema.Rule;
+import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import static graql.lang.common.GraqlToken.Char.NEW_LINE;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Command.DEFINE;
-import static graql.lang.common.GraqlToken.Command.UNDEFINE;
-import static graql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DEFINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.UNDEFINE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
 import static java.util.stream.Collectors.joining;
 
-abstract class GraqlDefinable extends GraqlQuery {
+abstract class TypeQLDefinable extends TypeQLQuery {
 
-    private final GraqlToken.Command keyword;
+    private final TypeQLToken.Command keyword;
     private final List<Definable> definables;
     private final List<TypeVariable> variables = new ArrayList<>();
     private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
-    GraqlDefinable(GraqlToken.Command keyword, List<Definable> definables) {
+    TypeQLDefinable(TypeQLToken.Command keyword, List<Definable> definables) {
         assert keyword == DEFINE || keyword == UNDEFINE;
-        if (definables == null || definables.isEmpty()) throw GraqlException.of(MISSING_DEFINABLES.message());
+        if (definables == null || definables.isEmpty()) throw TypeQLException.of(MISSING_DEFINABLES.message());
         this.definables = new ArrayList<>(definables);
         for (Definable definable : definables) {
             if (definable.isRule()) rules.add(definable.asRule());
@@ -56,7 +56,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         LinkedList<TypeVariable> typeVarsToVerify = new LinkedList<>(variables);
         while (!typeVarsToVerify.isEmpty()) {
             TypeVariable v = typeVarsToVerify.removeFirst();
-            if (!v.isLabelled()) throw GraqlException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
+            if (!v.isLabelled()) throw TypeQLException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
             else v.constraints().forEach(c -> typeVarsToVerify.addAll(c.variables()));
         }
 
@@ -65,8 +65,8 @@ abstract class GraqlDefinable extends GraqlQuery {
     }
 
     @Override
-    public GraqlArg.QueryType type() {
-        return GraqlArg.QueryType.WRITE;
+    public TypeQLArg.QueryType type() {
+        return TypeQLArg.QueryType.WRITE;
     }
 
     public final List<TypeVariable> variables() {
@@ -83,7 +83,7 @@ abstract class GraqlDefinable extends GraqlQuery {
         query.append(keyword);
 
         if (definables.size() > 1) query.append(NEW_LINE);
-        else query.append(GraqlToken.Char.SPACE);
+        else query.append(TypeQLToken.Char.SPACE);
 
         query.append(definables.stream().map(Definable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
         query.append(SEMICOLON);
@@ -94,7 +94,7 @@ abstract class GraqlDefinable extends GraqlQuery {
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GraqlDefinable that = (GraqlDefinable) o;
+        TypeQLDefinable that = (TypeQLDefinable) o;
         return this.keyword.equals(that.keyword) && this.definables.equals(that.definables);
     }
 

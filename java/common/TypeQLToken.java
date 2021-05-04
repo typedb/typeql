@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.common;
+package com.vaticle.typeql.lang.common;
 
-import graql.lang.common.exception.GraqlException;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
 
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-public class GraqlToken {
+public class TypeQLToken {
 
     public enum Type {
         THING("thing"),
@@ -188,11 +188,11 @@ public class GraqlToken {
         }
 
         default Equality asEquality() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Equality.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Equality.class)));
         }
 
         default SubString asSubString() {
-            throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(SubString.class)));
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(SubString.class)));
         }
 
         enum Equality implements Predicate {
@@ -430,7 +430,7 @@ public class GraqlToken {
         }
 
         /**
-         * Graql Compute conditions keyword
+         * TypeQL Compute conditions keyword
          */
         public enum Condition {
             FROM("from"),
@@ -462,7 +462,7 @@ public class GraqlToken {
         }
 
         /**
-         * Graql Compute parameter names
+         * TypeQL Compute parameter names
          */
         public enum Param {
             MIN_K("min-k"),

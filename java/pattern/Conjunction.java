@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern;
+package com.vaticle.typeql.lang.pattern;
 
-import graql.lang.common.exception.ErrorMessage;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.common.exception.ErrorMessage;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.Variable;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -34,12 +34,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
-import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -77,7 +77,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
     public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
         if (variables().noneMatch(v -> bounds.contains(v.toUnbound()))) {
             String str = toString().replace("\n", " ");
-            throw GraqlException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(str));
+            throw TypeQLException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(str));
         }
         HashSet<UnboundVariable> union = new HashSet<>(bounds);
         union.addAll(variables().map(BoundVariable::toUnbound).collect(Collectors.toSet()));
@@ -151,7 +151,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
             for (int i = axes.size() - 1; i >= 0; i--) {
                 axesSizeProduct[i] = axesSizeProduct[i + 1] * axes.get(i).size();
             }
-            if (axesSizeProduct[0] == 0) throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+            if (axesSizeProduct[0] == 0) throw TypeQLException.of(ErrorMessage.ILLEGAL_STATE);
             computed = new HashMap<>();
         }
 

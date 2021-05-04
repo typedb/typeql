@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2021 Grakn Labs
+Copyright (C) 2021 Vaticle
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>graql.lang</groupId>
+    <groupId>typeql</groupId>
     <artifactId>test-deployment</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -26,14 +26,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <url>http://maven.apache.org</url>
     <repositories>
         <repository>
-            <id>repo.grakn.ai.release</id>
-            <name>repo.grakn.ai</name>
-            <url>http://repo.grakn.ai/repository/maven/</url>
+            <id>repo.vaticle.com.release</id>
+            <name>repo.vaticle.com</name>
+            <url>http://repo.vaticle.com/repository/maven/</url>
         </repository>
         <repository>
-            <id>repo.grakn.ai.snapshot</id>
-            <name>repo.grakn.ai</name>
-            <url>https://repo.grakn.ai/repository/maven-snapshot/</url>
+            <id>repo.vaticle.com.snapshot</id>
+            <name>repo.vaticle.com</name>
+            <url>https://repo.vaticle.com/repository/maven-snapshot/</url>
         </repository>
     </repositories>
     <build>
@@ -51,9 +51,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     </build>
     <dependencies>
         <dependency>
-            <groupId>io.graql</groupId>
-            <artifactId>graql-lang</artifactId>
-            <version>GRAQL_LANG_VERSION_MARKER</version>
+            <groupId>com.vaticle.typeql</groupId>
+            <artifactId>typeql-lang</artifactId>
+            <version>TYPEQL_LANG_VERSION_MARKER</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,15 +16,15 @@
  *
  */
 
-package graql.lang.test.behaviour.graql;
+package com.vaticle.typeql.lang.test.behaviour.typeql;
 
-import graql.lang.Graql;
-import graql.lang.query.GraqlDefine;
-import graql.lang.query.GraqlDelete;
-import graql.lang.query.GraqlInsert;
-import graql.lang.query.GraqlMatch;
-import graql.lang.query.GraqlQuery;
-import graql.lang.query.GraqlUndefine;
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.query.TypeQLDefine;
+import com.vaticle.typeql.lang.query.TypeQLDelete;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLQuery;
+import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import io.cucumber.java.en.Given;
 
 import java.util.List;
@@ -32,66 +32,66 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class GraqlSteps {
+public class TypeQLSteps {
 
-    @Given("graql define")
-    @Given("graql define without commit")
-    @Given("for each session, graql define")
-    public void graql_define(String query) {
-        GraqlDefine parsed = Graql.parseQuery(query);
-        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
+    @Given("typeql define")
+    @Given("typeql define without commit")
+    @Given("for each session, typeql define")
+    public void typeql_define(String query) {
+        TypeQLDefine parsed = TypeQL.parseQuery(query);
+        assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
     }
 
-    @Given("graql undefine")
-    @Given("graql undefine without commit")
-    public void graql_undefine(String query) {
-        GraqlUndefine parsed = Graql.parseQuery(query);
-        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
+    @Given("typeql undefine")
+    @Given("typeql undefine without commit")
+    public void typeql_undefine(String query) {
+        TypeQLUndefine parsed = TypeQL.parseQuery(query);
+        assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
     }
 
-    @Given("graql insert")
-    @Given("get answers of graql insert")
-    @Given("graql insert without commit")
-    @Given("for each session, graql insert")
-    public void graql_insert(String query) {
-        GraqlInsert parsed = Graql.parseQuery(query);
-        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
+    @Given("typeql insert")
+    @Given("get answers of typeql insert")
+    @Given("typeql insert without commit")
+    @Given("for each session, typeql insert")
+    public void typeql_insert(String query) {
+        TypeQLInsert parsed = TypeQL.parseQuery(query);
+        assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
         parsed.match().ifPresent(match -> match.conjunction().normalise());
     }
 
-    @Given("graql delete")
-    public void graql_delete(String query) {
-        GraqlDelete parsed = Graql.parseQuery(query);
-        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
+    @Given("typeql delete")
+    public void typeql_delete(String query) {
+        TypeQLDelete parsed = TypeQL.parseQuery(query);
+        assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
         parsed.match().conjunction().normalise();
     }
 
-    @Given("for graql query")
-    @Given("get answers of graql match")
-    @Given("get answer of graql match aggregate")
-    @Given("get answers of graql match group")
-    @Given("get answers of graql match group aggregate")
-    @Given("answer set is equivalent for graql query")
-    public void graql_match(String query) {
-        GraqlQuery parsed = Graql.parseQuery(query);
-        assertEquals(parsed, Graql.parseQuery(parsed.toString()));
-        if (parsed instanceof GraqlMatch) {
+    @Given("for typeql query")
+    @Given("get answers of typeql match")
+    @Given("get answer of typeql match aggregate")
+    @Given("get answers of typeql match group")
+    @Given("get answers of typeql match group aggregate")
+    @Given("answer set is equivalent for typeql query")
+    public void typeql_match(String query) {
+        TypeQLQuery parsed = TypeQL.parseQuery(query);
+        assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
+        if (parsed instanceof TypeQLMatch) {
             parsed.asMatch().conjunction().normalise();
         }
     }
 
-    @Given("graql match throws")
-    @Given("graql insert throws")
-    @Given("graql delete throws")
-    @Given("graql define throws")
-    @Given("graql undefine throws")
-    @Given("graql match; throws exception")
-    @Given("graql match group; throws exception")
-    @Given("graql match aggregate; throws exception")
-    @Given("graql insert; throws exception")
-    @Given("graql delete; throws exception")
-    @Given("graql define; throws exception")
-    @Given("graql undefine; throws exception")
+    @Given("typeql match throws")
+    @Given("typeql insert throws")
+    @Given("typeql delete throws")
+    @Given("typeql define throws")
+    @Given("typeql undefine throws")
+    @Given("typeql match; throws exception")
+    @Given("typeql match group; throws exception")
+    @Given("typeql match aggregate; throws exception")
+    @Given("typeql insert; throws exception")
+    @Given("typeql delete; throws exception")
+    @Given("typeql define; throws exception")
+    @Given("typeql undefine; throws exception")
     public void do_nothing_with_throws(String query) {}
 
     @Given("transaction commits")

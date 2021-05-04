@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable.builder;
+package com.vaticle.typeql.lang.pattern.variable.builder;
 
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.pattern.constraint.TypeConstraint;
-import graql.lang.pattern.variable.TypeVariable;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
+import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 public interface TypeVariableBuilder {
 
-    default TypeVariable type(GraqlToken.Type type) {
+    default TypeVariable type(TypeQLToken.Type type) {
         return type(type.toString());
     }
 
@@ -41,7 +41,7 @@ public interface TypeVariableBuilder {
         return constrain(new TypeConstraint.Abstract());
     }
 
-    default TypeVariable sub(GraqlToken.Type type) {
+    default TypeVariable sub(TypeQLToken.Type type) {
         return sub(type.toString());
     }
 
@@ -57,7 +57,7 @@ public interface TypeVariableBuilder {
         return constrain(new TypeConstraint.Sub(typeVar, false));
     }
 
-    default TypeVariable subX(GraqlToken.Type type) {
+    default TypeVariable subX(TypeQLToken.Type type) {
         return subX(type.toString());
     }
 
@@ -170,7 +170,7 @@ public interface TypeVariableBuilder {
         return constrain(new TypeConstraint.Relates(roleTypeVar, overriddenRoleTypeVar));
     }
 
-    default TypeVariable value(GraqlArg.ValueType ValueType) {
+    default TypeVariable value(TypeQLArg.ValueType ValueType) {
         return constrain(new TypeConstraint.ValueType(ValueType));
     }
 

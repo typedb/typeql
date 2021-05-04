@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  *
  */
 
-package graql.lang.test.behaviour.debug;
+package com.vaticle.typeql.lang.test.behaviour.debug;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         strict = true,
         plugin = "pretty",
-        glue = "graql.lang.test.behaviour",
+        glue = "com.vaticle.typeql.lang.test.behaviour",
         features = "java/test/behaviour/debug/debug.feature"
 )
 public class DebugTest {
@@ -41,7 +41,7 @@ public class DebugTest {
     // 4) Ensure 'Target Expression' is set correctly: '//<this>/<package>/<name>:test'
     //
     // 5) Update 'Bazel Flags':
-    //    a) Remove the line that says: '--test_filter=graql.lang.*'
+    //    a) Remove the line that says: '--test_filter=com.vaticle.typeql.lang.*'
     //    b) Use the following Bazel flags:
     //       --cache_test_results=no : to make sure you're not using cache
     //       --test_output=streamed : to make sure all output is printed

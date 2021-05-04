@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,29 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.Variable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static graql.lang.common.GraqlToken.Char.NEW_LINE;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Command.DELETE;
-import static graql.lang.common.GraqlToken.Command.INSERT;
-import static graql.lang.query.GraqlDelete.validDeleteVars;
-import static graql.lang.query.GraqlInsert.validInsertVars;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
+import static com.vaticle.typeql.lang.query.TypeQLDelete.validDeleteVars;
+import static com.vaticle.typeql.lang.query.TypeQLInsert.validInsertVars;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
-public class GraqlUpdate extends GraqlWritable {
+public class TypeQLUpdate extends TypeQLWritable {
 
     private final List<ThingVariable<?>> deleteVariables;
     private final List<ThingVariable<?>> insertVariables;
@@ -46,15 +46,15 @@ public class GraqlUpdate extends GraqlWritable {
     private List<UnboundVariable> namedDeleteVariablesUnbound;
     private List<UnboundVariable> namedInsertVariablesUnbound;
 
-    public GraqlUpdate(GraqlMatch.Unfiltered match, List<ThingVariable<?>> deleteVariables,
-                       List<ThingVariable<?>> insertVariables) {
+    public TypeQLUpdate(TypeQLMatch.Unfiltered match, List<ThingVariable<?>> deleteVariables,
+                        List<ThingVariable<?>> insertVariables) {
         super(match);
         this.deleteVariables = validDeleteVars(match, deleteVariables);
         this.insertVariables = validInsertVars(match, insertVariables);
         this.hash = Objects.hash(match, deleteVariables, insertVariables);
     }
 
-    public GraqlMatch.Unfiltered match() {
+    public TypeQLMatch.Unfiltered match() {
         assert match != null;
         return match;
     }
@@ -107,7 +107,7 @@ public class GraqlUpdate extends GraqlWritable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GraqlUpdate that = (GraqlUpdate) o;
+        TypeQLUpdate that = (TypeQLUpdate) o;
         return (this.match.equals(that.match) &&
                 this.deleteVariables.equals(that.deleteVariables) &&
                 this.insertVariables.equals(that.insertVariables));

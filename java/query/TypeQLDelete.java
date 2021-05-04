@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,50 +15,50 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 
 import java.util.List;
 
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Command.DELETE;
-import static graql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_DELETE;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_DELETE;
 import static java.util.Objects.requireNonNull;
 
-public class GraqlDelete extends GraqlWritable.InsertOrDelete {
+public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
 
-    GraqlDelete(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    TypeQLDelete(TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         super(DELETE, requireNonNull(match), validDeleteVars(match, variables));
     }
 
-    static List<ThingVariable<?>> validDeleteVars(GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    static List<ThingVariable<?>> validDeleteVars(TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
             if (var.isNamed() && !match.namedVariablesUnbound().contains(var.toUnbound())) {
-                throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(var.reference()));
+                throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(var.reference()));
             }
             var.variables().forEach(nestedVar -> {
                 if (nestedVar.isNamed() && !match.namedVariablesUnbound().contains(nestedVar.toUnbound())) {
-                    throw GraqlException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(nestedVar.reference()));
+                    throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(nestedVar.reference()));
                 }
             });
         });
         return variables;
     }
 
-    public GraqlMatch.Unfiltered match() {
+    public TypeQLMatch.Unfiltered match() {
         assert match != null;
         return match;
     }
 
     public List<ThingVariable<?>> variables() { return variables; }
 
-    public GraqlUpdate insert(ThingVariable<?>... things) {
+    public TypeQLUpdate insert(ThingVariable<?>... things) {
         return insert(list(things));
     }
 
-    public GraqlUpdate insert(List<ThingVariable<?>> things) {
-        return new GraqlUpdate(this.match(), variables, things);
+    public TypeQLUpdate insert(List<ThingVariable<?>> things) {
+        return new TypeQLUpdate(this.match(), variables, things);
     }
 }

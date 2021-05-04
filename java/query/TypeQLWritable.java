@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,55 +15,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.query;
+package com.vaticle.typeql.lang.query;
 
-import graql.lang.common.GraqlArg;
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.Variable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static graql.lang.common.GraqlToken.Char.NEW_LINE;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Command.DELETE;
-import static graql.lang.common.GraqlToken.Command.INSERT;
-import static graql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
-public abstract class GraqlWritable extends GraqlQuery {
+public abstract class TypeQLWritable extends TypeQLQuery {
 
-    protected final GraqlMatch.Unfiltered match;
+    protected final TypeQLMatch.Unfiltered match;
 
-    GraqlWritable(@Nullable GraqlMatch.Unfiltered match) {
+    TypeQLWritable(@Nullable TypeQLMatch.Unfiltered match) {
         this.match = match;
     }
 
     @Override
-    public GraqlArg.QueryType type() {
-        return GraqlArg.QueryType.WRITE;
+    public TypeQLArg.QueryType type() {
+        return TypeQLArg.QueryType.WRITE;
     }
 
-    abstract static class InsertOrDelete extends GraqlWritable {
+    abstract static class InsertOrDelete extends TypeQLWritable {
 
         private List<UnboundVariable> namedVariablesUnbound;
-        private final GraqlToken.Command keyword;
+        private final TypeQLToken.Command keyword;
         protected final List<ThingVariable<?>> variables;
         private final int hash;
 
-        InsertOrDelete(GraqlToken.Command keyword, @Nullable GraqlMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+        InsertOrDelete(TypeQLToken.Command keyword, @Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
             super(match);
             assert keyword == INSERT || keyword == DELETE;
-            if (variables == null || variables.isEmpty()) throw GraqlException.of(MISSING_PATTERNS.message());
+            if (variables == null || variables.isEmpty()) throw TypeQLException.of(MISSING_PATTERNS.message());
             this.keyword = keyword;
             this.variables = variables;
             this.hash = Objects.hash(this.keyword, this.match, this.variables);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.common.exception;
+package com.vaticle.typeql.lang.common.exception;
 
-public class ErrorMessage extends grakn.common.exception.ErrorMessage {
+public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessage {
 
     public static final ErrorMessage ILLEGAL_STATE =
             new ErrorMessage(1, "Illegal internal state!");
@@ -100,7 +100,7 @@ public class ErrorMessage extends grakn.common.exception.ErrorMessage {
 
 
     private static final String codePrefix = "GQL";
-    private static final String messagePrefix = "Graql Error";
+    private static final String messagePrefix = "TypeQL Error";
 
     public ErrorMessage(int codeNumber, String messageBody) {
         super(codePrefix, codeNumber, messagePrefix, messageBody);

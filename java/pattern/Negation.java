@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern;
+package com.vaticle.typeql.lang.pattern;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.ErrorMessage;
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.ErrorMessage;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
-import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 
 /**
  * A class representing a negation of patterns. All inner patterns must not match in a query.
@@ -45,7 +45,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     public Negation(T pattern) {
         if (pattern == null) throw new NullPointerException("Null patterns");
-        else if (pattern.isNegation()) throw GraqlException.of(ErrorMessage.REDUNDANT_NESTED_NEGATION);
+        else if (pattern.isNegation()) throw TypeQLException.of(ErrorMessage.REDUNDANT_NESTED_NEGATION);
         this.pattern = pattern;
     }
 
@@ -59,7 +59,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     @Override
     public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
         if (pattern.isNegation()) {
-            throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+            throw TypeQLException.of(ErrorMessage.ILLEGAL_STATE);
         } else {
             pattern.validateIsBoundedBy(bounds);
         }
@@ -69,7 +69,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     public Negation<Disjunction<Conjunction<Conjunctable>>> normalise() {
         if (normalised == null) {
             if (pattern.isNegation()) {
-                throw GraqlException.of(ErrorMessage.ILLEGAL_STATE);
+                throw TypeQLException.of(ErrorMessage.ILLEGAL_STATE);
             } else if (pattern.isVariable()) {
                 normalised = new Negation<>(new Disjunction<>(list(new Conjunction<>(list(pattern.asVariable())))));
             } else {
@@ -89,7 +89,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     @Override
     public String toString() {
         StringBuilder negation = new StringBuilder();
-        negation.append(GraqlToken.Operator.NOT).append(SPACE);
+        negation.append(TypeQLToken.Operator.NOT).append(SPACE);
 
         if (pattern.isConjunction()) {
             negation.append(pattern.toString());

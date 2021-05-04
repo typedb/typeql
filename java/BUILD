@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,13 +17,13 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
 
 java_library(
-    name = "graql",
-    srcs = ["Graql.java"],
+    name = "typeql",
+    srcs = ["TypeQL.java"],
     deps = [
         # Internal Package Dependencies
         "//java/common:common",
@@ -32,20 +32,20 @@ java_library(
         "//java/query:query",
 
         # Internal Repository Dependencies
-        "@graknlabs_common//:common",
+        "@vaticle_typedb_common//:common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:org_slf4j_slf4j_api",
     ],
-    tags = ["maven_coordinates=io.graql:graql-lang:{pom_version}"],
+    tags = ["maven_coordinates=com.vaticle.typeql:typeql-lang:{pom_version}"],
 )
 
 assemble_maven(
   name = "assemble-maven",
-  target = ":graql",
-  source_jar_prefix = "graql/lang/",
-  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
+  target = ":typeql",
+  source_jar_prefix = "com/vaticle/typeql/lang/",
+  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(

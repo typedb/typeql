@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern;
+package com.vaticle.typeql.lang.pattern;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.variable.BoundVariable;
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.List;
 import java.util.Set;
 
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Pattern {
 
@@ -46,23 +46,23 @@ public interface Pattern {
     default boolean isConjunctable() { return false; }
 
     default BoundVariable asVariable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
     }
 
     default Conjunction<? extends Pattern> asConjunction() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Conjunction.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Conjunction.class)));
     }
 
     default Disjunction<? extends Pattern> asDisjunction() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Disjunction.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Disjunction.class)));
     }
 
     default Negation<? extends Pattern> asNegation() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
     }
 
     default Conjunctable asConjunctable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.variable;
 
-import graql.lang.common.GraqlToken;
-import graql.lang.common.exception.GraqlException;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static graql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
 public abstract class Reference {
 
@@ -58,7 +58,7 @@ public abstract class Reference {
     public abstract String name();
 
     public String syntax() {
-        return GraqlToken.Char.$ + name();
+        return TypeQLToken.Char.$ + name();
     }
 
     protected boolean isVisible() {
@@ -82,19 +82,19 @@ public abstract class Reference {
     }
 
     public Referable asReferable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Referable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Referable.class)));
     }
 
     public Reference.Name asName() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
     }
 
     public Reference.Label asLabel() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Label.class)));
     }
 
     public Reference.Anonymous asAnonymous() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Anonymous.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Anonymous.class)));
     }
 
     @Override
@@ -129,7 +129,7 @@ public abstract class Reference {
         protected Name(String name) {
             super(Type.NAME, true);
             if (!REGEX.matcher(name).matches()) {
-                throw GraqlException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
+                throw TypeQLException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
             }
             this.name = name;
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
@@ -178,7 +178,7 @@ public abstract class Reference {
 
         @Override
         public String name() {
-            return GraqlToken.Char.UNDERSCORE.toString() + label;
+            return TypeQLToken.Char.UNDERSCORE.toString() + label;
         }
 
         @Override
@@ -213,7 +213,7 @@ public abstract class Reference {
 
         @Override
         public String name() {
-            return GraqlToken.Char.UNDERSCORE.toString();
+            return TypeQLToken.Char.UNDERSCORE.toString();
         }
 
         @Override

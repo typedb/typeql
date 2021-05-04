@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,15 +16,15 @@
  *
  */
 
-package graql.lang.pattern.test;
+package com.vaticle.typeql.lang.pattern.test;
 
-import graql.lang.Graql;
-import graql.lang.pattern.Conjunctable;
-import graql.lang.pattern.Conjunction;
-import graql.lang.pattern.Disjunction;
-import graql.lang.pattern.Pattern;
-import graql.lang.query.GraqlMatch;
-import graql.lang.query.GraqlQuery;
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.pattern.Conjunctable;
+import com.vaticle.typeql.lang.pattern.Conjunction;
+import com.vaticle.typeql.lang.pattern.Disjunction;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
 import java.util.List;
@@ -37,13 +37,13 @@ public class NormalisationTest {
     @Test
     public void disjunction() {
         String query = "match $com isa company; {$com has name $n1; $n1 \"the-company\";} or {$com has name $n2; $n2 \"another-company\";};";
-        GraqlMatch graqlMatch = Graql.parseQuery(query).asMatch();
-        Disjunction<Conjunction<Conjunctable>> normalised = graqlMatch.conjunction().normalise();
+        TypeQLMatch typeqlMatch = TypeQL.parseQuery(query).asMatch();
+        Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
 
         List<Conjunction<Conjunctable>> disjunction = normalised.patterns();
         assertTrue(disjunction.size() == 2);
-        Conjunction<? extends Pattern> partA = Graql.parsePattern("{ $com isa company; $com has name $n1; $n1 \"the-company\"; }").asConjunction();
-        Conjunction<? extends Pattern> partB = Graql.parsePattern("{ $com isa company; $com has name $n2; $n2 \"another-company\";}").asConjunction();
+        Conjunction<? extends Pattern> partA = TypeQL.parsePattern("{ $com isa company; $com has name $n1; $n1 \"the-company\"; }").asConjunction();
+        Conjunction<? extends Pattern> partB = TypeQL.parsePattern("{ $com isa company; $com has name $n2; $n2 \"another-company\";}").asConjunction();
         disjunction.get(0).variables().forEach(var -> {
             assertEquals(partA.variables().filter(variable -> variable.equals(var)).count(), 1);
         });
@@ -55,12 +55,12 @@ public class NormalisationTest {
     @Test
     public void negatedDisjunction() {
         String query = "match $com isa company; not { $com has name $n1; { $n1 \"the-company\"; } or { $n1 \"other-company\"; }; }; ";
-        GraqlMatch graqlMatch = Graql.parseQuery(query).asMatch();
-        Disjunction<Conjunction<Conjunctable>> normalised = graqlMatch.conjunction().normalise();
+        TypeQLMatch typeqlMatch = TypeQL.parseQuery(query).asMatch();
+        Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
 
         String expected = "match $com isa company; not { " +
                 "{ $com has name $n1; $n1 \"the-company\"; } or { $com has name $n1; $n1 \"other-company\"; }; };";
-        GraqlQuery expectedQuery = Graql.parseQuery(expected);
+        TypeQLQuery expectedQuery = TypeQL.parseQuery(expected);
         Disjunction<? extends Pattern> inner = expectedQuery.asMatch().conjunction().patterns().get(1).asNegation().pattern().asDisjunction();
         assertEquals(expected, expectedQuery.toString().replace("\n", " "));
     }

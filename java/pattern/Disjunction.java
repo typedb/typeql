@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package graql.lang.pattern;
+package com.vaticle.typeql.lang.pattern;
 
-import graql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -25,12 +25,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static grakn.common.collection.Collections.list;
-import static graql.lang.common.GraqlToken.Char.CURLY_CLOSE;
-import static graql.lang.common.GraqlToken.Char.CURLY_OPEN;
-import static graql.lang.common.GraqlToken.Char.SEMICOLON;
-import static graql.lang.common.GraqlToken.Char.SPACE;
-import static graql.lang.common.GraqlToken.Operator.OR;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Operator.OR;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 

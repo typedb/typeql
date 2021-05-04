@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -18,16 +18,16 @@
 package(default_visibility = ["//:__subpackages__"])
 
 load("@rules_antlr//antlr:antlr4.bzl", "antlr4")
-load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 antlr4(
     name = "java-src",
     srcs = glob(["*.g4"]),
     language = "Java",
     visitor = True,
-    package = "graql.grammar",
+    package = "com.vaticle.typeql.grammar",
 )
 
 java_library(
@@ -36,7 +36,7 @@ java_library(
     deps = [
         "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
     ],
-    tags = ["maven_coordinates=io.graql:graql-grammar:{pom_version}", "checkstyle_ignore"],
+    tags = ["maven_coordinates=com.vaticle.typeql:typeql-grammar:{pom_version}", "checkstyle_ignore"],
 )
 
 checkstyle_test(
@@ -48,8 +48,8 @@ checkstyle_test(
 assemble_maven(
   name = "assemble-maven",
   target = ":java",
-  source_jar_prefix = "graql/grammar/",
-  workspace_refs = "@graknlabs_graql_workspace_refs//:refs.json"
+  source_jar_prefix = "com/vaticle/typeql/grammar/",
+  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(

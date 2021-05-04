@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,14 +16,14 @@
 #
 
 package(default_visibility = ["//visibility:__subpackages__"])
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_test(
     name = "test",
     srcs = [
         "DebugTest.java",
     ],
-    test_class = "graql.lang.test.behaviour.debug.DebugTest",
+    test_class = "com.vaticle.typeql.lang.test.behaviour.debug.DebugTest",
     deps = [
         # Internal Package Dependencies
 
@@ -35,7 +35,7 @@ java_test(
         "@maven//:io_cucumber_cucumber_junit",
     ],
     runtime_deps = [
-        "//java/test/behaviour/graql:steps",
+        "//java/test/behaviour/typeql:steps",
     ],
     data = [":debug.feature"],
     size = "medium",

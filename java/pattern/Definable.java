@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,14 +16,14 @@
  *
  */
 
-package graql.lang.pattern;
+package com.vaticle.typeql.lang.pattern;
 
-import graql.lang.common.exception.GraqlException;
-import graql.lang.pattern.schema.Rule;
-import graql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.schema.Rule;
+import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 
-import static grakn.common.util.Objects.className;
-import static graql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Definable {
 
@@ -36,10 +36,10 @@ public interface Definable {
     }
 
     default Rule asRule() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(Rule.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Rule.class)));
     }
 
     default TypeVariable asTypeVariable() {
-        throw GraqlException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }
 }

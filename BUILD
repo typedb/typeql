@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@graknlabs_dependencies//tool/release:rules.bzl", "release_validate_deps")
-load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_dependencies//tool/release:rules.bzl", "release_validate_deps")
+load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("//:deployment.bzl", "deployment")
 
 exports_files(
@@ -28,7 +28,7 @@ exports_files(
 deploy_github(
     name = "deploy-github",
     release_description = "//:RELEASE_TEMPLATE.md",
-    title = "Graql",
+    title = "TypeQL",
     title_append_version = True,
     organisation = deployment['github.organisation'],
     repository = deployment['github.repository'],
@@ -37,9 +37,9 @@ deploy_github(
 
 release_validate_deps(
     name = "release-validate-deps",
-    refs = "@graknlabs_graql_workspace_refs//:refs.json",
+    refs = "@vaticle_typeql_workspace_refs//:refs.json",
     tagged_deps = [
-        "@graknlabs_common",
+        "@vaticle_typedb_common",
     ],
     tags = ["manual"]  # in order for bazel test //... to not fail
 )
@@ -59,11 +59,10 @@ checkstyle_test(
 filegroup(
     name = "ci",
     data = [
-        "@graknlabs_dependencies//image/rbe:ubuntu-1604",
-        "@graknlabs_dependencies//library/maven:update",
-        "@graknlabs_dependencies//tool/checkstyle:test-coverage",
-        "@graknlabs_dependencies//tool/release:create-notes",
-        "@graknlabs_dependencies//tool/sonarcloud:code-analysis",
-        "@graknlabs_dependencies//tool/unuseddeps:unused-deps",
+        "@vaticle_dependencies//library/maven:update",
+        "@vaticle_dependencies//tool/checkstyle:test-coverage",
+        "@vaticle_dependencies//tool/release:create-notes",
+        "@vaticle_dependencies//tool/sonarcloud:code-analysis",
+        "@vaticle_dependencies//tool/unuseddeps:unused-deps",
     ],
 )

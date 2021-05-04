@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,15 +16,15 @@
 #
 
 package(default_visibility = ["//java/test/behaviour:__subpackages__"])
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
     name = "steps",
-    srcs = ["GraqlSteps.java"],
+    srcs = ["TypeQLSteps.java"],
     deps = [
         # Internal Package Dependencies
         "//java/query:query",
-        "//java:graql",
+        "//java:typeql",
 
         # External dependencies from Maven
         "@maven//:junit_junit",
@@ -33,8 +33,8 @@ java_library(
 )
 java_test(
     name = "test",
-    srcs = ["GraqlTest.java"],
-    test_class = "graql.lang.test.behaviour.graql.GraqlTest",
+    srcs = ["TypeQLTest.java"],
+    test_class = "com.vaticle.typeql.lang.test.behaviour.typeql.TypeQLTest",
     deps = [
         # External dependencies from Maven
         "@maven//:io_cucumber_cucumber_junit",
@@ -43,9 +43,9 @@ java_test(
         ":steps",
     ],
     data = [
-        "@graknlabs_behaviour//graql/explanation:features",
-        "@graknlabs_behaviour//graql/language:features",
-        "@graknlabs_behaviour//graql/reasoner:features",
+        "@vaticle_typedb_behaviour//typeql/explanation:features",
+        "@vaticle_typedb_behaviour//typeql/language:features",
+        "@vaticle_typedb_behaviour//typeql/reasoner:features",
     ],
     visibility = ["//visibility:public"],
     size = "small",

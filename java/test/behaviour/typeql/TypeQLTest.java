@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  *
  */
 
-package graql.lang.test.behaviour.graql;
+package com.vaticle.typeql.lang.test.behaviour.typeql;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
@@ -26,30 +26,30 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         strict = true,
         plugin = "pretty",
-        glue = "graql.lang.test.behaviour",
-        features = "external/graknlabs_behaviour/graql",
-        tags = "not @ignore and not @ignore-graql"
+        glue = "com.vaticle.typeql.lang.test.behaviour",
+        features = "external/vaticle_typedb_behaviour/typeql",
+        tags = "not @ignore and not @ignore-typeql"
 )
-public class GraqlTest {
+public class TypeQLTest {
     // ATTENTION:
     // When you click RUN from within this class through Intellij IDE, it will fail.
     // You can fix it by doing:
     //
     // 1) Go to 'Run'
     // 2) Select 'Edit Configurations...'
-    // 3) Select 'Bazel test GraqlTest'
+    // 3) Select 'Bazel test TypeQLTest'
     //
     // 4) Ensure 'Target Expression' is set correctly:
     //    Use '//<this>/<package>/<name>:test'
     //
     // 5) Update 'Bazel Flags':
-    //    a) Remove the line that says: '--test_filter=graql.lang.*'
+    //    a) Remove the line that says: '--test_filter=com.vaticle.typeql.lang.*'
     //    b) Use the following Bazel flags:
     //       --cache_test_results=no : to make sure you're not using cache
     //       --test_output=streamed : to make sure all output is printed
     //       --subcommands : to print the low-level commands and execution paths
     //       --sandbox_debug : to keep the sandbox not deleted after test runs
-    //       --spawn_strategy=standalone : if you're on Mac, tests need permission to access filesystem (to run Grakn)
+    //       --spawn_strategy=standalone : if you're on Mac, tests need permission to access filesystem (to run TypeDB)
     //
     // 6) Hit the RUN button by selecting the test from the dropdown menu on the top bar
 }
