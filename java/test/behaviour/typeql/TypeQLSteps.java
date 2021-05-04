@@ -68,8 +68,8 @@ public class TypeQLSteps {
 
     @Given("for typeql query")
     @Given("get answers of typeql match")
-    @Given("get answer of typeql match aggregate")
     @Given("get answers of typeql match group")
+    @Given("get answer of typeql match aggregate")
     @Given("get answers of typeql match group aggregate")
     @Given("answer set is equivalent for typeql query")
     public void typeql_match(String query) {
@@ -116,6 +116,7 @@ public class TypeQLSteps {
     @Given("aggregate value is: {}")
     @Given("number of groups is: {}")
     @Given("rules do not contain: {}")
+    @Given("each answer does not satisfy")
     @Given("reasoned database is named: {}")
     @Given("connection create database: {}")
     @Given("session transaction is open: {}")
