@@ -19,8 +19,8 @@ config:
   version-candidate: VERSION
   dependencies:
     dependencies: [build]
-    common: [build, release]
-    behaviour: [build]
+    typedb-common: [build, release]
+    typedb-behaviour: [build]
 
 build:
   quality:
