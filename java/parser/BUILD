@@ -44,10 +44,10 @@ java_library(
 )
 
 assemble_maven(
-  name = "assemble-maven",
-  target = ":parser",
-  source_jar_prefix = "com/vaticle/typeql/java/parser/",
-  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
+    name = "assemble-maven",
+    target = ":parser",
+    source_jar_prefix = "com/vaticle/typeql/java/parser/",
+    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(
