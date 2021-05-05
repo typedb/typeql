@@ -36,7 +36,7 @@ build:
     dependency-analysis:
       image: vaticle-ubuntu-20.04
       command: |
-        bazel run @vaticle_dependencies//grabl/analysis:dependency-analysis
+        bazel run @vaticle_dependencies//factory/analysis:dependency-analysis
   correctness:
     build:
       image: vaticle-ubuntu-20.04
