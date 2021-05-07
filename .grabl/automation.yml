@@ -58,7 +58,11 @@ build:
     test-typeql-java:
       image: vaticle-ubuntu-20.04
       command: |
-        bazel test //... --test_output=errors
+        bazel test //common/... --test_output=errors
+        bazel test //parser/... --test_output=errors
+        bazel test //pattern/... --test_output=errors
+        bazel test //query/... --test_output=errors
+        bazel test //test/... --test_output=errors
     deploy-maven-snapshot:
       filter:
         owner: vaticle
