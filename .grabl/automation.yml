@@ -37,7 +37,7 @@ build:
       command: |
         SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
           bazel run @vaticle_dependencies//tool/sonarcloud:code-analysis -- \
-          --project-key vaticle_typeql_java --branch=$GRABL_BRANCH --commit-id=$GRABL_COMMIT
+          --project-key vaticle_typeql_lang_java --branch=$GRABL_BRANCH --commit-id=$GRABL_COMMIT
     dependency-analysis:
       image: vaticle-ubuntu-20.04
       command: |

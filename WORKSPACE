@@ -19,7 +19,7 @@
 # under the License.
 #
 
-workspace(name = "vaticle_typeql_java")
+workspace(name = "vaticle_typeql_lang_java")
 
 ################################
 # Load @vaticle_dependencies #
@@ -102,7 +102,7 @@ vaticle_typedb_common()
 vaticle_typedb_behaviour()
 
 load("@vaticle_typeql//dependencies/maven:artifacts.bzl", vaticle_typeql_artifacts = "artifacts")
-load("//dependencies/maven:artifacts.bzl", vaticle_typeql_java_artifacts = "artifacts")
+load("//dependencies/maven:artifacts.bzl", vaticle_typeql_lang_java_artifacts = "artifacts")
 
 ############################
 # Load @maven dependencies #
@@ -113,12 +113,12 @@ maven(
     vaticle_bazel_distribution_maven_artifacts +
     vaticle_dependencies_tool_maven_artifacts +
     vaticle_typeql_artifacts +
-    vaticle_typeql_java_artifacts
+    vaticle_typeql_lang_java_artifacts
 )
 
 ############################################
-# Generate @vaticle_typeql_java_workspace_refs #
+# Generate @vaticle_typeql_lang_java_workspace_refs #
 ############################################
 
 load("@vaticle_bazel_distribution//common:rules.bzl", "workspace_refs")
-workspace_refs(name = "vaticle_typeql_java_workspace_refs")
+workspace_refs(name = "vaticle_typeql_lang_java_workspace_refs")
