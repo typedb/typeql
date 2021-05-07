@@ -1,5 +1,5 @@
-[![Grabl](https://grabl.io/api/status/vaticle/typeql-java/badge.svg)](https://grabl.io/vaticle/typeql-java)
-[![GitHub release](https://img.shields.io/github/release/vaticle/typeql-java.svg)](https://github.com/vaticle/typeql-java/releases/latest)
+[![Grabl](https://grabl.io/api/status/vaticle/typeql-lang-java/badge.svg)](https://grabl.io/vaticle/typeql-lang-java)
+[![GitHub release](https://img.shields.io/github/release/vaticle/typeql-lang-java.svg)](https://github.com/vaticle/typeql-lang-java/releases/latest)
 [![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff)](https://vaticle.com/discord)
 [![Discussion Forum](https://img.shields.io/discourse/https/forum.vaticle.com/topics.svg)](https://forum.vaticle.com)
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)

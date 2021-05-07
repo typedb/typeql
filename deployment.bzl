@@ -21,5 +21,5 @@
 
 deployment = {
   'github.organisation': 'vaticle',
-  'github.repository': 'typeql-java'
+  'github.repository': 'typeql-lang-java'
 }
