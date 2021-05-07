@@ -1,5 +1,5 @@
-[![Grabl](https://grabl.io/api/status/vaticle/typeql/badge.svg)](https://grabl.io/vaticle/typeql)
-[![GitHub release](https://img.shields.io/github/release/vaticle/typeql.svg)](https://github.com/vaticle/typeql/releases/latest)
+[![Grabl](https://grabl.io/api/status/vaticle/typeql-java/badge.svg)](https://grabl.io/vaticle/typeql-java)
+[![GitHub release](https://img.shields.io/github/release/vaticle/typeql-java.svg)](https://github.com/vaticle/typeql-java/releases/latest)
 [![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff)](https://vaticle.com/discord)
 [![Discussion Forum](https://img.shields.io/discourse/https/forum.vaticle.com/topics.svg)](https://forum.vaticle.com)
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)
@@ -50,7 +50,7 @@ With the expressivity of the schema, inference through OLTP, and distributed alg
 <dependencies>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
-        <artifactId>lang</artifactId>
+        <artifactId>typeql-lang</artifactId>
         <version>{version}</version>
     </dependency>
 </dependencies>
@@ -70,7 +70,7 @@ Replace `{version}` with the version number, in which you can find the latest on
 
    a) to build the native/raw JAR:
    ```
-   bazel build //java:typeql
+   bazel build//:typeql
    ```
    The Java library JAR will be produced at: `bazel-bin/libclient-java.jar`
 

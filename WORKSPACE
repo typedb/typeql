@@ -1,21 +1,25 @@
 #
 # Copyright (C) 2021 Vaticle
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 
-workspace(name = "vaticle_typeql")
+workspace(name = "vaticle_typeql_java")
 
 ################################
 # Load @vaticle_dependencies #
@@ -92,25 +96,29 @@ load("@vaticle_bazel_distribution//maven:deps.bzl", vaticle_bazel_distribution_m
 
 # We don't load Maven artifacts for @vaticle_typedb_common as they are only needed
 # if you depend on @vaticle_typedb_common//test/server
-load("//dependencies/vaticle:repositories.bzl", "vaticle_typedb_common")
+load("//dependencies/vaticle:repositories.bzl", "vaticle_typeql", "vaticle_typedb_common", "vaticle_typedb_behaviour")
+vaticle_typeql()
 vaticle_typedb_common()
-
-load("//dependencies/vaticle:repositories.bzl", "vaticle_typedb_behaviour")
 vaticle_typedb_behaviour()
 
-load("//dependencies/maven:artifacts.bzl", vaticle_typeql_artifacts = "artifacts")
+load("@vaticle_typeql//dependencies/maven:artifacts.bzl", vaticle_typeql_artifacts = "artifacts")
+load("//dependencies/maven:artifacts.bzl", vaticle_typeql_java_artifacts = "artifacts")
 
 ############################
 # Load @maven dependencies #
 ############################
 
 load("@vaticle_dependencies//library/maven:rules.bzl", "maven")
-
-maven(vaticle_bazel_distribution_maven_artifacts + vaticle_dependencies_tool_maven_artifacts + vaticle_typeql_artifacts)
+maven(
+    vaticle_bazel_distribution_maven_artifacts +
+    vaticle_dependencies_tool_maven_artifacts +
+    vaticle_typeql_artifacts +
+    vaticle_typeql_java_artifacts
+)
 
 ############################################
-# Generate @vaticle_typeql_workspace_refs #
+# Generate @vaticle_typeql_java_workspace_refs #
 ############################################
 
 load("@vaticle_bazel_distribution//common:rules.bzl", "workspace_refs")
-workspace_refs(name = "vaticle_typeql_workspace_refs")
+workspace_refs(name = "vaticle_typeql_java_workspace_refs")

@@ -1,19 +1,63 @@
 #
 # Copyright (C) 2021 Vaticle
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
+
+package(default_visibility = ["//visibility:public"])
+
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
+
+java_library(
+    name = "typeql-lang",
+    srcs = ["TypeQL.java"],
+    deps = [
+        # Internal Package Dependencies
+        "//common:common",
+        "//parser:parser",
+        "//pattern:pattern",
+        "//query:query",
+
+        # Internal Repository Dependencies
+        "@vaticle_typedb_common//:common",
+
+        # External dependencies
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:org_slf4j_slf4j_api",
+    ],
+    tags = ["maven_coordinates=com.vaticle.typeql:typeql-lang:{pom_version}"],
+)
+
+assemble_maven(
+  name = "assemble-maven",
+  target = ":typeql-lang",
+  source_jar_prefix = "com/vaticle/typeql/lang/",
+  workspace_refs = "@vaticle_typeql_java_workspace_refs//:refs.json"
+)
+
+deploy_maven(
+    name = "deploy-maven",
+    target = ":assemble-maven",
+    snapshot = deployment['maven.snapshot'],
+    release = deployment['maven.release']
+)
 
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@vaticle_dependencies//tool/release:rules.bzl", "release_validate_deps")
@@ -37,7 +81,7 @@ deploy_github(
 
 release_validate_deps(
     name = "release-validate-deps",
-    refs = "@vaticle_typeql_workspace_refs//:refs.json",
+    refs = "@vaticle_typeql_java_workspace_refs//:refs.json",
     tagged_deps = [
         "@vaticle_typedb_common",
     ],
@@ -49,10 +93,8 @@ checkstyle_test(
     include = glob([
         "*",
         ".grabl/automation.yml",
-        "docs/*",
     ]),
-    exclude = ["docs/java-package-structure.png"],
-    license_type = "agpl",
+    license_type = "apache",
 )
 
 # CI targets that are not declared in any BUILD file, but are called externally
