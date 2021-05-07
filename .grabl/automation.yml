@@ -84,8 +84,8 @@ build:
       image: vaticle-ubuntu-20.04
       dependencies: [deploy-maven-snapshot]
       command: |
-        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/$GRABL_COMMIT/g" java/test/deployment/pom.xml
-        cd java/test/deployment/ && mvn test
+        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/$GRABL_COMMIT/g" test/deployment/pom.xml
+        cd test/deployment/ && mvn test
 
 release:
   filter:

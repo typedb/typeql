@@ -21,9 +21,18 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_dependencies//tool/release:rules.bzl", "release_validate_deps")
+load("//:deployment.bzl", github_deployment = "deployment")
+
+
+exports_files(
+    ["VERSION", "RELEASE_TEMPLATE.md"],
+    visibility = ["//visibility:public"]
+)
 
 java_library(
     name = "typeql-lang",
@@ -59,23 +68,13 @@ deploy_maven(
     release = deployment['maven.release']
 )
 
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//tool/release:rules.bzl", "release_validate_deps")
-load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
-load("//:deployment.bzl", "deployment")
-
-exports_files(
-    ["VERSION", "RELEASE_TEMPLATE.md"],
-    visibility = ["//visibility:public"]
-)
-
 deploy_github(
     name = "deploy-github",
     release_description = "//:RELEASE_TEMPLATE.md",
     title = "TypeQL",
     title_append_version = True,
-    organisation = deployment['github.organisation'],
-    repository = deployment['github.repository'],
+    organisation = github_deployment['github.organisation'],
+    repository = github_deployment['github.repository'],
     draft = False
 )
 
