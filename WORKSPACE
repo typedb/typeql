@@ -86,26 +86,12 @@ github_deps()
 # Load //maven
 load("@vaticle_bazel_distribution//maven:deps.bzl", vaticle_bazel_distribution_maven_artifacts = "maven_artifacts")
 
-################################
-# Load @vaticle dependencies #
-################################
-
-# We don't load Maven artifacts for @vaticle_typedb_common as they are only needed
-# if you depend on @vaticle_typedb_common//test/server
-load("//dependencies/vaticle:repositories.bzl", "vaticle_typedb_common")
-vaticle_typedb_common()
-
-load("//dependencies/vaticle:repositories.bzl", "vaticle_typedb_behaviour")
-vaticle_typedb_behaviour()
-
-load("//dependencies/maven:artifacts.bzl", vaticle_typeql_artifacts = "artifacts")
-
 ############################
 # Load @maven dependencies #
 ############################
 
+load("//dependencies/maven:artifacts.bzl", vaticle_typeql_artifacts = "artifacts")
 load("@vaticle_dependencies//library/maven:rules.bzl", "maven")
-
 maven(vaticle_bazel_distribution_maven_artifacts + vaticle_dependencies_tool_maven_artifacts + vaticle_typeql_artifacts)
 
 ############################################
