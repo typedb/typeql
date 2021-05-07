@@ -27,12 +27,6 @@ build:
     filter:
       owner: vaticle
       branch: master
-    build-analysis:
-      image: vaticle-ubuntu-20.04
-      command: |
-        SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
-          bazel run @vaticle_dependencies//tool/sonarcloud:code-analysis -- \
-          --project-key vaticle_typeql --branch=$GRABL_BRANCH --commit-id=$GRABL_COMMIT
     dependency-analysis:
       image: vaticle-ubuntu-20.04
       command: |
@@ -50,34 +44,16 @@ build:
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
-    test-typeql-java:
-      image: vaticle-ubuntu-20.04
-      command: |
-        bazel test //java/... --test_output=errors
     deploy-maven-snapshot:
       filter:
         owner: vaticle
         branch: master
       image: vaticle-ubuntu-20.04
-      dependencies: [build, build-dependency, test-typeql-java]
+      dependencies: [build, build-dependency]
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //grammar:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/pattern:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/query:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/parser:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
-    test-deployment-maven:
-      filter:
-        owner: vaticle
-        branch: master
-      image: vaticle-ubuntu-20.04
-      dependencies: [deploy-maven-snapshot]
-      command: |
-        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/$GRABL_COMMIT/g" java/test/deployment/pom.xml
-        cd java/test/deployment/ && mvn test
 
 release:
   filter:
@@ -105,8 +81,3 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/common:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/pattern:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/query:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/parser:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java:deploy-maven -- release

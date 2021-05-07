@@ -50,39 +50,13 @@ With the expressivity of the schema, inference through OLTP, and distributed alg
 <dependencies>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
-        <artifactId>lang</artifactId>
+        <artifactId>typeql-grammar</artifactId>
         <version>{version}</version>
     </dependency>
 </dependencies>
 ```
 
 Replace `{version}` with the version number, in which you can find the latest on [TypeQL's Maven Repository](https://repo.vaticle.com/#browse/browse:maven:com%2Fvaticle%2Ftypeql%2Ftypeql-lang). Further documentation: http://docs.vaticle.com/docs/client-api/java#typeql
-
-## Building TypeQL from Source
-
-> Note: You don't need to compile TypeQL from source if you just want to use it in your code. See the _"Importing TypeQL"_ section above.
-
-1. Make sure you have the following dependencies installed on your machine:
-    - Java 8
-    - [Bazel](https://docs.bazel.build/versions/master/install.html)
-
-2. Build the JAR:
-
-   a) to build the native/raw JAR:
-   ```
-   bazel build //java:typeql
-   ```
-   The Java library JAR will be produced at: `bazel-bin/libclient-java.jar`
-
-   b) to build the JAR for a Maven application:
-   ```
-   bazel build //:assemble-maven
-   ```
-   The Maven JAR and POM will be produced at: 
-   ```
-   bazel-bin/java/com.vaticle.typeql:lang.jar
-   bazel-bin/java/pom.xml
-   ```
 
 ## Contributions
 

@@ -49,9 +49,7 @@ checkstyle_test(
     include = glob([
         "*",
         ".grabl/automation.yml",
-        "docs/*",
     ]),
-    exclude = ["docs/java-package-structure.png"],
     license_type = "agpl",
 )
 
