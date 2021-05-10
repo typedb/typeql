@@ -51,7 +51,6 @@ java_library(
 assemble_maven(
   name = "assemble-maven",
   target = ":pattern",
-  source_jar_prefix = "com/vaticle/typeql/java/pattern/",
   workspace_refs = "@vaticle_typeql_lang_java_workspace_refs//:refs.json"
 )
 

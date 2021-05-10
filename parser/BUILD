@@ -50,7 +50,6 @@ java_library(
 assemble_maven(
     name = "assemble-maven",
     target = ":parser",
-    source_jar_prefix = "com/vaticle/typeql/java/parser/",
     workspace_refs = "@vaticle_typeql_lang_java_workspace_refs//:refs.json"
 )
 
