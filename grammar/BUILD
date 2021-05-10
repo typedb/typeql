@@ -48,7 +48,6 @@ checkstyle_test(
 assemble_maven(
   name = "assemble-maven",
   target = ":java",
-  source_jar_prefix = "com/vaticle/typeql/grammar/",
   workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
