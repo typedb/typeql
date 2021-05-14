@@ -54,6 +54,16 @@ build:
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //grammar:deploy-maven -- snapshot
+    deploy-pip-snapshot:
+      filter:
+        owner: vaticle
+        branch: master
+      image: vaticle-ubuntu-20.04
+      dependencies: [ build, build-dependency ]
+      command: |
+        export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
+        export DEPLOY_PIP_PASSWORD=$REPO_VATICLE_PASSWORD
+        bazel run --define version=$(git rev-parse HEAD) //grammar:deploy-pip -- snapshot
 
 release:
   filter:
@@ -81,3 +91,10 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar:deploy-maven -- release
+    deploy-pip-release:
+      image: vaticle-ubuntu-20.04
+      dependencies: [ deploy-github ]
+      command: |
+        export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
+        export DEPLOY_PIP_PASSWORD=$REPO_VATICLE_PASSWORD
+        bazel run --define version=$(cat VERSION) //grammar:deploy-pip -- release
