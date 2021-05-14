@@ -81,6 +81,10 @@ rules_pkg()
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
+# Load //pip
+load("@vaticle_bazel_distribution//pip:deps.bzl", pip_deps = "deps")
+pip_deps()
+
 # Load //github
 load("@vaticle_bazel_distribution//github:deps.bzl", github_deps = "deps")
 github_deps()
