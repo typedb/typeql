@@ -17,12 +17,12 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("@rules_antlr//antlr:antlr4.bzl", "antlr4")
+load("@rules_antlr//antlr:antlr4.bzl", "antlr")
 load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
-antlr4(
+antlr(
     name = "java-src",
     srcs = glob(["*.g4"]),
     language = "Java",
