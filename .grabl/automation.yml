@@ -38,12 +38,6 @@ build:
         bazel build //... --test_output=errors
         bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
-    build-dependency:
-      image: vaticle-ubuntu-20.04
-      command: |
-        dependencies/maven/update.sh
-        git diff --exit-code dependencies/maven/artifacts.snapshot
-        bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
     deploy-maven-snapshot:
       filter:
         owner: vaticle

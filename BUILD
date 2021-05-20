@@ -35,15 +35,6 @@ deploy_github(
     draft = False
 )
 
-release_validate_deps(
-    name = "release-validate-deps",
-    refs = "@vaticle_typeql_workspace_refs//:refs.json",
-    tagged_deps = [
-        "@vaticle_typedb_common",
-    ],
-    tags = ["manual"]  # in order for bazel test //... to not fail
-)
-
 checkstyle_test(
     name = "checkstyle",
     include = glob([
