@@ -69,10 +69,6 @@ release:
   filter:
     owner: vaticle
     branch: master
-  validation:
-    validate-dependencies:
-      image: vaticle-ubuntu-20.04
-      command: bazel test //:release-validate-deps --test_output=streamed
   deployment:
     deploy-github:
       image: vaticle-ubuntu-20.04
