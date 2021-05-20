@@ -92,6 +92,10 @@ github_deps()
 # Load //maven
 load("@vaticle_bazel_distribution//maven:deps.bzl", vaticle_bazel_distribution_maven_artifacts = "maven_artifacts")
 
+# Load //pip
+load("@vaticle_bazel_distribution//pip:deps.bzl", pip_deps = "deps")
+pip_deps()
+
 ################################
 # Load @vaticle dependencies #
 ################################
