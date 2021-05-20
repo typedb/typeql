@@ -11,12 +11,19 @@
 <dependencies>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
-        <artifactId>typeql-lang</artifactId>
+        <artifactId>typeql-grammar</artifactId>
         <version>{version}</version>
     </dependency>
 </dependencies>
 ```
 
+## Distribution (for Python)
+
+Available through https://pypi.org
+
+```
+pip install typeql-grammar=={version}
+```
+
 { release notes }
 
-**Please refer to [full release notes of 2.0.0-alpha](https://github.com/vaticle/typeql/releases/tag/2.0.0-alpha) to see the changes in 2.0.0.**

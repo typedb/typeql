@@ -89,6 +89,6 @@ release:
       image: vaticle-ubuntu-20.04
       dependencies: [ deploy-github ]
       command: |
-        export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
-        export DEPLOY_PIP_PASSWORD=$REPO_VATICLE_PASSWORD
+        export DEPLOY_PIP_USERNAME=$REPO_PYPI_USERNAME
+        export DEPLOY_PIP_PASSWORD=$REPO_PYPI_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar:deploy-pip -- release
