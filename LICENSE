@@ -660,3 +660,28 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <http://www.gnu.org/licenses/>.
+
+---
+
+The TypeQL language and related materials are distributed under the terms
+GNU Affero General Public License v3.0 ("AGPL 3.0") as published by the Free
+Software Foundation, but with the following special exception.
+
+Exception to AGPL 3.0: Any TypeQL language library that is based on material
+or materials in the Vaticle TypeQL repository, and that is used to communicate
+or interact (in each case) with a database created or managed or accessed
+(in each case) using a version of the TypeQL software that is made available
+by or on behalf of Vaticle Limited (UK Company Number 08766237) or any
+successor entity (but excluding any forked version of that software), may be
+distributed under one of the following licences:
+
+- The Apache License version 2: https://www.apache.org/licenses/LICENSE-2.0.txt
+- The MIT License: https://opensource.org/licenses/MIT
+- The BSD License (2-Clause): https://opensource.org/licenses/BSD-2-Clause
+
+As used above "successor entity" means any entity then owning copyrights in
+the TypeDB software that were previously owned by Vaticle Limited.
+
+If you make any change to, or contribute to, (in each case) the TypeQL code
+or related materials, then this exception will apply to any TypeQL language
+library that uses or implements that change/contribution.

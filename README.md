@@ -72,8 +72,18 @@ Replace `{version}` with the version number, in which you can find the latest on
 
 TypeDB & TypeQL has been built using various open-source Graph and Distributed Computing frameworks throughout its evolution. Today TypeDB & TypeQL is built using [RocksDB](https://rocksdb.org), [ANTLR](http://www.antlr.org), [SCIP](https://www.scipopt.org), [Bazel](https://bazel.build), [GRPC](https://grpc.io), and [ZeroMQ](https://zeromq.org), and [Caffeine](https://github.com/ben-manes/caffeine). In the past, TypeDB was enabled by various open-source technologies and communities that we are hugely thankful to: [Apache Cassandra](http://cassandra.apache.org), [Apache Hadoop](https://hadoop.apache.org), [Apache Spark](http://spark.apache.org), [Apache TinkerPop](http://tinkerpop.apache.org), and [JanusGraph](http://janusgraph.org). Thank you!
 
+---
+
 ## Licensing
 
-This product includes software developed by [Vaticle](https://vaticle.com/).  It's released under the GNU Affero GENERAL PUBLIC LICENSE, Version 3, 19 November 2007. For license information, please see [LICENSE](https://github.com/vaticle/typedb/blob/master/LICENSE). Vaticle also provides a commercial license for TypeDB Cluster - get in touch with our team at enterprise@vaticle.com.
+The TypeQL language and related materials are distributed under the terms GNU Affero General Public License v3.0 ("AGPL 3.0") as published by the Free Software Foundation, but with the following special exception.
 
-Copyright (C) 2020 Vaticle
+Exception to AGPL 3.0: Any TypeQL language library that is based on material or materials in the Vaticle TypeQL repository, and that is used to communicate or interact (in each case) with a database created or managed or accessed (in each case) using a version of the TypeQL software that is made available by or on behalf of Vaticle Limited (UK Company Number 08766237) or any successor entity (but excluding any forked version of that software), may be distributed under one of the following licences:
+
+- The Apache License version 2: https://www.apache.org/licenses/LICENSE-2.0.txt
+- The MIT License: https://opensource.org/licenses/MIT
+- The BSD License (2-Clause): https://opensource.org/licenses/BSD-2-Clause
+
+As used above "successor entity" means any entity then owning copyrights in the TypeDB software that were previously owned by Vaticle Limited.
+
+If you make any change to, or contribute to, (in each case) the TypeQL code or related materials, then this exception will apply to any TypeQL language library that uses or implements that change/contribution.
