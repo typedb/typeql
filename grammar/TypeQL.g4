@@ -138,8 +138,8 @@ variable_thing        :   VAR_            ISA_ type   ( ',' attributes )?
 variable_relation     :   VAR_? relation  ISA_ type   ( ',' attributes )?
                       |   VAR_? relation  attributes?
                       ;
-variable_attribute    :   VAR_? predicate ISA_ type   ( ',' attributes )?
-                      |   VAR_? predicate attributes?
+variable_attribute    :   VAR_ predicate ISA_ type   ( ',' attributes )?
+                      |   VAR_ predicate attributes?
                       ;
 
 // RELATION CONSTRUCT ==========================================================
