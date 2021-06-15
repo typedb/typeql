@@ -26,6 +26,7 @@ import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
+import com.vaticle.typeql.lang.pattern.Negation;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
@@ -56,6 +58,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_FILT
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
@@ -90,12 +93,14 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
 
         hasBoundingConjunction();
         nestedPatternsAreBounded();
-        hasNamedVariable();
+        queryHasNamedVariable();
+        eachPatternVariableHasNamedVariable(conjunction.patterns());
         filtersAreInScope();
-        sortVarsArInScope();
+        sortVarsAreInScope();
 
         this.hash = Objects.hash(this.conjunction, this.modifiers);
     }
+
 
     public class Modifiers {
 
@@ -178,8 +183,19 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         });
     }
 
-    private void hasNamedVariable() {
+    private void queryHasNamedVariable() {
         if (namedVariablesUnbound().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
+    }
+
+    private void eachPatternVariableHasNamedVariable(List<? extends Pattern> patterns) {
+        patterns.forEach(pattern -> {
+            if (pattern.isVariable() && !pattern.asVariable().reference().isName()
+                    && pattern.asVariable().variables().noneMatch(constraintVar -> constraintVar.reference().isName())) {
+                throw TypeQLException.of(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.message(pattern));
+            } else if (!pattern.isVariable()) {
+                eachPatternVariableHasNamedVariable(pattern.patterns());
+            }
+        });
     }
 
     private void filtersAreInScope() {
@@ -193,7 +209,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
     }
 
-    private void sortVarsArInScope() {
+    private void sortVarsAreInScope() {
         List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
         if (modifiers.sorting != null && !sortableVars.contains(modifiers.sorting.var())) {
             throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.var()));
