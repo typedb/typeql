@@ -171,7 +171,7 @@ $person isa postgrad, has name "Bob";
 
 ## Using TypeQL
 
-### TypeQL (native sytnax)
+### TypeQL (native syntax)
 
 All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively. 
 
