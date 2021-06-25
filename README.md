@@ -13,7 +13,7 @@ TypeQL language library for Java allows you to construct TypeQL queries programm
 match $x isa person, has name "alice", has age 32;
 ``` 
 
-The TypeQL query above can be constructed programmatically in Java, in the following way.
+The native TypeQL query above can be constructed programmatically in Java using this library, in the following way.
 
 ```java
 TypeQL.match(var("x").isa("person").has("name", "alice").has("age", 32));
