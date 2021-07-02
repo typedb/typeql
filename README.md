@@ -41,8 +41,8 @@ TypeQL allows you to easily model type inheritance into your domain model. Follo
 define
 
 person sub entity,
-  has first-name,
-  has last-name;
+  owns first-name,
+  owns last-name;
 
 student sub person;
 undergrad sub student;
