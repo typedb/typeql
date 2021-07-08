@@ -154,7 +154,6 @@ public interface TypeVariableBuilder {
     }
 
     default TypeVariable relates(UnboundVariable roleTypeVar) {
-        System.out.println(this);
         return constrain(new TypeConstraint.Relates(roleTypeVar));
     }
 
