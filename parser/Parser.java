@@ -136,6 +136,7 @@ public class Parser extends TypeQLBaseVisitor {
             // DefaultErrorStrategy + LL_EXACT_AMBIG_DETECTION
             // This was not set to default parsing strategy, but it is useful
             // to produce detailed/useful error message
+            errorListener.clearErrors();
             parser.setErrorHandler(new DefaultErrorStrategy());
             parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
             queryContext = parserMethod.apply(parser);

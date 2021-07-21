@@ -74,6 +74,10 @@ public class ErrorListener extends BaseErrorListener {
         return !errors.isEmpty();
     }
 
+    public void clearErrors() {
+        errors.clear();
+    }
+
     @Override
     public String toString() {
         return errors.stream().map(SyntaxError::toString).collect(Collectors.joining("\n"));

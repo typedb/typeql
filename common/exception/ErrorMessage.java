@@ -105,7 +105,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(40, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
 
 
-    private static final String codePrefix = "GQL";
+    private static final String codePrefix = "TQL";
     private static final String messagePrefix = "TypeQL Error";
 
     public ErrorMessage(int codeNumber, String messageBody) {
