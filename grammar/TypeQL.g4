@@ -59,10 +59,10 @@ query_match_group_agg :   query_match   match_group       match_aggregate  ;
 
 modifiers             : ( filter ';' )? ( sort ';' )? ( offset ';' )? ( limit ';' )?;
 
-filter                :   GET         VAR_  ( ',' VAR_ )*   ;
-sort                  :   SORT        VAR_        ORDER_?   ;
-offset                :   OFFSET      LONG_                 ;
-limit                 :   LIMIT       LONG_                 ;
+filter                :   GET         VAR_  ( ',' VAR_ )*           ;
+sort                  :   SORT        VAR_  ( ',' VAR_ )*   ORDER_? ;
+offset                :   OFFSET      LONG_                         ;
+limit                 :   LIMIT       LONG_                         ;
 
 
 // GET AGGREGATE QUERY =========================================================
