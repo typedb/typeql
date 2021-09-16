@@ -327,12 +327,7 @@ public class Parser extends TypeQLBaseVisitor {
             Long offset = null, limit = null;
 
             if (ctx.modifiers().filter() != null) variables = this.visitFilter(ctx.modifiers().filter());
-            if (ctx.modifiers().sort() != null) {
-                UnboundVariable var = getVar(ctx.modifiers().sort().VAR_());
-                sorting = ctx.modifiers().sort().ORDER_() == null
-                        ? new Sortable.Sorting(var)
-                        : new Sortable.Sorting(var, TypeQLArg.Order.of(ctx.modifiers().sort().ORDER_().getText()));
-            }
+            if (ctx.modifiers().sort() != null) sorting = this.visitSort(ctx.modifiers().sort());
             if (ctx.modifiers().offset() != null) offset = getLong(ctx.modifiers().offset().LONG_());
             if (ctx.modifiers().limit() != null) limit = getLong(ctx.modifiers().limit().LONG_());
             match = new TypeQLMatch(match.conjunction(), variables, sorting, offset, limit);
@@ -380,6 +375,13 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public List<UnboundVariable> visitFilter(TypeQLParser.FilterContext ctx) {
         return ctx.VAR_().stream().map(this::getVar).collect(toList());
+    }
+
+    @Override
+    public Sortable.Sorting visitSort(TypeQLParser.SortContext ctx) {
+        List<UnboundVariable> vars = ctx.VAR_().stream().map(this::getVar).collect(toList());
+        return ctx.ORDER_() == null ? new Sortable.Sorting(vars) :
+                new Sortable.Sorting(vars, TypeQLArg.Order.of(ctx.ORDER_().getText()));
     }
 
     // COMPUTE QUERY ===========================================================

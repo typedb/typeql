@@ -26,7 +26,6 @@ import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -57,7 +56,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
 
     @Override
     public List<? extends Pattern> patterns() {
-        return Arrays.asList(pattern);
+        return list(pattern);
     }
 
     @Override

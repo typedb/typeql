@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.vaticle.typedb.common.collection.Collections.list;
+
 public interface Computable {
 
     TypeQLToken.Compute.Method method();
@@ -59,7 +61,7 @@ public interface Computable {
         default T of(String type, String... types) {
             ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
-            typeList.addAll(Arrays.asList(types));
+            typeList.addAll(list(types));
 
             return of(typeList);
         }
@@ -76,7 +78,7 @@ public interface Computable {
         default T in(String type, String... types) {
             ArrayList<String> typeList = new ArrayList<>(types.length + 1);
             typeList.add(type);
-            typeList.addAll(Arrays.asList(types));
+            typeList.addAll(list(types));
 
             return in(typeList);
         }
@@ -99,7 +101,7 @@ public interface Computable {
         default T where(U arg, U... args) {
             ArrayList<U> argList = new ArrayList<>(args.length + 1);
             argList.add(arg);
-            argList.addAll(Arrays.asList(args));
+            argList.addAll(list(args));
 
             return where(argList);
         }

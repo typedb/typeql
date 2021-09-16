@@ -26,9 +26,10 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.vaticle.typedb.common.collection.Collections.list;
 
 /**
  * ANTLR error listener that listens for syntax errors.
@@ -54,7 +55,7 @@ public class ErrorListener extends BaseErrorListener {
     }
 
     public static ErrorListener of(String query) {
-        List<String> queryList = Arrays.asList(query.split("\n"));
+        List<String> queryList = list(query.split("\n"));
         return new ErrorListener(queryList);
     }
 

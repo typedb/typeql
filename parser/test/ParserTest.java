@@ -42,10 +42,10 @@ import org.junit.rules.ExpectedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.define;
 import static com.vaticle.typeql.lang.TypeQL.gte;
@@ -377,7 +377,6 @@ public class ParserTest {
         TypeQLMatch apiQuery = match(var("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000)));
     }
 
-
     @Test
     public void testLongPredicateQuery() {
         final String query = "match $x isa movie, has tmdb-vote-count <= 400;";
@@ -391,7 +390,7 @@ public class ParserTest {
     public void testSchemaQuery() {
         final String query = "match $x plays starring:actor; sort $x asc;";
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(var("x").plays("starring", "actor")).sort("x", "asc");
+        TypeQLMatch expected = match(var("x").plays("starring", "actor")).sort(list("x"), "asc");
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -402,7 +401,7 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).sort("r", "desc");
+        ).sort(list("r"), "desc");
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -424,7 +423,7 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).sort("r", "desc").offset(10).limit(10);
+        ).sort(list("r"), "desc").offset(10).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -1130,7 +1129,7 @@ public class ParserTest {
         final String getString = "match $y isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(getString).collect(toList());
 
-        assertEquals(Arrays.asList(match(var("y").isa("movie"))), queries);
+        assertEquals(list(match(var("y").isa("movie"))), queries);
     }
 
     @Test
@@ -1138,7 +1137,7 @@ public class ParserTest {
         final String insertString = "insert $x isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString).collect(toList());
 
-        assertEquals(Arrays.asList(insert(var("x").isa("movie"))), queries);
+        assertEquals(list(insert(var("x").isa("movie"))), queries);
     }
 
     @Test
@@ -1146,7 +1145,7 @@ public class ParserTest {
         final String insertString = " insert $x isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString).collect(toList());
 
-        assertEquals(Arrays.asList(insert(var("x").isa("movie"))), queries);
+        assertEquals(list(insert(var("x").isa("movie"))), queries);
     }
 
     @Test
@@ -1154,7 +1153,7 @@ public class ParserTest {
         final String insertString = "#hola\ninsert $x isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString).collect(toList());
 
-        assertEquals(Arrays.asList(insert(var("x").isa("movie"))), queries);
+        assertEquals(list(insert(var("x").isa("movie"))), queries);
     }
 
     @Test
@@ -1163,7 +1162,7 @@ public class ParserTest {
         final String getString = "match $y isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString + getString).collect(toList());
 
-        assertEquals(Arrays.asList(insert(var("x").isa("movie")), match(var("y").isa("movie"))), queries);
+        assertEquals(list(insert(var("x").isa("movie")), match(var("y").isa("movie"))), queries);
     }
 
     @Test

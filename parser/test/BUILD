@@ -30,6 +30,7 @@ java_test(
         "//common:common",
         "//pattern:pattern",
         "//query:query",
+        "@vaticle_typedb_common//:common",
         "@maven//:org_hamcrest_hamcrest_library",
     ],
     size = "small",

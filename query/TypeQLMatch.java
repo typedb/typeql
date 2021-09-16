@@ -26,7 +26,6 @@ import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
-import com.vaticle.typeql.lang.pattern.Negation;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
@@ -36,13 +35,11 @@ import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
@@ -211,8 +208,8 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
 
     private void sortVarsAreInScope() {
         List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
-        if (modifiers.sorting != null && !sortableVars.contains(modifiers.sorting.var())) {
-            throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.var()));
+        if (modifiers.sorting != null && modifiers.sorting.vars().stream().anyMatch(v -> !sortableVars.contains(v))) {
+            throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.vars()));
         }
     }
 
@@ -307,7 +304,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         public TypeQLMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {
             List<UnboundVariable> varList = new ArrayList<>();
             varList.add(var);
-            varList.addAll(Arrays.asList(vars));
+            varList.addAll(list(vars));
             return get(varList);
         }
 

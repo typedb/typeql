@@ -43,7 +43,6 @@ import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -100,7 +99,7 @@ public class TypeQL {
     }
 
     public static TypeQLMatch.Unfiltered match(Pattern... patterns) {
-        return match(Arrays.asList(patterns));
+        return match(list(patterns));
     }
 
     public static TypeQLMatch.Unfiltered match(List<? extends Pattern> patterns) {
@@ -138,7 +137,7 @@ public class TypeQL {
     // Pattern Builder Methods
 
     public static Conjunction<? extends Pattern> and(Pattern... patterns) {
-        return and(Arrays.asList(patterns));
+        return and(list(patterns));
     }
 
     public static Conjunction<? extends Pattern> and(List<? extends Pattern> patterns) {
@@ -146,7 +145,7 @@ public class TypeQL {
     }
 
     public static Pattern or(Pattern... patterns) {
-        return or(Arrays.asList(patterns));
+        return or(list(patterns));
     }
 
     public static Pattern or(List<Pattern> patterns) {
