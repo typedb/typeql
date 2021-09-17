@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 public class TypeQLSteps {
 
     @Given("typeql define")
+    @Given("reasoning schema")
     @Given("typeql define without commit")
     @Given("for each session, typeql define")
     public void typeql_define(String query) {
@@ -54,6 +55,7 @@ public class TypeQLSteps {
     }
 
     @Given("typeql insert")
+    @Given("reasoning data")
     @Given("get answers of typeql insert")
     @Given("typeql insert without commit")
     @Given("for each session, typeql insert")
@@ -71,11 +73,12 @@ public class TypeQLSteps {
     }
 
     @Given("for typeql query")
+    @Given("reasoning query")
     @Given("get answers of typeql match")
     @Given("get answers of typeql match group")
     @Given("get answer of typeql match aggregate")
     @Given("get answers of typeql match group aggregate")
-    @Given("answer set is equivalent for typeql query")
+    @Given("verify answer set is equivalent for query")
     public void typeql_match(String query) {
         TypeQLQuery parsed = TypeQL.parseQuery(query);
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
@@ -103,15 +106,15 @@ public class TypeQLSteps {
     @Given("connection has been opened")
     @Given("transaction is initialised")
     @Given("the integrity is validated")
+    @Given("verifier is initialised")
+    @Given("verify answers are complete")
+    @Given("verify answers are sound")
     @Given("connection close all sessions")
     @Given("connection delete all databases")
-    @Given("materialised database is completed")
     @Given("for each session, transaction closes")
     @Given("transaction commits; throws exception")
     @Given("connection does not have any database")
     @Given("for each session, transaction commits")
-    @Given("all answers are correct in reasoned database")
-    @Given("materialised and reasoned databases are the same size")
     public void do_nothing() {}
 
     @Given("rules contain: {}")
@@ -121,17 +124,15 @@ public class TypeQLSteps {
     @Given("number of groups is: {}")
     @Given("rules do not contain: {}")
     @Given("each answer does not satisfy")
-    @Given("reasoned database is named: {}")
+    @Given("verify answer size is: {}")
     @Given("connection create database: {}")
     @Given("session transaction is open: {}")
-    @Given("materialised database is named: {}")
     @Given("session opens transaction of type: {}")
-    @Given("answer size in reasoned database is: {}")
     @Given("connection open data session for database: {}")
     @Given("connection open schema session for database: {}")
     @Given("for each session, open transactions of type: {}")
     @Given("for each session, open transactions with reasoning of type: {}")
-    @Given("answers are consistent across {} executions in reasoned database")
+    @Given("verify answers are consistent across {} executions")
     public void do_nothing_with_arg(String ignored) {}
 
     @Given("connection open data sessions for databases:")
