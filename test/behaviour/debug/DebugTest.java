@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
         strict = true,
         plugin = "pretty",
         glue = "com.vaticle.typeql.lang.test.behaviour",
-        features = "java/test/behaviour/debug/debug.feature"
+        features = "test/behaviour/debug/debug.feature"
 )
 public class DebugTest {
     // ATTENTION:

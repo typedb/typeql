@@ -103,14 +103,14 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     private <CONTEXT extends ParserRuleContext, RETURN> RETURN parse(
-            String typeqlString, Function<TypeQLParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
+            String rawTypeQLString, Function<TypeQLParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
     ) {
-        if (typeqlString == null || typeqlString.isEmpty()) {
-            throw TypeQLException.of("Query String is NULL or Empty");
-        }
+        if (rawTypeQLString == null) throw TypeQLException.of("Query String is NULL");
+        String typeQLString = rawTypeQLString.stripTrailing();
+        if (typeQLString.isEmpty()) throw TypeQLException.of("Query String is empty or blank");
 
-        ErrorListener errorListener = ErrorListener.of(typeqlString);
-        CharStream charStream = CharStreams.fromString(typeqlString);
+        ErrorListener errorListener = ErrorListener.of(typeQLString);
+        CharStream charStream = CharStreams.fromString(typeQLString);
         TypeQLLexer lexer = new TypeQLLexer(charStream);
 
         lexer.removeErrorListeners();

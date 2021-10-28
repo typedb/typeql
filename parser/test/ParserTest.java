@@ -1064,11 +1064,23 @@ public class ParserTest {
         exception.expect(TypeQLException.class);
         exception.expectMessage(allOf(
                 containsString("syntax error"), containsString("line 1"),
-                containsString("\nmatch $x isa "),
-                containsString("\n             ^")
+                containsString("\nmatch $x isa"),
+                containsString("\n            ^")
         ));
         //noinspection ResultOfMethodCallIgnored
-        parseQuery("match $x isa ");
+        parseQuery("match $x isa");
+    }
+
+    @Test
+    public void whenParseIncorrectSyntax_TrailingQueryWhitespaceIsIgnored() {
+        exception.expect(TypeQLException.class);
+        exception.expectMessage(allOf(
+                containsString("syntax error"), containsString("line 1"),
+                containsString("\nmatch $x isa"),
+                containsString("\n            ^")
+        ));
+        //noinspection ResultOfMethodCallIgnored
+        parseQuery("match $x isa \n");
     }
 
     @Test
