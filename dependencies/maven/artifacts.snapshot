@@ -1,5 +1,9 @@
 @maven//:com_eclipsesource_minimal_json_minimal_json
 @maven//:com_eclipsesource_minimal_json_minimal_json_0_9_5
+@maven//:com_electronwill_night_config_core
+@maven//:com_electronwill_night_config_core_3_6_5
+@maven//:com_electronwill_night_config_toml
+@maven//:com_electronwill_night_config_toml_3_6_5
 @maven//:com_google_code_findbugs_jsr305
 @maven//:com_google_code_findbugs_jsr305_3_0_2
 @maven//:com_google_errorprone_error_prone_annotations
@@ -30,6 +34,8 @@
 @maven//:io_opencensus_opencensus_contrib_http_util_0_24_0
 @maven//:org_antlr_antlr4_runtime
 @maven//:org_antlr_antlr4_runtime_4_7_1
+@maven//:org_apache_commons_commons_compress
+@maven//:org_apache_commons_commons_compress_1_21
 @maven//:org_apache_httpcomponents_httpclient
 @maven//:org_apache_httpcomponents_httpclient_4_5_11
 @maven//:org_apache_httpcomponents_httpcore
