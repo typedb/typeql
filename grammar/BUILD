@@ -21,8 +21,10 @@ load("@rules_antlr//antlr:antlr4.bzl", "antlr")
 load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//builder/antlr:rules.bzl", "python_grammar_adapter")
+load("@vaticle_dependencies//builder/antlr:rules.bzl", "python_grammar_adapter", "rust_grammar_adapter")
 load("@vaticle_bazel_distribution//pip:rules.bzl", "assemble_pip", "deploy_pip")
+load("@vaticle_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 antlr(
     name = "java-src",
@@ -39,6 +41,51 @@ java_library(
         "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
     ],
     tags = ["maven_coordinates=com.vaticle.typeql:typeql-grammar:{pom_version}", "checkstyle_ignore"],
+)
+
+rust_grammar_adapter(
+    name = "rust-grammar",
+    input = "TypeQL.g4",
+    output = "TypeQLRust.g4",
+)
+
+antlr(
+    name = "rust-src",
+    srcs = [":rust-grammar"],
+    language = "Rust",
+    visitor = True,
+    package = "typeqlgrammar",
+)
+
+
+rust_library(
+    name = "typeql-grammar",
+    srcs = [":rust-src"],
+    deps = [
+        "@vaticle_dependencies//library/crates:antlr_rust",
+    ]
+)
+
+assemble_crate(
+    name = "assemble-crate",
+    target = ":typeql-grammar",
+    description = "TypeQL Grammar for Rust",
+    license = "AGPLv3",
+    deps = {
+        "antlr-rust": "0.2.0",
+    },
+    readme_file = "//:README.md",
+    homepage = "https://github.com/vaticle/typeql",
+    repository = "https://github.com/vaticle/typeql",
+    keywords = ["grakn", "database", "graph", "knowledgebase", "knowledgeengineering"],
+    authors = ["Vaticle <community@vaticle.com>"]
+)
+
+deploy_crate(
+    name = "deploy-crate",
+    target = ":assemble-crate",
+    snapshot = deployment["crate.snapshot"],
+    release = deployment["crate.release"],
 )
 
 python_grammar_adapter(
