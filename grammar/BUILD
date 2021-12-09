@@ -17,4 +17,12 @@
 
 package(default_visibility = ["//grammar:__subpackages__"])
 
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+
 exports_files(["TypeQL.g4"])
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob(["*"]),
+    license_type = "agpl",
+)
