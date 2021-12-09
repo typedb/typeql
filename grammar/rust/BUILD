@@ -35,9 +35,8 @@ antlr(
     srcs = [":rust-grammar"],
     language = "Rust",
     visitor = True,
-    package = "typeqlgrammar",
+    package = "typeql-grammar",
 )
-
 
 rust_library(
     name = "typeql-grammar",
