@@ -42,6 +42,13 @@ build:
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
+#    TODO: enable this
+#    deploy-rust-snapshot:
+#      image: vaticle-ubuntu-20.04
+#      dependencies: [build, build-dependency]
+#      command: |
+#        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
+#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy-crate -- snapshot
     deploy-maven-snapshot:
       filter:
         owner: vaticle
@@ -51,7 +58,7 @@ build:
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
-        bazel run --define version=$(git rev-parse HEAD) //grammar:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
     deploy-pip-snapshot:
       filter:
         owner: vaticle
@@ -61,7 +68,7 @@ build:
       command: |
         export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_PIP_PASSWORD=$REPO_VATICLE_PASSWORD
-        bazel run --define version=$(git rev-parse HEAD) //grammar:deploy-pip -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //grammar/python:deploy-pip -- snapshot
 
 release:
   filter:
@@ -78,17 +85,24 @@ release:
         bazel run @vaticle_dependencies//tool/release/createnotes:bin -- $GRABL_OWNER $GRABL_REPO $GRABL_COMMIT $(cat VERSION) ./RELEASE_TEMPLATE.md
         export DEPLOY_GITHUB_TOKEN=$REPO_GITHUB_TOKEN
         bazel run --define version=$(cat VERSION) //:deploy-github -- $GRABL_COMMIT
+#    TODO: enable this
+#    deploy-rust-release:
+#      image: vaticle-ubuntu-20.04
+#      dependencies: [ deploy-github ]
+#      command: |
+#        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
+#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy-crate -- release
     deploy-maven-release:
       image: vaticle-ubuntu-20.04
       dependencies: [deploy-github]
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
-        bazel run --define version=$(cat VERSION) //grammar:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //grammar/java:deploy-maven -- release
     deploy-pip-release:
       image: vaticle-ubuntu-20.04
       dependencies: [ deploy-github ]
       command: |
         export DEPLOY_PIP_USERNAME=$REPO_PYPI_USERNAME
         export DEPLOY_PIP_PASSWORD=$REPO_PYPI_PASSWORD
-        bazel run --define version=$(cat VERSION) //grammar:deploy-pip -- release
+        bazel run --define version=$(cat VERSION) //grammar/python:deploy-pip -- release
