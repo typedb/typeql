@@ -48,7 +48,7 @@ build:
 #      dependencies: [build, build-dependency]
 #      command: |
 #        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
-#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy-crate -- snapshot
+#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy_crate -- snapshot
     deploy-maven-snapshot:
       filter:
         owner: vaticle
@@ -91,7 +91,7 @@ release:
 #      dependencies: [ deploy-github ]
 #      command: |
 #        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
-#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy-crate -- release
+#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy_crate -- release
     deploy-maven-release:
       image: vaticle-ubuntu-20.04
       dependencies: [deploy-github]

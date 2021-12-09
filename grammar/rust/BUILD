@@ -25,30 +25,30 @@ load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 rust_grammar_adapter(
-    name = "rust-grammar",
+    name = "rust_grammar",
     input = "//grammar:TypeQL.g4",
     output = "TypeQLRust.g4",
 )
 
 antlr(
-    name = "rust-src",
-    srcs = [":rust-grammar"],
+    name = "rust_src",
+    srcs = [":rust_grammar"],
     language = "Rust",
     visitor = True,
-    package = "typeql-grammar",
+    package = "typeql_grammar",
 )
 
 rust_library(
-    name = "typeql-grammar",
-    srcs = [":rust-src"],
+    name = "typeql_grammar",
+    srcs = [":rust_src"],
     deps = [
         "@vaticle_dependencies//library/crates:antlr_rust",
     ]
 )
 
 assemble_crate(
-    name = "assemble-crate",
-    target = ":typeql-grammar",
+    name = "assemble_crate",
+    target = ":typeql_grammar",
     description = "TypeQL Grammar for Rust",
     license = "AGPLv3",
     readme_file = "//:README.md",
@@ -59,8 +59,8 @@ assemble_crate(
 )
 
 deploy_crate(
-    name = "deploy-crate",
-    target = ":assemble-crate",
+    name = "deploy_crate",
+    target = ":assemble_crate",
     snapshot = deployment["crate.snapshot"],
     release = deployment["crate.release"],
 )
