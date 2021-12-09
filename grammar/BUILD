@@ -71,9 +71,6 @@ assemble_crate(
     target = ":typeql-grammar",
     description = "TypeQL Grammar for Rust",
     license = "AGPLv3",
-    deps = {
-        "antlr-rust": "0.2.0",
-    },
     readme_file = "//:README.md",
     homepage = "https://github.com/vaticle/typeql",
     repository = "https://github.com/vaticle/typeql",
