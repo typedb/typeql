@@ -27,14 +27,22 @@ load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("//:deployment.bzl", deployment_github = "deployment")
 load("@vaticle_dependencies//distribution:deployment.bzl", deployment_crate = "deployment")
 
+exports_files(
+    ["VERSION", "RELEASE_TEMPLATE.md", "README.md"],
+    visibility = ["//visibility:public"]
+)
 
 rust_library(
     name = "typeql-lang-rust",
     srcs = glob([
-        "lib.rs",
+        "typeql-lang-rust.rs",
         "query/*.rs",
         "parser/*.rs",
     ]),
+    deps = [
+        # External Vaticle Dependencies
+        "@vaticle_typeql//grammar/rust:typeql_grammar",
+    ]
 )
 
 assemble_crate(
@@ -55,14 +63,6 @@ deploy_crate(
     snapshot = deployment_crate["crate.snapshot"],
     release = deployment_crate["crate.release"],
 )
-
-
-exports_files(
-    ["VERSION", "RELEASE_TEMPLATE.md", "README.md"],
-    visibility = ["//visibility:public"]
-)
-
-
 
 deploy_github(
     name = "deploy-github",

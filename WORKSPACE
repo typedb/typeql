@@ -107,6 +107,12 @@ github_deps()
 # Load //maven
 load("@vaticle_bazel_distribution//maven:deps.bzl", vaticle_bazel_distribution_maven_artifacts = "maven_artifacts")
 
+########################
+# Load @vaticle_typeql #
+########################
+load("//dependencies/vaticle:repositories.bzl", "vaticle_typeql")
+vaticle_typeql()
+
 ############################
 # Load @maven dependencies #
 ############################
