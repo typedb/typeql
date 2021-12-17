@@ -26,25 +26,25 @@ build:
       owner: vaticle
       branch: master
     dependency-analysis:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         bazel run @vaticle_dependencies//factory/analysis:dependency-analysis
   correctness:
     build:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         bazel build //... --test_output=errors
         bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
     build-dependency:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
 #    TODO: enable this
 #    deploy-rust-snapshot:
-#      image: vaticle-ubuntu-20.04
+#      image: vaticle-ubuntu-21.04
 #      dependencies: [build, build-dependency]
 #      command: |
 #        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
@@ -53,7 +53,7 @@ build:
       filter:
         owner: vaticle
         branch: master
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [build, build-dependency]
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
@@ -63,7 +63,7 @@ build:
       filter:
         owner: vaticle
         branch: master
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [ build, build-dependency ]
       command: |
         export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
@@ -76,7 +76,7 @@ release:
     branch: master
   deployment:
     deploy-github:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         pyenv install -s 3.6.10
         pyenv global 3.6.10 system
@@ -87,20 +87,20 @@ release:
         bazel run --define version=$(cat VERSION) //:deploy-github -- $GRABL_COMMIT
 #    TODO: enable this
 #    deploy-rust-release:
-#      image: vaticle-ubuntu-20.04
+#      image: vaticle-ubuntu-21.04
 #      dependencies: [ deploy-github ]
 #      command: |
 #        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
 #        bazel run --define version=$(cat VERSION) //grammar/rust:deploy_crate -- release
     deploy-maven-release:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [deploy-github]
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar/java:deploy-maven -- release
     deploy-pip-release:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [ deploy-github ]
       command: |
         export DEPLOY_PIP_USERNAME=$REPO_PYPI_USERNAME
