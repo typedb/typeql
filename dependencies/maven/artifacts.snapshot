@@ -33,7 +33,7 @@
 @maven//:io_opencensus_opencensus_contrib_http_util
 @maven//:io_opencensus_opencensus_contrib_http_util_0_24_0
 @maven//:org_antlr_antlr4_runtime
-@maven//:org_antlr_antlr4_runtime_4_7_1
+@maven//:org_antlr_antlr4_runtime_4_8
 @maven//:org_apache_commons_commons_compress
 @maven//:org_apache_commons_commons_compress_1_21
 @maven//:org_apache_httpcomponents_httpclient
