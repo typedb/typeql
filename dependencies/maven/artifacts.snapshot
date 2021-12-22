@@ -21,7 +21,7 @@
 @maven//:commons_codec_commons_codec
 @maven//:commons_codec_commons_codec_1_11
 @maven//:commons_io_commons_io
-@maven//:commons_io_commons_io_1_4
+@maven//:commons_io_commons_io_2_3
 @maven//:commons_logging_commons_logging
 @maven//:commons_logging_commons_logging_1_2
 @maven//:info_picocli_picocli
@@ -72,5 +72,7 @@
 @maven//:org_hamcrest_hamcrest_library_1_3
 @maven//:org_slf4j_slf4j_api
 @maven//:org_slf4j_slf4j_api_1_7_32
+@maven//:org_yaml_snakeyaml
+@maven//:org_yaml_snakeyaml_1_25
 @maven//:org_zeroturnaround_zt_exec
 @maven//:org_zeroturnaround_zt_exec_1_10

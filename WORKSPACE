@@ -100,13 +100,12 @@ pip_deps()
 # Load @vaticle dependencies #
 ################################
 
-# We don't load Maven artifacts for @vaticle_typedb_common as they are only needed
-# if you depend on @vaticle_typedb_common//test/server
 load("//dependencies/vaticle:repositories.bzl", "vaticle_typeql", "vaticle_typedb_common", "vaticle_typedb_behaviour")
 vaticle_typeql()
 vaticle_typedb_common()
 vaticle_typedb_behaviour()
 
+load("@vaticle_typedb_common//dependencies/maven:artifacts.bzl", vaticle_typedb_common_artifacts = "artifacts")
 load("@vaticle_typeql//dependencies/maven:artifacts.bzl", vaticle_typeql_artifacts = "artifacts")
 load("//dependencies/maven:artifacts.bzl", vaticle_typeql_lang_java_artifacts = "artifacts")
 
@@ -118,6 +117,7 @@ load("@vaticle_dependencies//library/maven:rules.bzl", "maven")
 maven(
     vaticle_bazel_distribution_maven_artifacts +
     vaticle_dependencies_tool_maven_artifacts +
+    vaticle_typedb_common_artifacts +
     vaticle_typeql_artifacts +
     vaticle_typeql_lang_java_artifacts
 )
