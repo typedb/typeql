@@ -46,6 +46,7 @@ java_library(
 
         # Internal Repository Dependencies
         "@vaticle_typedb_common//:common",
+        "@vaticle_typeql//grammar:java",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",

@@ -21,6 +21,7 @@
 
 package com.vaticle.typeql.lang;
 
+import com.vaticle.typeql.grammar.TypeQLLexer;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.parser.Parser;
@@ -96,6 +97,10 @@ public class TypeQL {
         if (!parsedLabel.equals(label))
             throw TypeQLException.of(ILLEGAL_CHAR_IN_LABEL.message(label)); // e.g: 'abc#123'
         return parsedLabel;
+    }
+
+    public static TypeQLLexer lexer(String string) {
+        return parser.lexer(string);
     }
 
     public static TypeQLMatch.Unfiltered match(Pattern... patterns) {

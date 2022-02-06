@@ -102,6 +102,10 @@ public class Parser extends TypeQLBaseVisitor {
         return Collections.unmodifiableSet(keywords);
     }
 
+    public TypeQLLexer lexer(String string) {
+        return new TypeQLLexer(CharStreams.fromString(string));
+    }
+
     private <CONTEXT extends ParserRuleContext, RETURN> RETURN parse(
             String rawTypeQLString, Function<TypeQLParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
     ) {
@@ -110,8 +114,7 @@ public class Parser extends TypeQLBaseVisitor {
         if (typeQLString.isEmpty()) throw TypeQLException.of("Query String is empty or blank");
 
         ErrorListener errorListener = ErrorListener.of(typeQLString);
-        CharStream charStream = CharStreams.fromString(typeQLString);
-        TypeQLLexer lexer = new TypeQLLexer(charStream);
+        TypeQLLexer lexer = lexer(typeQLString);
 
         lexer.removeErrorListeners();
         lexer.addErrorListener(errorListener);
