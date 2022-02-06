@@ -99,7 +99,7 @@ public class TypeQLSteps {
     @Given("typeql delete; throws exception")
     @Given("typeql define; throws exception")
     @Given("typeql undefine; throws exception")
-    public void do_nothing_with_throws(String query) {}
+    public void do_nothing_with_throws(String query) { }
 
     @Given("transaction commits")
     @Given("aggregate answer is not a number")
@@ -115,7 +115,7 @@ public class TypeQLSteps {
     @Given("transaction commits; throws exception")
     @Given("connection does not have any database")
     @Given("for each session, transaction commits")
-    public void do_nothing() {}
+    public void do_nothing() { }
 
     @Given("rules contain: {}")
     @Given("answer size is: {}")
@@ -133,21 +133,21 @@ public class TypeQLSteps {
     @Given("for each session, open transactions of type: {}")
     @Given("for each session, open transactions with reasoning of type: {}")
     @Given("verify answers are consistent across {} executions")
-    public void do_nothing_with_arg(String ignored) {}
+    public void do_nothing_with_arg(String ignored) { }
 
     @Given("connection open data sessions for databases:")
     @Given("connection open schema sessions for databases:")
-    public void do_nothing_with_list(List<String> ignored) {}
+    public void do_nothing_with_list(List<String> ignored) { }
 
     @Given("answer groups are")
     @Given("group aggregate values are")
     @Given("order of answer concepts is")
     @Given("uniquely identify answer concepts")
-    public void do_nothing_with_list_of_map(List<Map<String, String>> ignored) {}
+    public void do_nothing_with_list_of_map(List<Map<String, String>> ignored) { }
 
     @Given("rules are")
     @Given("group identifiers are")
     @Given("concept identifiers are")
     @Given("answers contain explanation tree")
-    public void do_nothing_with_map_of_map(Map<String, Map<String, String>> ignored) {}
+    public void do_nothing_with_map_of_map(Map<String, Map<String, String>> ignored) { }
 }

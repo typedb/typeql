@@ -26,7 +26,6 @@ import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

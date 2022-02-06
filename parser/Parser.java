@@ -53,7 +53,6 @@ import com.vaticle.typeql.lang.query.TypeQLUpdate;
 import com.vaticle.typeql.lang.query.builder.Computable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
