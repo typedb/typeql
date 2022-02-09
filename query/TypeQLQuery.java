@@ -23,7 +23,6 @@ package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
@@ -100,38 +99,6 @@ public abstract class TypeQLQuery {
             return (TypeQLMatch.Group.Aggregate) this;
         } else {
             throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLMatch.Group.Aggregate.class)));
-        }
-    }
-
-    public TypeQLCompute.Statistics asComputeStatistics() {
-        if (this instanceof TypeQLCompute.Statistics) {
-            return (TypeQLCompute.Statistics) this;
-        } else {
-            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLCompute.Statistics.class)));
-        }
-    }
-
-    public TypeQLCompute.Path asComputePath() {
-        if (this instanceof TypeQLCompute.Path) {
-            return (TypeQLCompute.Path) this;
-        } else {
-            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLCompute.Path.class)));
-        }
-    }
-
-    public TypeQLCompute.Centrality asComputeCentrality() {
-        if (this instanceof TypeQLCompute.Centrality) {
-            return (TypeQLCompute.Centrality) this;
-        } else {
-            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLCompute.Centrality.class)));
-        }
-    }
-
-    public TypeQLCompute.Cluster asComputeCluster() {
-        if (this instanceof TypeQLCompute.Cluster) {
-            return (TypeQLCompute.Cluster) this;
-        } else {
-            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLCompute.Cluster.class)));
         }
     }
 

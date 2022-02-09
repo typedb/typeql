@@ -22,7 +22,6 @@
 package com.vaticle.typeql.lang.common;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
@@ -57,7 +56,6 @@ public class TypeQLToken {
     }
 
     public enum Command {
-        COMPUTE("compute"),
         DEFINE("define"),
         UNDEFINE("undefine"),
         INSERT("insert"),
@@ -398,101 +396,4 @@ public class TypeQLToken {
         }
     }
 
-    public static class Compute {
-
-        public enum Method {
-            COUNT("count"),
-            MIN("min"),
-            MAX("max"),
-            MEDIAN("median"),
-            MEAN("mean"),
-            STD("std"),
-            SUM("sum"),
-            PATH("path"),
-            CENTRALITY("centrality"),
-            CLUSTER("cluster");
-
-            private final String method;
-
-            Method(String method) {
-                this.method = method;
-            }
-
-            @Override
-            public String toString() {
-                return this.method;
-            }
-
-            public static Compute.Method of(String name) {
-                for (Compute.Method m : Compute.Method.values()) {
-                    if (m.method.equals(name)) {
-                        return m;
-                    }
-                }
-                return null;
-            }
-        }
-
-        /**
-         * TypeQL Compute conditions keyword
-         */
-        public enum Condition {
-            FROM("from"),
-            TO("to"),
-            OF("of"),
-            IN("in"),
-            USING("using"),
-            WHERE("where");
-
-            private final String condition;
-
-            Condition(String algorithm) {
-                this.condition = algorithm;
-            }
-
-            @Override
-            public String toString() {
-                return this.condition;
-            }
-
-            public static Compute.Condition of(String value) {
-                for (Compute.Condition c : Compute.Condition.values()) {
-                    if (c.condition.equals(value)) {
-                        return c;
-                    }
-                }
-                return null;
-            }
-        }
-
-        /**
-         * TypeQL Compute parameter names
-         */
-        public enum Param {
-            MIN_K("min-k"),
-            K("k"),
-            CONTAINS("contains"),
-            SIZE("size");
-
-            private final String param;
-
-            Param(String param) {
-                this.param = param;
-            }
-
-            @Override
-            public String toString() {
-                return this.param;
-            }
-
-            public static Compute.Param of(String value) {
-                for (Compute.Param p : Compute.Param.values()) {
-                    if (p.param.equals(value)) {
-                        return p;
-                    }
-                }
-                return null;
-            }
-        }
-    }
 }

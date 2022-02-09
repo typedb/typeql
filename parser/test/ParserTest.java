@@ -27,7 +27,6 @@ import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.query.TypeQLCompute;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
@@ -35,16 +34,14 @@ import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import com.vaticle.typeql.lang.query.TypeQLUpdate;
-import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-
+import org.hamcrest.Matchers;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.define;
@@ -61,10 +58,6 @@ import static com.vaticle.typeql.lang.TypeQL.rule;
 import static com.vaticle.typeql.lang.TypeQL.type;
 import static com.vaticle.typeql.lang.TypeQL.undefine;
 import static com.vaticle.typeql.lang.TypeQL.var;
-import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.CONNECTED_COMPONENT;
-import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.K_CORE;
-import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.k;
-import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.size;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.AllOf.allOf;
@@ -943,117 +936,6 @@ public class ParserTest {
     public void testParseAggregateToString() {
         final String query = "match $x isa movie; get $x; group $x; count;";
         assertEquals(query, parseQuery(query).toString());
-    }
-
-    // ===============================================================================================================//
-    // Test TypeQL Compute queries
-    // ===============================================================================================================//
-    @Test
-    public void testParseComputeCount() {
-        assertParseEquivalence("compute count;");
-    }
-
-    @Test
-    public void testParseComputeCountWithSubgraph() {
-        assertParseEquivalence("compute count in [movie, person];");
-    }
-
-    @Test
-    public void testParseComputeClusterUsingCC() {
-        assertParseEquivalence("compute cluster in [movie, person], using connected-component;");
-    }
-
-    @Test
-    public void testParseComputeClusterUsingCCWithSize() {
-        TypeQLCompute expected = TypeQL.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
-        TypeQLCompute parsed = TypeQL.parseQuery(
-                "compute cluster in [movie, person], using connected-component, where [size = 10];").asComputeCluster();
-
-        assertEquals(expected, parsed);
-    }
-
-    @Test
-    public void testParseComputeClusterUsingCCWithSizeTwice() {
-        TypeQLCompute expected =
-                TypeQL.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10), size(15));
-
-        TypeQLCompute parsed = TypeQL.parseQuery(
-                "compute cluster in [movie, person], using connected-component, where [size = 10, size = 15];").asComputeCluster();
-
-        assertEquals(expected, parsed);
-    }
-
-    @Test
-    public void testParseComputeClusterUsingKCore() {
-        assertParseEquivalence("compute cluster in [movie, person], using k-core;");
-    }
-
-    @Test
-    public void testParseComputeClusterUsingKCoreWithK() {
-        TypeQLCompute expected = TypeQL.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
-        TypeQLCompute parsed = TypeQL.parseQuery(
-                "compute cluster in [movie, person], using k-core, where k = 10;").asComputeCluster();
-
-        assertEquals(expected, parsed);
-    }
-
-    @Test
-    public void testParseComputeClusterUsingKCoreWithKTwice() {
-        TypeQLCompute expected = TypeQL.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
-        TypeQLCompute parsed = TypeQL.parseQuery(
-                "compute cluster in [movie, person], using k-core, where [k = 5, k = 10];").asComputeCluster();
-
-        assertEquals(expected, parsed);
-    }
-
-    @Test
-    public void testParseComputeDegree() {
-        assertParseEquivalence("compute centrality in movie, using degree;");
-    }
-
-    @Test
-    public void testParseComputeCoreness() {
-        assertParseEquivalence("compute centrality in movie, using k-core, where min-k=3;");
-    }
-
-    @Test
-    public void testParseComputeMax() {
-        assertParseEquivalence("compute max of person, in movie;");
-    }
-
-    @Test
-    public void testParseComputeMean() {
-        assertParseEquivalence("compute mean of person, in movie;");
-    }
-
-    @Test
-    public void testParseComputeMedian() {
-        assertParseEquivalence("compute median of person, in movie;");
-    }
-
-    @Test
-    public void testParseComputeMin() {
-        assertParseEquivalence("compute min of movie, in person;");
-    }
-
-    @Test
-    public void testParseComputePath() {
-        assertParseEquivalence("compute path from 0x83cb2, to 0x4ba92, in person;");
-    }
-
-    @Test
-    public void testParseComputePathWithMultipleInTypes() {
-        assertParseEquivalence("compute path from 0x83cb2, to 0x4ba92, in [person, marriage];");
-    }
-
-    @Test
-    public void testParseComputeStd() {
-        assertParseEquivalence("compute std of movie;");
-    }
-
-    @Test
-    public void testParseComputeSum() {
-        assertParseEquivalence("compute sum of movie, in person;");
     }
 
     // ===============================================================================================================//

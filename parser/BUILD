@@ -38,7 +38,7 @@ java_library(
         "//query:query",
 
         # Internal Repository Dependencies
-        "@vaticle_typeql//grammar:java",
+        "@vaticle_typeql//grammar/java:typeql-grammar",
         "@vaticle_typedb_common//:common",
 
         # External dependencies

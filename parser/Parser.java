@@ -42,7 +42,6 @@ import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-import com.vaticle.typeql.lang.query.TypeQLCompute;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
@@ -50,18 +49,7 @@ import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import com.vaticle.typeql.lang.query.TypeQLUpdate;
-import com.vaticle.typeql.lang.query.builder.Computable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DefaultErrorStrategy;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -73,7 +61,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
@@ -265,9 +261,6 @@ public class Parser extends TypeQLBaseVisitor {
         } else if (ctx.query_match_group_agg() != null) {
             return visitQuery_match_group_agg(ctx.query_match_group_agg());
 
-        } else if (ctx.query_compute() != null) {
-            return visitQuery_compute(ctx.query_compute());
-
         } else {
             throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
@@ -384,170 +377,6 @@ public class Parser extends TypeQLBaseVisitor {
         List<UnboundVariable> vars = ctx.VAR_().stream().map(this::getVar).collect(toList());
         return ctx.ORDER_() == null ? new Sortable.Sorting(vars) :
                 new Sortable.Sorting(vars, TypeQLArg.Order.of(ctx.ORDER_().getText()));
-    }
-
-    // COMPUTE QUERY ===========================================================
-
-    @Override
-    public TypeQLCompute visitQuery_compute(TypeQLParser.Query_computeContext ctx) {
-
-        if (ctx.compute_conditions().conditions_count() != null) {
-            return visitConditions_count(ctx.compute_conditions().conditions_count());
-        } else if (ctx.compute_conditions().conditions_value() != null) {
-            return visitConditions_value(ctx.compute_conditions().conditions_value());
-        } else if (ctx.compute_conditions().conditions_path() != null) {
-            return visitConditions_path(ctx.compute_conditions().conditions_path());
-        } else if (ctx.compute_conditions().conditions_central() != null) {
-            return visitConditions_central(ctx.compute_conditions().conditions_central());
-        } else if (ctx.compute_conditions().conditions_cluster() != null) {
-            return visitConditions_cluster(ctx.compute_conditions().conditions_cluster());
-        } else {
-            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-        }
-    }
-
-    @Override
-    public TypeQLCompute.Statistics.Count visitConditions_count(TypeQLParser.Conditions_countContext ctx) {
-        TypeQLCompute.Statistics.Count compute = new TypeQLCompute.Builder().count();
-        if (ctx.input_count() != null) {
-            compute = compute.in(visitLabels(ctx.input_count().compute_scope().labels()));
-        }
-        return compute;
-    }
-
-    @Override
-    public TypeQLCompute.Statistics.Value visitConditions_value(TypeQLParser.Conditions_valueContext ctx) {
-        TypeQLCompute.Statistics.Value compute;
-        TypeQLToken.Compute.Method method = TypeQLToken.Compute.Method.of(ctx.compute_method().getText());
-
-        if (method == null) {
-            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-        } else if (method.equals(TypeQLToken.Compute.Method.MAX)) {
-            compute = new TypeQLCompute.Builder().max();
-        } else if (method.equals(TypeQLToken.Compute.Method.MIN)) {
-            compute = new TypeQLCompute.Builder().min();
-        } else if (method.equals(TypeQLToken.Compute.Method.MEAN)) {
-            compute = new TypeQLCompute.Builder().mean();
-        } else if (method.equals(TypeQLToken.Compute.Method.MEDIAN)) {
-            compute = new TypeQLCompute.Builder().median();
-        } else if (method.equals(TypeQLToken.Compute.Method.SUM)) {
-            compute = new TypeQLCompute.Builder().sum();
-        } else if (method.equals(TypeQLToken.Compute.Method.STD)) {
-            compute = new TypeQLCompute.Builder().std();
-        } else {
-            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-        }
-
-        for (TypeQLParser.Input_valueContext valueCtx : ctx.input_value()) {
-            if (valueCtx.compute_target() != null) {
-                compute = compute.of(visitLabels(valueCtx.compute_target().labels()));
-            } else if (valueCtx.compute_scope() != null) {
-                compute = compute.in(visitLabels(valueCtx.compute_scope().labels()));
-            } else {
-                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-            }
-        }
-
-        return compute;
-    }
-
-    @Override
-    public TypeQLCompute.Path visitConditions_path(TypeQLParser.Conditions_pathContext ctx) {
-        TypeQLCompute.Path compute = new TypeQLCompute.Builder().path();
-
-        for (TypeQLParser.Input_pathContext pathCtx : ctx.input_path()) {
-
-            if (pathCtx.compute_direction() != null) {
-                String id = pathCtx.compute_direction().IID_().getText();
-                if (pathCtx.compute_direction().FROM() != null) {
-                    compute = compute.from(id);
-                } else if (pathCtx.compute_direction().TO() != null) {
-                    compute = compute.to(id);
-                }
-            } else if (pathCtx.compute_scope() != null) {
-                compute = compute.in(visitLabels(pathCtx.compute_scope().labels()));
-            } else {
-                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-            }
-        }
-
-        return compute;
-    }
-
-    @Override
-    public TypeQLCompute.Centrality visitConditions_central(TypeQLParser.Conditions_centralContext ctx) {
-        TypeQLCompute.Centrality compute = new TypeQLCompute.Builder().centrality();
-
-        for (TypeQLParser.Input_centralContext centralityCtx : ctx.input_central()) {
-            if (centralityCtx.compute_target() != null) {
-                compute = compute.of(visitLabels(centralityCtx.compute_target().labels()));
-            } else if (centralityCtx.compute_scope() != null) {
-                compute = compute.in(visitLabels(centralityCtx.compute_scope().labels()));
-            } else if (centralityCtx.compute_config() != null) {
-                compute = (TypeQLCompute.Centrality) setComputeConfig(compute, centralityCtx.compute_config());
-            } else {
-                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-            }
-        }
-
-        return compute;
-    }
-
-    @Override
-    public TypeQLCompute.Cluster visitConditions_cluster(TypeQLParser.Conditions_clusterContext ctx) {
-        TypeQLCompute.Cluster compute = new TypeQLCompute.Builder().cluster();
-
-        for (TypeQLParser.Input_clusterContext clusterCtx : ctx.input_cluster()) {
-            if (clusterCtx.compute_scope() != null) {
-                compute = compute.in(visitLabels(clusterCtx.compute_scope().labels()));
-            } else if (clusterCtx.compute_config() != null) {
-                compute = (TypeQLCompute.Cluster) setComputeConfig(compute, clusterCtx.compute_config());
-            } else {
-                throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
-            }
-        }
-
-        return compute;
-    }
-
-    private Computable.Configurable setComputeConfig(Computable.Configurable compute, TypeQLParser.Compute_configContext ctx) {
-        if (ctx.USING() != null) {
-            compute = compute.using(TypeQLArg.Algorithm.of(ctx.compute_algorithm().getText()));
-        } else if (ctx.WHERE() != null) {
-            compute = compute.where(visitCompute_args(ctx.compute_args()));
-        }
-
-        return compute;
-    }
-
-    @Override
-    public List<TypeQLCompute.Argument> visitCompute_args(TypeQLParser.Compute_argsContext ctx) {
-
-        List<TypeQLParser.Compute_argContext> argContextList = new ArrayList<>();
-        List<TypeQLCompute.Argument> argList = new ArrayList<>();
-
-        if (ctx.compute_arg() != null) {
-            argContextList.add(ctx.compute_arg());
-        } else if (ctx.compute_args_array() != null) {
-            argContextList.addAll(ctx.compute_args_array().compute_arg());
-        }
-
-        for (TypeQLParser.Compute_argContext argContext : argContextList) {
-            if (argContext.MIN_K() != null) {
-                argList.add(TypeQLCompute.Argument.minK(getLong(argContext.LONG_())));
-
-            } else if (argContext.K() != null) {
-                argList.add(TypeQLCompute.Argument.k(getLong(argContext.LONG_())));
-
-            } else if (argContext.SIZE() != null) {
-                argList.add(TypeQLCompute.Argument.size(getLong(argContext.LONG_())));
-
-            } else if (argContext.CONTAINS() != null) {
-                argList.add(TypeQLCompute.Argument.contains(argContext.IID_().getText()));
-            }
-        }
-
-        return argList;
     }
 
     // QUERY PATTERNS ==========================================================

@@ -42,9 +42,9 @@ public class TypeQLArg {
             return null;
         }
 
-        public boolean isRead() { return !isWrite; }
+        public boolean isRead() {return !isWrite;}
 
-        public boolean isWrite() { return isWrite; }
+        public boolean isWrite() {return isWrite;}
     }
 
     public enum ValueType {
@@ -94,35 +94,6 @@ public class TypeQLArg {
             for (Order c : Order.values()) {
                 if (c.order.equals(value)) {
                     return c;
-                }
-            }
-            return null;
-        }
-    }
-
-    /**
-     * TypeQL Compute algorithm names
-     */
-    public enum Algorithm {
-        DEGREE("degree"),
-        K_CORE("k-core"),
-        CONNECTED_COMPONENT("connected-component");
-
-        private final String algorithm;
-
-        Algorithm(String algorithm) {
-            this.algorithm = algorithm;
-        }
-
-        @Override
-        public String toString() {
-            return this.algorithm;
-        }
-
-        public static Algorithm of(String value) {
-            for (Algorithm a : Algorithm.values()) {
-                if (a.algorithm.equals(value)) {
-                    return a;
                 }
             }
             return null;

@@ -36,17 +36,14 @@ import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-import com.vaticle.typeql.lang.query.TypeQLCompute;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
-
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
@@ -79,9 +76,9 @@ public class TypeQL {
         return parser.parsePatternsEOF(pattern);
     }
 
-    public static List<Definable> parseDefinables(String pattern) { return parser.parseDefinablesEOF(pattern); }
+    public static List<Definable> parseDefinables(String pattern) {return parser.parseDefinablesEOF(pattern);}
 
-    public static Rule parseRule(String pattern) { return parser.parseSchemaRuleEOF(pattern).asRule(); }
+    public static Rule parseRule(String pattern) {return parser.parseSchemaRuleEOF(pattern).asRule();}
 
     public static BoundVariable parseVariable(String variable) {
         return parser.parseVariableEOF(variable);
@@ -133,10 +130,6 @@ public class TypeQL {
 
     public static TypeQLUndefine undefine(List<Definable> definables) {
         return new TypeQLUndefine(definables);
-    }
-
-    public static TypeQLCompute.Builder compute() {
-        return new TypeQLCompute.Builder();
     }
 
     // Pattern Builder Methods

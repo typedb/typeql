@@ -23,13 +23,11 @@ package com.vaticle.typeql.lang.query.test;
 
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.query.TypeQLCompute;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
-
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.lte;
 import static com.vaticle.typeql.lang.TypeQL.match;
@@ -38,12 +36,6 @@ import static com.vaticle.typeql.lang.TypeQL.rel;
 import static com.vaticle.typeql.lang.TypeQL.rule;
 import static com.vaticle.typeql.lang.TypeQL.type;
 import static com.vaticle.typeql.lang.TypeQL.var;
-import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.CONNECTED_COMPONENT;
-import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.DEGREE;
-import static com.vaticle.typeql.lang.common.TypeQLArg.Algorithm.K_CORE;
-import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.k;
-import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.minK;
-import static com.vaticle.typeql.lang.query.TypeQLCompute.Argument.size;
 import static org.junit.Assert.assertEquals;
 
 // TODO: This test should be split into one TypeQL query test class each
@@ -128,47 +120,6 @@ public class TypeQLQueryTest {
     @Test
     public void testOwns() {
         assertEquals("define person owns thingy;", TypeQL.define(type("person").owns("thingy")).toString());
-    }
-
-    @Test
-    public void testComputeQueryToString() {
-        assertEquals("compute count;", TypeQL.compute().count().toString());
-    }
-
-    @Test
-    public void testComputeQuerySubgraphToString() {
-        TypeQLCompute query = TypeQL.compute().centrality().using(DEGREE).in("movie", "person");
-        assertEquivalent(query, "compute centrality in [movie, person], using degree;");
-    }
-
-    @Test
-    public void testClusterToString() {
-        TypeQLCompute connectedcomponent = TypeQL.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person");
-        assertEquivalent(connectedcomponent, "compute cluster in [movie, person], using connected-component;");
-
-        TypeQLCompute kcore = TypeQL.compute().cluster().using(K_CORE).in("movie", "person");
-        assertEquivalent(kcore, "compute cluster in [movie, person], using k-core;");
-    }
-
-    @Test
-    public void testCCSizeToString() {
-        TypeQLCompute query = TypeQL.compute().cluster().using(CONNECTED_COMPONENT).in("movie", "person").where(size(10));
-        assertEquivalent(query, "compute cluster in [movie, person], using connected-component, where size=10;");
-    }
-
-    @Test
-    public void testKCoreToString() {
-        TypeQLCompute query = TypeQL.compute().cluster().using(K_CORE).in("movie", "person").where(k(10));
-        assertEquivalent(query, "compute cluster in [movie, person], using k-core, where k=10;");
-    }
-
-    @Test
-    public void testCentralityOf() {
-        TypeQLCompute query = TypeQL.compute().centrality().using(DEGREE).in("movie", "person").of("person");
-        assertEquivalent(query, "compute centrality of person, in [movie, person], using degree;");
-
-        query = TypeQL.compute().centrality().using(K_CORE).in("movie", "person").of("person").where(minK(5));
-        assertEquivalent(query, "compute centrality of person, in [movie, person], using k-core, where min-k=5;");
     }
 
     @Test

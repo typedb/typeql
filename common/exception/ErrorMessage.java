@@ -89,20 +89,14 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(32, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(33, "Invalid query containing redundant nested negations.");
-    public static final ErrorMessage MISSING_COMPUTE_CONDITION =
-            new ErrorMessage(34, "Missing condition(s) for 'compute '%s''. The required condition(s) are: '%s'.");
-    public static final ErrorMessage INVALID_COMPUTE_METHOD_ALGORITHM =
-            new ErrorMessage(35, "Invalid algorithm for 'compute '%s''. The accepted algorithm(s) are: '%s'.");
-    public static final ErrorMessage INVALID_COMPUTE_ARGUMENT =
-            new ErrorMessage(36, "Invalid argument(s) 'compute %s using %s'. The accepted argument(s) are: '%s'.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
-            new ErrorMessage(37, "Invalid sorting order. Valid options: '%s' or '%s'.");
+            new ErrorMessage(34, "Invalid sorting order. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
-            new ErrorMessage(38, "Aggregate COUNT does not accept a Variable.");
+            new ErrorMessage(35, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(39, "Illegal grammar!");
+            new ErrorMessage(36, "Illegal grammar!");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
-            new ErrorMessage(40, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
+            new ErrorMessage(47, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
 
 
     private static final String codePrefix = "TQL";
