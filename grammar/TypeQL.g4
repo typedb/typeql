@@ -34,8 +34,7 @@ eof_schema_rule       :   schema_rule      EOF ;
 query                 :   query_define      |   query_undefine
                       |   query_insert      |   query_delete_or_update
                       |   query_match       |   query_match_aggregate
-                      |   query_match_group |   query_match_group_agg
-                      |   query_compute   ;
+                      |   query_match_group |   query_match_group_agg           ;
 
 query_define          :   DEFINE      definables  ;
 query_undefine        :   UNDEFINE    definables  ;
@@ -47,7 +46,6 @@ query_delete_or_update:   MATCH       patterns      DELETE  variable_things
 // TODO: The above feels like a hack. Find a clean way to split delete and update
 
 query_match           :   MATCH       patterns            ( modifiers )         ;
-query_compute         :   COMPUTE     compute_conditions                        ;
 
 // MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
 
@@ -171,48 +169,6 @@ predicate_value       :   value | VAR_  ;
 schema_rule           :   RULE label
                       |   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
 
-// COMPUTE QUERY ===============================================================
-//
-// A compute query is composed of 3 things:
-// The "compute" keyword followed by a method and optionally a set of input
-
-compute_conditions    :   conditions_count    ';'                               // compute the number of concepts
-                      |   conditions_value    ';'                               // compute statistical values
-                      |   conditions_central  ';'                               // compute density of connected concepts
-                      |   conditions_cluster  ';'                               // compute density of connected concepts
-                      |   conditions_path     ';'                               // compute the paths between concepts
-                      ;
-compute_method        :   MIN         |   MAX         |   MEDIAN                // statistical value methods
-                      |   MEAN        |   STD         |   SUM
-                      ;
-conditions_count      :   COUNT          input_count?                           ;
-conditions_value      :   compute_method input_value   (',' input_value    )*   ;
-conditions_central    :   CENTRALITY     input_central (',' input_central  )*   ;
-conditions_cluster    :   CLUSTER        input_cluster (',' input_cluster  )*   ;
-conditions_path       :   PATH           input_path    (',' input_path     )*   ;
-
-input_count           :   compute_scope ;
-input_value           :   compute_scope | compute_target      ;
-input_central         :   compute_scope | compute_target      | compute_config  ;
-input_cluster         :   compute_scope                       | compute_config  ;
-input_path            :   compute_scope | compute_direction   ;
-
-
-compute_direction     :   FROM    IID_                                          // an instance to start the compute from
-                      |   TO      IID_                ;                         // an instance to end the compute at
-compute_target        :   OF      labels              ;                         // type(s) of instances to apply compute
-compute_scope         :   IN      labels              ;                         // type(s) to scope compute visibility
-compute_config        :   USING   compute_algorithm                             // algorithm to determine how to compute
-                      |   WHERE   compute_args        ;                         // additional args for compute method
-
-compute_algorithm     :   DEGREE | K_CORE | CONNECTED_COMPONENT   ;             // algorithm to determine how to compute
-compute_args          :   compute_arg | compute_args_array ;                    // single argument or array of arguments
-compute_args_array    :   '[' compute_arg ( ',' compute_arg )* ']';             // an array of arguments
-compute_arg           :   MIN_K     '=' LONG_                                   // a single argument for min-k=LONG
-                      |   K         '=' LONG_                                   // a single argument for k=LONG
-                      |   SIZE      '=' LONG_                                   // a single argument for size=LONG
-                      |   CONTAINS  '=' IID_           ;                        // a single argument for contains=ID
-
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
 type_any              :   type_scoped   | type          | VAR_          ;
@@ -243,10 +199,7 @@ regex                 :   STRING_         ;
 
 unreserved            : VALUE
                       | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
-                      | GET | SORT | LIMIT | OFFSET | GROUP
-                      | PATH | CLUSTER | FROM | TO | OF | IN
-                      | DEGREE | K_CORE | CONNECTED_COMPONENT
-                      | MIN_K | K | CONTAINS | SIZE | WHERE
+                      | GET | SORT | LIMIT | OFFSET | GROUP | CONTAINS
                       ;
 
 // TYPEQL SYNTAX KEYWORDS =======================================================
@@ -304,17 +257,6 @@ GROUP           : 'group'       ;   COUNT           : 'count'       ;
 MAX             : 'max'         ;   MIN             : 'min'         ;
 MEAN            : 'mean'        ;   MEDIAN          : 'median'      ;
 STD             : 'std'         ;   SUM             : 'sum'         ;
-
-// COMPUTE QUERY KEYWORDS
-
-CLUSTER         : 'cluster'     ;   CENTRALITY      : 'centrality'  ;
-PATH            : 'path'        ;   DEGREE          : 'degree'      ;
-K_CORE          : 'k-core'      ;   CONNECTED_COMPONENT : 'connected-component';
-FROM            : 'from'        ;   TO              : 'to'          ;
-OF              : 'of'          ;   IN              : 'in'          ;
-USING           : 'using'       ;   WHERE           : 'where'       ;
-MIN_K           : 'min-k'       ;   K               : 'k'           ;
-SIZE            : 'size'        ;
 
 // VALUE TYPE KEYWORDS
 
