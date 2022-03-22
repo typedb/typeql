@@ -95,6 +95,7 @@ public class TypeQLSteps {
     @Given("typeql match; throws exception")
     @Given("typeql match group; throws exception")
     @Given("typeql match aggregate; throws exception")
+    @Given("templated typeql match; throws exception")
     @Given("typeql insert; throws exception")
     @Given("typeql delete; throws exception")
     @Given("typeql define; throws exception")
