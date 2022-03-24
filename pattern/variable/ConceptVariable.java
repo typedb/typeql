@@ -69,7 +69,7 @@ public class ConceptVariable extends BoundVariable {
     @Override
     public String toString() {
         if (isConstraint == null) return reference.toString();
-        return reference.toString() + SPACE + isConstraint.toString();
+        return reference.toString() + SPACE + isConstraint;
     }
 
     @Override

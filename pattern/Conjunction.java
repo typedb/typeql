@@ -26,7 +26,6 @@ import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.pattern.variable.Variable;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +36,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
@@ -124,8 +122,8 @@ public class Conjunction<T extends Pattern> implements Pattern {
     public String toString() {
         StringBuilder pattern = new StringBuilder();
         pattern.append(CURLY_OPEN).append(SPACE);
-        pattern.append(patterns.stream().map(Objects::toString).collect(joining("" + SEMICOLON + SPACE)));
-        pattern.append(SEMICOLON).append(SPACE).append(CURLY_CLOSE);
+        pattern.append(patterns.stream().map(Objects::toString).collect(joining("" + SEMICOLON + SPACE))).append(SEMICOLON);
+        pattern.append(SPACE).append(CURLY_CLOSE);
         return pattern.toString();
     }
 
