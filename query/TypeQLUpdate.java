@@ -25,19 +25,14 @@ import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.pattern.variable.Variable;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
 import static com.vaticle.typeql.lang.query.TypeQLDelete.validDeleteVars;
 import static com.vaticle.typeql.lang.query.TypeQLInsert.validInsertVars;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
@@ -92,18 +87,9 @@ public class TypeQLUpdate extends TypeQLWritable {
     public String toString() {
         StringBuilder query = new StringBuilder();
         query.append(match).append(NEW_LINE);
-
-        query.append(DELETE);
-        if (deleteVariables.size() > 1) query.append(NEW_LINE);
-        else query.append(SPACE);
-        query.append(deleteVariables.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON).append(NEW_LINE);
-
-        query.append(INSERT);
-        if (insertVariables.size() > 1) query.append(NEW_LINE);
-        else query.append(SPACE);
-        query.append(insertVariables.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON);
+        appendSubQuery(query, DELETE, deleteVariables);
+        query.append(NEW_LINE);
+        appendSubQuery(query, INSERT, insertVariables);
         return query.toString();
     }
 

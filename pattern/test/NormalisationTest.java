@@ -40,7 +40,15 @@ public class NormalisationTest {
 
     @Test
     public void disjunction() {
-        String query = "match $com isa company; {$com has name $n1; $n1 \"the-company\";} or {$com has name $n2; $n2 \"another-company\";};";
+        String query = "match\n" +
+                "$com isa company;\n" +
+                "{\n" +
+                "    $com has name $n1;\n" +
+                "    $n1 \"the-company\";\n" +
+                "} or {\n" +
+                "    $com has name $n2;\n" +
+                "    $n2 \"another-company\";\n" +
+                "};";
         TypeQLMatch typeqlMatch = TypeQL.parseQuery(query).asMatch();
         Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
 
@@ -58,14 +66,32 @@ public class NormalisationTest {
 
     @Test
     public void negatedDisjunction() {
-        String query = "match $com isa company; not { $com has name $n1; { $n1 \"the-company\"; } or { $n1 \"other-company\"; }; }; ";
+        String query = "match\n" +
+                "$com isa company;\n" +
+                "not {\n" +
+                "    $com has name $n1;\n" +
+                "    {\n" +
+                "        $n1 \"the-company\";\n" +
+                "    } or {\n" +
+                "        $n1 \"other-company\";\n" +
+                "    };\n" +
+                "}; ";
         TypeQLMatch typeqlMatch = TypeQL.parseQuery(query).asMatch();
         Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
 
-        String expected = "match $com isa company; not { " +
-                "{ $com has name $n1; $n1 \"the-company\"; } or { $com has name $n1; $n1 \"other-company\"; }; };";
+        String expected = "match\n" +
+                "$com isa company;\n" +
+                "not {\n" +
+                "    {\n" +
+                "        $com has name $n1;\n" +
+                "        $n1 \"the-company\";\n" +
+                "    } or {\n" +
+                "        $com has name $n1;\n" +
+                "        $n1 \"other-company\";\n" +
+                "    };\n" +
+                "};";
         TypeQLQuery expectedQuery = TypeQL.parseQuery(expected);
         Disjunction<? extends Pattern> inner = expectedQuery.asMatch().conjunction().patterns().get(1).asNegation().pattern().asDisjunction();
-        assertEquals(expected, expectedQuery.toString().replace("\n", " "));
+        assertEquals(expected, expectedQuery.toString());
     }
 }

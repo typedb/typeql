@@ -32,21 +32,20 @@ import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.builder.Aggregatable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
+import javax.annotation.Nullable;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.GROUP;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.MATCH;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.GET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
@@ -59,7 +58,6 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTER
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
@@ -143,14 +141,14 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
             StringBuilder syntax = new StringBuilder();
             if (!filter.isEmpty()) {
                 syntax.append(GET);
-                String varsStr = filter.stream().map(UnboundVariable::toString).collect(joining(COMMA_SPACE.toString()));
-                syntax.append(SPACE).append(varsStr);
-                syntax.append(SEMICOLON);
+                String vars = filter.stream().map(UnboundVariable::toString).collect(COMMA_SPACE.joiner());
+                syntax.append(SPACE).append(vars);
+                syntax.append(SEMICOLON).append(SPACE);
             }
             if (sorting != null) syntax.append(SORT).append(SPACE).append(sorting).append(SEMICOLON).append(SPACE);
             if (offset != null) syntax.append(OFFSET).append(SPACE).append(offset).append(SEMICOLON).append(SPACE);
             if (limit != null) syntax.append(LIMIT).append(SPACE).append(limit).append(SEMICOLON).append(SPACE);
-            return syntax.toString();
+            return syntax.toString().trim();
         }
 
         @Override
@@ -254,20 +252,12 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     @Override
     public String toString() {
         StringBuilder query = new StringBuilder();
-        query.append(TypeQLToken.Command.MATCH);
-
-        if (conjunction.patterns().size() > 1) query.append(NEW_LINE);
-        else query.append(SPACE);
-        query.append(conjunction.patterns().stream().map(Object::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON);
-
+        appendSubQuery(query, MATCH, conjunction.patterns());
         if (!modifiers.isEmpty()) {
-            if (conjunction.patterns().size() > 1) query.append(NEW_LINE);
-            else query.append(SPACE);
-            query.append(modifiers.toString());
+            query.append(NEW_LINE);
+            query.append(modifiers);
         }
-
-        return query.toString().trim();
+        return query.toString();
     }
 
     @Override
@@ -445,15 +435,9 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         @Override
         public final String toString() {
             StringBuilder query = new StringBuilder();
-
-            if (match().modifiers().filter().isEmpty() && match().conjunction().patterns().size() > 1) {
-                query.append(match()).append(NEW_LINE);
-            } else query.append(match()).append(SPACE);
-
-            query.append(method);
+            query.append(match()).append(NEW_LINE).append(method);
             if (var != null) query.append(SPACE).append(var);
             query.append(SEMICOLON);
-
             return query.toString();
         }
 
@@ -510,14 +494,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
 
         @Override
         public String toString() {
-            StringBuilder query = new StringBuilder();
-
-            if (match().modifiers().filter.isEmpty() && match().conjunction().patterns().size() > 1) {
-                query.append(match()).append(NEW_LINE);
-            } else query.append(match()).append(SPACE);
-
-            query.append(GROUP).append(SPACE).append(var).append(SEMICOLON);
-            return query.toString();
+            return match().toString() + NEW_LINE + GROUP + SPACE + var + SEMICOLON;
         }
 
         @Override
@@ -578,16 +555,10 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
             @Override
             public final String toString() {
                 StringBuilder query = new StringBuilder();
-
-                if (group().match().modifiers().filter.isEmpty() && group().match().conjunction().patterns().size() > 1) {
-                    query.append(group().match()).append(NEW_LINE);
-                } else query.append(group().match()).append(SPACE);
-
+                query.append(group().match()).append(NEW_LINE);
                 query.append(GROUP).append(SPACE).append(group().var()).append(SEMICOLON).append(SPACE).append(method);
-
                 if (var != null) query.append(SPACE).append(var);
                 query.append(SEMICOLON);
-
                 return query.toString();
             }
 

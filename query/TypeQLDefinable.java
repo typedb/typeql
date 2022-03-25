@@ -28,29 +28,24 @@ import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DEFINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.UNDEFINE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
-import static java.util.stream.Collectors.joining;
 
 abstract class TypeQLDefinable extends TypeQLQuery {
 
-    private final TypeQLToken.Command keyword;
+    private final TypeQLToken.Command command;
     private final List<Definable> definables;
     private final List<TypeVariable> variables = new ArrayList<>();
     private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
-    TypeQLDefinable(TypeQLToken.Command keyword, List<Definable> definables) {
-        assert keyword == DEFINE || keyword == UNDEFINE;
+    TypeQLDefinable(TypeQLToken.Command command, List<Definable> definables) {
+        assert command == DEFINE || command == UNDEFINE;
         if (definables == null || definables.isEmpty()) throw TypeQLException.of(MISSING_DEFINABLES.message());
         this.definables = new ArrayList<>(definables);
         for (Definable definable : definables) {
@@ -64,8 +59,8 @@ abstract class TypeQLDefinable extends TypeQLQuery {
             else v.constraints().forEach(c -> typeVarsToVerify.addAll(c.variables()));
         }
 
-        this.keyword = keyword;
-        this.hash = Objects.hash(this.keyword, this.variables, this.rules);
+        this.command = command;
+        this.hash = Objects.hash(this.command, this.variables, this.rules);
     }
 
     @Override
@@ -84,13 +79,7 @@ abstract class TypeQLDefinable extends TypeQLQuery {
     @Override
     public final String toString() {
         StringBuilder query = new StringBuilder();
-        query.append(keyword);
-
-        if (definables.size() > 1) query.append(NEW_LINE);
-        else query.append(TypeQLToken.Char.SPACE);
-
-        query.append(definables.stream().map(Definable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-        query.append(SEMICOLON);
+        appendSubQuery(query, command, definables);
         return query.toString();
     }
 
@@ -99,7 +88,7 @@ abstract class TypeQLDefinable extends TypeQLQuery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TypeQLDefinable that = (TypeQLDefinable) o;
-        return this.keyword.equals(that.keyword) && this.definables.equals(that.definables);
+        return this.command.equals(that.command) && this.definables.equals(that.definables);
     }
 
     @Override

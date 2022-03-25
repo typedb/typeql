@@ -22,6 +22,8 @@
 package com.vaticle.typeql.lang.common;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
@@ -116,9 +118,11 @@ public class TypeQLToken {
         EQUAL("="),
         COLON(":"),
         SEMICOLON(";"),
+        SEMICOLON_NEW_LINE(";\n"),
         SPACE(" "),
         COMMA(","),
         COMMA_SPACE(", "),
+        COMMA_NEW_LINE(",\n"),
         CURLY_OPEN("{"),
         CURLY_CLOSE("}"),
         PARAN_OPEN("("),
@@ -128,6 +132,7 @@ public class TypeQLToken {
         QUOTE_DOUBLE("\""),
         QUOTE_SINGLE("'"),
         NEW_LINE("\n"),
+        INDENTATION("    "),
         UNDERSCORE("_"),
         $_("$_"),
         $("$");
@@ -136,6 +141,10 @@ public class TypeQLToken {
 
         Char(String character) {
             this.character = character;
+        }
+
+        public Collector<CharSequence, ?, String> joiner() {
+            return Collectors.joining(character);
         }
 
         @Override

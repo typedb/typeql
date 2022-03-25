@@ -30,8 +30,6 @@ import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-
+import javax.annotation.Nullable;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typedb.common.collection.Collections.set;
@@ -68,7 +66,6 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONS
 import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
 import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
 import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
-import static java.util.stream.Collectors.joining;
 
 public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
@@ -318,7 +315,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         @Override
         public String toString() {
-            return PARAN_OPEN + players().stream().map(RolePlayer::toString).collect(joining(COMMA_SPACE.toString())) + PARAN_CLOSE;
+            return PARAN_OPEN + players().stream().map(RolePlayer::toString).collect(COMMA_SPACE.joiner()) + PARAN_CLOSE;
         }
 
         @Override

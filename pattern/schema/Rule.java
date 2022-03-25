@@ -30,16 +30,15 @@ import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.Reference;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.Variable;
-
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import javax.annotation.Nullable;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.RULE;
@@ -51,6 +50,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
+import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
 public class Rule implements Definable {
     private final String label;
@@ -153,28 +153,17 @@ public class Rule implements Definable {
 
     @Override
     public String toString() {
-        StringBuilder syntax = new StringBuilder();
-        syntax.append(RULE).append(SPACE).append(label);
-
-        if (when != null || then != null) syntax.append(COLON).append(SPACE);
-
-        // when
+        StringBuilder rule = new StringBuilder("" + RULE + SPACE + label);
         if (when != null) {
-            syntax.append(WHEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-            for (Pattern p : when.patterns()) {
-                syntax.append(p).append(SEMICOLON).append(SPACE);
-            }
-            syntax.append(CURLY_CLOSE).append(SPACE);
+            rule.append(COLON).append(NEW_LINE);
+            StringBuilder body = new StringBuilder();
+            body.append(WHEN).append(SPACE).append(when.toString(true)).append(NEW_LINE);
+            body.append(THEN).append(SPACE).append(CURLY_OPEN).append(NEW_LINE);
+            body.append(indent(then)).append(SEMICOLON);
+            body.append(NEW_LINE).append(CURLY_CLOSE);
+            rule.append(indent(body));
         }
-
-        // then
-        if (then != null) {
-            syntax.append(THEN).append(SPACE).append(CURLY_OPEN).append(SPACE);
-            syntax.append(then).append(SEMICOLON).append(SPACE);
-            syntax.append(CURLY_CLOSE);
-        }
-
-        return syntax.toString();
+        return rule.toString();
     }
 
     @Override

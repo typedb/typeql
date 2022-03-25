@@ -22,18 +22,14 @@
 package com.vaticle.typeql.lang.query.builder;
 
 import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
@@ -96,7 +92,7 @@ public interface Sortable<S, O, L> {
         @Override
         public String toString() {
             StringBuilder sort = new StringBuilder();
-            sort.append(vars.stream().map(Objects::toString).collect(joining(COMMA_SPACE.toString())));
+            sort.append(vars.stream().map(Objects::toString).collect(COMMA_SPACE.joiner()));
             if (order != null) sort.append(SPACE).append(order);
             return sort.toString();
         }

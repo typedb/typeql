@@ -108,50 +108,50 @@ public class TypeQLQueryTest {
 
     @Test
     public void testInsertQueryToString() {
-        assertEquals("insert $x isa movie;", TypeQL.insert(var("x").isa("movie")).toString());
+        assertEquals("insert\n$x isa movie;", TypeQL.insert(var("x").isa("movie")).toString());
     }
 
     @Test
     public void testEscapeStrings() {
-        assertEquals("insert $x \"hello\nworld\";", TypeQL.insert(var("x").eq("hello\nworld")).toString());
-        assertEquals("insert $x \"hello\\nworld\";", TypeQL.insert(var("x").eq("hello\\nworld")).toString());
+        assertEquals("insert\n$x \"hello\nworld\";", TypeQL.insert(var("x").eq("hello\nworld")).toString());
+        assertEquals("insert\n$x \"hello\\nworld\";", TypeQL.insert(var("x").eq("hello\\nworld")).toString());
     }
 
     @Test
     public void testOwns() {
-        assertEquals("define person owns thingy;", TypeQL.define(type("person").owns("thingy")).toString());
+        assertEquals("define\nperson owns thingy;", TypeQL.define(type("person").owns("thingy")).toString());
     }
 
     @Test
     public void testRepeatRoleplayerToString() {
-        assertEquals("match ($x, $x);", match(rel("x").rel("x")).toString());
+        assertEquals("match\n($x, $x);", match(rel("x").rel("x")).toString());
     }
 
     @Test
     public void testMatchInsertToString() {
         TypeQLInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
-        assertEquals("match $x isa movie;\ninsert $x has title \"hello\";", query.toString());
+        assertEquals("match\n$x isa movie;\ninsert\n$x has title \"hello\";", query.toString());
     }
 
     @Test
     public void testZeroToString() {
-        assertEquals("match $x 0.0;", match(var("x").eq(0.0)).toString());
+        assertEquals("match\n$x 0.0;", match(var("x").eq(0.0)).toString());
     }
 
     @Test
     public void testExponentsToString() {
-        assertEquals("match $x 1000000000.0;", match(var("x").eq(1_000_000_000.0)).toString());
+        assertEquals("match\n$x 1000000000.0;", match(var("x").eq(1_000_000_000.0)).toString());
     }
 
     @Test
     public void testDecimalToString() {
-        assertEquals("match $x 0.0001;", match(var("x").eq(0.0001)).toString());
+        assertEquals("match\n$x 0.0001;", match(var("x").eq(0.0001)).toString());
     }
 
     @Test
     public void whenCallingToStringOnDeleteQuery_ItLooksLikeOriginalQuery() {
-        final String query = "match $x isa movie;\n" +
-                "delete $x isa movie;";
+        final String query = "match\n$x isa movie;\n" +
+                "delete\n$x isa movie;";
         assertEquals(query, TypeQL.parseQuery(query).toString());
     }
 

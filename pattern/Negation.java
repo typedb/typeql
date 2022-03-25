@@ -25,16 +25,16 @@ import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
 /**
  * A class representing a negation of patterns. All inner patterns must not match in a query.
@@ -95,10 +95,14 @@ public class Negation<T extends Pattern> implements Conjunctable {
         negation.append(TypeQLToken.Operator.NOT).append(SPACE);
 
         if (pattern.isConjunction()) {
-            negation.append(pattern.toString());
+            negation.append(pattern);
+        } else if (pattern.toString().lines().count() > 1) {
+            negation.append(CURLY_OPEN).append(NEW_LINE);
+            negation.append(indent(pattern.toString() + SEMICOLON));
+            negation.append(NEW_LINE).append(CURLY_CLOSE);
         } else {
             negation.append(CURLY_OPEN).append(SPACE);
-            negation.append(pattern.toString()).append(SEMICOLON);
+            negation.append(pattern).append(SEMICOLON);
             negation.append(SPACE).append(CURLY_CLOSE);
         }
 

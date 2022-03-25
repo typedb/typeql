@@ -22,8 +22,13 @@
 package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import java.util.List;
 import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class TypeQLQuery {
@@ -100,6 +105,12 @@ public abstract class TypeQLQuery {
         } else {
             throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLMatch.Group.Aggregate.class)));
         }
+    }
+
+    protected void appendSubQuery(StringBuilder query, TypeQLToken.Command command, List<?> elements) {
+        query.append(command).append(NEW_LINE);
+        query.append(elements.stream().map(Object::toString).collect(SEMICOLON_NEW_LINE.joiner()));
+        query.append(SEMICOLON);
     }
 
     @Override

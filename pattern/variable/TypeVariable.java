@@ -26,17 +26,16 @@ import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.constraint.Constraint;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
 import com.vaticle.typeql.lang.pattern.variable.builder.TypeVariableBuilder;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
+import java.util.stream.Stream;
 import static com.vaticle.typedb.common.collection.Collections.set;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
-import static java.util.stream.Collectors.joining;
+import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
 public class TypeVariable extends BoundVariable implements TypeVariableBuilder, Definable {
 
@@ -186,19 +185,11 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     @Override
     public String toString() {
         StringBuilder syntax = new StringBuilder();
-
-        if (isVisible()) {
-            syntax.append(reference.syntax());
-            if (!constraints.isEmpty()) {
-                syntax.append(SPACE);
-                syntax.append(constraints.stream().map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
-            }
-        } else if (label().isPresent()) {
-            syntax.append(label().get().scopedLabel());
-            if (constraints.size() > 1) {
-                syntax.append(SPACE).append(constraints.stream().filter(p -> !p.isLabel())
-                                                    .map(Constraint::toString).collect(joining(COMMA_SPACE.toString())));
-            }
+        if (isVisible() || label().isPresent()) {
+            syntax.append(isVisible() ? reference.syntax() : label().get().scopedLabel());
+            Stream<TypeConstraint> consStream = isVisible() ? constraints.stream() : constraints.stream().skip(1);
+            String consStr = indent(consStream.map(Constraint::toString).collect(COMMA_NEW_LINE.joiner())).trim();
+            if (!consStr.isEmpty()) syntax.append(SPACE).append(consStr);
         } else {
             // This should only be called by debuggers trying to print nested variables
             syntax.append(reference);

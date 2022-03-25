@@ -23,7 +23,10 @@ package com.vaticle.typeql.lang.common.util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.Locale;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.INDENTATION;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 
 public class Strings {
 
@@ -41,6 +44,14 @@ public class Strings {
      */
     public static String quoteString(String string) {
         return "\"" + string + "\"";
+    }
+
+    public static String indent(Object object) {
+        return indent(object.toString());
+    }
+
+    public static String indent(String string) {
+        return Arrays.stream(string.split("\n")).map(s -> INDENTATION + s).collect(NEW_LINE.joiner());
     }
 
     /**

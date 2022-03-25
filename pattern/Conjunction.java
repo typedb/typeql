@@ -21,6 +21,7 @@
 
 package com.vaticle.typeql.lang.pattern;
 
+import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
@@ -39,10 +40,12 @@ import java.util.stream.Stream;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
-import static java.util.stream.Collectors.joining;
+import static com.vaticle.typeql.lang.common.util.Strings.indent;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
@@ -118,13 +121,16 @@ public class Conjunction<T extends Pattern> implements Pattern {
     @Override
     public Conjunction<?> asConjunction() { return this; }
 
+    public String toString(boolean isMultiline) {
+        TypeQLToken.Char whitespace = isMultiline ? NEW_LINE : SPACE;
+        String body = patterns.stream().map(Objects::toString).collect(SEMICOLON_NEW_LINE.joiner()) + SEMICOLON;
+        if (isMultiline) body = indent(body);
+        return CURLY_OPEN.toString() + whitespace + body + whitespace + CURLY_CLOSE;
+    }
+
     @Override
     public String toString() {
-        StringBuilder pattern = new StringBuilder();
-        pattern.append(CURLY_OPEN).append(SPACE);
-        pattern.append(patterns.stream().map(Objects::toString).collect(joining("" + SEMICOLON + SPACE))).append(SEMICOLON);
-        pattern.append(SPACE).append(CURLY_CLOSE);
-        return pattern.toString();
+        return toString(patterns.size() > 1 || patterns.get(0).toString().lines().count() > 1);
     }
 
     @Override

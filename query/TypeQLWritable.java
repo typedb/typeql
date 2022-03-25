@@ -28,19 +28,14 @@ import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.pattern.variable.Variable;
-
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
+import javax.annotation.Nullable;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
@@ -60,17 +55,17 @@ public abstract class TypeQLWritable extends TypeQLQuery {
     abstract static class InsertOrDelete extends TypeQLWritable {
 
         private List<UnboundVariable> namedVariablesUnbound;
-        private final TypeQLToken.Command keyword;
+        private final TypeQLToken.Command command;
         protected final List<ThingVariable<?>> variables;
         private final int hash;
 
-        InsertOrDelete(TypeQLToken.Command keyword, @Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+        InsertOrDelete(TypeQLToken.Command command, @Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
             super(match);
-            assert keyword == INSERT || keyword == DELETE;
+            assert command == INSERT || command == DELETE;
             if (variables == null || variables.isEmpty()) throw TypeQLException.of(MISSING_PATTERNS.message());
-            this.keyword = keyword;
+            this.command = command;
             this.variables = variables;
-            this.hash = Objects.hash(this.keyword, this.match, this.variables);
+            this.hash = Objects.hash(this.command, this.match, this.variables);
         }
 
         public List<UnboundVariable> namedVariablesUnbound() {
@@ -84,15 +79,8 @@ public abstract class TypeQLWritable extends TypeQLQuery {
         @Override
         public String toString() {
             StringBuilder query = new StringBuilder();
-
             if (match != null) query.append(match).append(NEW_LINE);
-            query.append(keyword);
-
-            if (variables.size() > 1) query.append(NEW_LINE);
-            else query.append(SPACE);
-
-            query.append(variables.stream().map(ThingVariable::toString).collect(joining("" + SEMICOLON + NEW_LINE)));
-            query.append(SEMICOLON);
+            appendSubQuery(query, command, variables);
             return query.toString();
         }
 
@@ -101,7 +89,7 @@ public abstract class TypeQLWritable extends TypeQLQuery {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             InsertOrDelete that = (InsertOrDelete) o;
-            return (this.keyword.equals(that.keyword) &&
+            return (this.command.equals(that.command) &&
                     Objects.equals(this.match, that.match) &&
                     this.variables.equals(that.variables));
         }
