@@ -59,8 +59,16 @@ public class MavenApplicationTest {
     @Test
     public void testPredicateQuery1() {
         final String query = "match\n" +
-                "$x isa movie, has title $t;\n" +
-                "{ $t 'Apocalypse Now'; } or { $t < 'Juno'; $t > 'Godfather'; } or { $t 'Spy'; };\n" +
+                "$x isa movie,\n" +
+                "    has title $t;\n" +
+                "{\n" +
+                "    $t 'Apocalypse Now';\n" +
+                "} or {\n" +
+                "    $t < 'Juno';\n" +
+                "    $t > 'Godfather';\n" +
+                "} or {\n" +
+                "    $t 'Spy';\n" +
+                "};\n" +
                 "$t != 'Apocalypse Now';";
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
 
