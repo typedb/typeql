@@ -84,7 +84,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage INVALID_RULE_THEN =
             new ErrorMessage(30, "Rule '%s' 'then' '%s': must be exactly one attribute ownership, or exactly one relation.");
     public static final ErrorMessage INVALID_RULE_THEN_HAS =
-            new ErrorMessage(31, "Rule '%s' 'then' '%s': is trying to assign both an attribute type and a variable attribute value.");
+            new ErrorMessage(31, "Rule '%s' 'then' '%s' tries to assign type '%s' to variable '%s', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
             new ErrorMessage(32, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
