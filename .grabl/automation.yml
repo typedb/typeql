@@ -66,6 +66,12 @@ build:
       image: vaticle-ubuntu-21.04
       dependencies: [ build, build-dependency ]
       command: |
+        pyenv install 3.7.12
+        pyenv global 3.7.12
+        sudo unlink /usr/bin/python3
+        sudo ln -s $(which python3) /usr/bin/python3
+        sudo ln -s /usr/share/pyshared/lsb_release.py /opt/pyenv/versions/3.7.12/lib/python3.7/site-packages/lsb_release.py
+
         export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_PIP_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //grammar/python:deploy-pip -- snapshot
@@ -78,8 +84,9 @@ release:
     deploy-github:
       image: vaticle-ubuntu-21.04
       command: |
-        pyenv install -s 3.6.10
-        pyenv global 3.6.10 system
+        pyenv install -s 3.7.12
+        pyenv global 3.7.12 system
+        pip3 install -U pip
         pip3 install certifi
         export NOTES_CREATE_TOKEN=$REPO_GITHUB_TOKEN
         bazel run @vaticle_dependencies//tool/release/notes:create -- $GRABL_OWNER $GRABL_REPO $GRABL_COMMIT $(cat VERSION) ./RELEASE_TEMPLATE.md
@@ -103,6 +110,9 @@ release:
       image: vaticle-ubuntu-21.04
       dependencies: [ deploy-github ]
       command: |
+        pyenv install -s 3.7.12
+        pyenv global 3.7.12 system
+        pip3 install -U pip
         export DEPLOY_PIP_USERNAME=$REPO_PYPI_USERNAME
         export DEPLOY_PIP_PASSWORD=$REPO_PYPI_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar/python:deploy-pip -- release
