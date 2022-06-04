@@ -61,6 +61,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
+import org.antlr.v4.runtime.ANTLRErrorStrategy;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -76,6 +78,8 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STAT
 import static com.vaticle.typeql.lang.common.util.Strings.unescapeRegex;
 import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
 import static java.util.stream.Collectors.toList;
+import static org.antlr.v4.runtime.atn.PredictionMode.LL_EXACT_AMBIG_DETECTION;
+import static org.antlr.v4.runtime.atn.PredictionMode.SLL;
 
 /**
  * TypeQL query string parser to produce TypeQL Java objects
@@ -102,47 +106,43 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     private <CONTEXT extends ParserRuleContext, RETURN> RETURN parse(
-            String rawTypeQLString, Function<TypeQLParser, CONTEXT> parserMethod, Function<CONTEXT, RETURN> visitor
+            String rawTypeQLString, Function<TypeQLParser, CONTEXT> rule, Function<CONTEXT, RETURN> visitor
     ) {
         if (rawTypeQLString == null) throw TypeQLException.of("Query String is NULL");
         String typeQLString = rawTypeQLString.stripTrailing();
         if (typeQLString.isEmpty()) throw TypeQLException.of("Query String is empty or blank");
 
-        ErrorListener errorListener = ErrorListener.of(typeQLString);
-        TypeQLLexer lexer = lexer(typeQLString);
-
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(errorListener);
-
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        TypeQLParser parser = new TypeQLParser(tokens);
-
-        parser.removeErrorListeners();
-        parser.addErrorListener(errorListener);
-
-        // BailErrorStrategy + SLL is a very fast parsing strategy for queries
-        // that are expected to be correct. However, it may not be able to
-        // provide detailed/useful error message, if at all.
-        parser.setErrorHandler(new BailErrorStrategy());
-        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-
-        CONTEXT queryContext;
         try {
-            queryContext = parserMethod.apply(parser);
+            // BailErrorStrategy + SLL is a very fast parsing strategy for queries
+            // that are expected to be correct. However, it may not be able to
+            // provide detailed/useful error message, if at all.
+            return visitor.apply(parseContext(rule, typeQLString, new BailErrorStrategy(), SLL, null));
         } catch (ParseCancellationException e) {
             // We parse the query one more time, with "strict strategy" :
             // DefaultErrorStrategy + LL_EXACT_AMBIG_DETECTION
             // This was not set to default parsing strategy, but it is useful
             // to produce detailed/useful error message
-            errorListener.clearErrors();
-            parser.setErrorHandler(new DefaultErrorStrategy());
-            parser.getInterpreter().setPredictionMode(PredictionMode.LL_EXACT_AMBIG_DETECTION);
-            queryContext = parserMethod.apply(parser);
-
+            ErrorListener errorListener = ErrorListener.of(typeQLString);
+            parseContext(rule, typeQLString, new DefaultErrorStrategy(), LL_EXACT_AMBIG_DETECTION, errorListener);
             throw TypeQLException.of(errorListener.toString());
         }
+    }
 
-        return visitor.apply(queryContext);
+    private <CONTEXT extends ParserRuleContext> CONTEXT parseContext(
+            Function<TypeQLParser, CONTEXT> rule,
+            String typeQLString, ANTLRErrorStrategy errorHandlingStrategy, PredictionMode prediction,
+            @Nullable ErrorListener errorListener
+    ) {
+        TypeQLLexer lexer = lexer(typeQLString);
+        lexer.removeErrorListeners();
+        if (errorListener != null) lexer.addErrorListener(errorListener);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        TypeQLParser parser = new TypeQLParser(tokens);
+        parser.removeErrorListeners();
+        if (errorListener != null) parser.addErrorListener(errorListener);
+        parser.setErrorHandler(errorHandlingStrategy);
+        parser.getInterpreter().setPredictionMode(prediction);
+        return rule.apply(parser);
     }
 
     @SuppressWarnings("unchecked")

@@ -42,6 +42,7 @@ java_library(
         "@vaticle_typedb_common//:common",
 
         # External dependencies
+        "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
     ],
     tags = ["maven_coordinates=com.vaticle.typeql:typeql-parser:{pom_version}"],
