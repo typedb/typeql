@@ -20,12 +20,12 @@
 #
 
 load("@rules_rust//rust:defs.bzl", "rust_library")
-load("@vaticle_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//tool/release:rules.bzl", "release_validate_deps")
 load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
+load("@vaticle_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
+load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
 load("//:deployment.bzl", deployment_github = "deployment")
-load("@vaticle_dependencies//distribution:deployment.bzl", deployment_crate = "deployment")
 
 exports_files(
     ["VERSION", "RELEASE_TEMPLATE.md", "README.md"],
@@ -33,9 +33,9 @@ exports_files(
 )
 
 rust_library(
-    name = "typeql-lang-rust",
+    name = "typeql_lang",
     srcs = glob([
-        "typeql-lang-rust.rs",
+        "*.rs",
         "query/*.rs",
         "parser/*.rs",
     ]),
@@ -46,26 +46,26 @@ rust_library(
 )
 
 assemble_crate(
-    name = "assemble-crate",
-    target = ":typeql-lang-rust",
+    name = "assemble_crate",
+    target = ":typeql_lang",
     description = "TypeQL Language for Rust",
     license = "Apache-2.0",
     readme_file = "//:README.md",
-    homepage = "https://github.com/vaticle/typeql-lang-rust",
-    repository = "https://github.com/vaticle/typeql-lang-rust",
-    keywords = ["grakn", "database", "graph", "knowledgebase", "knowledgeengineering"],
+    homepage = "https://github.com/vaticle/typeql",
+    repository = "https://github.com/vaticle/typeql",
+    keywords = ["typeql", "typedb", "database", "strongly-typed"],
     authors = ["Vaticle <community@vaticle.com>"]
 )
 
 deploy_crate(
-    name = "deploy-crate",
-    target = ":assemble-crate",
-    snapshot = deployment_crate["crate.snapshot"],
-    release = deployment_crate["crate.release"],
+    name = "deploy_crate",
+    target = ":assemble_crate",
+    snapshot = deployment["crate.snapshot"],
+    release = deployment["crate.release"],
 )
 
 deploy_github(
-    name = "deploy-github",
+    name = "deploy_github",
     release_description = "//:RELEASE_TEMPLATE.md",
     title = "TypeQL",
     title_append_version = True,

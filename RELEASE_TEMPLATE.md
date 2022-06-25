@@ -1,4 +1,4 @@
-## Distribution (for Java)
+## TypeQL Grammar and Language Library distributions for Java
 
 ```xml
 <repositories>
@@ -22,7 +22,7 @@
 </dependencies>
 ```
 
-## Distribution (for Python)
+## TypeQL Grammar distribution for Python
 
 Available through https://pypi.org
 
