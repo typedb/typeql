@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Vaticle
+# Copyright (C) 2022 Vaticle
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -78,7 +78,7 @@ checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
-        ".grabl/automation.yml",
+        "*/*",
     ]),
-    license_type = "agpl",
+    license_type = "apache",
 )
