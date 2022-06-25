@@ -1,10 +1,3 @@
-[![Grabl](https://grabl.io/api/status/vaticle/typeql-lang-java/badge.svg)](https://grabl.io/vaticle/typeql-lang-java)
-[![GitHub release](https://img.shields.io/github/release/vaticle/typeql-lang-java.svg)](https://github.com/vaticle/typeql-lang-java/releases/latest)
-[![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff)](https://vaticle.com/discord)
-[![Discussion Forum](https://img.shields.io/discourse/https/forum.vaticle.com/topics.svg)](https://forum.vaticle.com)
-[![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)
-[![Stack Overflow](https://img.shields.io/badge/stackoverflow-typeql-3dce8c.svg)](https://stackoverflow.com/questions/tagged/typeql)
-
 # TypeQL Language Library for Java
 
 TypeQL language library for Java allows you to construct TypeQL queries programmatically, as opposed to manual string concatenations. For example, take the following native TypeQL query.
@@ -47,33 +40,23 @@ Replace `{version}` with the version number, in which you can find the latest on
 > Note: You don't need to compile TypeQL from source if you just want to use it in your code. See the _"Importing TypeQL"_ section above.
 
 1. Make sure you have the following dependencies installed on your machine:
-    - Java 8
+    - Java 11
     - [Bazel](https://docs.bazel.build/versions/master/install.html)
 
 2. Build the JAR:
 
    a) to build the native/raw JAR:
    ```
-   bazel build//:typeql
+   bazel build//java:typeql
    ```
    The Java library JAR will be produced at: `bazel-bin/libclient-java.jar`
 
    b) to build the JAR for a Maven application:
    ```
-   bazel build //:assemble-maven
+   bazel build //java:assemble-maven
    ```
    The Maven JAR and POM will be produced at: 
    ```
    bazel-bin/java/com.vaticle.typeql:lang.jar
    bazel-bin/java/pom.xml
    ```
-
-## Contributions
-
-TypeDB & TypeQL has been built using various open-source Graph and Distributed Computing frameworks throughout its evolution. Today TypeDB & TypeQL is built using [RocksDB](https://rocksdb.org), [ANTLR](http://www.antlr.org), [SCIP](https://www.scipopt.org), [Bazel](https://bazel.build), [GRPC](https://grpc.io), and [ZeroMQ](https://zeromq.org), and [Caffeine](https://github.com/ben-manes/caffeine). In the past, TypeDB was enabled by various open-source technologies and communities that we are hugely thankful to: [Apache Cassandra](http://cassandra.apache.org), [Apache Hadoop](https://hadoop.apache.org), [Apache Spark](http://spark.apache.org), [Apache TinkerPop](http://tinkerpop.apache.org), and [JanusGraph](http://janusgraph.org). Thank you!
-
-## Licensing
-
-This software is developed by [Vaticle](https://vaticle.com/).  It's released under the GNU Affero GENERAL PUBLIC LICENSE, Version 3, 29 June 2007. For license information, please see [LICENSE](https://github.com/vaticle/typedb/blob/master/LICENSE).
-
-Copyright (C) 2020 Vaticle

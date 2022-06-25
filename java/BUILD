@@ -39,10 +39,10 @@ java_library(
     srcs = ["TypeQL.java"],
     deps = [
         # Internal Package Dependencies
-        "//common:common",
-        "//parser:parser",
-        "//pattern:pattern",
-        "//query:query",
+        "//java/common:common",
+        "//java/parser:parser",
+        "//java/pattern:pattern",
+        "//java/query:query",
 
         # Internal Repository Dependencies
         "@vaticle_typedb_common//:common",
@@ -58,7 +58,7 @@ java_library(
 assemble_maven(
   name = "assemble-maven",
   target = ":typeql-lang",
-  workspace_refs = "@vaticle_typeql_lang_java_workspace_refs//:refs.json"
+  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(
@@ -80,7 +80,7 @@ deploy_github(
 
 release_validate_deps(
     name = "release-validate-deps",
-    refs = "@vaticle_typeql_lang_java_workspace_refs//:refs.json",
+    refs = "@vaticle_typeql_workspace_refs//:refs.json",
     tagged_deps = [
         "@vaticle_typedb_common",
     ],

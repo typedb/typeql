@@ -19,7 +19,7 @@
 # under the License.
 #
 
-package(default_visibility = ["//test/behaviour:__subpackages__"])
+package(default_visibility = ["//java/test/behaviour:__subpackages__"])
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
@@ -27,8 +27,8 @@ java_library(
     srcs = ["TypeQLSteps.java"],
     deps = [
         # Internal Package Dependencies
-        "//query:query",
-        "//:typeql-lang",
+        "//java/query:query",
+        "//java:typeql-lang",
 
         # External dependencies from Maven
         "@maven//:junit_junit",

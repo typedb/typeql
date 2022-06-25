@@ -1,24 +1,30 @@
 #
 # Copyright (C) 2022 Vaticle
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 
 config:
   version-candidate: VERSION
   dependencies:
     dependencies: [build]
+      typedb-common: [build, release]
+      typedb-behaviour: [build]
 
 build:
   quality:
@@ -42,23 +48,36 @@ build:
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
-#    TODO: enable this
-#    deploy-rust-snapshot:
-#      image: vaticle-ubuntu-21.04
-#      dependencies: [build, build-dependency]
-#      command: |
-#        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
-#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy_crate -- snapshot
+    test-java:
+      image: vaticle-ubuntu-21.04
+      command: |
+        bazel test //java/common/... --test_output=errors
+        bazel test //java/parser/... --test_output=errors
+        bazel test //java/pattern/... --test_output=errors
+        bazel test //java/query/... --test_output=errors
+        bazel test //java/test/... --test_output=errors
+    #    TODO: enable this
+    #    deploy-crate-snapshot:
+    #      image: vaticle-ubuntu-21.04
+    #      dependencies: [build, build-dependency]
+    #      command: |
+    #        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
+    #        bazel run --define version=$(cat VERSION) //grammar/rust:deploy_crate -- snapshot
     deploy-maven-snapshot:
       filter:
         owner: vaticle
         branch: master
       image: vaticle-ubuntu-21.04
-      dependencies: [build, build-dependency]
+      dependencies: [build, build-dependency, test-java]
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //java/pattern:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //java/query:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //java/parser:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
     deploy-pip-snapshot:
       filter:
         owner: vaticle
@@ -75,11 +94,24 @@ build:
         export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_PIP_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //grammar/python:deploy-pip -- snapshot
+    test-deployment-maven:
+      filter:
+        owner: vaticle
+        branch: master
+      image: vaticle-ubuntu-21.04
+      dependencies: [deploy-maven-snapshot]
+      command: |
+        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/$GRABL_COMMIT/g" java/test/deployment/pom.xml
+        cd java/test/deployment/ && mvn test
 
 release:
   filter:
     owner: vaticle
     branch: master
+  validation:
+    validate-dependencies:
+      image: vaticle-ubuntu-21.04
+      command: bazel test //:release-validate-deps --test_output=streamed
   deployment:
     deploy-github:
       image: vaticle-ubuntu-21.04
@@ -92,13 +124,13 @@ release:
         bazel run @vaticle_dependencies//tool/release/notes:create -- $GRABL_OWNER $GRABL_REPO $GRABL_COMMIT $(cat VERSION) ./RELEASE_TEMPLATE.md
         export DEPLOY_GITHUB_TOKEN=$REPO_GITHUB_TOKEN
         bazel run --define version=$(cat VERSION) //:deploy-github -- $GRABL_COMMIT
-#    TODO: enable this
-#    deploy-rust-release:
-#      image: vaticle-ubuntu-21.04
-#      dependencies: [ deploy-github ]
-#      command: |
-#        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
-#        bazel run --define version=$(cat VERSION) //grammar/rust:deploy_crate -- release
+    #    TODO: enable this
+    #    deploy-create-release:
+    #      image: vaticle-ubuntu-21.04
+    #      dependencies: [ deploy-github ]
+    #      command: |
+    #        export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
+    #        bazel run --define version=$(cat VERSION) //grammar/rust:deploy_crate -- release
     deploy-maven-release:
       image: vaticle-ubuntu-21.04
       dependencies: [deploy-github]
@@ -106,6 +138,11 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar/java:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/common:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/pattern:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/query:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/parser:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java:deploy-maven -- release
     deploy-pip-release:
       image: vaticle-ubuntu-21.04
       dependencies: [ deploy-github ]

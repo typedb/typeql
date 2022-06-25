@@ -27,7 +27,7 @@ popd > /dev/null
 OUT_DIR=$(cd "$(dirname "${path}")" && pwd -P)
 pushd "$OUT_DIR" > /dev/null
 
-bazel query "filter('^(?!(//dependencies|@vaticle|//test|//common).*$).*', kind(java_library, deps($1)))" --output graph > "$2".dot
+bazel query "filter('^(?!(//dependencies|@vaticle|//java/test|//java/common).*$).*', kind(java_library, deps($1)))" --output graph > "$2".dot
 dot -Tpng < "$2".dot > "$2".png
 open "$2".png
 

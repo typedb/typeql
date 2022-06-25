@@ -30,9 +30,9 @@ java_test(
     test_class = "com.vaticle.typeql.lang.pattern.test.NormalisationTest",
     deps = [
         # Internal Package Dependencies
-        "//:typeql-lang",
-        "//query",
-        "//pattern",
+        "//java:typeql-lang",
+        "//java/query:query",
+        "//java/pattern:pattern",
 
         # Internal Repository Dependencies
 

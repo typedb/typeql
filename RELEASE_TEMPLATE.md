@@ -14,6 +14,11 @@
         <artifactId>typeql-grammar</artifactId>
         <version>{version}</version>
     </dependency>
+    <dependency>
+        <groupId>com.vaticle.typeql</groupId>
+        <artifactId>typeql-lang</artifactId>
+        <version>{version}</version>
+    </dependency>
 </dependencies>
 ```
 

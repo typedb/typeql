@@ -169,56 +169,15 @@ $person isa teacher, has name "Alice";
 $person isa postgrad, has name "Bob";
 ```
 
-## Using TypeQL
+## TypeQL Grammar and Language Libraries
 
-### TypeQL (native syntax)
+> Note: All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively.
+> However, if you would like to construct TypeQL queries programmatically, you can do so with "Language Libraries" listed below.
 
-All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively. 
-
-### TypeQL for Java
-
-#### Language Library
-
-To use a TypeQL language library for Java, to be able to construct queries programmatically as opposed to manual string concatenations, please visit [vaticle/typeql-lang-java](https://github.com/vaticle/typeql-lang-java)
-
-#### Grammar
-
-If you would like to develop language TypeQL plugins or extension in Java, and require the TypeQL grammar library, you can import the following Maven package.
-
-```xml
-<repositories>
-    <repository>
-        <id>repo.vaticle.com</id>
-        <url>https://repo.vaticle.com/repository/maven/</url>
-    </repository>
-</repositories>
-
-<dependencies>
-    <dependency>
-        <groupId>com.vaticle.typeql</groupId>
-        <artifactId>typeql-grammar</artifactId>
-        <version>{version}</version>
-    </dependency>
-</dependencies>
-```
-
-Replace `{version}` with the version number, in which you can find the latest of TypeQL Grammar on our [Maven Repository](https://repo.vaticle.com/#browse/browse:maven:com%2Fvaticle%2Ftypeql%2Ftypeql-grammar).
-
-## TypeQL for Python
-
-#### Language Library
-
-To use a TypeQL language library for Python, to be able to construct queries programmatically as opposed to manual string concatenations, please visit [typedb-osi/typeql-lang-python](https://github.com/typedb-osi/typeql-lang-python). The project is still under development by the community. You are welcome to contribute to the project development.
-
-#### Grammar
-
-If you would like to develop language TypeQL plugins or extension in Python, and require the TypeQL grammar library, you can import the following PyPI package.
-
-```
-pip install typeql-grammar=={version}
-```
-
-Replace `{version}` with the version number, in which you can find the latest on [TypeQL's PyPi Page](https://pypi.org/project/typeql-grammar/). 
+- [TypeQL Grammar](https://github.com/typeql/blob/master/grammar/README.md)
+- [TypeQL Language Library for Java](https://github.com/vaticle/typeql/blob/master/java/README.md)
+- [TypeQL Language Library for Rust (under development)](https://github.com/vaticle/typeql-lang-rust)
+- [TypeQL Language Library for Python (under development)](https://github.com/typedb-osi/typeql-lang-python)
 
 ## Contributions
 
@@ -228,14 +187,8 @@ TypeDB & TypeQL has been built using various open-source Graph and Distributed C
 
 ## Licensing
 
-The TypeQL language and related materials are distributed under the terms GNU Affero General Public License v3.0 ("AGPL 3.0") as published by the Free Software Foundation, but with the following special exception.
+The TypeQL language libraries, such as TypeQL Rust and Java, are distributed under Apache License, Version 2.0, January 2004. The full license can be founder at: [LICENSE](https://github.com/vaticle/typeql/blob/master/LICENSE).
 
-Exception to AGPL 3.0: Any TypeQL language library that is based on material or materials in the Vaticle TypeQL repository, and that is used to communicate or interact (in each case) with a database created or managed or accessed (in each case) using a version of the TypeQL software that is made available by or on behalf of Vaticle Limited (UK Company Number 08766237) or any successor entity (but excluding any forked version of that software), may be distributed under one of the following licences:
+However, the TypeQL Grammar libraries, located under the `/grammar` package in this repository, are distributed under the terms GNU Affero General Public License v3.0 ("AGPL 3.0") as published by the Free Software Foundation, but with a special exception. Please refer to [TypeQL Grammar Licensing](https://github.com/vaticle/typeql/blob/master/grammar/README.md#licensing) for further details.
 
-- The Apache License version 2: https://www.apache.org/licenses/LICENSE-2.0.txt
-- The MIT License: https://opensource.org/licenses/MIT
-- The BSD License (2-Clause): https://opensource.org/licenses/BSD-2-Clause
-
-As used above "successor entity" means any entity then owning copyrights in the TypeDB software that were previously owned by Vaticle Ltd.
-
-If you make any change to, or contribute to, (in each case) the TypeQL code or related materials, then this exception will apply to any TypeQL language library that uses or implements that change/contribution.
+Copyright (C) 2022 Vaticle

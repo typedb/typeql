@@ -32,14 +32,14 @@ java_test(
         # Internal Package Dependencies
 
         # Add your additional debugging dependencies here
-        # e.g. "//test/behaviour/connection/session:steps",
+        # e.g. "//java/test/behaviour/connection/session:steps",
 
         # External Maven Dependencies
         "@maven//:io_cucumber_cucumber_java",
         "@maven//:io_cucumber_cucumber_junit",
     ],
     runtime_deps = [
-        "//test/behaviour/typeql:steps",
+        "//java/test/behaviour/typeql:steps",
     ],
     data = [":debug.feature"],
     size = "medium",

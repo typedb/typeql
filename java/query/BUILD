@@ -33,8 +33,8 @@ java_library(
     ]),
     deps = [
         # Internal Package Dependencies
-        "//common:common",
-        "//pattern:pattern",
+        "//java/common:common",
+        "//java/pattern:pattern",
 
         # Internal Repository Dependencies
         "@vaticle_typedb_common//:common",
@@ -48,7 +48,7 @@ java_library(
 assemble_maven(
   name = "assemble-maven",
   target = ":query",
-  workspace_refs = "@vaticle_typeql_lang_java_workspace_refs//:refs.json"
+  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(

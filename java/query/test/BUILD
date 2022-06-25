@@ -26,9 +26,9 @@ java_test(
     test_class = "com.vaticle.typeql.lang.query.test.TypeQLQueryTest",
     srcs = ["TypeQLQueryTest.java"],
     deps = [
-        "//:typeql-lang",
-        "//common:common",
-        "//query:query",
+        "//java:typeql-lang",
+        "//java/common:common",
+        "//java/query:query",
     ],
     size = "small",
 )
@@ -39,10 +39,10 @@ java_test(
     test_class = "com.vaticle.typeql.lang.query.test.TypeQLDeleteTest",
     srcs = ["TypeQLDeleteTest.java"],
     deps = [
-        "//:typeql-lang",
-        "//common:common",
-        "//pattern:pattern",
-        "//query:query",
+        "//java:typeql-lang",
+        "//java/common:common",
+        "//java/pattern:pattern",
+        "//java/query:query",
         "@vaticle_typedb_common//:common",
     ],
     size = "small",
