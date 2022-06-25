@@ -91,7 +91,6 @@ checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
-        ".grabl/automation.yml",
         "docs/*",
     ]),
     exclude = [
