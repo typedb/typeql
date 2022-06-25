@@ -54,7 +54,7 @@ assemble_crate(
     readme_file = "//:README.md",
     homepage = "https://github.com/vaticle/typeql",
     repository = "https://github.com/vaticle/typeql",
-    keywords = ["grakn", "database", "graph", "knowledgebase", "knowledgeengineering"],
+    keywords = ["typeql", "typedb", "database", "strongly-typed"],
     authors = ["Vaticle <community@vaticle.com>"]
 )
 

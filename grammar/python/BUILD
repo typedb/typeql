@@ -67,7 +67,7 @@ assemble_pip(
     author_email = "community@vaticle.com",
     license = "AGPLv3",
     requirements_file = "//:requirements.txt",
-    keywords = ["grakn", "database", "graph", "knowledgebase", "knowledge-engineering"],
+    keywords = ["typeql", "typedb", "database", "strongly-typed"],
     description = "TypeQL Grammar for Python",
     long_description_file = "//:README.md",
 )
