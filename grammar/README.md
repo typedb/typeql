@@ -1,7 +1,7 @@
 ## Using TypeQL Grammar
 
 > Note: All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively.
-> > However, if you would like to build a "Language Library" for TypeQL so you can construct TypeQL queries programmatically in your preferred language, you may use TypeQL Grammar library listed below.
+> However, if you would like to build a "Language Library" for TypeQL so you can construct TypeQL queries programmatically in your preferred language, you may use TypeQL Grammar library listed below.
 
 ---
 
