@@ -24,5 +24,6 @@ exports_files(["TypeQL.g4"])
 checkstyle_test(
     name = "checkstyle",
     include = glob(["*"]),
-    license_type = "agpl",
+    exclude = ["README.md"],
+    license_type = "agpl-header",
 )

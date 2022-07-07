@@ -30,5 +30,5 @@ checkstyle_test(
         "deployment/pom.xml",
         "deployment/src/test/java/MavenApplicationTest.java"
     ]),
-    license_type = "apache",
+    license_type = "apache-header",
 )

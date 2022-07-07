@@ -94,11 +94,17 @@ checkstyle_test(
         "docs/*",
     ]),
     exclude = [
-        "LICENSE", # TODO: Figure out why this has to be disabled -- this seems to be a bug in checkstyle_test
         "docs/package-structure.dot",
         "docs/package-structure.png",
+        "LICENSE",
+        "README.md",
     ],
-    license_type = "apache",
+    license_type = "apache-header",
+)
+checkstyle_test(
+    name = "checkstyle-license",
+    include = ["LICENSE"],
+    license_type = "apache-fulltext",
 )
 
 # CI targets that are not declared in any BUILD file, but are called externally

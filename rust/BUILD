@@ -80,6 +80,11 @@ checkstyle_test(
         "*",
         "*/*",
     ]),
-    exclude = ["LICENSE"], # TODO: Figure out why this has to be disabled -- this seems to be a bug in checkstyle_test
-    license_type = "apache",
+    exclude = ["LICENSE", "README.md"],
+    license_type = "apache-header",
+)
+checkstyle_test(
+    name = "checkstyle-license",
+    include = ["LICENSE"],
+    license_type = "apache-fulltext",
 )
