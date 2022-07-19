@@ -70,5 +70,5 @@ checkstyle_test(
         "variable/builder/*.java",
         "schema/*.java"
     ]),
-    license_type = "apache",
+    license_type = "apache-header",
 )

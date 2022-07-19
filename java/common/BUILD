@@ -59,5 +59,5 @@ checkstyle_test(
         "exception/*.java",
         "util/*.java",
     ]),
-    license_type = "apache",
+    license_type = "apache-header",
 )

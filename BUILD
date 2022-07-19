@@ -41,11 +41,22 @@ deploy_github(
 
 checkstyle_test(
     name = "checkstyle",
-    include = glob([
-        "*",
+    include = [
+        ".bazelrc",
+        ".gitignore",
         ".grabl/automation.yml",
-    ]),
-    license_type = "apache",
+        "BUILD",
+        "WORKSPACE",
+        "deployment.bzl",
+        "requirements.txt",
+    ],
+    license_type = "apache-header",
+)
+
+checkstyle_test(
+    name = "checkstyle-license",
+    include = ["LICENSE"],
+    license_type = "apache-fulltext",
 )
 
 # CI targets that are not declared in any BUILD file, but are called externally
