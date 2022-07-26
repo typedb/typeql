@@ -174,7 +174,7 @@ $person isa postgrad, has name "Bob";
 > Note: All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively.
 > However, if you would like to construct TypeQL queries programmatically, you can do so with "Language Libraries" listed below.
 
-- [TypeQL Grammar](https://github.com/typeql/blob/master/grammar/README.md)
+- [TypeQL Grammar](https://github.com/vaticle/typeql/blob/master/grammar/README.md)
 - [TypeQL Language Library for Java](https://github.com/vaticle/typeql/blob/master/java)
 - [TypeQL Language Library for Rust (under development)](https://github.com/vaticle/typeql/blob/master/rust)
 - [TypeQL Language Library for Python (under development)](https://github.com/typedb-osi/typeql-lang-python)
