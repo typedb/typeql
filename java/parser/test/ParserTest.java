@@ -954,7 +954,6 @@ public class ParserTest {
         final String attributeValue = "This has \"double quotes\" and a single-quoted backslash: '\\'";
         final String escapedValue = attributeValue.replace("\\", "\\\\").replace("\"", "\\\"");
 
-
         final String query = "insert\n" +
                 "$_ isa movie,\n" +
                 "    has title \"" + escapedValue + "\";";
@@ -1273,7 +1272,7 @@ public class ParserTest {
     public void defineAttributeTypeRegex() {
         final String query = "define\n" +
                 "digit sub attribute,\n" +
-                "    regex '\\d';";
+                "    regex '\\\\d';";
         TypeQLDefine parsed = parseQuery(query);
         TypeQLDefine expected = define(type("digit").sub("attribute").regex("\\d"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
@@ -1281,7 +1280,7 @@ public class ParserTest {
 
     @Test
     public void undefineAttributeTypeRegex() {
-        final String query = "undefine\ndigit regex '\\d';";
+        final String query = "undefine\ndigit regex '\\\\d';";
         TypeQLUndefine parsed = parseQuery(query);
         TypeQLUndefine expected = undefine(type("digit").regex("\\d"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
@@ -1289,7 +1288,7 @@ public class ParserTest {
 
     @Test
     public void regexPredicateParsesCharacterClassesCorrectly() {
-        final String query = "match\n$x like '\\d';";
+        final String query = "match\n$x like '\\\\d';";
         TypeQLMatch parsed = parseQuery(query);
         TypeQLMatch expected = match(var("x").like("\\d"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
@@ -1299,7 +1298,7 @@ public class ParserTest {
     public void regexPredicateParsesQuotesCorrectly() {
         final String query = "match\n$x like '\\\"';";
         TypeQLMatch parsed = parseQuery(query);
-        TypeQLMatch expected = match(var("x").like("\\\""));
+        TypeQLMatch expected = match(var("x").like("\""));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
@@ -1307,13 +1306,13 @@ public class ParserTest {
     public void regexPredicateParsesBackslashesCorrectly() {
         final String query = "match\n$x like '\\\\';";
         TypeQLMatch parsed = parseQuery(query);
-        TypeQLMatch expected = match(var("x").like("\\\\"));
+        TypeQLMatch expected = match(var("x").like("\\"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesNewlineCorrectly() {
-        final String query = "match\n$x like '\\n';";
+        final String query = "match\n$x like '\\\\n';";
         TypeQLMatch parsed = parseQuery(query);
         TypeQLMatch expected = match(var("x").like("\\n"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
@@ -1321,7 +1320,7 @@ public class ParserTest {
 
     @Test
     public void regexPredicateParsesForwardSlashesCorrectly() {
-        final String query = "match\n$x like '\\/';";
+        final String query = "match\n$x like '\\\\/';";
         TypeQLMatch parsed = parseQuery(query);
         TypeQLMatch expected = match(var("x").like("/"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));

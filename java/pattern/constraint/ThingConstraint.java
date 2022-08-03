@@ -651,7 +651,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
                 StringBuilder operation = new StringBuilder();
 
                 if (predicate().equals(LIKE)) {
-                    operation.append(LIKE).append(SPACE).append(quoteString(escapeRegex(value())));
+                    operation.append(LIKE).append(SPACE).append(quoteString(escapeString(escapeRegex(value()))));
                 } else if (predicate().equals(EQ)) {
                     operation.append(quoteString(escapeString(value())));
                 } else {

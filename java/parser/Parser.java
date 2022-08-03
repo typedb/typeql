@@ -716,7 +716,7 @@ public class Parser extends TypeQLBaseVisitor {
     // LITERAL INPUT VALUES ====================================================
 
     public String getRegex(TerminalNode string) {
-        return unescapeRegex(unquoteString(string.getText()));
+        return unescapeRegex(unescapeString(unquoteString(string.getText())));
     }
 
     @Override
