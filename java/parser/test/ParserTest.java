@@ -24,6 +24,7 @@ package com.vaticle.typeql.lang.parser.test;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.common.util.Strings;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
@@ -950,17 +951,17 @@ public class ParserTest {
 
     @Test
     public void testEscapeString() {
-        // ANTLR will see this as a string that looks like:
-        // "This has \"double quotes\" and a single-quoted backslash: '\\'"
-        final String input = "This has \\\"double quotes\\\" and a single-quoted backslash: \\'\\\\\\'";
+        final String attributeValue = "This has \"double quotes\" and a single-quoted backslash: '\\'";
+        final String escapedValue = attributeValue.replace("\\", "\\\\").replace("\"", "\\\"");
+
 
         final String query = "insert\n" +
                 "$_ isa movie,\n" +
-                "    has title \"" + input + "\";";
+                "    has title \"" + escapedValue + "\";";
         TypeQLInsert parsed = TypeQL.parseQuery(query).asInsert();
-        TypeQLInsert expected = insert(var().isa("movie").has("title", input));
+        TypeQLInsert built = insert(var().isa("movie").has("title", attributeValue));
 
-        assertQueryEquals(expected, parsed, query);
+        assertQueryEquals(built, parsed, query);
     }
 
 

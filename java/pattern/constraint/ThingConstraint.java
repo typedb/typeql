@@ -64,6 +64,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONS
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
 import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
+import static com.vaticle.typeql.lang.common.util.Strings.escapeString;
 import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
 import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
 
@@ -652,9 +653,9 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
                 if (predicate().equals(LIKE)) {
                     operation.append(LIKE).append(SPACE).append(quoteString(escapeRegex(value())));
                 } else if (predicate().equals(EQ)) {
-                    operation.append(quoteString(value()));
+                    operation.append(quoteString(escapeString(value())));
                 } else {
-                    operation.append(predicate()).append(SPACE).append(quoteString(value()));
+                    operation.append(predicate()).append(SPACE).append(quoteString(escapeString(value())));
                 }
 
                 return operation.toString();
