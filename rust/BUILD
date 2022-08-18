@@ -40,8 +40,9 @@ rust_library(
         "parser/*.rs",
     ]),
     deps = [
+        "@vaticle_dependencies//library/crates:antlr_rust",
         # External Vaticle Dependencies
-        "@vaticle_typeql//grammar/rust:typeql_grammar",
+        "//grammar/rust:typeql_grammar",
     ]
 )
 

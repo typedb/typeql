@@ -22,15 +22,3 @@
 
 mod pattern;
 pub use pattern::*;
-
-#[derive(Debug)]
-pub enum Query {
-    Dud(String),
-    Match(TypeQLMatch),
-}
-
-#[derive(Debug)]
-pub struct TypeQLMatch {
-    pub conjunction: Conjunction,
-}
-

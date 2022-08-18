@@ -20,5 +20,45 @@
  *
  */
 
-pub mod query;
+extern crate core;
+
+use std::convert::Into;
+
+use typeql_grammar::typeqlrustlexer::TypeQLRustLexer;
+use typeql_grammar::typeqlrustparser::*;
+use typeql_grammar::typeqlrustvisitor::TypeQLRustVisitorCompat;
+
+use antlr_rust::common_token_stream::CommonTokenStream;
+use antlr_rust::InputStream;
+
+use query::*;
+
 pub mod parser;
+pub mod query;
+
+use parser::Parser;
+
+pub fn parse_query(typeql_query: &str) -> Query {
+    parse_eof_query(typeql_query)
+}
+
+pub fn var<T: Into<String>>(name: T) -> UnboundVariable
+{
+    UnboundVariable {
+        reference: Reference::Named(name.into()),
+    }
+}
+
+pub fn typeql_match<T>(pattern: T) -> TypeQLMatch
+    where Conjunction: From<T>
+{
+    TypeQLMatch {
+        conjunction: Conjunction::from(pattern),
+    }
+}
+
+pub fn parse_eof_query(query_string: &str) -> Query {
+    let lexer = TypeQLRustLexer::new(InputStream::new(query_string.into()));
+    let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
+    Parser::default().visit_eof_query(parser.eof_query().unwrap().as_ref()).into_query()
+}
