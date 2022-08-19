@@ -20,10 +20,24 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+use crate::pattern::Reference;
+use crate::pattern::TypeConstraint;
 
-pub use parser::Parser;
+#[derive(Debug, Clone)]
+pub struct TypeVariable {
+    pub reference: Reference,
+    pub type_: Option<TypeConstraint>,
+}
 
-#[cfg(test)]
-mod test;
+impl TypeVariable {
+    pub fn new(reference: Reference) -> TypeVariable {
+        TypeVariable {
+            reference,
+            type_: None,
+        }
+    }
+    pub fn constrain(mut self, type_: TypeConstraint) -> TypeVariable {
+        self.type_ = Some(type_);
+        self
+    }
+}

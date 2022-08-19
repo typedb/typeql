@@ -19,7 +19,7 @@
 # under the License.
 #
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@vaticle_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
@@ -36,14 +36,17 @@ rust_library(
     name = "typeql_lang",
     srcs = glob([
         "*.rs",
-        "query/*.rs",
-        "parser/*.rs",
+        "**/*.rs",
     ]),
     deps = [
         "@vaticle_dependencies//library/crates:antlr_rust",
         # External Vaticle Dependencies
         "//grammar/rust:typeql_grammar",
     ]
+)
+rust_test(
+    name = "typeql_lang_rust_test",
+    crate = ":typeql_lang",
 )
 
 assemble_crate(

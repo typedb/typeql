@@ -20,17 +20,56 @@
  *
  */
 
-mod pattern;
-pub use pattern::*;
+pub use crate::pattern::*;
+use std::fmt;
+use std::fmt::Display;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Query {
-    Dud(String),
     Match(TypeQLMatch),
+    Dud(String),
+}
+
+impl Query {
+    pub fn get<T: Into<String>>(self, var: T) -> Query {
+        use Query::*;
+        if let Match(mut query) = self {
+            query.filter = vec![UnboundVariable {
+                reference: Reference::Named(var.into()),
+            }];
+            Match(query)
+        } else {
+            panic!("")
+        }
+    }
+}
+
+impl Display for Query {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Query::*;
+        match self {
+            Match(query) => write!(f, "{}", query),
+            Dud(message) => write!(f, "Dud({})", message),
+        }
+    }
 }
 
 #[derive(Debug)]
 pub struct TypeQLMatch {
     pub conjunction: Conjunction,
+    pub filter: Vec<UnboundVariable>,
 }
 
+impl Display for TypeQLMatch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let query = format!("match\n$x isa movie;");
+        write!(f, "{}", query)
+    }
+}
+
+impl PartialEq for TypeQLMatch {
+    fn eq(&self, other: &Self) -> bool {
+        self.conjunction == other.conjunction
+    }
+}
+impl Eq for TypeQLMatch {}

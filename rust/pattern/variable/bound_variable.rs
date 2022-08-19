@@ -20,10 +20,23 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+use crate::pattern::ThingVariable;
+use crate::pattern::TypeVariable;
 
-pub use parser::Parser;
+#[derive(Debug, Clone)]
+pub enum BoundVariable {
+    Thing(ThingVariable),
+    Type(TypeVariable),
+}
 
-#[cfg(test)]
-mod test;
+impl From<ThingVariable> for BoundVariable {
+    fn from(thing: ThingVariable) -> Self {
+        BoundVariable::Thing(thing)
+    }
+}
+
+impl From<TypeVariable> for BoundVariable {
+    fn from(type_: TypeVariable) -> Self {
+        BoundVariable::Type(type_)
+    }
+}

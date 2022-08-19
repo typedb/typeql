@@ -20,10 +20,33 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+use crate::{parse_query, typeql_match, var};
 
-pub use parser::Parser;
+macro_rules! assert_query_eq {
+    ($expected:ident, $parsed:ident, $query:ident) => {
+        assert_eq!($expected, $parsed);
+        assert_eq!($expected.to_string(), $query);
+        assert_eq!($parsed.to_string(), $query);
+    }
+}
 
-#[cfg(test)]
-mod test;
+#[test]
+fn test_simple_query() {
+    let query = r#"match
+$x isa movie;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match(var("x").isa("movie"));
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_named_type_variable() {
+    let query = r#"match
+$a type attribute_label;
+get $a;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match(var("a").type_("attribute_label")).get("a");
+    assert_query_eq!(expected, parsed, query);
+}

@@ -20,10 +20,34 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+use crate::pattern::IsaConstraint;
+use crate::pattern::Reference;
+use crate::pattern::ThingVariable;
+use crate::pattern::TypeVariable;
+use crate::pattern::TypeConstraint;
 
-pub use parser::Parser;
+#[derive(Debug, Clone)]
+pub struct UnboundVariable {
+    pub reference: Reference,
+}
 
-#[cfg(test)]
-mod test;
+impl UnboundVariable {
+    pub fn into_thing(self) -> ThingVariable {
+        ThingVariable::new(self.reference)
+    }
+
+    pub fn isa(self, type_name: &str) -> ThingVariable {
+        self.into_thing().constrain(IsaConstraint {
+            type_name: String::from(type_name),
+            is_explicit: false,
+        })
+    }
+
+    pub fn type_(self, type_name: &str) -> TypeVariable {
+        TypeVariable::new(self.reference).constrain(TypeConstraint {
+            type_name: String::from(type_name),
+            is_explicit: false,
+        })
+    }
+}
+

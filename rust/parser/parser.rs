@@ -196,10 +196,10 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_query_match(&mut self, ctx: &Query_matchContext<'input>) -> Self::Return {
-        ParserReturn::Query(Query::Match(typeql_match(
+        ParserReturn::Query(typeql_match(
             self.visit_patterns(ctx.patterns().unwrap().as_ref())
                 .into_patterns(),
-        )))
+        ))
     }
 
     fn visit_query_match_aggregate(
@@ -334,7 +334,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         let unscoped = self.get_var(ctx.VAR_().unwrap().as_ref());
         if let Some(isa) = ctx.ISA_() {
             ParserReturn::Pattern(Pattern::Conjunctable(Conjunctable::from(
-                unscoped.constrain(
+                unscoped.into_thing().constrain(
                     self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref()),
                 ),
             )))

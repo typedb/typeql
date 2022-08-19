@@ -20,10 +20,37 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+mod reference;
+pub use reference::*;
 
-pub use parser::Parser;
+mod bound_variable;
+pub use bound_variable::*;
 
-#[cfg(test)]
-mod test;
+mod thing_variable;
+pub use thing_variable::*;
+
+mod type_variable;
+pub use type_variable::*;
+
+mod unbound_variable;
+pub use unbound_variable::*;
+
+#[derive(Debug, Clone)]
+pub enum Variable {
+    Bound(BoundVariable),
+    Unbound(UnboundVariable),
+}
+
+impl From<UnboundVariable> for Variable {
+    fn from(unbound: UnboundVariable) -> Self {
+        Variable::Unbound(unbound)
+    }
+}
+
+impl<T> From<T> for Variable
+    where BoundVariable: From<T>
+{
+    fn from(var: T) -> Self {
+        Variable::Bound(BoundVariable::from(var))
+    }
+}

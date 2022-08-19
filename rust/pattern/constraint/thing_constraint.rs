@@ -20,10 +20,9 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+#[derive(Debug, Clone)]
+pub struct IsaConstraint {
+    pub type_name: String,
+    pub is_explicit: bool,
+}
 
-pub use parser::Parser;
-
-#[cfg(test)]
-mod test;

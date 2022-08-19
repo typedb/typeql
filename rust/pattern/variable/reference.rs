@@ -20,5 +20,8 @@
  *
  */
 
-mod pattern;
-pub use pattern::*;
+#[derive(Debug, Clone)]
+pub enum Reference {
+    Anonymous(()),
+    Named(String),
+}

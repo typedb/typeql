@@ -20,10 +20,8 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+mod type_constraint;
+pub use type_constraint::*;
 
-pub use parser::Parser;
-
-#[cfg(test)]
-mod test;
+mod thing_constraint;
+pub use thing_constraint::*;

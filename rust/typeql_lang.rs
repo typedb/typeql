@@ -35,6 +35,7 @@ use query::*;
 
 pub mod parser;
 pub mod query;
+mod pattern;
 
 use parser::Parser;
 
@@ -49,12 +50,12 @@ pub fn var<T: Into<String>>(name: T) -> UnboundVariable
     }
 }
 
-pub fn typeql_match<T>(pattern: T) -> TypeQLMatch
-    where Conjunction: From<T>
+pub fn typeql_match<T: Into<Conjunction>>(pattern: T) -> Query
 {
-    TypeQLMatch {
-        conjunction: Conjunction::from(pattern),
-    }
+    Query::Match(TypeQLMatch {
+        conjunction: pattern.into(),
+        filter: vec![],
+    })
 }
 
 pub fn parse_eof_query(query_string: &str) -> Query {

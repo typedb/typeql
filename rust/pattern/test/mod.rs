@@ -19,11 +19,3 @@
  * under the License.
  *
  */
-
-pub mod parser;
-pub mod syntax_error;
-
-pub use parser::Parser;
-
-#[cfg(test)]
-mod test;

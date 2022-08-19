@@ -20,10 +20,25 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+use crate::pattern::IsaConstraint;
+use crate::pattern::Reference;
 
-pub use parser::Parser;
+#[derive(Debug, Clone)]
+pub struct ThingVariable {
+    pub reference: Reference,
+    pub isa: Option<IsaConstraint>,
+}
 
-#[cfg(test)]
-mod test;
+impl ThingVariable {
+    pub fn new(reference: Reference) -> ThingVariable {
+        ThingVariable {
+            reference,
+            isa: None,
+        }
+    }
+    pub fn constrain(mut self, isa: IsaConstraint) -> ThingVariable {
+        self.isa = Some(isa);
+        self
+    }
+}
+

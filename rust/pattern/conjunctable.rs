@@ -20,10 +20,5 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+pub use crate::query::pattern::Pattern;
 
-pub use parser::Parser;
-
-#[cfg(test)]
-mod test;

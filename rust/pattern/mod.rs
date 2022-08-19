@@ -20,10 +20,17 @@
  *
  */
 
-pub mod parser;
-pub mod syntax_error;
+mod pattern;
+pub use pattern::*;
 
-pub use parser::Parser;
+mod conjunction;
+pub use conjunction::*;
+
+mod variable;
+pub use variable::*;
+
+mod constraint;
+pub use constraint::*;
 
 #[cfg(test)]
 mod test;
