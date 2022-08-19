@@ -20,7 +20,7 @@
  *
  */
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Reference {
     Anonymous(()),
     Named(String),

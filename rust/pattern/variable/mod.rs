@@ -35,22 +35,6 @@ pub use type_variable::*;
 mod unbound_variable;
 pub use unbound_variable::*;
 
-#[derive(Debug, Clone)]
-pub enum Variable {
-    Bound(BoundVariable),
-    Unbound(UnboundVariable),
-}
+mod variable;
+pub use variable::*;
 
-impl From<UnboundVariable> for Variable {
-    fn from(unbound: UnboundVariable) -> Self {
-        Variable::Unbound(unbound)
-    }
-}
-
-impl<T> From<T> for Variable
-    where BoundVariable: From<T>
-{
-    fn from(var: T) -> Self {
-        Variable::Bound(BoundVariable::from(var))
-    }
-}

@@ -23,10 +23,20 @@
 use crate::pattern::ThingVariable;
 use crate::pattern::TypeVariable;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum BoundVariable {
     Thing(ThingVariable),
     Type(TypeVariable),
+}
+
+impl BoundVariable {
+    pub fn into_type(self) -> TypeVariable {
+        if let BoundVariable::Type(var) = self {
+            var
+        } else {
+            panic!("")
+        }
+    }
 }
 
 impl From<ThingVariable> for BoundVariable {

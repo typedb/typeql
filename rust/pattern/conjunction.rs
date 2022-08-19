@@ -22,7 +22,7 @@
 
 pub use crate::pattern::Pattern;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
     pub patterns: Vec<Pattern>,
 }
@@ -34,13 +34,6 @@ impl Conjunction {
         }
     }
 }
-
-impl PartialEq for Conjunction {
-    fn eq(&self, other: &Self) -> bool {
-        self.patterns == other.patterns
-    }
-}
-impl Eq for Conjunction {}
 
 impl<T> From<T> for Conjunction
     where Pattern: From<T>

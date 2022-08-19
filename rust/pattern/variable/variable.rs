@@ -20,19 +20,19 @@
  *
  */
 
-pub use crate::pattern::Pattern;
-use crate::pattern::Variable;
-use crate::pattern::TypeVariable;
+use crate::pattern::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Conjunctable {
-    Negation(()),
-    Variable(Variable),
+pub enum Variable {
+    Bound(BoundVariable),
+    Unbound(UnboundVariable),
 }
 
-impl Conjunctable {
-    pub fn into_type_variable(self) -> TypeVariable {
-        if let Conjunctable::Variable(var) = self {
+impl Variable {
+    pub fn into_type(self) -> TypeVariable {
+        if let Variable::Bound(var) = self {
+            var.into_type()
+        } else if let Variable::Unbound(var) = self {
             var.into_type()
         } else {
             panic!("")
@@ -40,10 +40,16 @@ impl Conjunctable {
     }
 }
 
-impl<T> From<T> for Conjunctable
-    where Variable: From<T>
+impl From<UnboundVariable> for Variable {
+    fn from(unbound: UnboundVariable) -> Self {
+        Variable::Unbound(unbound)
+    }
+}
+
+impl<T> From<T> for Variable
+    where BoundVariable: From<T>
 {
-    fn from(variable: T) -> Self {
-        Conjunctable::Variable(Variable::from(variable))
+    fn from(var: T) -> Self {
+        Variable::Bound(BoundVariable::from(var))
     }
 }

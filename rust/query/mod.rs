@@ -20,9 +20,13 @@
  *
  */
 
-pub use crate::pattern::*;
 use std::fmt;
 use std::fmt::Display;
+
+use crate::pattern::*;
+
+mod typeql_match;
+pub use typeql_match::*;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
@@ -42,6 +46,10 @@ impl Query {
             panic!("")
         }
     }
+
+    pub fn filter<T>(self, _: T) -> Query {
+        self
+    }
 }
 
 impl Display for Query {
@@ -53,23 +61,3 @@ impl Display for Query {
         }
     }
 }
-
-#[derive(Debug)]
-pub struct TypeQLMatch {
-    pub conjunction: Conjunction,
-    pub filter: Vec<UnboundVariable>,
-}
-
-impl Display for TypeQLMatch {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let query = format!("match\n$x isa movie;");
-        write!(f, "{}", query)
-    }
-}
-
-impl PartialEq for TypeQLMatch {
-    fn eq(&self, other: &Self) -> bool {
-        self.conjunction == other.conjunction
-    }
-}
-impl Eq for TypeQLMatch {}

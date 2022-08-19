@@ -26,14 +26,30 @@ use crate::pattern::ThingVariable;
 use crate::pattern::TypeVariable;
 use crate::pattern::TypeConstraint;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundVariable {
     pub reference: Reference,
 }
 
 impl UnboundVariable {
+    pub fn named(name: String) -> UnboundVariable {
+        UnboundVariable { reference: Reference::Named(name) }
+    }
+
+    pub fn anonymous() -> UnboundVariable {
+        UnboundVariable { reference: Reference::Anonymous(()) }
+    }
+
+    pub fn hidden() -> UnboundVariable {
+        UnboundVariable { reference: Reference::Anonymous(()) }
+    }
+
     pub fn into_thing(self) -> ThingVariable {
         ThingVariable::new(self.reference)
+    }
+
+    pub fn into_type(self) -> TypeVariable {
+        TypeVariable::new(self.reference)
     }
 
     pub fn isa(self, type_name: &str) -> ThingVariable {
@@ -50,4 +66,3 @@ impl UnboundVariable {
         })
     }
 }
-

@@ -20,30 +20,20 @@
  *
  */
 
-pub use crate::pattern::Pattern;
-use crate::pattern::Variable;
-use crate::pattern::TypeVariable;
+use std::fmt;
+use std::fmt::Display;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Conjunctable {
-    Negation(()),
-    Variable(Variable),
+use crate::pattern::*;
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct TypeQLMatch {
+    pub conjunction: Conjunction,
+    pub filter: Vec<UnboundVariable>,
 }
 
-impl Conjunctable {
-    pub fn into_type_variable(self) -> TypeVariable {
-        if let Conjunctable::Variable(var) = self {
-            var.into_type()
-        } else {
-            panic!("")
-        }
-    }
-}
-
-impl<T> From<T> for Conjunctable
-    where Variable: From<T>
-{
-    fn from(variable: T) -> Self {
-        Conjunctable::Variable(Variable::from(variable))
+impl Display for TypeQLMatch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let query = format!("match\n$x isa movie;");
+        write!(f, "{}", query)
     }
 }

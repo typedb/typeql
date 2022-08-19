@@ -20,22 +20,26 @@
  *
  */
 
-pub use crate::pattern::Conjunction;
-pub use crate::pattern::Variable;
+use crate::pattern::Conjunction;
+use crate::pattern::Conjunctable;
+use crate::pattern::TypeVariable;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(()),
     Conjunctable(Conjunctable),
 }
 
-impl PartialEq for Pattern {
-    fn eq(&self, _other: &Self) -> bool {
-        true
+impl Pattern {
+    pub fn into_type_variable(self) -> TypeVariable {
+        if let Pattern::Conjunctable(conjunctable) = self {
+            conjunctable.into_type_variable()
+        } else {
+            panic!("")
+        }
     }
 }
-impl Eq for Pattern {}
 
 // impl<T> From<T> for Pattern
 //     where Conjunction: From<T>
@@ -50,19 +54,5 @@ impl<T> From<T> for Pattern
 {
     fn from(conjunctable: T) -> Self {
         Pattern::Conjunctable(Conjunctable::from(conjunctable))
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum Conjunctable {
-    Negation(()),
-    Variable(Variable),
-}
-
-impl<T> From<T> for Conjunctable
-    where Variable: From<T>
-{
-    fn from(variable: T) -> Self {
-        Conjunctable::Variable(Variable::from(variable))
     }
 }

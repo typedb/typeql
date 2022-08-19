@@ -23,7 +23,7 @@
 use crate::pattern::Reference;
 use crate::pattern::TypeConstraint;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
     pub reference: Reference,
     pub type_: Option<TypeConstraint>,

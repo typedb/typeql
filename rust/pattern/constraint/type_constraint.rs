@@ -20,7 +20,7 @@
  *
  */
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeConstraint {
     pub type_name: String,
     pub is_explicit: bool,

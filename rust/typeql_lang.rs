@@ -31,12 +31,12 @@ use typeql_grammar::typeqlrustvisitor::TypeQLRustVisitorCompat;
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
 
-use query::*;
-
 pub mod parser;
 pub mod query;
-mod pattern;
+pub mod pattern;
 
+use query::*;
+use pattern::*;
 use parser::Parser;
 
 pub fn parse_query(typeql_query: &str) -> Query {

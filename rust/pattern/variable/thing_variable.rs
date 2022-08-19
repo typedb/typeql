@@ -23,7 +23,7 @@
 use crate::pattern::IsaConstraint;
 use crate::pattern::Reference;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
     pub reference: Reference,
     pub isa: Option<IsaConstraint>,
