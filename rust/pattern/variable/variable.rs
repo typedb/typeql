@@ -20,7 +20,10 @@
  *
  */
 
+use crate::enum_getter;
 use crate::pattern::*;
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
@@ -29,6 +32,16 @@ pub enum Variable {
 }
 
 impl Variable {
+    enum_getter!(into_unbound_variable, Unbound, UnboundVariable);
+
+    pub fn into_pattern(self) -> Pattern {
+        self.into_conjunctable().into_pattern()
+    }
+
+    pub fn into_conjunctable(self) -> Conjunctable {
+        Conjunctable::Variable(self)
+    }
+
     pub fn into_type(self) -> TypeVariable {
         if let Variable::Bound(var) = self {
             var.into_type()
@@ -47,9 +60,25 @@ impl From<UnboundVariable> for Variable {
 }
 
 impl<T> From<T> for Variable
-    where BoundVariable: From<T>
+where
+    BoundVariable: From<T>,
 {
     fn from(var: T) -> Self {
         Variable::Bound(BoundVariable::from(var))
+    }
+}
+
+impl Display for Variable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Variable::*;
+        write!(
+            f,
+            "{}",
+            match self {
+                Unbound(unbound) => unbound.to_string(),
+                Bound(bound) => bound.to_string(),
+            }
+            .as_str()
+        )
     }
 }

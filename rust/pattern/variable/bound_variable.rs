@@ -20,8 +20,10 @@
  *
  */
 
-use crate::pattern::ThingVariable;
-use crate::pattern::TypeVariable;
+use std::fmt;
+use std::fmt::Display;
+use crate::enum_getter;
+use crate::pattern::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum BoundVariable {
@@ -30,12 +32,15 @@ pub enum BoundVariable {
 }
 
 impl BoundVariable {
-    pub fn into_type(self) -> TypeVariable {
-        if let BoundVariable::Type(var) = self {
-            var
-        } else {
-            panic!("")
-        }
+    enum_getter!(into_thing, Thing, ThingVariable);
+    enum_getter!(into_type, Type, TypeVariable);
+
+    pub fn into_pattern(self) -> Pattern {
+        self.into_variable().into_pattern()
+    }
+
+    pub fn into_variable(self) -> Variable {
+        Variable::Bound(self)
     }
 }
 
@@ -48,5 +53,20 @@ impl From<ThingVariable> for BoundVariable {
 impl From<TypeVariable> for BoundVariable {
     fn from(type_: TypeVariable) -> Self {
         BoundVariable::Type(type_)
+    }
+}
+
+impl Display for BoundVariable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use BoundVariable::*;
+        write!(
+            f,
+            "{}",
+            match self {
+                Thing(thing) => thing.to_string(),
+                Type(type_) => type_.to_string(),
+            }
+                .as_str()
+        )
     }
 }

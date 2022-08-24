@@ -20,9 +20,24 @@
  *
  */
 
+use std::fmt;
+use std::fmt::Display;
+use crate::Constraint;
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeConstraint {
     pub type_name: String,
     pub is_explicit: bool,
 }
 
+impl TypeConstraint {
+    pub fn into_constraint(self) -> Constraint {
+        Constraint::Type(self)
+    }
+}
+
+impl Display for TypeConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "type {}", self.type_name)
+    }
+}

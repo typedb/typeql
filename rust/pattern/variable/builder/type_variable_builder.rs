@@ -20,11 +20,16 @@
  *
  */
 
-mod constraint;
-pub use constraint::*;
+use crate::pattern::*;
 
-mod type_constraint;
-pub use type_constraint::*;
+pub trait TypeVariableBuilder: Sized
+{
+    fn type_(self, type_name: &str) -> TypeVariable {
+        self.constrain_type(TypeConstraint {
+            type_name: String::from(type_name),
+            is_explicit: false,
+        })
+    }
 
-mod thing_constraint;
-pub use thing_constraint::*;
+    fn constrain_type(self, constraint: TypeConstraint) -> TypeVariable;
+}

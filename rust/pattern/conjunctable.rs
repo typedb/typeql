@@ -20,9 +20,11 @@
  *
  */
 
-pub use crate::pattern::Pattern;
-use crate::pattern::Variable;
-use crate::pattern::TypeVariable;
+use std::fmt;
+use std::fmt::Display;
+
+use crate::enum_getter;
+use crate::pattern::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Conjunctable {
@@ -31,6 +33,16 @@ pub enum Conjunctable {
 }
 
 impl Conjunctable {
+    enum_getter!(into_variable, Variable, Variable);
+
+    pub fn into_pattern(self) -> Pattern {
+        Pattern::Conjunctable(self)
+    }
+
+    pub fn into_unbound_variable(self) -> UnboundVariable {
+        self.into_variable().into_unbound_variable()
+    }
+
     pub fn into_type_variable(self) -> TypeVariable {
         if let Conjunctable::Variable(var) = self {
             var.into_type()
@@ -41,9 +53,25 @@ impl Conjunctable {
 }
 
 impl<T> From<T> for Conjunctable
-    where Variable: From<T>
+where
+    Variable: From<T>,
 {
     fn from(variable: T) -> Self {
         Conjunctable::Variable(Variable::from(variable))
+    }
+}
+
+impl Display for Conjunctable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Conjunctable::*;
+        write!(
+            f,
+            "{}",
+            match self {
+                Negation(()) => "".to_string(),
+                Variable(variable) => variable.to_string(),
+            }
+            .as_str()
+        )
     }
 }

@@ -21,7 +21,24 @@
  */
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Visibility {
+    Visible,
+    Invisible,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Reference {
-    Anonymous(()),
-    Named(String),
+    Anonymous(Visibility),
+    Name(String),
+}
+
+impl Reference {
+    pub fn syntax(&self) -> String {
+        use Reference::*;
+        String::from("$")
+            + match self {
+                Anonymous(_) => "_",
+                Name(name) => name.as_str(),
+            }
+    }
 }

@@ -20,25 +20,54 @@
  *
  */
 
-use crate::pattern::IsaConstraint;
-use crate::pattern::Reference;
+use crate::pattern::*;
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
     pub reference: Reference,
     pub isa: Option<IsaConstraint>,
+    pub has: Vec<HasConstraint>,
 }
 
 impl ThingVariable {
+    pub fn into_pattern(self) -> Pattern {
+        self.into_bound_variable().into_pattern()
+    }
+
+    pub fn into_bound_variable(self) -> BoundVariable {
+        BoundVariable::Thing(self)
+    }
+
     pub fn new(reference: Reference) -> ThingVariable {
         ThingVariable {
             reference,
             isa: None,
+            has: Vec::new(),
         }
     }
-    pub fn constrain(mut self, isa: IsaConstraint) -> ThingVariable {
-        self.isa = Some(isa);
+}
+
+impl ThingVariableBuilderCommon for ThingVariable {
+    fn constrain_thing(mut self, constraint: ThingConstraint) -> ThingVariable {
+        use ThingConstraint::*;
+        match constraint {
+            Isa(isa) => self.isa = Some(isa),
+            Has(has) => self.has.push(has),
+        }
         self
     }
 }
 
+
+impl Display for ThingVariable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut var = self.reference.syntax();
+        if let Some(isa) = &self.isa {
+            var.push(' ');
+            var += &isa.to_string();
+        }
+        write!(f, "{}", var)
+    }
+}

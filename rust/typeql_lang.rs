@@ -32,26 +32,25 @@ use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::InputStream;
 
 pub mod parser;
-pub mod query;
 pub mod pattern;
+pub mod query;
 
-use query::*;
-use pattern::*;
+#[macro_use]
+mod util;
+
 use parser::Parser;
+use pattern::*;
+use query::*;
 
 pub fn parse_query(typeql_query: &str) -> Query {
     parse_eof_query(typeql_query)
 }
 
-pub fn var<T: Into<String>>(name: T) -> UnboundVariable
-{
-    UnboundVariable {
-        reference: Reference::Named(name.into()),
-    }
+pub fn var<T: Into<String>>(name: T) -> UnboundVariable {
+    UnboundVariable::named(name.into())
 }
 
-pub fn typeql_match<T: Into<Conjunction>>(pattern: T) -> Query
-{
+pub fn typeql_match<T: Into<Conjunction>>(pattern: T) -> Query {
     Query::Match(TypeQLMatch {
         conjunction: pattern.into(),
         filter: vec![],
@@ -61,5 +60,7 @@ pub fn typeql_match<T: Into<Conjunction>>(pattern: T) -> Query
 pub fn parse_eof_query(query_string: &str) -> Query {
     let lexer = TypeQLRustLexer::new(InputStream::new(query_string.into()));
     let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
-    Parser::default().visit_eof_query(parser.eof_query().unwrap().as_ref()).into_query()
+    Parser::default()
+        .visit_eof_query(parser.eof_query().unwrap().as_ref())
+        .into_query()
 }

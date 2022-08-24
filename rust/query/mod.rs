@@ -23,6 +23,7 @@
 use std::fmt;
 use std::fmt::Display;
 
+use crate::enum_getter;
 use crate::pattern::*;
 
 mod typeql_match;
@@ -38,18 +39,14 @@ impl Query {
     pub fn get<T: Into<String>>(self, var: T) -> Query {
         use Query::*;
         if let Match(mut query) = self {
-            query.filter = vec![UnboundVariable {
-                reference: Reference::Named(var.into()),
-            }];
+            query.filter = vec![UnboundVariable::named(var.into())];
             Match(query)
         } else {
             panic!("")
         }
     }
 
-    pub fn filter<T>(self, _: T) -> Query {
-        self
-    }
+    enum_getter!(into_match, Match, TypeQLMatch);
 }
 
 impl Display for Query {

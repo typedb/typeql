@@ -38,3 +38,5 @@ pub use unbound_variable::*;
 mod variable;
 pub use variable::*;
 
+mod builder;
+pub use builder::*;

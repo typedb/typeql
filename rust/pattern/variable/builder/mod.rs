@@ -20,11 +20,8 @@
  *
  */
 
-mod constraint;
-pub use constraint::*;
+mod thing_variable_builder;
+pub use thing_variable_builder::*;
 
-mod type_constraint;
-pub use type_constraint::*;
-
-mod thing_constraint;
-pub use thing_constraint::*;
+mod type_variable_builder;
+pub use type_variable_builder::*;

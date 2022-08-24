@@ -20,8 +20,9 @@
  *
  */
 
-use crate::pattern::Reference;
-use crate::pattern::TypeConstraint;
+use std::fmt;
+use std::fmt::Display;
+use crate::pattern::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
@@ -30,14 +31,36 @@ pub struct TypeVariable {
 }
 
 impl TypeVariable {
+    pub fn into_pattern(self) -> Pattern {
+        self.into_bound_variable().into_pattern()
+    }
+
+    pub fn into_bound_variable(self) -> BoundVariable {
+        BoundVariable::Type(self)
+    }
+
     pub fn new(reference: Reference) -> TypeVariable {
         TypeVariable {
             reference,
             type_: None,
         }
     }
-    pub fn constrain(mut self, type_: TypeConstraint) -> TypeVariable {
-        self.type_ = Some(type_);
+}
+
+impl TypeVariableBuilder for TypeVariable {
+    fn constrain_type(mut self, constraint: TypeConstraint) -> TypeVariable {
+        self.type_ = Some(constraint);
         self
+    }
+}
+
+impl Display for TypeVariable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut var = self.reference.syntax();
+        if let Some(type_) = &self.type_ {
+            var.push(' ');
+            var += &type_.to_string();
+        }
+        write!(f, "{}", var)
     }
 }

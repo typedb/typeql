@@ -20,11 +20,14 @@
  *
  */
 
-mod constraint;
-pub use constraint::*;
-
-mod type_constraint;
-pub use type_constraint::*;
-
-mod thing_constraint;
-pub use thing_constraint::*;
+#[macro_export]
+macro_rules! enum_getter {
+    ($fn_name:ident, $enum_value:ident, $classname:ty) => {
+        pub fn $fn_name(self) -> $classname {
+            match self {
+                Self::$enum_value(x) => x,
+                _ => panic!(""),
+            }
+        }
+    };
+}

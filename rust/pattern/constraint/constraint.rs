@@ -20,11 +20,16 @@
  *
  */
 
-mod constraint;
-pub use constraint::*;
 
-mod type_constraint;
-pub use type_constraint::*;
+use crate::{enum_getter, ThingConstraint, TypeConstraint};
 
-mod thing_constraint;
-pub use thing_constraint::*;
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Constraint {
+    Thing(ThingConstraint),
+    Type(TypeConstraint),
+}
+
+impl Constraint {
+    enum_getter!(into_thing, Thing, ThingConstraint);
+    enum_getter!(into_type, Type, TypeConstraint);
+}

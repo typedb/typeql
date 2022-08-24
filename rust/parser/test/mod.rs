@@ -20,14 +20,14 @@
  *
  */
 
-use crate::{parse_query, typeql_match, var};
+use crate::{parse_query, typeql_match, var, ThingVariableBuilderCommon, TypeVariableBuilder};
 
 macro_rules! assert_query_eq {
     ($expected:ident, $parsed:ident, $query:ident) => {
         assert_eq!($expected, $parsed);
         assert_eq!($expected.to_string(), $query);
         assert_eq!($parsed.to_string(), $query);
-    }
+    };
 }
 
 #[test]
@@ -48,5 +48,16 @@ get $a;"#;
 
     let parsed = parse_query(query);
     let expected = typeql_match(var("a").type_("attribute_label")).get("a");
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_parse_string_with_slash() {
+    let query = r#"match
+$x isa person,
+    has name "alice/bob";"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match(var("x").isa("person").has("name", "alice/bob"));
     assert_query_eq!(expected, parsed, query);
 }

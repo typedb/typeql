@@ -20,7 +20,9 @@
  *
  */
 
-pub use crate::pattern::Pattern;
+use crate::pattern::Pattern;
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -36,17 +38,29 @@ impl Conjunction {
 }
 
 impl<T> From<T> for Conjunction
-    where Pattern: From<T>
+where
+    Pattern: From<T>,
 {
     fn from(pattern: T) -> Self {
-        Conjunction { patterns: vec![Pattern::from(pattern)] }
+        Conjunction {
+            patterns: vec![Pattern::from(pattern)],
+        }
     }
 }
 
 impl<T> From<Vec<T>> for Conjunction
-    where Pattern: From<T>
+where
+    Pattern: From<T>,
 {
     fn from(patterns: Vec<T>) -> Self {
-        Conjunction { patterns: patterns.into_iter().map(Pattern::from).collect() }
+        Conjunction {
+            patterns: patterns.into_iter().map(Pattern::from).collect(),
+        }
+    }
+}
+
+impl Display for Conjunction {
+    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
     }
 }

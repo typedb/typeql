@@ -20,11 +20,9 @@
  *
  */
 
-use crate::pattern::IsaConstraint;
-use crate::pattern::Reference;
-use crate::pattern::ThingVariable;
-use crate::pattern::TypeVariable;
-use crate::pattern::TypeConstraint;
+use crate::pattern::*;
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundVariable {
@@ -32,16 +30,12 @@ pub struct UnboundVariable {
 }
 
 impl UnboundVariable {
-    pub fn named(name: String) -> UnboundVariable {
-        UnboundVariable { reference: Reference::Named(name) }
+    pub fn into_pattern(self) -> Pattern {
+        self.into_variable().into_pattern()
     }
 
-    pub fn anonymous() -> UnboundVariable {
-        UnboundVariable { reference: Reference::Anonymous(()) }
-    }
-
-    pub fn hidden() -> UnboundVariable {
-        UnboundVariable { reference: Reference::Anonymous(()) }
+    pub fn into_variable(self) -> Variable {
+        Variable::Unbound(self)
     }
 
     pub fn into_thing(self) -> ThingVariable {
@@ -52,17 +46,39 @@ impl UnboundVariable {
         TypeVariable::new(self.reference)
     }
 
-    pub fn isa(self, type_name: &str) -> ThingVariable {
-        self.into_thing().constrain(IsaConstraint {
-            type_name: String::from(type_name),
-            is_explicit: false,
-        })
+    pub fn named(name: String) -> UnboundVariable {
+        UnboundVariable {
+            reference: Reference::Name(name),
+        }
     }
 
-    pub fn type_(self, type_name: &str) -> TypeVariable {
-        TypeVariable::new(self.reference).constrain(TypeConstraint {
-            type_name: String::from(type_name),
-            is_explicit: false,
-        })
+    pub fn anonymous() -> UnboundVariable {
+        UnboundVariable {
+            reference: Reference::Anonymous(Visibility::Visible),
+        }
+    }
+
+    pub fn hidden() -> UnboundVariable {
+        UnboundVariable {
+            reference: Reference::Anonymous(Visibility::Invisible),
+        }
+    }
+}
+
+impl ThingVariableBuilderCommon for UnboundVariable {
+    fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable {
+        self.into_thing().constrain_thing(constraint)
+    }
+}
+
+impl TypeVariableBuilder for UnboundVariable {
+    fn constrain_type(self, constraint: TypeConstraint) -> TypeVariable {
+        self.into_type().constrain_type(constraint)
+    }
+}
+
+impl Display for UnboundVariable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.reference.syntax().as_str())
     }
 }

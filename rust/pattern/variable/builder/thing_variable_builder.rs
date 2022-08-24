@@ -20,11 +20,25 @@
  *
  */
 
-mod constraint;
-pub use constraint::*;
+use crate::pattern::*;
 
-mod type_constraint;
-pub use type_constraint::*;
+pub trait ThingVariableBuilderCommon: Sized {
+    fn has(self, type_name: &str, value: &str) -> ThingVariable {
+        self.constrain_thing(
+            HasConstraint::new(String::from(type_name), String::from(value))
+                .into_thing_constraint(),
+        )
+    }
 
-mod thing_constraint;
-pub use thing_constraint::*;
+    fn isa(self, type_name: &str) -> ThingVariable {
+        self.constrain_thing(
+            IsaConstraint {
+                type_name: String::from(type_name),
+                is_explicit: false,
+            }
+            .into_thing_constraint(),
+        )
+    }
+
+    fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable;
+}
