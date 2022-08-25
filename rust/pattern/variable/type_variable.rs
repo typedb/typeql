@@ -56,11 +56,10 @@ impl TypeVariableBuilder for TypeVariable {
 
 impl Display for TypeVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut var = self.reference.syntax();
+        write!(f, "{}", self.reference)?;
         if let Some(type_) = &self.type_ {
-            var.push(' ');
-            var += &type_.to_string();
+            write!(f, " {}", type_)?;
         }
-        write!(f, "{}", var)
+        Ok(())
     }
 }

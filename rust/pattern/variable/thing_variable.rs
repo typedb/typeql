@@ -23,12 +23,14 @@
 use crate::pattern::*;
 use std::fmt;
 use std::fmt::Display;
+use crate::write_joined;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
     pub reference: Reference,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
+    pub value: Option<ValueConstraint>,
 }
 
 impl ThingVariable {
@@ -45,6 +47,7 @@ impl ThingVariable {
             reference,
             isa: None,
             has: Vec::new(),
+            value: None,
         }
     }
 }
@@ -55,19 +58,24 @@ impl ThingVariableBuilderCommon for ThingVariable {
         match constraint {
             Isa(isa) => self.isa = Some(isa),
             Has(has) => self.has.push(has),
+            Value(value) => self.value = Some(value),
         }
         self
     }
 }
 
-
 impl Display for ThingVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut var = self.reference.syntax();
+        write!(f, "{} ", self.reference)?;
         if let Some(isa) = &self.isa {
-            var.push(' ');
-            var += &isa.to_string();
+            write!(f, "{}", isa)?;
         }
-        write!(f, "{}", var)
+        if !self.has.is_empty() {
+            if self.isa.is_some() {
+                f.write_str(",\n    ")?;
+            }
+            write_joined!(f, self.has, ",\n    ")?;
+        }
+        Ok(())
     }
 }

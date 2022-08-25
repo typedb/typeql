@@ -43,12 +43,18 @@ impl Variable {
     }
 
     pub fn into_type(self) -> TypeVariable {
-        if let Variable::Bound(var) = self {
-            var.into_type()
-        } else if let Variable::Unbound(var) = self {
-            var.into_type()
-        } else {
-            panic!("")
+        use Variable::*;
+        match self {
+            Bound(var) => var.into_type(),
+            Unbound(var) => var.into_type(),
+        }
+    }
+
+    pub fn into_thing(self) -> ThingVariable {
+        use Variable::*;
+        match self {
+            Bound(var) => var.into_thing(),
+            Unbound(var) => var.into_thing(),
         }
     }
 }
@@ -71,14 +77,9 @@ where
 impl Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Variable::*;
-        write!(
-            f,
-            "{}",
-            match self {
-                Unbound(unbound) => unbound.to_string(),
-                Bound(bound) => bound.to_string(),
-            }
-            .as_str()
-        )
+        match self {
+            Unbound(unbound) => write!(f, "{}", unbound),
+            Bound(bound) => write!(f, "{}", bound),
+        }
     }
 }

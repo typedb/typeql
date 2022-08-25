@@ -31,3 +31,20 @@ macro_rules! enum_getter {
         }
     };
 }
+
+#[macro_export]
+macro_rules! write_joined {
+    ($f:ident, $iterable:expr, $joiner:tt) => {{
+        let mut iter = $iterable.iter();
+        let mut result = write!($f, "{}", iter.next().unwrap());
+        if result.is_ok() {
+            for x in iter {
+                result = write!($f, "{}{}", $joiner, x);
+                if result.is_err() {
+                    break;
+                }
+            }
+        }
+        result
+    }};
+}

@@ -79,6 +79,6 @@ impl TypeVariableBuilder for UnboundVariable {
 
 impl Display for UnboundVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reference.syntax().as_str())
+        write!(f, "{}", self.reference)
     }
 }

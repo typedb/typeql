@@ -42,7 +42,7 @@ rust_library(
         "@vaticle_dependencies//library/crates:antlr_rust",
         # External Vaticle Dependencies
         "//grammar/rust:typeql_grammar",
-    ]
+    ],
 )
 rust_test(
     name = "typeql_lang_rust_test",

@@ -87,6 +87,11 @@ impl Parser {
         }
     }
 
+    fn get_string(&self, string: &TerminalNode<TypeQLRustParserContextType>) -> String {
+        let quoted = string.get_text();
+        String::from(&quoted[1..quoted.len()-1])
+    }
+
     fn get_isa_constraint(
         &mut self,
         _isa: &TerminalNode<TypeQLRustParserContextType>,
@@ -416,7 +421,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         if let Some(label) = ctx.label() {
             if let Some(var) = ctx.VAR_() {
                 ParserReturn::Constraint(
-                    HasConstraint::new(
+                    HasConstraint::from_typed_variable(
                         label.get_text(),
                         self.get_var(var.as_ref()).into_variable(),
                     )
@@ -424,9 +429,12 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 )
             } else if let Some(predicate) = ctx.predicate() {
                 ParserReturn::Constraint(
-                    HasConstraint::new(
+                    HasConstraint::from_value(
                         label.get_text(),
-                        self.visit_predicate(predicate.as_ref()).into_value(),
+                        self.visit_predicate(predicate.as_ref())
+                            .into_constraint()
+                            .into_thing()
+                            .into_value(),
                     )
                     .into_constraint(),
                 )
@@ -441,13 +449,16 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_predicate(&mut self, ctx: &PredicateContext<'input>) -> Self::Return {
-        // ParserReturn::Value(
-            if let Some(_) = ctx.value() {
-                todo!()
-            } else {
-                todo!()
-            }
-        // )
+        let (predicate, value) = if let Some(value) = ctx.value() {
+            (
+                Predicate::Equality(EqualityPredicate::Eq),
+                self.visit_value(value.as_ref()).into_value(),
+            )
+        } else {
+            todo!()
+        };
+
+        ParserReturn::Constraint(ValueConstraint::new(predicate, value).into_constraint())
     }
 
     fn visit_predicate_equality(
@@ -535,7 +546,11 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_value(&mut self, ctx: &ValueContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+        if let Some(string) = ctx.STRING_() {
+            ParserReturn::Value(Value::from(self.get_string(string.as_ref())))
+        } else {
+            todo!()
+        }
     }
 
     fn visit_regex(&mut self, ctx: &RegexContext<'input>) -> Self::Return {

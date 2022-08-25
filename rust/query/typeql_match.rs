@@ -24,6 +24,7 @@ use std::fmt;
 use std::fmt::Display;
 
 use crate::query::*;
+use crate::write_joined;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -49,27 +50,19 @@ impl TypeQLMatch {
 
 impl Display for TypeQLMatch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut query = String::from("match\n");
-        query += &self
-            .conjunction
-            .patterns
-            .iter()
-            .map(Pattern::to_string)
-            .collect::<Vec<String>>()
-            .join(";\n");
-        query.push(';');
+        f.write_str("match")?;
 
-        if !self.filter.is_empty() {
-            query.push_str("\nget ");
-            query += &self
-                .filter
-                .iter()
-                .map(UnboundVariable::to_string)
-                .collect::<Vec<String>>()
-                .join(", ");
-            query.push_str("; ");
+        for pattern in &self.conjunction.patterns {
+            write!(f, "\n{};", pattern)?;
         }
 
-        write!(f, "{}", query.trim())
+        if !self.filter.is_empty() {
+            f.write_str("\n")?; // separate because there is only meant to be one newline before all modifiers
+            f.write_str("get ")?;
+            write_joined!(f, self.filter, ", ")?;
+            f.write_str(";")?;
+        }
+
+        Ok(())
     }
 }

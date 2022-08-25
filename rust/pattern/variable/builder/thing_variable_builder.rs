@@ -23,17 +23,20 @@
 use crate::pattern::*;
 
 pub trait ThingVariableBuilderCommon: Sized {
-    fn has(self, type_name: &str, value: &str) -> ThingVariable {
+    fn has(self, type_name: impl Into<String>, value: impl Into<Value>) -> ThingVariable {
         self.constrain_thing(
-            HasConstraint::new(String::from(type_name), String::from(value))
-                .into_thing_constraint(),
+            HasConstraint::from_value(
+                type_name.into(),
+                ValueConstraint::new(Predicate::Equality(EqualityPredicate::Eq), value.into()),
+            )
+            .into_thing_constraint(),
         )
     }
 
-    fn isa(self, type_name: &str) -> ThingVariable {
+    fn isa(self, type_name: impl Into<String>) -> ThingVariable {
         self.constrain_thing(
             IsaConstraint {
-                type_name: String::from(type_name),
+                type_name: type_name.into(),
                 is_explicit: false,
             }
             .into_thing_constraint(),

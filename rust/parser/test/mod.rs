@@ -61,3 +61,21 @@ $x isa person,
     let expected = typeql_match(var("x").isa("person").has("name", "alice/bob"));
     assert_query_eq!(expected, parsed, query);
 }
+
+// #[test]
+// fn test_relation_query() {
+//     let query = r#"match
+// $brando "Marl B" isa name;
+// (actor: $brando, $char, production-with-cast: $prod);
+// get $char, $prod;"#;
+
+//     let parsed = parse_query(query);
+//     let expected = typeql_match(
+//         var("brando").eq("Marl B").isa("name"),
+//         rel("actor", "brando")
+//             .rel("char")
+//             .rel("production-with-cast", "prod"),
+//     )
+//     .get("char", "prod");
+//     assert_query_eq!(expected, parsed, query);
+// }

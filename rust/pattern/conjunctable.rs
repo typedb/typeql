@@ -64,14 +64,9 @@ where
 impl Display for Conjunctable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Conjunctable::*;
-        write!(
-            f,
-            "{}",
-            match self {
-                Negation(()) => "".to_string(),
-                Variable(variable) => variable.to_string(),
-            }
-            .as_str()
-        )
+        match self {
+            Negation(()) => Ok(()),
+            Variable(variable) => write!(f, "{}", variable),
+        }
     }
 }

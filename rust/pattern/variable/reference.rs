@@ -20,6 +20,9 @@
  *
  */
 
+use std::fmt;
+use std::fmt::Display;
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Visibility {
     Visible,
@@ -33,12 +36,17 @@ pub enum Reference {
 }
 
 impl Reference {
-    pub fn syntax(&self) -> String {
+    // pub fn syntax(&self) -> String {
+    //     self.to_string()
+    // }
+}
+
+impl Display for Reference {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Reference::*;
-        String::from("$")
-            + match self {
-                Anonymous(_) => "_",
-                Name(name) => name.as_str(),
-            }
+        write!(f, "${}", match self {
+            Anonymous(_) => "_",
+            Name(name) => name,
+        })
     }
 }

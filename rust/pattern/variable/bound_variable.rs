@@ -59,14 +59,9 @@ impl From<TypeVariable> for BoundVariable {
 impl Display for BoundVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use BoundVariable::*;
-        write!(
-            f,
-            "{}",
-            match self {
-                Thing(thing) => thing.to_string(),
-                Type(type_) => type_.to_string(),
-            }
-                .as_str()
-        )
+        match self {
+            Thing(thing) => write!(f, "{}", thing),
+            Type(type_) => write!(f, "{}", type_),
+        }
     }
 }

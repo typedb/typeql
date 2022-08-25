@@ -24,9 +24,9 @@ use crate::pattern::*;
 
 pub trait TypeVariableBuilder: Sized
 {
-    fn type_(self, type_name: &str) -> TypeVariable {
+    fn type_(self, type_name: impl Into<String>) -> TypeVariable {
         self.constrain_type(TypeConstraint {
-            type_name: String::from(type_name),
+            type_name: type_name.into(),
             is_explicit: false,
         })
     }
