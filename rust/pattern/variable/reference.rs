@@ -36,9 +36,13 @@ pub enum Reference {
 }
 
 impl Reference {
-    // pub fn syntax(&self) -> String {
-    //     self.to_string()
-    // }
+    pub fn is_visible(&self) -> bool {
+        use Reference::*;
+        match self {
+            Anonymous(visibility) => *visibility == Visibility::Visible,
+            Name(_) => true,
+        }
+    }
 }
 
 impl Display for Reference {

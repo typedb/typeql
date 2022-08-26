@@ -46,15 +46,19 @@ pub fn parse_query(typeql_query: &str) -> Query {
     parse_eof_query(typeql_query)
 }
 
-pub fn var(name: impl Into<String>) -> UnboundVariable {
-    UnboundVariable::named(name.into())
-}
-
 pub fn typeql_match(pattern: impl Into<Conjunction>) -> Query {
     Query::Match(TypeQLMatch {
         conjunction: pattern.into(),
         filter: vec![],
     })
+}
+
+pub fn var(name: impl Into<String>) -> UnboundVariable {
+    UnboundVariable::named(name.into())
+}
+
+pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
+    UnboundVariable::hidden().rel(value)
 }
 
 pub fn parse_eof_query(query_string: &str) -> Query {

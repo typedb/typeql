@@ -65,9 +65,15 @@ impl UnboundVariable {
     }
 }
 
-impl ThingVariableBuilderCommon for UnboundVariable {
+impl ThingVariableBuilder for UnboundVariable {
     fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable {
         self.into_thing().constrain_thing(constraint)
+    }
+}
+
+impl RelationVariableBuilder for UnboundVariable {
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable {
+        self.into_thing().constrain_role_player(constraint)
     }
 }
 

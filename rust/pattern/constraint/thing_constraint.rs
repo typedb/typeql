@@ -20,22 +20,24 @@
  *
  */
 
-use crate::enum_getter;
+use crate::{enum_getter, write_joined};
 use crate::pattern::*;
 use std::fmt;
-use std::fmt::Display;
+use std::fmt::{Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ThingConstraint {
     Isa(IsaConstraint),
     Has(HasConstraint),
     Value(ValueConstraint),
+    Relation(RelationConstraint),
 }
 
 impl ThingConstraint {
     enum_getter!(into_isa, Isa, IsaConstraint);
     enum_getter!(into_has, Has, HasConstraint);
     enum_getter!(into_value, Value, ValueConstraint);
+    enum_getter!(into_relation, Relation, RelationConstraint);
 
     pub fn into_constraint(self) -> Constraint {
         Constraint::Thing(self)
@@ -220,7 +222,125 @@ impl Display for Value {
         use Value::*;
         match self {
             String(string) => write!(f, "\"{}\"", string),
-            _ => Ok(())
+            _ => Ok(()),
         }
     }
 }
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct RelationConstraint {
+    role_players: Vec<RolePlayerConstraint>,
+    scope: String,
+}
+
+impl RelationConstraint {
+    pub fn into_constraint(self) -> Constraint {
+        self.into_thing_constraint().into_constraint()
+    }
+
+    pub fn into_thing_constraint(self) -> ThingConstraint {
+        ThingConstraint::Relation(self)
+    }
+
+    pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
+        RelationConstraint { role_players, scope: String::from("relation") }
+    }
+
+    pub fn add(&mut self, role_player: RolePlayerConstraint) {
+        self.role_players.push(role_player);
+    }
+}
+
+impl From<RolePlayerConstraint> for RelationConstraint {
+    fn from(constraint: RolePlayerConstraint) -> Self {
+        RelationConstraint::new(vec![constraint])
+    }
+}
+
+impl Display for RelationConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_char('(')?;
+        write_joined!(f, self.role_players, ", ")?;
+        f.write_char(')')
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct RolePlayerConstraint {
+    pub role_type: Option<TypeVariable>,
+    pub player: ThingVariable,
+    pub repetition: u64,
+}
+
+impl RolePlayerConstraint {
+    pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> RolePlayerConstraint {
+        RolePlayerConstraint {
+            role_type,
+            player,
+            repetition: 0,
+        }
+    }
+}
+
+impl From<&str> for RolePlayerConstraint {
+    fn from(player_var: &str) -> Self {
+        Self::from(String::from(player_var))
+    }
+}
+
+impl From<String> for RolePlayerConstraint {
+    fn from(player_var: String) -> Self {
+        Self::from(UnboundVariable::named(player_var))
+    }
+}
+
+impl From<(&str, &str)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (&str, &str)) -> Self {
+        Self::from((String::from(role_type), String::from(player_var)))
+    }
+}
+
+impl From<(String, String)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (String, String)) -> Self {
+        Self::from((role_type, UnboundVariable::named(player_var)))
+    }
+}
+
+impl From<UnboundVariable> for RolePlayerConstraint {
+    fn from(player_var: UnboundVariable) -> Self {
+        Self::new(None, player_var.into_thing())
+    }
+}
+
+impl From<(String, UnboundVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
+        Self::from((UnboundVariable::hidden().type_(role_type), player_var))
+    }
+}
+
+impl From<(UnboundVariable, UnboundVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (UnboundVariable, UnboundVariable)) -> Self {
+        Self::new(Some(role_type.into_type()), player_var.into_thing())
+    }
+}
+
+impl From<(TypeVariable, UnboundVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (TypeVariable, UnboundVariable)) -> Self {
+        Self::new(Some(role_type), player_var.into_thing())
+    }
+}
+
+impl Display for RolePlayerConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(role_type) = &self.role_type {
+            if role_type.reference.is_visible() {
+                write!(f, "{}", role_type.reference)?;
+            } else {
+                write!(f, "{}", role_type.type_.as_ref().unwrap().type_name)?;
+            }
+            f.write_str(": ")?;
+        }
+        write!(f, "{}", self.player)
+    }
+}
+

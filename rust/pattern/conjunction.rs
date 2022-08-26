@@ -38,12 +38,23 @@ impl Conjunction {
 }
 
 impl<T> From<T> for Conjunction
-where
-    Pattern: From<T>,
+    where
+        Pattern: From<T>,
 {
     fn from(pattern: T) -> Self {
         Conjunction {
             patterns: vec![Pattern::from(pattern)],
+        }
+    }
+}
+
+impl<T, const N: usize> From<[T; N]> for Conjunction
+where
+Pattern: From<T>
+{
+    fn from(patterns: [T; N]) -> Self {
+        Conjunction {
+            patterns: patterns.into_iter().map(Pattern::from).collect(),
         }
     }
 }

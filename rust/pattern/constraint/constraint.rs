@@ -21,7 +21,7 @@
  */
 
 
-use crate::{enum_getter, ThingConstraint, TypeConstraint};
+use crate::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Constraint {

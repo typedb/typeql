@@ -89,7 +89,7 @@ impl Parser {
 
     fn get_string(&self, string: &TerminalNode<TypeQLRustParserContextType>) -> String {
         let quoted = string.get_text();
-        String::from(&quoted[1..quoted.len()-1])
+        String::from(&quoted[1..quoted.len() - 1])
     }
 
     fn get_isa_constraint(
@@ -360,8 +360,12 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     ) -> Self::Return {
         if let Some(var_thing) = ctx.variable_thing() {
             self.visit_variable_thing(var_thing.as_ref())
+        } else if let Some(var_relation) = ctx.variable_relation() {
+            self.visit_variable_relation(var_relation.as_ref())
+        } else if let Some(var_attribute) = ctx.variable_attribute() {
+            self.visit_variable_attribute(var_attribute.as_ref())
         } else {
-            panic!("visit_variable_thing_any: not implemented")
+            panic!("visit_variable_thing_any: illegal grammar")
         }
     }
 
@@ -386,18 +390,78 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_variable_relation(&mut self, ctx: &Variable_relationContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+        let mut relation = match ctx.VAR_() {
+            Some(var) => self.get_var(var.as_ref()),
+            None => UnboundVariable::hidden(),
+        }
+        .constrain_thing(
+            self.visit_relation(ctx.relation().unwrap().as_ref())
+                .into_constraint()
+                .into_thing(),
+        );
+
+        if let Some(isa) = ctx.ISA_() {
+            relation = relation.constrain_thing(
+                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
+                    .into_thing_constraint(),
+            );
+        }
+
+        if let Some(_attributes) = ctx.attributes() {
+            todo!();
+        }
+
+        ParserReturn::Pattern(relation.into_pattern())
     }
 
     fn visit_variable_attribute(
         &mut self,
         ctx: &Variable_attributeContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        let mut attribute = match ctx.VAR_() {
+            Some(var) => self.get_var(var.as_ref()),
+            None => UnboundVariable::hidden(),
+        }
+        .constrain_thing(
+            self.visit_predicate(ctx.predicate().unwrap().as_ref())
+                .into_constraint()
+                .into_thing(),
+        );
+
+        if let Some(isa) = ctx.ISA_() {
+            attribute = attribute.constrain_thing(
+                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
+                    .into_thing_constraint(),
+            );
+        }
+
+        if let Some(_attributes) = ctx.attributes() {
+            todo!();
+        }
+
+        ParserReturn::Pattern(attribute.into_pattern())
     }
 
     fn visit_relation(&mut self, ctx: &RelationContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+        ParserReturn::Constraint(
+            RelationConstraint::new(
+                (0..)
+                    .map_while(|i| ctx.role_player(i))
+                    .map(|ctx| {
+                        let player = self.get_var(ctx.player().unwrap().VAR_().unwrap().as_ref());
+                        if let Some(type_) = ctx.type_() {
+                            RolePlayerConstraint::from((
+                                self.visit_type_(type_.as_ref()).into_label(),
+                                player,
+                            ))
+                        } else {
+                            RolePlayerConstraint::from(player)
+                        }
+                    })
+                    .collect(),
+            )
+            .into_constraint(),
+        )
     }
 
     fn visit_role_player(&mut self, ctx: &Role_playerContext<'input>) -> Self::Return {

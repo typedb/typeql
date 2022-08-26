@@ -22,7 +22,7 @@
 
 use crate::pattern::*;
 
-pub trait ThingVariableBuilderCommon: Sized {
+pub trait ThingVariableBuilder: Sized {
     fn has(self, type_name: impl Into<String>, value: impl Into<Value>) -> ThingVariable {
         self.constrain_thing(
             HasConstraint::from_value(
@@ -43,5 +43,20 @@ pub trait ThingVariableBuilderCommon: Sized {
         )
     }
 
+    fn eq(self, value: impl Into<Value>) -> ThingVariable {
+        self.constrain_thing(
+            ValueConstraint::new(Predicate::Equality(EqualityPredicate::Eq), value.into())
+                .into_thing_constraint(),
+        )
+    }
+
     fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable;
+}
+
+pub trait RelationVariableBuilder: Sized {
+    fn rel<T: Into<RolePlayerConstraint>>(self, value: T) -> ThingVariable {
+        self.constrain_role_player(value.into())
+    }
+
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable;
 }

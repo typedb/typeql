@@ -20,7 +20,10 @@
  *
  */
 
-use crate::{parse_query, typeql_match, var, ThingVariableBuilderCommon, TypeVariableBuilder};
+use crate::{
+    parse_query, rel, typeql_match, var, RelationVariableBuilder, ThingVariableBuilder,
+    TypeVariableBuilder,
+};
 
 macro_rules! assert_query_eq {
     ($expected:ident, $parsed:ident, $query:ident) => {
@@ -47,7 +50,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query);
-    let expected = typeql_match(var("a").type_("attribute_label")).get("a");
+    let expected = typeql_match(var("a").type_("attribute_label")).get(["a"]);
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -62,20 +65,24 @@ $x isa person,
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]
-// fn test_relation_query() {
-//     let query = r#"match
-// $brando "Marl B" isa name;
-// (actor: $brando, $char, production-with-cast: $prod);
-// get $char, $prod;"#;
+#[test]
+fn test_relation_query() {
+    let query = r#"match
+$brando "Marl B" isa name;
+(actor: $brando, $char, production-with-cast: $prod);
+get $char, $prod;"#;
 
-//     let parsed = parse_query(query);
-//     let expected = typeql_match(
-//         var("brando").eq("Marl B").isa("name"),
-//         rel("actor", "brando")
-//             .rel("char")
-//             .rel("production-with-cast", "prod"),
-//     )
-//     .get("char", "prod");
-//     assert_query_eq!(expected, parsed, query);
-// }
+    let parsed = parse_query(query);
+    let expected = typeql_match([
+        var("brando").eq("Marl B").isa("name"),
+        rel(("actor", "brando"))
+            .rel("char")
+            .rel(("production-with-cast", "prod")),
+    ])
+    .get(["char", "prod"]);
+
+    println!("{:?}", query);
+    println!("{:?}", parsed.to_string());
+    println!("{:?}", expected.to_string());
+    assert_query_eq!(expected, parsed, query);
+}

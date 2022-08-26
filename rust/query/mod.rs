@@ -36,13 +36,13 @@ pub enum Query {
 }
 
 impl Query {
-    pub fn get<T: Into<String>>(self, var: T) -> Query {
+    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Query {
         use Query::*;
         if let Match(mut query) = self {
-            query.filter = vec![UnboundVariable::named(var.into())];
+            query.filter = vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect();
             Match(query)
         } else {
-            panic!("")
+            todo!()
         }
     }
 

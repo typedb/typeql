@@ -21,9 +21,9 @@
  */
 
 use crate::pattern::*;
-use std::fmt;
-use std::fmt::Display;
 use crate::write_joined;
+use std::fmt;
+use std::fmt::{Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
@@ -31,6 +31,7 @@ pub struct ThingVariable {
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
     pub value: Option<ValueConstraint>,
+    pub relation: Option<RelationConstraint>,
 }
 
 impl ThingVariable {
@@ -48,31 +49,65 @@ impl ThingVariable {
             isa: None,
             has: Vec::new(),
             value: None,
+            relation: None,
         }
     }
 }
 
-impl ThingVariableBuilderCommon for ThingVariable {
+impl ThingVariableBuilder for ThingVariable {
     fn constrain_thing(mut self, constraint: ThingConstraint) -> ThingVariable {
         use ThingConstraint::*;
         match constraint {
             Isa(isa) => self.isa = Some(isa),
             Has(has) => self.has.push(has),
             Value(value) => self.value = Some(value),
+            Relation(relation) => self.relation = Some(relation),
         }
         self
     }
 }
 
+impl RelationVariableBuilder for ThingVariable {
+    fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> ThingVariable {
+        match &mut self.relation {
+            None => self.relation = Some(RelationConstraint::from(constraint)),
+            Some(relation) => relation.add(constraint),
+        }
+        self
+    }
+}
+
+impl ThingVariable {
+}
+
 impl Display for ThingVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", self.reference)?;
-        if let Some(isa) = &self.isa {
-            write!(f, "{}", isa)?;
+        if self.reference.is_visible() {
+            write!(f, "{}", self.reference)?;
         }
+
+        if let Some(value) = &self.value {
+            if self.reference.is_visible() {
+                f.write_char(' ')?;
+            }
+            write!(f, "{}", value.value)?;
+        }
+        if let Some(relation) = &self.relation {
+            if self.reference.is_visible() {
+                f.write_char(' ')?;
+            }
+            write!(f, "{}", relation)?;
+        }
+
+        if let Some(isa) = &self.isa {
+            write!(f, " {}", isa)?;
+        }
+
         if !self.has.is_empty() {
             if self.isa.is_some() {
                 f.write_str(",\n    ")?;
+            } else {
+                f.write_char(' ')?;
             }
             write_joined!(f, self.has, ",\n    ")?;
         }
