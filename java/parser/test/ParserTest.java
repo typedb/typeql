@@ -152,16 +152,6 @@ public class ParserTest {
     }
 
     @Test
-    public void testRoleTypeScopedSpecifically() {
-        String query = "match\n" +
-                "$m relates spouse;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(var("m").relates("spouse"));
-
-        assertQueryEquals(expected, parsed, query);
-    }
-
-    @Test
     public void testRoleTypeNotScoped() {
         String query = "match\n" +
                 "marriage relates $s;";
