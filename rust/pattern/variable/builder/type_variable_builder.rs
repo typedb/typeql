@@ -22,13 +22,18 @@
 
 use crate::pattern::*;
 
-pub trait TypeVariableBuilder: Sized
-{
-    fn type_(self, type_name: impl Into<String>) -> TypeVariable {
-        self.constrain_type(TypeConstraint {
-            type_name: type_name.into(),
-            is_explicit: false,
-        })
+pub trait TypeVariableBuilder: Sized {
+    fn type_(self, type_name: impl Into<ScopedType>) -> TypeVariable {
+        self.constrain_type(
+            LabelConstraint {
+                scoped_type: type_name.into(),
+            }
+            .into_type_constraint(),
+        )
+    }
+
+    fn relates(self, type_name: impl Into<RelatesConstraint>) -> TypeVariable {
+        self.constrain_type(type_name.into().into_type_constraint())
     }
 
     fn constrain_type(self, constraint: TypeConstraint) -> TypeVariable;

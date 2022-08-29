@@ -20,14 +20,16 @@
  *
  */
 
-use std::fmt;
-use std::fmt::Display;
 use crate::pattern::*;
+use crate::write_joined;
+use std::fmt;
+use std::fmt::{Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
     pub reference: Reference,
-    pub type_: Option<TypeConstraint>,
+    pub label: Option<LabelConstraint>,
+    pub relates: Vec<RelatesConstraint>,
 }
 
 impl TypeVariable {
@@ -42,23 +44,36 @@ impl TypeVariable {
     pub fn new(reference: Reference) -> TypeVariable {
         TypeVariable {
             reference,
-            type_: None,
+            label: None,
+            relates: vec![],
         }
     }
 }
 
 impl TypeVariableBuilder for TypeVariable {
     fn constrain_type(mut self, constraint: TypeConstraint) -> TypeVariable {
-        self.type_ = Some(constraint);
+        use TypeConstraint::*;
+        match constraint {
+            Label(label) => self.label = Some(label),
+            Relates(relates) => self.relates.push(relates),
+        }
         self
     }
 }
 
 impl Display for TypeVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reference)?;
-        if let Some(type_) = &self.type_ {
-            write!(f, " {}", type_)?;
+        if self.reference.is_visible() {
+            write!(f, "{}", self.reference)?;
+            if let Some(type_) = &self.label {
+                write!(f, " {}", type_)?;
+            }
+        } else {
+            write!(f, "{}", self.label.as_ref().unwrap().scoped_type)?;
+        }
+        if !self.relates.is_empty() {
+            f.write_char(' ')?;
+            write_joined!(f, self.relates, ",\n    ")?;
         }
         Ok(())
     }

@@ -48,9 +48,13 @@ impl Reference {
 impl Display for Reference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Reference::*;
-        write!(f, "${}", match self {
-            Anonymous(_) => "_",
-            Name(name) => name,
-        })
+        write!(
+            f,
+            "${}",
+            match self {
+                Anonymous(_) => "_",
+                Name(name) => name,
+            }
+        )
     }
 }

@@ -319,31 +319,35 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_variable_type(&mut self, ctx: &Variable_typeContext<'input>) -> Self::Return {
-        let var_type = self.visit_type_any(ctx.type_any().unwrap().as_ref());
-        let mut var_type = match var_type {
-            ParserReturn::Pattern(p) => p,
-            ParserReturn::Label(p) => {
-                Pattern::from(UnboundVariable::hidden().constrain_type(TypeConstraint {
-                    type_name: p,
-                    is_explicit: false,
-                }))
-            }
-            _ => panic!("{:?}", var_type),
+        let mut var_type = match self.visit_type_any(ctx.type_any().unwrap().as_ref()) {
+            ParserReturn::Pattern(p) => p.into_type_variable(),
+            ParserReturn::Label(p) => UnboundVariable::hidden().type_(p),
+            other @ _ => panic!("{:?}", other),
         };
         for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
-            if let Some(_) = constraint.TYPE() {
+            if constraint.RELATES().is_some() {
+                let _overridden: Option<u8> = match constraint.AS() {
+                    None => None,
+                    Some(_) => todo!(),
+                };
+                var_type = var_type.constrain_type(
+                    match self.visit_type_(constraint.type_(0).unwrap().as_ref()) {
+                        ParserReturn::Label(label) => RelatesConstraint::from(label),
+                        ParserReturn::Pattern(var) => {
+                            RelatesConstraint::from(var.into_unbound_variable())
+                        }
+                        _ => panic!(""),
+                    }
+                    .into_type_constraint(),
+                );
+            } else if constraint.TYPE().is_some() {
                 let scoped_label = self.visit_label_any(constraint.label_any().unwrap().as_ref());
-                var_type = Pattern::from(var_type.into_type_variable().constrain_type(
-                    TypeConstraint {
-                        type_name: scoped_label.into_label(),
-                        is_explicit: false,
-                    },
-                ));
+                var_type = var_type.type_(scoped_label.into_label());
             } else {
                 panic!("visit_variable_type: not implemented")
             }
         }
-        ParserReturn::Pattern(var_type)
+        ParserReturn::Pattern(var_type.into_pattern())
     }
 
     fn visit_type_constraint(&mut self, ctx: &Type_constraintContext<'input>) -> Self::Return {
@@ -482,25 +486,19 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_attribute(&mut self, ctx: &AttributeContext<'input>) -> Self::Return {
-        if let Some(label) = ctx.label() {
+        let has = if let Some(label) = ctx.label() {
             if let Some(var) = ctx.VAR_() {
-                ParserReturn::Constraint(
-                    HasConstraint::from_typed_variable(
-                        label.get_text(),
-                        self.get_var(var.as_ref()).into_variable(),
-                    )
-                    .into_constraint(),
+                HasConstraint::from_typed_variable(
+                    label.get_text(),
+                    self.get_var(var.as_ref()).into_variable(),
                 )
             } else if let Some(predicate) = ctx.predicate() {
-                ParserReturn::Constraint(
-                    HasConstraint::from_value(
-                        label.get_text(),
-                        self.visit_predicate(predicate.as_ref())
-                            .into_constraint()
-                            .into_thing()
-                            .into_value(),
-                    )
-                    .into_constraint(),
+                HasConstraint::from_value(
+                    label.get_text(),
+                    self.visit_predicate(predicate.as_ref())
+                        .into_constraint()
+                        .into_thing()
+                        .into_value(),
                 )
             } else {
                 panic!("Illegal grammar")
@@ -509,13 +507,15 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
             todo!()
         } else {
             panic!("illegal grammar")
-        }
+        };
+
+        ParserReturn::Constraint(has.into_constraint())
     }
 
     fn visit_predicate(&mut self, ctx: &PredicateContext<'input>) -> Self::Return {
         let (predicate, value) = if let Some(value) = ctx.value() {
             (
-                Predicate::Equality(EqualityPredicate::Eq),
+                Predicate::Eq,
                 self.visit_value(value.as_ref()).into_value(),
             )
         } else {
@@ -570,7 +570,13 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_type_(&mut self, ctx: &Type_Context<'input>) -> Self::Return {
-        ParserReturn::Label(ctx.label().unwrap().get_text())
+        if let Some(label) = ctx.label() {
+            ParserReturn::Label(label.get_text())
+        } else if let Some(var) = ctx.VAR_() {
+            ParserReturn::Pattern(self.get_var(var.as_ref()).into_pattern())
+        } else {
+            panic!("")
+        }
     }
 
     fn visit_label_any(&mut self, ctx: &Label_anyContext<'input>) -> Self::Return {

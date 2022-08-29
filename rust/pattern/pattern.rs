@@ -64,10 +64,10 @@ where
 impl Display for Pattern {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Pattern::*;
-            match self {
-                Conjunction(conjunction) => write!(f, "{}", conjunction),
-                Disjunction(()) => Ok(()),
-                Conjunctable(conjunctable) => write!(f, "{}", conjunctable),
-            }
+        match self {
+            Conjunction(conjunction) => write!(f, "{}", conjunction),
+            Disjunction(()) => Ok(()),
+            Conjunctable(conjunctable) => write!(f, "{}", conjunctable),
+        }
     }
 }

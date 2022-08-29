@@ -20,10 +20,10 @@
  *
  */
 
-use std::fmt;
-use std::fmt::Display;
 use crate::enum_getter;
 use crate::pattern::*;
+use std::fmt;
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum BoundVariable {

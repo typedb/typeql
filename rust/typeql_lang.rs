@@ -20,8 +20,6 @@
  *
  */
 
-extern crate core;
-
 use std::convert::Into;
 
 use typeql_grammar::typeqlrustlexer::TypeQLRustLexer;
@@ -55,6 +53,10 @@ pub fn typeql_match(pattern: impl Into<Conjunction>) -> Query {
 
 pub fn var(name: impl Into<String>) -> UnboundVariable {
     UnboundVariable::named(name.into())
+}
+
+pub fn type_(name: impl Into<String>) -> TypeVariable {
+    UnboundVariable::hidden().type_(name.into())
 }
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {

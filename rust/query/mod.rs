@@ -39,7 +39,10 @@ impl Query {
     pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Query {
         use Query::*;
         if let Match(mut query) = self {
-            query.filter = vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect();
+            query.filter = vars
+                .into_iter()
+                .map(|s| UnboundVariable::named(s.into()))
+                .collect();
             Match(query)
         } else {
             todo!()

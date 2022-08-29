@@ -20,8 +20,8 @@
  *
  */
 
-use crate::{enum_getter, write_joined};
 use crate::pattern::*;
+use crate::{enum_getter, write_joined};
 use std::fmt;
 use std::fmt::{Display, Write};
 
@@ -107,7 +107,7 @@ impl Display for HasConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("has")?;
         if let Some(type_) = &self.type_ {
-            write!(f, " {}", &type_.type_.as_ref().unwrap().type_name)?;
+            write!(f, " {}", &type_.label.as_ref().unwrap())?;
         }
 
         use Reference::*;
@@ -134,11 +134,8 @@ impl ValueConstraint {
     }
 
     pub fn new(predicate: Predicate, value: Value) -> ValueConstraint {
-        if let Predicate::SubString(_) = predicate {
-            match value {
-                Value::String(_) => (),
-                _ => panic!(""),
-            }
+        if predicate.is_substring() && !matches!(value, Value::String(_)) {
+            panic!("");
         }
         ValueConstraint { predicate, value }
     }
@@ -148,7 +145,7 @@ impl Display for ValueConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Value::Variable(_) = self.value {
             write!(f, "{} {}", self.predicate, self.value)
-        } else if self.predicate == Predicate::Equality(EqualityPredicate::Eq) {
+        } else if self.predicate == Predicate::Eq {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)
@@ -158,30 +155,34 @@ impl Display for ValueConstraint {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Predicate {
-    Equality(EqualityPredicate),
-    SubString(SubStringPredicate),
-}
-
-impl Display for Predicate {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", "")
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum EqualityPredicate {
+    // equality
     Eq,
     Neq,
     Gt,
     Gte,
     Lt,
     Lte,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum SubStringPredicate {
+    // substring
     Contains,
     Like,
+}
+
+impl Predicate {
+    pub fn is_equality(&self) -> bool {
+        use Predicate::*;
+        matches!(self, Eq | Neq | Gt | Gte | Lt | Lte)
+    }
+
+    pub fn is_substring(&self) -> bool {
+        use Predicate::*;
+        matches!(self, Contains | Like)
+    }
+}
+
+impl Display for Predicate {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", "")
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -243,7 +244,10 @@ impl RelationConstraint {
     }
 
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
-        RelationConstraint { role_players, scope: String::from("relation") }
+        RelationConstraint {
+            role_players,
+            scope: String::from("relation"),
+        }
     }
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {
@@ -336,11 +340,10 @@ impl Display for RolePlayerConstraint {
             if role_type.reference.is_visible() {
                 write!(f, "{}", role_type.reference)?;
             } else {
-                write!(f, "{}", role_type.type_.as_ref().unwrap().type_name)?;
+                write!(f, "{}", role_type.label.as_ref().unwrap())?;
             }
             f.write_str(": ")?;
         }
         write!(f, "{}", self.player)
     }
 }
-

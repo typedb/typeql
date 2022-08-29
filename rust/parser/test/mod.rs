@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    parse_query, rel, typeql_match, var, RelationVariableBuilder, ThingVariableBuilder,
+    parse_query, rel, type_, typeql_match, var, RelationVariableBuilder, ThingVariableBuilder,
     TypeVariableBuilder,
 };
 
@@ -81,8 +81,104 @@ get $char, $prod;"#;
     ])
     .get(["char", "prod"]);
 
-    println!("{:?}", query);
-    println!("{:?}", parsed.to_string());
-    println!("{:?}", expected.to_string());
     assert_query_eq!(expected, parsed, query);
 }
+
+#[test]
+fn test_role_type_scoped_globally() {
+    let query = r#"match
+$m relates spouse;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match(var("m").relates("spouse"));
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_role_type_not_scoped() {
+    let query = r#"match
+marriage relates $s;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match(type_("marriage").relates(var("s")));
+    assert_query_eq!(expected, parsed, query);
+}
+
+/*
+#[test]
+fn test_predicate_query_1() {
+    let query = r#"match
+$x isa movie,
+    has title $t;
+{
+    $t "Apocalypse Now";
+} or {
+    $t < "Juno";
+    $t > "Godfather";
+} or {
+    $t "Spy";
+};
+$t != "Apocalypse Now";"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match([
+        var("x").isa("movie").has("title", var("t")),
+        or(
+            var("t").eq("Apocalypse Now"),
+            and(var("t").lt("Juno"), var("t").gt("Godfather")),
+            var("t").eq("Spy"),
+        ),
+        var("t").neq("Apocalypse Now"),
+    ]);
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_predicate_query_2() {
+    let query = r#"match
+$x isa movie,
+    has title $t;
+{
+    $t <= "Juno";
+    $t >= "Godfather";
+    $t != "Heat";
+} or {
+    $t "The Muppets";
+};"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match([
+        var("x").isa("movie").has("title", var("t")),
+        or(
+            and(
+                var("t").lte("Juno"),
+                var("t").gte("Godfather"),
+                var("t").neq("Heat"),
+            ),
+            var("t").eq("The Muppets"),
+        ),
+    ]);
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_predicate_query_3() {
+    let query = r#"match
+($x, $y);
+$y isa person,
+    has name $n;
+{
+    $n contains "ar";
+} or {
+    $n like "^M.*$";
+};"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match([
+        rel("x").rel("y"),
+        var("y").isa("person").has("name", var("n")),
+        or(var("n").contains("ar"), var("n").like("^M.*$")),
+    ]);
+    assert_query_eq!(expected, parsed, query);
+}
+ */
