@@ -272,14 +272,14 @@ public class ParserTest {
                 "not { $a is $b; };";
         TypeQLMatch parsed = TypeQL.parseQuery(query);
 
-        TypeQLMatch exepcted = match(
+        TypeQLMatch expected = match(
                 var("x").sub(var("z")), var("y").sub(var("z")),
                 var("a").isa(var("x")), var("b").isa(var("y")),
                 not(var("x").is("y")),
                 not(var("a").is("b"))
         );
 
-        assertQueryEquals(exepcted, parsed, query);
+        assertQueryEquals(expected, parsed, query);
     }
 
     @Test
