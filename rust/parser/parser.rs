@@ -514,10 +514,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
 
     fn visit_predicate(&mut self, ctx: &PredicateContext<'input>) -> Self::Return {
         let (predicate, value) = if let Some(value) = ctx.value() {
-            (
-                Predicate::Eq,
-                self.visit_value(value.as_ref()).into_value(),
-            )
+            (Predicate::Eq, self.visit_value(value.as_ref()).into_value())
         } else {
             todo!()
         };

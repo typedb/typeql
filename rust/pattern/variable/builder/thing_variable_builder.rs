@@ -45,8 +45,7 @@ pub trait ThingVariableBuilder: Sized {
 
     fn eq(self, value: impl Into<Value>) -> ThingVariable {
         self.constrain_thing(
-            ValueConstraint::new(Predicate::Eq, value.into())
-                .into_thing_constraint(),
+            ValueConstraint::new(Predicate::Eq, value.into()).into_thing_constraint(),
         )
     }
 
