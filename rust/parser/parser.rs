@@ -23,6 +23,7 @@
 use antlr_rust::token::Token;
 use antlr_rust::tree::TerminalNode;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitorCompat};
+use chrono::NaiveDateTime;
 
 use typeql_grammar::typeqlrustparser::*;
 use typeql_grammar::typeqlrustvisitor::TypeQLRustVisitorCompat;
@@ -90,6 +91,14 @@ impl Parser {
     fn get_string(&self, string: &TerminalNode<TypeQLRustParserContextType>) -> String {
         let quoted = string.get_text();
         String::from(&quoted[1..quoted.len() - 1])
+    }
+
+    fn get_date(&self, date: &TerminalNode<TypeQLRustParserContextType>) -> NaiveDateTime {
+        NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d").unwrap()
+    }
+
+    fn get_date_time(&self, date_time: &TerminalNode<TypeQLRustParserContextType>) -> NaiveDateTime {
+        NaiveDateTime::parse_from_str(&date_time.get_text(), "%Y-%m-%dT%H:%M:%S").unwrap()
     }
 
     fn get_isa_constraint(
@@ -515,6 +524,17 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     fn visit_predicate(&mut self, ctx: &PredicateContext<'input>) -> Self::Return {
         let (predicate, value) = if let Some(value) = ctx.value() {
             (Predicate::Eq, self.visit_value(value.as_ref()).into_value())
+        } else if let Some(equality) = ctx.predicate_equality() {
+            (
+                Predicate::from(equality.get_text()),
+                if let Some(_value) = ctx.predicate_value().unwrap().value() {
+                    todo!()
+                } else if let Some(var) = ctx.predicate_value().unwrap().VAR_() {
+                    Value::from(self.get_var(var.as_ref()))
+                } else {
+                    panic!("Illegal state")
+                },
+            )
         } else {
             todo!()
         };
@@ -615,6 +635,10 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     fn visit_value(&mut self, ctx: &ValueContext<'input>) -> Self::Return {
         if let Some(string) = ctx.STRING_() {
             ParserReturn::Value(Value::from(self.get_string(string.as_ref())))
+        } else if let Some(date_time) = ctx.DATETIME_() {
+            ParserReturn::Value(Value::from(self.get_date_time(date_time.as_ref())))
+        } else if let Some(date) = ctx.DATE_() {
+            ParserReturn::Value(Value::from(self.get_date(date.as_ref())))
         } else {
             todo!()
         }

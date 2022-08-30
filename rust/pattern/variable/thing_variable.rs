@@ -89,7 +89,7 @@ impl Display for ThingVariable {
             if self.reference.is_visible() {
                 f.write_char(' ')?;
             }
-            write!(f, "{}", value.value)?;
+            write!(f, "{}", value)?;
         }
         if let Some(relation) = &self.relation {
             if self.reference.is_visible() {

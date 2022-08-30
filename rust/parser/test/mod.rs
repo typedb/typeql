@@ -24,6 +24,7 @@ use crate::{
     parse_query, rel, type_, typeql_match, var, RelationVariableBuilder, ThingVariableBuilder,
     TypeVariableBuilder,
 };
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 macro_rules! assert_query_eq {
     ($expected:ident, $parsed:ident, $query:ident) => {
@@ -181,4 +182,102 @@ $y isa person,
     ]);
     assert_query_eq!(expected, parsed, query);
 }
- */
+
+#[test]
+fn test_predicate_query_4() {
+    let query = r#"match
+$x has age $y;
+$y >= $z;
+$z 18 isa age;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match([
+        var("x").has("age", var("y")),
+        var("y").gte(var("z")),
+        var("z").eq(18).isa("age"),
+    ]);
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_concept_variable() {
+    let query = r#"match
+$x sub $z;
+$y sub $z;
+$a isa $x;
+$b isa $y;
+not { $x is $y; };
+not { $a is $b; };"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match([
+        var("x").sub(var("z")),
+        var("y").sub(var("z")),
+        var("a").isa(var("x")),
+        var("b").isa(var("y")),
+        not(var("x").is("y")),
+        not(var("a").is("b")),
+    ]);
+    assert_query_eq!(expected, parsed, query);
+}
+*/
+
+#[test]
+fn test_value_equals_variable_query() {
+    let query = r#"match
+$s1 = $s2;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match(var("s1").eq(var("s2")));
+    assert_query_eq!(expected, parsed, query);
+}
+
+/*
+#[test]
+fn test_movies_released_after_or_at_the_same_time_as_spy() {
+    let query = r#"match
+$x has release-date >= $r;
+$_ has title "Spy",
+    has release-date $r;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match([
+        var("x").has("release-date", gte(var("r"))),
+        var(()).has("title", "Spy").has("release-date", var("r")),
+    ]);
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_predicate() {
+    let query = r#"
+$x has release-date < 1986-03-03T00:00,
+    has tmdb-vote-count 100,
+    has tmdb-vote-average <= 9.0;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match([var("x")
+        .has("release-date", lt(LocalDate.of(1986, 3, 3).atStartOfDay()))
+        .has("tmdb-vote-count", 100)
+        .has("tmdb-vote-average", lte(9.0))]);
+
+    assert_query_eq!(expected, parsed, query);
+}
+*/
+
+#[test]
+fn when_parsing_date_handle_time() {
+    let query = r#"match
+$x has release-date 1000-11-12T13:14:15;"#;
+
+    let parsed = parse_query(query);
+    let expected = typeql_match(var("x").has(
+        "release-date",
+        NaiveDateTime::new(
+            NaiveDate::from_ymd(1000, 11, 12),
+            NaiveTime::from_hms(13, 14, 15),
+        ),
+    ));
+
+    assert_query_eq!(expected, parsed, query);
+}

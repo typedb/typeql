@@ -22,6 +22,7 @@
 
 use crate::pattern::*;
 use crate::{enum_getter, write_joined};
+use chrono::NaiveDateTime;
 use std::fmt;
 use std::fmt::{Display, Write};
 
@@ -143,9 +144,7 @@ impl ValueConstraint {
 
 impl Display for ValueConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Value::Variable(_) = self.value {
-            write!(f, "{} {}", self.predicate, self.value)
-        } else if self.predicate == Predicate::Eq {
+        if self.predicate == Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)
@@ -179,9 +178,28 @@ impl Predicate {
     }
 }
 
+impl From<String> for Predicate {
+    fn from(string: String) -> Self {
+        use Predicate::*;
+        match string.as_str() {
+            "=" => Eq,
+            _ => todo!(),
+        }
+    }
+}
+
 impl Display for Predicate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", "")
+        use Predicate::*;
+        write!(
+            f,
+            "{}",
+            match self {
+                Eq => "=",
+                Neq => "!=",
+                _ => todo!(),
+            }
+        )
     }
 }
 
@@ -191,7 +209,7 @@ pub enum Value {
     Double(f64),
     Boolean(bool),
     String(String),
-    DateTime(()),
+    DateTime(NaiveDateTime),
     Variable(Box<ThingVariable>),
 }
 impl Eq for Value {} // can't derive, because f32 does not implement Eq
@@ -212,6 +230,22 @@ impl From<String> for Value {
     }
 }
 
+impl From<NaiveDateTime> for Value {
+    fn from(date_time: NaiveDateTime) -> Value {
+        Value::DateTime(date_time)
+    }
+}
+
+impl From<UnboundVariable> for Value {
+    fn from(variable: UnboundVariable) -> Value {
+        Value::Variable(Box::new(variable.into_thing()))
+    }
+}
+impl From<ThingVariable> for Value {
+    fn from(variable: ThingVariable) -> Value {
+        Value::Variable(Box::new(variable))
+    }
+}
 impl From<Variable> for Value {
     fn from(variable: Variable) -> Value {
         Value::Variable(Box::new(variable.into_thing()))
@@ -222,8 +256,10 @@ impl Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
+            DateTime(date_time) => write!(f, "{}", date_time.format("%Y-%m-%dT%H:%M:%S")),
             String(string) => write!(f, "\"{}\"", string),
-            _ => Ok(()),
+            Variable(var) => write!(f, "{}", var.reference),
+            _ => panic!(""),
         }
     }
 }
