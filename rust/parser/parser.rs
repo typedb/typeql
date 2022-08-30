@@ -70,15 +70,15 @@ impl Default for ParserReturn {
     }
 }
 
-pub struct Parser;
+pub struct TypeQLParser;
 
-impl Default for Parser {
+impl Default for TypeQLParser {
     fn default() -> Self {
-        Parser {}
+        TypeQLParser {}
     }
 }
 
-impl Parser {
+impl TypeQLParser {
     fn get_var(&mut self, var: &TerminalNode<TypeQLRustParserContextType>) -> UnboundVariable {
         let name = &var.symbol.get_text()[1..];
         if name == "_" {
@@ -97,7 +97,10 @@ impl Parser {
         NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d").unwrap()
     }
 
-    fn get_date_time(&self, date_time: &TerminalNode<TypeQLRustParserContextType>) -> NaiveDateTime {
+    fn get_date_time(
+        &self,
+        date_time: &TerminalNode<TypeQLRustParserContextType>,
+    ) -> NaiveDateTime {
         NaiveDateTime::parse_from_str(&date_time.get_text(), "%Y-%m-%dT%H:%M:%S").unwrap()
     }
 
@@ -113,7 +116,7 @@ impl Parser {
     }
 }
 
-impl<'input> ParseTreeVisitorCompat<'input> for Parser {
+impl<'input> ParseTreeVisitorCompat<'input> for TypeQLParser {
     type Node = TypeQLRustParserContextType;
     type Return = ParserReturn;
 
@@ -126,7 +129,7 @@ impl<'input> ParseTreeVisitorCompat<'input> for Parser {
     }
 }
 
-impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
+impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
     fn visit_eof_query(&mut self, ctx: &Eof_queryContext<'input>) -> Self::Return {
         self.visit_query(ctx.query().unwrap().as_ref())
     }

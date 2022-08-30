@@ -23,7 +23,7 @@
 pub mod parser;
 pub mod syntax_error;
 
-pub use parser::Parser;
+pub use parser::TypeQLParser;
 
 #[cfg(test)]
 mod test;
