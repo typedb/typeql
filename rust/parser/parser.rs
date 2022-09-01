@@ -36,8 +36,9 @@ use crate::typeql_match;
 #[derive(Debug)]
 pub struct Definable;
 
+#[must_use]
 #[derive(Debug)]
-pub enum ParserReturn {
+pub enum ParserResult {
     Label(String),
     Queries(Vec<Query>),
     Query(Query),
@@ -48,10 +49,10 @@ pub enum ParserReturn {
     Constraints(Vec<Constraint>),
     Definable(Definable),
     Definables(Vec<Definable>),
-    None,
+    Err(()),
 }
 
-impl ParserReturn {
+impl ParserResult {
     enum_getter!(into_query, Query, Query);
     enum_getter!(into_queries, Queries, Vec<Query>);
     enum_getter!(into_label, Label, String);
@@ -62,11 +63,18 @@ impl ParserReturn {
     enum_getter!(into_constraints, Constraints, Vec<Constraint>);
     enum_getter!(into_definable, Definable, Definable);
     enum_getter!(into_definables, Definables, Vec<Definable>);
+
+    pub fn is_err(&self) -> bool {
+        matches!(self, Self::Err(_))
+    }
+    pub fn is_ok(&self) -> bool {
+        !self.is_err()
+    }
 }
 
-impl Default for ParserReturn {
+impl Default for ParserResult {
     fn default() -> Self {
-        ParserReturn::None
+        ParserResult::Err(())
     }
 }
 
@@ -118,7 +126,7 @@ impl TypeQLParser {
 
 impl<'input> ParseTreeVisitorCompat<'input> for TypeQLParser {
     type Node = TypeQLRustParserContextType;
-    type Return = ParserReturn;
+    type Return = ParserResult;
 
     fn temp_result(&mut self) -> &mut Self::Return {
         panic!("temp_result")
@@ -135,7 +143,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
     }
 
     fn visit_eof_queries(&mut self, ctx: &Eof_queriesContext<'input>) -> Self::Return {
-        ParserReturn::Queries(
+        ParserResult::Queries(
             (0..)
                 .map_while(|i| ctx.query(i))
                 .map(|query_ctx| self.visit_query(query_ctx.as_ref()).into_query())
@@ -153,7 +161,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
 
     fn visit_eof_definables(&mut self, ctx: &Eof_definablesContext<'input>) -> Self::Return {
         let definables = ctx.definables().unwrap();
-        ParserReturn::Definables(
+        ParserResult::Definables(
             (0..)
                 .map_while(|i| definables.definable(i))
                 .map(|definable_ctx| {
@@ -169,7 +177,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
     }
 
     fn visit_eof_label(&mut self, ctx: &Eof_labelContext<'input>) -> Self::Return {
-        ParserReturn::Label(ctx.label().unwrap().get_text())
+        ParserResult::Label(ctx.label().unwrap().get_text())
     }
 
     fn visit_eof_schema_rule(&mut self, ctx: &Eof_schema_ruleContext<'input>) -> Self::Return {
@@ -180,7 +188,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
         if let Some(query_match) = ctx.query_match() {
             self.visit_query_match(query_match.as_ref())
         } else {
-            ParserReturn::Query(Query::Dud(String::from("Unsupported")))
+            ParserResult::Query(Query::Dud(String::from("Unsupported")))
         }
     }
 
@@ -215,7 +223,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
                     match_query.filter(self.visit_filter(filter.as_ref()).into_patterns());
             }
         }
-        ParserReturn::Query(match_query.into_query())
+        ParserResult::Query(match_query.into_query())
     }
 
     fn visit_query_match_aggregate(
@@ -241,7 +249,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
     }
 
     fn visit_filter(&mut self, ctx: &FilterContext<'input>) -> Self::Return {
-        ParserReturn::Patterns(
+        ParserResult::Patterns(
             (0..)
                 .map_while(|i| ctx.VAR_(i))
                 .map(|x| self.get_var(x.as_ref()).into_pattern())
@@ -282,7 +290,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
     }
 
     fn visit_patterns(&mut self, ctx: &PatternsContext<'input>) -> Self::Return {
-        ParserReturn::Patterns(
+        ParserResult::Patterns(
             (0..)
                 .map_while(|i| ctx.pattern(i))
                 .map(|pattern| self.visit_pattern(pattern.as_ref()).into_pattern())
@@ -332,8 +340,8 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
 
     fn visit_variable_type(&mut self, ctx: &Variable_typeContext<'input>) -> Self::Return {
         let mut var_type = match self.visit_type_any(ctx.type_any().unwrap().as_ref()) {
-            ParserReturn::Pattern(p) => p.into_type_variable(),
-            ParserReturn::Label(p) => UnboundVariable::hidden().type_(p),
+            ParserResult::Pattern(p) => p.into_type_variable(),
+            ParserResult::Label(p) => UnboundVariable::hidden().type_(p),
             other @ _ => panic!("{:?}", other),
         };
         for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
@@ -344,8 +352,8 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
                 };
                 var_type = var_type.constrain_type(
                     match self.visit_type_(constraint.type_(0).unwrap().as_ref()) {
-                        ParserReturn::Label(label) => RelatesConstraint::from(label),
-                        ParserReturn::Pattern(var) => {
+                        ParserResult::Label(label) => RelatesConstraint::from(label),
+                        ParserResult::Pattern(var) => {
                             RelatesConstraint::from(var.into_unbound_variable())
                         }
                         _ => panic!(""),
@@ -359,7 +367,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
                 panic!("visit_variable_type: not implemented")
             }
         }
-        ParserReturn::Pattern(var_type.into_pattern())
+        ParserResult::Pattern(var_type.into_pattern())
     }
 
     fn visit_type_constraint(&mut self, ctx: &Type_constraintContext<'input>) -> Self::Return {
@@ -402,7 +410,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
                     var_thing.constrain_thing(constraint.into_thing())
                 });
         }
-        ParserReturn::Pattern(var_thing.into_pattern())
+        ParserResult::Pattern(var_thing.into_pattern())
     }
 
     fn visit_variable_relation(&mut self, ctx: &Variable_relationContext<'input>) -> Self::Return {
@@ -427,7 +435,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
             todo!();
         }
 
-        ParserReturn::Pattern(relation.into_pattern())
+        ParserResult::Pattern(relation.into_pattern())
     }
 
     fn visit_variable_attribute(
@@ -455,11 +463,11 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
             todo!();
         }
 
-        ParserReturn::Pattern(attribute.into_pattern())
+        ParserResult::Pattern(attribute.into_pattern())
     }
 
     fn visit_relation(&mut self, ctx: &RelationContext<'input>) -> Self::Return {
-        ParserReturn::Constraint(
+        ParserResult::Constraint(
             RelationConstraint::new(
                 (0..)
                     .map_while(|i| ctx.role_player(i))
@@ -489,7 +497,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
     }
 
     fn visit_attributes(&mut self, ctx: &AttributesContext<'input>) -> Self::Return {
-        ParserReturn::Constraints(
+        ParserResult::Constraints(
             (0..)
                 .map_while(|i| ctx.attribute(i))
                 .map(|attribute| self.visit_attribute(attribute.as_ref()).into_constraint())
@@ -521,7 +529,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
             panic!("illegal grammar")
         };
 
-        ParserReturn::Constraint(has.into_constraint())
+        ParserResult::Constraint(has.into_constraint())
     }
 
     fn visit_predicate(&mut self, ctx: &PredicateContext<'input>) -> Self::Return {
@@ -542,7 +550,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
             todo!()
         };
 
-        ParserReturn::Constraint(ValueConstraint::new(predicate, value).into_constraint())
+        ParserResult::Constraint(ValueConstraint::new(predicate, value).into_constraint())
     }
 
     fn visit_predicate_equality(
@@ -569,7 +577,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
 
     fn visit_type_any(&mut self, ctx: &Type_anyContext<'input>) -> Self::Return {
         if let Some(var) = ctx.VAR_() {
-            ParserReturn::Pattern(Pattern::from(self.get_var(var.as_ref())))
+            ParserResult::Pattern(Pattern::from(self.get_var(var.as_ref())))
         } else if let Some(type_) = ctx.type_() {
             self.visit_type_(type_.as_ref())
         } else if let Some(scoped) = ctx.type_scoped() {
@@ -583,7 +591,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
         if let Some(scoped) = ctx.label_scoped() {
             self.visit_label_scoped(scoped.as_ref())
         } else if let Some(var) = ctx.VAR_() {
-            ParserReturn::Pattern(Pattern::from(self.get_var(var.as_ref())))
+            ParserResult::Pattern(Pattern::from(self.get_var(var.as_ref())))
         } else {
             panic!("null scoped type label")
         }
@@ -591,9 +599,9 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
 
     fn visit_type_(&mut self, ctx: &Type_Context<'input>) -> Self::Return {
         if let Some(label) = ctx.label() {
-            ParserReturn::Label(label.get_text())
+            ParserResult::Label(label.get_text())
         } else if let Some(var) = ctx.VAR_() {
-            ParserReturn::Pattern(self.get_var(var.as_ref()).into_pattern())
+            ParserResult::Pattern(self.get_var(var.as_ref()).into_pattern())
         } else {
             panic!("")
         }
@@ -601,7 +609,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
 
     fn visit_label_any(&mut self, ctx: &Label_anyContext<'input>) -> Self::Return {
         if let Some(label) = ctx.label() {
-            ParserReturn::Label(label.get_text())
+            ParserResult::Label(label.get_text())
         } else {
             panic!("visit_label_any: not implemented")
         }
@@ -637,11 +645,11 @@ impl<'input> TypeQLRustVisitorCompat<'input> for TypeQLParser {
 
     fn visit_value(&mut self, ctx: &ValueContext<'input>) -> Self::Return {
         if let Some(string) = ctx.STRING_() {
-            ParserReturn::Value(Value::from(self.get_string(string.as_ref())))
+            ParserResult::Value(Value::from(self.get_string(string.as_ref())))
         } else if let Some(date_time) = ctx.DATETIME_() {
-            ParserReturn::Value(Value::from(self.get_date_time(date_time.as_ref())))
+            ParserResult::Value(Value::from(self.get_date_time(date_time.as_ref())))
         } else if let Some(date) = ctx.DATE_() {
-            ParserReturn::Value(Value::from(self.get_date(date.as_ref())))
+            ParserResult::Value(Value::from(self.get_date(date.as_ref())))
         } else {
             todo!()
         }
