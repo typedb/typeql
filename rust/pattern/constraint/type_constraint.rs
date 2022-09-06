@@ -67,7 +67,9 @@ impl From<(String, String)> for ScopedType {
 impl Display for ScopedType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(scope) = &self.scope {
-            write!(f, "{}:", scope)?;
+            if scope != "relation" {
+                write!(f, "{}:", scope)?;
+            }
         }
         write!(f, "{}", self.name)
     }

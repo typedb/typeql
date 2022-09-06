@@ -57,7 +57,7 @@ rust_deps()
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
 rules_rust_dependencies()
-rust_register_toolchains(include_rustc_srcs = True, edition="2021")
+rust_register_toolchains(include_rustc_srcs = True, edition="2021", version = "1.63.0")
 
 load("@vaticle_dependencies//library/crates:crates.bzl", "raze_fetch_remote_crates")
 raze_fetch_remote_crates()

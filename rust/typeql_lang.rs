@@ -77,11 +77,10 @@ pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
     )));
 
     let query = Parser::default()
-        .visit_eof_query(parser.eof_query().unwrap().as_ref())
-        .into_query();
+        .visit_eof_query(parser.eof_query().unwrap().as_ref());
 
     if errors.borrow().is_empty() {
-        Ok(query)
+        Ok(query.into_query())
     } else {
         Err(errors
             .borrow()
