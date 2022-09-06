@@ -31,7 +31,7 @@ use antlr_rust::tree::TerminalNode;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitorCompat};
 use chrono::{NaiveDateTime, Timelike};
 
-use crate::common::error::{ILLEGAL_GRAMMAR, ILLEGAL_STATE};
+use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR, ILLEGAL_STATE};
 use typeql_grammar::typeqlrustparser::*;
 use typeql_grammar::typeqlrustvisitor::TypeQLRustVisitorCompat;
 
@@ -60,7 +60,7 @@ pub enum ParserResult {
     ScopedLabel((String, String)),
 
     Value(Value),
-    Err(String),
+    Err(ErrorMessage),
 }
 
 impl ParserResult {
@@ -88,7 +88,7 @@ impl ParserResult {
 
 impl Default for ParserResult {
     fn default() -> Self {
-        ParserResult::Err(String::new())
+        ParserResult::Err(ILLEGAL_STATE.format(&[]))
     }
 }
 
@@ -172,12 +172,20 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_eof_queries(&mut self, ctx: &Eof_queriesContext<'input>) -> Self::Return {
-        ParserResult::Queries(
-            (0..)
-                .map_while(|i| ctx.query(i))
-                .map(|query_ctx| self.visit_query(query_ctx.as_ref()).into_query())
-                .collect(),
-        )
+        let mut queries = Vec::new();
+        for i in 0.. {
+            if let Some(query_ctx) = ctx.query(i) {
+                use ParserResult::*;
+                match self.visit_query(query_ctx.as_ref()) {
+                    Query(query) => queries.push(query),
+                    err @ Err(_) => return err,
+                    _ => return ParserResult::Err(ILLEGAL_STATE.format(&[])),
+                }
+            } else {
+                break;
+            }
+        }
+        ParserResult::Queries(queries)
     }
 
     fn visit_eof_pattern(&mut self, ctx: &Eof_patternContext<'input>) -> Self::Return {
@@ -189,16 +197,21 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     }
 
     fn visit_eof_definables(&mut self, ctx: &Eof_definablesContext<'input>) -> Self::Return {
-        let definables = ctx.definables().unwrap();
-        ParserResult::Definables(
-            (0..)
-                .map_while(|i| definables.definable(i))
-                .map(|definable_ctx| {
-                    self.visit_definable(definable_ctx.as_ref())
-                        .into_definable()
-                })
-                .collect(),
-        )
+        let definables_ctx = ctx.definables().unwrap();
+        let mut definables = Vec::new();
+        for i in 0.. {
+            if let Some(definable_ctx) = definables_ctx.definable(i) {
+                use ParserResult::*;
+                match self.visit_definable(definable_ctx.as_ref()) {
+                    Definable(definable) => definables.push(definable),
+                    err @ Err(_) => return err,
+                    _ => return ParserResult::Err(ILLEGAL_STATE.format(&[])),
+                }
+            } else {
+                break;
+            }
+        }
+        ParserResult::Definables(definables)
     }
 
     fn visit_eof_variable(&mut self, ctx: &Eof_variableContext<'input>) -> Self::Return {
@@ -586,14 +599,12 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                         .into_value(),
                 )
             } else {
-                panic!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
-                // ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))  // fixme return this
+                return ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]));
             }
         } else if let Some(_) = ctx.VAR_() {
             todo!()
         } else {
-            panic!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
-            // ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))  // fixme return this
+            return ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]));
         };
 
         ParserResult::Constraint(has.into_constraint())
@@ -610,8 +621,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 } else if let Some(var) = ctx.predicate_value().unwrap().VAR_() {
                     Value::from(self.get_var(var.as_ref()))
                 } else {
-                    panic!("{}", ILLEGAL_STATE.format(&[]))
-                    // ParserResult::Err(ILLEGAL_STATE.format(&[]))  // fixme return this
+                    return ParserResult::Err(ILLEGAL_STATE.format(&[]));
                 },
             )
         } else {

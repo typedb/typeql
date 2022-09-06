@@ -50,11 +50,7 @@ pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
 }
 
 pub fn typeql_match(pattern: impl Into<Conjunction>) -> Query {
-    Query::Match(TypeQLMatch {
-        conjunction: pattern.into(),
-        filter: vec![],
-        sorting: None,
-    })
+    Query::Match(TypeQLMatch::new(pattern.into()))
 }
 
 pub fn var(name: impl Into<String>) -> UnboundVariable {

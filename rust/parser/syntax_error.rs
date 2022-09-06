@@ -46,14 +46,14 @@ impl Display for SyntaxError {
                     query_line,
                     &(" ".repeat(self.char_position_in_line) + "^"),
                     &self.message
-                ]).to_string()
+                ]).message
             )
         } else {
             f.write_str(
                 &SYNTAX_ERROR_NO_DETAILS.format(&[
                     self.line.to_string().as_str(),
                     &self.message
-                ]).to_string()
+                ]).message
             )
         }
     }

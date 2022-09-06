@@ -29,28 +29,30 @@ use crate::write_joined;
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
     pub conjunction: Conjunction,
-    pub filter: Vec<UnboundVariable>,
-    pub sorting: Option<Sorting>,
+    pub modifiers: Modifiers,
 }
 
 impl TypeQLMatch {
+    pub fn new(conjunction: Conjunction) -> Self {
+          Self {
+              conjunction, modifiers: Modifiers::default()
+          }
+    }
+
     pub fn into_query(self) -> Query {
         Query::Match(self)
     }
 
     pub fn filter(self, vars: Vec<Pattern>) -> TypeQLMatch {
         TypeQLMatch {
-            filter: vars
-                .into_iter()
-                .map(Pattern::into_unbound_variable)
-                .collect(),
+            modifiers: self.modifiers.filter(vars),
             ..self
         }
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> TypeQLMatch {
         TypeQLMatch {
-            sorting: Some(sorting.into()),
+            modifiers: self.modifiers.sort(sorting),
             ..self
         }
     }
@@ -64,17 +66,94 @@ impl Display for TypeQLMatch {
             write!(f, "\n{};", pattern)?;
         }
 
-        if !self.filter.is_empty() {
-            f.write_str("\n")?; // separate because there is only meant to be one newline before all modifiers
-            f.write_str("get ")?;
-            write_joined!(f, self.filter, ", ")?;
-            f.write_str(";")?;
-        }
-        if let Some(sorting) = &self.sorting {
-            f.write_str("\n")?; // separate because there is only meant to be one newline before all modifiers
-            write!(f, "{}", sorting)?;
+        if !self.modifiers.is_empty() {
+            write!(f, "\n{}", self.modifiers)?;
         }
 
         Ok(())
     }
 }
+
+#[derive(Debug, Eq, PartialEq, Default)]
+pub struct Modifiers {
+    pub filter: Vec<UnboundVariable>,
+    pub sorting: Option<Sorting>,
+}
+
+impl Modifiers {
+    pub fn is_empty(&self) -> bool {
+        self.filter.is_empty() && self.sorting.is_none()
+    }
+
+    pub fn filter(self, vars: Vec<Pattern>) -> Self {
+        Self {
+            filter: vars
+                .into_iter()
+                .map(Pattern::into_unbound_variable)
+                .collect(),
+            ..self
+        }
+    }
+
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
+        Self {
+            sorting: Some(sorting.into()),
+            ..self
+        }
+    }
+}
+
+impl Display for Modifiers {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if !self.filter.is_empty() {
+            f.write_str("get ")?;
+            write_joined!(f, self.filter, ", ")?;
+            f.write_str(";")?;
+        }
+        if let Some(sorting) = &self.sorting {
+            write!(f, "{};", sorting)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct Sorting {
+    vars: Vec<UnboundVariable>,
+    order: String, // FIXME token
+}
+
+impl Sorting {
+    pub fn new(vars: Vec<UnboundVariable>, order: &str) -> Self {
+        Sorting {
+            vars,
+            order: order.to_string(),
+        }
+    }
+}
+
+impl From<&str> for Sorting {
+    fn from(var_name: &str) -> Self {
+        Self::new(vec![var(var_name)], "asc")
+    }
+}
+impl<const N: usize> From<([&str; N], &'static str)> for Sorting {
+    fn from((vars, order): ([&str; N], &'static str)) -> Self {
+        Self::new(vars.map(var).to_vec(), order)
+    }
+}
+impl From<Vec<Pattern>> for Sorting {
+    fn from(vars: Vec<Pattern>) -> Self {
+        Self::new(vars.into_iter().map(Pattern::into_unbound_variable).collect(), "asc")
+    }
+}
+
+impl Display for Sorting {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str("sort ")?;
+        write_joined!(f, self.vars, ", ")?;
+        write!(f, " {}", self.order)?;
+        Ok(())
+    }
+}
+
