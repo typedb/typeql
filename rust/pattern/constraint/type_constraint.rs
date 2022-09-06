@@ -22,12 +22,13 @@
 
 use crate::{Constraint, TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeConstraint {
     Label(LabelConstraint),
     Relates(RelatesConstraint),
+    Plays(PlaysConstraint),
 }
 
 impl TypeConstraint {
@@ -65,6 +66,9 @@ impl From<(String, String)> for ScopedType {
 
 impl Display for ScopedType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(scope) = &self.scope {
+            write!(f, "{}:", scope)?;
+        }
         write!(f, "{}", self.name)
     }
 }
@@ -134,5 +138,59 @@ impl From<UnboundVariable> for RelatesConstraint {
 impl Display for RelatesConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "relates {}", self.role_type)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct PlaysConstraint {
+    pub role_type: TypeVariable,
+    pub relation_type: Option<TypeVariable>,
+    pub overridden_role_type: Option<TypeVariable>,
+}
+
+impl PlaysConstraint {
+    pub fn into_type_constraint(self) -> TypeConstraint {
+        TypeConstraint::Plays(self)
+    }
+
+    fn new(role_type: TypeVariable, overridden_role_type: Option<TypeVariable>) -> Self {
+        PlaysConstraint {
+            relation_type: match &role_type.label {
+                Some(label) => Some(
+                    UnboundVariable::hidden()
+                        .type_(label.scoped_type.scope.as_ref().cloned().unwrap()),
+                ),
+                None => None,
+            },
+            role_type,
+            overridden_role_type,
+        }
+    }
+}
+
+impl From<(&str, &str)> for PlaysConstraint {
+    fn from((relation_type, role_type): (&str, &str)) -> Self {
+        PlaysConstraint::from((String::from(relation_type), String::from(role_type)))
+    }
+}
+
+impl From<(String, String)> for PlaysConstraint {
+    fn from((relation_type, role_type): (String, String)) -> Self {
+        PlaysConstraint::new(
+            UnboundVariable::hidden().type_(ScopedType::from((relation_type, role_type))),
+            None,
+        )
+    }
+}
+
+impl From<UnboundVariable> for PlaysConstraint {
+    fn from(role_type: UnboundVariable) -> Self {
+        PlaysConstraint::new(role_type.into_type(), None)
+    }
+}
+
+impl Display for PlaysConstraint {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "plays {}", self.role_type)
     }
 }

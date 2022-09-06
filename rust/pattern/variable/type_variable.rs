@@ -30,6 +30,7 @@ pub struct TypeVariable {
     pub reference: Reference,
     pub label: Option<LabelConstraint>,
     pub relates: Vec<RelatesConstraint>,
+    pub plays: Vec<PlaysConstraint>,
 }
 
 impl TypeVariable {
@@ -46,6 +47,7 @@ impl TypeVariable {
             reference,
             label: None,
             relates: vec![],
+            plays: vec![],
         }
     }
 }
@@ -56,6 +58,7 @@ impl TypeVariableBuilder for TypeVariable {
         match constraint {
             Label(label) => self.label = Some(label),
             Relates(relates) => self.relates.push(relates),
+            Plays(plays) => self.plays.push(plays),
         }
         self
     }
@@ -74,6 +77,10 @@ impl Display for TypeVariable {
         if !self.relates.is_empty() {
             f.write_char(' ')?;
             write_joined!(f, self.relates, ",\n    ")?;
+        }
+        if !self.plays.is_empty() {
+            f.write_char(' ')?;
+            write_joined!(f, self.plays, ",\n    ")?;
         }
         Ok(())
     }

@@ -20,9 +20,10 @@
  *
  */
 
+extern crate core;
+
 use std::cell::RefCell;
 use std::convert::Into;
-use std::ops::Deref;
 use std::rc::Rc;
 
 use typeql_grammar::typeqlrustlexer::TypeQLRustLexer;
@@ -30,25 +31,21 @@ use typeql_grammar::typeqlrustparser::*;
 use typeql_grammar::typeqlrustvisitor::TypeQLRustVisitorCompat;
 
 use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream, Parser};
+use antlr_rust::{InputStream, Parser as ANTLRParser};
 
 pub mod common;
 pub mod parser;
 pub mod pattern;
 pub mod query;
 
-pub mod error;
-use error::TypeQLErrorListener;
-use error::TypeQLSyntaxError;
-
 #[macro_use]
 mod util;
 
-use crate::parser::TypeQLParser;
 use pattern::*;
 use query::*;
+use crate::parser::{Parser, error_listener::ErrorListener, syntax_error::SyntaxError};
 
-pub fn parse_query(typeql_query: &str) -> Query {
+pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query)
 }
 
@@ -56,6 +53,7 @@ pub fn typeql_match(pattern: impl Into<Conjunction>) -> Query {
     Query::Match(TypeQLMatch {
         conjunction: pattern.into(),
         filter: vec![],
+        sorting: None,
     })
 }
 
@@ -71,23 +69,29 @@ pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
     UnboundVariable::hidden().rel(value)
 }
 
-pub fn parse_eof_query(query_string: &str) -> Query {
-    let lexer = TypeQLRustLexer::new(InputStream::new(query_string.into()));
+pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
+    let lexer = TypeQLRustLexer::new(InputStream::new(query_string));
     let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
 
     parser.remove_error_listeners();
-    let errors = Rc::new(RefCell::new(Vec::<TypeQLSyntaxError>::new()));
-    parser.add_error_listener(Box::new(TypeQLErrorListener::new(
+    let errors = Rc::new(RefCell::new(Vec::<SyntaxError>::new()));
+    parser.add_error_listener(Box::new(ErrorListener::new(
         query_string,
         errors.clone(),
     )));
 
-    let query = TypeQLParser::default()
+    let query = Parser::default()
         .visit_eof_query(parser.eof_query().unwrap().as_ref())
         .into_query();
 
-    for e in errors.deref().borrow().iter() {
-        println!("{}", e);
+    if errors.borrow().is_empty() {
+        Ok(query)
+    } else {
+        Err(errors
+            .borrow()
+            .iter()
+            .map(SyntaxError::to_string)
+            .collect::<Vec<String>>()
+            .join("\n\n"))
     }
-    query
 }

@@ -22,7 +22,7 @@
 
 use crate::pattern::*;
 use crate::{enum_getter, write_joined};
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
 use std::fmt::{Display, Write};
 
@@ -256,7 +256,15 @@ impl Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
-            DateTime(date_time) => write!(f, "{}", date_time.format("%Y-%m-%dT%H:%M:%S")),
+            DateTime(date_time) => write!(f, "{}", {
+                if date_time.time().nanosecond() > 0 {
+                    date_time.format("%Y-%m-%dT%H:%M:%S.%3f")
+                } else if date_time.time().second() > 0 {
+                    date_time.format("%Y-%m-%dT%H:%M:%S")
+                } else {
+                    date_time.format("%Y-%m-%dT%H:%M")
+                }
+            }),
             String(string) => write!(f, "\"{}\"", string),
             Variable(var) => write!(f, "{}", var.reference),
             _ => panic!(""),

@@ -20,10 +20,715 @@
  *
  */
 
-pub mod parser;
+pub mod error_listener;
 pub mod syntax_error;
-
-pub use parser::TypeQLParser;
 
 #[cfg(test)]
 mod test;
+
+use antlr_rust::token::Token;
+use antlr_rust::tree::TerminalNode;
+use antlr_rust::tree::{ParseTree, ParseTreeVisitorCompat};
+use chrono::{NaiveDateTime, Timelike};
+
+use crate::common::error::{ILLEGAL_GRAMMAR, ILLEGAL_STATE};
+use typeql_grammar::typeqlrustparser::*;
+use typeql_grammar::typeqlrustvisitor::TypeQLRustVisitorCompat;
+
+use crate::enum_getter;
+use crate::pattern::*;
+use crate::query::*;
+use crate::typeql_match;
+
+#[derive(Debug)]
+pub struct Definable;
+
+#[must_use]
+#[derive(Debug)]
+pub enum ParserResult {
+    Constraint(Constraint),
+    Constraints(Vec<Constraint>),
+    Definable(Definable),
+    Definables(Vec<Definable>),
+    Pattern(Pattern),
+    Patterns(Vec<Pattern>),
+    Query(Query),
+    Queries(Vec<Query>),
+    Sorting(Sorting),
+
+    Label(String),
+    ScopedLabel((String, String)),
+
+    Value(Value),
+    Err(String),
+}
+
+impl ParserResult {
+    enum_getter!(into_constraint, Constraint, Constraint);
+    enum_getter!(into_constraints, Constraints, Vec<Constraint>);
+    enum_getter!(into_definable, Definable, Definable);
+    enum_getter!(into_definables, Definables, Vec<Definable>);
+    enum_getter!(into_pattern, Pattern, Pattern);
+    enum_getter!(into_patterns, Patterns, Vec<Pattern>);
+    enum_getter!(into_query, Query, Query);
+    enum_getter!(into_queries, Queries, Vec<Query>);
+    enum_getter!(into_sorting, Sorting, Sorting);
+
+    enum_getter!(into_label, Label, String);
+
+    enum_getter!(into_value, Value, Value);
+
+    pub fn is_err(&self) -> bool {
+        matches!(self, Self::Err(_))
+    }
+    pub fn is_ok(&self) -> bool {
+        !self.is_err()
+    }
+}
+
+impl Default for ParserResult {
+    fn default() -> Self {
+        ParserResult::Err(String::new())
+    }
+}
+
+#[derive(Default)]
+pub struct Parser;
+
+impl Parser {
+    fn get_var(&mut self, var: &TerminalNode<TypeQLRustParserContextType>) -> UnboundVariable {
+        let name = &var.symbol.get_text()[1..];
+        if name == "_" {
+            UnboundVariable::anonymous()
+        } else {
+            UnboundVariable::named(String::from(name))
+        }
+    }
+
+    fn get_string(&self, string: &TerminalNode<TypeQLRustParserContextType>) -> String {
+        let quoted = string.get_text();
+        String::from(&quoted[1..quoted.len() - 1])
+    }
+
+    fn get_date(&self, date: &TerminalNode<TypeQLRustParserContextType>) -> NaiveDateTime {
+        NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d").unwrap()
+    }
+
+    fn get_date_time(
+        &self,
+        date_time: &TerminalNode<TypeQLRustParserContextType>,
+    ) -> NaiveDateTime {
+        let date_time_text = &date_time.get_text();
+        let has_seconds = date_time_text.matches(":").count() == 2;
+        if has_seconds {
+            let has_nanos = date_time_text.matches(".").count() == 1;
+            if has_nanos {
+                let parts: Vec<&str> = date_time_text.splitn(2, ".").collect();
+                let (date_time, nanos) = (parts[0], parts[1]);
+                NaiveDateTime::parse_from_str(date_time, "%Y-%m-%dT%H:%M:%S")
+                    .unwrap()
+                    .with_nanosecond(
+                        format!("{}{}", nanos, "0".repeat(9 - nanos.len()))
+                            .parse()
+                            .unwrap(),
+                    )
+                    .unwrap()
+            } else {
+                NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M:%S").unwrap()
+            }
+        } else {
+            NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M").unwrap()
+        }
+    }
+
+    fn get_isa_constraint(
+        &mut self,
+        _isa: &TerminalNode<TypeQLRustParserContextType>,
+        ctx: &Type_ContextAll,
+    ) -> IsaConstraint {
+        IsaConstraint {
+            type_name: self.visit_type_(ctx).into_label(),
+            is_explicit: false,
+        }
+    }
+}
+
+impl<'input> ParseTreeVisitorCompat<'input> for Parser {
+    type Node = TypeQLRustParserContextType;
+    type Return = ParserResult;
+
+    fn temp_result(&mut self) -> &mut Self::Return {
+        panic!("temp_result")
+    }
+
+    fn aggregate_results(&self, _aggregate: Self::Return, _next: Self::Return) -> Self::Return {
+        panic!("aggregate_results")
+    }
+}
+
+impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
+    fn visit_eof_query(&mut self, ctx: &Eof_queryContext<'input>) -> Self::Return {
+        self.visit_query(ctx.query().unwrap().as_ref())
+    }
+
+    fn visit_eof_queries(&mut self, ctx: &Eof_queriesContext<'input>) -> Self::Return {
+        ParserResult::Queries(
+            (0..)
+                .map_while(|i| ctx.query(i))
+                .map(|query_ctx| self.visit_query(query_ctx.as_ref()).into_query())
+                .collect(),
+        )
+    }
+
+    fn visit_eof_pattern(&mut self, ctx: &Eof_patternContext<'input>) -> Self::Return {
+        self.visit_pattern(ctx.pattern().unwrap().as_ref())
+    }
+
+    fn visit_eof_patterns(&mut self, ctx: &Eof_patternsContext<'input>) -> Self::Return {
+        self.visit_patterns(ctx.patterns().unwrap().as_ref())
+    }
+
+    fn visit_eof_definables(&mut self, ctx: &Eof_definablesContext<'input>) -> Self::Return {
+        let definables = ctx.definables().unwrap();
+        ParserResult::Definables(
+            (0..)
+                .map_while(|i| definables.definable(i))
+                .map(|definable_ctx| {
+                    self.visit_definable(definable_ctx.as_ref())
+                        .into_definable()
+                })
+                .collect(),
+        )
+    }
+
+    fn visit_eof_variable(&mut self, ctx: &Eof_variableContext<'input>) -> Self::Return {
+        self.visit_pattern_variable(ctx.pattern_variable().unwrap().as_ref())
+    }
+
+    fn visit_eof_label(&mut self, ctx: &Eof_labelContext<'input>) -> Self::Return {
+        ParserResult::Label(ctx.label().unwrap().get_text())
+    }
+
+    fn visit_eof_schema_rule(&mut self, ctx: &Eof_schema_ruleContext<'input>) -> Self::Return {
+        self.visit_schema_rule(ctx.schema_rule().unwrap().as_ref())
+    }
+
+    fn visit_query(&mut self, ctx: &QueryContext<'input>) -> Self::Return {
+        if let Some(query_match) = ctx.query_match() {
+            self.visit_query_match(query_match.as_ref())
+        } else {
+            ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+        }
+    }
+
+    fn visit_query_define(&mut self, ctx: &Query_defineContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_query_undefine(&mut self, ctx: &Query_undefineContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_query_insert(&mut self, ctx: &Query_insertContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_query_delete_or_update(
+        &mut self,
+        ctx: &Query_delete_or_updateContext<'input>,
+    ) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_query_match(&mut self, ctx: &Query_matchContext<'input>) -> Self::Return {
+        let mut match_query = typeql_match(
+            self.visit_patterns(ctx.patterns().unwrap().as_ref())
+                .into_patterns(),
+        )
+        .into_match();
+        if let Some(modifiers) = ctx.modifiers() {
+            if let Some(filter) = modifiers.filter() {
+                match_query =
+                    match_query.filter(self.visit_filter(filter.as_ref()).into_patterns());
+            }
+            if let Some(sort) = modifiers.sort() {
+                match_query = match_query.sort(self.visit_sort(sort.as_ref()).into_sorting());
+            }
+            if let Some(_limit) = modifiers.limit() {
+                todo!();
+            }
+            if let Some(_offset) = modifiers.offset() {
+                todo!();
+            }
+        }
+        ParserResult::Query(match_query.into_query())
+    }
+
+    fn visit_query_match_aggregate(
+        &mut self,
+        ctx: &Query_match_aggregateContext<'input>,
+    ) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_query_match_group(&mut self, ctx: &Query_match_groupContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_query_match_group_agg(
+        &mut self,
+        ctx: &Query_match_group_aggContext<'input>,
+    ) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_modifiers(&mut self, ctx: &ModifiersContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_filter(&mut self, ctx: &FilterContext<'input>) -> Self::Return {
+        ParserResult::Patterns(
+            (0..)
+                .map_while(|i| ctx.VAR_(i))
+                .map(|x| self.get_var(x.as_ref()).into_pattern())
+                .collect(),
+        )
+    }
+
+    fn visit_sort(&mut self, ctx: &SortContext<'input>) -> Self::Return {
+        ParserResult::Sorting(Sorting::new(
+            (0..)
+                .map_while(|i| ctx.VAR_(i))
+                .map(|x| self.get_var(x.as_ref()))
+                .collect(),
+            &if let Some(order) = ctx.ORDER_() {
+                order.get_text()
+            } else {
+                String::from("asc")
+            },
+        ))
+    }
+
+    fn visit_offset(&mut self, ctx: &OffsetContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_limit(&mut self, ctx: &LimitContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_match_aggregate(&mut self, ctx: &Match_aggregateContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_aggregate_method(&mut self, ctx: &Aggregate_methodContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_match_group(&mut self, ctx: &Match_groupContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_definables(&mut self, ctx: &DefinablesContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_definable(&mut self, ctx: &DefinableContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_patterns(&mut self, ctx: &PatternsContext<'input>) -> Self::Return {
+        ParserResult::Patterns(
+            (0..)
+                .map_while(|i| ctx.pattern(i))
+                .map(|pattern| self.visit_pattern(pattern.as_ref()).into_pattern())
+                .collect(),
+        )
+    }
+
+    fn visit_pattern(&mut self, ctx: &PatternContext<'input>) -> Self::Return {
+        if let Some(var) = ctx.pattern_variable() {
+            self.visit_pattern_variable(var.as_ref())
+        } else {
+            panic!("visit_pattern: not implemented")
+        }
+    }
+
+    fn visit_pattern_conjunction(
+        &mut self,
+        ctx: &Pattern_conjunctionContext<'input>,
+    ) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_pattern_disjunction(
+        &mut self,
+        ctx: &Pattern_disjunctionContext<'input>,
+    ) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_pattern_negation(&mut self, ctx: &Pattern_negationContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_pattern_variable(&mut self, ctx: &Pattern_variableContext<'input>) -> Self::Return {
+        if let Some(var_thing_any) = ctx.variable_thing_any() {
+            self.visit_variable_thing_any(var_thing_any.as_ref())
+        } else if let Some(var_type) = ctx.variable_type() {
+            self.visit_variable_type(var_type.as_ref())
+        } else if let Some(var_concept) = ctx.variable_concept() {
+            self.visit_variable_concept(var_concept.as_ref())
+        } else {
+            ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+        }
+    }
+
+    fn visit_variable_concept(&mut self, ctx: &Variable_conceptContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_variable_type(&mut self, ctx: &Variable_typeContext<'input>) -> Self::Return {
+        let mut var_type = match self.visit_type_any(ctx.type_any().unwrap().as_ref()) {
+            ParserResult::Pattern(p) => p.into_type_variable(),
+            ParserResult::Label(p) => UnboundVariable::hidden().type_(p),
+            other => panic!("{:?}", other),
+        };
+        for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
+            if constraint.PLAYS().is_some() {
+                let _overridden: Option<u8> = match constraint.AS() {
+                    None => None,
+                    Some(_) => todo!(),
+                };
+                var_type = var_type.constrain_type(
+                    match self.visit_type_scoped(constraint.type_scoped().unwrap().as_ref()) {
+                        ParserResult::ScopedLabel(scoped) => PlaysConstraint::from(scoped),
+                        ParserResult::Pattern(var) => {
+                            PlaysConstraint::from(var.into_unbound_variable())
+                        }
+                        _ => panic!(""),
+                    }
+                    .into_type_constraint(),
+                );
+            } else if constraint.RELATES().is_some() {
+                let _overridden: Option<u8> = match constraint.AS() {
+                    None => None,
+                    Some(_) => todo!(),
+                };
+                var_type = var_type.constrain_type(
+                    match self.visit_type_(constraint.type_(0).unwrap().as_ref()) {
+                        ParserResult::Label(label) => RelatesConstraint::from(label),
+                        ParserResult::Pattern(var) => {
+                            RelatesConstraint::from(var.into_unbound_variable())
+                        }
+                        _ => panic!(""),
+                    }
+                    .into_type_constraint(),
+                );
+            } else if constraint.TYPE().is_some() {
+                let scoped_label = self.visit_label_any(constraint.label_any().unwrap().as_ref());
+                var_type = var_type.type_(scoped_label.into_label());
+            } else {
+                panic!("visit_variable_type: not implemented")
+            }
+        }
+        ParserResult::Pattern(var_type.into_pattern())
+    }
+
+    fn visit_type_constraint(&mut self, ctx: &Type_constraintContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_variable_things(&mut self, ctx: &Variable_thingsContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_variable_thing_any(
+        &mut self,
+        ctx: &Variable_thing_anyContext<'input>,
+    ) -> Self::Return {
+        if let Some(var_thing) = ctx.variable_thing() {
+            self.visit_variable_thing(var_thing.as_ref())
+        } else if let Some(var_relation) = ctx.variable_relation() {
+            self.visit_variable_relation(var_relation.as_ref())
+        } else if let Some(var_attribute) = ctx.variable_attribute() {
+            self.visit_variable_attribute(var_attribute.as_ref())
+        } else {
+            ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+        }
+    }
+
+    fn visit_variable_thing(&mut self, ctx: &Variable_thingContext<'input>) -> Self::Return {
+        let mut var_thing = self.get_var(ctx.VAR_().unwrap().as_ref()).into_thing();
+        if let Some(isa) = ctx.ISA_() {
+            var_thing = var_thing.constrain_thing(
+                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
+                    .into_thing_constraint(),
+            )
+        }
+        if let Some(attributes) = ctx.attributes() {
+            var_thing = self
+                .visit_attributes(attributes.as_ref())
+                .into_constraints()
+                .into_iter()
+                .fold(var_thing, |var_thing, constraint| {
+                    var_thing.constrain_thing(constraint.into_thing())
+                });
+        }
+        ParserResult::Pattern(var_thing.into_pattern())
+    }
+
+    fn visit_variable_relation(&mut self, ctx: &Variable_relationContext<'input>) -> Self::Return {
+        let mut relation = match ctx.VAR_() {
+            Some(var) => self.get_var(var.as_ref()),
+            None => UnboundVariable::hidden(),
+        }
+        .constrain_thing(
+            self.visit_relation(ctx.relation().unwrap().as_ref())
+                .into_constraint()
+                .into_thing(),
+        );
+
+        if let Some(isa) = ctx.ISA_() {
+            relation = relation.constrain_thing(
+                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
+                    .into_thing_constraint(),
+            );
+        }
+
+        if let Some(_attributes) = ctx.attributes() {
+            todo!();
+        }
+
+        ParserResult::Pattern(relation.into_pattern())
+    }
+
+    fn visit_variable_attribute(
+        &mut self,
+        ctx: &Variable_attributeContext<'input>,
+    ) -> Self::Return {
+        let mut attribute = match ctx.VAR_() {
+            Some(var) => self.get_var(var.as_ref()),
+            None => UnboundVariable::hidden(),
+        }
+        .constrain_thing(
+            self.visit_predicate(ctx.predicate().unwrap().as_ref())
+                .into_constraint()
+                .into_thing(),
+        );
+
+        if let Some(isa) = ctx.ISA_() {
+            attribute = attribute.constrain_thing(
+                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
+                    .into_thing_constraint(),
+            );
+        }
+
+        if let Some(_attributes) = ctx.attributes() {
+            todo!();
+        }
+
+        ParserResult::Pattern(attribute.into_pattern())
+    }
+
+    fn visit_relation(&mut self, ctx: &RelationContext<'input>) -> Self::Return {
+        ParserResult::Constraint(
+            RelationConstraint::new(
+                (0..)
+                    .map_while(|i| ctx.role_player(i))
+                    .map(|ctx| {
+                        let player = self.get_var(ctx.player().unwrap().VAR_().unwrap().as_ref());
+                        if let Some(type_) = ctx.type_() {
+                            RolePlayerConstraint::from((
+                                self.visit_type_(type_.as_ref()).into_label(),
+                                player,
+                            ))
+                        } else {
+                            RolePlayerConstraint::from(player)
+                        }
+                    })
+                    .collect(),
+            )
+            .into_constraint(),
+        )
+    }
+
+    fn visit_role_player(&mut self, ctx: &Role_playerContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_player(&mut self, ctx: &PlayerContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_attributes(&mut self, ctx: &AttributesContext<'input>) -> Self::Return {
+        ParserResult::Constraints(
+            (0..)
+                .map_while(|i| ctx.attribute(i))
+                .map(|attribute| self.visit_attribute(attribute.as_ref()).into_constraint())
+                .collect(),
+        )
+    }
+
+    fn visit_attribute(&mut self, ctx: &AttributeContext<'input>) -> Self::Return {
+        let has = if let Some(label) = ctx.label() {
+            if let Some(var) = ctx.VAR_() {
+                HasConstraint::from_typed_variable(
+                    label.get_text(),
+                    self.get_var(var.as_ref()).into_variable(),
+                )
+            } else if let Some(predicate) = ctx.predicate() {
+                HasConstraint::from_value(
+                    label.get_text(),
+                    self.visit_predicate(predicate.as_ref())
+                        .into_constraint()
+                        .into_thing()
+                        .into_value(),
+                )
+            } else {
+                panic!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+                // ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))  // fixme return this
+            }
+        } else if let Some(_) = ctx.VAR_() {
+            todo!()
+        } else {
+            panic!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+            // ParserResult::Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))  // fixme return this
+        };
+
+        ParserResult::Constraint(has.into_constraint())
+    }
+
+    fn visit_predicate(&mut self, ctx: &PredicateContext<'input>) -> Self::Return {
+        let (predicate, value) = if let Some(value) = ctx.value() {
+            (Predicate::Eq, self.visit_value(value.as_ref()).into_value())
+        } else if let Some(equality) = ctx.predicate_equality() {
+            (
+                Predicate::from(equality.get_text()),
+                if let Some(_value) = ctx.predicate_value().unwrap().value() {
+                    todo!()
+                } else if let Some(var) = ctx.predicate_value().unwrap().VAR_() {
+                    Value::from(self.get_var(var.as_ref()))
+                } else {
+                    panic!("{}", ILLEGAL_STATE.format(&[]))
+                    // ParserResult::Err(ILLEGAL_STATE.format(&[]))  // fixme return this
+                },
+            )
+        } else {
+            todo!()
+        };
+
+        ParserResult::Constraint(ValueConstraint::new(predicate, value).into_constraint())
+    }
+
+    fn visit_predicate_equality(
+        &mut self,
+        ctx: &Predicate_equalityContext<'input>,
+    ) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_predicate_substring(
+        &mut self,
+        ctx: &Predicate_substringContext<'input>,
+    ) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_predicate_value(&mut self, ctx: &Predicate_valueContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_schema_rule(&mut self, ctx: &Schema_ruleContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_type_any(&mut self, ctx: &Type_anyContext<'input>) -> Self::Return {
+        if let Some(var) = ctx.VAR_() {
+            ParserResult::Pattern(Pattern::from(self.get_var(var.as_ref())))
+        } else if let Some(type_) = ctx.type_() {
+            self.visit_type_(type_.as_ref())
+        } else if let Some(scoped) = ctx.type_scoped() {
+            self.visit_type_scoped(scoped.as_ref())
+        } else {
+            panic!("null type label")
+        }
+    }
+
+    fn visit_type_scoped(&mut self, ctx: &Type_scopedContext<'input>) -> Self::Return {
+        if let Some(scoped) = ctx.label_scoped() {
+            self.visit_label_scoped(scoped.as_ref())
+        } else if let Some(var) = ctx.VAR_() {
+            ParserResult::Pattern(Pattern::from(self.get_var(var.as_ref())))
+        } else {
+            panic!("null scoped type label")
+        }
+    }
+
+    fn visit_type_(&mut self, ctx: &Type_Context<'input>) -> Self::Return {
+        if let Some(label) = ctx.label() {
+            ParserResult::Label(label.get_text())
+        } else if let Some(var) = ctx.VAR_() {
+            ParserResult::Pattern(self.get_var(var.as_ref()).into_pattern())
+        } else {
+            panic!("")
+        }
+    }
+
+    fn visit_label_any(&mut self, ctx: &Label_anyContext<'input>) -> Self::Return {
+        if let Some(label) = ctx.label() {
+            ParserResult::Label(label.get_text())
+        } else {
+            panic!("visit_label_any: not implemented")
+        }
+    }
+
+    fn visit_label_scoped(&mut self, ctx: &Label_scopedContext<'input>) -> Self::Return {
+        let parts: Vec<String> = ctx.get_text().split(":").map(String::from).collect();
+        ParserResult::ScopedLabel((parts[0].clone(), parts[1].clone()))
+    }
+
+    fn visit_label(&mut self, ctx: &LabelContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_labels(&mut self, ctx: &LabelsContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_label_array(&mut self, ctx: &Label_arrayContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_schema_native(&mut self, ctx: &Schema_nativeContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_type_native(&mut self, ctx: &Type_nativeContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_value_type(&mut self, ctx: &Value_typeContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_value(&mut self, ctx: &ValueContext<'input>) -> Self::Return {
+        if let Some(string) = ctx.STRING_() {
+            ParserResult::Value(Value::from(self.get_string(string.as_ref())))
+        } else if let Some(date_time) = ctx.DATETIME_() {
+            ParserResult::Value(Value::from(self.get_date_time(date_time.as_ref())))
+        } else if let Some(date) = ctx.DATE_() {
+            ParserResult::Value(Value::from(self.get_date(date.as_ref())))
+        } else {
+            todo!()
+        }
+    }
+
+    fn visit_regex(&mut self, ctx: &RegexContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+
+    fn visit_unreserved(&mut self, ctx: &UnreservedContext<'input>) -> Self::Return {
+        self.visit_children(ctx)
+    }
+}

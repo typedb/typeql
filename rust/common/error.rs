@@ -20,34 +20,26 @@
  *
  */
 
-pub trait ErrorMessage {
-    const CODE_PREFIX: &'static str;
-    const MESSAGE_PREFIX: &'static str;
-    const CODE_DIGITS: usize;
+pub struct ErrorMessage {
+    template: &'static str,
+    prefix: &'static str,
+    code: usize,
+    padding_len: usize,
+}
 
-    fn code_number(&self) -> usize;
-    fn message_body(&self) -> &'static str;
-
-    fn template(&self) -> String {
-        format!(
-            "[{}{}{}] {}: {}",
-            Self::CODE_PREFIX,
-            "0".repeat(Self::CODE_DIGITS - num_digits(self.code_number())),
-            self.code_number(),
-            Self::MESSAGE_PREFIX,
-            self.message_body()
-        )
-    }
-
-    fn format(&self, args: &[&str]) -> String {
-        let expected_arg_count = self.message_body().matches("{}").count();
+impl ErrorMessage {
+    pub fn format(&self, args: &[&str]) -> String {
+        let expected_arg_count = self.template.matches("{}").count();
         assert_eq!(
-            expected_arg_count, args.len(),
-            "Message template `{}` takes `{}` args but `{}` were provided",
-            self.message_body(), expected_arg_count, args.len()
+            expected_arg_count,
+            args.len(),
+            "Message template `{:?}` takes `{}` args but `{}` were provided",
+            self.template,
+            expected_arg_count,
+            args.len()
         );
-        let mut buffer = String::new();
-        for (i, fragment) in self.template().split("{}").enumerate() {
+        let mut buffer = format!("[{}{}{}] ", self.prefix, "0".repeat(self.padding_len), self.code);
+        for (i, fragment) in self.template.split("{}").enumerate() {
             if i > 0 {
                 buffer += args.get(i - 1).unwrap_or(&"{}");
             }
@@ -55,51 +47,39 @@ pub trait ErrorMessage {
         }
         buffer
     }
-
-    // fn to_err(&self, args: &[&str]) -> Error {
-    //     Error::new(self.format(args))
-    // }
 }
 
 const fn num_digits(x: usize) -> usize {
-    if x < 10 {
-        1
-    } else {
-        1 + num_digits(x / 10)
-    }
+    if x < 10 { 1 } else { 1 + num_digits(x / 10) }
 }
 
-macro_rules! last {
-    ($x:tt) => ($x);
-    ($x:tt $($xs:tt)*) => (last!($($xs)*));
+const fn max(x: usize, y: usize) -> usize {
+    if x > y { x } else { y }
+}
+
+macro_rules! max {
+    ($x:literal) => ($x);
+    ($x:literal, $($xs:literal),*) => (max($x, max!($($xs),*)));
 }
 
 macro_rules! error_message {
-    ($name:ident, $code_pfx:literal, $message_pfx:literal, $(($error_name:ident, $code:literal, $body:literal)),*) => {
-        pub struct $name {
-            code_number: usize,
-            message_body: &'static str,
-        }
-        impl ErrorMessage for $name {
-            const CODE_PREFIX: &'static str = $code_pfx;
-            const MESSAGE_PREFIX: &'static str = $message_pfx;
-            const CODE_DIGITS: usize = num_digits(last!($($code),*));
-
-            fn code_number(&self) -> usize {
-                self.code_number
-            }
-            fn message_body(&self) -> &'static str {
-                self.message_body
-            }
-        }
+    ($code_pfx:literal, $message_pfx:literal, $(($error_name:ident, $code:literal, $body:literal)),* $(,)?) => {
+        error_message!($code_pfx, num_digits(max!($($code),*)), $message_pfx, $(($error_name, $code, $body)),*);
+    };
+    ($code_pfx:literal, $code_len:expr, $message_pfx:literal, $(($error_name:ident, $code:literal, $body:literal)),* $(,)?) => {
         $(
-            pub const $error_name: $name = $name { code_number: $code, message_body: $body };
+        pub const $error_name: ErrorMessage = ErrorMessage {
+            template: concat!($message_pfx, ": ", $body),
+            prefix: $code_pfx,
+            code: $code,
+            padding_len: $code_len - num_digits($code),
+        };
         )*
-    }
+    };
 }
 
 error_message!(
-    TypeQLErrorMessage, "TQL", "TypeQL Error",
+    "TQL", "TypeQL Error",
     (ILLEGAL_STATE, 1, "Illegal internal state!"),
     (SYNTAX_ERROR_NO_DETAILS, 2, "There is a syntax error at line {}:\n{}"),
     (SYNTAX_ERROR_DETAILED, 3, "There is a syntax error at line {}:\n{}\n{}\n{}"),
@@ -136,5 +116,5 @@ error_message!(
     (INVALID_SORTING_ORDER, 34, "Invalid sorting order. Valid options: '{}' or '{}'."),
     (INVALID_COUNT_VARIABLE_ARGUMENT, 35, "Aggregate COUNT does not accept a Variable."),
     (ILLEGAL_GRAMMAR, 36, "Illegal grammar!"),
-    (ILLEGAL_CHAR_IN_LABEL, 47, "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.")
+    (ILLEGAL_CHAR_IN_LABEL, 47, "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'."),
 );

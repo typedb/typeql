@@ -32,8 +32,12 @@ pub trait TypeVariableBuilder: Sized {
         )
     }
 
-    fn relates(self, type_name: impl Into<RelatesConstraint>) -> TypeVariable {
-        self.constrain_type(type_name.into().into_type_constraint())
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeVariable {
+        self.constrain_type(relates.into().into_type_constraint())
+    }
+
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeVariable {
+        self.constrain_type(plays.into().into_type_constraint())
     }
 
     fn constrain_type(self, constraint: TypeConstraint) -> TypeVariable;

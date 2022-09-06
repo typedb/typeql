@@ -30,6 +30,7 @@ use crate::write_joined;
 pub struct TypeQLMatch {
     pub conjunction: Conjunction,
     pub filter: Vec<UnboundVariable>,
+    pub sorting: Option<Sorting>,
 }
 
 impl TypeQLMatch {
@@ -39,11 +40,18 @@ impl TypeQLMatch {
 
     pub fn filter(self, vars: Vec<Pattern>) -> TypeQLMatch {
         TypeQLMatch {
-            conjunction: self.conjunction,
             filter: vars
                 .into_iter()
                 .map(Pattern::into_unbound_variable)
                 .collect(),
+            ..self
+        }
+    }
+
+    pub fn sort(self, sorting: impl Into<Sorting>) -> TypeQLMatch {
+        TypeQLMatch {
+            sorting: Some(sorting.into()),
+            ..self
         }
     }
 }
@@ -61,6 +69,10 @@ impl Display for TypeQLMatch {
             f.write_str("get ")?;
             write_joined!(f, self.filter, ", ")?;
             f.write_str(";")?;
+        }
+        if let Some(sorting) = &self.sorting {
+            f.write_str("\n")?; // separate because there is only meant to be one newline before all modifiers
+            write!(f, "{}", sorting)?;
         }
 
         Ok(())

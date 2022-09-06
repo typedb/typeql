@@ -21,59 +21,22 @@
  */
 
 use std::cell::RefCell;
-use std::fmt::{Display, Formatter};
-use std::ops::Deref;
 use std::rc::Rc;
 
+use antlr_rust::error_listener::ErrorListener as ANTLRErrorListener;
 use antlr_rust::errors::ANTLRError;
 use antlr_rust::recognizer::Recognizer;
 use antlr_rust::token_factory::TokenFactory;
-use antlr_rust::error_listener::ErrorListener;
 
-use crate::common::error::{ErrorMessage, SYNTAX_ERROR_DETAILED, SYNTAX_ERROR_NO_DETAILS};
+use crate::parser::syntax_error::SyntaxError;
 
-pub struct TypeQLSyntaxError {
-    query_line: Option<String>,
-    line: usize,
-    char_position_in_line: usize,
-    message: String,
-}
-
-impl Display for TypeQLSyntaxError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if let Some(query_line) = &self.query_line {
-            // Error message appearance:
-            //
-            // syntax error at line 1:
-            // match $
-            //       ^
-            // blah blah antlr blah
-            f.write_str(
-                &SYNTAX_ERROR_DETAILED.format(&[
-                    self.line.to_string().as_str(),
-                    query_line,
-                    &(" ".repeat(self.char_position_in_line) + "^"),
-                    &self.message
-                ])
-            )
-        } else {
-            f.write_str(
-                &SYNTAX_ERROR_NO_DETAILS.format(&[
-                    self.line.to_string().as_str(),
-                    &self.message
-                ])
-            )
-        }
-    }
-}
-
-pub(crate) struct TypeQLErrorListener {
+pub(crate) struct ErrorListener {
     query_lines: Vec<String>,
-    errors: Rc<RefCell<Vec<TypeQLSyntaxError>>>,
+    errors: Rc<RefCell<Vec<SyntaxError>>>,
 }
 
-impl TypeQLErrorListener {
-    pub fn new(query: &str, error_buffer: Rc<RefCell<Vec<TypeQLSyntaxError>>>) -> Self {
+impl ErrorListener {
+    pub fn new(query: &str, error_buffer: Rc<RefCell<Vec<SyntaxError>>>) -> Self {
         Self {
             query_lines: query.lines().map(String::from).collect::<Vec<String>>(),
             errors: error_buffer,
@@ -81,7 +44,7 @@ impl TypeQLErrorListener {
     }
 }
 
-impl<'a, T: Recognizer<'a>> ErrorListener<'a, T> for TypeQLErrorListener {
+impl<'a, T: Recognizer<'a>> ANTLRErrorListener<'a, T> for ErrorListener {
     fn syntax_error(
         &self,
         _: &T,
@@ -91,7 +54,7 @@ impl<'a, T: Recognizer<'a>> ErrorListener<'a, T> for TypeQLErrorListener {
         message: &str,
         _: Option<&ANTLRError>,
     ) {
-        self.errors.deref().borrow_mut().push(TypeQLSyntaxError {
+        self.errors.borrow_mut().push(SyntaxError {
             query_line: self
                 .query_lines
                 .get::<usize>((line - 1).try_into().unwrap())
@@ -102,4 +65,3 @@ impl<'a, T: Recognizer<'a>> ErrorListener<'a, T> for TypeQLErrorListener {
         });
     }
 }
-

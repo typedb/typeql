@@ -21,35 +21,86 @@
  */
 
 use std::fmt;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter, Write};
 
-use crate::enum_getter;
 use crate::pattern::*;
+use crate::{enum_getter, var, write_joined};
 
 mod typeql_match;
 pub use typeql_match::*;
 
 #[derive(Debug, Eq, PartialEq)]
+pub struct Sorting {
+    vars: Vec<UnboundVariable>,
+    order: String, // FIXME
+}
+
+impl Sorting {
+    pub fn new(vars: Vec<UnboundVariable>, order: &str) -> Self {
+        Sorting {
+            vars,
+            order: order.to_string(),
+        }
+    }
+}
+
+impl From<&str> for Sorting {
+    fn from(var_name: &str) -> Self {
+        Self::new(vec![var(var_name)], "asc")
+    }
+}
+impl<const N: usize> From<([&str; N], &'static str)> for Sorting {
+    fn from((vars, order): ([&str; N], &'static str)) -> Self {
+        Self::new(vars.map(var).to_vec(), order)
+    }
+}
+impl From<Vec<Pattern>> for Sorting {
+    fn from(vars: Vec<Pattern>) -> Self {
+        Self::new(vars.into_iter().map(Pattern::into_unbound_variable).collect(), "asc")
+    }
+}
+
+impl Display for Sorting {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str("sort ")?;
+        write_joined!(f, self.vars, ", ")?;
+        f.write_char(' ')?;
+        f.write_str(&self.order)?;
+        f.write_str(";")
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Match(TypeQLMatch),
-    Dud(String),
 }
 
 impl Query {
+    enum_getter!(into_match, Match, TypeQLMatch);
+
     pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Query {
         use Query::*;
-        if let Match(mut query) = self {
-            query.filter = vars
-                .into_iter()
-                .map(|s| UnboundVariable::named(s.into()))
-                .collect();
-            Match(query)
-        } else {
-            todo!()
+        match self {
+            Match(mut query) => {
+                query.filter = vars
+                    .into_iter()
+                    .map(|s| UnboundVariable::named(s.into()))
+                    .collect();
+                Match(query)
+            }
+            _ => todo!(),
         }
     }
 
-    enum_getter!(into_match, Match, TypeQLMatch);
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Query {
+        use Query::*;
+        match self {
+            Match(query) => {
+                Match(query.sort(sorting))
+            }
+            _ => todo!(),
+        }
+    }
 }
 
 impl Display for Query {
@@ -57,7 +108,6 @@ impl Display for Query {
         use Query::*;
         match self {
             Match(query) => write!(f, "{}", query),
-            Dud(message) => write!(f, "Dud({})", message),
         }
     }
 }
