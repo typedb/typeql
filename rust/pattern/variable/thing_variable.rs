@@ -39,6 +39,10 @@ impl ThingVariable {
         self.into_bound_variable().into_pattern()
     }
 
+    pub fn into_variable(self) -> Variable {
+        self.into_bound_variable().into_variable()
+    }
+
     pub fn into_bound_variable(self) -> BoundVariable {
         BoundVariable::Thing(self)
     }

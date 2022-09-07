@@ -56,6 +56,20 @@ impl TypeQLMatch {
             ..self
         }
     }
+
+    pub fn limit(self, limit: usize) -> TypeQLMatch {
+        TypeQLMatch {
+            modifiers: self.modifiers.limit(limit),
+            ..self
+        }
+    }
+
+    pub fn offset(self, offset: usize) -> TypeQLMatch {
+        TypeQLMatch {
+            modifiers: self.modifiers.offset(offset),
+            ..self
+        }
+    }
 }
 
 impl Display for TypeQLMatch {
@@ -78,11 +92,13 @@ impl Display for TypeQLMatch {
 pub struct Modifiers {
     pub filter: Vec<UnboundVariable>,
     pub sorting: Option<Sorting>,
+    pub limit: Option<usize>,
+    pub offset: Option<usize>,
 }
 
 impl Modifiers {
     pub fn is_empty(&self) -> bool {
-        self.filter.is_empty() && self.sorting.is_none()
+        self.filter.is_empty() && self.sorting.is_none() && self.limit.is_none() && self.offset.is_none()
     }
 
     pub fn filter(self, vars: Vec<Pattern>) -> Self {
@@ -101,17 +117,41 @@ impl Modifiers {
             ..self
         }
     }
+
+    pub fn limit(self, limit: usize) -> Self {
+        Self {
+            limit: Some(limit),
+            ..self
+        }
+    }
+
+    pub fn offset(self, offset: usize) -> Self {
+        Self {
+            offset: Some(offset),
+            ..self
+        }
+    }
 }
 
 impl Display for Modifiers {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut trail = "";
         if !self.filter.is_empty() {
             f.write_str("get ")?;
             write_joined!(f, self.filter, ", ")?;
             f.write_str(";")?;
+            trail = " ";
         }
         if let Some(sorting) = &self.sorting {
-            write!(f, "{};", sorting)?;
+            write!(f, "{}sort {};", trail, sorting)?;
+            trail = " ";
+        }
+        if let Some(offset) = &self.offset {
+            write!(f, "{}offset {};", trail, offset)?;
+            trail = " ";
+        }
+        if let Some(limit) = &self.limit {
+            write!(f, "{}limit {};", trail, limit)?;
         }
         Ok(())
     }
@@ -120,21 +160,24 @@ impl Display for Modifiers {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Sorting {
     vars: Vec<UnboundVariable>,
-    order: String, // FIXME token
+    order: Option<String>, // FIXME token
 }
 
 impl Sorting {
     pub fn new(vars: Vec<UnboundVariable>, order: &str) -> Self {
         Sorting {
             vars,
-            order: order.to_string(),
+            order: match order {
+                "" => None,
+                order => Some(order.to_string()),
+            }
         }
     }
 }
 
 impl From<&str> for Sorting {
     fn from(var_name: &str) -> Self {
-        Self::new(vec![var(var_name)], "asc")
+        Self::new(vec![var(var_name)], "")
     }
 }
 impl<const N: usize> From<([&str; N], &'static str)> for Sorting {
@@ -150,9 +193,10 @@ impl From<Vec<Pattern>> for Sorting {
 
 impl Display for Sorting {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_str("sort ")?;
         write_joined!(f, self.vars, ", ")?;
-        write!(f, " {}", self.order)?;
+        if let Some(order) = &self.order {
+            write!(f, " {}", order)?;
+        }
         Ok(())
     }
 }

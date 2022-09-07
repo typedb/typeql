@@ -400,19 +400,20 @@ fn test_schema_query() {
     let query = r#"match
 $x plays starring:actor;
 sort $x asc;"#;
+
     let parsed = parse_query(query).unwrap();
     let expected = typeql_match(var("x").plays(("starring", "actor"))).sort((["x"], "asc"));
 
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_get_sort() {
     let query = r#"match
 $x isa movie,
     has rating $r;
 sort $r desc;"#;
+
     let parsed = parse_query(query).unwrap();
     let expected =
         typeql_match(var("x").isa("movie").has("rating", var("r"))).sort((["r"], "desc"));
@@ -426,10 +427,64 @@ fn test_get_sort_limit() {
 $x isa movie,
     has rating $r;
 sort $r; limit 10;"#;
+
     let parsed = parse_query(query).unwrap();
     let expected = typeql_match(var("x").isa("movie").has("rating", var("r")))
         .sort("r")
         .limit(10);
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_get_sort_offset_limit() {
+    let query = r#"match
+$x isa movie,
+    has rating $r;
+sort $r desc; offset 10; limit 10;"#;
+
+    let parsed = parse_query(query).unwrap();
+    let expected = typeql_match(var("x").isa("movie").has("rating", var("r")))
+        .sort((["r"], "desc"))
+        .offset(10)
+        .limit(10);
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_get_offset_limit() {
+    let query = r#"match
+$y isa movie,
+    has title $n;
+offset 2; limit 4;"#;
+
+    let parsed = parse_query(query).unwrap();
+    let expected = typeql_match(var("y").isa("movie").has("title", var("n")))
+        .offset(2)
+        .limit(4);
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+/*
+#[test]
+fn test_variables_everywhere_query() {  // SubConstraint
+    let query = r#"match
+($p: $x, $y);
+$x isa $z;
+$y "crime";
+$z sub production;
+has-genre relates $p;"#;
+
+    let parsed = parse_query(query).unwrap();
+    let expected = typeql_match([
+        rel((var("p"), var("x"))).rel("y"),
+        var("x").isa(var("z")),
+        var("y").eq("crime"),
+        var("z").sub("production"),
+        type_("has-genre").relates(var("p")),
+    ]);
 
     assert_query_eq!(expected, parsed, query);
 }

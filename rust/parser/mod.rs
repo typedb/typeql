@@ -110,6 +110,10 @@ impl Parser {
         String::from(&quoted[1..quoted.len() - 1])
     }
 
+    fn get_long(&self, long: &TerminalNode<TypeQLRustParserContextType>) -> i64 {
+        long.get_text().parse().unwrap()  // FIXME
+    }
+
     fn get_date(&self, date: &TerminalNode<TypeQLRustParserContextType>) -> NaiveDateTime {
         NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d").unwrap()
     }
@@ -271,11 +275,13 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 match_query =
                     match_query.sort(maybe!(self.visit_sort(sort.as_ref())).into_sorting());
             }
-            if let Some(_limit) = modifiers.limit() {
-                todo!();
+            if let Some(limit) = modifiers.limit() {
+                match_query =
+                    match_query.limit(self.get_long(limit.LONG_().unwrap().as_ref()) as usize);
             }
-            if let Some(_offset) = modifiers.offset() {
-                todo!();
+            if let Some(offset) = modifiers.offset() {
+                match_query =
+                    match_query.offset(self.get_long(offset.LONG_().unwrap().as_ref()) as usize);
             }
         }
         ParserResult::Query(match_query.into_query())
@@ -321,7 +327,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
             &if let Some(order) = ctx.ORDER_() {
                 order.get_text()
             } else {
-                String::from("asc")
+                String::from("")
             },
         ))
     }

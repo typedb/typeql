@@ -25,10 +25,16 @@ use crate::pattern::*;
 pub trait ThingVariableBuilder: Sized {
     fn has(self, type_name: impl Into<String>, value: impl Into<Value>) -> ThingVariable {
         self.constrain_thing(
-            HasConstraint::from_value(
-                type_name.into(),
-                ValueConstraint::new(Predicate::Eq, value.into()),
-            )
+            match value.into() {
+                Value::Variable(variable) => HasConstraint::from_typed_variable(
+                    type_name.into(),
+                    (*variable).into_variable(),
+                ),
+                value => HasConstraint::from_value(
+                    type_name.into(),
+                    ValueConstraint::new(Predicate::Eq, value),
+                ),
+            }
             .into_thing_constraint(),
         )
     }

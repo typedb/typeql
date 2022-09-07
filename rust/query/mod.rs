@@ -59,6 +59,22 @@ impl Query {
             _ => todo!(),
         }
     }
+
+    pub fn limit(self, limit: usize) -> Query {
+        use Query::*;
+        match self {
+            Match(query) => Match(query.limit(limit)),
+            _ => todo!(),
+        }
+    }
+
+    pub fn offset(self, offset: usize) -> Query {
+        use Query::*;
+        match self {
+            Match(query) => Match(query.offset(offset)),
+            _ => todo!(),
+        }
+    }
 }
 
 impl Display for Query {
