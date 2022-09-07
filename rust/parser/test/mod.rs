@@ -410,7 +410,7 @@ sort $x asc;"#;
 #[test]
 fn test_get_sort() {
     let query = r#"match
-$x isa movie
+$x isa movie,
     has rating $r;
 sort $r desc;"#;
     let parsed = parse_query(query).unwrap();
