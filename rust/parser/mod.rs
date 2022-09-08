@@ -417,7 +417,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     fn visit_variable_type(&mut self, ctx: &Variable_typeContext<'input>) -> Self::Return {
         let mut var_type = match maybe!(self.visit_type_any(ctx.type_any().unwrap().as_ref())) {
             ParserResult::Pattern(p) => p.into_type_variable(),
-            ParserResult::Label(p) => UnboundVariable::hidden().type_(p),
+            ParserResult::Label(p) => UnboundVariable::hidden().type_(p).into_type(),
             other => panic!("{:?}", other),
         };
         for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
@@ -438,7 +438,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                             _ => panic!(""),
                         }
                         .into_type_constraint(),
-                    );
+                    ).into_type();
             } else if constraint.RELATES().is_some() {
                 let _overridden: Option<u8> = match constraint.AS() {
                     None => None,
@@ -453,11 +453,11 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                         _ => panic!(""),
                     }
                     .into_type_constraint(),
-                );
+                ).into_type();
             } else if constraint.TYPE().is_some() {
                 let scoped_label =
                     maybe!(self.visit_label_any(constraint.label_any().unwrap().as_ref()));
-                var_type = var_type.type_(scoped_label.into_label());
+                var_type = var_type.type_(scoped_label.into_label()).into_type();
             } else {
                 panic!("visit_variable_type: not implemented")
             }
@@ -495,7 +495,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
                     .unwrap()
                     .into_thing_constraint(),
-            )
+            ).into_thing()
         }
         if let Some(attributes) = ctx.attributes() {
             var_thing = self
@@ -503,7 +503,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 .into_constraints()
                 .into_iter()
                 .fold(var_thing, |var_thing, constraint| {
-                    var_thing.constrain_thing(constraint.into_thing())
+                    var_thing.constrain_thing(constraint.into_thing()).into_thing()
                 });
         }
         ParserResult::Pattern(var_thing.into_pattern())

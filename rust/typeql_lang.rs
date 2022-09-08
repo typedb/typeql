@@ -57,11 +57,11 @@ pub fn var(name: impl Into<String>) -> UnboundVariable {
     UnboundVariable::named(name.into())
 }
 
-pub fn type_(name: impl Into<String>) -> TypeVariable {
+pub fn type_(name: impl Into<String>) -> BoundVariable {
     UnboundVariable::hidden().type_(name.into())
 }
 
-pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
+pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> BoundVariable {
     UnboundVariable::hidden().rel(value)
 }
 

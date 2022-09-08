@@ -38,6 +38,10 @@ impl TypeVariable {
         self.into_bound_variable().into_pattern()
     }
 
+    pub fn into_variable(self) -> Variable {
+        self.into_bound_variable().into_variable()
+    }
+
     pub fn into_bound_variable(self) -> BoundVariable {
         BoundVariable::Type(self)
     }
@@ -53,14 +57,14 @@ impl TypeVariable {
 }
 
 impl TypeVariableBuilder for TypeVariable {
-    fn constrain_type(mut self, constraint: TypeConstraint) -> TypeVariable {
+    fn constrain_type(mut self, constraint: TypeConstraint) -> BoundVariable {
         use TypeConstraint::*;
         match constraint {
             Label(label) => self.label = Some(label),
             Relates(relates) => self.relates.push(relates),
             Plays(plays) => self.plays.push(plays),
         }
-        self
+        self.into_bound_variable()
     }
 }
 

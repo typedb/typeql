@@ -56,6 +56,24 @@ impl From<TypeVariable> for BoundVariable {
     }
 }
 
+impl ThingVariableBuilder for BoundVariable {
+    fn constrain_thing(self, constraint: ThingConstraint) -> BoundVariable {
+        self.into_thing().constrain_thing(constraint)
+    }
+}
+
+impl RelationVariableBuilder for BoundVariable {
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> BoundVariable {
+        self.into_thing().constrain_role_player(constraint)
+    }
+}
+
+impl TypeVariableBuilder for BoundVariable {
+    fn constrain_type(self, constraint: TypeConstraint) -> BoundVariable {
+        self.into_type().constrain_type(constraint)
+    }
+}
+
 impl Display for BoundVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use BoundVariable::*;

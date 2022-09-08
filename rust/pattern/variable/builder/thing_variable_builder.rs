@@ -23,7 +23,7 @@
 use crate::pattern::*;
 
 pub trait ThingVariableBuilder: Sized {
-    fn has(self, type_name: impl Into<String>, value: impl Into<Value>) -> ThingVariable {
+    fn has(self, type_name: impl Into<String>, value: impl Into<Value>) -> BoundVariable {
         self.constrain_thing(
             match value.into() {
                 Value::Variable(variable) => HasConstraint::from_typed_variable(
@@ -39,7 +39,7 @@ pub trait ThingVariableBuilder: Sized {
         )
     }
 
-    fn isa(self, type_name: impl Into<String>) -> ThingVariable {
+    fn isa(self, type_name: impl Into<String>) -> BoundVariable {
         self.constrain_thing(
             IsaConstraint {
                 type_name: type_name.into(),
@@ -49,19 +49,19 @@ pub trait ThingVariableBuilder: Sized {
         )
     }
 
-    fn eq(self, value: impl Into<Value>) -> ThingVariable {
+    fn eq(self, value: impl Into<Value>) -> BoundVariable {
         self.constrain_thing(
             ValueConstraint::new(Predicate::Eq, value.into()).into_thing_constraint(),
         )
     }
 
-    fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable;
+    fn constrain_thing(self, constraint: ThingConstraint) -> BoundVariable;
 }
 
 pub trait RelationVariableBuilder: Sized {
-    fn rel<T: Into<RolePlayerConstraint>>(self, value: T) -> ThingVariable {
+    fn rel<T: Into<RolePlayerConstraint>>(self, value: T) -> BoundVariable {
         self.constrain_role_player(value.into())
     }
 
-    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable;
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> BoundVariable;
 }

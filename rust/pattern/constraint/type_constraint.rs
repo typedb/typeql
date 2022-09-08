@@ -122,7 +122,7 @@ impl From<String> for RelatesConstraint {
     fn from(type_name: String) -> Self {
         RelatesConstraint {
             role_type: UnboundVariable::hidden()
-                .type_(ScopedType::from((String::from("relation"), type_name))),
+                .type_(ScopedType::from((String::from("relation"), type_name))).into_type(),
             overridden_role_type: None,
         }
     }
@@ -160,7 +160,7 @@ impl PlaysConstraint {
             relation_type: match &role_type.label {
                 Some(label) => Some(
                     UnboundVariable::hidden()
-                        .type_(label.scoped_type.scope.as_ref().cloned().unwrap()),
+                        .type_(label.scoped_type.scope.as_ref().cloned().unwrap()).into_type(),
                 ),
                 None => None,
             },
@@ -179,7 +179,7 @@ impl From<(&str, &str)> for PlaysConstraint {
 impl From<(String, String)> for PlaysConstraint {
     fn from((relation_type, role_type): (String, String)) -> Self {
         PlaysConstraint::new(
-            UnboundVariable::hidden().type_(ScopedType::from((relation_type, role_type))),
+            UnboundVariable::hidden().type_(ScopedType::from((relation_type, role_type))).into_type(),
             None,
         )
     }

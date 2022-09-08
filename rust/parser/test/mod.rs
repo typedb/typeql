@@ -488,4 +488,16 @@ has-genre relates $p;"#;
 
     assert_query_eq!(expected, parsed, query);
 }
+
+#[test]
+fn test_parse_relates_type_variable() {
+    let query = r#"match
+$x isa $type;
+$type relates someRole;"#;
+    let parsed = parse_query(query).unwrap();
+    let expected = typeql_match([var("x").isa(var("type")), var("type").relates("someRole")]);
+    // [ThingVariable, TypeVariable] no bueno
+
+    assert_query_eq!(expected, parsed, query);
+}
  */

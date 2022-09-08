@@ -84,14 +84,14 @@ impl HasConstraint {
 
     pub fn from_value(type_name: String, value: ValueConstraint) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name)),
-            attribute: UnboundVariable::hidden().constrain_thing(value.into_thing_constraint()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
+            attribute: UnboundVariable::hidden().constrain_thing(value.into_thing_constraint()).into_thing(),
         }
     }
 
     pub fn from_typed_variable(type_name: String, variable: Variable) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name)),
+            type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
             attribute: variable.into_thing(),
         }
     }
@@ -246,6 +246,11 @@ impl From<ThingVariable> for Value {
         Value::Variable(Box::new(variable))
     }
 }
+impl From<BoundVariable> for Value {
+    fn from(variable: BoundVariable) -> Value {
+        Value::Variable(Box::new(variable.into_thing()))
+    }
+}
 impl From<Variable> for Value {
     fn from(variable: Variable) -> Value {
         Value::Variable(Box::new(variable.into_thing()))
@@ -362,7 +367,7 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type).into_type(), player_var))
     }
 }
 

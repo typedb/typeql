@@ -37,35 +37,26 @@ impl Conjunction {
     }
 }
 
-impl<T> From<T> for Conjunction
-where
-    Pattern: From<T>,
-{
+impl<T: Into<Pattern>> From<T> for Conjunction {
     fn from(pattern: T) -> Self {
         Conjunction {
-            patterns: vec![Pattern::from(pattern)],
+            patterns: vec![pattern.into()],
         }
     }
 }
 
-impl<T, const N: usize> From<[T; N]> for Conjunction
-where
-    Pattern: From<T>,
-{
+impl<T: Into<Pattern>, const N: usize> From<[T; N]> for Conjunction {
     fn from(patterns: [T; N]) -> Self {
         Conjunction {
-            patterns: patterns.into_iter().map(Pattern::from).collect(),
+            patterns: patterns.into_iter().map(T::into).collect(),
         }
     }
 }
 
-impl<T> From<Vec<T>> for Conjunction
-where
-    Pattern: From<T>,
-{
+impl<T: Into<Pattern>> From<Vec<T>> for Conjunction {
     fn from(patterns: Vec<T>) -> Self {
         Conjunction {
-            patterns: patterns.into_iter().map(Pattern::from).collect(),
+            patterns: patterns.into_iter().map(T::into).collect(),
         }
     }
 }
