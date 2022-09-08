@@ -27,6 +27,7 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeConstraint {
     Label(LabelConstraint),
+    Sub(SubConstraint),
     Relates(RelatesConstraint),
     Plays(PlaysConstraint),
 }
@@ -93,6 +94,43 @@ impl LabelConstraint {
 impl Display for LabelConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "type {}", self.scoped_type)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct SubConstraint {
+    pub type_: Box<TypeVariable>,
+}
+
+impl SubConstraint {
+    pub fn into_constraint(self) -> Constraint {
+        self.into_type_constraint().into_constraint()
+    }
+
+    pub fn into_type_constraint(self) -> TypeConstraint {
+        TypeConstraint::Sub(self)
+    }
+}
+
+impl<T: Into<ScopedType>> From<T> for SubConstraint {
+    fn from(scoped_type: T) -> Self {
+        SubConstraint {
+            type_: Box::new(UnboundVariable::hidden().type_(scoped_type).into_type()),
+        }
+    }
+}
+
+impl From<UnboundVariable> for SubConstraint {
+    fn from(type_: UnboundVariable) -> Self {
+        SubConstraint {
+            type_: Box::new(type_.into_type()),
+        }
+    }
+}
+
+impl Display for SubConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "sub {}", self.type_)
     }
 }
 

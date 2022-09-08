@@ -39,14 +39,8 @@ pub trait ThingVariableBuilder: Sized {
         )
     }
 
-    fn isa(self, type_name: impl Into<String>) -> BoundVariable {
-        self.constrain_thing(
-            IsaConstraint {
-                type_name: type_name.into(),
-                is_explicit: false,
-            }
-            .into_thing_constraint(),
-        )
+    fn isa(self, isa: impl Into<IsaConstraint>) -> BoundVariable {
+        self.constrain_thing(isa.into().into_thing_constraint())
     }
 
     fn eq(self, value: impl Into<Value>) -> BoundVariable {

@@ -111,7 +111,7 @@ impl Parser {
     }
 
     fn get_long(&self, long: &TerminalNode<TypeQLRustParserContextType>) -> i64 {
-        long.get_text().parse().unwrap()  // FIXME
+        long.get_text().parse().unwrap() // FIXME
     }
 
     fn get_date(&self, date: &TerminalNode<TypeQLRustParserContextType>) -> NaiveDateTime {
@@ -150,13 +150,11 @@ impl Parser {
         _isa: &TerminalNode<TypeQLRustParserContextType>,
         ctx: &Type_ContextAll,
     ) -> Result<IsaConstraint, ErrorMessage> {
-        Ok(IsaConstraint {
-            type_name: match self.visit_type_(ctx) {
-                ParserResult::Label(label) => label,
-                ParserResult::Err(err) => Err(err)?,
-                _ => Err(ILLEGAL_STATE.format(&[]))?,
-            },
-            is_explicit: false,
+        Ok(match self.visit_type_(ctx) {
+            ParserResult::Label(label) => IsaConstraint::from(label),
+            ParserResult::Pattern(var) => IsaConstraint::from(var.into_unbound_variable()),
+            ParserResult::Err(err) => return Err(err),
+            _ => return Err(ILLEGAL_STATE.format(&[])),
         })
     }
 }
@@ -426,8 +424,8 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                     None => None,
                     Some(_) => todo!(),
                 };
-                var_type =
-                    var_type.constrain_type(
+                var_type = var_type
+                    .constrain_type(
                         match maybe!(
                             self.visit_type_scoped(constraint.type_scoped().unwrap().as_ref())
                         ) {
@@ -435,24 +433,35 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                             ParserResult::Pattern(var) => {
                                 PlaysConstraint::from(var.into_unbound_variable())
                             }
-                            _ => panic!(""),
+                            other => panic!("{:?}", other),
                         }
                         .into_type_constraint(),
-                    ).into_type();
+                    )
+                    .into_type();
             } else if constraint.RELATES().is_some() {
                 let _overridden: Option<u8> = match constraint.AS() {
                     None => None,
                     Some(_) => todo!(),
                 };
-                var_type = var_type.constrain_type(
-                    match maybe!(self.visit_type_(constraint.type_(0).unwrap().as_ref())) {
-                        ParserResult::Label(label) => RelatesConstraint::from(label),
-                        ParserResult::Pattern(var) => {
-                            RelatesConstraint::from(var.into_unbound_variable())
+                var_type = var_type
+                    .constrain_type(
+                        match maybe!(self.visit_type_(constraint.type_(0).unwrap().as_ref())) {
+                            ParserResult::Label(label) => RelatesConstraint::from(label),
+                            ParserResult::Pattern(var) => {
+                                RelatesConstraint::from(var.into_unbound_variable())
+                            }
+                            other => panic!("{:?}", other),
                         }
-                        _ => panic!(""),
-                    }
-                    .into_type_constraint(),
+                        .into_type_constraint(),
+                    )
+                    .into_type();
+            } else if constraint.SUB_().is_some() {
+                var_type = var_type.constrain_type(
+                    match maybe!(self.visit_type_any(constraint.type_any().unwrap().as_ref())) {
+                        ParserResult::Label(label) => SubConstraint::from(label),
+                        ParserResult::Pattern(var) => SubConstraint::from(var.into_unbound_variable()),
+                        other => panic!("{:?}", other),
+                    }.into_type_constraint()
                 ).into_type();
             } else if constraint.TYPE().is_some() {
                 let scoped_label =
@@ -491,11 +500,13 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
     fn visit_variable_thing(&mut self, ctx: &Variable_thingContext<'input>) -> Self::Return {
         let mut var_thing = self.get_var(ctx.VAR_().unwrap().as_ref()).into_thing();
         if let Some(isa) = ctx.ISA_() {
-            var_thing = var_thing.constrain_thing(
-                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
-                    .unwrap()
-                    .into_thing_constraint(),
-            ).into_thing()
+            var_thing = var_thing
+                .constrain_thing(
+                    self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
+                        .unwrap()
+                        .into_thing_constraint(),
+                )
+                .into_thing()
         }
         if let Some(attributes) = ctx.attributes() {
             var_thing = self
@@ -503,7 +514,9 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 .into_constraints()
                 .into_iter()
                 .fold(var_thing, |var_thing, constraint| {
-                    var_thing.constrain_thing(constraint.into_thing()).into_thing()
+                    var_thing
+                        .constrain_thing(constraint.into_thing())
+                        .into_thing()
                 });
         }
         ParserResult::Pattern(var_thing.into_pattern())
@@ -571,10 +584,11 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 let player =
                     self.get_var(role_player_ctx.player().unwrap().VAR_().unwrap().as_ref());
                 role_players.push(if let Some(type_) = role_player_ctx.type_() {
-                    RolePlayerConstraint::from((
-                        maybe!(self.visit_type_(type_.as_ref())).into_label(),
-                        player,
-                    ))
+                    match maybe!(self.visit_type_(type_.as_ref())) {
+                        ParserResult::Label(label) => RolePlayerConstraint::from((label, player)),
+                        ParserResult::Pattern(var) => RolePlayerConstraint::from((var.into_type_variable(), player)),
+                        other => panic!("{:?}", other),
+                    }
                 } else {
                     RolePlayerConstraint::from(player)
                 });
@@ -597,7 +611,8 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         let mut constraints = Vec::new();
         for i in 0.. {
             if let Some(attribute_ctx) = ctx.attribute(i) {
-                constraints.push(maybe!(self.visit_attribute(attribute_ctx.as_ref())).into_constraint());
+                constraints
+                    .push(maybe!(self.visit_attribute(attribute_ctx.as_ref())).into_constraint());
             } else {
                 break;
             }
@@ -634,7 +649,10 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
 
     fn visit_predicate(&mut self, ctx: &PredicateContext<'input>) -> Self::Return {
         let (predicate, value) = if let Some(value) = ctx.value() {
-            (Predicate::Eq, maybe!(self.visit_value(value.as_ref())).into_value())
+            (
+                Predicate::Eq,
+                maybe!(self.visit_value(value.as_ref())).into_value(),
+            )
         } else if let Some(equality) = ctx.predicate_equality() {
             (
                 Predicate::from(equality.get_text()),

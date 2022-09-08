@@ -29,6 +29,7 @@ use std::fmt::{Display, Write};
 pub struct TypeVariable {
     pub reference: Reference,
     pub label: Option<LabelConstraint>,
+    pub sub: Option<SubConstraint>,
     pub relates: Vec<RelatesConstraint>,
     pub plays: Vec<PlaysConstraint>,
 }
@@ -50,6 +51,7 @@ impl TypeVariable {
         TypeVariable {
             reference,
             label: None,
+            sub: None,
             relates: vec![],
             plays: vec![],
         }
@@ -61,6 +63,7 @@ impl TypeVariableBuilder for TypeVariable {
         use TypeConstraint::*;
         match constraint {
             Label(label) => self.label = Some(label),
+            Sub(sub) => self.sub = Some(sub),
             Relates(relates) => self.relates.push(relates),
             Plays(plays) => self.plays.push(plays),
         }
@@ -77,6 +80,9 @@ impl Display for TypeVariable {
             }
         } else {
             write!(f, "{}", self.label.as_ref().unwrap().scoped_type)?;
+        }
+        if let Some(sub) = &self.sub {
+            write!(f, " {}", sub)?;
         }
         if !self.relates.is_empty() {
             f.write_char(' ')?;

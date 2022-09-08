@@ -47,7 +47,7 @@ impl ThingConstraint {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
-    pub type_name: String,
+    pub type_: TypeVariable,
     pub is_explicit: bool,
 }
 
@@ -61,9 +61,27 @@ impl IsaConstraint {
     }
 }
 
+impl<T: Into<ScopedType>> From<T> for IsaConstraint {
+    fn from(type_name: T) -> Self {
+        IsaConstraint {
+            type_: UnboundVariable::hidden().type_(type_name).into_type(),
+            is_explicit: false,
+        }
+    }
+}
+
+impl From<UnboundVariable> for IsaConstraint {
+    fn from(type_: UnboundVariable) -> Self {
+        IsaConstraint {
+            type_: type_.into_type(),
+            is_explicit: false,
+        }
+    }
+}
+
 impl Display for IsaConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "isa {}", self.type_name)
+        write!(f, "isa {}", self.type_)
     }
 }
 

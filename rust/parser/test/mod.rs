@@ -467,9 +467,8 @@ offset 2; limit 4;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
-fn test_variables_everywhere_query() {  // SubConstraint
+fn test_variables_everywhere_query() {
     let query = r#"match
 ($p: $x, $y);
 $x isa $z;
@@ -496,8 +495,6 @@ $x isa $type;
 $type relates someRole;"#;
     let parsed = parse_query(query).unwrap();
     let expected = typeql_match([var("x").isa(var("type")), var("type").relates("someRole")]);
-    // [ThingVariable, TypeVariable] no bueno
 
     assert_query_eq!(expected, parsed, query);
 }
- */

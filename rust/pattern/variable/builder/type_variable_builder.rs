@@ -36,6 +36,10 @@ pub trait TypeVariableBuilder: Sized {
         self.constrain_type(relates.into().into_type_constraint())
     }
 
+    fn sub(self, sub: impl Into<SubConstraint>) -> BoundVariable {
+        self.constrain_type(sub.into().into_type_constraint())
+    }
+
     fn plays(self, plays: impl Into<PlaysConstraint>) -> BoundVariable {
         self.constrain_type(plays.into().into_type_constraint())
     }
