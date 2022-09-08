@@ -87,14 +87,16 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(31, "Rule '%s' 'then' '%s' tries to assign type '%s' to variable '%s', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
             new ErrorMessage(32, "Rule '%s' 'then' variables must be present in rule 'when'.");
+    public static final ErrorMessage INVALID_RULE_THEN_ROLES =
+            new ErrorMessage(33, "Rule '%s' 'then' '%s': all roles must be specified explicitly or using a variable.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(33, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(34, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
-            new ErrorMessage(34, "Invalid sorting order. Valid options: '%s' or '%s'.");
+            new ErrorMessage(35, "Invalid sorting order. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
-            new ErrorMessage(35, "Aggregate COUNT does not accept a Variable.");
+            new ErrorMessage(36, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(36, "Illegal grammar!");
+            new ErrorMessage(37, "Illegal grammar!");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
             new ErrorMessage(47, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
 
