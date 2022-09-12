@@ -266,23 +266,23 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         }
     }
 
-    fn visit_query_define(&mut self, ctx: &Query_defineContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_query_define(&mut self, _ctx: &Query_defineContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_query_undefine(&mut self, ctx: &Query_undefineContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_query_undefine(&mut self, _ctx: &Query_undefineContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_query_insert(&mut self, ctx: &Query_insertContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_query_insert(&mut self, _ctx: &Query_insertContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_query_delete_or_update(
         &mut self,
-        ctx: &Query_delete_or_updateContext<'input>,
+        _ctx: &Query_delete_or_updateContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        todo!()
     }
 
     fn visit_query_match(&mut self, ctx: &Query_matchContext<'input>) -> Self::Return {
@@ -314,24 +314,24 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
 
     fn visit_query_match_aggregate(
         &mut self,
-        ctx: &Query_match_aggregateContext<'input>,
+        _ctx: &Query_match_aggregateContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        todo!()
     }
 
-    fn visit_query_match_group(&mut self, ctx: &Query_match_groupContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_query_match_group(&mut self, _ctx: &Query_match_groupContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_query_match_group_agg(
         &mut self,
-        ctx: &Query_match_group_aggContext<'input>,
+        _ctx: &Query_match_group_aggContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        todo!()
     }
 
-    fn visit_modifiers(&mut self, ctx: &ModifiersContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_modifiers(&mut self, _ctx: &ModifiersContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_filter(&mut self, ctx: &FilterContext<'input>) -> Self::Return {
@@ -357,32 +357,32 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         ))
     }
 
-    fn visit_offset(&mut self, ctx: &OffsetContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_offset(&mut self, _ctx: &OffsetContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_limit(&mut self, ctx: &LimitContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_limit(&mut self, _ctx: &LimitContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_match_aggregate(&mut self, ctx: &Match_aggregateContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_match_aggregate(&mut self, _ctx: &Match_aggregateContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_aggregate_method(&mut self, ctx: &Aggregate_methodContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_aggregate_method(&mut self, _ctx: &Aggregate_methodContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_match_group(&mut self, ctx: &Match_groupContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_match_group(&mut self, _ctx: &Match_groupContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_definables(&mut self, ctx: &DefinablesContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_definables(&mut self, _ctx: &DefinablesContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_definable(&mut self, ctx: &DefinableContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_definable(&mut self, _ctx: &DefinableContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_patterns(&mut self, ctx: &PatternsContext<'input>) -> Self::Return {
@@ -407,20 +407,20 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
 
     fn visit_pattern_conjunction(
         &mut self,
-        ctx: &Pattern_conjunctionContext<'input>,
+        _ctx: &Pattern_conjunctionContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        todo!()
     }
 
     fn visit_pattern_disjunction(
         &mut self,
-        ctx: &Pattern_disjunctionContext<'input>,
+        _ctx: &Pattern_disjunctionContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        todo!()
     }
 
-    fn visit_pattern_negation(&mut self, ctx: &Pattern_negationContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_pattern_negation(&mut self, _ctx: &Pattern_negationContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_pattern_variable(&mut self, ctx: &Pattern_variableContext<'input>) -> Self::Return {
@@ -435,8 +435,8 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         }
     }
 
-    fn visit_variable_concept(&mut self, ctx: &Variable_conceptContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_variable_concept(&mut self, _ctx: &Variable_conceptContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_variable_type(&mut self, ctx: &Variable_typeContext<'input>) -> Self::Return {
@@ -509,12 +509,12 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         ParserResult::Pattern(var_type.into_pattern())
     }
 
-    fn visit_type_constraint(&mut self, ctx: &Type_constraintContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_type_constraint(&mut self, _ctx: &Type_constraintContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_variable_things(&mut self, ctx: &Variable_thingsContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_variable_things(&mut self, _ctx: &Variable_thingsContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_variable_thing_any(
@@ -635,12 +635,12 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         ParserResult::Constraint(RelationConstraint::new(role_players).into_constraint())
     }
 
-    fn visit_role_player(&mut self, ctx: &Role_playerContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_role_player(&mut self, _ctx: &Role_playerContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_player(&mut self, ctx: &PlayerContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_player(&mut self, _ctx: &PlayerContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_attributes(&mut self, ctx: &AttributesContext<'input>) -> Self::Return {
@@ -709,24 +709,24 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
 
     fn visit_predicate_equality(
         &mut self,
-        ctx: &Predicate_equalityContext<'input>,
+        _ctx: &Predicate_equalityContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        todo!()
     }
 
     fn visit_predicate_substring(
         &mut self,
-        ctx: &Predicate_substringContext<'input>,
+        _ctx: &Predicate_substringContext<'input>,
     ) -> Self::Return {
-        self.visit_children(ctx)
+        todo!()
     }
 
-    fn visit_predicate_value(&mut self, ctx: &Predicate_valueContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_predicate_value(&mut self, _ctx: &Predicate_valueContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_schema_rule(&mut self, ctx: &Schema_ruleContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_schema_rule(&mut self, _ctx: &Schema_ruleContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_type_any(&mut self, ctx: &Type_anyContext<'input>) -> Self::Return {
@@ -774,28 +774,28 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         ParserResult::ScopedLabel((parts[0].clone(), parts[1].clone()))
     }
 
-    fn visit_label(&mut self, ctx: &LabelContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_label(&mut self, _ctx: &LabelContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_labels(&mut self, ctx: &LabelsContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_labels(&mut self, _ctx: &LabelsContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_label_array(&mut self, ctx: &Label_arrayContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_label_array(&mut self, _ctx: &Label_arrayContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_schema_native(&mut self, ctx: &Schema_nativeContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_schema_native(&mut self, _ctx: &Schema_nativeContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_type_native(&mut self, ctx: &Type_nativeContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_type_native(&mut self, _ctx: &Type_nativeContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_value_type(&mut self, ctx: &Value_typeContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_value_type(&mut self, _ctx: &Value_typeContext<'input>) -> Self::Return {
+        todo!()
     }
 
     fn visit_value(&mut self, ctx: &ValueContext<'input>) -> Self::Return {
@@ -814,11 +814,11 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         }
     }
 
-    fn visit_regex(&mut self, ctx: &RegexContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_regex(&mut self, _ctx: &RegexContext<'input>) -> Self::Return {
+        todo!()
     }
 
-    fn visit_unreserved(&mut self, ctx: &UnreservedContext<'input>) -> Self::Return {
-        self.visit_children(ctx)
+    fn visit_unreserved(&mut self, _ctx: &UnreservedContext<'input>) -> Self::Return {
+        todo!()
     }
 }
