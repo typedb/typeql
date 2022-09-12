@@ -28,7 +28,6 @@ use std::rc::Rc;
 
 use typeql_grammar::typeqlrustlexer::TypeQLRustLexer;
 use typeql_grammar::typeqlrustparser::*;
-use typeql_grammar::typeqlrustvisitor::TypeQLRustVisitorCompat;
 
 use antlr_rust::common_token_stream::CommonTokenStream;
 use antlr_rust::{InputStream, Parser as ANTLRParser};
@@ -43,7 +42,7 @@ mod util;
 
 use pattern::*;
 use query::*;
-use crate::parser::{Parser, error_listener::ErrorListener, syntax_error::SyntaxError};
+use crate::parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query};
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query)
@@ -76,8 +75,7 @@ pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
         errors.clone(),
     )));
 
-    let query = Parser::default()
-        .visit_eof_query(parser.eof_query().unwrap().as_ref());
+    let query = visit_eof_query(parser.eof_query().unwrap().as_ref());
 
     if errors.borrow().is_empty() {
         Ok(query.into_query())
