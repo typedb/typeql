@@ -40,9 +40,9 @@ pub mod query;
 #[macro_use]
 mod util;
 
+use crate::parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query};
 use pattern::*;
 use query::*;
-use crate::parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query};
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query)
@@ -70,10 +70,7 @@ pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
 
     parser.remove_error_listeners();
     let errors = Rc::new(RefCell::new(Vec::<SyntaxError>::new()));
-    parser.add_error_listener(Box::new(ErrorListener::new(
-        query_string,
-        errors.clone(),
-    )));
+    parser.add_error_listener(Box::new(ErrorListener::new(query_string, errors.clone())));
 
     let query = visit_eof_query(parser.eof_query().unwrap().as_ref());
 

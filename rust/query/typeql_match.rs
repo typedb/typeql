@@ -34,9 +34,10 @@ pub struct TypeQLMatch {
 
 impl TypeQLMatch {
     pub fn new(conjunction: Conjunction) -> Self {
-          Self {
-              conjunction, modifiers: Modifiers::default()
-          }
+        Self {
+            conjunction,
+            modifiers: Modifiers::default(),
+        }
     }
 
     pub fn into_query(self) -> Query {
@@ -98,7 +99,10 @@ pub struct Modifiers {
 
 impl Modifiers {
     pub fn is_empty(&self) -> bool {
-        self.filter.is_empty() && self.sorting.is_none() && self.limit.is_none() && self.offset.is_none()
+        self.filter.is_empty()
+            && self.sorting.is_none()
+            && self.limit.is_none()
+            && self.offset.is_none()
     }
 
     pub fn filter(self, vars: Vec<Pattern>) -> Self {
@@ -170,7 +174,7 @@ impl Sorting {
             order: match order {
                 "" => None,
                 order => Some(order.to_string()),
-            }
+            },
         }
     }
 }
@@ -187,7 +191,12 @@ impl<const N: usize> From<([&str; N], &'static str)> for Sorting {
 }
 impl From<Vec<Pattern>> for Sorting {
     fn from(vars: Vec<Pattern>) -> Self {
-        Self::new(vars.into_iter().map(Pattern::into_unbound_variable).collect(), "asc")
+        Self::new(
+            vars.into_iter()
+                .map(Pattern::into_unbound_variable)
+                .collect(),
+            "asc",
+        )
     }
 }
 
@@ -200,4 +209,3 @@ impl Display for Sorting {
         Ok(())
     }
 }
-

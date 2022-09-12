@@ -41,21 +41,21 @@ impl Display for SyntaxError {
             //       ^
             // blah blah antlr blah
             f.write_str(
-                &SYNTAX_ERROR_DETAILED.format(&[
-                    self.line.to_string().as_str(),
-                    query_line,
-                    &(" ".repeat(self.char_position_in_line) + "^"),
-                    &self.message
-                ]).message
+                &SYNTAX_ERROR_DETAILED
+                    .format(&[
+                        self.line.to_string().as_str(),
+                        query_line,
+                        &(" ".repeat(self.char_position_in_line) + "^"),
+                        &self.message,
+                    ])
+                    .message,
             )
         } else {
             f.write_str(
-                &SYNTAX_ERROR_NO_DETAILS.format(&[
-                    self.line.to_string().as_str(),
-                    &self.message
-                ]).message
+                &SYNTAX_ERROR_NO_DETAILS
+                    .format(&[self.line.to_string().as_str(), &self.message])
+                    .message,
             )
         }
     }
 }
-

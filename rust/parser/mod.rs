@@ -27,14 +27,12 @@ pub mod syntax_error;
 mod test;
 
 use antlr_rust::token::Token;
-use antlr_rust::tree::TerminalNode;
 use antlr_rust::tree::ParseTree;
+use antlr_rust::tree::TerminalNode;
 use chrono::{NaiveDateTime, Timelike};
-
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR, ILLEGAL_STATE};
 use typeql_grammar::typeqlrustparser::*;
-
 
 use crate::enum_getter;
 use crate::pattern::*;
