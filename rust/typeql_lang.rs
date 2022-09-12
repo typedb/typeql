@@ -53,8 +53,8 @@ pub fn typeql_match(pattern: impl Into<Conjunction>) -> Query {
     Query::Match(TypeQLMatch::new(pattern.into()))
 }
 
-pub fn var(name: impl Into<String>) -> UnboundVariable {
-    UnboundVariable::named(name.into())
+pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
+    var.into()
 }
 
 pub fn type_(name: impl Into<String>) -> BoundVariable {

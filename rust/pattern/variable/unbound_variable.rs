@@ -83,6 +83,22 @@ impl TypeVariableBuilder for UnboundVariable {
     }
 }
 
+impl From<()> for UnboundVariable {
+    fn from(_: ()) -> Self {
+        UnboundVariable::anonymous()
+    }
+}
+impl From<&str> for UnboundVariable {
+    fn from(name: &str) -> Self {
+        UnboundVariable::named(name.to_string())
+    }
+}
+impl From<String> for UnboundVariable {
+    fn from(name: String) -> Self {
+        UnboundVariable::named(name)
+    }
+}
+
 impl Display for UnboundVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)

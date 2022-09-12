@@ -20,6 +20,7 @@
  *
  */
 
+use crate::common::error::{ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION};
 use crate::pattern::*;
 use crate::{enum_getter, write_joined};
 use chrono::{NaiveDateTime, Timelike};
@@ -103,7 +104,9 @@ impl HasConstraint {
     pub fn from_value(type_name: String, value: ValueConstraint) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
-            attribute: UnboundVariable::hidden().constrain_thing(value.into_thing_constraint()).into_thing(),
+            attribute: UnboundVariable::hidden()
+                .constrain_thing(value.into_thing_constraint())
+                .into_thing(),
         }
     }
 
@@ -248,9 +251,16 @@ impl From<String> for Value {
     }
 }
 
-impl From<NaiveDateTime> for Value {
-    fn from(date_time: NaiveDateTime) -> Value {
-        Value::DateTime(date_time)
+impl TryFrom<NaiveDateTime> for Value {
+    type Error = ErrorMessage;
+
+    fn try_from(date_time: NaiveDateTime) -> Result<Value, ErrorMessage> {
+        if date_time.nanosecond() % 1000000 > 0 {
+            return Err(
+                INVALID_CONSTRAINT_DATETIME_PRECISION.format(&[date_time.to_string().as_str()])
+            );
+        }
+        Ok(Value::DateTime(date_time))
     }
 }
 
@@ -385,7 +395,10 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).into_type(), player_var))
+        Self::from((
+            UnboundVariable::hidden().type_(role_type).into_type(),
+            player_var,
+        ))
     }
 }
 

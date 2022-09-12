@@ -30,6 +30,7 @@ use antlr_rust::token::Token;
 use antlr_rust::tree::TerminalNode;
 use antlr_rust::tree::{ParseTree, ParseTreeVisitorCompat};
 use chrono::{NaiveDateTime, Timelike};
+use std::string::ParseError;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR, ILLEGAL_STATE};
 use typeql_grammar::typeqlrustparser::*;
@@ -95,53 +96,69 @@ impl Default for ParserResult {
 #[derive(Default)]
 pub struct Parser;
 
+fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
+    let has_seconds = date_time_text.matches(":").count() == 2;
+    if has_seconds {
+        let has_nanos = date_time_text.matches(".").count() == 1;
+        if has_nanos {
+            let parts: Vec<&str> = date_time_text.splitn(2, ".").collect();
+            let (date_time, nanos) = (parts[0], parts[1]);
+            NaiveDateTime::parse_from_str(date_time, "%Y-%m-%dT%H:%M:%S").ok()?
+                .with_nanosecond(format!("{}{}", nanos, "0".repeat(9 - nanos.len())).parse().ok()?)
+        } else {
+            NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M:%S").ok()
+        }
+    } else {
+        NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M").ok()
+    }
+}
+
 impl Parser {
+    fn get_string(&self, string: &TerminalNode<TypeQLRustParserContextType>) -> String {
+        let quoted = string.get_text();
+        String::from(&quoted[1..quoted.len() - 1])
+    }
+
+    fn get_long(
+        &self,
+        long: &TerminalNode<TypeQLRustParserContextType>,
+    ) -> Result<i64, ErrorMessage> {
+        long.get_text()
+            .parse()
+            .map_err(|_| ILLEGAL_GRAMMAR.format(&[long.get_text().as_str()]))
+    }
+
+    fn get_double(
+        &self,
+        double: &TerminalNode<TypeQLRustParserContextType>,
+    ) -> Result<f64, ErrorMessage> {
+        double.get_text()
+            .parse()
+            .map_err(|_| ILLEGAL_GRAMMAR.format(&[double.get_text().as_str()]))
+    }
+
+    fn get_date(
+        &self,
+        date: &TerminalNode<TypeQLRustParserContextType>,
+    ) -> Result<NaiveDateTime, ErrorMessage> {
+        NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d")
+            .map_err(|_| ILLEGAL_GRAMMAR.format(&[date.get_text().as_str()]))
+    }
+
+    fn get_date_time(
+        &self,
+        date_time: &TerminalNode<TypeQLRustParserContextType>,
+    ) -> Result<NaiveDateTime, ErrorMessage> {
+        let date_time_text = &date_time.get_text();
+        parse_date_time(date_time_text).ok_or(ILLEGAL_GRAMMAR.format(&[date_time_text]))
+    }
+
     fn get_var(&mut self, var: &TerminalNode<TypeQLRustParserContextType>) -> UnboundVariable {
         let name = &var.symbol.get_text()[1..];
         if name == "_" {
             UnboundVariable::anonymous()
         } else {
             UnboundVariable::named(String::from(name))
-        }
-    }
-
-    fn get_string(&self, string: &TerminalNode<TypeQLRustParserContextType>) -> String {
-        let quoted = string.get_text();
-        String::from(&quoted[1..quoted.len() - 1])
-    }
-
-    fn get_long(&self, long: &TerminalNode<TypeQLRustParserContextType>) -> i64 {
-        long.get_text().parse().unwrap() // FIXME
-    }
-
-    fn get_date(&self, date: &TerminalNode<TypeQLRustParserContextType>) -> NaiveDateTime {
-        NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d").unwrap()
-    }
-
-    fn get_date_time(
-        &self,
-        date_time: &TerminalNode<TypeQLRustParserContextType>,
-    ) -> NaiveDateTime {
-        let date_time_text = &date_time.get_text();
-        let has_seconds = date_time_text.matches(":").count() == 2;
-        if has_seconds {
-            let has_nanos = date_time_text.matches(".").count() == 1;
-            if has_nanos {
-                let parts: Vec<&str> = date_time_text.splitn(2, ".").collect();
-                let (date_time, nanos) = (parts[0], parts[1]);
-                NaiveDateTime::parse_from_str(date_time, "%Y-%m-%dT%H:%M:%S")
-                    .unwrap()
-                    .with_nanosecond(
-                        format!("{}{}", nanos, "0".repeat(9 - nanos.len()))
-                            .parse()
-                            .unwrap(),
-                    )
-                    .unwrap()
-            } else {
-                NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M:%S").unwrap()
-            }
-        } else {
-            NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M").unwrap()
         }
     }
 
@@ -163,7 +180,16 @@ macro_rules! maybe {
     ($e:expr) => {
         match $e {
             err @ ParserResult::Err(_) => return err,
-            _ => $e,
+            result => result,
+        }
+    };
+}
+
+macro_rules! maybe_unwrap {
+    ($e:expr) => {
+        match $e {
+            Err(err) => return ParserResult::Err(err),
+            Ok(result) => result,
         }
     };
 }
@@ -274,12 +300,13 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                     match_query.sort(maybe!(self.visit_sort(sort.as_ref())).into_sorting());
             }
             if let Some(limit) = modifiers.limit() {
-                match_query =
-                    match_query.limit(self.get_long(limit.LONG_().unwrap().as_ref()) as usize);
+                match_query = match_query
+                    .limit(maybe_unwrap!(self.get_long(limit.LONG_().unwrap().as_ref())) as usize);
             }
             if let Some(offset) = modifiers.offset() {
-                match_query =
-                    match_query.offset(self.get_long(offset.LONG_().unwrap().as_ref()) as usize);
+                match_query = match_query.offset(maybe_unwrap!(
+                    self.get_long(offset.LONG_().unwrap().as_ref())
+                ) as usize);
             }
         }
         ParserResult::Query(match_query.into_query())
@@ -456,13 +483,21 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                     )
                     .into_type();
             } else if constraint.SUB_().is_some() {
-                var_type = var_type.constrain_type(
-                    match maybe!(self.visit_type_any(constraint.type_any().unwrap().as_ref())) {
-                        ParserResult::Label(label) => SubConstraint::from(label),
-                        ParserResult::Pattern(var) => SubConstraint::from(var.into_unbound_variable()),
-                        other => panic!("{:?}", other),
-                    }.into_type_constraint()
-                ).into_type();
+                var_type =
+                    var_type
+                        .constrain_type(
+                            match maybe!(
+                                self.visit_type_any(constraint.type_any().unwrap().as_ref())
+                            ) {
+                                ParserResult::Label(label) => SubConstraint::from(label),
+                                ParserResult::Pattern(var) => {
+                                    SubConstraint::from(var.into_unbound_variable())
+                                }
+                                other => panic!("{:?}", other),
+                            }
+                            .into_type_constraint(),
+                        )
+                        .into_type();
             } else if constraint.TYPE().is_some() {
                 let scoped_label =
                     maybe!(self.visit_label_any(constraint.label_any().unwrap().as_ref()));
@@ -502,9 +537,10 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         if let Some(isa) = ctx.ISA_() {
             var_thing = var_thing
                 .constrain_thing(
-                    self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
-                        .unwrap()
-                        .into_thing_constraint(),
+                    maybe_unwrap!(
+                        self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
+                    )
+                    .into_thing_constraint(),
                 )
                 .into_thing()
         }
@@ -535,8 +571,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
 
         if let Some(isa) = ctx.ISA_() {
             relation = relation.constrain_thing(
-                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
-                    .unwrap()
+                maybe_unwrap!(self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref()))
                     .into_thing_constraint(),
             );
         }
@@ -564,8 +599,7 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
 
         if let Some(isa) = ctx.ISA_() {
             attribute = attribute.constrain_thing(
-                self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref())
-                    .unwrap()
+                maybe_unwrap!(self.get_isa_constraint(isa.as_ref(), ctx.type_().unwrap().as_ref()))
                     .into_thing_constraint(),
             );
         }
@@ -586,7 +620,9 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
                 role_players.push(if let Some(type_) = role_player_ctx.type_() {
                     match maybe!(self.visit_type_(type_.as_ref())) {
                         ParserResult::Label(label) => RolePlayerConstraint::from((label, player)),
-                        ParserResult::Pattern(var) => RolePlayerConstraint::from((var.into_type_variable(), player)),
+                        ParserResult::Pattern(var) => {
+                            RolePlayerConstraint::from((var.into_type_variable(), player))
+                        }
                         other => panic!("{:?}", other),
                     }
                 } else {
@@ -766,9 +802,13 @@ impl<'input> TypeQLRustVisitorCompat<'input> for Parser {
         if let Some(string) = ctx.STRING_() {
             ParserResult::Value(Value::from(self.get_string(string.as_ref())))
         } else if let Some(date_time) = ctx.DATETIME_() {
-            ParserResult::Value(Value::from(self.get_date_time(date_time.as_ref())))
+            ParserResult::Value(maybe_unwrap!(Value::try_from(maybe_unwrap!(
+                self.get_date_time(date_time.as_ref())
+            ))))
         } else if let Some(date) = ctx.DATE_() {
-            ParserResult::Value(Value::from(self.get_date(date.as_ref())))
+            ParserResult::Value(maybe_unwrap!(Value::try_from(maybe_unwrap!(
+                self.get_date(date.as_ref())
+            ))))
         } else {
             todo!()
         }

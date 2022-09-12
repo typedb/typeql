@@ -21,11 +21,15 @@
  */
 
 use crate::pattern::*;
+use std::fmt::Debug;
 
 pub trait ThingVariableBuilder: Sized {
-    fn has(self, type_name: impl Into<String>, value: impl Into<Value>) -> BoundVariable {
+    fn has<T: TryInto<Value>>(self, type_name: impl Into<String>, value: T) -> BoundVariable
+    where
+        <T as TryInto<Value>>::Error: Debug,
+    {
         self.constrain_thing(
-            match value.into() {
+            match value.try_into().unwrap() {
                 Value::Variable(variable) => HasConstraint::from_typed_variable(
                     type_name.into(),
                     (*variable).into_variable(),
