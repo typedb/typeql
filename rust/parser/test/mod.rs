@@ -914,9 +914,9 @@ fn test_parse_without_var() {
 $_ isa person;"#;
 
     let _parsed = parse_query(query); // todo error
-                                      // assert!(parsed.is_err());
+    // assert!(parsed.is_err());
     let _built = typeql_match(var(()).isa("person")); // todo error
-                                                      // assert!(built.is_err());
+    // assert!(built.is_err());
 }
 
 /*
