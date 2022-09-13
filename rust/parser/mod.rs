@@ -471,21 +471,19 @@ fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstrain
 }
 
 fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
-    let has = if let Some(label) = ctx.label() {
+    if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            HasConstraint::from_typed_variable(label.get_text(), get_var(var).into_thing())
+            Ok(HasConstraint::from_typed_variable(label.get_text(), get_var(var).into_thing()))
         } else if let Some(predicate) = ctx.predicate() {
-            HasConstraint::from_value(label.get_text(), visit_predicate(predicate)?)
+            Ok(HasConstraint::from_value(label.get_text(), visit_predicate(predicate)?))
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
     } else if let Some(_) = ctx.VAR_() {
         todo!()
     } else {
-        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
-    };
-
-    Ok(has)
+        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+    }
 }
 
 fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
