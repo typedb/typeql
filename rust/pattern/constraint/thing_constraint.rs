@@ -35,17 +35,6 @@ pub enum ThingConstraint {
     Relation(RelationConstraint),
 }
 
-impl ThingConstraint {
-    enum_getter!(into_isa, Isa, IsaConstraint);
-    enum_getter!(into_has, Has, HasConstraint);
-    enum_getter!(into_value, Value, ValueConstraint);
-    enum_getter!(into_relation, Relation, RelationConstraint);
-
-    pub fn into_constraint(self) -> Constraint {
-        Constraint::Thing(self)
-    }
-}
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
     pub type_: TypeVariable,
@@ -53,10 +42,6 @@ pub struct IsaConstraint {
 }
 
 impl IsaConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        self.into_thing_constraint().into_constraint()
-    }
-
     pub fn into_thing_constraint(self) -> ThingConstraint {
         ThingConstraint::Isa(self)
     }
@@ -98,10 +83,6 @@ pub struct HasConstraint {
 }
 
 impl HasConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        self.into_thing_constraint().into_constraint()
-    }
-
     pub fn into_thing_constraint(self) -> ThingConstraint {
         ThingConstraint::Has(self)
     }
@@ -151,10 +132,6 @@ pub struct ValueConstraint {
 }
 
 impl ValueConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        self.into_thing_constraint().into_constraint()
-    }
-
     pub fn into_thing_constraint(self) -> ThingConstraint {
         ThingConstraint::Value(self)
     }
@@ -316,10 +293,6 @@ pub struct RelationConstraint {
 }
 
 impl RelationConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        self.into_thing_constraint().into_constraint()
-    }
-
     pub fn into_thing_constraint(self) -> ThingConstraint {
         ThingConstraint::Relation(self)
     }

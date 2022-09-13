@@ -32,12 +32,6 @@ pub enum TypeConstraint {
     Plays(PlaysConstraint),
 }
 
-impl TypeConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        Constraint::Type(self)
-    }
-}
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ScopedType {
     scope: Option<String>,
@@ -82,10 +76,6 @@ pub struct LabelConstraint {
 }
 
 impl LabelConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        self.into_type_constraint().into_constraint()
-    }
-
     pub fn into_type_constraint(self) -> TypeConstraint {
         TypeConstraint::Label(self)
     }
@@ -103,10 +93,6 @@ pub struct SubConstraint {
 }
 
 impl SubConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        self.into_type_constraint().into_constraint()
-    }
-
     pub fn into_type_constraint(self) -> TypeConstraint {
         TypeConstraint::Sub(self)
     }
@@ -146,10 +132,6 @@ pub struct RelatesConstraint {
 }
 
 impl RelatesConstraint {
-    pub fn into_constraint(self) -> Constraint {
-        self.into_type_constraint().into_constraint()
-    }
-
     pub fn into_type_constraint(self) -> TypeConstraint {
         TypeConstraint::Relates(self)
     }

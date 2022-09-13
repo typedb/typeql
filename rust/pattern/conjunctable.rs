@@ -39,10 +39,6 @@ impl Conjunctable {
         Pattern::Conjunctable(self)
     }
 
-    pub fn into_unbound_variable(self) -> UnboundVariable {
-        self.into_variable().into_unbound_variable()
-    }
-
     pub fn into_type_variable(self) -> TypeVariable {
         if let Conjunctable::Variable(var) = self {
             var.into_type()

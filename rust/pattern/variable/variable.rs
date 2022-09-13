@@ -32,8 +32,6 @@ pub enum Variable {
 }
 
 impl Variable {
-    enum_getter!(into_unbound_variable, Unbound, UnboundVariable);
-
     pub fn into_pattern(self) -> Pattern {
         self.into_conjunctable().into_pattern()
     }

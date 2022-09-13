@@ -38,10 +38,6 @@ impl Pattern {
     pub fn into_type_variable(self) -> TypeVariable {
         self.into_conjunctable().into_type_variable()
     }
-
-    pub fn into_unbound_variable(self) -> UnboundVariable {
-        self.into_conjunctable().into_unbound_variable()
-    }
 }
 
 // impl<T> From<T> for Pattern

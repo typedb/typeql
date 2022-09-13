@@ -186,14 +186,9 @@ impl<const N: usize> From<([&str; N], &'static str)> for Sorting {
         Self::new(vars.map(var).to_vec(), order)
     }
 }
-impl From<Vec<Pattern>> for Sorting {
-    fn from(vars: Vec<Pattern>) -> Self {
-        Self::new(
-            vars.into_iter()
-                .map(Pattern::into_unbound_variable)
-                .collect(),
-            "asc",
-        )
+impl From<Vec<UnboundVariable>> for Sorting {
+    fn from(vars: Vec<UnboundVariable>) -> Self {
+        Self::new(vars, "asc")
     }
 }
 
