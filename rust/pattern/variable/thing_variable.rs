@@ -81,8 +81,6 @@ impl RelationVariableBuilder for ThingVariable {
     }
 }
 
-impl ThingVariable {}
-
 impl Display for ThingVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
