@@ -475,10 +475,7 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
         if let Some(var) = ctx.VAR_() {
             HasConstraint::from_typed_variable(label.get_text(), get_var(var).into_thing())
         } else if let Some(predicate) = ctx.predicate() {
-            HasConstraint::from_value(
-                label.get_text(),
-                visit_predicate(predicate)?
-            )
+            HasConstraint::from_value(label.get_text(), visit_predicate(predicate)?)
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
