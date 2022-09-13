@@ -114,17 +114,17 @@ impl HasConstraint {
         }
     }
 
-    pub fn from_typed_variable(type_name: String, variable: Variable) -> Self {
+    pub fn from_typed_variable(type_name: String, variable: ThingVariable) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
-            attribute: variable.into_thing(),
+            attribute: variable,
         }
     }
 
-    pub fn from_variable(variable: Variable) -> Self {
+    pub fn from_variable(variable: ThingVariable) -> Self {
         HasConstraint {
             type_: None,
-            attribute: variable.into_thing(),
+            attribute: variable,
         }
     }
 }

@@ -26,11 +26,11 @@ pub mod syntax_error;
 #[cfg(test)]
 mod test;
 
-use std::rc::Rc;
 use antlr_rust::token::Token;
 use antlr_rust::tree::ParseTree;
-use antlr_rust::tree::TerminalNode;
+use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
 use chrono::{NaiveDateTime, Timelike};
+use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR, ILLEGAL_STATE};
 use typeql_grammar::typeqlrustparser::*;
@@ -43,6 +43,7 @@ use crate::typeql_match;
 pub struct Definable;
 
 type ParserResult<T> = Result<T, ErrorMessage>;
+type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
 #[derive(Debug)]
 enum Type {
@@ -51,25 +52,25 @@ enum Type {
     Variable(TypeVariable),
 }
 
-fn get_string(string: Rc<TerminalNode<TypeQLRustParserContextType>>) -> String {
+fn get_string(string: Rc<TerminalNode>) -> String {
     let quoted = string.get_text();
     String::from(&quoted[1..quoted.len() - 1])
 }
 
-fn get_long(long: Rc<TerminalNode<TypeQLRustParserContextType>>) -> ParserResult<i64> {
+fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {
     long.get_text()
         .parse()
         .map_err(|_| ILLEGAL_GRAMMAR.format(&[long.get_text().as_str()]))
 }
 
-fn get_double(double: Rc<TerminalNode<TypeQLRustParserContextType>>) -> ParserResult<f64> {
+fn get_double(double: Rc<TerminalNode>) -> ParserResult<f64> {
     double
         .get_text()
         .parse()
         .map_err(|_| ILLEGAL_GRAMMAR.format(&[double.get_text().as_str()]))
 }
 
-fn get_date(date: Rc<TerminalNode<TypeQLRustParserContextType>>) -> ParserResult<NaiveDateTime> {
+fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
     NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d")
         .map_err(|_| ILLEGAL_GRAMMAR.format(&[date.get_text().as_str()]))
 }
@@ -96,14 +97,12 @@ fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
     }
 }
 
-fn get_date_time(
-    date_time: Rc<TerminalNode<TypeQLRustParserContextType>>,
-) -> Result<NaiveDateTime, ErrorMessage> {
+fn get_date_time(date_time: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
     parse_date_time(&date_time.get_text())
         .ok_or(ILLEGAL_GRAMMAR.format(&[date_time.get_text().as_str()]))
 }
 
-fn get_var(var: Rc<TerminalNode<TypeQLRustParserContextType>>) -> UnboundVariable {
+fn get_var(var: Rc<TerminalNode>) -> UnboundVariable {
     let name = &var.symbol.get_text()[1..];
     if name == "_" {
         UnboundVariable::anonymous()
@@ -113,14 +112,34 @@ fn get_var(var: Rc<TerminalNode<TypeQLRustParserContextType>>) -> UnboundVariabl
 }
 
 fn get_isa_constraint(
-    _isa: Rc<TerminalNode<TypeQLRustParserContextType>>,
+    _isa: Rc<TerminalNode>,
     ctx: Rc<Type_ContextAll>,
-) -> Result<IsaConstraint, ErrorMessage> {
-    Ok(match visit_type_(ctx)? {
-        Type::Unscoped(label) => IsaConstraint::from(label),
-        Type::Variable(var) => IsaConstraint::from(var),
-        other => panic!("{:?}", other),
-    })
+) -> ParserResult<IsaConstraint> {
+    match visit_type(ctx)? {
+        Type::Unscoped(label) => Ok(IsaConstraint::from(label)),
+        Type::Variable(var) => Ok(IsaConstraint::from(var)),
+        _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()])),
+    }
+}
+
+fn get_role_player_constraint(ctx: Rc<Role_playerContext>) -> ParserResult<RolePlayerConstraint> {
+    let player = get_var(ctx.player().unwrap().VAR_().unwrap());
+    if let Some(type_) = ctx.type_() {
+        match visit_type(type_)? {
+            Type::Unscoped(label) => Ok(RolePlayerConstraint::from((label, player))),
+            Type::Variable(var) => Ok(RolePlayerConstraint::from((var, player))),
+            _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()])),
+        }
+    } else {
+        Ok(RolePlayerConstraint::from(player))
+    }
+}
+
+fn get_role_players(ctx: Rc<RelationContext>) -> ParserResult<Vec<RolePlayerConstraint>> {
+    (0..)
+        .map_while(|i| ctx.role_player(i))
+        .map(get_role_player_constraint)
+        .collect()
 }
 
 pub fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
@@ -139,17 +158,12 @@ fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>
     visit_patterns(ctx.patterns().unwrap())
 }
 
-fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<()>> {
+fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Definable>> {
     let definables_ctx = ctx.definables().unwrap();
-    let mut definables = Vec::new();
-    for i in 0.. {
-        if let Some(definable_ctx) = definables_ctx.definable(i) {
-            definables.push(visit_definable(definable_ctx)?);
-        } else {
-            break;
-        }
-    }
-    Ok(definables)
+    (0..)
+        .map_while(|i| definables_ctx.definable(i))
+        .map(visit_definable)
+        .collect()
 }
 
 fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
@@ -189,8 +203,7 @@ fn visit_query_delete_or_update(_ctx: Rc<Query_delete_or_updateContext>) -> Pars
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
-    let mut match_query =
-        typeql_match(visit_patterns(ctx.patterns().unwrap())?).into_match();
+    let mut match_query = typeql_match(visit_patterns(ctx.patterns().unwrap())?).into_match();
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
             match_query = match_query.filter(visit_filter(filter)?);
@@ -225,22 +238,16 @@ fn visit_modifiers(_ctx: Rc<ModifiersContext>) -> ParserResult<()> {
 }
 
 fn visit_filter(ctx: Rc<FilterContext>) -> ParserResult<Vec<UnboundVariable>> {
-    Ok((0..)
-        .map_while(|i| ctx.VAR_(i))
-        .map(|x| get_var(x))
-        .collect())
+    Ok((0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect())
 }
 
 fn visit_sort(ctx: Rc<SortContext>) -> ParserResult<Sorting> {
     Ok(Sorting::new(
-        (0..)
-            .map_while(|i| ctx.VAR_(i))
-            .map(|x| get_var(x))
-            .collect(),
+        (0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect(),
         &if let Some(order) = ctx.ORDER_() {
             order.get_text()
         } else {
-            String::from("")
+            String::from("") // FIXME
         },
     ))
 }
@@ -269,20 +276,15 @@ fn visit_definables(_ctx: Rc<DefinablesContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_definable(_ctx: Rc<DefinableContext>) -> ParserResult<()> {
+fn visit_definable(_ctx: Rc<DefinableContext>) -> ParserResult<Definable> {
     todo!()
 }
 
 fn visit_patterns(ctx: Rc<PatternsContext>) -> ParserResult<Vec<Pattern>> {
-    let mut patterns = Vec::new();
-    for i in 0.. {
-        if let Some(pattern_ctx) = ctx.pattern(i) {
-            patterns.push(visit_pattern(pattern_ctx)?);
-        } else {
-            break;
-        }
-    }
-    Ok(patterns)
+    (0..)
+        .map_while(|i| ctx.pattern(i))
+        .map(visit_pattern)
+        .collect()
 }
 
 fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
@@ -325,7 +327,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
     let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
         Type::Variable(p) => p,
         Type::Unscoped(p) => UnboundVariable::hidden().type_(p).into_type(),
-        other => panic!("{:?}", other),
+        _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.PLAYS().is_some() {
@@ -337,7 +339,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 match visit_type_scoped(constraint.type_scoped().unwrap())? {
                     Type::Scoped(scoped) => PlaysConstraint::from(scoped),
                     Type::Variable(var) => PlaysConstraint::from(var),
-                    other => panic!("{:?}", other),
+                    _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
                 }
                 .into_type_constraint(),
             );
@@ -347,10 +349,10 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 Some(_) => todo!(),
             };
             var_type = var_type.constrain_type(
-                match visit_type_(constraint.type_(0).unwrap())? {
+                match visit_type(constraint.type_(0).unwrap())? {
                     Type::Unscoped(label) => RelatesConstraint::from(label),
                     Type::Variable(var) => RelatesConstraint::from(var),
-                    other => panic!("{:?}", other),
+                    _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
                 }
                 .into_type_constraint(),
             );
@@ -359,7 +361,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 match visit_type_any(constraint.type_any().unwrap())? {
                     Type::Unscoped(label) => SubConstraint::from(label),
                     Type::Variable(var) => SubConstraint::from(var),
-                    other => panic!("{:?}", other),
+                    _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
                 }
                 .into_type_constraint(),
             );
@@ -396,10 +398,8 @@ fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<
 fn visit_variable_thing(ctx: Rc<Variable_thingContext>) -> ParserResult<ThingVariable> {
     let mut var_thing = get_var(ctx.VAR_().unwrap()).into_thing();
     if let Some(isa) = ctx.ISA_() {
-        var_thing = var_thing.constrain_thing(
-            get_isa_constraint(isa, ctx.type_().unwrap())?
-                .into_thing_constraint(),
-        )
+        var_thing = var_thing
+            .constrain_thing(get_isa_constraint(isa, ctx.type_().unwrap())?.into_thing_constraint())
     }
     if let Some(attributes) = ctx.attributes() {
         var_thing = visit_attributes(attributes)?
@@ -416,16 +416,12 @@ fn visit_variable_relation(ctx: Rc<Variable_relationContext>) -> ParserResult<Th
         Some(var) => get_var(var),
         None => UnboundVariable::hidden(),
     }
-    .constrain_thing(visit_relation(ctx.relation().unwrap())?.into_thing_constraint())
-    ;
+    .constrain_thing(visit_relation(ctx.relation().unwrap())?.into_thing_constraint());
 
     if let Some(isa) = ctx.ISA_() {
-        relation = relation
-            .constrain_thing(
-                get_isa_constraint(isa, ctx.type_().unwrap())?
-                    .into_thing_constraint(),
-            )
-    ;
+        relation = relation.constrain_thing(
+            get_isa_constraint(isa, ctx.type_().unwrap())?.into_thing_constraint(),
+        );
     }
 
     if let Some(_attributes) = ctx.attributes() {
@@ -440,15 +436,11 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
         Some(var) => get_var(var),
         None => UnboundVariable::hidden(),
     }
-    .constrain_thing(
-        visit_predicate(ctx.predicate().unwrap())?
-            .into_thing_constraint()
-    );
+    .constrain_thing(visit_predicate(ctx.predicate().unwrap())?.into_thing_constraint());
 
     if let Some(isa) = ctx.ISA_() {
         attribute = attribute.constrain_thing(
-            get_isa_constraint(isa, ctx.type_().unwrap())?
-                .into_thing_constraint(),
+            get_isa_constraint(isa, ctx.type_().unwrap())?.into_thing_constraint(),
         );
     }
 
@@ -460,24 +452,7 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
 }
 
 fn visit_relation(ctx: Rc<RelationContext>) -> ParserResult<RelationConstraint> {
-    let mut role_players = Vec::new();
-    for i in 0.. {
-        if let Some(role_player_ctx) = ctx.role_player(i) {
-            let player = get_var(role_player_ctx.player().unwrap().VAR_().unwrap());
-            role_players.push(if let Some(type_) = role_player_ctx.type_() {
-                match visit_type_(type_)? {
-                    Type::Unscoped(label) => RolePlayerConstraint::from((label, player)),
-                    Type::Variable(var) => RolePlayerConstraint::from((var, player)),
-                    other => panic!("{:?}", other),
-                }
-            } else {
-                RolePlayerConstraint::from(player)
-            });
-        } else {
-            break;
-        }
-    }
-    Ok(RelationConstraint::new(role_players))
+    Ok(RelationConstraint::new(get_role_players(ctx)?))
 }
 
 fn visit_role_player(_ctx: Rc<Role_playerContext>) -> ParserResult<()> {
@@ -489,24 +464,16 @@ fn visit_player(_ctx: Rc<PlayerContext>) -> ParserResult<()> {
 }
 
 fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstraint>> {
-    let mut constraints = Vec::new();
-    for i in 0.. {
-        if let Some(attribute_ctx) = ctx.attribute(i) {
-            constraints.push(visit_attribute(attribute_ctx)?);
-        } else {
-            break;
-        }
-    }
-    Ok(constraints)
+    (0..)
+        .map_while(|i| ctx.attribute(i))
+        .map(visit_attribute)
+        .collect()
 }
 
 fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
     let has = if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            HasConstraint::from_typed_variable(
-                label.get_text(),
-                get_var(var).into_variable(),
-            )
+            HasConstraint::from_typed_variable(label.get_text(), get_var(var).into_thing())
         } else if let Some(predicate) = ctx.predicate() {
             HasConstraint::from_value(
                 label.get_text(),
@@ -515,12 +482,12 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
                     .into_value(),
             )
         } else {
-            return Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]));
+            Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
     } else if let Some(_) = ctx.VAR_() {
         todo!()
     } else {
-        return Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]));
+        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
     };
 
     Ok(has)
@@ -537,7 +504,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             } else if let Some(var) = ctx.predicate_value().unwrap().VAR_() {
                 Value::from(get_var(var))
             } else {
-                return Err(ILLEGAL_STATE.format(&[]));
+                Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?
             },
         )
     } else {
@@ -567,7 +534,7 @@ fn visit_type_any(ctx: Rc<Type_anyContext>) -> ParserResult<Type> {
     if let Some(var) = ctx.VAR_() {
         Ok(Type::Variable(get_var(var).into_type()))
     } else if let Some(type_) = ctx.type_() {
-        visit_type_(type_)
+        visit_type(type_)
     } else if let Some(scoped) = ctx.type_scoped() {
         visit_type_scoped(scoped)
     } else {
@@ -585,13 +552,13 @@ fn visit_type_scoped(ctx: Rc<Type_scopedContext>) -> ParserResult<Type> {
     }
 }
 
-fn visit_type_(ctx: Rc<Type_Context>) -> ParserResult<Type> {
+fn visit_type(ctx: Rc<Type_Context>) -> ParserResult<Type> {
     if let Some(label) = ctx.label() {
         Ok(Type::Unscoped(label.get_text()))
     } else if let Some(var) = ctx.VAR_() {
         Ok(Type::Variable(get_var(var).into_type()))
     } else {
-        panic!("")
+        panic!("visit_type: not implemented")
     }
 }
 

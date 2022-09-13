@@ -32,7 +32,7 @@ pub trait ThingVariableBuilder: Sized {
             match value.try_into().unwrap() {
                 Value::Variable(variable) => HasConstraint::from_typed_variable(
                     type_name.into(),
-                    (*variable).into_variable(),
+                    *variable,
                 ),
                 value => HasConstraint::from_value(
                     type_name.into(),
