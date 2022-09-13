@@ -72,9 +72,14 @@ impl<T: Into<ScopedType>> From<T> for IsaConstraint {
 }
 
 impl From<UnboundVariable> for IsaConstraint {
-    fn from(type_: UnboundVariable) -> Self {
+    fn from(var: UnboundVariable) -> Self {
+        IsaConstraint::from(var.into_type())
+    }
+}
+impl From<TypeVariable> for IsaConstraint {
+    fn from(type_: TypeVariable) -> Self {
         IsaConstraint {
-            type_: type_.into_type(),
+            type_,
             is_explicit: false,
         }
     }

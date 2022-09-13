@@ -44,7 +44,7 @@ impl TypeQLMatch {
         Query::Match(self)
     }
 
-    pub fn filter(self, vars: Vec<Pattern>) -> TypeQLMatch {
+    pub fn filter(self, vars: Vec<UnboundVariable>) -> TypeQLMatch {
         TypeQLMatch {
             modifiers: self.modifiers.filter(vars),
             ..self
@@ -105,12 +105,9 @@ impl Modifiers {
             && self.offset.is_none()
     }
 
-    pub fn filter(self, vars: Vec<Pattern>) -> Self {
+    pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         Self {
-            filter: vars
-                .into_iter()
-                .map(Pattern::into_unbound_variable)
-                .collect(),
+            filter: vars,
             ..self
         }
     }

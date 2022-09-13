@@ -20,6 +20,8 @@
  *
  */
 
+#![allow(dead_code)]
+
 extern crate core;
 
 use std::cell::RefCell;
@@ -75,7 +77,7 @@ pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
     let query = visit_eof_query(parser.eof_query().unwrap().as_ref());
 
     if errors.borrow().is_empty() {
-        Ok(query.into_query())
+        query.map_err(|em| em.message)
     } else {
         Err(errors
             .borrow()

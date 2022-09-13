@@ -44,7 +44,7 @@ impl Query {
             Match(query) => Match(
                 query.filter(
                     vars.into_iter()
-                        .map(|s| UnboundVariable::named(s.into()).into_pattern())
+                        .map(|s| UnboundVariable::named(s.into()))
                         .collect(),
                 ),
             ),

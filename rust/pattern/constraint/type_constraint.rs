@@ -122,8 +122,13 @@ impl<T: Into<ScopedType>> From<T> for SubConstraint {
 
 impl From<UnboundVariable> for SubConstraint {
     fn from(type_: UnboundVariable) -> Self {
+        Self::from(type_.into_type())
+    }
+}
+impl From<TypeVariable> for SubConstraint {
+    fn from(type_: TypeVariable) -> Self {
         SubConstraint {
-            type_: Box::new(type_.into_type()),
+            type_: Box::new(type_),
         }
     }
 }
@@ -169,8 +174,13 @@ impl From<String> for RelatesConstraint {
 
 impl From<UnboundVariable> for RelatesConstraint {
     fn from(role_type: UnboundVariable) -> Self {
+        RelatesConstraint::from(role_type.into_type())
+    }
+}
+impl From<TypeVariable> for RelatesConstraint {
+    fn from(role_type: TypeVariable) -> Self {
         RelatesConstraint {
-            role_type: role_type.into_type(),
+            role_type,
             overridden_role_type: None,
         }
     }
@@ -218,10 +228,14 @@ impl From<(&str, &str)> for PlaysConstraint {
 
 impl From<(String, String)> for PlaysConstraint {
     fn from((relation_type, role_type): (String, String)) -> Self {
+        PlaysConstraint::from(ScopedType::from((relation_type, role_type)))
+    }
+}
+
+impl From<ScopedType> for PlaysConstraint {
+    fn from(scoped_type: ScopedType) -> Self {
         PlaysConstraint::new(
-            UnboundVariable::hidden()
-                .type_(ScopedType::from((relation_type, role_type)))
-                .into_type(),
+            UnboundVariable::hidden().type_(scoped_type).into_type(),
             None,
         )
     }
@@ -229,7 +243,12 @@ impl From<(String, String)> for PlaysConstraint {
 
 impl From<UnboundVariable> for PlaysConstraint {
     fn from(role_type: UnboundVariable) -> Self {
-        PlaysConstraint::new(role_type.into_type(), None)
+        PlaysConstraint::from(role_type.into_type())
+    }
+}
+impl From<TypeVariable> for PlaysConstraint {
+    fn from(role_type: TypeVariable) -> Self {
+        PlaysConstraint::new(role_type, None)
     }
 }
 
