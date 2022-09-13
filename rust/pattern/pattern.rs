@@ -40,14 +40,6 @@ impl Pattern {
     }
 }
 
-// impl<T> From<T> for Pattern
-//     where Conjunction: From<T>
-// {
-//     fn from(conjunction: T) -> Self {
-//         Pattern::Conjunction(Conjunction::from(conjunction))
-//     }
-// }
-
 impl<T> From<T> for Pattern
 where
     Conjunctable: From<T>,
