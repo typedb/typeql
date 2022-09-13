@@ -478,8 +478,6 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
             HasConstraint::from_value(
                 label.get_text(),
                 visit_predicate(predicate)?
-                    .into_thing_constraint()
-                    .into_value(),
             )
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
