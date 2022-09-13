@@ -473,9 +473,15 @@ fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstrain
 fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
     if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            Ok(HasConstraint::from_typed_variable(label.get_text(), get_var(var).into_thing()))
+            Ok(HasConstraint::from_typed_variable(
+                label.get_text(),
+                get_var(var).into_thing(),
+            ))
         } else if let Some(predicate) = ctx.predicate() {
-            Ok(HasConstraint::from_value(label.get_text(), visit_predicate(predicate)?))
+            Ok(HasConstraint::from_value(
+                label.get_text(),
+                visit_predicate(predicate)?,
+            ))
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
@@ -487,10 +493,10 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
 }
 
 fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
-    let (predicate, value) = if let Some(value) = ctx.value() {
-        (Predicate::Eq, visit_value(value)?)
+    if let Some(value) = ctx.value() {
+        Ok(ValueConstraint::new(Predicate::Eq, visit_value(value)?))
     } else if let Some(equality) = ctx.predicate_equality() {
-        (
+        Ok(ValueConstraint::new(
             Predicate::from(equality.get_text()),
             if let Some(_value) = ctx.predicate_value().unwrap().value() {
                 todo!()
@@ -499,12 +505,10 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             } else {
                 Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?
             },
-        )
+        ))
     } else {
         todo!()
-    };
-
-    Ok(ValueConstraint::new(predicate, value))
+    }
 }
 
 fn visit_predicate_equality(_ctx: Rc<Predicate_equalityContext>) -> ParserResult<()> {
