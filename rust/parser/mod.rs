@@ -29,7 +29,7 @@ mod test;
 use antlr_rust::token::Token;
 use antlr_rust::tree::ParseTree;
 use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
-use chrono::{NaiveDateTime, Timelike};
+use chrono::{NaiveDate, NaiveDateTime, Timelike};
 use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR, ILLEGAL_STATE};
@@ -70,8 +70,8 @@ fn get_double(double: Rc<TerminalNode>) -> ParserResult<f64> {
         .map_err(|_| ILLEGAL_GRAMMAR.format(&[double.get_text().as_str()]))
 }
 
-fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
-    NaiveDateTime::parse_from_str(&date.get_text(), "%Y-%m-%d")
+fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
+    NaiveDate::parse_from_str(&date.get_text(), "%Y-%m-%d")
         .map_err(|_| ILLEGAL_GRAMMAR.format(&[date.get_text().as_str()]))
 }
 
@@ -602,7 +602,7 @@ fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
     } else if let Some(date_time) = ctx.DATETIME_() {
         Value::try_from(get_date_time(date_time)?)
     } else if let Some(date) = ctx.DATE_() {
-        Value::try_from(get_date(date)?)
+        Value::try_from(get_date(date)?.and_hms(0, 0, 0))
     } else {
         todo!()
     }
