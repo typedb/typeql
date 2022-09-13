@@ -110,8 +110,7 @@ impl HasConstraint {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
             attribute: UnboundVariable::hidden()
-                .constrain_thing(value.into_thing_constraint())
-                .into_thing(),
+                .constrain_thing(value.into_thing_constraint()),
         }
     }
 

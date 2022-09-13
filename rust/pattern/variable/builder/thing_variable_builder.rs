@@ -40,26 +40,26 @@ pub trait ThingVariableBuilder: Sized {
                 ),
             }
             .into_thing_constraint(),
-        )
+        ).into_bound_variable()
     }
 
     fn isa(self, isa: impl Into<IsaConstraint>) -> BoundVariable {
-        self.constrain_thing(isa.into().into_thing_constraint())
+        self.constrain_thing(isa.into().into_thing_constraint()).into_bound_variable()
     }
 
     fn eq(self, value: impl Into<Value>) -> BoundVariable {
         self.constrain_thing(
             ValueConstraint::new(Predicate::Eq, value.into()).into_thing_constraint(),
-        )
+        ).into_bound_variable()
     }
 
-    fn constrain_thing(self, constraint: ThingConstraint) -> BoundVariable;
+    fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable;
 }
 
 pub trait RelationVariableBuilder: Sized {
     fn rel<T: Into<RolePlayerConstraint>>(self, value: T) -> BoundVariable {
-        self.constrain_role_player(value.into())
+        self.constrain_role_player(value.into()).into_bound_variable()
     }
 
-    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> BoundVariable;
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable;
 }

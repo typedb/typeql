@@ -59,7 +59,7 @@ impl ThingVariable {
 }
 
 impl ThingVariableBuilder for ThingVariable {
-    fn constrain_thing(mut self, constraint: ThingConstraint) -> BoundVariable {
+    fn constrain_thing(mut self, constraint: ThingConstraint) -> ThingVariable {
         use ThingConstraint::*;
         match constraint {
             Isa(isa) => self.isa = Some(isa),
@@ -67,17 +67,17 @@ impl ThingVariableBuilder for ThingVariable {
             Value(value) => self.value = Some(value),
             Relation(relation) => self.relation = Some(relation),
         }
-        self.into_bound_variable()
+        self
     }
 }
 
 impl RelationVariableBuilder for ThingVariable {
-    fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> BoundVariable {
+    fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> ThingVariable {
         match &mut self.relation {
             None => self.relation = Some(RelationConstraint::from(constraint)),
             Some(relation) => relation.add(constraint),
         }
-        self.into_bound_variable()
+        self
     }
 }
 

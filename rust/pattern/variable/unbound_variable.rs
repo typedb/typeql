@@ -66,19 +66,19 @@ impl UnboundVariable {
 }
 
 impl ThingVariableBuilder for UnboundVariable {
-    fn constrain_thing(self, constraint: ThingConstraint) -> BoundVariable {
+    fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable {
         self.into_thing().constrain_thing(constraint)
     }
 }
 
 impl RelationVariableBuilder for UnboundVariable {
-    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> BoundVariable {
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable {
         self.into_thing().constrain_role_player(constraint)
     }
 }
 
 impl TypeVariableBuilder for UnboundVariable {
-    fn constrain_type(self, constraint: TypeConstraint) -> BoundVariable {
+    fn constrain_type(self, constraint: TypeConstraint) -> TypeVariable {
         self.into_type().constrain_type(constraint)
     }
 }

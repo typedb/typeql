@@ -59,7 +59,7 @@ impl TypeVariable {
 }
 
 impl TypeVariableBuilder for TypeVariable {
-    fn constrain_type(mut self, constraint: TypeConstraint) -> BoundVariable {
+    fn constrain_type(mut self, constraint: TypeConstraint) -> TypeVariable {
         use TypeConstraint::*;
         match constraint {
             Label(label) => self.label = Some(label),
@@ -67,7 +67,7 @@ impl TypeVariableBuilder for TypeVariable {
             Relates(relates) => self.relates.push(relates),
             Plays(plays) => self.plays.push(plays),
         }
-        self.into_bound_variable()
+        self
     }
 }
 

@@ -74,7 +74,7 @@ pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
     let errors = Rc::new(RefCell::new(Vec::<SyntaxError>::new()));
     parser.add_error_listener(Box::new(ErrorListener::new(query_string, errors.clone())));
 
-    let query = visit_eof_query(parser.eof_query().unwrap().as_ref());
+    let query = visit_eof_query(parser.eof_query().unwrap());
 
     if errors.borrow().is_empty() {
         query.map_err(|em| em.message)
