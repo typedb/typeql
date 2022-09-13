@@ -331,7 +331,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.PLAYS().is_some() {
-            let _overridden: Option<u8> = match constraint.AS() {
+            let _overridden: Option<()> = match constraint.AS() {
                 None => None,
                 Some(_) => todo!(),
             };
@@ -344,7 +344,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 .into_type_constraint(),
             );
         } else if constraint.RELATES().is_some() {
-            let _overridden: Option<u8> = match constraint.AS() {
+            let _overridden: Option<()> = match constraint.AS() {
                 None => None,
                 Some(_) => todo!(),
             };
