@@ -36,19 +36,9 @@ macro_rules! enum_getter {
 macro_rules! write_joined {
     ($f:ident, $iterable:expr, $joiner:tt) => {{
         let mut iter = $iterable.iter();
-        if let Some(value) = iter.next() {
-            let mut result = write!($f, "{}", value);
-            if result.is_ok() {
-                for x in iter {
-                    result = write!($f, "{}{}", $joiner, x);
-                    if result.is_err() {
-                        break;
-                    }
-                }
-            }
-            result
-        } else {
-            Ok(())
-        }
+        iter.next().map_or(Ok(()), |head| {
+            write!($f, "{}", head)
+                .and_then(|()| iter.map(|x| write!($f, "{}{}", $joiner, x)).collect())
+        })
     }};
 }
