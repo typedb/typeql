@@ -1004,16 +1004,6 @@ public class ParserTest {
     }
 
     @Test
-    public void testQueryParserWithoutGraph() {
-        final String queryString = "match\n" +
-                "$x isa movie;\n" +
-                "get $x;";
-        TypeQLMatch query = parseQuery("match\n" +
-                                               "$x isa movie; get $x;").asMatch();
-        assertEquals(queryString, query.toString());
-    }
-
-    @Test
     public void testParseBoolean() {
         final String query = "insert\n$_ has flag true;";
         TypeQLInsert parsed = TypeQL.parseQuery(query).asInsert();
