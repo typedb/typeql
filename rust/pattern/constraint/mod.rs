@@ -20,9 +20,6 @@
  *
  */
 
-mod constraint;
-pub use constraint::*;
-
 mod type_constraint;
 pub use type_constraint::*;
 

@@ -85,6 +85,10 @@ impl TypeVariableBuilder for BoundVariable {
         self.into_type().constrain_label(label)
     }
 
+    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable {
+        self.into_type().constrain_owns(owns)
+    }
+
     fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
         self.into_type().constrain_plays(plays)
     }

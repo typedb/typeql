@@ -193,3 +193,68 @@ impl Display for PlaysConstraint {
         write!(f, "plays {}", self.role_type)
     }
 }
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum IsKey {
+    Yes,
+    No,
+}
+
+impl Display for IsKey {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if *self == IsKey::Yes {
+            f.write_str(" @key")?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct OwnsConstraint {
+    pub attribute_type: TypeVariable,
+    pub overridden_attribute_type: Option<TypeVariable>,
+    pub is_key: IsKey,
+}
+
+impl OwnsConstraint {
+    fn new(
+        attribute_type: TypeVariable,
+        overridden_attribute_type: Option<TypeVariable>,
+        is_key: IsKey,
+    ) -> Self {
+        OwnsConstraint { attribute_type, overridden_attribute_type, is_key }
+    }
+}
+
+impl From<&str> for OwnsConstraint {
+    fn from(attribute_type: &str) -> Self {
+        OwnsConstraint::from((attribute_type, IsKey::No))
+    }
+}
+
+impl From<(&str, IsKey)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (&str, IsKey)) -> Self {
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).into_type(), is_key))
+    }
+}
+impl From<(String, IsKey)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (String, IsKey)) -> Self {
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).into_type(), is_key))
+    }
+}
+impl From<(UnboundVariable, IsKey)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (UnboundVariable, IsKey)) -> Self {
+        OwnsConstraint::from((attribute_type.into_type(), is_key))
+    }
+}
+impl From<(TypeVariable, IsKey)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (TypeVariable, IsKey)) -> Self {
+        OwnsConstraint::new(attribute_type, None, is_key)
+    }
+}
+
+impl Display for OwnsConstraint {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "owns {}{}", self.attribute_type, self.is_key)
+    }
+}

@@ -29,9 +29,10 @@ use std::fmt::{Display, Write};
 pub struct TypeVariable {
     pub reference: Reference,
     pub label: Option<LabelConstraint>,
-    pub sub: Option<SubConstraint>,
-    pub relates: Vec<RelatesConstraint>,
+    pub owns: Vec<OwnsConstraint>,
     pub plays: Vec<PlaysConstraint>,
+    pub relates: Vec<RelatesConstraint>,
+    pub sub: Option<SubConstraint>,
 }
 
 impl TypeVariable {
@@ -48,13 +49,25 @@ impl TypeVariable {
     }
 
     pub fn new(reference: Reference) -> TypeVariable {
-        TypeVariable { reference, label: None, sub: None, relates: vec![], plays: vec![] }
+        TypeVariable {
+            reference,
+            label: None,
+            owns: vec![],
+            plays: vec![],
+            relates: vec![],
+            sub: None,
+        }
     }
 }
 
 impl TypeVariableBuilder for TypeVariable {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
         TypeVariable { label: Some(label), ..self }
+    }
+
+    fn constrain_owns(mut self, owns: OwnsConstraint) -> TypeVariable {
+        self.owns.push(owns);
+        self
     }
 
     fn constrain_plays(mut self, plays: PlaysConstraint) -> TypeVariable {
@@ -92,6 +105,10 @@ impl Display for TypeVariable {
         if !self.plays.is_empty() {
             f.write_char(' ')?;
             write_joined!(f, self.plays, ",\n    ")?;
+        }
+        if !self.owns.is_empty() {
+            f.write_char(' ')?;
+            write_joined!(f, self.owns, ",\n    ")?;
         }
         Ok(())
     }

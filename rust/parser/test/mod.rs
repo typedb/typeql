@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    parse_query, rel, type_, typeql_match, var, Query, RelationVariableBuilder,
+    parse_query, rel, type_, typeql_match, var, IsKey, Query, RelationVariableBuilder,
     ThingVariableBuilder, TypeVariableBuilder,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
@@ -1123,19 +1123,17 @@ fn test_typeql_parse_query() {
     assert!(matches!(parse_query("match\n$x isa movie;"), Ok(Query::Match(_))));
 }
 
-/*
 #[test]
 fn test_parse_key() {
     let query = r#"match
 $x owns name @key;
-get $x"#;
+get $x;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = typeql_match(var("x").owns_key("name")).get(["x"]);  // TODO OwnsConstraint (Type)
+    let expected = typeql_match(var("x").owns(("name", IsKey::Yes))).get(["x"]);
 
     assert_query_eq!(expected, parsed, query);
 }
- */
 
 #[test]
 fn test_parse_empty_string() {

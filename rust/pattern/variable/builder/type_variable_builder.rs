@@ -24,9 +24,14 @@ use crate::pattern::*;
 
 pub trait TypeVariableBuilder: Sized {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable;
+    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable;
     fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable;
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable;
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable;
+
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> BoundVariable {
+        self.constrain_owns(owns.into()).into_bound_variable()
+    }
 
     fn plays(self, plays: impl Into<PlaysConstraint>) -> BoundVariable {
         self.constrain_plays(plays.into()).into_bound_variable()

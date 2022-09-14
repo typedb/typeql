@@ -317,7 +317,18 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
         _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
-        if constraint.PLAYS().is_some() {
+        if constraint.OWNS().is_some() {
+            let _overridden: Option<()> = match constraint.AS() {
+                None => None,
+                Some(_) => todo!(),
+            };
+            let is_key = constraint.IS_KEY().map_or(IsKey::No, |_| IsKey::Yes);
+            var_type = var_type.constrain_owns(match visit_type(constraint.type_(0).unwrap())? {
+                Type::Unscoped(label) => OwnsConstraint::from((label, is_key)),
+                Type::Variable(var) => OwnsConstraint::from((var, is_key)),
+                _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
+            });
+        } else if constraint.PLAYS().is_some() {
             let _overridden: Option<()> = match constraint.AS() {
                 None => None,
                 Some(_) => todo!(),
