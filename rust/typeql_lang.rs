@@ -47,7 +47,7 @@ use pattern::*;
 use query::*;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
-    parse_eof_query(typeql_query)
+    parse_eof_query(typeql_query.trim_end())
 }
 
 pub fn typeql_match(pattern: impl Into<Conjunction>) -> Query {

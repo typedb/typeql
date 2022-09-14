@@ -20,7 +20,6 @@
  *
  */
 
-use crate::enum_getter;
 use crate::pattern::*;
 use std::fmt;
 use std::fmt::Display;

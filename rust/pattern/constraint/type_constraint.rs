@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{Constraint, TypeVariable, TypeVariableBuilder, UnboundVariable};
+use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 

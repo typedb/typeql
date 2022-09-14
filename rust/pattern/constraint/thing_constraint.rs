@@ -22,7 +22,7 @@
 
 use crate::common::error::{ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION};
 use crate::pattern::*;
-use crate::{enum_getter, write_joined};
+use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
 use std::fmt::{Display, Write};
