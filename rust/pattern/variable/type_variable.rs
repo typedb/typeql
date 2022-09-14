@@ -53,15 +53,22 @@ impl TypeVariable {
 }
 
 impl TypeVariableBuilder for TypeVariable {
-    fn constrain_type(mut self, constraint: TypeConstraint) -> TypeVariable {
-        use TypeConstraint::*;
-        match constraint {
-            Label(label) => self.label = Some(label),
-            Sub(sub) => self.sub = Some(sub),
-            Relates(relates) => self.relates.push(relates),
-            Plays(plays) => self.plays.push(plays),
-        }
+    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
+        TypeVariable { label: Some(label), ..self }
+    }
+
+    fn constrain_plays(mut self, plays: PlaysConstraint) -> TypeVariable {
+        self.plays.push(plays);
         self
+    }
+
+    fn constrain_relates(mut self, relates: RelatesConstraint) -> TypeVariable {
+        self.relates.push(relates);
+        self
+    }
+
+    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
+        TypeVariable { sub: Some(sub), ..self }
     }
 }
 

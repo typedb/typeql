@@ -23,7 +23,7 @@
 use crate::pattern::*;
 use crate::write_joined;
 use std::fmt;
-use std::fmt::{Display, Write};
+use std::fmt::{Debug, Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
@@ -53,15 +53,21 @@ impl ThingVariable {
 }
 
 impl ThingVariableBuilder for ThingVariable {
-    fn constrain_thing(mut self, constraint: ThingConstraint) -> ThingVariable {
-        use ThingConstraint::*;
-        match constraint {
-            Isa(isa) => self.isa = Some(isa),
-            Has(has) => self.has.push(has),
-            Value(value) => self.value = Some(value),
-            Relation(relation) => self.relation = Some(relation),
-        }
+    fn constrain_has(mut self, has: HasConstraint) -> ThingVariable {
+        self.has.push(has);
         self
+    }
+
+    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
+        ThingVariable { isa: Some(isa), ..self }
+    }
+
+    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
+        ThingVariable { value: Some(value), ..self }
+    }
+
+    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
+        ThingVariable { relation: Some(relation), ..self }
     }
 }
 

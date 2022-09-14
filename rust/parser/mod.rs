@@ -322,36 +322,31 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 None => None,
                 Some(_) => todo!(),
             };
-            var_type = var_type.constrain_type(
+            var_type = var_type.constrain_plays(
                 match visit_type_scoped(constraint.type_scoped().unwrap())? {
                     Type::Scoped(scoped) => PlaysConstraint::from(scoped),
                     Type::Variable(var) => PlaysConstraint::from(var),
                     _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
-                }
-                .into_type_constraint(),
+                },
             );
         } else if constraint.RELATES().is_some() {
             let _overridden: Option<()> = match constraint.AS() {
                 None => None,
                 Some(_) => todo!(),
             };
-            var_type = var_type.constrain_type(
-                match visit_type(constraint.type_(0).unwrap())? {
+            var_type =
+                var_type.constrain_relates(match visit_type(constraint.type_(0).unwrap())? {
                     Type::Unscoped(label) => RelatesConstraint::from(label),
                     Type::Variable(var) => RelatesConstraint::from(var),
                     _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
-                }
-                .into_type_constraint(),
-            );
+                });
         } else if constraint.SUB_().is_some() {
-            var_type = var_type.constrain_type(
-                match visit_type_any(constraint.type_any().unwrap())? {
+            var_type =
+                var_type.constrain_sub(match visit_type_any(constraint.type_any().unwrap())? {
                     Type::Unscoped(label) => SubConstraint::from(label),
                     Type::Variable(var) => SubConstraint::from(var),
                     _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
-                }
-                .into_type_constraint(),
-            );
+                });
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
             var_type = var_type.type_(scoped_label).into_type();
@@ -385,14 +380,12 @@ fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<
 fn visit_variable_thing(ctx: Rc<Variable_thingContext>) -> ParserResult<ThingVariable> {
     let mut var_thing = get_var(ctx.VAR_().unwrap()).into_thing();
     if let Some(isa) = ctx.ISA_() {
-        var_thing = var_thing
-            .constrain_thing(get_isa_constraint(isa, ctx.type_().unwrap())?.into_thing_constraint())
+        var_thing = var_thing.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?)
     }
     if let Some(attributes) = ctx.attributes() {
-        var_thing =
-            visit_attributes(attributes)?.into_iter().fold(var_thing, |var_thing, constraint| {
-                var_thing.constrain_thing(constraint.into_thing_constraint())
-            });
+        var_thing = visit_attributes(attributes)?
+            .into_iter()
+            .fold(var_thing, |var_thing, has| var_thing.constrain_has(has));
     }
     Ok(var_thing)
 }
@@ -402,12 +395,10 @@ fn visit_variable_relation(ctx: Rc<Variable_relationContext>) -> ParserResult<Th
         Some(var) => get_var(var),
         None => UnboundVariable::hidden(),
     }
-    .constrain_thing(visit_relation(ctx.relation().unwrap())?.into_thing_constraint());
+    .constrain_relation(visit_relation(ctx.relation().unwrap())?);
 
     if let Some(isa) = ctx.ISA_() {
-        relation = relation.constrain_thing(
-            get_isa_constraint(isa, ctx.type_().unwrap())?.into_thing_constraint(),
-        );
+        relation = relation.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?);
     }
 
     if let Some(_attributes) = ctx.attributes() {
@@ -422,12 +413,10 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
         Some(var) => get_var(var),
         None => UnboundVariable::hidden(),
     }
-    .constrain_thing(visit_predicate(ctx.predicate().unwrap())?.into_thing_constraint());
+    .constrain_value(visit_predicate(ctx.predicate().unwrap())?);
 
     if let Some(isa) = ctx.ISA_() {
-        attribute = attribute.constrain_thing(
-            get_isa_constraint(isa, ctx.type_().unwrap())?.into_thing_constraint(),
-        );
+        attribute = attribute.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?);
     }
 
     if let Some(_attributes) = ctx.attributes() {

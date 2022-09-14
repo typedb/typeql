@@ -24,37 +24,35 @@ use crate::pattern::*;
 use std::fmt::Debug;
 
 pub trait ThingVariableBuilder: Sized {
+    fn constrain_has(self, has: HasConstraint) -> ThingVariable;
+    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable;
+    fn constrain_value(self, value: ValueConstraint) -> ThingVariable;
+    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable;
+
     fn has<T: TryInto<Value>>(self, type_name: impl Into<String>, value: T) -> BoundVariable
     where
         <T as TryInto<Value>>::Error: Debug,
     {
-        self.constrain_thing(
-            match value.try_into().unwrap() {
-                Value::Variable(variable) => {
-                    HasConstraint::from_typed_variable(type_name.into(), *variable)
-                }
-                value => HasConstraint::from_value(
-                    type_name.into(),
-                    ValueConstraint::new(Predicate::Eq, value),
-                ),
+        self.constrain_has(match value.try_into().unwrap() {
+            Value::Variable(variable) => {
+                HasConstraint::from_typed_variable(type_name.into(), *variable)
             }
-            .into_thing_constraint(),
-        )
+            value => HasConstraint::from_value(
+                type_name.into(),
+                ValueConstraint::new(Predicate::Eq, value),
+            ),
+        })
         .into_bound_variable()
     }
 
     fn isa(self, isa: impl Into<IsaConstraint>) -> BoundVariable {
-        self.constrain_thing(isa.into().into_thing_constraint()).into_bound_variable()
+        self.constrain_isa(isa.into()).into_bound_variable()
     }
 
     fn eq(self, value: impl Into<Value>) -> BoundVariable {
-        self.constrain_thing(
-            ValueConstraint::new(Predicate::Eq, value.into()).into_thing_constraint(),
-        )
-        .into_bound_variable()
+        self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into()))
+            .into_bound_variable()
     }
-
-    fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable;
 }
 
 pub trait RelationVariableBuilder: Sized {

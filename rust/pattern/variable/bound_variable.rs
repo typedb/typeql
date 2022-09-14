@@ -23,7 +23,7 @@
 use crate::enum_getter;
 use crate::pattern::*;
 use std::fmt;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum BoundVariable {
@@ -57,8 +57,20 @@ impl From<TypeVariable> for BoundVariable {
 }
 
 impl ThingVariableBuilder for BoundVariable {
-    fn constrain_thing(self, constraint: ThingConstraint) -> ThingVariable {
-        self.into_thing().constrain_thing(constraint)
+    fn constrain_has(self, has: HasConstraint) -> ThingVariable {
+        self.into_thing().constrain_has(has)
+    }
+
+    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
+        self.into_thing().constrain_isa(isa)
+    }
+
+    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
+        self.into_thing().constrain_value(value)
+    }
+
+    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
+        self.into_thing().constrain_relation(relation)
     }
 }
 
@@ -69,8 +81,20 @@ impl RelationVariableBuilder for BoundVariable {
 }
 
 impl TypeVariableBuilder for BoundVariable {
-    fn constrain_type(self, constraint: TypeConstraint) -> TypeVariable {
-        self.into_type().constrain_type(constraint)
+    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
+        self.into_type().constrain_label(label)
+    }
+
+    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
+        self.into_type().constrain_plays(plays)
+    }
+
+    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
+        self.into_type().constrain_relates(relates)
+    }
+
+    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
+        self.into_type().constrain_sub(sub)
     }
 }
 

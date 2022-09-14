@@ -87,7 +87,7 @@ impl HasConstraint {
     pub fn from_value(type_name: String, value: ValueConstraint) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
-            attribute: UnboundVariable::hidden().constrain_thing(value.into_thing_constraint()),
+            attribute: UnboundVariable::hidden().constrain_value(value),
         }
     }
 

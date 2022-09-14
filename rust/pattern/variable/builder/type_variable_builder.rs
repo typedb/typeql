@@ -23,24 +23,25 @@
 use crate::pattern::*;
 
 pub trait TypeVariableBuilder: Sized {
-    fn type_(self, type_name: impl Into<ScopedType>) -> BoundVariable {
-        self.constrain_type(
-            LabelConstraint { scoped_type: type_name.into() }.into_type_constraint(),
-        )
-        .into_bound_variable()
+    fn constrain_label(self, label: LabelConstraint) -> TypeVariable;
+    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable;
+    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable;
+    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable;
+
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> BoundVariable {
+        self.constrain_plays(plays.into()).into_bound_variable()
     }
 
     fn relates(self, relates: impl Into<RelatesConstraint>) -> BoundVariable {
-        self.constrain_type(relates.into().into_type_constraint()).into_bound_variable()
+        self.constrain_relates(relates.into()).into_bound_variable()
     }
 
     fn sub(self, sub: impl Into<SubConstraint>) -> BoundVariable {
-        self.constrain_type(sub.into().into_type_constraint()).into_bound_variable()
+        self.constrain_sub(sub.into()).into_bound_variable()
     }
 
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> BoundVariable {
-        self.constrain_type(plays.into().into_type_constraint()).into_bound_variable()
+    fn type_(self, type_name: impl Into<ScopedType>) -> BoundVariable {
+        self.constrain_label(LabelConstraint { scoped_type: type_name.into() })
+            .into_bound_variable()
     }
-
-    fn constrain_type(self, constraint: TypeConstraint) -> TypeVariable;
 }
