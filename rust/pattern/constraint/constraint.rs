@@ -21,14 +21,3 @@
  */
 
 use crate::*;
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Constraint {
-    Thing(ThingConstraint),
-    Type(TypeConstraint),
-}
-
-impl Constraint {
-    enum_getter!(into_thing, Thing, ThingConstraint);
-    enum_getter!(into_type, Type, TypeConstraint);
-}

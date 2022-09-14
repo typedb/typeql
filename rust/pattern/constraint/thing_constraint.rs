@@ -28,23 +28,9 @@ use std::fmt;
 use std::fmt::{Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum ThingConstraint {
-    Isa(IsaConstraint),
-    Has(HasConstraint),
-    Value(ValueConstraint),
-    Relation(RelationConstraint),
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
     pub type_: TypeVariable,
     pub is_explicit: bool,
-}
-
-impl IsaConstraint {
-    pub fn into_thing_constraint(self) -> ThingConstraint {
-        ThingConstraint::Isa(self)
-    }
 }
 
 impl<T: Into<ScopedType>> From<T> for IsaConstraint {
@@ -80,10 +66,6 @@ pub struct HasConstraint {
 }
 
 impl HasConstraint {
-    pub fn into_thing_constraint(self) -> ThingConstraint {
-        ThingConstraint::Has(self)
-    }
-
     pub fn from_value(type_name: String, value: ValueConstraint) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
@@ -125,10 +107,6 @@ pub struct ValueConstraint {
 }
 
 impl ValueConstraint {
-    pub fn into_thing_constraint(self) -> ThingConstraint {
-        ThingConstraint::Value(self)
-    }
-
     pub fn new(predicate: Predicate, value: Value) -> ValueConstraint {
         if predicate.is_substring() && !matches!(value, Value::String(_)) {
             panic!("");
@@ -286,10 +264,6 @@ pub struct RelationConstraint {
 }
 
 impl RelationConstraint {
-    pub fn into_thing_constraint(self) -> ThingConstraint {
-        ThingConstraint::Relation(self)
-    }
-
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
         RelationConstraint { role_players, scope: String::from("relation") }
     }

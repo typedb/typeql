@@ -25,14 +25,6 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum TypeConstraint {
-    Label(LabelConstraint),
-    Sub(SubConstraint),
-    Relates(RelatesConstraint),
-    Plays(PlaysConstraint),
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ScopedType {
     scope: Option<String>,
     name: String,
@@ -72,12 +64,6 @@ pub struct LabelConstraint {
     pub scoped_type: ScopedType,
 }
 
-impl LabelConstraint {
-    pub fn into_type_constraint(self) -> TypeConstraint {
-        TypeConstraint::Label(self)
-    }
-}
-
 impl Display for LabelConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "type {}", self.scoped_type)
@@ -87,12 +73,6 @@ impl Display for LabelConstraint {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
     pub type_: Box<TypeVariable>,
-}
-
-impl SubConstraint {
-    pub fn into_type_constraint(self) -> TypeConstraint {
-        TypeConstraint::Sub(self)
-    }
 }
 
 impl<T: Into<ScopedType>> From<T> for SubConstraint {
@@ -122,12 +102,6 @@ impl Display for SubConstraint {
 pub struct RelatesConstraint {
     pub role_type: TypeVariable,
     pub overridden_role_type: Option<TypeVariable>,
-}
-
-impl RelatesConstraint {
-    pub fn into_type_constraint(self) -> TypeConstraint {
-        TypeConstraint::Relates(self)
-    }
 }
 
 impl From<&str> for RelatesConstraint {
@@ -172,10 +146,6 @@ pub struct PlaysConstraint {
 }
 
 impl PlaysConstraint {
-    pub fn into_type_constraint(self) -> TypeConstraint {
-        TypeConstraint::Plays(self)
-    }
-
     fn new(role_type: TypeVariable, overridden_role_type: Option<TypeVariable>) -> Self {
         PlaysConstraint {
             relation_type: role_type.label.as_ref().map(|label| {
