@@ -47,21 +47,15 @@ impl UnboundVariable {
     }
 
     pub fn named(name: String) -> UnboundVariable {
-        UnboundVariable {
-            reference: Reference::Name(name),
-        }
+        UnboundVariable { reference: Reference::Name(name) }
     }
 
     pub fn anonymous() -> UnboundVariable {
-        UnboundVariable {
-            reference: Reference::Anonymous(Visibility::Visible),
-        }
+        UnboundVariable { reference: Reference::Anonymous(Visibility::Visible) }
     }
 
     pub fn hidden() -> UnboundVariable {
-        UnboundVariable {
-            reference: Reference::Anonymous(Visibility::Invisible),
-        }
+        UnboundVariable { reference: Reference::Anonymous(Visibility::Invisible) }
     }
 }
 

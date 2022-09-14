@@ -63,10 +63,7 @@ impl From<UnboundVariable> for IsaConstraint {
 }
 impl From<TypeVariable> for IsaConstraint {
     fn from(type_: TypeVariable) -> Self {
-        IsaConstraint {
-            type_,
-            is_explicit: false,
-        }
+        IsaConstraint { type_, is_explicit: false }
     }
 }
 
@@ -90,8 +87,7 @@ impl HasConstraint {
     pub fn from_value(type_name: String, value: ValueConstraint) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
-            attribute: UnboundVariable::hidden()
-                .constrain_thing(value.into_thing_constraint()),
+            attribute: UnboundVariable::hidden().constrain_thing(value.into_thing_constraint()),
         }
     }
 
@@ -103,10 +99,7 @@ impl HasConstraint {
     }
 
     pub fn from_variable(variable: ThingVariable) -> Self {
-        HasConstraint {
-            type_: None,
-            attribute: variable,
-        }
+        HasConstraint { type_: None, attribute: variable }
     }
 }
 
@@ -298,10 +291,7 @@ impl RelationConstraint {
     }
 
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
-        RelationConstraint {
-            role_players,
-            scope: String::from("relation"),
-        }
+        RelationConstraint { role_players, scope: String::from("relation") }
     }
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {
@@ -332,11 +322,7 @@ pub struct RolePlayerConstraint {
 
 impl RolePlayerConstraint {
     pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> RolePlayerConstraint {
-        RolePlayerConstraint {
-            role_type,
-            player,
-            repetition: 0,
-        }
+        RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 }
 
@@ -372,10 +358,7 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((
-            UnboundVariable::hidden().type_(role_type).into_type(),
-            player_var,
-        ))
+        Self::from((UnboundVariable::hidden().type_(role_type).into_type(), player_var))
     }
 }
 

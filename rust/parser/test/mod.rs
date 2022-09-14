@@ -76,9 +76,7 @@ get $char, $prod;"#;
     let parsed = parse_query(query).unwrap();
     let expected = typeql_match([
         var("brando").eq("Marl B").isa("name"),
-        rel(("actor", "brando"))
-            .rel("char")
-            .rel(("production-with-cast", "prod")),
+        rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
     ])
     .get(["char", "prod"]);
 
@@ -273,10 +271,7 @@ $x has release-date 1000-11-12T13:14:15;"#;
     let parsed = parse_query(query).unwrap();
     let expected = typeql_match(var("x").has(
         "release-date",
-        NaiveDateTime::new(
-            NaiveDate::from_ymd(1000, 11, 12),
-            NaiveTime::from_hms(13, 14, 15),
-        ),
+        NaiveDateTime::new(NaiveDate::from_ymd(1000, 11, 12), NaiveTime::from_hms(13, 14, 15)),
     ));
 
     assert_query_eq!(expected, parsed, query);
@@ -290,10 +285,7 @@ $x has release-date +12345-12-25T00:00;"#;
     let parsed = parse_query(query).unwrap();
     let expected = typeql_match(var("x").has(
         "release-date",
-        NaiveDateTime::new(
-            NaiveDate::from_ymd(12345, 12, 25),
-            NaiveTime::from_hms(0, 0, 0),
-        ),
+        NaiveDateTime::new(NaiveDate::from_ymd(12345, 12, 25), NaiveTime::from_hms(0, 0, 0)),
     ));
 
     assert_query_eq!(expected, parsed, query);
@@ -321,10 +313,7 @@ $x has release-date -3200-01-01T00:00;"#;
     let parsed = parse_query(query).unwrap();
     let expected = typeql_match(var("x").has(
         "release-date",
-        NaiveDateTime::new(
-            NaiveDate::from_ymd(-3200, 1, 1),
-            NaiveTime::from_hms(0, 0, 0),
-        ),
+        NaiveDateTime::new(NaiveDate::from_ymd(-3200, 1, 1), NaiveTime::from_hms(0, 0, 0)),
     ));
 
     assert_query_eq!(expected, parsed, query);
@@ -441,9 +430,7 @@ $x isa movie,
 sort $r; limit 10;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = typeql_match(var("x").isa("movie").has("rating", var("r")))
-        .sort("r")
-        .limit(10);
+    let expected = typeql_match(var("x").isa("movie").has("rating", var("r"))).sort("r").limit(10);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -472,9 +459,7 @@ $y isa movie,
 offset 2; limit 4;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = typeql_match(var("y").isa("movie").has("title", var("n")))
-        .offset(2)
-        .limit(4);
+    let expected = typeql_match(var("y").isa("movie").has("title", var("n"))).offset(2).limit(4);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -926,9 +911,9 @@ fn test_parse_without_var() {
 $_ isa person;"#;
 
     let _parsed = parse_query(query); // todo error
-    // assert!(parsed.is_err());
+                                      // assert!(parsed.is_err());
     let _built = typeql_match(var(()).isa("person")); // todo error
-    // assert!(built.is_err());
+                                                      // assert!(built.is_err());
 }
 
 /*
@@ -1115,11 +1100,7 @@ $_ has title "Godfather",
     has tmdb-vote-count $x;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = typeql_match(
-        var(())
-            .has("title", "Godfather")
-            .has("tmdb-vote-count", var("x")),
-    );
+    let expected = typeql_match(var(()).has("title", "Godfather").has("tmdb-vote-count", var("x")));
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1139,10 +1120,7 @@ $x regex "(fe)?male";"#;
 
 #[test]
 fn test_typeql_parse_query() {
-    assert!(matches!(
-        parse_query("match\n$x isa movie;"),
-        Ok(Query::Match(_))
-    ));
+    assert!(matches!(parse_query("match\n$x isa movie;"), Ok(Query::Match(_))));
 }
 
 /*

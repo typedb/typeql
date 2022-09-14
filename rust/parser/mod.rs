@@ -58,16 +58,11 @@ fn get_string(string: Rc<TerminalNode>) -> String {
 }
 
 fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {
-    long.get_text()
-        .parse()
-        .map_err(|_| ILLEGAL_GRAMMAR.format(&[long.get_text().as_str()]))
+    long.get_text().parse().map_err(|_| ILLEGAL_GRAMMAR.format(&[long.get_text().as_str()]))
 }
 
 fn get_double(double: Rc<TerminalNode>) -> ParserResult<f64> {
-    double
-        .get_text()
-        .parse()
-        .map_err(|_| ILLEGAL_GRAMMAR.format(&[double.get_text().as_str()]))
+    double.get_text().parse().map_err(|_| ILLEGAL_GRAMMAR.format(&[double.get_text().as_str()]))
 }
 
 fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
@@ -84,11 +79,7 @@ fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
             let (date_time, nanos) = (parts[0], parts[1]);
             NaiveDateTime::parse_from_str(date_time, "%Y-%m-%dT%H:%M:%S")
                 .ok()?
-                .with_nanosecond(
-                    format!("{}{}", nanos, "0".repeat(9 - nanos.len()))
-                        .parse()
-                        .ok()?,
-                )
+                .with_nanosecond(format!("{}{}", nanos, "0".repeat(9 - nanos.len())).parse().ok()?)
         } else {
             NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M:%S").ok()
         }
@@ -136,10 +127,7 @@ fn get_role_player_constraint(ctx: Rc<Role_playerContext>) -> ParserResult<RoleP
 }
 
 fn get_role_players(ctx: Rc<RelationContext>) -> ParserResult<Vec<RolePlayerConstraint>> {
-    (0..)
-        .map_while(|i| ctx.role_player(i))
-        .map(get_role_player_constraint)
-        .collect()
+    (0..).map_while(|i| ctx.role_player(i)).map(get_role_player_constraint).collect()
 }
 
 pub fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
@@ -160,10 +148,7 @@ fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>
 
 fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Definable>> {
     let definables_ctx = ctx.definables().unwrap();
-    (0..)
-        .map_while(|i| definables_ctx.definable(i))
-        .map(visit_definable)
-        .collect()
+    (0..).map_while(|i| definables_ctx.definable(i)).map(visit_definable).collect()
 }
 
 fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
@@ -281,10 +266,7 @@ fn visit_definable(_ctx: Rc<DefinableContext>) -> ParserResult<Definable> {
 }
 
 fn visit_patterns(ctx: Rc<PatternsContext>) -> ParserResult<Vec<Pattern>> {
-    (0..)
-        .map_while(|i| ctx.pattern(i))
-        .map(visit_pattern)
-        .collect()
+    (0..).map_while(|i| ctx.pattern(i)).map(visit_pattern).collect()
 }
 
 fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
@@ -402,9 +384,8 @@ fn visit_variable_thing(ctx: Rc<Variable_thingContext>) -> ParserResult<ThingVar
             .constrain_thing(get_isa_constraint(isa, ctx.type_().unwrap())?.into_thing_constraint())
     }
     if let Some(attributes) = ctx.attributes() {
-        var_thing = visit_attributes(attributes)?
-            .into_iter()
-            .fold(var_thing, |var_thing, constraint| {
+        var_thing =
+            visit_attributes(attributes)?.into_iter().fold(var_thing, |var_thing, constraint| {
                 var_thing.constrain_thing(constraint.into_thing_constraint())
             });
     }
@@ -464,24 +445,15 @@ fn visit_player(_ctx: Rc<PlayerContext>) -> ParserResult<()> {
 }
 
 fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstraint>> {
-    (0..)
-        .map_while(|i| ctx.attribute(i))
-        .map(visit_attribute)
-        .collect()
+    (0..).map_while(|i| ctx.attribute(i)).map(visit_attribute).collect()
 }
 
 fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
     if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            Ok(HasConstraint::from_typed_variable(
-                label.get_text(),
-                get_var(var).into_thing(),
-            ))
+            Ok(HasConstraint::from_typed_variable(label.get_text(), get_var(var).into_thing()))
         } else if let Some(predicate) = ctx.predicate() {
-            Ok(HasConstraint::from_value(
-                label.get_text(),
-                visit_predicate(predicate)?,
-            ))
+            Ok(HasConstraint::from_value(label.get_text(), visit_predicate(predicate)?))
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }

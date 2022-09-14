@@ -48,13 +48,7 @@ impl TypeVariable {
     }
 
     pub fn new(reference: Reference) -> TypeVariable {
-        TypeVariable {
-            reference,
-            label: None,
-            sub: None,
-            relates: vec![],
-            plays: vec![],
-        }
+        TypeVariable { reference, label: None, sub: None, relates: vec![], plays: vec![] }
     }
 }
 

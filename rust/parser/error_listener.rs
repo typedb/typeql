@@ -36,11 +36,8 @@ pub(crate) struct ErrorListener {
 }
 
 impl ErrorListener {
-    pub fn new(query: &str, error_buffer: Rc<RefCell<Vec<SyntaxError>>>) -> Self {
-        Self {
-            query_lines: query.lines().map(String::from).collect::<Vec<String>>(),
-            errors: error_buffer,
-        }
+    pub fn new(query: &str, errors: Rc<RefCell<Vec<SyntaxError>>>) -> Self {
+        Self { query_lines: query.lines().map(String::from).collect::<Vec<String>>(), errors }
     }
 }
 
@@ -55,10 +52,7 @@ impl<'a, T: Recognizer<'a>> ANTLRErrorListener<'a, T> for ErrorListener {
         _: Option<&ANTLRError>,
     ) {
         self.errors.borrow_mut().push(SyntaxError {
-            query_line: self
-                .query_lines
-                .get::<usize>((line - 1).try_into().unwrap())
-                .cloned(),
+            query_line: self.query_lines.get::<usize>((line - 1).try_into().unwrap()).cloned(),
             line: line.try_into().unwrap(),
             char_position_in_line: column.try_into().unwrap(),
             message: String::from(message),

@@ -48,13 +48,7 @@ impl ThingVariable {
     }
 
     pub fn new(reference: Reference) -> ThingVariable {
-        ThingVariable {
-            reference,
-            isa: None,
-            has: Vec::new(),
-            value: None,
-            relation: None,
-        }
+        ThingVariable { reference, isa: None, has: Vec::new(), value: None, relation: None }
     }
 }
 

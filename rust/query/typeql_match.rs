@@ -34,10 +34,7 @@ pub struct TypeQLMatch {
 
 impl TypeQLMatch {
     pub fn new(conjunction: Conjunction) -> Self {
-        Self {
-            conjunction,
-            modifiers: Modifiers::default(),
-        }
+        Self { conjunction, modifiers: Modifiers::default() }
     }
 
     pub fn into_query(self) -> Query {
@@ -45,31 +42,19 @@ impl TypeQLMatch {
     }
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> TypeQLMatch {
-        TypeQLMatch {
-            modifiers: self.modifiers.filter(vars),
-            ..self
-        }
+        TypeQLMatch { modifiers: self.modifiers.filter(vars), ..self }
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> TypeQLMatch {
-        TypeQLMatch {
-            modifiers: self.modifiers.sort(sorting),
-            ..self
-        }
+        TypeQLMatch { modifiers: self.modifiers.sort(sorting), ..self }
     }
 
     pub fn limit(self, limit: usize) -> TypeQLMatch {
-        TypeQLMatch {
-            modifiers: self.modifiers.limit(limit),
-            ..self
-        }
+        TypeQLMatch { modifiers: self.modifiers.limit(limit), ..self }
     }
 
     pub fn offset(self, offset: usize) -> TypeQLMatch {
-        TypeQLMatch {
-            modifiers: self.modifiers.offset(offset),
-            ..self
-        }
+        TypeQLMatch { modifiers: self.modifiers.offset(offset), ..self }
     }
 }
 
@@ -106,31 +91,19 @@ impl Modifiers {
     }
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
-        Self {
-            filter: vars,
-            ..self
-        }
+        Self { filter: vars, ..self }
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
-        Self {
-            sorting: Some(sorting.into()),
-            ..self
-        }
+        Self { sorting: Some(sorting.into()), ..self }
     }
 
     pub fn limit(self, limit: usize) -> Self {
-        Self {
-            limit: Some(limit),
-            ..self
-        }
+        Self { limit: Some(limit), ..self }
     }
 
     pub fn offset(self, offset: usize) -> Self {
-        Self {
-            offset: Some(offset),
-            ..self
-        }
+        Self { offset: Some(offset), ..self }
     }
 }
 

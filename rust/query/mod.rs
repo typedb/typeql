@@ -42,11 +42,7 @@ impl Query {
         use Query::*;
         match self {
             Match(query) => Match(
-                query.filter(
-                    vars.into_iter()
-                        .map(|s| UnboundVariable::named(s.into()))
-                        .collect(),
-                ),
+                query.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect()),
             ),
             _ => todo!(),
         }

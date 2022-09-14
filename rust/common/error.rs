@@ -44,22 +44,14 @@ impl ErrorTemplate {
             expected_arg_count,
             args.len()
         );
-        let mut buffer = format!(
-            "[{}{}{}] ",
-            self.prefix,
-            "0".repeat(self.padding_len),
-            self.code
-        );
+        let mut buffer = format!("[{}{}{}] ", self.prefix, "0".repeat(self.padding_len), self.code);
         for (i, fragment) in self.template.split("{}").enumerate() {
             if i > 0 {
                 buffer += args.get(i - 1).unwrap_or(&"{}");
             }
             buffer += fragment;
         }
-        ErrorMessage {
-            code: self.code,
-            message: buffer,
-        }
+        ErrorMessage { code: self.code, message: buffer }
     }
 }
 
