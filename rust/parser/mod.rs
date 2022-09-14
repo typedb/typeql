@@ -71,11 +71,11 @@ fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
 }
 
 fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
-    let has_seconds = date_time_text.matches(":").count() == 2;
+    let has_seconds = date_time_text.matches(':').count() == 2;
     if has_seconds {
-        let has_nanos = date_time_text.matches(".").count() == 1;
+        let has_nanos = date_time_text.matches('.').count() == 1;
         if has_nanos {
-            let parts: Vec<&str> = date_time_text.splitn(2, ".").collect();
+            let parts: Vec<&str> = date_time_text.splitn(2, '.').collect();
             let (date_time, nanos) = (parts[0], parts[1]);
             NaiveDateTime::parse_from_str(date_time, "%Y-%m-%dT%H:%M:%S")
                 .ok()?
@@ -90,7 +90,7 @@ fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
 
 fn get_date_time(date_time: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
     parse_date_time(&date_time.get_text())
-        .ok_or(ILLEGAL_GRAMMAR.format(&[date_time.get_text().as_str()]))
+        .ok_or_else(|| ILLEGAL_GRAMMAR.format(&[date_time.get_text().as_str()]))
 }
 
 fn get_var(var: Rc<TerminalNode>) -> UnboundVariable {
@@ -545,7 +545,7 @@ fn visit_label_any(ctx: Rc<Label_anyContext>) -> ParserResult<String> {
 }
 
 fn visit_label_scoped(ctx: Rc<Label_scopedContext>) -> ParserResult<ScopedType> {
-    let parts: Vec<String> = ctx.get_text().split(":").map(String::from).collect();
+    let parts: Vec<String> = ctx.get_text().split(':').map(String::from).collect();
     Ok(ScopedType::from((parts[0].clone(), parts[1].clone())))
 }
 

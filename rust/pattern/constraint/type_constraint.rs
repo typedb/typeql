@@ -178,14 +178,11 @@ impl PlaysConstraint {
 
     fn new(role_type: TypeVariable, overridden_role_type: Option<TypeVariable>) -> Self {
         PlaysConstraint {
-            relation_type: match &role_type.label {
-                Some(label) => Some(
-                    UnboundVariable::hidden()
-                        .type_(label.scoped_type.scope.as_ref().cloned().unwrap())
-                        .into_type(),
-                ),
-                None => None,
-            },
+            relation_type: role_type.label.as_ref().map(|label| {
+                UnboundVariable::hidden()
+                    .type_(label.scoped_type.scope.as_ref().cloned().unwrap())
+                    .into_type()
+            }),
             role_type,
             overridden_role_type,
         }
