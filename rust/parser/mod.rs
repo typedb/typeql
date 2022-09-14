@@ -53,8 +53,8 @@ enum Type {
 }
 
 fn get_string(string: Rc<TerminalNode>) -> String {
-    let quoted = string.get_text();
-    String::from(&quoted[1..quoted.len() - 1])
+    let quoted_string = string.get_text();
+    String::from(&quoted_string[1..quoted_string.len() - 1])
 }
 
 fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {
@@ -94,7 +94,12 @@ fn get_date_time(date_time: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
 }
 
 fn get_var(var: Rc<TerminalNode>) -> UnboundVariable {
-    let name = &var.symbol.get_text()[1..];
+    let name = &var.symbol.get_text();
+
+    assert!(name.len() > 1);
+    assert_eq!(name.chars().next(), Some('$'));
+    let name = &name[1..];
+
     if name == "_" {
         UnboundVariable::anonymous()
     } else {
