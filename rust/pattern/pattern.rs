@@ -29,23 +29,24 @@ use std::fmt::Display;
 pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(()),
-    Conjunctable(Conjunctable),
+    Negation(()),
+    Variable(Variable),
 }
 
 impl Pattern {
-    enum_getter!(into_conjunctable, Conjunctable, Conjunctable);
+    enum_getter!(into_variable, Variable, Variable);
 
     pub fn into_type_variable(self) -> TypeVariable {
-        self.into_conjunctable().into_type_variable()
+        self.into_variable().into_type()
     }
 }
 
 impl<T> From<T> for Pattern
 where
-    Conjunctable: From<T>,
+    Variable: From<T>,
 {
-    fn from(conjunctable: T) -> Self {
-        Pattern::Conjunctable(Conjunctable::from(conjunctable))
+    fn from(variable: T) -> Self {
+        Pattern::Variable(Variable::from(variable))
     }
 }
 
@@ -54,8 +55,9 @@ impl Display for Pattern {
         use Pattern::*;
         match self {
             Conjunction(conjunction) => write!(f, "{}", conjunction),
-            Disjunction(()) => Ok(()),
-            Conjunctable(conjunctable) => write!(f, "{}", conjunctable),
+            Disjunction(()) => todo!(),
+            Negation(()) => todo!(),
+            Variable(variable) => write!(f, "{}", variable),
         }
     }
 }

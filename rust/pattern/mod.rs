@@ -23,9 +23,6 @@
 mod pattern;
 pub use pattern::*;
 
-mod conjunctable;
-pub use conjunctable::*;
-
 mod conjunction;
 pub use conjunction::*;
 

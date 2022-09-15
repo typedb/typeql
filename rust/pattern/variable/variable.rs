@@ -33,11 +33,7 @@ pub enum Variable {
 
 impl Variable {
     pub fn into_pattern(self) -> Pattern {
-        self.into_conjunctable().into_pattern()
-    }
-
-    pub fn into_conjunctable(self) -> Conjunctable {
-        Conjunctable::Variable(self)
+        Pattern::Variable(self)
     }
 
     pub fn into_type(self) -> TypeVariable {
