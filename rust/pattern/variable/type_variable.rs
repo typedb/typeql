@@ -37,15 +37,11 @@ pub struct TypeVariable {
 
 impl TypeVariable {
     pub fn into_pattern(self) -> Pattern {
-        self.into_bound_variable().into_pattern()
+        self.into_variable().into_pattern()
     }
 
     pub fn into_variable(self) -> Variable {
-        self.into_bound_variable().into_variable()
-    }
-
-    pub fn into_bound_variable(self) -> BoundVariable {
-        BoundVariable::Type(self)
+        Variable::Type(self)
     }
 
     pub fn new(reference: Reference) -> TypeVariable {

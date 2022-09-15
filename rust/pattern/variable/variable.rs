@@ -26,7 +26,8 @@ use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
-    Bound(BoundVariable),
+    Thing(ThingVariable),
+    Type(TypeVariable),
     Unbound(UnboundVariable),
 }
 
@@ -42,16 +43,18 @@ impl Variable {
     pub fn into_type(self) -> TypeVariable {
         use Variable::*;
         match self {
-            Bound(var) => var.into_type(),
+            Type(var) => var,
             Unbound(var) => var.into_type(),
+            _ => panic!(""),
         }
     }
 
     pub fn into_thing(self) -> ThingVariable {
         use Variable::*;
         match self {
-            Bound(var) => var.into_thing(),
+            Thing(var) => var,
             Unbound(var) => var.into_thing(),
+            _ => panic!(""),
         }
     }
 }
@@ -62,12 +65,63 @@ impl From<UnboundVariable> for Variable {
     }
 }
 
-impl<T> From<T> for Variable
-where
-    BoundVariable: From<T>,
+impl From<ThingVariable> for Variable
 {
-    fn from(var: T) -> Self {
-        Variable::Bound(BoundVariable::from(var))
+    fn from(var: ThingVariable) -> Self {
+        Variable::Thing(var)
+    }
+}
+
+impl From<TypeVariable> for Variable
+{
+    fn from(var: TypeVariable) -> Self {
+        Variable::Type(var)
+    }
+}
+
+impl ThingVariableBuilder for Variable {
+    fn constrain_has(self, has: HasConstraint) -> ThingVariable {
+        self.into_thing().constrain_has(has)
+    }
+
+    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
+        self.into_thing().constrain_isa(isa)
+    }
+
+    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
+        self.into_thing().constrain_value(value)
+    }
+
+    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
+        self.into_thing().constrain_relation(relation)
+    }
+}
+
+impl RelationVariableBuilder for Variable {
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable {
+        self.into_thing().constrain_role_player(constraint)
+    }
+}
+
+impl TypeVariableBuilder for Variable {
+    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
+        self.into_type().constrain_label(label)
+    }
+
+    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable {
+        self.into_type().constrain_owns(owns)
+    }
+
+    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
+        self.into_type().constrain_plays(plays)
+    }
+
+    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
+        self.into_type().constrain_relates(relates)
+    }
+
+    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
+        self.into_type().constrain_sub(sub)
     }
 }
 
@@ -76,7 +130,8 @@ impl Display for Variable {
         use Variable::*;
         match self {
             Unbound(unbound) => write!(f, "{}", unbound),
-            Bound(bound) => write!(f, "{}", bound),
+            Thing(thing) => write!(f, "{}", thing),
+            Type(type_) => write!(f, "{}", type_),
         }
     }
 }

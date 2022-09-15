@@ -31,26 +31,26 @@ pub trait TypeVariableBuilder: Sized {
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable;
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable;
 
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<BoundVariable, ErrorMessage> {
-        Ok(self.constrain_owns(owns.into()).into_bound_variable())
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_owns(owns.into()).into_variable())
     }
 
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<BoundVariable, ErrorMessage> {
-        Ok(self.constrain_plays(plays.into()).into_bound_variable())
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_plays(plays.into()).into_variable())
     }
 
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<BoundVariable, ErrorMessage> {
-        Ok(self.constrain_relates(relates.into()).into_bound_variable())
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_relates(relates.into()).into_variable())
     }
 
-    fn sub(self, sub: impl Into<SubConstraint>) -> Result<BoundVariable, ErrorMessage> {
-        Ok(self.constrain_sub(sub.into()).into_bound_variable())
+    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_sub(sub.into()).into_variable())
     }
 
-    fn type_(self, type_name: impl Into<ScopedType>) -> Result<BoundVariable, ErrorMessage> {
+    fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
         Ok(self
             .constrain_label(LabelConstraint { scoped_type: type_name.into() })
-            .into_bound_variable())
+            .into_variable())
     }
 }
 
@@ -90,19 +90,19 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
         }
     }
 
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         self?.owns(owns)
     }
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
         self?.plays(plays)
     }
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
         self?.relates(relates)
     }
-    fn sub(self, sub: impl Into<SubConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
         self?.sub(sub)
     }
-    fn type_(self, type_name: impl Into<ScopedType>) -> Result<BoundVariable, ErrorMessage> {
+    fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
         self?.type_(type_name)
     }
 }
@@ -123,19 +123,19 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, Infallible> {
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
         self.unwrap().constrain_sub(sub)
     }
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().owns(owns)
     }
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().plays(plays)
     }
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().relates(relates)
     }
-    fn sub(self, sub: impl Into<SubConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().sub(sub)
     }
-    fn type_(self, type_name: impl Into<ScopedType>) -> Result<BoundVariable, ErrorMessage> {
+    fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
         self.unwrap().type_(type_name)
     }
 }

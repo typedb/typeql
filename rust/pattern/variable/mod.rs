@@ -23,9 +23,6 @@
 mod reference;
 pub use reference::*;
 
-mod bound_variable;
-pub use bound_variable::*;
-
 mod thing_variable;
 pub use thing_variable::*;
 

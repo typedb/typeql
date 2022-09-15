@@ -34,7 +34,7 @@ pub trait ThingVariableBuilder: Sized {
         self,
         type_name: impl Into<String>,
         value: T,
-    ) -> Result<BoundVariable, ErrorMessage>
+    ) -> Result<Variable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<Value>>::Error>,
     {
@@ -48,17 +48,15 @@ pub trait ThingVariableBuilder: Sized {
                     ValueConstraint::new(Predicate::Eq, value),
                 ),
             })
-            .into_bound_variable())
+            .into_variable())
     }
 
-    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<BoundVariable, ErrorMessage> {
-        Ok(self.constrain_isa(isa.into()).into_bound_variable())
+    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_isa(isa.into()).into_variable())
     }
 
-    fn eq(self, value: impl Into<Value>) -> Result<BoundVariable, ErrorMessage> {
-        Ok(self
-            .constrain_value(ValueConstraint::new(Predicate::Eq, value.into()))
-            .into_bound_variable())
+    fn eq(self, value: impl Into<Value>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into())).into_variable())
     }
 }
 
@@ -92,18 +90,18 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
         self,
         type_name: impl Into<String>,
         value: T,
-    ) -> Result<BoundVariable, ErrorMessage>
+    ) -> Result<Variable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<Value>>::Error>,
     {
         self?.has(type_name, value)
     }
 
-    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
         self?.isa(isa)
     }
 
-    fn eq(self, value: impl Into<Value>) -> Result<BoundVariable, ErrorMessage> {
+    fn eq(self, value: impl Into<Value>) -> Result<Variable, ErrorMessage> {
         self?.eq(value)
     }
 }
@@ -126,18 +124,18 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, Infallible> {
         self,
         type_name: impl Into<String>,
         value: T,
-    ) -> Result<BoundVariable, ErrorMessage>
+    ) -> Result<Variable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<Value>>::Error>,
     {
         self.unwrap().has(type_name, value)
     }
 
-    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().isa(isa)
     }
 
-    fn eq(self, value: impl Into<Value>) -> Result<BoundVariable, ErrorMessage> {
+    fn eq(self, value: impl Into<Value>) -> Result<Variable, ErrorMessage> {
         self.unwrap().eq(value)
     }
 }
@@ -145,8 +143,8 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, Infallible> {
 pub trait RelationVariableBuilder: Sized {
     fn constrain_role_player(self, role_player: RolePlayerConstraint) -> ThingVariable;
 
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<BoundVariable, ErrorMessage> {
-        Ok(self.constrain_role_player(value.into()).into_bound_variable())
+    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_role_player(value.into()).into_variable())
     }
 }
 
@@ -158,7 +156,7 @@ impl<U: RelationVariableBuilder> RelationVariableBuilder for Result<U, ErrorMess
         }
     }
 
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
         self?.rel(value)
     }
 }
@@ -168,7 +166,7 @@ impl<U: RelationVariableBuilder> RelationVariableBuilder for Result<U, Infallibl
         self.unwrap().constrain_role_player(role_player)
     }
 
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<BoundVariable, ErrorMessage> {
+    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().rel(value)
     }
 }

@@ -226,11 +226,6 @@ impl From<ThingVariable> for Value {
         Value::Variable(Box::new(variable))
     }
 }
-impl From<BoundVariable> for Value {
-    fn from(variable: BoundVariable) -> Value {
-        Value::Variable(Box::new(variable.into_thing()))
-    }
-}
 impl From<Variable> for Value {
     fn from(variable: Variable) -> Value {
         Value::Variable(Box::new(variable.into_thing()))

@@ -306,7 +306,7 @@ fn visit_pattern_variable(ctx: Rc<Pattern_variableContext>) -> ParserResult<Vari
     }
 }
 
-fn visit_variable_concept(_ctx: Rc<Variable_conceptContext>) -> ParserResult<BoundVariable> {
+fn visit_variable_concept(_ctx: Rc<Variable_conceptContext>) -> ParserResult<TypeVariable> {
     todo!()
 }
 
