@@ -199,7 +199,7 @@ fn visit_query_delete_or_update(_ctx: Rc<Query_delete_or_updateContext>) -> Pars
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
-    let mut match_query = typeql_match(visit_patterns(ctx.patterns().unwrap())?).into_match();
+    let mut match_query = typeql_match(visit_patterns(ctx.patterns().unwrap())?)?.into_match();
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
             match_query = match_query.filter(visit_filter(filter)?);
@@ -319,7 +319,7 @@ fn visit_variable_concept(_ctx: Rc<Variable_conceptContext>) -> ParserResult<Bou
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
     let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
         Type::Variable(p) => p,
-        Type::Unscoped(p) => UnboundVariable::hidden().type_(p).into_type(),
+        Type::Unscoped(p) => UnboundVariable::hidden().type_(p)?.into_type(),
         _ => Err(ILLEGAL_STATE.format(&[loc!()]))?,
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
@@ -366,7 +366,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 });
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
-            var_type = var_type.type_(scoped_label).into_type();
+            var_type = var_type.type_(scoped_label)?.into_type();
         } else {
             panic!("visit_variable_type: not implemented")
         }

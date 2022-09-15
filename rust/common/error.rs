@@ -20,10 +20,18 @@
  *
  */
 
+use std::convert::Infallible;
+
 #[derive(Debug)]
 pub struct ErrorMessage {
     pub code: usize,
     pub message: String,
+}
+
+impl From<Infallible> for ErrorMessage {
+    fn from(_: Infallible) -> Self {
+        unreachable!()
+    }
 }
 
 pub struct ErrorTemplate {

@@ -42,6 +42,7 @@ pub mod query;
 #[macro_use]
 mod util;
 
+use crate::common::error::ErrorMessage;
 use crate::parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query};
 use pattern::*;
 use query::*;
@@ -50,19 +51,22 @@ pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query.trim_end())
 }
 
-pub fn typeql_match(pattern: impl Into<Conjunction>) -> Query {
-    Query::Match(TypeQLMatch::new(pattern.into()))
+pub fn typeql_match<T: TryInto<Conjunction>>(pattern: T) -> Result<Query, ErrorMessage>
+where
+    ErrorMessage: From<<T as TryInto<Conjunction>>::Error>,
+{
+    Ok(Query::Match(TypeQLMatch::new(pattern.try_into()?)))
 }
 
 pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
     var.into()
 }
 
-pub fn type_(name: impl Into<String>) -> BoundVariable {
+pub fn type_(name: impl Into<String>) -> Result<BoundVariable, ErrorMessage> {
     UnboundVariable::hidden().type_(name.into())
 }
 
-pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> BoundVariable {
+pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> Result<BoundVariable, ErrorMessage> {
     UnboundVariable::hidden().rel(value)
 }
 

@@ -36,7 +36,7 @@ pub struct IsaConstraint {
 impl<T: Into<ScopedType>> From<T> for IsaConstraint {
     fn from(type_name: T) -> Self {
         IsaConstraint {
-            type_: UnboundVariable::hidden().type_(type_name).into_type(),
+            type_: UnboundVariable::hidden().type_(type_name).unwrap().into_type(),
             is_explicit: false,
         }
     }
@@ -68,14 +68,14 @@ pub struct HasConstraint {
 impl HasConstraint {
     pub fn from_value(type_name: String, value: ValueConstraint) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
             attribute: UnboundVariable::hidden().constrain_value(value),
         }
     }
 
     pub fn from_typed_variable(type_name: String, variable: ThingVariable) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
             attribute: variable,
         }
     }
@@ -332,7 +332,7 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).into_type(), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type).unwrap().into_type(), player_var))
     }
 }
 

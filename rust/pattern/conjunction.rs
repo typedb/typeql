@@ -21,6 +21,7 @@
  */
 
 use crate::pattern::Pattern;
+use crate::ErrorMessage;
 use std::fmt;
 use std::fmt::Display;
 
@@ -50,6 +51,28 @@ impl<T: Into<Pattern>, const N: usize> From<[T; N]> for Conjunction {
 impl<T: Into<Pattern>> From<Vec<T>> for Conjunction {
     fn from(patterns: Vec<T>) -> Self {
         Conjunction { patterns: patterns.into_iter().map(T::into).collect() }
+    }
+}
+
+impl<T: Into<Pattern>, E> TryFrom<Result<T, E>> for Conjunction
+where
+    ErrorMessage: From<E>,
+{
+    type Error = ErrorMessage;
+
+    fn try_from(value: Result<T, E>) -> Result<Self, Self::Error> {
+        Ok(Self::from(value?))
+    }
+}
+
+impl<T: Into<Pattern>, const N: usize, E> TryFrom<[Result<T, E>; N]> for Conjunction
+where
+    ErrorMessage: From<E>,
+{
+    type Error = ErrorMessage;
+
+    fn try_from(patterns: [Result<T, E>; N]) -> Result<Self, Self::Error> {
+        Ok(Self::from(patterns.into_iter().collect::<Result<Vec<T>, E>>()?))
     }
 }
 
