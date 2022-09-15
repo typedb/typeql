@@ -77,7 +77,9 @@ pub struct SubConstraint {
 
 impl<T: Into<ScopedType>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
-        SubConstraint { type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap().into_type()) }
+        SubConstraint {
+            type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap().into_type()),
+        }
     }
 }
 
@@ -115,7 +117,8 @@ impl From<String> for RelatesConstraint {
         RelatesConstraint {
             role_type: UnboundVariable::hidden()
                 .type_(ScopedType::from((String::from("relation"), type_name)))
-                .unwrap().into_type(),
+                .unwrap()
+                .into_type(),
             overridden_role_type: None,
         }
     }
@@ -174,7 +177,10 @@ impl From<(String, String)> for PlaysConstraint {
 
 impl From<ScopedType> for PlaysConstraint {
     fn from(scoped_type: ScopedType) -> Self {
-        PlaysConstraint::new(UnboundVariable::hidden().type_(scoped_type).unwrap().into_type(), None)
+        PlaysConstraint::new(
+            UnboundVariable::hidden().type_(scoped_type).unwrap().into_type(),
+            None,
+        )
     }
 }
 
@@ -235,12 +241,18 @@ impl From<&str> for OwnsConstraint {
 
 impl From<(&str, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (&str, IsKey)) -> Self {
-        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(), is_key))
+        OwnsConstraint::from((
+            UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(),
+            is_key,
+        ))
     }
 }
 impl From<(String, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (String, IsKey)) -> Self {
-        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(), is_key))
+        OwnsConstraint::from((
+            UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(),
+            is_key,
+        ))
     }
 }
 impl From<(UnboundVariable, IsKey)> for OwnsConstraint {
