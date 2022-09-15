@@ -94,7 +94,7 @@ macro_rules! error_messages {
 
 error_messages! {
    code: "TQL", type: "TypeQL Error",
-   ILLEGAL_STATE = 1: "Illegal internal state on line {}!",
+   ILLEGAL_STATE = 1: "Illegal internal state at {}!",
    SYNTAX_ERROR_NO_DETAILS = 2: "There is a syntax error at line {}:\n{}",
    SYNTAX_ERROR_DETAILED = 3: "There is a syntax error at line {}:\n{}\n{}\n{}",
    INVALID_CASTING = 4: "The class '{}' cannot be casted to '{}'.",

@@ -52,6 +52,12 @@ enum Type {
     Variable(TypeVariable),
 }
 
+macro_rules! loc {
+    () => {
+        concat!(file!(), ":", line!())
+    };
+}
+
 fn get_string(string: Rc<TerminalNode>) -> String {
     let quoted_string = string.get_text();
     String::from(&quoted_string[1..quoted_string.len() - 1])
@@ -114,7 +120,7 @@ fn get_isa_constraint(
     match visit_type(ctx)? {
         Type::Unscoped(label) => Ok(IsaConstraint::from(label)),
         Type::Variable(var) => Ok(IsaConstraint::from(var)),
-        _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()])),
+        _ => Err(ILLEGAL_STATE.format(&[loc!()])),
     }
 }
 
@@ -124,7 +130,7 @@ fn get_role_player_constraint(ctx: Rc<Role_playerContext>) -> ParserResult<RoleP
         match visit_type(type_)? {
             Type::Unscoped(label) => Ok(RolePlayerConstraint::from((label, player))),
             Type::Variable(var) => Ok(RolePlayerConstraint::from((var, player))),
-            _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()])),
+            _ => Err(ILLEGAL_STATE.format(&[loc!()])),
         }
     } else {
         Ok(RolePlayerConstraint::from(player))
@@ -314,7 +320,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
     let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
         Type::Variable(p) => p,
         Type::Unscoped(p) => UnboundVariable::hidden().type_(p).into_type(),
-        _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
+        _ => Err(ILLEGAL_STATE.format(&[loc!()]))?,
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.OWNS().is_some() {
@@ -326,7 +332,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             var_type = var_type.constrain_owns(match visit_type(constraint.type_(0).unwrap())? {
                 Type::Unscoped(label) => OwnsConstraint::from((label, is_key)),
                 Type::Variable(var) => OwnsConstraint::from((var, is_key)),
-                _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
+                _ => Err(ILLEGAL_STATE.format(&[loc!()]))?,
             });
         } else if constraint.PLAYS().is_some() {
             let _overridden: Option<()> = match constraint.AS() {
@@ -337,7 +343,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 match visit_type_scoped(constraint.type_scoped().unwrap())? {
                     Type::Scoped(scoped) => PlaysConstraint::from(scoped),
                     Type::Variable(var) => PlaysConstraint::from(var),
-                    _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
+                    _ => Err(ILLEGAL_STATE.format(&[loc!()]))?,
                 },
             );
         } else if constraint.RELATES().is_some() {
@@ -349,14 +355,14 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 var_type.constrain_relates(match visit_type(constraint.type_(0).unwrap())? {
                     Type::Unscoped(label) => RelatesConstraint::from(label),
                     Type::Variable(var) => RelatesConstraint::from(var),
-                    _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
+                    _ => Err(ILLEGAL_STATE.format(&[loc!()]))?,
                 });
         } else if constraint.SUB_().is_some() {
             var_type =
                 var_type.constrain_sub(match visit_type_any(constraint.type_any().unwrap())? {
                     Type::Unscoped(label) => SubConstraint::from(label),
                     Type::Variable(var) => SubConstraint::from(var),
-                    _ => Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?,
+                    _ => Err(ILLEGAL_STATE.format(&[loc!()]))?,
                 });
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
@@ -480,7 +486,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             } else if let Some(var) = ctx.predicate_value().unwrap().VAR_() {
                 Value::from(get_var(var))
             } else {
-                Err(ILLEGAL_STATE.format(&[line!().to_string().as_str()]))?
+                Err(ILLEGAL_STATE.format(&[loc!()]))?
             },
         ))
     } else {
