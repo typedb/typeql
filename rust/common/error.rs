@@ -137,5 +137,5 @@ error_messages! {
    INVALID_SORTING_ORDER = 34: "Invalid sorting order. Valid options: '{}' or '{}'.",
    INVALID_COUNT_VARIABLE_ARGUMENT = 35: "Aggregate COUNT does not accept a Variable.",
    ILLEGAL_GRAMMAR = 36: "Illegal grammar: '{}'",
-   ILLEGAL_CHAR_IN_LABEL = 47: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
+   ILLEGAL_CHAR_IN_LABEL = 37: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
 }
