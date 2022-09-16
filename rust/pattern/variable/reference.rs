@@ -37,11 +37,7 @@ pub enum Reference {
 
 impl Reference {
     pub fn is_visible(&self) -> bool {
-        use Reference::*;
-        match self {
-            Anonymous(visibility) => *visibility == Visibility::Visible,
-            Name(_) => true,
-        }
+        !matches!(self, Reference::Anonymous(Visibility::Invisible))
     }
 }
 
