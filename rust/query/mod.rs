@@ -24,7 +24,7 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 
 use crate::pattern::*;
-use crate::{enum_getter, ErrorMessage, var};
+use crate::{enum_getter, var, ErrorMessage};
 
 mod typeql_match;
 pub use typeql_match::*;
@@ -96,12 +96,15 @@ impl MatchQueryBuilder for Result<Query, ErrorMessage> {
     fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
         Ok(self?.get(vars))
     }
+
     fn sort(self, sorting: impl Into<Sorting>) -> Self {
         Ok(self?.sort(sorting))
     }
+
     fn limit(self, limit: usize) -> Self {
         Ok(self?.limit(limit))
     }
+
     fn offset(self, offset: usize) -> Self {
         Ok(self?.offset(offset))
     }

@@ -53,8 +53,8 @@ impl Pattern {
 }
 
 impl<T> From<T> for Pattern
-    where
-        Variable: From<T>,
+where
+    Variable: From<T>,
 {
     fn from(variable: T) -> Self {
         Pattern::Variable(Variable::from(variable))

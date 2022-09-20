@@ -1305,7 +1305,8 @@ fn regex_predicate_parses_forward_slashes_correctly() {
  */
 
 #[test]
-fn when_value_equality_to_string_create_valid_query_string() {  // TODO no unwraps
+fn when_value_equality_to_string_create_valid_query_string() {
+    // TODO no unwraps
     let expected = typeql_match(var("x").eq(var("y"))).unwrap();
     let parsed = parse_query(&expected.to_string()).unwrap();
 

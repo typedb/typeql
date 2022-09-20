@@ -129,6 +129,7 @@ impl From<UnboundVariable> for RelatesConstraint {
         RelatesConstraint::from(role_type.into_type())
     }
 }
+
 impl From<TypeVariable> for RelatesConstraint {
     fn from(role_type: TypeVariable) -> Self {
         RelatesConstraint { role_type, overridden_role_type: None }
@@ -189,6 +190,7 @@ impl From<UnboundVariable> for PlaysConstraint {
         PlaysConstraint::from(role_type.into_type())
     }
 }
+
 impl From<TypeVariable> for PlaysConstraint {
     fn from(role_type: TypeVariable) -> Self {
         PlaysConstraint::new(role_type, None)
@@ -206,6 +208,7 @@ pub enum IsKey {
     Yes,
     No,
 }
+
 impl From<bool> for IsKey {
     fn from(is_key: bool) -> Self {
         match is_key {
@@ -257,6 +260,7 @@ impl From<(&str, IsKey)> for OwnsConstraint {
         ))
     }
 }
+
 impl From<(String, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (String, IsKey)) -> Self {
         OwnsConstraint::from((
@@ -265,11 +269,13 @@ impl From<(String, IsKey)> for OwnsConstraint {
         ))
     }
 }
+
 impl From<(UnboundVariable, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (UnboundVariable, IsKey)) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), is_key))
     }
 }
+
 impl From<(TypeVariable, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (TypeVariable, IsKey)) -> Self {
         OwnsConstraint::new(attribute_type, None, is_key)

@@ -65,18 +65,21 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
             Err(err) => panic!("{:?}", err),
         }
     }
+
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
         match self {
             Ok(var) => var.constrain_isa(isa),
             Err(err) => panic!("{:?}", err),
         }
     }
+
     fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
         match self {
             Ok(var) => var.constrain_value(value),
             Err(err) => panic!("{:?}", err),
         }
     }
+
     fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
         match self {
             Ok(var) => var.constrain_relation(relation),
@@ -108,12 +111,15 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, Infallible> {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable {
         self.unwrap().constrain_has(has)
     }
+
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
         self.unwrap().constrain_isa(isa)
     }
+
     fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
         self.unwrap().constrain_value(value)
     }
+
     fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
         self.unwrap().constrain_relation(relation)
     }

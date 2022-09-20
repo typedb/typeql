@@ -53,9 +53,7 @@ pub trait TypeVariableBuilder: Sized {
     }
 
     fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
-        Ok(self
-            .constrain_label(LabelConstraint { scoped_type: type_name.into() })
-            .into_variable())
+        Ok(self.constrain_label(LabelConstraint { scoped_type: type_name.into() }).into_variable())
     }
 }
 
@@ -101,21 +99,27 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
             Err(err) => panic!("{:?}", err),
         }
     }
+
     fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         self?.owns(owns)
     }
+
     fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
         self?.plays(plays)
     }
+
     fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
         self?.regex(regex)
     }
+
     fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
         self?.relates(relates)
     }
+
     fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
         self?.sub(sub)
     }
+
     fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
         self?.type_(type_name)
     }
@@ -125,36 +129,47 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, Infallible> {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
         self.unwrap().constrain_label(label)
     }
+
     fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable {
         self.unwrap().constrain_owns(owns)
     }
+
     fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
         self.unwrap().constrain_plays(plays)
     }
+
     fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
         self.unwrap().constrain_regex(regex)
     }
+
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
         self.unwrap().constrain_relates(relates)
     }
+
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
         self.unwrap().constrain_sub(sub)
     }
+
     fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().owns(owns)
     }
+
     fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().plays(plays)
     }
+
     fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().regex(regex)
     }
+
     fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().relates(relates)
     }
+
     fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().sub(sub)
     }
+
     fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
         self.unwrap().type_(type_name)
     }

@@ -154,11 +154,13 @@ impl From<&str> for Sorting {
         Self::new(vec![var(var_name)], "")
     }
 }
+
 impl<const N: usize> From<([&str; N], &'static str)> for Sorting {
     fn from((vars, order): ([&str; N], &'static str)) -> Self {
         Self::new(vars.map(var).to_vec(), order)
     }
 }
+
 impl From<Vec<UnboundVariable>> for Sorting {
     fn from(vars: Vec<UnboundVariable>) -> Self {
         Self::new(vars, "asc")

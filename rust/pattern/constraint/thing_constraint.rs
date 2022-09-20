@@ -47,6 +47,7 @@ impl From<UnboundVariable> for IsaConstraint {
         IsaConstraint::from(var.into_type())
     }
 }
+
 impl From<TypeVariable> for IsaConstraint {
     fn from(type_: TypeVariable) -> Self {
         IsaConstraint { type_, is_explicit: false }
@@ -228,11 +229,13 @@ impl From<UnboundVariable> for Value {
         Value::Variable(Box::new(variable.into_thing()))
     }
 }
+
 impl From<ThingVariable> for Value {
     fn from(variable: ThingVariable) -> Value {
         Value::Variable(Box::new(variable))
     }
 }
+
 impl From<Variable> for Value {
     fn from(variable: Variable) -> Value {
         Value::Variable(Box::new(variable.into_thing()))

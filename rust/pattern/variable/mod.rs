@@ -76,15 +76,13 @@ impl From<UnboundVariable> for Variable {
     }
 }
 
-impl From<ThingVariable> for Variable
-{
+impl From<ThingVariable> for Variable {
     fn from(var: ThingVariable) -> Self {
         Variable::Thing(var)
     }
 }
 
-impl From<TypeVariable> for Variable
-{
+impl From<TypeVariable> for Variable {
     fn from(var: TypeVariable) -> Self {
         Variable::Type(var)
     }

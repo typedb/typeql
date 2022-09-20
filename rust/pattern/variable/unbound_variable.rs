@@ -114,11 +114,13 @@ impl From<()> for UnboundVariable {
         UnboundVariable::anonymous()
     }
 }
+
 impl From<&str> for UnboundVariable {
     fn from(name: &str) -> Self {
         UnboundVariable::named(name.to_string())
     }
 }
+
 impl From<String> for UnboundVariable {
     fn from(name: String) -> Self {
         UnboundVariable::named(name)
