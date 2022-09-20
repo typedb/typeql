@@ -65,23 +65,30 @@ pub struct HasConstraint {
     pub attribute: ThingVariable,
 }
 
-impl HasConstraint {
-    pub fn from_value(type_name: String, value: ValueConstraint) -> Self {
+impl From<(String, ValueConstraint)> for HasConstraint {
+    fn from((type_name, value_constraint): (String, ValueConstraint)) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
-            attribute: UnboundVariable::hidden().constrain_value(value),
+            attribute: UnboundVariable::hidden().constrain_value(value_constraint),
         }
     }
+}
 
-    pub fn from_typed_variable(type_name: String, variable: ThingVariable) -> Self {
+impl From<(String, UnboundVariable)> for HasConstraint {
+    fn from((type_name, variable): (String, UnboundVariable)) -> Self {
+        HasConstraint {
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
+            attribute: variable.into_thing(),
+        }
+    }
+}
+
+impl From<(String, ThingVariable)> for HasConstraint {
+    fn from((type_name, variable): (String, ThingVariable)) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
             attribute: variable,
         }
-    }
-
-    pub fn from_variable(variable: ThingVariable) -> Self {
-        HasConstraint { type_: None, attribute: variable }
     }
 }
 

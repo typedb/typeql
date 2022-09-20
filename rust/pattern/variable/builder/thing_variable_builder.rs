@@ -40,13 +40,11 @@ pub trait ThingVariableBuilder: Sized {
     {
         Ok(self
             .constrain_has(match value.try_into()? {
-                Value::Variable(variable) => {
-                    HasConstraint::from_typed_variable(type_name.into(), *variable)
-                }
-                value => HasConstraint::from_value(
+                Value::Variable(variable) => HasConstraint::from((type_name.into(), *variable)),
+                value => HasConstraint::from((
                     type_name.into(),
                     ValueConstraint::new(Predicate::Eq, value),
-                ),
+                )),
             })
             .into_variable())
     }
