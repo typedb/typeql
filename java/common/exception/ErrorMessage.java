@@ -88,7 +88,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
             new ErrorMessage(32, "Rule '%s' 'then' variables must be present in rule 'when'.");
     public static final ErrorMessage INVALID_RULE_THEN_ROLES =
-            new ErrorMessage(33, "Rule '%s' 'then' '%s': all roles must be specified explicitly or using a variable.");
+            new ErrorMessage(33, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(34, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage INVALID_SORTING_ORDER =

@@ -163,9 +163,7 @@ public class Rule implements Definable {
 
         // Roles must be explicit
         if (then.relation().isPresent() && !then.relation().get().players().stream()
-                .map(player -> {
-                    return player.roleType().isPresent();
-                })
+                .map(player -> player.roleType().isPresent())
                 .reduce(true, Boolean::logicalAnd)) {
             throw TypeQLException.of(INVALID_RULE_THEN_ROLES.message(label, then));
         }
