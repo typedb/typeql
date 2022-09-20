@@ -20,9 +20,6 @@
  *
  */
 
-mod pattern;
-pub use pattern::*;
-
 mod conjunction;
 pub use conjunction::*;
 
@@ -34,3 +31,44 @@ pub use constraint::*;
 
 #[cfg(test)]
 mod test;
+
+use crate::enum_getter;
+use std::fmt;
+use std::fmt::Display;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Pattern {
+    Conjunction(Conjunction),
+    Disjunction(()),
+    Negation(()),
+    Variable(Variable),
+}
+
+impl Pattern {
+    enum_getter!(into_variable, Variable, Variable);
+
+    pub fn into_type_variable(self) -> TypeVariable {
+        self.into_variable().into_type()
+    }
+}
+
+impl<T> From<T> for Pattern
+    where
+        Variable: From<T>,
+{
+    fn from(variable: T) -> Self {
+        Pattern::Variable(Variable::from(variable))
+    }
+}
+
+impl Display for Pattern {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => write!(f, "{}", conjunction),
+            Disjunction(()) => todo!(),
+            Negation(()) => todo!(),
+            Variable(variable) => write!(f, "{}", variable),
+        }
+    }
+}
