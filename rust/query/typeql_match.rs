@@ -155,8 +155,8 @@ impl From<&str> for Sorting {
     }
 }
 
-impl<const N: usize> From<([&str; N], &'static str)> for Sorting {
-    fn from((vars, order): ([&str; N], &'static str)) -> Self {
+impl<const N: usize> From<([&str; N], &str)> for Sorting {
+    fn from((vars, order): ([&str; N], &str)) -> Self {
         Self::new(vars.map(var).to_vec(), order)
     }
 }
