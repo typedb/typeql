@@ -30,11 +30,13 @@ import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.Reference;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.Variable;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
@@ -46,6 +48,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.THEN;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.WHEN;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ROLES;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
@@ -156,6 +159,13 @@ public class Rule implements Definable {
             if (!whenReferences.containsAll(thenReferences)) {
                 throw TypeQLException.of(INVALID_RULE_THEN_VARIABLES.message(label));
             }
+        }
+
+        // Roles must be explicit
+        if (then.relation().isPresent() && !then.relation().get().players().stream()
+                .map(player -> player.roleType().isPresent())
+                .reduce(true, Boolean::logicalAnd)) {
+            throw TypeQLException.of(INVALID_RULE_THEN_ROLES.message(label, then));
         }
     }
 
