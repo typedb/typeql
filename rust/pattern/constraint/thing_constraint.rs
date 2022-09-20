@@ -33,7 +33,7 @@ pub struct IsaConstraint {
     pub is_explicit: bool,
 }
 
-impl<T: Into<ScopedType>> From<T> for IsaConstraint {
+impl<T: Into<Label>> From<T> for IsaConstraint {
     fn from(type_name: T) -> Self {
         IsaConstraint {
             type_: UnboundVariable::hidden().type_(type_name).unwrap().into_type(),
@@ -329,6 +329,12 @@ impl From<(String, String)> for RolePlayerConstraint {
     }
 }
 
+impl From<(Label, String)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (Label, String)) -> Self {
+        Self::from((role_type, UnboundVariable::named(player_var)))
+    }
+}
+
 impl From<UnboundVariable> for RolePlayerConstraint {
     fn from(player_var: UnboundVariable) -> Self {
         Self::new(None, player_var.into_thing())
@@ -337,6 +343,12 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
+        Self::from((UnboundVariable::hidden().type_(role_type).unwrap().into_type(), player_var))
+    }
+}
+
+impl From<(Label, UnboundVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (Label, UnboundVariable)) -> Self {
         Self::from((UnboundVariable::hidden().type_(role_type).unwrap().into_type(), player_var))
     }
 }

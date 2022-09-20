@@ -47,8 +47,7 @@ type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
 #[derive(Debug)]
 enum Type {
-    Unscoped(String),
-    Scoped(ScopedType),
+    Label(Label),
     Variable(TypeVariable),
 }
 
@@ -123,9 +122,8 @@ fn get_isa_constraint(
     ctx: Rc<Type_ContextAll>,
 ) -> ParserResult<IsaConstraint> {
     match visit_type(ctx)? {
-        Type::Unscoped(label) => Ok(IsaConstraint::from(label)),
+        Type::Label(label) => Ok(IsaConstraint::from(label)),
         Type::Variable(var) => Ok(IsaConstraint::from(var)),
-        t => panic!("Unexpected type: {:?}", t),
     }
 }
 
@@ -133,9 +131,8 @@ fn get_role_player_constraint(ctx: Rc<Role_playerContext>) -> ParserResult<RoleP
     let player = get_var(ctx.player().unwrap().VAR_().unwrap());
     if let Some(type_) = ctx.type_() {
         match visit_type(type_)? {
-            Type::Unscoped(label) => Ok(RolePlayerConstraint::from((label, player))),
+            Type::Label(label) => Ok(RolePlayerConstraint::from((label, player))),
             Type::Variable(var) => Ok(RolePlayerConstraint::from((var, player))),
-            t => panic!("Unexpected type: {:?}", t),
         }
     } else {
         Ok(RolePlayerConstraint::from(player))
@@ -324,8 +321,7 @@ fn visit_variable_concept(_ctx: Rc<Variable_conceptContext>) -> ParserResult<Typ
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
     let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
         Type::Variable(p) => p,
-        Type::Unscoped(p) => UnboundVariable::hidden().type_(p)?.into_type(),
-        t => panic!("Unexpected type: {:?}", t),
+        Type::Label(p) => UnboundVariable::hidden().type_(p)?.into_type(),
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.OWNS().is_some() {
@@ -335,9 +331,8 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             };
             let is_key = IsKey::from(constraint.IS_KEY().is_some());
             var_type = var_type.constrain_owns(match visit_type(constraint.type_(0).unwrap())? {
-                Type::Unscoped(label) => OwnsConstraint::from((label, is_key)),
+                Type::Label(label) => OwnsConstraint::from((label, is_key)),
                 Type::Variable(var) => OwnsConstraint::from((var, is_key)),
-                t => panic!("Unexpected type: {:?}", t),
             });
         } else if constraint.PLAYS().is_some() {
             let _overridden: Option<()> = match constraint.AS() {
@@ -346,9 +341,8 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             };
             var_type = var_type.constrain_plays(
                 match visit_type_scoped(constraint.type_scoped().unwrap())? {
-                    Type::Scoped(scoped) => PlaysConstraint::from(scoped),
+                    Type::Label(scoped) => PlaysConstraint::from(scoped),
                     Type::Variable(var) => PlaysConstraint::from(var),
-                    t => panic!("Unexpected type: {:?}", t),
                 },
             );
         } else if constraint.REGEX().is_some() {
@@ -360,16 +354,14 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             };
             var_type =
                 var_type.constrain_relates(match visit_type(constraint.type_(0).unwrap())? {
-                    Type::Unscoped(label) => RelatesConstraint::from(label),
+                    Type::Label(label) => RelatesConstraint::from(label),
                     Type::Variable(var) => RelatesConstraint::from(var),
-                    t => panic!("Unexpected type: {:?}", t),
                 });
         } else if constraint.SUB_().is_some() {
             var_type =
                 var_type.constrain_sub(match visit_type_any(constraint.type_any().unwrap())? {
-                    Type::Unscoped(label) => SubConstraint::from(label),
+                    Type::Label(label) => SubConstraint::from(label),
                     Type::Variable(var) => SubConstraint::from(var),
-                    t => panic!("Unexpected type: {:?}", t),
                 });
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
@@ -531,7 +523,7 @@ fn visit_type_any(ctx: Rc<Type_anyContext>) -> ParserResult<Type> {
 
 fn visit_type_scoped(ctx: Rc<Type_scopedContext>) -> ParserResult<Type> {
     if let Some(scoped) = ctx.label_scoped() {
-        Ok(Type::Scoped(visit_label_scoped(scoped)?))
+        Ok(Type::Label(visit_label_scoped(scoped)?))
     } else if let Some(var) = ctx.VAR_() {
         Ok(Type::Variable(get_var(var).into_type()))
     } else {
@@ -541,7 +533,7 @@ fn visit_type_scoped(ctx: Rc<Type_scopedContext>) -> ParserResult<Type> {
 
 fn visit_type(ctx: Rc<Type_Context>) -> ParserResult<Type> {
     if let Some(label) = ctx.label() {
-        Ok(Type::Unscoped(label.get_text()))
+        Ok(Type::Label(label.get_text().into()))
     } else if let Some(var) = ctx.VAR_() {
         Ok(Type::Variable(get_var(var).into_type()))
     } else {
@@ -557,9 +549,9 @@ fn visit_label_any(ctx: Rc<Label_anyContext>) -> ParserResult<String> {
     }
 }
 
-fn visit_label_scoped(ctx: Rc<Label_scopedContext>) -> ParserResult<ScopedType> {
+fn visit_label_scoped(ctx: Rc<Label_scopedContext>) -> ParserResult<Label> {
     let parts: Vec<String> = ctx.get_text().split(':').map(String::from).collect();
-    Ok(ScopedType::from((parts[0].clone(), parts[1].clone())))
+    Ok(Label::from((parts[0].clone(), parts[1].clone())))
 }
 
 fn visit_label(_ctx: Rc<LabelContext>) -> ParserResult<()> {

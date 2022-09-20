@@ -25,30 +25,30 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ScopedType {
+pub struct Label {
     scope: Option<String>,
     name: String,
 }
 
-impl From<&str> for ScopedType {
+impl From<&str> for Label {
     fn from(name: &str) -> Self {
-        ScopedType::from(String::from(name))
+        Label::from(String::from(name))
     }
 }
 
-impl From<String> for ScopedType {
+impl From<String> for Label {
     fn from(name: String) -> Self {
-        ScopedType { scope: None, name }
+        Label { scope: None, name }
     }
 }
 
-impl From<(String, String)> for ScopedType {
+impl From<(String, String)> for Label {
     fn from((scope, name): (String, String)) -> Self {
-        ScopedType { scope: Some(scope), name }
+        Label { scope: Some(scope), name }
     }
 }
 
-impl Display for ScopedType {
+impl Display for Label {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(scope) = &self.scope {
             if scope != "relation" {
@@ -61,7 +61,7 @@ impl Display for ScopedType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct LabelConstraint {
-    pub scoped_type: ScopedType,
+    pub scoped_type: Label,
 }
 
 impl Display for LabelConstraint {
@@ -75,7 +75,7 @@ pub struct SubConstraint {
     pub type_: Box<TypeVariable>,
 }
 
-impl<T: Into<ScopedType>> From<T> for SubConstraint {
+impl<T: Into<Label>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
         SubConstraint {
             type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap().into_type()),
@@ -114,11 +114,14 @@ impl From<&str> for RelatesConstraint {
 
 impl From<String> for RelatesConstraint {
     fn from(type_name: String) -> Self {
+        RelatesConstraint::from(Label::from(type_name))
+    }
+}
+
+impl From<Label> for RelatesConstraint {
+    fn from(type_: Label) -> Self {
         RelatesConstraint {
-            role_type: UnboundVariable::hidden()
-                .type_(ScopedType::from((String::from("relation"), type_name)))
-                .unwrap()
-                .into_type(),
+            role_type: UnboundVariable::hidden().type_(type_).unwrap().into_type(),
             overridden_role_type: None,
         }
     }
@@ -172,12 +175,12 @@ impl From<(&str, &str)> for PlaysConstraint {
 
 impl From<(String, String)> for PlaysConstraint {
     fn from((relation_type, role_type): (String, String)) -> Self {
-        PlaysConstraint::from(ScopedType::from((relation_type, role_type)))
+        PlaysConstraint::from(Label::from((relation_type, role_type)))
     }
 }
 
-impl From<ScopedType> for PlaysConstraint {
-    fn from(scoped_type: ScopedType) -> Self {
+impl From<Label> for PlaysConstraint {
+    fn from(scoped_type: Label) -> Self {
         PlaysConstraint::new(
             UnboundVariable::hidden().type_(scoped_type).unwrap().into_type(),
             None,
@@ -254,15 +257,18 @@ impl From<&str> for OwnsConstraint {
 
 impl From<(&str, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (&str, IsKey)) -> Self {
-        OwnsConstraint::from((
-            UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(),
-            is_key,
-        ))
+        OwnsConstraint::from((Label::from(attribute_type), is_key))
     }
 }
 
 impl From<(String, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (String, IsKey)) -> Self {
+        OwnsConstraint::from((Label::from(attribute_type), is_key))
+    }
+}
+
+impl From<(Label, IsKey)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (Label, IsKey)) -> Self {
         OwnsConstraint::from((
             UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(),
             is_key,

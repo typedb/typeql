@@ -52,7 +52,7 @@ pub trait TypeVariableBuilder: Sized {
         Ok(self.constrain_sub(sub.into()).into_variable())
     }
 
-    fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
+    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage> {
         Ok(self.constrain_label(LabelConstraint { scoped_type: type_name.into() }).into_variable())
     }
 }
@@ -120,7 +120,7 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
         self?.sub(sub)
     }
 
-    fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
+    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage> {
         self?.type_(type_name)
     }
 }
@@ -170,7 +170,7 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, Infallible> {
         self.unwrap().sub(sub)
     }
 
-    fn type_(self, type_name: impl Into<ScopedType>) -> Result<Variable, ErrorMessage> {
+    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage> {
         self.unwrap().type_(type_name)
     }
 }
