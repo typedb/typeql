@@ -100,10 +100,10 @@ impl Display for HasConstraint {
             write!(f, " {}", &type_.label.as_ref().unwrap().scoped_type)?;
         }
 
-        use Reference::*;
-        match self.attribute.reference {
-            Name(_) => write!(f, " {}", self.attribute.reference),
-            Anonymous(_) => write!(f, " {}", self.attribute.value.as_ref().unwrap()),
+        if self.attribute.reference.is_name() {
+            write!(f, " {}", self.attribute.reference)
+        } else {
+            write!(f, " {}", self.attribute.value.as_ref().unwrap())
         }
     }
 }
