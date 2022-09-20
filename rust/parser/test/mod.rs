@@ -905,15 +905,15 @@ fn test_match_value_type_query() {
 }
  */
 
-#[test]
+// #[test]
 fn test_parse_without_var() {
     let query = r#"match
 $_ isa person;"#;
 
-    let _parsed = parse_query(query); // todo error
-    // assert!(parsed.is_err());
-    let _built = typeql_match(var(()).isa("person")); // todo error
-    // assert!(built.is_err());
+    let parsed = parse_query(query); // todo error
+    assert!(parsed.is_err());
+    let built = typeql_match(var(()).isa("person")); // todo error
+    assert!(built.is_err());
 }
 
 /*
