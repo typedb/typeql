@@ -24,7 +24,7 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 
 use crate::pattern::*;
-use crate::{enum_getter, var};
+use crate::{enum_getter, ErrorMessage, var};
 
 mod typeql_match;
 pub use typeql_match::*;
@@ -37,8 +37,10 @@ pub enum Query {
 
 impl Query {
     enum_getter!(into_match, Match, TypeQLMatch);
+}
 
-    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Query {
+impl MatchQueryBuilder for Query {
+    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Query {
         use Query::*;
         match self {
             Match(query) => Match(
@@ -48,7 +50,7 @@ impl Query {
         }
     }
 
-    pub fn sort(self, sorting: impl Into<Sorting>) -> Query {
+    fn sort(self, sorting: impl Into<Sorting>) -> Query {
         use Query::*;
         match self {
             Match(query) => Match(query.sort(sorting)),
@@ -56,7 +58,7 @@ impl Query {
         }
     }
 
-    pub fn limit(self, limit: usize) -> Query {
+    fn limit(self, limit: usize) -> Query {
         use Query::*;
         match self {
             Match(query) => Match(query.limit(limit)),
@@ -64,7 +66,7 @@ impl Query {
         }
     }
 
-    pub fn offset(self, offset: usize) -> Query {
+    fn offset(self, offset: usize) -> Query {
         use Query::*;
         match self {
             Match(query) => Match(query.offset(offset)),
@@ -80,5 +82,27 @@ impl Display for Query {
             Match(query) => write!(f, "{}", query),
             _ => todo!(),
         }
+    }
+}
+
+pub trait MatchQueryBuilder {
+    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self;
+    fn sort(self, sorting: impl Into<Sorting>) -> Self;
+    fn limit(self, limit: usize) -> Self;
+    fn offset(self, offset: usize) -> Self;
+}
+
+impl MatchQueryBuilder for Result<Query, ErrorMessage> {
+    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
+        Ok(self?.get(vars))
+    }
+    fn sort(self, sorting: impl Into<Sorting>) -> Self {
+        Ok(self?.sort(sorting))
+    }
+    fn limit(self, limit: usize) -> Self {
+        Ok(self?.limit(limit))
+    }
+    fn offset(self, offset: usize) -> Self {
+        Ok(self?.offset(offset))
     }
 }
