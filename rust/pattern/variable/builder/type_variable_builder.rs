@@ -28,6 +28,7 @@ pub trait TypeVariableBuilder: Sized {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable;
     fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable;
     fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable;
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable;
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable;
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable;
 
@@ -37,6 +38,10 @@ pub trait TypeVariableBuilder: Sized {
 
     fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
         Ok(self.constrain_plays(plays.into()).into_variable())
+    }
+
+    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
+        Ok(self.constrain_regex(regex.into()).into_variable())
     }
 
     fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
@@ -76,6 +81,13 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
         }
     }
 
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
+        match self {
+            Ok(var) => var.constrain_regex(regex),
+            Err(err) => panic!("{:?}", err),
+        }
+    }
+
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
         match self {
             Ok(var) => var.constrain_relates(relates),
@@ -89,12 +101,14 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
             Err(err) => panic!("{:?}", err),
         }
     }
-
     fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         self?.owns(owns)
     }
     fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
         self?.plays(plays)
+    }
+    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
+        self?.regex(regex)
     }
     fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
         self?.relates(relates)
@@ -117,6 +131,9 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, Infallible> {
     fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
         self.unwrap().constrain_plays(plays)
     }
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
+        self.unwrap().constrain_regex(regex)
+    }
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
         self.unwrap().constrain_relates(relates)
     }
@@ -128,6 +145,9 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, Infallible> {
     }
     fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().plays(plays)
+    }
+    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
+        self.unwrap().regex(regex)
     }
     fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().relates(relates)

@@ -1105,18 +1105,16 @@ $_ has title "Godfather",
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_regex_attribute_type() {
     let query = r#"match
 $x regex "(fe)?male";"#;
 
     let parsed = parse_query(query);
-    let expected = typeql_match(var("x").regex("(fe)?male"));  // TODO RegexConstraint (Type)
+    let expected = typeql_match(var("x").regex("(fe)?male"));
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn test_typeql_parse_query() {

@@ -281,3 +281,30 @@ impl Display for OwnsConstraint {
         write!(f, "owns {}{}", self.attribute_type, self.is_key)
     }
 }
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct RegexConstraint {
+    regex: String,
+}
+
+impl From<&str> for RegexConstraint {
+    fn from(regex: &str) -> Self {
+        RegexConstraint { regex: regex.to_string() }
+    }
+}
+
+impl From<String> for RegexConstraint {
+    fn from(regex: String) -> Self {
+        RegexConstraint { regex }
+    }
+}
+
+fn escape_regex(regex: &str) -> String {
+    regex.replace('/', r#"\\/"#)
+}
+
+impl Display for RegexConstraint {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, r#"regex "{}""#, escape_regex(&self.regex))
+    }
+}

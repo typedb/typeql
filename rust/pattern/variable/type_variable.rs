@@ -31,6 +31,7 @@ pub struct TypeVariable {
     pub label: Option<LabelConstraint>,
     pub owns: Vec<OwnsConstraint>,
     pub plays: Vec<PlaysConstraint>,
+    pub regex: Option<RegexConstraint>,
     pub relates: Vec<RelatesConstraint>,
     pub sub: Option<SubConstraint>,
 }
@@ -50,6 +51,7 @@ impl TypeVariable {
             label: None,
             owns: vec![],
             plays: vec![],
+            regex: None,
             relates: vec![],
             sub: None,
         }
@@ -69,6 +71,10 @@ impl TypeVariableBuilder for TypeVariable {
     fn constrain_plays(mut self, plays: PlaysConstraint) -> TypeVariable {
         self.plays.push(plays);
         self
+    }
+
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
+        TypeVariable { regex: Some(regex), ..self }
     }
 
     fn constrain_relates(mut self, relates: RelatesConstraint) -> TypeVariable {
@@ -93,6 +99,9 @@ impl Display for TypeVariable {
         }
         if let Some(sub) = &self.sub {
             write!(f, " {}", sub)?;
+        }
+        if let Some(regex) = &self.regex {
+            write!(f, " {}", regex)?;
         }
         if !self.relates.is_empty() {
             f.write_char(' ')?;

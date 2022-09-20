@@ -52,9 +52,20 @@ enum Type {
     Variable(TypeVariable),
 }
 
-fn get_string(string: Rc<TerminalNode>) -> String {
-    let quoted_string = string.get_text();
+fn unquote_string(quoted_string: String) -> String {
     String::from(&quoted_string[1..quoted_string.len() - 1])
+}
+
+fn get_string(string: Rc<TerminalNode>) -> String {
+    unquote_string(string.get_text())
+}
+
+fn unescape_regex(regex: String) -> String {
+    regex.replace(r#"\\/"#, "/")
+}
+
+fn get_regex(string: Rc<TerminalNode>) -> String {
+    unescape_regex(unquote_string(string.get_text()))
 }
 
 fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {
@@ -340,6 +351,8 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                     t => panic!("Unexpected type: {:?}", t),
                 },
             );
+        } else if constraint.REGEX().is_some() {
+            var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?.into_type();
         } else if constraint.RELATES().is_some() {
             let _overridden: Option<()> = match constraint.AS() {
                 None => None,

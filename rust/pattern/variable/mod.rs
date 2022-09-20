@@ -127,6 +127,10 @@ impl TypeVariableBuilder for Variable {
         self.into_type().constrain_plays(plays)
     }
 
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
+        self.into_type().constrain_regex(regex)
+    }
+
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
         self.into_type().constrain_relates(relates)
     }
