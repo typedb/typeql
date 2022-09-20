@@ -21,8 +21,8 @@
  */
 
 use crate::{
-    parse_query, rel, type_, typeql_match, var, IsKey, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeVariableBuilder,
+    parse_query, rel, type_, typeql_match, var, Query, RelationVariableBuilder,
+    ThingVariableBuilder, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -1144,7 +1144,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = typeql_match(var("x").owns(("name", IsKey::Yes))).unwrap().get(["x"]);
+    let expected = typeql_match(var("x").owns(("name", KEY))).unwrap().get(["x"]);
 
     assert_query_eq!(expected, parsed, query);
 }

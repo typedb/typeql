@@ -206,6 +206,16 @@ pub enum IsKey {
     Yes,
     No,
 }
+impl From<bool> for IsKey {
+    fn from(is_key: bool) -> Self {
+        match is_key {
+            true => IsKey::Yes,
+            false => IsKey::No,
+        }
+    }
+}
+
+pub const KEY: IsKey = IsKey::Yes;
 
 impl Display for IsKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
