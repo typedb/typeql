@@ -27,6 +27,7 @@ import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.pattern.variable.Variable;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;

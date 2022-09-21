@@ -21,42 +21,56 @@
 
 package com.vaticle.typeql.lang.query.builder;
 
+import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_SORTED;
 
 public interface Sortable<S, O, L> {
 
     default S sort(String var, String... vars) {
-        return sort(concat(of(var), of(vars)).map(UnboundVariable::named).collect(Collectors.toList()));
+        List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
+        pairs.add(new Pair<>(UnboundVariable.named(var), null));
+        for (String v : vars) pairs.add(new Pair<>(UnboundVariable.named(v), null));
+        return sort(pairs);
     }
 
-    default S sort(UnboundVariable var, UnboundVariable... vars) {
-        return sort(concat(of(var), of(vars)).collect(Collectors.toList()));
+    default S sort(Pair<String, String> varOrder1) {
+        return sort(list(parseVarOrder(varOrder1)));
     }
 
-    default S sort(List<String> vars, String order) {
-        TypeQLArg.Order o = TypeQLArg.Order.of(order);
-        if (o == null) throw TypeQLException.of(
-                INVALID_SORTING_ORDER.message(TypeQLArg.Order.ASC, TypeQLArg.Order.DESC)
+    default S sort(Pair<String, String> varOrder1, Pair<String, String> varOrder2) {
+        return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2)));
+    }
+
+    default S sort(Pair<String, String> varOrder1, Pair<String, String> varOrder2, Pair<String, String> varOrder3) {
+        return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2), parseVarOrder(varOrder3)));
+    }
+
+    default S sort(Pair<String, String> varOrder1, Pair<String, String> varOrder2, Pair<String, String> varOrder3, Pair<String, String> varOrder4) {
+        return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2), parseVarOrder(varOrder3), parseVarOrder(varOrder4)));
+    }
+
+    static Pair<UnboundVariable, TypeQLArg.Order> parseVarOrder(Pair<String, String> varOrder) {
+        return new Pair<>(
+                UnboundVariable.named(varOrder.first()),
+                varOrder.second() == null ? null : TypeQLArg.Order.of(varOrder.second())
         );
-        return sort(vars.stream().map(UnboundVariable::named).collect(Collectors.toList()), o);
     }
 
-    default S sort(List<UnboundVariable> vars) {
-        return sort(new Sorting(vars));
-    }
-
-    default S sort(List<UnboundVariable> vars, TypeQLArg.Order order) {
-        return sort(new Sorting(vars, order));
+    default S sort(List<Pair<UnboundVariable, TypeQLArg.Order>> varOrders) {
+        return sort(Sorting.create(varOrders));
     }
 
     S sort(Sorting sorting);
@@ -67,34 +81,41 @@ public interface Sortable<S, O, L> {
 
     class Sorting {
 
-        private final List<UnboundVariable> vars;
-        private final TypeQLArg.Order order;
         private final int hash;
+        private final List<UnboundVariable> variables;
+        private final Map<UnboundVariable, TypeQLArg.Order> orders;
 
-        public Sorting(List<UnboundVariable> vars) {
-            this(vars, null);
+        private Sorting(List<UnboundVariable> variables, Map<UnboundVariable, TypeQLArg.Order> orders) {
+            this.variables = variables;
+            this.orders = orders;
+            this.hash = Objects.hash(variables, orders);
         }
 
-        public Sorting(List<UnboundVariable> vars, TypeQLArg.Order order) {
-            this.vars = vars;
-            this.order = order;
-            this.hash = Objects.hash(vars(), order());
+        public static Sorting create(List<Pair<UnboundVariable, TypeQLArg.Order>> sorting) {
+            List<UnboundVariable> vars = new ArrayList<>();
+            Map<UnboundVariable, TypeQLArg.Order> orders = new HashMap<>();
+            sorting.forEach(pair -> {
+                vars.add(pair.first());
+                orders.put(pair.first(), pair.second());
+            });
+            return new Sorting(vars, orders);
         }
 
-        public List<UnboundVariable> vars() {
-            return vars;
+        public List<UnboundVariable> variables() {
+            return variables;
         }
 
-        public TypeQLArg.Order order() {
-            return order == null ? TypeQLArg.Order.ASC : order;
+        public TypeQLArg.Order getOrder(UnboundVariable var) {
+            if (variables.contains(var)) throw TypeQLException.of(VARIABLE_NOT_SORTED.message(var));
+            return orders.getOrDefault(var, TypeQLArg.Order.ASC);
         }
 
         @Override
         public String toString() {
-            StringBuilder sort = new StringBuilder();
-            sort.append(vars.stream().map(Objects::toString).collect(COMMA_SPACE.joiner()));
-            if (order != null) sort.append(SPACE).append(order);
-            return sort.toString();
+            return variables.stream().map(v -> {
+                if (orders.get(v) == null) return v.toString();
+                else return v.toString() + SPACE + orders.get(v);
+            }).collect(COMMA_SPACE.joiner());
         }
 
         @Override
@@ -102,8 +123,7 @@ public interface Sortable<S, O, L> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Sorting that = (Sorting) o;
-            return (this.vars().equals(that.vars()) &&
-                    this.order().equals(that.order()));
+            return this.variables.equals(that.variables) && this.orders.equals(that.orders);
         }
 
         @Override

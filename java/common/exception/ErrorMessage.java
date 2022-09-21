@@ -91,14 +91,16 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(33, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(34, "Invalid query containing redundant nested negations.");
+    public static final ErrorMessage VARIABLE_NOT_SORTED =
+            new ErrorMessage(35, "Variable '%s' does not exist in the sorting clause.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
-            new ErrorMessage(35, "Invalid sorting order. Valid options: '%s' or '%s'.");
+            new ErrorMessage(36, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
-            new ErrorMessage(36, "Aggregate COUNT does not accept a Variable.");
+            new ErrorMessage(37, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(37, "Illegal grammar!");
+            new ErrorMessage(38, "Illegal grammar!");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
-            new ErrorMessage(38, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
+            new ErrorMessage(39, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
 
 
     private static final String codePrefix = "TQL";

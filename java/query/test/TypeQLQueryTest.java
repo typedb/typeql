@@ -28,6 +28,7 @@ import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
+
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.lte;
 import static com.vaticle.typeql.lang.TypeQL.match;

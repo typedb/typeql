@@ -28,10 +28,12 @@ import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DEFINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.UNDEFINE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;

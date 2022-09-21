@@ -21,6 +21,10 @@
 
 package com.vaticle.typeql.lang.common;
 
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
+
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
+
 public class TypeQLArg {
 
     public enum QueryType {
@@ -96,7 +100,7 @@ public class TypeQLArg {
                     return c;
                 }
             }
-            return null;
+            throw TypeQLException.of(INVALID_SORTING_ORDER.message(value, ASC.order, DESC.order));
         }
     }
 }

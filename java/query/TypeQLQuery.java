@@ -24,7 +24,9 @@ package com.vaticle.typeql.lang.query;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
+
 import java.util.List;
+
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;

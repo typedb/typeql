@@ -34,15 +34,18 @@ import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import com.vaticle.typeql.lang.query.TypeQLUpdate;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
 import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.define;
 import static com.vaticle.typeql.lang.TypeQL.gte;
@@ -411,7 +414,7 @@ public class ParserTest {
                 "$x plays starring:actor;\n" +
                 "sort $x asc;";
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(var("x").plays("starring", "actor")).sort(list("x"), "asc");
+        TypeQLMatch expected = match(var("x").plays("starring", "actor")).sort(pair("x", "asc"));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -425,7 +428,7 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).sort(list("r"), "desc");
+        ).sort(pair("r", "desc"));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -449,11 +452,11 @@ public class ParserTest {
         final String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has rating $r;\n" +
-                "sort $r desc; offset 10; limit 10;";
+                "sort $r desc, $x asc; offset 10; limit 10;";
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).sort(list("r"), "desc").offset(10).limit(10);
+        ).sort(pair("r", "desc"), pair("x", "asc")).offset(10).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -558,9 +561,9 @@ public class ParserTest {
         TypeQLMatch expected = match(
                 var("y").isa(var("p")),
                 or(rel("y").rel("q"),
-                   and(var("x").isa(var("p")),
-                       or(var("x").has("first-name", var("y")),
-                          var("x").has("last-name", var("z"))))));
+                        and(var("x").isa(var("p")),
+                                or(var("x").has("first-name", var("y")),
+                                        var("x").has("last-name", var("z"))))));
         assertQueryEquals(expected, parsed, query);
     }
 

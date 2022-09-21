@@ -21,13 +21,15 @@
 
 package com.vaticle.typeql.lang.parser;
 
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
+
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_DETAILED;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_NO_DETAILS;
