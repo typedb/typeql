@@ -23,6 +23,8 @@ package com.vaticle.typeql.lang.query.builder;
 
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.exception.ErrorMessage;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.ArrayList;
@@ -34,13 +36,14 @@ import java.util.Objects;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_SORTED;
 
 public interface Sortable<S, O, L> {
 
     default S sort(String var, String... vars) {
         List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
-        pairs.add(new Pair<>(UnboundVariable.named(var), TypeQLArg.Order.ASC));
-        for (String v : vars) pairs.add(new Pair<>(UnboundVariable.named(v), TypeQLArg.Order.ASC));
+        pairs.add(new Pair<>(UnboundVariable.named(var), null));
+        for (String v : vars) pairs.add(new Pair<>(UnboundVariable.named(v), null));
         return sort(pairs);
     }
 
@@ -84,7 +87,7 @@ public interface Sortable<S, O, L> {
             Map<UnboundVariable, TypeQLArg.Order> orders = new HashMap<>();
             sorting.forEach(pair -> {
                 vars.add(pair.first());
-                orders.put(pair.first(), pair.second() == null ? TypeQLArg.Order.ASC : pair.second());
+                orders.put(pair.first(), pair.second());
             });
             return new Sorting(vars, orders);
         }
@@ -93,13 +96,17 @@ public interface Sortable<S, O, L> {
             return variables;
         }
 
-        public Map<UnboundVariable, TypeQLArg.Order> orders() {
-            return orders;
+        public TypeQLArg.Order getOrder(UnboundVariable var) {
+            if (variables.contains(var)) throw TypeQLException.of(VARIABLE_NOT_SORTED.message(var));
+            return orders.getOrDefault(var, TypeQLArg.Order.ASC);
         }
 
         @Override
         public String toString() {
-            return variables.stream().map(v -> v.toString() + SPACE + orders.get(v)).collect(COMMA_SPACE.joiner());
+            return variables.stream().map(v -> {
+                if (orders.get(v) == null) return v.toString();
+                else return v.toString() + SPACE + orders.get(v);
+            }).collect(COMMA_SPACE.joiner());
         }
 
         @Override

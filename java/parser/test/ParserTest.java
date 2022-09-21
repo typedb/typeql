@@ -414,7 +414,7 @@ public class ParserTest {
                 "$x plays starring:actor;\n" +
                 "sort $x asc;";
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(var("x").plays("starring", "actor")).sort("x", "asc");
+        TypeQLMatch expected = match(var("x").plays("starring", "actor")).sort(pair("x", "asc"));
 
         assertQueryEquals(expected, parsed, query);
     }

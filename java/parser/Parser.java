@@ -382,7 +382,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Pair<UnboundVariable, TypeQLArg.Order> visitVar_order(TypeQLParser.Var_orderContext ctx) {
-        return new Pair<>(getVar(ctx.VAR_()), ctx.ORDER_() == null ? TypeQLArg.Order.ASC : TypeQLArg.Order.of(ctx.ORDER_().getText()));
+        return new Pair<>(getVar(ctx.VAR_()), ctx.ORDER_() == null ? null : TypeQLArg.Order.of(ctx.ORDER_().getText()));
     }
 
 
