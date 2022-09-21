@@ -29,6 +29,7 @@ import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,17 +48,17 @@ public interface Sortable<S, O, L> {
         return sort(pairs);
     }
 
-    default S sort(Pair<String, String> varOrder, Pair<String, String>... varOrders) {
+    default S sort(Pair<String, String> varOrder) {
+        return sort(varOrder, Collections.emptyList());
+    }
+
+    default S sort(Pair<String, String> varOrder, List<Pair<String, String>> varOrders) {
         List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
         pairs.add(new Pair<>(UnboundVariable.named(varOrder.first()), TypeQLArg.Order.of(varOrder.second())));
         for (Pair<String, String> pair : varOrders) {
             pairs.add(new Pair<>(UnboundVariable.named(pair.first()), TypeQLArg.Order.of(pair.second())));
         }
         return sort(pairs);
-    }
-
-    default S sort(Pair<UnboundVariable, TypeQLArg.Order>... varOrders) {
-        return sort(Arrays.asList(varOrders));
     }
 
     default S sort(List<Pair<UnboundVariable, TypeQLArg.Order>> varOrders) {

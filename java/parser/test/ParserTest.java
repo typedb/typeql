@@ -428,7 +428,7 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).sort(pair("r", "desc")) ;
+        ).sort(pair("r", "desc"));
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -456,7 +456,7 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).sort(pair("r", "desc"), pair("$x", "asc")).offset(10).limit(10);
+        ).sort(pair("r", "desc"), list(pair("$x", "asc"))).offset(10).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
