@@ -452,11 +452,11 @@ public class ParserTest {
         final String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has rating $r;\n" +
-                "sort $r desc; offset 10; limit 10;";
+                "sort $r desc, $x asc; offset 10; limit 10;";
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 var("x").isa("movie").has("rating", var("r"))
-        ).sort(pair("r", "desc")).offset(10).limit(10);
+        ).sort(pair("r", "desc"), pair("$x", "asc")).offset(10).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
