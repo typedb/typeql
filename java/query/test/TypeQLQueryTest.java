@@ -60,7 +60,7 @@ public class TypeQLQueryTest {
                         )
                 ),
                 var("y").has("name", var("n"))
-        ).get("x", "y", "n").sort("n", "asc").offset(4).limit(8);
+        ).get("x", "y", "n").sort("n").offset(4).limit(8);
 
         assertEquivalent(query, query.toString());
     }
