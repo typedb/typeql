@@ -31,6 +31,7 @@ import com.vaticle.typeql.lang.pattern.variable.Reference;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.Variable;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
