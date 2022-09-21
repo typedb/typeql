@@ -152,16 +152,6 @@ public class ParserTest {
     }
 
     @Test
-    public void testRoleTypeScopedSpecifically() {
-        String query = "match\n" +
-                "$m relates spouse;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(var("m").relates("spouse"));
-
-        assertQueryEquals(expected, parsed, query);
-    }
-
-    @Test
     public void testRoleTypeNotScoped() {
         String query = "match\n" +
                 "marriage relates $s;";
@@ -282,14 +272,14 @@ public class ParserTest {
                 "not { $a is $b; };";
         TypeQLMatch parsed = TypeQL.parseQuery(query);
 
-        TypeQLMatch exepcted = match(
+        TypeQLMatch expected = match(
                 var("x").sub(var("z")), var("y").sub(var("z")),
                 var("a").isa(var("x")), var("b").isa(var("y")),
                 not(var("x").is("y")),
                 not(var("a").is("b"))
         );
 
-        assertQueryEquals(exepcted, parsed, query);
+        assertQueryEquals(expected, parsed, query);
     }
 
     @Test
@@ -1011,16 +1001,6 @@ public class ParserTest {
         TypeQLDefine parsed = TypeQL.parseQuery(query).asDefine();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
-    }
-
-    @Test
-    public void testQueryParserWithoutGraph() {
-        final String queryString = "match\n" +
-                "$x isa movie;\n" +
-                "get $x;";
-        TypeQLMatch query = parseQuery("match\n" +
-                                               "$x isa movie; get $x;").asMatch();
-        assertEquals(queryString, query.toString());
     }
 
     @Test
