@@ -23,18 +23,16 @@ package com.vaticle.typeql.lang.query.builder;
 
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_SORTED;
@@ -48,17 +46,27 @@ public interface Sortable<S, O, L> {
         return sort(pairs);
     }
 
-    default S sort(Pair<String, String> varOrder) {
-        return sort(varOrder, Collections.emptyList());
+    default S sort(Pair<String, String> varOrder1) {
+        return sort(list(parseVarOrder(varOrder1)));
     }
 
-    default S sort(Pair<String, String> varOrder, List<Pair<String, String>> varOrders) {
-        List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
-        pairs.add(new Pair<>(UnboundVariable.named(varOrder.first()), TypeQLArg.Order.of(varOrder.second())));
-        for (Pair<String, String> pair : varOrders) {
-            pairs.add(new Pair<>(UnboundVariable.named(pair.first()), TypeQLArg.Order.of(pair.second())));
-        }
-        return sort(pairs);
+    default S sort(Pair<String, String> varOrder1, Pair<String, String> varOrder2) {
+        return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2)));
+    }
+
+    default S sort(Pair<String, String> varOrder1, Pair<String, String> varOrder2, Pair<String, String> varOrder3) {
+        return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2), parseVarOrder(varOrder3)));
+    }
+
+    default S sort(Pair<String, String> varOrder1, Pair<String, String> varOrder2, Pair<String, String> varOrder3, Pair<String, String> varOrder4) {
+        return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2), parseVarOrder(varOrder3), parseVarOrder(varOrder4)));
+    }
+
+    static Pair<UnboundVariable, TypeQLArg.Order> parseVarOrder(Pair<String, String> varOrder) {
+        return new Pair<>(
+                UnboundVariable.named(varOrder.first()),
+                varOrder.second() == null ? null : TypeQLArg.Order.valueOf(varOrder.second())
+        );
     }
 
     default S sort(List<Pair<UnboundVariable, TypeQLArg.Order>> varOrders) {
