@@ -65,7 +65,7 @@ public interface Sortable<S, O, L> {
     static Pair<UnboundVariable, TypeQLArg.Order> parseVarOrder(Pair<String, String> varOrder) {
         return new Pair<>(
                 UnboundVariable.named(varOrder.first()),
-                varOrder.second() == null ? null : TypeQLArg.Order.valueOf(varOrder.second())
+                varOrder.second() == null ? null : TypeQLArg.Order.of(varOrder.second())
         );
     }
 
