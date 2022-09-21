@@ -26,11 +26,13 @@ import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.constraint.Constraint;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
 import com.vaticle.typeql.lang.pattern.variable.builder.TypeVariableBuilder;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;

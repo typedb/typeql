@@ -32,13 +32,15 @@ import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.builder.Aggregatable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
+
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
@@ -206,8 +208,8 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
 
     private void sortVarsAreInScope() {
         List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
-        if (modifiers.sorting != null && modifiers.sorting.vars().stream().anyMatch(v -> !sortableVars.contains(v))) {
-            throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.vars()));
+        if (modifiers.sorting != null && modifiers.sorting.variables().stream().anyMatch(v -> !sortableVars.contains(v))) {
+            throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.variables()));
         }
     }
 

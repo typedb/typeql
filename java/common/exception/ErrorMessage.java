@@ -92,7 +92,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(34, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
-            new ErrorMessage(35, "Invalid sorting order. Valid options: '%s' or '%s'.");
+            new ErrorMessage(35, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
             new ErrorMessage(36, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =

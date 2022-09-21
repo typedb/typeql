@@ -28,6 +28,7 @@ import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
+
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.lte;
 import static com.vaticle.typeql.lang.TypeQL.match;
@@ -59,7 +60,7 @@ public class TypeQLQueryTest {
                         )
                 ),
                 var("y").has("name", var("n"))
-        ).get("x", "y", "n").sort("n").offset(4).limit(8);
+        ).get("x", "y", "n").sort("n", "asc").offset(4).limit(8);
 
         assertEquivalent(query, query.toString());
     }

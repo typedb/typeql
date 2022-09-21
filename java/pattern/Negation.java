@@ -25,9 +25,11 @@ import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;

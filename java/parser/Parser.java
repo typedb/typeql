@@ -50,6 +50,18 @@ import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import com.vaticle.typeql.lang.query.TypeQLUpdate;
 import com.vaticle.typeql.lang.query.builder.Sortable;
+import org.antlr.v4.runtime.ANTLRErrorStrategy;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -61,17 +73,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
-import org.antlr.v4.runtime.ANTLRErrorStrategy;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DefaultErrorStrategy;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.TerminalNode;
+
 import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
@@ -374,10 +376,15 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Sortable.Sorting visitSort(TypeQLParser.SortContext ctx) {
-        List<UnboundVariable> vars = ctx.VAR_().stream().map(this::getVar).collect(toList());
-        return ctx.ORDER_() == null ? new Sortable.Sorting(vars) :
-                new Sortable.Sorting(vars, TypeQLArg.Order.of(ctx.ORDER_().getText()));
+        List<Pair<UnboundVariable, TypeQLArg.Order>> sorting = ctx.var_order().stream().map(this::visitVar_order).collect(toList());
+        return Sortable.Sorting.create(sorting);
     }
+
+    @Override
+    public Pair<UnboundVariable, TypeQLArg.Order> visitVar_order(TypeQLParser.Var_orderContext ctx) {
+        return new Pair<>(getVar(ctx.VAR_()), ctx.ORDER_() == null ? TypeQLArg.Order.ASC : TypeQLArg.Order.of(ctx.ORDER_().getText()));
+    }
+
 
     // QUERY PATTERNS ==========================================================
 

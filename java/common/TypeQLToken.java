@@ -22,8 +22,10 @@
 package com.vaticle.typeql.lang.common;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
+
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 

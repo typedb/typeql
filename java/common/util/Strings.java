@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Locale;
+
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.INDENTATION;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 
