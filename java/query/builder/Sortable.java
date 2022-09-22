@@ -106,7 +106,7 @@ public interface Sortable<S, O, L> {
         }
 
         public TypeQLArg.Order getOrder(UnboundVariable var) {
-            if (variables.contains(var)) throw TypeQLException.of(VARIABLE_NOT_SORTED.message(var));
+            if (!variables.contains(var)) throw TypeQLException.of(VARIABLE_NOT_SORTED.message(var));
             return orders.getOrDefault(var, TypeQLArg.Order.ASC);
         }
 
