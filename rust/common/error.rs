@@ -113,7 +113,7 @@ error_messages! {
    MATCH_HAS_UNBOUNDED_NESTED_PATTERN = 10: "The match query contains a nested pattern is not bounded: '{}'.",
    MISSING_MATCH_FILTER = 11: "The match query cannot be constructed with NULL filter variable collection.",
    EMPTY_MATCH_FILTER = 12: "The match query cannot be filtered with an empty list of variables.",
-   INVALID_IID_STRING = 13: "Invalid IID: '{}'. IIDs must follow the regular expression: '{}'.",
+   INVALID_IID_STRING = 13: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
    INVALID_ATTRIBUTE_TYPE_REGEX = 14: "Invalid regular expression '{}'.",
    ILLEGAL_FILTER_VARIABLE_REPEATING = 15: "The variable '{}' occurred more than once in match query filter.",
    VARIABLE_OUT_OF_SCOPE_MATCH = 16: "The variable '{}' is out of scope of the match query.",

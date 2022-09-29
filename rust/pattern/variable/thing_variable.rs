@@ -21,13 +21,14 @@
  */
 
 use crate::pattern::*;
-use crate::write_joined;
+use crate::{write_joined, ErrorMessage};
 use std::fmt;
 use std::fmt::{Debug, Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
     pub reference: Reference,
+    pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
     pub value: Option<ValueConstraint>,
@@ -44,7 +45,14 @@ impl ThingVariable {
     }
 
     pub fn new(reference: Reference) -> ThingVariable {
-        ThingVariable { reference, isa: None, has: Vec::new(), value: None, relation: None }
+        ThingVariable {
+            reference,
+            iid: None,
+            isa: None,
+            has: Vec::new(),
+            value: None,
+            relation: None,
+        }
     }
 }
 
@@ -52,6 +60,10 @@ impl ThingVariableBuilder for ThingVariable {
     fn constrain_has(mut self, has: HasConstraint) -> ThingVariable {
         self.has.push(has);
         self
+    }
+
+    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
+        ThingVariable { iid: Some(iid), ..self }
     }
 
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
@@ -94,6 +106,10 @@ impl Display for ThingVariable {
                 f.write_char(' ')?;
             }
             write!(f, "{}", relation)?;
+        }
+
+        if let Some(iid) = &self.iid {
+            write!(f, " {}", iid)?;
         }
 
         if let Some(isa) = &self.isa {

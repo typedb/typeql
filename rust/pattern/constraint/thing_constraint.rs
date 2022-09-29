@@ -20,12 +20,55 @@
  *
  */
 
-use crate::common::error::{ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION};
+use crate::common::error::{
+    ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
+};
 use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
 use std::fmt::{Display, Write};
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct IIDConstraint {
+    pub iid: String,
+}
+
+fn is_valid_iid(iid: &str) -> bool {
+    iid.starts_with("0x") && iid.chars().skip(2).all(|c| c.is_digit(16) && !c.is_uppercase())
+}
+
+impl IIDConstraint {
+    pub fn new(iid: String) -> Result<IIDConstraint, ErrorMessage> {
+        if is_valid_iid(&iid) {
+            Ok(IIDConstraint { iid })
+        } else {
+            Err(INVALID_IID_STRING.format(&[&iid]))
+        }
+    }
+}
+
+impl TryFrom<&str> for IIDConstraint {
+    type Error = ErrorMessage;
+
+    fn try_from(iid: &str) -> Result<Self, Self::Error> {
+        IIDConstraint::new(iid.to_string())
+    }
+}
+
+impl TryFrom<String> for IIDConstraint {
+    type Error = ErrorMessage;
+
+    fn try_from(iid: String) -> Result<Self, Self::Error> {
+        IIDConstraint::new(iid)
+    }
+}
+
+impl Display for IIDConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "iid {}", self.iid)
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {

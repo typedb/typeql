@@ -21,6 +21,7 @@
  */
 
 use crate::pattern::*;
+use crate::ErrorMessage;
 use std::fmt;
 use std::fmt::{Debug, Display};
 
@@ -62,6 +63,10 @@ impl UnboundVariable {
 impl ThingVariableBuilder for UnboundVariable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable {
         self.into_thing().constrain_has(has)
+    }
+
+    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
+        self.into_thing().constrain_iid(iid)
     }
 
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {

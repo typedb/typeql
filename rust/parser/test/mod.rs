@@ -1312,3 +1312,37 @@ fn when_value_equality_to_string_create_valid_query_string() {
 
     assert_eq!(expected, parsed);
 }
+
+#[test]
+fn test_iid_constraint() {
+    let iid = "0x0123456789abcdefdeadbeef";
+    let query = format!(
+        r#"match
+$x iid {};"#,
+        iid
+    );
+
+    let parsed = parse_query(&query);
+    let expected = typeql_match(var("x").iid(iid));
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn when_parsing_invalid_iid_throw() {
+    let iid = "invalid";
+    let query = format!(
+        r#"match
+$x iid {};"#,
+        iid
+    );
+
+    let parsed = parse_query(&query);
+    assert!(parsed.is_err());
+}
+
+#[test]
+fn when_building_invalid_iid_throw() {
+    let iid = "invalid";
+    let expected = typeql_match(var("x").iid(iid));
+    assert!(expected.is_err());
+}

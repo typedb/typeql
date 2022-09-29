@@ -395,6 +395,9 @@ fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<
 
 fn visit_variable_thing(ctx: Rc<Variable_thingContext>) -> ParserResult<ThingVariable> {
     let mut var_thing = get_var(ctx.VAR_().unwrap()).into_thing();
+    if let Some(iid) = ctx.IID_() {
+        var_thing = var_thing.iid(iid.get_text())?.into_thing();
+    }
     if let Some(isa) = ctx.ISA_() {
         var_thing = var_thing.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?)
     }

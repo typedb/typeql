@@ -26,6 +26,7 @@ use std::convert::Infallible;
 
 pub trait ThingVariableBuilder: Sized {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable;
+    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable;
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable;
     fn constrain_value(self, value: ValueConstraint) -> ThingVariable;
     fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable;
@@ -49,6 +50,13 @@ pub trait ThingVariableBuilder: Sized {
             .into_variable())
     }
 
+    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<Variable, ErrorMessage>
+    where
+        ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>,
+    {
+        Ok(self.constrain_iid(iid.try_into()?).into_variable())
+    }
+
     fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
         Ok(self.constrain_isa(isa.into()).into_variable())
     }
@@ -62,6 +70,13 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable {
         match self {
             Ok(var) => var.constrain_has(has),
+            Err(err) => panic!("{:?}", err),
+        }
+    }
+
+    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
+        match self {
+            Ok(var) => var.constrain_iid(iid),
             Err(err) => panic!("{:?}", err),
         }
     }
@@ -98,6 +113,13 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
         self?.has(type_name, value)
     }
 
+    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<Variable, ErrorMessage>
+    where
+        ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>,
+    {
+        self?.iid(iid)
+    }
+
     fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
         self?.isa(isa)
     }
@@ -110,6 +132,10 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
 impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, Infallible> {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable {
         self.unwrap().constrain_has(has)
+    }
+
+    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
+        self.unwrap().constrain_iid(iid)
     }
 
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
@@ -133,6 +159,13 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, Infallible> {
         ErrorMessage: From<<T as TryInto<Value>>::Error>,
     {
         self.unwrap().has(type_name, value)
+    }
+
+    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<Variable, ErrorMessage>
+    where
+        ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>,
+    {
+        self.unwrap().iid(iid)
     }
 
     fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
