@@ -64,7 +64,7 @@ impl<U: TypeConstrainable> TypeVariableBuilder for U {
     }
 
     fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_label(LabelConstraint { scoped_type: type_name.into() }).into_variable())
+        Ok(self.constrain_label(LabelConstraint { label: type_name.into() }).into_variable())
     }
 }
 

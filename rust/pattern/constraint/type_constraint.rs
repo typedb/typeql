@@ -61,12 +61,12 @@ impl Display for Label {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct LabelConstraint {
-    pub scoped_type: Label,
+    pub label: Label,
 }
 
 impl Display for LabelConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "type {}", self.scoped_type)
+        write!(f, "type {}", self.label)
     }
 }
 
@@ -157,7 +157,7 @@ impl PlaysConstraint {
         PlaysConstraint {
             relation_type: role_type.label.as_ref().map(|label| {
                 UnboundVariable::hidden()
-                    .type_(label.scoped_type.scope.as_ref().cloned().unwrap())
+                    .type_(label.label.scope.as_ref().cloned().unwrap())
                     .unwrap()
                     .into_type()
             }),

@@ -95,7 +95,7 @@ impl Display for TypeVariable {
                 write!(f, " {}", type_)?;
             }
         } else {
-            write!(f, "{}", self.label.as_ref().unwrap().scoped_type)?;
+            write!(f, "{}", self.label.as_ref().unwrap().label)?;
         }
         if let Some(sub) = &self.sub {
             write!(f, " {}", sub)?;

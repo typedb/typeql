@@ -140,7 +140,7 @@ impl Display for HasConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("has")?;
         if let Some(type_) = &self.type_ {
-            write!(f, " {}", &type_.label.as_ref().unwrap().scoped_type)?;
+            write!(f, " {}", &type_.label.as_ref().unwrap().label)?;
         }
 
         if self.attribute.reference.is_name() {
@@ -427,7 +427,7 @@ impl Display for RolePlayerConstraint {
             if role_type.reference.is_visible() {
                 write!(f, "{}", role_type.reference)?;
             } else {
-                write!(f, "{}", role_type.label.as_ref().unwrap().scoped_type)?;
+                write!(f, "{}", role_type.label.as_ref().unwrap().label)?;
             }
             f.write_str(": ")?;
         }
