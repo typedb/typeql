@@ -35,7 +35,7 @@ pub struct IIDConstraint {
 }
 
 fn is_valid_iid(iid: &str) -> bool {
-    iid.starts_with("0x") && iid.chars().skip(2).all(|c| c.is_digit(16) && !c.is_uppercase())
+    iid.starts_with("0x") && iid.chars().skip(2).all(|c| c.is_ascii_hexdigit() && !c.is_uppercase())
 }
 
 impl IIDConstraint {
