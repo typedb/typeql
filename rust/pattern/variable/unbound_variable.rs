@@ -21,7 +21,7 @@
  */
 
 use crate::pattern::*;
-use crate::ErrorMessage;
+
 use std::fmt;
 use std::fmt::{Debug, Display};
 
@@ -60,7 +60,7 @@ impl UnboundVariable {
     }
 }
 
-impl ThingVariableBuilder for UnboundVariable {
+impl ThingConstrainable for UnboundVariable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable {
         self.into_thing().constrain_has(has)
     }
@@ -82,13 +82,13 @@ impl ThingVariableBuilder for UnboundVariable {
     }
 }
 
-impl RelationVariableBuilder for UnboundVariable {
+impl RelationConstrainable for UnboundVariable {
     fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable {
         self.into_thing().constrain_role_player(constraint)
     }
 }
 
-impl TypeVariableBuilder for UnboundVariable {
+impl TypeConstrainable for UnboundVariable {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
         self.into_type().constrain_label(label)
     }

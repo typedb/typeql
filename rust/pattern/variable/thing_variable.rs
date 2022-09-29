@@ -21,7 +21,7 @@
  */
 
 use crate::pattern::*;
-use crate::{write_joined, ErrorMessage};
+use crate::write_joined;
 use std::fmt;
 use std::fmt::{Debug, Display, Write};
 
@@ -56,7 +56,7 @@ impl ThingVariable {
     }
 }
 
-impl ThingVariableBuilder for ThingVariable {
+impl ThingConstrainable for ThingVariable {
     fn constrain_has(mut self, has: HasConstraint) -> ThingVariable {
         self.has.push(has);
         self
@@ -79,7 +79,7 @@ impl ThingVariableBuilder for ThingVariable {
     }
 }
 
-impl RelationVariableBuilder for ThingVariable {
+impl RelationConstrainable for ThingVariable {
     fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> ThingVariable {
         match &mut self.relation {
             None => self.relation = Some(RelationConstraint::from(constraint)),

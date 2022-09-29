@@ -36,7 +36,7 @@ mod builder;
 pub use builder::*;
 
 use crate::pattern::*;
-use crate::ErrorMessage;
+
 use std::fmt;
 use std::fmt::Display;
 
@@ -89,7 +89,7 @@ impl From<TypeVariable> for Variable {
     }
 }
 
-impl ThingVariableBuilder for Variable {
+impl ThingConstrainable for Variable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable {
         self.into_thing().constrain_has(has)
     }
@@ -111,13 +111,13 @@ impl ThingVariableBuilder for Variable {
     }
 }
 
-impl RelationVariableBuilder for Variable {
+impl RelationConstrainable for Variable {
     fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable {
         self.into_thing().constrain_role_player(constraint)
     }
 }
 
-impl TypeVariableBuilder for Variable {
+impl TypeConstrainable for Variable {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
         self.into_type().constrain_label(label)
     }

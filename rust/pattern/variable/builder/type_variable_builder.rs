@@ -24,14 +24,25 @@ use crate::pattern::*;
 use crate::ErrorMessage;
 use std::convert::Infallible;
 
-pub trait TypeVariableBuilder: Sized {
+pub trait TypeConstrainable {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable;
     fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable;
     fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable;
     fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable;
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable;
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable;
+}
 
+pub trait TypeVariableBuilder: Sized {
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage>;
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage>;
+    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage>;
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage>;
+    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage>;
+    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage>;
+}
+
+impl<U: TypeConstrainable> TypeVariableBuilder for U {
     fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         Ok(self.constrain_owns(owns.into()).into_variable())
     }
@@ -58,48 +69,6 @@ pub trait TypeVariableBuilder: Sized {
 }
 
 impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
-    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
-        match self {
-            Ok(var) => var.constrain_label(label),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable {
-        match self {
-            Ok(var) => var.constrain_owns(owns),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
-        match self {
-            Ok(var) => var.constrain_plays(plays),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
-        match self {
-            Ok(var) => var.constrain_regex(regex),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
-        match self {
-            Ok(var) => var.constrain_relates(relates),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
-        match self {
-            Ok(var) => var.constrain_sub(sub),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
     fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         self?.owns(owns)
     }
@@ -126,30 +95,6 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
 }
 
 impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, Infallible> {
-    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
-        self.unwrap().constrain_label(label)
-    }
-
-    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable {
-        self.unwrap().constrain_owns(owns)
-    }
-
-    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
-        self.unwrap().constrain_plays(plays)
-    }
-
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
-        self.unwrap().constrain_regex(regex)
-    }
-
-    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
-        self.unwrap().constrain_relates(relates)
-    }
-
-    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
-        self.unwrap().constrain_sub(sub)
-    }
-
     fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().owns(owns)
     }

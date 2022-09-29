@@ -24,13 +24,33 @@ use crate::common::error::ErrorMessage;
 use crate::pattern::*;
 use std::convert::Infallible;
 
-pub trait ThingVariableBuilder: Sized {
+pub trait ThingConstrainable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable;
     fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable;
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable;
     fn constrain_value(self, value: ValueConstraint) -> ThingVariable;
     fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable;
+}
 
+pub trait ThingVariableBuilder {
+    fn has<T: TryInto<Value>>(
+        self,
+        type_name: impl Into<String>,
+        value: T,
+    ) -> Result<Variable, ErrorMessage>
+    where
+        ErrorMessage: From<<T as TryInto<Value>>::Error>;
+
+    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<Variable, ErrorMessage>
+    where
+        ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>;
+
+    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage>;
+
+    fn eq(self, value: impl Into<Value>) -> Result<Variable, ErrorMessage>;
+}
+
+impl<U: ThingConstrainable> ThingVariableBuilder for U {
     fn has<T: TryInto<Value>>(
         self,
         type_name: impl Into<String>,
@@ -67,41 +87,6 @@ pub trait ThingVariableBuilder: Sized {
 }
 
 impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
-    fn constrain_has(self, has: HasConstraint) -> ThingVariable {
-        match self {
-            Ok(var) => var.constrain_has(has),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
-        match self {
-            Ok(var) => var.constrain_iid(iid),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
-        match self {
-            Ok(var) => var.constrain_isa(isa),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
-        match self {
-            Ok(var) => var.constrain_value(value),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
-    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
-        match self {
-            Ok(var) => var.constrain_relation(relation),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
     fn has<T: TryInto<Value>>(
         self,
         type_name: impl Into<String>,
@@ -130,26 +115,6 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
 }
 
 impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, Infallible> {
-    fn constrain_has(self, has: HasConstraint) -> ThingVariable {
-        self.unwrap().constrain_has(has)
-    }
-
-    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
-        self.unwrap().constrain_iid(iid)
-    }
-
-    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
-        self.unwrap().constrain_isa(isa)
-    }
-
-    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
-        self.unwrap().constrain_value(value)
-    }
-
-    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
-        self.unwrap().constrain_relation(relation)
-    }
-
     fn has<T: TryInto<Value>>(
         self,
         type_name: impl Into<String>,
@@ -177,32 +142,27 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, Infallible> {
     }
 }
 
-pub trait RelationVariableBuilder: Sized {
+pub trait RelationConstrainable {
     fn constrain_role_player(self, role_player: RolePlayerConstraint) -> ThingVariable;
+}
 
+pub trait RelationVariableBuilder {
+    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage>;
+}
+
+impl<U: RelationConstrainable> RelationVariableBuilder for U {
     fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
         Ok(self.constrain_role_player(value.into()).into_variable())
     }
 }
 
 impl<U: RelationVariableBuilder> RelationVariableBuilder for Result<U, ErrorMessage> {
-    fn constrain_role_player(self, role_player: RolePlayerConstraint) -> ThingVariable {
-        match self {
-            Ok(var) => var.constrain_role_player(role_player),
-            Err(err) => panic!("{:?}", err),
-        }
-    }
-
     fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
         self?.rel(value)
     }
 }
 
 impl<U: RelationVariableBuilder> RelationVariableBuilder for Result<U, Infallible> {
-    fn constrain_role_player(self, role_player: RolePlayerConstraint) -> ThingVariable {
-        self.unwrap().constrain_role_player(role_player)
-    }
-
     fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
         self.unwrap().rel(value)
     }

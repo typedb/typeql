@@ -58,7 +58,7 @@ impl TypeVariable {
     }
 }
 
-impl TypeVariableBuilder for TypeVariable {
+impl TypeConstrainable for TypeVariable {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
         TypeVariable { label: Some(label), ..self }
     }
