@@ -40,17 +40,15 @@ impl Query {
 }
 
 impl MatchQueryBuilder for Query {
-    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Query {
+    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
         use Query::*;
         match self {
-            Match(query) => Match(
-                query.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect()),
-            ),
+            Match(query) => Match(query.get(vars)),
             _ => todo!(),
         }
     }
 
-    fn sort(self, sorting: impl Into<Sorting>) -> Query {
+    fn sort(self, sorting: impl Into<Sorting>) -> Self {
         use Query::*;
         match self {
             Match(query) => Match(query.sort(sorting)),
@@ -58,7 +56,7 @@ impl MatchQueryBuilder for Query {
         }
     }
 
-    fn limit(self, limit: usize) -> Query {
+    fn limit(self, limit: usize) -> Self {
         use Query::*;
         match self {
             Match(query) => Match(query.limit(limit)),
@@ -66,7 +64,7 @@ impl MatchQueryBuilder for Query {
         }
     }
 
-    fn offset(self, offset: usize) -> Query {
+    fn offset(self, offset: usize) -> Self {
         use Query::*;
         match self {
             Match(query) => Match(query.offset(offset)),
@@ -92,7 +90,7 @@ pub trait MatchQueryBuilder {
     fn offset(self, offset: usize) -> Self;
 }
 
-impl MatchQueryBuilder for Result<Query, ErrorMessage> {
+impl<U: MatchQueryBuilder> MatchQueryBuilder for Result<U, ErrorMessage> {
     fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
         Ok(self?.get(vars))
     }

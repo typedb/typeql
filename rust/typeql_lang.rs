@@ -51,11 +51,11 @@ pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query.trim_end())
 }
 
-pub fn typeql_match<T: TryInto<Conjunction>>(pattern: T) -> Result<Query, ErrorMessage>
+pub fn typeql_match<T: TryInto<Conjunction>>(pattern: T) -> Result<TypeQLMatch, ErrorMessage>
 where
     ErrorMessage: From<<T as TryInto<Conjunction>>::Error>,
 {
-    Ok(Query::Match(TypeQLMatch::new(pattern.try_into()?)))
+    Ok(TypeQLMatch::new(pattern.try_into()?))
 }
 
 pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {

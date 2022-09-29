@@ -44,16 +44,22 @@ impl TypeQLMatch {
     pub fn filter(self, vars: Vec<UnboundVariable>) -> TypeQLMatch {
         TypeQLMatch { modifiers: self.modifiers.filter(vars), ..self }
     }
+}
 
-    pub fn sort(self, sorting: impl Into<Sorting>) -> TypeQLMatch {
+impl MatchQueryBuilder for TypeQLMatch {
+    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
+        self.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect())
+    }
+
+    fn sort(self, sorting: impl Into<Sorting>) -> TypeQLMatch {
         TypeQLMatch { modifiers: self.modifiers.sort(sorting), ..self }
     }
 
-    pub fn limit(self, limit: usize) -> TypeQLMatch {
+    fn limit(self, limit: usize) -> TypeQLMatch {
         TypeQLMatch { modifiers: self.modifiers.limit(limit), ..self }
     }
 
-    pub fn offset(self, offset: usize) -> TypeQLMatch {
+    fn offset(self, offset: usize) -> TypeQLMatch {
         TypeQLMatch { modifiers: self.modifiers.offset(offset), ..self }
     }
 }

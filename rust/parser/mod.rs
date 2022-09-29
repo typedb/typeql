@@ -201,7 +201,7 @@ fn visit_query_delete_or_update(_ctx: Rc<Query_delete_or_updateContext>) -> Pars
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
-    let mut match_query = typeql_match(visit_patterns(ctx.patterns().unwrap())?)?.into_match();
+    let mut match_query = typeql_match(visit_patterns(ctx.patterns().unwrap())?)?;
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
             match_query = match_query.filter(visit_filter(filter)?);
