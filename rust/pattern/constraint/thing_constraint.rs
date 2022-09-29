@@ -239,10 +239,23 @@ pub enum Value {
 impl Eq for Value {} // can't derive, because f32 does not implement Eq
 
 impl From<i64> for Value {
-    fn from(int: i64) -> Value {
-        Value::Long(int)
+    fn from(long: i64) -> Value {
+        Value::Long(long)
     }
 }
+
+impl From<f64> for Value {
+    fn from(double: f64) -> Value {
+        Value::Double(double)
+    }
+}
+
+impl From<bool> for Value {
+    fn from(bool: bool) -> Value {
+        Value::Boolean(bool)
+    }
+}
+
 impl From<&str> for Value {
     fn from(string: &str) -> Value {
         Value::String(String::from(string))
