@@ -22,7 +22,6 @@
 
 use crate::common::error::ErrorMessage;
 use crate::pattern::*;
-use std::convert::Infallible;
 
 pub trait ThingConstrainable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable;

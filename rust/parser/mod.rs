@@ -240,14 +240,16 @@ fn visit_filter(ctx: Rc<FilterContext>) -> ParserResult<Vec<UnboundVariable>> {
 }
 
 fn visit_sort(ctx: Rc<SortContext>) -> ParserResult<Sorting> {
-    Ok(Sorting::new(
-        (0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect(),
-        &if let Some(order) = ctx.ORDER_() {
-            order.get_text()
-        } else {
-            String::from("") // FIXME
-        },
-    ))
+    println!("{:?}", ctx);
+    todo!()
+    // Ok(Sorting::new(
+    //     (0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect(),
+    //     &if let Some(order) = ctx.ORDER_() {
+    //         order.get_text()
+    //     } else {
+    //         String::from("") // FIXME
+    //     },
+    // ))
 }
 
 fn visit_offset(_ctx: Rc<OffsetContext>) -> ParserResult<()> {

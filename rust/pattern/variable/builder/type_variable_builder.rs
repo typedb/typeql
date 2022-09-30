@@ -22,7 +22,6 @@
 
 use crate::pattern::*;
 use crate::ErrorMessage;
-use std::convert::Infallible;
 
 pub trait TypeConstrainable {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable;
