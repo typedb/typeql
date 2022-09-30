@@ -83,7 +83,7 @@ checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
-        "*/*",
+        "**/*",
     ]),
     exclude = ["LICENSE", "README.md"],
     license_type = "apache-header",
