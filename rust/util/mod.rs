@@ -20,4 +20,25 @@
  *
  */
 
-extern crate typeql_grammar;
+#[macro_export]
+macro_rules! enum_getter {
+    ($fn_name:ident, $enum_value:ident, $classname:ty) => {
+        pub fn $fn_name(self) -> $classname {
+            match self {
+                Self::$enum_value(x) => x,
+                _ => panic!(""),
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! write_joined {
+    ($f:ident, $iterable:expr, $joiner:tt) => {{
+        let mut iter = $iterable.iter();
+        iter.next().map_or(Ok(()), |head| {
+            write!($f, "{}", head)
+                .and_then(|()| iter.map(|x| write!($f, "{}{}", $joiner, x)).collect())
+        })
+    }};
+}

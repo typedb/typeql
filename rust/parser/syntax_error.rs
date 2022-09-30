@@ -19,3 +19,43 @@
  * under the License.
  *
  */
+
+use std::fmt::{Display, Formatter};
+
+use crate::common::error::{SYNTAX_ERROR_DETAILED, SYNTAX_ERROR_NO_DETAILS};
+
+pub struct SyntaxError {
+    pub query_line: Option<String>,
+    pub line: usize,
+    pub char_position_in_line: usize,
+    pub message: String,
+}
+
+impl Display for SyntaxError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if let Some(query_line) = &self.query_line {
+            // Error message appearance:
+            //
+            // syntax error at line 1:
+            // match $
+            //       ^
+            // blah blah antlr blah
+            f.write_str(
+                &SYNTAX_ERROR_DETAILED
+                    .format(&[
+                        self.line.to_string().as_str(),
+                        query_line,
+                        &(" ".repeat(self.char_position_in_line) + "^"),
+                        &self.message,
+                    ])
+                    .message,
+            )
+        } else {
+            f.write_str(
+                &SYNTAX_ERROR_NO_DETAILS
+                    .format(&[self.line.to_string().as_str(), &self.message])
+                    .message,
+            )
+        }
+    }
+}
