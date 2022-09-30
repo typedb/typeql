@@ -93,29 +93,3 @@ impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
         self?.type_(type_name)
     }
 }
-
-impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, Infallible> {
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
-        self.unwrap().owns(owns)
-    }
-
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
-        self.unwrap().plays(plays)
-    }
-
-    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
-        self.unwrap().regex(regex)
-    }
-
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
-        self.unwrap().relates(relates)
-    }
-
-    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
-        self.unwrap().sub(sub)
-    }
-
-    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage> {
-        self.unwrap().type_(type_name)
-    }
-}
