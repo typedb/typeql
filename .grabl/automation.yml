@@ -56,6 +56,10 @@ build:
         bazel test //java/pattern/... --test_output=errors
         bazel test //java/query/... --test_output=errors
         bazel test //java/test/... --test_output=errors
+    test-rust:
+      image: vaticle-ubuntu-21.04
+      command: |
+        bazel test //rust/... --test_output=errors
     #    TODO: enable this
     #    deploy-crate-snapshot:
     #      image: vaticle-ubuntu-21.04
