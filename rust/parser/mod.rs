@@ -207,7 +207,7 @@ fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
             match_query = match_query.filter(visit_filter(filter)?);
         }
         if let Some(sort) = modifiers.sort() {
-            match_query = match_query.sort(visit_sort(sort)?);
+            match_query = match_query.sort(visit_sort(sort));
         }
         if let Some(limit) = modifiers.limit() {
             match_query = match_query.limit(get_long(limit.LONG_().unwrap())? as usize);
@@ -239,17 +239,19 @@ fn visit_filter(ctx: Rc<FilterContext>) -> ParserResult<Vec<UnboundVariable>> {
     Ok((0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect())
 }
 
-fn visit_sort(ctx: Rc<SortContext>) -> ParserResult<Sorting> {
-    println!("{:?}", ctx);
-    todo!()
-    // Ok(Sorting::new(
-    //     (0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect(),
-    //     &if let Some(order) = ctx.ORDER_() {
-    //         order.get_text()
-    //     } else {
-    //         String::from("") // FIXME
-    //     },
-    // ))
+fn visit_sort(ctx: Rc<SortContext>) -> Sorting {
+    Sorting::new((0..).map_while(|i| ctx.var_order(i)).map(visit_var_order).collect())
+}
+
+fn visit_var_order(ctx: Rc<Var_orderContext>) -> OrderedVariable {
+    OrderedVariable {
+        var: get_var(ctx.VAR_().unwrap()),
+        order: if let Some(order) = ctx.ORDER_() {
+            Some(order.get_text())
+        } else {
+            None
+        },
+    }
 }
 
 fn visit_offset(_ctx: Rc<OffsetContext>) -> ParserResult<()> {

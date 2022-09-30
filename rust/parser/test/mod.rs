@@ -403,7 +403,7 @@ $x plays starring:actor;
 sort $x asc;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").plays(("starring", "actor"))).sort((["x"], "asc"));
+    let expected = typeql_match(var("x").plays(("starring", "actor"))).sort([("x", "asc")]);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -417,7 +417,7 @@ sort $r desc;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
     let expected =
-        typeql_match(var("x").isa("movie").has("rating", var("r"))).sort((["r"], "desc"));
+        typeql_match(var("x").isa("movie").has("rating", var("r"))).sort([("r", "desc")]);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -444,7 +444,7 @@ sort $r desc; offset 10; limit 10;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match(var("x").isa("movie").has("rating", var("r")))
-        .sort((["r"], "desc"))
+        .sort([("r", "desc")])
         .offset(10)
         .limit(10);
 

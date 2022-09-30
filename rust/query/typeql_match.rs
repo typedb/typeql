@@ -65,7 +65,7 @@ impl MatchQueryBuilder for TypeQLMatch {
 }
 
 impl Display for TypeQLMatch {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str("match")?;
 
         for pattern in &self.conjunction.patterns {
@@ -114,7 +114,7 @@ impl Modifiers {
 }
 
 impl Display for Modifiers {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut trail = "";
         if !self.filter.is_empty() {
             f.write_str("get ")?;
@@ -137,16 +137,16 @@ impl Display for Modifiers {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
-pub struct Sorting {
-    vars: Vec<UnboundVariable>,
-    order: Option<String>, // FIXME token
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct OrderedVariable {
+    pub var: UnboundVariable,
+    pub order: Option<String>, // FIXME
 }
 
-impl Sorting {
-    pub fn new(vars: Vec<UnboundVariable>, order: &str) -> Self {
-        Sorting {
-            vars,
+impl OrderedVariable {
+    fn new(var: UnboundVariable, order: &str) -> OrderedVariable {
+        OrderedVariable {
+            var,
             order: match order {
                 "" => None,
                 order => Some(order.to_string()),
@@ -155,30 +155,47 @@ impl Sorting {
     }
 }
 
-impl From<&str> for Sorting {
-    fn from(var_name: &str) -> Self {
-        Self::new(vec![var(var_name)], "")
+impl Display for OrderedVariable {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.var)?;
+        if let Some(order) = &self.order {
+            write!(f, " {}", order)?;
+        }
+        Ok(())
     }
 }
 
-impl<const N: usize> From<([&str; N], &str)> for Sorting {
-    fn from((vars, order): ([&str; N], &str)) -> Self {
-        Self::new(vars.map(var).to_vec(), order)
+#[derive(Debug, Eq, PartialEq)]
+pub struct Sorting {
+    vars: Vec<OrderedVariable>,
+}
+
+impl Sorting {
+    pub fn new(vars: Vec<OrderedVariable>) -> Self {
+        Sorting { vars }
+    }
+}
+
+impl From<&str> for Sorting {
+    fn from(var_name: &str) -> Self {
+        Self::from([(var_name, "")])
+    }
+}
+
+impl<const N: usize> From<([(&str, &str); N])> for Sorting {
+    fn from(ordered_vars: [(&str, &str); N]) -> Self {
+        Self::new(ordered_vars.map(|(name, order)| OrderedVariable::new(var(name), order)).to_vec())
     }
 }
 
 impl From<Vec<UnboundVariable>> for Sorting {
     fn from(vars: Vec<UnboundVariable>) -> Self {
-        Self::new(vars, "asc")
+        Self::new(vars.into_iter().map(|name| OrderedVariable::new(var(name), "")).collect())
     }
 }
 
 impl Display for Sorting {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write_joined!(f, self.vars, ", ")?;
-        if let Some(order) = &self.order {
-            write!(f, " {}", order)?;
-        }
-        Ok(())
+        write_joined!(f, self.vars, ", ")
     }
 }
