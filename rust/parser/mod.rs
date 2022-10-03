@@ -250,11 +250,7 @@ fn visit_sort(ctx: Rc<SortContext>) -> Sorting {
 fn visit_var_order(ctx: Rc<Var_orderContext>) -> OrderedVariable {
     OrderedVariable {
         var: get_var(ctx.VAR_().unwrap()),
-        order: if let Some(order) = ctx.ORDER_() {
-            Some(order.get_text())
-        } else {
-            None
-        },
+        order: ctx.ORDER_().map(|order| order.get_text()),
     }
 }
 
