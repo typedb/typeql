@@ -32,18 +32,18 @@ eof_schema_rule       :   schema_rule      EOF ;
 // TYPEQL QUERY LANGUAGE ========================================================
 
 query                 :   query_define      |   query_undefine
-                      |   query_insert      |   query_delete_or_update
+                      |   query_update      |   query_insert      |   query_delete
                       |   query_match       |   query_match_aggregate
                       |   query_match_group |   query_match_group_agg           ;
 
 query_define          :   DEFINE      definables  ;
 query_undefine        :   UNDEFINE    definables  ;
 
+query_update          :   MATCH       patterns      DELETE  variable_things
+                                                    INSERT  variable_things     ;
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
-query_delete_or_update:   MATCH       patterns      DELETE  variable_things
-                                                  ( INSERT  variable_things )?  ;
-// TODO: The above feels like a hack. Find a clean way to split delete and update
+query_delete          :   MATCH       patterns      DELETE  variable_things;
 
 query_match           :   MATCH       patterns            ( modifiers )         ;
 
@@ -118,8 +118,6 @@ type_constraint       :   ABSTRACT
                       |   PLAYS       type_scoped  ( AS type )?
                       |   VALUE       value_type
                       |   REGEX       STRING_
-                      |   WHEN    '{' patterns        '}'
-                      |   THEN    '{' variable_things '}'
                       |   TYPE        label_any
                       ;
 
@@ -179,8 +177,6 @@ type                  :   label                         | VAR_          ;       
 label_any             :   label_scoped  | label         ;
 label_scoped          :   LABEL_SCOPED_ ;
 label                 :   LABEL_        | schema_native | type_native   | unreserved    ;
-labels                :   label         | label_array   ;
-label_array           :   '[' label ( ',' label )* ']'  ;
 
 // LITERAL INPUT VALUES =======================================================
 
