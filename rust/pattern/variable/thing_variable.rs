@@ -23,7 +23,6 @@
 use crate::pattern::*;
 use crate::write_joined;
 use std::fmt;
-use std::fmt::{Debug, Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
@@ -89,7 +88,7 @@ impl RelationConstrainable for ThingVariable {
     }
 }
 
-impl Display for ThingVariable {
+impl fmt::Display for ThingVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;
@@ -97,13 +96,13 @@ impl Display for ThingVariable {
 
         if let Some(value) = &self.value {
             if self.reference.is_visible() {
-                f.write_char(' ')?;
+                f.write_str(" ")?;
             }
             write!(f, "{}", value)?;
         }
         if let Some(relation) = &self.relation {
             if self.reference.is_visible() {
-                f.write_char(' ')?;
+                f.write_str(" ")?;
             }
             write!(f, "{}", relation)?;
         }
@@ -120,7 +119,7 @@ impl Display for ThingVariable {
             if self.isa.is_some() {
                 f.write_str(",\n    ")?;
             } else {
-                f.write_char(' ')?;
+                f.write_str(" ")?;
             }
             write_joined!(f, self.has, ",\n    ")?;
         }

@@ -20,7 +20,7 @@
  *
  */
 
-use std::fmt::{Display, Formatter};
+use std::fmt;
 
 use crate::common::error::{SYNTAX_ERROR_DETAILED, SYNTAX_ERROR_NO_DETAILS};
 
@@ -31,8 +31,8 @@ pub struct SyntaxError {
     pub message: String,
 }
 
-impl Display for SyntaxError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for SyntaxError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(query_line) = &self.query_line {
             // Error message appearance:
             //

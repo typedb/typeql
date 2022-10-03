@@ -21,7 +21,6 @@
  */
 
 use std::fmt;
-use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Visibility {
@@ -45,7 +44,7 @@ impl Reference {
     }
 }
 
-impl Display for Reference {
+impl fmt::Display for Reference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Reference::*;
         write!(

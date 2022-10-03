@@ -27,7 +27,6 @@ use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
-use std::fmt::{Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {
@@ -64,7 +63,7 @@ impl TryFrom<String> for IIDConstraint {
     }
 }
 
-impl Display for IIDConstraint {
+impl fmt::Display for IIDConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "iid {}", self.iid)
     }
@@ -97,7 +96,7 @@ impl From<TypeVariable> for IsaConstraint {
     }
 }
 
-impl Display for IsaConstraint {
+impl fmt::Display for IsaConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "isa {}", self.type_)
     }
@@ -136,7 +135,7 @@ impl From<(String, ThingVariable)> for HasConstraint {
     }
 }
 
-impl Display for HasConstraint {
+impl fmt::Display for HasConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("has")?;
         if let Some(type_) = &self.type_ {
@@ -166,7 +165,7 @@ impl ValueConstraint {
     }
 }
 
-impl Display for ValueConstraint {
+impl fmt::Display for ValueConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.predicate == Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
             write!(f, "{}", self.value)
@@ -212,7 +211,7 @@ impl From<String> for Predicate {
     }
 }
 
-impl Display for Predicate {
+impl fmt::Display for Predicate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Predicate::*;
         write!(
@@ -298,7 +297,7 @@ impl From<Variable> for Value {
     }
 }
 
-impl Display for Value {
+impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
@@ -340,11 +339,11 @@ impl From<RolePlayerConstraint> for RelationConstraint {
     }
 }
 
-impl Display for RelationConstraint {
+impl fmt::Display for RelationConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_char('(')?;
+        f.write_str("(")?;
         write_joined!(f, self.role_players, ", ")?;
-        f.write_char(')')
+        f.write_str(")")
     }
 }
 
@@ -421,7 +420,7 @@ impl From<(TypeVariable, UnboundVariable)> for RolePlayerConstraint {
     }
 }
 
-impl Display for RolePlayerConstraint {
+impl fmt::Display for RolePlayerConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(role_type) = &self.role_type {
             if role_type.reference.is_visible() {

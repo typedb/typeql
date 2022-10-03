@@ -38,7 +38,6 @@ pub use builder::*;
 use crate::pattern::*;
 
 use std::fmt;
-use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
@@ -143,7 +142,7 @@ impl TypeConstrainable for Variable {
     }
 }
 
-impl Display for Variable {
+impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Variable::*;
         match self {

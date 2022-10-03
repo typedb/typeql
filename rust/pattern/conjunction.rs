@@ -23,7 +23,6 @@
 use crate::pattern::Pattern;
 use crate::ErrorMessage;
 use std::fmt;
-use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -76,7 +75,7 @@ where
     }
 }
 
-impl Display for Conjunction {
+impl fmt::Display for Conjunction {
     fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         todo!()
     }

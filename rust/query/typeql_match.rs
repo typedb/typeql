@@ -21,7 +21,6 @@
  */
 
 use std::fmt;
-use std::fmt::Display;
 
 use crate::query::*;
 use crate::write_joined;
@@ -64,8 +63,8 @@ impl MatchQueryBuilder for TypeQLMatch {
     }
 }
 
-impl Display for TypeQLMatch {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl fmt::Display for TypeQLMatch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("match")?;
 
         for pattern in &self.conjunction.patterns {
@@ -113,8 +112,8 @@ impl Modifiers {
     }
 }
 
-impl Display for Modifiers {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl fmt::Display for Modifiers {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut trail = "";
         if !self.filter.is_empty() {
             f.write_str("get ")?;
@@ -155,8 +154,8 @@ impl OrderedVariable {
     }
 }
 
-impl Display for OrderedVariable {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl fmt::Display for OrderedVariable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.var)?;
         if let Some(order) = &self.order {
             write!(f, " {}", order)?;
@@ -194,8 +193,8 @@ impl From<Vec<UnboundVariable>> for Sorting {
     }
 }
 
-impl Display for Sorting {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl fmt::Display for Sorting {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write_joined!(f, self.vars, ", ")
     }
 }

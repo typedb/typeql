@@ -34,7 +34,6 @@ mod test;
 
 use crate::enum_getter;
 use std::fmt;
-use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
@@ -61,7 +60,7 @@ where
     }
 }
 
-impl Display for Pattern {
+impl fmt::Display for Pattern {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Pattern::*;
         match self {

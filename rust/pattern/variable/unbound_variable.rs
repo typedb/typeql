@@ -23,7 +23,6 @@
 use crate::pattern::*;
 
 use std::fmt;
-use std::fmt::{Debug, Display};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundVariable {
@@ -132,7 +131,7 @@ impl From<String> for UnboundVariable {
     }
 }
 
-impl Display for UnboundVariable {
+impl fmt::Display for UnboundVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)
     }
