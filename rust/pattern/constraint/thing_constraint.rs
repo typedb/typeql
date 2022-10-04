@@ -342,7 +342,7 @@ impl From<RolePlayerConstraint> for RelationConstraint {
 impl fmt::Display for RelationConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("(")?;
-        write_joined!(f, self.role_players, ", ")?;
+        write_joined!(f, ", ", self.role_players)?;
         f.write_str(")")
     }
 }

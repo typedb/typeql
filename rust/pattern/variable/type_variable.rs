@@ -104,15 +104,15 @@ impl fmt::Display for TypeVariable {
         }
         if !self.relates.is_empty() {
             f.write_str(" ")?;
-            write_joined!(f, self.relates, ",\n    ")?;
+            write_joined!(f, ",\n    ", self.relates)?;
         }
         if !self.plays.is_empty() {
             f.write_str(" ")?;
-            write_joined!(f, self.plays, ",\n    ")?;
+            write_joined!(f, ",\n    ", self.plays)?;
         }
         if !self.owns.is_empty() {
             f.write_str(" ")?;
-            write_joined!(f, self.owns, ",\n    ")?;
+            write_joined!(f, ",\n    ", self.owns)?;
         }
         Ok(())
     }

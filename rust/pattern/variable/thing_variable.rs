@@ -121,7 +121,7 @@ impl fmt::Display for ThingVariable {
             } else {
                 f.write_str(" ")?;
             }
-            write_joined!(f, self.has, ",\n    ")?;
+            write_joined!(f, ",\n    ", self.has)?;
         }
         Ok(())
     }
