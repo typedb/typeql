@@ -312,10 +312,8 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public TypeQLUpdate visitQuery_update(TypeQLParser.Query_updateContext ctx) {
-        assert ctx.variable_things().size() == 2;
-        return new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()))
-                .delete(visitVariable_things(ctx.variable_things(0)))
-                .insert(visitVariable_things(ctx.variable_things(1)));
+        return visitQuery_delete(ctx.query_delete())
+                .insert(visitVariable_things(ctx.variable_things()));
     }
 
     @Override

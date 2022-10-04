@@ -32,18 +32,17 @@ eof_schema_rule       :   schema_rule      EOF ;
 // TYPEQL QUERY LANGUAGE ========================================================
 
 query                 :   query_define      |   query_undefine
-                      |   query_update      |   query_insert      |   query_delete
+                      |   query_insert      |   query_update      |   query_delete
                       |   query_match       |   query_match_aggregate
                       |   query_match_group |   query_match_group_agg           ;
 
 query_define          :   DEFINE      definables  ;
 query_undefine        :   UNDEFINE    definables  ;
 
-query_update          :   MATCH       patterns      DELETE  variable_things
-                                                    INSERT  variable_things     ;
 query_insert          :   MATCH       patterns      INSERT  variable_things
                       |                             INSERT  variable_things     ;
-query_delete          :   MATCH       patterns      DELETE  variable_things;
+query_update          :   query_delete              INSERT  variable_things     ;
+query_delete          :   MATCH       patterns      DELETE  variable_things     ;
 
 query_match           :   MATCH       patterns            ( modifiers )         ;
 
