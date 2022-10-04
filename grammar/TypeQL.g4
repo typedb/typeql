@@ -31,10 +31,11 @@ eof_schema_rule       :   schema_rule      EOF ;
 
 // TYPEQL QUERY LANGUAGE ========================================================
 
-query                 :   query_define      |   query_undefine
-                      |   query_insert      |   query_update      |   query_delete
-                      |   query_match       |   query_match_aggregate
-                      |   query_match_group |   query_match_group_agg           ;
+query                 :   query_define           |   query_undefine
+                      |   query_insert           |   query_update
+                      |   query_delete           |   query_match
+                      |   query_match_aggregate  |   query_match_group
+                      |   query_match_group_agg                                 ;
 
 query_define          :   DEFINE      definables  ;
 query_undefine        :   UNDEFINE    definables  ;
