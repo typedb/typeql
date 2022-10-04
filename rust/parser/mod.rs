@@ -196,7 +196,11 @@ fn visit_query_insert(_ctx: Rc<Query_insertContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_query_delete_or_update(_ctx: Rc<Query_delete_or_updateContext>) -> ParserResult<()> {
+fn visit_query_delete(_ctx: Rc<Query_deleteContext>) -> ParserResult<()> {
+    todo!()
+}
+
+fn visit_query_update(_ctx: Rc<Query_updateContext>) -> ParserResult<()> {
     todo!()
 }
 
@@ -562,14 +566,6 @@ fn visit_label_scoped(ctx: Rc<Label_scopedContext>) -> ParserResult<Label> {
 }
 
 fn visit_label(_ctx: Rc<LabelContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_labels(_ctx: Rc<LabelsContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_label_array(_ctx: Rc<Label_arrayContext>) -> ParserResult<()> {
     todo!()
 }
 

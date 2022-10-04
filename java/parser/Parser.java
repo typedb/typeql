@@ -249,8 +249,10 @@ public class Parser extends TypeQLBaseVisitor {
         } else if (ctx.query_insert() != null) {
             return visitQuery_insert(ctx.query_insert());
 
-        } else if (ctx.query_delete_or_update() != null) {
-            return visitQuery_delete_or_update(ctx.query_delete_or_update()).apply(q -> q, q -> q);
+        } else if (ctx.query_delete() != null) {
+            return visitQuery_delete(ctx.query_delete());
+        } else if (ctx.query_update() != null) {
+            return visitQuery_update(ctx.query_update());
         } else if (ctx.query_match() != null) {
             return visitQuery_match(ctx.query_match());
 
@@ -303,15 +305,15 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public Either<TypeQLDelete, TypeQLUpdate> visitQuery_delete_or_update(TypeQLParser.Query_delete_or_updateContext ctx) {
-        TypeQLDelete delete = new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()))
-                .delete(visitVariable_things(ctx.variable_things(0)));
-        if (ctx.INSERT() == null) {
-            return Either.first(delete);
-        } else {
-            assert ctx.variable_things().size() == 2;
-            return Either.second(delete.insert(visitVariable_things(ctx.variable_things(1))));
-        }
+    public TypeQLDelete visitQuery_delete(TypeQLParser.Query_deleteContext ctx) {
+        return new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()))
+                .delete(visitVariable_things(ctx.variable_things()));
+    }
+
+    @Override
+    public TypeQLUpdate visitQuery_update(TypeQLParser.Query_updateContext ctx) {
+        return visitQuery_delete(ctx.query_delete())
+                .insert(visitVariable_things(ctx.variable_things()));
     }
 
     @Override
@@ -668,14 +670,6 @@ public class Parser extends TypeQLBaseVisitor {
     public Pair<String, String> visitLabel_scoped(TypeQLParser.Label_scopedContext ctx) {
         String[] scopedLabel = ctx.getText().split(":");
         return pair(scopedLabel[0], scopedLabel[1]);
-    }
-
-    @Override
-    public List<String> visitLabels(TypeQLParser.LabelsContext ctx) {
-        List<TypeQLParser.LabelContext> labelsList = new ArrayList<>();
-        if (ctx.label() != null) labelsList.add(ctx.label());
-        else if (ctx.label_array() != null) labelsList.addAll(ctx.label_array().label());
-        return labelsList.stream().map(RuleContext::getText).collect(toList());
     }
 
     // ATTRIBUTE OPERATION CONSTRUCTS ==========================================
