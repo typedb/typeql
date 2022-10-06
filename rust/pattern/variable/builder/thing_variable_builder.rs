@@ -21,6 +21,7 @@
  */
 
 use crate::common::error::ErrorMessage;
+use crate::common::token::Predicate;
 use crate::pattern::*;
 
 pub trait ThingConstrainable {

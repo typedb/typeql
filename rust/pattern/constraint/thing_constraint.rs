@@ -27,6 +27,9 @@ use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
+use crate::common::token::Constraint::*;
+use crate::common::token::Predicate;
+use crate::common::token::Type::Relation;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {
@@ -65,7 +68,7 @@ impl TryFrom<String> for IIDConstraint {
 
 impl fmt::Display for IIDConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "iid {}", self.iid)
+        write!(f, "{} {}", Iid, self.iid)
     }
 }
 
@@ -98,7 +101,7 @@ impl From<TypeVariable> for IsaConstraint {
 
 impl fmt::Display for IsaConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "isa {}", self.type_)
+        write!(f, "{} {}", Isa, self.type_)
     }
 }
 
@@ -137,7 +140,7 @@ impl From<(String, ThingVariable)> for HasConstraint {
 
 impl fmt::Display for HasConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("has")?;
+        write!(f, "{}", Has)?;
         if let Some(type_) = &self.type_ {
             write!(f, " {}", &type_.label.as_ref().unwrap().label)?;
         }
@@ -172,57 +175,6 @@ impl fmt::Display for ValueConstraint {
         } else {
             write!(f, "{} {}", self.predicate, self.value)
         }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Predicate {
-    // equality
-    Eq,
-    Neq,
-    Gt,
-    Gte,
-    Lt,
-    Lte,
-    // substring
-    Contains,
-    Like,
-}
-
-impl Predicate {
-    pub fn is_equality(&self) -> bool {
-        use Predicate::*;
-        matches!(self, Eq | Neq | Gt | Gte | Lt | Lte)
-    }
-
-    pub fn is_substring(&self) -> bool {
-        use Predicate::*;
-        matches!(self, Contains | Like)
-    }
-}
-
-impl From<String> for Predicate {
-    fn from(string: String) -> Self {
-        use Predicate::*;
-        match string.as_str() {
-            "=" => Eq,
-            _ => todo!(),
-        }
-    }
-}
-
-impl fmt::Display for Predicate {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Predicate::*;
-        write!(
-            f,
-            "{}",
-            match self {
-                Eq => "=",
-                Neq => "!=",
-                _ => todo!(),
-            }
-        )
     }
 }
 
@@ -325,7 +277,7 @@ pub struct RelationConstraint {
 
 impl RelationConstraint {
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
-        RelationConstraint { role_players, scope: String::from("relation") }
+        RelationConstraint { role_players, scope: Relation.to_string() }
     }
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {

@@ -34,6 +34,7 @@ use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
 use typeql_grammar::typeqlrustparser::*;
+use crate::common::token::Predicate;
 
 use crate::pattern::*;
 use crate::query::*;

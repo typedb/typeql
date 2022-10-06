@@ -21,6 +21,7 @@
  */
 
 use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
+use crate::common::token::Constraint::*;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -50,9 +51,7 @@ impl From<(String, String)> for Label {
 impl fmt::Display for Label {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(scope) = &self.scope {
-            if scope != "relation" {
-                write!(f, "{}:", scope)?;
-            }
+            write!(f, "{}:", scope)?;
         }
         write!(f, "{}", self.name)
     }
@@ -65,7 +64,7 @@ pub struct LabelConstraint {
 
 impl fmt::Display for LabelConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "type {}", self.label)
+        write!(f, "{} {}", Type, self.label)
     }
 }
 
@@ -95,7 +94,7 @@ impl From<TypeVariable> for SubConstraint {
 
 impl fmt::Display for SubConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "sub {}", self.type_)
+        write!(f, "{} {}", Sub, self.type_)
     }
 }
 
@@ -140,7 +139,7 @@ impl From<TypeVariable> for RelatesConstraint {
 
 impl fmt::Display for RelatesConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "relates {}", self.role_type)
+        write!(f, "{} {}", Relates, self.role_type)
     }
 }
 
@@ -201,7 +200,7 @@ impl From<TypeVariable> for PlaysConstraint {
 
 impl fmt::Display for PlaysConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "plays {}", self.role_type)
+        write!(f, "{} {}", Plays, self.role_type)
     }
 }
 
@@ -225,7 +224,7 @@ pub const KEY: IsKey = IsKey::Yes;
 impl fmt::Display for IsKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if *self == IsKey::Yes {
-            f.write_str(" @key")?;
+            write!(f, " {}", IsKey)?;
         }
         Ok(())
     }
@@ -289,7 +288,7 @@ impl From<(TypeVariable, IsKey)> for OwnsConstraint {
 
 impl fmt::Display for OwnsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "owns {}{}", self.attribute_type, self.is_key)
+        write!(f, "{} {}{}", Owns, self.attribute_type, self.is_key)
     }
 }
 
@@ -316,6 +315,6 @@ fn escape_regex(regex: &str) -> String {
 
 impl fmt::Display for RegexConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, r#"regex "{}""#, escape_regex(&self.regex))
+        write!(f, r#"{} "{}""#, Regex, escape_regex(&self.regex))
     }
 }

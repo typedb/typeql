@@ -21,6 +21,8 @@
  */
 
 use std::fmt;
+use crate::common::token::Command::Match;
+use crate::common::token::Filter::*;
 
 use crate::query::*;
 use crate::write_joined;
@@ -65,7 +67,7 @@ impl MatchQueryBuilder for TypeQLMatch {
 
 impl fmt::Display for TypeQLMatch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("match")?;
+        write!(f, "{}", Match)?;
 
         for pattern in &self.conjunction.patterns {
             write!(f, "\n{};", pattern)?;
@@ -126,7 +128,7 @@ pub struct Filter {
 
 impl fmt::Display for Filter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("get ")?;
+        write!(f, "{} ", Get)?;
         write_joined!(f, ", ", self.vars)
     }
 }
@@ -190,7 +192,7 @@ impl From<Vec<UnboundVariable>> for Sorting {
 
 impl fmt::Display for Sorting {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("sort ")?;
+        write!(f, "{} ", Sort)?;
         write_joined!(f, ", ", self.vars)
     }
 }
@@ -202,7 +204,7 @@ pub struct Limit {
 
 impl fmt::Display for Limit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "limit {}", self.limit)
+        write!(f, "{} {}", Limit, self.limit)
     }
 }
 
@@ -213,6 +215,6 @@ pub struct Offset {
 
 impl fmt::Display for Offset {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "offset {}", self.offset)
+        write!(f, "{} {}", Offset, self.offset)
     }
 }
