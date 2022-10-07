@@ -20,9 +20,9 @@
  *
  */
 
-use std::fmt;
 use crate::common::token::Command::Match;
 use crate::common::token::Filter::*;
+use std::fmt;
 
 use crate::query::*;
 use crate::write_joined;

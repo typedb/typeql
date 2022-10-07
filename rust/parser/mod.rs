@@ -33,12 +33,11 @@ use chrono::{NaiveDate, NaiveDateTime, Timelike};
 use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
-use typeql_grammar::typeqlrustparser::*;
 use crate::common::token::Predicate;
+use typeql_grammar::typeqlrustparser::*;
 
 use crate::pattern::*;
 use crate::query::*;
-use crate::typeql_match;
 
 #[derive(Debug)]
 pub struct Definable;
@@ -206,7 +205,8 @@ fn visit_query_update(_ctx: Rc<Query_updateContext>) -> ParserResult<()> {
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
-    let mut match_query = typeql_match(visit_patterns(ctx.patterns().unwrap())?)?;
+    let mut match_query =
+        TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?));
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
             match_query = match_query.filter(visit_filter(filter)?);

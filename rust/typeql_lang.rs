@@ -22,8 +22,6 @@
 
 #![allow(dead_code)]
 
-extern crate core;
-
 use std::cell::RefCell;
 use std::convert::Into;
 use std::rc::Rc;
@@ -51,11 +49,15 @@ pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query.trim_end())
 }
 
-pub fn typeql_match<T: TryInto<Conjunction>>(pattern: T) -> Result<TypeQLMatch, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Conjunction>>::Error>,
-{
-    Ok(TypeQLMatch::new(pattern.try_into()?))
+#[macro_export]
+macro_rules! typeql_match {
+    ($($pattern:expr),* $(,)?) => {{
+        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
+        match patterns {
+            Ok(patterns) => Ok(TypeQLMatch::new(Conjunction::from(patterns))),
+            Err(err) => Err(err),
+        }
+    }}
 }
 
 pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {

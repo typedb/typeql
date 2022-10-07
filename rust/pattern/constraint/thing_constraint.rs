@@ -23,13 +23,13 @@
 use crate::common::error::{
     ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
 };
+use crate::common::token::Constraint::*;
+use crate::common::token::Predicate;
+use crate::common::token::Type::Relation;
 use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
-use crate::common::token::Constraint::*;
-use crate::common::token::Predicate;
-use crate::common::token::Type::Relation;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {

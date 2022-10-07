@@ -20,8 +20,8 @@
  *
  */
 
-use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
 use crate::common::token::Constraint::*;
+use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
