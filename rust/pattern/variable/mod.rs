@@ -23,6 +23,9 @@
 mod reference;
 pub use reference::*;
 
+mod concept_variable;
+pub use concept_variable::*;
+
 mod thing_variable;
 pub use thing_variable::*;
 
@@ -41,6 +44,7 @@ use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
+    Concept(ConceptVariable),
     Thing(ThingVariable),
     Type(TypeVariable),
     Unbound(UnboundVariable),
@@ -49,6 +53,15 @@ pub enum Variable {
 impl Variable {
     pub fn into_pattern(self) -> Pattern {
         Pattern::Variable(self)
+    }
+
+    pub fn into_concept(self) -> ConceptVariable {
+        use Variable::*;
+        match self {
+            Concept(var) => var,
+            Unbound(var) => var.into_concept(),
+            _ => panic!(""),
+        }
     }
 
     pub fn into_type(self) -> TypeVariable {
@@ -76,6 +89,12 @@ impl From<UnboundVariable> for Variable {
     }
 }
 
+impl From<ConceptVariable> for Variable {
+    fn from(var: ConceptVariable) -> Self {
+        Variable::Concept(var)
+    }
+}
+
 impl From<ThingVariable> for Variable {
     fn from(var: ThingVariable) -> Self {
         Variable::Thing(var)
@@ -85,6 +104,12 @@ impl From<ThingVariable> for Variable {
 impl From<TypeVariable> for Variable {
     fn from(var: TypeVariable) -> Self {
         Variable::Type(var)
+    }
+}
+
+impl ConceptConstrainable for Variable {
+    fn constrain_is(self, is: IsConstraint) -> ConceptVariable {
+        self.into_concept().constrain_is(is)
     }
 }
 
@@ -147,6 +172,7 @@ impl fmt::Display for Variable {
         use Variable::*;
         match self {
             Unbound(unbound) => write!(f, "{}", unbound),
+            Concept(concept) => write!(f, "{}", concept),
             Thing(thing) => write!(f, "{}", thing),
             Type(type_) => write!(f, "{}", type_),
         }

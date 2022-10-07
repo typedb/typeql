@@ -20,6 +20,9 @@
  *
  */
 
+mod concept_variable_builder;
+pub use concept_variable_builder::*;
+
 mod thing_variable_builder;
 pub use thing_variable_builder::*;
 

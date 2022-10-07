@@ -21,9 +21,9 @@
  */
 
 use crate::{
-    parse_query, rel, type_, typeql_match, var, Conjunction, ErrorMessage, MatchQueryBuilder,
-    Pattern, Query, RelationVariableBuilder, ThingVariableBuilder, TypeQLMatch,
-    TypeVariableBuilder, KEY,
+    not, parse_query, rel, type_, typeql_match, var, ConceptVariableBuilder, Conjunction,
+    ErrorMessage, MatchQueryBuilder, Query, RelationVariableBuilder, ThingVariableBuilder,
+    TypeQLMatch, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -197,6 +197,7 @@ $z 18 isa age;"#;
     ]);
     assert_query_eq!(expected, parsed, query);
 }
+*/
 
 #[test]
 fn test_concept_variable() {
@@ -208,16 +209,17 @@ $b isa $y;
 not { $x is $y; };
 not { $a is $b; };"#;
 
-    let expected = typeql_match!([
+    let expected = typeql_match!(
         var("x").sub(var("z")),
         var("y").sub(var("z")),
-        var("a").isa(var("x")).sub("z"),
+        var("a").isa(var("x")),
         var("b").isa(var("y")),
-    ]);
+        not(var("x").is(var("y"))),
+        not(var("a").is(var("b"))),
+    );
     let parsed = parse_query(query).map(Query::into_match);
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn test_value_equals_variable_query() {

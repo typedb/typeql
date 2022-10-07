@@ -33,6 +33,10 @@ impl Conjunction {
     pub fn new(patterns: &[Pattern]) -> Conjunction {
         Conjunction { patterns: patterns.to_vec() }
     }
+
+    pub fn into_pattern(self) -> Pattern {
+        Pattern::Conjunction(self)
+    }
 }
 
 impl<T: Into<Pattern>> From<T> for Conjunction {

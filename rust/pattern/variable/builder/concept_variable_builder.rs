@@ -20,11 +20,25 @@
  *
  */
 
-mod concept_constraint;
-pub use concept_constraint::*;
+use crate::pattern::*;
+use crate::ErrorMessage;
 
-mod type_constraint;
-pub use type_constraint::*;
+pub trait ConceptConstrainable {
+    fn constrain_is(self, is: IsConstraint) -> ConceptVariable;
+}
 
-mod thing_constraint;
-pub use thing_constraint::*;
+pub trait ConceptVariableBuilder: Sized {
+    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage>;
+}
+
+impl<U: ConceptConstrainable> ConceptVariableBuilder for U {
+    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage> {
+        Ok(self.constrain_is(is.into()))
+    }
+}
+
+impl<U: ConceptVariableBuilder> ConceptVariableBuilder for Result<U, ErrorMessage> {
+    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage> {
+        self?.is(is)
+    }
+}

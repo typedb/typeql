@@ -20,57 +20,49 @@
  *
  */
 
-mod conjunction;
-pub use conjunction::*;
-
-mod negation;
-pub use negation::*;
-
-mod variable;
-pub use variable::*;
-
-mod constraint;
-pub use constraint::*;
-
-#[cfg(test)]
-mod test;
-
-use crate::enum_getter;
-use std::fmt;
+use crate::common::token::Operator::Not;
+use crate::{ErrorMessage, Pattern, Variable};
+use core::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Pattern {
-    Conjunction(Conjunction),
-    Disjunction(()),
-    Negation(Negation),
-    Variable(Variable),
+pub struct Negation {
+    pub pattern: Box<Pattern>,
 }
 
-impl Pattern {
-    enum_getter!(into_variable, Variable, Variable);
-
-    pub fn into_type_variable(self) -> TypeVariable {
-        self.into_variable().into_type()
+impl Negation {
+    pub fn into_pattern(self) -> Pattern {
+        self.into()
     }
 }
 
-impl<T> From<T> for Pattern
-where
-    Variable: From<T>,
-{
+impl Into<Pattern> for Negation {
+    fn into(self) -> Pattern {
+        Pattern::Negation(self)
+    }
+}
+
+impl From<Pattern> for Negation {
+    fn from(pattern: Pattern) -> Self {
+        Negation { pattern: Box::new(pattern) }
+    }
+}
+
+impl<T: Into<Variable>> From<T> for Negation {
     fn from(variable: T) -> Self {
-        Pattern::Variable(Variable::from(variable))
+        Negation { pattern: Box::new(variable.into().into_pattern()) }
     }
 }
 
-impl fmt::Display for Pattern {
+impl<T: Into<Variable>> TryFrom<Result<T, ErrorMessage>> for Negation {
+    type Error = ErrorMessage;
+
+    fn try_from(variable: Result<T, ErrorMessage>) -> Result<Self, Self::Error> {
+        Ok(Negation { pattern: Box::new(variable?.into().into_pattern()) })
+    }
+}
+
+impl fmt::Display for Negation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Pattern::*;
-        match self {
-            Conjunction(conjunction) => write!(f, "{}", conjunction),
-            Disjunction(()) => todo!(),
-            Negation(negation) => write!(f, "{}", negation),
-            Variable(variable) => write!(f, "{}", variable),
-        }
+        write!(f, "{} {{ {}; }}", Not, self.pattern)
     }
 }

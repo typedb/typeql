@@ -72,6 +72,13 @@ pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> Result<Variable, ErrorMes
     UnboundVariable::hidden().rel(value)
 }
 
+pub fn not<T: TryInto<Negation>>(pattern: T) -> Result<Negation, ErrorMessage>
+where
+    ErrorMessage: From<<T as TryInto<Negation>>::Error>,
+{
+    Ok(pattern.try_into()?)
+}
+
 pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
     let lexer = TypeQLRustLexer::new(InputStream::new(query_string));
     let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));

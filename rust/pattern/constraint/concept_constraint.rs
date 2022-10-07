@@ -20,57 +20,41 @@
  *
  */
 
-mod conjunction;
-pub use conjunction::*;
-
-mod negation;
-pub use negation::*;
-
-mod variable;
-pub use variable::*;
-
-mod constraint;
-pub use constraint::*;
-
-#[cfg(test)]
-mod test;
-
-use crate::enum_getter;
+use crate::common::token::Constraint::Is;
+use crate::pattern::*;
+use crate::var;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Pattern {
-    Conjunction(Conjunction),
-    Disjunction(()),
-    Negation(Negation),
-    Variable(Variable),
+pub struct IsConstraint {
+    variable: Box<ConceptVariable>,
 }
 
-impl Pattern {
-    enum_getter!(into_variable, Variable, Variable);
-
-    pub fn into_type_variable(self) -> TypeVariable {
-        self.into_variable().into_type()
+impl From<&str> for IsConstraint {
+    fn from(string: &str) -> IsConstraint {
+        Self::from(var(string))
+    }
+}
+impl From<String> for IsConstraint {
+    fn from(string: String) -> IsConstraint {
+        Self::from(var(string))
     }
 }
 
-impl<T> From<T> for Pattern
-where
-    Variable: From<T>,
-{
-    fn from(variable: T) -> Self {
-        Pattern::Variable(Variable::from(variable))
+impl From<UnboundVariable> for IsConstraint {
+    fn from(var: UnboundVariable) -> IsConstraint {
+        Self::from(var.into_concept())
     }
 }
 
-impl fmt::Display for Pattern {
+impl From<ConceptVariable> for IsConstraint {
+    fn from(var: ConceptVariable) -> IsConstraint {
+        Self { variable: Box::new(var) }
+    }
+}
+
+impl fmt::Display for IsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Pattern::*;
-        match self {
-            Conjunction(conjunction) => write!(f, "{}", conjunction),
-            Disjunction(()) => todo!(),
-            Negation(negation) => write!(f, "{}", negation),
-            Variable(variable) => write!(f, "{}", variable),
-        }
+        write!(f, "{} {}", Is, self.variable)
     }
 }

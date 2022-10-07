@@ -38,6 +38,10 @@ impl UnboundVariable {
         Variable::Unbound(self)
     }
 
+    pub fn into_concept(self) -> ConceptVariable {
+        ConceptVariable::new(self.reference)
+    }
+
     pub fn into_thing(self) -> ThingVariable {
         ThingVariable::new(self.reference)
     }
@@ -56,6 +60,12 @@ impl UnboundVariable {
 
     pub fn hidden() -> UnboundVariable {
         UnboundVariable { reference: Reference::Anonymous(Visibility::Invisible) }
+    }
+}
+
+impl ConceptConstrainable for UnboundVariable {
+    fn constrain_is(self, is: IsConstraint) -> ConceptVariable {
+        self.into_concept().constrain_is(is)
     }
 }
 
