@@ -23,6 +23,7 @@
 use crate::common::token::Constraint::*;
 use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
+use crate::common::string::escape_regex;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {
@@ -306,10 +307,6 @@ impl From<String> for RegexConstraint {
     fn from(regex: String) -> Self {
         RegexConstraint { regex }
     }
-}
-
-fn escape_regex(regex: &str) -> String {
-    regex.replace('/', r#"\\/"#)
 }
 
 impl fmt::Display for RegexConstraint {

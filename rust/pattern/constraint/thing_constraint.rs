@@ -30,6 +30,7 @@ use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
+use crate::common::string::escape_regex;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {
@@ -170,7 +171,10 @@ impl ValueConstraint {
 
 impl fmt::Display for ValueConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.predicate == Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
+        if self.predicate == Predicate::Like {
+            assert!(matches!(self.value, Value::String(_)));
+            write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
+        } else if self.predicate == Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)

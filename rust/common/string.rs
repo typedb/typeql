@@ -20,6 +20,18 @@
  *
  */
 
-pub mod error;
-pub mod string;
-pub mod token;
+pub(crate) fn quote_string(string: String) -> String {
+    format!("\"{}\"", string)
+}
+
+pub(crate) fn unquote_string(quoted_string: String) -> String {
+    String::from(&quoted_string[1..quoted_string.len() - 1])
+}
+
+pub(crate) fn escape_regex(regex: &str) -> String {
+    regex.replace('/', r#"\/"#)
+}
+
+pub(crate) fn unescape_regex(regex: String) -> String {
+    regex.replace(r#"\/"#, "/")
+}

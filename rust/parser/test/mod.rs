@@ -1275,39 +1275,41 @@ $x like "\d";"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn regex_predicate_parses_quotes_correctly() {
-    let query = "match\n$x like '\\\"';";
+    let query = r#"match
+$x like "\"";"#;
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(var("x").like("\\\""));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn regex_predicate_parses_backslashes_correctly() {
-    let query = "match\n$x like '\\\\';";
+    let query = r#"match
+$x like "\\";"#;
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(var("x").like("\\\\"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn regex_predicate_parses_newline_correctly() {
-    let query = "match\n$x like '\\n';";
+    let query = r#"match
+$x like "\n";"#;
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(var("x").like("\\n"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn regex_predicate_parses_forward_slashes_correctly() {
-    let query = "match\n$x like '\\/';";
+    let query = r#"match
+$x like "\/";"#;
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(var("x").like("/"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
- */
 
 #[test]
 fn when_value_equality_to_string_create_valid_query_string() {

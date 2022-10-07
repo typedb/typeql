@@ -34,6 +34,7 @@ use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
 use crate::common::token::Predicate;
+use crate::common::string::*;
 use typeql_grammar::typeqlrustparser::*;
 
 use crate::pattern::*;
@@ -51,16 +52,8 @@ enum Type {
     Variable(TypeVariable),
 }
 
-fn unquote_string(quoted_string: String) -> String {
-    String::from(&quoted_string[1..quoted_string.len() - 1])
-}
-
 fn get_string(string: Rc<TerminalNode>) -> String {
     unquote_string(string.get_text())
-}
-
-fn unescape_regex(regex: String) -> String {
-    regex.replace(r#"\\/"#, "/")
 }
 
 fn get_regex(string: Rc<TerminalNode>) -> String {
