@@ -34,7 +34,7 @@ macro_rules! enum_getter {
 
 #[macro_export]
 macro_rules! write_joined {
-    ($f:ident, $joiner:tt, $($iterable:expr),* $(,)*) => {{
+    ($f:ident, $joiner:expr, $($iterable:expr),* $(,)*) => {{
         let mut result: std::fmt::Result = Ok(());
         let mut _is_first = true;
         $(

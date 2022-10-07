@@ -28,6 +28,10 @@ pub(crate) fn unquote_string(quoted_string: String) -> String {
     String::from(&quoted_string[1..quoted_string.len() - 1])
 }
 
+pub(crate) fn indent(multiline_string: String) -> String {
+    format!("    {}", multiline_string.replace('\n', "\n    "))
+}
+
 pub(crate) fn escape_regex(regex: &str) -> String {
     regex.replace('/', r#"\/"#)
 }

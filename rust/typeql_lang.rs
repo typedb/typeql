@@ -60,6 +60,28 @@ macro_rules! typeql_match {
     }}
 }
 
+#[macro_export]
+macro_rules! and {
+    ($($pattern:expr),* $(,)?) => {{
+        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
+        match patterns {
+            Ok(patterns) => Ok(Conjunction::from(patterns)),
+            Err(err) => Err(err),
+        }
+    }}
+}
+
+#[macro_export]
+macro_rules! or {
+    ($($pattern:expr),* $(,)?) => {{
+        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
+        match patterns {
+            Ok(patterns) => Ok(Disjunction::from(patterns)),
+            Err(err) => Err(err),
+        }
+    }}
+}
+
 pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
     var.into()
 }

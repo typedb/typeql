@@ -23,6 +23,9 @@
 mod conjunction;
 pub use conjunction::*;
 
+mod disjunction;
+pub use disjunction::*;
+
 mod negation;
 pub use negation::*;
 
@@ -41,7 +44,7 @@ use std::fmt;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
     Conjunction(Conjunction),
-    Disjunction(()),
+    Disjunction(Disjunction),
     Negation(Negation),
     Variable(Variable),
 }
@@ -68,7 +71,7 @@ impl fmt::Display for Pattern {
         use Pattern::*;
         match self {
             Conjunction(conjunction) => write!(f, "{}", conjunction),
-            Disjunction(()) => todo!(),
+            Disjunction(disjunction) => write!(f, "{}", disjunction),
             Negation(negation) => write!(f, "{}", negation),
             Variable(variable) => write!(f, "{}", variable),
         }

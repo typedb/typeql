@@ -20,10 +20,10 @@
  *
  */
 
+use crate::common::string::escape_regex;
 use crate::common::token::Constraint::*;
 use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
-use crate::common::string::escape_regex;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {
@@ -76,9 +76,7 @@ pub struct SubConstraint {
 
 impl<T: Into<Label>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
-        SubConstraint {
-            type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap()),
-        }
+        SubConstraint { type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap()) }
     }
 }
 
@@ -179,10 +177,7 @@ impl From<(String, String)> for PlaysConstraint {
 
 impl From<Label> for PlaysConstraint {
     fn from(scoped_type: Label) -> Self {
-        PlaysConstraint::new(
-            UnboundVariable::hidden().type_(scoped_type).unwrap(),
-            None,
-        )
+        PlaysConstraint::new(UnboundVariable::hidden().type_(scoped_type).unwrap(), None)
     }
 }
 
@@ -267,10 +262,7 @@ impl From<(String, IsKey)> for OwnsConstraint {
 
 impl From<(Label, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (Label, IsKey)) -> Self {
-        OwnsConstraint::from((
-            UnboundVariable::hidden().type_(attribute_type).unwrap(),
-            is_key,
-        ))
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).unwrap(), is_key))
     }
 }
 

@@ -20,6 +20,7 @@
  *
  */
 
+use crate::common::string::indent;
 use crate::pattern::Pattern;
 use crate::ErrorMessage;
 use std::fmt;
@@ -80,7 +81,11 @@ where
 }
 
 impl fmt::Display for Conjunction {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("{\n")?;
+        f.write_str(
+            &self.patterns.iter().map(|p| indent(p.to_string()) + ";\n").collect::<String>(),
+        )?;
+        f.write_str("}")
     }
 }

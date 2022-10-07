@@ -21,9 +21,9 @@
  */
 
 use crate::{
-    not, parse_query, rel, type_, typeql_match, var, ConceptVariableBuilder, Conjunction,
-    ErrorMessage, MatchQueryBuilder, Query, RelationVariableBuilder, ThingVariableBuilder,
-    TypeQLMatch, TypeVariableBuilder, KEY,
+    and, not, or, parse_query, rel, type_, typeql_match, var, ConceptVariableBuilder, Conjunction,
+    Disjunction, ErrorMessage, MatchQueryBuilder, Query, RelationVariableBuilder,
+    ThingVariableBuilder, TypeQLMatch, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -104,7 +104,6 @@ marriage relates $s;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_predicate_query_1() {
     let query = r#"match
@@ -121,15 +120,15 @@ $x isa movie,
 $t != "Apocalypse Now";"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match!([
+    let expected = typeql_match!(
         var("x").isa("movie").has("title", var("t")),
-        or(
+        or!(
             var("t").eq("Apocalypse Now"),
-            and(var("t").lt("Juno"), var("t").gt("Godfather")),
+            and!(var("t").lt("Juno"), var("t").gt("Godfather")),
             var("t").eq("Spy"),
         ),
         var("t").neq("Apocalypse Now"),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -147,17 +146,13 @@ $x isa movie,
 };"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match!([
+    let expected = typeql_match!(
         var("x").isa("movie").has("title", var("t")),
-        or(
-            and(
-                var("t").lte("Juno"),
-                var("t").gte("Godfather"),
-                var("t").neq("Heat"),
-            ),
+        or!(
+            and!(var("t").lte("Juno"), var("t").gte("Godfather"), var("t").neq("Heat"),),
             var("t").eq("The Muppets"),
         ),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -174,11 +169,11 @@ $y isa person,
 };"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match!([
+    let expected = typeql_match!(
         rel("x").rel("y"),
         var("y").isa("person").has("name", var("n")),
-        or(var("n").contains("ar"), var("n").like("^M.*$")),
-    ]);
+        or!(var("n").contains("ar"), var("n").like("^M.*$")),
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -190,14 +185,13 @@ $y >= $z;
 $z 18 isa age;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match!([
+    let expected = typeql_match!(
         var("x").has("age", var("y")),
         var("y").gte(var("z")),
         var("z").eq(18).isa("age"),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn test_concept_variable() {
@@ -240,10 +234,10 @@ $_ has title "Spy",
     has release-date $r;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match!([
+    let expected = typeql_match!(
         var("x").has("release-date", gte(var("r"))),
         var(()).has("title", "Spy").has("release-date", var("r")),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -491,73 +485,76 @@ fn test_parse_relates_type_variable() {
     let query = r#"match
 $x isa $type;
 $type relates someRole;"#;
+
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(var("x").isa(var("type")), var("type").relates("someRole"));
 
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_or_query() {
-    let query = "match\n" +
-            "$x isa movie;\n" +
-            "{\n" +
-            "    $y 'drama' isa genre;\n" +
-            "    ($x, $y);\n" +
-            "} or {\n" +
-            "    $x 'The Muppets';\n" +
-            "};";
+    let query = r#"match
+$x isa movie;
+{
+    $y "drama" isa genre;
+    ($x, $y);
+} or {
+    $x "The Muppets";
+};"#;
+
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(
-            var("x").isa("movie"),
-            or(
-                    and(
-                            var("y").eq("drama").isa("genre"),
-                            rel("x").rel("y")
-                    ),
-                    var("x").eq("The Muppets")
-            )
+        var("x").isa("movie"),
+        or!(and!(var("y").eq("drama").isa("genre"), rel("x").rel("y")), var("x").eq("The Muppets"))
     );
 
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
 
-#[test]
+// #[test]
 fn test_disjunction_not_in_conjunction() {
-    String query = "match\n" +
-            "{\n" +
-            "    $x isa person;\n" +
-            "} or {\n" +
-            "    $x isa company;\n" +
-            "};";
-    assertThrows(() -> parse_query(query));
+    let query = r#"match
+{
+    $x isa person;
+} or {
+    $x isa company;
+};"#;
+
+    assert!(parse_query(query).is_err())
 }
 
 #[test]
 fn test_nested_conjunction_and_disjunction() {
-    let query = "match\n" +
-            "$y isa $p;\n" +
-            "{\n" +
-            "    ($y, $q);\n" +
-            "} or {\n" +
-            "    $x isa $p;\n" +
-            "    {\n" +
-            "        $x has first-name $y;\n" +
-            "    } or {\n" +
-            "        $x has last-name $z;\n" +
-            "    };\n" +
-            "};";
+    let query = r#"match
+$y isa $p;
+{
+    ($y, $q);
+} or {
+    $x isa $p;
+    {
+        $x has first-name $y;
+    } or {
+        $x has last-name $z;
+    };
+};"#;
+
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(
-            var("y").isa(var("p")),
-            or(rel("y").rel("q"),
-               and(var("x").isa(var("p")),
-                   or(var("x").has("first-name", var("y")),
-                      var("x").has("last-name", var("z"))))));
+        var("y").isa(var("p")),
+        or!(
+            rel("y").rel("q"),
+            and!(
+                var("x").isa(var("p")),
+                or!(var("x").has("first-name", var("y")), var("x").has("last-name", var("z")))
+            )
+        )
+    );
+
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn test_disjunction_not_binding_conjunction() {
     let query = "match\n" +
@@ -1200,18 +1197,16 @@ fn test_parse_many_match_insert_without_stack_overflow() {
 
     assert_eq!(vec![expected; num_queries], parsed);
 }
+ */
 
 #[test]
 fn when_parsing_list_of_queries_with_syntax_error_report_error() {
-    let query_text = "define\nperson sub entity has name;"; // note no semicolon
+    let query_text = "define\nperson sub entity has name;"; // note no comma
 
-    exception.expect(TypeQLException.class);
-    exception.expectMessage("\nperson sub entity has name;"); // Message should refer to line
-
-    //noinspection ResultOfMethodCallIgnored
-    parse_query(query_text);
+    let parsed = parse_query(query_text);
+    assert!(parsed.is_err());
+    assert!(parsed.err().unwrap().contains("\nperson sub entity has name;"));
 }
- */
 
 #[test]
 fn when_parsing_multiple_queries_like_one_throw() {

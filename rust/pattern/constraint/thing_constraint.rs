@@ -23,6 +23,7 @@
 use crate::common::error::{
     ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
 };
+use crate::common::string::escape_regex;
 use crate::common::token::Constraint::*;
 use crate::common::token::Predicate;
 use crate::common::token::Type::Relation;
@@ -30,7 +31,6 @@ use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
-use crate::common::string::escape_regex;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {
@@ -257,6 +257,10 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
+            Long(long) => write!(f, "{}", long),
+            Double(double) => write!(f, "{}", double),
+            Boolean(boolean) => write!(f, "{}", boolean),
+            String(string) => write!(f, "\"{}\"", string),
             DateTime(date_time) => write!(f, "{}", {
                 if date_time.time().nanosecond() > 0 {
                     date_time.format("%Y-%m-%dT%H:%M:%S.%3f")
@@ -266,9 +270,7 @@ impl fmt::Display for Value {
                     date_time.format("%Y-%m-%dT%H:%M")
                 }
             }),
-            String(string) => write!(f, "\"{}\"", string),
             Variable(var) => write!(f, "{}", var.reference),
-            _ => panic!(""),
         }
     }
 }

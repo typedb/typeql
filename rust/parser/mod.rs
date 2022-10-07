@@ -33,8 +33,8 @@ use chrono::{NaiveDate, NaiveDateTime, Timelike};
 use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
-use crate::common::token::Predicate;
 use crate::common::string::*;
+use crate::common::token::Predicate;
 use typeql_grammar::typeqlrustparser::*;
 
 use crate::pattern::*;
@@ -66,6 +66,10 @@ fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {
 
 fn get_double(double: Rc<TerminalNode>) -> ParserResult<f64> {
     double.get_text().parse().map_err(|_| ILLEGAL_GRAMMAR.format(&[double.get_text().as_str()]))
+}
+
+fn get_boolean(boolean: Rc<TerminalNode>) -> ParserResult<bool> {
+    boolean.get_text().parse().map_err(|_| ILLEGAL_GRAMMAR.format(&[boolean.get_text().as_str()]))
 }
 
 fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
@@ -283,8 +287,8 @@ fn visit_patterns(ctx: Rc<PatternsContext>) -> ParserResult<Vec<Pattern>> {
 fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
     if let Some(var) = ctx.pattern_variable() {
         Ok(visit_pattern_variable(var)?.into_pattern())
-    } else if let Some(_disjunction) = ctx.pattern_disjunction() {
-        todo!()
+    } else if let Some(disjunction) = ctx.pattern_disjunction() {
+        Ok(visit_pattern_disjunction(disjunction)?.into_pattern())
     } else if let Some(_conjunction) = ctx.pattern_conjunction() {
         todo!()
     } else if let Some(negation) = ctx.pattern_negation() {
@@ -298,8 +302,19 @@ fn visit_pattern_conjunction(_ctx: Rc<Pattern_conjunctionContext>) -> ParserResu
     todo!()
 }
 
-fn visit_pattern_disjunction(_ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<()> {
-    todo!()
+fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<Disjunction> {
+    Ok(Disjunction::from(
+        (0..)
+            .map_while(|i| ctx.patterns(i))
+            .map(visit_patterns)
+            .map(|result| {
+                result.map(|mut nested| match nested.len() {
+                    1 => nested.pop().unwrap(),
+                    _ => Conjunction::from(nested).into_pattern(),
+                })
+            })
+            .collect::<ParserResult<Vec<Pattern>>>()?,
+    ))
 }
 
 fn visit_pattern_negation(ctx: Rc<Pattern_negationContext>) -> ParserResult<Negation> {
@@ -491,8 +506,8 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
     } else if let Some(equality) = ctx.predicate_equality() {
         Ok(ValueConstraint::new(Predicate::from(equality.get_text()), {
             let predicate_value = ctx.predicate_value().unwrap();
-            if let Some(_value) = predicate_value.value() {
-                todo!()
+            if let Some(value) = predicate_value.value() {
+                visit_value(value)?
             } else if let Some(var) = predicate_value.VAR_() {
                 Value::from(get_var(var))
             } else {
@@ -592,10 +607,16 @@ fn visit_value_type(_ctx: Rc<Value_typeContext>) -> ParserResult<()> {
 fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
     if let Some(string) = ctx.STRING_() {
         Ok(Value::from(get_string(string)))
-    } else if let Some(date_time) = ctx.DATETIME_() {
-        Value::try_from(get_date_time(date_time)?)
+    } else if let Some(long) = ctx.LONG_() {
+        Ok(Value::from(get_long(long)?))
+    } else if let Some(double) = ctx.DOUBLE_() {
+        Ok(Value::from(get_double(double)?))
+    } else if let Some(boolean) = ctx.BOOLEAN_() {
+        Ok(Value::from(get_boolean(boolean)?))
     } else if let Some(date) = ctx.DATE_() {
         Value::try_from(get_date(date)?.and_hms(0, 0, 0))
+    } else if let Some(date_time) = ctx.DATETIME_() {
+        Value::try_from(get_date_time(date_time)?)
     } else {
         todo!()
     }
