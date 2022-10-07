@@ -368,7 +368,6 @@ $x has release-date 1000-11-12T13:14:15.000123456;"#;
     }
 }
 
-/*
 #[test]
 fn when_parsing_date_error_when_handling_overly_precise_nanos() {
     let expected = typeql_match!(var("x").has(
@@ -379,11 +378,12 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
         ),
     ));
     match expected {
-        Err(err) => assert!(err.contains("more precise than 1 millisecond")),
+        Err(err) => assert!(err.message.contains("more precise than 1 millisecond")),
         Ok(_) => assert!(false),
     }
 }
 
+/*
 #[test]
 fn test_long_predicate_query() {
     let query = r#"match
@@ -1264,15 +1264,18 @@ fn undefine_attribute_type_regex() {
     let expected = undefine(type_("digit").regex("\\d"));
     assert_query_eq!(expected, parsed, query.replace("'", "\""));
 }
+*/
 
 #[test]
 fn regex_predicate_parses_character_classes_correctly() {
-    let query = "match\n$x like '\\d';";
+    let query = r#"match
+$x like "\d";"#;
     let parsed = parse_query(query).map(Query::into_match);
     let expected = typeql_match!(var("x").like("\\d"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn regex_predicate_parses_quotes_correctly() {
     let query = "match\n$x like '\\\"';";

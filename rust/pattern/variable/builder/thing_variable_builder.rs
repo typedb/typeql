@@ -48,6 +48,7 @@ pub trait ThingVariableBuilder {
     fn isa(self, isa: impl Into<IsaConstraint>) -> Result<ThingVariable, ErrorMessage>;
 
     fn eq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage>;
+    fn like(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage>;
 }
 
 impl<U: ThingConstrainable> ThingVariableBuilder for U {
@@ -84,6 +85,10 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
     fn eq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
         Ok(self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into())))
     }
+
+    fn like(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Like, value.into().into())))
+    }
 }
 
 impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
@@ -111,6 +116,10 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
 
     fn eq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
         self?.eq(value)
+    }
+
+    fn like(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
+        self?.like(value)
     }
 }
 

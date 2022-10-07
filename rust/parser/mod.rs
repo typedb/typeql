@@ -506,6 +506,14 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
                 panic!("Unexpected predicate value: `{}`", predicate_value.get_text())
             }
         }))
+    } else if let Some(substring) = ctx.predicate_substring() {
+        Ok(ValueConstraint::new(Predicate::from(substring.get_text()), {
+            if let Some(_) = substring.LIKE() {
+                Value::from(get_regex(ctx.STRING_().unwrap()))
+            } else {
+                Value::from(get_string(ctx.STRING_().unwrap()))
+            }
+        }))
     } else {
         todo!()
     }
