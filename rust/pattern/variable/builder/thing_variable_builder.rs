@@ -37,17 +37,17 @@ pub trait ThingVariableBuilder {
         self,
         type_name: impl Into<String>,
         value: T,
-    ) -> Result<Variable, ErrorMessage>
+    ) -> Result<ThingVariable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<Value>>::Error>;
 
-    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<Variable, ErrorMessage>
+    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>;
 
-    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage>;
+    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<ThingVariable, ErrorMessage>;
 
-    fn eq(self, value: impl Into<Value>) -> Result<Variable, ErrorMessage>;
+    fn eq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage>;
 }
 
 impl<U: ThingConstrainable> ThingVariableBuilder for U {
@@ -55,7 +55,7 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
         self,
         type_name: impl Into<String>,
         value: T,
-    ) -> Result<Variable, ErrorMessage>
+    ) -> Result<ThingVariable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<Value>>::Error>,
     {
@@ -67,22 +67,22 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
                     ValueConstraint::new(Predicate::Eq, value),
                 )),
             })
-            .into_variable())
+        )
     }
 
-    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<Variable, ErrorMessage>
+    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>,
     {
-        Ok(self.constrain_iid(iid.try_into()?).into_variable())
+        Ok(self.constrain_iid(iid.try_into()?))
     }
 
-    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_isa(isa.into()).into_variable())
+    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<ThingVariable, ErrorMessage> {
+        Ok(self.constrain_isa(isa.into()))
     }
 
-    fn eq(self, value: impl Into<Value>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into())).into_variable())
+    fn eq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into())))
     }
 }
 
@@ -91,25 +91,25 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
         self,
         type_name: impl Into<String>,
         value: T,
-    ) -> Result<Variable, ErrorMessage>
+    ) -> Result<ThingVariable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<Value>>::Error>,
     {
         self?.has(type_name, value)
     }
 
-    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<Variable, ErrorMessage>
+    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>
     where
         ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>,
     {
         self?.iid(iid)
     }
 
-    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<Variable, ErrorMessage> {
+    fn isa(self, isa: impl Into<IsaConstraint>) -> Result<ThingVariable, ErrorMessage> {
         self?.isa(isa)
     }
 
-    fn eq(self, value: impl Into<Value>) -> Result<Variable, ErrorMessage> {
+    fn eq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
         self?.eq(value)
     }
 }
@@ -119,17 +119,17 @@ pub trait RelationConstrainable {
 }
 
 pub trait RelationVariableBuilder {
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage>;
+    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<ThingVariable, ErrorMessage>;
 }
 
 impl<U: RelationConstrainable> RelationVariableBuilder for U {
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_role_player(value.into()).into_variable())
+    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<ThingVariable, ErrorMessage> {
+        Ok(self.constrain_role_player(value.into()))
     }
 }
 
 impl<U: RelationVariableBuilder> RelationVariableBuilder for Result<U, ErrorMessage> {
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<Variable, ErrorMessage> {
+    fn rel(self, value: impl Into<RolePlayerConstraint>) -> Result<ThingVariable, ErrorMessage> {
         self?.rel(value)
     }
 }

@@ -81,7 +81,7 @@ pub struct IsaConstraint {
 impl<T: Into<Label>> From<T> for IsaConstraint {
     fn from(type_name: T) -> Self {
         IsaConstraint {
-            type_: UnboundVariable::hidden().type_(type_name).unwrap().into_type(),
+            type_: UnboundVariable::hidden().type_(type_name).unwrap(),
             is_explicit: false,
         }
     }
@@ -114,7 +114,7 @@ pub struct HasConstraint {
 impl From<(String, ValueConstraint)> for HasConstraint {
     fn from((type_name, value_constraint): (String, ValueConstraint)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
             attribute: UnboundVariable::hidden().constrain_value(value_constraint),
         }
     }
@@ -123,7 +123,7 @@ impl From<(String, ValueConstraint)> for HasConstraint {
 impl From<(String, UnboundVariable)> for HasConstraint {
     fn from((type_name, variable): (String, UnboundVariable)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
             attribute: variable.into_thing(),
         }
     }
@@ -132,7 +132,7 @@ impl From<(String, UnboundVariable)> for HasConstraint {
 impl From<(String, ThingVariable)> for HasConstraint {
     fn from((type_name, variable): (String, ThingVariable)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
             attribute: variable,
         }
     }
@@ -350,13 +350,13 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).unwrap().into_type(), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type).unwrap(), player_var))
     }
 }
 
 impl From<(Label, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).unwrap().into_type(), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type).unwrap(), player_var))
     }
 }
 

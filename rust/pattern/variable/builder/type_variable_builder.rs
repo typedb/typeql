@@ -33,62 +33,62 @@ pub trait TypeConstrainable {
 }
 
 pub trait TypeVariableBuilder: Sized {
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage>;
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage>;
-    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage>;
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage>;
-    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage>;
-    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage>;
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<TypeVariable, ErrorMessage>;
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<TypeVariable, ErrorMessage>;
+    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<TypeVariable, ErrorMessage>;
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<TypeVariable, ErrorMessage>;
+    fn sub(self, sub: impl Into<SubConstraint>) -> Result<TypeVariable, ErrorMessage>;
+    fn type_(self, type_name: impl Into<Label>) -> Result<TypeVariable, ErrorMessage>;
 }
 
 impl<U: TypeConstrainable> TypeVariableBuilder for U {
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_owns(owns.into()).into_variable())
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<TypeVariable, ErrorMessage> {
+        Ok(self.constrain_owns(owns.into()))
     }
 
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_plays(plays.into()).into_variable())
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<TypeVariable, ErrorMessage> {
+        Ok(self.constrain_plays(plays.into()))
     }
 
-    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_regex(regex.into()).into_variable())
+    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<TypeVariable, ErrorMessage> {
+        Ok(self.constrain_regex(regex.into()))
     }
 
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_relates(relates.into()).into_variable())
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<TypeVariable, ErrorMessage> {
+        Ok(self.constrain_relates(relates.into()))
     }
 
-    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_sub(sub.into()).into_variable())
+    fn sub(self, sub: impl Into<SubConstraint>) -> Result<TypeVariable, ErrorMessage> {
+        Ok(self.constrain_sub(sub.into()))
     }
 
-    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage> {
-        Ok(self.constrain_label(LabelConstraint { label: type_name.into() }).into_variable())
+    fn type_(self, type_name: impl Into<Label>) -> Result<TypeVariable, ErrorMessage> {
+        Ok(self.constrain_label(LabelConstraint { label: type_name.into() }))
     }
 }
 
 impl<U: TypeVariableBuilder> TypeVariableBuilder for Result<U, ErrorMessage> {
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<Variable, ErrorMessage> {
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> Result<TypeVariable, ErrorMessage> {
         self?.owns(owns)
     }
 
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<Variable, ErrorMessage> {
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> Result<TypeVariable, ErrorMessage> {
         self?.plays(plays)
     }
 
-    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<Variable, ErrorMessage> {
+    fn regex(self, regex: impl Into<RegexConstraint>) -> Result<TypeVariable, ErrorMessage> {
         self?.regex(regex)
     }
 
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<Variable, ErrorMessage> {
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> Result<TypeVariable, ErrorMessage> {
         self?.relates(relates)
     }
 
-    fn sub(self, sub: impl Into<SubConstraint>) -> Result<Variable, ErrorMessage> {
+    fn sub(self, sub: impl Into<SubConstraint>) -> Result<TypeVariable, ErrorMessage> {
         self?.sub(sub)
     }
 
-    fn type_(self, type_name: impl Into<Label>) -> Result<Variable, ErrorMessage> {
+    fn type_(self, type_name: impl Into<Label>) -> Result<TypeVariable, ErrorMessage> {
         self?.type_(type_name)
     }
 }

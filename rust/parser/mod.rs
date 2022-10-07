@@ -336,7 +336,7 @@ fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ParserResult<Conc
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
     let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
         Type::Variable(p) => p,
-        Type::Label(p) => UnboundVariable::hidden().type_(p)?.into_type(),
+        Type::Label(p) => UnboundVariable::hidden().type_(p)?,
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.OWNS().is_some() {
@@ -361,7 +361,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 },
             );
         } else if constraint.REGEX().is_some() {
-            var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?.into_type();
+            var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?;
         } else if constraint.RELATES().is_some() {
             let _overridden: Option<()> = match constraint.AS() {
                 None => None,
@@ -380,7 +380,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 });
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
-            var_type = var_type.type_(scoped_label)?.into_type();
+            var_type = var_type.type_(scoped_label)?;
         } else {
             panic!("visit_variable_type: not implemented")
         }
@@ -411,7 +411,7 @@ fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<
 fn visit_variable_thing(ctx: Rc<Variable_thingContext>) -> ParserResult<ThingVariable> {
     let mut var_thing = get_var(ctx.VAR_().unwrap()).into_thing();
     if let Some(iid) = ctx.IID_() {
-        var_thing = var_thing.iid(iid.get_text())?.into_thing();
+        var_thing = var_thing.iid(iid.get_text())?;
     }
     if let Some(isa) = ctx.ISA_() {
         var_thing = var_thing.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?)

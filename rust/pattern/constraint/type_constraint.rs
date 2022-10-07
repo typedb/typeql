@@ -76,7 +76,7 @@ pub struct SubConstraint {
 impl<T: Into<Label>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
         SubConstraint {
-            type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap().into_type()),
+            type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap()),
         }
     }
 }
@@ -119,7 +119,7 @@ impl From<String> for RelatesConstraint {
 impl From<Label> for RelatesConstraint {
     fn from(type_: Label) -> Self {
         RelatesConstraint {
-            role_type: UnboundVariable::hidden().type_(type_).unwrap().into_type(),
+            role_type: UnboundVariable::hidden().type_(type_).unwrap(),
             overridden_role_type: None,
         }
     }
@@ -157,7 +157,6 @@ impl PlaysConstraint {
                 UnboundVariable::hidden()
                     .type_(label.label.scope.as_ref().cloned().unwrap())
                     .unwrap()
-                    .into_type()
             }),
             role_type,
             overridden_role_type,
@@ -180,7 +179,7 @@ impl From<(String, String)> for PlaysConstraint {
 impl From<Label> for PlaysConstraint {
     fn from(scoped_type: Label) -> Self {
         PlaysConstraint::new(
-            UnboundVariable::hidden().type_(scoped_type).unwrap().into_type(),
+            UnboundVariable::hidden().type_(scoped_type).unwrap(),
             None,
         )
     }
@@ -268,7 +267,7 @@ impl From<(String, IsKey)> for OwnsConstraint {
 impl From<(Label, IsKey)> for OwnsConstraint {
     fn from((attribute_type, is_key): (Label, IsKey)) -> Self {
         OwnsConstraint::from((
-            UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(),
+            UnboundVariable::hidden().type_(attribute_type).unwrap(),
             is_key,
         ))
     }
