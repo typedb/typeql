@@ -65,6 +65,12 @@ impl MatchQueryBuilder for TypeQLMatch {
     }
 }
 
+impl InsertQueryBuilder for TypeQLMatch {
+    fn insert(self, vars: impl Insertable) -> Result<TypeQLInsert, ErrorMessage> {
+        Ok(TypeQLInsert { match_query: Some(self), variables: vars.vars() })
+    }
+}
+
 impl fmt::Display for TypeQLMatch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Match)?;

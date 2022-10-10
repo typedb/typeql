@@ -176,6 +176,8 @@ fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<()> {
 fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
     if let Some(query_match) = ctx.query_match() {
         Ok(visit_query_match(query_match)?.into_query())
+    } else if let Some(query_insert) = ctx.query_insert() {
+        Ok(visit_query_insert(query_insert)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -189,8 +191,13 @@ fn visit_query_undefine(_ctx: Rc<Query_undefineContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_query_insert(_ctx: Rc<Query_insertContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {
+    let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
+    if let Some(patterns) = ctx.patterns() {
+        TypeQLMatch::new(Conjunction::from(visit_patterns(patterns)?)).insert(variable_things)
+    } else {
+        Ok(TypeQLInsert::new(variable_things))
+    }
 }
 
 fn visit_query_delete(_ctx: Rc<Query_deleteContext>) -> ParserResult<()> {
@@ -400,8 +407,8 @@ fn visit_type_constraint(_ctx: Rc<Type_constraintContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_variable_things(_ctx: Rc<Variable_thingsContext>) -> ParserResult<()> {
-    todo!()
+fn visit_variable_things(ctx: Rc<Variable_thingsContext>) -> ParserResult<Vec<ThingVariable>> {
+    (0..).map_while(|i| ctx.variable_thing_any(i)).map(visit_variable_thing_any).collect()
 }
 
 fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<ThingVariable> {

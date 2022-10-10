@@ -61,6 +61,17 @@ macro_rules! typeql_match {
 }
 
 #[macro_export]
+macro_rules! typeql_insert {
+    ($($thing_variable:expr),* $(,)?) => {{
+        let variables = [$($thing_variable),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
+        match variables {
+            Ok(variables) => Ok(TypeQLInsert::new(variables)),
+            Err(err) => Err(err),
+        }
+    }}
+}
+
+#[macro_export]
 macro_rules! and {
     ($($pattern:expr),* $(,)?) => {{
         let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();

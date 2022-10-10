@@ -21,9 +21,10 @@
  */
 
 use crate::{
-    and, not, or, parse_query, rel, type_, typeql_match, var, ConceptVariableBuilder, Conjunction,
-    Disjunction, ErrorMessage, MatchQueryBuilder, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeQLMatch, TypeVariableBuilder, KEY,
+    and, not, or, parse_query, rel, type_, typeql_insert, typeql_match, var,
+    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, InsertQueryBuilder,
+    MatchQueryBuilder, Query, RelationVariableBuilder, ThingVariableBuilder, TypeQLInsert,
+    TypeQLMatch, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -640,17 +641,21 @@ fn when_comparing_count_query_using_typeql_and_java_typeql_they_are_equivalent()
 
     assert_query_eq!(expected, parsed, query);
 }
+*/
 
 #[test]
 fn test_insert_query() {
-    let query = "insert\n$_ isa movie,\n" +
-            "    has title \"The Title\";";
-    let parsed = parse_query(query).asInsert();
-    let expected = insert(var().isa("movie").has("title", "The Title"));
+    let query = r#"insert
+$_ isa movie,
+    has title "The Title";"#;
+
+    let parsed = parse_query(query).map(Query::into_insert);
+    let expected = typeql_insert!(var(()).isa("movie").has("title", "The Title"));
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn when_parsing_delete_query_result_is_same_as_java_type_ql() {
     let query = "match\n" +
@@ -668,30 +673,33 @@ fn when_parsing_delete_query_result_is_same_as_java_type_ql() {
 
     assert_query_eq!(expected, parsed, query.replace("'", "\""));
 }
+*/
 
 #[test]
-fn when_parsing_insert_query_result_is_same_as_java_type_ql() {
-    let query = "insert\n" +
-            "$x isa pokemon,\n" +
-            "    has name 'Pichu';\n" +
-            "$y isa pokemon,\n" +
-            "    has name 'Pikachu';\n" +
-            "$z isa pokemon,\n" +
-            "    has name 'Raichu';\n" +
-            "(evolves-from: $x, evolves-to: $y) isa evolution;\n" +
-            "(evolves-from: $y, evolves-to: $z) isa evolution;";
-    let parsed = parse_query(query).asInsert();
-    let expected = insert(
-            var("x").isa("pokemon").has("name", "Pichu"),
-            var("y").isa("pokemon").has("name", "Pikachu"),
-            var("z").isa("pokemon").has("name", "Raichu"),
-            rel("evolves-from", "x").rel("evolves-to", "y").isa("evolution"),
-            rel("evolves-from", "y").rel("evolves-to", "z").isa("evolution")
+fn when_parsing_insert_query_result_is_same_as_java_typeql() {
+    let query = r#"insert
+$x isa pokemon,
+    has name "Pichu";
+$y isa pokemon,
+    has name "Pikachu";
+$z isa pokemon,
+    has name "Raichu";
+(evolves-from: $x, evolves-to: $y) isa evolution;
+(evolves-from: $y, evolves-to: $z) isa evolution;"#;
+
+    let parsed = parse_query(query).map(Query::into_insert);
+    let expected = typeql_insert!(
+        var("x").isa("pokemon").has("name", "Pichu"),
+        var("y").isa("pokemon").has("name", "Pikachu"),
+        var("z").isa("pokemon").has("name", "Raichu"),
+        rel(("evolves-from", "x")).rel(("evolves-to", "y")).isa("evolution"),
+        rel(("evolves-from", "y")).rel(("evolves-to", "z")).isa("evolution")
     );
 
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn when_parsing_update_query_result_issame_as_java_type_ql() {
     String query = "match\n" +
@@ -865,19 +873,22 @@ fn when_parsing_undefine_query_result_is_same_as_java_type_ql() {
 
     assert_query_eq!(expected, parsed, query);
 }
+*/
 
 #[test]
 fn test_match_insert_query() {
-    let query = "match\n" +
-            "$x isa language;\n" +
-            "insert\n$x has name \"HELLO\";";
-    let parsed = parse_query(query).asInsert();
-    let expected = typeql_match!(var("x").isa("language"))
-            .insert(var("x").has("name", "HELLO"));
+    let query = r#"match
+$x isa language;
+insert
+$x has name "HELLO";"#;
+
+    let parsed = parse_query(query).map(Query::into_insert);
+    let expected = typeql_match!(var("x").isa("language")).insert(var("x").has("name", "HELLO"));
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn test_define_abstract_entity_query() {
     let query = "define\n" +
@@ -934,6 +945,7 @@ fn test_define_value_type_query() {
 
     assert_query_eq!(expected, parsed, query);
 }
+*/
 
 #[test]
 fn test_escape_string() {
@@ -941,15 +953,17 @@ fn test_escape_string() {
     // "This has \"double quotes\" and a single-quoted backslash: '\\'"
     let input = r#"This has \"double quotes\" and a single-quoted backslash: '\\'"#;
 
-    let query = "insert\n" +
-            "$_ isa movie,\n" +
-            "    has title \"" + input + "\";";
-    let parsed = parse_query(query);
-    let expected = insert(var(()).isa("movie").has("title", input));
+    let query = format!(r#"insert
+$_ isa movie,
+    has title "{}";"#, input);
+
+    let parsed = parse_query(&query).map(Query::into_insert);
+    let expected = typeql_insert!(var(()).isa("movie").has("title", input));
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn when_parsing_query_with_comments_they_are_ignored() {
     let query = "match\n" +
@@ -999,16 +1013,20 @@ fn test_define_rules() {
 
     assert_query_eq!(expected, parsed, query.replace("'", "\""));
 }
+*/
 
 #[test]
 fn test_parse_boolean() {
-    let query = "insert\n$_ has flag true;";
-    let parsed = parse_query(query).asInsert();
-    let expected = insert(var(()).has("flag", true));
+    let query = r#"insert
+$_ has flag true;"#;
+
+    let parsed = parse_query(query).map(Query::into_insert);
+    let expected = typeql_insert!(var(()).has("flag", true));
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn test_parse_aggregate_group() {
     let query = "match\n" +

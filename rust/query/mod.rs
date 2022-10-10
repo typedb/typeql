@@ -25,51 +25,21 @@ use std::fmt;
 use crate::pattern::*;
 use crate::{enum_getter, var, ErrorMessage};
 
+mod typeql_insert;
+pub use typeql_insert::*;
+
 mod typeql_match;
 pub use typeql_match::*;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Match(TypeQLMatch),
-    Dud(()),
+    Insert(TypeQLInsert),
 }
 
 impl Query {
     enum_getter!(into_match, Match, TypeQLMatch);
-}
-
-impl MatchQueryBuilder for Query {
-    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
-        use Query::*;
-        match self {
-            Match(query) => Match(query.get(vars)),
-            _ => todo!(),
-        }
-    }
-
-    fn sort(self, sorting: impl Into<Sorting>) -> Self {
-        use Query::*;
-        match self {
-            Match(query) => Match(query.sort(sorting)),
-            _ => todo!(),
-        }
-    }
-
-    fn limit(self, limit: usize) -> Self {
-        use Query::*;
-        match self {
-            Match(query) => Match(query.limit(limit)),
-            _ => todo!(),
-        }
-    }
-
-    fn offset(self, offset: usize) -> Self {
-        use Query::*;
-        match self {
-            Match(query) => Match(query.offset(offset)),
-            _ => todo!(),
-        }
-    }
+    enum_getter!(into_insert, Insert, TypeQLInsert);
 }
 
 impl fmt::Display for Query {
@@ -77,7 +47,7 @@ impl fmt::Display for Query {
         use Query::*;
         match self {
             Match(query) => write!(f, "{}", query),
-            _ => todo!(),
+            Insert(query) => write!(f, "{}", query),
         }
     }
 }
