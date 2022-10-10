@@ -20,10 +20,10 @@
  *
  */
 
+use crate::common::date_time::format_date_time;
 use crate::common::error::{
     ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
 };
-use crate::common::date_time::format_date_time;
 use crate::common::string::escape_regex;
 use crate::common::token::Constraint::*;
 use crate::common::token::Predicate;

@@ -32,11 +32,11 @@ use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
 use chrono::{NaiveDate, NaiveDateTime};
 use std::rc::Rc;
 
+use crate::common::date_time::parse_date_time;
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
 use crate::common::string::*;
 use crate::common::token::Predicate;
 use typeql_grammar::typeqlrustparser::*;
-use crate::common::date_time::parse_date_time;
 
 use crate::pattern::*;
 use crate::query::*;
@@ -197,8 +197,8 @@ fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete
 }
 
 fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {
-    Ok(visit_query_delete(ctx.query_delete().unwrap())?
-        .insert(visit_variable_things(ctx.variable_things().unwrap())?)?)
+    visit_query_delete(ctx.query_delete().unwrap())?
+        .insert(visit_variable_things(ctx.variable_things().unwrap())?)
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
@@ -487,7 +487,7 @@ fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstrain
 fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
     if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            Ok(HasConstraint::try_from((label.get_text(), get_var(var)))?)
+            HasConstraint::try_from((label.get_text(), get_var(var)))
         } else if let Some(predicate) = ctx.predicate() {
             Ok(HasConstraint::new((label.get_text(), visit_predicate(predicate)?)))
         } else {
