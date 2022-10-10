@@ -23,6 +23,7 @@
 use crate::common::error::{
     ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
 };
+use crate::common::date_time::format_date_time;
 use crate::common::string::escape_regex;
 use crate::common::token::Constraint::*;
 use crate::common::token::Predicate;
@@ -30,7 +31,6 @@ use crate::common::token::Type::Relation;
 use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
-use std::convert::Infallible;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -265,15 +265,7 @@ impl fmt::Display for Value {
             Double(double) => write!(f, "{}", double),
             Boolean(boolean) => write!(f, "{}", boolean),
             String(string) => write!(f, "\"{}\"", string),
-            DateTime(date_time) => write!(f, "{}", {
-                if date_time.time().nanosecond() > 0 {
-                    date_time.format("%Y-%m-%dT%H:%M:%S.%3f")
-                } else if date_time.time().second() > 0 {
-                    date_time.format("%Y-%m-%dT%H:%M:%S")
-                } else {
-                    date_time.format("%Y-%m-%dT%H:%M")
-                }
-            }),
+            DateTime(date_time) => write!(f, "{}", format_date_time(date_time)),
             Variable(var) => write!(f, "{}", var.reference),
         }
     }

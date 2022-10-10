@@ -29,13 +29,14 @@ mod test;
 use antlr_rust::token::Token;
 use antlr_rust::tree::ParseTree;
 use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
-use chrono::{NaiveDate, NaiveDateTime, Timelike};
+use chrono::{NaiveDate, NaiveDateTime};
 use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
 use crate::common::string::*;
 use crate::common::token::Predicate;
 use typeql_grammar::typeqlrustparser::*;
+use crate::common::date_time::parse_date_time;
 
 use crate::pattern::*;
 use crate::query::*;
@@ -75,24 +76,6 @@ fn get_boolean(boolean: Rc<TerminalNode>) -> ParserResult<bool> {
 fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
     NaiveDate::parse_from_str(&date.get_text(), "%Y-%m-%d")
         .map_err(|_| ILLEGAL_GRAMMAR.format(&[date.get_text().as_str()]))
-}
-
-fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
-    let has_seconds = date_time_text.matches(':').count() == 2;
-    if has_seconds {
-        let has_nanos = date_time_text.matches('.').count() == 1;
-        if has_nanos {
-            let parts: Vec<&str> = date_time_text.splitn(2, '.').collect();
-            let (date_time, nanos) = (parts[0], parts[1]);
-            NaiveDateTime::parse_from_str(date_time, "%Y-%m-%dT%H:%M:%S")
-                .ok()?
-                .with_nanosecond(format!("{}{}", nanos, "0".repeat(9 - nanos.len())).parse().ok()?)
-        } else {
-            NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M:%S").ok()
-        }
-    } else {
-        NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M").ok()
-    }
 }
 
 fn get_date_time(date_time: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
