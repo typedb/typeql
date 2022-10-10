@@ -20,15 +20,15 @@
  *
  */
 
-pub(crate) fn quote_string(string: String) -> String {
+pub(crate) fn quote(string: &str) -> String {
     format!("\"{}\"", string)
 }
 
-pub(crate) fn unquote_string(quoted_string: String) -> String {
+pub(crate) fn unquote(quoted_string: &str) -> String {
     String::from(&quoted_string[1..quoted_string.len() - 1])
 }
 
-pub(crate) fn indent(multiline_string: String) -> String {
+pub(crate) fn indent(multiline_string: &str) -> String {
     format!("    {}", multiline_string.replace('\n', "\n    "))
 }
 
@@ -36,6 +36,6 @@ pub(crate) fn escape_regex(regex: &str) -> String {
     regex.replace('/', r#"\/"#)
 }
 
-pub(crate) fn unescape_regex(regex: String) -> String {
+pub(crate) fn unescape_regex(regex: &str) -> String {
     regex.replace(r#"\/"#, "/")
 }

@@ -53,11 +53,11 @@ enum Type {
 }
 
 fn get_string(string: Rc<TerminalNode>) -> String {
-    unquote_string(string.get_text())
+    unquote(&string.get_text())
 }
 
 fn get_regex(string: Rc<TerminalNode>) -> String {
-    unescape_regex(unquote_string(string.get_text()))
+    unescape_regex(&unquote(&string.get_text()))
 }
 
 fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {

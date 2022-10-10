@@ -49,7 +49,7 @@ impl fmt::Display for Disjunction {
         while next.is_some() {
             match next.unwrap() {
                 Pattern::Conjunction(conjunction) => write!(f, "{}", conjunction)?,
-                other => write!(f, "{{\n{};\n}}", indent(other.to_string()))?,
+                other => write!(f, "{{\n{};\n}}", indent(&other.to_string()))?,
             }
             next = iter.next();
             if next.is_some() {
