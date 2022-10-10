@@ -38,7 +38,6 @@ pub use constraint::*;
 #[cfg(test)]
 mod test;
 
-use crate::enum_getter;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -47,14 +46,6 @@ pub enum Pattern {
     Disjunction(Disjunction),
     Negation(Negation),
     Variable(Variable),
-}
-
-impl Pattern {
-    enum_getter!(into_variable, Variable, Variable);
-
-    pub fn into_type_variable(self) -> TypeVariable {
-        self.into_variable().into_type()
-    }
 }
 
 impl<T> From<T> for Pattern

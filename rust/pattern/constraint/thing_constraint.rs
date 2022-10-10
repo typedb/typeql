@@ -247,12 +247,6 @@ impl From<ThingVariable> for Value {
     }
 }
 
-impl From<Variable> for Value {
-    fn from(variable: Variable) -> Value {
-        Value::Variable(Box::new(variable.into_thing()))
-    }
-}
-
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
