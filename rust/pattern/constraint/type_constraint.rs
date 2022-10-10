@@ -200,25 +200,25 @@ impl fmt::Display for PlaysConstraint {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum IsKey {
+pub enum IsKeyAttribute {
     Yes,
     No,
 }
 
-impl From<bool> for IsKey {
+impl From<bool> for IsKeyAttribute {
     fn from(is_key: bool) -> Self {
         match is_key {
-            true => IsKey::Yes,
-            false => IsKey::No,
+            true => IsKeyAttribute::Yes,
+            false => IsKeyAttribute::No,
         }
     }
 }
 
-pub const KEY: IsKey = IsKey::Yes;
+pub const KEY: IsKeyAttribute = IsKeyAttribute::Yes;
 
-impl fmt::Display for IsKey {
+impl fmt::Display for IsKeyAttribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if *self == IsKey::Yes {
+        if *self == IsKeyAttribute::Yes {
             write!(f, " {}", IsKey)?;
         }
         Ok(())
@@ -229,14 +229,14 @@ impl fmt::Display for IsKey {
 pub struct OwnsConstraint {
     pub attribute_type: TypeVariable,
     pub overridden_attribute_type: Option<TypeVariable>,
-    pub is_key: IsKey,
+    pub is_key: IsKeyAttribute,
 }
 
 impl OwnsConstraint {
     fn new(
         attribute_type: TypeVariable,
         overridden_attribute_type: Option<TypeVariable>,
-        is_key: IsKey,
+        is_key: IsKeyAttribute,
     ) -> Self {
         OwnsConstraint { attribute_type, overridden_attribute_type, is_key }
     }
@@ -244,36 +244,36 @@ impl OwnsConstraint {
 
 impl From<&str> for OwnsConstraint {
     fn from(attribute_type: &str) -> Self {
-        OwnsConstraint::from((attribute_type, IsKey::No))
+        OwnsConstraint::from((attribute_type, IsKeyAttribute::No))
     }
 }
 
-impl From<(&str, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (&str, IsKey)) -> Self {
+impl From<(&str, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (&str, IsKeyAttribute)) -> Self {
         OwnsConstraint::from((Label::from(attribute_type), is_key))
     }
 }
 
-impl From<(String, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (String, IsKey)) -> Self {
+impl From<(String, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (String, IsKeyAttribute)) -> Self {
         OwnsConstraint::from((Label::from(attribute_type), is_key))
     }
 }
 
-impl From<(Label, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (Label, IsKey)) -> Self {
+impl From<(Label, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (Label, IsKeyAttribute)) -> Self {
         OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).unwrap(), is_key))
     }
 }
 
-impl From<(UnboundVariable, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (UnboundVariable, IsKey)) -> Self {
+impl From<(UnboundVariable, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (UnboundVariable, IsKeyAttribute)) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), is_key))
     }
 }
 
-impl From<(TypeVariable, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (TypeVariable, IsKey)) -> Self {
+impl From<(TypeVariable, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (TypeVariable, IsKeyAttribute)) -> Self {
         OwnsConstraint::new(attribute_type, None, is_key)
     }
 }

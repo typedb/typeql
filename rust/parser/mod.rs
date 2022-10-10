@@ -352,7 +352,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 None => None,
                 Some(_) => todo!(),
             };
-            let is_key = IsKey::from(constraint.IS_KEY().is_some());
+            let is_key = IsKeyAttribute::from(constraint.IS_KEY().is_some());
             var_type = var_type.constrain_owns(match visit_type(constraint.type_(0).unwrap())? {
                 Type::Label(label) => OwnsConstraint::from((label, is_key)),
                 Type::Variable(var) => OwnsConstraint::from((var, is_key)),
