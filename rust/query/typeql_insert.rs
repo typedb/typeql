@@ -43,10 +43,10 @@ impl TypeQLInsert {
 impl fmt::Display for TypeQLInsert {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(match_query) = &self.match_query {
-            write!(f, "{}\n", match_query)?;
+            writeln!(f, "{}", match_query)?;
         }
 
-        write!(f, "{}\n", Insert)?;
+        writeln!(f, "{}", Insert)?;
         write_joined!(f, ";\n", self.variables)?;
         f.write_str(";")
     }

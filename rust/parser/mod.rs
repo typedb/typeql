@@ -507,7 +507,7 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
-    } else if let Some(_) = ctx.VAR_() {
+    } else if let Some(_var) = ctx.VAR_() {
         todo!()
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
@@ -530,7 +530,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
         }))
     } else if let Some(substring) = ctx.predicate_substring() {
         Ok(ValueConstraint::new(Predicate::from(substring.get_text()), {
-            if let Some(_) = substring.LIKE() {
+            if substring.LIKE().is_some() {
                 Value::from(get_regex(ctx.STRING_().unwrap()))
             } else {
                 Value::from(get_string(ctx.STRING_().unwrap()))
