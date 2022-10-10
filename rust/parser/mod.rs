@@ -180,6 +180,8 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
         Ok(visit_query_insert(query_insert)?.into_query())
     } else if let Some(query_delete) = ctx.query_delete() {
         Ok(visit_query_delete(query_delete)?.into_query())
+    } else if let Some(query_update) = ctx.query_update() {
+        Ok(visit_query_update(query_update)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -211,8 +213,9 @@ fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete
     }
 }
 
-fn visit_query_update(_ctx: Rc<Query_updateContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {
+    Ok(visit_query_delete(ctx.query_delete().unwrap())?
+        .insert(visit_variable_things(ctx.variable_things().unwrap())?)?)
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
@@ -501,14 +504,14 @@ fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstrain
 fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
     if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            Ok(HasConstraint::from((label.get_text(), get_var(var))))
+            Ok(HasConstraint::try_from((label.get_text(), get_var(var)))?)
         } else if let Some(predicate) = ctx.predicate() {
-            Ok(HasConstraint::from((label.get_text(), visit_predicate(predicate)?)))
+            Ok(HasConstraint::new((label.get_text(), visit_predicate(predicate)?)))
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
-    } else if let Some(_var) = ctx.VAR_() {
-        todo!()
+    } else if let Some(var) = ctx.VAR_() {
+        Ok(HasConstraint::from(get_var(var)))
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }

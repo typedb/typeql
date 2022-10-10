@@ -21,7 +21,10 @@
  */
 
 use crate::common::token::Command::Delete;
-use crate::{write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch};
+use crate::{
+    write_joined, ErrorMessage, Insertable, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
+    UpdateQueryBuilder,
+};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -93,5 +96,11 @@ pub trait DeleteQueryBuilder {
 impl<U: DeleteQueryBuilder> DeleteQueryBuilder for Result<U, ErrorMessage> {
     fn delete(self, vars: impl Deletable) -> Result<TypeQLDelete, ErrorMessage> {
         self?.delete(vars)
+    }
+}
+
+impl UpdateQueryBuilder for TypeQLDelete {
+    fn insert(self, vars: impl Insertable) -> Result<TypeQLUpdate, ErrorMessage> {
+        Ok(TypeQLUpdate { delete_query: Some(self), variables: vars.vars() })
     }
 }

@@ -34,17 +34,22 @@ pub use typeql_insert::*;
 mod typeql_match;
 pub use typeql_match::*;
 
+mod typeql_update;
+pub use typeql_update::*;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Match(TypeQLMatch),
     Insert(TypeQLInsert),
     Delete(TypeQLDelete),
+    Update(TypeQLUpdate),
 }
 
 impl Query {
     enum_getter!(into_match, Match, TypeQLMatch);
     enum_getter!(into_insert, Insert, TypeQLInsert);
     enum_getter!(into_delete, Delete, TypeQLDelete);
+    enum_getter!(into_update, Update, TypeQLUpdate);
 }
 
 impl fmt::Display for Query {
@@ -54,6 +59,7 @@ impl fmt::Display for Query {
             Match(query) => write!(f, "{}", query),
             Insert(query) => write!(f, "{}", query),
             Delete(query) => write!(f, "{}", query),
+            Update(query) => write!(f, "{}", query),
         }
     }
 }
