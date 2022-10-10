@@ -39,7 +39,7 @@ macro_rules! write_joined {
         let mut _is_first = true;
         $(
         let mut iter = $iterable.iter();
-        if _is_first {
+        if result.is_ok() && _is_first {
             if let Some(head) = iter.next() {
                 _is_first = false;
                 result = write!($f, "{}", head);
