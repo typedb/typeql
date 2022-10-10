@@ -20,72 +20,78 @@
  *
  */
 
-use crate::common::token::Command::Insert;
+use crate::common::token::Command::Delete;
 use crate::{write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct TypeQLInsert {
+pub struct TypeQLDelete {
     pub match_query: Option<TypeQLMatch>,
     pub variables: Vec<ThingVariable>,
 }
 
-impl TypeQLInsert {
+impl TypeQLDelete {
     pub fn new(variables: Vec<ThingVariable>) -> Self {
-        TypeQLInsert { match_query: None, variables }
+        TypeQLDelete { match_query: None, variables }
     }
 
     pub fn into_query(self) -> Query {
-        Query::Insert(self)
+        Query::Delete(self)
     }
 }
 
-impl fmt::Display for TypeQLInsert {
+impl fmt::Display for TypeQLDelete {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(match_query) = &self.match_query {
             write!(f, "{}\n", match_query)?;
         }
 
-        write!(f, "{}\n", Insert)?;
+        write!(f, "{}\n", Delete)?;
         write_joined!(f, ";\n", self.variables)?;
         f.write_str(";")
     }
 }
 
-pub trait Insertable {
+pub trait Deletable {
     fn vars(self) -> Vec<ThingVariable>;
 }
 
-impl Insertable for ThingVariable {
+impl Deletable for ThingVariable {
     fn vars(self) -> Vec<ThingVariable> {
         vec![self]
     }
 }
 
-impl<const N: usize> Insertable for [ThingVariable; N] {
+impl<const N: usize> Deletable for [ThingVariable; N] {
     fn vars(self) -> Vec<ThingVariable> {
         self.to_vec()
     }
 }
 
-impl Insertable for Vec<ThingVariable> {
+impl<const N: usize> Deletable for [Result<ThingVariable, ErrorMessage>; N] {
+    fn vars(self) -> Vec<ThingVariable> {
+        self.into_iter().map(|x| x.unwrap()).collect()
+    }
+}
+
+impl Deletable for Vec<ThingVariable> {
     fn vars(self) -> Vec<ThingVariable> {
         self
     }
 }
 
-impl<U: Insertable> Insertable for Result<U, ErrorMessage> {
+impl<U: Deletable> Deletable for Result<U, ErrorMessage> {
     fn vars(self) -> Vec<ThingVariable> {
         self.unwrap().vars()
     }
 }
 
-pub trait InsertQueryBuilder {
-    fn insert(self, vars: impl Insertable) -> Result<TypeQLInsert, ErrorMessage>;
+pub trait DeleteQueryBuilder {
+    fn delete(self, vars: impl Deletable) -> Result<TypeQLDelete, ErrorMessage>;
 }
 
-impl<U: InsertQueryBuilder> InsertQueryBuilder for Result<U, ErrorMessage> {
-    fn insert(self, vars: impl Insertable) -> Result<TypeQLInsert, ErrorMessage> {
-        self?.insert(vars)
+impl<U: DeleteQueryBuilder> DeleteQueryBuilder for Result<U, ErrorMessage> {
+    fn delete(self, vars: impl Deletable) -> Result<TypeQLDelete, ErrorMessage> {
+        self?.delete(vars)
     }
 }

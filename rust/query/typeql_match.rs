@@ -96,6 +96,12 @@ impl InsertQueryBuilder for TypeQLMatch {
     }
 }
 
+impl DeleteQueryBuilder for TypeQLMatch {
+    fn delete(self, vars: impl Deletable) -> Result<TypeQLDelete, ErrorMessage> {
+        Ok(TypeQLDelete { match_query: Some(self), variables: vars.vars() })
+    }
+}
+
 impl fmt::Display for TypeQLMatch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Match)?;

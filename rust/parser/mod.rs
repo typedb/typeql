@@ -178,6 +178,8 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
         Ok(visit_query_match(query_match)?.into_query())
     } else if let Some(query_insert) = ctx.query_insert() {
         Ok(visit_query_insert(query_insert)?.into_query())
+    } else if let Some(query_delete) = ctx.query_delete() {
+        Ok(visit_query_delete(query_delete)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -200,8 +202,13 @@ fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert
     }
 }
 
-fn visit_query_delete(_ctx: Rc<Query_deleteContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete> {
+    let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
+    if let Some(patterns) = ctx.patterns() {
+        TypeQLMatch::new(Conjunction::from(visit_patterns(patterns)?)).delete(variable_things)
+    } else {
+        Ok(TypeQLDelete::new(variable_things))
+    }
 }
 
 fn visit_query_update(_ctx: Rc<Query_updateContext>) -> ParserResult<()> {

@@ -25,6 +25,9 @@ use std::fmt;
 use crate::pattern::*;
 use crate::{enum_getter, var, ErrorMessage};
 
+mod typeql_delete;
+pub use typeql_delete::*;
+
 mod typeql_insert;
 pub use typeql_insert::*;
 
@@ -35,11 +38,13 @@ pub use typeql_match::*;
 pub enum Query {
     Match(TypeQLMatch),
     Insert(TypeQLInsert),
+    Delete(TypeQLDelete),
 }
 
 impl Query {
     enum_getter!(into_match, Match, TypeQLMatch);
     enum_getter!(into_insert, Insert, TypeQLInsert);
+    enum_getter!(into_delete, Delete, TypeQLDelete);
 }
 
 impl fmt::Display for Query {
@@ -48,6 +53,7 @@ impl fmt::Display for Query {
         match self {
             Match(query) => write!(f, "{}", query),
             Insert(query) => write!(f, "{}", query),
+            Delete(query) => write!(f, "{}", query),
         }
     }
 }

@@ -22,9 +22,9 @@
 
 use crate::{
     and, not, or, parse_query, rel, type_, typeql_insert, typeql_match, var,
-    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, InsertQueryBuilder,
-    MatchQueryBuilder, Query, RelationVariableBuilder, ThingVariableBuilder, TypeQLInsert,
-    TypeQLMatch, TypeVariableBuilder, KEY,
+    ConceptVariableBuilder, Conjunction, DeleteQueryBuilder, Disjunction, ErrorMessage,
+    InsertQueryBuilder, MatchQueryBuilder, Query, RelationVariableBuilder, ThingVariableBuilder,
+    TypeQLInsert, TypeQLMatch, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -655,25 +655,23 @@ $_ isa movie,
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
-fn when_parsing_delete_query_result_is_same_as_java_type_ql() {
-    let query = "match\n" +
-            "$x isa movie,\n" +
-            "    has title 'The Title';\n" +
-            "$y isa movie;\n" +
-            "delete\n" +
-            "$x isa movie;\n" +
-            "$y isa movie;";
-    let parsed = parse_query(query).asDelete();
-    let expected = typeql_match!(
-            var("x").isa("movie").has("title", "The Title"),
-            var("y").isa("movie")
-    ).delete(var("x").isa("movie"), var("y").isa("movie"));
+fn when_parsing_delete_query_result_is_same_as_java_typeql() {
+    let query = r#"match
+$x isa movie,
+    has title "The Title";
+$y isa movie;
+delete
+$x isa movie;
+$y isa movie;"#;
 
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let parsed = parse_query(query).map(Query::into_delete);
+    let expected =
+        typeql_match!(var("x").isa("movie").has("title", "The Title"), var("y").isa("movie"))
+            .delete([var("x").isa("movie"), var("y").isa("movie")]);
+
+    assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn when_parsing_insert_query_result_is_same_as_java_typeql() {
@@ -953,9 +951,12 @@ fn test_escape_string() {
     // "This has \"double quotes\" and a single-quoted backslash: '\\'"
     let input = r#"This has \"double quotes\" and a single-quoted backslash: '\\'"#;
 
-    let query = format!(r#"insert
+    let query = format!(
+        r#"insert
 $_ isa movie,
-    has title "{}";"#, input);
+    has title "{}";"#,
+        input
+    );
 
     let parsed = parse_query(&query).map(Query::into_insert);
     let expected = typeql_insert!(var(()).isa("movie").has("title", input));
