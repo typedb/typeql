@@ -81,7 +81,7 @@ fn get_var(var: Rc<TerminalNode>) -> UnboundVariable {
     let name = &var.symbol.get_text();
 
     assert!(name.len() > 1);
-    assert_eq!(name.chars().next(), Some('$'));
+    assert!(name.starts_with('$'));
     let name = &name[1..];
 
     if name == "_" {
