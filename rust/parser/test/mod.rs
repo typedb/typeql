@@ -357,10 +357,8 @@ fn when_parsing_date_error_when_parsing_overly_precise_decimal_seconds() {
 $x has release-date 1000-11-12T13:14:15.000123456;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    match parsed {
-        Err(err) => assert!(err.contains("no viable alternative")),
-        Ok(_) => assert!(false),
-    }
+    assert!(parsed.is_err());
+    assert!(parsed.err().unwrap().contains("no viable alternative"));
 }
 
 #[test]
@@ -372,10 +370,8 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
             NaiveTime::from_hms_nano(13, 14, 15, 123450000),
         ),
     )));
-    match expected {
-        Err(err) => assert!(err.message.contains("more precise than 1 millisecond")),
-        Ok(_) => assert!(false),
-    }
+    assert!(expected.is_err());
+    assert!(expected.err().unwrap().message.contains("more precise than 1 millisecond"));
 }
 
 /*
