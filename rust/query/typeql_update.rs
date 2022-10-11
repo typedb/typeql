@@ -20,8 +20,10 @@
  *
  */
 
-use crate::common::token::Command::Insert;
-use crate::{write_joined, ErrorMessage, Query, ThingVariable, TypeQLDelete, Writable};
+use crate::{
+    common::token::Command::Insert, write_joined, ErrorMessage, Query, ThingVariable, TypeQLDelete,
+    Writable,
+};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]

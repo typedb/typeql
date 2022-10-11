@@ -20,20 +20,18 @@
  *
  */
 
-use crate::common::date_time;
-use crate::common::error::{
-    ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
+use crate::{
+    common::{
+        date_time,
+        error::{ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING},
+        string::{escape_regex, format_double},
+        token::{Constraint::*, Predicate, Type::Relation},
+    },
+    pattern::*,
+    write_joined,
 };
-use crate::common::string::escape_regex;
-use crate::common::string::format_double;
-use crate::common::token::Constraint::*;
-use crate::common::token::Predicate;
-use crate::common::token::Type::Relation;
-use crate::pattern::*;
-use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
-use std::convert::Infallible;
-use std::fmt;
+use std::{convert::Infallible, fmt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {

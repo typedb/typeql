@@ -20,10 +20,9 @@
  *
  */
 
-use crate::common::token::Command::Delete;
 use crate::{
-    write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
-    UpdateQueryBuilder, Writable,
+    common::token::Command::Delete, write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch,
+    TypeQLUpdate, UpdateQueryBuilder, Writable,
 };
 use std::fmt;
 

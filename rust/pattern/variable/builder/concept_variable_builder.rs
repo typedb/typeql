@@ -20,8 +20,7 @@
  *
  */
 
-use crate::pattern::*;
-use crate::ErrorMessage;
+use crate::{pattern::*, ErrorMessage};
 
 pub trait ConceptConstrainable {
     fn constrain_is(self, is: IsConstraint) -> ConceptVariable;

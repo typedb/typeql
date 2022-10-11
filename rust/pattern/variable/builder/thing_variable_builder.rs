@@ -20,9 +20,10 @@
  *
  */
 
-use crate::common::error::ErrorMessage;
-use crate::common::token::Predicate;
-use crate::pattern::*;
+use crate::{
+    common::{error::ErrorMessage, token::Predicate},
+    pattern::*,
+};
 
 pub trait ThingConstrainable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable;

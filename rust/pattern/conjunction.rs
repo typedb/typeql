@@ -20,9 +20,7 @@
  *
  */
 
-use crate::common::string::indent;
-use crate::pattern::Pattern;
-use crate::ErrorMessage;
+use crate::{common::string::indent, pattern::Pattern, ErrorMessage};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

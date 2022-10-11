@@ -20,9 +20,10 @@
  *
  */
 
-use crate::common::string::escape_regex;
-use crate::common::token::Constraint::*;
-use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
+use crate::{
+    common::{string::escape_regex, token::Constraint::*},
+    TypeVariable, TypeVariableBuilder, UnboundVariable,
+};
 use std::fmt;
 
 #[derive(Debug)]

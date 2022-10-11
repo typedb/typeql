@@ -20,8 +20,7 @@
  *
  */
 
-use crate::common::token::Predicate;
-use crate::*;
+use crate::{common::token::Predicate, *};
 
 #[macro_export]
 macro_rules! typeql_match {
@@ -87,15 +86,15 @@ where
 }
 
 pub fn eq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<Value>>::Error>,
+where
+    ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
     Ok(ValueConstraint::new(Predicate::Eq, value.try_into()?))
 }
 
 pub fn neq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<Value>>::Error>,
+where
+    ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
     Ok(ValueConstraint::new(Predicate::Neq, value.try_into()?))
 }
@@ -122,8 +121,8 @@ where
 }
 
 pub fn gte<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<Value>>::Error>,
+where
+    ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
     Ok(ValueConstraint::new(Predicate::Gte, value.try_into()?))
 }

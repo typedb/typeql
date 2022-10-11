@@ -26,20 +26,22 @@ pub mod syntax_error;
 #[cfg(test)]
 mod test;
 
-use antlr_rust::token::Token;
-use antlr_rust::tree::ParseTree;
-use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
+use antlr_rust::{
+    token::Token,
+    tree::{ParseTree, TerminalNode as ANTLRTerminalNode},
+};
 use chrono::{NaiveDate, NaiveDateTime};
 use std::rc::Rc;
 
-use crate::common::date_time;
-use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
-use crate::common::string::*;
-use crate::common::token::Predicate;
+use crate::common::{
+    date_time,
+    error::{ErrorMessage, ILLEGAL_GRAMMAR},
+    string::*,
+    token::Predicate,
+};
 use typeql_grammar::typeqlrustparser::*;
 
-use crate::pattern::*;
-use crate::query::*;
+use crate::{pattern::*, query::*};
 
 #[derive(Debug)]
 pub struct Definable;

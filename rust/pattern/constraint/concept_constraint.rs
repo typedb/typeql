@@ -20,9 +20,7 @@
  *
  */
 
-use crate::common::token::Constraint::Is;
-use crate::pattern::*;
-use crate::var;
+use crate::{common::token::Constraint::Is, pattern::*, var};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

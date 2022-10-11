@@ -20,9 +20,10 @@
  *
  */
 
-use crate::common::string::indent;
-use crate::common::token::Operator::Or;
-use crate::Pattern;
+use crate::{
+    common::{string::indent, token::Operator::Or},
+    Pattern,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -22,15 +22,11 @@
 
 #![allow(dead_code)]
 
-use std::cell::RefCell;
-use std::convert::Into;
-use std::rc::Rc;
+use std::{cell::RefCell, convert::Into, rc::Rc};
 
-use typeql_grammar::typeqlrustlexer::TypeQLRustLexer;
-use typeql_grammar::typeqlrustparser::*;
+use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::*};
 
-use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream, Parser as ANTLRParser};
+use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
 
 #[macro_use]
 pub mod builder;
@@ -44,8 +40,10 @@ pub mod query;
 #[macro_use]
 mod util;
 
-use crate::common::error::ErrorMessage;
-use crate::parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query};
+use crate::{
+    common::error::ErrorMessage,
+    parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query},
+};
 use pattern::*;
 use query::*;
 
