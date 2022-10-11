@@ -55,6 +55,14 @@ impl TypeVariable {
             sub: None,
         }
     }
+
+    fn is_type_constrained(&self) -> bool {
+        !self.owns.is_empty()
+            || !self.plays.is_empty()
+            || self.regex.is_some()
+            || !self.relates.is_empty()
+            || self.sub.is_some()
+    }
 }
 
 impl TypeConstrainable for TypeVariable {
@@ -96,23 +104,9 @@ impl fmt::Display for TypeVariable {
         } else {
             write!(f, "{}", self.label.as_ref().unwrap().label)?;
         }
-        if let Some(sub) = &self.sub {
-            write!(f, " {}", sub)?;
-        }
-        if let Some(regex) = &self.regex {
-            write!(f, " {}", regex)?;
-        }
-        if !self.relates.is_empty() {
+        if self.is_type_constrained() {
             f.write_str(" ")?;
-            write_joined!(f, ",\n    ", self.relates)?;
-        }
-        if !self.plays.is_empty() {
-            f.write_str(" ")?;
-            write_joined!(f, ",\n    ", self.plays)?;
-        }
-        if !self.owns.is_empty() {
-            f.write_str(" ")?;
-            write_joined!(f, ",\n    ", self.owns)?;
+            write_joined!(f, ",\n    ", self.sub, self.regex, self.relates, self.plays, self.owns)?;
         }
         Ok(())
     }

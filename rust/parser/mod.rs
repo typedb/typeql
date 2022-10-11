@@ -47,12 +47,6 @@ pub struct Definable;
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
-#[derive(Debug)]
-enum Type {
-    Label(Label),
-    Variable(TypeVariable),
-}
-
 fn get_string(string: Rc<TerminalNode>) -> String {
     unquote(&string.get_text())
 }
@@ -339,50 +333,37 @@ fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ParserResult<Conc
 }
 
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
-    let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
-        Type::Variable(p) => p,
-        Type::Label(p) => UnboundVariable::hidden().type_(p)?,
-    };
+    let mut var_type = visit_type_any(ctx.type_any().unwrap())?.into_variable();
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.OWNS().is_some() {
-            let _overridden: Option<()> = match constraint.AS() {
-                None => None,
-                Some(_) => todo!(),
-            };
+            let overridden =
+                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
             let is_key = IsKeyAttribute::from(constraint.IS_KEY().is_some());
-            var_type = var_type.constrain_owns(match visit_type(constraint.type_(0).unwrap())? {
-                Type::Label(label) => OwnsConstraint::from((label, is_key)),
-                Type::Variable(var) => OwnsConstraint::from((var, is_key)),
-            });
+            var_type = var_type.constrain_owns(OwnsConstraint::from((
+                visit_type(constraint.type_(0).unwrap())?,
+                overridden,
+                is_key,
+            )));
         } else if constraint.PLAYS().is_some() {
-            let _overridden: Option<()> = match constraint.AS() {
-                None => None,
-                Some(_) => todo!(),
-            };
-            var_type = var_type.constrain_plays(
-                match visit_type_scoped(constraint.type_scoped().unwrap())? {
-                    Type::Label(scoped) => PlaysConstraint::from(scoped),
-                    Type::Variable(var) => PlaysConstraint::from(var),
-                },
-            );
+            let overridden =
+                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
+            var_type = var_type.constrain_plays(PlaysConstraint::from((
+                visit_type_scoped(constraint.type_scoped().unwrap())?,
+                overridden,
+            )));
         } else if constraint.REGEX().is_some() {
             var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?;
         } else if constraint.RELATES().is_some() {
-            let _overridden: Option<()> = match constraint.AS() {
-                None => None,
-                Some(_) => todo!(),
-            };
-            var_type =
-                var_type.constrain_relates(match visit_type(constraint.type_(0).unwrap())? {
-                    Type::Label(label) => RelatesConstraint::from(label),
-                    Type::Variable(var) => RelatesConstraint::from(var),
-                });
+            let overridden =
+                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
+            var_type = var_type.constrain_relates(RelatesConstraint::from((
+                visit_type(constraint.type_(0).unwrap())?,
+                overridden,
+            )));
         } else if constraint.SUB_().is_some() {
-            var_type =
-                var_type.constrain_sub(match visit_type_any(constraint.type_any().unwrap())? {
-                    Type::Label(label) => SubConstraint::from(label),
-                    Type::Variable(var) => SubConstraint::from(var),
-                });
+            var_type = var_type.constrain_sub(SubConstraint::from(visit_type_any(
+                constraint.type_any().unwrap(),
+            )?));
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
             var_type = var_type.type_(scoped_label)?;

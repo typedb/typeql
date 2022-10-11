@@ -25,6 +25,21 @@ use crate::common::token::Constraint::*;
 use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
 
+#[derive(Debug)]
+pub enum Type {
+    Label(Label),
+    Variable(TypeVariable),
+}
+
+impl Type {
+    pub fn into_variable(self) -> TypeVariable {
+        match self {
+            Self::Label(label) => UnboundVariable::hidden().type_(label).unwrap(),
+            Self::Variable(var) => var,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {
     scope: Option<String>,
@@ -40,6 +55,12 @@ impl From<&str> for Label {
 impl From<String> for Label {
     fn from(name: String) -> Self {
         Label { scope: None, name }
+    }
+}
+
+impl From<(&str, &str)> for Label {
+    fn from((scope, name): (&str, &str)) -> Self {
+        Label::from((scope.to_string(), name.to_string()))
     }
 }
 
@@ -91,6 +112,12 @@ impl From<TypeVariable> for SubConstraint {
     }
 }
 
+impl From<Type> for SubConstraint {
+    fn from(type_: Type) -> Self {
+        SubConstraint::from(type_.into_variable())
+    }
+}
+
 impl fmt::Display for SubConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", Sub, self.type_)
@@ -115,6 +142,17 @@ impl From<String> for RelatesConstraint {
     }
 }
 
+impl From<(&str, &str)> for RelatesConstraint {
+    fn from((role_type, overridden_role_type): (&str, &str)) -> Self {
+        RelatesConstraint {
+            role_type: UnboundVariable::hidden().type_(role_type).unwrap(),
+            overridden_role_type: Some(
+                UnboundVariable::hidden().type_(overridden_role_type).unwrap(),
+            ),
+        }
+    }
+}
+
 impl From<Label> for RelatesConstraint {
     fn from(type_: Label) -> Self {
         RelatesConstraint {
@@ -136,9 +174,31 @@ impl From<TypeVariable> for RelatesConstraint {
     }
 }
 
+impl From<(TypeVariable, Option<TypeVariable>)> for RelatesConstraint {
+    fn from((role_type, overridden_role_type): (TypeVariable, Option<TypeVariable>)) -> Self {
+        RelatesConstraint { role_type, overridden_role_type }
+    }
+}
+
+impl From<Type> for RelatesConstraint {
+    fn from(role_type: Type) -> Self {
+        RelatesConstraint::from(role_type.into_variable())
+    }
+}
+
+impl From<(Type, Option<Type>)> for RelatesConstraint {
+    fn from((role_type, overridden): (Type, Option<Type>)) -> Self {
+        RelatesConstraint::from((role_type.into_variable(), overridden.map(Type::into_variable)))
+    }
+}
+
 impl fmt::Display for RelatesConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Relates, self.role_type)
+        write!(f, "{} {}", Relates, self.role_type)?;
+        if let Some(overridden) = &self.overridden_role_type {
+            write!(f, " {} {}", As, overridden)?;
+        }
+        Ok(())
     }
 }
 
@@ -184,6 +244,21 @@ impl From<Label> for PlaysConstraint {
 impl From<UnboundVariable> for PlaysConstraint {
     fn from(role_type: UnboundVariable) -> Self {
         PlaysConstraint::from(role_type.into_type())
+    }
+}
+
+impl From<Type> for PlaysConstraint {
+    fn from(role_type: Type) -> Self {
+        PlaysConstraint::new(role_type.into_variable(), None)
+    }
+}
+
+impl From<(Type, Option<Type>)> for PlaysConstraint {
+    fn from((role_type, overridden_role_type): (Type, Option<Type>)) -> Self {
+        PlaysConstraint::new(
+            role_type.into_variable(),
+            overridden_role_type.map(Type::into_variable),
+        )
     }
 }
 
@@ -272,9 +347,49 @@ impl From<(UnboundVariable, IsKeyAttribute)> for OwnsConstraint {
     }
 }
 
+impl From<TypeVariable> for OwnsConstraint {
+    fn from(attribute_type: TypeVariable) -> Self {
+        OwnsConstraint::new(attribute_type, None, IsKeyAttribute::No)
+    }
+}
+
 impl From<(TypeVariable, IsKeyAttribute)> for OwnsConstraint {
     fn from((attribute_type, is_key): (TypeVariable, IsKeyAttribute)) -> Self {
         OwnsConstraint::new(attribute_type, None, is_key)
+    }
+}
+
+impl From<Type> for OwnsConstraint {
+    fn from(role_type: Type) -> Self {
+        OwnsConstraint::from(role_type.into_variable())
+    }
+}
+
+impl From<(Type, IsKeyAttribute)> for OwnsConstraint {
+    fn from((role_type, is_key): (Type, IsKeyAttribute)) -> Self {
+        OwnsConstraint::new(role_type.into_variable(), None, is_key)
+    }
+}
+
+impl From<(Type, Option<Type>)> for OwnsConstraint {
+    fn from((role_type, overridden_role_type): (Type, Option<Type>)) -> Self {
+        OwnsConstraint::new(
+            role_type.into_variable(),
+            overridden_role_type.map(Type::into_variable),
+            IsKeyAttribute::No,
+        )
+    }
+}
+
+impl From<(Type, Option<Type>, IsKeyAttribute)> for OwnsConstraint {
+    fn from(
+        (role_type, overridden_role_type, is_key): (Type, Option<Type>, IsKeyAttribute),
+    ) -> Self {
+        OwnsConstraint::new(
+            role_type.into_variable(),
+            overridden_role_type.map(Type::into_variable),
+            is_key,
+        )
     }
 }
 

@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    and, not, or, parse_query, rel, type_, typeql_insert, typeql_match, var,
+    and, gte, lt, lte, not, or, parse_query, rel, type_, typeql_insert, typeql_match, var,
     ConceptVariableBuilder, Conjunction, DeleteQueryBuilder, Disjunction, ErrorMessage,
     InsertQueryBuilder, MatchQueryBuilder, Query, RelationVariableBuilder, ThingVariableBuilder,
     TypeQLInsert, TypeQLMatch, TypeVariableBuilder, UpdateQueryBuilder, KEY,
@@ -226,7 +226,6 @@ $s1 = $s2;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_movies_released_after_or_at_the_same_time_as_spy() {
     let query = r#"match
@@ -244,20 +243,22 @@ $_ has title "Spy",
 
 #[test]
 fn test_predicate() {
-    let query = r#"
+    let query = r#"match
 $x has release-date < 1986-03-03T00:00,
     has tmdb-vote-count 100,
     has tmdb-vote-average <= 9.0;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match!([var("x")
-        .has(("release-date", lt(LocalDate.of(1986, 3, 3).atStartOfDay())))
+    let expected = typeql_match!(var("x")
+        .has((
+            "release-date",
+            lt(NaiveDateTime::new(NaiveDate::from_ymd(1986, 3, 3), NaiveTime::from_hms(0, 0, 0)))
+        ))
         .has(("tmdb-vote-count", 100))
-        .has(("tmdb-vote-average", lte(9.0)))]);
+        .has(("tmdb-vote-average", lte(9.0))));
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn when_parsing_date_handle_time() {
@@ -374,7 +375,6 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
     assert!(expected.err().unwrap().message.contains("more precise than 1 millisecond"));
 }
 
-/*
 #[test]
 fn test_long_predicate_query() {
     let query = r#"match
@@ -386,7 +386,6 @@ $x isa movie,
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn test_schema_query() {
@@ -740,23 +739,25 @@ fn when_parsing_as_in_define_result_is_same_as_sub() {
 
     assert_query_eq!(expected, parsed, query);
 }
+*/
 
 #[test]
 fn when_parsing_as_in_match_result_is_same_as_sub() {
-    let query = "match\n" +
-            "$f sub parenthood,\n" +
-            "    relates father as parent,\n" +
-            "    relates son as child;";
+    let query = r#"match
+$f sub parenthood,
+    relates father as parent,
+    relates son as child;"#;
+
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match!(
-            var("f").sub("parenthood")
-                    .relates("father", "parent")
-                    .relates("son", "child")
-    );
+    let expected = typeql_match!(var("f")
+        .sub("parenthood")
+        .relates(("father", "parent"))
+        .relates(("son", "child")));
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn when_parsing_define_query_with_owns_overrides_result_is_same_as_java_type_ql() {
     let query = "define\n" +
