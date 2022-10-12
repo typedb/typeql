@@ -49,7 +49,7 @@ impl From<TypeVariable> for SubConstraint {
 
 impl From<Type> for SubConstraint {
     fn from(type_: Type) -> Self {
-        SubConstraint::from(type_.into_variable())
+        SubConstraint::from(type_.into_type_variable())
     }
 }
 

@@ -73,15 +73,15 @@ impl From<UnboundVariable> for PlaysConstraint {
 
 impl From<Type> for PlaysConstraint {
     fn from(role_type: Type) -> Self {
-        PlaysConstraint::new(role_type.into_variable(), None)
+        PlaysConstraint::new(role_type.into_type_variable(), None)
     }
 }
 
 impl From<(Type, Option<Type>)> for PlaysConstraint {
     fn from((role_type, overridden_role_type): (Type, Option<Type>)) -> Self {
         PlaysConstraint::new(
-            role_type.into_variable(),
-            overridden_role_type.map(Type::into_variable),
+            role_type.into_type_variable(),
+            overridden_role_type.map(Type::into_type_variable),
         )
     }
 }

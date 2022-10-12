@@ -84,13 +84,16 @@ impl From<(TypeVariable, Option<TypeVariable>)> for RelatesConstraint {
 
 impl From<Type> for RelatesConstraint {
     fn from(role_type: Type) -> Self {
-        RelatesConstraint::from(role_type.into_variable())
+        RelatesConstraint::from(role_type.into_type_variable())
     }
 }
 
 impl From<(Type, Option<Type>)> for RelatesConstraint {
     fn from((role_type, overridden): (Type, Option<Type>)) -> Self {
-        RelatesConstraint::from((role_type.into_variable(), overridden.map(Type::into_variable)))
+        RelatesConstraint::from((
+            role_type.into_type_variable(),
+            overridden.map(Type::into_type_variable),
+        ))
     }
 }
 

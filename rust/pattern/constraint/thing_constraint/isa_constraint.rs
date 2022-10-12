@@ -21,39 +21,57 @@
  */
 
 use crate::{
-    common::token::Constraint::Isa, Label, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    common::token::Constraint::{Isa, IsaX},
+    IsExplicit, Label, TypeVariable, TypeVariableBuilder, UnboundVariable,
 };
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
     pub type_: TypeVariable,
-    pub is_explicit: bool,
+    pub is_explicit: IsExplicit,
+}
+
+impl IsaConstraint {
+    fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
+        IsaConstraint { type_, is_explicit }
+    }
 }
 
 impl<T: Into<Label>> From<T> for IsaConstraint {
     fn from(type_name: T) -> Self {
-        IsaConstraint {
-            type_: UnboundVariable::hidden().type_(type_name).unwrap(),
-            is_explicit: false,
-        }
+        IsaConstraint::new(UnboundVariable::hidden().type_(type_name).unwrap(), IsExplicit::No)
+    }
+}
+
+impl<T: Into<Label>> From<(T, IsExplicit)> for IsaConstraint {
+    fn from((type_name, is_explicit): (T, IsExplicit)) -> Self {
+        IsaConstraint::new(UnboundVariable::hidden().type_(type_name).unwrap(), is_explicit)
     }
 }
 
 impl From<UnboundVariable> for IsaConstraint {
     fn from(var: UnboundVariable) -> Self {
-        IsaConstraint::from(var.into_type())
+        IsaConstraint::new(var.into_type(), IsExplicit::No)
     }
 }
 
-impl From<TypeVariable> for IsaConstraint {
-    fn from(type_: TypeVariable) -> Self {
-        IsaConstraint { type_, is_explicit: false }
+impl From<(UnboundVariable, IsExplicit)> for IsaConstraint {
+    fn from((var, is_explicit): (UnboundVariable, IsExplicit)) -> Self {
+        IsaConstraint::new(var.into_type(), is_explicit)
     }
 }
 
 impl fmt::Display for IsaConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Isa, self.type_)
+        write!(
+            f,
+            "{} {}",
+            match self.is_explicit {
+                IsExplicit::Yes => IsaX,
+                IsExplicit::No => Isa,
+            },
+            self.type_
+        )
     }
 }

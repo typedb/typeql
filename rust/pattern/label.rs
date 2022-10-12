@@ -20,20 +20,20 @@
  *
  */
 
-use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
+use crate::{common::token, TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
 
 #[derive(Debug)]
 pub enum Type {
     Label(Label),
-    Variable(TypeVariable),
+    Variable(UnboundVariable),
 }
 
 impl Type {
-    pub fn into_variable(self) -> TypeVariable {
+    pub fn into_type_variable(self) -> TypeVariable {
         match self {
             Self::Label(label) => UnboundVariable::hidden().type_(label).unwrap(),
-            Self::Variable(var) => var,
+            Self::Variable(var) => var.into_type(),
         }
     }
 }
@@ -42,6 +42,12 @@ impl Type {
 pub struct Label {
     pub scope: Option<String>,
     pub name: String,
+}
+
+impl From<token::Type> for Label {
+    fn from(name: token::Type) -> Self {
+        Label::from(name.to_string())
+    }
 }
 
 impl From<&str> for Label {

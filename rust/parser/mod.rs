@@ -335,7 +335,7 @@ fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ParserResult<Conc
 }
 
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
-    let mut var_type = visit_type_any(ctx.type_any().unwrap())?.into_variable();
+    let mut var_type = visit_type_any(ctx.type_any().unwrap())?.into_type_variable();
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.OWNS().is_some() {
             let overridden =
@@ -525,7 +525,7 @@ fn visit_schema_rule(_ctx: Rc<Schema_ruleContext>) -> ParserResult<()> {
 
 fn visit_type_any(ctx: Rc<Type_anyContext>) -> ParserResult<Type> {
     if let Some(var) = ctx.VAR_() {
-        Ok(Type::Variable(get_var(var).into_type()))
+        Ok(Type::Variable(get_var(var)))
     } else if let Some(type_) = ctx.type_() {
         visit_type(type_)
     } else if let Some(scoped) = ctx.type_scoped() {
@@ -539,7 +539,7 @@ fn visit_type_scoped(ctx: Rc<Type_scopedContext>) -> ParserResult<Type> {
     if let Some(scoped) = ctx.label_scoped() {
         Ok(Type::Label(visit_label_scoped(scoped)?))
     } else if let Some(var) = ctx.VAR_() {
-        Ok(Type::Variable(get_var(var).into_type()))
+        Ok(Type::Variable(get_var(var)))
     } else {
         panic!("null scoped type label")
     }
@@ -549,7 +549,7 @@ fn visit_type(ctx: Rc<Type_Context>) -> ParserResult<Type> {
     if let Some(label) = ctx.label() {
         Ok(Type::Label(label.get_text().into()))
     } else if let Some(var) = ctx.VAR_() {
-        Ok(Type::Variable(get_var(var).into_type()))
+        Ok(Type::Variable(get_var(var)))
     } else {
         panic!("visit_type: not implemented")
     }

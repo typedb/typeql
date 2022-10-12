@@ -28,3 +28,9 @@ pub use type_constraint::*;
 
 mod thing_constraint;
 pub use thing_constraint::*;
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum IsExplicit {
+    Yes,
+    No,
+}
