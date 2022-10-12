@@ -23,17 +23,20 @@
 mod conjunction;
 pub use conjunction::*;
 
+mod constraint;
+pub use constraint::*;
+
 mod disjunction;
 pub use disjunction::*;
+
+mod label;
+pub use label::*;
 
 mod negation;
 pub use negation::*;
 
 mod variable;
 pub use variable::*;
-
-mod constraint;
-pub use constraint::*;
 
 #[cfg(test)]
 mod test;
