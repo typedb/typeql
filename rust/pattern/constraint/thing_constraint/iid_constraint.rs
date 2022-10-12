@@ -36,7 +36,7 @@ fn is_valid_iid(iid: &str) -> bool {
 }
 
 impl IIDConstraint {
-    pub fn new(iid: String) -> Result<IIDConstraint, ErrorMessage> {
+    pub fn new(iid: String) -> Result<Self, ErrorMessage> {
         if is_valid_iid(&iid) {
             Ok(IIDConstraint { iid })
         } else {
