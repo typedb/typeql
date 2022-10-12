@@ -53,8 +53,8 @@ pub trait ThingVariableBuilder {
     fn gte(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage>;
     fn lt(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage>;
     fn lte(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage>;
-    fn contains(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage>;
-    fn like(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage>;
+    fn contains(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage>;
+    fn like(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage>;
 }
 
 impl<U: ThingConstrainable> ThingVariableBuilder for U {
@@ -109,12 +109,13 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
         Ok(self.constrain_value(ValueConstraint::new(Predicate::Lte, value.into())))
     }
 
-    fn contains(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Contains, value.into().into())))
+    fn contains(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
+        Ok(self
+            .constrain_value(ValueConstraint::new(Predicate::Contains, Value::from(string.into()))))
     }
 
-    fn like(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Like, value.into().into())))
+    fn like(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Like, Value::from(string.into()))))
     }
 }
 
@@ -165,12 +166,12 @@ impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
         self?.lte(value)
     }
 
-    fn contains(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        self?.contains(value)
+    fn contains(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
+        self?.contains(string)
     }
 
-    fn like(self, value: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        self?.like(value)
+    fn like(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
+        self?.like(string)
     }
 }
 
