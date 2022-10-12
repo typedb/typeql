@@ -23,7 +23,6 @@
 use crate::pattern::*;
 use crate::write_joined;
 use std::fmt;
-use std::fmt::{Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
@@ -87,7 +86,7 @@ impl TypeConstrainable for TypeVariable {
     }
 }
 
-impl Display for TypeVariable {
+impl fmt::Display for TypeVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;
@@ -104,16 +103,16 @@ impl Display for TypeVariable {
             write!(f, " {}", regex)?;
         }
         if !self.relates.is_empty() {
-            f.write_char(' ')?;
-            write_joined!(f, self.relates, ",\n    ")?;
+            f.write_str(" ")?;
+            write_joined!(f, ",\n    ", self.relates)?;
         }
         if !self.plays.is_empty() {
-            f.write_char(' ')?;
-            write_joined!(f, self.plays, ",\n    ")?;
+            f.write_str(" ")?;
+            write_joined!(f, ",\n    ", self.plays)?;
         }
         if !self.owns.is_empty() {
-            f.write_char(' ')?;
-            write_joined!(f, self.owns, ",\n    ")?;
+            f.write_str(" ")?;
+            write_joined!(f, ",\n    ", self.owns)?;
         }
         Ok(())
     }

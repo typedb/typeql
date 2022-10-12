@@ -34,11 +34,21 @@ macro_rules! enum_getter {
 
 #[macro_export]
 macro_rules! write_joined {
-    ($f:ident, $iterable:expr, $joiner:tt) => {{
+    ($f:ident, $joiner:expr, $($iterable:expr),* $(,)*) => {{
+        let mut result: std::fmt::Result = Ok(());
+        let mut _is_first = true;
+        $(
         let mut iter = $iterable.iter();
-        iter.next().map_or(Ok(()), |head| {
-            write!($f, "{}", head)
-                .and_then(|()| iter.map(|x| write!($f, "{}{}", $joiner, x)).collect())
-        })
+        if result.is_ok() && _is_first {
+            if let Some(head) = iter.next() {
+                _is_first = false;
+                result = write!($f, "{}", head);
+            }
+        }
+        if result.is_ok() {
+            result = iter.map(|x| write!($f, "{}{}", $joiner, x)).collect();
+        }
+        )*
+        result
     }};
 }

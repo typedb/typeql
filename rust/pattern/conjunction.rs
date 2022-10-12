@@ -20,10 +20,10 @@
  *
  */
 
+use crate::common::string::indent;
 use crate::pattern::Pattern;
 use crate::ErrorMessage;
 use std::fmt;
-use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -33,6 +33,10 @@ pub struct Conjunction {
 impl Conjunction {
     pub fn new(patterns: &[Pattern]) -> Conjunction {
         Conjunction { patterns: patterns.to_vec() }
+    }
+
+    pub fn into_pattern(self) -> Pattern {
+        Pattern::Conjunction(self)
     }
 }
 
@@ -76,8 +80,12 @@ where
     }
 }
 
-impl Display for Conjunction {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+impl fmt::Display for Conjunction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("{\n")?;
+        f.write_str(
+            &self.patterns.iter().map(|p| indent(&p.to_string()) + ";\n").collect::<String>(),
+        )?;
+        f.write_str("}")
     }
 }

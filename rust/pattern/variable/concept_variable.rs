@@ -20,51 +20,41 @@
  *
  */
 
-mod conjunction;
-pub use conjunction::*;
-
-mod disjunction;
-pub use disjunction::*;
-
-mod negation;
-pub use negation::*;
-
-mod variable;
-pub use variable::*;
-
-mod constraint;
-pub use constraint::*;
-
-#[cfg(test)]
-mod test;
-
+use crate::pattern::*;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Pattern {
-    Conjunction(Conjunction),
-    Disjunction(Disjunction),
-    Negation(Negation),
-    Variable(Variable),
+pub struct ConceptVariable {
+    pub reference: Reference,
+    pub is_constraint: Option<IsConstraint>,
 }
 
-impl<T> From<T> for Pattern
-where
-    Variable: From<T>,
-{
-    fn from(variable: T) -> Self {
-        Pattern::Variable(Variable::from(variable))
+impl ConceptVariable {
+    pub fn into_pattern(self) -> Pattern {
+        self.into_variable().into_pattern()
+    }
+
+    pub fn into_variable(self) -> Variable {
+        Variable::Concept(self)
+    }
+
+    pub fn new(reference: Reference) -> ConceptVariable {
+        ConceptVariable { reference, is_constraint: None }
     }
 }
 
-impl fmt::Display for Pattern {
+impl ConceptConstrainable for ConceptVariable {
+    fn constrain_is(self, is: IsConstraint) -> ConceptVariable {
+        Self { is_constraint: Some(is), ..self }
+    }
+}
+
+impl fmt::Display for ConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Pattern::*;
-        match self {
-            Conjunction(conjunction) => write!(f, "{}", conjunction),
-            Disjunction(disjunction) => write!(f, "{}", disjunction),
-            Negation(negation) => write!(f, "{}", negation),
-            Variable(variable) => write!(f, "{}", variable),
+        write!(f, "{}", self.reference)?;
+        if let Some(is) = &self.is_constraint {
+            write!(f, " {}", is)?;
         }
+        Ok(())
     }
 }

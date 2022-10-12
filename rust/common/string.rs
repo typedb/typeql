@@ -20,40 +20,22 @@
  *
  */
 
-use std::fmt;
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Visibility {
-    Visible,
-    Invisible,
+pub(crate) fn quote(string: &str) -> String {
+    format!("\"{}\"", string)
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Reference {
-    Anonymous(Visibility),
-    Name(String),
+pub(crate) fn unquote(quoted_string: &str) -> String {
+    String::from(&quoted_string[1..quoted_string.len() - 1])
 }
 
-impl Reference {
-    pub fn is_name(&self) -> bool {
-        matches!(self, Reference::Name(_))
-    }
-
-    pub fn is_visible(&self) -> bool {
-        !matches!(self, Reference::Anonymous(Visibility::Invisible))
-    }
+pub(crate) fn indent(multiline_string: &str) -> String {
+    format!("    {}", multiline_string.replace('\n', "\n    "))
 }
 
-impl fmt::Display for Reference {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Reference::*;
-        write!(
-            f,
-            "${}",
-            match self {
-                Anonymous(_) => "_",
-                Name(name) => name,
-            }
-        )
-    }
+pub(crate) fn escape_regex(regex: &str) -> String {
+    regex.replace('/', r#"\/"#)
+}
+
+pub(crate) fn unescape_regex(regex: &str) -> String {
+    regex.replace(r#"\/"#, "/")
 }

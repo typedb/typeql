@@ -23,7 +23,6 @@
 use crate::pattern::*;
 use crate::write_joined;
 use std::fmt;
-use std::fmt::{Debug, Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
@@ -53,6 +52,27 @@ impl ThingVariable {
             value: None,
             relation: None,
         }
+    }
+
+    fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.reference.is_visible() {
+            write!(f, "{}", self.reference)?;
+            if self.value.is_some() || self.relation.is_some() {
+                f.write_str(" ")?;
+            }
+        }
+
+        if let Some(value) = &self.value {
+            write!(f, "{}", value)?;
+        } else if let Some(relation) = &self.relation {
+            write!(f, "{}", relation)?;
+        }
+
+        Ok(())
+    }
+
+    fn is_thing_constrained(&self) -> bool {
+        self.isa.is_some() || self.iid.is_some() || !self.has.is_empty()
     }
 }
 
@@ -89,41 +109,15 @@ impl RelationConstrainable for ThingVariable {
     }
 }
 
-impl Display for ThingVariable {
+impl fmt::Display for ThingVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.reference.is_visible() {
-            write!(f, "{}", self.reference)?;
+        self.fmt_thing_syntax(f)?;
+
+        if self.is_thing_constrained() {
+            f.write_str(" ")?;
+            write_joined!(f, ",\n    ", self.isa, self.iid, self.has)?;
         }
 
-        if let Some(value) = &self.value {
-            if self.reference.is_visible() {
-                f.write_char(' ')?;
-            }
-            write!(f, "{}", value)?;
-        }
-        if let Some(relation) = &self.relation {
-            if self.reference.is_visible() {
-                f.write_char(' ')?;
-            }
-            write!(f, "{}", relation)?;
-        }
-
-        if let Some(iid) = &self.iid {
-            write!(f, " {}", iid)?;
-        }
-
-        if let Some(isa) = &self.isa {
-            write!(f, " {}", isa)?;
-        }
-
-        if !self.has.is_empty() {
-            if self.isa.is_some() {
-                f.write_str(",\n    ")?;
-            } else {
-                f.write_char(' ')?;
-            }
-            write_joined!(f, self.has, ",\n    ")?;
-        }
         Ok(())
     }
 }

@@ -20,40 +20,25 @@
  *
  */
 
-use std::fmt;
+use crate::pattern::*;
+use crate::ErrorMessage;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Visibility {
-    Visible,
-    Invisible,
+pub trait ConceptConstrainable {
+    fn constrain_is(self, is: IsConstraint) -> ConceptVariable;
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Reference {
-    Anonymous(Visibility),
-    Name(String),
+pub trait ConceptVariableBuilder: Sized {
+    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage>;
 }
 
-impl Reference {
-    pub fn is_name(&self) -> bool {
-        matches!(self, Reference::Name(_))
-    }
-
-    pub fn is_visible(&self) -> bool {
-        !matches!(self, Reference::Anonymous(Visibility::Invisible))
+impl<U: ConceptConstrainable> ConceptVariableBuilder for U {
+    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage> {
+        Ok(self.constrain_is(is.into()))
     }
 }
 
-impl fmt::Display for Reference {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Reference::*;
-        write!(
-            f,
-            "${}",
-            match self {
-                Anonymous(_) => "_",
-                Name(name) => name,
-            }
-        )
+impl<U: ConceptVariableBuilder> ConceptVariableBuilder for Result<U, ErrorMessage> {
+    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage> {
+        self?.is(is)
     }
 }

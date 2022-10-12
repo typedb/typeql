@@ -20,9 +20,10 @@
  *
  */
 
+use crate::common::string::escape_regex;
+use crate::common::token::Constraint::*;
 use crate::{TypeVariable, TypeVariableBuilder, UnboundVariable};
 use std::fmt;
-use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {
@@ -48,12 +49,10 @@ impl From<(String, String)> for Label {
     }
 }
 
-impl Display for Label {
+impl fmt::Display for Label {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(scope) = &self.scope {
-            if scope != "relation" {
-                write!(f, "{}:", scope)?;
-            }
+            write!(f, "{}:", scope)?;
         }
         write!(f, "{}", self.name)
     }
@@ -64,9 +63,9 @@ pub struct LabelConstraint {
     pub label: Label,
 }
 
-impl Display for LabelConstraint {
+impl fmt::Display for LabelConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "type {}", self.label)
+        write!(f, "{} {}", Type, self.label)
     }
 }
 
@@ -77,9 +76,7 @@ pub struct SubConstraint {
 
 impl<T: Into<Label>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
-        SubConstraint {
-            type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap().into_type()),
-        }
+        SubConstraint { type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap()) }
     }
 }
 
@@ -94,9 +91,9 @@ impl From<TypeVariable> for SubConstraint {
     }
 }
 
-impl Display for SubConstraint {
+impl fmt::Display for SubConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "sub {}", self.type_)
+        write!(f, "{} {}", Sub, self.type_)
     }
 }
 
@@ -121,7 +118,7 @@ impl From<String> for RelatesConstraint {
 impl From<Label> for RelatesConstraint {
     fn from(type_: Label) -> Self {
         RelatesConstraint {
-            role_type: UnboundVariable::hidden().type_(type_).unwrap().into_type(),
+            role_type: UnboundVariable::hidden().type_(type_).unwrap(),
             overridden_role_type: None,
         }
     }
@@ -139,9 +136,9 @@ impl From<TypeVariable> for RelatesConstraint {
     }
 }
 
-impl Display for RelatesConstraint {
+impl fmt::Display for RelatesConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "relates {}", self.role_type)
+        write!(f, "{} {}", Relates, self.role_type)
     }
 }
 
@@ -159,7 +156,6 @@ impl PlaysConstraint {
                 UnboundVariable::hidden()
                     .type_(label.label.scope.as_ref().cloned().unwrap())
                     .unwrap()
-                    .into_type()
             }),
             role_type,
             overridden_role_type,
@@ -181,10 +177,7 @@ impl From<(String, String)> for PlaysConstraint {
 
 impl From<Label> for PlaysConstraint {
     fn from(scoped_type: Label) -> Self {
-        PlaysConstraint::new(
-            UnboundVariable::hidden().type_(scoped_type).unwrap().into_type(),
-            None,
-        )
+        PlaysConstraint::new(UnboundVariable::hidden().type_(scoped_type).unwrap(), None)
     }
 }
 
@@ -200,33 +193,33 @@ impl From<TypeVariable> for PlaysConstraint {
     }
 }
 
-impl Display for PlaysConstraint {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "plays {}", self.role_type)
+impl fmt::Display for PlaysConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", Plays, self.role_type)
     }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum IsKey {
+pub enum IsKeyAttribute {
     Yes,
     No,
 }
 
-impl From<bool> for IsKey {
+impl From<bool> for IsKeyAttribute {
     fn from(is_key: bool) -> Self {
         match is_key {
-            true => IsKey::Yes,
-            false => IsKey::No,
+            true => IsKeyAttribute::Yes,
+            false => IsKeyAttribute::No,
         }
     }
 }
 
-pub const KEY: IsKey = IsKey::Yes;
+pub const KEY: IsKeyAttribute = IsKeyAttribute::Yes;
 
-impl Display for IsKey {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        if *self == IsKey::Yes {
-            f.write_str(" @key")?;
+impl fmt::Display for IsKeyAttribute {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if *self == IsKeyAttribute::Yes {
+            write!(f, " {}", IsKey)?;
         }
         Ok(())
     }
@@ -236,14 +229,14 @@ impl Display for IsKey {
 pub struct OwnsConstraint {
     pub attribute_type: TypeVariable,
     pub overridden_attribute_type: Option<TypeVariable>,
-    pub is_key: IsKey,
+    pub is_key: IsKeyAttribute,
 }
 
 impl OwnsConstraint {
     fn new(
         attribute_type: TypeVariable,
         overridden_attribute_type: Option<TypeVariable>,
-        is_key: IsKey,
+        is_key: IsKeyAttribute,
     ) -> Self {
         OwnsConstraint { attribute_type, overridden_attribute_type, is_key }
     }
@@ -251,46 +244,43 @@ impl OwnsConstraint {
 
 impl From<&str> for OwnsConstraint {
     fn from(attribute_type: &str) -> Self {
-        OwnsConstraint::from((attribute_type, IsKey::No))
+        OwnsConstraint::from((attribute_type, IsKeyAttribute::No))
     }
 }
 
-impl From<(&str, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (&str, IsKey)) -> Self {
+impl From<(&str, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (&str, IsKeyAttribute)) -> Self {
         OwnsConstraint::from((Label::from(attribute_type), is_key))
     }
 }
 
-impl From<(String, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (String, IsKey)) -> Self {
+impl From<(String, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (String, IsKeyAttribute)) -> Self {
         OwnsConstraint::from((Label::from(attribute_type), is_key))
     }
 }
 
-impl From<(Label, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (Label, IsKey)) -> Self {
-        OwnsConstraint::from((
-            UnboundVariable::hidden().type_(attribute_type).unwrap().into_type(),
-            is_key,
-        ))
+impl From<(Label, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (Label, IsKeyAttribute)) -> Self {
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).unwrap(), is_key))
     }
 }
 
-impl From<(UnboundVariable, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (UnboundVariable, IsKey)) -> Self {
+impl From<(UnboundVariable, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (UnboundVariable, IsKeyAttribute)) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), is_key))
     }
 }
 
-impl From<(TypeVariable, IsKey)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (TypeVariable, IsKey)) -> Self {
+impl From<(TypeVariable, IsKeyAttribute)> for OwnsConstraint {
+    fn from((attribute_type, is_key): (TypeVariable, IsKeyAttribute)) -> Self {
         OwnsConstraint::new(attribute_type, None, is_key)
     }
 }
 
-impl Display for OwnsConstraint {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "owns {}{}", self.attribute_type, self.is_key)
+impl fmt::Display for OwnsConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}{}", Owns, self.attribute_type, self.is_key)
     }
 }
 
@@ -311,12 +301,8 @@ impl From<String> for RegexConstraint {
     }
 }
 
-fn escape_regex(regex: &str) -> String {
-    regex.replace('/', r#"\\/"#)
-}
-
-impl Display for RegexConstraint {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, r#"regex "{}""#, escape_regex(&self.regex))
+impl fmt::Display for RegexConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, r#"{} "{}""#, Regex, escape_regex(&self.regex))
     }
 }

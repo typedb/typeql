@@ -20,6 +20,9 @@
  *
  */
 
+mod concept_constraint;
+pub use concept_constraint::*;
+
 mod type_constraint;
 pub use type_constraint::*;
 

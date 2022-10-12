@@ -33,11 +33,12 @@ use chrono::{NaiveDate, NaiveDateTime, Timelike};
 use std::rc::Rc;
 
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
+use crate::common::string::*;
+use crate::common::token::Predicate;
 use typeql_grammar::typeqlrustparser::*;
 
 use crate::pattern::*;
 use crate::query::*;
-use crate::typeql_match;
 
 #[derive(Debug)]
 pub struct Definable;
@@ -51,20 +52,12 @@ enum Type {
     Variable(TypeVariable),
 }
 
-fn unquote_string(quoted_string: String) -> String {
-    String::from(&quoted_string[1..quoted_string.len() - 1])
-}
-
 fn get_string(string: Rc<TerminalNode>) -> String {
-    unquote_string(string.get_text())
-}
-
-fn unescape_regex(regex: String) -> String {
-    regex.replace(r#"\\/"#, "/")
+    unquote(&string.get_text())
 }
 
 fn get_regex(string: Rc<TerminalNode>) -> String {
-    unescape_regex(unquote_string(string.get_text()))
+    unescape_regex(&unquote(&string.get_text()))
 }
 
 fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {
@@ -73,6 +66,10 @@ fn get_long(long: Rc<TerminalNode>) -> ParserResult<i64> {
 
 fn get_double(double: Rc<TerminalNode>) -> ParserResult<f64> {
     double.get_text().parse().map_err(|_| ILLEGAL_GRAMMAR.format(&[double.get_text().as_str()]))
+}
+
+fn get_boolean(boolean: Rc<TerminalNode>) -> ParserResult<bool> {
+    boolean.get_text().parse().map_err(|_| ILLEGAL_GRAMMAR.format(&[boolean.get_text().as_str()]))
 }
 
 fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
@@ -205,7 +202,8 @@ fn visit_query_update(_ctx: Rc<Query_updateContext>) -> ParserResult<()> {
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
-    let mut match_query = typeql_match(visit_patterns(ctx.patterns().unwrap())?)?;
+    let mut match_query =
+        TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?));
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
             match_query = match_query.filter(visit_filter(filter)?);
@@ -250,11 +248,7 @@ fn visit_sort(ctx: Rc<SortContext>) -> Sorting {
 fn visit_var_order(ctx: Rc<Var_orderContext>) -> OrderedVariable {
     OrderedVariable {
         var: get_var(ctx.VAR_().unwrap()),
-        order: if let Some(order) = ctx.ORDER_() {
-            Some(order.get_text())
-        } else {
-            None
-        },
+        order: ctx.ORDER_().map(|order| order.get_text()),
     }
 }
 
@@ -293,8 +287,14 @@ fn visit_patterns(ctx: Rc<PatternsContext>) -> ParserResult<Vec<Pattern>> {
 fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
     if let Some(var) = ctx.pattern_variable() {
         Ok(visit_pattern_variable(var)?.into_pattern())
-    } else {
+    } else if let Some(disjunction) = ctx.pattern_disjunction() {
+        Ok(visit_pattern_disjunction(disjunction)?.into_pattern())
+    } else if let Some(_conjunction) = ctx.pattern_conjunction() {
         todo!()
+    } else if let Some(negation) = ctx.pattern_negation() {
+        Ok(visit_pattern_negation(negation)?.into_pattern())
+    } else {
+        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -302,12 +302,27 @@ fn visit_pattern_conjunction(_ctx: Rc<Pattern_conjunctionContext>) -> ParserResu
     todo!()
 }
 
-fn visit_pattern_disjunction(_ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<()> {
-    todo!()
+fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<Disjunction> {
+    Ok(Disjunction::from(
+        (0..)
+            .map_while(|i| ctx.patterns(i))
+            .map(visit_patterns)
+            .map(|result| {
+                result.map(|mut nested| match nested.len() {
+                    1 => nested.pop().unwrap(),
+                    _ => Conjunction::from(nested).into_pattern(),
+                })
+            })
+            .collect::<ParserResult<Vec<Pattern>>>()?,
+    ))
 }
 
-fn visit_pattern_negation(_ctx: Rc<Pattern_negationContext>) -> ParserResult<()> {
-    todo!()
+fn visit_pattern_negation(ctx: Rc<Pattern_negationContext>) -> ParserResult<Negation> {
+    let mut patterns = visit_patterns(ctx.patterns().unwrap())?;
+    Ok(match patterns.len() {
+        1 => Negation::from(patterns.pop().unwrap()),
+        _ => Negation::from(Conjunction::from(patterns).into_pattern()),
+    })
 }
 
 fn visit_pattern_variable(ctx: Rc<Pattern_variableContext>) -> ParserResult<Variable> {
@@ -322,14 +337,14 @@ fn visit_pattern_variable(ctx: Rc<Pattern_variableContext>) -> ParserResult<Vari
     }
 }
 
-fn visit_variable_concept(_ctx: Rc<Variable_conceptContext>) -> ParserResult<TypeVariable> {
-    todo!()
+fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ParserResult<ConceptVariable> {
+    get_var(ctx.VAR_(0).unwrap()).is(get_var(ctx.VAR_(1).unwrap()))
 }
 
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
     let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
         Type::Variable(p) => p,
-        Type::Label(p) => UnboundVariable::hidden().type_(p)?.into_type(),
+        Type::Label(p) => UnboundVariable::hidden().type_(p)?,
     };
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.OWNS().is_some() {
@@ -337,7 +352,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 None => None,
                 Some(_) => todo!(),
             };
-            let is_key = IsKey::from(constraint.IS_KEY().is_some());
+            let is_key = IsKeyAttribute::from(constraint.IS_KEY().is_some());
             var_type = var_type.constrain_owns(match visit_type(constraint.type_(0).unwrap())? {
                 Type::Label(label) => OwnsConstraint::from((label, is_key)),
                 Type::Variable(var) => OwnsConstraint::from((var, is_key)),
@@ -354,7 +369,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 },
             );
         } else if constraint.REGEX().is_some() {
-            var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?.into_type();
+            var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?;
         } else if constraint.RELATES().is_some() {
             let _overridden: Option<()> = match constraint.AS() {
                 None => None,
@@ -373,7 +388,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 });
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
-            var_type = var_type.type_(scoped_label)?.into_type();
+            var_type = var_type.type_(scoped_label)?;
         } else {
             panic!("visit_variable_type: not implemented")
         }
@@ -404,7 +419,7 @@ fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<
 fn visit_variable_thing(ctx: Rc<Variable_thingContext>) -> ParserResult<ThingVariable> {
     let mut var_thing = get_var(ctx.VAR_().unwrap()).into_thing();
     if let Some(iid) = ctx.IID_() {
-        var_thing = var_thing.iid(iid.get_text())?.into_thing();
+        var_thing = var_thing.iid(iid.get_text())?;
     }
     if let Some(isa) = ctx.ISA_() {
         var_thing = var_thing.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?)
@@ -491,12 +506,20 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
     } else if let Some(equality) = ctx.predicate_equality() {
         Ok(ValueConstraint::new(Predicate::from(equality.get_text()), {
             let predicate_value = ctx.predicate_value().unwrap();
-            if let Some(_value) = predicate_value.value() {
-                todo!()
+            if let Some(value) = predicate_value.value() {
+                visit_value(value)?
             } else if let Some(var) = predicate_value.VAR_() {
                 Value::from(get_var(var))
             } else {
                 panic!("Unexpected predicate value: `{}`", predicate_value.get_text())
+            }
+        }))
+    } else if let Some(substring) = ctx.predicate_substring() {
+        Ok(ValueConstraint::new(Predicate::from(substring.get_text()), {
+            if let Some(_) = substring.LIKE() {
+                Value::from(get_regex(ctx.STRING_().unwrap()))
+            } else {
+                Value::from(get_string(ctx.STRING_().unwrap()))
             }
         }))
     } else {
@@ -584,10 +607,16 @@ fn visit_value_type(_ctx: Rc<Value_typeContext>) -> ParserResult<()> {
 fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
     if let Some(string) = ctx.STRING_() {
         Ok(Value::from(get_string(string)))
-    } else if let Some(date_time) = ctx.DATETIME_() {
-        Value::try_from(get_date_time(date_time)?)
+    } else if let Some(long) = ctx.LONG_() {
+        Ok(Value::from(get_long(long)?))
+    } else if let Some(double) = ctx.DOUBLE_() {
+        Ok(Value::from(get_double(double)?))
+    } else if let Some(boolean) = ctx.BOOLEAN_() {
+        Ok(Value::from(get_boolean(boolean)?))
     } else if let Some(date) = ctx.DATE_() {
         Value::try_from(get_date(date)?.and_hms(0, 0, 0))
+    } else if let Some(date_time) = ctx.DATETIME_() {
+        Value::try_from(get_date_time(date_time)?)
     } else {
         todo!()
     }

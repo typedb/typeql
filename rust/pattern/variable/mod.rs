@@ -23,6 +23,9 @@
 mod reference;
 pub use reference::*;
 
+mod concept_variable;
+pub use concept_variable::*;
+
 mod thing_variable;
 pub use thing_variable::*;
 
@@ -38,10 +41,10 @@ pub use builder::*;
 use crate::pattern::*;
 
 use std::fmt;
-use std::fmt::Display;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
+    Concept(ConceptVariable),
     Thing(ThingVariable),
     Type(TypeVariable),
     Unbound(UnboundVariable),
@@ -51,29 +54,17 @@ impl Variable {
     pub fn into_pattern(self) -> Pattern {
         Pattern::Variable(self)
     }
-
-    pub fn into_type(self) -> TypeVariable {
-        use Variable::*;
-        match self {
-            Type(var) => var,
-            Unbound(var) => var.into_type(),
-            _ => panic!(""),
-        }
-    }
-
-    pub fn into_thing(self) -> ThingVariable {
-        use Variable::*;
-        match self {
-            Thing(var) => var,
-            Unbound(var) => var.into_thing(),
-            _ => panic!(""),
-        }
-    }
 }
 
 impl From<UnboundVariable> for Variable {
     fn from(unbound: UnboundVariable) -> Self {
         Variable::Unbound(unbound)
+    }
+}
+
+impl From<ConceptVariable> for Variable {
+    fn from(var: ConceptVariable) -> Self {
+        Variable::Concept(var)
     }
 }
 
@@ -89,65 +80,12 @@ impl From<TypeVariable> for Variable {
     }
 }
 
-impl ThingConstrainable for Variable {
-    fn constrain_has(self, has: HasConstraint) -> ThingVariable {
-        self.into_thing().constrain_has(has)
-    }
-
-    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
-        self.into_thing().constrain_iid(iid)
-    }
-
-    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
-        self.into_thing().constrain_isa(isa)
-    }
-
-    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
-        self.into_thing().constrain_value(value)
-    }
-
-    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
-        self.into_thing().constrain_relation(relation)
-    }
-}
-
-impl RelationConstrainable for Variable {
-    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable {
-        self.into_thing().constrain_role_player(constraint)
-    }
-}
-
-impl TypeConstrainable for Variable {
-    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
-        self.into_type().constrain_label(label)
-    }
-
-    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable {
-        self.into_type().constrain_owns(owns)
-    }
-
-    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
-        self.into_type().constrain_plays(plays)
-    }
-
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
-        self.into_type().constrain_regex(regex)
-    }
-
-    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
-        self.into_type().constrain_relates(relates)
-    }
-
-    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
-        self.into_type().constrain_sub(sub)
-    }
-}
-
-impl Display for Variable {
+impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Variable::*;
         match self {
             Unbound(unbound) => write!(f, "{}", unbound),
+            Concept(concept) => write!(f, "{}", concept),
             Thing(thing) => write!(f, "{}", thing),
             Type(type_) => write!(f, "{}", type_),
         }

@@ -23,11 +23,14 @@
 use crate::common::error::{
     ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
 };
+use crate::common::string::escape_regex;
+use crate::common::token::Constraint::*;
+use crate::common::token::Predicate;
+use crate::common::token::Type::Relation;
 use crate::pattern::*;
 use crate::write_joined;
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
-use std::fmt::{Display, Write};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {
@@ -64,9 +67,9 @@ impl TryFrom<String> for IIDConstraint {
     }
 }
 
-impl Display for IIDConstraint {
+impl fmt::Display for IIDConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "iid {}", self.iid)
+        write!(f, "{} {}", Iid, self.iid)
     }
 }
 
@@ -79,7 +82,7 @@ pub struct IsaConstraint {
 impl<T: Into<Label>> From<T> for IsaConstraint {
     fn from(type_name: T) -> Self {
         IsaConstraint {
-            type_: UnboundVariable::hidden().type_(type_name).unwrap().into_type(),
+            type_: UnboundVariable::hidden().type_(type_name).unwrap(),
             is_explicit: false,
         }
     }
@@ -97,9 +100,9 @@ impl From<TypeVariable> for IsaConstraint {
     }
 }
 
-impl Display for IsaConstraint {
+impl fmt::Display for IsaConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "isa {}", self.type_)
+        write!(f, "{} {}", Isa, self.type_)
     }
 }
 
@@ -112,7 +115,7 @@ pub struct HasConstraint {
 impl From<(String, ValueConstraint)> for HasConstraint {
     fn from((type_name, value_constraint): (String, ValueConstraint)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
             attribute: UnboundVariable::hidden().constrain_value(value_constraint),
         }
     }
@@ -121,7 +124,7 @@ impl From<(String, ValueConstraint)> for HasConstraint {
 impl From<(String, UnboundVariable)> for HasConstraint {
     fn from((type_name, variable): (String, UnboundVariable)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
             attribute: variable.into_thing(),
         }
     }
@@ -130,15 +133,15 @@ impl From<(String, UnboundVariable)> for HasConstraint {
 impl From<(String, ThingVariable)> for HasConstraint {
     fn from((type_name, variable): (String, ThingVariable)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap().into_type()),
+            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
             attribute: variable,
         }
     }
 }
 
-impl Display for HasConstraint {
+impl fmt::Display for HasConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("has")?;
+        write!(f, "{}", Has)?;
         if let Some(type_) = &self.type_ {
             write!(f, " {}", &type_.label.as_ref().unwrap().label)?;
         }
@@ -166,64 +169,16 @@ impl ValueConstraint {
     }
 }
 
-impl Display for ValueConstraint {
+impl fmt::Display for ValueConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.predicate == Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
+        if self.predicate == Predicate::Like {
+            assert!(matches!(self.value, Value::String(_)));
+            write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
+        } else if self.predicate == Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)
         }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Predicate {
-    // equality
-    Eq,
-    Neq,
-    Gt,
-    Gte,
-    Lt,
-    Lte,
-    // substring
-    Contains,
-    Like,
-}
-
-impl Predicate {
-    pub fn is_equality(&self) -> bool {
-        use Predicate::*;
-        matches!(self, Eq | Neq | Gt | Gte | Lt | Lte)
-    }
-
-    pub fn is_substring(&self) -> bool {
-        use Predicate::*;
-        matches!(self, Contains | Like)
-    }
-}
-
-impl From<String> for Predicate {
-    fn from(string: String) -> Self {
-        use Predicate::*;
-        match string.as_str() {
-            "=" => Eq,
-            _ => todo!(),
-        }
-    }
-}
-
-impl Display for Predicate {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Predicate::*;
-        write!(
-            f,
-            "{}",
-            match self {
-                Eq => "=",
-                Neq => "!=",
-                _ => todo!(),
-            }
-        )
     }
 }
 
@@ -292,16 +247,14 @@ impl From<ThingVariable> for Value {
     }
 }
 
-impl From<Variable> for Value {
-    fn from(variable: Variable) -> Value {
-        Value::Variable(Box::new(variable.into_thing()))
-    }
-}
-
-impl Display for Value {
+impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
+            Long(long) => write!(f, "{}", long),
+            Double(double) => write!(f, "{}", double),
+            Boolean(boolean) => write!(f, "{}", boolean),
+            String(string) => write!(f, "\"{}\"", string),
             DateTime(date_time) => write!(f, "{}", {
                 if date_time.time().nanosecond() > 0 {
                     date_time.format("%Y-%m-%dT%H:%M:%S.%3f")
@@ -311,9 +264,7 @@ impl Display for Value {
                     date_time.format("%Y-%m-%dT%H:%M")
                 }
             }),
-            String(string) => write!(f, "\"{}\"", string),
             Variable(var) => write!(f, "{}", var.reference),
-            _ => panic!(""),
         }
     }
 }
@@ -326,7 +277,7 @@ pub struct RelationConstraint {
 
 impl RelationConstraint {
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
-        RelationConstraint { role_players, scope: String::from("relation") }
+        RelationConstraint { role_players, scope: Relation.to_string() }
     }
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {
@@ -340,11 +291,11 @@ impl From<RolePlayerConstraint> for RelationConstraint {
     }
 }
 
-impl Display for RelationConstraint {
+impl fmt::Display for RelationConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_char('(')?;
-        write_joined!(f, self.role_players, ", ")?;
-        f.write_char(')')
+        f.write_str("(")?;
+        write_joined!(f, ", ", self.role_players)?;
+        f.write_str(")")
     }
 }
 
@@ -399,13 +350,13 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).unwrap().into_type(), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type).unwrap(), player_var))
     }
 }
 
 impl From<(Label, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).unwrap().into_type(), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type).unwrap(), player_var))
     }
 }
 
@@ -421,7 +372,7 @@ impl From<(TypeVariable, UnboundVariable)> for RolePlayerConstraint {
     }
 }
 
-impl Display for RolePlayerConstraint {
+impl fmt::Display for RolePlayerConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(role_type) = &self.role_type {
             if role_type.reference.is_visible() {

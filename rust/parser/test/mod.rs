@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    parse_query, rel, type_, typeql_match, var, MatchQueryBuilder, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeVariableBuilder, KEY,
+    and, not, or, parse_query, rel, type_, typeql_match, var, ConceptVariableBuilder, Conjunction,
+    Disjunction, ErrorMessage, MatchQueryBuilder, Query, RelationVariableBuilder,
+    ThingVariableBuilder, TypeQLMatch, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -40,7 +41,7 @@ fn test_simple_query() {
 $x isa movie;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").isa("movie"));
+    let expected = typeql_match!(var("x").isa("movie"));
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -51,7 +52,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("a").type_("attribute_label")).get(["a"]);
+    let expected = typeql_match!(var("a").type_("attribute_label")).get(["a"]);
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -62,7 +63,7 @@ $x isa person,
     has name "alice/bob";"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").isa("person").has("name", "alice/bob"));
+    let expected = typeql_match!(var("x").isa("person").has("name", "alice/bob"));
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -74,10 +75,10 @@ $brando "Marl B" isa name;
 get $char, $prod;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         var("brando").eq("Marl B").isa("name"),
         rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
-    ])
+    )
     .get(["char", "prod"]);
 
     assert_query_eq!(expected, parsed, query);
@@ -89,7 +90,7 @@ fn test_role_type_scoped_globally() {
 $m relates spouse;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("m").relates("spouse"));
+    let expected = typeql_match!(var("m").relates("spouse"));
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -99,11 +100,10 @@ fn test_role_type_not_scoped() {
 marriage relates $s;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(type_("marriage").relates(var("s")));
+    let expected = typeql_match!(type_("marriage").relates(var("s")));
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_predicate_query_1() {
     let query = r#"match
@@ -120,15 +120,15 @@ $x isa movie,
 $t != "Apocalypse Now";"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         var("x").isa("movie").has("title", var("t")),
-        or(
+        or!(
             var("t").eq("Apocalypse Now"),
-            and(var("t").lt("Juno"), var("t").gt("Godfather")),
+            and!(var("t").lt("Juno"), var("t").gt("Godfather")),
             var("t").eq("Spy"),
         ),
         var("t").neq("Apocalypse Now"),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -146,17 +146,13 @@ $x isa movie,
 };"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         var("x").isa("movie").has("title", var("t")),
-        or(
-            and(
-                var("t").lte("Juno"),
-                var("t").gte("Godfather"),
-                var("t").neq("Heat"),
-            ),
+        or!(
+            and!(var("t").lte("Juno"), var("t").gte("Godfather"), var("t").neq("Heat"),),
             var("t").eq("The Muppets"),
         ),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -173,11 +169,11 @@ $y isa person,
 };"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         rel("x").rel("y"),
         var("y").isa("person").has("name", var("n")),
-        or(var("n").contains("ar"), var("n").like("^M.*$")),
-    ]);
+        or!(var("n").contains("ar"), var("n").like("^M.*$")),
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -189,11 +185,11 @@ $y >= $z;
 $z 18 isa age;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         var("x").has("age", var("y")),
         var("y").gte(var("z")),
         var("z").eq(18).isa("age"),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -207,18 +203,17 @@ $b isa $y;
 not { $x is $y; };
 not { $a is $b; };"#;
 
-    let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         var("x").sub(var("z")),
         var("y").sub(var("z")),
         var("a").isa(var("x")),
         var("b").isa(var("y")),
-        not(var("x").is("y")),
-        not(var("a").is("b")),
-    ]);
+        not(var("x").is(var("y"))),
+        not(var("a").is(var("b"))),
+    );
+    let parsed = parse_query(query).map(Query::into_match);
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn test_value_equals_variable_query() {
@@ -226,7 +221,7 @@ fn test_value_equals_variable_query() {
 $s1 = $s2;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("s1").eq(var("s2")));
+    let expected = typeql_match!(var("s1").eq(var("s2")));
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -239,10 +234,10 @@ $_ has title "Spy",
     has release-date $r;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         var("x").has("release-date", gte(var("r"))),
         var(()).has("title", "Spy").has("release-date", var("r")),
-    ]);
+    );
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -254,7 +249,7 @@ $x has release-date < 1986-03-03T00:00,
     has tmdb-vote-average <= 9.0;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([var("x")
+    let expected = typeql_match!([var("x")
         .has("release-date", lt(LocalDate.of(1986, 3, 3).atStartOfDay()))
         .has("tmdb-vote-count", 100)
         .has("tmdb-vote-average", lte(9.0))]);
@@ -269,7 +264,7 @@ fn when_parsing_date_handle_time() {
 $x has release-date 1000-11-12T13:14:15;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").has(
+    let expected = typeql_match!(var("x").has(
         "release-date",
         NaiveDateTime::new(NaiveDate::from_ymd(1000, 11, 12), NaiveTime::from_hms(13, 14, 15)),
     ));
@@ -283,7 +278,7 @@ fn when_parsing_date_handle_big_years() {
 $x has release-date +12345-12-25T00:00;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").has(
+    let expected = typeql_match!(var("x").has(
         "release-date",
         NaiveDateTime::new(NaiveDate::from_ymd(12345, 12, 25), NaiveTime::from_hms(0, 0, 0)),
     ));
@@ -297,7 +292,7 @@ fn when_parsing_date_handle_small_years() {
 $x has release-date 0867-01-01T00:00;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").has(
+    let expected = typeql_match!(var("x").has(
         "release-date",
         NaiveDateTime::new(NaiveDate::from_ymd(867, 1, 1), NaiveTime::from_hms(0, 0, 0)),
     ));
@@ -311,7 +306,7 @@ fn when_parsing_date_handle_negative_years() {
 $x has release-date -3200-01-01T00:00;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").has(
+    let expected = typeql_match!(var("x").has(
         "release-date",
         NaiveDateTime::new(NaiveDate::from_ymd(-3200, 1, 1), NaiveTime::from_hms(0, 0, 0)),
     ));
@@ -325,7 +320,7 @@ fn when_parsing_date_handle_millis() {
 $x has release-date 1000-11-12T13:14:15.123;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").has(
+    let expected = typeql_match!(var("x").has(
         "release-date",
         NaiveDateTime::new(
             NaiveDate::from_ymd(1000, 11, 12),
@@ -342,7 +337,7 @@ fn when_parsing_date_handle_millis_shorthand() {
 $x has release-date 1000-11-12T13:14:15.1;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").has(
+    let expected = typeql_match!(var("x").has(
         "release-date",
         NaiveDateTime::new(
             NaiveDate::from_ymd(1000, 11, 12),
@@ -367,10 +362,9 @@ $x has release-date 1000-11-12T13:14:15.000123456;"#;
     }
 }
 
-/*
 #[test]
 fn when_parsing_date_error_when_handling_overly_precise_nanos() {
-    let expected = typeql_match(var("x").has(
+    let expected = typeql_match!(var("x").has(
         "release-date",
         NaiveDateTime::new(
             NaiveDate::from_ymd(1000, 11, 12),
@@ -378,11 +372,12 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
         ),
     ));
     match expected {
-        Err(err) => assert!(err.contains("more precise than 1 millisecond")),
+        Err(err) => assert!(err.message.contains("more precise than 1 millisecond")),
         Ok(_) => assert!(false),
     }
 }
 
+/*
 #[test]
 fn test_long_predicate_query() {
     let query = r#"match
@@ -390,7 +385,7 @@ $x isa movie,
     has tmdb-vote-count <= 400;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").isa("movie").has("tmdb-vote-count", lte(400)));
+    let expected = typeql_match!(var("x").isa("movie").has("tmdb-vote-count", lte(400)));
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -403,7 +398,7 @@ $x plays starring:actor;
 sort $x asc;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").plays(("starring", "actor"))).sort([("x", "asc")]);
+    let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([("x", "asc")]);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -417,7 +412,7 @@ sort $r desc;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
     let expected =
-        typeql_match(var("x").isa("movie").has("rating", var("r"))).sort([("r", "desc")]);
+        typeql_match!(var("x").isa("movie").has("rating", var("r"))).sort([("r", "desc")]);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -430,7 +425,7 @@ $x isa movie,
 sort $r; limit 10;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").isa("movie").has("rating", var("r"))).sort("r").limit(10);
+    let expected = typeql_match!(var("x").isa("movie").has("rating", var("r"))).sort("r").limit(10);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -443,7 +438,7 @@ $x isa movie,
 sort $r desc; offset 10; limit 10;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").isa("movie").has("rating", var("r")))
+    let expected = typeql_match!(var("x").isa("movie").has("rating", var("r")))
         .sort([("r", "desc")])
         .offset(10)
         .limit(10);
@@ -459,7 +454,7 @@ $y isa movie,
 offset 2; limit 4;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("y").isa("movie").has("title", var("n"))).offset(2).limit(4);
+    let expected = typeql_match!(var("y").isa("movie").has("title", var("n"))).offset(2).limit(4);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -474,13 +469,13 @@ $z sub production;
 has-genre relates $p;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([
+    let expected = typeql_match!(
         rel((var("p"), var("x"))).rel("y"),
         var("x").isa(var("z")),
         var("y").eq("crime"),
         var("z").sub("production"),
         type_("has-genre").relates(var("p")),
-    ]);
+    );
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -490,73 +485,76 @@ fn test_parse_relates_type_variable() {
     let query = r#"match
 $x isa $type;
 $type relates someRole;"#;
+
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match([var("x").isa(var("type")), var("type").relates("someRole")]);
+    let expected = typeql_match!(var("x").isa(var("type")), var("type").relates("someRole"));
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_or_query() {
+    let query = r#"match
+$x isa movie;
+{
+    $y "drama" isa genre;
+    ($x, $y);
+} or {
+    $x "The Muppets";
+};"#;
+
+    let parsed = parse_query(query).map(Query::into_match);
+    let expected = typeql_match!(
+        var("x").isa("movie"),
+        or!(and!(var("y").eq("drama").isa("genre"), rel("x").rel("y")), var("x").eq("The Muppets"))
+    );
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+// #[test]
+fn test_disjunction_not_in_conjunction() {
+    let query = r#"match
+{
+    $x isa person;
+} or {
+    $x isa company;
+};"#;
+
+    assert!(parse_query(query).is_err())
+}
+
+#[test]
+fn test_nested_conjunction_and_disjunction() {
+    let query = r#"match
+$y isa $p;
+{
+    ($y, $q);
+} or {
+    $x isa $p;
+    {
+        $x has first-name $y;
+    } or {
+        $x has last-name $z;
+    };
+};"#;
+
+    let parsed = parse_query(query).map(Query::into_match);
+    let expected = typeql_match!(
+        var("y").isa(var("p")),
+        or!(
+            rel("y").rel("q"),
+            and!(
+                var("x").isa(var("p")),
+                or!(var("x").has("first-name", var("y")), var("x").has("last-name", var("z")))
+            )
+        )
+    );
 
     assert_query_eq!(expected, parsed, query);
 }
 
 /*
-#[test]
-fn test_or_query() {
-    let query = "match\n" +
-            "$x isa movie;\n" +
-            "{\n" +
-            "    $y 'drama' isa genre;\n" +
-            "    ($x, $y);\n" +
-            "} or {\n" +
-            "    $x 'The Muppets';\n" +
-            "};";
-    let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(
-            var("x").isa("movie"),
-            or(
-                    and(
-                            var("y").eq("drama").isa("genre"),
-                            rel("x").rel("y")
-                    ),
-                    var("x").eq("The Muppets")
-            )
-    );
-
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
-}
-
-#[test]
-fn test_disjunction_not_in_conjunction() {
-    String query = "match\n" +
-            "{\n" +
-            "    $x isa person;\n" +
-            "} or {\n" +
-            "    $x isa company;\n" +
-            "};";
-    assertThrows(() -> parse_query(query));
-}
-
-#[test]
-fn test_nested_conjunction_and_disjunction() {
-    let query = "match\n" +
-            "$y isa $p;\n" +
-            "{\n" +
-            "    ($y, $q);\n" +
-            "} or {\n" +
-            "    $x isa $p;\n" +
-            "    {\n" +
-            "        $x has first-name $y;\n" +
-            "    } or {\n" +
-            "        $x has last-name $z;\n" +
-            "    };\n" +
-            "};";
-    let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(
-            var("y").isa(var("p")),
-            or(rel("y").rel("q"),
-               and(var("x").isa(var("p")),
-                   or(var("x").has("first-name", var("y")),
-                      var("x").has("last-name", var("z"))))));
-    assert_query_eq!(expected, parsed, query);
-}
-
 #[test]
 fn test_disjunction_not_binding_conjunction() {
     let query = "match\n" +
@@ -572,7 +570,7 @@ fn test_aggregate_count_query() {
             "get $x, $y;\n" +
             "count;";
     let parsed = parse_query(query).unwrapAggregate();
-    let expected = typeql_match(rel("x").rel("y").isa("friendship")).get("x", "y").count();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get("x", "y").count();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -584,7 +582,7 @@ fn test_aggregate_group_count_query() {
             "get $x, $y;\n" +
             "group $x; count;";
     let parsed = parse_query(query).unwrapGroupAggregate();
-    let expected = typeql_match(rel("x").rel("y").isa("friendship")).get("x", "y").group("x").count();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get("x", "y").group("x").count();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -595,7 +593,7 @@ fn test_single_line_group_aggregate_max_query() {
             "$x has age $a;\n" +
             "group $x; max $a;";
     let parsed = parse_query(query).unwrapGroupAggregate();
-    let expected = typeql_match(var("x").has("age", var("a"))).group("x").max("a");
+    let expected = typeql_match!(var("x").has("age", var("a"))).group("x").max("a");
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -607,7 +605,7 @@ fn test_multi_line_group_aggregate_max_query() {
             "$y has age $z;\n" +
             "group $x; max $z;";
     let parsed = parse_query(query).unwrapGroupAggregate();
-    let expected = typeql_match(
+    let expected = typeql_match!(
             rel("x").rel("y").isa("friendship"),
             var("y").has("age", var("z"))
     ).group("x").max("z");
@@ -623,7 +621,7 @@ fn test_multi_line_filtered_group_aggregate_max_query() {
             "get $x, $y, $z;\n" +
             "group $x; max $z;";
     let parsed = parse_query(query).unwrapGroupAggregate();
-    let expected = typeql_match(
+    let expected = typeql_match!(
             rel("x").rel("y").isa("friendship"),
             var("y").has("age", var("z"))
     ).get("x", "y", "z").group("x").max("z");
@@ -638,7 +636,7 @@ fn when_comparing_count_query_using_typeql_and_java_typeql_they_are_equivalent()
             "    has title \"Godfather\";\n" +
             "count;";
     let parsed = parse_query(query).unwrapAggregate();
-    let expected = typeql_match(var("x").isa("movie").has("title", "Godfather")).count();
+    let expected = typeql_match!(var("x").isa("movie").has("title", "Godfather")).count();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -663,7 +661,7 @@ fn when_parsing_delete_query_result_is_same_as_java_type_ql() {
             "$x isa movie;\n" +
             "$y isa movie;";
     let parsed = parse_query(query).asDelete();
-    let expected = typeql_match(
+    let expected = typeql_match!(
             var("x").isa("movie").has("title", "The Title"),
             var("y").isa("movie")
     ).delete(var("x").isa("movie"), var("y").isa("movie"));
@@ -705,7 +703,7 @@ fn when_parsing_update_query_result_issame_as_java_type_ql() {
             "insert\n" +
             "$x has age 25;";
     let parsed = parse_query(query).asUpdate();
-    let expected = typeql_match(var("x").isa("person").has("name", "alice").has("age", var("a")))
+    let expected = typeql_match!(var("x").isa("person").has("name", "alice").has("age", var("a")))
             .delete(var("x").has(var("a")))
             .insert(var("x").has("age", 25));
     assert_query_eq!(expected, parsed, query.replace("'", "\""));
@@ -745,7 +743,7 @@ fn when_parsing_as_in_match_result_is_same_as_sub() {
             "    relates father as parent,\n" +
             "    relates son as child;";
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(
+    let expected = typeql_match!(
             var("f").sub("parenthood")
                     .relates("father", "parent")
                     .relates("son", "child")
@@ -874,7 +872,7 @@ fn test_match_insert_query() {
             "$x isa language;\n" +
             "insert\n$x has name \"HELLO\";";
     let parsed = parse_query(query).asInsert();
-    let expected = typeql_match(var("x").isa("language"))
+    let expected = typeql_match!(var("x").isa("language"))
             .insert(var("x").has("name", "HELLO"));
 
     assert_query_eq!(expected, parsed, query);
@@ -899,7 +897,7 @@ fn test_define_abstract_entity_query() {
 fn test_match_value_type_query() {
     let query = "match\n$x value double;";
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").value(TypeQLArg.ValueType.DOUBLE));
+    let expected = typeql_match!(var("x").value(TypeQLArg.ValueType.DOUBLE));
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -912,16 +910,16 @@ $_ isa person;"#;
 
     let parsed = parse_query(query); // todo error
     assert!(parsed.is_err());
-    let built = typeql_match(var(()).isa("person")); // todo error
+    let built = typeql_match!(var(()).isa("person")); // todo error
     assert!(built.is_err());
 }
 
 /*
 #[test]
 fn when_parsing_date_keyword_parse_as_the_correct_value_type() {
-    let query = "typeql_match\n$x value datetime;";
+    let query = "match\n$x value datetime;";
     let parsed = parse_query(query).asMatch();
-    let expected = typeql_match(var("x").value(TypeQLArg.ValueType.DATETIME));
+    let expected = typeql_match!(var("x").value(TypeQLArg.ValueType.DATETIME));
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -959,7 +957,7 @@ fn when_parsing_query_with_comments_they_are_ignored() {
     let uncommented = "match\n$x isa movie;\ncount;";
 
     let parsed = parse_query(query).asMatchAggregate();
-    let expected = typeql_match(var("x").isa("movie")).count();
+    let expected = typeql_match!(var("x").isa("movie")).count();
 
     assert_query_eq!(expected, parsed, uncommented);
 }
@@ -1017,7 +1015,7 @@ fn test_parse_aggregate_group() {
             "$x isa movie;\n" +
             "group $x;";
     let parsed = parse_query(query).asMatchGroup();
-    let expected = typeql_match(var("x").isa("movie")).group("x");
+    let expected = typeql_match!(var("x").isa("movie")).group("x");
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1028,7 +1026,7 @@ fn test_parse_aggregate_group_count() {
             "$x isa movie;\n" +
             "group $x; count;";
     let parsed = parse_query(query).asMatchGroupAggregate();
-    let expected = typeql_match(var("x").isa("movie")).group("x").count();
+    let expected = typeql_match!(var("x").isa("movie")).group("x").count();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1039,7 +1037,7 @@ fn test_parse_aggregate_std() {
             "$x isa movie;\n" +
             "std $x;";
     let parsed = parse_query(query).asMatchAggregate();
-    let expected = typeql_match(var("x").isa("movie")).std("x");
+    let expected = typeql_match!(var("x").isa("movie")).std("x");
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1100,7 +1098,8 @@ $_ has title "Godfather",
     has tmdb-vote-count $x;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var(()).has("title", "Godfather").has("tmdb-vote-count", var("x")));
+    let expected =
+        typeql_match!(var(()).has("title", "Godfather").has("tmdb-vote-count", var("x")));
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1111,7 +1110,7 @@ fn test_regex_attribute_type() {
 $x regex "(fe)?male";"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").regex("(fe)?male"));
+    let expected = typeql_match!(var("x").regex("(fe)?male"));
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1128,7 +1127,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").owns(("name", KEY))).get(["x"]);
+    let expected = typeql_match!(var("x").owns(("name", KEY))).get(["x"]);
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1145,7 +1144,7 @@ fn test_parse_list_one_match() {
 $y isa movie;"#;
 
     let parsed = parse_queries(queries).collect();  // TODO parse_queries -> Iter
-    let expected = vec![typeql_match(var("y").isa("movie"))];
+    let expected = vec![typeql_match!(var("y").isa("movie"))];
 
     assert_eq!(parsed, expected);
 }
@@ -1181,7 +1180,7 @@ fn test_parse_list() {
     let match_string = "match\n$y isa movie;";
     let queries = parse_queries(insert_string + match_string).collect();
 
-    assertEquals(list(insert(var("x").isa("movie")), typeql_match(var("y").isa("movie"))), queries);
+    assertEquals(list(insert(var("x").isa("movie")), typeql_match!(var("y").isa("movie"))), queries);
 }
 
 #[test]
@@ -1194,22 +1193,20 @@ fn test_parse_many_match_insert_without_stack_overflow() {
     }
 
     let parsed = parse_queries(long_query).collect();
-    let expected = typeql_match(var("x").isa("person")).insert(var("x").has("name", "bob"));
+    let expected = typeql_match!(var("x").isa("person")).insert(var("x").has("name", "bob"));
 
     assert_eq!(vec![expected; num_queries], parsed);
 }
+ */
 
 #[test]
 fn when_parsing_list_of_queries_with_syntax_error_report_error() {
-    let query_text = "define\nperson sub entity has name;"; // note no semicolon
+    let query_text = "define\nperson sub entity has name;"; // note no comma
 
-    exception.expect(TypeQLException.class);
-    exception.expectMessage("\nperson sub entity has name;"); // Message should refer to line
-
-    //noinspection ResultOfMethodCallIgnored
-    parse_query(query_text);
+    let parsed = parse_query(query_text);
+    assert!(parsed.is_err());
+    assert!(parsed.err().unwrap().contains("\nperson sub entity has name;"));
 }
- */
 
 #[test]
 fn when_parsing_multiple_queries_like_one_throw() {
@@ -1262,52 +1259,57 @@ fn undefine_attribute_type_regex() {
     let expected = undefine(type_("digit").regex("\\d"));
     assert_query_eq!(expected, parsed, query.replace("'", "\""));
 }
+*/
 
 #[test]
 fn regex_predicate_parses_character_classes_correctly() {
-    let query = "match\n$x like '\\d';";
+    let query = r#"match
+$x like "\d";"#;
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").like("\\d"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let expected = typeql_match!(var("x").like("\\d"));
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn regex_predicate_parses_quotes_correctly() {
-    let query = "match\n$x like '\\\"';";
+    let query = r#"match
+$x like "\"";"#;
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").like("\\\""));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let expected = typeql_match!(var("x").like("\\\""));
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn regex_predicate_parses_backslashes_correctly() {
-    let query = "match\n$x like '\\\\';";
+    let query = r#"match
+$x like "\\";"#;
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").like("\\\\"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let expected = typeql_match!(var("x").like("\\\\"));
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn regex_predicate_parses_newline_correctly() {
-    let query = "match\n$x like '\\n';";
+    let query = r#"match
+$x like "\n";"#;
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").like("\\n"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let expected = typeql_match!(var("x").like("\\n"));
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn regex_predicate_parses_forward_slashes_correctly() {
-    let query = "match\n$x like '\\/';";
+    let query = r#"match
+$x like "\/";"#;
     let parsed = parse_query(query).map(Query::into_match);
-    let expected = typeql_match(var("x").like("/"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let expected = typeql_match!(var("x").like("/"));
+    assert_query_eq!(expected, parsed, query);
 }
- */
 
 #[test]
 fn when_value_equality_to_string_create_valid_query_string() {
     // TODO no unwraps
-    let expected = typeql_match(var("x").eq(var("y"))).unwrap();
+    let expected = typeql_match!(var("x").eq(var("y"))).unwrap();
     let parsed = parse_query(&expected.to_string()).map(Query::into_match).unwrap();
 
     assert_eq!(expected, parsed);
@@ -1323,7 +1325,7 @@ $x iid {};"#,
     );
 
     let parsed = parse_query(&query).map(Query::into_match);
-    let expected = typeql_match(var("x").iid(iid));
+    let expected = typeql_match!(var("x").iid(iid));
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -1343,6 +1345,6 @@ $x iid {};"#,
 #[test]
 fn when_building_invalid_iid_throw() {
     let iid = "invalid";
-    let expected = typeql_match(var("x").iid(iid));
+    let expected = typeql_match!(var("x").iid(iid));
     assert!(expected.is_err());
 }

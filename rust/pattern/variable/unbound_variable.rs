@@ -23,7 +23,6 @@
 use crate::pattern::*;
 
 use std::fmt;
-use std::fmt::{Debug, Display};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundVariable {
@@ -37,6 +36,10 @@ impl UnboundVariable {
 
     pub fn into_variable(self) -> Variable {
         Variable::Unbound(self)
+    }
+
+    pub fn into_concept(self) -> ConceptVariable {
+        ConceptVariable::new(self.reference)
     }
 
     pub fn into_thing(self) -> ThingVariable {
@@ -57,6 +60,12 @@ impl UnboundVariable {
 
     pub fn hidden() -> UnboundVariable {
         UnboundVariable { reference: Reference::Anonymous(Visibility::Invisible) }
+    }
+}
+
+impl ConceptConstrainable for UnboundVariable {
+    fn constrain_is(self, is: IsConstraint) -> ConceptVariable {
+        self.into_concept().constrain_is(is)
     }
 }
 
@@ -132,7 +141,7 @@ impl From<String> for UnboundVariable {
     }
 }
 
-impl Display for UnboundVariable {
+impl fmt::Display for UnboundVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)
     }

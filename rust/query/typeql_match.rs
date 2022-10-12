@@ -20,8 +20,9 @@
  *
  */
 
+use crate::common::token::Command::Match;
+use crate::common::token::Filter::*;
 use std::fmt;
-use std::fmt::Display;
 
 use crate::query::*;
 use crate::write_joined;
@@ -64,9 +65,9 @@ impl MatchQueryBuilder for TypeQLMatch {
     }
 }
 
-impl Display for TypeQLMatch {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_str("match")?;
+impl fmt::Display for TypeQLMatch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Match)?;
 
         for pattern in &self.conjunction.patterns {
             write!(f, "\n{};", pattern)?;
@@ -82,22 +83,22 @@ impl Display for TypeQLMatch {
 
 #[derive(Debug, Eq, PartialEq, Default)]
 pub struct Modifiers {
-    pub filter: Vec<UnboundVariable>,
+    pub filter: Option<Filter>,
     pub sorting: Option<Sorting>,
-    pub limit: Option<usize>,
-    pub offset: Option<usize>,
+    pub limit: Option<Limit>,
+    pub offset: Option<Offset>,
 }
 
 impl Modifiers {
     pub fn is_empty(&self) -> bool {
-        self.filter.is_empty()
+        self.filter.is_none()
             && self.sorting.is_none()
             && self.limit.is_none()
             && self.offset.is_none()
     }
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
-        Self { filter: vars, ..self }
+        Self { filter: Some(Filter { vars }), ..self }
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
@@ -105,35 +106,30 @@ impl Modifiers {
     }
 
     pub fn limit(self, limit: usize) -> Self {
-        Self { limit: Some(limit), ..self }
+        Self { limit: Some(Limit { limit }), ..self }
     }
 
     pub fn offset(self, offset: usize) -> Self {
-        Self { offset: Some(offset), ..self }
+        Self { offset: Some(Offset { offset }), ..self }
     }
 }
 
-impl Display for Modifiers {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let mut trail = "";
-        if !self.filter.is_empty() {
-            f.write_str("get ")?;
-            write_joined!(f, self.filter, ", ")?;
-            f.write_str(";")?;
-            trail = " ";
-        }
-        if let Some(sorting) = &self.sorting {
-            write!(f, "{}sort {};", trail, sorting)?;
-            trail = " ";
-        }
-        if let Some(offset) = &self.offset {
-            write!(f, "{}offset {};", trail, offset)?;
-            trail = " ";
-        }
-        if let Some(limit) = &self.limit {
-            write!(f, "{}limit {};", trail, limit)?;
-        }
-        Ok(())
+impl fmt::Display for Modifiers {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write_joined!(f, "; ", self.filter, self.sorting, self.offset, self.limit)?;
+        f.write_str(";")
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Default)]
+pub struct Filter {
+    pub vars: Vec<UnboundVariable>,
+}
+
+impl fmt::Display for Filter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ", Get)?;
+        write_joined!(f, ", ", self.vars)
     }
 }
 
@@ -155,8 +151,8 @@ impl OrderedVariable {
     }
 }
 
-impl Display for OrderedVariable {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl fmt::Display for OrderedVariable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.var)?;
         if let Some(order) = &self.order {
             write!(f, " {}", order)?;
@@ -194,8 +190,31 @@ impl From<Vec<UnboundVariable>> for Sorting {
     }
 }
 
-impl Display for Sorting {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write_joined!(f, self.vars, ", ")
+impl fmt::Display for Sorting {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ", Sort)?;
+        write_joined!(f, ", ", self.vars)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Default)]
+pub struct Limit {
+    pub limit: usize,
+}
+
+impl fmt::Display for Limit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", Limit, self.limit)
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Default)]
+pub struct Offset {
+    pub offset: usize,
+}
+
+impl fmt::Display for Offset {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", Offset, self.offset)
     }
 }

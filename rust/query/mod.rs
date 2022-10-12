@@ -21,7 +21,6 @@
  */
 
 use std::fmt;
-use std::fmt::{Display, Formatter};
 
 use crate::pattern::*;
 use crate::{enum_getter, var, ErrorMessage};
@@ -73,7 +72,7 @@ impl MatchQueryBuilder for Query {
     }
 }
 
-impl Display for Query {
+impl fmt::Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Query::*;
         match self {

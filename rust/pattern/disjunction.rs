@@ -20,51 +20,42 @@
  *
  */
 
-mod conjunction;
-pub use conjunction::*;
-
-mod disjunction;
-pub use disjunction::*;
-
-mod negation;
-pub use negation::*;
-
-mod variable;
-pub use variable::*;
-
-mod constraint;
-pub use constraint::*;
-
-#[cfg(test)]
-mod test;
-
+use crate::common::string::indent;
+use crate::common::token::Operator::Or;
+use crate::Pattern;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Pattern {
-    Conjunction(Conjunction),
-    Disjunction(Disjunction),
-    Negation(Negation),
-    Variable(Variable),
+pub struct Disjunction {
+    pub patterns: Vec<Pattern>,
 }
 
-impl<T> From<T> for Pattern
-where
-    Variable: From<T>,
-{
-    fn from(variable: T) -> Self {
-        Pattern::Variable(Variable::from(variable))
+impl Disjunction {
+    pub fn into_pattern(self) -> Pattern {
+        Pattern::Disjunction(self)
     }
 }
 
-impl fmt::Display for Pattern {
+impl From<Vec<Pattern>> for Disjunction {
+    fn from(patterns: Vec<Pattern>) -> Self {
+        Disjunction { patterns }
+    }
+}
+
+impl fmt::Display for Disjunction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Pattern::*;
-        match self {
-            Conjunction(conjunction) => write!(f, "{}", conjunction),
-            Disjunction(disjunction) => write!(f, "{}", disjunction),
-            Negation(negation) => write!(f, "{}", negation),
-            Variable(variable) => write!(f, "{}", variable),
+        let mut iter = self.patterns.iter();
+        let mut next = iter.next();
+        while next.is_some() {
+            match next.unwrap() {
+                Pattern::Conjunction(conjunction) => write!(f, "{}", conjunction)?,
+                other => write!(f, "{{\n{};\n}}", indent(&other.to_string()))?,
+            }
+            next = iter.next();
+            if next.is_some() {
+                write!(f, " {} ", Or)?;
+            }
         }
+        Ok(())
     }
 }
