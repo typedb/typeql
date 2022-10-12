@@ -89,40 +89,40 @@ pub fn eq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
 where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
-    Ok(ValueConstraint::new(Predicate::Eq, value.try_into()?))
+    ValueConstraint::new(Predicate::Eq, value.try_into()?)
 }
 
 pub fn neq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
 where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
-    Ok(ValueConstraint::new(Predicate::Neq, value.try_into()?))
+    ValueConstraint::new(Predicate::Neq, value.try_into()?)
 }
 
 pub fn lt<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
 where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
-    Ok(ValueConstraint::new(Predicate::Lt, value.try_into()?))
+    ValueConstraint::new(Predicate::Lt, value.try_into()?)
 }
 
 pub fn lte<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
 where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
-    Ok(ValueConstraint::new(Predicate::Lte, value.try_into()?))
+    ValueConstraint::new(Predicate::Lte, value.try_into()?)
 }
 
 pub fn gt<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
 where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
-    Ok(ValueConstraint::new(Predicate::Gt, value.try_into()?))
+    ValueConstraint::new(Predicate::Gt, value.try_into()?)
 }
 
 pub fn gte<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
 where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
-    Ok(ValueConstraint::new(Predicate::Gte, value.try_into()?))
+    ValueConstraint::new(Predicate::Gte, value.try_into()?)
 }

@@ -23,7 +23,7 @@
 use crate::{
     common::{
         date_time,
-        error::INVALID_CONSTRAINT_DATETIME_PRECISION,
+        error::{INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
         string::{escape_regex, format_double},
         token::Predicate,
     },
@@ -39,11 +39,12 @@ pub struct ValueConstraint {
 }
 
 impl ValueConstraint {
-    pub fn new(predicate: Predicate, value: Value) -> ValueConstraint {
+    pub fn new(predicate: Predicate, value: Value) -> Result<Self, ErrorMessage> {
         if predicate.is_substring() && !matches!(value, Value::String(_)) {
-            panic!("");
+            Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))
+        } else {
+            Ok(ValueConstraint { predicate, value })
         }
-        ValueConstraint { predicate, value }
     }
 }
 
@@ -72,30 +73,30 @@ pub enum Value {
 impl Eq for Value {} // can't derive, because f32 does not implement Eq
 
 impl From<i64> for Value {
-    fn from(long: i64) -> Value {
+    fn from(long: i64) -> Self {
         Value::Long(long)
     }
 }
 
 impl From<f64> for Value {
-    fn from(double: f64) -> Value {
+    fn from(double: f64) -> Self {
         Value::Double(double)
     }
 }
 
 impl From<bool> for Value {
-    fn from(bool: bool) -> Value {
+    fn from(bool: bool) -> Self {
         Value::Boolean(bool)
     }
 }
 
 impl From<&str> for Value {
-    fn from(string: &str) -> Value {
+    fn from(string: &str) -> Self {
         Value::String(String::from(string))
     }
 }
 impl From<String> for Value {
-    fn from(string: String) -> Value {
+    fn from(string: String) -> Self {
         Value::String(string)
     }
 }
@@ -103,7 +104,7 @@ impl From<String> for Value {
 impl TryFrom<NaiveDateTime> for Value {
     type Error = ErrorMessage;
 
-    fn try_from(date_time: NaiveDateTime) -> Result<Value, ErrorMessage> {
+    fn try_from(date_time: NaiveDateTime) -> Result<Self, ErrorMessage> {
         if date_time.nanosecond() % 1000000 > 0 {
             return Err(
                 INVALID_CONSTRAINT_DATETIME_PRECISION.format(&[date_time.to_string().as_str()])
@@ -114,13 +115,13 @@ impl TryFrom<NaiveDateTime> for Value {
 }
 
 impl From<UnboundVariable> for Value {
-    fn from(variable: UnboundVariable) -> Value {
+    fn from(variable: UnboundVariable) -> Self {
         Value::Variable(Box::new(variable.into_thing()))
     }
 }
 
 impl From<ThingVariable> for Value {
-    fn from(variable: ThingVariable) -> Value {
+    fn from(variable: ThingVariable) -> Self {
         Value::Variable(Box::new(variable))
     }
 }

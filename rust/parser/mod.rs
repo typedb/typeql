@@ -482,9 +482,9 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
 
 fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
     if let Some(value) = ctx.value() {
-        Ok(ValueConstraint::new(Predicate::Eq, visit_value(value)?))
+        ValueConstraint::new(Predicate::Eq, visit_value(value)?)
     } else if let Some(equality) = ctx.predicate_equality() {
-        Ok(ValueConstraint::new(Predicate::from(equality.get_text()), {
+        ValueConstraint::new(Predicate::from(equality.get_text()), {
             let predicate_value = ctx.predicate_value().unwrap();
             if let Some(value) = predicate_value.value() {
                 visit_value(value)?
@@ -493,15 +493,15 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             } else {
                 panic!("Unexpected predicate value: `{}`", predicate_value.get_text())
             }
-        }))
+        })
     } else if let Some(substring) = ctx.predicate_substring() {
-        Ok(ValueConstraint::new(Predicate::from(substring.get_text()), {
+        ValueConstraint::new(Predicate::from(substring.get_text()), {
             if substring.LIKE().is_some() {
                 Value::from(get_regex(ctx.STRING_().unwrap()))
             } else {
                 Value::from(get_string(ctx.STRING_().unwrap()))
             }
-        }))
+        })
     } else {
         todo!()
     }

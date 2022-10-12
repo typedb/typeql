@@ -54,7 +54,7 @@ where
             value => HasConstraint {
                 type_: Some(UnboundVariable::hidden().type_(type_name.into()).unwrap()),
                 attribute: UnboundVariable::hidden()
-                    .constrain_value(ValueConstraint::new(Predicate::Eq, value)),
+                    .constrain_value(ValueConstraint::new(Predicate::Eq, value)?),
             },
         })
     }
