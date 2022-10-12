@@ -29,12 +29,12 @@ use std::fmt;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
     role_players: Vec<RolePlayerConstraint>,
-    scope: String,
+    scope: Label,
 }
 
 impl RelationConstraint {
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
-        RelationConstraint { role_players, scope: Relation.to_string() }
+        RelationConstraint { role_players, scope: Relation.into() }
     }
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {
@@ -64,7 +64,7 @@ pub struct RolePlayerConstraint {
 }
 
 impl RolePlayerConstraint {
-    pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> RolePlayerConstraint {
+    pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> Self {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 }
