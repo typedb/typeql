@@ -20,49 +20,37 @@
  *
  */
 
+use crate::common::token::Command::Insert;
+use crate::{write_joined, ErrorMessage, Query, ThingVariable, TypeQLDelete, Writable};
 use std::fmt;
 
-use crate::pattern::*;
-use crate::{enum_getter, var, ErrorMessage};
-
-mod typeql_delete;
-pub use typeql_delete::*;
-
-mod typeql_insert;
-pub use typeql_insert::*;
-
-mod typeql_match;
-pub use typeql_match::*;
-
-mod typeql_update;
-pub use typeql_update::*;
-
-mod writable;
-pub use writable::*;
-
 #[derive(Debug, Eq, PartialEq)]
-pub enum Query {
-    Match(TypeQLMatch),
-    Insert(TypeQLInsert),
-    Delete(TypeQLDelete),
-    Update(TypeQLUpdate),
+pub struct TypeQLUpdate {
+    pub delete_query: TypeQLDelete,
+    pub insert_variables: Vec<ThingVariable>,
 }
 
-impl Query {
-    enum_getter!(into_match, Match, TypeQLMatch);
-    enum_getter!(into_insert, Insert, TypeQLInsert);
-    enum_getter!(into_delete, Delete, TypeQLDelete);
-    enum_getter!(into_update, Update, TypeQLUpdate);
+impl TypeQLUpdate {
+    pub fn into_query(self) -> Query {
+        Query::Update(self)
+    }
 }
 
-impl fmt::Display for Query {
+impl fmt::Display for TypeQLUpdate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Query::*;
-        match self {
-            Match(query) => write!(f, "{}", query),
-            Insert(query) => write!(f, "{}", query),
-            Delete(query) => write!(f, "{}", query),
-            Update(query) => write!(f, "{}", query),
-        }
+        writeln!(f, "{}", self.delete_query)?;
+        writeln!(f, "{}", Insert)?;
+        write_joined!(f, ";\n", self.insert_variables)?;
+        f.write_str(";")
+    }
+}
+
+pub trait UpdateQueryBuilder {
+    fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage>;
+}
+
+impl<U: UpdateQueryBuilder> UpdateQueryBuilder for Result<U, ErrorMessage> {
+    fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage> {
+        self?.insert(vars)
     }
 }

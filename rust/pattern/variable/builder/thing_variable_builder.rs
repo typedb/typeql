@@ -33,13 +33,9 @@ pub trait ThingConstrainable {
 }
 
 pub trait ThingVariableBuilder {
-    fn has<T: TryInto<Value>>(
-        self,
-        type_name: impl Into<String>,
-        value: T,
-    ) -> Result<ThingVariable, ErrorMessage>
+    fn has<T: TryInto<HasConstraint>>(self, has: T) -> Result<ThingVariable, ErrorMessage>
     where
-        ErrorMessage: From<<T as TryInto<Value>>::Error>;
+        ErrorMessage: From<<T as TryInto<HasConstraint>>::Error>;
 
     fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>
     where
@@ -58,20 +54,11 @@ pub trait ThingVariableBuilder {
 }
 
 impl<U: ThingConstrainable> ThingVariableBuilder for U {
-    fn has<T: TryInto<Value>>(
-        self,
-        type_name: impl Into<String>,
-        value: T,
-    ) -> Result<ThingVariable, ErrorMessage>
+    fn has<T: TryInto<HasConstraint>>(self, has: T) -> Result<ThingVariable, ErrorMessage>
     where
-        ErrorMessage: From<<T as TryInto<Value>>::Error>,
+        ErrorMessage: From<<T as TryInto<HasConstraint>>::Error>,
     {
-        Ok(self.constrain_has(match value.try_into()? {
-            Value::Variable(variable) => HasConstraint::from((type_name.into(), *variable)),
-            value => {
-                HasConstraint::from((type_name.into(), ValueConstraint::new(Predicate::Eq, value)))
-            }
-        }))
+        Ok(self.constrain_has(has.try_into()?))
     }
 
     fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>
@@ -120,15 +107,11 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
 }
 
 impl<U: ThingVariableBuilder> ThingVariableBuilder for Result<U, ErrorMessage> {
-    fn has<T: TryInto<Value>>(
-        self,
-        type_name: impl Into<String>,
-        value: T,
-    ) -> Result<ThingVariable, ErrorMessage>
+    fn has<T: TryInto<HasConstraint>>(self, has: T) -> Result<ThingVariable, ErrorMessage>
     where
-        ErrorMessage: From<<T as TryInto<Value>>::Error>,
+        ErrorMessage: From<<T as TryInto<HasConstraint>>::Error>,
     {
-        self?.has(type_name, value)
+        self?.has(has)
     }
 
     fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>

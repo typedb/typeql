@@ -57,6 +57,12 @@ where
     }
 }
 
+impl From<Negation> for Pattern {
+    fn from(negation: Negation) -> Self {
+        Pattern::Negation(negation)
+    }
+}
+
 impl fmt::Display for Pattern {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Pattern::*;

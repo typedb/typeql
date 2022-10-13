@@ -20,7 +20,38 @@
  *
  */
 
-pub mod date_time;
-pub mod error;
-pub mod string;
-pub mod token;
+use crate::{ErrorMessage, ThingVariable};
+
+pub trait Writable {
+    fn vars(self) -> Vec<ThingVariable>;
+}
+
+impl Writable for ThingVariable {
+    fn vars(self) -> Vec<ThingVariable> {
+        vec![self]
+    }
+}
+
+impl<const N: usize> Writable for [ThingVariable; N] {
+    fn vars(self) -> Vec<ThingVariable> {
+        self.to_vec()
+    }
+}
+
+impl<const N: usize> Writable for [Result<ThingVariable, ErrorMessage>; N] {
+    fn vars(self) -> Vec<ThingVariable> {
+        self.into_iter().map(|x| x.unwrap()).collect()
+    }
+}
+
+impl Writable for Vec<ThingVariable> {
+    fn vars(self) -> Vec<ThingVariable> {
+        self
+    }
+}
+
+impl<U: Writable> Writable for Result<U, ErrorMessage> {
+    fn vars(self) -> Vec<ThingVariable> {
+        self.unwrap().vars()
+    }
+}

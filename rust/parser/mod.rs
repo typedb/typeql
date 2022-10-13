@@ -29,9 +29,10 @@ mod test;
 use antlr_rust::token::Token;
 use antlr_rust::tree::ParseTree;
 use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
-use chrono::{NaiveDate, NaiveDateTime, Timelike};
+use chrono::{NaiveDate, NaiveDateTime};
 use std::rc::Rc;
 
+use crate::common::date_time;
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
 use crate::common::string::*;
 use crate::common::token::Predicate;
@@ -77,26 +78,8 @@ fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
         .map_err(|_| ILLEGAL_GRAMMAR.format(&[date.get_text().as_str()]))
 }
 
-fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
-    let has_seconds = date_time_text.matches(':').count() == 2;
-    if has_seconds {
-        let has_nanos = date_time_text.matches('.').count() == 1;
-        if has_nanos {
-            let parts: Vec<&str> = date_time_text.splitn(2, '.').collect();
-            let (date_time, nanos) = (parts[0], parts[1]);
-            NaiveDateTime::parse_from_str(date_time, "%Y-%m-%dT%H:%M:%S")
-                .ok()?
-                .with_nanosecond(format!("{}{}", nanos, "0".repeat(9 - nanos.len())).parse().ok()?)
-        } else {
-            NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M:%S").ok()
-        }
-    } else {
-        NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M").ok()
-    }
-}
-
 fn get_date_time(date_time: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
-    parse_date_time(&date_time.get_text())
+    date_time::parse(&date_time.get_text())
         .ok_or_else(|| ILLEGAL_GRAMMAR.format(&[date_time.get_text().as_str()]))
 }
 
@@ -176,6 +159,12 @@ fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<()> {
 fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
     if let Some(query_match) = ctx.query_match() {
         Ok(visit_query_match(query_match)?.into_query())
+    } else if let Some(query_insert) = ctx.query_insert() {
+        Ok(visit_query_insert(query_insert)?.into_query())
+    } else if let Some(query_delete) = ctx.query_delete() {
+        Ok(visit_query_delete(query_delete)?.into_query())
+    } else if let Some(query_update) = ctx.query_update() {
+        Ok(visit_query_update(query_update)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -189,16 +178,24 @@ fn visit_query_undefine(_ctx: Rc<Query_undefineContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_query_insert(_ctx: Rc<Query_insertContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {
+    let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
+    if let Some(patterns) = ctx.patterns() {
+        TypeQLMatch::new(Conjunction::from(visit_patterns(patterns)?)).insert(variable_things)
+    } else {
+        Ok(TypeQLInsert::new(variable_things))
+    }
 }
 
-fn visit_query_delete(_ctx: Rc<Query_deleteContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete> {
+    let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
+    TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
+        .delete(variable_things)
 }
 
-fn visit_query_update(_ctx: Rc<Query_updateContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {
+    visit_query_delete(ctx.query_delete().unwrap())?
+        .insert(visit_variable_things(ctx.variable_things().unwrap())?)
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
@@ -400,8 +397,8 @@ fn visit_type_constraint(_ctx: Rc<Type_constraintContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_variable_things(_ctx: Rc<Variable_thingsContext>) -> ParserResult<()> {
-    todo!()
+fn visit_variable_things(ctx: Rc<Variable_thingsContext>) -> ParserResult<Vec<ThingVariable>> {
+    (0..).map_while(|i| ctx.variable_thing_any(i)).map(visit_variable_thing_any).collect()
 }
 
 fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<ThingVariable> {
@@ -487,14 +484,14 @@ fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstrain
 fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
     if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            Ok(HasConstraint::from((label.get_text(), get_var(var))))
+            HasConstraint::try_from((label.get_text(), get_var(var)))
         } else if let Some(predicate) = ctx.predicate() {
-            Ok(HasConstraint::from((label.get_text(), visit_predicate(predicate)?)))
+            Ok(HasConstraint::new((label.get_text(), visit_predicate(predicate)?)))
         } else {
             Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
-    } else if let Some(_) = ctx.VAR_() {
-        todo!()
+    } else if let Some(var) = ctx.VAR_() {
+        Ok(HasConstraint::from(get_var(var)))
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -516,7 +513,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
         }))
     } else if let Some(substring) = ctx.predicate_substring() {
         Ok(ValueConstraint::new(Predicate::from(substring.get_text()), {
-            if let Some(_) = substring.LIKE() {
+            if substring.LIKE().is_some() {
                 Value::from(get_regex(ctx.STRING_().unwrap()))
             } else {
                 Value::from(get_string(ctx.STRING_().unwrap()))

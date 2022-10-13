@@ -20,6 +20,7 @@
  *
  */
 
+use crate::common::date_time;
 use crate::common::error::{
     ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
 };
@@ -112,29 +113,38 @@ pub struct HasConstraint {
     pub attribute: ThingVariable,
 }
 
-impl From<(String, ValueConstraint)> for HasConstraint {
-    fn from((type_name, value_constraint): (String, ValueConstraint)) -> Self {
+impl From<UnboundVariable> for HasConstraint {
+    fn from(variable: UnboundVariable) -> Self {
+        HasConstraint { type_: None, attribute: variable.into_thing() }
+    }
+}
+
+impl<S: Into<String>, T: TryInto<Value>> TryFrom<(S, T)> for HasConstraint
+where
+    ErrorMessage: From<<T as TryInto<Value>>::Error>,
+{
+    type Error = ErrorMessage;
+
+    fn try_from((type_name, value): (S, T)) -> Result<Self, Self::Error> {
+        Ok(match value.try_into()? {
+            Value::Variable(variable) => HasConstraint {
+                type_: Some(UnboundVariable::hidden().type_(type_name.into()).unwrap()),
+                attribute: *variable,
+            },
+            value => HasConstraint {
+                type_: Some(UnboundVariable::hidden().type_(type_name.into()).unwrap()),
+                attribute: UnboundVariable::hidden()
+                    .constrain_value(ValueConstraint::new(Predicate::Eq, value)),
+            },
+        })
+    }
+}
+
+impl HasConstraint {
+    pub fn new((type_name, value_constraint): (String, ValueConstraint)) -> Self {
         HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
             attribute: UnboundVariable::hidden().constrain_value(value_constraint),
-        }
-    }
-}
-
-impl From<(String, UnboundVariable)> for HasConstraint {
-    fn from((type_name, variable): (String, UnboundVariable)) -> Self {
-        HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
-            attribute: variable.into_thing(),
-        }
-    }
-}
-
-impl From<(String, ThingVariable)> for HasConstraint {
-    fn from((type_name, variable): (String, ThingVariable)) -> Self {
-        HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
-            attribute: variable,
         }
     }
 }
@@ -255,15 +265,7 @@ impl fmt::Display for Value {
             Double(double) => write!(f, "{}", double),
             Boolean(boolean) => write!(f, "{}", boolean),
             String(string) => write!(f, "\"{}\"", string),
-            DateTime(date_time) => write!(f, "{}", {
-                if date_time.time().nanosecond() > 0 {
-                    date_time.format("%Y-%m-%dT%H:%M:%S.%3f")
-                } else if date_time.time().second() > 0 {
-                    date_time.format("%Y-%m-%dT%H:%M:%S")
-                } else {
-                    date_time.format("%Y-%m-%dT%H:%M")
-                }
-            }),
+            DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
             Variable(var) => write!(f, "{}", var.reference),
         }
     }

@@ -35,12 +35,6 @@ impl Negation {
     }
 }
 
-impl Into<Pattern> for Negation {
-    fn into(self) -> Pattern {
-        Pattern::Negation(self)
-    }
-}
-
 impl From<Pattern> for Negation {
     fn from(pattern: Pattern) -> Self {
         Negation { pattern: Box::new(pattern) }
