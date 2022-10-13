@@ -189,11 +189,8 @@ fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert
 
 fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete> {
     let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
-    if let Some(patterns) = ctx.patterns() {
-        TypeQLMatch::new(Conjunction::from(visit_patterns(patterns)?)).delete(variable_things)
-    } else {
-        Ok(TypeQLDelete::new(variable_things))
-    }
+    TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
+        .delete(variable_things)
 }
 
 fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {

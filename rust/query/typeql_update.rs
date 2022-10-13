@@ -21,20 +21,16 @@
  */
 
 use crate::common::token::Command::Insert;
-use crate::{write_joined, ErrorMessage, Writable, Query, ThingVariable, TypeQLDelete};
+use crate::{write_joined, ErrorMessage, Query, ThingVariable, TypeQLDelete, Writable};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {
-    pub delete_query: Option<TypeQLDelete>,
+    pub delete_query: TypeQLDelete,
     pub insert_variables: Vec<ThingVariable>,
 }
 
 impl TypeQLUpdate {
-    pub fn new(variables: Vec<ThingVariable>) -> Self {
-        TypeQLUpdate { delete_query: None, insert_variables: variables }
-    }
-
     pub fn into_query(self) -> Query {
         Query::Update(self)
     }
@@ -42,10 +38,7 @@ impl TypeQLUpdate {
 
 impl fmt::Display for TypeQLUpdate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(delete_query) = &self.delete_query {
-            writeln!(f, "{}", delete_query)?;
-        }
-
+        writeln!(f, "{}", self.delete_query)?;
         writeln!(f, "{}", Insert)?;
         write_joined!(f, ";\n", self.insert_variables)?;
         f.write_str(";")

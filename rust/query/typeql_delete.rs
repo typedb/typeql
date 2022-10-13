@@ -22,22 +22,18 @@
 
 use crate::common::token::Command::Delete;
 use crate::{
-    write_joined, ErrorMessage, Writable, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
-    UpdateQueryBuilder,
+    write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
+    UpdateQueryBuilder, Writable,
 };
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDelete {
-    pub match_query: Option<TypeQLMatch>,
+    pub match_query: TypeQLMatch,
     pub variables: Vec<ThingVariable>,
 }
 
 impl TypeQLDelete {
-    pub fn new(variables: Vec<ThingVariable>) -> Self {
-        TypeQLDelete { match_query: None, variables }
-    }
-
     pub fn into_query(self) -> Query {
         Query::Delete(self)
     }
@@ -45,10 +41,7 @@ impl TypeQLDelete {
 
 impl fmt::Display for TypeQLDelete {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(match_query) = &self.match_query {
-            writeln!(f, "{}", match_query)?;
-        }
-
+        writeln!(f, "{}", self.match_query)?;
         writeln!(f, "{}", Delete)?;
         write_joined!(f, ";\n", self.variables)?;
         f.write_str(";")
@@ -67,6 +60,6 @@ impl<U: DeleteQueryBuilder> DeleteQueryBuilder for Result<U, ErrorMessage> {
 
 impl UpdateQueryBuilder for TypeQLDelete {
     fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage> {
-        Ok(TypeQLUpdate { delete_query: Some(self), insert_variables: vars.vars() })
+        Ok(TypeQLUpdate { delete_query: self, insert_variables: vars.vars() })
     }
 }

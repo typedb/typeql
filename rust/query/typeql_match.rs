@@ -98,7 +98,7 @@ impl InsertQueryBuilder for TypeQLMatch {
 
 impl DeleteQueryBuilder for TypeQLMatch {
     fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage> {
-        Ok(TypeQLDelete { match_query: Some(self), variables: vars.vars() })
+        Ok(TypeQLDelete { match_query: self, variables: vars.vars() })
     }
 }
 
