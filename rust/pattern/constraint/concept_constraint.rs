@@ -29,24 +29,24 @@ pub struct IsConstraint {
 }
 
 impl From<&str> for IsConstraint {
-    fn from(string: &str) -> IsConstraint {
+    fn from(string: &str) -> Self {
         Self::from(var(string))
     }
 }
 impl From<String> for IsConstraint {
-    fn from(string: String) -> IsConstraint {
+    fn from(string: String) -> Self {
         Self::from(var(string))
     }
 }
 
 impl From<UnboundVariable> for IsConstraint {
-    fn from(var: UnboundVariable) -> IsConstraint {
+    fn from(var: UnboundVariable) -> Self {
         Self::from(var.into_concept())
     }
 }
 
 impl From<ConceptVariable> for IsConstraint {
-    fn from(var: ConceptVariable) -> IsConstraint {
+    fn from(var: ConceptVariable) -> Self {
         Self { variable: Box::new(var) }
     }
 }
