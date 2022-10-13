@@ -487,10 +487,12 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         private final int hash;
 
         Value(TypeQLToken.Predicate predicate, T value) {
-            assert !predicate.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
             if (predicate == null) throw TypeQLException.of(MISSING_CONSTRAINT_PREDICATE);
             else if (value == null) throw TypeQLException.of(MISSING_CONSTRAINT_VALUE);
+
+            assert !predicate.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
             if (predicate.isSubString() && !(value instanceof java.lang.String)) throw TypeQLException.of(INVALID_CONSTRAINT_PREDICATE.message(predicate, value));
+
             this.predicate = predicate;
             this.value = value;
             this.hash = Objects.hash(Value.class, this.predicate, this.value);
