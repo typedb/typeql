@@ -62,7 +62,6 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Type.RELATION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_PREDICATE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_PREDICATE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
@@ -491,7 +490,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             else if (value == null) throw TypeQLException.of(MISSING_CONSTRAINT_VALUE);
 
             assert !predicate.isEquality() || value instanceof Comparable || value instanceof ThingVariable<?>;
-            if (predicate.isSubString() && !(value instanceof java.lang.String)) throw TypeQLException.of(INVALID_CONSTRAINT_PREDICATE.message(predicate, value));
+            assert !predicate.isSubString() || value instanceof java.lang.String;
 
             this.predicate = predicate;
             this.value = value;

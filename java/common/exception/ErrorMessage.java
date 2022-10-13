@@ -71,8 +71,6 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(23, "A value constraint has not been provided with a variable or literal value.");
     public static final ErrorMessage MISSING_CONSTRAINT_PREDICATE =
             new ErrorMessage(24, "A value constraint has not been provided with a predicate.");
-    public static final ErrorMessage INVALID_CONSTRAINT_PREDICATE =
-            new ErrorMessage(25, "The '%s' constraint may only accept a string value as its operand, got '%s' instead.");
     public static final ErrorMessage INVALID_CONSTRAINT_DATETIME_PRECISION =
             new ErrorMessage(26, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
