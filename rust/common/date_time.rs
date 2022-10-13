@@ -22,7 +22,7 @@
 
 use chrono::{NaiveDateTime, Timelike};
 
-pub(crate) fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
+pub(crate) fn parse(date_time_text: &str) -> Option<NaiveDateTime> {
     let has_seconds = date_time_text.matches(':').count() == 2;
     if has_seconds {
         let has_nanos = date_time_text.matches('.').count() == 1;
@@ -40,7 +40,7 @@ pub(crate) fn parse_date_time(date_time_text: &str) -> Option<NaiveDateTime> {
     }
 }
 
-pub(crate) fn format_date_time(date_time: &NaiveDateTime) -> String {
+pub(crate) fn format(date_time: &NaiveDateTime) -> String {
     if date_time.time().nanosecond() > 0 {
         date_time.format("%Y-%m-%dT%H:%M:%S.%3f").to_string()
     } else if date_time.time().second() > 0 {

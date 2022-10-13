@@ -20,7 +20,7 @@
  *
  */
 
-use crate::common::date_time::format_date_time;
+use crate::common::date_time;
 use crate::common::error::{
     ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_IID_STRING,
 };
@@ -265,7 +265,7 @@ impl fmt::Display for Value {
             Double(double) => write!(f, "{}", double),
             Boolean(boolean) => write!(f, "{}", boolean),
             String(string) => write!(f, "\"{}\"", string),
-            DateTime(date_time) => write!(f, "{}", format_date_time(date_time)),
+            DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
             Variable(var) => write!(f, "{}", var.reference),
         }
     }

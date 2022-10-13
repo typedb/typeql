@@ -32,7 +32,7 @@ use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
 use chrono::{NaiveDate, NaiveDateTime};
 use std::rc::Rc;
 
-use crate::common::date_time::parse_date_time;
+use crate::common::date_time;
 use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
 use crate::common::string::*;
 use crate::common::token::Predicate;
@@ -79,7 +79,7 @@ fn get_date(date: Rc<TerminalNode>) -> ParserResult<NaiveDate> {
 }
 
 fn get_date_time(date_time: Rc<TerminalNode>) -> ParserResult<NaiveDateTime> {
-    parse_date_time(&date_time.get_text())
+    date_time::parse(&date_time.get_text())
         .ok_or_else(|| ILLEGAL_GRAMMAR.format(&[date_time.get_text().as_str()]))
 }
 
