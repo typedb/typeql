@@ -37,6 +37,9 @@ pub use typeql_match::*;
 mod typeql_update;
 pub use typeql_update::*;
 
+mod writable;
+pub use writable::*;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Match(TypeQLMatch),

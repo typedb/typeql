@@ -91,13 +91,13 @@ impl MatchQueryBuilder for TypeQLMatch {
 }
 
 impl InsertQueryBuilder for TypeQLMatch {
-    fn insert(self, vars: impl Insertable) -> Result<TypeQLInsert, ErrorMessage> {
+    fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage> {
         Ok(TypeQLInsert { match_query: Some(self), variables: vars.vars() })
     }
 }
 
 impl DeleteQueryBuilder for TypeQLMatch {
-    fn delete(self, vars: impl Deletable) -> Result<TypeQLDelete, ErrorMessage> {
+    fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage> {
         Ok(TypeQLDelete { match_query: Some(self), variables: vars.vars() })
     }
 }

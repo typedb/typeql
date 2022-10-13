@@ -21,7 +21,7 @@
  */
 
 use crate::common::token::Command::Insert;
-use crate::{write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch};
+use crate::{write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch, Writable};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -52,40 +52,12 @@ impl fmt::Display for TypeQLInsert {
     }
 }
 
-pub trait Insertable {
-    fn vars(self) -> Vec<ThingVariable>;
-}
-
-impl Insertable for ThingVariable {
-    fn vars(self) -> Vec<ThingVariable> {
-        vec![self]
-    }
-}
-
-impl<const N: usize> Insertable for [ThingVariable; N] {
-    fn vars(self) -> Vec<ThingVariable> {
-        self.to_vec()
-    }
-}
-
-impl Insertable for Vec<ThingVariable> {
-    fn vars(self) -> Vec<ThingVariable> {
-        self
-    }
-}
-
-impl<U: Insertable> Insertable for Result<U, ErrorMessage> {
-    fn vars(self) -> Vec<ThingVariable> {
-        self.unwrap().vars()
-    }
-}
-
 pub trait InsertQueryBuilder {
-    fn insert(self, vars: impl Insertable) -> Result<TypeQLInsert, ErrorMessage>;
+    fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage>;
 }
 
 impl<U: InsertQueryBuilder> InsertQueryBuilder for Result<U, ErrorMessage> {
-    fn insert(self, vars: impl Insertable) -> Result<TypeQLInsert, ErrorMessage> {
+    fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage> {
         self?.insert(vars)
     }
 }

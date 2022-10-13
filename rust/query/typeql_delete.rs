@@ -22,7 +22,7 @@
 
 use crate::common::token::Command::Delete;
 use crate::{
-    write_joined, ErrorMessage, Insertable, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
+    write_joined, ErrorMessage, Writable, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
     UpdateQueryBuilder,
 };
 use std::fmt;
@@ -55,52 +55,18 @@ impl fmt::Display for TypeQLDelete {
     }
 }
 
-pub trait Deletable {
-    fn vars(self) -> Vec<ThingVariable>;
-}
-
-impl Deletable for ThingVariable {
-    fn vars(self) -> Vec<ThingVariable> {
-        vec![self]
-    }
-}
-
-impl<const N: usize> Deletable for [ThingVariable; N] {
-    fn vars(self) -> Vec<ThingVariable> {
-        self.to_vec()
-    }
-}
-
-impl<const N: usize> Deletable for [Result<ThingVariable, ErrorMessage>; N] {
-    fn vars(self) -> Vec<ThingVariable> {
-        self.into_iter().map(|x| x.unwrap()).collect()
-    }
-}
-
-impl Deletable for Vec<ThingVariable> {
-    fn vars(self) -> Vec<ThingVariable> {
-        self
-    }
-}
-
-impl<U: Deletable> Deletable for Result<U, ErrorMessage> {
-    fn vars(self) -> Vec<ThingVariable> {
-        self.unwrap().vars()
-    }
-}
-
 pub trait DeleteQueryBuilder {
-    fn delete(self, vars: impl Deletable) -> Result<TypeQLDelete, ErrorMessage>;
+    fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage>;
 }
 
 impl<U: DeleteQueryBuilder> DeleteQueryBuilder for Result<U, ErrorMessage> {
-    fn delete(self, vars: impl Deletable) -> Result<TypeQLDelete, ErrorMessage> {
+    fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage> {
         self?.delete(vars)
     }
 }
 
 impl UpdateQueryBuilder for TypeQLDelete {
-    fn insert(self, vars: impl Insertable) -> Result<TypeQLUpdate, ErrorMessage> {
+    fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage> {
         Ok(TypeQLUpdate { delete_query: Some(self), insert_variables: vars.vars() })
     }
 }
