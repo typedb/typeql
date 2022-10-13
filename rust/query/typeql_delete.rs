@@ -101,6 +101,6 @@ impl<U: DeleteQueryBuilder> DeleteQueryBuilder for Result<U, ErrorMessage> {
 
 impl UpdateQueryBuilder for TypeQLDelete {
     fn insert(self, vars: impl Insertable) -> Result<TypeQLUpdate, ErrorMessage> {
-        Ok(TypeQLUpdate { delete_query: Some(self), variables: vars.vars() })
+        Ok(TypeQLUpdate { delete_query: Some(self), insert_variables: vars.vars() })
     }
 }

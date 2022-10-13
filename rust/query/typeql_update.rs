@@ -27,12 +27,12 @@ use std::fmt;
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {
     pub delete_query: Option<TypeQLDelete>,
-    pub variables: Vec<ThingVariable>,
+    pub insert_variables: Vec<ThingVariable>,
 }
 
 impl TypeQLUpdate {
     pub fn new(variables: Vec<ThingVariable>) -> Self {
-        TypeQLUpdate { delete_query: None, variables }
+        TypeQLUpdate { delete_query: None, insert_variables: variables }
     }
 
     pub fn into_query(self) -> Query {
@@ -47,7 +47,7 @@ impl fmt::Display for TypeQLUpdate {
         }
 
         writeln!(f, "{}", Insert)?;
-        write_joined!(f, ";\n", self.variables)?;
+        write_joined!(f, ";\n", self.insert_variables)?;
         f.write_str(";")
     }
 }
