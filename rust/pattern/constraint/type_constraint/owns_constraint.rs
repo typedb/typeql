@@ -112,22 +112,22 @@ impl From<(TypeVariable, IsKeyAttribute)> for OwnsConstraint {
 }
 
 impl From<Type> for OwnsConstraint {
-    fn from(role_type: Type) -> Self {
-        OwnsConstraint::from(role_type.into_type_variable())
+    fn from(attribute_type: Type) -> Self {
+        OwnsConstraint::from(attribute_type.into_type_variable())
     }
 }
 
 impl From<(Type, IsKeyAttribute)> for OwnsConstraint {
-    fn from((role_type, is_key): (Type, IsKeyAttribute)) -> Self {
-        OwnsConstraint::new(role_type.into_type_variable(), None, is_key)
+    fn from((attribute_type, is_key): (Type, IsKeyAttribute)) -> Self {
+        OwnsConstraint::new(attribute_type.into_type_variable(), None, is_key)
     }
 }
 
 impl From<(Type, Option<Type>)> for OwnsConstraint {
-    fn from((role_type, overridden_role_type): (Type, Option<Type>)) -> Self {
+    fn from((attribute_type, overridden_attribute_type): (Type, Option<Type>)) -> Self {
         OwnsConstraint::new(
-            role_type.into_type_variable(),
-            overridden_role_type.map(Type::into_type_variable),
+            attribute_type.into_type_variable(),
+            overridden_attribute_type.map(Type::into_type_variable),
             IsKeyAttribute::No,
         )
     }
@@ -135,11 +135,11 @@ impl From<(Type, Option<Type>)> for OwnsConstraint {
 
 impl From<(Type, Option<Type>, IsKeyAttribute)> for OwnsConstraint {
     fn from(
-        (role_type, overridden_role_type, is_key): (Type, Option<Type>, IsKeyAttribute),
+        (attribute_type, overridden_attribute_type, is_key): (Type, Option<Type>, IsKeyAttribute),
     ) -> Self {
         OwnsConstraint::new(
-            role_type.into_type_variable(),
-            overridden_role_type.map(Type::into_type_variable),
+            attribute_type.into_type_variable(),
+            overridden_attribute_type.map(Type::into_type_variable),
             is_key,
         )
     }
