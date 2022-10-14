@@ -70,7 +70,7 @@ pub enum Value {
     DateTime(NaiveDateTime),
     Variable(Box<ThingVariable>),
 }
-impl Eq for Value {} // can't derive, because f32 does not implement Eq
+impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
 impl From<i64> for Value {
     fn from(long: i64) -> Self {
