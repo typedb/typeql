@@ -98,8 +98,10 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
     }
 
     fn contains(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self
-            .constrain_value(ValueConstraint::new(Predicate::Contains, Value::from(string.into()))?))
+        Ok(self.constrain_value(ValueConstraint::new(
+            Predicate::Contains,
+            Value::from(string.into()),
+        )?))
     }
 
     fn like(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
