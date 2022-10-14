@@ -23,17 +23,17 @@
 mod reference;
 pub use reference::*;
 
-mod concept_variable;
-pub use concept_variable::*;
+mod concept;
+pub use concept::*;
 
-mod thing_variable;
-pub use thing_variable::*;
+mod thing;
+pub use thing::*;
 
-mod type_variable;
-pub use type_variable::*;
+mod type_;
+pub use type_::*;
 
-mod unbound_variable;
-pub use unbound_variable::*;
+mod unbound;
+pub use unbound::*;
 
 mod builder;
 pub use builder::*;

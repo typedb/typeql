@@ -20,20 +20,20 @@
  *
  */
 
-pub mod label_constraint;
-pub use label_constraint::*;
+pub mod label;
+pub use label::*;
 
-pub mod owns_constraint;
-pub use owns_constraint::*;
+pub mod owns;
+pub use owns::*;
 
-pub mod plays_constraint;
-pub use plays_constraint::*;
+pub mod plays;
+pub use plays::*;
 
-pub mod regex_constraint;
-pub use regex_constraint::*;
+pub mod regex;
+pub use regex::*;
 
-pub mod relates_constraint;
-pub use relates_constraint::*;
+pub mod relates;
+pub use relates::*;
 
-pub mod sub_constraint;
-pub use sub_constraint::*;
+pub mod sub;
+pub use sub::*;

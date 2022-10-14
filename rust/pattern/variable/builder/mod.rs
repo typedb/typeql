@@ -20,11 +20,11 @@
  *
  */
 
-mod concept_variable_builder;
-pub use concept_variable_builder::*;
+mod concept;
+pub use concept::*;
 
-mod thing_variable_builder;
-pub use thing_variable_builder::*;
+mod thing;
+pub use thing::*;
 
-mod type_variable_builder;
-pub use type_variable_builder::*;
+mod type_;
+pub use type_::*;

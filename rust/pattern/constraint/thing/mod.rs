@@ -20,17 +20,17 @@
  *
  */
 
-pub mod has_constraint;
-pub use has_constraint::*;
+pub mod has;
+pub use has::*;
 
-pub mod iid_constraint;
-pub use iid_constraint::*;
+pub mod iid;
+pub use iid::*;
 
-pub mod isa_constraint;
-pub use isa_constraint::*;
+pub mod isa;
+pub use isa::*;
 
-pub mod relation_constraint;
-pub use relation_constraint::*;
+pub mod relation;
+pub use relation::*;
 
-pub mod value_constraint;
-pub use value_constraint::*;
+pub mod value;
+pub use value::*;

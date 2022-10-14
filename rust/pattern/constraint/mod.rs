@@ -20,14 +20,14 @@
  *
  */
 
-mod concept_constraint;
-pub use concept_constraint::*;
+mod concept;
+pub use concept::*;
 
-mod type_constraint;
-pub use type_constraint::*;
+mod type_;
+pub use type_::*;
 
-mod thing_constraint;
-pub use thing_constraint::*;
+mod thing;
+pub use thing::*;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum IsExplicit {
