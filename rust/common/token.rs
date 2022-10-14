@@ -122,7 +122,7 @@ string_enum! { Constraint
     Abstract = "abstract",
     As = "as",
     Has = "has",
-    Iid = "iid",
+    IID = "iid",
     Is = "is",
     IsKey = "@key",
     Isa = "isa",
