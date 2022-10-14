@@ -20,11 +20,17 @@
  *
  */
 
-mod concept;
-pub use concept::*;
+pub mod has;
+pub use has::*;
 
-mod thing;
-pub use thing::*;
+pub mod iid;
+pub use iid::*;
 
-mod type_;
-pub use type_::*;
+pub mod isa;
+pub use isa::*;
+
+pub mod relation;
+pub use relation::*;
+
+pub mod value;
+pub use value::*;

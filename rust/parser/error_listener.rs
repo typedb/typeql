@@ -20,13 +20,12 @@
  *
  */
 
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
-use antlr_rust::error_listener::ErrorListener as ANTLRErrorListener;
-use antlr_rust::errors::ANTLRError;
-use antlr_rust::recognizer::Recognizer;
-use antlr_rust::token_factory::TokenFactory;
+use antlr_rust::{
+    error_listener::ErrorListener as ANTLRErrorListener, errors::ANTLRError,
+    recognizer::Recognizer, token_factory::TokenFactory,
+};
 
 use crate::parser::syntax_error::SyntaxError;
 

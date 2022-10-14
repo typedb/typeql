@@ -20,11 +20,39 @@
  *
  */
 
-mod concept;
-pub use concept::*;
+use crate::{common::token::Constraint::Is, pattern::*, var};
+use std::fmt;
 
-mod thing;
-pub use thing::*;
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct IsConstraint {
+    variable: Box<ConceptVariable>,
+}
 
-mod type_;
-pub use type_::*;
+impl From<&str> for IsConstraint {
+    fn from(string: &str) -> Self {
+        Self::from(var(string))
+    }
+}
+impl From<String> for IsConstraint {
+    fn from(string: String) -> Self {
+        Self::from(var(string))
+    }
+}
+
+impl From<UnboundVariable> for IsConstraint {
+    fn from(var: UnboundVariable) -> Self {
+        Self::from(var.into_concept())
+    }
+}
+
+impl From<ConceptVariable> for IsConstraint {
+    fn from(var: ConceptVariable) -> Self {
+        Self { variable: Box::new(var) }
+    }
+}
+
+impl fmt::Display for IsConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", Is, self.variable)
+    }
+}

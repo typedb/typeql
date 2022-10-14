@@ -20,8 +20,7 @@
  *
  */
 
-use crate::pattern::*;
-use crate::write_joined;
+use crate::{pattern::*, write_joined};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -20,12 +20,10 @@
  *
  */
 
-use crate::common::token::Command::Match;
-use crate::common::token::Filter::*;
+use crate::common::token::{Command::Match, Filter::*};
 use std::fmt;
 
-use crate::query::*;
-use crate::write_joined;
+use crate::{query::*, write_joined};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -42,7 +40,7 @@ impl TypeQLMatch {
         Query::Match(self)
     }
 
-    pub fn filter(self, vars: Vec<UnboundVariable>) -> TypeQLMatch {
+    pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         TypeQLMatch { modifiers: self.modifiers.filter(vars), ..self }
     }
 }
@@ -77,15 +75,15 @@ impl MatchQueryBuilder for TypeQLMatch {
         self.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect())
     }
 
-    fn sort(self, sorting: impl Into<Sorting>) -> TypeQLMatch {
+    fn sort(self, sorting: impl Into<Sorting>) -> Self {
         TypeQLMatch { modifiers: self.modifiers.sort(sorting), ..self }
     }
 
-    fn limit(self, limit: usize) -> TypeQLMatch {
+    fn limit(self, limit: usize) -> Self {
         TypeQLMatch { modifiers: self.modifiers.limit(limit), ..self }
     }
 
-    fn offset(self, offset: usize) -> TypeQLMatch {
+    fn offset(self, offset: usize) -> Self {
         TypeQLMatch { modifiers: self.modifiers.offset(offset), ..self }
     }
 }
@@ -177,7 +175,7 @@ pub struct OrderedVariable {
 }
 
 impl OrderedVariable {
-    fn new(var: UnboundVariable, order: &str) -> OrderedVariable {
+    fn new(var: UnboundVariable, order: &str) -> Self {
         OrderedVariable {
             var,
             order: match order {

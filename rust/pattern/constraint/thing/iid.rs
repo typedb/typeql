@@ -21,40 +21,48 @@
  */
 
 use crate::{
-    common::{string::indent, token::Operator::Or},
-    Pattern,
+    common::{error::INVALID_IID_STRING, token::Constraint::IID},
+    ErrorMessage,
 };
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Disjunction {
-    pub patterns: Vec<Pattern>,
+pub struct IIDConstraint {
+    pub iid: String,
 }
 
-impl Disjunction {
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Disjunction(self)
+fn is_valid_iid(iid: &str) -> bool {
+    iid.starts_with("0x") && iid.chars().skip(2).all(|c| c.is_ascii_hexdigit() && !c.is_uppercase())
+}
+
+impl IIDConstraint {
+    pub fn new(iid: String) -> Result<Self, ErrorMessage> {
+        if is_valid_iid(&iid) {
+            Ok(IIDConstraint { iid })
+        } else {
+            Err(INVALID_IID_STRING.format(&[&iid]))
+        }
     }
 }
 
-impl From<Vec<Pattern>> for Disjunction {
-    fn from(patterns: Vec<Pattern>) -> Self {
-        Disjunction { patterns }
+impl TryFrom<&str> for IIDConstraint {
+    type Error = ErrorMessage;
+
+    fn try_from(iid: &str) -> Result<Self, Self::Error> {
+        IIDConstraint::new(iid.to_string())
     }
 }
 
-impl fmt::Display for Disjunction {
+impl TryFrom<String> for IIDConstraint {
+    type Error = ErrorMessage;
+
+    fn try_from(iid: String) -> Result<Self, Self::Error> {
+        IIDConstraint::new(iid)
+    }
+}
+
+impl fmt::Display for IIDConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(
-            &self
-                .patterns
-                .iter()
-                .map(|pattern| match pattern {
-                    Pattern::Conjunction(conjunction) => conjunction.to_string(),
-                    other => format!("{{\n{};\n}}", indent(&other.to_string())),
-                })
-                .collect::<Vec<_>>()
-                .join(&format!(" {} ", Or)),
-        )
+        write!(f, "{} {}", IID, self.iid)
     }
 }

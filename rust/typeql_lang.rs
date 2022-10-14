@@ -22,15 +22,15 @@
 
 #![allow(dead_code)]
 
-use std::cell::RefCell;
-use std::convert::Into;
-use std::rc::Rc;
+use std::{cell::RefCell, convert::Into, rc::Rc};
 
-use typeql_grammar::typeqlrustlexer::TypeQLRustLexer;
-use typeql_grammar::typeqlrustparser::*;
+use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::*};
 
-use antlr_rust::common_token_stream::CommonTokenStream;
-use antlr_rust::{InputStream, Parser as ANTLRParser};
+use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
+
+#[macro_use]
+pub mod builder;
+pub use builder::*;
 
 pub mod common;
 pub mod parser;
@@ -40,76 +40,15 @@ pub mod query;
 #[macro_use]
 mod util;
 
-use crate::common::error::ErrorMessage;
-use crate::parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query};
+use crate::{
+    common::error::ErrorMessage,
+    parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query},
+};
 use pattern::*;
 use query::*;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query.trim_end())
-}
-
-#[macro_export]
-macro_rules! typeql_match {
-    ($($pattern:expr),* $(,)?) => {{
-        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match patterns {
-            Ok(patterns) => Ok(TypeQLMatch::new(Conjunction::from(patterns))),
-            Err(err) => Err(err),
-        }
-    }}
-}
-
-#[macro_export]
-macro_rules! typeql_insert {
-    ($($thing_variable:expr),* $(,)?) => {{
-        let variables = [$($thing_variable),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match variables {
-            Ok(variables) => Ok(TypeQLInsert::new(variables)),
-            Err(err) => Err(err),
-        }
-    }}
-}
-
-#[macro_export]
-macro_rules! and {
-    ($($pattern:expr),* $(,)?) => {{
-        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match patterns {
-            Ok(patterns) => Ok(Conjunction::from(patterns)),
-            Err(err) => Err(err),
-        }
-    }}
-}
-
-#[macro_export]
-macro_rules! or {
-    ($($pattern:expr),* $(,)?) => {{
-        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match patterns {
-            Ok(patterns) => Ok(Disjunction::from(patterns)),
-            Err(err) => Err(err),
-        }
-    }}
-}
-
-pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
-    var.into()
-}
-
-pub fn type_(name: impl Into<String>) -> Result<TypeVariable, ErrorMessage> {
-    UnboundVariable::hidden().type_(name.into())
-}
-
-pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> Result<ThingVariable, ErrorMessage> {
-    UnboundVariable::hidden().rel(value)
-}
-
-pub fn not<T: TryInto<Negation>>(pattern: T) -> Result<Negation, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Negation>>::Error>,
-{
-    Ok(pattern.try_into()?)
 }
 
 pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {

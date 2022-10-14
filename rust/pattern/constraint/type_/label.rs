@@ -20,39 +20,16 @@
  *
  */
 
-use crate::{
-    common::token::Command::Insert, write_joined, ErrorMessage, Query, ThingVariable, TypeQLDelete,
-    Writable,
-};
+use crate::{common::token::Constraint::Type, Label};
 use std::fmt;
 
-#[derive(Debug, Eq, PartialEq)]
-pub struct TypeQLUpdate {
-    pub delete_query: TypeQLDelete,
-    pub insert_variables: Vec<ThingVariable>,
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct LabelConstraint {
+    pub label: Label,
 }
 
-impl TypeQLUpdate {
-    pub fn into_query(self) -> Query {
-        Query::Update(self)
-    }
-}
-
-impl fmt::Display for TypeQLUpdate {
+impl fmt::Display for LabelConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.delete_query)?;
-        writeln!(f, "{}", Insert)?;
-        write_joined!(f, ";\n", self.insert_variables)?;
-        f.write_str(";")
-    }
-}
-
-pub trait UpdateQueryBuilder {
-    fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage>;
-}
-
-impl<U: UpdateQueryBuilder> UpdateQueryBuilder for Result<U, ErrorMessage> {
-    fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage> {
-        self?.insert(vars)
+        write!(f, "{} {}", Type, self.label)
     }
 }

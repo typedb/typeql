@@ -20,11 +20,20 @@
  *
  */
 
-mod concept;
-pub use concept::*;
+pub mod label;
+pub use label::*;
 
-mod thing;
-pub use thing::*;
+pub mod owns;
+pub use owns::*;
 
-mod type_;
-pub use type_::*;
+pub mod plays;
+pub use plays::*;
+
+pub mod regex;
+pub use regex::*;
+
+pub mod relates;
+pub use relates::*;
+
+pub mod sub;
+pub use sub::*;

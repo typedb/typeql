@@ -20,8 +20,7 @@
  *
  */
 
-use crate::pattern::*;
-use crate::ErrorMessage;
+use crate::{pattern::*, ErrorMessage};
 
 pub trait TypeConstrainable {
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable;

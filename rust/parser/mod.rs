@@ -26,32 +26,28 @@ pub mod syntax_error;
 #[cfg(test)]
 mod test;
 
-use antlr_rust::token::Token;
-use antlr_rust::tree::ParseTree;
-use antlr_rust::tree::TerminalNode as ANTLRTerminalNode;
+use antlr_rust::{
+    token::Token,
+    tree::{ParseTree, TerminalNode as ANTLRTerminalNode},
+};
 use chrono::{NaiveDate, NaiveDateTime};
 use std::rc::Rc;
 
-use crate::common::date_time;
-use crate::common::error::{ErrorMessage, ILLEGAL_GRAMMAR};
-use crate::common::string::*;
-use crate::common::token::Predicate;
+use crate::common::{
+    date_time,
+    error::{ErrorMessage, ILLEGAL_GRAMMAR},
+    string::*,
+    token::Predicate,
+};
 use typeql_grammar::typeqlrustparser::*;
 
-use crate::pattern::*;
-use crate::query::*;
+use crate::{pattern::*, query::*};
 
 #[derive(Debug)]
 pub struct Definable;
 
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
-
-#[derive(Debug)]
-enum Type {
-    Label(Label),
-    Variable(TypeVariable),
-}
 
 fn get_string(string: Rc<TerminalNode>) -> String {
     unquote(&string.get_text())
@@ -87,7 +83,7 @@ fn get_var(var: Rc<TerminalNode>) -> UnboundVariable {
     let name = &var.symbol.get_text();
 
     assert!(name.len() > 1);
-    assert_eq!(name.chars().next(), Some('$'));
+    assert!(name.starts_with('$'));
     let name = &name[1..];
 
     if name == "_" {
@@ -339,50 +335,37 @@ fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ParserResult<Conc
 }
 
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
-    let mut var_type = match visit_type_any(ctx.type_any().unwrap())? {
-        Type::Variable(p) => p,
-        Type::Label(p) => UnboundVariable::hidden().type_(p)?,
-    };
+    let mut var_type = visit_type_any(ctx.type_any().unwrap())?.into_type_variable();
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
         if constraint.OWNS().is_some() {
-            let _overridden: Option<()> = match constraint.AS() {
-                None => None,
-                Some(_) => todo!(),
-            };
+            let overridden =
+                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
             let is_key = IsKeyAttribute::from(constraint.IS_KEY().is_some());
-            var_type = var_type.constrain_owns(match visit_type(constraint.type_(0).unwrap())? {
-                Type::Label(label) => OwnsConstraint::from((label, is_key)),
-                Type::Variable(var) => OwnsConstraint::from((var, is_key)),
-            });
+            var_type = var_type.constrain_owns(OwnsConstraint::from((
+                visit_type(constraint.type_(0).unwrap())?,
+                overridden,
+                is_key,
+            )));
         } else if constraint.PLAYS().is_some() {
-            let _overridden: Option<()> = match constraint.AS() {
-                None => None,
-                Some(_) => todo!(),
-            };
-            var_type = var_type.constrain_plays(
-                match visit_type_scoped(constraint.type_scoped().unwrap())? {
-                    Type::Label(scoped) => PlaysConstraint::from(scoped),
-                    Type::Variable(var) => PlaysConstraint::from(var),
-                },
-            );
+            let overridden =
+                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
+            var_type = var_type.constrain_plays(PlaysConstraint::from((
+                visit_type_scoped(constraint.type_scoped().unwrap())?,
+                overridden,
+            )));
         } else if constraint.REGEX().is_some() {
             var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?;
         } else if constraint.RELATES().is_some() {
-            let _overridden: Option<()> = match constraint.AS() {
-                None => None,
-                Some(_) => todo!(),
-            };
-            var_type =
-                var_type.constrain_relates(match visit_type(constraint.type_(0).unwrap())? {
-                    Type::Label(label) => RelatesConstraint::from(label),
-                    Type::Variable(var) => RelatesConstraint::from(var),
-                });
+            let overridden =
+                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
+            var_type = var_type.constrain_relates(RelatesConstraint::from((
+                visit_type(constraint.type_(0).unwrap())?,
+                overridden,
+            )));
         } else if constraint.SUB_().is_some() {
-            var_type =
-                var_type.constrain_sub(match visit_type_any(constraint.type_any().unwrap())? {
-                    Type::Label(label) => SubConstraint::from(label),
-                    Type::Variable(var) => SubConstraint::from(var),
-                });
+            var_type = var_type.constrain_sub(SubConstraint::from(visit_type_any(
+                constraint.type_any().unwrap(),
+            )?));
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
             var_type = var_type.type_(scoped_label)?;
@@ -499,9 +482,9 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
 
 fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
     if let Some(value) = ctx.value() {
-        Ok(ValueConstraint::new(Predicate::Eq, visit_value(value)?))
+        ValueConstraint::new(Predicate::Eq, visit_value(value)?)
     } else if let Some(equality) = ctx.predicate_equality() {
-        Ok(ValueConstraint::new(Predicate::from(equality.get_text()), {
+        ValueConstraint::new(Predicate::from(equality.get_text()), {
             let predicate_value = ctx.predicate_value().unwrap();
             if let Some(value) = predicate_value.value() {
                 visit_value(value)?
@@ -510,15 +493,15 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             } else {
                 panic!("Unexpected predicate value: `{}`", predicate_value.get_text())
             }
-        }))
+        })
     } else if let Some(substring) = ctx.predicate_substring() {
-        Ok(ValueConstraint::new(Predicate::from(substring.get_text()), {
+        ValueConstraint::new(Predicate::from(substring.get_text()), {
             if substring.LIKE().is_some() {
                 Value::from(get_regex(ctx.STRING_().unwrap()))
             } else {
                 Value::from(get_string(ctx.STRING_().unwrap()))
             }
-        }))
+        })
     } else {
         todo!()
     }
@@ -542,7 +525,7 @@ fn visit_schema_rule(_ctx: Rc<Schema_ruleContext>) -> ParserResult<()> {
 
 fn visit_type_any(ctx: Rc<Type_anyContext>) -> ParserResult<Type> {
     if let Some(var) = ctx.VAR_() {
-        Ok(Type::Variable(get_var(var).into_type()))
+        Ok(Type::Variable(get_var(var)))
     } else if let Some(type_) = ctx.type_() {
         visit_type(type_)
     } else if let Some(scoped) = ctx.type_scoped() {
@@ -556,7 +539,7 @@ fn visit_type_scoped(ctx: Rc<Type_scopedContext>) -> ParserResult<Type> {
     if let Some(scoped) = ctx.label_scoped() {
         Ok(Type::Label(visit_label_scoped(scoped)?))
     } else if let Some(var) = ctx.VAR_() {
-        Ok(Type::Variable(get_var(var).into_type()))
+        Ok(Type::Variable(get_var(var)))
     } else {
         panic!("null scoped type label")
     }
@@ -566,7 +549,7 @@ fn visit_type(ctx: Rc<Type_Context>) -> ParserResult<Type> {
     if let Some(label) = ctx.label() {
         Ok(Type::Label(label.get_text().into()))
     } else if let Some(var) = ctx.VAR_() {
-        Ok(Type::Variable(get_var(var).into_type()))
+        Ok(Type::Variable(get_var(var)))
     } else {
         panic!("visit_type: not implemented")
     }

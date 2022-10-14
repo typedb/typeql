@@ -20,9 +20,10 @@
  *
  */
 
-use crate::common::error::ErrorMessage;
-use crate::common::token::Predicate;
-use crate::pattern::*;
+use crate::{
+    common::{error::ErrorMessage, token::Predicate},
+    pattern::*,
+};
 
 pub trait ThingConstrainable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable;
@@ -73,36 +74,38 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
     }
 
     fn eq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into())))
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into())?))
     }
 
     fn neq(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Neq, value.into())))
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Neq, value.into())?))
     }
 
     fn gt(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Gt, value.into())))
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Gt, value.into())?))
     }
 
     fn gte(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Gte, value.into())))
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Gte, value.into())?))
     }
 
     fn lt(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Lt, value.into())))
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Lt, value.into())?))
     }
 
     fn lte(self, value: impl Into<Value>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Lte, value.into())))
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Lte, value.into())?))
     }
 
     fn contains(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self
-            .constrain_value(ValueConstraint::new(Predicate::Contains, Value::from(string.into()))))
+        Ok(self.constrain_value(ValueConstraint::new(
+            Predicate::Contains,
+            Value::from(string.into()),
+        )?))
     }
 
     fn like(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Like, Value::from(string.into()))))
+        Ok(self.constrain_value(ValueConstraint::new(Predicate::Like, Value::from(string.into()))?))
     }
 }
 

@@ -20,41 +20,41 @@
  *
  */
 
-use crate::common::token::Constraint::Is;
-use crate::pattern::*;
-use crate::var;
+use crate::{
+    common::token::Constraint::Sub, Label, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct IsConstraint {
-    variable: Box<ConceptVariable>,
+pub struct SubConstraint {
+    pub type_: Box<TypeVariable>,
 }
 
-impl From<&str> for IsConstraint {
-    fn from(string: &str) -> IsConstraint {
-        Self::from(var(string))
-    }
-}
-impl From<String> for IsConstraint {
-    fn from(string: String) -> IsConstraint {
-        Self::from(var(string))
+impl<T: Into<Label>> From<T> for SubConstraint {
+    fn from(scoped_type: T) -> Self {
+        SubConstraint { type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap()) }
     }
 }
 
-impl From<UnboundVariable> for IsConstraint {
-    fn from(var: UnboundVariable) -> IsConstraint {
-        Self::from(var.into_concept())
+impl From<UnboundVariable> for SubConstraint {
+    fn from(type_: UnboundVariable) -> Self {
+        Self::from(type_.into_type())
+    }
+}
+impl From<TypeVariable> for SubConstraint {
+    fn from(type_: TypeVariable) -> Self {
+        SubConstraint { type_: Box::new(type_) }
     }
 }
 
-impl From<ConceptVariable> for IsConstraint {
-    fn from(var: ConceptVariable) -> IsConstraint {
-        Self { variable: Box::new(var) }
+impl From<Type> for SubConstraint {
+    fn from(type_: Type) -> Self {
+        SubConstraint::from(type_.into_type_variable())
     }
 }
 
-impl fmt::Display for IsConstraint {
+impl fmt::Display for SubConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Is, self.variable)
+        write!(f, "{} {}", Sub, self.type_)
     }
 }

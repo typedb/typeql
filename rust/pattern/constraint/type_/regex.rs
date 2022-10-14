@@ -20,11 +20,28 @@
  *
  */
 
-mod concept;
-pub use concept::*;
+use crate::common::{string::escape_regex, token::Constraint::Regex};
+use std::fmt;
 
-mod thing;
-pub use thing::*;
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct RegexConstraint {
+    regex: String,
+}
 
-mod type_;
-pub use type_::*;
+impl From<&str> for RegexConstraint {
+    fn from(regex: &str) -> Self {
+        RegexConstraint { regex: regex.to_string() }
+    }
+}
+
+impl From<String> for RegexConstraint {
+    fn from(regex: String) -> Self {
+        RegexConstraint { regex }
+    }
+}
+
+impl fmt::Display for RegexConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, r#"{} "{}""#, Regex, escape_regex(&self.regex))
+    }
+}
