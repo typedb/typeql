@@ -51,7 +51,9 @@ impl TypeQLDefine {
         self.variables.push(variable)
     }
 
-    pub fn add_rule(&mut self, _: Rule) {}
+    pub fn add_rule(&mut self, rule: Rule) {
+        self.rules.push(rule)
+    }
 }
 
 impl fmt::Display for TypeQLDefine {

@@ -114,3 +114,7 @@ where
 {
     ValueConstraint::new(Predicate::Gte, value.try_into()?)
 }
+
+pub fn rule(name: &str) -> RuleDeclaration {
+    RuleDeclaration::new(name)
+}

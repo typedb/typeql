@@ -21,9 +21,10 @@
  */
 
 use crate::{
-    and, gte, lt, lte, not, or, parse_query, rel, try_, type_, typeql_insert, typeql_match, var,
-    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeVariableBuilder, KEY,
+    and, gte, lt, lte, not, or, parse_query, rel, rule, try_, type_, typeql_insert, typeql_match,
+    var, ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query,
+    RelationVariableBuilder, ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch,
+    TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -902,33 +903,33 @@ pokemon plays evolves-final:from-final as from;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn when_parsing_define_query_result_is_same_as_java_typeql() {
-    let query = "define\n" +
-            "pokemon sub entity;\n" +
-            "evolution sub relation;\n" +
-            "evolves-from sub role;\n" +
-            "evolves-to sub role;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "pokemon plays evolves:from,\n" +
-            "    plays evolves:to,\n" +
-            "    owns name;";
-    let parsed = parse_query(query).asDefine();
+    let query = r#"define
+pokemon sub entity;
+evolution sub relation;
+evolves-from sub role;
+evolves-to sub role;
+evolves relates from,
+    relates to;
+pokemon plays evolves:from,
+    plays evolves:to,
+    owns name;"#;
 
-    let expected = define(
-            type_("pokemon").sub("entity"),
-            type_("evolution").sub("relation"),
-            type_("evolves-from").sub("role"),
-            type_("evolves-to").sub("role"),
-            type_("evolves").relates("from").relates("to"),
-            type_("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("pokemon").sub("entity"),
+        type_("evolution").sub("relation"),
+        type_("evolves-from").sub("role"),
+        type_("evolves-to").sub("role"),
+        type_("evolves").relates("from").relates("to"),
+        type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
     );
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn when_parsing_undefine_query_result_is_same_as_java_typeql() {
     let query = "undefine\n" +
@@ -1036,8 +1037,6 @@ fn test_define_value_type_query() {
 */
 #[test]
 fn test_escape_string() {
-    // ANTLR will see this as a string that looks like:
-    // "This has \"double quotes\" and a single-quoted backslash: '\\'"
     let input = r#"This has \"double quotes\" and a single-quoted backslash: '\\'"#;
 
     let query = format!(
@@ -1083,28 +1082,33 @@ fn test_parsing_pattern() {
 
     assert_query_eq!(expected, parsed, pattern.replace("'", "\""));
 }
+*/
 
 #[test]
 fn test_define_rules() {
-    let when = "$x isa movie;";
-    let then = "$x has genre 'drama';";
-    let when_pattern = and((var("x").isa("movie")));
-    let then_pattern = var("x").has(("genre", "drama"));
+    let when = and!(var("x").isa("movie"));
+    let then = var("x").has(("genre", "drama")).unwrap();
 
-    let expected = define(rule("all-movies-are-drama").when(when_pattern).then(then_pattern));
-    let query = "define\n" +
-            "rule all-movies-are-drama:\n" +
-            "    when {\n" +
-            "        " + when + "\n" +
-            "    }\n" +
-            "    then {\n" +
-            "        " + then + "\n" +
-            "    };";
-    let parsed = parse_query(query).asDefine();
+    let query = format!(
+        r#"define
+rule all-movies-are-drama:
+    when {{
+        {};
+    }}
+    then {{
+        {};
+    }};"#,
+        when.patterns.get(0).unwrap(),
+        then
+    );
+    println!("{}", query);
 
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let parsed = parse_query(&query).unwrap().into_define();
+    let expected = typeql_define!(rule("all-movies-are-drama").when(when).then(then));
+
+    assert_query_eq!(expected, parsed, query);
 }
-*/
+
 #[test]
 fn test_parse_boolean() {
     let query = r#"insert
@@ -1357,17 +1361,19 @@ fn when_parsing_aggregate_with_wrong_name_throw() {
     assert!(parse_query("match\n$x isa name; hello $x;").is_err());
 }
 
-/*
 #[test]
 fn define_attribute_type_regex() {
-    let query = "define\n" +
-            "digit sub attribute,\n" +
-            "    regex '\\d';";
-    let = parse_query(query);
-    let = define(type_("digit").sub("attribute").regex("\\d"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let query = r#"define
+digit sub attribute,
+    regex "\d";"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(type_("digit").sub("attribute").regex(r#"\d"#));
+
+    assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn undefine_attribute_type_regex() {
     let query = "undefine\ndigit regex '\\d';";

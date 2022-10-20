@@ -20,8 +20,41 @@
  *
  */
 
-use crate::{Conjunction, Label, Pattern, ThingVariable};
+use crate::{
+    common::{string::indent, token::Schema},
+    Conjunction, Label, Pattern, ThingVariable,
+};
 use std::fmt;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct RuleDeclaration {
+    pub label: Label,
+}
+
+impl RuleDeclaration {
+    pub fn new(label: &str) -> Self {
+        RuleDeclaration { label: Label::from(label) }
+    }
+
+    pub fn into_pattern(self) -> Pattern {
+        todo!()
+    }
+
+    pub fn when(self, conjunction: Conjunction) -> RuleStub {
+        RuleStub { label: self.label, when: conjunction }
+    }
+}
+
+pub struct RuleStub {
+    pub label: Label,
+    pub when: Conjunction,
+}
+
+impl RuleStub {
+    pub fn then(self, conclusion: ThingVariable) -> Rule {
+        Rule { label: self.label, when: self.when, then: conclusion }
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Rule {
@@ -31,13 +64,29 @@ pub struct Rule {
 }
 
 impl Rule {
+    pub fn new(label: Label, when: Conjunction, then: ThingVariable) -> Self {
+        Rule { label, when, then }
+    }
+
     pub fn into_pattern(self) -> Pattern {
         Pattern::Rule(self)
     }
 }
 
 impl fmt::Display for Rule {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{} {}:\n{}",
+            Schema::Rule,
+            self.label,
+            indent(&format!(
+                "{} {}\n{} {{\n    {};\n}}",
+                Schema::When,
+                self.when,
+                Schema::Then,
+                self.then
+            ))
+        )
     }
 }

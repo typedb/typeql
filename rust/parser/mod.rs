@@ -272,7 +272,12 @@ fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Pattern> {
     if let Some(variable_type) = ctx.variable_type() {
         Ok(visit_variable_type(variable_type)?.into_variable().into_pattern())
     } else {
-        visit_schema_rule(ctx.schema_rule().unwrap()).map(Rule::into_pattern)
+        let rule_ctx = ctx.schema_rule().unwrap();
+        if rule_ctx.patterns().is_some() {
+            visit_schema_rule(rule_ctx).map(Rule::into_pattern)
+        } else {
+            visit_schema_rule_declaration(rule_ctx).map(Rule::into_pattern)
+        }
     }
 }
 
@@ -285,8 +290,8 @@ fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
         Ok(visit_pattern_variable(var)?.into_pattern())
     } else if let Some(disjunction) = ctx.pattern_disjunction() {
         Ok(visit_pattern_disjunction(disjunction)?.into_pattern())
-    } else if let Some(_conjunction) = ctx.pattern_conjunction() {
-        todo!()
+    } else if let Some(conjunction) = ctx.pattern_conjunction() {
+        Ok(visit_pattern_conjunction(conjunction)?.into_pattern())
     } else if let Some(negation) = ctx.pattern_negation() {
         Ok(visit_pattern_negation(negation)?.into_pattern())
     } else {
@@ -294,8 +299,8 @@ fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
     }
 }
 
-fn visit_pattern_conjunction(_ctx: Rc<Pattern_conjunctionContext>) -> ParserResult<()> {
-    todo!()
+fn visit_pattern_conjunction(ctx: Rc<Pattern_conjunctionContext>) -> ParserResult<Conjunction> {
+    Ok(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
 }
 
 fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<Disjunction> {
@@ -524,7 +529,15 @@ fn visit_predicate_value(_ctx: Rc<Predicate_valueContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_schema_rule(_ctx: Rc<Schema_ruleContext>) -> ParserResult<Rule> {
+fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<Rule> {
+    Ok(Rule::new(
+        Label::from(ctx.label().unwrap().get_text()),
+        Conjunction::from(visit_patterns(ctx.patterns().unwrap())?),
+        visit_variable_thing_any(ctx.variable_thing_any().unwrap())?,
+    ))
+}
+
+fn visit_schema_rule_declaration(_ctx: Rc<Schema_ruleContext>) -> ParserResult<Rule> {
     todo!()
 }
 
