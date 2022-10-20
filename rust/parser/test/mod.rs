@@ -856,53 +856,55 @@ triangle-right-angled owns hypotenuse-length as side-length;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
+#[test]
+fn when_parsing_define_query_with_relates_overrides_result_is_same_as_java_typeql() {
+    let query = r#"define
+pokemon sub entity;
+evolves sub relation;
+evolves relates from,
+    relates to;
+evolves-final sub evolves;
+evolves-final relates from-final as from;"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("pokemon").sub("entity"),
+        type_("evolves").sub("relation"),
+        type_("evolves").relates("from").relates("to"),
+        type_("evolves-final").sub("evolves"),
+        type_("evolves-final").relates(("from-final", "from"))
+    );
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn when_parsing_define_query_with_plays_overrides_result_is_same_as_java_typeql() {
+    let query = r#"define
+pokemon sub entity;
+evolves sub relation;
+evolves relates from,
+    relates to;
+evolves-final sub evolves;
+evolves-final relates from-final as from;
+pokemon plays evolves-final:from-final as from;"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("pokemon").sub("entity"),
+        type_("evolves").sub("relation"),
+        type_("evolves").relates("from").relates("to"),
+        type_("evolves-final").sub("evolves"),
+        type_("evolves-final").relates(("from-final", "from")),
+        type_("pokemon").plays(("evolves-final", "from-final", "from"))
+    );
+
+    assert_query_eq!(expected, parsed, query);
+}
+
 /*
 #[test]
-fn when_parsing_define_query_with_relates_overrides_result_is_same_as_java_type_ql() {
-    let query = "define\n" +
-            "pokemon sub entity;\n" +
-            "evolves sub relation;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "evolves-final sub evolves;\n" +
-            "evolves-final relates from-final as from;";
-    let parsed = parse_query(query).asDefine();
-
-    let expected = define(
-            type_("pokemon").sub("entity"),
-            type_("evolves").sub("relation"),
-            type_("evolves").relates("from").relates("to"),
-            type_("evolves-final").sub("evolves"),
-            type_("evolves-final").relates("from-final", "from")
-    );
-    assert_query_eq!(expected, parsed, query);
-}
-
-#[test]
-fn when_parsing_define_query_with_plays_overrides_result_is_same_as_java_type_ql() {
-    let query = "define\n" +
-            "pokemon sub entity;\n" +
-            "evolves sub relation;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "evolves-final sub evolves;\n" +
-            "evolves-final relates from-final as from;\n" +
-            "pokemon plays evolves-final:from-final as from;";
-    let parsed = parse_query(query).asDefine();
-
-    let expected = define(
-            type_("pokemon").sub("entity"),
-            type_("evolves").sub("relation"),
-            type_("evolves").relates("from").relates("to"),
-            type_("evolves-final").sub("evolves"),
-            type_("evolves-final").relates("from-final", "from"),
-            type_("pokemon").plays("evolves-final", "from-final", "from")
-    );
-    assert_query_eq!(expected, parsed, query);
-}
-
-#[test]
-fn when_parsing_define_query_result_is_same_as_java_type_ql() {
+fn when_parsing_define_query_result_is_same_as_java_typeql() {
     let query = "define\n" +
             "pokemon sub entity;\n" +
             "evolution sub relation;\n" +
@@ -928,7 +930,7 @@ fn when_parsing_define_query_result_is_same_as_java_type_ql() {
 }
 
 #[test]
-fn when_parsing_undefine_query_result_is_same_as_java_type_ql() {
+fn when_parsing_undefine_query_result_is_same_as_java_typeql() {
     let query = "undefine\n" +
             "pokemon sub entity;\n" +
             "evolution sub relation;\n" +

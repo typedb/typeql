@@ -353,7 +353,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             )));
         } else if constraint.PLAYS().is_some() {
             let overridden =
-                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
+                constraint.AS().map(|_| visit_type(constraint.type_(0).unwrap())).transpose()?;
             var_type = var_type.constrain_plays(PlaysConstraint::from((
                 visit_type_scoped(constraint.type_scoped().unwrap())?,
                 overridden,
