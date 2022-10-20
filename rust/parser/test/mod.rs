@@ -23,7 +23,7 @@
 use crate::{
     and, gte, lt, lte, not, or, parse_query, rel, try_, type_, typeql_insert, typeql_match, var,
     ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeQLInsert, TypeQLMatch, TypeVariableBuilder, KEY,
+    ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -972,22 +972,23 @@ $x has name "HELLO";"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_define_abstract_entity_query() {
-    let query = "define\n" +
-            "concrete-type_ sub entity;\n" +
-            "abstract-type_ sub entity,\n" +
-            "    abstract;";
-    let parsed = parse_query(query).asDefine();
-    let expected = define(
-            type_("concrete-type").sub("entity"),
-            type_("abstract-type").sub("entity").isAbstract()
+    let query = r#"define
+concrete-type sub entity;
+abstract-type sub entity,
+    abstract;"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("concrete-type").sub("entity"),
+        type_("abstract-type").sub("entity").abstract_()
     );
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn test_match_value_type_query() {
     let query = "match\n$x value double;";

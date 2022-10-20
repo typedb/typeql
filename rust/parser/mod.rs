@@ -43,9 +43,6 @@ use typeql_grammar::typeqlrustparser::*;
 
 use crate::{pattern::*, query::*};
 
-#[derive(Debug)]
-pub struct Definable;
-
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
@@ -135,7 +132,7 @@ fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>
     visit_patterns(ctx.patterns().unwrap())
 }
 
-fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Definable>> {
+fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Pattern>> {
     let definables_ctx = ctx.definables().unwrap();
     (0..).map_while(|i| definables_ctx.definable(i)).map(visit_definable).collect()
 }
@@ -148,7 +145,7 @@ fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<String> {
     Ok(ctx.label().unwrap().get_text())
 }
 
-fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<()> {
+fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<Rule> {
     visit_schema_rule(ctx.schema_rule().unwrap())
 }
 
@@ -161,13 +158,15 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
         Ok(visit_query_delete(query_delete)?.into_query())
     } else if let Some(query_update) = ctx.query_update() {
         Ok(visit_query_update(query_update)?.into_query())
+    } else if let Some(query_define) = ctx.query_define() {
+        Ok(visit_query_define(query_define)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
-fn visit_query_define(_ctx: Rc<Query_defineContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_define(ctx: Rc<Query_defineContext>) -> ParserResult<TypeQLDefine> {
+    Ok(TypeQLDefine::new(visit_definables(ctx.definables().unwrap())?))
 }
 
 fn visit_query_undefine(_ctx: Rc<Query_undefineContext>) -> ParserResult<()> {
@@ -265,12 +264,16 @@ fn visit_match_group(_ctx: Rc<Match_groupContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_definables(_ctx: Rc<DefinablesContext>) -> ParserResult<()> {
-    todo!()
+fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Pattern>> {
+    (0..).map_while(|i| ctx.definable(i)).map(visit_definable).collect()
 }
 
-fn visit_definable(_ctx: Rc<DefinableContext>) -> ParserResult<Definable> {
-    todo!()
+fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Pattern> {
+    if let Some(variable_type) = ctx.variable_type() {
+        Ok(visit_variable_type(variable_type)?.into_variable().into_pattern())
+    } else {
+        visit_schema_rule(ctx.schema_rule().unwrap()).map(Rule::into_pattern)
+    }
 }
 
 fn visit_patterns(ctx: Rc<PatternsContext>) -> ParserResult<Vec<Pattern>> {
@@ -337,7 +340,9 @@ fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ConceptVariable {
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
     let mut var_type = visit_type_any(ctx.type_any().unwrap())?.into_type_variable();
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
-        if constraint.OWNS().is_some() {
+        if constraint.ABSTRACT().is_some() {
+            var_type = var_type.abstract_();
+        } else if constraint.OWNS().is_some() {
             let overridden =
                 constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
             let is_key = IsKeyAttribute::from(constraint.IS_KEY().is_some());
@@ -519,7 +524,7 @@ fn visit_predicate_value(_ctx: Rc<Predicate_valueContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_schema_rule(_ctx: Rc<Schema_ruleContext>) -> ParserResult<()> {
+fn visit_schema_rule(_ctx: Rc<Schema_ruleContext>) -> ParserResult<Rule> {
     todo!()
 }
 

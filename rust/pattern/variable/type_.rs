@@ -20,8 +20,17 @@
  *
  */
 
-use crate::{pattern::*, write_joined};
+use crate::{common::token::Constraint, pattern::*, write_joined};
 use std::fmt;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Abstract;
+
+impl fmt::Display for Abstract {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Constraint::Abstract)
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
@@ -32,6 +41,7 @@ pub struct TypeVariable {
     pub regex: Option<RegexConstraint>,
     pub relates: Vec<RelatesConstraint>,
     pub sub: Option<SubConstraint>,
+    pub abstract_: Option<Abstract>,
 }
 
 impl TypeVariable {
@@ -46,6 +56,7 @@ impl TypeVariable {
     pub fn new(reference: Reference) -> TypeVariable {
         TypeVariable {
             reference,
+            abstract_: None,
             label: None,
             owns: vec![],
             plays: vec![],
@@ -56,7 +67,8 @@ impl TypeVariable {
     }
 
     fn is_type_constrained(&self) -> bool {
-        !self.owns.is_empty()
+        self.abstract_.is_some()
+            || !self.owns.is_empty()
             || !self.plays.is_empty()
             || self.regex.is_some()
             || !self.relates.is_empty()
@@ -65,6 +77,10 @@ impl TypeVariable {
 }
 
 impl TypeConstrainable for TypeVariable {
+    fn constrain_abstract(self) -> TypeVariable {
+        TypeVariable { abstract_: Some(Abstract), ..self }
+    }
+
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
         TypeVariable { label: Some(label), ..self }
     }
@@ -105,7 +121,16 @@ impl fmt::Display for TypeVariable {
         }
         if self.is_type_constrained() {
             f.write_str(" ")?;
-            write_joined!(f, ",\n    ", self.sub, self.regex, self.relates, self.plays, self.owns)?;
+            write_joined!(
+                f,
+                ",\n    ",
+                self.sub,
+                self.regex,
+                self.relates,
+                self.plays,
+                self.owns,
+                self.abstract_
+            )?;
         }
         Ok(())
     }

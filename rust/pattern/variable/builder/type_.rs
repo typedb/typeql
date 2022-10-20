@@ -23,6 +23,7 @@
 use crate::pattern::*;
 
 pub trait TypeConstrainable {
+    fn constrain_abstract(self) -> TypeVariable;
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable;
     fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable;
     fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable;
@@ -32,6 +33,7 @@ pub trait TypeConstrainable {
 }
 
 pub trait TypeVariableBuilder: Sized {
+    fn abstract_(self) -> TypeVariable;
     fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeVariable;
     fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeVariable;
     fn regex(self, regex: impl Into<RegexConstraint>) -> TypeVariable;
@@ -41,6 +43,10 @@ pub trait TypeVariableBuilder: Sized {
 }
 
 impl<U: TypeConstrainable> TypeVariableBuilder for U {
+    fn abstract_(self) -> TypeVariable {
+        self.constrain_abstract()
+    }
+
     fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeVariable {
         self.constrain_owns(owns.into())
     }

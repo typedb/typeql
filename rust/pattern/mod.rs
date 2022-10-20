@@ -32,6 +32,9 @@ pub use disjunction::*;
 mod label;
 pub use label::*;
 
+mod schema;
+pub use schema::*;
+
 mod negation;
 pub use negation::*;
 
@@ -48,6 +51,7 @@ pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
+    Rule(Rule),
     Variable(Variable),
 }
 
@@ -73,6 +77,7 @@ impl fmt::Display for Pattern {
             Conjunction(conjunction) => write!(f, "{}", conjunction),
             Disjunction(disjunction) => write!(f, "{}", disjunction),
             Negation(negation) => write!(f, "{}", negation),
+            Rule(rule) => write!(f, "{}", rule),
             Variable(variable) => write!(f, "{}", variable),
         }
     }

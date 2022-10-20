@@ -20,34 +20,24 @@
  *
  */
 
-use crate::{common::token::Operator::Not, Pattern, Variable};
-use core::fmt;
+use crate::{Conjunction, Label, Pattern, ThingVariable};
+use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Negation {
-    pub pattern: Box<Pattern>,
+pub struct Rule {
+    pub label: Label,
+    pub when: Conjunction,
+    pub then: ThingVariable,
 }
 
-impl Negation {
+impl Rule {
     pub fn into_pattern(self) -> Pattern {
-        self.into()
+        Pattern::Rule(self)
     }
 }
 
-impl From<Pattern> for Negation {
-    fn from(pattern: Pattern) -> Self {
-        Negation { pattern: Box::new(pattern) }
-    }
-}
-
-impl<T: Into<Variable>> From<T> for Negation {
-    fn from(variable: T) -> Self {
-        Negation { pattern: Box::new(variable.into().into_pattern()) }
-    }
-}
-
-impl fmt::Display for Negation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {{ {}; }}", Not, self.pattern)
+impl fmt::Display for Rule {
+    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
     }
 }
