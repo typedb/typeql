@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token::Constraint::{IsKey, Owns},
+    common::token::Constraint::{As, IsKey, Owns},
     Label, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
 };
 use std::fmt;
@@ -123,6 +123,36 @@ impl From<(Type, IsKeyAttribute)> for OwnsConstraint {
     }
 }
 
+impl From<(&str, &str)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (&str, &str)) -> Self {
+        OwnsConstraint::from((attribute_type, overridden_attribute_type, IsKeyAttribute::No))
+    }
+}
+
+impl From<(&str, &str, IsKeyAttribute)> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, is_key): (&str, &str, IsKeyAttribute),
+    ) -> Self {
+        OwnsConstraint::from((
+            Label::from(attribute_type),
+            Label::from(overridden_attribute_type),
+            is_key,
+        ))
+    }
+}
+
+impl From<(Label, Label, IsKeyAttribute)> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, is_key): (Label, Label, IsKeyAttribute),
+    ) -> Self {
+        OwnsConstraint::new(
+            UnboundVariable::hidden().type_(attribute_type),
+            Some(UnboundVariable::hidden().type_(overridden_attribute_type)),
+            is_key,
+        )
+    }
+}
+
 impl From<(Type, Option<Type>)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (Type, Option<Type>)) -> Self {
         OwnsConstraint::new(
@@ -147,6 +177,10 @@ impl From<(Type, Option<Type>, IsKeyAttribute)> for OwnsConstraint {
 
 impl fmt::Display for OwnsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}{}", Owns, self.attribute_type, self.is_key)
+        write!(f, "{} {}{}", Owns, self.attribute_type, self.is_key)?;
+        if let Some(overridden) = &self.overridden_attribute_type {
+            write!(f, " {} {}", As, overridden)?;
+        }
+        Ok(())
     }
 }

@@ -795,34 +795,31 @@ $x has age 25;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn when_parsing_as_in_define_result_is_same_as_sub() {
-    let query = "define\n" +
-            "parent sub role;\n" +
-            "child sub role;\n" +
-            "parenthood sub relation,\n" +
-            "    relates parent,\n" +
-            "    relates child;\n" +
-            "fatherhood sub parenthood,\n" +
-            "    relates father as parent,\n" +
-            "    relates son as child;";
-    let parsed = parse_query(query).asDefine();
+    let query = r#"define
+parent sub role;
+child sub role;
+parenthood sub relation,
+    relates parent,
+    relates child;
+fatherhood sub parenthood,
+    relates father as parent,
+    relates son as child;"#;
 
-    let expected = define(
-            type_("parent").sub("role"),
-            type_("child").sub("role"),
-            type_("parenthood").sub("relation")
-                    .relates("parent")
-                    .relates("child"),
-            type_("fatherhood").sub("parenthood")
-                    .relates("father", "parent")
-                    .relates("son", "child")
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("parent").sub("role"),
+        type_("child").sub("role"),
+        type_("parenthood").sub("relation").relates("parent").relates("child"),
+        type_("fatherhood")
+            .sub("parenthood")
+            .relates(("father", "parent"))
+            .relates(("son", "child"))
     );
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn when_parsing_as_in_match_result_is_same_as_sub() {
@@ -840,25 +837,26 @@ $f sub parenthood,
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
-fn when_parsing_define_query_with_owns_overrides_result_is_same_as_java_type_ql() {
-    let query = "define\n" +
-            "triangle sub entity;\n" +
-            "triangle owns side-length;\n" +
-            "triangle-right-angled sub triangle;\n" +
-            "triangle-right-angled owns hypotenuse-length as side-length;";
-    let parsed = parse_query(query).asDefine();
+fn when_parsing_define_query_with_owns_overrides_result_is_same_as_java_typeql() {
+    let query = r#"define
+triangle sub entity;
+triangle owns side-length;
+triangle-right-angled sub triangle;
+triangle-right-angled owns hypotenuse-length as side-length;"#;
 
-    let expected = define(
-            type_("triangle").sub("entity"),
-            type_("triangle").owns("side-length"),
-            type_("triangle-right-angled").sub("triangle"),
-            type_("triangle-right-angled").owns("hypotenuse-length", "side-length")
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("triangle").sub("entity"),
+        type_("triangle").owns("side-length"),
+        type_("triangle-right-angled").sub("triangle"),
+        type_("triangle-right-angled").owns(("hypotenuse-length", "side-length"))
     );
+
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn when_parsing_define_query_with_relates_overrides_result_is_same_as_java_type_ql() {
     let query = "define\n" +
