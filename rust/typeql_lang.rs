@@ -42,33 +42,50 @@ mod util;
 
 use crate::{
     common::error::ErrorMessage,
-    parser::{error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_query},
+    parser::{
+        error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_pattern,
+        visit_eof_query,
+    },
 };
 use pattern::*;
 use query::*;
+
+macro_rules! parse {
+    ($visitor:ident($accessor:ident($input:ident))) => {{
+        let lexer = TypeQLRustLexer::new(InputStream::new($input));
+        let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
+
+        parser.remove_error_listeners();
+        let errors = Rc::new(RefCell::new(Vec::<SyntaxError>::new()));
+        parser.add_error_listener(Box::new(ErrorListener::new($input, errors.clone())));
+
+        let result = $visitor(parser.$accessor().unwrap());
+
+        if errors.borrow().is_empty() {
+            result.map_err(|em| em.message)
+        } else {
+            Err(errors
+                .borrow()
+                .iter()
+                .map(SyntaxError::to_string)
+                .collect::<Vec<String>>()
+                .join("\n\n"))
+        }
+    }};
+}
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse_eof_query(typeql_query.trim_end())
 }
 
 pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
-    let lexer = TypeQLRustLexer::new(InputStream::new(query_string));
-    let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
+    parse!(visit_eof_query(eof_query(query_string)))
+}
 
-    parser.remove_error_listeners();
-    let errors = Rc::new(RefCell::new(Vec::<SyntaxError>::new()));
-    parser.add_error_listener(Box::new(ErrorListener::new(query_string, errors.clone())));
+pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, String> {
+    parse_eof_pattern(typeql_pattern.trim_end())
+}
 
-    let query = visit_eof_query(parser.eof_query().unwrap());
-
-    if errors.borrow().is_empty() {
-        query.map_err(|em| em.message)
-    } else {
-        Err(errors
-            .borrow()
-            .iter()
-            .map(SyntaxError::to_string)
-            .collect::<Vec<String>>()
-            .join("\n\n"))
-    }
+pub fn parse_eof_pattern(pattern_string: &str) -> Result<Pattern, String> {
+    parse!(visit_eof_pattern(eof_pattern(pattern_string)))
 }

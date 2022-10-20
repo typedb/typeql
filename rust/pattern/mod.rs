@@ -44,6 +44,7 @@ pub use variable::*;
 #[cfg(test)]
 mod test;
 
+use crate::enum_getter;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -53,6 +54,14 @@ pub enum Pattern {
     Negation(Negation),
     Rule(Rule),
     Variable(Variable),
+}
+
+impl Pattern {
+    enum_getter!(into_conjunction, Conjunction, Conjunction);
+    enum_getter!(into_disjunction, Disjunction, Disjunction);
+    enum_getter!(into_negation, Negation, Negation);
+    enum_getter!(into_rule, Rule, Rule);
+    enum_getter!(into_variable, Variable, Variable);
 }
 
 impl<T> From<T> for Pattern

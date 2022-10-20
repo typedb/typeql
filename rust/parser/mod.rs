@@ -124,7 +124,7 @@ fn visit_eof_queries(ctx: Rc<Eof_queriesContext>) -> ParserResult<Vec<Query>> {
     (0..).map_while(|i| ctx.query(i)).map(visit_query).collect()
 }
 
-fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
+pub fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
     visit_pattern(ctx.pattern().unwrap())
 }
 

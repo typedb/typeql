@@ -21,8 +21,8 @@
  */
 
 use crate::{
-    and, gte, lt, lte, not, or, parse_query, rel, rule, try_, type_, typeql_insert, typeql_match,
-    var, ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query,
+    and, gte, lt, lte, not, or, parse_pattern, parse_query, rel, rule, try_, type_, typeql_insert,
+    typeql_match, var, ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query,
     RelationVariableBuilder, ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch,
     TypeVariableBuilder, KEY,
 };
@@ -1065,24 +1065,29 @@ fn when_parsing_query_with_comments_they_are_ignored() {
 
     assert_query_eq!(expected, parsed, uncommented);
 }
+*/
 
 #[test]
 fn test_parsing_pattern() {
-    let pattern = "{\n" +
-            "    (wife: $a, husband: $b) isa marriage;\n" +
-            "    $a has gender 'male';\n" +
-            "    $b has gender 'female';\n" +
-            "}";
-    let parsed = parse_pattern(pattern);
-    let expected = and(
-            rel("wife", "a").rel("husband", "b").isa("marriage"),
-            var("a").has(("gender", "male")),
-            var("b").has(("gender", "female"))
-    );
+    let pattern = r#"{
+    (wife: $a, husband: $b) isa marriage;
+    $a has gender "male";
+    $b has gender "female";
+}"#;
 
-    assert_query_eq!(expected, parsed, pattern.replace("'", "\""));
+    let parsed = parse_pattern(pattern).unwrap().into_conjunction();
+    let expected = try_! {
+        and!(
+            rel(("wife", "a")).rel(("husband", "b")).isa("marriage"),
+            var("a").has(("gender", "male"))?,
+            var("b").has(("gender", "female"))?
+        )
+    }
+    .unwrap();
+
+    // TODO rename the assert macro
+    assert_query_eq!(expected, parsed, pattern);
 }
-*/
 
 #[test]
 fn test_define_rules() {
