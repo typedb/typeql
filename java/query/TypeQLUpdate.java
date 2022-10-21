@@ -86,12 +86,12 @@ public class TypeQLUpdate extends TypeQLWritable {
     }
 
     @Override
-    public String toString() {
+    public String toString(boolean pretty) {
         StringBuilder query = new StringBuilder();
-        query.append(match).append(NEW_LINE);
-        appendSubQuery(query, DELETE, deleteVariables);
+        query.append(match.toString(pretty)).append(NEW_LINE);
+        appendSubQuery(query, DELETE, deleteVariables.stream().map(v -> v.toString(pretty)), pretty);
         query.append(NEW_LINE);
-        appendSubQuery(query, INSERT, insertVariables);
+        appendSubQuery(query, INSERT, insertVariables.stream().map(v -> v.toString(pretty)), pretty);
         return query.toString();
     }
 

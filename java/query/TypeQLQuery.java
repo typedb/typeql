@@ -26,6 +26,7 @@ import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
@@ -109,12 +110,17 @@ public abstract class TypeQLQuery {
         }
     }
 
-    protected void appendSubQuery(StringBuilder query, TypeQLToken.Command command, List<?> elements) {
+    protected void appendSubQuery(StringBuilder query, TypeQLToken.Command command, Stream<String> elements, boolean pretty) {
         query.append(command).append(NEW_LINE);
-        query.append(elements.stream().map(Object::toString).collect(SEMICOLON_NEW_LINE.joiner()));
+        if (pretty) query.append(elements.collect(SEMICOLON_NEW_LINE.joiner()));
+        else query.append(elements.collect(SEMICOLON.joiner()));
         query.append(SEMICOLON);
     }
 
     @Override
-    public abstract String toString();
+    public String toString() {
+        return toString(true);
+    }
+
+    public abstract String toString(boolean pretty);
 }

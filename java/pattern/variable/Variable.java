@@ -110,7 +110,11 @@ public abstract class Variable {
     }
 
     @Override
-    public abstract String toString();
+    public String toString() {
+        return toString(true);
+    }
+
+    public abstract String toString(boolean pretty);
 
     @Override
     public abstract boolean equals(Object o);

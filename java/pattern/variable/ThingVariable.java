@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
@@ -121,9 +122,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     @Override
-    public abstract String toString();
-
-    @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !ThingVariable.class.isAssignableFrom(o.getClass())) return false;
@@ -162,19 +160,23 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public String toString() {
+        public String toString(boolean pretty) {
             StringBuilder thing = new StringBuilder();
             if (isVisible()) thing.append(reference.syntax());
-            String constraints = Stream.of(thingSyntax(), hasSyntax())
-                    .filter(s -> !s.isEmpty()).collect(COMMA_NEW_LINE.joiner());
-            constraints = indent(constraints).trim();
+            String constraints;
+            if (pretty) {
+                constraints = Stream.of(thingSyntax(), hasSyntax()).filter(s -> !s.isEmpty()).collect(COMMA_NEW_LINE.joiner());
+                constraints = indent(constraints).trim();
+            } else {
+                constraints = Stream.of(thingSyntax(), hasSyntax()).filter(s -> !s.isEmpty()).collect(COMMA.joiner());
+            }
             if (!constraints.isEmpty()) thing.append(SPACE).append(constraints);
             return thing.toString();
         }
     }
 
     public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
-                                                                            ThingVariableBuilder.Common<Relation> {
+            ThingVariableBuilder.Common<Relation> {
 
         Relation(Reference reference, ThingConstraint.Relation relationConstraint) {
             super(reference);
@@ -194,14 +196,19 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public String toString() {
+        public String toString(boolean pretty) {
             assert relation().isPresent();
             StringBuilder relation = new StringBuilder();
             if (isVisible()) relation.append(reference.syntax()).append(SPACE);
             relation.append(relation().get());
-            String constraints = Stream.of(isaSyntax(), hasSyntax())
-                    .filter(s -> !s.isEmpty()).collect(COMMA_NEW_LINE.joiner());
-            constraints = indent(constraints).trim();
+            String constraints;
+            if (pretty) {
+                constraints = Stream.of(isaSyntax(), hasSyntax())
+                        .filter(s -> !s.isEmpty()).collect(COMMA_NEW_LINE.joiner());
+                constraints = indent(constraints).trim();
+            } else {
+                constraints = Stream.of(isaSyntax(), hasSyntax()).filter(s -> !s.isEmpty()).collect(COMMA.joiner());
+            }
             if (!constraints.isEmpty()) relation.append(SPACE).append(constraints);
             return relation.toString();
         }
@@ -221,14 +228,20 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
 
         @Override
-        public String toString() {
+        public String toString(boolean pretty) {
             assert value().isPresent();
             StringBuilder attribute = new StringBuilder();
             if (isVisible()) attribute.append(reference.syntax()).append(SPACE);
             attribute.append(value().get());
-            String constraints = Stream.of(isaSyntax(), hasSyntax())
-                    .filter(s -> !s.isEmpty()).collect(COMMA_NEW_LINE.joiner());
-            constraints = indent(constraints).trim();
+            String constraints;
+            if (pretty) {
+                constraints = Stream.of(isaSyntax(), hasSyntax())
+                        .filter(s -> !s.isEmpty()).collect(COMMA_NEW_LINE.joiner());
+                constraints = indent(constraints).trim();
+            } else {
+                constraints = Stream.of(isaSyntax(), hasSyntax())
+                        .filter(s -> !s.isEmpty()).collect(COMMA.joiner());
+            }
             if (!constraints.isEmpty()) attribute.append(SPACE).append(constraints);
             return attribute.toString();
         }

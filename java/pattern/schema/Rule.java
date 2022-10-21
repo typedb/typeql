@@ -171,15 +171,27 @@ public class Rule implements Definable {
 
     @Override
     public String toString() {
+        return toString(true);
+    }
+
+    @Override
+    public String toString(boolean pretty) {
         StringBuilder rule = new StringBuilder("" + RULE + SPACE + label);
         if (when != null) {
-            rule.append(COLON).append(NEW_LINE);
-            StringBuilder body = new StringBuilder();
-            body.append(WHEN).append(SPACE).append(when.toString(true)).append(NEW_LINE);
-            body.append(THEN).append(SPACE).append(CURLY_OPEN).append(NEW_LINE);
-            body.append(indent(then)).append(SEMICOLON);
-            body.append(NEW_LINE).append(CURLY_CLOSE);
-            rule.append(indent(body));
+            if (pretty) {
+                rule.append(COLON).append(NEW_LINE);
+                StringBuilder body = new StringBuilder();
+                body.append(WHEN).append(SPACE).append(when.toString(pretty)).append(NEW_LINE);
+                body.append(THEN).append(SPACE).append(CURLY_OPEN).append(NEW_LINE);
+                body.append(indent(then)).append(SEMICOLON);
+                body.append(NEW_LINE).append(CURLY_CLOSE);
+                rule.append(indent(body));
+            } else {
+                rule.append(COLON);
+                String content = String.valueOf(WHEN) + SPACE + when.toString(pretty) + THEN + SPACE + CURLY_OPEN +
+                        then.toString(true) + SEMICOLON + CURLY_CLOSE;
+                rule.append(content);
+            }
         }
         return rule.toString();
     }

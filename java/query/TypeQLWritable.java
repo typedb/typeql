@@ -79,10 +79,10 @@ public abstract class TypeQLWritable extends TypeQLQuery {
         }
 
         @Override
-        public String toString() {
+        public String toString(boolean pretty) {
             StringBuilder query = new StringBuilder();
-            if (match != null) query.append(match).append(NEW_LINE);
-            appendSubQuery(query, command, variables);
+            if (match != null) query.append(match.toString(pretty)).append(NEW_LINE);
+            appendSubQuery(query, command, variables.stream().map(v -> v.toString(pretty)), pretty);
             return query.toString();
         }
 

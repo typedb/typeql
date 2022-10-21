@@ -71,4 +71,6 @@ public interface Pattern {
 
     @Override
     String toString();
+
+    String toString(boolean pretty);
 }

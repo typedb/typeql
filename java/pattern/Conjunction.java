@@ -123,17 +123,25 @@ public class Conjunction<T extends Pattern> implements Pattern {
     @Override
     public Conjunction<?> asConjunction() { return this; }
 
-    public String toString(boolean isMultiline) {
-        TypeQLToken.Char whitespace = isMultiline ? NEW_LINE : SPACE;
-        String body = patterns.stream().map(Objects::toString).collect(SEMICOLON_NEW_LINE.joiner()) + SEMICOLON;
-        if (isMultiline) body = indent(body);
-        return CURLY_OPEN.toString() + whitespace + body + whitespace + CURLY_CLOSE;
-    }
-
     @Override
     public String toString() {
         return toString(patterns.size() > 1 || patterns.get(0).toString().lines().count() > 1);
     }
+
+    @Override
+    public String toString(boolean pretty) {
+        if (pretty) {
+            TypeQLToken.Char whitespace = NEW_LINE;
+            String body = patterns.stream().map(p -> p.toString(pretty)).collect(SEMICOLON_NEW_LINE.joiner()) + SEMICOLON;
+            body = indent(body);
+            return CURLY_OPEN.toString() + whitespace + body + whitespace + CURLY_CLOSE;
+        } else {
+            TypeQLToken.Char whitespace = SPACE;
+            String body = patterns.stream().map(p -> p.toString(pretty)).collect(SEMICOLON.joiner()) + SEMICOLON;
+            return CURLY_OPEN.toString() + whitespace + body + whitespace + CURLY_CLOSE;
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {
