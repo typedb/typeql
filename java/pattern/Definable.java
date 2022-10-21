@@ -46,4 +46,6 @@ public interface Definable {
     default TypeVariable asTypeVariable() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }
+
+    String toString(boolean pretty);
 }

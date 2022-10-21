@@ -159,7 +159,7 @@ public class UnboundVariable extends Variable implements ConceptVariableBuilder,
     }
 
     @Override
-    public String toString() {
+    public String toString(boolean pretty) {
         return reference.syntax();
     }
 

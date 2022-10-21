@@ -22,11 +22,13 @@
 package com.vaticle.typeql.lang.pattern;
 
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
@@ -75,22 +77,37 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public boolean isDisjunction() { return true; }
+    public boolean isDisjunction() {
+        return true;
+    }
 
     @Override
-    public Disjunction<?> asDisjunction() { return this; }
+    public Disjunction<?> asDisjunction() {
+        return this;
+    }
 
     @Override
     public String toString() {
+        return toString(true);
+    }
+
+    @Override
+    public String toString(boolean pretty) {
         StringBuilder disjunction = new StringBuilder();
         Iterator<T> patternIter = patterns.iterator();
         while (patternIter.hasNext()) {
             Pattern pattern = patternIter.next();
-            if (pattern.isConjunction()) disjunction.append(pattern.asConjunction().toString(true));
+            if (pattern.isConjunction()) disjunction.append(pattern.asConjunction().toString(pretty));
             else {
-                disjunction.append(CURLY_OPEN).append(NEW_LINE);
-                disjunction.append(indent(pattern.toString() + SEMICOLON));
-                disjunction.append(NEW_LINE).append(CURLY_CLOSE);
+                disjunction.append(CURLY_OPEN);
+                if (pretty) {
+                    disjunction.append(NEW_LINE);
+                    disjunction.append(indent(pattern.toString(pretty) + SEMICOLON));
+                    disjunction.append(NEW_LINE);
+                } else {
+                    disjunction.append(pattern.toString(pretty)).append(SEMICOLON);
+                }
+                disjunction.append(CURLY_CLOSE);
             }
             if (patternIter.hasNext()) disjunction.append(SPACE).append(OR).append(SPACE);
         }

@@ -79,9 +79,9 @@ abstract class TypeQLDefinable extends TypeQLQuery {
     }
 
     @Override
-    public final String toString() {
+    public String toString(boolean pretty) {
         StringBuilder query = new StringBuilder();
-        appendSubQuery(query, command, definables);
+        appendSubQuery(query, command, definables.stream().map(d -> d.toString(pretty)), pretty);
         return query.toString();
     }
 

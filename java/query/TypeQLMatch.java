@@ -252,11 +252,11 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     }
 
     @Override
-    public String toString() {
+    public String toString(boolean pretty) {
         StringBuilder query = new StringBuilder();
-        appendSubQuery(query, MATCH, conjunction.patterns());
+        appendSubQuery(query, MATCH, conjunction.patterns().stream().map(p -> p.toString(pretty)), pretty);
         if (!modifiers.isEmpty()) {
-            query.append(NEW_LINE);
+            if (pretty) query.append(NEW_LINE);
             query.append(modifiers);
         }
         return query.toString();
@@ -435,10 +435,12 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
 
         @Override
-        public final String toString() {
+        public final String toString(boolean pretty) {
             StringBuilder query = new StringBuilder();
-            query.append(match()).append(NEW_LINE).append(method);
-            if (var != null) query.append(SPACE).append(var);
+            query.append(match());
+            if (pretty) query.append(NEW_LINE);
+            query.append(method);
+            if (var != null) query.append(SPACE).append(var.toString(pretty));
             query.append(SEMICOLON);
             return query.toString();
         }
@@ -495,8 +497,9 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
 
         @Override
-        public String toString() {
-            return match().toString() + NEW_LINE + GROUP + SPACE + var + SEMICOLON;
+        public String toString(boolean pretty) {
+            if (pretty) return match().toString(pretty) + NEW_LINE + GROUP + SPACE + var + SEMICOLON;
+            else return match().toString(pretty) + GROUP + SPACE + var + SEMICOLON;
         }
 
         @Override
@@ -555,11 +558,13 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
             }
 
             @Override
-            public final String toString() {
+            public final String toString(boolean pretty) {
                 StringBuilder query = new StringBuilder();
-                query.append(group().match()).append(NEW_LINE);
-                query.append(GROUP).append(SPACE).append(group().var()).append(SEMICOLON).append(SPACE).append(method);
-                if (var != null) query.append(SPACE).append(var);
+                query.append(group().match().toString(pretty));
+                if (pretty) query.append(NEW_LINE);
+                query.append(GROUP).append(SPACE).append(group().var().toString(pretty))
+                        .append(SEMICOLON).append(SPACE).append(method);
+                if (var != null) query.append(SPACE).append(var.toString(pretty));
                 query.append(SEMICOLON);
                 return query.toString();
             }

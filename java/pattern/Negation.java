@@ -54,7 +54,9 @@ public class Negation<T extends Pattern> implements Conjunctable {
         this.pattern = pattern;
     }
 
-    public T pattern() { return pattern; }
+    public T pattern() {
+        return pattern;
+    }
 
     @Override
     public List<? extends Pattern> patterns() {
@@ -86,22 +88,30 @@ public class Negation<T extends Pattern> implements Conjunctable {
     }
 
     @Override
-    public boolean isNegation() { return true; }
+    public boolean isNegation() {
+        return true;
+    }
 
     @Override
-    public Negation<?> asNegation() { return this; }
+    public Negation<?> asNegation() {
+        return this;
+    }
 
     @Override
-    public String toString() {
+    public String toString(boolean pretty) {
         StringBuilder negation = new StringBuilder();
         negation.append(TypeQLToken.Operator.NOT).append(SPACE);
 
         if (pattern.isConjunction()) {
-            negation.append(pattern);
-        } else if (pattern.toString().lines().count() > 1) {
-            negation.append(CURLY_OPEN).append(NEW_LINE);
-            negation.append(indent(pattern.toString() + SEMICOLON));
-            negation.append(NEW_LINE).append(CURLY_CLOSE);
+            negation.append(pattern.toString(pretty));
+        } else if (pattern.toString(pretty).lines().count() > 1) {
+            negation.append(CURLY_OPEN);
+            if (pretty) {
+                negation.append(NEW_LINE).append(indent(pattern.toString(pretty) + SEMICOLON)).append(NEW_LINE);
+            } else {
+                negation.append(pattern.toString(pretty)).append(SEMICOLON);
+            }
+            negation.append(CURLY_CLOSE);
         } else {
             negation.append(CURLY_OPEN).append(SPACE);
             negation.append(pattern).append(SEMICOLON);

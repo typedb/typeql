@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
@@ -185,12 +186,17 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public String toString() {
+    public String toString(boolean pretty) {
         StringBuilder syntax = new StringBuilder();
         if (isVisible() || label().isPresent()) {
             syntax.append(isVisible() ? reference.syntax() : label().get().scopedLabel());
             Stream<TypeConstraint> consStream = isVisible() ? constraints.stream() : constraints.stream().skip(1);
-            String consStr = indent(consStream.map(Constraint::toString).collect(COMMA_NEW_LINE.joiner())).trim();
+            String consStr;
+            if (pretty) {
+                consStr = indent(consStream.map(Constraint::toString).collect(COMMA_NEW_LINE.joiner())).trim();
+            } else {
+                consStr = consStream.map(Constraint::toString).collect(COMMA.joiner());
+            }
             if (!consStr.isEmpty()) syntax.append(SPACE).append(consStr);
         } else {
             // This should only be called by debuggers trying to print nested variables
@@ -219,5 +225,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable asTypeVariable() { return this; }
+    public TypeVariable asTypeVariable() {
+        return this;
+    }
 }
