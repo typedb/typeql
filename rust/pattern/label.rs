@@ -32,7 +32,7 @@ pub enum Type {
 impl Type {
     pub fn into_type_variable(self) -> TypeVariable {
         match self {
-            Self::Label(label) => UnboundVariable::hidden().type_(label).unwrap(),
+            Self::Label(label) => UnboundVariable::hidden().type_(label),
             Self::Variable(var) => var.into_type(),
         }
     }

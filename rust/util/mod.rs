@@ -52,3 +52,12 @@ macro_rules! write_joined {
         result
     }};
 }
+
+#[macro_export]
+macro_rules! try_ {
+    {$($stmt:tt)*} => {
+        || -> Result<_, ErrorMessage> {
+            Ok({$($stmt)*})
+        }()
+    };
+}

@@ -37,9 +37,7 @@ impl PlaysConstraint {
     fn new(role_type: TypeVariable, overridden_role_type: Option<TypeVariable>) -> Self {
         PlaysConstraint {
             relation_type: role_type.label.as_ref().map(|label| {
-                UnboundVariable::hidden()
-                    .type_(label.label.scope.as_ref().cloned().unwrap())
-                    .unwrap()
+                UnboundVariable::hidden().type_(label.label.scope.as_ref().cloned().unwrap())
             }),
             role_type,
             overridden_role_type,
@@ -61,7 +59,7 @@ impl From<(String, String)> for PlaysConstraint {
 
 impl From<Label> for PlaysConstraint {
     fn from(scoped_type: Label) -> Self {
-        PlaysConstraint::new(UnboundVariable::hidden().type_(scoped_type).unwrap(), None)
+        PlaysConstraint::new(UnboundVariable::hidden().type_(scoped_type), None)
     }
 }
 

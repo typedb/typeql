@@ -20,24 +20,18 @@
  *
  */
 
-use crate::{pattern::*, ErrorMessage};
+use crate::pattern::*;
 
 pub trait ConceptConstrainable {
     fn constrain_is(self, is: IsConstraint) -> ConceptVariable;
 }
 
 pub trait ConceptVariableBuilder: Sized {
-    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage>;
+    fn is(self, is: impl Into<IsConstraint>) -> ConceptVariable;
 }
 
 impl<U: ConceptConstrainable> ConceptVariableBuilder for U {
-    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage> {
-        Ok(self.constrain_is(is.into()))
-    }
-}
-
-impl<U: ConceptVariableBuilder> ConceptVariableBuilder for Result<U, ErrorMessage> {
-    fn is(self, is: impl Into<IsConstraint>) -> Result<ConceptVariable, ErrorMessage> {
-        self?.is(is)
+    fn is(self, is: impl Into<IsConstraint>) -> ConceptVariable {
+        self.constrain_is(is.into())
     }
 }

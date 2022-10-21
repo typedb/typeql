@@ -47,10 +47,8 @@ impl From<String> for RelatesConstraint {
 impl From<(&str, &str)> for RelatesConstraint {
     fn from((role_type, overridden_role_type): (&str, &str)) -> Self {
         RelatesConstraint {
-            role_type: UnboundVariable::hidden().type_(role_type).unwrap(),
-            overridden_role_type: Some(
-                UnboundVariable::hidden().type_(overridden_role_type).unwrap(),
-            ),
+            role_type: UnboundVariable::hidden().type_(role_type),
+            overridden_role_type: Some(UnboundVariable::hidden().type_(overridden_role_type)),
         }
     }
 }
@@ -58,7 +56,7 @@ impl From<(&str, &str)> for RelatesConstraint {
 impl From<Label> for RelatesConstraint {
     fn from(type_: Label) -> Self {
         RelatesConstraint {
-            role_type: UnboundVariable::hidden().type_(type_).unwrap(),
+            role_type: UnboundVariable::hidden().type_(type_),
             overridden_role_type: None,
         }
     }

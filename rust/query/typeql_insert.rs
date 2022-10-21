@@ -21,8 +21,7 @@
  */
 
 use crate::{
-    common::token::Command::Insert, write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch,
-    Writable,
+    common::token::Command::Insert, write_joined, Query, ThingVariable, TypeQLMatch, Writable,
 };
 use std::fmt;
 
@@ -55,11 +54,5 @@ impl fmt::Display for TypeQLInsert {
 }
 
 pub trait InsertQueryBuilder {
-    fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage>;
-}
-
-impl<U: InsertQueryBuilder> InsertQueryBuilder for Result<U, ErrorMessage> {
-    fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage> {
-        self?.insert(vars)
-    }
+    fn insert(self, vars: impl Writable) -> TypeQLInsert;
 }
