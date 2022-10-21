@@ -24,7 +24,7 @@ use crate::{
     and, gte, lt, lte, not, or, parse_pattern, parse_query, rel, rule, try_, type_, typeql_insert,
     typeql_match, var, ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query,
     RelationVariableBuilder, ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch,
-    TypeVariableBuilder, KEY,
+    TypeQLUndefine, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -1378,15 +1378,16 @@ digit sub attribute,
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn undefine_attribute_type_regex() {
-    let query = "undefine\ndigit regex '\\d';";
-    let parsed = parse_query(query).unwrap().into_match();
-    let expected = undefine(type_("digit").regex("\\d"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let query = r#"undefine
+digit regex "\d";"#;
+
+    let parsed = parse_query(query).unwrap().into_undefine();
+    let expected = typeql_undefine!(type_("digit").regex(r#"\d"#));
+    assert_query_eq!(expected, parsed, query);
 }
-*/
+
 #[test]
 fn regex_predicate_parses_character_classes_correctly() {
     let query = r#"match

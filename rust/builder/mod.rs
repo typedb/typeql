@@ -44,6 +44,13 @@ macro_rules! typeql_define {
 }
 
 #[macro_export]
+macro_rules! typeql_undefine {
+    ($($pattern:expr),* $(,)?) => {{
+        TypeQLUndefine::new(vec![$($pattern.into_pattern()),*])
+    }}
+}
+
+#[macro_export]
 macro_rules! and {
     ($($pattern:expr),* $(,)?) => {{
         Conjunction::from(vec![$($pattern.into_pattern()),*])

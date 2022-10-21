@@ -160,6 +160,8 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
         Ok(visit_query_update(query_update)?.into_query())
     } else if let Some(query_define) = ctx.query_define() {
         Ok(visit_query_define(query_define)?.into_query())
+    } else if let Some(query_undefine) = ctx.query_undefine() {
+        Ok(visit_query_undefine(query_undefine)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -169,8 +171,8 @@ fn visit_query_define(ctx: Rc<Query_defineContext>) -> ParserResult<TypeQLDefine
     Ok(TypeQLDefine::new(visit_definables(ctx.definables().unwrap())?))
 }
 
-fn visit_query_undefine(_ctx: Rc<Query_undefineContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_undefine(ctx: Rc<Query_undefineContext>) -> ParserResult<TypeQLUndefine> {
+    Ok(TypeQLUndefine::new(visit_definables(ctx.definables().unwrap())?))
 }
 
 fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {
