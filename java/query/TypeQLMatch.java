@@ -437,7 +437,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         @Override
         public final String toString(boolean pretty) {
             StringBuilder query = new StringBuilder();
-            query.append(match());
+            query.append(match().toString(pretty));
             if (pretty) query.append(NEW_LINE);
             query.append(method);
             if (var != null) query.append(SPACE).append(var.toString(pretty));

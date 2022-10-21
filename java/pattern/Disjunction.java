@@ -101,9 +101,8 @@ public class Disjunction<T extends Pattern> implements Pattern {
             else {
                 disjunction.append(CURLY_OPEN);
                 if (pretty) {
-                    disjunction.append(NEW_LINE);
-                    disjunction.append(indent(pattern.toString(pretty) + SEMICOLON));
-                    disjunction.append(NEW_LINE);
+                    disjunction.append(NEW_LINE).append(indent(pattern.toString(pretty) + SEMICOLON))
+                            .append(NEW_LINE);
                 } else {
                     disjunction.append(pattern.toString(pretty)).append(SEMICOLON);
                 }
