@@ -46,14 +46,6 @@ impl<T: Into<Variable>> From<T> for Negation {
     }
 }
 
-impl<T: Into<Variable>> TryFrom<Result<T, ErrorMessage>> for Negation {
-    type Error = ErrorMessage;
-
-    fn try_from(variable: Result<T, ErrorMessage>) -> Result<Self, Self::Error> {
-        Ok(Negation { pattern: Box::new(variable?.into().into_pattern()) })
-    }
-}
-
 impl fmt::Display for Negation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {{ {}; }}", Not, self.pattern)

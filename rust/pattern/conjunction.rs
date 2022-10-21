@@ -56,28 +56,6 @@ impl<T: Into<Pattern>> From<Vec<T>> for Conjunction {
     }
 }
 
-impl<T: Into<Pattern>, E> TryFrom<Result<T, E>> for Conjunction
-where
-    ErrorMessage: From<E>,
-{
-    type Error = ErrorMessage;
-
-    fn try_from(value: Result<T, E>) -> Result<Self, Self::Error> {
-        Ok(Self::from(value?))
-    }
-}
-
-impl<T: Into<Pattern>, const N: usize, E> TryFrom<[Result<T, E>; N]> for Conjunction
-where
-    ErrorMessage: From<E>,
-{
-    type Error = ErrorMessage;
-
-    fn try_from(patterns: [Result<T, E>; N]) -> Result<Self, Self::Error> {
-        Ok(Self::from(patterns.into_iter().collect::<Result<Vec<T>, E>>()?))
-    }
-}
-
 impl fmt::Display for Conjunction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("{\n")?;
