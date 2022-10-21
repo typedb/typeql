@@ -45,6 +45,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
@@ -137,7 +138,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
             return CURLY_OPEN.toString() + whitespace + body + whitespace + CURLY_CLOSE;
         } else {
             TypeQLToken.Char whitespace = SPACE;
-            String body = patterns.stream().map(p -> p.toString(pretty)).collect(SEMICOLON.joiner()) + SEMICOLON;
+            String body = patterns.stream().map(p -> p.toString(pretty)).collect(SEMICOLON_SPACE.joiner()) + SEMICOLON;
             return CURLY_OPEN.toString() + whitespace + body + whitespace + CURLY_CLOSE;
         }
     }

@@ -120,6 +120,7 @@ public class TypeQLToken {
         EQUAL("="),
         COLON(":"),
         SEMICOLON(";"),
+        SEMICOLON_SPACE("; "),
         SEMICOLON_NEW_LINE(";\n"),
         SPACE(" "),
         COMMA(","),

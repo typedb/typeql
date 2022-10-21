@@ -187,7 +187,7 @@ public class Rule implements Definable {
                 body.append(NEW_LINE).append(CURLY_CLOSE);
                 rule.append(indent(body));
             } else {
-                rule.append(COLON);
+                rule.append(COLON).append(SPACE);
                 String content = String.valueOf(WHEN) + SPACE + when.toString(pretty) + THEN + SPACE + CURLY_OPEN +
                         then.toString(true) + SEMICOLON + CURLY_CLOSE;
                 rule.append(content);
