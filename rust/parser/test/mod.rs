@@ -22,9 +22,8 @@
 
 use crate::{
     and, gte, lt, lte, not, or, parse_query, rel, try_, type_, typeql_insert, typeql_match, var,
-    ConceptVariableBuilder, Conjunction, DeleteQueryBuilder, Disjunction, ErrorMessage,
-    InsertQueryBuilder, MatchQueryBuilder, Query, RelationVariableBuilder, ThingVariableBuilder,
-    TypeQLInsert, TypeQLMatch, TypeVariableBuilder, UpdateQueryBuilder, KEY,
+    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
+    ThingVariableBuilder, TypeQLInsert, TypeQLMatch, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 

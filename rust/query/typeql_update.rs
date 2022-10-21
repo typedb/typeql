@@ -45,7 +45,3 @@ impl fmt::Display for TypeQLUpdate {
         f.write_str(";")
     }
 }
-
-pub trait UpdateQueryBuilder {
-    fn insert(self, vars: impl Writable) -> TypeQLUpdate;
-}
