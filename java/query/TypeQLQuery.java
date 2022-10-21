@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
@@ -113,7 +114,7 @@ public abstract class TypeQLQuery {
         query.append(command).append(NEW_LINE);
         if (pretty) query.append(elements.collect(SEMICOLON_NEW_LINE.joiner()));
         else query.append(elements.collect(SEMICOLON_SPACE.joiner()));
-        query.append(SEMICOLON_SPACE);
+        query.append(SEMICOLON);
     }
 
     @Override
