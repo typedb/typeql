@@ -146,3 +146,11 @@ string_enum! { Aggregate
     Std = "std",
     Sum = "sum",
 }
+
+string_enum! { ValueType
+    Boolean = "boolean",
+    DateTime = "datetime",
+    Double = "double",
+    Long = "long",
+    String = "string",
+}

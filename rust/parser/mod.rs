@@ -42,6 +42,7 @@ use crate::common::{
 use typeql_grammar::typeqlrustparser::*;
 
 use crate::{pattern::*, query::*};
+use crate::common::token::ValueType;
 
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
@@ -381,6 +382,8 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
             var_type = var_type.type_(scoped_label);
+        } else if constraint.VALUE().is_some() {
+            var_type = var_type.value(ValueType::from(constraint.value_type().unwrap().get_text()));
         } else {
             panic!("visit_variable_type: not implemented")
         }

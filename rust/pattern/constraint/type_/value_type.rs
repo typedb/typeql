@@ -20,26 +20,17 @@
  *
  */
 
-pub mod abstract_;
-pub use abstract_::*;
+use crate::common::token::Constraint::ValueType as ValueTypeKeyword;
+use crate::common::token::ValueType;
+use std::fmt;
 
-pub mod label;
-pub use label::*;
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ValueTypeConstraint {
+    pub value_type: ValueType,
+}
 
-pub mod owns;
-pub use owns::*;
-
-pub mod plays;
-pub use plays::*;
-
-pub mod regex;
-pub use regex::*;
-
-pub mod relates;
-pub use relates::*;
-
-pub mod sub;
-pub use sub::*;
-
-pub mod value_type;
-pub use value_type::*;
+impl fmt::Display for ValueTypeConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", ValueTypeKeyword, self.value_type)
+    }
+}

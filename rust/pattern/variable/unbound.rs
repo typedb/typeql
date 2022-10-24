@@ -125,6 +125,10 @@ impl TypeConstrainable for UnboundVariable {
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
         self.into_type().constrain_sub(sub)
     }
+
+    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeVariable {
+        self.into_type().constrain_value_type(value_type)
+    }
 }
 
 impl From<()> for UnboundVariable {

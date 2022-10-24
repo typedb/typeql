@@ -21,10 +21,10 @@
  */
 
 use crate::{
-    and, gte, lt, lte, not, or, parse_pattern, parse_query, rel, rule, try_, type_, typeql_insert,
-    typeql_match, var, ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query,
-    RelationVariableBuilder, ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch,
-    TypeQLUndefine, TypeVariableBuilder, KEY,
+    and, common::token::ValueType, gte, lt, lte, not, or, parse_pattern, parse_query,
+    rel, rule, try_, type_, typeql_insert, typeql_match, var, ConceptVariableBuilder, Conjunction,
+    Disjunction, ErrorMessage, Query, RelationVariableBuilder, ThingVariableBuilder, TypeQLDefine,
+    TypeQLInsert, TypeQLMatch, TypeQLUndefine, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -1004,18 +1004,17 @@ abstract-type sub entity,
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_match_value_type_query() {
-    let query = "match\n$x value double;";
+    let query = r#"match
+$x value double;"#;
+
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = try_! {
-    typeql_match!(var("x").value(TypeQLArg.ValueType.DOUBLE))
-};
+    let expected = typeql_match!(var("x").value(ValueType::Double));
 
     assert_query_eq!(expected, parsed, query);
 }
- */
+
 // #[test]
 fn test_parse_without_var() {
     let query = r#"match
@@ -1027,29 +1026,29 @@ $_ isa person;"#;
     assert!(built.is_err());
 }
 
-/*
 #[test]
 fn when_parsing_date_keyword_parse_as_the_correct_value_type() {
-    let query = "match\n$x value datetime;";
-    let parsed = parse_query(query).asMatch();
-    let expected = try_! {
-    typeql_match!(var("x").value(TypeQLArg.ValueType.DATETIME))
-};
+    let query = r#"match
+$x value datetime;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(var("x").value(ValueType::DateTime));
 
     assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn test_define_value_type_query() {
-    let query = "define\n" +
-            "my-type sub attribute,\n" +
-            "    value long;";
-    let parsed = parse_query(query).asDefine();
-    let expected = define(type_("my-type").sub("attribute").value(TypeQLArg.ValueType.LONG));
+    let query = r#"define
+my-type sub attribute,
+    value long;"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(type_("my-type").sub("attribute").value(ValueType::Long));
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
+
 #[test]
 fn test_escape_string() {
     let input = r#"This has \"double quotes\" and a single-quoted backslash: '\\'"#;
