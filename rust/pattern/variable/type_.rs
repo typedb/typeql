@@ -20,17 +20,8 @@
  *
  */
 
-use crate::{common::token::Constraint, pattern::*, write_joined};
+use crate::{pattern::*, write_joined};
 use std::fmt;
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Abstract;
-
-impl fmt::Display for Abstract {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Constraint::Abstract)
-    }
-}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
@@ -41,7 +32,7 @@ pub struct TypeVariable {
     pub regex: Option<RegexConstraint>,
     pub relates: Vec<RelatesConstraint>,
     pub sub: Option<SubConstraint>,
-    pub abstract_: Option<Abstract>,
+    pub abstract_: Option<AbstractConstraint>,
 }
 
 impl TypeVariable {
@@ -78,7 +69,7 @@ impl TypeVariable {
 
 impl TypeConstrainable for TypeVariable {
     fn constrain_abstract(self) -> TypeVariable {
-        TypeVariable { abstract_: Some(Abstract), ..self }
+        TypeVariable { abstract_: Some(AbstractConstraint), ..self }
     }
 
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {

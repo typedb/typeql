@@ -37,3 +37,15 @@ pub use relates::*;
 
 pub mod sub;
 pub use sub::*;
+
+use crate::common::token::Constraint::Abstract;
+use std::fmt;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct AbstractConstraint;
+
+impl fmt::Display for AbstractConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Abstract)
+    }
+}
