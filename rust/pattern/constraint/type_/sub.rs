@@ -32,7 +32,7 @@ pub struct SubConstraint {
 
 impl<T: Into<Label>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
-        SubConstraint { type_: Box::new(UnboundVariable::hidden().type_(scoped_type).unwrap()) }
+        SubConstraint { type_: Box::new(UnboundVariable::hidden().type_(scoped_type)) }
     }
 }
 

@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::{enum_getter, pattern::*, var, ErrorMessage};
+use crate::{enum_getter, pattern::*, var};
 
 mod typeql_delete;
 pub use typeql_delete::*;

@@ -40,13 +40,13 @@ impl IsaConstraint {
 
 impl<T: Into<Label>> From<T> for IsaConstraint {
     fn from(type_name: T) -> Self {
-        IsaConstraint::new(UnboundVariable::hidden().type_(type_name).unwrap(), IsExplicit::No)
+        IsaConstraint::new(UnboundVariable::hidden().type_(type_name), IsExplicit::No)
     }
 }
 
 impl<T: Into<Label>> From<(T, IsExplicit)> for IsaConstraint {
     fn from((type_name, is_explicit): (T, IsExplicit)) -> Self {
-        IsaConstraint::new(UnboundVariable::hidden().type_(type_name).unwrap(), is_explicit)
+        IsaConstraint::new(UnboundVariable::hidden().type_(type_name), is_explicit)
     }
 }
 

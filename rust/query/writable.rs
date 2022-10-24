@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{ErrorMessage, ThingVariable};
+use crate::ThingVariable;
 
 pub trait Writable {
     fn vars(self) -> Vec<ThingVariable>;
@@ -38,20 +38,8 @@ impl<const N: usize> Writable for [ThingVariable; N] {
     }
 }
 
-impl<const N: usize> Writable for [Result<ThingVariable, ErrorMessage>; N] {
-    fn vars(self) -> Vec<ThingVariable> {
-        self.into_iter().map(|x| x.unwrap()).collect()
-    }
-}
-
 impl Writable for Vec<ThingVariable> {
     fn vars(self) -> Vec<ThingVariable> {
         self
-    }
-}
-
-impl<U: Writable> Writable for Result<U, ErrorMessage> {
-    fn vars(self) -> Vec<ThingVariable> {
-        self.unwrap().vars()
     }
 }

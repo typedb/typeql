@@ -43,60 +43,29 @@ impl TypeQLMatch {
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         TypeQLMatch { modifiers: self.modifiers.filter(vars), ..self }
     }
-}
 
-pub trait MatchQueryBuilder {
-    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self;
-    fn sort(self, sorting: impl Into<Sorting>) -> Self;
-    fn limit(self, limit: usize) -> Self;
-    fn offset(self, offset: usize) -> Self;
-}
-
-impl<U: MatchQueryBuilder> MatchQueryBuilder for Result<U, ErrorMessage> {
-    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
-        Ok(self?.get(vars))
-    }
-
-    fn sort(self, sorting: impl Into<Sorting>) -> Self {
-        Ok(self?.sort(sorting))
-    }
-
-    fn limit(self, limit: usize) -> Self {
-        Ok(self?.limit(limit))
-    }
-
-    fn offset(self, offset: usize) -> Self {
-        Ok(self?.offset(offset))
-    }
-}
-
-impl MatchQueryBuilder for TypeQLMatch {
-    fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
+    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
         self.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect())
     }
 
-    fn sort(self, sorting: impl Into<Sorting>) -> Self {
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
         TypeQLMatch { modifiers: self.modifiers.sort(sorting), ..self }
     }
 
-    fn limit(self, limit: usize) -> Self {
+    pub fn limit(self, limit: usize) -> Self {
         TypeQLMatch { modifiers: self.modifiers.limit(limit), ..self }
     }
 
-    fn offset(self, offset: usize) -> Self {
+    pub fn offset(self, offset: usize) -> Self {
         TypeQLMatch { modifiers: self.modifiers.offset(offset), ..self }
     }
-}
 
-impl InsertQueryBuilder for TypeQLMatch {
-    fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage> {
-        Ok(TypeQLInsert { match_query: Some(self), variables: vars.vars() })
+    pub fn insert(self, vars: impl Writable) -> TypeQLInsert {
+        TypeQLInsert { match_query: Some(self), variables: vars.vars() }
     }
-}
 
-impl DeleteQueryBuilder for TypeQLMatch {
-    fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage> {
-        Ok(TypeQLDelete { match_query: self, variables: vars.vars() })
+    pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
+        TypeQLDelete { match_query: self, variables: vars.vars() }
     }
 }
 

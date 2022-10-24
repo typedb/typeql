@@ -107,13 +107,13 @@ impl From<UnboundVariable> for RolePlayerConstraint {
 
 impl From<(String, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).unwrap(), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type), player_var))
     }
 }
 
 impl From<(Label, UnboundVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type).unwrap(), player_var))
+        Self::from((UnboundVariable::hidden().type_(role_type), player_var))
     }
 }
 

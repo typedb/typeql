@@ -89,7 +89,7 @@ impl From<(String, IsKeyAttribute)> for OwnsConstraint {
 
 impl From<(Label, IsKeyAttribute)> for OwnsConstraint {
     fn from((attribute_type, is_key): (Label, IsKeyAttribute)) -> Self {
-        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type).unwrap(), is_key))
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), is_key))
     }
 }
 

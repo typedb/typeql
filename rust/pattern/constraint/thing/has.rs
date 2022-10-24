@@ -48,11 +48,11 @@ where
     fn try_from((type_name, value): (S, T)) -> Result<Self, Self::Error> {
         Ok(match value.try_into()? {
             Value::Variable(variable) => HasConstraint {
-                type_: Some(UnboundVariable::hidden().type_(type_name.into()).unwrap()),
+                type_: Some(UnboundVariable::hidden().type_(type_name.into())),
                 attribute: *variable,
             },
             value => HasConstraint {
-                type_: Some(UnboundVariable::hidden().type_(type_name.into()).unwrap()),
+                type_: Some(UnboundVariable::hidden().type_(type_name.into())),
                 attribute: UnboundVariable::hidden()
                     .constrain_value(ValueConstraint::new(Predicate::Eq, value)?),
             },
@@ -65,7 +65,7 @@ impl<S: Into<String>> TryFrom<(S, ValueConstraint)> for HasConstraint {
 
     fn try_from((type_name, value): (S, ValueConstraint)) -> Result<Self, Self::Error> {
         Ok(HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name.into()).unwrap()),
+            type_: Some(UnboundVariable::hidden().type_(type_name.into())),
             attribute: UnboundVariable::hidden().constrain_value(value),
         })
     }
@@ -78,7 +78,7 @@ impl<S: Into<String>> TryFrom<(S, Result<ValueConstraint, ErrorMessage>)> for Ha
         (type_name, value): (S, Result<ValueConstraint, ErrorMessage>),
     ) -> Result<Self, Self::Error> {
         Ok(HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name.into()).unwrap()),
+            type_: Some(UnboundVariable::hidden().type_(type_name.into())),
             attribute: UnboundVariable::hidden().constrain_value(value?),
         })
     }
@@ -87,7 +87,7 @@ impl<S: Into<String>> TryFrom<(S, Result<ValueConstraint, ErrorMessage>)> for Ha
 impl HasConstraint {
     pub fn new((type_name, value_constraint): (String, ValueConstraint)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name).unwrap()),
+            type_: Some(UnboundVariable::hidden().type_(type_name)),
             attribute: UnboundVariable::hidden().constrain_value(value_constraint),
         }
     }

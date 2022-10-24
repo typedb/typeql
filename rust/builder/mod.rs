@@ -25,44 +25,28 @@ use crate::{common::token::Predicate, *};
 #[macro_export]
 macro_rules! typeql_match {
     ($($pattern:expr),* $(,)?) => {{
-        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match patterns {
-            Ok(patterns) => Ok(TypeQLMatch::new(Conjunction::from(patterns))),
-            Err(err) => Err(err),
-        }
+        TypeQLMatch::new(Conjunction::from(vec![$($pattern.into_pattern()),*]))
     }}
 }
 
 #[macro_export]
 macro_rules! typeql_insert {
     ($($thing_variable:expr),* $(,)?) => {{
-        let variables = [$($thing_variable),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match variables {
-            Ok(variables) => Ok(TypeQLInsert::new(variables)),
-            Err(err) => Err(err),
-        }
+        TypeQLInsert::new(vec![$($thing_variable),*])
     }}
 }
 
 #[macro_export]
 macro_rules! and {
     ($($pattern:expr),* $(,)?) => {{
-        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match patterns {
-            Ok(patterns) => Ok(Conjunction::from(patterns)),
-            Err(err) => Err(err),
-        }
+        Conjunction::from(vec![$($pattern.into_pattern()),*])
     }}
 }
 
 #[macro_export]
 macro_rules! or {
     ($($pattern:expr),* $(,)?) => {{
-        let patterns = [$($pattern.map(|p| p.into_pattern())),*].into_iter().collect::<Result<Vec<_>, ErrorMessage>>();
-        match patterns {
-            Ok(patterns) => Ok(Disjunction::from(patterns)),
-            Err(err) => Err(err),
-        }
+        Disjunction::from(vec![$($pattern.into_pattern()),*])
     }}
 }
 
@@ -70,19 +54,16 @@ pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
     var.into()
 }
 
-pub fn type_(name: impl Into<String>) -> Result<TypeVariable, ErrorMessage> {
+pub fn type_(name: impl Into<String>) -> TypeVariable {
     UnboundVariable::hidden().type_(name.into())
 }
 
-pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> Result<ThingVariable, ErrorMessage> {
+pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
     UnboundVariable::hidden().rel(value)
 }
 
-pub fn not<T: TryInto<Negation>>(pattern: T) -> Result<Negation, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Negation>>::Error>,
-{
-    Ok(pattern.try_into()?)
+pub fn not<T: Into<Negation>>(pattern: T) -> Negation {
+    pattern.into()
 }
 
 pub fn eq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>

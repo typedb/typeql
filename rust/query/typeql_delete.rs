@@ -21,8 +21,8 @@
  */
 
 use crate::{
-    common::token::Command::Delete, write_joined, ErrorMessage, Query, ThingVariable, TypeQLMatch,
-    TypeQLUpdate, UpdateQueryBuilder, Writable,
+    common::token::Command::Delete, write_joined, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
+    Writable,
 };
 use std::fmt;
 
@@ -36,6 +36,10 @@ impl TypeQLDelete {
     pub fn into_query(self) -> Query {
         Query::Delete(self)
     }
+
+    pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
+        TypeQLUpdate { delete_query: self, insert_variables: vars.vars() }
+    }
 }
 
 impl fmt::Display for TypeQLDelete {
@@ -44,21 +48,5 @@ impl fmt::Display for TypeQLDelete {
         writeln!(f, "{}", Delete)?;
         write_joined!(f, ";\n", self.variables)?;
         f.write_str(";")
-    }
-}
-
-pub trait DeleteQueryBuilder {
-    fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage>;
-}
-
-impl<U: DeleteQueryBuilder> DeleteQueryBuilder for Result<U, ErrorMessage> {
-    fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage> {
-        self?.delete(vars)
-    }
-}
-
-impl UpdateQueryBuilder for TypeQLDelete {
-    fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage> {
-        Ok(TypeQLUpdate { delete_query: self, insert_variables: vars.vars() })
     }
 }

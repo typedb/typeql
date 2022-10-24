@@ -177,7 +177,7 @@ fn visit_query_undefine(_ctx: Rc<Query_undefineContext>) -> ParserResult<()> {
 fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {
     let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
     if let Some(patterns) = ctx.patterns() {
-        TypeQLMatch::new(Conjunction::from(visit_patterns(patterns)?)).insert(variable_things)
+        Ok(TypeQLMatch::new(Conjunction::from(visit_patterns(patterns)?)).insert(variable_things))
     } else {
         Ok(TypeQLInsert::new(variable_things))
     }
@@ -185,13 +185,13 @@ fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert
 
 fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete> {
     let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
-    TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
-        .delete(variable_things)
+    Ok(TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
+        .delete(variable_things))
 }
 
 fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {
-    visit_query_delete(ctx.query_delete().unwrap())?
-        .insert(visit_variable_things(ctx.variable_things().unwrap())?)
+    Ok(visit_query_delete(ctx.query_delete().unwrap())?
+        .insert(visit_variable_things(ctx.variable_things().unwrap())?))
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
@@ -324,13 +324,13 @@ fn visit_pattern_variable(ctx: Rc<Pattern_variableContext>) -> ParserResult<Vari
     } else if let Some(var_type) = ctx.variable_type() {
         Ok(visit_variable_type(var_type)?.into_variable())
     } else if let Some(var_concept) = ctx.variable_concept() {
-        Ok(visit_variable_concept(var_concept)?.into_variable())
+        Ok(visit_variable_concept(var_concept).into_variable())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
-fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ParserResult<ConceptVariable> {
+fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ConceptVariable {
     get_var(ctx.VAR_(0).unwrap()).is(get_var(ctx.VAR_(1).unwrap()))
 }
 
@@ -354,7 +354,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
                 overridden,
             )));
         } else if constraint.REGEX().is_some() {
-            var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()))?;
+            var_type = var_type.regex(get_regex(constraint.STRING_().unwrap()));
         } else if constraint.RELATES().is_some() {
             let overridden =
                 constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
@@ -368,7 +368,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             )?));
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
-            var_type = var_type.type_(scoped_label)?;
+            var_type = var_type.type_(scoped_label);
         } else {
             panic!("visit_variable_type: not implemented")
         }
