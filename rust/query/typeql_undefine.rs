@@ -21,7 +21,8 @@
  */
 
 use crate::{
-    common::token::Command::Undefine, write_joined, Pattern, Query, RuleDeclaration, TypeVariable, Variable,
+    common::token::Command::Undefine, write_joined, Pattern, Query, RuleDeclaration, TypeVariable,
+    Variable,
 };
 use std::fmt;
 

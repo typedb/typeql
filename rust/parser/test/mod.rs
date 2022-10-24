@@ -944,12 +944,12 @@ pokemon plays evolves:from,
 
     let parsed = parse_query(query).unwrap().into_undefine();
     let expected = typeql_undefine!(
-            type_("pokemon").sub("entity"),
-            type_("evolution").sub("relation"),
-            type_("evolves-from").sub("role"),
-            type_("evolves-to").sub("role"),
-            type_("evolves").relates("from").relates("to"),
-            type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
+        type_("pokemon").sub("entity"),
+        type_("evolution").sub("relation"),
+        type_("evolves-from").sub("role"),
+        type_("evolves-to").sub("role"),
+        type_("evolves").relates("from").relates("to"),
+        type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
     );
 
     assert_query_eq!(expected, parsed, query);
@@ -1096,25 +1096,19 @@ fn test_parsing_pattern() {
 
 #[test]
 fn test_define_rules() {
-    let when = and!(var("x").isa("movie"));
-    let then = var("x").has(("genre", "drama")).unwrap();
-
-    let query = format!(
-        r#"define
+    let query = r#"define
 rule all-movies-are-drama:
-    when {{
-        {};
-    }}
-    then {{
-        {};
-    }};"#,
-        when.patterns.get(0).unwrap(),
-        then
-    );
-    println!("{}", query);
+    when {
+        $x isa movie;
+    }
+    then {
+        $x has genre "drama";
+    };"#;
 
     let parsed = parse_query(&query).unwrap().into_define();
-    let expected = typeql_define!(rule("all-movies-are-drama").when(when).then(then));
+    let expected = typeql_define!(rule("all-movies-are-drama")
+        .when(and!(var("x").isa("movie")))
+        .then(var("x").has(("genre", "drama")).unwrap()));
 
     assert_query_eq!(expected, parsed, query);
 }

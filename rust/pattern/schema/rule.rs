@@ -58,12 +58,7 @@ impl RuleWhenStub {
 
 impl fmt::Display for RuleDeclaration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{} {}",
-            Schema::Rule,
-            self.label,
-        )
+        write!(f, "{} {}", Schema::Rule, self.label)
     }
 }
 
