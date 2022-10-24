@@ -116,36 +116,36 @@ fn get_role_players(ctx: Rc<RelationContext>) -> ParserResult<Vec<RolePlayerCons
     (0..).map_while(|i| ctx.role_player(i)).map(get_role_player_constraint).collect()
 }
 
-pub fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
+pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
     visit_query(ctx.query().unwrap())
 }
 
-fn visit_eof_queries(ctx: Rc<Eof_queriesContext>) -> ParserResult<Vec<Query>> {
+pub(crate) fn visit_eof_queries(ctx: Rc<Eof_queriesContext>) -> ParserResult<Vec<Query>> {
     (0..).map_while(|i| ctx.query(i)).map(visit_query).collect()
 }
 
-pub fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
+pub(crate) fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
     visit_pattern(ctx.pattern().unwrap())
 }
 
-fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>> {
+pub(crate) fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>> {
     visit_patterns(ctx.patterns().unwrap())
 }
 
-fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Pattern>> {
+pub(crate) fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Pattern>> {
     let definables_ctx = ctx.definables().unwrap();
     (0..).map_while(|i| definables_ctx.definable(i)).map(visit_definable).collect()
 }
 
-fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
+pub(crate) fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
     visit_pattern_variable(ctx.pattern_variable().unwrap())
 }
 
-fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<String> {
+pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<String> {
     Ok(ctx.label().unwrap().get_text())
 }
 
-fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<Rule> {
+pub(crate) fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<Rule> {
     visit_schema_rule(ctx.schema_rule().unwrap())
 }
 
