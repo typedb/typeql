@@ -25,7 +25,7 @@ use crate::{common::token::Predicate, *};
 #[macro_export]
 macro_rules! typeql_match {
     ($($pattern:expr),* $(,)?) => {{
-        TypeQLMatch::new(Conjunction::from(vec![$($pattern.into_pattern()),*]))
+        TypeQLMatch::new(vec![$($pattern.into_pattern()),*])
     }}
 }
 
