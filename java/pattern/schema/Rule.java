@@ -109,9 +109,6 @@ public class Rule implements Definable {
         if (findNegations(when).anyMatch(negation -> findNegations(negation.pattern()).findAny().isPresent())) {
             throw TypeQLException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
         }
-        if (findDisjunctions(when).findAny().isPresent()) {
-            throw TypeQLException.of(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.message(label));
-        }
     }
 
     private static Stream<Negation<?>> findNegations(Pattern pattern) {
@@ -153,12 +150,14 @@ public class Rule implements Definable {
             Set<Reference> thenReferences = Stream.concat(Stream.of(then), then.variables())
                     .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
 
-            Set<Reference> whenReferences = when.variables()
-                    .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
+            when.normalise().patterns().forEach(conjunction -> {
+                Set<Reference> whenReferences = conjunction.variables()
+                        .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
 
-            if (!whenReferences.containsAll(thenReferences)) {
-                throw TypeQLException.of(INVALID_RULE_THEN_VARIABLES.message(label));
-            }
+                if (!whenReferences.containsAll(thenReferences)) {
+                    throw TypeQLException.of(INVALID_RULE_THEN_VARIABLES.message(label));
+                }
+            });
         }
 
         // Roles must be explicit

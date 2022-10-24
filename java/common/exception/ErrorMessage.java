@@ -79,14 +79,12 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(28, "Rule '%s' 'when' has not been provided with any patterns.");
     public static final ErrorMessage INVALID_RULE_WHEN_NESTED_NEGATION =
             new ErrorMessage(29, "Rule '%s' 'when' contains a nested negation.");
-    public static final ErrorMessage INVALID_RULE_WHEN_CONTAINS_DISJUNCTION =
-            new ErrorMessage(30, "Rule '%s' 'when' contains a disjunction.");
     public static final ErrorMessage INVALID_RULE_THEN =
             new ErrorMessage(31, "Rule '%s' 'then' '%s': must be exactly one attribute ownership, or exactly one relation.");
     public static final ErrorMessage INVALID_RULE_THEN_HAS =
             new ErrorMessage(32, "Rule '%s' 'then' '%s' tries to assign type '%s' to variable '%s', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
-            new ErrorMessage(33, "Rule '%s' 'then' variables must be present in rule 'when'.");
+            new ErrorMessage(33, "Rule '%s' 'then' variables must be present in every branch of rule 'when'.");
     public static final ErrorMessage INVALID_RULE_THEN_ROLES =
             new ErrorMessage(34, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
