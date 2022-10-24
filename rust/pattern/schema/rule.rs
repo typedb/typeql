@@ -32,16 +32,22 @@ pub struct RuleDeclaration {
 }
 
 impl RuleDeclaration {
-    pub fn new(label: &str) -> Self {
-        RuleDeclaration { label: Label::from(label) }
+    pub fn new(label: Label) -> Self {
+        RuleDeclaration { label }
     }
 
     pub fn into_pattern(self) -> Pattern {
-        todo!()
+        Pattern::RuleDeclaration(self)
     }
 
     pub fn when(self, conjunction: Conjunction) -> RuleWhenStub {
         RuleWhenStub { label: self.label, when: conjunction }
+    }
+}
+
+impl From<&str> for RuleDeclaration {
+    fn from(label: &str) -> Self {
+        RuleDeclaration::new(Label::from(label))
     }
 }
 

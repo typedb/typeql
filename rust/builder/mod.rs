@@ -123,5 +123,5 @@ where
 }
 
 pub fn rule(name: &str) -> RuleDeclaration {
-    RuleDeclaration::new(name)
+    RuleDeclaration::from(name)
 }

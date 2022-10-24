@@ -276,7 +276,7 @@ fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Pattern> {
         if rule_ctx.patterns().is_some() {
             visit_schema_rule(rule_ctx).map(Rule::into_pattern)
         } else {
-            visit_schema_rule_declaration(rule_ctx).map(Rule::into_pattern)
+            visit_schema_rule_declaration(rule_ctx).map(RuleDeclaration::into_pattern)
         }
     }
 }
@@ -537,8 +537,10 @@ fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<Rule> {
     ))
 }
 
-fn visit_schema_rule_declaration(_ctx: Rc<Schema_ruleContext>) -> ParserResult<Rule> {
-    todo!()
+fn visit_schema_rule_declaration(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDeclaration> {
+    Ok(RuleDeclaration::new(
+        Label::from(ctx.label().unwrap().get_text()),
+    ))
 }
 
 fn visit_type_any(ctx: Rc<Type_anyContext>) -> ParserResult<Type> {
