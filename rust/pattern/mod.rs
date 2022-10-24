@@ -53,6 +53,7 @@ pub enum Pattern {
     Disjunction(Disjunction),
     Negation(Negation),
     Rule(Rule),
+    RuleDeclaration(RuleDeclaration),
     Variable(Variable),
 }
 
@@ -61,6 +62,7 @@ impl Pattern {
     enum_getter!(into_disjunction, Disjunction, Disjunction);
     enum_getter!(into_negation, Negation, Negation);
     enum_getter!(into_rule, Rule, Rule);
+    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
 }
 
@@ -87,6 +89,7 @@ impl fmt::Display for Pattern {
             Disjunction(disjunction) => write!(f, "{}", disjunction),
             Negation(negation) => write!(f, "{}", negation),
             Rule(rule) => write!(f, "{}", rule),
+            RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
             Variable(variable) => write!(f, "{}", variable),
         }
     }

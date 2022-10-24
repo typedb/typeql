@@ -929,33 +929,38 @@ pokemon plays evolves:from,
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn when_parsing_undefine_query_result_is_same_as_java_typeql() {
-    let query = "undefine\n" +
-            "pokemon sub entity;\n" +
-            "evolution sub relation;\n" +
-            "evolves-from sub role;\n" +
-            "evolves-to sub role;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "pokemon plays evolves:from,\n" +
-            "    plays evolves:to,\n" +
-            "    owns name;";
-    let parsed = parse_query(query).asUndefine();
+    let query = r#"undefine
+pokemon sub entity;
+evolution sub relation;
+evolves-from sub role;
+evolves-to sub role;
+evolves relates from,
+    relates to;
+pokemon plays evolves:from,
+    plays evolves:to,
+    owns name;"#;
 
-    let expected = undefine(
+    let parsed = parse_query(query).unwrap().into_undefine();
+    let expected = typeql_undefine!(
             type_("pokemon").sub("entity"),
             type_("evolution").sub("relation"),
             type_("evolves-from").sub("role"),
             type_("evolves-to").sub("role"),
             type_("evolves").relates("from").relates("to"),
-            type_("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
+            type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
     );
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
+
+// #[test]
+fn when_parse_undefine_rule_with_body_throw() {
+    let query = r#"undefine rule r: when { $x isa thing; } then { $x has name "a"; };"#;
+    let parsed = parse_query(query);
+    assert!(parsed.is_err());
+}
 
 #[test]
 fn test_match_insert_query() {

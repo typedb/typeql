@@ -21,25 +21,25 @@
  */
 
 use crate::{
-    common::token::Command::Undefine, write_joined, Pattern, Query, Rule, TypeVariable, Variable,
+    common::token::Command::Undefine, write_joined, Pattern, Query, RuleDeclaration, TypeVariable, Variable,
 };
 use std::fmt;
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLUndefine {
     variables: Vec<TypeVariable>,
-    rules: Vec<Rule>,
+    rules: Vec<RuleDeclaration>,
 }
 
 impl TypeQLUndefine {
-    pub fn new(definables: Vec<Pattern>) -> Self {
-        definables.into_iter().fold(TypeQLUndefine::default(), |mut define, definable| {
-            match definable {
-                Pattern::Rule(rule) => define.add_rule(rule),
-                Pattern::Variable(Variable::Type(var)) => define.add_definition(var),
+    pub fn new(undefinables: Vec<Pattern>) -> Self {
+        undefinables.into_iter().fold(TypeQLUndefine::default(), |mut undefine, undefinable| {
+            match undefinable {
+                Pattern::RuleDeclaration(rule) => undefine.add_rule(rule),
+                Pattern::Variable(Variable::Type(var)) => undefine.add_definition(var),
                 _ => unreachable!(),
             }
-            define
+            undefine
         })
     }
 
@@ -51,7 +51,7 @@ impl TypeQLUndefine {
         self.variables.push(variable)
     }
 
-    pub fn add_rule(&mut self, rule: Rule) {
+    pub fn add_rule(&mut self, rule: RuleDeclaration) {
         self.rules.push(rule)
     }
 }

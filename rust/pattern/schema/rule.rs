@@ -40,19 +40,30 @@ impl RuleDeclaration {
         todo!()
     }
 
-    pub fn when(self, conjunction: Conjunction) -> RuleStub {
-        RuleStub { label: self.label, when: conjunction }
+    pub fn when(self, conjunction: Conjunction) -> RuleWhenStub {
+        RuleWhenStub { label: self.label, when: conjunction }
     }
 }
 
-pub struct RuleStub {
+pub struct RuleWhenStub {
     pub label: Label,
     pub when: Conjunction,
 }
 
-impl RuleStub {
+impl RuleWhenStub {
     pub fn then(self, conclusion: ThingVariable) -> Rule {
         Rule { label: self.label, when: self.when, then: conclusion }
+    }
+}
+
+impl fmt::Display for RuleDeclaration {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{} {}",
+            Schema::Rule,
+            self.label,
+        )
     }
 }
 
