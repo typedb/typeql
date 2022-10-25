@@ -44,7 +44,7 @@ checkstyle_test(
     include = [
         ".bazelrc",
         ".gitignore",
-        ".grabl/automation.yml",
+        ".factory/automation.yml",
         "BUILD",
         "WORKSPACE",
         "deployment.bzl",
