@@ -57,8 +57,8 @@ pub struct RuleWhenStub {
 }
 
 impl RuleWhenStub {
-    pub fn then(self, conclusion: ThingVariable) -> Rule {
-        Rule { label: self.label, when: self.when, then: conclusion }
+    pub fn then(self, conclusion: ThingVariable) -> RuleDefinition {
+        RuleDefinition { label: self.label, when: self.when, then: conclusion }
     }
 }
 
@@ -69,15 +69,15 @@ impl fmt::Display for RuleDeclaration {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Rule {
+pub struct RuleDefinition {
     pub label: Label,
     pub when: Conjunction,
     pub then: ThingVariable,
 }
 
-impl Rule {
+impl RuleDefinition {
     pub fn new(label: Label, when: Conjunction, then: ThingVariable) -> Self {
-        Rule { label, when, then }
+        RuleDefinition { label, when, then }
     }
 
     pub fn into_pattern(self) -> Pattern {
@@ -85,7 +85,7 @@ impl Rule {
     }
 }
 
-impl fmt::Display for Rule {
+impl fmt::Display for RuleDefinition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,

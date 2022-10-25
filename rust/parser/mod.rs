@@ -145,7 +145,9 @@ pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<String>
     Ok(ctx.label().unwrap().get_text())
 }
 
-pub(crate) fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<Rule> {
+pub(crate) fn visit_eof_schema_rule(
+    ctx: Rc<Eof_schema_ruleContext>,
+) -> ParserResult<RuleDefinition> {
     visit_schema_rule(ctx.schema_rule().unwrap())
 }
 
@@ -274,7 +276,7 @@ fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Pattern> {
     } else {
         let rule_ctx = ctx.schema_rule().unwrap();
         if rule_ctx.patterns().is_some() {
-            visit_schema_rule(rule_ctx).map(Rule::into_pattern)
+            visit_schema_rule(rule_ctx).map(RuleDefinition::into_pattern)
         } else {
             visit_schema_rule_declaration(rule_ctx).map(RuleDeclaration::into_pattern)
         }
@@ -529,8 +531,8 @@ fn visit_predicate_value(_ctx: Rc<Predicate_valueContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<Rule> {
-    Ok(Rule::new(
+fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDefinition> {
+    Ok(RuleDefinition::new(
         Label::from(ctx.label().unwrap().get_text()),
         Conjunction::from(visit_patterns(ctx.patterns().unwrap())?),
         visit_variable_thing_any(ctx.variable_thing_any().unwrap())?,

@@ -52,7 +52,7 @@ pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
-    Rule(Rule),
+    Rule(RuleDefinition),
     RuleDeclaration(RuleDeclaration),
     Variable(Variable),
 }
@@ -61,7 +61,7 @@ impl Pattern {
     enum_getter!(into_conjunction, Conjunction, Conjunction);
     enum_getter!(into_disjunction, Disjunction, Disjunction);
     enum_getter!(into_negation, Negation, Negation);
-    enum_getter!(into_rule, Rule, Rule);
+    enum_getter!(into_rule, Rule, RuleDefinition);
     enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
 }

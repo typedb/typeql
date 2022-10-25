@@ -21,14 +21,15 @@
  */
 
 use crate::{
-    common::token::Command::Define, write_joined, Pattern, Query, Rule, TypeVariable, Variable,
+    common::token::Command::Define, write_joined, Pattern, Query, RuleDefinition, TypeVariable,
+    Variable,
 };
 use std::fmt;
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLDefine {
     variables: Vec<TypeVariable>,
-    rules: Vec<Rule>,
+    rules: Vec<RuleDefinition>,
 }
 
 impl TypeQLDefine {
@@ -51,7 +52,7 @@ impl TypeQLDefine {
         self.variables.push(variable)
     }
 
-    pub fn add_rule(&mut self, rule: Rule) {
+    pub fn add_rule(&mut self, rule: RuleDefinition) {
         self.rules.push(rule)
     }
 }
