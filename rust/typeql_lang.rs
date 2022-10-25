@@ -44,7 +44,7 @@ use crate::{
     common::error::ErrorMessage,
     parser::{
         error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_pattern,
-        visit_eof_query,
+        visit_eof_queries, visit_eof_query,
     },
 };
 use pattern::*;
@@ -77,6 +77,12 @@ macro_rules! parse {
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse!(visit_eof_query(eof_query(typeql_query.trim_end())))
+}
+
+pub fn parse_queries(
+    typeql_queries: &str,
+) -> Result<impl Iterator<Item = Result<Query, ErrorMessage>> + '_, String> {
+    parse!(visit_eof_queries(eof_queries(typeql_queries.trim_end())))
 }
 
 pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, String> {

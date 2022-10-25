@@ -41,8 +41,7 @@ use crate::common::{
 };
 use typeql_grammar::typeqlrustparser::*;
 
-use crate::{pattern::*, query::*};
-use crate::common::token::ValueType;
+use crate::{common::token::ValueType, pattern::*, query::*};
 
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
@@ -121,8 +120,10 @@ pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> 
     visit_query(ctx.query().unwrap())
 }
 
-pub(crate) fn visit_eof_queries(ctx: Rc<Eof_queriesContext>) -> ParserResult<Vec<Query>> {
-    (0..).map_while(|i| ctx.query(i)).map(visit_query).collect()
+pub(crate) fn visit_eof_queries(
+    ctx: Rc<Eof_queriesContext>,
+) -> ParserResult<impl Iterator<Item = ParserResult<Query>> + '_> {
+    Ok((0..).map_while(move |i| ctx.query(i)).map(visit_query))
 }
 
 pub(crate) fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {

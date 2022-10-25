@@ -21,10 +21,10 @@
  */
 
 use crate::{
-    and, common::token::ValueType, gte, lt, lte, not, or, parse_pattern, parse_query,
-    rel, rule, try_, type_, typeql_insert, typeql_match, var, ConceptVariableBuilder, Conjunction,
-    Disjunction, ErrorMessage, Query, RelationVariableBuilder, ThingVariableBuilder, TypeQLDefine,
-    TypeQLInsert, TypeQLMatch, TypeQLUndefine, TypeVariableBuilder, KEY,
+    and, common::token::ValueType, gte, lt, lte, not, or, parse_pattern, parse_queries,
+    parse_query, rel, rule, try_, type_, typeql_insert, typeql_match, var, ConceptVariableBuilder,
+    Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder, ThingVariableBuilder,
+    TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -1265,73 +1265,70 @@ fn test_parse_empty_string() {
     assert!(parse_query("").is_err());
 }
 
-/*
 #[test]
 fn test_parse_list_one_match() {
-    let queries = r#"match
-$y isa movie;"#;
-
-    let parsed = parse_queries(queries).collect();  // TODO parse_queries -> Iter
-    let expected = vec![try_! {
-    typeql_match!(var("y").isa("movie"))]
-};
-
+    let queries = "match $y isa movie;";
+    let parsed =
+        parse_queries(queries).unwrap().map(|q| q.unwrap().into_match()).collect::<Vec<_>>();
+    let expected = vec![typeql_match!(var("y").isa("movie"))];
     assert_eq!(parsed, expected);
 }
 
 #[test]
 fn test_parse_list_one_insert() {
-    let insertString = "insert\n$x isa movie;";
-    let queries = parse_queries(insertString).collect(toList());
-
-    assertEquals(list(insert(var("x").isa("movie"))), queries);
+    let queries = "insert $x isa movie;";
+    let parsed =
+        parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
+    let expected = vec![typeql_insert!(var("x").isa("movie"))];
+    assert_eq!(parsed, expected);
 }
 
-#[test]
+// #[test]
 fn test_parse_list_one_insert_with_whitespace_prefix() {
     let queries = " insert $x isa movie;";
-
-    let queries = parse_queries(queries).collect();
-
-    assertEquals(list(insert(var("x").isa("movie"))), queries);
+    let parsed =
+        parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
+    let expected = vec![typeql_insert!(var("x").isa("movie"))];
+    assert_eq!(parsed, expected);
 }
 
-#[test]
+// #[test]
 fn test_parse_list_one_insert_with_prefix_comment() {
-    let insertString = "#hola\ninsert $x isa movie;";
-    let queries = parse_queries(insertString).collect(toList());
-
-    assertEquals(list(insert(var("x").isa("movie"))), queries);
+    let queries = r#"#hola
+insert $x isa movie;"#;
+    let parsed =
+        parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
+    let expected = vec![typeql_insert!(var("x").isa("movie"))];
+    assert_eq!(parsed, expected);
 }
 
 #[test]
 fn test_parse_list() {
-    let insert_string = "insert\n$x isa movie;";
-    let match_string = "match\n$y isa movie;";
-    let queries = parse_queries(insert_string + match_string).collect();
-
-    assertEquals(list(insert(var("x").isa("movie")), try_! {
-    typeql_match!(var("y").isa("movie"))), queries)
-};
+    let queries = "insert $x isa movie; match $y isa movie;";
+    let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap()).collect::<Vec<_>>();
+    let expected = vec![
+        typeql_insert!(var("x").isa("movie")).into_query(),
+        typeql_match!(var("y").isa("movie")).into_query(),
+    ];
+    assert_eq!(parsed, expected);
 }
 
 #[test]
 fn test_parse_many_match_insert_without_stack_overflow() {
-    let num_queries = 10_000;
-    let match_insert_string = "match\n$x isa person; insert $x has name 'bob';\n";
-    let mut long_query = String::new();
-    for _ in 0..num_queries {
-        long_query += match_insert_string;
-    }
+    let num_queries = 10;//_000;
+    let query = "match\n$x isa person; insert $x has name 'bob';\n";
+    let queries = query.repeat(num_queries);
 
-    let parsed = parse_queries(long_query).collect();
+    let mut parsed = Vec::with_capacity(num_queries);
+    parsed.extend(parse_queries(&queries).unwrap().map(|q| q.unwrap().into_insert()));
+
     let expected = try_! {
-    typeql_match!(var("x").isa("person")).insert(var("x").has(("name", "bob")))
-};
+        typeql_match!(var("x").isa("person")).insert(var("x").has(("name", "bob"))?)
+    }
+    .unwrap();
 
     assert_eq!(vec![expected; num_queries], parsed);
 }
- */
 
 #[test]
 fn when_parsing_list_of_queries_with_syntax_error_report_error() {

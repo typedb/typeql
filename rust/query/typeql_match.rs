@@ -25,7 +25,7 @@ use std::fmt;
 
 use crate::{query::*, write_joined};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
     pub conjunction: Conjunction,
     pub modifiers: Modifiers,
@@ -85,7 +85,7 @@ impl fmt::Display for TypeQLMatch {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Modifiers {
     pub filter: Option<Filter>,
     pub sorting: Option<Sorting>,
@@ -125,7 +125,7 @@ impl fmt::Display for Modifiers {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Filter {
     pub vars: Vec<UnboundVariable>,
 }
@@ -165,7 +165,7 @@ impl fmt::Display for OrderedVariable {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sorting {
     vars: Vec<OrderedVariable>,
 }
@@ -201,7 +201,7 @@ impl fmt::Display for Sorting {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Limit {
     pub limit: usize,
 }
@@ -212,7 +212,7 @@ impl fmt::Display for Limit {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Offset {
     pub offset: usize,
 }

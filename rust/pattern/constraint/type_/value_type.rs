@@ -20,8 +20,7 @@
  *
  */
 
-use crate::common::token::Constraint::ValueType as ValueTypeKeyword;
-use crate::common::token::ValueType;
+use crate::common::token::{Constraint::ValueType as ValueTypeKeyword, ValueType};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
