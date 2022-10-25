@@ -20,23 +20,14 @@
  *
  */
 
-pub mod abstract_;
-pub use abstract_::*;
+use crate::common::token::Constraint::Abstract;
+use std::fmt;
 
-pub mod label;
-pub use label::*;
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct AbstractConstraint;
 
-pub mod owns;
-pub use owns::*;
-
-pub mod plays;
-pub use plays::*;
-
-pub mod regex;
-pub use regex::*;
-
-pub mod relates;
-pub use relates::*;
-
-pub mod sub;
-pub use sub::*;
+impl fmt::Display for AbstractConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", Abstract)
+    }
+}
