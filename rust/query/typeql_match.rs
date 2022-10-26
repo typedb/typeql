@@ -20,7 +20,7 @@
  *
  */
 
-use crate::common::token::{Command::Match, Filter::*};
+use crate::common::token::{Aggregate, Command::Match, Filter::*};
 use std::fmt;
 
 use crate::{query::*, write_joined};
@@ -66,6 +66,38 @@ impl TypeQLMatch {
 
     pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
         TypeQLDelete { match_query: self, variables: vars.vars() }
+    }
+
+    pub fn count(self) -> TypeQLMatchAggregate {
+        TypeQLMatchAggregate::new_count(self)
+    }
+
+    pub(crate) fn aggregate(self, method: Aggregate, var: UnboundVariable) -> TypeQLMatchAggregate {
+        TypeQLMatchAggregate::new(self, method, var)
+    }
+
+    pub fn max(self, var: impl Into<UnboundVariable>) -> TypeQLMatchAggregate {
+        self.aggregate(Aggregate::Max, var.into())
+    }
+
+    pub fn min(self, var: impl Into<UnboundVariable>) -> TypeQLMatchAggregate {
+        self.aggregate(Aggregate::Min, var.into())
+    }
+
+    pub fn mean(self, var: impl Into<UnboundVariable>) -> TypeQLMatchAggregate {
+        self.aggregate(Aggregate::Mean, var.into())
+    }
+
+    pub fn median(self, var: impl Into<UnboundVariable>) -> TypeQLMatchAggregate {
+        self.aggregate(Aggregate::Median, var.into())
+    }
+
+    pub fn std(self, var: impl Into<UnboundVariable>) -> TypeQLMatchAggregate {
+        self.aggregate(Aggregate::Std, var.into())
+    }
+
+    pub fn sum(self, var: impl Into<UnboundVariable>) -> TypeQLMatchAggregate {
+        self.aggregate(Aggregate::Sum, var.into())
     }
 }
 

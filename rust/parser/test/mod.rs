@@ -569,7 +569,7 @@ $x isa movie;
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]
+// #[test]  // TODO validation
 fn test_disjunction_not_in_conjunction() {
     let query = r#"match
 {
@@ -613,29 +613,29 @@ $y isa $p;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
-#[test]
+// #[test]  // TODO validation
 fn test_disjunction_not_binding_conjunction() {
-    let query = "match\n" +
-            "$y isa $p;\n" +
-            "{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $q has last-name $z; }; };";
-    assertThrows(() -> parse_query(query));
+    let query = r#"match
+$y isa $p;
+{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $q has last-name $z; }; };"#;
+    let parsed = parse_query(query);
+    assert!(parsed.is_err());
 }
 
 #[test]
 fn test_aggregate_count_query() {
-    let query = "match\n" +
-            "($x, $y) isa friendship;\n" +
-            "get $x, $y;\n" +
-            "count;";
-    let parsed = parse_query(query).unwrapAggregate();
-    let expected = try_! {
-    typeql_match!(rel("x").rel("y").isa("friendship")).get("x", "y").count()
-};
+    let query = r#"match
+($x, $y) isa friendship;
+get $x, $y;
+count;"#;
+
+    let parsed = parse_query(query).unwrap().into_aggregate();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get(["x", "y"]).count();
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn test_aggregate_group_count_query() {
     let query = "match\n" +
@@ -697,21 +697,23 @@ fn test_multi_line_filtered_group_aggregate_max_query() {
 
     assert_query_eq!(expected, parsed, query);
 }
+*/
 
 #[test]
-fn when_comparing_count_query_using_typeql_and_java_typeql_they_are_equivalent() {
-    let query = "match\n" +
-            "$x isa movie,\n" +
-            "    has title \"Godfather\";\n" +
-            "count;";
-    let parsed = parse_query(query).unwrapAggregate();
+fn when_comparing_count_query_using_typeql_and_rust_typeql_they_are_equivalent() {
+    let query = r#"match
+$x isa movie,
+    has title "Godfather";
+count;"#;
+
+    let parsed = parse_query(query).unwrap().into_aggregate();
     let expected = try_! {
-    typeql_match!(var("x").isa("movie").has(("title", "Godfather"))).count()
-};
+        typeql_match!(var("x").isa("movie").has(("title", "Godfather"))?).count()
+    }.unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
+
 #[test]
 fn test_insert_query() {
     let query = r#"insert
@@ -965,7 +967,7 @@ rule r;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]
+// #[test]  // TODO pending grammar changes
 fn when_parse_undefine_rule_with_body_throw() {
     let query = r#"undefine rule r: when { $x isa thing; } then { $x has name "a"; };"#;
     let parsed = parse_query(query);
@@ -1015,14 +1017,14 @@ $x value double;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]
+// #[test]  // TODO validation
 fn test_parse_without_var() {
     let query = r#"match
 $_ isa person;"#;
 
-    let parsed = parse_query(query); // todo error
+    let parsed = parse_query(query);
     assert!(parsed.is_err());
-    let built = try_! { typeql_match!(var(()).isa("person")) }; // todo error
+    let built = try_! { typeql_match!(var(()).isa("person")) };
     assert!(built.is_err());
 }
 
@@ -1065,21 +1067,18 @@ $_ isa movie,
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn when_parsing_query_with_comments_they_are_ignored() {
-    let query = "match\n" +
-            "\n# there's a comment here\n$x isa###WOW HERES ANOTHER###\r\nmovie; count;";
-    let uncommented = "match\n$x isa movie;\ncount;";
+    let query = "match\n\n# there's a comment here\n$x isa###WOW HERES ANOTHER###\r\nmovie; count;";
+    let uncommented = r#"match
+$x isa movie;
+count;"#;
 
-    let parsed = parse_query(query).asMatchAggregate();
-    let expected = try_! {
-    typeql_match!(var("x").isa("movie")).count()
-};
+    let parsed = parse_query(query).unwrap().into_aggregate();
+    let expected = typeql_match!(var("x").isa("movie")).count();
 
     assert_query_eq!(expected, parsed, uncommented);
 }
-*/
 
 #[test]
 fn test_parsing_pattern() {
@@ -1174,13 +1173,15 @@ fn test_parse_aggregate_std() {
 
 #[test]
 fn test_parse_aggregate_to_string() {
-    let query = "match\n" +
-            "$x isa movie;\n" +
-            "get $x;\n" +
-            "group $x; count;";
-    assertEquals(query, parse_query(query).toString());
+    let query = r#"match
+$x isa movie;
+get $x;
+group $x; count;"#;
+
+    assert_eq!(query, parse_query(query).unwrap().to_string());
 }
 */
+
 #[test]
 fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error() {
     let parsed = parse_query("match\n$x isa");
@@ -1283,7 +1284,7 @@ fn test_parse_list_one_insert() {
     assert_eq!(parsed, expected);
 }
 
-// #[test]
+// #[test]  // TODO antlr4rust bug?
 fn test_parse_list_one_insert_with_whitespace_prefix() {
     let queries = " insert $x isa movie;";
     let parsed =
@@ -1292,7 +1293,7 @@ fn test_parse_list_one_insert_with_whitespace_prefix() {
     assert_eq!(parsed, expected);
 }
 
-// #[test]
+// #[test]  // TODO antlr4rust bug?
 fn test_parse_list_one_insert_with_prefix_comment() {
     let queries = r#"#hola
 insert $x isa movie;"#;
@@ -1315,7 +1316,7 @@ fn test_parse_list() {
 
 #[test]
 fn test_parse_many_match_insert_without_stack_overflow() {
-    let num_queries = 10;//_000;
+    let num_queries = 10; //_000;  // FIXME antlr4rust slow
     let query = "match\n$x isa person; insert $x has name 'bob';\n";
     let queries = query.repeat(num_queries);
 

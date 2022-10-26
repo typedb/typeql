@@ -36,6 +36,9 @@ pub use typeql_insert::*;
 mod typeql_match;
 pub use typeql_match::*;
 
+mod typeql_match_aggregate;
+pub use typeql_match_aggregate::*;
+
 mod typeql_undefine;
 pub use typeql_undefine::*;
 
@@ -53,6 +56,7 @@ pub enum Query {
     Update(TypeQLUpdate),
     Define(TypeQLDefine),
     Undefine(TypeQLUndefine),
+    Aggregate(TypeQLMatchAggregate),
 }
 
 impl Query {
@@ -62,6 +66,7 @@ impl Query {
     enum_getter!(into_update, Update, TypeQLUpdate);
     enum_getter!(into_define, Define, TypeQLDefine);
     enum_getter!(into_undefine, Undefine, TypeQLUndefine);
+    enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
 }
 
 impl fmt::Display for Query {
@@ -74,6 +79,7 @@ impl fmt::Display for Query {
             Update(query) => write!(f, "{}", query),
             Define(query) => write!(f, "{}", query),
             Undefine(query) => write!(f, "{}", query),
+            Aggregate(query) => write!(f, "{}", query),
         }
     }
 }
