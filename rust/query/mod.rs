@@ -24,6 +24,9 @@ use std::fmt;
 
 use crate::{enum_getter, pattern::*, var};
 
+mod aggregatable;
+pub use aggregatable::*;
+
 mod typeql_define;
 pub use typeql_define::*;
 
@@ -38,6 +41,12 @@ pub use typeql_match::*;
 
 mod typeql_match_aggregate;
 pub use typeql_match_aggregate::*;
+
+mod typeql_match_group;
+pub use typeql_match_group::*;
+
+mod typeql_match_group_aggregate;
+pub use typeql_match_group_aggregate::*;
 
 mod typeql_undefine;
 pub use typeql_undefine::*;
@@ -57,6 +66,8 @@ pub enum Query {
     Define(TypeQLDefine),
     Undefine(TypeQLUndefine),
     Aggregate(TypeQLMatchAggregate),
+    Group(TypeQLMatchGroup),
+    GroupAggregate(TypeQLMatchGroupAggregate),
 }
 
 impl Query {
@@ -67,6 +78,8 @@ impl Query {
     enum_getter!(into_define, Define, TypeQLDefine);
     enum_getter!(into_undefine, Undefine, TypeQLUndefine);
     enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
+    enum_getter!(into_group, Group, TypeQLMatchGroup);
+    enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
 }
 
 impl fmt::Display for Query {
@@ -80,6 +93,8 @@ impl fmt::Display for Query {
             Define(query) => write!(f, "{}", query),
             Undefine(query) => write!(f, "{}", query),
             Aggregate(query) => write!(f, "{}", query),
+            Group(query) => write!(f, "{}", query),
+            GroupAggregate(query) => write!(f, "{}", query),
         }
     }
 }

@@ -70,7 +70,6 @@ string_enum! { Command
     Insert = "insert",
     Delete = "delete",
     Match = "match",
-    Aggregate = "aggregate",
     Group = "group",
 }
 

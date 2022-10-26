@@ -22,9 +22,10 @@
 
 use crate::{
     and, common::token::ValueType, gte, lt, lte, not, or, parse_pattern, parse_queries,
-    parse_query, rel, rule, try_, type_, typeql_insert, typeql_match, var, ConceptVariableBuilder,
-    Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder, ThingVariableBuilder,
-    TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine, TypeVariableBuilder, KEY,
+    parse_query, rel, rule, try_, type_, typeql_insert, typeql_match, var, Aggregatable,
+    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
+    ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine,
+    TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -635,69 +636,73 @@ count;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_aggregate_group_count_query() {
-    let query = "match\n" +
-            "($x, $y) isa friendship;\n" +
-            "get $x, $y;\n" +
-            "group $x; count;";
-    let parsed = parse_query(query).unwrapGroupAggregate();
-    let expected = try_! {
-    typeql_match!(rel("x").rel("y").isa("friendship")).get("x", "y").group("x").count()
-};
+    let query = r#"match
+($x, $y) isa friendship;
+get $x, $y;
+group $x; count;"#;
+
+    let parsed = parse_query(query).unwrap().into_group_aggregate();
+    let expected =
+        typeql_match!(rel("x").rel("y").isa("friendship")).get(["x", "y"]).group("x").count();
 
     assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn test_single_line_group_aggregate_max_query() {
-    let query = "match\n" +
-            "$x has age $a;\n" +
-            "group $x; max $a;";
-    let parsed = parse_query(query).unwrapGroupAggregate();
+    let query = r#"match
+$x has age $a;
+group $x; max $a;"#;
+
+    let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = try_! {
-    typeql_match!(var("x").has(("age", var("a")))).group("x").max("a")
-};
+        typeql_match!(var("x").has(("age", var("a")))?).group("x").max("a")
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn test_multi_line_group_aggregate_max_query() {
-    let query = "match\n" +
-            "($x, $y) isa friendship;\n" +
-            "$y has age $z;\n" +
-            "group $x; max $z;";
-    let parsed = parse_query(query).unwrapGroupAggregate();
+    let query = r#"match
+($x, $y) isa friendship;
+$y has age $z;
+group $x; max $z;"#;
+
+    let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = try_! {
-    typeql_match!(
-            rel("x").rel("y").isa("friendship"),
-            var("y").has(("age", var("z")))
-    ).group("x").max("z")
-};
+        typeql_match!(
+                rel("x").rel("y").isa("friendship"),
+                var("y").has(("age", var("z")))?
+        ).group("x").max("z")
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn test_multi_line_filtered_group_aggregate_max_query() {
-    let query = "match\n" +
-            "($x, $y) isa friendship;\n" +
-            "$y has age $z;\n" +
-            "get $x, $y, $z;\n" +
-            "group $x; max $z;";
-    let parsed = parse_query(query).unwrapGroupAggregate();
+    let query = r#"match
+($x, $y) isa friendship;
+$y has age $z;
+get $x, $y, $z;
+group $x; max $z;"#;
+
+    let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = try_! {
-    typeql_match!(
+        typeql_match!(
             rel("x").rel("y").isa("friendship"),
-            var("y").has(("age", var("z")))
-    ).get("x", "y", "z").group("x").max("z")
-};
+            var("y").has(("age", var("z")))?
+        ).get(["x", "y", "z"]).group("x").max("z")
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn when_comparing_count_query_using_typeql_and_rust_typeql_they_are_equivalent() {
@@ -709,7 +714,8 @@ count;"#;
     let parsed = parse_query(query).unwrap().into_aggregate();
     let expected = try_! {
         typeql_match!(var("x").isa("movie").has(("title", "Godfather"))?).count()
-    }.unwrap();
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1131,42 +1137,38 @@ $_ has flag true;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_parse_aggregate_group() {
-    let query = "match\n" +
-            "$x isa movie;\n" +
-            "group $x;";
-    let parsed = parse_query(query).asMatchGroup();
-    let expected = try_! {
-    typeql_match!(var("x").isa("movie")).group("x")
-};
+    let query = r#"match
+$x isa movie;
+group $x;"#;
+
+    let parsed = parse_query(query).unwrap().into_group();
+    let expected = typeql_match!(var("x").isa("movie")).group("x");
 
     assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn test_parse_aggregate_group_count() {
-    let query = "match\n" +
-            "$x isa movie;\n" +
-            "group $x; count;";
-    let parsed = parse_query(query).asMatchGroupAggregate();
-    let expected = try_! {
-    typeql_match!(var("x").isa("movie")).group("x").count()
-};
+    let query = r#"match
+$x isa movie;
+group $x; count;"#;
+
+    let parsed = parse_query(query).unwrap().into_group_aggregate();
+    let expected = typeql_match!(var("x").isa("movie")).group("x").count();
 
     assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn test_parse_aggregate_std() {
-    let query = "match\n" +
-            "$x isa movie;\n" +
-            "std $x;";
-    let parsed = parse_query(query).asMatchAggregate();
-    let expected = try_! {
-    typeql_match!(var("x").isa("movie")).std("x")
-};
+    let query = r#"match
+$x isa movie;
+std $x;"#;
+
+    let parsed = parse_query(query).unwrap().into_aggregate();
+    let expected = typeql_match!(var("x").isa("movie")).std("x");
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1180,7 +1182,6 @@ group $x; count;"#;
 
     assert_eq!(query, parse_query(query).unwrap().to_string());
 }
-*/
 
 #[test]
 fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error() {

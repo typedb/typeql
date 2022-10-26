@@ -41,8 +41,11 @@ use crate::common::{
 };
 use typeql_grammar::typeqlrustparser::*;
 
-use crate::{common::token::ValueType, pattern::*, query::*};
-use crate::common::token::Aggregate;
+use crate::{
+    common::token::{Aggregate, ValueType},
+    pattern::*,
+    query::*,
+};
 
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
@@ -169,6 +172,10 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
         Ok(visit_query_undefine(query_undefine)?.into_query())
     } else if let Some(query_aggregate) = ctx.query_match_aggregate() {
         Ok(visit_query_match_aggregate(query_aggregate)?.into_query())
+    } else if let Some(query_group) = ctx.query_match_group() {
+        Ok(visit_query_match_group(query_group)?.into_query())
+    } else if let Some(query_group_aggregate) = ctx.query_match_group_agg() {
+        Ok(visit_query_match_group_agg(query_group_aggregate)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -231,12 +238,21 @@ fn visit_query_match_aggregate(
     })
 }
 
-fn visit_query_match_group(_ctx: Rc<Query_match_groupContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_match_group(ctx: Rc<Query_match_groupContext>) -> ParserResult<TypeQLMatchGroup> {
+    Ok(visit_query_match(ctx.query_match().unwrap())?
+        .group(get_var(ctx.match_group().unwrap().VAR_().unwrap())))
 }
 
-fn visit_query_match_group_agg(_ctx: Rc<Query_match_group_aggContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_match_group_agg(
+    ctx: Rc<Query_match_group_aggContext>,
+) -> ParserResult<TypeQLMatchGroupAggregate> {
+    let function = ctx.match_aggregate().unwrap();
+    let group = visit_query_match(ctx.query_match().unwrap())?
+        .group(get_var(ctx.match_group().unwrap().VAR_().unwrap()));
+    Ok(match Aggregate::from(function.aggregate_method().unwrap().get_text()) {
+        Aggregate::Count => group.count(),
+        method => group.aggregate(method, get_var(function.VAR_().unwrap())),
+    })
 }
 
 fn visit_modifiers(_ctx: Rc<ModifiersContext>) -> ParserResult<()> {

@@ -20,39 +20,38 @@
  *
  */
 
-use std::fmt;
-
 use crate::{
     common::token::{Aggregate, Aggregate::Count},
-    query::*,
+    Aggregating, Query, TypeQLMatchGroup, UnboundVariable,
 };
+use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct TypeQLMatchAggregate {
-    pub query: TypeQLMatch,
+pub struct TypeQLMatchGroupAggregate {
+    pub query: TypeQLMatchGroup,
     pub method: Aggregate,
     pub var: Option<UnboundVariable>,
 }
 
-impl TypeQLMatchAggregate {
+impl TypeQLMatchGroupAggregate {
     pub fn into_query(self) -> Query {
-        Query::Aggregate(self)
+        Query::GroupAggregate(self)
     }
 }
 
-impl Aggregating<TypeQLMatch> for TypeQLMatchAggregate {
-    fn new_count(query: TypeQLMatch) -> Self {
+impl Aggregating<TypeQLMatchGroup> for TypeQLMatchGroupAggregate {
+    fn new_count(query: TypeQLMatchGroup) -> Self {
         Self { query, method: Count, var: None }
     }
 
-    fn new(query: TypeQLMatch, method: Aggregate, var: UnboundVariable) -> Self {
+    fn new(query: TypeQLMatchGroup, method: Aggregate, var: UnboundVariable) -> Self {
         Self { query, method, var: Some(var) } // TODO check method is not COUNT & var is in query's scope
     }
 }
 
-impl fmt::Display for TypeQLMatchAggregate {
+impl fmt::Display for TypeQLMatchGroupAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{}", self.query, self.method)?;
+        write!(f, "{} {}", self.query, self.method)?;
         if let Some(var) = &self.var {
             write!(f, " {}", var)?;
         }
