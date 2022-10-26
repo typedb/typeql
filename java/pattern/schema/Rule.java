@@ -50,7 +50,6 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ROLES;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
