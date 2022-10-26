@@ -32,8 +32,8 @@ pub struct TypeQLMatch {
 }
 
 impl TypeQLMatch {
-    pub fn new(conjunction: Conjunction) -> Self {
-        Self { conjunction, modifiers: Modifiers::default() }
+    pub fn new(patterns: Vec<Pattern>) -> Self {
+        Self { conjunction: Conjunction::from(patterns), modifiers: Modifiers::default() }
     }
 
     pub fn into_query(self) -> Query {

@@ -20,23 +20,5 @@
  *
  */
 
-pub mod abstract_;
-pub use abstract_::*;
-
-pub mod label;
-pub use label::*;
-
-pub mod owns;
-pub use owns::*;
-
-pub mod plays;
-pub use plays::*;
-
-pub mod regex;
-pub use regex::*;
-
-pub mod relates;
-pub use relates::*;
-
-pub mod sub;
-pub use sub::*;
+mod rule;
+pub use rule::*;

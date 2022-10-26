@@ -32,6 +32,9 @@ pub use disjunction::*;
 mod label;
 pub use label::*;
 
+mod schema;
+pub use schema::*;
+
 mod negation;
 pub use negation::*;
 
@@ -41,6 +44,7 @@ pub use variable::*;
 #[cfg(test)]
 mod test;
 
+use crate::enum_getter;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -48,7 +52,18 @@ pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
+    Rule(RuleDefinition),
+    RuleDeclaration(RuleDeclaration),
     Variable(Variable),
+}
+
+impl Pattern {
+    enum_getter!(into_conjunction, Conjunction, Conjunction);
+    enum_getter!(into_disjunction, Disjunction, Disjunction);
+    enum_getter!(into_negation, Negation, Negation);
+    enum_getter!(into_rule, Rule, RuleDefinition);
+    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
+    enum_getter!(into_variable, Variable, Variable);
 }
 
 impl<T> From<T> for Pattern
@@ -73,6 +88,8 @@ impl fmt::Display for Pattern {
             Conjunction(conjunction) => write!(f, "{}", conjunction),
             Disjunction(disjunction) => write!(f, "{}", disjunction),
             Negation(negation) => write!(f, "{}", negation),
+            Rule(rule) => write!(f, "{}", rule),
+            RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
             Variable(variable) => write!(f, "{}", variable),
         }
     }

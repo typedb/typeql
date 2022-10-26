@@ -98,6 +98,10 @@ impl RelationConstrainable for UnboundVariable {
 }
 
 impl TypeConstrainable for UnboundVariable {
+    fn constrain_abstract(self) -> TypeVariable {
+        self.into_type().constrain_abstract()
+    }
+
     fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
         self.into_type().constrain_label(label)
     }

@@ -24,6 +24,9 @@ use std::fmt;
 
 use crate::{enum_getter, pattern::*, var};
 
+mod typeql_define;
+pub use typeql_define::*;
+
 mod typeql_delete;
 pub use typeql_delete::*;
 
@@ -32,6 +35,9 @@ pub use typeql_insert::*;
 
 mod typeql_match;
 pub use typeql_match::*;
+
+mod typeql_undefine;
+pub use typeql_undefine::*;
 
 mod typeql_update;
 pub use typeql_update::*;
@@ -45,6 +51,8 @@ pub enum Query {
     Insert(TypeQLInsert),
     Delete(TypeQLDelete),
     Update(TypeQLUpdate),
+    Define(TypeQLDefine),
+    Undefine(TypeQLUndefine),
 }
 
 impl Query {
@@ -52,6 +60,8 @@ impl Query {
     enum_getter!(into_insert, Insert, TypeQLInsert);
     enum_getter!(into_delete, Delete, TypeQLDelete);
     enum_getter!(into_update, Update, TypeQLUpdate);
+    enum_getter!(into_define, Define, TypeQLDefine);
+    enum_getter!(into_undefine, Undefine, TypeQLUndefine);
 }
 
 impl fmt::Display for Query {
@@ -62,6 +72,8 @@ impl fmt::Display for Query {
             Insert(query) => write!(f, "{}", query),
             Delete(query) => write!(f, "{}", query),
             Update(query) => write!(f, "{}", query),
+            Define(query) => write!(f, "{}", query),
+            Undefine(query) => write!(f, "{}", query),
         }
     }
 }

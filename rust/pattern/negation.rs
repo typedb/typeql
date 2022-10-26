@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::token::Operator::Not, ErrorMessage, Pattern, Variable};
+use crate::{common::token::Operator::Not, Pattern, Variable};
 use core::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

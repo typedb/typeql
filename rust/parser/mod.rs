@@ -43,9 +43,6 @@ use typeql_grammar::typeqlrustparser::*;
 
 use crate::{pattern::*, query::*};
 
-#[derive(Debug)]
-pub struct Definable;
-
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
@@ -119,36 +116,38 @@ fn get_role_players(ctx: Rc<RelationContext>) -> ParserResult<Vec<RolePlayerCons
     (0..).map_while(|i| ctx.role_player(i)).map(get_role_player_constraint).collect()
 }
 
-pub fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
+pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
     visit_query(ctx.query().unwrap())
 }
 
-fn visit_eof_queries(ctx: Rc<Eof_queriesContext>) -> ParserResult<Vec<Query>> {
+pub(crate) fn visit_eof_queries(ctx: Rc<Eof_queriesContext>) -> ParserResult<Vec<Query>> {
     (0..).map_while(|i| ctx.query(i)).map(visit_query).collect()
 }
 
-fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
+pub(crate) fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
     visit_pattern(ctx.pattern().unwrap())
 }
 
-fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>> {
+pub(crate) fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>> {
     visit_patterns(ctx.patterns().unwrap())
 }
 
-fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Definable>> {
+pub(crate) fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Pattern>> {
     let definables_ctx = ctx.definables().unwrap();
     (0..).map_while(|i| definables_ctx.definable(i)).map(visit_definable).collect()
 }
 
-fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
+pub(crate) fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
     visit_pattern_variable(ctx.pattern_variable().unwrap())
 }
 
-fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<String> {
+pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<String> {
     Ok(ctx.label().unwrap().get_text())
 }
 
-fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> ParserResult<()> {
+pub(crate) fn visit_eof_schema_rule(
+    ctx: Rc<Eof_schema_ruleContext>,
+) -> ParserResult<RuleDefinition> {
     visit_schema_rule(ctx.schema_rule().unwrap())
 }
 
@@ -161,23 +160,27 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
         Ok(visit_query_delete(query_delete)?.into_query())
     } else if let Some(query_update) = ctx.query_update() {
         Ok(visit_query_update(query_update)?.into_query())
+    } else if let Some(query_define) = ctx.query_define() {
+        Ok(visit_query_define(query_define)?.into_query())
+    } else if let Some(query_undefine) = ctx.query_undefine() {
+        Ok(visit_query_undefine(query_undefine)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
-fn visit_query_define(_ctx: Rc<Query_defineContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_define(ctx: Rc<Query_defineContext>) -> ParserResult<TypeQLDefine> {
+    Ok(TypeQLDefine::new(visit_definables(ctx.definables().unwrap())?))
 }
 
-fn visit_query_undefine(_ctx: Rc<Query_undefineContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_undefine(ctx: Rc<Query_undefineContext>) -> ParserResult<TypeQLUndefine> {
+    Ok(TypeQLUndefine::new(visit_definables(ctx.definables().unwrap())?))
 }
 
 fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {
     let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
     if let Some(patterns) = ctx.patterns() {
-        Ok(TypeQLMatch::new(Conjunction::from(visit_patterns(patterns)?)).insert(variable_things))
+        Ok(TypeQLMatch::new(visit_patterns(patterns)?).insert(variable_things))
     } else {
         Ok(TypeQLInsert::new(variable_things))
     }
@@ -185,8 +188,7 @@ fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert
 
 fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete> {
     let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
-    Ok(TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
-        .delete(variable_things))
+    Ok(TypeQLMatch::new(visit_patterns(ctx.patterns().unwrap())?).delete(variable_things))
 }
 
 fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {
@@ -195,8 +197,7 @@ fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
-    let mut match_query =
-        TypeQLMatch::new(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?));
+    let mut match_query = TypeQLMatch::new(visit_patterns(ctx.patterns().unwrap())?);
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
             match_query = match_query.filter(visit_filter(filter)?);
@@ -265,12 +266,21 @@ fn visit_match_group(_ctx: Rc<Match_groupContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_definables(_ctx: Rc<DefinablesContext>) -> ParserResult<()> {
-    todo!()
+fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Pattern>> {
+    (0..).map_while(|i| ctx.definable(i)).map(visit_definable).collect()
 }
 
-fn visit_definable(_ctx: Rc<DefinableContext>) -> ParserResult<Definable> {
-    todo!()
+fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Pattern> {
+    if let Some(variable_type) = ctx.variable_type() {
+        Ok(visit_variable_type(variable_type)?.into_variable().into_pattern())
+    } else {
+        let rule_ctx = ctx.schema_rule().unwrap();
+        if rule_ctx.patterns().is_some() {
+            visit_schema_rule(rule_ctx).map(RuleDefinition::into_pattern)
+        } else {
+            visit_schema_rule_declaration(rule_ctx).map(RuleDeclaration::into_pattern)
+        }
+    }
 }
 
 fn visit_patterns(ctx: Rc<PatternsContext>) -> ParserResult<Vec<Pattern>> {
@@ -282,8 +292,8 @@ fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
         Ok(visit_pattern_variable(var)?.into_pattern())
     } else if let Some(disjunction) = ctx.pattern_disjunction() {
         Ok(visit_pattern_disjunction(disjunction)?.into_pattern())
-    } else if let Some(_conjunction) = ctx.pattern_conjunction() {
-        todo!()
+    } else if let Some(conjunction) = ctx.pattern_conjunction() {
+        Ok(visit_pattern_conjunction(conjunction)?.into_pattern())
     } else if let Some(negation) = ctx.pattern_negation() {
         Ok(visit_pattern_negation(negation)?.into_pattern())
     } else {
@@ -291,8 +301,8 @@ fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
     }
 }
 
-fn visit_pattern_conjunction(_ctx: Rc<Pattern_conjunctionContext>) -> ParserResult<()> {
-    todo!()
+fn visit_pattern_conjunction(ctx: Rc<Pattern_conjunctionContext>) -> ParserResult<Conjunction> {
+    Ok(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
 }
 
 fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<Disjunction> {
@@ -337,7 +347,9 @@ fn visit_variable_concept(ctx: Rc<Variable_conceptContext>) -> ConceptVariable {
 fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariable> {
     let mut var_type = visit_type_any(ctx.type_any().unwrap())?.into_type_variable();
     for constraint in (0..).map_while(|i| ctx.type_constraint(i)) {
-        if constraint.OWNS().is_some() {
+        if constraint.ABSTRACT().is_some() {
+            var_type = var_type.abstract_();
+        } else if constraint.OWNS().is_some() {
             let overridden =
                 constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
             let is_key = IsKeyAttribute::from(constraint.IS_KEY().is_some());
@@ -348,7 +360,7 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             )));
         } else if constraint.PLAYS().is_some() {
             let overridden =
-                constraint.AS().map(|_| visit_type(constraint.type_(1).unwrap())).transpose()?;
+                constraint.AS().map(|_| visit_type(constraint.type_(0).unwrap())).transpose()?;
             var_type = var_type.constrain_plays(PlaysConstraint::from((
                 visit_type_scoped(constraint.type_scoped().unwrap())?,
                 overridden,
@@ -519,8 +531,16 @@ fn visit_predicate_value(_ctx: Rc<Predicate_valueContext>) -> ParserResult<()> {
     todo!()
 }
 
-fn visit_schema_rule(_ctx: Rc<Schema_ruleContext>) -> ParserResult<()> {
-    todo!()
+fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDefinition> {
+    Ok(RuleDefinition::new(
+        Label::from(ctx.label().unwrap().get_text()),
+        Conjunction::from(visit_patterns(ctx.patterns().unwrap())?),
+        visit_variable_thing_any(ctx.variable_thing_any().unwrap())?,
+    ))
+}
+
+fn visit_schema_rule_declaration(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDeclaration> {
+    Ok(RuleDeclaration::new(Label::from(ctx.label().unwrap().get_text())))
 }
 
 fn visit_type_any(ctx: Rc<Type_anyContext>) -> ParserResult<Type> {

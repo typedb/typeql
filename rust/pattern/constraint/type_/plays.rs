@@ -21,8 +21,8 @@
  */
 
 use crate::{
-    common::token::Constraint::Plays, Label, Type, TypeVariable, TypeVariableBuilder,
-    UnboundVariable,
+    common::token::Constraint::{As, Plays},
+    Label, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
 };
 use std::fmt;
 
@@ -51,15 +51,43 @@ impl From<(&str, &str)> for PlaysConstraint {
     }
 }
 
+impl From<(&str, &str, &str)> for PlaysConstraint {
+    fn from((relation_type, role_type, overridden_role_type): (&str, &str, &str)) -> Self {
+        PlaysConstraint::from((
+            String::from(relation_type),
+            String::from(role_type),
+            String::from(overridden_role_type),
+        ))
+    }
+}
+
 impl From<(String, String)> for PlaysConstraint {
     fn from((relation_type, role_type): (String, String)) -> Self {
         PlaysConstraint::from(Label::from((relation_type, role_type)))
     }
 }
 
+impl From<(String, String, String)> for PlaysConstraint {
+    fn from((relation_type, role_type, overridden_role_type): (String, String, String)) -> Self {
+        PlaysConstraint::from((
+            Label::from((relation_type, role_type)),
+            Label::from(overridden_role_type),
+        ))
+    }
+}
+
 impl From<Label> for PlaysConstraint {
-    fn from(scoped_type: Label) -> Self {
-        PlaysConstraint::new(UnboundVariable::hidden().type_(scoped_type), None)
+    fn from(role_type: Label) -> Self {
+        PlaysConstraint::new(UnboundVariable::hidden().type_(role_type), None)
+    }
+}
+
+impl From<(Label, Label)> for PlaysConstraint {
+    fn from((role_type, overridden_role_type): (Label, Label)) -> Self {
+        PlaysConstraint::new(
+            UnboundVariable::hidden().type_(role_type),
+            Some(UnboundVariable::hidden().type_(overridden_role_type)),
+        )
     }
 }
 
@@ -92,6 +120,10 @@ impl From<TypeVariable> for PlaysConstraint {
 
 impl fmt::Display for PlaysConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Plays, self.role_type)
+        write!(f, "{} {}", Plays, self.role_type)?;
+        if let Some(overridden) = &self.overridden_role_type {
+            write!(f, " {} {}", As, overridden)?;
+        }
+        Ok(())
     }
 }

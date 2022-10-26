@@ -21,9 +21,10 @@
  */
 
 use crate::{
-    and, gte, lt, lte, not, or, parse_query, rel, try_, type_, typeql_insert, typeql_match, var,
-    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeQLInsert, TypeQLMatch, TypeVariableBuilder, KEY,
+    and, gte, lt, lte, not, or, parse_pattern, parse_query, rel, rule, try_, type_, typeql_insert,
+    typeql_match, var, ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query,
+    RelationVariableBuilder, ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch,
+    TypeQLUndefine, TypeVariableBuilder, KEY,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -795,34 +796,31 @@ $x has age 25;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn when_parsing_as_in_define_result_is_same_as_sub() {
-    let query = "define\n" +
-            "parent sub role;\n" +
-            "child sub role;\n" +
-            "parenthood sub relation,\n" +
-            "    relates parent,\n" +
-            "    relates child;\n" +
-            "fatherhood sub parenthood,\n" +
-            "    relates father as parent,\n" +
-            "    relates son as child;";
-    let parsed = parse_query(query).asDefine();
+    let query = r#"define
+parent sub role;
+child sub role;
+parenthood sub relation,
+    relates parent,
+    relates child;
+fatherhood sub parenthood,
+    relates father as parent,
+    relates son as child;"#;
 
-    let expected = define(
-            type_("parent").sub("role"),
-            type_("child").sub("role"),
-            type_("parenthood").sub("relation")
-                    .relates("parent")
-                    .relates("child"),
-            type_("fatherhood").sub("parenthood")
-                    .relates("father", "parent")
-                    .relates("son", "child")
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("parent").sub("role"),
+        type_("child").sub("role"),
+        type_("parenthood").sub("relation").relates("parent").relates("child"),
+        type_("fatherhood")
+            .sub("parenthood")
+            .relates(("father", "parent"))
+            .relates(("son", "child"))
     );
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
 
 #[test]
 fn when_parsing_as_in_match_result_is_same_as_sub() {
@@ -840,121 +838,139 @@ $f sub parenthood,
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
-fn when_parsing_define_query_with_owns_overrides_result_is_same_as_java_type_ql() {
-    let query = "define\n" +
-            "triangle sub entity;\n" +
-            "triangle owns side-length;\n" +
-            "triangle-right-angled sub triangle;\n" +
-            "triangle-right-angled owns hypotenuse-length as side-length;";
-    let parsed = parse_query(query).asDefine();
+fn when_parsing_define_query_with_owns_overrides_result_is_same_as_java_typeql() {
+    let query = r#"define
+triangle sub entity;
+triangle owns side-length;
+triangle-right-angled sub triangle;
+triangle-right-angled owns hypotenuse-length as side-length;"#;
 
-    let expected = define(
-            type_("triangle").sub("entity"),
-            type_("triangle").owns("side-length"),
-            type_("triangle-right-angled").sub("triangle"),
-            type_("triangle-right-angled").owns("hypotenuse-length", "side-length")
-    );
-    assert_query_eq!(expected, parsed, query);
-}
-
-#[test]
-fn when_parsing_define_query_with_relates_overrides_result_is_same_as_java_type_ql() {
-    let query = "define\n" +
-            "pokemon sub entity;\n" +
-            "evolves sub relation;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "evolves-final sub evolves;\n" +
-            "evolves-final relates from-final as from;";
-    let parsed = parse_query(query).asDefine();
-
-    let expected = define(
-            type_("pokemon").sub("entity"),
-            type_("evolves").sub("relation"),
-            type_("evolves").relates("from").relates("to"),
-            type_("evolves-final").sub("evolves"),
-            type_("evolves-final").relates("from-final", "from")
-    );
-    assert_query_eq!(expected, parsed, query);
-}
-
-#[test]
-fn when_parsing_define_query_with_plays_overrides_result_is_same_as_java_type_ql() {
-    let query = "define\n" +
-            "pokemon sub entity;\n" +
-            "evolves sub relation;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "evolves-final sub evolves;\n" +
-            "evolves-final relates from-final as from;\n" +
-            "pokemon plays evolves-final:from-final as from;";
-    let parsed = parse_query(query).asDefine();
-
-    let expected = define(
-            type_("pokemon").sub("entity"),
-            type_("evolves").sub("relation"),
-            type_("evolves").relates("from").relates("to"),
-            type_("evolves-final").sub("evolves"),
-            type_("evolves-final").relates("from-final", "from"),
-            type_("pokemon").plays("evolves-final", "from-final", "from")
-    );
-    assert_query_eq!(expected, parsed, query);
-}
-
-#[test]
-fn when_parsing_define_query_result_is_same_as_java_type_ql() {
-    let query = "define\n" +
-            "pokemon sub entity;\n" +
-            "evolution sub relation;\n" +
-            "evolves-from sub role;\n" +
-            "evolves-to sub role;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "pokemon plays evolves:from,\n" +
-            "    plays evolves:to,\n" +
-            "    owns name;";
-    let parsed = parse_query(query).asDefine();
-
-    let expected = define(
-            type_("pokemon").sub("entity"),
-            type_("evolution").sub("relation"),
-            type_("evolves-from").sub("role"),
-            type_("evolves-to").sub("role"),
-            type_("evolves").relates("from").relates("to"),
-            type_("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("triangle").sub("entity"),
+        type_("triangle").owns("side-length"),
+        type_("triangle-right-angled").sub("triangle"),
+        type_("triangle-right-angled").owns(("hypotenuse-length", "side-length"))
     );
 
     assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
-fn when_parsing_undefine_query_result_is_same_as_java_type_ql() {
-    let query = "undefine\n" +
-            "pokemon sub entity;\n" +
-            "evolution sub relation;\n" +
-            "evolves-from sub role;\n" +
-            "evolves-to sub role;\n" +
-            "evolves relates from,\n" +
-            "    relates to;\n" +
-            "pokemon plays evolves:from,\n" +
-            "    plays evolves:to,\n" +
-            "    owns name;";
-    let parsed = parse_query(query).asUndefine();
+fn when_parsing_define_query_with_relates_overrides_result_is_same_as_java_typeql() {
+    let query = r#"define
+pokemon sub entity;
+evolves sub relation;
+evolves relates from,
+    relates to;
+evolves-final sub evolves;
+evolves-final relates from-final as from;"#;
 
-    let expected = undefine(
-            type_("pokemon").sub("entity"),
-            type_("evolution").sub("relation"),
-            type_("evolves-from").sub("role"),
-            type_("evolves-to").sub("role"),
-            type_("evolves").relates("from").relates("to"),
-            type_("pokemon").plays("evolves", "from").plays("evolves", "to").owns("name")
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("pokemon").sub("entity"),
+        type_("evolves").sub("relation"),
+        type_("evolves").relates("from").relates("to"),
+        type_("evolves-final").sub("evolves"),
+        type_("evolves-final").relates(("from-final", "from"))
     );
 
     assert_query_eq!(expected, parsed, query);
 }
-*/
+
+#[test]
+fn when_parsing_define_query_with_plays_overrides_result_is_same_as_java_typeql() {
+    let query = r#"define
+pokemon sub entity;
+evolves sub relation;
+evolves relates from,
+    relates to;
+evolves-final sub evolves;
+evolves-final relates from-final as from;
+pokemon plays evolves-final:from-final as from;"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("pokemon").sub("entity"),
+        type_("evolves").sub("relation"),
+        type_("evolves").relates("from").relates("to"),
+        type_("evolves-final").sub("evolves"),
+        type_("evolves-final").relates(("from-final", "from")),
+        type_("pokemon").plays(("evolves-final", "from-final", "from"))
+    );
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn when_parsing_define_query_result_is_same_as_java_typeql() {
+    let query = r#"define
+pokemon sub entity;
+evolution sub relation;
+evolves-from sub role;
+evolves-to sub role;
+evolves relates from,
+    relates to;
+pokemon plays evolves:from,
+    plays evolves:to,
+    owns name;"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("pokemon").sub("entity"),
+        type_("evolution").sub("relation"),
+        type_("evolves-from").sub("role"),
+        type_("evolves-to").sub("role"),
+        type_("evolves").relates("from").relates("to"),
+        type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
+    );
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn when_parsing_undefine_query_result_is_same_as_java_typeql() {
+    let query = r#"undefine
+pokemon sub entity;
+evolution sub relation;
+evolves-from sub role;
+evolves-to sub role;
+evolves relates from,
+    relates to;
+pokemon plays evolves:from,
+    plays evolves:to,
+    owns name;"#;
+
+    let parsed = parse_query(query).unwrap().into_undefine();
+    let expected = typeql_undefine!(
+        type_("pokemon").sub("entity"),
+        type_("evolution").sub("relation"),
+        type_("evolves-from").sub("role"),
+        type_("evolves-to").sub("role"),
+        type_("evolves").relates("from").relates("to"),
+        type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
+    );
+
+    assert_query_eq!(expected, parsed, query);
+}
+
+#[test]
+fn test_undefine_rule() {
+    let query = r#"undefine
+rule r;"#;
+
+    let parsed = parse_query(query).unwrap().into_undefine();
+    let expected = typeql_undefine!(rule("r"));
+    assert_query_eq!(expected, parsed, query);
+}
+
+// #[test]
+fn when_parse_undefine_rule_with_body_throw() {
+    let query = r#"undefine rule r: when { $x isa thing; } then { $x has name "a"; };"#;
+    let parsed = parse_query(query);
+    assert!(parsed.is_err());
+}
 
 #[test]
 fn test_match_insert_query() {
@@ -972,22 +988,23 @@ $x has name "HELLO";"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
 #[test]
 fn test_define_abstract_entity_query() {
-    let query = "define\n" +
-            "concrete-type_ sub entity;\n" +
-            "abstract-type_ sub entity,\n" +
-            "    abstract;";
-    let parsed = parse_query(query).asDefine();
-    let expected = define(
-            type_("concrete-type").sub("entity"),
-            type_("abstract-type").sub("entity").isAbstract()
+    let query = r#"define
+concrete-type sub entity;
+abstract-type sub entity,
+    abstract;"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(
+        type_("concrete-type").sub("entity"),
+        type_("abstract-type").sub("entity").abstract_()
     );
 
     assert_query_eq!(expected, parsed, query);
 }
 
+/*
 #[test]
 fn test_match_value_type_query() {
     let query = "match\n$x value double;";
@@ -1035,8 +1052,6 @@ fn test_define_value_type_query() {
 */
 #[test]
 fn test_escape_string() {
-    // ANTLR will see this as a string that looks like:
-    // "This has \"double quotes\" and a single-quoted backslash: '\\'"
     let input = r#"This has \"double quotes\" and a single-quoted backslash: '\\'"#;
 
     let query = format!(
@@ -1065,45 +1080,49 @@ fn when_parsing_query_with_comments_they_are_ignored() {
 
     assert_query_eq!(expected, parsed, uncommented);
 }
+*/
 
 #[test]
 fn test_parsing_pattern() {
-    let pattern = "{\n" +
-            "    (wife: $a, husband: $b) isa marriage;\n" +
-            "    $a has gender 'male';\n" +
-            "    $b has gender 'female';\n" +
-            "}";
-    let parsed = parse_pattern(pattern);
-    let expected = and(
-            rel("wife", "a").rel("husband", "b").isa("marriage"),
-            var("a").has(("gender", "male")),
-            var("b").has(("gender", "female"))
-    );
+    let pattern = r#"{
+    (wife: $a, husband: $b) isa marriage;
+    $a has gender "male";
+    $b has gender "female";
+}"#;
 
-    assert_query_eq!(expected, parsed, pattern.replace("'", "\""));
+    let parsed = parse_pattern(pattern).unwrap().into_conjunction();
+    let expected = try_! {
+        and!(
+            rel(("wife", "a")).rel(("husband", "b")).isa("marriage"),
+            var("a").has(("gender", "male"))?,
+            var("b").has(("gender", "female"))?
+        )
+    }
+    .unwrap();
+
+    // TODO rename the assert macro
+    assert_query_eq!(expected, parsed, pattern);
 }
 
 #[test]
 fn test_define_rules() {
-    let when = "$x isa movie;";
-    let then = "$x has genre 'drama';";
-    let when_pattern = and((var("x").isa("movie")));
-    let then_pattern = var("x").has(("genre", "drama"));
+    let query = r#"define
+rule all-movies-are-drama:
+    when {
+        $x isa movie;
+    }
+    then {
+        $x has genre "drama";
+    };"#;
 
-    let expected = define(rule("all-movies-are-drama").when(when_pattern).then(then_pattern));
-    let query = "define\n" +
-            "rule all-movies-are-drama:\n" +
-            "    when {\n" +
-            "        " + when + "\n" +
-            "    }\n" +
-            "    then {\n" +
-            "        " + then + "\n" +
-            "    };";
-    let parsed = parse_query(query).asDefine();
+    let parsed = parse_query(&query).unwrap().into_define();
+    let expected = typeql_define!(rule("all-movies-are-drama")
+        .when(and!(var("x").isa("movie")))
+        .then(var("x").has(("genre", "drama")).unwrap()));
 
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    assert_query_eq!(expected, parsed, query);
 }
-*/
+
 #[test]
 fn test_parse_boolean() {
     let query = r#"insert
@@ -1356,25 +1375,28 @@ fn when_parsing_aggregate_with_wrong_name_throw() {
     assert!(parse_query("match\n$x isa name; hello $x;").is_err());
 }
 
-/*
 #[test]
 fn define_attribute_type_regex() {
-    let query = "define\n" +
-            "digit sub attribute,\n" +
-            "    regex '\\d';";
-    let = parse_query(query);
-    let = define(type_("digit").sub("attribute").regex("\\d"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let query = r#"define
+digit sub attribute,
+    regex "\d";"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(type_("digit").sub("attribute").regex(r#"\d"#));
+
+    assert_query_eq!(expected, parsed, query);
 }
 
 #[test]
 fn undefine_attribute_type_regex() {
-    let query = "undefine\ndigit regex '\\d';";
-    let parsed = parse_query(query).unwrap().into_match();
-    let expected = undefine(type_("digit").regex("\\d"));
-    assert_query_eq!(expected, parsed, query.replace("'", "\""));
+    let query = r#"undefine
+digit regex "\d";"#;
+
+    let parsed = parse_query(query).unwrap().into_undefine();
+    let expected = typeql_undefine!(type_("digit").regex(r#"\d"#));
+    assert_query_eq!(expected, parsed, query);
 }
-*/
+
 #[test]
 fn regex_predicate_parses_character_classes_correctly() {
     let query = r#"match

@@ -25,7 +25,7 @@ use crate::{common::token::Predicate, *};
 #[macro_export]
 macro_rules! typeql_match {
     ($($pattern:expr),* $(,)?) => {{
-        TypeQLMatch::new(Conjunction::from(vec![$($pattern.into_pattern()),*]))
+        TypeQLMatch::new(vec![$($pattern.into_pattern()),*])
     }}
 }
 
@@ -33,6 +33,20 @@ macro_rules! typeql_match {
 macro_rules! typeql_insert {
     ($($thing_variable:expr),* $(,)?) => {{
         TypeQLInsert::new(vec![$($thing_variable),*])
+    }}
+}
+
+#[macro_export]
+macro_rules! typeql_define {
+    ($($pattern:expr),* $(,)?) => {{
+        TypeQLDefine::new(vec![$($pattern.into_pattern()),*])
+    }}
+}
+
+#[macro_export]
+macro_rules! typeql_undefine {
+    ($($pattern:expr),* $(,)?) => {{
+        TypeQLUndefine::new(vec![$($pattern.into_pattern()),*])
     }}
 }
 
@@ -106,4 +120,8 @@ where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
     ValueConstraint::new(Predicate::Gte, value.try_into()?)
+}
+
+pub fn rule(name: &str) -> RuleDeclaration {
+    RuleDeclaration::from(name)
 }
