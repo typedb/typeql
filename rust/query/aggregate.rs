@@ -81,7 +81,9 @@ impl fmt::Display for TypeQLMatchGroupAggregate {
     }
 }
 
-pub trait AggregateQueryBuilder: Sized + fmt::Display + Clone + fmt::Debug + Eq + PartialEq {
+pub trait AggregateQueryBuilder:
+    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq
+{
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)
     }
