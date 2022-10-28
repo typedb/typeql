@@ -70,7 +70,6 @@ string_enum! { Command
     Insert = "insert",
     Delete = "delete",
     Match = "match",
-    Aggregate = "aggregate",
     Group = "group",
 }
 
@@ -145,4 +144,12 @@ string_enum! { Aggregate
     Min = "min",
     Std = "std",
     Sum = "sum",
+}
+
+string_enum! { ValueType
+    Boolean = "boolean",
+    DateTime = "datetime",
+    Double = "double",
+    Long = "long",
+    String = "string",
 }

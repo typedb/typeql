@@ -32,6 +32,7 @@ pub struct TypeVariable {
     pub regex: Option<RegexConstraint>,
     pub relates: Vec<RelatesConstraint>,
     pub sub: Option<SubConstraint>,
+    pub value_type: Option<ValueTypeConstraint>,
     pub abstract_: Option<AbstractConstraint>,
 }
 
@@ -54,6 +55,7 @@ impl TypeVariable {
             regex: None,
             relates: vec![],
             sub: None,
+            value_type: None,
         }
     }
 
@@ -64,6 +66,7 @@ impl TypeVariable {
             || self.regex.is_some()
             || !self.relates.is_empty()
             || self.sub.is_some()
+            || self.value_type.is_some()
     }
 }
 
@@ -98,6 +101,10 @@ impl TypeConstrainable for TypeVariable {
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
         TypeVariable { sub: Some(sub), ..self }
     }
+
+    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeVariable {
+        TypeVariable { value_type: Some(value_type), ..self }
+    }
 }
 
 impl fmt::Display for TypeVariable {
@@ -111,6 +118,9 @@ impl fmt::Display for TypeVariable {
             write!(f, "{}", self.label.as_ref().unwrap().label)?;
         }
         if self.is_type_constrained() {
+            if self.reference.is_visible() && self.label.is_some() {
+                f.write_str(",")?;
+            }
             f.write_str(" ")?;
             write_joined!(
                 f,
@@ -120,7 +130,8 @@ impl fmt::Display for TypeVariable {
                 self.relates,
                 self.plays,
                 self.owns,
-                self.abstract_
+                self.value_type,
+                self.abstract_,
             )?;
         }
         Ok(())

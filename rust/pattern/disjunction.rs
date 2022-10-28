@@ -32,14 +32,12 @@ pub struct Disjunction {
 }
 
 impl Disjunction {
+    pub fn new(patterns: Vec<Pattern>) -> Self {
+        Disjunction { patterns }
+    }
+
     pub fn into_pattern(self) -> Pattern {
         Pattern::Disjunction(self)
-    }
-}
-
-impl From<Vec<Pattern>> for Disjunction {
-    fn from(patterns: Vec<Pattern>) -> Self {
-        Disjunction { patterns }
     }
 }
 

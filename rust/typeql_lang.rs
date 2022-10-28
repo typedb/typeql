@@ -44,20 +44,21 @@ use crate::{
     common::error::ErrorMessage,
     parser::{
         error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_pattern,
-        visit_eof_query,
+        visit_eof_queries, visit_eof_query,
     },
 };
 use pattern::*;
 use query::*;
 
 macro_rules! parse {
-    ($visitor:ident($accessor:ident($input:ident))) => {{
-        let lexer = TypeQLRustLexer::new(InputStream::new($input));
+    ($visitor:ident($accessor:ident($input:expr))) => {{
+        let input = $input;
+        let lexer = TypeQLRustLexer::new(InputStream::new(input));
         let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
 
         parser.remove_error_listeners();
         let errors = Rc::new(RefCell::new(Vec::<SyntaxError>::new()));
-        parser.add_error_listener(Box::new(ErrorListener::new($input, errors.clone())));
+        parser.add_error_listener(Box::new(ErrorListener::new(input, errors.clone())));
 
         let result = $visitor(parser.$accessor().unwrap());
 
@@ -75,17 +76,15 @@ macro_rules! parse {
 }
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
-    parse_eof_query(typeql_query.trim_end())
+    parse!(visit_eof_query(eof_query(typeql_query.trim_end())))
 }
 
-pub fn parse_eof_query(query_string: &str) -> Result<Query, String> {
-    parse!(visit_eof_query(eof_query(query_string)))
+pub fn parse_queries(
+    typeql_queries: &str,
+) -> Result<impl Iterator<Item = Result<Query, ErrorMessage>> + '_, String> {
+    parse!(visit_eof_queries(eof_queries(typeql_queries.trim_end())))
 }
 
 pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, String> {
-    parse_eof_pattern(typeql_pattern.trim_end())
-}
-
-pub fn parse_eof_pattern(pattern_string: &str) -> Result<Pattern, String> {
-    parse!(visit_eof_pattern(eof_pattern(pattern_string)))
+    parse!(visit_eof_pattern(eof_pattern(typeql_pattern.trim_end())))
 }

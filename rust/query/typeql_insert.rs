@@ -23,7 +23,7 @@
 use crate::{common::token::Command::Insert, write_joined, Query, ThingVariable, TypeQLMatch};
 use std::fmt;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {
     pub match_query: Option<TypeQLMatch>,
     pub variables: Vec<ThingVariable>,

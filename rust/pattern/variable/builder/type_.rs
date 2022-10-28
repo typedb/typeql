@@ -20,7 +20,7 @@
  *
  */
 
-use crate::pattern::*;
+use crate::{common::token::ValueType, pattern::*};
 
 pub trait TypeConstrainable {
     fn constrain_abstract(self) -> TypeVariable;
@@ -30,6 +30,7 @@ pub trait TypeConstrainable {
     fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable;
     fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable;
     fn constrain_sub(self, sub: SubConstraint) -> TypeVariable;
+    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeVariable;
 }
 
 pub trait TypeVariableBuilder: Sized {
@@ -40,6 +41,7 @@ pub trait TypeVariableBuilder: Sized {
     fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeVariable;
     fn sub(self, sub: impl Into<SubConstraint>) -> TypeVariable;
     fn type_(self, type_name: impl Into<Label>) -> TypeVariable;
+    fn value(self, value_type: ValueType) -> TypeVariable;
 }
 
 impl<U: TypeConstrainable> TypeVariableBuilder for U {
@@ -69,5 +71,9 @@ impl<U: TypeConstrainable> TypeVariableBuilder for U {
 
     fn type_(self, type_name: impl Into<Label>) -> TypeVariable {
         self.constrain_label(LabelConstraint { label: type_name.into() })
+    }
+
+    fn value(self, value_type: ValueType) -> TypeVariable {
+        self.constrain_value_type(ValueTypeConstraint { value_type })
     }
 }

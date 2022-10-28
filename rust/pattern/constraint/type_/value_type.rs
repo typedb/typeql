@@ -20,30 +20,16 @@
  *
  */
 
-use crate::{common::string::indent, pattern::Pattern};
+use crate::common::token::{Constraint::ValueType as ValueTypeKeyword, ValueType};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Conjunction {
-    pub patterns: Vec<Pattern>,
+pub struct ValueTypeConstraint {
+    pub value_type: ValueType,
 }
 
-impl Conjunction {
-    pub fn new(patterns: Vec<Pattern>) -> Self {
-        Conjunction { patterns }
-    }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Conjunction(self)
-    }
-}
-
-impl fmt::Display for Conjunction {
+impl fmt::Display for ValueTypeConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("{\n")?;
-        f.write_str(
-            &self.patterns.iter().map(|p| indent(&p.to_string()) + ";\n").collect::<String>(),
-        )?;
-        f.write_str("}")
+        write!(f, "{} {}", ValueTypeKeyword, self.value_type)
     }
 }

@@ -20,30 +20,27 @@
  *
  */
 
-use crate::{common::string::indent, pattern::Pattern};
+use crate::{
+    common::token::Command::Group, AggregateQueryBuilder, Query, TypeQLMatch, UnboundVariable,
+};
 use std::fmt;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Conjunction {
-    pub patterns: Vec<Pattern>,
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TypeQLMatchGroup {
+    pub query: TypeQLMatch,
+    pub group_var: UnboundVariable,
 }
 
-impl Conjunction {
-    pub fn new(patterns: Vec<Pattern>) -> Self {
-        Conjunction { patterns }
-    }
+impl AggregateQueryBuilder for TypeQLMatchGroup {}
 
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Conjunction(self)
+impl TypeQLMatchGroup {
+    pub fn into_query(self) -> Query {
+        Query::Group(self)
     }
 }
 
-impl fmt::Display for Conjunction {
+impl fmt::Display for TypeQLMatchGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("{\n")?;
-        f.write_str(
-            &self.patterns.iter().map(|p| indent(&p.to_string()) + ";\n").collect::<String>(),
-        )?;
-        f.write_str("}")
+        write!(f, "{}\n{} {};", self.query, Group, self.group_var)
     }
 }

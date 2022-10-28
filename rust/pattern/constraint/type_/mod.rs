@@ -40,3 +40,6 @@ pub use relates::*;
 
 pub mod sub;
 pub use sub::*;
+
+pub mod value_type;
+pub use value_type::*;

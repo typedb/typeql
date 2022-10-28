@@ -25,15 +25,17 @@ use std::fmt;
 
 use crate::{query::*, write_joined};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
     pub conjunction: Conjunction,
     pub modifiers: Modifiers,
 }
 
+impl AggregateQueryBuilder for TypeQLMatch {}
+
 impl TypeQLMatch {
     pub fn new(patterns: Vec<Pattern>) -> Self {
-        Self { conjunction: Conjunction::from(patterns), modifiers: Modifiers::default() }
+        Self { conjunction: Conjunction::new(patterns), modifiers: Modifiers::default() }
     }
 
     pub fn into_query(self) -> Query {
@@ -67,6 +69,10 @@ impl TypeQLMatch {
     pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
         TypeQLDelete { match_query: self, variables: vars.vars() }
     }
+
+    pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLMatchGroup {
+        TypeQLMatchGroup { query: self, group_var: var.into() }
+    }
 }
 
 impl fmt::Display for TypeQLMatch {
@@ -85,7 +91,7 @@ impl fmt::Display for TypeQLMatch {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Modifiers {
     pub filter: Option<Filter>,
     pub sorting: Option<Sorting>,
@@ -125,7 +131,7 @@ impl fmt::Display for Modifiers {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Filter {
     pub vars: Vec<UnboundVariable>,
 }
@@ -165,7 +171,7 @@ impl fmt::Display for OrderedVariable {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sorting {
     vars: Vec<OrderedVariable>,
 }
@@ -201,7 +207,7 @@ impl fmt::Display for Sorting {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Limit {
     pub limit: usize,
 }
@@ -212,7 +218,7 @@ impl fmt::Display for Limit {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Offset {
     pub offset: usize,
 }

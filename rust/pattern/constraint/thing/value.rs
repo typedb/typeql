@@ -24,7 +24,7 @@ use crate::{
     common::{
         date_time,
         error::{INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
-        string::{escape_regex, format_double},
+        string::{escape_regex, format_double, quote},
         token::Predicate,
     },
     ErrorMessage, ThingVariable, UnboundVariable,
@@ -133,7 +133,7 @@ impl fmt::Display for Value {
             Long(long) => write!(f, "{}", long),
             Double(double) => write!(f, "{}", format_double(*double)),
             Boolean(boolean) => write!(f, "{}", boolean),
-            String(string) => write!(f, "\"{}\"", string),
+            String(string) => write!(f, "{}", quote(string)),
             DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
             Variable(var) => write!(f, "{}", var.reference),
         }

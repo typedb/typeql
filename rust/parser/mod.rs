@@ -41,7 +41,11 @@ use crate::common::{
 };
 use typeql_grammar::typeqlrustparser::*;
 
-use crate::{pattern::*, query::*};
+use crate::{
+    common::token::{Aggregate, ValueType},
+    pattern::*,
+    query::*,
+};
 
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
@@ -120,8 +124,10 @@ pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> 
     visit_query(ctx.query().unwrap())
 }
 
-pub(crate) fn visit_eof_queries(ctx: Rc<Eof_queriesContext>) -> ParserResult<Vec<Query>> {
-    (0..).map_while(|i| ctx.query(i)).map(visit_query).collect()
+pub(crate) fn visit_eof_queries(
+    ctx: Rc<Eof_queriesContext>,
+) -> ParserResult<impl Iterator<Item = ParserResult<Query>> + '_> {
+    Ok((0..).map_while(move |i| ctx.query(i)).map(visit_query))
 }
 
 pub(crate) fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
@@ -164,6 +170,12 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
         Ok(visit_query_define(query_define)?.into_query())
     } else if let Some(query_undefine) = ctx.query_undefine() {
         Ok(visit_query_undefine(query_undefine)?.into_query())
+    } else if let Some(query_aggregate) = ctx.query_match_aggregate() {
+        Ok(visit_query_match_aggregate(query_aggregate)?.into_query())
+    } else if let Some(query_group) = ctx.query_match_group() {
+        Ok(visit_query_match_group(query_group)?.into_query())
+    } else if let Some(query_group_aggregate) = ctx.query_match_group_agg() {
+        Ok(visit_query_match_group_agg(query_group_aggregate)?.into_query())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -200,7 +212,7 @@ fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
     let mut match_query = TypeQLMatch::new(visit_patterns(ctx.patterns().unwrap())?);
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
-            match_query = match_query.filter(visit_filter(filter)?);
+            match_query = match_query.filter(visit_filter(filter));
         }
         if let Some(sort) = modifiers.sort() {
             match_query = match_query.sort(visit_sort(sort));
@@ -215,24 +227,36 @@ fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
     Ok(match_query)
 }
 
-fn visit_query_match_aggregate(_ctx: Rc<Query_match_aggregateContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_match_aggregate(
+    ctx: Rc<Query_match_aggregateContext>,
+) -> ParserResult<TypeQLMatchAggregate> {
+    let function = ctx.match_aggregate().unwrap();
+    let match_query = visit_query_match(ctx.query_match().unwrap())?;
+    Ok(match visit_aggregate_method(function.aggregate_method().unwrap()) {
+        Aggregate::Count => match_query.count(),
+        method => match_query.aggregate(method, get_var(function.VAR_().unwrap())),
+    })
 }
 
-fn visit_query_match_group(_ctx: Rc<Query_match_groupContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_match_group(ctx: Rc<Query_match_groupContext>) -> ParserResult<TypeQLMatchGroup> {
+    Ok(visit_query_match(ctx.query_match().unwrap())?
+        .group(get_var(ctx.match_group().unwrap().VAR_().unwrap())))
 }
 
-fn visit_query_match_group_agg(_ctx: Rc<Query_match_group_aggContext>) -> ParserResult<()> {
-    todo!()
+fn visit_query_match_group_agg(
+    ctx: Rc<Query_match_group_aggContext>,
+) -> ParserResult<TypeQLMatchGroupAggregate> {
+    let function = ctx.match_aggregate().unwrap();
+    let group = visit_query_match(ctx.query_match().unwrap())?
+        .group(get_var(ctx.match_group().unwrap().VAR_().unwrap()));
+    Ok(match visit_aggregate_method(function.aggregate_method().unwrap()) {
+        Aggregate::Count => group.count(),
+        method => group.aggregate(method, get_var(function.VAR_().unwrap())),
+    })
 }
 
-fn visit_modifiers(_ctx: Rc<ModifiersContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_filter(ctx: Rc<FilterContext>) -> ParserResult<Vec<UnboundVariable>> {
-    Ok((0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect())
+fn visit_filter(ctx: Rc<FilterContext>) -> Vec<UnboundVariable> {
+    (0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect()
 }
 
 fn visit_sort(ctx: Rc<SortContext>) -> Sorting {
@@ -246,24 +270,8 @@ fn visit_var_order(ctx: Rc<Var_orderContext>) -> OrderedVariable {
     }
 }
 
-fn visit_offset(_ctx: Rc<OffsetContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_limit(_ctx: Rc<LimitContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_match_aggregate(_ctx: Rc<Match_aggregateContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_aggregate_method(_ctx: Rc<Aggregate_methodContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_match_group(_ctx: Rc<Match_groupContext>) -> ParserResult<()> {
-    todo!()
+fn visit_aggregate_method(ctx: Rc<Aggregate_methodContext>) -> Aggregate {
+    Aggregate::from(ctx.get_text())
 }
 
 fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Pattern>> {
@@ -302,18 +310,18 @@ fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
 }
 
 fn visit_pattern_conjunction(ctx: Rc<Pattern_conjunctionContext>) -> ParserResult<Conjunction> {
-    Ok(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
+    Ok(Conjunction::new(visit_patterns(ctx.patterns().unwrap())?))
 }
 
 fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<Disjunction> {
-    Ok(Disjunction::from(
+    Ok(Disjunction::new(
         (0..)
             .map_while(|i| ctx.patterns(i))
             .map(visit_patterns)
             .map(|result| {
                 result.map(|mut nested| match nested.len() {
                     1 => nested.pop().unwrap(),
-                    _ => Conjunction::from(nested).into_pattern(),
+                    _ => Conjunction::new(nested).into_pattern(),
                 })
             })
             .collect::<ParserResult<Vec<Pattern>>>()?,
@@ -324,7 +332,7 @@ fn visit_pattern_negation(ctx: Rc<Pattern_negationContext>) -> ParserResult<Nega
     let mut patterns = visit_patterns(ctx.patterns().unwrap())?;
     Ok(match patterns.len() {
         1 => Negation::from(patterns.pop().unwrap()),
-        _ => Negation::from(Conjunction::from(patterns).into_pattern()),
+        _ => Negation::from(Conjunction::new(patterns).into_pattern()),
     })
 }
 
@@ -381,15 +389,13 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
         } else if constraint.TYPE().is_some() {
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
             var_type = var_type.type_(scoped_label);
+        } else if constraint.VALUE().is_some() {
+            var_type = var_type.value(ValueType::from(constraint.value_type().unwrap().get_text()));
         } else {
             panic!("visit_variable_type: not implemented")
         }
     }
     Ok(var_type)
-}
-
-fn visit_type_constraint(_ctx: Rc<Type_constraintContext>) -> ParserResult<()> {
-    todo!()
 }
 
 fn visit_variable_things(ctx: Rc<Variable_thingsContext>) -> ParserResult<Vec<ThingVariable>> {
@@ -435,8 +441,10 @@ fn visit_variable_relation(ctx: Rc<Variable_relationContext>) -> ParserResult<Th
         relation = relation.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?);
     }
 
-    if let Some(_attributes) = ctx.attributes() {
-        todo!();
+    if let Some(attributes) = ctx.attributes() {
+        relation = visit_attributes(attributes)?
+            .into_iter()
+            .fold(relation, |relation, has| relation.constrain_has(has));
     }
 
     Ok(relation)
@@ -453,8 +461,10 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
         attribute = attribute.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?);
     }
 
-    if let Some(_attributes) = ctx.attributes() {
-        todo!();
+    if let Some(attributes) = ctx.attributes() {
+        attribute = visit_attributes(attributes)?
+            .into_iter()
+            .fold(attribute, |attribute, has| attribute.constrain_has(has));
     }
 
     Ok(attribute)
@@ -462,14 +472,6 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
 
 fn visit_relation(ctx: Rc<RelationContext>) -> ParserResult<RelationConstraint> {
     Ok(RelationConstraint::new(get_role_players(ctx)?))
-}
-
-fn visit_role_player(_ctx: Rc<Role_playerContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_player(_ctx: Rc<PlayerContext>) -> ParserResult<()> {
-    todo!()
 }
 
 fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstraint>> {
@@ -515,26 +517,14 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             }
         })
     } else {
-        todo!()
+        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
-}
-
-fn visit_predicate_equality(_ctx: Rc<Predicate_equalityContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_predicate_substring(_ctx: Rc<Predicate_substringContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_predicate_value(_ctx: Rc<Predicate_valueContext>) -> ParserResult<()> {
-    todo!()
 }
 
 fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDefinition> {
     Ok(RuleDefinition::new(
         Label::from(ctx.label().unwrap().get_text()),
-        Conjunction::from(visit_patterns(ctx.patterns().unwrap())?),
+        Conjunction::new(visit_patterns(ctx.patterns().unwrap())?),
         visit_variable_thing_any(ctx.variable_thing_any().unwrap())?,
     ))
 }
@@ -575,33 +565,19 @@ fn visit_type(ctx: Rc<Type_Context>) -> ParserResult<Type> {
     }
 }
 
-fn visit_label_any(ctx: Rc<Label_anyContext>) -> ParserResult<String> {
+fn visit_label_any(ctx: Rc<Label_anyContext>) -> ParserResult<Label> {
     if let Some(label) = ctx.label() {
-        Ok(label.get_text())
+        Ok(Label::from(label.get_text()))
+    } else if let Some(label_scoped) = ctx.label_scoped() {
+        visit_label_scoped(label_scoped)
     } else {
-        panic!("visit_label_any: not implemented")
+        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
 fn visit_label_scoped(ctx: Rc<Label_scopedContext>) -> ParserResult<Label> {
     let parts: Vec<String> = ctx.get_text().split(':').map(String::from).collect();
     Ok(Label::from((parts[0].clone(), parts[1].clone())))
-}
-
-fn visit_label(_ctx: Rc<LabelContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_schema_native(_ctx: Rc<Schema_nativeContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_type_native(_ctx: Rc<Type_nativeContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_value_type(_ctx: Rc<Value_typeContext>) -> ParserResult<()> {
-    todo!()
 }
 
 fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
@@ -618,14 +594,6 @@ fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
     } else if let Some(date_time) = ctx.DATETIME_() {
         Value::try_from(get_date_time(date_time)?)
     } else {
-        todo!()
+        unreachable!()
     }
-}
-
-fn visit_regex(_ctx: Rc<RegexContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_unreserved(_ctx: Rc<UnreservedContext>) -> ParserResult<()> {
-    todo!()
 }
