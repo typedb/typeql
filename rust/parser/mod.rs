@@ -517,7 +517,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             }
         })
     } else {
-        todo!()
+        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
