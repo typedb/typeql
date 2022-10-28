@@ -31,6 +31,8 @@ pub struct TypeQLMatch {
     pub modifiers: Modifiers,
 }
 
+impl Aggregatable for TypeQLMatch {}
+
 impl TypeQLMatch {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Self { conjunction: Conjunction::from(patterns), modifiers: Modifiers::default() }
@@ -71,10 +73,6 @@ impl TypeQLMatch {
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLMatchGroup {
         TypeQLMatchGroup { query: self, group_var: var.into() }
     }
-}
-
-impl Aggregatable for TypeQLMatch {
-    type Aggregate = TypeQLMatchAggregate;
 }
 
 impl fmt::Display for TypeQLMatch {

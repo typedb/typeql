@@ -24,8 +24,8 @@ use std::fmt;
 
 use crate::{enum_getter, pattern::*, var};
 
-mod aggregatable;
-pub use aggregatable::*;
+mod aggregate;
+pub use aggregate::*;
 
 mod typeql_define;
 pub use typeql_define::*;
@@ -39,14 +39,8 @@ pub use typeql_insert::*;
 mod typeql_match;
 pub use typeql_match::*;
 
-mod typeql_match_aggregate;
-pub use typeql_match_aggregate::*;
-
 mod typeql_match_group;
 pub use typeql_match_group::*;
-
-mod typeql_match_group_aggregate;
-pub use typeql_match_group_aggregate::*;
 
 mod typeql_undefine;
 pub use typeql_undefine::*;

@@ -20,10 +20,7 @@
  *
  */
 
-use crate::{
-    common::token::Command::Group, Aggregatable, Query, TypeQLMatch, TypeQLMatchGroupAggregate,
-    UnboundVariable,
-};
+use crate::{common::token::Command::Group, Aggregatable, Query, TypeQLMatch, UnboundVariable};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -32,9 +29,7 @@ pub struct TypeQLMatchGroup {
     pub group_var: UnboundVariable,
 }
 
-impl Aggregatable for TypeQLMatchGroup {
-    type Aggregate = TypeQLMatchGroupAggregate;
-}
+impl Aggregatable for TypeQLMatchGroup {}
 
 impl TypeQLMatchGroup {
     pub fn into_query(self) -> Query {
