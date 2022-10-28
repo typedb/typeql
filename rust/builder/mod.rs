@@ -60,7 +60,7 @@ macro_rules! and {
 #[macro_export]
 macro_rules! or {
     ($($pattern:expr),* $(,)?) => {{
-        Disjunction::from(vec![$($pattern.into_pattern()),*])
+        Disjunction::new(vec![$($pattern.into_pattern()),*])
     }}
 }
 

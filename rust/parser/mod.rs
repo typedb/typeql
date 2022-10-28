@@ -314,7 +314,7 @@ fn visit_pattern_conjunction(ctx: Rc<Pattern_conjunctionContext>) -> ParserResul
 }
 
 fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<Disjunction> {
-    Ok(Disjunction::from(
+    Ok(Disjunction::new(
         (0..)
             .map_while(|i| ctx.patterns(i))
             .map(visit_patterns)
