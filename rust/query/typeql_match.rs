@@ -35,7 +35,7 @@ impl AggregateQueryBuilder for TypeQLMatch {}
 
 impl TypeQLMatch {
     pub fn new(patterns: Vec<Pattern>) -> Self {
-        Self { conjunction: Conjunction::from(patterns), modifiers: Modifiers::default() }
+        Self { conjunction: Conjunction::new(patterns), modifiers: Modifiers::default() }
     }
 
     pub fn into_query(self) -> Query {

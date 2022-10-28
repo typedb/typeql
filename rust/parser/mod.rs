@@ -310,7 +310,7 @@ fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
 }
 
 fn visit_pattern_conjunction(ctx: Rc<Pattern_conjunctionContext>) -> ParserResult<Conjunction> {
-    Ok(Conjunction::from(visit_patterns(ctx.patterns().unwrap())?))
+    Ok(Conjunction::new(visit_patterns(ctx.patterns().unwrap())?))
 }
 
 fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResult<Disjunction> {
@@ -321,7 +321,7 @@ fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResul
             .map(|result| {
                 result.map(|mut nested| match nested.len() {
                     1 => nested.pop().unwrap(),
-                    _ => Conjunction::from(nested).into_pattern(),
+                    _ => Conjunction::new(nested).into_pattern(),
                 })
             })
             .collect::<ParserResult<Vec<Pattern>>>()?,
@@ -332,7 +332,7 @@ fn visit_pattern_negation(ctx: Rc<Pattern_negationContext>) -> ParserResult<Nega
     let mut patterns = visit_patterns(ctx.patterns().unwrap())?;
     Ok(match patterns.len() {
         1 => Negation::from(patterns.pop().unwrap()),
-        _ => Negation::from(Conjunction::from(patterns).into_pattern()),
+        _ => Negation::from(Conjunction::new(patterns).into_pattern()),
     })
 }
 
@@ -524,7 +524,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
 fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDefinition> {
     Ok(RuleDefinition::new(
         Label::from(ctx.label().unwrap().get_text()),
-        Conjunction::from(visit_patterns(ctx.patterns().unwrap())?),
+        Conjunction::new(visit_patterns(ctx.patterns().unwrap())?),
         visit_variable_thing_any(ctx.variable_thing_any().unwrap())?,
     ))
 }

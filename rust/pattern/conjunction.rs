@@ -29,30 +29,12 @@ pub struct Conjunction {
 }
 
 impl Conjunction {
-    pub fn new(patterns: &[Pattern]) -> Conjunction {
-        Conjunction { patterns: patterns.to_vec() }
+    pub fn new(patterns: Vec<Pattern>) -> Self {
+        Conjunction { patterns }
     }
 
     pub fn into_pattern(self) -> Pattern {
         Pattern::Conjunction(self)
-    }
-}
-
-impl<T: Into<Pattern>> From<T> for Conjunction {
-    fn from(pattern: T) -> Self {
-        Conjunction { patterns: vec![pattern.into()] }
-    }
-}
-
-impl<T: Into<Pattern>, const N: usize> From<[T; N]> for Conjunction {
-    fn from(patterns: [T; N]) -> Self {
-        Conjunction { patterns: patterns.into_iter().map(T::into).collect() }
-    }
-}
-
-impl<T: Into<Pattern>> From<Vec<T>> for Conjunction {
-    fn from(patterns: Vec<T>) -> Self {
-        Conjunction { patterns: patterns.into_iter().map(T::into).collect() }
     }
 }
 
