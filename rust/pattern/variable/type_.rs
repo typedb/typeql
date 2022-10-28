@@ -118,6 +118,9 @@ impl fmt::Display for TypeVariable {
             write!(f, "{}", self.label.as_ref().unwrap().label)?;
         }
         if self.is_type_constrained() {
+            if self.reference.is_visible() && self.label.is_some() {
+                f.write_str(",")?;
+            }
             f.write_str(" ")?;
             write_joined!(
                 f,
