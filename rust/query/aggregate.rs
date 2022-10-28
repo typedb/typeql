@@ -29,7 +29,7 @@ use std::fmt;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>
 where
-    T: Aggregatable,
+    T: AggregateQueryBuilder,
 {
     pub query: T,
     pub method: Aggregate,
@@ -39,7 +39,7 @@ where
 pub type TypeQLMatchAggregate = AggregateQuery<TypeQLMatch>;
 pub type TypeQLMatchGroupAggregate = AggregateQuery<TypeQLMatchGroup>;
 
-impl<T: Aggregatable> AggregateQuery<T> {
+impl<T: AggregateQueryBuilder> AggregateQuery<T> {
     pub fn new_count(base: T) -> Self {
         Self { query: base, method: Count, var: None }
     }
@@ -81,7 +81,7 @@ impl fmt::Display for TypeQLMatchGroupAggregate {
     }
 }
 
-pub trait Aggregatable: Sized + fmt::Display + Clone + fmt::Debug + Eq + PartialEq {
+pub trait AggregateQueryBuilder: Sized + fmt::Display + Clone + fmt::Debug + Eq + PartialEq {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)
     }

@@ -22,7 +22,7 @@
 
 use crate::{
     and, common::token::ValueType, gte, lt, lte, not, or, parse_pattern, parse_queries,
-    parse_query, rel, rule, try_, type_, typeql_insert, typeql_match, var, Aggregatable,
+    parse_query, rel, rule, try_, type_, typeql_insert, typeql_match, var, AggregateQueryBuilder,
     ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
     ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine,
     TypeVariableBuilder, KEY,

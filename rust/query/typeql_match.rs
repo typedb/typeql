@@ -31,7 +31,7 @@ pub struct TypeQLMatch {
     pub modifiers: Modifiers,
 }
 
-impl Aggregatable for TypeQLMatch {}
+impl AggregateQueryBuilder for TypeQLMatch {}
 
 impl TypeQLMatch {
     pub fn new(patterns: Vec<Pattern>) -> Self {
