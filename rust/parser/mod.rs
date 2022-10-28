@@ -212,7 +212,7 @@ fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
     let mut match_query = TypeQLMatch::new(visit_patterns(ctx.patterns().unwrap())?);
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
-            match_query = match_query.filter(visit_filter(filter)?);
+            match_query = match_query.filter(visit_filter(filter));
         }
         if let Some(sort) = modifiers.sort() {
             match_query = match_query.sort(visit_sort(sort));
@@ -232,7 +232,7 @@ fn visit_query_match_aggregate(
 ) -> ParserResult<TypeQLMatchAggregate> {
     let function = ctx.match_aggregate().unwrap();
     let match_query = visit_query_match(ctx.query_match().unwrap())?;
-    Ok(match Aggregate::from(function.aggregate_method().unwrap().get_text()) {
+    Ok(match visit_aggregate_method(function.aggregate_method().unwrap()) {
         Aggregate::Count => match_query.count(),
         method => match_query.aggregate(method, get_var(function.VAR_().unwrap())),
     })
@@ -249,18 +249,14 @@ fn visit_query_match_group_agg(
     let function = ctx.match_aggregate().unwrap();
     let group = visit_query_match(ctx.query_match().unwrap())?
         .group(get_var(ctx.match_group().unwrap().VAR_().unwrap()));
-    Ok(match Aggregate::from(function.aggregate_method().unwrap().get_text()) {
+    Ok(match visit_aggregate_method(function.aggregate_method().unwrap()) {
         Aggregate::Count => group.count(),
         method => group.aggregate(method, get_var(function.VAR_().unwrap())),
     })
 }
 
-fn visit_modifiers(_ctx: Rc<ModifiersContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_filter(ctx: Rc<FilterContext>) -> ParserResult<Vec<UnboundVariable>> {
-    Ok((0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect())
+fn visit_filter(ctx: Rc<FilterContext>) -> Vec<UnboundVariable> {
+    (0..).map_while(|i| ctx.VAR_(i)).map(get_var).collect()
 }
 
 fn visit_sort(ctx: Rc<SortContext>) -> Sorting {
@@ -274,24 +270,8 @@ fn visit_var_order(ctx: Rc<Var_orderContext>) -> OrderedVariable {
     }
 }
 
-fn visit_offset(_ctx: Rc<OffsetContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_limit(_ctx: Rc<LimitContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_match_aggregate(_ctx: Rc<Match_aggregateContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_aggregate_method(_ctx: Rc<Aggregate_methodContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_match_group(_ctx: Rc<Match_groupContext>) -> ParserResult<()> {
-    todo!()
+fn visit_aggregate_method(ctx: Rc<Aggregate_methodContext>) -> Aggregate {
+    Aggregate::from(ctx.get_text())
 }
 
 fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Pattern>> {
@@ -418,10 +398,6 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
     Ok(var_type)
 }
 
-fn visit_type_constraint(_ctx: Rc<Type_constraintContext>) -> ParserResult<()> {
-    todo!()
-}
-
 fn visit_variable_things(ctx: Rc<Variable_thingsContext>) -> ParserResult<Vec<ThingVariable>> {
     (0..).map_while(|i| ctx.variable_thing_any(i)).map(visit_variable_thing_any).collect()
 }
@@ -465,8 +441,10 @@ fn visit_variable_relation(ctx: Rc<Variable_relationContext>) -> ParserResult<Th
         relation = relation.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?);
     }
 
-    if let Some(_attributes) = ctx.attributes() {
-        todo!();
+    if let Some(attributes) = ctx.attributes() {
+        relation = visit_attributes(attributes)?
+            .into_iter()
+            .fold(relation, |relation, has| relation.constrain_has(has));
     }
 
     Ok(relation)
@@ -483,8 +461,10 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
         attribute = attribute.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?);
     }
 
-    if let Some(_attributes) = ctx.attributes() {
-        todo!();
+    if let Some(attributes) = ctx.attributes() {
+        attribute = visit_attributes(attributes)?
+            .into_iter()
+            .fold(attribute, |attribute, has| attribute.constrain_has(has));
     }
 
     Ok(attribute)
@@ -492,14 +472,6 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
 
 fn visit_relation(ctx: Rc<RelationContext>) -> ParserResult<RelationConstraint> {
     Ok(RelationConstraint::new(get_role_players(ctx)?))
-}
-
-fn visit_role_player(_ctx: Rc<Role_playerContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_player(_ctx: Rc<PlayerContext>) -> ParserResult<()> {
-    todo!()
 }
 
 fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstraint>> {
@@ -547,18 +519,6 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
     } else {
         todo!()
     }
-}
-
-fn visit_predicate_equality(_ctx: Rc<Predicate_equalityContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_predicate_substring(_ctx: Rc<Predicate_substringContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_predicate_value(_ctx: Rc<Predicate_valueContext>) -> ParserResult<()> {
-    todo!()
 }
 
 fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDefinition> {
@@ -618,22 +578,6 @@ fn visit_label_scoped(ctx: Rc<Label_scopedContext>) -> ParserResult<Label> {
     Ok(Label::from((parts[0].clone(), parts[1].clone())))
 }
 
-fn visit_label(_ctx: Rc<LabelContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_schema_native(_ctx: Rc<Schema_nativeContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_type_native(_ctx: Rc<Type_nativeContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_value_type(_ctx: Rc<Value_typeContext>) -> ParserResult<()> {
-    todo!()
-}
-
 fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
     if let Some(string) = ctx.STRING_() {
         Ok(Value::from(get_string(string)))
@@ -648,14 +592,6 @@ fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
     } else if let Some(date_time) = ctx.DATETIME_() {
         Value::try_from(get_date_time(date_time)?)
     } else {
-        todo!()
+        unreachable!()
     }
-}
-
-fn visit_regex(_ctx: Rc<RegexContext>) -> ParserResult<()> {
-    todo!()
-}
-
-fn visit_unreserved(_ctx: Rc<UnreservedContext>) -> ParserResult<()> {
-    todo!()
 }
