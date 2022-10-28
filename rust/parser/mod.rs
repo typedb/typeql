@@ -565,11 +565,13 @@ fn visit_type(ctx: Rc<Type_Context>) -> ParserResult<Type> {
     }
 }
 
-fn visit_label_any(ctx: Rc<Label_anyContext>) -> ParserResult<String> {
+fn visit_label_any(ctx: Rc<Label_anyContext>) -> ParserResult<Label> {
     if let Some(label) = ctx.label() {
-        Ok(label.get_text())
+        Ok(Label::from(label.get_text()))
+    } else if let Some(label_scoped) = ctx.label_scoped() {
+        visit_label_scoped(label_scoped)
     } else {
-        panic!("visit_label_any: not implemented")
+        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
