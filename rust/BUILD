@@ -53,6 +53,11 @@ rust_library(
 rust_test(
     name = "typeql_lang_rust_test",
     crate = ":typeql_lang",
+    data = [
+        "@vaticle_typedb_behaviour//typeql/explanation:features",
+        "@vaticle_typedb_behaviour//typeql/language:features",
+        "@vaticle_typedb_behaviour//typeql/reasoner:features",
+    ],
 )
 
 assemble_crate(
