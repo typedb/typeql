@@ -21,7 +21,8 @@
  */
 
 use crate::{
-    common::token::{Aggregate, Aggregate::Count}, TypeQLMatch, TypeQLMatchGroup, UnboundVariable,
+    common::token::{Aggregate, Aggregate::Count},
+    TypeQLMatch, TypeQLMatchGroup, UnboundVariable,
 };
 use std::fmt;
 
