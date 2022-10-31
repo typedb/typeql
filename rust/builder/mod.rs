@@ -124,8 +124,18 @@ where
 }
 
 pub fn gte<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
+    where
+        ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
     ValueConstraint::new(Predicate::Gte, value.try_into()?)
+}
+
+pub fn contains<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage>
+{
+    ValueConstraint::new(Predicate::Contains, Value::from(value.into()))
+}
+
+pub fn like<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage>
+{
+    ValueConstraint::new(Predicate::Like, Value::from(value.into()))
 }
