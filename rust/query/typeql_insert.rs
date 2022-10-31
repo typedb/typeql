@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::token::Command::Insert, write_joined, Query, ThingVariable, TypeQLMatch};
+use crate::{common::token::Command::Insert, write_joined, ThingVariable, TypeQLMatch};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -32,10 +32,6 @@ pub struct TypeQLInsert {
 impl TypeQLInsert {
     pub fn new(variables: Vec<ThingVariable>) -> Self {
         TypeQLInsert { match_query: None, variables }
-    }
-
-    pub fn into_query(self) -> Query {
-        Query::Insert(self)
     }
 }
 

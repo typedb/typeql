@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token::Command::Define, write_joined, Pattern, Query, RuleDefinition, TypeVariable,
+    common::token::Command::Define, write_joined, Pattern, RuleDefinition, TypeVariable,
     Variable,
 };
 use std::fmt;
@@ -42,10 +42,6 @@ impl TypeQLDefine {
             }
             define
         })
-    }
-
-    pub fn into_query(self) -> Query {
-        Query::Define(self)
     }
 
     pub fn add_definition(&mut self, variable: TypeVariable) {

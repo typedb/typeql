@@ -38,10 +38,6 @@ impl TypeQLMatch {
         Self { conjunction: Conjunction::new(patterns), modifiers: Modifiers::default() }
     }
 
-    pub fn into_query(self) -> Query {
-        Query::Match(self)
-    }
-
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         TypeQLMatch { modifiers: self.modifiers.filter(vars), ..self }
     }
