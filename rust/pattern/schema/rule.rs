@@ -22,7 +22,7 @@
 
 use crate::{
     common::{string::indent, token::Schema},
-    Conjunction, Label, Pattern, ThingVariable,
+    Conjunction, Label, ThingVariable,
 };
 use std::fmt;
 
@@ -34,10 +34,6 @@ pub struct RuleDeclaration {
 impl RuleDeclaration {
     pub fn new(label: Label) -> Self {
         RuleDeclaration { label }
-    }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::RuleDeclaration(self)
     }
 
     pub fn when(self, conjunction: Conjunction) -> RuleWhenStub {
@@ -78,10 +74,6 @@ pub struct RuleDefinition {
 impl RuleDefinition {
     pub fn new(label: Label, when: Conjunction, then: ThingVariable) -> Self {
         RuleDefinition { label, when, then }
-    }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Rule(self)
     }
 }
 

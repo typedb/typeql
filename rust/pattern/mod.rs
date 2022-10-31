@@ -44,7 +44,7 @@ pub use variable::*;
 #[cfg(test)]
 mod test;
 
-use crate::enum_getter;
+use crate::{enum_getter, enum_wrapper};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -64,22 +64,38 @@ impl Pattern {
     enum_getter!(into_rule, Rule, RuleDefinition);
     enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
-
-    pub fn into_pattern(self) -> Self { self }
 }
 
-impl<T> From<T> for Pattern
-where
-    Variable: From<T>,
-{
-    fn from(variable: T) -> Self {
-        Pattern::Variable(Variable::from(variable))
+enum_wrapper!{ Pattern
+    Conjunction => Conjunction,
+    Disjunction => Disjunction,
+    Negation => Negation,
+    RuleDefinition => Rule,
+    RuleDeclaration => RuleDeclaration,
+    Variable => Variable,
+}
+
+impl From<ConceptVariable> for Pattern {
+    fn from(variable: ConceptVariable) -> Self {
+        Variable::from(variable).into()
     }
 }
 
-impl From<Negation> for Pattern {
-    fn from(negation: Negation) -> Self {
-        Pattern::Negation(negation)
+impl From<ThingVariable> for Pattern {
+    fn from(variable: ThingVariable) -> Self {
+        Variable::from(variable).into()
+    }
+}
+
+impl From<TypeVariable> for Pattern {
+    fn from(variable: TypeVariable) -> Self {
+        Variable::from(variable).into()
+    }
+}
+
+impl From<UnboundVariable> for Pattern {
+    fn from(variable: UnboundVariable) -> Self {
+        Variable::from(variable).into()
     }
 }
 
