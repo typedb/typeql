@@ -1,4 +1,4 @@
-[![Grabl](https://grabl.io/api/status/vaticle/typeql/badge.svg)](https://grabl.io/vaticle/typeql)
+[![Factory](https://factory.vaticle.com/api/status/vaticle/typeql/badge.svg)](https://factory.vaticle.com/vaticle/typeql)
 [![GitHub release](https://img.shields.io/github/release/vaticle/typeql.svg)](https://github.com/vaticle/typeql/releases/latest)
 [![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff)](https://vaticle.com/discord)
 [![Discussion Forum](https://img.shields.io/discourse/https/forum.vaticle.com/topics.svg)](https://forum.vaticle.com)
