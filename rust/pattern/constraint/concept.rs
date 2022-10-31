@@ -20,7 +20,11 @@
  *
  */
 
-use crate::{common::token::Constraint::Is, pattern::*, var};
+use crate::{
+    common::token,
+    pattern::{ConceptVariable, UnboundVariable},
+    var,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -53,6 +57,6 @@ impl From<UnboundVariable> for IsConstraint {
 
 impl fmt::Display for IsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Is, self.variable)
+        write!(f, "{} {}", token::Constraint::Is, self.variable)
     }
 }

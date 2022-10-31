@@ -20,7 +20,7 @@
  *
  */
 
-use crate::common::{string::escape_regex, token::Constraint::Regex};
+use crate::common::{string::escape_regex, token};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -42,6 +42,6 @@ impl From<String> for RegexConstraint {
 
 impl fmt::Display for RegexConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, r#"{} "{}""#, Regex, escape_regex(&self.regex))
+        write!(f, r#"{} "{}""#, token::Constraint::Regex, escape_regex(&self.regex))
     }
 }

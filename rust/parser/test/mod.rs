@@ -21,11 +21,15 @@
  */
 
 use crate::{
-    and, common::token::ValueType, gte, lt, lte, not, or, parse_pattern, parse_queries,
-    parse_query, rel, rule, try_, type_, typeql_insert, typeql_match, var, AggregateQueryBuilder,
-    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine,
-    TypeVariableBuilder, KEY,
+    and,
+    common::token::ValueType,
+    gte, lt, lte, not, or, parse_pattern, parse_queries, parse_query,
+    pattern::{
+        ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
+        ThingVariableBuilder, TypeVariableBuilder, KEY,
+    },
+    query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
+    rel, rule, try_, type_, typeql_insert, typeql_match, var, ErrorMessage, Query,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 

@@ -21,25 +21,35 @@
  */
 
 mod conjunction;
-pub use conjunction::*;
+pub use conjunction::Conjunction;
 
 mod constraint;
-pub use constraint::*;
+pub use constraint::{
+    AbstractConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsKeyAttribute,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
+    RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value,
+    ValueConstraint, ValueTypeConstraint, KEY,
+};
 
 mod disjunction;
-pub use disjunction::*;
+pub use disjunction::Disjunction;
 
 mod label;
-pub use label::*;
+pub use label::{Label, Type};
 
 mod schema;
-pub use schema::*;
+pub use schema::{RuleDeclaration, RuleDefinition};
 
 mod negation;
-pub use negation::*;
+pub use negation::Negation;
 
 mod variable;
-pub use variable::*;
+pub use variable::{
+    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference,
+    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable,
+    ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    Variable, Visibility,
+};
 
 #[cfg(test)]
 mod test;

@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::token::Command::Insert, write_joined, ThingVariable, TypeQLMatch};
+use crate::{common::token, pattern::ThingVariable, query::TypeQLMatch, write_joined};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -41,7 +41,7 @@ impl fmt::Display for TypeQLInsert {
             writeln!(f, "{}", match_query)?;
         }
 
-        writeln!(f, "{}", Insert)?;
+        writeln!(f, "{}", token::Command::Insert)?;
         write_joined!(f, ";\n", self.variables)?;
         f.write_str(";")
     }

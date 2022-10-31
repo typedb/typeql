@@ -20,8 +20,13 @@
  *
  */
 
-use crate::pattern::*;
-
+use crate::pattern::{
+    ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint,
+    RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
+    SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable,
+    ValueConstraint, ValueTypeConstraint, Visibility,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

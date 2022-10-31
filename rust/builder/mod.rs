@@ -20,7 +20,14 @@
  *
  */
 
-use crate::{common::token::Predicate, *};
+use crate::{
+    common::token::Predicate,
+    pattern::{
+        Negation, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable,
+        TypeVariable, TypeVariableBuilder, UnboundVariable, Value, ValueConstraint,
+    },
+    ErrorMessage, Pattern,
+};
 
 #[macro_export]
 macro_rules! typeql_match {
@@ -124,18 +131,16 @@ where
 }
 
 pub fn gte<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<Value>>::Error>,
+where
+    ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
     ValueConstraint::new(Predicate::Gte, value.try_into()?)
 }
 
-pub fn contains<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-{
+pub fn contains<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage> {
     ValueConstraint::new(Predicate::Contains, Value::from(value.into()))
 }
 
-pub fn like<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-{
+pub fn like<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage> {
     ValueConstraint::new(Predicate::Like, Value::from(value.into()))
 }

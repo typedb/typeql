@@ -20,7 +20,14 @@
  *
  */
 
-use crate::{common::token::ValueType, pattern::*};
+use crate::{
+    common::token::ValueType,
+    pattern::{
+        LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint,
+        SubConstraint, TypeVariable, ValueTypeConstraint,
+    },
+    Label,
+};
 
 pub trait TypeConstrainable {
     fn constrain_abstract(self) -> TypeVariable;

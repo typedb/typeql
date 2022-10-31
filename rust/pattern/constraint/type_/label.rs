@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::token::Constraint::Type, Label};
+use crate::{common::token, Label};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -30,6 +30,6 @@ pub struct LabelConstraint {
 
 impl fmt::Display for LabelConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Type, self.label)
+        write!(f, "{} {}", token::Constraint::Type, self.label)
     }
 }

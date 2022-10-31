@@ -20,16 +20,16 @@
  *
  */
 
-use crate::common::token::{Constraint::ValueType as ValueTypeKeyword, ValueType};
+use crate::common::token;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueTypeConstraint {
-    pub value_type: ValueType,
+    pub value_type: token::ValueType,
 }
 
 impl fmt::Display for ValueTypeConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", ValueTypeKeyword, self.value_type)
+        write!(f, "{} {}", token::Constraint::ValueType, self.value_type)
     }
 }

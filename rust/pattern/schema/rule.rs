@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::{string::indent, token::Schema},
-    Conjunction, Label, ThingVariable,
+    common::{string::indent, token},
+    pattern::{Conjunction, ThingVariable},
+    Label,
 };
 use std::fmt;
 
@@ -60,7 +61,7 @@ impl RuleWhenStub {
 
 impl fmt::Display for RuleDeclaration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Schema::Rule, self.label)
+        write!(f, "{} {}", token::Schema::Rule, self.label)
     }
 }
 
@@ -82,13 +83,13 @@ impl fmt::Display for RuleDefinition {
         write!(
             f,
             "{} {}:\n{}",
-            Schema::Rule,
+            token::Schema::Rule,
             self.label,
             indent(&format!(
                 "{} {}\n{} {{\n    {};\n}}",
-                Schema::When,
+                token::Schema::When,
                 self.when,
-                Schema::Then,
+                token::Schema::Then,
                 self.then
             ))
         )

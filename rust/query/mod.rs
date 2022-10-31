@@ -22,34 +22,34 @@
 
 use std::fmt;
 
-use crate::{enum_getter, enum_wrapper, pattern::*, var};
+use crate::{enum_getter, enum_wrapper};
 
 mod aggregate;
-pub use aggregate::*;
+pub use aggregate::{AggregateQueryBuilder, TypeQLMatchAggregate, TypeQLMatchGroupAggregate};
 
 mod typeql_define;
-pub use typeql_define::*;
+pub use typeql_define::TypeQLDefine;
 
 mod typeql_delete;
-pub use typeql_delete::*;
+pub use typeql_delete::TypeQLDelete;
 
 mod typeql_insert;
-pub use typeql_insert::*;
+pub use typeql_insert::TypeQLInsert;
 
 mod typeql_match;
-pub use typeql_match::*;
+pub use typeql_match::{sorting, Filter, Limit, Offset, Sorting, TypeQLMatch};
 
 mod typeql_match_group;
-pub use typeql_match_group::*;
+pub use typeql_match_group::TypeQLMatchGroup;
 
 mod typeql_undefine;
-pub use typeql_undefine::*;
+pub use typeql_undefine::TypeQLUndefine;
 
 mod typeql_update;
-pub use typeql_update::*;
+pub use typeql_update::TypeQLUpdate;
 
 mod writable;
-pub use writable::*;
+pub use writable::Writable;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {

@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::token::Constraint::{As, Relates},
-    Label, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    common::token,
+    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    Label,
 };
 use std::fmt;
 
@@ -97,9 +98,9 @@ impl From<(Type, Option<Type>)> for RelatesConstraint {
 
 impl fmt::Display for RelatesConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Relates, self.role_type)?;
+        write!(f, "{} {}", token::Constraint::Relates, self.role_type)?;
         if let Some(overridden) = &self.overridden_role_type {
-            write!(f, " {} {}", As, overridden)?;
+            write!(f, " {} {}", token::Constraint::As, overridden)?;
         }
         Ok(())
     }

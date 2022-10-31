@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::token::Command::Undefine, write_joined, Pattern, RuleDeclaration, TypeVariable,
-    Variable,
+    common::token,
+    pattern::{RuleDeclaration, TypeVariable, Variable},
+    write_joined, Pattern,
 };
 use std::fmt;
 
@@ -55,7 +56,7 @@ impl TypeQLUndefine {
 
 impl fmt::Display for TypeQLUndefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", Undefine)?;
+        writeln!(f, "{}", token::Command::Undefine)?;
         write_joined!(f, ";\n", self.variables)?;
         write_joined!(f, ";\n", self.rules)?;
         f.write_str(";")

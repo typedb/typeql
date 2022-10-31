@@ -20,26 +20,26 @@
  *
  */
 
-pub mod abstract_;
-pub use abstract_::*;
+mod abstract_;
+pub use abstract_::AbstractConstraint;
 
-pub mod label;
-pub use label::*;
+mod label;
+pub use label::LabelConstraint;
 
-pub mod owns;
-pub use owns::*;
+mod owns;
+pub use owns::{IsKeyAttribute, OwnsConstraint, KEY};
 
-pub mod plays;
-pub use plays::*;
+mod plays;
+pub use plays::PlaysConstraint;
 
-pub mod regex;
-pub use regex::*;
+mod regex;
+pub use regex::RegexConstraint;
 
-pub mod relates;
-pub use relates::*;
+mod relates;
+pub use relates::RelatesConstraint;
 
-pub mod sub;
-pub use sub::*;
+mod sub;
+pub use sub::SubConstraint;
 
-pub mod value_type;
-pub use value_type::*;
+mod value_type;
+pub use value_type::ValueTypeConstraint;

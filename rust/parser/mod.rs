@@ -33,19 +33,28 @@ use antlr_rust::{
 use chrono::{NaiveDate, NaiveDateTime};
 use std::rc::Rc;
 
-use crate::common::{
-    date_time,
-    error::{ErrorMessage, ILLEGAL_GRAMMAR},
-    string::*,
-    token::Predicate,
+use crate::{
+    common::{
+        date_time,
+        error::{ErrorMessage, ILLEGAL_GRAMMAR},
+        string::{unescape_regex, unquote},
+        token,
+    },
+    pattern::{
+        ConceptVariable, ConceptVariableBuilder, Conjunction, Disjunction, HasConstraint,
+        IsKeyAttribute, IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint,
+        RelatesConstraint, RelationConstraint, RolePlayerConstraint, RuleDeclaration,
+        RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
+        Type, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable, Value,
+        ValueConstraint, Variable,
+    },
+    query::{
+        sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert,
+        TypeQLMatch, TypeQLMatchAggregate, TypeQLMatchGroup, TypeQLMatchGroupAggregate,
+        TypeQLUndefine, TypeQLUpdate,
+    },
 };
 use typeql_grammar::typeqlrustparser::*;
-
-use crate::{
-    common::token::{Aggregate, ValueType},
-    pattern::*,
-    query::*,
-};
 
 type ParserResult<T> = Result<T, ErrorMessage>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
@@ -233,7 +242,7 @@ fn visit_query_match_aggregate(
     let function = ctx.match_aggregate().unwrap();
     let match_query = visit_query_match(ctx.query_match().unwrap())?;
     Ok(match visit_aggregate_method(function.aggregate_method().unwrap()) {
-        Aggregate::Count => match_query.count(),
+        token::Aggregate::Count => match_query.count(),
         method => match_query.aggregate(method, get_var(function.VAR_().unwrap())),
     })
 }
@@ -250,7 +259,7 @@ fn visit_query_match_group_agg(
     let group = visit_query_match(ctx.query_match().unwrap())?
         .group(get_var(ctx.match_group().unwrap().VAR_().unwrap()));
     Ok(match visit_aggregate_method(function.aggregate_method().unwrap()) {
-        Aggregate::Count => group.count(),
+        token::Aggregate::Count => group.count(),
         method => group.aggregate(method, get_var(function.VAR_().unwrap())),
     })
 }
@@ -263,15 +272,15 @@ fn visit_sort(ctx: Rc<SortContext>) -> Sorting {
     Sorting::new((0..).map_while(|i| ctx.var_order(i)).map(visit_var_order).collect())
 }
 
-fn visit_var_order(ctx: Rc<Var_orderContext>) -> OrderedVariable {
-    OrderedVariable {
+fn visit_var_order(ctx: Rc<Var_orderContext>) -> sorting::OrderedVariable {
+    sorting::OrderedVariable {
         var: get_var(ctx.VAR_().unwrap()),
         order: ctx.ORDER_().map(|order| order.get_text()),
     }
 }
 
-fn visit_aggregate_method(ctx: Rc<Aggregate_methodContext>) -> Aggregate {
-    Aggregate::from(ctx.get_text())
+fn visit_aggregate_method(ctx: Rc<Aggregate_methodContext>) -> token::Aggregate {
+    token::Aggregate::from(ctx.get_text())
 }
 
 fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Pattern>> {
@@ -390,7 +399,8 @@ fn visit_variable_type(ctx: Rc<Variable_typeContext>) -> ParserResult<TypeVariab
             let scoped_label = visit_label_any(constraint.label_any().unwrap())?;
             var_type = var_type.type_(scoped_label);
         } else if constraint.VALUE().is_some() {
-            var_type = var_type.value(ValueType::from(constraint.value_type().unwrap().get_text()));
+            var_type =
+                var_type.value(token::ValueType::from(constraint.value_type().unwrap().get_text()));
         } else {
             panic!("visit_variable_type: not implemented")
         }
@@ -496,9 +506,9 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
 
 fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
     if let Some(value) = ctx.value() {
-        ValueConstraint::new(Predicate::Eq, visit_value(value)?)
+        ValueConstraint::new(token::Predicate::Eq, visit_value(value)?)
     } else if let Some(equality) = ctx.predicate_equality() {
-        ValueConstraint::new(Predicate::from(equality.get_text()), {
+        ValueConstraint::new(token::Predicate::from(equality.get_text()), {
             let predicate_value = ctx.predicate_value().unwrap();
             if let Some(value) = predicate_value.value() {
                 visit_value(value)?
@@ -509,7 +519,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             }
         })
     } else if let Some(substring) = ctx.predicate_substring() {
-        ValueConstraint::new(Predicate::from(substring.get_text()), {
+        ValueConstraint::new(token::Predicate::from(substring.get_text()), {
             if substring.LIKE().is_some() {
                 Value::from(get_regex(ctx.STRING_().unwrap()))
             } else {

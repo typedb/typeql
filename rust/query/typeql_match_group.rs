@@ -20,7 +20,11 @@
  *
  */
 
-use crate::{common::token::Command::Group, AggregateQueryBuilder, TypeQLMatch, UnboundVariable};
+use crate::{
+    common::token,
+    pattern::UnboundVariable,
+    query::{AggregateQueryBuilder, TypeQLMatch},
+};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -33,6 +37,6 @@ impl AggregateQueryBuilder for TypeQLMatchGroup {}
 
 impl fmt::Display for TypeQLMatchGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{} {};", self.query, Group, self.group_var)
+        write!(f, "{}\n{} {};", self.query, token::Command::Group, self.group_var)
     }
 }

@@ -25,21 +25,22 @@ use crate::{
         date_time,
         error::{INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
         string::{escape_regex, format_double, quote},
-        token::Predicate,
+        token,
     },
-    ErrorMessage, ThingVariable, UnboundVariable,
+    pattern::{ThingVariable, UnboundVariable},
+    ErrorMessage,
 };
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueConstraint {
-    pub predicate: Predicate,
+    pub predicate: token::Predicate,
     pub value: Value,
 }
 
 impl ValueConstraint {
-    pub fn new(predicate: Predicate, value: Value) -> Result<Self, ErrorMessage> {
+    pub fn new(predicate: token::Predicate, value: Value) -> Result<Self, ErrorMessage> {
         if predicate.is_substring() && !matches!(value, Value::String(_)) {
             Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))
         } else {
@@ -50,10 +51,12 @@ impl ValueConstraint {
 
 impl fmt::Display for ValueConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.predicate == Predicate::Like {
+        if self.predicate == token::Predicate::Like {
             assert!(matches!(self.value, Value::String(_)));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
-        } else if self.predicate == Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
+        } else if self.predicate == token::Predicate::Eq
+            && !matches!(self.value, Value::Variable(_))
+        {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)
