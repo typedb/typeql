@@ -28,6 +28,12 @@ pub struct IsConstraint {
     variable: Box<ConceptVariable>,
 }
 
+impl IsConstraint {
+    fn new(var: ConceptVariable) -> Self {
+        Self { variable: Box::new(var) }
+    }
+}
+
 impl From<&str> for IsConstraint {
     fn from(string: &str) -> Self {
         Self::from(var(string))
@@ -41,13 +47,7 @@ impl From<String> for IsConstraint {
 
 impl From<UnboundVariable> for IsConstraint {
     fn from(var: UnboundVariable) -> Self {
-        Self::from(var.into_concept())
-    }
-}
-
-impl From<ConceptVariable> for IsConstraint {
-    fn from(var: ConceptVariable) -> Self {
-        Self { variable: Box::new(var) }
+        Self::new(var.into_concept())
     }
 }
 

@@ -24,7 +24,7 @@
 
 use std::{cell::RefCell, convert::Into, rc::Rc};
 
-use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::*};
+use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::TypeQLRustParser};
 
 use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
 
