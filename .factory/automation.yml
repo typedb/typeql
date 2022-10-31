@@ -86,7 +86,7 @@ build:
       filter:
         owner: vaticle
         branch: master
-      image: vaticle-ubuntu-22.04
+      image: vaticle-ubuntu-20.04
       dependencies: [ build, build-dependency ]
       command: |
         export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
@@ -138,7 +138,7 @@ release:
         bazel run --define version=$(cat VERSION) //java/parser:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java:deploy-maven -- release
     deploy-pip-release:
-      image: vaticle-ubuntu-22.04
+      image: vaticle-ubuntu-20.04
       dependencies: [ deploy-github ]
       command: |
         export DEPLOY_PIP_USERNAME=$REPO_PYPI_USERNAME
