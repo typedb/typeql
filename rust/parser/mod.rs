@@ -147,8 +147,8 @@ pub(crate) fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<V
     visit_pattern_variable(ctx.pattern_variable().unwrap())
 }
 
-pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<String> {
-    Ok(ctx.label().unwrap().get_text())
+pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<Label> {
+    Ok(ctx.label().unwrap().get_text().into())
 }
 
 pub(crate) fn visit_eof_schema_rule(
