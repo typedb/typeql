@@ -64,6 +64,8 @@ impl Pattern {
     enum_getter!(into_rule, Rule, RuleDefinition);
     enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
+
+    pub fn into_pattern(self) -> Self { self }
 }
 
 impl<T> From<T> for Pattern

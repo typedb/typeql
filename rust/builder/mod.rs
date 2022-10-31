@@ -60,7 +60,11 @@ macro_rules! and {
 #[macro_export]
 macro_rules! or {
     ($($pattern:expr),* $(,)?) => {{
-        Disjunction::new(vec![$($pattern.into_pattern()),*])
+        let mut patterns = vec![$($pattern.into_pattern()),*];
+        match patterns.len() {
+            1 => patterns.pop().unwrap(),
+            _ => Disjunction::new(patterns).into_pattern(),
+        }
     }}
 }
 
