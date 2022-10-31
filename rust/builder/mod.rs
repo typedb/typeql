@@ -68,6 +68,14 @@ macro_rules! or {
     }}
 }
 
+pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
+    Negation::new(pattern.into())
+}
+
+pub fn rule(name: &str) -> RuleDeclaration {
+    RuleDeclaration::from(name)
+}
+
 pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
     var.into()
 }
@@ -78,10 +86,6 @@ pub fn type_(name: impl Into<String>) -> TypeVariable {
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
     UnboundVariable::hidden().rel(value)
-}
-
-pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
-    Negation::new(pattern.into())
 }
 
 pub fn eq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
@@ -124,8 +128,4 @@ where
     ErrorMessage: From<<T as TryInto<Value>>::Error>,
 {
     ValueConstraint::new(Predicate::Gte, value.try_into()?)
-}
-
-pub fn rule(name: &str) -> RuleDeclaration {
-    RuleDeclaration::from(name)
 }
