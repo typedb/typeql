@@ -20,9 +20,7 @@
  *
  */
 
-use crate::{
-    common::token::Command::Group, AggregateQueryBuilder, TypeQLMatch, UnboundVariable,
-};
+use crate::{common::token::Command::Group, AggregateQueryBuilder, TypeQLMatch, UnboundVariable};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]

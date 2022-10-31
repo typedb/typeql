@@ -42,9 +42,7 @@ mod util;
 
 use crate::{
     common::error::ErrorMessage,
-    parser::{
-        error_listener::ErrorListener, syntax_error::SyntaxError, *,
-    },
+    parser::{error_listener::ErrorListener, syntax_error::SyntaxError, *},
 };
 use pattern::*;
 use query::*;

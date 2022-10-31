@@ -76,7 +76,7 @@ impl Query {
     enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
 }
 
-enum_wrapper!{ Query
+enum_wrapper! { Query
     TypeQLMatch => Match,
     TypeQLInsert => Insert,
     TypeQLDelete => Delete,

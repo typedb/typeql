@@ -66,7 +66,7 @@ impl Pattern {
     enum_getter!(into_variable, Variable, Variable);
 }
 
-enum_wrapper!{ Pattern
+enum_wrapper! { Pattern
     Conjunction => Conjunction,
     Disjunction => Disjunction,
     Negation => Negation,

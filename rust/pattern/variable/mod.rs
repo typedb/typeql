@@ -50,7 +50,7 @@ pub enum Variable {
     Unbound(UnboundVariable),
 }
 
-enum_wrapper!{ Variable
+enum_wrapper! { Variable
     ConceptVariable => Concept,
     ThingVariable => Thing,
     TypeVariable => Type,
