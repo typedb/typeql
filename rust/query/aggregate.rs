@@ -21,8 +21,7 @@
  */
 
 use crate::{
-    common::token::{Aggregate, Aggregate::Count},
-    Query, TypeQLMatch, TypeQLMatchGroup, UnboundVariable,
+    common::token::{Aggregate, Aggregate::Count}, TypeQLMatch, TypeQLMatchGroup, UnboundVariable,
 };
 use std::fmt;
 
@@ -46,18 +45,6 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
 
     pub fn new(base: T, method: Aggregate, var: UnboundVariable) -> Self {
         Self { query: base, method, var: Some(var) }
-    }
-}
-
-impl TypeQLMatchAggregate {
-    pub fn into_query(self) -> Query {
-        Query::Aggregate(self)
-    }
-}
-
-impl TypeQLMatchGroupAggregate {
-    pub fn into_query(self) -> Query {
-        Query::GroupAggregate(self)
     }
 }
 

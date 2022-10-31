@@ -20,19 +20,13 @@
  *
  */
 
-use crate::{common::token::Command::Insert, write_joined, Query, ThingVariable, TypeQLDelete};
+use crate::{common::token::Command::Insert, write_joined, ThingVariable, TypeQLDelete};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {
     pub delete_query: TypeQLDelete,
     pub insert_variables: Vec<ThingVariable>,
-}
-
-impl TypeQLUpdate {
-    pub fn into_query(self) -> Query {
-        Query::Update(self)
-    }
 }
 
 impl fmt::Display for TypeQLUpdate {

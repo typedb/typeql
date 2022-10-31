@@ -159,23 +159,23 @@ pub(crate) fn visit_eof_schema_rule(
 
 fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
     if let Some(query_match) = ctx.query_match() {
-        Ok(visit_query_match(query_match)?.into_query())
+        Ok(visit_query_match(query_match)?.into())
     } else if let Some(query_insert) = ctx.query_insert() {
-        Ok(visit_query_insert(query_insert)?.into_query())
+        Ok(visit_query_insert(query_insert)?.into())
     } else if let Some(query_delete) = ctx.query_delete() {
-        Ok(visit_query_delete(query_delete)?.into_query())
+        Ok(visit_query_delete(query_delete)?.into())
     } else if let Some(query_update) = ctx.query_update() {
-        Ok(visit_query_update(query_update)?.into_query())
+        Ok(visit_query_update(query_update)?.into())
     } else if let Some(query_define) = ctx.query_define() {
-        Ok(visit_query_define(query_define)?.into_query())
+        Ok(visit_query_define(query_define)?.into())
     } else if let Some(query_undefine) = ctx.query_undefine() {
-        Ok(visit_query_undefine(query_undefine)?.into_query())
+        Ok(visit_query_undefine(query_undefine)?.into())
     } else if let Some(query_aggregate) = ctx.query_match_aggregate() {
-        Ok(visit_query_match_aggregate(query_aggregate)?.into_query())
+        Ok(visit_query_match_aggregate(query_aggregate)?.into())
     } else if let Some(query_group) = ctx.query_match_group() {
-        Ok(visit_query_match_group(query_group)?.into_query())
+        Ok(visit_query_match_group(query_group)?.into())
     } else if let Some(query_group_aggregate) = ctx.query_match_group_agg() {
-        Ok(visit_query_match_group_agg(query_group_aggregate)?.into_query())
+        Ok(visit_query_match_group_agg(query_group_aggregate)?.into())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }

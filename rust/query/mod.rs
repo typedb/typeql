@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::{enum_getter, pattern::*, var};
+use crate::{enum_getter, enum_wrapper, pattern::*, var};
 
 mod aggregate;
 pub use aggregate::*;
@@ -74,6 +74,18 @@ impl Query {
     enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
     enum_getter!(into_group, Group, TypeQLMatchGroup);
     enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
+}
+
+enum_wrapper!{ Query
+    TypeQLMatch => Match,
+    TypeQLInsert => Insert,
+    TypeQLDelete => Delete,
+    TypeQLUpdate => Update,
+    TypeQLDefine => Define,
+    TypeQLUndefine => Undefine,
+    TypeQLMatchAggregate => Aggregate,
+    TypeQLMatchGroup => Group,
+    TypeQLMatchGroupAggregate => GroupAggregate,
 }
 
 impl fmt::Display for Query {

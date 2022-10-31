@@ -1309,8 +1309,8 @@ fn test_parse_list() {
     let queries = "insert $x isa movie; match $y isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap()).collect::<Vec<_>>();
     let expected = vec![
-        typeql_insert!(var("x").isa("movie")).into_query(),
-        typeql_match!(var("y").isa("movie")).into_query(),
+        typeql_insert!(var("x").isa("movie")).into(),
+        typeql_match!(var("y").isa("movie")).into(),
     ];
     assert_eq!(parsed, expected);
 }
