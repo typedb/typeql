@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::token::Operator::Not, Pattern};
+use crate::{common::token, pattern::Pattern};
 use core::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -36,6 +36,6 @@ impl Negation {
 
 impl fmt::Display for Negation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {{ {}; }}", Not, self.pattern)
+        write!(f, "{} {{ {}; }}", token::Operator::Not, self.pattern)
     }
 }

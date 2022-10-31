@@ -21,25 +21,27 @@
  */
 
 mod reference;
-pub use reference::*;
+pub use reference::{Reference, Visibility};
 
 mod concept;
-pub use concept::*;
+pub use concept::ConceptVariable;
 
 mod thing;
-pub use thing::*;
+pub use thing::ThingVariable;
 
 mod type_;
-pub use type_::*;
+pub use type_::TypeVariable;
 
 mod unbound;
-pub use unbound::*;
+pub use unbound::UnboundVariable;
 
 mod builder;
-pub use builder::*;
+pub use builder::{
+    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder,
+    ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
+};
 
-use crate::pattern::*;
-
+use crate::enum_wrapper;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

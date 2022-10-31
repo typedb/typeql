@@ -20,17 +20,17 @@
  *
  */
 
-pub mod has;
-pub use has::*;
+mod has;
+pub use has::HasConstraint;
 
-pub mod iid;
-pub use iid::*;
+mod iid;
+pub use iid::IIDConstraint;
 
-pub mod isa;
-pub use isa::*;
+mod isa;
+pub use isa::IsaConstraint;
 
-pub mod relation;
-pub use relation::*;
+mod relation;
+pub use relation::{RelationConstraint, RolePlayerConstraint};
 
-pub mod value;
-pub use value::*;
+mod value;
+pub use value::{Value, ValueConstraint};

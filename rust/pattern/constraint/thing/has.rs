@@ -21,9 +21,12 @@
  */
 
 use crate::{
-    common::token::{Constraint::Has, Predicate},
-    ErrorMessage, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
-    UnboundVariable, Value, ValueConstraint,
+    common::token,
+    pattern::{
+        ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable,
+        Value, ValueConstraint,
+    },
+    ErrorMessage,
 };
 use std::{convert::Infallible, fmt};
 
@@ -54,7 +57,7 @@ where
             value => HasConstraint {
                 type_: Some(UnboundVariable::hidden().type_(type_name.into())),
                 attribute: UnboundVariable::hidden()
-                    .constrain_value(ValueConstraint::new(Predicate::Eq, value)?),
+                    .constrain_value(ValueConstraint::new(token::Predicate::Eq, value)?),
             },
         })
     }
@@ -95,7 +98,7 @@ impl HasConstraint {
 
 impl fmt::Display for HasConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Has)?;
+        write!(f, "{}", token::Constraint::Has)?;
         if let Some(type_) = &self.type_ {
             write!(f, " {}", &type_.label.as_ref().unwrap().label)?;
         }

@@ -21,7 +21,9 @@
  */
 
 use crate::{
-    common::token::Command::Define, write_joined, Pattern, RuleDefinition, TypeVariable, Variable,
+    common::token,
+    pattern::{Pattern, RuleDefinition, TypeVariable, Variable},
+    write_joined,
 };
 use std::fmt;
 
@@ -54,7 +56,7 @@ impl TypeQLDefine {
 
 impl fmt::Display for TypeQLDefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", Define)?;
+        writeln!(f, "{}", token::Command::Define)?;
         write_joined!(f, ";\n", self.variables)?;
         write_joined!(f, ";\n", self.rules)?;
         f.write_str(";")

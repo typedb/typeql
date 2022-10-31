@@ -20,7 +20,13 @@
  *
  */
 
-use crate::{pattern::*, write_joined};
+use crate::{
+    pattern::{
+        HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable,
+        RelationConstraint, RolePlayerConstraint, ThingConstrainable, ValueConstraint,
+    },
+    write_joined,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::token::Constraint::{As, Plays},
-    Label, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    common::token,
+    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    Label,
 };
 use std::fmt;
 
@@ -120,9 +121,9 @@ impl From<TypeVariable> for PlaysConstraint {
 
 impl fmt::Display for PlaysConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Plays, self.role_type)?;
+        write!(f, "{} {}", token::Constraint::Plays, self.role_type)?;
         if let Some(overridden) = &self.overridden_role_type {
-            write!(f, " {} {}", As, overridden)?;
+            write!(f, " {} {}", token::Constraint::As, overridden)?;
         }
         Ok(())
     }

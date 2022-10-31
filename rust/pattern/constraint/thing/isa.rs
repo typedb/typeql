@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::token::Constraint::{Isa, IsaX},
-    IsExplicit, Label, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    common::token,
+    pattern::{IsExplicit, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    Label,
 };
 use std::fmt;
 
@@ -68,8 +69,8 @@ impl fmt::Display for IsaConstraint {
             f,
             "{} {}",
             match self.is_explicit {
-                IsExplicit::Yes => IsaX,
-                IsExplicit::No => Isa,
+                IsExplicit::Yes => token::Constraint::IsaX,
+                IsExplicit::No => token::Constraint::Isa,
             },
             self.type_
         )

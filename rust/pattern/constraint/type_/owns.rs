@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::token::Constraint::{As, IsKey, Owns},
-    Label, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    common::token,
+    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    Label,
 };
 use std::fmt;
 
@@ -46,7 +47,7 @@ pub const KEY: IsKeyAttribute = IsKeyAttribute::Yes;
 impl fmt::Display for IsKeyAttribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if *self == IsKeyAttribute::Yes {
-            write!(f, " {}", IsKey)?;
+            write!(f, " {}", token::Constraint::IsKey)?;
         }
         Ok(())
     }
@@ -177,9 +178,9 @@ impl From<(Type, Option<Type>, IsKeyAttribute)> for OwnsConstraint {
 
 impl fmt::Display for OwnsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}{}", Owns, self.attribute_type, self.is_key)?;
+        write!(f, "{} {}{}", token::Constraint::Owns, self.attribute_type, self.is_key)?;
         if let Some(overridden) = &self.overridden_attribute_type {
-            write!(f, " {} {}", As, overridden)?;
+            write!(f, " {} {}", token::Constraint::As, overridden)?;
         }
         Ok(())
     }

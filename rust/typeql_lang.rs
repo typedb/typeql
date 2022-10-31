@@ -22,15 +22,15 @@
 
 #![allow(dead_code)]
 
-use std::{cell::RefCell, convert::Into, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::TypeQLRustParser};
 
 use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
 
 #[macro_use]
-pub mod builder;
-pub use builder::*;
+mod builder;
+pub use builder::{contains, gt, gte, like, lt, lte, not, rel, rule, type_, var};
 
 pub mod common;
 pub mod parser;
@@ -40,12 +40,14 @@ pub mod query;
 #[macro_use]
 mod util;
 
-use crate::{
-    common::error::ErrorMessage,
-    parser::{error_listener::ErrorListener, syntax_error::SyntaxError, *},
+use common::error::ErrorMessage;
+use parser::{
+    error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_definables,
+    visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
+    visit_eof_schema_rule, visit_eof_variable,
 };
-use pattern::*;
-use query::*;
+use pattern::{Label, Pattern, RuleDefinition, Variable};
+use query::Query;
 
 macro_rules! parse {
     ($visitor:ident($accessor:ident($input:expr))) => {{

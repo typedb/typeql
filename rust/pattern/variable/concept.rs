@@ -20,7 +20,10 @@
  *
  */
 
-use crate::pattern::*;
+use crate::pattern::{
+    constraint::IsConstraint,
+    variable::{builder::ConceptConstrainable, Reference},
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

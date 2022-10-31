@@ -20,7 +20,7 @@
  *
  */
 
-use crate::ThingVariable;
+use crate::pattern::ThingVariable;
 
 pub trait Writable {
     fn vars(self) -> Vec<ThingVariable>;

@@ -20,7 +20,13 @@
  *
  */
 
-use crate::{common::token, TypeVariable, TypeVariableBuilder, UnboundVariable};
+use crate::{
+    common::token,
+    pattern::{
+        variable::{TypeVariable, UnboundVariable},
+        TypeVariableBuilder,
+    },
+};
 use std::fmt;
 
 #[derive(Debug)]

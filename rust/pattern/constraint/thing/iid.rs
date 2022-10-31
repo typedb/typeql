@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::INVALID_IID_STRING, token::Constraint::IID},
+    common::{error::INVALID_IID_STRING, token},
     ErrorMessage,
 };
 use std::fmt;
@@ -63,6 +63,6 @@ impl TryFrom<String> for IIDConstraint {
 
 impl fmt::Display for IIDConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", IID, self.iid)
+        write!(f, "{} {}", token::Constraint::IID, self.iid)
     }
 }
