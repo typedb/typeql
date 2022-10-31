@@ -280,13 +280,13 @@ fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Pattern>> {
 
 fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Pattern> {
     if let Some(variable_type) = ctx.variable_type() {
-        Ok(visit_variable_type(variable_type)?.into_variable().into_pattern())
+        Ok(visit_variable_type(variable_type)?.into())
     } else {
         let rule_ctx = ctx.schema_rule().unwrap();
         if rule_ctx.patterns().is_some() {
-            visit_schema_rule(rule_ctx).map(RuleDefinition::into_pattern)
+            visit_schema_rule(rule_ctx).map(Pattern::from)
         } else {
-            visit_schema_rule_declaration(rule_ctx).map(RuleDeclaration::into_pattern)
+            visit_schema_rule_declaration(rule_ctx).map(Pattern::from)
         }
     }
 }
@@ -297,13 +297,13 @@ fn visit_patterns(ctx: Rc<PatternsContext>) -> ParserResult<Vec<Pattern>> {
 
 fn visit_pattern(ctx: Rc<PatternContext>) -> ParserResult<Pattern> {
     if let Some(var) = ctx.pattern_variable() {
-        Ok(visit_pattern_variable(var)?.into_pattern())
+        Ok(visit_pattern_variable(var)?.into())
     } else if let Some(disjunction) = ctx.pattern_disjunction() {
-        Ok(visit_pattern_disjunction(disjunction)?.into_pattern())
+        Ok(visit_pattern_disjunction(disjunction)?.into())
     } else if let Some(conjunction) = ctx.pattern_conjunction() {
-        Ok(visit_pattern_conjunction(conjunction)?.into_pattern())
+        Ok(visit_pattern_conjunction(conjunction)?.into())
     } else if let Some(negation) = ctx.pattern_negation() {
-        Ok(visit_pattern_negation(negation)?.into_pattern())
+        Ok(visit_pattern_negation(negation)?.into())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
@@ -321,7 +321,7 @@ fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResul
             .map(|result| {
                 result.map(|mut nested| match nested.len() {
                     1 => nested.pop().unwrap(),
-                    _ => Conjunction::new(nested).into_pattern(),
+                    _ => Conjunction::new(nested).into(),
                 })
             })
             .collect::<ParserResult<Vec<Pattern>>>()?,
@@ -331,18 +331,18 @@ fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResul
 fn visit_pattern_negation(ctx: Rc<Pattern_negationContext>) -> ParserResult<Negation> {
     let mut patterns = visit_patterns(ctx.patterns().unwrap())?;
     Ok(match patterns.len() {
-        1 => Negation::from(patterns.pop().unwrap()),
-        _ => Negation::from(Conjunction::new(patterns).into_pattern()),
+        1 => Negation::new(patterns.pop().unwrap()),
+        _ => Negation::new(Conjunction::new(patterns).into()),
     })
 }
 
 fn visit_pattern_variable(ctx: Rc<Pattern_variableContext>) -> ParserResult<Variable> {
     if let Some(var_thing_any) = ctx.variable_thing_any() {
-        Ok(visit_variable_thing_any(var_thing_any)?.into_variable())
+        Ok(visit_variable_thing_any(var_thing_any)?.into())
     } else if let Some(var_type) = ctx.variable_type() {
-        Ok(visit_variable_type(var_type)?.into_variable())
+        Ok(visit_variable_type(var_type)?.into())
     } else if let Some(var_concept) = ctx.variable_concept() {
-        Ok(visit_variable_concept(var_concept).into_variable())
+        Ok(visit_variable_concept(var_concept).into())
     } else {
         Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }

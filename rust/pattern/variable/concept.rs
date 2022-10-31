@@ -30,14 +30,6 @@ pub struct ConceptVariable {
 }
 
 impl ConceptVariable {
-    pub fn into_pattern(self) -> Pattern {
-        self.into_variable().into_pattern()
-    }
-
-    pub fn into_variable(self) -> Variable {
-        Variable::Concept(self)
-    }
-
     pub fn new(reference: Reference) -> ConceptVariable {
         ConceptVariable { reference, is_constraint: None }
     }

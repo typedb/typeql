@@ -35,10 +35,6 @@ impl Disjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Disjunction { patterns }
     }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Disjunction(self)
-    }
 }
 
 impl fmt::Display for Disjunction {

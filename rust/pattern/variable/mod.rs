@@ -50,34 +50,11 @@ pub enum Variable {
     Unbound(UnboundVariable),
 }
 
-impl Variable {
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Variable(self)
-    }
-}
-
-impl From<UnboundVariable> for Variable {
-    fn from(unbound: UnboundVariable) -> Self {
-        Variable::Unbound(unbound)
-    }
-}
-
-impl From<ConceptVariable> for Variable {
-    fn from(var: ConceptVariable) -> Self {
-        Variable::Concept(var)
-    }
-}
-
-impl From<ThingVariable> for Variable {
-    fn from(var: ThingVariable) -> Self {
-        Variable::Thing(var)
-    }
-}
-
-impl From<TypeVariable> for Variable {
-    fn from(var: TypeVariable) -> Self {
-        Variable::Type(var)
-    }
+enum_wrapper!{ Variable
+    ConceptVariable => Concept,
+    ThingVariable => Thing,
+    TypeVariable => Type,
+    UnboundVariable => Unbound,
 }
 
 impl fmt::Display for Variable {
