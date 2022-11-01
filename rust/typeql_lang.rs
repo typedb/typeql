@@ -20,8 +20,6 @@
  *
  */
 
-#![allow(dead_code)]
-
 use std::{cell::RefCell, rc::Rc};
 
 use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::TypeQLRustParser};
@@ -30,7 +28,7 @@ use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as 
 
 #[macro_use]
 mod builder;
-pub use builder::{contains, gt, gte, like, lt, lte, not, rel, rule, type_, var};
+pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_, var};
 
 pub mod common;
 pub mod parser;
