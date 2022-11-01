@@ -20,12 +20,22 @@
  *
  */
 
-use crate::{common::token::Constraint::Is, pattern::*, var};
+use crate::{
+    common::token,
+    pattern::{ConceptVariable, UnboundVariable},
+    var,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {
     variable: Box<ConceptVariable>,
+}
+
+impl IsConstraint {
+    fn new(var: ConceptVariable) -> Self {
+        Self { variable: Box::new(var) }
+    }
 }
 
 impl From<&str> for IsConstraint {
@@ -41,18 +51,12 @@ impl From<String> for IsConstraint {
 
 impl From<UnboundVariable> for IsConstraint {
     fn from(var: UnboundVariable) -> Self {
-        Self::from(var.into_concept())
-    }
-}
-
-impl From<ConceptVariable> for IsConstraint {
-    fn from(var: ConceptVariable) -> Self {
-        Self { variable: Box::new(var) }
+        Self::new(var.into_concept())
     }
 }
 
 impl fmt::Display for IsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Is, self.variable)
+        write!(f, "{} {}", token::Constraint::Is, self.variable)
     }
 }

@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::token::{Aggregate, Aggregate::Count},
-    Query, TypeQLMatch, TypeQLMatchGroup, UnboundVariable,
+    common::token,
+    pattern::UnboundVariable,
+    query::{TypeQLMatch, TypeQLMatchGroup},
 };
 use std::fmt;
 
@@ -32,7 +33,7 @@ where
     T: AggregateQueryBuilder,
 {
     pub query: T,
-    pub method: Aggregate,
+    pub method: token::Aggregate,
     pub var: Option<UnboundVariable>,
 }
 
@@ -41,23 +42,11 @@ pub type TypeQLMatchGroupAggregate = AggregateQuery<TypeQLMatchGroup>;
 
 impl<T: AggregateQueryBuilder> AggregateQuery<T> {
     pub fn new_count(base: T) -> Self {
-        Self { query: base, method: Count, var: None }
+        Self { query: base, method: token::Aggregate::Count, var: None }
     }
 
-    pub fn new(base: T, method: Aggregate, var: UnboundVariable) -> Self {
+    pub fn new(base: T, method: token::Aggregate, var: UnboundVariable) -> Self {
         Self { query: base, method, var: Some(var) }
-    }
-}
-
-impl TypeQLMatchAggregate {
-    pub fn into_query(self) -> Query {
-        Query::Aggregate(self)
-    }
-}
-
-impl TypeQLMatchGroupAggregate {
-    pub fn into_query(self) -> Query {
-        Query::GroupAggregate(self)
     }
 }
 
@@ -88,31 +77,31 @@ pub trait AggregateQueryBuilder:
         AggregateQuery::<Self>::new_count(self)
     }
 
-    fn aggregate(self, method: Aggregate, var: UnboundVariable) -> AggregateQuery<Self> {
+    fn aggregate(self, method: token::Aggregate, var: UnboundVariable) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new(self, method, var)
     }
 
     fn max(self, var: impl Into<UnboundVariable>) -> AggregateQuery<Self> {
-        self.aggregate(Aggregate::Max, var.into())
+        self.aggregate(token::Aggregate::Max, var.into())
     }
 
     fn min(self, var: impl Into<UnboundVariable>) -> AggregateQuery<Self> {
-        self.aggregate(Aggregate::Min, var.into())
+        self.aggregate(token::Aggregate::Min, var.into())
     }
 
     fn mean(self, var: impl Into<UnboundVariable>) -> AggregateQuery<Self> {
-        self.aggregate(Aggregate::Mean, var.into())
+        self.aggregate(token::Aggregate::Mean, var.into())
     }
 
     fn median(self, var: impl Into<UnboundVariable>) -> AggregateQuery<Self> {
-        self.aggregate(Aggregate::Median, var.into())
+        self.aggregate(token::Aggregate::Median, var.into())
     }
 
     fn std(self, var: impl Into<UnboundVariable>) -> AggregateQuery<Self> {
-        self.aggregate(Aggregate::Std, var.into())
+        self.aggregate(token::Aggregate::Std, var.into())
     }
 
     fn sum(self, var: impl Into<UnboundVariable>) -> AggregateQuery<Self> {
-        self.aggregate(Aggregate::Sum, var.into())
+        self.aggregate(token::Aggregate::Sum, var.into())
     }
 }

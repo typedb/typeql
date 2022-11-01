@@ -20,7 +20,10 @@
  *
  */
 
-use crate::pattern::*;
+use crate::pattern::{
+    constraint::IsConstraint,
+    variable::{builder::ConceptConstrainable, Reference},
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -30,14 +33,6 @@ pub struct ConceptVariable {
 }
 
 impl ConceptVariable {
-    pub fn into_pattern(self) -> Pattern {
-        self.into_variable().into_pattern()
-    }
-
-    pub fn into_variable(self) -> Variable {
-        Variable::Concept(self)
-    }
-
     pub fn new(reference: Reference) -> ConceptVariable {
         ConceptVariable { reference, is_constraint: None }
     }

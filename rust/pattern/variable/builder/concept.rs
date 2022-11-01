@@ -20,7 +20,7 @@
  *
  */
 
-use crate::pattern::*;
+use crate::pattern::{ConceptVariable, IsConstraint};
 
 pub trait ConceptConstrainable {
     fn constrain_is(self, is: IsConstraint) -> ConceptVariable;

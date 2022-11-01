@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::{string::indent, token::Schema},
-    Conjunction, Label, Pattern, ThingVariable,
+    common::{string::indent, token},
+    pattern::{Conjunction, ThingVariable},
+    Label,
 };
 use std::fmt;
 
@@ -34,10 +35,6 @@ pub struct RuleDeclaration {
 impl RuleDeclaration {
     pub fn new(label: Label) -> Self {
         RuleDeclaration { label }
-    }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::RuleDeclaration(self)
     }
 
     pub fn when(self, conjunction: Conjunction) -> RuleWhenStub {
@@ -64,7 +61,7 @@ impl RuleWhenStub {
 
 impl fmt::Display for RuleDeclaration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Schema::Rule, self.label)
+        write!(f, "{} {}", token::Schema::Rule, self.label)
     }
 }
 
@@ -79,10 +76,6 @@ impl RuleDefinition {
     pub fn new(label: Label, when: Conjunction, then: ThingVariable) -> Self {
         RuleDefinition { label, when, then }
     }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Rule(self)
-    }
 }
 
 impl fmt::Display for RuleDefinition {
@@ -90,13 +83,13 @@ impl fmt::Display for RuleDefinition {
         write!(
             f,
             "{} {}:\n{}",
-            Schema::Rule,
+            token::Schema::Rule,
             self.label,
             indent(&format!(
                 "{} {}\n{} {{\n    {};\n}}",
-                Schema::When,
+                token::Schema::When,
                 self.when,
-                Schema::Then,
+                token::Schema::Then,
                 self.then
             ))
         )

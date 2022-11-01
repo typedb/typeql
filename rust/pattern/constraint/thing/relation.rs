@@ -21,8 +21,9 @@
  */
 
 use crate::{
-    common::token::Type::Relation, write_joined, Label, ThingVariable, TypeVariable,
-    TypeVariableBuilder, UnboundVariable,
+    common::token,
+    pattern::{ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    write_joined, Label,
 };
 use std::fmt;
 
@@ -34,7 +35,7 @@ pub struct RelationConstraint {
 
 impl RelationConstraint {
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
-        RelationConstraint { role_players, scope: Relation.into() }
+        RelationConstraint { role_players, scope: token::Type::Relation.into() }
     }
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {

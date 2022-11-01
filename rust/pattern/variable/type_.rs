@@ -20,7 +20,13 @@
  *
  */
 
-use crate::{pattern::*, write_joined};
+use crate::{
+    pattern::{
+        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
+        RegexConstraint, RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
+    },
+    write_joined,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -37,14 +43,6 @@ pub struct TypeVariable {
 }
 
 impl TypeVariable {
-    pub fn into_pattern(self) -> Pattern {
-        self.into_variable().into_pattern()
-    }
-
-    pub fn into_variable(self) -> Variable {
-        Variable::Type(self)
-    }
-
     pub fn new(reference: Reference) -> TypeVariable {
         TypeVariable {
             reference,

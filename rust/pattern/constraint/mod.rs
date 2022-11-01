@@ -21,13 +21,19 @@
  */
 
 mod concept;
-pub use concept::*;
+pub use concept::IsConstraint;
 
 mod type_;
-pub use type_::*;
+pub use type_::{
+    AbstractConstraint, IsKeyAttribute, LabelConstraint, OwnsConstraint, PlaysConstraint,
+    RegexConstraint, RelatesConstraint, SubConstraint, ValueTypeConstraint, KEY,
+};
 
 mod thing;
-pub use thing::*;
+pub use thing::{
+    HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint, Value,
+    ValueConstraint,
+};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum IsExplicit {

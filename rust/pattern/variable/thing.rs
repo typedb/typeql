@@ -20,7 +20,13 @@
  *
  */
 
-use crate::{pattern::*, write_joined};
+use crate::{
+    pattern::{
+        HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable,
+        RelationConstraint, RolePlayerConstraint, ThingConstrainable, ValueConstraint,
+    },
+    write_joined,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -34,14 +40,6 @@ pub struct ThingVariable {
 }
 
 impl ThingVariable {
-    pub fn into_pattern(self) -> Pattern {
-        self.into_variable().into_pattern()
-    }
-
-    pub fn into_variable(self) -> Variable {
-        Variable::Thing(self)
-    }
-
     pub fn new(reference: Reference) -> ThingVariable {
         ThingVariable {
             reference,

@@ -21,7 +21,9 @@
  */
 
 use crate::{
-    common::token::Constraint::Sub, Label, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    common::token,
+    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    Label,
 };
 use std::fmt;
 
@@ -55,6 +57,6 @@ impl From<Type> for SubConstraint {
 
 impl fmt::Display for SubConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Sub, self.type_)
+        write!(f, "{} {}", token::Constraint::Sub, self.type_)
     }
 }

@@ -21,30 +21,40 @@
  */
 
 mod conjunction;
-pub use conjunction::*;
+pub use conjunction::Conjunction;
 
 mod constraint;
-pub use constraint::*;
+pub use constraint::{
+    AbstractConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsKeyAttribute,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
+    RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value,
+    ValueConstraint, ValueTypeConstraint, KEY,
+};
 
 mod disjunction;
-pub use disjunction::*;
+pub use disjunction::Disjunction;
 
 mod label;
-pub use label::*;
+pub use label::{Label, Type};
 
 mod schema;
-pub use schema::*;
+pub use schema::{RuleDeclaration, RuleDefinition};
 
 mod negation;
-pub use negation::*;
+pub use negation::Negation;
 
 mod variable;
-pub use variable::*;
+pub use variable::{
+    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference,
+    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable,
+    ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    Variable, Visibility,
+};
 
 #[cfg(test)]
 mod test;
 
-use crate::enum_getter;
+use crate::{enum_getter, enum_wrapper};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -66,18 +76,36 @@ impl Pattern {
     enum_getter!(into_variable, Variable, Variable);
 }
 
-impl<T> From<T> for Pattern
-where
-    Variable: From<T>,
-{
-    fn from(variable: T) -> Self {
-        Pattern::Variable(Variable::from(variable))
+enum_wrapper! { Pattern
+    Conjunction => Conjunction,
+    Disjunction => Disjunction,
+    Negation => Negation,
+    RuleDefinition => Rule,
+    RuleDeclaration => RuleDeclaration,
+    Variable => Variable,
+}
+
+impl From<ConceptVariable> for Pattern {
+    fn from(variable: ConceptVariable) -> Self {
+        Variable::from(variable).into()
     }
 }
 
-impl From<Negation> for Pattern {
-    fn from(negation: Negation) -> Self {
-        Pattern::Negation(negation)
+impl From<ThingVariable> for Pattern {
+    fn from(variable: ThingVariable) -> Self {
+        Variable::from(variable).into()
+    }
+}
+
+impl From<TypeVariable> for Pattern {
+    fn from(variable: TypeVariable) -> Self {
+        Variable::from(variable).into()
+    }
+}
+
+impl From<UnboundVariable> for Pattern {
+    fn from(variable: UnboundVariable) -> Self {
+        Variable::from(variable).into()
     }
 }
 

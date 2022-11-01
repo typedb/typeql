@@ -22,7 +22,10 @@
 
 use crate::{
     common::{error::ErrorMessage, token::Predicate},
-    pattern::*,
+    pattern::{
+        HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint,
+        ThingVariable, Value, ValueConstraint,
+    },
 };
 
 pub trait ThingConstrainable {

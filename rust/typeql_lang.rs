@@ -20,17 +20,15 @@
  *
  */
 
-#![allow(dead_code)]
+use std::{cell::RefCell, rc::Rc};
 
-use std::{cell::RefCell, convert::Into, rc::Rc};
-
-use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::*};
+use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::TypeQLRustParser};
 
 use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
 
 #[macro_use]
-pub mod builder;
-pub use builder::*;
+mod builder;
+pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_, var};
 
 pub mod common;
 pub mod parser;
@@ -40,15 +38,14 @@ pub mod query;
 #[macro_use]
 mod util;
 
-use crate::{
-    common::error::ErrorMessage,
-    parser::{
-        error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_pattern,
-        visit_eof_queries, visit_eof_query,
-    },
+use common::error::ErrorMessage;
+use parser::{
+    error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_definables,
+    visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
+    visit_eof_schema_rule, visit_eof_variable,
 };
-use pattern::*;
-use query::*;
+use pattern::{Label, Pattern, RuleDefinition, Variable};
+use query::Query;
 
 macro_rules! parse {
     ($visitor:ident($accessor:ident($input:expr))) => {{
@@ -87,4 +84,24 @@ pub fn parse_queries(
 
 pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, String> {
     parse!(visit_eof_pattern(eof_pattern(typeql_pattern.trim_end())))
+}
+
+pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>, String> {
+    parse!(visit_eof_patterns(eof_patterns(typeql_patterns.trim_end())))
+}
+
+pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Pattern>, String> {
+    parse!(visit_eof_definables(eof_definables(typeql_definables.trim_end())))
+}
+
+pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition, String> {
+    parse!(visit_eof_schema_rule(eof_schema_rule(typeql_rule.trim_end())))
+}
+
+pub fn parse_variable(typeql_variable: &str) -> Result<Variable, String> {
+    parse!(visit_eof_variable(eof_variable(typeql_variable.trim_end())))
+}
+
+pub fn parse_label(typeql_label: &str) -> Result<Label, String> {
+    parse!(visit_eof_label(eof_label(typeql_label.trim_end())))
 }

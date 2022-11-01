@@ -21,8 +21,8 @@
  */
 
 use crate::{
-    common::{string::indent, token::Operator::Or},
-    Pattern,
+    common::{string::indent, token},
+    pattern::Pattern,
 };
 use std::fmt;
 
@@ -34,10 +34,6 @@ pub struct Disjunction {
 impl Disjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Disjunction { patterns }
-    }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Disjunction(self)
     }
 }
 
@@ -52,7 +48,7 @@ impl fmt::Display for Disjunction {
                     other => format!("{{\n{};\n}}", indent(&other.to_string())),
                 })
                 .collect::<Vec<_>>()
-                .join(&format!(" {} ", Or)),
+                .join(&format!(" {} ", token::Operator::Or)),
         )
     }
 }

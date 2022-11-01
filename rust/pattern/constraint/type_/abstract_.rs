@@ -20,7 +20,7 @@
  *
  */
 
-use crate::common::token::Constraint::Abstract;
+use crate::common::token;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -28,6 +28,6 @@ pub struct AbstractConstraint;
 
 impl fmt::Display for AbstractConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Abstract)
+        write!(f, "{}", token::Constraint::Abstract)
     }
 }

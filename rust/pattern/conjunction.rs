@@ -32,10 +32,6 @@ impl Conjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Conjunction { patterns }
     }
-
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Conjunction(self)
-    }
 }
 
 impl fmt::Display for Conjunction {

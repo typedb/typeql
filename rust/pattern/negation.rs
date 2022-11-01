@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::token::Operator::Not, Pattern, Variable};
+use crate::{common::token, pattern::Pattern};
 use core::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -29,25 +29,13 @@ pub struct Negation {
 }
 
 impl Negation {
-    pub fn into_pattern(self) -> Pattern {
-        self.into()
-    }
-}
-
-impl From<Pattern> for Negation {
-    fn from(pattern: Pattern) -> Self {
+    pub fn new(pattern: Pattern) -> Self {
         Negation { pattern: Box::new(pattern) }
-    }
-}
-
-impl<T: Into<Variable>> From<T> for Negation {
-    fn from(variable: T) -> Self {
-        Negation { pattern: Box::new(variable.into().into_pattern()) }
     }
 }
 
 impl fmt::Display for Negation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {{ {}; }}", Not, self.pattern)
+        write!(f, "{} {{ {}; }}", token::Operator::Not, self.pattern)
     }
 }

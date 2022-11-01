@@ -33,6 +33,17 @@ macro_rules! enum_getter {
 }
 
 #[macro_export]
+macro_rules! enum_wrapper {
+    {$enum_name:ident $($classname:ty => $enum_value:ident),* $(,)*} => {
+        $(impl From<$classname> for $enum_name {
+            fn from(x: $classname) -> Self {
+                Self::$enum_value(x)
+            }
+        })*
+    };
+}
+
+#[macro_export]
 macro_rules! write_joined {
     ($f:ident, $joiner:expr, $($iterable:expr),* $(,)*) => {{
         let mut result: std::fmt::Result = Ok(());

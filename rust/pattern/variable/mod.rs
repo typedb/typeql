@@ -21,25 +21,27 @@
  */
 
 mod reference;
-pub use reference::*;
+pub use reference::{Reference, Visibility};
 
 mod concept;
-pub use concept::*;
+pub use concept::ConceptVariable;
 
 mod thing;
-pub use thing::*;
+pub use thing::ThingVariable;
 
 mod type_;
-pub use type_::*;
+pub use type_::TypeVariable;
 
 mod unbound;
-pub use unbound::*;
+pub use unbound::UnboundVariable;
 
 mod builder;
-pub use builder::*;
+pub use builder::{
+    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder,
+    ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
+};
 
-use crate::pattern::*;
-
+use crate::enum_wrapper;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -50,34 +52,11 @@ pub enum Variable {
     Unbound(UnboundVariable),
 }
 
-impl Variable {
-    pub fn into_pattern(self) -> Pattern {
-        Pattern::Variable(self)
-    }
-}
-
-impl From<UnboundVariable> for Variable {
-    fn from(unbound: UnboundVariable) -> Self {
-        Variable::Unbound(unbound)
-    }
-}
-
-impl From<ConceptVariable> for Variable {
-    fn from(var: ConceptVariable) -> Self {
-        Variable::Concept(var)
-    }
-}
-
-impl From<ThingVariable> for Variable {
-    fn from(var: ThingVariable) -> Self {
-        Variable::Thing(var)
-    }
-}
-
-impl From<TypeVariable> for Variable {
-    fn from(var: TypeVariable) -> Self {
-        Variable::Type(var)
-    }
+enum_wrapper! { Variable
+    ConceptVariable => Concept,
+    ThingVariable => Thing,
+    TypeVariable => Type,
+    UnboundVariable => Unbound,
 }
 
 impl fmt::Display for Variable {

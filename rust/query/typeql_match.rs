@@ -20,10 +20,13 @@
  *
  */
 
-use crate::common::token::{Command::Match, Filter::*};
+use crate::{
+    common::token,
+    pattern::{Conjunction, Pattern, UnboundVariable},
+    query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
+    var, write_joined,
+};
 use std::fmt;
-
-use crate::{query::*, write_joined};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -36,10 +39,6 @@ impl AggregateQueryBuilder for TypeQLMatch {}
 impl TypeQLMatch {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Self { conjunction: Conjunction::new(patterns), modifiers: Modifiers::default() }
-    }
-
-    pub fn into_query(self) -> Query {
-        Query::Match(self)
     }
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
@@ -77,7 +76,7 @@ impl TypeQLMatch {
 
 impl fmt::Display for TypeQLMatch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Match)?;
+        write!(f, "{}", token::Command::Match)?;
 
         for pattern in &self.conjunction.patterns {
             write!(f, "\n{};", pattern)?;
@@ -138,46 +137,51 @@ pub struct Filter {
 
 impl fmt::Display for Filter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", Get)?;
+        write!(f, "{} ", token::Filter::Get)?;
         write_joined!(f, ", ", self.vars)
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OrderedVariable {
-    pub var: UnboundVariable,
-    pub order: Option<String>, // FIXME
-}
+pub mod sorting {
+    use crate::pattern::UnboundVariable;
+    use std::fmt;
 
-impl OrderedVariable {
-    fn new(var: UnboundVariable, order: &str) -> Self {
-        OrderedVariable {
-            var,
-            order: match order {
-                "" => None,
-                order => Some(order.to_string()),
-            },
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct OrderedVariable {
+        pub var: UnboundVariable,
+        pub order: Option<String>, // FIXME
+    }
+
+    impl OrderedVariable {
+        pub fn new(var: UnboundVariable, order: &str) -> Self {
+            OrderedVariable {
+                var,
+                order: match order {
+                    "" => None,
+                    order => Some(order.to_string()),
+                },
+            }
         }
     }
-}
 
-impl fmt::Display for OrderedVariable {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.var)?;
-        if let Some(order) = &self.order {
-            write!(f, " {}", order)?;
+    impl fmt::Display for OrderedVariable {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "{}", self.var)?;
+            if let Some(order) = &self.order {
+                write!(f, " {}", order)?;
+            }
+            Ok(())
         }
-        Ok(())
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sorting {
-    vars: Vec<OrderedVariable>,
+    vars: Vec<sorting::OrderedVariable>,
 }
 
 impl Sorting {
-    pub fn new(vars: Vec<OrderedVariable>) -> Self {
+    pub fn new(vars: Vec<sorting::OrderedVariable>) -> Self {
         Sorting { vars }
     }
 }
@@ -190,19 +194,25 @@ impl From<&str> for Sorting {
 
 impl<const N: usize> From<([(&str, &str); N])> for Sorting {
     fn from(ordered_vars: [(&str, &str); N]) -> Self {
-        Self::new(ordered_vars.map(|(name, order)| OrderedVariable::new(var(name), order)).to_vec())
+        Self::new(
+            ordered_vars
+                .map(|(name, order)| sorting::OrderedVariable::new(var(name), order))
+                .to_vec(),
+        )
     }
 }
 
 impl From<Vec<UnboundVariable>> for Sorting {
     fn from(vars: Vec<UnboundVariable>) -> Self {
-        Self::new(vars.into_iter().map(|name| OrderedVariable::new(var(name), "")).collect())
+        Self::new(
+            vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), "")).collect(),
+        )
     }
 }
 
 impl fmt::Display for Sorting {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", Sort)?;
+        write!(f, "{} ", token::Filter::Sort)?;
         write_joined!(f, ", ", self.vars)
     }
 }
@@ -214,7 +224,7 @@ pub struct Limit {
 
 impl fmt::Display for Limit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Limit, self.limit)
+        write!(f, "{} {}", token::Filter::Limit, self.limit)
     }
 }
 
@@ -225,6 +235,6 @@ pub struct Offset {
 
 impl fmt::Display for Offset {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", Offset, self.offset)
+        write!(f, "{} {}", token::Filter::Offset, self.offset)
     }
 }

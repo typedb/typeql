@@ -21,7 +21,9 @@
  */
 
 use crate::{
-    common::token::Command::Group, AggregateQueryBuilder, Query, TypeQLMatch, UnboundVariable,
+    common::token,
+    pattern::UnboundVariable,
+    query::{AggregateQueryBuilder, TypeQLMatch},
 };
 use std::fmt;
 
@@ -33,14 +35,8 @@ pub struct TypeQLMatchGroup {
 
 impl AggregateQueryBuilder for TypeQLMatchGroup {}
 
-impl TypeQLMatchGroup {
-    pub fn into_query(self) -> Query {
-        Query::Group(self)
-    }
-}
-
 impl fmt::Display for TypeQLMatchGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{} {};", self.query, Group, self.group_var)
+        write!(f, "{}\n{} {};", self.query, token::Command::Group, self.group_var)
     }
 }

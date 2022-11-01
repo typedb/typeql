@@ -21,11 +21,15 @@
  */
 
 use crate::{
-    and, common::token::ValueType, gte, lt, lte, not, or, parse_pattern, parse_queries,
-    parse_query, rel, rule, try_, type_, typeql_insert, typeql_match, var, AggregateQueryBuilder,
-    ConceptVariableBuilder, Conjunction, Disjunction, ErrorMessage, Query, RelationVariableBuilder,
-    ThingVariableBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine,
-    TypeVariableBuilder, KEY,
+    and,
+    common::token::ValueType,
+    gte, lt, lte, not, or, parse_pattern, parse_queries, parse_query,
+    pattern::{
+        ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
+        ThingVariableBuilder, TypeVariableBuilder, KEY,
+    },
+    query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
+    rel, rule, try_, type_, typeql_insert, typeql_match, var, ErrorMessage, Query,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -1309,8 +1313,8 @@ fn test_parse_list() {
     let queries = "insert $x isa movie; match $y isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap()).collect::<Vec<_>>();
     let expected = vec![
-        typeql_insert!(var("x").isa("movie")).into_query(),
-        typeql_match!(var("y").isa("movie")).into_query(),
+        typeql_insert!(var("x").isa("movie")).into(),
+        typeql_match!(var("y").isa("movie")).into(),
     ];
     assert_eq!(parsed, expected);
 }

@@ -21,8 +21,10 @@
  */
 
 use crate::{
-    common::token::Command::Delete, write_joined, Query, ThingVariable, TypeQLMatch, TypeQLUpdate,
-    Writable,
+    common::token,
+    pattern::ThingVariable,
+    query::{TypeQLMatch, TypeQLUpdate, Writable},
+    write_joined,
 };
 use std::fmt;
 
@@ -33,10 +35,6 @@ pub struct TypeQLDelete {
 }
 
 impl TypeQLDelete {
-    pub fn into_query(self) -> Query {
-        Query::Delete(self)
-    }
-
     pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
         TypeQLUpdate { delete_query: self, insert_variables: vars.vars() }
     }
@@ -45,7 +43,7 @@ impl TypeQLDelete {
 impl fmt::Display for TypeQLDelete {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.match_query)?;
-        writeln!(f, "{}", Delete)?;
+        writeln!(f, "{}", token::Command::Delete)?;
         write_joined!(f, ";\n", self.variables)?;
         f.write_str(";")
     }

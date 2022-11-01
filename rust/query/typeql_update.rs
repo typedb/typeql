@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::token::Command::Insert, write_joined, Query, ThingVariable, TypeQLDelete};
+use crate::{common::token, pattern::ThingVariable, query::TypeQLDelete, write_joined};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -29,16 +29,10 @@ pub struct TypeQLUpdate {
     pub insert_variables: Vec<ThingVariable>,
 }
 
-impl TypeQLUpdate {
-    pub fn into_query(self) -> Query {
-        Query::Update(self)
-    }
-}
-
 impl fmt::Display for TypeQLUpdate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.delete_query)?;
-        writeln!(f, "{}", Insert)?;
+        writeln!(f, "{}", token::Command::Insert)?;
         write_joined!(f, ";\n", self.insert_variables)?;
         f.write_str(";")
     }

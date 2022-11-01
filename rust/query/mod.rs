@@ -22,34 +22,34 @@
 
 use std::fmt;
 
-use crate::{enum_getter, pattern::*, var};
+use crate::{enum_getter, enum_wrapper};
 
 mod aggregate;
-pub use aggregate::*;
+pub use aggregate::{AggregateQueryBuilder, TypeQLMatchAggregate, TypeQLMatchGroupAggregate};
 
 mod typeql_define;
-pub use typeql_define::*;
+pub use typeql_define::TypeQLDefine;
 
 mod typeql_delete;
-pub use typeql_delete::*;
+pub use typeql_delete::TypeQLDelete;
 
 mod typeql_insert;
-pub use typeql_insert::*;
+pub use typeql_insert::TypeQLInsert;
 
 mod typeql_match;
-pub use typeql_match::*;
+pub use typeql_match::{sorting, Filter, Limit, Offset, Sorting, TypeQLMatch};
 
 mod typeql_match_group;
-pub use typeql_match_group::*;
+pub use typeql_match_group::TypeQLMatchGroup;
 
 mod typeql_undefine;
-pub use typeql_undefine::*;
+pub use typeql_undefine::TypeQLUndefine;
 
 mod typeql_update;
-pub use typeql_update::*;
+pub use typeql_update::TypeQLUpdate;
 
 mod writable;
-pub use writable::*;
+pub use writable::Writable;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
@@ -74,6 +74,18 @@ impl Query {
     enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
     enum_getter!(into_group, Group, TypeQLMatchGroup);
     enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
+}
+
+enum_wrapper! { Query
+    TypeQLMatch => Match,
+    TypeQLInsert => Insert,
+    TypeQLDelete => Delete,
+    TypeQLUpdate => Update,
+    TypeQLDefine => Define,
+    TypeQLUndefine => Undefine,
+    TypeQLMatchAggregate => Aggregate,
+    TypeQLMatchGroup => Group,
+    TypeQLMatchGroupAggregate => GroupAggregate,
 }
 
 impl fmt::Display for Query {

@@ -20,8 +20,13 @@
  *
  */
 
-use crate::pattern::*;
-
+use crate::pattern::{
+    ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint,
+    RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
+    SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable,
+    ValueConstraint, ValueTypeConstraint, Visibility,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -30,14 +35,6 @@ pub struct UnboundVariable {
 }
 
 impl UnboundVariable {
-    pub fn into_pattern(self) -> Pattern {
-        self.into_variable().into_pattern()
-    }
-
-    pub fn into_variable(self) -> Variable {
-        Variable::Unbound(self)
-    }
-
     pub fn into_concept(self) -> ConceptVariable {
         ConceptVariable::new(self.reference)
     }
