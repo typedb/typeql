@@ -54,6 +54,8 @@ use crate::{
         TypeQLUndefine, TypeQLUpdate,
     },
 };
+
+// keep star import to not expose generated code
 use typeql_grammar::typeqlrustparser::*;
 
 type ParserResult<T> = Result<T, ErrorMessage>;
