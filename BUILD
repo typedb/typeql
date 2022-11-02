@@ -63,6 +63,7 @@ checkstyle_test(
 filegroup(
     name = "ci",
     data = [
+        "@vaticle_dependencies//ide/rust:sync",
         "@vaticle_dependencies//library/maven:update",
         "@vaticle_dependencies//tool/checkstyle:test-coverage",
         "@vaticle_dependencies//tool/release/notes:create",
