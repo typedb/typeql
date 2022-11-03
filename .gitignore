@@ -25,9 +25,6 @@
 # Bazel files #
 bazel-*
 
-# Maven files #
-target/
-
 # IDE files #
 .idea/
 *.iml
@@ -43,7 +40,12 @@ target/
 # Compiled files #
 dist/
 out/
+target/
 *.class
+
+# Cargo files #
+Cargo.toml
+Cargo.lock
 
 # Mobile Tools for Java (J2ME) files #
 .mtj.tmp/
