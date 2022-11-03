@@ -147,10 +147,10 @@ public class Rule implements Definable {
         // all user-written variables in the 'then' must be present in the 'when', if it exists.
         if (when != null) {
             Set<Reference> thenReferences = Stream.concat(Stream.of(then), then.variables())
-                    .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
+                    .filter(Variable::isReferable).map(Variable::reference).collect(Collectors.toSet());
 
             Set<Reference> whenReferences = when.variables()
-                    .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
+                    .filter(Variable::isReferable).map(Variable::reference).collect(Collectors.toSet());
 
             if (!whenReferences.containsAll(thenReferences)) {
                 throw TypeQLException.of(INVALID_RULE_THEN_VARIABLES.message(label));

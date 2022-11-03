@@ -72,8 +72,8 @@ public class Conjunction<T extends Pattern> implements Pattern {
         });
     }
 
-    public Stream<UnboundVariable> namedVariablesUnbound() {
-        return variables().filter(Variable::isNamed).map(v -> UnboundVariable.named(v.name())).distinct();
+    public Stream<UnboundVariable> referableVariablesUnbound() {
+        return variables().filter(Variable::isReferable).map(BoundVariable::toUnbound).distinct();
     }
 
     @Override

@@ -102,6 +102,9 @@ public class TypeQLSteps {
     @Given("typeql undefine; throws exception")
     public void do_nothing_with_throws(String query) { }
 
+    @Given("typeql match; throws exception containing {string}")
+    public void do_nothing_with_throws_exception_containing(String exception, String query) { }
+
     @Given("transaction commits")
     @Given("aggregate answer is not a number")
     @Given("connection has been opened")

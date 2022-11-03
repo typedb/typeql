@@ -58,12 +58,10 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_REFERABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 
 public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch.Aggregate> {
 
@@ -118,7 +116,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
 
         public List<UnboundVariable> filter() {
-            if (filter.isEmpty()) return namedVariablesUnbound();
+            if (filter.isEmpty()) return referableVariablesUnbound();
             else return filter;
         }
 
@@ -169,25 +167,25 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     }
 
     private void hasBoundingConjunction() {
-        if (!conjunction.namedVariablesUnbound().findAny().isPresent()) {
+        if (!conjunction.referableVariablesUnbound().findAny().isPresent()) {
             throw TypeQLException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
         }
     }
 
     private void nestedPatternsAreBounded() {
         conjunction.patterns().stream().filter(pattern -> !pattern.isVariable()).forEach(pattern -> {
-            pattern.validateIsBoundedBy(conjunction.namedVariablesUnbound().collect(toSet()));
+            pattern.validateIsBoundedBy(conjunction.referableVariablesUnbound().collect(toSet()));
         });
     }
 
     private void queryHasNamedVariable() {
-        if (namedVariablesUnbound().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
+        if (referableVariablesUnbound().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
     }
 
     private void eachPatternVariableHasNamedVariable(List<? extends Pattern> patterns) {
         patterns.forEach(pattern -> {
-            if (pattern.isVariable() && !pattern.asVariable().reference().isName()
-                    && pattern.asVariable().variables().noneMatch(constraintVar -> constraintVar.reference().isName())) {
+            if (pattern.isVariable() && !pattern.asVariable().isReferable()
+                    && pattern.asVariable().variables().noneMatch(constraintVar -> constraintVar.isReferable())) {
                 throw TypeQLException.of(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.message(pattern));
             } else if (!pattern.isVariable()) {
                 eachPatternVariableHasNamedVariable(pattern.patterns());
@@ -198,8 +196,8 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     private void filtersAreInScope() {
         Set<UnboundVariable> duplicates = new HashSet<>();
         for (UnboundVariable var : modifiers.filter) {
-            if (!var.isNamed()) throw TypeQLException.of(VARIABLE_NOT_NAMED);
-            if (!namedVariablesUnbound().contains(var))
+            if (!var.isReferable()) throw TypeQLException.of(VARIABLE_NOT_REFERABLE);
+            if (!referableVariablesUnbound().contains(var))
                 throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (duplicates.contains(var)) throw TypeQLException.of(ILLEGAL_FILTER_VARIABLE_REPEATING.message(var));
             else duplicates.add(var);
@@ -207,7 +205,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     }
 
     private void sortVarsAreInScope() {
-        List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
+        List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? referableVariablesUnbound() : modifiers.filter;
         if (modifiers.sorting != null && modifiers.sorting.variables().stream().anyMatch(v -> !sortableVars.contains(v))) {
             throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.variables()));
         }
@@ -216,10 +214,6 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     @Override
     public Aggregate aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var) {
         return new Aggregate(this, method, var);
-    }
-
-    public Group group(String var) {
-        return group(UnboundVariable.named(var));
     }
 
     public Group group(UnboundVariable var) {
@@ -240,9 +234,9 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         return variables;
     }
 
-    public List<UnboundVariable> namedVariablesUnbound() {
+    public List<UnboundVariable> referableVariablesUnbound() {
         if (variablesNamedUnbound == null) {
-            variablesNamedUnbound = conjunction.namedVariablesUnbound().collect(toList());
+            variablesNamedUnbound = conjunction.referableVariablesUnbound().collect(toList());
         }
         return variablesNamedUnbound;
     }
@@ -287,10 +281,6 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         static Conjunction<? extends Pattern> validConjunction(List<? extends Pattern> patterns) {
             if (patterns.size() == 0) throw TypeQLException.of(MISSING_PATTERNS.message());
             return new Conjunction<>(patterns);
-        }
-
-        public TypeQLMatch.Filtered get(String var, String... vars) {
-            return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
         }
 
         public TypeQLMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {

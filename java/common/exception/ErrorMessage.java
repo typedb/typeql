@@ -59,7 +59,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(17, "The deleted variable '%s' is out of scope of the match query.");
     public static final ErrorMessage NO_VARIABLE_IN_SCOPE_INSERT =
             new ErrorMessage(18, "None of the variables in 'insert' ('%s') is within scope of 'match' ('%s')");
-    public static final ErrorMessage VARIABLE_NOT_NAMED =
+    public static final ErrorMessage VARIABLE_NOT_REFERABLE =
             new ErrorMessage(19, "Anonymous variable encountered in a match query filter.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
             new ErrorMessage(20, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");

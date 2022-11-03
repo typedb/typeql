@@ -60,8 +60,12 @@ public abstract class Variable {
         return false;
     }
 
+    public boolean isValue() {
+        return false;
+    }
+
     public UnboundVariable asUnbound() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundVariable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundConceptVariable.class)));
     }
 
     public BoundVariable asBound() {
@@ -78,8 +82,8 @@ public abstract class Variable {
 
     public String name() {
         switch (reference.type()) {
-            case NAME:
-                return reference.asName().name();
+            case NAME_CONCEPT:
+                return reference.name();
             case LABEL:
             case ANONYMOUS:
                 return null;
@@ -93,8 +97,12 @@ public abstract class Variable {
         return reference;
     }
 
-    public boolean isNamed() {
+    public boolean isReferable() {
         return reference.isName();
+    }
+
+    public boolean isNamed() {
+        return reference.isNameConcept();
     }
 
     public boolean isLabelled() {

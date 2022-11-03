@@ -45,7 +45,7 @@ public class TypeQLUpdate extends TypeQLWritable {
     private final int hash;
 
     private List<UnboundVariable> namedDeleteVariablesUnbound;
-    private List<UnboundVariable> namedInsertVariablesUnbound;
+    private List<UnboundVariable> referableInsertVariablesUnbound;
 
     public TypeQLUpdate(TypeQLMatch.Unfiltered match, List<ThingVariable<?>> deleteVariables,
                         List<ThingVariable<?>> insertVariables) {
@@ -77,12 +77,12 @@ public class TypeQLUpdate extends TypeQLWritable {
         return namedDeleteVariablesUnbound;
     }
 
-    public List<UnboundVariable> namedInsertVariablesUnbound() {
-        if (namedInsertVariablesUnbound == null) {
-            namedInsertVariablesUnbound = insertVariables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
-                    .filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct().collect(toList());
+    public List<UnboundVariable> referableInsertVariablesUnbound() {
+        if (referableInsertVariablesUnbound == null) {
+            referableInsertVariablesUnbound = insertVariables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
+                    .filter(Variable::isReferable).map(BoundVariable::toUnbound).distinct().collect(toList());
         }
-        return namedInsertVariablesUnbound;
+        return referableInsertVariablesUnbound;
     }
 
     @Override

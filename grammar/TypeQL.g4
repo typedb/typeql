@@ -29,7 +29,7 @@ eof_variable          :   pattern_variable EOF ;
 eof_label             :   label            EOF ;
 eof_schema_rule       :   schema_rule      EOF ;
 
-// TYPEQL QUERY LANGUAGE ========================================================
+// TYPEQL QUERY LANGUAGE =======================================================
 
 query                 :   query_define           |   query_undefine
                       |   query_insert           |   query_update
@@ -57,20 +57,19 @@ query_match_group_agg :   query_match   match_group       match_aggregate  ;
 
 modifiers             : ( filter ';' )? ( sort ';' )? ( offset ';' )? ( limit ';' )?;
 
-filter                :   GET         VAR_      ( ',' VAR_ )*                   ;
-sort                  :   SORT        var_order ( ',' var_order )*              ;
-var_order             :   VAR_ ORDER_?                                          ;
-offset                :   OFFSET      LONG_                                     ;
-limit                 :   LIMIT       LONG_                                     ;
-
+filter                :   GET        (VAR_CONCEPT_ | VAR_VALUE_)   ( ',' (VAR_CONCEPT_ | VAR_VALUE_) )* ;
+sort                  :   SORT        var_order     ( ',' var_order    )*                               ;
+var_order             :  (VAR_CONCEPT_  | VAR_VALUE_)  ORDER_?                                          ;
+offset                :   OFFSET      LONG_                                                             ;
+limit                 :   LIMIT       LONG_                                                             ;
 
 // GET AGGREGATE QUERY =========================================================
 //
 // An aggregate function is composed of 2 things:
 // The aggregate method name, followed by the variable to apply the function to
 
-match_aggregate       :   aggregate_method    VAR_?   ';';                      // method and, optionally, a variable
-aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN            // calculate statistical values
+match_aggregate       :   aggregate_method  (VAR_CONCEPT_  | VAR_VALUE_)?   ';' ;   // method and, optionally, a variable
+aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
 
 // GET GROUP QUERY =============================================================
@@ -78,9 +77,9 @@ aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN            
 // An group function is composed of 2 things:
 // The 'GROUP' method name, followed by the variable to group the results by
 
-match_group           :   GROUP   VAR_    ';' ;
+match_group           :   GROUP   (VAR_CONCEPT_  | VAR_VALUE_)  ';'             ;
 
-// SCHEMA QUERY ===============================================================
+// SCHEMA QUERY ================================================================
 
 definables            : ( definable ';' )+    ;
 definable             :   variable_type
@@ -102,11 +101,13 @@ pattern_negation      :   NOT '{' patterns '}'                        ;
 
 pattern_variable      :   variable_concept
                       |   variable_type
-                      |   variable_thing_any   ;
+                      |   variable_thing_any
+                      |   variable_value
+                      ;
 
 // CONCEPT VARAIBLES ===========================================================
 
-variable_concept      :   VAR_  IS  VAR_  ;
+variable_concept      :   VAR_CONCEPT_  IS  VAR_CONCEPT_  ;
 
 // TYPE VARIABLES ==============================================================
 
@@ -123,6 +124,12 @@ type_constraint       :   ABSTRACT
 
 annotations_owns      :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?          ;
 
+// VALUE VARIABLES =============================================================
+
+variable_value        :   VAR_VALUE_ ASSIGN expression
+                      |   VAR_VALUE_ predicate
+                      ;
+
 // THING VARIABLES =============================================================
 
 variable_things       : ( variable_thing_any ';' )+ ;
@@ -130,15 +137,15 @@ variable_thing_any    :   variable_thing
                       |   variable_relation
                       |   variable_attribute
                       ;
-variable_thing        :   VAR_            ISA_ type   ( ',' attributes )?
-                      |   VAR_            IID  IID_   ( ',' attributes )?
-                      |   VAR_            attributes
+variable_thing        :   VAR_CONCEPT_            ISA_ type   ( ',' attributes )?
+                      |   VAR_CONCEPT_            IID  IID_   ( ',' attributes )?
+                      |   VAR_CONCEPT_            attributes
                       ;
-variable_relation     :   VAR_? relation  ISA_ type   ( ',' attributes )?
-                      |   VAR_? relation  attributes?
+variable_relation     :   VAR_CONCEPT_? relation  ISA_ type   ( ',' attributes )?
+                      |   VAR_CONCEPT_? relation  attributes?
                       ;
-variable_attribute    :   VAR_? predicate ISA_ type   ( ',' attributes )?
-                      |   VAR_? predicate attributes?
+variable_attribute    :   VAR_CONCEPT_? predicate ISA_ type   ( ',' attributes )?
+                      |   VAR_CONCEPT_? predicate attributes?
                       ;
 
 // RELATION CONSTRUCT ==========================================================
@@ -146,41 +153,55 @@ variable_attribute    :   VAR_? predicate ISA_ type   ( ',' attributes )?
 relation              :   '(' role_player ( ',' role_player )* ')' ;            // A list of role players in a Relations
 role_player           :   type ':' player                                       // The Role type and and player variable
                       |            player ;                                     // Or just the player variable
-player                :   VAR_ ;                                                // A player is just a variable
+player                :   VAR_CONCEPT_ ;                                        // A player is just a variable
 
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes            :   attribute ( ',' attribute )* ;
-attribute             :   HAS label ( VAR_ | predicate )                        // ownership by labeled variable or value
-                      |   HAS VAR_ ;                                            // or just value
+attribute             :   HAS label ( VAR_CONCEPT_ | VAR_VALUE_ | predicate )   // ownership by labeled variable or value
+                      |   HAS VAR_CONCEPT_ ;                                    // or just value
 
-// ATTRIBUTE VALUATION CONSTRUCTS ==============================================
+// PREDICATE CONSTRUCTS ========================================================
 
 predicate             :   value
                       |   predicate_equality   predicate_value
                       |   predicate_substring  STRING_
                       ;
-predicate_equality    :   EQ | NEQ | GT | GTE | LT | LTE ;
+predicate_equality    :   EQ | NEQ | GT | GTE | LT | LTE
+                      |   ASSIGN ;                                              // Backwards compatibility till 3.0
 predicate_substring   :   CONTAINS | LIKE ;
 
-predicate_value       :   value | VAR_  ;
+predicate_value       :   value | VAR_CONCEPT_  | VAR_VALUE_ ;
 
-// SCHEMA CONSTRUCT =============================================================
+// EXPRESSION CONSTRUCTS =======================================================
+
+expression                  :   <assoc=right> expression POW expression         // exponentiation is right-associative
+                            |   expression  (TIMES | DIV | MOD)  expression
+                            |   expression  (PLUS  | MINUS) expression
+                            |   '(' expression ')'
+                            |   VAR_CONCEPT_            | VAR_VALUE_
+                            |   expression_function     | value
+                            ;
+expression_function         :   expression_function_name '('  expression_arguments? ')' ;
+expression_function_name    :   EXPR_FUNC_NAME | MAX | MIN                              ;
+expression_arguments        :   expression   (',' expression)*                          ;
+
+// SCHEMA CONSTRUCT ============================================================
 
 schema_rule           :   RULE label
                       |   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type_any              :   type_scoped   | type          | VAR_          ;
-type_scoped           :   label_scoped                  | VAR_          ;
-type                  :   label                         | VAR_          ;       // A type can be a label or variable
+type_any              :   type_scoped   | type          | VAR_CONCEPT_          ;
+type_scoped           :   label_scoped                  | VAR_CONCEPT_          ;
+type                  :   label                         | VAR_CONCEPT_          ;       // A type can be a label or variable
 
 label_any             :   label_scoped  | label         ;
 label_scoped          :   LABEL_SCOPED_ ;
 label                 :   LABEL_        | schema_native | type_native   | unreserved    ;
 
-// LITERAL INPUT VALUES =======================================================
+// LITERAL INPUT VALUES ========================================================
 
 schema_native         :   RULE            ;
 
@@ -189,15 +210,18 @@ type_native           :   THING           |   ENTITY          |   ATTRIBUTE
 
 value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;
-value                 :   STRING_         |   LONG_           |   DOUBLE_
-                      |   BOOLEAN_        |   DATE_           |   DATETIME_     ;
-regex                 :   STRING_         ;
+value                 :   STRING_         |   BOOLEAN_
+                      |   DATE_           |   DATETIME_
+                      |   signed_long     |   signed_double   ;
+
+signed_long           :   (PLUS | MINUS)?  LONG_              ;
+signed_double         :   (PLUS | MINUS)?  DOUBLE_            ;
 
 // UNRESERVED KEYWORDS =========================================================
 // Most of TypeQL syntax should not be reserved from being used as identifiers
 
-unreserved            : VALUE
-                      | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
+unreserved            : VALUE | EXPR_FUNC_NAME
+                      | MIN | MAX | MEDIAN | MEAN | STD | SUM | COUNT
                       | GET | SORT | LIMIT | OFFSET | GROUP | CONTAINS
                       ;
 
@@ -250,10 +274,21 @@ OR              : 'or'          ;   NOT             : 'not'         ;
 
 // PREDICATE KEYWORDS
 
-EQ              : '='           ;   NEQ             : '!='          ;
+EQ              : '=='          ;   NEQ             : '!='          ;
 GT              : '>'           ;   GTE             : '>='          ;
 LT              : '<'           ;   LTE             : '<='          ;
 LIKE            : 'like'        ;   CONTAINS        : 'contains'    ;
+
+// EXPRESSION KEYWORDS
+
+ASSIGN          : '='         ;
+PAREN_OPEN      : '('         ;     PAREN_CLOSE         : ')'       ;
+POW             : '^'         ;
+DIV             : '/'         ;     TIMES               : '*'       ;      MOD                 : '%'         ;
+PLUS            : '+'         ;     MINUS               : '-'       ;
+
+// Incomplete list of function names usable in expressions. Use `func_name` as source of truth.
+EXPR_FUNC_NAME  :  'floor' | 'ceil' | 'round' | 'abs' ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
@@ -274,20 +309,21 @@ TRUE            : 'true'        ;
 FALSE           : 'false'       ;
 STRING_         : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
                 | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''    ;
-LONG_           : ('+' | '-')? [0-9]+                   ;
-DOUBLE_         : ('+' | '-')? [0-9]+ '.' [0-9]+        ;
+LONG_           : [0-9]+                                ;
+DOUBLE_         : [0-9]+ '.' [0-9]+                     ;
 DATE_           : DATE_FRAGMENT_                        ;
 DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 
 // TYPEQL INPUT TOKEN PATTERNS
 // All token names must end with an underscore ('_')
-VAR_            : VAR_ANONYMOUS_ | VAR_NAMED_ ;
-VAR_ANONYMOUS_  : '$_' ;
-VAR_NAMED_      : '$' [a-zA-Z0-9][a-zA-Z0-9_-]* ;
-IID_            : '0x'[0-9a-f]+ ;
-LABEL_          : TYPE_CHAR_H_ TYPE_CHAR_T_* ;
-LABEL_SCOPED_   : LABEL_ ':' LABEL_ ;
 
+VAR_CONCEPT_            : VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_   ;
+VAR_CONCEPT_ANONYMOUS_  : '$_' ;
+VAR_CONCEPT_NAMED_      : '$'  [a-zA-Z0-9][a-zA-Z0-9_-]* ;
+VAR_VALUE_              : '?'  [a-zA-Z0-9][a-zA-Z0-9_-]* ;
+IID_                    : '0x' [0-9a-f]+                 ;
+LABEL_                  : TYPE_CHAR_H_ TYPE_CHAR_T_*     ;
+LABEL_SCOPED_           : LABEL_ ':' LABEL_              ;
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
@@ -320,7 +356,7 @@ fragment TIME_            : HOUR_ ':' MINUTE_ (':' SECOND_ ('.' SECOND_FRACTION_
 fragment HOUR_            : [0-2][0-9] ;
 fragment MINUTE_          : [0-6][0-9] ;
 fragment SECOND_          : [0-6][0-9] ;
-fragment SECOND_FRACTION_   : [0-9] ([0-9] ([0-9])?)?; // between 1 and 3 digits
+fragment SECOND_FRACTION_ : [0-9] ([0-9] ([0-9])?)?; // between 1 and 3 digits
 fragment ESCAPE_SEQ_      : '\\' . ;
 
 COMMENT                   : '#' .*? '\r'? ('\n' | EOF)    -> channel(HIDDEN) ;

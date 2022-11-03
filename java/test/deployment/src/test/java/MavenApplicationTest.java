@@ -30,7 +30,6 @@ import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.match;
 import static com.vaticle.typeql.lang.TypeQL.or;
 import static com.vaticle.typeql.lang.TypeQL.rel;
-import static com.vaticle.typeql.lang.TypeQL.var;
 import static org.junit.Assert.assertEquals;
 
 public class MavenApplicationTest {
@@ -49,9 +48,9 @@ public class MavenApplicationTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
 
         TypeQLMatch expected = match(
-                var("brando").eq("Marl B").isa("name"),
-                rel("actor", "brando").rel("char").rel("production-with-cast", "prod")
-        ).get("char", "prod");
+                TypeQL.cVar("brando").eq("Marl B").isa("name"),
+                rel("actor", TypeQL.cVar("brando")).rel(TypeQL.cVar("char")).rel("production-with-cast", TypeQL.cVar("prod"))
+        ).get(TypeQL.cVar("char"), TypeQL.cVar("prod"));
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -73,16 +72,16 @@ public class MavenApplicationTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
 
         TypeQLMatch expected = match(
-                var("x").isa("movie").has("title", var("t")),
+                TypeQL.cVar("x").isa("movie").has("title", TypeQL.cVar("t")),
                 or(
-                        var("t").eq("Apocalypse Now"),
+                        TypeQL.cVar("t").eq("Apocalypse Now"),
                         and(
-                                var("t").lt("Juno"),
-                                var("t").gt("Godfather")
+                                TypeQL.cVar("t").lt("Juno"),
+                                TypeQL.cVar("t").gt("Godfather")
                         ),
-                        var("t").eq("Spy")
+                        TypeQL.cVar("t").eq("Spy")
                 ),
-                var("t").neq("Apocalypse Now")
+                TypeQL.cVar("t").neq("Apocalypse Now")
         );
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));

@@ -48,6 +48,11 @@ public class ConceptVariable extends BoundVariable {
     }
 
     @Override
+    public UnboundConceptVariable toUnbound() {
+        return new UnboundConceptVariable(reference);
+    }
+
+    @Override
     public boolean isConcept() {
         return true;
     }

@@ -36,15 +36,19 @@ public abstract class Reference {
     final Type type;
     final boolean isVisible;
 
-    enum Type {NAME, LABEL, ANONYMOUS}
+    enum Type {NAME_CONCEPT, NAME_VALUE, ANONYMOUS, LABEL,}
 
     Reference(Type type, boolean isVisible) {
         this.type = type;
         this.isVisible = isVisible;
     }
 
-    public static Reference.Name name(String name) {
-        return new Name(name);
+    public static Name.Concept concept(String name) {
+        return new Name.Concept(name);
+    }
+
+    public static Name.Value value(String name) {
+        return new Name.Value(name);
     }
 
     public static Reference.Label label(String label) {
@@ -62,19 +66,23 @@ public abstract class Reference {
     public abstract String name();
 
     public String syntax() {
-        return TypeQLToken.Char.$ + name();
+        return (type == Type.NAME_VALUE ? TypeQLToken.Char.QUESTION_MARK : TypeQLToken.Char.$) + name();
     }
 
     protected boolean isVisible() {
         return isVisible;
     }
 
-    public boolean isReferable() {
-        return !isAnonymous();
+    public boolean isName() {
+        return false;
     }
 
-    public boolean isName() {
-        return type == Type.NAME;
+    public boolean isNameConcept() {
+        return type == Type.NAME_CONCEPT;
+    }
+
+    public boolean isNameValue() {
+        return type == Type.NAME_VALUE;
     }
 
     public boolean isLabel() {
@@ -85,11 +93,7 @@ public abstract class Reference {
         return type == Type.ANONYMOUS;
     }
 
-    public Referable asReferable() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Referable.class)));
-    }
-
-    public Reference.Name asName() {
+    public Name asName() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Name.class)));
     }
 
@@ -112,29 +116,17 @@ public abstract class Reference {
     @Override
     public abstract int hashCode();
 
-    public static abstract class Referable extends Reference {
-
-        Referable(Type type, boolean isVisible) {
-            super(type, isVisible);
-        }
-
-        @Override
-        public Referable asReferable() {
-            return this;
-        }
-    }
-
-    public static class Name extends Referable {
+    public static abstract class Name extends Reference {
 
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
-        protected final String name;
+        final String name;
         private final int hash;
 
-        protected Name(String name) {
-            super(Type.NAME, true);
-            if (!REGEX.matcher(name).matches()) {
-                throw TypeQLException.of(INVALID_VARIABLE_NAME.message(name, REGEX.toString()));
-            }
+
+        Name(Type type, String name, boolean isVisible) {
+            super(type, isVisible);
+            if (!REGEX.matcher(name).matches())
+                throw TypeQLException.of(INVALID_VARIABLE_NAME.message(name, REGEX.pattern()));
             this.name = name;
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }
@@ -145,27 +137,71 @@ public abstract class Reference {
         }
 
         @Override
+        public boolean isName() {
+            return true;
+        }
+
+        @Override
         public Name asName() {
             return this;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Name that = (Name) o;
-            return (this.type == that.type &&
-                    this.isVisible == that.isVisible &&
-                    this.name.equals(that.name));
+        public Concept asConcept() {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Concept.class)));
+        }
+
+        public Value asValue() {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Value.class)));
         }
 
         @Override
         public int hashCode() {
             return hash;
         }
+
+
+        public static class Value extends Name {
+
+            private Value(String name) {
+                super(Type.NAME_VALUE, name, true);
+            }
+
+            @Override
+            public Value asValue() {
+                return this;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Value that = (Value) o;
+                return (this.type == that.type && this.isVisible == that.isVisible && this.name.equals(that.name));
+            }
+        }
+
+        public static class Concept extends Name {
+
+            private Concept(String name) {
+                super(Type.NAME_CONCEPT, name, true);
+            }
+
+            @Override
+            public Concept asConcept() {
+                return this;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Concept that = (Concept) o;
+                return (this.type == that.type && this.isVisible == that.isVisible && this.name.equals(that.name));
+            }
+        }
     }
 
-    public static class Label extends Referable {
+    public static class Label extends Reference {
 
         private final String label;
         private final int hash;
@@ -238,4 +274,6 @@ public abstract class Reference {
             return hash;
         }
     }
+
+
 }

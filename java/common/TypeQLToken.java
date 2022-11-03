@@ -139,7 +139,8 @@ public class TypeQLToken {
         INDENTATION("    "),
         UNDERSCORE("_"),
         $_("$_"),
-        $("$");
+        $("$"),
+        QUESTION_MARK("?");
 
         private final String character;
 
@@ -177,11 +178,6 @@ public class TypeQLToken {
             this.operator = operator;
         }
 
-        @Override
-        public String toString() {
-            return this.operator;
-        }
-
         public static Operator of(String value) {
             for (Operator c : Operator.values()) {
                 if (c.operator.equals(value)) {
@@ -189,6 +185,11 @@ public class TypeQLToken {
                 }
             }
             return null;
+        }
+
+        @Override
+        public String toString() {
+            return this.operator;
         }
     }
 
@@ -211,7 +212,7 @@ public class TypeQLToken {
         }
 
         enum Equality implements Predicate {
-            EQ("="),
+            EQ("=="),
             NEQ("!="),
             GT(">"),
             GTE(">="),
@@ -314,6 +315,7 @@ public class TypeQLToken {
     public enum Constraint {
         ABSTRACT("abstract"),
         AS("as"),
+        ASSIGN("="),
         HAS("has"),
         IID("iid"),
         IS("is"),
@@ -433,4 +435,59 @@ public class TypeQLToken {
         }
     }
 
+    public static class Expression {
+        public enum Operation {
+            POW("^"),
+            TIMES("*"),
+            DIV("/"),
+            MOD("%"),
+            PLUS("+"),
+            MINUS("-");
+
+            private final String symbol;
+
+            Operation(String symbol) {
+                this.symbol = symbol;
+            }
+
+            @Override
+            public String toString() {
+                return this.symbol;
+            }
+
+            public static Operator of(String value) {
+                for (Operator c : Operator.values()) {
+                    if (c.operator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
+        }
+
+        public enum Function {
+            MAX("max"), MIN("min"),
+            FLOOR("floor"), CEIL("ceil"), ROUND("round"), ABS("abs");
+
+            private final String symbol;
+
+            Function(String symbol) {
+                this.symbol = symbol;
+            }
+            
+            @Override
+            public String toString() {
+                return this.symbol;
+            }
+
+            public static Operator of(String value) {
+                for (Operator c : Operator.values()) {
+                    if (c.operator.equals(value)) {
+                        return c;
+                    }
+                }
+                return null;
+            }
+        }
+    }
 }

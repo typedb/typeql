@@ -31,19 +31,26 @@ import com.vaticle.typeql.lang.pattern.Disjunction;
 import com.vaticle.typeql.lang.pattern.Negation;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
+import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
+import com.vaticle.typeql.lang.pattern.variable.builder.ExpressionBuilder;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
@@ -54,7 +61,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CHAR_IN_LABEL;
-import static com.vaticle.typeql.lang.pattern.variable.UnboundVariable.hidden;
+import static com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable.hidden;
 
 public class TypeQL {
 
@@ -76,9 +83,13 @@ public class TypeQL {
         return parser.parsePatternsEOF(pattern);
     }
 
-    public static List<Definable> parseDefinables(String pattern) {return parser.parseDefinablesEOF(pattern);}
+    public static List<Definable> parseDefinables(String pattern) {
+        return parser.parseDefinablesEOF(pattern);
+    }
 
-    public static Rule parseRule(String pattern) {return parser.parseSchemaRuleEOF(pattern).asRule();}
+    public static Rule parseRule(String pattern) {
+        return parser.parseSchemaRuleEOF(pattern).asRule();
+    }
 
     public static BoundVariable parseVariable(String variable) {
         return parser.parseVariableEOF(variable);
@@ -160,12 +171,16 @@ public class TypeQL {
         return new Rule(label);
     }
 
-    public static UnboundVariable var() {
-        return UnboundVariable.anonymous();
+    public static UnboundConceptVariable cVar() {
+        return UnboundConceptVariable.anonymous();
     }
 
-    public static UnboundVariable var(String name) {
-        return UnboundVariable.named(name);
+    public static UnboundConceptVariable cVar(String name) {
+        return UnboundConceptVariable.named(name);
+    }
+
+    public static UnboundValueVariable vVar(String name) {
+        return UnboundValueVariable.named(name);
     }
 
     public static TypeVariable type(TypeQLToken.Type type) {
@@ -176,176 +191,245 @@ public class TypeQL {
         return hidden().type(label);
     }
 
-    public static ThingVariable.Relation rel(String playerVar) {
+    public static ThingVariable.Relation rel(UnboundConceptVariable playerVar) {
         return hidden().rel(playerVar);
     }
 
-    public static ThingVariable.Relation rel(UnboundVariable playerVar) {
-        return hidden().rel(playerVar);
-    }
-
-    public static ThingVariable.Relation rel(String roleType, String playerVar) {
+    public static ThingVariable.Relation rel(String roleType, UnboundConceptVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingVariable.Relation rel(String roleType, UnboundVariable playerVar) {
+    public static ThingVariable.Relation rel(UnboundConceptVariable roleType, UnboundConceptVariable playerVar) {
         return hidden().rel(roleType, playerVar);
     }
 
-    public static ThingVariable.Relation rel(UnboundVariable roleType, UnboundVariable playerVar) {
-        return hidden().rel(roleType, playerVar);
+    public static ThingConstraint.Predicate eq(long value) {
+        return new ThingConstraint.Predicate(new Predicate.Long(EQ, value));
     }
 
-    public static ThingConstraint.Value.Long eq(long value) {
-        return new ThingConstraint.Value.Long(EQ, value);
+    public static ThingConstraint.Predicate eq(double value) {
+        return new ThingConstraint.Predicate(new Predicate.Double(EQ, value));
     }
 
-    public static ThingConstraint.Value.Double eq(double value) {
-        return new ThingConstraint.Value.Double(EQ, value);
+    public static ThingConstraint.Predicate eq(boolean value) {
+        return new ThingConstraint.Predicate(new Predicate.Boolean(EQ, value));
     }
 
-    public static ThingConstraint.Value.Boolean eq(boolean value) {
-        return new ThingConstraint.Value.Boolean(EQ, value);
+    public static ThingConstraint.Predicate eq(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(EQ, value));
     }
 
-    public static ThingConstraint.Value.String eq(String value) {
-        return new ThingConstraint.Value.String(EQ, value);
+    public static ThingConstraint.Predicate eq(LocalDateTime value) {
+        return new ThingConstraint.Predicate(new Predicate.DateTime(EQ, value));
     }
 
-    public static ThingConstraint.Value.DateTime eq(LocalDateTime value) {
-        return new ThingConstraint.Value.DateTime(EQ, value);
+    public static ThingConstraint.Predicate eq(UnboundConceptVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ThingVariable(EQ, variable.toThing()));
     }
 
-    public static ThingConstraint.Value.Variable eq(UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(EQ, variable);
+    public static ThingConstraint.Predicate eq(UnboundValueVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ValueVariable(EQ, variable.toValue()));
     }
 
-    public static ThingConstraint.Value.Long neq(long value) {
-        return new ThingConstraint.Value.Long(NEQ, value);
+    public static ThingConstraint.Predicate neq(long value) {
+        return new ThingConstraint.Predicate(new Predicate.Long(NEQ, value));
     }
 
-    public static ThingConstraint.Value.Double neq(double value) {
-        return new ThingConstraint.Value.Double(NEQ, value);
+    public static ThingConstraint.Predicate neq(double value) {
+        return new ThingConstraint.Predicate(new Predicate.Double(NEQ, value));
     }
 
-    public static ThingConstraint.Value.Boolean neq(boolean value) {
-        return new ThingConstraint.Value.Boolean(NEQ, value);
+    public static ThingConstraint.Predicate neq(boolean value) {
+        return new ThingConstraint.Predicate(new Predicate.Boolean(NEQ, value));
     }
 
-    public static ThingConstraint.Value.String neq(String value) {
-        return new ThingConstraint.Value.String(NEQ, value);
+    public static ThingConstraint.Predicate neq(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(NEQ, value));
     }
 
-    public static ThingConstraint.Value.DateTime neq(LocalDateTime value) {
-        return new ThingConstraint.Value.DateTime(NEQ, value);
+    public static ThingConstraint.Predicate neq(LocalDateTime value) {
+        return new ThingConstraint.Predicate(new Predicate.DateTime(NEQ, value));
     }
 
-    public static ThingConstraint.Value.Variable neq(UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(NEQ, variable);
+    public static ThingConstraint.Predicate neq(UnboundConceptVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ThingVariable(NEQ, variable.toThing()));
     }
 
-    public static ThingConstraint.Value.Long gt(long value) {
-        return new ThingConstraint.Value.Long(GT, value);
+    public static ThingConstraint.Predicate neq(UnboundValueVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ValueVariable(NEQ, variable.toValue()));
     }
 
-    public static ThingConstraint.Value.Double gt(double value) {
-        return new ThingConstraint.Value.Double(GT, value);
+    public static ThingConstraint.Predicate gt(long value) {
+        return new ThingConstraint.Predicate(new Predicate.Long(GT, value));
     }
 
-    public static ThingConstraint.Value.Boolean gt(boolean value) {
-        return new ThingConstraint.Value.Boolean(GT, value);
+    public static ThingConstraint.Predicate gt(double value) {
+        return new ThingConstraint.Predicate(new Predicate.Double(GT, value));
     }
 
-    public static ThingConstraint.Value.String gt(String value) {
-        return new ThingConstraint.Value.String(GT, value);
+    public static ThingConstraint.Predicate gt(boolean value) {
+        return new ThingConstraint.Predicate(new Predicate.Boolean(GT, value));
     }
 
-    public static ThingConstraint.Value.DateTime gt(LocalDateTime value) {
-        return new ThingConstraint.Value.DateTime(GT, value);
+    public static ThingConstraint.Predicate gt(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(GT, value));
     }
 
-    public static ThingConstraint.Value.Variable gt(UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(GT, variable);
+    public static ThingConstraint.Predicate gt(LocalDateTime value) {
+        return new ThingConstraint.Predicate(new Predicate.DateTime(GT, value));
     }
 
-    public static ThingConstraint.Value.Long gte(long value) {
-        return new ThingConstraint.Value.Long(GTE, value);
+    public static ThingConstraint.Predicate gt(UnboundConceptVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ThingVariable(GT, variable.toThing()));
     }
 
-    public static ThingConstraint.Value.Double gte(double value) {
-        return new ThingConstraint.Value.Double(GTE, value);
+    public static ThingConstraint.Predicate gt(UnboundValueVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ValueVariable(GT, variable.toValue()));
     }
 
-    public static ThingConstraint.Value.Boolean gte(boolean value) {
-        return new ThingConstraint.Value.Boolean(GTE, value);
+    public static ThingConstraint.Predicate gte(long value) {
+        return new ThingConstraint.Predicate(new Predicate.Long(GTE, value));
     }
 
-    public static ThingConstraint.Value.String gte(String value) {
-        return new ThingConstraint.Value.String(GTE, value);
+    public static ThingConstraint.Predicate gte(double value) {
+        return new ThingConstraint.Predicate(new Predicate.Double(GTE, value));
     }
 
-    public static ThingConstraint.Value.DateTime gte(LocalDateTime value) {
-        return new ThingConstraint.Value.DateTime(GTE, value);
+    public static ThingConstraint.Predicate gte(boolean value) {
+        return new ThingConstraint.Predicate(new Predicate.Boolean(GTE, value));
     }
 
-    public static ThingConstraint.Value.Variable gte(UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(GTE, variable);
+    public static ThingConstraint.Predicate gte(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(GTE, value));
     }
 
-    public static ThingConstraint.Value.Long lt(long value) {
-        return new ThingConstraint.Value.Long(LT, value);
+    public static ThingConstraint.Predicate gte(LocalDateTime value) {
+        return new ThingConstraint.Predicate(new Predicate.DateTime(GTE, value));
     }
 
-    public static ThingConstraint.Value.Double lt(double value) {
-        return new ThingConstraint.Value.Double(LT, value);
+    public static ThingConstraint.Predicate gte(UnboundConceptVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ThingVariable(GTE, variable.toThing()));
     }
 
-    public static ThingConstraint.Value.Boolean lt(boolean value) {
-        return new ThingConstraint.Value.Boolean(LT, value);
+    public static ThingConstraint.Predicate gte(UnboundValueVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ValueVariable(GTE, variable.toValue()));
     }
 
-    public static ThingConstraint.Value.String lt(String value) {
-        return new ThingConstraint.Value.String(LT, value);
+    public static ThingConstraint.Predicate lt(long value) {
+        return new ThingConstraint.Predicate(new Predicate.Long(LT, value));
     }
 
-    public static ThingConstraint.Value.DateTime lt(LocalDateTime value) {
-        return new ThingConstraint.Value.DateTime(LT, value);
+    public static ThingConstraint.Predicate lt(double value) {
+        return new ThingConstraint.Predicate(new Predicate.Double(LT, value));
     }
 
-    public static ThingConstraint.Value.Variable lt(UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(LT, variable);
+    public static ThingConstraint.Predicate lt(boolean value) {
+        return new ThingConstraint.Predicate(new Predicate.Boolean(LT, value));
     }
 
-    public static ThingConstraint.Value.Long lte(long value) {
-        return new ThingConstraint.Value.Long(LTE, value);
+    public static ThingConstraint.Predicate lt(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(LT, value));
     }
 
-    public static ThingConstraint.Value.Double lte(double value) {
-        return new ThingConstraint.Value.Double(LTE, value);
+    public static ThingConstraint.Predicate lt(LocalDateTime value) {
+        return new ThingConstraint.Predicate(new Predicate.DateTime(LT, value));
     }
 
-    public static ThingConstraint.Value.Boolean lte(boolean value) {
-        return new ThingConstraint.Value.Boolean(LTE, value);
+    public static ThingConstraint.Predicate lt(UnboundConceptVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ThingVariable(LT, variable.toThing()));
     }
 
-    public static ThingConstraint.Value.String lte(String value) {
-        return new ThingConstraint.Value.String(LTE, value);
+    public static ThingConstraint.Predicate lt(UnboundValueVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ValueVariable(LT, variable.toValue()));
     }
 
-    public static ThingConstraint.Value.DateTime lte(LocalDateTime value) {
-        return new ThingConstraint.Value.DateTime(LTE, value);
+    public static ThingConstraint.Predicate lte(long value) {
+        return new ThingConstraint.Predicate(new Predicate.Long(LTE, value));
     }
 
-    public static ThingConstraint.Value.Variable lte(UnboundVariable variable) {
-        return new ThingConstraint.Value.Variable(LTE, variable);
+    public static ThingConstraint.Predicate lte(double value) {
+        return new ThingConstraint.Predicate(new Predicate.Double(LTE, value));
     }
 
-    public static ThingConstraint.Value.String contains(String value) {
-        return new ThingConstraint.Value.String(CONTAINS, value);
+    public static ThingConstraint.Predicate lte(boolean value) {
+        return new ThingConstraint.Predicate(new Predicate.Boolean(LTE, value));
     }
 
-    public static ThingConstraint.Value.String like(String value) {
-        return new ThingConstraint.Value.String(LIKE, value);
+    public static ThingConstraint.Predicate lte(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(LTE, value));
     }
 
+    public static ThingConstraint.Predicate lte(LocalDateTime value) {
+        return new ThingConstraint.Predicate(new Predicate.DateTime(LTE, value));
+    }
+
+    public static ThingConstraint.Predicate lte(UnboundConceptVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ThingVariable(LTE, variable.toThing()));
+    }
+
+    public static ThingConstraint.Predicate lte(UnboundValueVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.ValueVariable(LTE, variable.toValue()));
+    }
+
+    public static ThingConstraint.Predicate contains(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(CONTAINS, value));
+    }
+
+    public static ThingConstraint.Predicate like(String value) {
+        return new ThingConstraint.Predicate(new Predicate.String(LIKE, value));
+    }
+
+    public static abstract class Expression {
+        public static ValueConstraint.Assignment.Expression.Operation plus(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
+            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.PLUS, a.toExpression(), b.toExpression());
+        }
+
+        public static ValueConstraint.Assignment.Expression.Operation minus(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
+            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.MINUS, a.toExpression(), b.toExpression());
+        }
+
+        public static ValueConstraint.Assignment.Expression.Operation times(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
+            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.TIMES, a.toExpression(), b.toExpression());
+        }
+
+        public static ValueConstraint.Assignment.Expression.Operation div(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
+            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.DIV, a.toExpression(), b.toExpression());
+        }
+
+        public static ValueConstraint.Assignment.Expression.Operation pow(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
+            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.POW, a.toExpression(), b.toExpression());
+        }
+
+        public static ValueConstraint.Assignment.Expression.Function func(TypeQLToken.Expression.Function funcId, ExpressionBuilder<?>... args) {
+            return func(funcId, list(args));
+        }
+
+        public static ValueConstraint.Assignment.Expression.Function func(TypeQLToken.Expression.Function funcId, List<ExpressionBuilder<?>> args) {
+            return new ValueConstraint.Assignment.Expression.Function(funcId, args.stream().map(ExpressionBuilder::toExpression).collect(Collectors.toList()));
+        }
+
+        public static ValueConstraint.Assignment.Expression.Bracketed bracketed(ExpressionBuilder<?> nestedExpr) {
+            return new ValueConstraint.Assignment.Expression.Bracketed(nestedExpr.toExpression());
+        }
+
+        public static ValueConstraint.Assignment.Expression.Constant.Boolean constant(boolean value) {
+            return new ValueConstraint.Assignment.Expression.Constant.Boolean(value);
+        }
+
+        public static ValueConstraint.Assignment.Expression.Constant.Long constant(long value) {
+            return new ValueConstraint.Assignment.Expression.Constant.Long(value);
+        }
+
+        public static ValueConstraint.Assignment.Expression.Constant.Double constant(double value) {
+            return new ValueConstraint.Assignment.Expression.Constant.Double(value);
+        }
+
+        public static ValueConstraint.Assignment.Expression.Constant.String constant(String value) {
+            return new ValueConstraint.Assignment.Expression.Constant.String(value);
+        }
+
+        public static ValueConstraint.Assignment.Expression.Constant.DateTime constant(LocalDateTime value) {
+            return new ValueConstraint.Assignment.Expression.Constant.DateTime(value);
+        }
+    }
 }
