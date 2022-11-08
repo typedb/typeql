@@ -1314,7 +1314,7 @@ fn test_parse_list_one_insert() {
     assert_eq!(parsed, expected);
 }
 
-// #[test]  // TODO antlr4rust bug?
+#[test]
 fn test_parse_list_one_insert_with_whitespace_prefix() {
     let queries = " insert $x isa movie;";
     let parsed =
@@ -1323,7 +1323,7 @@ fn test_parse_list_one_insert_with_whitespace_prefix() {
     assert_eq!(parsed, expected);
 }
 
-// #[test]  // TODO antlr4rust bug?
+#[test]
 fn test_parse_list_one_insert_with_prefix_comment() {
     let queries = r#"#hola
 insert $x isa movie;"#;

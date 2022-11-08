@@ -47,9 +47,21 @@ use parser::{
 use pattern::{Label, Pattern, RuleDefinition, Variable};
 use query::Query;
 
+fn trim_start(s: &str) -> &str {
+    if !s.starts_with(|c: char| c.is_ascii_whitespace() || c == '#') {
+        s
+    } else {
+        if s.starts_with("#") {
+            trim_start(s.split_once("\n").unwrap().1)
+        } else {
+            trim_start(s.trim_start())
+        }
+    }
+}
+
 macro_rules! parse {
-    ($visitor:ident($accessor:ident($input:expr))) => {{
-        let input = $input;
+    ($visitor:ident($accessor:ident($input:ident))) => {{
+        let input = trim_start($input.trim());
         let lexer = TypeQLRustLexer::new(InputStream::new(input));
         let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
 
@@ -73,35 +85,35 @@ macro_rules! parse {
 }
 
 pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
-    parse!(visit_eof_query(eof_query(typeql_query.trim_end())))
+    parse!(visit_eof_query(eof_query(typeql_query)))
 }
 
 pub fn parse_queries(
     typeql_queries: &str,
 ) -> Result<impl Iterator<Item = Result<Query, ErrorMessage>> + '_, String> {
-    parse!(visit_eof_queries(eof_queries(typeql_queries.trim_end())))
+    parse!(visit_eof_queries(eof_queries(typeql_queries)))
 }
 
 pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, String> {
-    parse!(visit_eof_pattern(eof_pattern(typeql_pattern.trim_end())))
+    parse!(visit_eof_pattern(eof_pattern(typeql_pattern)))
 }
 
 pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>, String> {
-    parse!(visit_eof_patterns(eof_patterns(typeql_patterns.trim_end())))
+    parse!(visit_eof_patterns(eof_patterns(typeql_patterns)))
 }
 
 pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Pattern>, String> {
-    parse!(visit_eof_definables(eof_definables(typeql_definables.trim_end())))
+    parse!(visit_eof_definables(eof_definables(typeql_definables)))
 }
 
 pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition, String> {
-    parse!(visit_eof_schema_rule(eof_schema_rule(typeql_rule.trim_end())))
+    parse!(visit_eof_schema_rule(eof_schema_rule(typeql_rule)))
 }
 
 pub fn parse_variable(typeql_variable: &str) -> Result<Variable, String> {
-    parse!(visit_eof_variable(eof_variable(typeql_variable.trim_end())))
+    parse!(visit_eof_variable(eof_variable(typeql_variable)))
 }
 
 pub fn parse_label(typeql_label: &str) -> Result<Label, String> {
-    parse!(visit_eof_label(eof_label(typeql_label.trim_end())))
+    parse!(visit_eof_label(eof_label(typeql_label)))
 }
