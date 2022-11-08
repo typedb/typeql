@@ -22,7 +22,7 @@
 
 use crate::{
     common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable, variable::Reference},
+    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 use std::fmt;

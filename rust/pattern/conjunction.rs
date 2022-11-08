@@ -21,10 +21,13 @@
  */
 
 use crate::{
-    common::string::indent,
+    common::{
+        error::{ErrorMessage, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        string::indent,
+    },
     pattern::{Pattern, Reference},
 };
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -42,9 +45,7 @@ impl Conjunction {
                 .iter()
                 .filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_)))
                 .flat_map(|p| match p {
-                    Pattern::Variable(v) => {
-                        Box::new(std::iter::once(v.reference()).chain(v.references()))
-                    }
+                    Pattern::Variable(v) => v.references(),
                     Pattern::Conjunction(c) => c.references(),
                     _ => unreachable!(),
                 }),
@@ -53,6 +54,25 @@ impl Conjunction {
 
     pub fn has_named_variables(&self) -> bool {
         self.references().filter(|r| r.is_name()).next().is_some()
+    }
+
+    pub fn names(&self) -> HashSet<String> {
+        self.references()
+            .filter(|r| r.is_name())
+            .map(|r| match r {
+                Reference::Name(s) => s.clone(),
+                _ => unreachable!(),
+            })
+            .collect()
+    }
+
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
+        let names = self.names();
+        if names.is_disjoint(bounds) {
+            Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace("\n", " ")]))?;
+        }
+        let bounds = bounds.union(&names).cloned().collect();
+        self.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)).collect()
     }
 }
 

@@ -43,11 +43,17 @@ fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<(), Erro
     Ok(())
 }
 
+fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), ErrorMessage> {
+    let bounds = conjunction.names();
+    conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)).collect()
+}
+
 impl TypeQLMatch {
     pub fn new(patterns: Vec<Pattern>, modifiers: Modifiers) -> Result<Self, ErrorMessage> {
         let conjunction = Conjunction::new(patterns);
 
         expect_has_bounding_conjunction(&conjunction)?;
+        expect_nested_patterns_are_bounded(&conjunction)?;
 
         Ok(Self { conjunction, modifiers })
     }

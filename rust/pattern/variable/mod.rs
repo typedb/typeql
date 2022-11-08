@@ -21,7 +21,9 @@
  */
 
 mod reference;
+
 pub use reference::{Reference, Visibility};
+use std::collections::HashSet;
 
 mod concept;
 pub use concept::ConceptVariable;
@@ -41,7 +43,10 @@ pub use builder::{
     ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
 };
 
-use crate::enum_wrapper;
+use crate::{
+    common::error::{ErrorMessage, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+    enum_wrapper,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -65,16 +70,29 @@ impl Variable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         use Variable::*;
-        match self {
+        Box::new(std::iter::once(self.reference()).chain(match self {
             Unbound(unbound) => unbound.references(),
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
             Type(type_) => type_.references(),
-        }
+        }))
     }
 
-    pub fn is_named(&self) -> bool {
-        self.reference().is_name()
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
+        match self {
+            Self::Unbound(_) => unreachable!(),
+            _ => {
+                if self.references().any(|r| match r {
+                    Reference::Name(s) => bounds.contains(s),
+                    _ => false,
+                }) {
+                    Ok(())
+                } else {
+                    Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
+                        .format(&[&self.to_string().replace("\n", " ")]))
+                }
+            }
+        }
     }
 }
 

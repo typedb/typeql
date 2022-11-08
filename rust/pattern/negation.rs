@@ -20,8 +20,12 @@
  *
  */
 
-use crate::{common::token, pattern::Pattern};
+use crate::{
+    common::{error::ErrorMessage, token},
+    pattern::Pattern,
+};
 use core::fmt;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Negation {
@@ -31,6 +35,10 @@ pub struct Negation {
 impl Negation {
     pub fn new(pattern: Pattern) -> Self {
         Negation { pattern: Box::new(pattern) }
+    }
+
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
+        self.pattern.expect_is_bounded_by(bounds)
     }
 }
 

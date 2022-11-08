@@ -635,7 +635,7 @@ $y isa $p;
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]  // TODO validation
+#[test]
 fn test_disjunction_not_binding_conjunction() {
     let query = r#"match
 $y isa $p;

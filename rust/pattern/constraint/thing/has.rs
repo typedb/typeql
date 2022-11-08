@@ -23,13 +23,12 @@
 use crate::{
     common::token,
     pattern::{
-        ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable,
-        Value, ValueConstraint,
+        Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
+        UnboundVariable, Value, ValueConstraint,
     },
     ErrorMessage,
 };
 use std::{convert::Infallible, fmt};
-use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {
@@ -39,7 +38,12 @@ pub struct HasConstraint {
 
 impl HasConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.type_.iter().map(|t| &t.reference).chain(std::iter::once(&self.attribute.reference)))
+        Box::new(
+            self.type_
+                .iter()
+                .map(|t| &t.reference)
+                .chain(std::iter::once(&self.attribute.reference)),
+        )
     }
 }
 

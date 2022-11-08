@@ -53,10 +53,12 @@ impl ThingVariable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            self.isa.iter().flat_map(|c| c.references())
+            self.isa
+                .iter()
+                .flat_map(|c| c.references())
                 .chain(self.has.iter().flat_map(|c| c.references()))
                 .chain(self.relation.iter().flat_map(|c| c.references()))
-                .chain(self.value.iter().flat_map(|c| c.references()))
+                .chain(self.value.iter().flat_map(|c| c.references())),
         )
     }
 

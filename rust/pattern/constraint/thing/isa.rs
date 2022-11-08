@@ -22,11 +22,10 @@
 
 use crate::{
     common::token,
-    pattern::{IsExplicit, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{IsExplicit, Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 use std::fmt;
-use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {

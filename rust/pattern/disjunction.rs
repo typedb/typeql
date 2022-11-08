@@ -21,10 +21,10 @@
  */
 
 use crate::{
-    common::{string::indent, token},
+    common::{error::ErrorMessage, string::indent, token},
     pattern::Pattern,
 };
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Disjunction {
@@ -34,6 +34,10 @@ pub struct Disjunction {
 impl Disjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Disjunction { patterns }
+    }
+
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
+        self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)).collect()
     }
 }
 

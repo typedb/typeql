@@ -21,7 +21,9 @@
  */
 
 mod conjunction;
+
 pub use conjunction::Conjunction;
+use std::collections::HashSet;
 
 mod constraint;
 pub use constraint::{
@@ -54,7 +56,7 @@ pub use variable::{
 #[cfg(test)]
 mod test;
 
-use crate::{enum_as, enum_getter, enum_wrapper};
+use crate::{common::error::ErrorMessage, enum_getter, enum_wrapper};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -75,12 +77,16 @@ impl Pattern {
     enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
 
-    enum_as!(as_conjunction, Conjunction, Conjunction);
-    enum_as!(as_disjunction, Disjunction, Disjunction);
-    enum_as!(as_negation, Negation, Negation);
-    enum_as!(as_rule, Rule, RuleDefinition);
-    enum_as!(as_rule_declaration, RuleDeclaration, RuleDeclaration);
-    enum_as!(as_variable, Variable, Variable);
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
+            Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
+            Negation(negation) => negation.expect_is_bounded_by(bounds),
+            Variable(variable) => variable.expect_is_bounded_by(bounds),
+            _ => unreachable!(),
+        }
+    }
 }
 
 enum_wrapper! { Pattern

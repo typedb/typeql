@@ -22,11 +22,10 @@
 
 use crate::{
     common::token,
-    pattern::{ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
     write_joined, Label,
 };
 use std::fmt;
-use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
@@ -75,7 +74,12 @@ impl RolePlayerConstraint {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.role_type.iter().map(|r| &r.reference).chain(std::iter::once(&self.player.reference)))
+        Box::new(
+            self.role_type
+                .iter()
+                .map(|r| &r.reference)
+                .chain(std::iter::once(&self.player.reference)),
+        )
     }
 }
 
