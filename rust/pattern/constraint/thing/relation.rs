@@ -26,6 +26,7 @@ use crate::{
     write_joined, Label,
 };
 use std::fmt;
+use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
@@ -40,6 +41,10 @@ impl RelationConstraint {
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {
         self.role_players.push(role_player);
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.role_players.iter().flat_map(|rp| rp.references()))
     }
 }
 
@@ -67,6 +72,10 @@ pub struct RolePlayerConstraint {
 impl RolePlayerConstraint {
     pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> Self {
         RolePlayerConstraint { role_type, player, repetition: 0 }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.role_type.iter().map(|r| &r.reference).chain(std::iter::once(&self.player.reference)))
     }
 }
 

@@ -58,6 +58,10 @@ impl UnboundVariable {
     pub fn hidden() -> UnboundVariable {
         UnboundVariable { reference: Reference::Anonymous(Visibility::Invisible) }
     }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(std::iter::empty())
+    }
 }
 
 impl ConceptConstrainable for UnboundVariable {

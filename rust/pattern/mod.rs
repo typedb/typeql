@@ -54,7 +54,7 @@ pub use variable::{
 #[cfg(test)]
 mod test;
 
-use crate::{enum_getter, enum_wrapper};
+use crate::{enum_as, enum_getter, enum_wrapper};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -74,6 +74,13 @@ impl Pattern {
     enum_getter!(into_rule, Rule, RuleDefinition);
     enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
+
+    enum_as!(as_conjunction, Conjunction, Conjunction);
+    enum_as!(as_disjunction, Disjunction, Disjunction);
+    enum_as!(as_negation, Negation, Negation);
+    enum_as!(as_rule, Rule, RuleDefinition);
+    enum_as!(as_rule_declaration, RuleDeclaration, RuleDeclaration);
+    enum_as!(as_variable, Variable, Variable);
 }
 
 enum_wrapper! { Pattern

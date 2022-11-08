@@ -22,7 +22,7 @@
 
 use crate::{
     common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable, variable::Reference},
     Label,
 };
 use std::fmt;
@@ -30,6 +30,12 @@ use std::fmt;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
     pub type_: Box<TypeVariable>,
+}
+
+impl SubConstraint {
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(std::iter::once(&self.type_.reference))
+    }
 }
 
 impl<T: Into<Label>> From<T> for SubConstraint {

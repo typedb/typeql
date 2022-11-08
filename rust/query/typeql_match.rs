@@ -21,10 +21,10 @@
  */
 
 use crate::{
-    common::token,
+    common::{error::MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE, token},
     pattern::{Conjunction, Pattern, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
-    var, write_joined,
+    var, write_joined, ErrorMessage,
 };
 use std::fmt;
 
@@ -36,9 +36,24 @@ pub struct TypeQLMatch {
 
 impl AggregateQueryBuilder for TypeQLMatch {}
 
+fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<(), ErrorMessage> {
+    if !conjunction.has_named_variables() {
+        Err(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE.format(&[]))?;
+    }
+    Ok(())
+}
+
 impl TypeQLMatch {
-    pub fn new(patterns: Vec<Pattern>) -> Self {
-        Self { conjunction: Conjunction::new(patterns), modifiers: Modifiers::default() }
+    pub fn new(patterns: Vec<Pattern>, modifiers: Modifiers) -> Result<Self, ErrorMessage> {
+        let conjunction = Conjunction::new(patterns);
+
+        expect_has_bounding_conjunction(&conjunction)?;
+
+        Ok(Self { conjunction, modifiers })
+    }
+
+    pub fn from_patterns(patterns: Vec<Pattern>) -> Result<Self, ErrorMessage> {
+        Self::new(patterns, Modifiers::default())
     }
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {

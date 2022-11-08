@@ -33,6 +33,18 @@ macro_rules! enum_getter {
 }
 
 #[macro_export]
+macro_rules! enum_as {
+    ($fn_name:ident, $enum_value:ident, $classname:ty) => {
+        pub fn $fn_name(&self) -> &$classname {
+            match &self {
+                Self::$enum_value(x) => &x,
+                _ => panic!(""),
+            }
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! enum_wrapper {
     {$enum_name:ident $($classname:ty => $enum_value:ident),* $(,)*} => {
         $(impl From<$classname> for $enum_name {

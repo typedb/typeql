@@ -32,6 +32,7 @@ use crate::{
 };
 use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
+use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueConstraint {
@@ -45,6 +46,13 @@ impl ValueConstraint {
             Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))
         } else {
             Ok(ValueConstraint { predicate, value })
+        }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        match &self.value {
+            Value::Variable(v) => Box::new(std::iter::once(&v.reference)),
+            _ => Box::new(std::iter::empty())
         }
     }
 }

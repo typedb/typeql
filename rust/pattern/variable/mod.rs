@@ -52,6 +52,32 @@ pub enum Variable {
     Unbound(UnboundVariable),
 }
 
+impl Variable {
+    pub fn reference(&self) -> &Reference {
+        use Variable::*;
+        match self {
+            Unbound(unbound) => &unbound.reference,
+            Concept(concept) => &concept.reference,
+            Thing(thing) => &thing.reference,
+            Type(type_) => &type_.reference,
+        }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        use Variable::*;
+        match self {
+            Unbound(unbound) => unbound.references(),
+            Concept(concept) => concept.references(),
+            Thing(thing) => thing.references(),
+            Type(type_) => type_.references(),
+        }
+    }
+
+    pub fn is_named(&self) -> bool {
+        self.reference().is_name()
+    }
+}
+
 enum_wrapper! { Variable
     ConceptVariable => Concept,
     ThingVariable => Thing,

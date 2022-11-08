@@ -32,7 +32,7 @@ use crate::{
 #[macro_export]
 macro_rules! typeql_match {
     ($($pattern:expr),* $(,)?) => {{
-        TypeQLMatch::new(vec![$($pattern.into()),*])
+        TypeQLMatch::from_patterns(vec![$($pattern.into()),*])
     }}
 }
 

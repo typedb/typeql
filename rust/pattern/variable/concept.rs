@@ -36,6 +36,10 @@ impl ConceptVariable {
     pub fn new(reference: Reference) -> ConceptVariable {
         ConceptVariable { reference, is_constraint: None }
     }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(std::iter::empty())
+    }
 }
 
 impl ConceptConstrainable for ConceptVariable {

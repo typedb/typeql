@@ -22,7 +22,7 @@
 
 use crate::{
     common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable, variable::Reference},
     Label,
 };
 use std::fmt;
@@ -31,6 +31,15 @@ use std::fmt;
 pub struct RelatesConstraint {
     pub role_type: TypeVariable,
     pub overridden_role_type: Option<TypeVariable>,
+}
+
+impl RelatesConstraint {
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            std::iter::once(&self.role_type.reference)
+                .chain(self.overridden_role_type.iter().map(|v| &v.reference)),
+        )
+    }
 }
 
 impl From<&str> for RelatesConstraint {

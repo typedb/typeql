@@ -57,6 +57,15 @@ impl TypeVariable {
         }
     }
 
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            self.owns.iter().flat_map(|c| c.references())
+                .chain(self.plays.iter().flat_map(|c| c.references()))
+                .chain(self.relates.iter().flat_map(|c| c.references()))
+                .chain(self.sub.iter().flat_map(|c| c.references()))
+        )
+    }
+
     fn is_type_constrained(&self) -> bool {
         self.abstract_.is_some()
             || !self.owns.is_empty()

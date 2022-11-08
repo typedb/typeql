@@ -29,7 +29,7 @@ use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {
-    variable: Box<ConceptVariable>,
+    pub variable: Box<ConceptVariable>,
 }
 
 impl IsConstraint {

@@ -20,7 +20,10 @@
  *
  */
 
-use crate::{common::string::indent, pattern::Pattern};
+use crate::{
+    common::string::indent,
+    pattern::{Pattern, Reference},
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -31,6 +34,25 @@ pub struct Conjunction {
 impl Conjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Conjunction { patterns }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            self.patterns
+                .iter()
+                .filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_)))
+                .flat_map(|p| match p {
+                    Pattern::Variable(v) => {
+                        Box::new(std::iter::once(v.reference()).chain(v.references()))
+                    }
+                    Pattern::Conjunction(c) => c.references(),
+                    _ => unreachable!(),
+                }),
+        )
+    }
+
+    pub fn has_named_variables(&self) -> bool {
+        self.references().filter(|r| r.is_name()).next().is_some()
     }
 }
 

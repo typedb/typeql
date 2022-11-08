@@ -29,11 +29,18 @@ use crate::{
     ErrorMessage,
 };
 use std::{convert::Infallible, fmt};
+use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {
     pub type_: Option<TypeVariable>,
     pub attribute: ThingVariable,
+}
+
+impl HasConstraint {
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.type_.iter().map(|t| &t.reference).chain(std::iter::once(&self.attribute.reference)))
+    }
 }
 
 impl From<UnboundVariable> for HasConstraint {

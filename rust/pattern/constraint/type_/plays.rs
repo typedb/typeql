@@ -22,7 +22,7 @@
 
 use crate::{
     common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 use std::fmt;
@@ -43,6 +43,14 @@ impl PlaysConstraint {
             role_type,
             overridden_role_type,
         }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            std::iter::once(&self.role_type.reference)
+                .chain(self.relation_type.iter().map(|v| &v.reference))
+                .chain(self.overridden_role_type.iter().map(|v| &v.reference)),
+        )
     }
 }
 

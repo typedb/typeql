@@ -51,6 +51,15 @@ impl ThingVariable {
         }
     }
 
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            self.isa.iter().flat_map(|c| c.references())
+                .chain(self.has.iter().flat_map(|c| c.references()))
+                .chain(self.relation.iter().flat_map(|c| c.references()))
+                .chain(self.value.iter().flat_map(|c| c.references()))
+        )
+    }
+
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;

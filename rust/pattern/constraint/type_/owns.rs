@@ -22,7 +22,7 @@
 
 use crate::{
     common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 use std::fmt;
@@ -67,6 +67,13 @@ impl OwnsConstraint {
         is_key: IsKeyAttribute,
     ) -> Self {
         OwnsConstraint { attribute_type, overridden_attribute_type, is_key }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            std::iter::once(&self.attribute_type.reference)
+                .chain(self.overridden_attribute_type.iter().map(|v| &v.reference)),
+        )
     }
 }
 

@@ -26,6 +26,7 @@ use crate::{
     Label,
 };
 use std::fmt;
+use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
@@ -36,6 +37,10 @@ pub struct IsaConstraint {
 impl IsaConstraint {
     fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
         IsaConstraint { type_, is_explicit }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(std::iter::once(&self.type_.reference))
     }
 }
 
