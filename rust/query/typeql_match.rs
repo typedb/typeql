@@ -108,9 +108,7 @@ fn expect_sort_vars_are_in_scope(
 }
 
 impl TypeQLMatch {
-    pub fn new(patterns: Vec<Pattern>, modifiers: Modifiers) -> Result<Self, ErrorMessage> {
-        let conjunction = Conjunction::new(patterns);
-
+    pub fn new(conjunction: Conjunction, modifiers: Modifiers) -> Result<Self, ErrorMessage> {
         expect_has_bounding_conjunction(&conjunction)?;
         expect_nested_patterns_are_bounded(&conjunction)?;
         expect_filters_are_in_scope(&conjunction, &modifiers.filter)?;
@@ -120,19 +118,19 @@ impl TypeQLMatch {
     }
 
     pub fn from_patterns(patterns: Vec<Pattern>) -> Result<Self, ErrorMessage> {
-        Self::new(patterns, Modifiers::default())
+        Self::new(Conjunction::new(patterns), Modifiers::default())
     }
 
-    pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
-        TypeQLMatch { modifiers: self.modifiers.filter(vars), ..self }
+    pub fn filter(self, vars: Vec<UnboundVariable>) -> Result<Self, ErrorMessage> {
+        Self::new(self.conjunction, self.modifiers.filter(vars))
     }
 
-    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
+    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Result<Self, ErrorMessage> {
         self.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect())
     }
 
-    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
-        TypeQLMatch { modifiers: self.modifiers.sort(sorting), ..self }
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Result<Self, ErrorMessage> {
+        Self::new(self.conjunction, self.modifiers.sort(sorting))
     }
 
     pub fn limit(self, limit: usize) -> Self {

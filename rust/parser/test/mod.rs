@@ -58,7 +58,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = try_! { typeql_match!(var("a").type_("attribute_label"))?.get(["a"]) }.unwrap();
+    let expected = try_! { typeql_match!(var("a").type_("attribute_label"))?.get(["a"])? }.unwrap();
     assert_query_eq!(expected, parsed, query);
 }
 
@@ -90,7 +90,7 @@ get $char, $prod;"#;
             var("brando").eq("Marl B").isa("name"),
             rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
         )?
-        .get(["char", "prod"])
+        .get(["char", "prod"])?
     }
     .unwrap();
 
@@ -456,7 +456,7 @@ sort $x asc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = try_! {
-        typeql_match!(var("x").plays(("starring", "actor")))?.sort([("x", "asc")])
+        typeql_match!(var("x").plays(("starring", "actor")))?.sort([("x", "asc")])?
     }
     .unwrap();
 
@@ -472,7 +472,7 @@ sort $r desc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = try_! {
-        typeql_match!(var("x").isa("movie").has(("rating", var("r")))?)?.sort([("r", "desc")])
+        typeql_match!(var("x").isa("movie").has(("rating", var("r")))?)?.sort([("r", "desc")])?
     }
     .unwrap();
 
@@ -488,7 +488,7 @@ sort $r; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = try_! {
-        typeql_match!(var("x").isa("movie").has(("rating", var("r")))?)?.sort("r").limit(10)
+        typeql_match!(var("x").isa("movie").has(("rating", var("r")))?)?.sort("r")?.limit(10)
     }
     .unwrap();
 
@@ -505,7 +505,7 @@ sort $r desc; offset 10; limit 10;"#;
     let parsed = parse_query(query).unwrap().into_match();
     let expected = try_! {
         typeql_match!(var("x").isa("movie").has(("rating", var("r")))?)?
-        .sort([("r", "desc")])
+        .sort([("r", "desc")])?
         .offset(10)
         .limit(10)
     }
@@ -653,7 +653,7 @@ count;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
     let expected = try_! {
-        typeql_match!(rel("x").rel("y").isa("friendship"))?.get(["x", "y"]).count()
+        typeql_match!(rel("x").rel("y").isa("friendship"))?.get(["x", "y"])?.count()
     }
     .unwrap();
 
@@ -669,7 +669,7 @@ group $x; count;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = try_! {
-        typeql_match!(rel("x").rel("y").isa("friendship"))?.get(["x", "y"]).group("x").count()
+        typeql_match!(rel("x").rel("y").isa("friendship"))?.get(["x", "y"])?.group("x").count()
     }
     .unwrap();
 
@@ -723,7 +723,7 @@ group $x; max $z;"#;
         typeql_match!(
             rel("x").rel("y").isa("friendship"),
             var("y").has(("age", var("z")))?
-        )?.get(["x", "y", "z"]).group("x").max("z")
+        )?.get(["x", "y", "z"])?.group("x").max("z")
     }
     .unwrap();
 
@@ -1287,7 +1287,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = try_! { typeql_match!(var("x").owns(("name", KEY)))?.get(["x"]) }.unwrap();
+    let expected = try_! { typeql_match!(var("x").owns(("name", KEY)))?.get(["x"])? }.unwrap();
     assert_query_eq!(expected, parsed, query);
 }
 
