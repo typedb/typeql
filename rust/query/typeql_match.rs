@@ -21,12 +21,18 @@
  */
 
 use crate::{
-    common::{error::MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE, token},
-    pattern::{Conjunction, Pattern, UnboundVariable},
+    common::{
+        error::{
+            ILLEGAL_FILTER_VARIABLE_REPEATING, MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE,
+            VARIABLE_NOT_NAMED, VARIABLE_OUT_OF_SCOPE_MATCH,
+        },
+        token,
+    },
+    pattern::{Conjunction, Pattern, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined, ErrorMessage,
 };
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -48,12 +54,67 @@ fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), E
     conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)).collect()
 }
 
+fn expect_filters_are_in_scope(
+    conjunction: &Conjunction,
+    filter: &Option<Filter>,
+) -> Result<(), ErrorMessage> {
+    let bounds = conjunction.names();
+    let mut seen = HashSet::new();
+    filter
+        .iter()
+        .flat_map(|f| &f.vars)
+        .map(|v| match &v.reference {
+            Reference::Anonymous(_) => Err(VARIABLE_NOT_NAMED.format(&[])),
+            Reference::Name(n) => {
+                if !bounds.contains(n) {
+                    Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
+                } else if seen.contains(n) {
+                    Err(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&n]))
+                } else {
+                    seen.insert(n.clone());
+                    Ok(())
+                }
+            }
+        })
+        .collect()
+}
+
+fn expect_sort_vars_are_in_scope(
+    conjunction: &Conjunction,
+    filter: &Option<Filter>,
+    sorting: &Option<Sorting>,
+) -> Result<(), ErrorMessage> {
+    let scope = filter
+        .as_ref()
+        .map(|f| {
+            f.vars
+                .iter()
+                .map(|v| v.reference.to_string().trim_start_matches("$").to_owned())
+                .collect()
+        })
+        .unwrap_or(conjunction.names());
+    sorting
+        .iter()
+        .flat_map(|s| &s.vars)
+        .map(|v| v.var.reference.to_string().trim_start_matches("$").to_owned())
+        .map(|n| {
+            if scope.contains(&n) {
+                Ok(())
+            } else {
+                Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
+            }
+        })
+        .collect()
+}
+
 impl TypeQLMatch {
     pub fn new(patterns: Vec<Pattern>, modifiers: Modifiers) -> Result<Self, ErrorMessage> {
         let conjunction = Conjunction::new(patterns);
 
         expect_has_bounding_conjunction(&conjunction)?;
         expect_nested_patterns_are_bounded(&conjunction)?;
+        expect_filters_are_in_scope(&conjunction, &modifiers.filter)?;
+        expect_sort_vars_are_in_scope(&conjunction, &modifiers.filter, &modifiers.sorting)?;
 
         Ok(Self { conjunction, modifiers })
     }

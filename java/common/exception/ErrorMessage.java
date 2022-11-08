@@ -60,7 +60,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage NO_VARIABLE_IN_SCOPE_INSERT =
             new ErrorMessage(18, "None of the variables in 'insert' ('%s') is within scope of 'match' ('%s')");
     public static final ErrorMessage VARIABLE_NOT_NAMED =
-            new ErrorMessage(19, "The variable '%s' is not named and cannot be used as a filter for match query.");
+            new ErrorMessage(19, "Anonymous variable encountered in a match query filter.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
             new ErrorMessage(20, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
     public static final ErrorMessage ILLEGAL_CONSTRAINT_REPETITION =
