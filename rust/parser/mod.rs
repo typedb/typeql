@@ -194,11 +194,11 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
 }
 
 fn visit_query_define(ctx: Rc<Query_defineContext>) -> ParserResult<TypeQLDefine> {
-    Ok(TypeQLDefine::new(visit_definables(ctx.definables().unwrap())?))
+    TypeQLDefine::new(visit_definables(ctx.definables().unwrap())?)
 }
 
 fn visit_query_undefine(ctx: Rc<Query_undefineContext>) -> ParserResult<TypeQLUndefine> {
-    Ok(TypeQLUndefine::new(visit_definables(ctx.definables().unwrap())?))
+    TypeQLUndefine::new(visit_definables(ctx.definables().unwrap())?)
 }
 
 fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {

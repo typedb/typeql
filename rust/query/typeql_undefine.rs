@@ -21,7 +21,10 @@
  */
 
 use crate::{
-    common::token,
+    common::{
+        error::{ErrorMessage, INVALID_RULE_WHEN_MISSING_PATTERNS},
+        token,
+    },
     pattern::{Definable, RuleDeclaration, TypeVariable},
     write_joined,
 };
@@ -34,23 +37,26 @@ pub struct TypeQLUndefine {
 }
 
 impl TypeQLUndefine {
-    pub fn new(undefinables: Vec<Definable>) -> Self {
-        undefinables.into_iter().fold(TypeQLUndefine::default(), |mut undefine, undefinable| {
+    pub fn new(undefinables: Vec<Definable>) -> Result<Self, ErrorMessage> {
+        undefinables.into_iter().try_fold(TypeQLUndefine::default(), |undefine, undefinable| {
             match undefinable {
-                Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
-                Definable::TypeVariable(var) => undefine.add_definition(var),
-                _ => unreachable!(),
+                Definable::RuleDeclaration(rule) => Ok(undefine.add_rule(rule)),
+                Definable::TypeVariable(var) => Ok(undefine.add_definition(var)),
+                Definable::RuleDefinition(r) => {
+                    Err(INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
+                }
             }
-            undefine
         })
     }
 
-    pub fn add_definition(&mut self, variable: TypeVariable) {
-        self.variables.push(variable)
+    fn add_definition(mut self, variable: TypeVariable) -> Self {
+        self.variables.push(variable);
+        self
     }
 
-    pub fn add_rule(&mut self, rule: RuleDeclaration) {
-        self.rules.push(rule)
+    fn add_rule(mut self, rule: RuleDeclaration) -> Self {
+        self.rules.push(rule);
+        self
     }
 }
 

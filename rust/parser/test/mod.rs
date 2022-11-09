@@ -843,15 +843,18 @@ fatherhood sub parenthood,
     relates son as child;"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(
-        type_("parent").sub("role"),
-        type_("child").sub("role"),
-        type_("parenthood").sub("relation").relates("parent").relates("child"),
-        type_("fatherhood")
-            .sub("parenthood")
-            .relates(("father", "parent"))
-            .relates(("son", "child"))
-    );
+    let expected = try_! {
+        typeql_define!(
+            type_("parent").sub("role"),
+            type_("child").sub("role"),
+            type_("parenthood").sub("relation").relates("parent").relates("child"),
+            type_("fatherhood")
+                .sub("parenthood")
+                .relates(("father", "parent"))
+                .relates(("son", "child"))
+        )?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -884,12 +887,15 @@ triangle-right-angled sub triangle;
 triangle-right-angled owns hypotenuse-length as side-length;"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(
-        type_("triangle").sub("entity"),
-        type_("triangle").owns("side-length"),
-        type_("triangle-right-angled").sub("triangle"),
-        type_("triangle-right-angled").owns(("hypotenuse-length", "side-length"))
-    );
+    let expected = try_! {
+        typeql_define!(
+            type_("triangle").sub("entity"),
+            type_("triangle").owns("side-length"),
+            type_("triangle-right-angled").sub("triangle"),
+            type_("triangle-right-angled").owns(("hypotenuse-length", "side-length"))
+        )?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -905,13 +911,16 @@ evolves-final sub evolves;
 evolves-final relates from-final as from;"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(
-        type_("pokemon").sub("entity"),
-        type_("evolves").sub("relation"),
-        type_("evolves").relates("from").relates("to"),
-        type_("evolves-final").sub("evolves"),
-        type_("evolves-final").relates(("from-final", "from"))
-    );
+    let expected = try_! {
+        typeql_define!(
+            type_("pokemon").sub("entity"),
+            type_("evolves").sub("relation"),
+            type_("evolves").relates("from").relates("to"),
+            type_("evolves-final").sub("evolves"),
+            type_("evolves-final").relates(("from-final", "from"))
+        )?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -928,14 +937,17 @@ evolves-final relates from-final as from;
 pokemon plays evolves-final:from-final as from;"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(
-        type_("pokemon").sub("entity"),
-        type_("evolves").sub("relation"),
-        type_("evolves").relates("from").relates("to"),
-        type_("evolves-final").sub("evolves"),
-        type_("evolves-final").relates(("from-final", "from")),
-        type_("pokemon").plays(("evolves-final", "from-final", "from"))
-    );
+    let expected = try_! {
+        typeql_define!(
+            type_("pokemon").sub("entity"),
+            type_("evolves").sub("relation"),
+            type_("evolves").relates("from").relates("to"),
+            type_("evolves-final").sub("evolves"),
+            type_("evolves-final").relates(("from-final", "from")),
+            type_("pokemon").plays(("evolves-final", "from-final", "from"))
+        )?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -954,14 +966,17 @@ pokemon plays evolves:from,
     owns name;"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(
-        type_("pokemon").sub("entity"),
-        type_("evolution").sub("relation"),
-        type_("evolves-from").sub("role"),
-        type_("evolves-to").sub("role"),
-        type_("evolves").relates("from").relates("to"),
-        type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
-    );
+    let expected = try_! {
+        typeql_define!(
+            type_("pokemon").sub("entity"),
+            type_("evolution").sub("relation"),
+            type_("evolves-from").sub("role"),
+            type_("evolves-to").sub("role"),
+            type_("evolves").relates("from").relates("to"),
+            type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
+        )?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -980,14 +995,17 @@ pokemon plays evolves:from,
     owns name;"#;
 
     let parsed = parse_query(query).unwrap().into_undefine();
-    let expected = typeql_undefine!(
-        type_("pokemon").sub("entity"),
-        type_("evolution").sub("relation"),
-        type_("evolves-from").sub("role"),
-        type_("evolves-to").sub("role"),
-        type_("evolves").relates("from").relates("to"),
-        type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
-    );
+    let expected = try_! {
+        typeql_undefine!(
+            type_("pokemon").sub("entity"),
+            type_("evolution").sub("relation"),
+            type_("evolves-from").sub("role"),
+            type_("evolves-to").sub("role"),
+            type_("evolves").relates("from").relates("to"),
+            type_("pokemon").plays(("evolves", "from")).plays(("evolves", "to")).owns("name")
+        )?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -998,11 +1016,11 @@ fn test_undefine_rule() {
 rule r;"#;
 
     let parsed = parse_query(query).unwrap().into_undefine();
-    let expected = typeql_undefine!(rule("r"));
+    let expected = try_! { typeql_undefine!(rule("r"))? }.unwrap();
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]
+#[test]
 fn when_parse_undefine_rule_with_body_throw() {
     let query = r#"undefine rule r: when { $x isa thing; } then { $x has name "a"; };"#;
     let parsed = parse_query(query);
@@ -1033,10 +1051,13 @@ abstract-type sub entity,
     abstract;"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(
-        type_("concrete-type").sub("entity"),
-        type_("abstract-type").sub("entity").abstract_()
-    );
+    let expected = try_! {
+        typeql_define!(
+            type_("concrete-type").sub("entity"),
+            type_("abstract-type").sub("entity").abstract_()
+        )?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1081,7 +1102,10 @@ my-type sub attribute,
     value long;"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(type_("my-type").sub("attribute").value(ValueType::Long));
+    let expected = try_! {
+        typeql_define!(type_("my-type").sub("attribute").value(ValueType::Long))?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1149,9 +1173,12 @@ rule all-movies-are-drama:
     };"#;
 
     let parsed = parse_query(&query).unwrap().into_define();
-    let expected = typeql_define!(rule("all-movies-are-drama")
-        .when(and!(var("x").isa("movie")))
-        .then(var("x").has(("genre", "drama")).unwrap()));
+    let expected = try_! {
+        typeql_define!(rule("all-movies-are-drama")
+            .when(and!(var("x").isa("movie")))
+            .then(var("x").has(("genre", "drama")).unwrap()))?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1409,7 +1436,10 @@ digit sub attribute,
     regex "\d";"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(type_("digit").sub("attribute").regex(r#"\d"#));
+    let expected = try_! {
+        typeql_define!(type_("digit").sub("attribute").regex(r#"\d"#))?
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -1420,7 +1450,7 @@ fn undefine_attribute_type_regex() {
 digit regex "\d";"#;
 
     let parsed = parse_query(query).unwrap().into_undefine();
-    let expected = typeql_undefine!(type_("digit").regex(r#"\d"#));
+    let expected = try_! { typeql_undefine!(type_("digit").regex(r#"\d"#))? }.unwrap();
     assert_query_eq!(expected, parsed, query);
 }
 
