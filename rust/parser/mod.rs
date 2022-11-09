@@ -204,21 +204,20 @@ fn visit_query_undefine(ctx: Rc<Query_undefineContext>) -> ParserResult<TypeQLUn
 fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {
     let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
     if let Some(patterns) = ctx.patterns() {
-        Ok(TypeQLMatch::from_patterns(visit_patterns(patterns)?)?.insert(variable_things))
+        TypeQLMatch::from_patterns(visit_patterns(patterns)?)?.insert(variable_things)
     } else {
         Ok(TypeQLInsert::new(variable_things))
     }
 }
 
 fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete> {
-    let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
-    Ok(TypeQLMatch::from_patterns(visit_patterns(ctx.patterns().unwrap())?)?
-        .delete(variable_things))
+    TypeQLMatch::from_patterns(visit_patterns(ctx.patterns().unwrap())?)?
+        .delete(visit_variable_things(ctx.variable_things().unwrap())?)
 }
 
 fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {
-    Ok(visit_query_delete(ctx.query_delete().unwrap())?
-        .insert(visit_variable_things(ctx.variable_things().unwrap())?))
+    visit_query_delete(ctx.query_delete().unwrap())?
+        .insert(visit_variable_things(ctx.variable_things().unwrap())?)
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {

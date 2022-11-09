@@ -78,12 +78,12 @@ impl TypeQLMatch {
         TypeQLMatch { modifiers: self.modifiers.offset(offset), ..self }
     }
 
-    pub fn insert(self, vars: impl Writable) -> TypeQLInsert {
-        TypeQLInsert { match_query: Some(self), variables: vars.vars() }
+    pub fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage> {
+        Ok(TypeQLInsert { match_query: Some(self), variables: vars.vars()? })
     }
 
-    pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
-        TypeQLDelete { match_query: self, variables: vars.vars() }
+    pub fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage> {
+        Ok(TypeQLDelete { match_query: self, variables: vars.vars()? })
     }
 
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLMatchGroup {

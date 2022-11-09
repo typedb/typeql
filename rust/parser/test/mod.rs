@@ -777,7 +777,7 @@ $y isa movie;"#;
     let parsed = parse_query(query).unwrap().into_delete();
     let expected = try_! {
         typeql_match!(var("x").isa("movie").has(("title", "The Title"))?, var("y").isa("movie"))?
-        .delete([var("x").isa("movie"), var("y").isa("movie")])
+        .delete([var("x").isa("movie"), var("y").isa("movie")])?
     }
     .unwrap();
 
@@ -825,8 +825,8 @@ $x has age 25;"#;
     let parsed = parse_query(query).unwrap().into_update();
     let expected = try_! {
         typeql_match!(var("x").isa("person").has(("name", "alice"))?.has(("age", var("a")))?)?
-            .delete(var("x").has(var("a"))?)
-            .insert(var("x").has(("age", 25))?)
+            .delete(var("x").has(var("a"))?)?
+            .insert(var("x").has(("age", 25))?)?
     }
     .unwrap();
 
@@ -1039,7 +1039,7 @@ $x has name "HELLO";"#;
 
     let parsed = parse_query(query).unwrap().into_insert();
     let expected = try_! {
-        typeql_match!(var("x").isa("language"))?.insert(var("x").has(("name", "HELLO"))?)
+        typeql_match!(var("x").isa("language"))?.insert(var("x").has(("name", "HELLO"))?)?
     }
     .unwrap();
 
@@ -1384,7 +1384,7 @@ fn test_parse_many_match_insert_without_stack_overflow() {
     parsed.extend(parse_queries(&queries).unwrap().map(|q| q.unwrap().into_insert()));
 
     let expected = try_! {
-        typeql_match!(var("x").isa("person"))?.insert(var("x").has(("name", "bob"))?)
+        typeql_match!(var("x").isa("person"))?.insert(var("x").has(("name", "bob"))?)?
     }
     .unwrap();
 
