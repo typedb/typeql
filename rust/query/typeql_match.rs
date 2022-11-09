@@ -100,29 +100,27 @@ fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<(), Erro
 
 fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), ErrorMessage> {
     let bounds = conjunction.names();
-    conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)).collect()
+    conjunction.patterns.iter().try_for_each(|p| p.expect_is_bounded_by(&bounds))
 }
 
 fn expect_each_variable_is_bounded_by_named<'a>(
-    patterns: impl Iterator<Item = &'a Pattern>,
+    mut patterns: impl Iterator<Item = &'a Pattern>,
 ) -> Result<(), ErrorMessage> {
-    patterns
-        .map(|p| match p {
-            Pattern::Variable(v) => {
-                if v.references().filter(|r| r.is_name()).next().is_some() {
-                    Ok(())
-                } else {
-                    Err(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()]))
-                }
+    patterns.try_for_each(|p| match p {
+        Pattern::Variable(v) => {
+            if v.references().any(|r| r.is_name()) {
+                Ok(())
+            } else {
+                Err(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()]))
             }
-            Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
-            Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
-            Pattern::Negation(n) => {
-                expect_each_variable_is_bounded_by_named(std::iter::once(n.pattern.as_ref()))
-            }
-            _ => unreachable!(),
-        })
-        .collect()
+        }
+        Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
+        Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
+        Pattern::Negation(n) => {
+            expect_each_variable_is_bounded_by_named(std::iter::once(n.pattern.as_ref()))
+        }
+        _ => unreachable!(),
+    })
 }
 
 fn expect_filters_are_in_scope(
@@ -131,26 +129,21 @@ fn expect_filters_are_in_scope(
 ) -> Result<(), ErrorMessage> {
     let bounds = conjunction.names();
     let mut seen = HashSet::new();
-    filter
-        .iter()
-        .flat_map(|f| &f.vars)
-        .map(|v| &v.reference)
-        .map(|r| {
-            if !r.is_name() {
-                Err(VARIABLE_NOT_NAMED.format(&[]))
+    filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).try_for_each(|r| {
+        if !r.is_name() {
+            Err(VARIABLE_NOT_NAMED.format(&[]))
+        } else {
+            let n = r.to_string();
+            if !bounds.contains(&n) {
+                Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
+            } else if seen.contains(&n) {
+                Err(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&n]))
             } else {
-                let n = r.to_string();
-                if !bounds.contains(&n) {
-                    Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
-                } else if seen.contains(&n) {
-                    Err(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&n]))
-                } else {
-                    seen.insert(n);
-                    Ok(())
-                }
+                seen.insert(n);
+                Ok(())
             }
-        })
-        .collect()
+        }
+    })
 }
 
 fn expect_sort_vars_are_in_scope(
@@ -161,19 +154,14 @@ fn expect_sort_vars_are_in_scope(
     let scope = filter
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.reference.to_string()).collect())
-        .unwrap_or(conjunction.names());
-    sorting
-        .iter()
-        .flat_map(|s| &s.vars)
-        .map(|v| v.var.reference.to_string())
-        .map(|n| {
-            if scope.contains(&n) {
-                Ok(())
-            } else {
-                Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
-            }
-        })
-        .collect()
+        .unwrap_or_else(|| conjunction.names());
+    sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.to_string()).try_for_each(|n| {
+        if scope.contains(&n) {
+            Ok(())
+        } else {
+            Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
+        }
+    })
 }
 
 impl fmt::Display for TypeQLMatch {

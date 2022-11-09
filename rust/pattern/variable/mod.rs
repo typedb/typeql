@@ -86,7 +86,7 @@ impl Variable {
                     Ok(())
                 } else {
                     Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
-                        .format(&[&self.to_string().replace("\n", " ")]))
+                        .format(&[&self.to_string().replace('\n', " ")]))
                 }
             }
         }

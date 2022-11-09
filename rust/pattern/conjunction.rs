@@ -53,7 +53,7 @@ impl Conjunction {
     }
 
     pub fn has_named_variables(&self) -> bool {
-        self.references().filter(|r| r.is_name()).next().is_some()
+        self.references().any(|r| r.is_name())
     }
 
     pub fn names(&self) -> HashSet<String> {
@@ -63,10 +63,10 @@ impl Conjunction {
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
         let names = self.names();
         if names.is_disjoint(bounds) {
-            Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace("\n", " ")]))?;
+            Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")]))?;
         }
         let bounds = bounds.union(&names).cloned().collect();
-        self.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)).collect()
+        self.patterns.iter().try_for_each(|p| p.expect_is_bounded_by(&bounds))
     }
 }
 

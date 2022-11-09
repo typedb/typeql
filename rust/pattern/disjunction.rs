@@ -37,7 +37,7 @@ impl Disjunction {
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
-        self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)).collect()
+        self.patterns.iter().try_for_each(|p| p.expect_is_bounded_by(bounds))
     }
 }
 
