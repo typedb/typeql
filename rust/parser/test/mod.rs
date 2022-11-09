@@ -293,7 +293,8 @@ $x has release-date < 1986-03-03T00:00,
             .has(("tmdb-vote-count", 100))?
             .has(("tmdb-vote-average", lte(9.0)))?
         )?
-    }.unwrap();
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -586,7 +587,8 @@ $x isa movie;
             var("x").isa("movie"),
             or!(and!(var("y").eq("drama").isa("genre"), rel("x").rel("y")), var("x").eq("The Muppets"))
         )?
-    }.unwrap();
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
@@ -630,7 +632,8 @@ $y isa $p;
                 )
             )
         )?
-    }.unwrap();
+    }
+    .unwrap();
 
     assert_query_eq!(expected, parsed, query);
 }
