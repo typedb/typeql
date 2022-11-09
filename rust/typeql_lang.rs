@@ -47,16 +47,15 @@ use parser::{
 use pattern::{Label, Pattern, RuleDefinition, Variable};
 use query::Query;
 
-fn trim_start(s: &str) -> &str {
-    if !s.starts_with(|c: char| c.is_ascii_whitespace() || c == '#') {
-        s
-    } else {
-        if s.starts_with("#") {
-            trim_start(s.trim_start_matches(|c| c != '\n').trim_start())
+fn trim_start(mut s: &str) -> &str {
+    while s.starts_with(|c: char| c.is_ascii_whitespace() || c == '#') {
+        if s.starts_with('#') {
+            s = s.trim_start_matches(|c| c != '\n').trim_start();
         } else {
-            trim_start(s.trim_start())
+            s = s.trim_start();
         }
     }
+    s
 }
 
 macro_rules! parse {
