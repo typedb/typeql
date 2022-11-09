@@ -52,7 +52,7 @@ fn trim_start(s: &str) -> &str {
         s
     } else {
         if s.starts_with("#") {
-            trim_start(s.split_once("\n").unwrap().1)
+            trim_start(s.trim_start_matches(|c| c != '\n').trim_start())
         } else {
             trim_start(s.trim_start())
         }
