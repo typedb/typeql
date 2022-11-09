@@ -29,7 +29,7 @@ use crate::{
         },
         token,
     },
-    pattern::{Conjunction, Pattern, Reference, UnboundVariable},
+    pattern::{Conjunction, Pattern, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined, ErrorMessage,
 };
@@ -103,7 +103,9 @@ fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), E
     conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)).collect()
 }
 
-fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item=&'a Pattern>) -> Result<(), ErrorMessage> {
+fn expect_each_variable_is_bounded_by_named<'a>(
+    patterns: impl Iterator<Item = &'a Pattern>,
+) -> Result<(), ErrorMessage> {
     patterns
         .map(|p| match p {
             Pattern::Variable(v) => {
@@ -115,7 +117,9 @@ fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item=&'a
             }
             Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
             Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
-            Pattern::Negation(n) => expect_each_variable_is_bounded_by_named(std::iter::once(n.pattern.as_ref())),
+            Pattern::Negation(n) => {
+                expect_each_variable_is_bounded_by_named(std::iter::once(n.pattern.as_ref()))
+            }
             _ => unreachable!(),
         })
         .collect()
@@ -130,15 +134,18 @@ fn expect_filters_are_in_scope(
     filter
         .iter()
         .flat_map(|f| &f.vars)
-        .map(|v| match &v.reference {
-            Reference::Anonymous(_) => Err(VARIABLE_NOT_NAMED.format(&[])),
-            Reference::Name(n) => {
-                if !bounds.contains(n) {
+        .map(|v| &v.reference)
+        .map(|r| {
+            if !r.is_name() {
+                Err(VARIABLE_NOT_NAMED.format(&[]))
+            } else {
+                let n = r.to_string();
+                if !bounds.contains(&n) {
                     Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
-                } else if seen.contains(n) {
+                } else if seen.contains(&n) {
                     Err(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&n]))
                 } else {
-                    seen.insert(n.clone());
+                    seen.insert(n);
                     Ok(())
                 }
             }
@@ -153,17 +160,12 @@ fn expect_sort_vars_are_in_scope(
 ) -> Result<(), ErrorMessage> {
     let scope = filter
         .as_ref()
-        .map(|f| {
-            f.vars
-                .iter()
-                .map(|v| v.reference.to_string().trim_start_matches("$").to_owned())
-                .collect()
-        })
+        .map(|f| f.vars.iter().map(|v| v.reference.to_string()).collect())
         .unwrap_or(conjunction.names());
     sorting
         .iter()
         .flat_map(|s| &s.vars)
-        .map(|v| v.var.reference.to_string().trim_start_matches("$").to_owned())
+        .map(|v| v.var.reference.to_string())
         .map(|n| {
             if scope.contains(&n) {
                 Ok(())

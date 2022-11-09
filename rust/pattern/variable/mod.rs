@@ -82,10 +82,7 @@ impl Variable {
         match self {
             Self::Unbound(_) => unreachable!(),
             _ => {
-                if self.references().any(|r| match r {
-                    Reference::Name(s) => bounds.contains(s),
-                    _ => false,
-                }) {
+                if self.references().any(|r| r.is_name() && bounds.contains(&r.to_string())) {
                     Ok(())
                 } else {
                     Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN

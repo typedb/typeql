@@ -57,13 +57,7 @@ impl Conjunction {
     }
 
     pub fn names(&self) -> HashSet<String> {
-        self.references()
-            .filter(|r| r.is_name())
-            .map(|r| match r {
-                Reference::Name(s) => s.clone(),
-                _ => unreachable!(),
-            })
-            .collect()
+        self.references().filter(|r| r.is_name()).map(|r| r.to_string()).collect()
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
