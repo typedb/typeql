@@ -239,8 +239,8 @@ not { $a is $b; };"#;
             var("y").sub(var("z")),
             var("a").isa(var("x")),
             var("b").isa(var("y")),
-            not(var("x").is(var("y"))),
-            not(var("a").is(var("b"))),
+            not(var("x").is(var("y")))?,
+            not(var("a").is(var("b")))?,
         )?
     }
     .unwrap();

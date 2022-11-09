@@ -75,7 +75,7 @@ macro_rules! or {
     }}
 }
 
-pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
+pub fn not<T: Into<Pattern>>(pattern: T) -> Result<Negation, ErrorMessage> {
     Negation::new(pattern.into())
 }
 

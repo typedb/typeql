@@ -21,7 +21,10 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, token},
+    common::{
+        error::{ErrorMessage, REDUNDANT_NESTED_NEGATION},
+        token,
+    },
     pattern::Pattern,
 };
 use core::fmt;
@@ -33,8 +36,11 @@ pub struct Negation {
 }
 
 impl Negation {
-    pub fn new(pattern: Pattern) -> Self {
-        Negation { pattern: Box::new(pattern) }
+    pub fn new(pattern: Pattern) -> Result<Self, ErrorMessage> {
+        match pattern {
+            Pattern::Negation(_) => Err(REDUNDANT_NESTED_NEGATION.format(&[])),
+            pattern => Ok(Negation { pattern: Box::new(pattern) }),
+        }
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {

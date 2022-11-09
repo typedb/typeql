@@ -343,8 +343,8 @@ fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResul
 fn visit_pattern_negation(ctx: Rc<Pattern_negationContext>) -> ParserResult<Negation> {
     let mut patterns = visit_patterns(ctx.patterns().unwrap())?;
     Ok(match patterns.len() {
-        1 => Negation::new(patterns.pop().unwrap()),
-        _ => Negation::new(Conjunction::new(patterns).into()),
+        1 => Negation::new(patterns.pop().unwrap())?,
+        _ => Negation::new(Conjunction::new(patterns).into())?,
     })
 }
 
