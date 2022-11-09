@@ -56,6 +56,7 @@ use crate::{
 };
 
 // keep star import to not expose generated code
+use crate::pattern::Definable;
 use typeql_grammar::typeqlrustparser::*;
 
 type ParserResult<T> = Result<T, ErrorMessage>;
@@ -149,7 +150,7 @@ pub(crate) fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<V
     visit_patterns(ctx.patterns().unwrap())
 }
 
-pub(crate) fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Pattern>> {
+pub(crate) fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Definable>> {
     let definables_ctx = ctx.definables().unwrap();
     (0..).map_while(|i| definables_ctx.definable(i)).map(visit_definable).collect()
 }
@@ -286,19 +287,19 @@ fn visit_aggregate_method(ctx: Rc<Aggregate_methodContext>) -> token::Aggregate 
     token::Aggregate::from(ctx.get_text())
 }
 
-fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Pattern>> {
+fn visit_definables(ctx: Rc<DefinablesContext>) -> ParserResult<Vec<Definable>> {
     (0..).map_while(|i| ctx.definable(i)).map(visit_definable).collect()
 }
 
-fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Pattern> {
+fn visit_definable(ctx: Rc<DefinableContext>) -> ParserResult<Definable> {
     if let Some(variable_type) = ctx.variable_type() {
         Ok(visit_variable_type(variable_type)?.into())
     } else {
         let rule_ctx = ctx.schema_rule().unwrap();
         if rule_ctx.patterns().is_some() {
-            visit_schema_rule(rule_ctx).map(Pattern::from)
+            visit_schema_rule(rule_ctx).map(Definable::from)
         } else {
-            visit_schema_rule_declaration(rule_ctx).map(Pattern::from)
+            visit_schema_rule_declaration(rule_ctx).map(Definable::from)
         }
     }
 }

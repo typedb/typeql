@@ -22,7 +22,7 @@
 
 use crate::{
     common::token,
-    pattern::{Pattern, RuleDefinition, TypeVariable, Variable},
+    pattern::{Definable, RuleDefinition, TypeVariable},
     write_joined,
 };
 use std::fmt;
@@ -34,11 +34,11 @@ pub struct TypeQLDefine {
 }
 
 impl TypeQLDefine {
-    pub fn new(definables: Vec<Pattern>) -> Self {
+    pub fn new(definables: Vec<Definable>) -> Self {
         definables.into_iter().fold(TypeQLDefine::default(), |mut define, definable| {
             match definable {
-                Pattern::Rule(rule) => define.add_rule(rule),
-                Pattern::Variable(Variable::Type(var)) => define.add_definition(var),
+                Definable::RuleDefinition(rule) => define.add_rule(rule),
+                Definable::TypeVariable(var) => define.add_definition(var),
                 _ => unreachable!(),
             }
             define

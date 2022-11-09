@@ -38,6 +38,7 @@ pub mod query;
 #[macro_use]
 mod util;
 
+use crate::pattern::Definable;
 use common::error::ErrorMessage;
 use parser::{
     error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_definables,
@@ -101,7 +102,7 @@ pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>, String> {
     parse!(visit_eof_patterns(eof_patterns(typeql_patterns)))
 }
 
-pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Pattern>, String> {
+pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>, String> {
     parse!(visit_eof_definables(eof_definables(typeql_definables)))
 }
 

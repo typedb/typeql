@@ -1002,7 +1002,7 @@ rule r;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]  // TODO pending grammar changes
+// #[test]
 fn when_parse_undefine_rule_with_body_throw() {
     let query = r#"undefine rule r: when { $x isa thing; } then { $x has name "a"; };"#;
     let parsed = parse_query(query);

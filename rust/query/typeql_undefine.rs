@@ -22,8 +22,8 @@
 
 use crate::{
     common::token,
-    pattern::{RuleDeclaration, TypeVariable, Variable},
-    write_joined, Pattern,
+    pattern::{Definable, RuleDeclaration, TypeVariable},
+    write_joined,
 };
 use std::fmt;
 
@@ -34,11 +34,11 @@ pub struct TypeQLUndefine {
 }
 
 impl TypeQLUndefine {
-    pub fn new(undefinables: Vec<Pattern>) -> Self {
+    pub fn new(undefinables: Vec<Definable>) -> Self {
         undefinables.into_iter().fold(TypeQLUndefine::default(), |mut undefine, undefinable| {
             match undefinable {
-                Pattern::RuleDeclaration(rule) => undefine.add_rule(rule),
-                Pattern::Variable(Variable::Type(var)) => undefine.add_definition(var),
+                Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
+                Definable::TypeVariable(var) => undefine.add_definition(var),
                 _ => unreachable!(),
             }
             undefine

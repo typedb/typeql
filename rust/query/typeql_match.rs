@@ -117,7 +117,6 @@ fn expect_each_variable_is_bounded_by_named<'a>(
         Pattern::Negation(n) => {
             expect_each_variable_is_bounded_by_named(std::iter::once(n.pattern.as_ref()))
         }
-        _ => unreachable!(),
     })
 }
 

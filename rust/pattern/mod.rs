@@ -64,8 +64,6 @@ pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
-    Rule(RuleDefinition),
-    RuleDeclaration(RuleDeclaration),
     Variable(Variable),
 }
 
@@ -73,8 +71,6 @@ impl Pattern {
     enum_getter!(into_conjunction, Conjunction, Conjunction);
     enum_getter!(into_disjunction, Disjunction, Disjunction);
     enum_getter!(into_negation, Negation, Negation);
-    enum_getter!(into_rule, Rule, RuleDefinition);
-    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
@@ -84,7 +80,6 @@ impl Pattern {
             Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
             Negation(negation) => negation.expect_is_bounded_by(bounds),
             Variable(variable) => variable.expect_is_bounded_by(bounds),
-            _ => unreachable!(),
         }
     }
 }
@@ -93,8 +88,6 @@ enum_wrapper! { Pattern
     Conjunction => Conjunction,
     Disjunction => Disjunction,
     Negation => Negation,
-    RuleDefinition => Rule,
-    RuleDeclaration => RuleDeclaration,
     Variable => Variable,
 }
 
@@ -129,9 +122,37 @@ impl fmt::Display for Pattern {
             Conjunction(conjunction) => write!(f, "{}", conjunction),
             Disjunction(disjunction) => write!(f, "{}", disjunction),
             Negation(negation) => write!(f, "{}", negation),
-            Rule(rule) => write!(f, "{}", rule),
-            RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
             Variable(variable) => write!(f, "{}", variable),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Definable {
+    RuleDefinition(RuleDefinition),
+    RuleDeclaration(RuleDeclaration),
+    TypeVariable(TypeVariable),
+}
+
+impl Definable {
+    enum_getter!(into_rule, RuleDefinition, RuleDefinition);
+    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
+    enum_getter!(into_type_variable, TypeVariable, TypeVariable);
+}
+
+enum_wrapper! { Definable
+    RuleDefinition => RuleDefinition,
+    RuleDeclaration => RuleDeclaration,
+    TypeVariable => TypeVariable,
+}
+
+impl fmt::Display for Definable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Definable::*;
+        match self {
+            RuleDefinition(rule) => write!(f, "{}", rule),
+            RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
+            TypeVariable(variable) => write!(f, "{}", variable),
         }
     }
 }
