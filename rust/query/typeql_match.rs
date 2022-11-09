@@ -108,11 +108,9 @@ fn expect_each_variable_is_bounded_by_named<'a>(
 ) -> Result<(), ErrorMessage> {
     patterns.try_for_each(|p| match p {
         Pattern::Variable(v) => {
-            if v.references().any(|r| r.is_name()) {
-                Ok(())
-            } else {
-                Err(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()]))
-            }
+            v.references().any(|r| r.is_name()).then_some(()).ok_or_else(|| {
+                MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()])
+            })
         }
         Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
         Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
@@ -156,11 +154,7 @@ fn expect_sort_vars_are_in_scope(
         .map(|f| f.vars.iter().map(|v| v.reference.to_string()).collect())
         .unwrap_or_else(|| conjunction.names());
     sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.to_string()).try_for_each(|n| {
-        if scope.contains(&n) {
-            Ok(())
-        } else {
-            Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
-        }
+        scope.contains(&n).then_some(()).ok_or_else(|| VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n]))
     })
 }
 
