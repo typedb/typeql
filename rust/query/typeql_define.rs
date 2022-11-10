@@ -21,9 +21,7 @@
  */
 
 use crate::{
-    common::{
-        token,
-    },
+    common::token,
     pattern::{Definable, RuleDefinition, TypeVariable},
     write_joined,
 };

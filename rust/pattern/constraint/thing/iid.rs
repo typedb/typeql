@@ -20,9 +20,7 @@
  *
  */
 
-use crate::{
-    common::{token},
-};
+use crate::common::token;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]

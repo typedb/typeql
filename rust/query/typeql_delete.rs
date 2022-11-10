@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{token},
+    common::token,
     pattern::ThingVariable,
     query::{TypeQLMatch, TypeQLUpdate, Writable},
     write_joined,

@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{token::Predicate},
+    common::token::Predicate,
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint,
         ThingVariable, Value, ValueConstraint,

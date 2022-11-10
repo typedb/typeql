@@ -25,7 +25,8 @@ use crate::{
     pattern::{
         Negation, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable,
         TypeVariable, TypeVariableBuilder, UnboundVariable, Value, ValueConstraint,
-    }, Pattern,
+    },
+    Pattern,
 };
 
 #[macro_export]

@@ -28,7 +28,7 @@ use crate::{
     },
     ErrorMessage,
 };
-use std::{fmt};
+use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {

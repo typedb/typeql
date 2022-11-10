@@ -41,12 +41,12 @@ use crate::{
         token,
     },
     pattern::{
-        ConceptVariable, ConceptVariableBuilder, Conjunction, Disjunction, HasConstraint,
-        IsKeyAttribute, IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint,
-        RelatesConstraint, RelationConstraint, RolePlayerConstraint, RuleDeclaration,
-        RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
-        Type, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable, Value,
-        ValueConstraint, Variable,
+        ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction,
+        HasConstraint, IsKeyAttribute, IsaConstraint, Label, Negation, OwnsConstraint, Pattern,
+        PlaysConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
+        RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable,
+        ThingVariableBuilder, Type, TypeConstrainable, TypeVariable, TypeVariableBuilder,
+        UnboundVariable, Value, ValueConstraint, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert,
@@ -56,7 +56,6 @@ use crate::{
 };
 
 // keep star import to not expose generated code
-use crate::pattern::Definable;
 use typeql_grammar::typeqlrustparser::*;
 
 type ParserResult<T> = Result<T, ErrorMessage>;

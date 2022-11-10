@@ -28,7 +28,7 @@ use crate::{
     },
     pattern::{Reference, ThingVariable, UnboundVariable},
 };
-use chrono::{NaiveDateTime};
+use chrono::NaiveDateTime;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
