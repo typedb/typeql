@@ -48,20 +48,16 @@ use parser::{
 use pattern::{Label, Pattern, RuleDefinition, Variable};
 use query::Query;
 
-fn trim_start(mut s: &str) -> &str {
-    while s.starts_with(|c: char| c.is_ascii_whitespace() || c == '#') {
-        if s.starts_with('#') {
-            s = s.trim_start_matches(|c| c != '\n').trim_start();
-        } else {
-            s = s.trim_start();
-        }
+fn trim_start_comments(mut s: &str) -> &str {
+    while s.starts_with('#') {
+        s = s.trim_start_matches(|c| c != '\n').trim_start();
     }
     s
 }
 
 macro_rules! parse {
     ($visitor:ident($accessor:ident($input:ident))) => {{
-        let input = trim_start($input.trim());
+        let input = trim_start_comments($input.trim());
         let lexer = TypeQLRustLexer::new(InputStream::new(input));
         let mut parser = TypeQLRustParser::new(CommonTokenStream::new(lexer));
 
