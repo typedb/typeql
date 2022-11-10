@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, token::Predicate},
+    common::{token::Predicate},
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint,
         ThingVariable, Value, ValueConstraint,
@@ -37,39 +37,26 @@ pub trait ThingConstrainable {
 }
 
 pub trait ThingVariableBuilder {
-    fn has<T: TryInto<HasConstraint>>(self, has: T) -> Result<ThingVariable, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<HasConstraint>>::Error>;
-
-    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>;
-
+    fn has(self, has: impl Into<HasConstraint>) -> ThingVariable;
+    fn iid<T: Into<IIDConstraint>>(self, iid: T) -> ThingVariable;
     fn isa(self, isa: impl Into<IsaConstraint>) -> ThingVariable;
-
     fn eq(self, value: impl Into<Value>) -> ThingVariable;
     fn neq(self, value: impl Into<Value>) -> ThingVariable;
     fn gt(self, value: impl Into<Value>) -> ThingVariable;
     fn gte(self, value: impl Into<Value>) -> ThingVariable;
     fn lt(self, value: impl Into<Value>) -> ThingVariable;
     fn lte(self, value: impl Into<Value>) -> ThingVariable;
-    fn contains(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage>;
-    fn like(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage>;
+    fn contains(self, string: impl Into<String>) -> ThingVariable;
+    fn like(self, string: impl Into<String>) -> ThingVariable;
 }
 
 impl<U: ThingConstrainable> ThingVariableBuilder for U {
-    fn has<T: TryInto<HasConstraint>>(self, has: T) -> Result<ThingVariable, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<HasConstraint>>::Error>,
-    {
-        Ok(self.constrain_has(has.try_into()?))
+    fn has(self, has: impl Into<HasConstraint>) -> ThingVariable {
+        self.constrain_has(has.into())
     }
 
-    fn iid<T: TryInto<IIDConstraint>>(self, iid: T) -> Result<ThingVariable, ErrorMessage>
-    where
-        ErrorMessage: From<<T as TryInto<IIDConstraint>>::Error>,
-    {
-        Ok(self.constrain_iid(iid.try_into()?))
+    fn iid<T: Into<IIDConstraint>>(self, iid: T) -> ThingVariable {
+        self.constrain_iid(iid.into())
     }
 
     fn isa(self, isa: impl Into<IsaConstraint>) -> ThingVariable {
@@ -77,38 +64,35 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
     }
 
     fn eq(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into()).unwrap())
+        self.constrain_value(ValueConstraint::new(Predicate::Eq, value.into()))
     }
 
     fn neq(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_value(ValueConstraint::new(Predicate::Neq, value.into()).unwrap())
+        self.constrain_value(ValueConstraint::new(Predicate::Neq, value.into()))
     }
 
     fn gt(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_value(ValueConstraint::new(Predicate::Gt, value.into()).unwrap())
+        self.constrain_value(ValueConstraint::new(Predicate::Gt, value.into()))
     }
 
     fn gte(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_value(ValueConstraint::new(Predicate::Gte, value.into()).unwrap())
+        self.constrain_value(ValueConstraint::new(Predicate::Gte, value.into()))
     }
 
     fn lt(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_value(ValueConstraint::new(Predicate::Lt, value.into()).unwrap())
+        self.constrain_value(ValueConstraint::new(Predicate::Lt, value.into()))
     }
 
     fn lte(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_value(ValueConstraint::new(Predicate::Lte, value.into()).unwrap())
+        self.constrain_value(ValueConstraint::new(Predicate::Lte, value.into()))
     }
 
-    fn contains(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(
-            Predicate::Contains,
-            Value::from(string.into()),
-        )?))
+    fn contains(self, string: impl Into<String>) -> ThingVariable {
+        self.constrain_value(ValueConstraint::new(Predicate::Contains, Value::from(string.into())))
     }
 
-    fn like(self, string: impl Into<String>) -> Result<ThingVariable, ErrorMessage> {
-        Ok(self.constrain_value(ValueConstraint::new(Predicate::Like, Value::from(string.into()))?))
+    fn like(self, string: impl Into<String>) -> ThingVariable {
+        self.constrain_value(ValueConstraint::new(Predicate::Like, Value::from(string.into())))
     }
 }
 

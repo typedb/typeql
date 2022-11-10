@@ -21,10 +21,7 @@
  */
 
 use crate::{
-    common::{
-        error::{ErrorMessage, REDUNDANT_NESTED_NEGATION},
-        token,
-    },
+    common::{error::ErrorMessage, token},
     pattern::Pattern,
 };
 use core::fmt;
@@ -36,10 +33,11 @@ pub struct Negation {
 }
 
 impl Negation {
-    pub fn new(pattern: Pattern) -> Result<Self, ErrorMessage> {
+    pub fn new(pattern: Pattern) -> Self {
         match pattern {
-            Pattern::Negation(_) => Err(REDUNDANT_NESTED_NEGATION.format(&[])),
-            pattern => Ok(Negation { pattern: Box::new(pattern) }),
+            // TODO validation
+            // Pattern::Negation(_) => Err(REDUNDANT_NESTED_NEGATION.format(&[])),
+            pattern => Negation { pattern: Box::new(pattern) },
         }
     }
 

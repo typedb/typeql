@@ -28,7 +28,7 @@ use crate::{
     },
     ErrorMessage,
 };
-use std::{convert::Infallible, fmt};
+use std::{fmt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {
@@ -53,14 +53,9 @@ impl From<UnboundVariable> for HasConstraint {
     }
 }
 
-impl<S: Into<String>, T: TryInto<Value>> TryFrom<(S, T)> for HasConstraint
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
-{
-    type Error = ErrorMessage;
-
-    fn try_from((type_name, value): (S, T)) -> Result<Self, Self::Error> {
-        Ok(match value.try_into()? {
+impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
+    fn from((type_name, value): (S, T)) -> Self {
+        match value.into() {
             Value::Variable(variable) => HasConstraint {
                 type_: Some(UnboundVariable::hidden().type_(type_name.into())),
                 attribute: *variable,
@@ -68,20 +63,18 @@ where
             value => HasConstraint {
                 type_: Some(UnboundVariable::hidden().type_(type_name.into())),
                 attribute: UnboundVariable::hidden()
-                    .constrain_value(ValueConstraint::new(token::Predicate::Eq, value)?),
+                    .constrain_value(ValueConstraint::new(token::Predicate::Eq, value)),
             },
-        })
+        }
     }
 }
 
-impl<S: Into<String>> TryFrom<(S, ValueConstraint)> for HasConstraint {
-    type Error = Infallible;
-
-    fn try_from((type_name, value): (S, ValueConstraint)) -> Result<Self, Self::Error> {
-        Ok(HasConstraint {
+impl<S: Into<String>> From<(S, ValueConstraint)> for HasConstraint {
+    fn from((type_name, value): (S, ValueConstraint)) -> Self {
+        HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name.into())),
             attribute: UnboundVariable::hidden().constrain_value(value),
-        })
+        }
     }
 }
 

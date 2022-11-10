@@ -22,7 +22,6 @@
 
 use crate::{
     common::{
-        error::{ErrorMessage, INVALID_RULE_WHEN_MISSING_PATTERNS},
         token,
     },
     pattern::{Definable, RuleDeclaration, TypeVariable},
@@ -37,13 +36,14 @@ pub struct TypeQLUndefine {
 }
 
 impl TypeQLUndefine {
-    pub fn new(undefinables: Vec<Definable>) -> Result<Self, ErrorMessage> {
-        undefinables.into_iter().try_fold(TypeQLUndefine::default(), |undefine, undefinable| {
+    pub fn new(undefinables: Vec<Definable>) -> Self {
+        undefinables.into_iter().fold(TypeQLUndefine::default(), |undefine, undefinable| {
             match undefinable {
-                Definable::RuleDeclaration(rule) => Ok(undefine.add_rule(rule)),
-                Definable::TypeVariable(var) => Ok(undefine.add_definition(var)),
-                Definable::RuleDefinition(r) => {
-                    Err(INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
+                Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
+                Definable::TypeVariable(var) => undefine.add_definition(var),
+                Definable::RuleDefinition(_r) => {
+                    unreachable!() // TODO validation
+                                   // Err(INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
                 }
             }
         })

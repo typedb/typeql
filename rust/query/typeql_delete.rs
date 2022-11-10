@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, token},
+    common::{token},
     pattern::ThingVariable,
     query::{TypeQLMatch, TypeQLUpdate, Writable},
     write_joined,
@@ -35,8 +35,8 @@ pub struct TypeQLDelete {
 }
 
 impl TypeQLDelete {
-    pub fn insert(self, vars: impl Writable) -> Result<TypeQLUpdate, ErrorMessage> {
-        Ok(TypeQLUpdate { delete_query: self, insert_variables: vars.vars()? })
+    pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
+        TypeQLUpdate { delete_query: self, insert_variables: vars.vars() }
     }
 }
 

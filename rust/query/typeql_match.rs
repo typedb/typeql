@@ -44,29 +44,30 @@ pub struct TypeQLMatch {
 impl AggregateQueryBuilder for TypeQLMatch {}
 
 impl TypeQLMatch {
-    pub fn new(conjunction: Conjunction, modifiers: Modifiers) -> Result<Self, ErrorMessage> {
-        expect_has_bounding_conjunction(&conjunction)?;
-        expect_nested_patterns_are_bounded(&conjunction)?;
-        expect_each_variable_is_bounded_by_named(conjunction.patterns.iter())?;
-        expect_filters_are_in_scope(&conjunction, &modifiers.filter)?;
-        expect_sort_vars_are_in_scope(&conjunction, &modifiers.filter, &modifiers.sorting)?;
+    pub fn new(conjunction: Conjunction, modifiers: Modifiers) -> Self {
+        // TODO validation
+        // expect_has_bounding_conjunction(&conjunction)?;
+        // expect_nested_patterns_are_bounded(&conjunction)?;
+        // expect_each_variable_is_bounded_by_named(conjunction.patterns.iter())?;
+        // expect_filters_are_in_scope(&conjunction, &modifiers.filter)?;
+        // expect_sort_vars_are_in_scope(&conjunction, &modifiers.filter, &modifiers.sorting)?;
 
-        Ok(Self { conjunction, modifiers })
+        Self { conjunction, modifiers }
     }
 
-    pub fn from_patterns(patterns: Vec<Pattern>) -> Result<Self, ErrorMessage> {
+    pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
         Self::new(Conjunction::new(patterns), Modifiers::default())
     }
 
-    pub fn filter(self, vars: Vec<UnboundVariable>) -> Result<Self, ErrorMessage> {
+    pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         Self::new(self.conjunction, self.modifiers.filter(vars))
     }
 
-    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Result<Self, ErrorMessage> {
+    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
         self.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect())
     }
 
-    pub fn sort(self, sorting: impl Into<Sorting>) -> Result<Self, ErrorMessage> {
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
         Self::new(self.conjunction, self.modifiers.sort(sorting))
     }
 
@@ -78,12 +79,12 @@ impl TypeQLMatch {
         TypeQLMatch { modifiers: self.modifiers.offset(offset), ..self }
     }
 
-    pub fn insert(self, vars: impl Writable) -> Result<TypeQLInsert, ErrorMessage> {
-        Ok(TypeQLInsert { match_query: Some(self), variables: vars.vars()? })
+    pub fn insert(self, vars: impl Writable) -> TypeQLInsert {
+        TypeQLInsert { match_query: Some(self), variables: vars.vars() }
     }
 
-    pub fn delete(self, vars: impl Writable) -> Result<TypeQLDelete, ErrorMessage> {
-        Ok(TypeQLDelete { match_query: self, variables: vars.vars()? })
+    pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
+        TypeQLDelete { match_query: self, variables: vars.vars() }
     }
 
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLMatchGroup {

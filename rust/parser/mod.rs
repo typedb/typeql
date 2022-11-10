@@ -194,40 +194,40 @@ fn visit_query(ctx: Rc<QueryContext>) -> ParserResult<Query> {
 }
 
 fn visit_query_define(ctx: Rc<Query_defineContext>) -> ParserResult<TypeQLDefine> {
-    TypeQLDefine::new(visit_definables(ctx.definables().unwrap())?)
+    Ok(TypeQLDefine::new(visit_definables(ctx.definables().unwrap())?))
 }
 
 fn visit_query_undefine(ctx: Rc<Query_undefineContext>) -> ParserResult<TypeQLUndefine> {
-    TypeQLUndefine::new(visit_definables(ctx.definables().unwrap())?)
+    Ok(TypeQLUndefine::new(visit_definables(ctx.definables().unwrap())?))
 }
 
 fn visit_query_insert(ctx: Rc<Query_insertContext>) -> ParserResult<TypeQLInsert> {
     let variable_things = visit_variable_things(ctx.variable_things().unwrap())?;
-    if let Some(patterns) = ctx.patterns() {
-        TypeQLMatch::from_patterns(visit_patterns(patterns)?)?.insert(variable_things)
+    Ok(if let Some(patterns) = ctx.patterns() {
+        TypeQLMatch::from_patterns(visit_patterns(patterns)?).insert(variable_things)
     } else {
-        Ok(TypeQLInsert::new(variable_things))
-    }
+        TypeQLInsert::new(variable_things)
+    })
 }
 
 fn visit_query_delete(ctx: Rc<Query_deleteContext>) -> ParserResult<TypeQLDelete> {
-    TypeQLMatch::from_patterns(visit_patterns(ctx.patterns().unwrap())?)?
-        .delete(visit_variable_things(ctx.variable_things().unwrap())?)
+    Ok(TypeQLMatch::from_patterns(visit_patterns(ctx.patterns().unwrap())?)
+        .delete(visit_variable_things(ctx.variable_things().unwrap())?))
 }
 
 fn visit_query_update(ctx: Rc<Query_updateContext>) -> ParserResult<TypeQLUpdate> {
-    visit_query_delete(ctx.query_delete().unwrap())?
-        .insert(visit_variable_things(ctx.variable_things().unwrap())?)
+    Ok(visit_query_delete(ctx.query_delete().unwrap())?
+        .insert(visit_variable_things(ctx.variable_things().unwrap())?))
 }
 
 fn visit_query_match(ctx: Rc<Query_matchContext>) -> ParserResult<TypeQLMatch> {
-    let mut match_query = TypeQLMatch::from_patterns(visit_patterns(ctx.patterns().unwrap())?)?;
+    let mut match_query = TypeQLMatch::from_patterns(visit_patterns(ctx.patterns().unwrap())?);
     if let Some(modifiers) = ctx.modifiers() {
         if let Some(filter) = modifiers.filter() {
-            match_query = match_query.filter(visit_filter(filter))?;
+            match_query = match_query.filter(visit_filter(filter));
         }
         if let Some(sort) = modifiers.sort() {
-            match_query = match_query.sort(visit_sort(sort))?;
+            match_query = match_query.sort(visit_sort(sort));
         }
         if let Some(limit) = modifiers.limit() {
             match_query = match_query.limit(get_long(limit.LONG_().unwrap())? as usize);
@@ -343,8 +343,8 @@ fn visit_pattern_disjunction(ctx: Rc<Pattern_disjunctionContext>) -> ParserResul
 fn visit_pattern_negation(ctx: Rc<Pattern_negationContext>) -> ParserResult<Negation> {
     let mut patterns = visit_patterns(ctx.patterns().unwrap())?;
     Ok(match patterns.len() {
-        1 => Negation::new(patterns.pop().unwrap())?,
-        _ => Negation::new(Conjunction::new(patterns).into())?,
+        1 => Negation::new(patterns.pop().unwrap()),
+        _ => Negation::new(Conjunction::new(patterns).into()),
     })
 }
 
@@ -430,13 +430,13 @@ fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ParserResult<
 fn visit_variable_thing(ctx: Rc<Variable_thingContext>) -> ParserResult<ThingVariable> {
     let mut var_thing = get_var(ctx.VAR_().unwrap()).into_thing();
     if let Some(iid) = ctx.IID_() {
-        var_thing = var_thing.iid(iid.get_text())?;
+        var_thing = var_thing.iid(iid.get_text());
     }
     if let Some(isa) = ctx.ISA_() {
         var_thing = var_thing.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?)
     }
     if let Some(attributes) = ctx.attributes() {
-        var_thing = visit_attributes(attributes)?
+        var_thing = visit_attributes(attributes)
             .into_iter()
             .fold(var_thing, |var_thing, has| var_thing.constrain_has(has));
     }
@@ -455,7 +455,7 @@ fn visit_variable_relation(ctx: Rc<Variable_relationContext>) -> ParserResult<Th
     }
 
     if let Some(attributes) = ctx.attributes() {
-        relation = visit_attributes(attributes)?
+        relation = visit_attributes(attributes)
             .into_iter()
             .fold(relation, |relation, has| relation.constrain_has(has));
     }
@@ -468,14 +468,14 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
         Some(var) => get_var(var),
         None => UnboundVariable::hidden(),
     }
-    .constrain_value(visit_predicate(ctx.predicate().unwrap())?);
+    .constrain_value(visit_predicate(ctx.predicate().unwrap()));
 
     if let Some(isa) = ctx.ISA_() {
         attribute = attribute.constrain_isa(get_isa_constraint(isa, ctx.type_().unwrap())?);
     }
 
     if let Some(attributes) = ctx.attributes() {
-        attribute = visit_attributes(attributes)?
+        attribute = visit_attributes(attributes)
             .into_iter()
             .fold(attribute, |attribute, has| attribute.constrain_has(has));
     }
@@ -487,34 +487,36 @@ fn visit_relation(ctx: Rc<RelationContext>) -> ParserResult<RelationConstraint> 
     RelationConstraint::new(get_role_players(ctx)?)
 }
 
-fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstraint>> {
+fn visit_attributes(ctx: Rc<AttributesContext>) -> Vec<HasConstraint> {
     (0..).map_while(|i| ctx.attribute(i)).map(visit_attribute).collect()
 }
 
-fn visit_attribute(ctx: Rc<AttributeContext>) -> ParserResult<HasConstraint> {
+fn visit_attribute(ctx: Rc<AttributeContext>) -> HasConstraint {
     if let Some(label) = ctx.label() {
         if let Some(var) = ctx.VAR_() {
-            HasConstraint::try_from((label.get_text(), get_var(var)))
+            HasConstraint::from((label.get_text(), get_var(var)))
         } else if let Some(predicate) = ctx.predicate() {
-            Ok(HasConstraint::new((label.get_text(), visit_predicate(predicate)?)))
+            HasConstraint::new((label.get_text(), visit_predicate(predicate)))
         } else {
-            Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
+            unreachable!()
+            // Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))?
         }
     } else if let Some(var) = ctx.VAR_() {
-        Ok(HasConstraint::from(get_var(var)))
+        HasConstraint::from(get_var(var))
     } else {
-        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+        unreachable!()
+        // Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
-fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
+fn visit_predicate(ctx: Rc<PredicateContext>) -> ValueConstraint {
     if let Some(value) = ctx.value() {
-        ValueConstraint::new(token::Predicate::Eq, visit_value(value)?)
+        ValueConstraint::new(token::Predicate::Eq, visit_value(value))
     } else if let Some(equality) = ctx.predicate_equality() {
         ValueConstraint::new(token::Predicate::from(equality.get_text()), {
             let predicate_value = ctx.predicate_value().unwrap();
             if let Some(value) = predicate_value.value() {
-                visit_value(value)?
+                visit_value(value)
             } else if let Some(var) = predicate_value.VAR_() {
                 Value::from(get_var(var))
             } else {
@@ -530,14 +532,15 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
             }
         })
     } else {
-        Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
+        unreachable!()
+        // Err(ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
 fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDefinition> {
-    RuleDeclaration::new(Label::from(ctx.label().unwrap().get_text()))
-        .when(Conjunction::new(visit_patterns(ctx.patterns().unwrap())?))?
-        .then(visit_variable_thing_any(ctx.variable_thing_any().unwrap())?)
+    Ok(RuleDeclaration::new(Label::from(ctx.label().unwrap().get_text()))
+        .when(Conjunction::new(visit_patterns(ctx.patterns().unwrap())?))
+        .then(visit_variable_thing_any(ctx.variable_thing_any().unwrap())?))
 }
 
 fn visit_schema_rule_declaration(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDeclaration> {
@@ -591,19 +594,19 @@ fn visit_label_scoped(ctx: Rc<Label_scopedContext>) -> ParserResult<Label> {
     Ok(Label::from((parts[0].clone(), parts[1].clone())))
 }
 
-fn visit_value(ctx: Rc<ValueContext>) -> ParserResult<Value> {
+fn visit_value(ctx: Rc<ValueContext>) -> Value {
     if let Some(string) = ctx.STRING_() {
-        Ok(Value::from(get_string(string)))
+        Value::from(get_string(string))
     } else if let Some(long) = ctx.LONG_() {
-        Ok(Value::from(get_long(long)?))
+        Value::from(get_long(long).unwrap())
     } else if let Some(double) = ctx.DOUBLE_() {
-        Ok(Value::from(get_double(double)?))
+        Value::from(get_double(double).unwrap())
     } else if let Some(boolean) = ctx.BOOLEAN_() {
-        Ok(Value::from(get_boolean(boolean)?))
+        Value::from(get_boolean(boolean).unwrap())
     } else if let Some(date) = ctx.DATE_() {
-        Value::try_from(get_date(date)?.and_hms(0, 0, 0))
+        Value::from(get_date(date).unwrap().and_hms(0, 0, 0))
     } else if let Some(date_time) = ctx.DATETIME_() {
-        Value::try_from(get_date_time(date_time)?)
+        Value::from(get_date_time(date_time).unwrap())
     } else {
         unreachable!()
     }

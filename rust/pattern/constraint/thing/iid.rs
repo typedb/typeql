@@ -21,8 +21,7 @@
  */
 
 use crate::{
-    common::{error::INVALID_IID_STRING, token},
-    ErrorMessage,
+    common::{token},
 };
 use std::fmt;
 
@@ -36,27 +35,25 @@ fn is_valid_iid(iid: &str) -> bool {
 }
 
 impl IIDConstraint {
-    pub fn new(iid: String) -> Result<Self, ErrorMessage> {
-        if is_valid_iid(&iid) {
-            Ok(IIDConstraint { iid })
-        } else {
-            Err(INVALID_IID_STRING.format(&[&iid]))
-        }
+    pub fn new(iid: String) -> Self {
+        // TODO validation
+        // if is_valid_iid(&iid) {
+        //     Ok(IIDConstraint { iid })
+        // } else {
+        //     Err(INVALID_IID_STRING.format(&[&iid]))
+        // }
+        IIDConstraint { iid }
     }
 }
 
-impl TryFrom<&str> for IIDConstraint {
-    type Error = ErrorMessage;
-
-    fn try_from(iid: &str) -> Result<Self, Self::Error> {
+impl From<&str> for IIDConstraint {
+    fn from(iid: &str) -> Self {
         IIDConstraint::new(iid.to_string())
     }
 }
 
-impl TryFrom<String> for IIDConstraint {
-    type Error = ErrorMessage;
-
-    fn try_from(iid: String) -> Result<Self, Self::Error> {
+impl From<String> for IIDConstraint {
+    fn from(iid: String) -> Self {
         IIDConstraint::new(iid)
     }
 }

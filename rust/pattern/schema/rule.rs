@@ -45,9 +45,10 @@ impl RuleDeclaration {
         RuleDeclaration { label }
     }
 
-    pub fn when(self, conjunction: Conjunction) -> Result<RuleWhenStub, ErrorMessage> {
-        expect_only_conjunctions(conjunction.patterns.iter(), &self.label)?;
-        Ok(RuleWhenStub { label: self.label, when: conjunction })
+    pub fn when(self, conjunction: Conjunction) -> RuleWhenStub {
+        // TODO validation
+        // expect_only_conjunctions(conjunction.patterns.iter(), &self.label)?;
+        RuleWhenStub { label: self.label, when: conjunction }
     }
 }
 
@@ -79,12 +80,13 @@ pub struct RuleWhenStub {
 }
 
 impl RuleWhenStub {
-    pub fn then(self, conclusion: ThingVariable) -> Result<RuleDefinition, ErrorMessage> {
-        expect_infer_single_edge(&conclusion, &self.label)?;
-        expect_valid_inference(&conclusion, &self.label)?;
-        expect_then_bounded_by_when(&conclusion, &self.when, &self.label)?;
+    pub fn then(self, conclusion: ThingVariable) -> RuleDefinition {
+        // TODO validation
+        // expect_infer_single_edge(&conclusion, &self.label)?;
+        // expect_valid_inference(&conclusion, &self.label)?;
+        // expect_then_bounded_by_when(&conclusion, &self.when, &self.label)?;
 
-        Ok(RuleDefinition { label: self.label, when: self.when, then: conclusion })
+        RuleDefinition { label: self.label, when: self.when, then: conclusion }
     }
 }
 

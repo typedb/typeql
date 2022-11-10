@@ -21,36 +21,33 @@
  */
 
 use crate::{
-    common::error::{ErrorMessage, MISSING_PATTERNS},
     pattern::ThingVariable,
 };
 
 pub trait Writable {
-    fn vars(self) -> Result<Vec<ThingVariable>, ErrorMessage>;
+    fn vars(self) -> Vec<ThingVariable>;
 }
 
 impl Writable for ThingVariable {
-    fn vars(self) -> Result<Vec<ThingVariable>, ErrorMessage> {
-        Ok(vec![self])
+    fn vars(self) -> Vec<ThingVariable> {
+        vec![self]
     }
 }
 
 impl<const N: usize> Writable for [ThingVariable; N] {
-    fn vars(self) -> Result<Vec<ThingVariable>, ErrorMessage> {
-        if self.is_empty() {
-            Err(MISSING_PATTERNS.format(&[]))
-        } else {
-            Ok(self.to_vec())
-        }
+    fn vars(self) -> Vec<ThingVariable> {
+        // if self.is_empty() {
+        //     Err(MISSING_PATTERNS.format(&[]))  // TODO validation
+        // }
+        self.to_vec()
     }
 }
 
 impl Writable for Vec<ThingVariable> {
-    fn vars(self) -> Result<Vec<ThingVariable>, ErrorMessage> {
-        if self.is_empty() {
-            Err(MISSING_PATTERNS.format(&[]))
-        } else {
-            Ok(self.to_vec())
-        }
+    fn vars(self) -> Vec<ThingVariable> {
+        // if self.is_empty() {
+        //     Err(MISSING_PATTERNS.format(&[]))  // TODO validation
+        // }
+        self.to_vec()
     }
 }

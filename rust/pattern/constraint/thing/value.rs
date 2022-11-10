@@ -23,14 +23,12 @@
 use crate::{
     common::{
         date_time,
-        error::{INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
         string::{escape_regex, format_double, quote},
         token,
     },
     pattern::{Reference, ThingVariable, UnboundVariable},
-    ErrorMessage,
 };
-use chrono::{NaiveDateTime, Timelike};
+use chrono::{NaiveDateTime};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -40,12 +38,12 @@ pub struct ValueConstraint {
 }
 
 impl ValueConstraint {
-    pub fn new(predicate: token::Predicate, value: Value) -> Result<Self, ErrorMessage> {
-        if predicate.is_substring() && !matches!(value, Value::String(_)) {
-            Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))
-        } else {
-            Ok(ValueConstraint { predicate, value })
-        }
+    pub fn new(predicate: token::Predicate, value: Value) -> Self {
+        // TODO validation
+        // if predicate.is_substring() && !matches!(value, Value::String(_)) {
+        //     Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))
+        // }
+        ValueConstraint { predicate, value }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -111,16 +109,15 @@ impl From<String> for Value {
     }
 }
 
-impl TryFrom<NaiveDateTime> for Value {
-    type Error = ErrorMessage;
-
-    fn try_from(date_time: NaiveDateTime) -> Result<Self, ErrorMessage> {
-        if date_time.nanosecond() % 1000000 > 0 {
-            return Err(
-                INVALID_CONSTRAINT_DATETIME_PRECISION.format(&[date_time.to_string().as_str()])
-            );
-        }
-        Ok(Value::DateTime(date_time))
+impl From<NaiveDateTime> for Value {
+    fn from(date_time: NaiveDateTime) -> Self {
+        // TODO validation
+        // if date_time.nanosecond() % 1000000 > 0 {
+        //     return Err(
+        //         INVALID_CONSTRAINT_DATETIME_PRECISION.format(&[date_time.to_string().as_str()])
+        //     );
+        // }
+        Value::DateTime(date_time)
     }
 }
 
