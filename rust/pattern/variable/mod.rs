@@ -58,24 +58,14 @@ pub enum Variable {
 }
 
 impl Variable {
-    pub fn reference(&self) -> &Reference {
-        use Variable::*;
-        match self {
-            Unbound(unbound) => &unbound.reference,
-            Concept(concept) => &concept.reference,
-            Thing(thing) => &thing.reference,
-            Type(type_) => &type_.reference,
-        }
-    }
-
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         use Variable::*;
-        Box::new(std::iter::once(self.reference()).chain(match self {
+        match self {
             Unbound(unbound) => unbound.references(),
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
             Type(type_) => type_.references(),
-        }))
+        }
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {

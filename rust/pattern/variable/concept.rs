@@ -38,7 +38,10 @@ impl ConceptVariable {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(std::iter::empty())
+        Box::new(
+            std::iter::once(&self.reference)
+                .chain(self.is_constraint.iter().map(|is| &is.variable.reference)),
+        )
     }
 }
 

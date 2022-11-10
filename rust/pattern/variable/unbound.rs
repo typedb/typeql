@@ -60,7 +60,7 @@ impl UnboundVariable {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(std::iter::empty())
+        Box::new(std::iter::once(&self.reference))
     }
 }
 
