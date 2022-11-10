@@ -21,10 +21,7 @@
  */
 
 use crate::{
-    common::{
-        error::{ErrorMessage, MISSING_CONSTRAINT_RELATION_PLAYER},
-        token,
-    },
+    common::token,
     pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
     write_joined, Label,
 };
@@ -37,12 +34,12 @@ pub struct RelationConstraint {
 }
 
 impl RelationConstraint {
-    pub fn new(role_players: Vec<RolePlayerConstraint>) -> Result<Self, ErrorMessage> {
-        if role_players.is_empty() {
-            Err(MISSING_CONSTRAINT_RELATION_PLAYER.format(&[]))
-        } else {
-            Ok(RelationConstraint { role_players, scope: token::Type::Relation.into() })
-        }
+    pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
+        // TODO validation
+        // if role_players.is_empty() {
+        //     Err(MISSING_CONSTRAINT_RELATION_PLAYER.format(&[]))
+        // }
+        RelationConstraint { role_players, scope: token::Type::Relation.into() }
     }
 
     pub fn add(&mut self, role_player: RolePlayerConstraint) {
@@ -56,7 +53,7 @@ impl RelationConstraint {
 
 impl From<RolePlayerConstraint> for RelationConstraint {
     fn from(constraint: RolePlayerConstraint) -> Self {
-        RelationConstraint::new(vec![constraint]).unwrap()
+        RelationConstraint::new(vec![constraint])
     }
 }
 

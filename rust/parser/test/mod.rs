@@ -1198,8 +1198,7 @@ fn test_parse_empty_string() {
 #[test]
 fn test_parse_list_one_match() {
     let queries = "match $y isa movie;";
-    let parsed =
-        parse_queries(queries).unwrap().map(|q| q.unwrap().into_match()).collect::<Vec<_>>();
+    let parsed = parse_queries(queries).unwrap().map(Query::into_match).collect::<Vec<_>>();
     let expected = vec![typeql_match!(var("y").isa("movie"))];
     assert_eq!(parsed, expected);
 }
@@ -1207,8 +1206,7 @@ fn test_parse_list_one_match() {
 #[test]
 fn test_parse_list_one_insert() {
     let queries = "insert $x isa movie;";
-    let parsed =
-        parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
+    let parsed = parse_queries(queries).unwrap().map(Query::into_insert).collect::<Vec<_>>();
     let expected = vec![typeql_insert!(var("x").isa("movie"))];
     assert_eq!(parsed, expected);
 }
@@ -1216,8 +1214,7 @@ fn test_parse_list_one_insert() {
 #[test]
 fn test_parse_list_one_insert_with_whitespace_prefix() {
     let queries = " insert $x isa movie;";
-    let parsed =
-        parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
+    let parsed = parse_queries(queries).unwrap().map(Query::into_insert).collect::<Vec<_>>();
     let expected = vec![typeql_insert!(var("x").isa("movie"))];
     assert_eq!(parsed, expected);
 }
@@ -1226,8 +1223,7 @@ fn test_parse_list_one_insert_with_whitespace_prefix() {
 fn test_parse_list_one_insert_with_prefix_comment() {
     let queries = r#"#hola
 insert $x isa movie;"#;
-    let parsed =
-        parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
+    let parsed = parse_queries(queries).unwrap().map(Query::into_insert).collect::<Vec<_>>();
     let expected = vec![typeql_insert!(var("x").isa("movie"))];
     assert_eq!(parsed, expected);
 }
@@ -1235,7 +1231,7 @@ insert $x isa movie;"#;
 #[test]
 fn test_parse_list() {
     let queries = "insert $x isa movie; match $y isa movie;";
-    let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap()).collect::<Vec<_>>();
+    let parsed = parse_queries(queries).unwrap().collect::<Vec<_>>();
     let expected = vec![
         typeql_insert!(var("x").isa("movie")).into(),
         typeql_match!(var("y").isa("movie")).into(),
@@ -1250,7 +1246,7 @@ fn test_parse_many_match_insert_without_stack_overflow() {
     let queries = query.repeat(num_queries);
 
     let mut parsed = Vec::with_capacity(num_queries);
-    parsed.extend(parse_queries(&queries).unwrap().map(|q| q.unwrap().into_insert()));
+    parsed.extend(parse_queries(&queries).unwrap().map(Query::into_insert));
 
     let expected = typeql_match!(var("x").isa("person")).insert(var("x").has(("name", "bob")));
 

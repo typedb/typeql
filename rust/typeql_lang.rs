@@ -65,10 +65,10 @@ macro_rules! parse {
         let errors = Rc::new(RefCell::new(Vec::<SyntaxError>::new()));
         parser.add_error_listener(Box::new(ErrorListener::new(input, errors.clone())));
 
-        let result = $visitor(parser.$accessor().unwrap());
+        let ast_root = parser.$accessor().unwrap();
 
         if errors.borrow().is_empty() {
-            result.map_err(|em| em.message)
+            $visitor(ast_root).map_err(|em| em.message)
         } else {
             Err(errors
                 .borrow()
@@ -84,9 +84,7 @@ pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
     parse!(visit_eof_query(eof_query(typeql_query)))
 }
 
-pub fn parse_queries(
-    typeql_queries: &str,
-) -> Result<impl Iterator<Item = Result<Query, ErrorMessage>> + '_, String> {
+pub fn parse_queries(typeql_queries: &str) -> Result<impl Iterator<Item = Query> + '_, String> {
     parse!(visit_eof_queries(eof_queries(typeql_queries)))
 }
 
