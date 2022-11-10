@@ -484,7 +484,7 @@ fn visit_variable_attribute(ctx: Rc<Variable_attributeContext>) -> ParserResult<
 }
 
 fn visit_relation(ctx: Rc<RelationContext>) -> ParserResult<RelationConstraint> {
-    Ok(RelationConstraint::new(get_role_players(ctx)?))
+    RelationConstraint::new(get_role_players(ctx)?)
 }
 
 fn visit_attributes(ctx: Rc<AttributesContext>) -> ParserResult<Vec<HasConstraint>> {
