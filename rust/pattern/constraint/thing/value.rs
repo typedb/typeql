@@ -23,12 +23,15 @@
 use crate::{
     common::{
         date_time,
+        error::{
+            ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE,
+        },
         string::{escape_regex, format_double, quote},
         token,
     },
     pattern::{Reference, ThingVariable, UnboundVariable},
 };
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Timelike};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -39,10 +42,6 @@ pub struct ValueConstraint {
 
 impl ValueConstraint {
     pub fn new(predicate: token::Predicate, value: Value) -> Self {
-        // TODO validation
-        // if predicate.is_substring() && !matches!(value, Value::String(_)) {
-        //     Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))
-        // }
         ValueConstraint { predicate, value }
     }
 
@@ -51,6 +50,14 @@ impl ValueConstraint {
             Value::Variable(v) => Box::new(std::iter::once(&v.reference)),
             _ => Box::new(std::iter::empty()),
         }
+    }
+
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        if self.predicate.is_substring() && !matches!(self.value, Value::String(_)) {
+            Err(INVALID_CONSTRAINT_PREDICATE
+                .format(&[&self.predicate.to_string(), &self.value.to_string()]))?
+        }
+        self.value.validate()
     }
 }
 
@@ -79,6 +86,22 @@ pub enum Value {
     Variable(Box<ThingVariable>),
 }
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
+
+impl Value {
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        match &self {
+            Self::DateTime(date_time) => {
+                if date_time.nanosecond() % 1000000 > 0 {
+                    Err(INVALID_CONSTRAINT_DATETIME_PRECISION
+                        .format(&[date_time.to_string().as_str()]))
+                } else {
+                    Ok(())
+                }
+            }
+            _ => Ok(()),
+        }
+    }
+}
 
 impl From<i64> for Value {
     fn from(long: i64) -> Self {
@@ -111,12 +134,6 @@ impl From<String> for Value {
 
 impl From<NaiveDateTime> for Value {
     fn from(date_time: NaiveDateTime) -> Self {
-        // TODO validation
-        // if date_time.nanosecond() % 1000000 > 0 {
-        //     return Err(
-        //         INVALID_CONSTRAINT_DATETIME_PRECISION.format(&[date_time.to_string().as_str()])
-        //     );
-        // }
         Value::DateTime(date_time)
     }
 }

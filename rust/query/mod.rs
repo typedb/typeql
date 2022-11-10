@@ -50,6 +50,7 @@ pub use typeql_update::TypeQLUpdate;
 
 mod writable;
 pub use writable::Writable;
+use crate::common::error::ErrorMessage;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
@@ -74,6 +75,14 @@ impl Query {
     enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
     enum_getter!(into_group, Group, TypeQLMatchGroup);
     enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
+
+    pub fn validated(self) -> Result<Self, ErrorMessage> {
+        use Query::*;
+        match self {
+            Match(query) => query.validated().map(TypeQLMatch::into),
+            _ => Ok(self),
+        }
+    }
 }
 
 enum_wrapper! { Query

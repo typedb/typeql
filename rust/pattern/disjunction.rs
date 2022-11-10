@@ -36,6 +36,10 @@ impl Disjunction {
         Disjunction { patterns }
     }
 
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        Ok(())
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
         self.patterns.iter().try_for_each(|p| p.expect_is_bounded_by(bounds))
     }

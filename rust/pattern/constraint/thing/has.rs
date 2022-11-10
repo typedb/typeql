@@ -45,6 +45,10 @@ impl HasConstraint {
                 .chain(std::iter::once(&self.attribute.reference)),
         )
     }
+
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        self.attribute.validate()
+    }
 }
 
 impl From<UnboundVariable> for HasConstraint {

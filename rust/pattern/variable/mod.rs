@@ -68,6 +68,16 @@ impl Variable {
         }
     }
 
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        use Variable::*;
+        match self {
+            Unbound(_unbound) => Ok(()),
+            Concept(_concept) => Ok(()),
+            Thing(thing) => thing.validate(),
+            Type(_type_) => Ok(()),
+        }
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
         match self {
             Self::Unbound(_) => unreachable!(),

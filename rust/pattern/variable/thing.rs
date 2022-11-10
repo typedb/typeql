@@ -21,6 +21,7 @@
  */
 
 use crate::{
+    common::error::ErrorMessage,
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable, ValueConstraint,
@@ -59,6 +60,19 @@ impl ThingVariable {
                 .chain(self.relation.iter().flat_map(|c| c.references()))
                 .chain(self.value.iter().flat_map(|c| c.references())),
         )
+    }
+
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        println!("{:?}", &self);
+        // self.reference.validate()?;
+        // self.iid
+        // self.isa
+        self.has.iter().try_for_each(|has| has.validate())?;
+        if let Some(value) = &self.value {
+            value.validate()?;
+        }
+        // self.relation
+        Ok(())
     }
 
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

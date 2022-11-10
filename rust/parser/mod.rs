@@ -131,8 +131,7 @@ fn get_role_players(ctx: Rc<RelationContext>) -> Vec<RolePlayerConstraint> {
 }
 
 pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
-    // TODO validation
-    Ok(visit_query(ctx.query().unwrap()))
+    visit_query(ctx.query().unwrap()).validated()
 }
 
 pub(crate) fn visit_eof_queries(

@@ -60,6 +60,10 @@ impl Conjunction {
         self.references().filter(|r| r.is_name()).map(|r| r.to_string()).collect()
     }
 
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        Ok(())
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
         let names = self.names();
         if names.is_disjoint(bounds) {

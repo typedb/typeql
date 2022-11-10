@@ -372,22 +372,19 @@ $x has release-date 1000-11-12T13:14:15.000123456;"#;
     assert!(parsed.err().unwrap().contains("no viable alternative"));
 }
 
-/*
-#[test]  // TODO deferred validation
+#[test]
 fn when_parsing_date_error_when_handling_overly_precise_nanos() {
-    let expected =
-        typeql_match!(var("x").has((
-            "release-date",
-            NaiveDateTime::new(
-                NaiveDate::from_ymd(1000, 11, 12),
-                NaiveTime::from_hms_nano(13, 14, 15, 123450000),
-            ),
-        )))
-    ;
-    assert!(expected.is_err());
-    assert!(expected.err().unwrap().message.contains("more precise than 1 millisecond"));
+    let validated = typeql_match!(var("x").has((
+        "release-date",
+        NaiveDateTime::new(
+            NaiveDate::from_ymd(1000, 11, 12),
+            NaiveTime::from_hms_nano(13, 14, 15, 123450000),
+        ),
+    )))
+    .validated();
+    assert!(validated.is_err());
+    assert!(validated.err().unwrap().message.contains("more precise than 1 millisecond"));
 }
- */
 
 #[test]
 fn test_long_predicate_query() {
@@ -523,8 +520,7 @@ $x isa movie;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
-#[test]  // TODO deferred validation
+#[test]
 fn test_disjunction_not_in_conjunction() {
     let query = r#"match
 {
@@ -535,7 +531,6 @@ fn test_disjunction_not_in_conjunction() {
 
     assert!(parse_query(query).is_err())
 }
-*/
 
 #[test]
 fn test_nested_conjunction_and_disjunction() {
@@ -567,8 +562,7 @@ $y isa $p;
     assert_query_eq!(expected, parsed, query);
 }
 
-/*
-#[test]  // TODO deferred validation
+#[test]
 fn test_disjunction_not_binding_conjunction() {
     let query = r#"match
 $y isa $p;
@@ -576,7 +570,6 @@ $y isa $p;
     let parsed = parse_query(query);
     assert!(parsed.is_err());
 }
-*/
 
 #[test]
 fn test_aggregate_count_query() {
@@ -956,15 +949,15 @@ $x value double;"#;
     assert_query_eq!(expected, parsed, query);
 }
 
-// #[test]
+#[test]
 fn test_parse_without_var() {
     let query = r#"match
 $_ isa person;"#;
 
     let parsed = parse_query(query);
-    assert!(parsed.is_err()); // TODO validation
-    let _built = typeql_match!(var(()).isa("person"));
-    // assert!(built.is_err());  // TODO validation
+    assert!(parsed.is_err());
+    let built = typeql_match!(var(()).isa("person")).validated();
+    assert!(built.is_err());
 }
 
 #[test]

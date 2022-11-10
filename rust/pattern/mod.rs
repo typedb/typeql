@@ -73,6 +73,16 @@ impl Pattern {
     enum_getter!(into_negation, Negation, Negation);
     enum_getter!(into_variable, Variable, Variable);
 
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.validate(),
+            Disjunction(disjunction) => disjunction.validate(),
+            Negation(negation) => negation.validate(),
+            Variable(variable) => variable.validate(),
+        }
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
         use Pattern::*;
         match self {

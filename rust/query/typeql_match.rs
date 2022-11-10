@@ -45,14 +45,25 @@ impl AggregateQueryBuilder for TypeQLMatch {}
 
 impl TypeQLMatch {
     pub fn new(conjunction: Conjunction, modifiers: Modifiers) -> Self {
-        // TODO validation
-        // expect_has_bounding_conjunction(&conjunction)?;
-        // expect_nested_patterns_are_bounded(&conjunction)?;
-        // expect_each_variable_is_bounded_by_named(conjunction.patterns.iter())?;
-        // expect_filters_are_in_scope(&conjunction, &modifiers.filter)?;
-        // expect_sort_vars_are_in_scope(&conjunction, &modifiers.filter, &modifiers.sorting)?;
-
         Self { conjunction, modifiers }
+    }
+
+    pub fn validate(&self) -> Result<(), ErrorMessage> {
+        expect_has_bounding_conjunction(&self.conjunction)?;
+        expect_nested_patterns_are_bounded(&self.conjunction)?;
+        expect_each_variable_is_bounded_by_named(self.conjunction.patterns.iter())?;
+        expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter)?;
+        expect_sort_vars_are_in_scope(
+            &self.conjunction,
+            &self.modifiers.filter,
+            &self.modifiers.sorting,
+        )?;
+        self.conjunction.patterns.iter().try_for_each(|p| p.validate())?;
+        Ok(())
+    }
+
+    pub fn validated(self) -> Result<Self, ErrorMessage> {
+        self.validate().map(|_| self)
     }
 
     pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
