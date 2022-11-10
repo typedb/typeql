@@ -1178,8 +1178,8 @@ rule all-movies-are-drama:
     let parsed = parse_query(&query).unwrap().into_define();
     let expected = try_! {
         typeql_define!(rule("all-movies-are-drama")
-            .when(and!(var("x").isa("movie")))
-            .then(var("x").has(("genre", "drama")).unwrap()))?
+            .when(and!(var("x").isa("movie")))?
+            .then(var("x").has(("genre", "drama"))?)?)?
     }
     .unwrap();
 

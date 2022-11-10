@@ -21,8 +21,16 @@
  */
 
 use crate::{
-    common::{string::indent, token},
-    pattern::{Conjunction, ThingVariable},
+    common::{
+        error::{
+            ErrorMessage, INVALID_RULE_THEN, INVALID_RULE_THEN_HAS, INVALID_RULE_THEN_ROLES,
+            INVALID_RULE_THEN_VARIABLES, INVALID_RULE_WHEN_CONTAINS_DISJUNCTION,
+            INVALID_RULE_WHEN_NESTED_NEGATION,
+        },
+        string::indent,
+        token,
+    },
+    pattern::{Conjunction, Pattern, ThingVariable},
     Label,
 };
 use std::fmt;
@@ -37,9 +45,26 @@ impl RuleDeclaration {
         RuleDeclaration { label }
     }
 
-    pub fn when(self, conjunction: Conjunction) -> RuleWhenStub {
-        RuleWhenStub { label: self.label, when: conjunction }
+    pub fn when(self, conjunction: Conjunction) -> Result<RuleWhenStub, ErrorMessage> {
+        expect_only_conjunctions(conjunction.patterns.iter(), &self.label)?;
+        Ok(RuleWhenStub { label: self.label, when: conjunction })
     }
+}
+
+fn expect_only_conjunctions<'a>(
+    mut patterns: impl Iterator<Item = &'a Pattern>,
+    rule_label: &Label,
+) -> Result<(), ErrorMessage> {
+    patterns.try_for_each(|p| match p {
+        Pattern::Conjunction(c) => expect_only_conjunctions(c.patterns.iter(), rule_label),
+        Pattern::Variable(_) => Ok(()),
+        Pattern::Disjunction(_) => {
+            Err(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.format(&[&rule_label.to_string()]))
+        }
+        Pattern::Negation(_) => {
+            Err(INVALID_RULE_WHEN_NESTED_NEGATION.format(&[&rule_label.to_string()]))
+        }
+    })
 }
 
 impl From<&str> for RuleDeclaration {
@@ -54,8 +79,88 @@ pub struct RuleWhenStub {
 }
 
 impl RuleWhenStub {
-    pub fn then(self, conclusion: ThingVariable) -> RuleDefinition {
-        RuleDefinition { label: self.label, when: self.when, then: conclusion }
+    pub fn then(self, conclusion: ThingVariable) -> Result<RuleDefinition, ErrorMessage> {
+        expect_infer_single_edge(&conclusion, &self.label)?;
+        expect_valid_inference(&conclusion, &self.label)?;
+        expect_then_bounded_by_when(&conclusion, &self.when, &self.label)?;
+
+        Ok(RuleDefinition { label: self.label, when: self.when, then: conclusion })
+    }
+}
+
+fn expect_infer_single_edge(
+    conclusion: &ThingVariable,
+    rule_label: &Label,
+) -> Result<(), ErrorMessage> {
+    if conclusion.has.len() == 1
+        && (conclusion.iid.is_none()
+            && conclusion.isa.is_none()
+            && conclusion.value.is_none()
+            && conclusion.relation.is_none())
+    {
+        Ok(())
+    } else if conclusion.relation.is_some()
+        && conclusion.isa.is_some()
+        && (conclusion.iid.is_none() && conclusion.has.is_empty() && conclusion.value.is_none())
+    {
+        Ok(())
+    } else {
+        Err(INVALID_RULE_THEN.format(&[&rule_label.to_string(), &conclusion.to_string()]))
+    }
+}
+
+fn expect_valid_inference(
+    conclusion: &ThingVariable,
+    rule_label: &Label,
+) -> Result<(), ErrorMessage> {
+    if conclusion.has.len() == 1
+        && (conclusion.iid.is_none()
+            && conclusion.isa.is_none()
+            && conclusion.value.is_none()
+            && conclusion.relation.is_none())
+    {
+        let has = conclusion.has.get(0).unwrap();
+        if has.type_.is_some() && has.attribute.reference.is_name() {
+            Err(INVALID_RULE_THEN_HAS.format(&[
+                &rule_label.to_string(),
+                &conclusion.to_string(),
+                &has.attribute.reference.to_string(),
+                &has.type_.as_ref().unwrap().to_string(),
+            ]))
+        } else {
+            Ok(())
+        }
+    } else if conclusion.relation.is_some()
+        && conclusion.isa.is_some()
+        && (conclusion.iid.is_none() && conclusion.has.is_empty() && conclusion.value.is_none())
+    {
+        if conclusion
+            .relation
+            .as_ref()
+            .unwrap()
+            .role_players
+            .iter()
+            .all(|rp| rp.role_type.is_some())
+        {
+            Ok(())
+        } else {
+            Err(INVALID_RULE_THEN_ROLES.format(&[&rule_label.to_string(), &conclusion.to_string()]))
+        }
+    } else {
+        unreachable!()
+    }
+}
+
+fn expect_then_bounded_by_when(
+    conclusion: &ThingVariable,
+    conjunction: &Conjunction,
+    rule_label: &Label,
+) -> Result<(), ErrorMessage> {
+    let names = conjunction.names();
+    if conclusion.references().filter(|r| r.is_name()).all(|r| names.contains(&r.to_string())) {
+        Ok(())
+    } else {
+        Err(INVALID_RULE_THEN_VARIABLES.format(&[&rule_label.to_string()]))
     }
 }
 
@@ -70,12 +175,6 @@ pub struct RuleDefinition {
     pub label: Label,
     pub when: Conjunction,
     pub then: ThingVariable,
-}
-
-impl RuleDefinition {
-    pub fn new(label: Label, when: Conjunction, then: ThingVariable) -> Self {
-        RuleDefinition { label, when, then }
-    }
 }
 
 impl fmt::Display for RuleDefinition {

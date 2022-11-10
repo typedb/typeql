@@ -29,8 +29,8 @@ use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
-    role_players: Vec<RolePlayerConstraint>,
-    scope: Label,
+    pub role_players: Vec<RolePlayerConstraint>,
+    pub scope: Label,
 }
 
 impl RelationConstraint {

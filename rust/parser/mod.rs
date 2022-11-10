@@ -535,11 +535,9 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ParserResult<ValueConstraint> {
 }
 
 fn visit_schema_rule(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDefinition> {
-    Ok(RuleDefinition::new(
-        Label::from(ctx.label().unwrap().get_text()),
-        Conjunction::new(visit_patterns(ctx.patterns().unwrap())?),
-        visit_variable_thing_any(ctx.variable_thing_any().unwrap())?,
-    ))
+    RuleDeclaration::new(Label::from(ctx.label().unwrap().get_text()))
+        .when(Conjunction::new(visit_patterns(ctx.patterns().unwrap())?))?
+        .then(visit_variable_thing_any(ctx.variable_thing_any().unwrap())?)
 }
 
 fn visit_schema_rule_declaration(ctx: Rc<Schema_ruleContext>) -> ParserResult<RuleDeclaration> {
