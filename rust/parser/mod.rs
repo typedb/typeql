@@ -57,7 +57,7 @@ use std::rc::Rc;
 // keep star import to not expose generated code
 use typeql_grammar::typeqlrustparser::*;
 
-type ParserResult<T> = Result<T, ErrorMessage>;
+type ParserResult<T> = Result<T, Vec<ErrorMessage>>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
 fn get_string(string: Rc<TerminalNode>) -> String {

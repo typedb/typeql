@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{ErrorMessage, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        error::{list_err, ErrorMessage, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
         string::indent,
     },
     pattern::{Pattern, Reference},
@@ -60,17 +60,26 @@ impl Conjunction {
         self.references().filter(|r| r.is_name()).map(|r| r.to_string()).collect()
     }
 
-    pub fn validate(&self) -> Result<(), ErrorMessage> {
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         Ok(())
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
         let names = self.names();
         if names.is_disjoint(bounds) {
-            Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")]))?;
+            Err(vec![
+                MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")])
+            ])?;
         }
         let bounds = bounds.union(&names).cloned().collect();
-        self.patterns.iter().try_for_each(|p| p.expect_is_bounded_by(&bounds))
+        list_err(
+            self.patterns
+                .iter()
+                .map(|p| p.expect_is_bounded_by(&bounds))
+                .filter_map(Result::err)
+                .flatten()
+                .collect(),
+        )
     }
 }
 

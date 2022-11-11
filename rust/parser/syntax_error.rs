@@ -22,8 +22,9 @@
 
 use std::fmt;
 
-use crate::common::error::{SYNTAX_ERROR_DETAILED, SYNTAX_ERROR_NO_DETAILS};
+use crate::common::error::{ErrorMessage, SYNTAX_ERROR_DETAILED, SYNTAX_ERROR_NO_DETAILS};
 
+#[derive(Clone, Debug)]
 pub struct SyntaxError {
     pub query_line: Option<String>,
     pub line: usize,
@@ -31,31 +32,30 @@ pub struct SyntaxError {
     pub message: String,
 }
 
-impl fmt::Display for SyntaxError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(query_line) = &self.query_line {
+impl From<SyntaxError> for ErrorMessage {
+    fn from(syntax_error: SyntaxError) -> Self {
+        if let Some(query_line) = &syntax_error.query_line {
             // Error message appearance:
             //
             // syntax error at line 1:
             // match $
             //       ^
             // blah blah antlr blah
-            f.write_str(
-                &SYNTAX_ERROR_DETAILED
-                    .format(&[
-                        self.line.to_string().as_str(),
-                        query_line,
-                        &(" ".repeat(self.char_position_in_line) + "^"),
-                        &self.message,
-                    ])
-                    .message,
-            )
+            SYNTAX_ERROR_DETAILED.format(&[
+                syntax_error.line.to_string().as_str(),
+                query_line,
+                &(" ".repeat(syntax_error.char_position_in_line) + "^"),
+                &syntax_error.message,
+            ])
         } else {
-            f.write_str(
-                &SYNTAX_ERROR_NO_DETAILS
-                    .format(&[self.line.to_string().as_str(), &self.message])
-                    .message,
-            )
+            SYNTAX_ERROR_NO_DETAILS
+                .format(&[syntax_error.line.to_string().as_str(), &syntax_error.message])
         }
+    }
+}
+
+impl fmt::Display for SyntaxError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", ErrorMessage::from(self.clone()).message)
     }
 }

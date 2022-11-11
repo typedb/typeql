@@ -21,7 +21,11 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, string::indent, token},
+    common::{
+        error::{list_err, ErrorMessage},
+        string::indent,
+        token,
+    },
     pattern::Pattern,
 };
 use std::{collections::HashSet, fmt};
@@ -36,12 +40,19 @@ impl Disjunction {
         Disjunction { patterns }
     }
 
-    pub fn validate(&self) -> Result<(), ErrorMessage> {
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         Ok(())
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
-        self.patterns.iter().try_for_each(|p| p.expect_is_bounded_by(bounds))
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
+        list_err(
+            self.patterns
+                .iter()
+                .map(|p| p.expect_is_bounded_by(bounds))
+                .filter_map(Result::err)
+                .flatten()
+                .collect(),
+        )
     }
 }
 

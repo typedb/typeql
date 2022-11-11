@@ -68,46 +68,43 @@ macro_rules! parse {
         let ast_root = parser.$accessor().unwrap();
 
         if errors.borrow().is_empty() {
-            $visitor(ast_root).map_err(|em| em.message)
+            $visitor(ast_root)
         } else {
-            Err(errors
-                .borrow()
-                .iter()
-                .map(SyntaxError::to_string)
-                .collect::<Vec<String>>()
-                .join("\n\n"))
+            Err(errors.take().into_iter().map(SyntaxError::into).collect::<Vec<ErrorMessage>>())
         }
     }};
 }
 
-pub fn parse_query(typeql_query: &str) -> Result<Query, String> {
+pub fn parse_query(typeql_query: &str) -> Result<Query, Vec<ErrorMessage>> {
     parse!(visit_eof_query(eof_query(typeql_query)))
 }
 
-pub fn parse_queries(typeql_queries: &str) -> Result<impl Iterator<Item = Query> + '_, String> {
+pub fn parse_queries(
+    typeql_queries: &str,
+) -> Result<impl Iterator<Item = Query> + '_, Vec<ErrorMessage>> {
     parse!(visit_eof_queries(eof_queries(typeql_queries)))
 }
 
-pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, String> {
+pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, Vec<ErrorMessage>> {
     parse!(visit_eof_pattern(eof_pattern(typeql_pattern)))
 }
 
-pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>, String> {
+pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>, Vec<ErrorMessage>> {
     parse!(visit_eof_patterns(eof_patterns(typeql_patterns)))
 }
 
-pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>, String> {
+pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>, Vec<ErrorMessage>> {
     parse!(visit_eof_definables(eof_definables(typeql_definables)))
 }
 
-pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition, String> {
+pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition, Vec<ErrorMessage>> {
     parse!(visit_eof_schema_rule(eof_schema_rule(typeql_rule)))
 }
 
-pub fn parse_variable(typeql_variable: &str) -> Result<Variable, String> {
+pub fn parse_variable(typeql_variable: &str) -> Result<Variable, Vec<ErrorMessage>> {
     parse!(visit_eof_variable(eof_variable(typeql_variable)))
 }
 
-pub fn parse_label(typeql_label: &str) -> Result<Label, String> {
+pub fn parse_label(typeql_label: &str) -> Result<Label, Vec<ErrorMessage>> {
     parse!(visit_eof_label(eof_label(typeql_label)))
 }

@@ -46,7 +46,7 @@ impl HasConstraint {
         )
     }
 
-    pub fn validate(&self) -> Result<(), ErrorMessage> {
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         self.attribute.validate()
     }
 }

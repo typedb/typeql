@@ -52,12 +52,22 @@ impl ValueConstraint {
         }
     }
 
-    pub fn validate(&self) -> Result<(), ErrorMessage> {
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        let mut errors = vec![];
         if self.predicate.is_substring() && !matches!(self.value, Value::String(_)) {
-            Err(INVALID_CONSTRAINT_PREDICATE
-                .format(&[&self.predicate.to_string(), &self.value.to_string()]))?
+            errors.push(
+                INVALID_CONSTRAINT_PREDICATE
+                    .format(&[&self.predicate.to_string(), &self.value.to_string()]),
+            )
         }
-        self.value.validate()
+        if let Err(mut value_errors) = self.value.validate() {
+            errors.append(&mut value_errors)
+        }
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
     }
 }
 
@@ -88,12 +98,12 @@ pub enum Value {
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
 impl Value {
-    pub fn validate(&self) -> Result<(), ErrorMessage> {
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
-                    Err(INVALID_CONSTRAINT_DATETIME_PRECISION
-                        .format(&[date_time.to_string().as_str()]))
+                    Err(vec![INVALID_CONSTRAINT_DATETIME_PRECISION
+                        .format(&[date_time.to_string().as_str()])])
                 } else {
                     Ok(())
                 }

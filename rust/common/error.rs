@@ -142,3 +142,11 @@ error_messages! {
    ILLEGAL_GRAMMAR = 39: "Illegal grammar: '{}'",
    ILLEGAL_CHAR_IN_LABEL = 40: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
 }
+
+pub fn list_err(v: Vec<ErrorMessage>) -> Result<(), Vec<ErrorMessage>> {
+    if v.is_empty() {
+        Ok(())
+    } else {
+        Err(v)
+    }
+}

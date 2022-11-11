@@ -62,7 +62,7 @@ impl ThingVariable {
         )
     }
 
-    pub fn validate(&self) -> Result<(), ErrorMessage> {
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         println!("{:?}", &self);
         // self.reference.validate()?;
         // self.iid

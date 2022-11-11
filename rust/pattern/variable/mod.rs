@@ -68,7 +68,7 @@ impl Variable {
         }
     }
 
-    pub fn validate(&self) -> Result<(), ErrorMessage> {
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         use Variable::*;
         match self {
             Unbound(_unbound) => Ok(()),
@@ -78,15 +78,15 @@ impl Variable {
         }
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), ErrorMessage> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
         match self {
             Self::Unbound(_) => unreachable!(),
             _ => {
                 if self.references().any(|r| r.is_name() && bounds.contains(&r.to_string())) {
                     Ok(())
                 } else {
-                    Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
-                        .format(&[&self.to_string().replace('\n', " ")]))
+                    Err(vec![MATCH_HAS_UNBOUNDED_NESTED_PATTERN
+                        .format(&[&self.to_string().replace('\n', " ")])])
                 }
             }
         }
