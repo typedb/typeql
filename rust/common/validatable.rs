@@ -20,8 +20,16 @@
  *
  */
 
-pub mod date_time;
-pub mod error;
-pub mod string;
-pub mod token;
-pub mod validatable;
+use crate::common::error::ErrorMessage;
+
+pub trait Validatable: Sized {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>>;
+
+    fn validated(self) -> Result<Self, Vec<ErrorMessage>> {
+        self.validate().map(|_| self)
+    }
+
+    fn is_valid(&self) -> bool {
+        self.validate().is_ok()
+    }
+}

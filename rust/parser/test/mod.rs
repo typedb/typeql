@@ -22,7 +22,7 @@
 
 use crate::{
     and,
-    common::token::ValueType,
+    common::{token::ValueType, validatable::Validatable},
     gte, lt, lte, not, or, parse_pattern, parse_queries, parse_query,
     pattern::{
         ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,

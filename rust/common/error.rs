@@ -149,7 +149,10 @@ error_messages! {
    ILLEGAL_CHAR_IN_LABEL = 40: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
 }
 
-pub fn list_err(v: Vec<ErrorMessage>) -> Result<(), Vec<ErrorMessage>> {
+pub fn collect_err(
+    i: &mut dyn Iterator<Item = Result<(), Vec<ErrorMessage>>>,
+) -> Result<(), Vec<ErrorMessage>> {
+    let v = i.filter_map(Result::err).flatten().collect::<Vec<_>>();
     if v.is_empty() {
         Ok(())
     } else {

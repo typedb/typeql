@@ -56,7 +56,10 @@ pub use variable::{
 #[cfg(test)]
 mod test;
 
-use crate::{common::error::ErrorMessage, enum_getter, enum_wrapper};
+use crate::{
+    common::{error::ErrorMessage, validatable::Validatable},
+    enum_getter, enum_wrapper,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -73,16 +76,6 @@ impl Pattern {
     enum_getter!(into_negation, Negation, Negation);
     enum_getter!(into_variable, Variable, Variable);
 
-    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-        use Pattern::*;
-        match self {
-            Conjunction(conjunction) => conjunction.validate(),
-            Disjunction(disjunction) => disjunction.validate(),
-            Negation(negation) => negation.validate(),
-            Variable(variable) => variable.validate(),
-        }
-    }
-
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
         use Pattern::*;
         match self {
@@ -90,6 +83,18 @@ impl Pattern {
             Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
             Negation(negation) => negation.expect_is_bounded_by(bounds),
             Variable(variable) => variable.expect_is_bounded_by(bounds),
+        }
+    }
+}
+
+impl Validatable for Pattern {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.validate(),
+            Disjunction(disjunction) => disjunction.validate(),
+            Negation(negation) => negation.validate(),
+            Variable(variable) => variable.validate(),
         }
     }
 }

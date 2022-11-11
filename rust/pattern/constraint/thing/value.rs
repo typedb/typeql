@@ -28,6 +28,7 @@ use crate::{
         },
         string::{escape_regex, format_double, quote},
         token,
+        validatable::Validatable,
     },
     pattern::{Reference, ThingVariable, UnboundVariable},
 };
@@ -51,8 +52,10 @@ impl ValueConstraint {
             _ => Box::new(std::iter::empty()),
         }
     }
+}
 
-    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+impl Validatable for ValueConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         let mut errors = vec![];
         if self.predicate.is_substring() && !matches!(self.value, Value::String(_)) {
             errors.push(
@@ -97,8 +100,8 @@ pub enum Value {
 }
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
-impl Value {
-    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+impl Validatable for Value {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {

@@ -32,6 +32,7 @@ use crate::{
         error::{ErrorMessage, ILLEGAL_GRAMMAR},
         string::{unescape_regex, unquote},
         token,
+        validatable::Validatable,
     },
     pattern::{
         ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction,

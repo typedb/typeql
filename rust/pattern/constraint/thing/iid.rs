@@ -23,6 +23,7 @@
 use crate::common::{
     error::{ErrorMessage, INVALID_IID_STRING},
     token,
+    validatable::Validatable,
 };
 use std::fmt;
 
@@ -39,8 +40,10 @@ impl IIDConstraint {
     pub fn new(iid: String) -> Self {
         IIDConstraint { iid }
     }
+}
 
-    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+impl Validatable for IIDConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         if is_valid_iid(&self.iid) {
             Ok(())
         } else {

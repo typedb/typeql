@@ -21,7 +21,10 @@
  */
 
 use crate::{
-    common::error::{list_err, ErrorMessage},
+    common::{
+        error::{collect_err, ErrorMessage},
+        validatable::Validatable,
+    },
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable, ValueConstraint,
@@ -62,24 +65,6 @@ impl ThingVariable {
         )
     }
 
-    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-        list_err(
-            // std::iter::once(&self.reference)
-            //     .chain(
-            self.iid
-                .iter()
-                .map(|c| c.validate())
-                // )
-                // .chain(self.isa.iter().map(|c| c.references()))
-                .chain(self.has.iter().map(|c| c.validate()))
-                // .chain(self.relation.iter().map(|c| c.validate()))
-                .chain(self.value.iter().map(|c| c.validate()))
-                .filter_map(Result::err)
-                .flatten()
-                .collect(),
-        )
-    }
-
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;
@@ -99,6 +84,24 @@ impl ThingVariable {
 
     fn is_thing_constrained(&self) -> bool {
         self.isa.is_some() || self.iid.is_some() || !self.has.is_empty()
+    }
+}
+
+impl Validatable for ThingVariable {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut
+            // std::iter::once(&self.reference)
+            //     .chain(
+            self.iid
+                .iter()
+                .map(|c| c.validate())
+                // )
+                // .chain(self.isa.iter().map(|c| c.references()))
+                .chain(self.has.iter().map(|c| c.validate()))
+                // .chain(self.relation.iter().map(|c| c.validate()))
+                .chain(self.value.iter().map(|c| c.validate())),
+        )
     }
 }
 

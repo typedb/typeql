@@ -22,9 +22,10 @@
 
 use crate::{
     common::{
-        error::{list_err, ErrorMessage},
+        error::{collect_err, ErrorMessage},
         string::indent,
         token,
+        validatable::Validatable,
     },
     pattern::Pattern,
 };
@@ -40,19 +41,14 @@ impl Disjunction {
         Disjunction { patterns }
     }
 
-    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-        Ok(())
-    }
-
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
-        list_err(
-            self.patterns
-                .iter()
-                .map(|p| p.expect_is_bounded_by(bounds))
-                .filter_map(Result::err)
-                .flatten()
-                .collect(),
-        )
+        collect_err(&mut self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)))
+    }
+}
+
+impl Validatable for Disjunction {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        Ok(())
     }
 }
 

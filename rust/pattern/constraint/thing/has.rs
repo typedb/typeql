@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{token, validatable::Validatable},
     pattern::{
         Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
         UnboundVariable, Value, ValueConstraint,
@@ -45,8 +45,10 @@ impl HasConstraint {
                 .chain(std::iter::once(&self.attribute.reference)),
         )
     }
+}
 
-    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+impl Validatable for HasConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         self.attribute.validate()
     }
 }
