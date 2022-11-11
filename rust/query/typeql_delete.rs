@@ -65,10 +65,10 @@ fn expect_delete_in_scope_of_match(
     let bounds = match_query.conjunction.names();
     collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(
         |r| {
-            if !bounds.contains(r) {
-                Err(vec![VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()])])
-            } else {
+            if bounds.contains(r) {
                 Ok(())
+            } else {
+                Err(vec![VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()])])
             }
         },
     ))
