@@ -84,7 +84,17 @@ impl TypeVariable {
 
 impl Validatable for TypeVariable {
     fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-        collect_err(&mut std::iter::empty())
+        collect_err(
+            &mut std::iter::once(self.reference.validate())
+                .chain(self.label.iter().map(Validatable::validate))
+                .chain(self.owns.iter().map(Validatable::validate))
+                .chain(self.plays.iter().map(Validatable::validate))
+                .chain(self.regex.iter().map(Validatable::validate))
+                .chain(self.relates.iter().map(Validatable::validate))
+                .chain(self.sub.iter().map(Validatable::validate))
+                .chain(self.value_type.iter().map(Validatable::validate))
+                .chain(self.abstract_.iter().map(Validatable::validate)),
+        )
     }
 }
 

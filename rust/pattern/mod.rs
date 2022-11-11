@@ -155,6 +155,17 @@ impl Definable {
     enum_getter!(into_type_variable, TypeVariable, TypeVariable);
 }
 
+impl Validatable for Definable {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        use Definable::*;
+        match self {
+            RuleDefinition(rule) => rule.validate(),
+            RuleDeclaration(rule) => rule.validate(),
+            TypeVariable(variable) => variable.validate(),
+        }
+    }
+}
+
 enum_wrapper! { Definable
     RuleDefinition => RuleDefinition,
     RuleDeclaration => RuleDeclaration,

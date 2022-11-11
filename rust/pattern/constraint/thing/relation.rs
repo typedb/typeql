@@ -39,10 +39,6 @@ pub struct RelationConstraint {
 
 impl RelationConstraint {
     pub fn new(role_players: Vec<RolePlayerConstraint>) -> Self {
-        // TODO validation
-        // if role_players.is_empty() {
-        //     Err(MISSING_CONSTRAINT_RELATION_PLAYER.format(&[]))
-        // }
         RelationConstraint { role_players, scope: token::Type::Relation.into() }
     }
 

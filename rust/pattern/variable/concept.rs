@@ -20,9 +20,15 @@
  *
  */
 
-use crate::pattern::{
-    constraint::IsConstraint,
-    variable::{builder::ConceptConstrainable, Reference},
+use crate::{
+    common::{
+        error::{collect_err, ErrorMessage},
+        validatable::Validatable,
+    },
+    pattern::{
+        constraint::IsConstraint,
+        variable::{builder::ConceptConstrainable, Reference},
+    },
 };
 use std::fmt;
 
@@ -41,6 +47,15 @@ impl ConceptVariable {
         Box::new(
             std::iter::once(&self.reference)
                 .chain(self.is_constraint.iter().map(|is| &is.variable.reference)),
+        )
+    }
+}
+
+impl Validatable for ConceptVariable {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut std::iter::once(self.reference.validate())
+                .chain(self.is_constraint.iter().map(Validatable::validate)),
         )
     }
 }

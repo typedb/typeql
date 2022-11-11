@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{error::ErrorMessage, token, validatable::Validatable},
     pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
@@ -35,6 +35,12 @@ pub struct SubConstraint {
 impl SubConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(std::iter::once(&self.type_.reference))
+    }
+}
+
+impl Validatable for SubConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        self.type_.validate()
     }
 }
 

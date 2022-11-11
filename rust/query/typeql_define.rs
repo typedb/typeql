@@ -21,7 +21,11 @@
  */
 
 use crate::{
-    common::{error::INVALID_RULE_WHEN_MISSING_PATTERNS, token},
+    common::{
+        error::{collect_err, ErrorMessage, INVALID_RULE_WHEN_MISSING_PATTERNS},
+        token,
+        validatable::Validatable,
+    },
     pattern::{Definable, RuleDefinition, TypeVariable},
     write_joined,
 };
@@ -52,6 +56,15 @@ impl TypeQLDefine {
     fn add_rule(mut self, rule: RuleDefinition) -> Self {
         self.rules.push(rule);
         self
+    }
+}
+
+impl Validatable for TypeQLDefine {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut (self.variables.iter().map(Validatable::validate))
+                .chain(self.rules.iter().map(Validatable::validate)),
+        )
     }
 }
 

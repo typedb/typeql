@@ -20,12 +20,21 @@
  *
  */
 
-use crate::{common::token, Label};
+use crate::{
+    common::{error::ErrorMessage, token, validatable::Validatable},
+    Label,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct LabelConstraint {
     pub label: Label,
+}
+
+impl Validatable for LabelConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        Ok(())
+    }
 }
 
 impl fmt::Display for LabelConstraint {

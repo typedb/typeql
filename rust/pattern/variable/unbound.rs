@@ -20,12 +20,15 @@
  *
  */
 
-use crate::pattern::{
-    ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
-    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint,
-    RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
-    SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable,
-    ValueConstraint, ValueTypeConstraint, Visibility,
+use crate::{
+    common::{error::ErrorMessage, validatable::Validatable},
+    pattern::{
+        ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
+        IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
+        RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint,
+        RolePlayerConstraint, SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable,
+        TypeVariable, ValueConstraint, ValueTypeConstraint, Visibility,
+    },
 };
 use std::fmt;
 
@@ -61,6 +64,12 @@ impl UnboundVariable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(std::iter::once(&self.reference))
+    }
+}
+
+impl Validatable for UnboundVariable {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        self.reference.validate()
     }
 }
 

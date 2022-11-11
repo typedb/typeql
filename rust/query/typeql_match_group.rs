@@ -21,7 +21,11 @@
  */
 
 use crate::{
-    common::token,
+    common::{
+        error::{collect_err, ErrorMessage},
+        token,
+        validatable::Validatable,
+    },
     pattern::UnboundVariable,
     query::{AggregateQueryBuilder, TypeQLMatch},
 };
@@ -34,6 +38,12 @@ pub struct TypeQLMatchGroup {
 }
 
 impl AggregateQueryBuilder for TypeQLMatchGroup {}
+
+impl Validatable for TypeQLMatchGroup {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(&mut [self.query.validate(), self.group_var.validate()].into_iter())
+    }
+}
 
 impl fmt::Display for TypeQLMatchGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -20,12 +20,18 @@
  *
  */
 
-use crate::common::{string::escape_regex, token};
+use crate::common::{error::ErrorMessage, string::escape_regex, token, validatable::Validatable};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RegexConstraint {
     regex: String,
+}
+
+impl Validatable for RegexConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        Ok(()) // TODO validate regex using external crate
+    }
 }
 
 impl From<&str> for RegexConstraint {

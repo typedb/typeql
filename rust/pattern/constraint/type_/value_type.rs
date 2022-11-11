@@ -20,12 +20,18 @@
  *
  */
 
-use crate::common::token;
+use crate::common::{error::ErrorMessage, token, validatable::Validatable};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueTypeConstraint {
     pub value_type: token::ValueType,
+}
+
+impl Validatable for ValueTypeConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        Ok(())
+    }
 }
 
 impl fmt::Display for ValueTypeConstraint {

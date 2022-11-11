@@ -21,7 +21,11 @@
  */
 
 use crate::{
-    common::token,
+    common::{
+        error::{collect_err, ErrorMessage},
+        token,
+        validatable::Validatable,
+    },
     pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
@@ -73,6 +77,15 @@ impl OwnsConstraint {
         Box::new(
             std::iter::once(&self.attribute_type.reference)
                 .chain(self.overridden_attribute_type.iter().map(|v| &v.reference)),
+        )
+    }
+}
+
+impl Validatable for OwnsConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut std::iter::once(self.attribute_type.validate())
+                .chain(self.overridden_attribute_type.iter().map(Validatable::validate)),
         )
     }
 }

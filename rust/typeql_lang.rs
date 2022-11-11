@@ -20,12 +20,6 @@
  *
  */
 
-use std::{cell::RefCell, rc::Rc};
-
-use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::TypeQLRustParser};
-
-use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
-
 #[macro_use]
 mod builder;
 pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_, var};
@@ -39,6 +33,7 @@ pub mod query;
 mod util;
 
 use crate::pattern::Definable;
+use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
 use common::error::ErrorMessage;
 use parser::{
     error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_definables,
@@ -47,6 +42,8 @@ use parser::{
 };
 use pattern::{Label, Pattern, RuleDefinition, Variable};
 use query::Query;
+use std::{cell::RefCell, rc::Rc};
+use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::TypeQLRustParser};
 
 fn trim_start_comments(mut s: &str) -> &str {
     while s.starts_with('#') {
@@ -81,7 +78,7 @@ pub fn parse_query(typeql_query: &str) -> Result<Query, Vec<ErrorMessage>> {
 
 pub fn parse_queries(
     typeql_queries: &str,
-) -> Result<impl Iterator<Item = Query> + '_, Vec<ErrorMessage>> {
+) -> Result<impl Iterator<Item = Result<Query, Vec<ErrorMessage>>> + '_, Vec<ErrorMessage>> {
     parse!(visit_eof_queries(eof_queries(typeql_queries)))
 }
 

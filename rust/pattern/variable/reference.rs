@@ -20,9 +20,11 @@
  *
  */
 
+use crate::common::{
+    error::{ErrorMessage, INVALID_VARIABLE_NAME},
+    validatable::Validatable,
+};
 use std::fmt;
-use crate::common::error::{ErrorMessage, INVALID_VARIABLE_NAME};
-use crate::common::validatable::Validatable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Visibility {
@@ -48,15 +50,17 @@ impl Reference {
 
 impl Validatable for Reference {
     fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-       match self {
-           Self::Anonymous(_) => Ok(()),
-           Self::Name(n) => expect_valid_identifier(n)
-       }
+        match self {
+            Self::Anonymous(_) => Ok(()),
+            Self::Name(n) => expect_valid_identifier(n),
+        }
     }
 }
 
 fn expect_valid_identifier(name: &str) -> Result<(), Vec<ErrorMessage>> {
-    if name.starts_with(|c: char| c.is_ascii_alphanumeric()) && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-') {
+    if name.starts_with(|c: char| c.is_ascii_alphanumeric())
+        && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    {
         Ok(())
     } else {
         Err(vec![INVALID_VARIABLE_NAME.format(&[name])])

@@ -20,13 +20,32 @@
  *
  */
 
-use crate::{common::token, pattern::ThingVariable, query::TypeQLDelete, write_joined};
+use crate::{
+    common::{
+        error::{collect_err, ErrorMessage},
+        token,
+        validatable::Validatable,
+    },
+    pattern::ThingVariable,
+    query::{writable::expect_non_empty, TypeQLDelete},
+    write_joined,
+};
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {
     pub delete_query: TypeQLDelete,
     pub insert_variables: Vec<ThingVariable>,
+}
+
+impl Validatable for TypeQLUpdate {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut ([expect_non_empty(&self.insert_variables), self.delete_query.validate()]
+                .into_iter())
+            .chain(self.insert_variables.iter().map(Validatable::validate)),
+        )
+    }
 }
 
 impl fmt::Display for TypeQLUpdate {

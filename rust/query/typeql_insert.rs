@@ -20,7 +20,16 @@
  *
  */
 
-use crate::{common::token, pattern::ThingVariable, query::TypeQLMatch, write_joined};
+use crate::{
+    common::{
+        error::{collect_err, ErrorMessage},
+        token,
+        validatable::Validatable,
+    },
+    pattern::ThingVariable,
+    query::{writable::expect_non_empty, TypeQLMatch},
+    write_joined,
+};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -32,6 +41,16 @@ pub struct TypeQLInsert {
 impl TypeQLInsert {
     pub fn new(variables: Vec<ThingVariable>) -> Self {
         TypeQLInsert { match_query: None, variables }
+    }
+}
+
+impl Validatable for TypeQLInsert {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut std::iter::once(expect_non_empty(&self.variables))
+                .chain(self.match_query.iter().map(Validatable::validate))
+                .chain(self.variables.iter().map(Validatable::validate)),
+        )
     }
 }
 

@@ -90,10 +90,10 @@ impl Validatable for Variable {
     fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         use Variable::*;
         match self {
-            Unbound(_unbound) => Ok(()),
-            Concept(_concept) => Ok(()),
+            Unbound(unbound) => unbound.validate(),
+            Concept(concept) => concept.validate(),
             Thing(thing) => thing.validate(),
-            Type(_type_) => Ok(()),
+            Type(type_) => type_.validate(),
         }
     }
 }

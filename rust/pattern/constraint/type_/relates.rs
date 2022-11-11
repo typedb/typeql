@@ -21,7 +21,11 @@
  */
 
 use crate::{
-    common::token,
+    common::{
+        error::{collect_err, ErrorMessage},
+        token,
+        validatable::Validatable,
+    },
     pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
@@ -38,6 +42,15 @@ impl RelatesConstraint {
         Box::new(
             std::iter::once(&self.role_type.reference)
                 .chain(self.overridden_role_type.iter().map(|v| &v.reference)),
+        )
+    }
+}
+
+impl Validatable for RelatesConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut std::iter::once(self.role_type.validate())
+                .chain(self.overridden_role_type.iter().map(Validatable::validate)),
         )
     }
 }

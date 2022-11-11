@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{error::ErrorMessage, token, validatable::Validatable},
     pattern::UnboundVariable,
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
@@ -50,6 +50,12 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
     }
 }
 
+impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        self.query.validate()
+    }
+}
+
 impl fmt::Display for TypeQLMatchAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}\n{}", self.query, self.method)?;
@@ -71,7 +77,7 @@ impl fmt::Display for TypeQLMatchGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq
+    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)

@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{error::ErrorMessage, token, validatable::Validatable},
     pattern::{ConceptVariable, UnboundVariable},
     var,
 };
@@ -35,6 +35,12 @@ pub struct IsConstraint {
 impl IsConstraint {
     fn new(var: ConceptVariable) -> Self {
         Self { variable: Box::new(var) }
+    }
+}
+
+impl Validatable for IsConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        self.variable.validate()
     }
 }
 

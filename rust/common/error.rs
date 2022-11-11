@@ -126,7 +126,7 @@ error_messages! {
    VARIABLE_OUT_OF_SCOPE_DELETE = 17: "The deleted variable '{}' is out of scope of the match query.",
    NO_VARIABLE_IN_SCOPE_INSERT = 18: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
    VARIABLE_NOT_NAMED = 19: "Anonymous variable encountered in a match query filter.",
-   INVALID_VARIABLE_NAME = 20: "The variable name '{}' is invalid; variables must match the following regular expression: '{}'.",
+   INVALID_VARIABLE_NAME = 20: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
    ILLEGAL_CONSTRAINT_REPETITION = 21: "The variable '{}' contains illegally repeating constraints: '{}' and '{}'.",
    MISSING_CONSTRAINT_RELATION_PLAYER = 22: "A relation variable has not been provided with role players.",
    MISSING_CONSTRAINT_VALUE = 23: "A value constraint has not been provided with a variable or literal value.",

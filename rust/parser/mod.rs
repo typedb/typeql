@@ -137,30 +137,24 @@ pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> 
 
 pub(crate) fn visit_eof_queries(
     ctx: Rc<Eof_queriesContext>,
-) -> ParserResult<impl Iterator<Item = Query> + '_> {
-    // TODO validation
-    Ok((0..).map_while(move |i| ctx.query(i)).map(visit_query))
+) -> ParserResult<impl Iterator<Item = ParserResult<Query>> + '_> {
+    Ok((0..).map_while(move |i| ctx.query(i)).map(visit_query).map(Validatable::validated))
 }
 
 pub(crate) fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
-    // TODO validation
-    Ok(visit_pattern(ctx.pattern().unwrap()))
+    visit_pattern(ctx.pattern().unwrap()).validated()
 }
 
 pub(crate) fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>> {
-    // TODO validation
-    Ok(visit_patterns(ctx.patterns().unwrap()))
+    visit_patterns(ctx.patterns().unwrap()).into_iter().map(Validatable::validated).collect()
 }
 
 pub(crate) fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Definable>> {
-    // TODO validation
-    let definables_ctx = ctx.definables().unwrap();
-    Ok((0..).map_while(|i| definables_ctx.definable(i)).map(visit_definable).collect())
+    visit_definables(ctx.definables().unwrap()).into_iter().map(Validatable::validated).collect()
 }
 
 pub(crate) fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
-    // TODO validation
-    Ok(visit_pattern_variable(ctx.pattern_variable().unwrap()))
+    visit_pattern_variable(ctx.pattern_variable().unwrap()).validated()
 }
 
 pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<Label> {
@@ -171,8 +165,7 @@ pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<Label> 
 pub(crate) fn visit_eof_schema_rule(
     ctx: Rc<Eof_schema_ruleContext>,
 ) -> ParserResult<RuleDefinition> {
-    // TODO validation
-    Ok(visit_schema_rule(ctx.schema_rule().unwrap()))
+    visit_schema_rule(ctx.schema_rule().unwrap()).validated()
 }
 
 fn visit_query(ctx: Rc<QueryContext>) -> Query {

@@ -47,7 +47,13 @@ impl RuleDeclaration {
     }
 
     pub fn when(self, when: Conjunction) -> RuleWhenStub {
-        RuleWhenStub { label: self.label, when: when }
+        RuleWhenStub { label: self.label, when }
+    }
+}
+
+impl Validatable for RuleDeclaration {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        Ok(())
     }
 }
 
