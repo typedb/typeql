@@ -91,7 +91,14 @@ impl Validatable for Query {
         use Query::*;
         match self {
             Match(query) => query.validated().map(TypeQLMatch::into),
-            _ => Ok(self),
+            Insert(query) => query.validated().map(TypeQLInsert::into),
+            Delete(query) => query.validated().map(TypeQLDelete::into),
+            Update(query) => query.validated().map(TypeQLUpdate::into),
+            Define(query) => query.validated().map(TypeQLDefine::into),
+            Undefine(query) => query.validated().map(TypeQLUndefine::into),
+            Aggregate(query) => query.validated().map(TypeQLMatchAggregate::into),
+            Group(query) => query.validated().map(TypeQLMatchGroup::into),
+            GroupAggregate(query) => query.validated().map(TypeQLMatchGroupAggregate::into),
         }
     }
 }
