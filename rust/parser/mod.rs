@@ -194,7 +194,7 @@ fn visit_query(ctx: Rc<QueryContext>) -> Query {
     } else if let Some(query_group_aggregate) = ctx.query_match_group_agg() {
         visit_query_match_group_agg(query_group_aggregate).into()
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -318,7 +318,7 @@ fn visit_pattern(ctx: Rc<PatternContext>) -> Pattern {
     } else if let Some(negation) = ctx.pattern_negation() {
         visit_pattern_negation(negation).into()
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -355,7 +355,7 @@ fn visit_pattern_variable(ctx: Rc<Pattern_variableContext>) -> Variable {
     } else if let Some(var_concept) = ctx.variable_concept() {
         visit_variable_concept(var_concept).into()
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -419,7 +419,7 @@ fn visit_variable_thing_any(ctx: Rc<Variable_thing_anyContext>) -> ThingVariable
     } else if let Some(var_attribute) = ctx.variable_attribute() {
         visit_variable_attribute(var_attribute)
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -494,12 +494,12 @@ fn visit_attribute(ctx: Rc<AttributeContext>) -> HasConstraint {
         } else if let Some(predicate) = ctx.predicate() {
             HasConstraint::new((label.get_text(), visit_predicate(predicate)))
         } else {
-            unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+            unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
         }
     } else if let Some(var) = ctx.VAR_() {
         HasConstraint::from(get_var(var))
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -526,7 +526,7 @@ fn visit_predicate(ctx: Rc<PredicateContext>) -> ValueConstraint {
             }
         })
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -578,7 +578,7 @@ fn visit_label_any(ctx: Rc<Label_anyContext>) -> Label {
     } else if let Some(label_scoped) = ctx.label_scoped() {
         visit_label_scoped(label_scoped)
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }
 
@@ -602,6 +602,6 @@ fn visit_value(ctx: Rc<ValueContext>) -> Value {
     } else if let Some(date_time) = ctx.DATETIME_() {
         Value::from(get_date_time(date_time))
     } else {
-        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]).message)
+        unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&ctx.get_text()]))
     }
 }

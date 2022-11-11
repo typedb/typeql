@@ -20,7 +20,7 @@
  *
  */
 
-use std::convert::Infallible;
+use std::{convert::Infallible, fmt};
 
 #[derive(Debug)]
 pub struct ErrorMessage {
@@ -31,6 +31,12 @@ pub struct ErrorMessage {
 impl From<Infallible> for ErrorMessage {
     fn from(_: Infallible) -> Self {
         unreachable!()
+    }
+}
+
+impl fmt::Display for ErrorMessage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.message)
     }
 }
 

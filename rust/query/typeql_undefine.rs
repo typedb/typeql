@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{error::INVALID_RULE_WHEN_MISSING_PATTERNS, token},
     pattern::{Definable, RuleDeclaration, TypeVariable},
     write_joined,
 };
@@ -39,9 +39,9 @@ impl TypeQLUndefine {
             match undefinable {
                 Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
                 Definable::TypeVariable(var) => undefine.add_definition(var),
-                Definable::RuleDefinition(_r) => {
-                    unreachable!() // TODO validation
-                                   // Err(INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
+                Definable::RuleDefinition(r) => {
+                    // TODO new error message
+                    panic!("{}", INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
                 }
             }
         })

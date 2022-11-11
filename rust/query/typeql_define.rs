@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{error::INVALID_RULE_WHEN_MISSING_PATTERNS, token},
     pattern::{Definable, RuleDefinition, TypeVariable},
     write_joined,
 };
@@ -38,9 +38,8 @@ impl TypeQLDefine {
         definables.into_iter().fold(TypeQLDefine::default(), |define, definable| match definable {
             Definable::RuleDefinition(rule) => define.add_rule(rule),
             Definable::TypeVariable(var) => define.add_definition(var),
-            Definable::RuleDeclaration(_) => {
-                unreachable!() // TODO validation
-                               //Err(INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
+            Definable::RuleDeclaration(r) => {
+                panic!("{}", INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
             }
         })
     }
