@@ -90,17 +90,12 @@ impl ThingVariable {
 impl Validatable for ThingVariable {
     fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
         collect_err(
-            &mut
-            // std::iter::once(&self.reference)
-            //     .chain(
-            self.iid
-                .iter()
-                .map(|c| c.validate())
-                // )
-                // .chain(self.isa.iter().map(|c| c.references()))
-                .chain(self.has.iter().map(|c| c.validate()))
-                // .chain(self.relation.iter().map(|c| c.validate()))
-                .chain(self.value.iter().map(|c| c.validate())),
+            &mut std::iter::once(self.reference.validate())
+                .chain(self.iid.iter().map(Validatable::validate))
+                .chain(self.isa.iter().map(Validatable::validate))
+                .chain(self.has.iter().map(Validatable::validate))
+                .chain(self.relation.iter().map(Validatable::validate))
+                .chain(self.value.iter().map(Validatable::validate)),
         )
     }
 }

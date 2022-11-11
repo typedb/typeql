@@ -24,7 +24,8 @@ use crate::{
     common::{
         date_time,
         error::{
-            ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE,
+            collect_err, ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION,
+            INVALID_CONSTRAINT_PREDICATE,
         },
         string::{escape_regex, format_double, quote},
         token,
@@ -56,21 +57,26 @@ impl ValueConstraint {
 
 impl Validatable for ValueConstraint {
     fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-        let mut errors = vec![];
-        if self.predicate.is_substring() && !matches!(self.value, Value::String(_)) {
-            errors.push(
-                INVALID_CONSTRAINT_PREDICATE
-                    .format(&[&self.predicate.to_string(), &self.value.to_string()]),
-            )
-        }
-        if let Err(mut value_errors) = self.value.validate() {
-            errors.append(&mut value_errors)
-        }
-        if errors.is_empty() {
-            Ok(())
-        } else {
-            Err(errors)
-        }
+        collect_err(
+            &mut [
+                expect_string_value_with_substring_predicate(self.predicate, &self.value),
+                self.value.validate(),
+            ]
+            .into_iter(),
+        )
+    }
+}
+
+fn expect_string_value_with_substring_predicate(
+    predicate: token::Predicate,
+    value: &Value,
+) -> Result<(), Vec<ErrorMessage>> {
+    if predicate.is_substring() && !matches!(value, Value::String(_)) {
+        Err(
+            vec![INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()])],
+        )
+    } else {
+        Ok(())
     }
 }
 
@@ -111,6 +117,7 @@ impl Validatable for Value {
                     Ok(())
                 }
             }
+            Self::Variable(variable) => variable.validate(),
             _ => Ok(()),
         }
     }
@@ -139,6 +146,7 @@ impl From<&str> for Value {
         Value::String(String::from(string))
     }
 }
+
 impl From<String> for Value {
     fn from(string: String) -> Self {
         Value::String(string)

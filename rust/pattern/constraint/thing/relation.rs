@@ -21,7 +21,11 @@
  */
 
 use crate::{
-    common::token,
+    common::{
+        error::{collect_err, ErrorMessage, MISSING_CONSTRAINT_RELATION_PLAYER},
+        token,
+        validatable::Validatable,
+    },
     pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
     write_joined, Label,
 };
@@ -48,6 +52,25 @@ impl RelationConstraint {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(self.role_players.iter().flat_map(|rp| rp.references()))
+    }
+}
+
+impl Validatable for RelationConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut std::iter::once(expect_role_players_present(&self.role_players))
+                .chain(self.role_players.iter().map(Validatable::validate)),
+        )
+    }
+}
+
+fn expect_role_players_present(
+    role_players: &Vec<RolePlayerConstraint>,
+) -> Result<(), Vec<ErrorMessage>> {
+    if role_players.is_empty() {
+        Err(vec![MISSING_CONSTRAINT_RELATION_PLAYER.format(&[])])
+    } else {
+        Ok(())
     }
 }
 
@@ -79,10 +102,17 @@ impl RolePlayerConstraint {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            self.role_type
-                .iter()
-                .map(|r| &r.reference)
+            (self.role_type.iter().map(|r| &r.reference))
                 .chain(std::iter::once(&self.player.reference)),
+        )
+    }
+}
+
+impl Validatable for RolePlayerConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(
+            &mut (self.role_type.iter().map(Validatable::validate))
+                .chain(std::iter::once(self.player.validate())),
         )
     }
 }

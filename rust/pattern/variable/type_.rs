@@ -21,6 +21,10 @@
  */
 
 use crate::{
+    common::{
+        error::{collect_err, ErrorMessage},
+        validatable::Validatable,
+    },
     pattern::{
         AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
         RegexConstraint, RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
@@ -75,6 +79,12 @@ impl TypeVariable {
             || !self.relates.is_empty()
             || self.sub.is_some()
             || self.value_type.is_some()
+    }
+}
+
+impl Validatable for TypeVariable {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        collect_err(&mut std::iter::empty())
     }
 }
 

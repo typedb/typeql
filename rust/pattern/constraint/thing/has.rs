@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{token, validatable::Validatable},
+    common::{error::collect_err, token, validatable::Validatable},
     pattern::{
         Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
         UnboundVariable, Value, ValueConstraint,
@@ -39,9 +39,7 @@ pub struct HasConstraint {
 impl HasConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            self.type_
-                .iter()
-                .map(|t| &t.reference)
+            (self.type_.iter().map(|t| &t.reference))
                 .chain(std::iter::once(&self.attribute.reference)),
         )
     }
@@ -49,7 +47,10 @@ impl HasConstraint {
 
 impl Validatable for HasConstraint {
     fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-        self.attribute.validate()
+        collect_err(
+            &mut std::iter::once(self.attribute.validate())
+                .chain(self.type_.iter().map(Validatable::validate)),
+        )
     }
 }
 

@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{error::ErrorMessage, token, validatable::Validatable},
     pattern::{IsExplicit, Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
@@ -40,6 +40,12 @@ impl IsaConstraint {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(std::iter::once(&self.type_.reference))
+    }
+}
+
+impl Validatable for IsaConstraint {
+    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        self.type_.validate()
     }
 }
 
