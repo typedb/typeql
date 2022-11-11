@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, token, validatable::Validatable},
+    common::{error::ErrorReport, token, validatable::Validatable},
     pattern::{IsExplicit, Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
@@ -44,7 +44,7 @@ impl IsaConstraint {
 }
 
 impl Validatable for IsaConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         self.type_.validate()
     }
 }

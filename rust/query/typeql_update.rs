@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, ErrorReport},
         token,
         validatable::Validatable,
     },
@@ -39,7 +39,7 @@ pub struct TypeQLUpdate {
 }
 
 impl Validatable for TypeQLUpdate {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut ([expect_non_empty(&self.insert_variables), self.delete_query.validate()]
                 .into_iter())

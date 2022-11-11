@@ -45,7 +45,7 @@ pub use builder::{
 
 use crate::{
     common::{
-        error::{ErrorMessage, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        error::{ErrorReport, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
         validatable::Validatable,
     },
     enum_wrapper,
@@ -71,18 +71,17 @@ impl Variable {
         }
     }
 
-    pub fn expect_is_bounded_by(
-        &self,
-        bounds: &HashSet<Reference>,
-    ) -> Result<(), Vec<ErrorMessage>> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<(), ErrorReport> {
         match self {
             Self::Unbound(_) => unreachable!(),
             _ => {
                 if self.references().any(|r| r.is_name() && bounds.contains(r)) {
                     Ok(())
                 } else {
-                    Err(vec![MATCH_HAS_UNBOUNDED_NESTED_PATTERN
-                        .format(&[&self.to_string().replace('\n', " ")])])
+                    Err(ErrorReport::from(
+                        MATCH_HAS_UNBOUNDED_NESTED_PATTERN
+                            .format(&[&self.to_string().replace('\n', " ")]),
+                    ))
                 }
             }
         }
@@ -90,7 +89,7 @@ impl Variable {
 }
 
 impl Validatable for Variable {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         use Variable::*;
         match self {
             Unbound(unbound) => unbound.validate(),

@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, ErrorReport},
         token,
         validatable::Validatable,
     },
@@ -82,7 +82,7 @@ impl OwnsConstraint {
 }
 
 impl Validatable for OwnsConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut std::iter::once(self.attribute_type.validate())
                 .chain(self.overridden_attribute_type.iter().map(Validatable::validate)),

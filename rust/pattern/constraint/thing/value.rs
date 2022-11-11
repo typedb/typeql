@@ -24,7 +24,7 @@ use crate::{
     common::{
         date_time,
         error::{
-            collect_err, ErrorMessage, INVALID_CONSTRAINT_DATETIME_PRECISION,
+            collect_err, ErrorReport, INVALID_CONSTRAINT_DATETIME_PRECISION,
             INVALID_CONSTRAINT_PREDICATE,
         },
         string::{escape_regex, format_double, quote},
@@ -56,7 +56,7 @@ impl ValueConstraint {
 }
 
 impl Validatable for ValueConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut [
                 expect_string_value_with_substring_predicate(self.predicate, &self.value),
@@ -70,11 +70,11 @@ impl Validatable for ValueConstraint {
 fn expect_string_value_with_substring_predicate(
     predicate: token::Predicate,
     value: &Value,
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     if predicate.is_substring() && !matches!(value, Value::String(_)) {
-        Err(
-            vec![INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()])],
-        )
+        Err(ErrorReport::from(
+            INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]),
+        ))
     } else {
         Ok(())
     }
@@ -107,12 +107,14 @@ pub enum Value {
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
 impl Validatable for Value {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
-                    Err(vec![INVALID_CONSTRAINT_DATETIME_PRECISION
-                        .format(&[date_time.to_string().as_str()])])
+                    Err(ErrorReport::from(
+                        INVALID_CONSTRAINT_DATETIME_PRECISION
+                            .format(&[date_time.to_string().as_str()]),
+                    ))
                 } else {
                     Ok(())
                 }

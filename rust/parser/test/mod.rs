@@ -371,7 +371,7 @@ $x has release-date 1000-11-12T13:14:15.000123456;"#;
 
     let parsed = parse_query(query);
     assert!(parsed.is_err());
-    assert!(parsed.err().unwrap().iter().any(|em| em.message.contains("no viable alternative")));
+    assert!(parsed.unwrap_err().to_string().contains("no viable alternative"));
 }
 
 #[test]
@@ -385,11 +385,7 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
     )))
     .validated();
     assert!(validated.is_err());
-    assert!(validated
-        .err()
-        .unwrap()
-        .iter()
-        .any(|em| em.message.contains("more precise than 1 millisecond")));
+    assert!(validated.unwrap_err().to_string().contains("more precise than 1 millisecond"));
 }
 
 #[test]
@@ -1115,39 +1111,39 @@ group $x; count;"#;
 fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error() {
     let parsed = parse_query("match\n$x isa");
     assert!(parsed.is_err());
-    let messages = parsed.unwrap_err();
-    assert!(messages.iter().any(|em| em.message.contains("syntax error")));
-    assert!(messages.iter().any(|em| em.message.contains("line 2")));
-    assert!(messages.iter().any(|em| em.message.contains("\n$x isa")));
-    assert!(messages.iter().any(|em| em.message.contains("\n      ^")));
+    let report = parsed.unwrap_err().to_string();
+    assert!(report.contains("syntax error"));
+    assert!(report.contains("line 2"));
+    assert!(report.contains("\n$x isa"));
+    assert!(report.contains("\n      ^"));
 }
 
 #[test]
 fn when_parse_incorrect_syntax_trailing_query_whitespace_is_ignored() {
     let parsed = parse_query("match\n$x isa \n");
     assert!(parsed.is_err());
-    let messages = parsed.unwrap_err();
-    assert!(messages.iter().any(|em| em.message.contains("syntax error")));
-    assert!(messages.iter().any(|em| em.message.contains("line 2")));
-    assert!(messages.iter().any(|em| em.message.contains("\n$x isa")));
-    assert!(messages.iter().any(|em| em.message.contains("\n      ^")));
+    let report = parsed.unwrap_err().to_string();
+    assert!(report.contains("syntax error"));
+    assert!(report.contains("line 2"));
+    assert!(report.contains("\n$x isa"));
+    assert!(report.contains("\n      ^"));
 }
 
 #[test]
 fn when_parse_incorrect_syntax_error_message_should_retain_whitespace() {
     let parsed = parse_query("match\n$x isa ");
     assert!(parsed.is_err());
-    let messages = parsed.unwrap_err();
-    assert!(!messages.iter().any(|em| em.message.contains("match$xisa")));
+    let report = parsed.unwrap_err().to_string();
+    assert!(!report.contains("match$xisa"));
 }
 
 #[test]
 fn test_syntax_error_pointer() {
     let parsed = parse_query("match\n$x of");
     assert!(parsed.is_err());
-    let messages = parsed.unwrap_err();
-    assert!(messages.iter().any(|em| em.message.contains("\n$x of")));
-    assert!(messages.iter().any(|em| em.message.contains("\n   ^")));
+    let report = parsed.unwrap_err().to_string();
+    assert!(report.contains("\n$x of"));
+    assert!(report.contains("\n   ^"));
 }
 
 #[test]
@@ -1260,11 +1256,7 @@ fn when_parsing_list_of_queries_with_syntax_error_report_error() {
     let query_text = "define\nperson sub entity has name;"; // note no comma
     let parsed = parse_query(query_text);
     assert!(parsed.is_err());
-    assert!(parsed
-        .err()
-        .unwrap()
-        .iter()
-        .any(|em| em.message.contains("\nperson sub entity has name;")));
+    assert!(parsed.unwrap_err().to_string().contains("\nperson sub entity has name;"));
 }
 
 #[test]
@@ -1286,8 +1278,8 @@ fn test_missing_comma() {
 fn test_limit_mistake() {
     let parsed = parse_query("match\n($x, $y); limit1;");
     assert!(parsed.is_err());
-    let messages = parsed.unwrap_err();
-    assert!(messages.iter().any(|em| em.message.contains("limit1")));
+    let report = parsed.unwrap_err().to_string();
+    assert!(report.contains("limit1"));
 }
 
 #[test]

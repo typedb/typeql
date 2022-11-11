@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, ErrorReport},
         validatable::Validatable,
     },
     pattern::{
@@ -88,7 +88,7 @@ impl ThingVariable {
 }
 
 impl Validatable for ThingVariable {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut std::iter::once(self.reference.validate())
                 .chain(self.iid.iter().map(Validatable::validate))

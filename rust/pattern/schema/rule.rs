@@ -23,7 +23,7 @@
 use crate::{
     common::{
         error::{
-            collect_err, ErrorMessage, INVALID_RULE_THEN, INVALID_RULE_THEN_HAS,
+            collect_err, ErrorReport, INVALID_RULE_THEN, INVALID_RULE_THEN_HAS,
             INVALID_RULE_THEN_ROLES, INVALID_RULE_THEN_VARIABLES,
             INVALID_RULE_WHEN_CONTAINS_DISJUNCTION, INVALID_RULE_WHEN_NESTED_NEGATION,
         },
@@ -52,7 +52,7 @@ impl RuleDeclaration {
 }
 
 impl Validatable for RuleDeclaration {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         Ok(())
     }
 }
@@ -88,7 +88,7 @@ pub struct RuleDefinition {
 }
 
 impl Validatable for RuleDefinition {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut [
                 expect_only_conjunctions(self.when.patterns.iter(), &self.label),
@@ -106,23 +106,20 @@ impl Validatable for RuleDefinition {
 fn expect_only_conjunctions<'a>(
     patterns: impl Iterator<Item = &'a Pattern>,
     rule_label: &Label,
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     collect_err(&mut patterns.map(|p| match p {
         Pattern::Conjunction(c) => expect_only_conjunctions(c.patterns.iter(), rule_label),
         Pattern::Variable(_) => Ok(()),
-        Pattern::Disjunction(_) => {
-            Err(vec![INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.format(&[&rule_label.to_string()])])
-        }
-        Pattern::Negation(_) => {
-            Err(vec![INVALID_RULE_WHEN_NESTED_NEGATION.format(&[&rule_label.to_string()])])
-        }
+        Pattern::Disjunction(_) => Err(ErrorReport::from(
+            INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.format(&[&rule_label.to_string()]),
+        )),
+        Pattern::Negation(_) => Err(ErrorReport::from(
+            INVALID_RULE_WHEN_NESTED_NEGATION.format(&[&rule_label.to_string()]),
+        )),
     }))
 }
 
-fn expect_infer_single_edge(
-    then: &ThingVariable,
-    rule_label: &Label,
-) -> Result<(), Vec<ErrorMessage>> {
+fn expect_infer_single_edge(then: &ThingVariable, rule_label: &Label) -> Result<(), ErrorReport> {
     if then.has.len() == 1
         && (then.iid.is_none()
             && then.isa.is_none()
@@ -134,22 +131,21 @@ fn expect_infer_single_edge(
     {
         Ok(())
     } else {
-        Err(vec![INVALID_RULE_THEN.format(&[&rule_label.to_string(), &then.to_string()])])
+        Err(ErrorReport::from(
+            INVALID_RULE_THEN.format(&[&rule_label.to_string(), &then.to_string()]),
+        ))
     }
 }
 
-fn expect_valid_inference(
-    then: &ThingVariable,
-    rule_label: &Label,
-) -> Result<(), Vec<ErrorMessage>> {
+fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<(), ErrorReport> {
     if let Some(has) = then.has.get(0) {
         if has.type_.is_some() && has.attribute.reference.is_name() {
-            Err(vec![INVALID_RULE_THEN_HAS.format(&[
+            Err(ErrorReport::from(vec![INVALID_RULE_THEN_HAS.format(&[
                 &rule_label.to_string(),
                 &then.to_string(),
                 &has.attribute.reference.to_string(),
                 &has.type_.as_ref().unwrap().to_string(),
-            ])])
+            ])]))
         } else {
             Ok(())
         }
@@ -157,7 +153,9 @@ fn expect_valid_inference(
         if relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
             Ok(())
         } else {
-            Err(vec![INVALID_RULE_THEN_ROLES.format(&[&rule_label.to_string(), &then.to_string()])])
+            Err(ErrorReport::from(
+                INVALID_RULE_THEN_ROLES.format(&[&rule_label.to_string(), &then.to_string()]),
+            ))
         }
     } else {
         unreachable!()
@@ -168,12 +166,12 @@ fn expect_then_bounded_by_when(
     then: &ThingVariable,
     when: &Conjunction,
     rule_label: &Label,
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     let names = when.names();
     if then.references().filter(|r| r.is_name()).all(|r| names.contains(r)) {
         Ok(())
     } else {
-        Err(vec![INVALID_RULE_THEN_VARIABLES.format(&[&rule_label.to_string()])])
+        Err(ErrorReport::from(INVALID_RULE_THEN_VARIABLES.format(&[&rule_label.to_string()])))
     }
 }
 

@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, token, validatable::Validatable},
+    common::{error::ErrorReport, token, validatable::Validatable},
     pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
@@ -39,7 +39,7 @@ impl SubConstraint {
 }
 
 impl Validatable for SubConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         self.type_.validate()
     }
 }

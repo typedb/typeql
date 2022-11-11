@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, token, validatable::Validatable},
+    common::{error::ErrorReport, token, validatable::Validatable},
     Label,
 };
 use std::fmt;
@@ -32,7 +32,7 @@ pub struct LabelConstraint {
 }
 
 impl Validatable for LabelConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         Ok(())
     }
 }

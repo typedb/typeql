@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, validatable::Validatable},
+    common::{error::ErrorReport, validatable::Validatable},
     pattern::{
         ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
         IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
@@ -68,7 +68,7 @@ impl UnboundVariable {
 }
 
 impl Validatable for UnboundVariable {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         self.reference.validate()
     }
 }

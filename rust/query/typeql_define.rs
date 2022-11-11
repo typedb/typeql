@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage, INVALID_RULE_WHEN_MISSING_PATTERNS},
+        error::{collect_err, ErrorReport, INVALID_RULE_WHEN_MISSING_PATTERNS},
         token,
         validatable::Validatable,
     },
@@ -60,7 +60,7 @@ impl TypeQLDefine {
 }
 
 impl Validatable for TypeQLDefine {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut (self.variables.iter().map(Validatable::validate))
                 .chain(self.rules.iter().map(Validatable::validate)),

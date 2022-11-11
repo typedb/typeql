@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::error::{ErrorMessage, MISSING_PATTERNS},
+    common::error::{ErrorReport, MISSING_PATTERNS},
     pattern::ThingVariable,
 };
 
@@ -47,9 +47,9 @@ impl Writable for Vec<ThingVariable> {
     }
 }
 
-pub(crate) fn expect_non_empty(variables: &[ThingVariable]) -> Result<(), Vec<ErrorMessage>> {
+pub(crate) fn expect_non_empty(variables: &[ThingVariable]) -> Result<(), ErrorReport> {
     if variables.is_empty() {
-        Err(vec![MISSING_PATTERNS.format(&[])])
+        Err(ErrorReport::from(MISSING_PATTERNS.format(&[])))
     } else {
         Ok(())
     }

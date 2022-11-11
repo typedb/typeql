@@ -23,16 +23,16 @@
 use crate::{
     common::{
         error::{
-            collect_err, ILLEGAL_FILTER_VARIABLE_REPEATING, MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE,
-            MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE, VARIABLE_NOT_NAMED,
-            VARIABLE_OUT_OF_SCOPE_MATCH,
+            collect_err, ErrorReport, ILLEGAL_FILTER_VARIABLE_REPEATING,
+            MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE, MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE,
+            VARIABLE_NOT_NAMED, VARIABLE_OUT_OF_SCOPE_MATCH,
         },
         token,
         validatable::Validatable,
     },
     pattern::{Conjunction, Pattern, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
-    var, write_joined, ErrorMessage,
+    var, write_joined,
 };
 use std::{collections::HashSet, fmt};
 
@@ -87,7 +87,7 @@ impl TypeQLMatch {
 }
 
 impl Validatable for TypeQLMatch {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut [
                 expect_has_bounding_conjunction(&self.conjunction),
@@ -106,26 +106,28 @@ impl Validatable for TypeQLMatch {
     }
 }
 
-fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<(), Vec<ErrorMessage>> {
+fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<(), ErrorReport> {
     if conjunction.has_named_variables() {
         Ok(())
     } else {
-        Err(vec![MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE.format(&[])])
+        Err(ErrorReport::from(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE.format(&[])))
     }
 }
 
-fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), Vec<ErrorMessage>> {
+fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), ErrorReport> {
     let bounds = conjunction.names();
     collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
 }
 
 fn expect_each_variable_is_bounded_by_named<'a>(
     patterns: impl Iterator<Item = &'a Pattern>,
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     collect_err(&mut patterns.map(|p| match p {
         Pattern::Variable(v) => {
             v.references().any(|r| r.is_name()).then_some(()).ok_or_else(|| {
-                vec![MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()])]
+                ErrorReport::from(
+                    MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()]),
+                )
             })
         }
         Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
@@ -139,16 +141,16 @@ fn expect_each_variable_is_bounded_by_named<'a>(
 fn expect_filters_are_in_scope(
     conjunction: &Conjunction,
     filter: &Option<Filter>,
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     let bounds = conjunction.names();
     let mut seen = HashSet::new();
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
-            Err(vec![VARIABLE_NOT_NAMED.format(&[])])
+            Err(ErrorReport::from(VARIABLE_NOT_NAMED.format(&[])))
         } else if !bounds.contains(r) {
-            Err(vec![VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])])
+            Err(ErrorReport::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))
         } else if seen.contains(&r) {
-            Err(vec![ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&r.to_string()])])
+            Err(ErrorReport::from(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&r.to_string()])))
         } else {
             seen.insert(r);
             Ok(())
@@ -160,17 +162,16 @@ fn expect_sort_vars_are_in_scope(
     conjunction: &Conjunction,
     filter: &Option<Filter>,
     sorting: &Option<Sorting>,
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     let scope = filter
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())
         .unwrap_or_else(|| conjunction.names());
     collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(
         |r| {
-            scope
-                .contains(&r)
-                .then_some(())
-                .ok_or_else(|| vec![VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])])
+            scope.contains(&r).then_some(()).ok_or_else(|| {
+                ErrorReport::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()]))
+            })
         },
     ))
 }

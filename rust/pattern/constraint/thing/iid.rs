@@ -21,7 +21,7 @@
  */
 
 use crate::common::{
-    error::{ErrorMessage, INVALID_IID_STRING},
+    error::{ErrorReport, INVALID_IID_STRING},
     token,
     validatable::Validatable,
 };
@@ -43,11 +43,11 @@ impl IIDConstraint {
 }
 
 impl Validatable for IIDConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         if is_valid_iid(&self.iid) {
             Ok(())
         } else {
-            Err(vec![INVALID_IID_STRING.format(&[&self.iid])])
+            Err(ErrorReport::from(INVALID_IID_STRING.format(&[&self.iid])))
         }
     }
 }

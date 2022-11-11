@@ -29,7 +29,7 @@ mod test;
 use crate::{
     common::{
         date_time,
-        error::{ErrorMessage, ILLEGAL_GRAMMAR},
+        error::{ErrorReport, ILLEGAL_GRAMMAR},
         string::{unescape_regex, unquote},
         token,
         validatable::Validatable,
@@ -58,7 +58,7 @@ use std::rc::Rc;
 // keep star import to not expose generated code
 use typeql_grammar::typeqlrustparser::*;
 
-type ParserResult<T> = Result<T, Vec<ErrorMessage>>;
+type ParserResult<T> = Result<T, ErrorReport>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
 fn get_string(string: Rc<TerminalNode>) -> String {

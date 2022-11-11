@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage, VARIABLE_OUT_OF_SCOPE_DELETE},
+        error::{collect_err, ErrorReport, VARIABLE_OUT_OF_SCOPE_DELETE},
         token,
         validatable::Validatable,
     },
@@ -45,7 +45,7 @@ impl TypeQLDelete {
 }
 
 impl Validatable for TypeQLDelete {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut ([
                 expect_delete_in_scope_of_match(&self.match_query, &self.variables),
@@ -61,14 +61,14 @@ impl Validatable for TypeQLDelete {
 fn expect_delete_in_scope_of_match(
     match_query: &TypeQLMatch,
     variables: &[ThingVariable],
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     let bounds = match_query.conjunction.names();
     collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(
         |r| {
             if bounds.contains(r) {
                 Ok(())
             } else {
-                Err(vec![VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()])])
+                Err(ErrorReport::from(VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()])))
             }
         },
     ))

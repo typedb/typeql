@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, ErrorReport},
         token,
         validatable::Validatable,
     },
@@ -59,7 +59,7 @@ impl PlaysConstraint {
 }
 
 impl Validatable for PlaysConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut std::iter::once(self.role_type.validate())
                 .chain(self.overridden_role_type.iter().map(Validatable::validate))

@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage, NO_VARIABLE_IN_SCOPE_INSERT},
+        error::{collect_err, ErrorReport, NO_VARIABLE_IN_SCOPE_INSERT},
         token,
         validatable::Validatable,
     },
@@ -45,7 +45,7 @@ impl TypeQLInsert {
 }
 
 impl Validatable for TypeQLInsert {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut [
                 expect_non_empty(&self.variables),
@@ -61,7 +61,7 @@ impl Validatable for TypeQLInsert {
 fn expect_insert_in_scope_of_match(
     match_query: &Option<TypeQLMatch>,
     variables: &[ThingVariable],
-) -> Result<(), Vec<ErrorMessage>> {
+) -> Result<(), ErrorReport> {
     if let Some(match_query) = match_query {
         let bounds = match_query.conjunction.names();
         if variables.iter().any(|v| {
@@ -74,7 +74,9 @@ fn expect_insert_in_scope_of_match(
                 variables.iter().map(ThingVariable::to_string).collect::<Vec<String>>().join(", ");
             let bounds_str =
                 bounds.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
-            Err(vec![NO_VARIABLE_IN_SCOPE_INSERT.format(&[&variables_str, &bounds_str])])
+            Err(ErrorReport::from(
+                NO_VARIABLE_IN_SCOPE_INSERT.format(&[&variables_str, &bounds_str]),
+            ))
         }
     } else {
         Ok(())

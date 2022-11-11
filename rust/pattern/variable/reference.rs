@@ -21,7 +21,7 @@
  */
 
 use crate::common::{
-    error::{ErrorMessage, INVALID_VARIABLE_NAME},
+    error::{ErrorReport, INVALID_VARIABLE_NAME},
     validatable::Validatable,
 };
 use std::fmt;
@@ -49,7 +49,7 @@ impl Reference {
 }
 
 impl Validatable for Reference {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         match self {
             Self::Anonymous(_) => Ok(()),
             Self::Name(n) => expect_valid_identifier(n),
@@ -57,13 +57,13 @@ impl Validatable for Reference {
     }
 }
 
-fn expect_valid_identifier(name: &str) -> Result<(), Vec<ErrorMessage>> {
+fn expect_valid_identifier(name: &str) -> Result<(), ErrorReport> {
     if name.starts_with(|c: char| c.is_ascii_alphanumeric())
         && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
     {
         Ok(())
     } else {
-        Err(vec![INVALID_VARIABLE_NAME.format(&[name])])
+        Err(ErrorReport::from(INVALID_VARIABLE_NAME.format(&[name])))
     }
 }
 

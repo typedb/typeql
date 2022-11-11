@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage, MISSING_CONSTRAINT_RELATION_PLAYER},
+        error::{collect_err, ErrorReport, MISSING_CONSTRAINT_RELATION_PLAYER},
         token,
         validatable::Validatable,
     },
@@ -52,7 +52,7 @@ impl RelationConstraint {
 }
 
 impl Validatable for RelationConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut std::iter::once(expect_role_players_present(&self.role_players))
                 .chain(self.role_players.iter().map(Validatable::validate)),
@@ -60,11 +60,9 @@ impl Validatable for RelationConstraint {
     }
 }
 
-fn expect_role_players_present(
-    role_players: &[RolePlayerConstraint],
-) -> Result<(), Vec<ErrorMessage>> {
+fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result<(), ErrorReport> {
     if role_players.is_empty() {
-        Err(vec![MISSING_CONSTRAINT_RELATION_PLAYER.format(&[])])
+        Err(ErrorReport::from(MISSING_CONSTRAINT_RELATION_PLAYER.format(&[])))
     } else {
         Ok(())
     }
@@ -105,7 +103,7 @@ impl RolePlayerConstraint {
 }
 
 impl Validatable for RolePlayerConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut (self.role_type.iter().map(Validatable::validate))
                 .chain(std::iter::once(self.player.validate())),

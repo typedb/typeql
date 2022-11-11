@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, ErrorReport},
         validatable::Validatable,
     },
     pattern::{
@@ -52,7 +52,7 @@ impl ConceptVariable {
 }
 
 impl Validatable for ConceptVariable {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut std::iter::once(self.reference.validate())
                 .chain(self.is_constraint.iter().map(Validatable::validate)),

@@ -20,14 +20,14 @@
  *
  */
 
-use crate::common::{error::ErrorMessage, token, validatable::Validatable};
+use crate::common::{error::ErrorReport, token, validatable::Validatable};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AbstractConstraint;
 
 impl Validatable for AbstractConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         Ok(())
     }
 }

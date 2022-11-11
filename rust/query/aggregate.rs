@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorMessage, token, validatable::Validatable},
+    common::{error::ErrorReport, token, validatable::Validatable},
     pattern::UnboundVariable,
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
@@ -51,7 +51,7 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
 }
 
 impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         self.query.validate()
     }
 }

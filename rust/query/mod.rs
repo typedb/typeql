@@ -51,7 +51,7 @@ pub use typeql_update::TypeQLUpdate;
 mod writable;
 pub use writable::Writable;
 
-use crate::common::{error::ErrorMessage, validatable::Validatable};
+use crate::common::{error::ErrorReport, validatable::Validatable};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
@@ -79,7 +79,7 @@ impl Query {
 }
 
 impl Validatable for Query {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         use Query::*;
         match self {
             Match(query) => query.validate(),
@@ -87,7 +87,7 @@ impl Validatable for Query {
         }
     }
 
-    fn validated(self) -> Result<Self, Vec<ErrorMessage>> {
+    fn validated(self) -> Result<Self, ErrorReport> {
         use Query::*;
         match self {
             Match(query) => query.validated().map(TypeQLMatch::into),

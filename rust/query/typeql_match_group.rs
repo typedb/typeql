@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, ErrorReport},
         token,
         validatable::Validatable,
     },
@@ -40,7 +40,7 @@ pub struct TypeQLMatchGroup {
 impl AggregateQueryBuilder for TypeQLMatchGroup {}
 
 impl Validatable for TypeQLMatchGroup {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(&mut [self.query.validate(), self.group_var.validate()].into_iter())
     }
 }

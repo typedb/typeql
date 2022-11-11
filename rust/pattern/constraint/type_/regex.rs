@@ -20,7 +20,7 @@
  *
  */
 
-use crate::common::{error::ErrorMessage, string::escape_regex, token, validatable::Validatable};
+use crate::common::{error::ErrorReport, string::escape_regex, token, validatable::Validatable};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -29,7 +29,7 @@ pub struct RegexConstraint {
 }
 
 impl Validatable for RegexConstraint {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         Ok(()) // TODO validate regex using external crate
     }
 }

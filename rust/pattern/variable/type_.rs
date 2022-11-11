@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, ErrorReport},
         validatable::Validatable,
     },
     pattern::{
@@ -83,7 +83,7 @@ impl TypeVariable {
 }
 
 impl Validatable for TypeVariable {
-    fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+    fn validate(&self) -> Result<(), ErrorReport> {
         collect_err(
             &mut std::iter::once(self.reference.validate())
                 .chain(self.label.iter().map(Validatable::validate))
