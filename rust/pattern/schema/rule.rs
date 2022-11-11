@@ -121,13 +121,7 @@ fn expect_valid_inference(
     conclusion: &ThingVariable,
     rule_label: &Label,
 ) -> Result<(), ErrorMessage> {
-    if conclusion.has.len() == 1
-        && (conclusion.iid.is_none()
-            && conclusion.isa.is_none()
-            && conclusion.value.is_none()
-            && conclusion.relation.is_none())
-    {
-        let has = conclusion.has.get(0).unwrap();
+    if let Some(has) = conclusion.has.get(0) {
         if has.type_.is_some() && has.attribute.reference.is_name() {
             Err(INVALID_RULE_THEN_HAS.format(&[
                 &rule_label.to_string(),
@@ -138,18 +132,8 @@ fn expect_valid_inference(
         } else {
             Ok(())
         }
-    } else if conclusion.relation.is_some()
-        && conclusion.isa.is_some()
-        && (conclusion.iid.is_none() && conclusion.has.is_empty() && conclusion.value.is_none())
-    {
-        if conclusion
-            .relation
-            .as_ref()
-            .unwrap()
-            .role_players
-            .iter()
-            .all(|rp| rp.role_type.is_some())
-        {
+    } else if let Some(relation) = &conclusion.relation {
+        if relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
             Ok(())
         } else {
             Err(INVALID_RULE_THEN_ROLES.format(&[&rule_label.to_string(), &conclusion.to_string()]))

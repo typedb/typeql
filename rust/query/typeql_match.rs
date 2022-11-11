@@ -132,7 +132,7 @@ fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), V
 }
 
 fn expect_each_variable_is_bounded_by_named<'a>(
-    mut patterns: impl Iterator<Item = &'a Pattern>,
+    patterns: impl Iterator<Item = &'a Pattern>,
 ) -> Result<(), Vec<ErrorMessage>> {
     list_err(
         patterns
