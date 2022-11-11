@@ -74,6 +74,12 @@ impl From<&str> for RuleDeclaration {
     }
 }
 
+impl fmt::Display for RuleDeclaration {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Schema::Rule, self.label)
+    }
+}
+
 pub struct RuleWhenStub {
     pub label: Label,
     pub when: Conjunction,
@@ -163,12 +169,6 @@ fn expect_then_bounded_by_when(
         Ok(())
     } else {
         Err(INVALID_RULE_THEN_VARIABLES.format(&[&rule_label.to_string()]))
-    }
-}
-
-impl fmt::Display for RuleDeclaration {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Schema::Rule, self.label)
     }
 }
 
