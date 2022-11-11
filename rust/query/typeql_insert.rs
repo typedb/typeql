@@ -60,19 +60,20 @@ impl Validatable for TypeQLInsert {
 
 fn expect_insert_in_scope_of_match(
     match_query: &Option<TypeQLMatch>,
-    variables: &Vec<ThingVariable>,
+    variables: &[ThingVariable],
 ) -> Result<(), Vec<ErrorMessage>> {
     if let Some(match_query) = match_query {
         let bounds = match_query.conjunction.names();
         if variables.iter().any(|v| {
-            v.reference.is_name() && bounds.contains(&v.reference.to_string())
-                || v.references().any(|w| bounds.contains(&w.to_string()))
+            v.reference.is_name() && bounds.contains(&v.reference)
+                || v.references().any(|w| bounds.contains(w))
         }) {
             Ok(())
         } else {
             let variables_str =
                 variables.iter().map(ThingVariable::to_string).collect::<Vec<String>>().join(", ");
-            let bounds_str = bounds.into_iter().collect::<Vec<String>>().join(", ");
+            let bounds_str =
+                bounds.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
             Err(vec![NO_VARIABLE_IN_SCOPE_INSERT.format(&[&variables_str, &bounds_str])])
         }
     } else {

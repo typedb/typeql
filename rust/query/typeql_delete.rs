@@ -60,14 +60,13 @@ impl Validatable for TypeQLDelete {
 
 fn expect_delete_in_scope_of_match(
     match_query: &TypeQLMatch,
-    variables: &Vec<ThingVariable>,
+    variables: &[ThingVariable],
 ) -> Result<(), Vec<ErrorMessage>> {
     let bounds = match_query.conjunction.names();
     collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(
         |r| {
-            let n = r.to_string();
-            if !bounds.contains(&n) {
-                Err(vec![VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&n])])
+            if !bounds.contains(r) {
+                Err(vec![VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()])])
             } else {
                 Ok(())
             }

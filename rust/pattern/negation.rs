@@ -26,7 +26,7 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::Pattern,
+    pattern::{Pattern, Reference},
 };
 use core::fmt;
 use std::collections::HashSet;
@@ -41,7 +41,10 @@ impl Negation {
         Self { pattern: Box::new(pattern) }
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
+    pub fn expect_is_bounded_by(
+        &self,
+        bounds: &HashSet<Reference>,
+    ) -> Result<(), Vec<ErrorMessage>> {
         self.pattern.expect_is_bounded_by(bounds)
     }
 }

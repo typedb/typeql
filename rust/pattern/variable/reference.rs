@@ -26,13 +26,13 @@ use crate::common::{
 };
 use std::fmt;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Visibility {
     Visible,
     Invisible,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Reference {
     Anonymous(Visibility),
     Name(String),

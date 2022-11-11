@@ -47,7 +47,7 @@ impl Writable for Vec<ThingVariable> {
     }
 }
 
-pub(crate) fn expect_non_empty(variables: &Vec<ThingVariable>) -> Result<(), Vec<ErrorMessage>> {
+pub(crate) fn expect_non_empty(variables: &[ThingVariable]) -> Result<(), Vec<ErrorMessage>> {
     if variables.is_empty() {
         Err(vec![MISSING_PATTERNS.format(&[])])
     } else {

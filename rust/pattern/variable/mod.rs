@@ -71,11 +71,14 @@ impl Variable {
         }
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
+    pub fn expect_is_bounded_by(
+        &self,
+        bounds: &HashSet<Reference>,
+    ) -> Result<(), Vec<ErrorMessage>> {
         match self {
             Self::Unbound(_) => unreachable!(),
             _ => {
-                if self.references().any(|r| r.is_name() && bounds.contains(&r.to_string())) {
+                if self.references().any(|r| r.is_name() && bounds.contains(r)) {
                     Ok(())
                 } else {
                     Err(vec![MATCH_HAS_UNBOUNDED_NESTED_PATTERN

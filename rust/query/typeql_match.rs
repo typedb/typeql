@@ -145,16 +145,13 @@ fn expect_filters_are_in_scope(
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
             Err(vec![VARIABLE_NOT_NAMED.format(&[])])
+        } else if !bounds.contains(r) {
+            Err(vec![VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])])
+        } else if seen.contains(&r) {
+            Err(vec![ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&r.to_string()])])
         } else {
-            let n = r.to_string();
-            if !bounds.contains(&n) {
-                Err(vec![VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n])])
-            } else if seen.contains(&n) {
-                Err(vec![ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&n])])
-            } else {
-                seen.insert(n);
-                Ok(())
-            }
+            seen.insert(r);
+            Ok(())
         }
     }))
 }
@@ -166,14 +163,14 @@ fn expect_sort_vars_are_in_scope(
 ) -> Result<(), Vec<ErrorMessage>> {
     let scope = filter
         .as_ref()
-        .map(|f| f.vars.iter().map(|v| v.reference.to_string()).collect())
+        .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())
         .unwrap_or_else(|| conjunction.names());
-    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.to_string()).map(
-        |n| {
+    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(
+        |r| {
             scope
-                .contains(&n)
+                .contains(&r)
                 .then_some(())
-                .ok_or_else(|| vec![VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&n])])
+                .ok_or_else(|| vec![VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])])
         },
     ))
 }

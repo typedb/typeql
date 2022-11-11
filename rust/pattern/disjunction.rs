@@ -27,7 +27,7 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::Pattern,
+    pattern::{Pattern, Reference},
 };
 use std::{collections::HashSet, fmt};
 
@@ -41,7 +41,10 @@ impl Disjunction {
         Disjunction { patterns }
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
+    pub fn expect_is_bounded_by(
+        &self,
+        bounds: &HashSet<Reference>,
+    ) -> Result<(), Vec<ErrorMessage>> {
         collect_err(&mut self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)))
     }
 }

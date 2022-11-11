@@ -128,11 +128,9 @@ fn expect_infer_single_edge(
             && then.isa.is_none()
             && then.value.is_none()
             && then.relation.is_none())
-    {
-        Ok(())
-    } else if then.relation.is_some()
-        && then.isa.is_some()
-        && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
+        || then.relation.is_some()
+            && then.isa.is_some()
+            && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
     {
         Ok(())
     } else {
@@ -172,7 +170,7 @@ fn expect_then_bounded_by_when(
     rule_label: &Label,
 ) -> Result<(), Vec<ErrorMessage>> {
     let names = when.names();
-    if then.references().filter(|r| r.is_name()).all(|r| names.contains(&r.to_string())) {
+    if then.references().filter(|r| r.is_name()).all(|r| names.contains(r)) {
         Ok(())
     } else {
         Err(vec![INVALID_RULE_THEN_VARIABLES.format(&[&rule_label.to_string()])])

@@ -61,7 +61,7 @@ impl Validatable for RelationConstraint {
 }
 
 fn expect_role_players_present(
-    role_players: &Vec<RolePlayerConstraint>,
+    role_players: &[RolePlayerConstraint],
 ) -> Result<(), Vec<ErrorMessage>> {
     if role_players.is_empty() {
         Err(vec![MISSING_CONSTRAINT_RELATION_PLAYER.format(&[])])

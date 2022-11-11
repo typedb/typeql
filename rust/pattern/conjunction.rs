@@ -57,11 +57,14 @@ impl Conjunction {
         self.references().any(|r| r.is_name())
     }
 
-    pub fn names(&self) -> HashSet<String> {
-        self.references().filter(|r| r.is_name()).map(|r| r.to_string()).collect()
+    pub fn names(&self) -> HashSet<Reference> {
+        self.references().filter(|r| r.is_name()).cloned().collect()
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
+    pub fn expect_is_bounded_by(
+        &self,
+        bounds: &HashSet<Reference>,
+    ) -> Result<(), Vec<ErrorMessage>> {
         let names = self.names();
         if names.is_disjoint(bounds) {
             Err(vec![

@@ -76,7 +76,10 @@ impl Pattern {
     enum_getter!(into_negation, Negation, Negation);
     enum_getter!(into_variable, Variable, Variable);
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<String>) -> Result<(), Vec<ErrorMessage>> {
+    pub fn expect_is_bounded_by(
+        &self,
+        bounds: &HashSet<Reference>,
+    ) -> Result<(), Vec<ErrorMessage>> {
         use Pattern::*;
         match self {
             Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
