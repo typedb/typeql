@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::error::ErrorMessage,
+    common::error::{list_err, ErrorMessage},
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable, ValueConstraint,
@@ -63,16 +63,21 @@ impl ThingVariable {
     }
 
     pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
-        println!("{:?}", &self);
-        // self.reference.validate()?;
-        // self.iid
-        // self.isa
-        self.has.iter().try_for_each(|has| has.validate())?;
-        if let Some(value) = &self.value {
-            value.validate()?;
-        }
-        // self.relation
-        Ok(())
+        list_err(
+            // std::iter::once(&self.reference)
+            //     .chain(
+            self.iid
+                .iter()
+                .map(|c| c.validate())
+                // )
+                // .chain(self.isa.iter().map(|c| c.references()))
+                .chain(self.has.iter().map(|c| c.validate()))
+                // .chain(self.relation.iter().map(|c| c.validate()))
+                .chain(self.value.iter().map(|c| c.validate()))
+                .filter_map(Result::err)
+                .flatten()
+                .collect(),
+        )
     }
 
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

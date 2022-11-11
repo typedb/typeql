@@ -20,7 +20,10 @@
  *
  */
 
-use crate::common::token;
+use crate::common::{
+    error::{ErrorMessage, INVALID_IID_STRING},
+    token,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -34,13 +37,15 @@ fn is_valid_iid(iid: &str) -> bool {
 
 impl IIDConstraint {
     pub fn new(iid: String) -> Self {
-        // TODO validation
-        // if is_valid_iid(&iid) {
-        //     Ok(IIDConstraint { iid })
-        // } else {
-        //     Err(INVALID_IID_STRING.format(&[&iid]))
-        // }
         IIDConstraint { iid }
+    }
+
+    pub fn validate(&self) -> Result<(), Vec<ErrorMessage>> {
+        if is_valid_iid(&self.iid) {
+            Ok(())
+        } else {
+            Err(vec![INVALID_IID_STRING.format(&[&self.iid])])
+        }
     }
 }
 
