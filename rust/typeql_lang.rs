@@ -22,8 +22,6 @@
 
 #[macro_use]
 mod builder;
-pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_, var};
-
 pub mod common;
 pub mod parser;
 pub mod pattern;
@@ -32,15 +30,16 @@ pub mod query;
 #[macro_use]
 mod util;
 
-use crate::{common::Result, pattern::Definable};
 use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
 
+pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_, var};
+use common::Result;
 use parser::{
     error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_definables,
     visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
     visit_eof_schema_rule, visit_eof_variable,
 };
-use pattern::{Label, Pattern, RuleDefinition, Variable};
+use pattern::{Definable, Label, Pattern, RuleDefinition, Variable};
 use query::Query;
 use std::{cell::RefCell, rc::Rc};
 use typeql_grammar::{typeqlrustlexer::TypeQLRustLexer, typeqlrustparser::TypeQLRustParser};
