@@ -24,8 +24,7 @@ use crate::{
     common::{
         error::{
             collect_err, INVALID_RULE_THEN, INVALID_RULE_THEN_HAS, INVALID_RULE_THEN_ROLES,
-            INVALID_RULE_THEN_VARIABLES, INVALID_RULE_WHEN_CONTAINS_DISJUNCTION,
-            INVALID_RULE_WHEN_NESTED_NEGATION,
+            INVALID_RULE_THEN_VARIABLES, INVALID_RULE_WHEN_NESTED_NEGATION,
         },
         string::indent,
         token,
@@ -92,7 +91,7 @@ impl Validatable for RuleDefinition {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [
-                expect_only_conjunctions(self.when.patterns.iter(), &self.label),
+                expect_no_negations(self.when.patterns.iter(), &self.label),
                 expect_infer_single_edge(&self.then, &self.label),
                 expect_valid_inference(&self.then, &self.label),
                 expect_then_bounded_by_when(&self.then, &self.when, &self.label),
@@ -104,17 +103,15 @@ impl Validatable for RuleDefinition {
     }
 }
 
-fn expect_only_conjunctions<'a>(
+fn expect_no_negations<'a>(
     patterns: impl Iterator<Item = &'a Pattern>,
     rule_label: &Label,
 ) -> Result<()> {
     collect_err(&mut patterns.map(|p| -> Result<()> {
         match p {
-            Pattern::Conjunction(c) => expect_only_conjunctions(c.patterns.iter(), rule_label),
+            Pattern::Conjunction(c) => expect_no_negations(c.patterns.iter(), rule_label),
             Pattern::Variable(_) => Ok(()),
-            Pattern::Disjunction(_) => {
-                Err(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.format(&[&rule_label.to_string()]))?
-            }
+            Pattern::Disjunction(d) => expect_no_negations(d.patterns.iter(), rule_label),
             Pattern::Negation(_) => {
                 Err(INVALID_RULE_WHEN_NESTED_NEGATION.format(&[&rule_label.to_string()]))?
             }
