@@ -21,11 +21,7 @@
  */
 
 use crate::{
-    common::{
-        error::{ErrorReport, REDUNDANT_NESTED_NEGATION},
-        token,
-        validatable::Validatable,
-    },
+    common::{error::REDUNDANT_NESTED_NEGATION, token, validatable::Validatable, Result},
     pattern::{Pattern, Reference},
 };
 use core::fmt;
@@ -41,15 +37,15 @@ impl Negation {
         Self { pattern: Box::new(pattern) }
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<(), ErrorReport> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         self.pattern.expect_is_bounded_by(bounds)
     }
 }
 
 impl Validatable for Negation {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         match self.pattern.as_ref() {
-            Pattern::Negation(_) => Err(ErrorReport::from(REDUNDANT_NESTED_NEGATION.format(&[]))),
+            Pattern::Negation(_) => Err(REDUNDANT_NESTED_NEGATION.format(&[]))?,
             _ => Ok(()),
         }
     }

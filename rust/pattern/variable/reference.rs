@@ -20,10 +20,7 @@
  *
  */
 
-use crate::common::{
-    error::{ErrorReport, INVALID_VARIABLE_NAME},
-    validatable::Validatable,
-};
+use crate::common::{error::INVALID_VARIABLE_NAME, validatable::Validatable, Result};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -49,7 +46,7 @@ impl Reference {
 }
 
 impl Validatable for Reference {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         match self {
             Self::Anonymous(_) => Ok(()),
             Self::Name(n) => expect_valid_identifier(n),
@@ -57,14 +54,13 @@ impl Validatable for Reference {
     }
 }
 
-fn expect_valid_identifier(name: &str) -> Result<(), ErrorReport> {
-    if name.starts_with(|c: char| c.is_ascii_alphanumeric())
-        && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+fn expect_valid_identifier(name: &str) -> Result<()> {
+    if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
+        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
     {
-        Ok(())
-    } else {
-        Err(ErrorReport::from(INVALID_VARIABLE_NAME.format(&[name])))
+        Err(INVALID_VARIABLE_NAME.format(&[name]))?
     }
+    Ok(())
 }
 
 impl fmt::Display for Reference {

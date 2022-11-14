@@ -32,9 +32,9 @@ pub mod query;
 #[macro_use]
 mod util;
 
-use crate::{common::error::ErrorReport, pattern::Definable};
+use crate::{common::Result, pattern::Definable};
 use antlr_rust::{common_token_stream::CommonTokenStream, InputStream, Parser as ANTLRParser};
-use common::error::ErrorMessage;
+
 use parser::{
     error_listener::ErrorListener, syntax_error::SyntaxError, visit_eof_definables,
     visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
@@ -72,36 +72,34 @@ macro_rules! parse {
     }};
 }
 
-pub fn parse_query(typeql_query: &str) -> Result<Query, ErrorReport> {
+pub fn parse_query(typeql_query: &str) -> Result<Query> {
     parse!(visit_eof_query(eof_query(typeql_query)))
 }
 
-pub fn parse_queries(
-    typeql_queries: &str,
-) -> Result<impl Iterator<Item = Result<Query, ErrorReport>> + '_, ErrorReport> {
+pub fn parse_queries(typeql_queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
     parse!(visit_eof_queries(eof_queries(typeql_queries)))
 }
 
-pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern, ErrorReport> {
+pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern> {
     parse!(visit_eof_pattern(eof_pattern(typeql_pattern)))
 }
 
-pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>, ErrorReport> {
+pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>> {
     parse!(visit_eof_patterns(eof_patterns(typeql_patterns)))
 }
 
-pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>, ErrorReport> {
+pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>> {
     parse!(visit_eof_definables(eof_definables(typeql_definables)))
 }
 
-pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition, ErrorReport> {
+pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition> {
     parse!(visit_eof_schema_rule(eof_schema_rule(typeql_rule)))
 }
 
-pub fn parse_variable(typeql_variable: &str) -> Result<Variable, ErrorReport> {
+pub fn parse_variable(typeql_variable: &str) -> Result<Variable> {
     parse!(visit_eof_variable(eof_variable(typeql_variable)))
 }
 
-pub fn parse_label(typeql_label: &str) -> Result<Label, ErrorReport> {
+pub fn parse_label(typeql_label: &str) -> Result<Label> {
     parse!(visit_eof_label(eof_label(typeql_label)))
 }

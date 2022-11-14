@@ -24,6 +24,41 @@ use crate::write_joined;
 use std::{convert::Infallible, fmt};
 
 #[derive(Debug)]
+pub struct ErrorReport {
+    messages: Vec<ErrorMessage>,
+}
+
+impl From<ErrorMessage> for ErrorReport {
+    fn from(message: ErrorMessage) -> Self {
+        Self { messages: vec![message] }
+    }
+}
+
+impl From<Vec<ErrorMessage>> for ErrorReport {
+    fn from(messages: Vec<ErrorMessage>) -> Self {
+        assert!(!messages.is_empty());
+        Self { messages }
+    }
+}
+
+impl fmt::Display for ErrorReport {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write_joined!(f, "\n\n", self.messages)
+    }
+}
+
+pub fn collect_err(
+    i: &mut dyn Iterator<Item = Result<(), ErrorReport>>,
+) -> Result<(), ErrorReport> {
+    let messages = i.filter_map(Result::err).flat_map(|e| e.messages).collect::<Vec<_>>();
+    if messages.is_empty() {
+        Ok(())
+    } else {
+        Err(ErrorReport { messages })
+    }
+}
+
+#[derive(Debug)]
 pub struct ErrorMessage {
     pub code: usize,
     pub message: String,
@@ -148,39 +183,4 @@ error_messages! {
    INVALID_COUNT_VARIABLE_ARGUMENT = 38: "Aggregate COUNT does not accept a Variable.",
    ILLEGAL_GRAMMAR = 39: "Illegal grammar: '{}'",
    ILLEGAL_CHAR_IN_LABEL = 40: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
-}
-
-#[derive(Debug)]
-pub struct ErrorReport {
-    messages: Vec<ErrorMessage>,
-}
-
-impl From<ErrorMessage> for ErrorReport {
-    fn from(message: ErrorMessage) -> Self {
-        Self { messages: vec![message] }
-    }
-}
-
-impl From<Vec<ErrorMessage>> for ErrorReport {
-    fn from(messages: Vec<ErrorMessage>) -> Self {
-        assert!(!messages.is_empty());
-        Self { messages }
-    }
-}
-
-impl fmt::Display for ErrorReport {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_joined!(f, "\n\n", self.messages)
-    }
-}
-
-pub fn collect_err(
-    i: &mut dyn Iterator<Item = Result<(), ErrorReport>>,
-) -> Result<(), ErrorReport> {
-    let messages = i.filter_map(Result::err).flat_map(|e| e.messages).collect::<Vec<_>>();
-    if messages.is_empty() {
-        Ok(())
-    } else {
-        Err(ErrorReport { messages })
-    }
 }

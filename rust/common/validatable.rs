@@ -20,12 +20,12 @@
  *
  */
 
-use crate::common::error::ErrorReport;
+use crate::common::Result;
 
 pub trait Validatable: Sized {
-    fn validate(&self) -> Result<(), ErrorReport>;
+    fn validate(&self) -> Result<()>;
 
-    fn validated(self) -> Result<Self, ErrorReport> {
+    fn validated(self) -> Result<Self> {
         self.validate().map(|_| self)
     }
 

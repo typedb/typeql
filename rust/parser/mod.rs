@@ -29,10 +29,11 @@ mod test;
 use crate::{
     common::{
         date_time,
-        error::{ErrorReport, ILLEGAL_GRAMMAR},
+        error::ILLEGAL_GRAMMAR,
         string::{unescape_regex, unquote},
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::{
         ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction,
@@ -58,7 +59,6 @@ use std::rc::Rc;
 // keep star import to not expose generated code
 use typeql_grammar::typeqlrustparser::*;
 
-type ParserResult<T> = Result<T, ErrorReport>;
 type TerminalNode<'a> = ANTLRTerminalNode<'a, TypeQLRustParserContextType>;
 
 fn get_string(string: Rc<TerminalNode>) -> String {
@@ -131,40 +131,38 @@ fn get_role_players(ctx: Rc<RelationContext>) -> Vec<RolePlayerConstraint> {
     (0..).map_while(|i| ctx.role_player(i)).map(get_role_player_constraint).collect()
 }
 
-pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> ParserResult<Query> {
+pub(crate) fn visit_eof_query(ctx: Rc<Eof_queryContext>) -> Result<Query> {
     visit_query(ctx.query().unwrap()).validated()
 }
 
 pub(crate) fn visit_eof_queries(
     ctx: Rc<Eof_queriesContext>,
-) -> ParserResult<impl Iterator<Item = ParserResult<Query>> + '_> {
+) -> Result<impl Iterator<Item = Result<Query>> + '_> {
     Ok((0..).map_while(move |i| ctx.query(i)).map(visit_query).map(Validatable::validated))
 }
 
-pub(crate) fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> ParserResult<Pattern> {
+pub(crate) fn visit_eof_pattern(ctx: Rc<Eof_patternContext>) -> Result<Pattern> {
     visit_pattern(ctx.pattern().unwrap()).validated()
 }
 
-pub(crate) fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> ParserResult<Vec<Pattern>> {
+pub(crate) fn visit_eof_patterns(ctx: Rc<Eof_patternsContext>) -> Result<Vec<Pattern>> {
     visit_patterns(ctx.patterns().unwrap()).into_iter().map(Validatable::validated).collect()
 }
 
-pub(crate) fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> ParserResult<Vec<Definable>> {
+pub(crate) fn visit_eof_definables(ctx: Rc<Eof_definablesContext>) -> Result<Vec<Definable>> {
     visit_definables(ctx.definables().unwrap()).into_iter().map(Validatable::validated).collect()
 }
 
-pub(crate) fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> ParserResult<Variable> {
+pub(crate) fn visit_eof_variable(ctx: Rc<Eof_variableContext>) -> Result<Variable> {
     visit_pattern_variable(ctx.pattern_variable().unwrap()).validated()
 }
 
-pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> ParserResult<Label> {
+pub(crate) fn visit_eof_label(ctx: Rc<Eof_labelContext>) -> Result<Label> {
     // TODO validation
     Ok(ctx.label().unwrap().get_text().into())
 }
 
-pub(crate) fn visit_eof_schema_rule(
-    ctx: Rc<Eof_schema_ruleContext>,
-) -> ParserResult<RuleDefinition> {
+pub(crate) fn visit_eof_schema_rule(ctx: Rc<Eof_schema_ruleContext>) -> Result<RuleDefinition> {
     visit_schema_rule(ctx.schema_rule().unwrap()).validated()
 }
 

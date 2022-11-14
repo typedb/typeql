@@ -21,10 +21,7 @@
  */
 
 use crate::{
-    common::{
-        error::{collect_err, ErrorReport},
-        validatable::Validatable,
-    },
+    common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable, ValueConstraint,
@@ -88,7 +85,7 @@ impl ThingVariable {
 }
 
 impl Validatable for ThingVariable {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         collect_err(
             &mut std::iter::once(self.reference.validate())
                 .chain(self.iid.iter().map(Validatable::validate))

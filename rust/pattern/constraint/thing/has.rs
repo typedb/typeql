@@ -21,16 +21,11 @@
  */
 
 use crate::{
-    common::{
-        error::{collect_err, ErrorReport},
-        token,
-        validatable::Validatable,
-    },
+    common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
         Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
         UnboundVariable, Value, ValueConstraint,
     },
-    ErrorMessage,
 };
 use std::fmt;
 
@@ -50,7 +45,7 @@ impl HasConstraint {
 }
 
 impl Validatable for HasConstraint {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         collect_err(
             &mut std::iter::once(self.attribute.validate())
                 .chain(self.type_.iter().map(Validatable::validate)),
@@ -86,19 +81,6 @@ impl<S: Into<String>> From<(S, ValueConstraint)> for HasConstraint {
             type_: Some(UnboundVariable::hidden().type_(type_name.into())),
             attribute: UnboundVariable::hidden().constrain_value(value),
         }
-    }
-}
-
-impl<S: Into<String>> TryFrom<(S, Result<ValueConstraint, ErrorMessage>)> for HasConstraint {
-    type Error = ErrorMessage;
-
-    fn try_from(
-        (type_name, value): (S, Result<ValueConstraint, ErrorMessage>),
-    ) -> Result<Self, Self::Error> {
-        Ok(HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name.into())),
-            attribute: UnboundVariable::hidden().constrain_value(value?),
-        })
     }
 }
 

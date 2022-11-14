@@ -57,7 +57,7 @@ pub use variable::{
 mod test;
 
 use crate::{
-    common::{error::ErrorReport, validatable::Validatable},
+    common::{validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
 use std::fmt;
@@ -76,7 +76,7 @@ impl Pattern {
     enum_getter!(into_negation, Negation, Negation);
     enum_getter!(into_variable, Variable, Variable);
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<(), ErrorReport> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         use Pattern::*;
         match self {
             Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
@@ -88,7 +88,7 @@ impl Pattern {
 }
 
 impl Validatable for Pattern {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         use Pattern::*;
         match self {
             Conjunction(conjunction) => conjunction.validate(),
@@ -156,7 +156,7 @@ impl Definable {
 }
 
 impl Validatable for Definable {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         use Definable::*;
         match self {
             RuleDefinition(rule) => rule.validate(),

@@ -21,11 +21,7 @@
  */
 
 use crate::{
-    common::{
-        error::{collect_err, ErrorReport},
-        token,
-        validatable::Validatable,
-    },
+    common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::ThingVariable,
     query::{writable::expect_non_empty, TypeQLDelete},
     write_joined,
@@ -39,7 +35,7 @@ pub struct TypeQLUpdate {
 }
 
 impl Validatable for TypeQLUpdate {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         collect_err(
             &mut ([expect_non_empty(&self.insert_variables), self.delete_query.validate()]
                 .into_iter())

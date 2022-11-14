@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::ErrorReport, token, validatable::Validatable},
+    common::{token, validatable::Validatable, Result},
     pattern::{ConceptVariable, UnboundVariable},
     var,
 };
@@ -39,7 +39,7 @@ impl IsConstraint {
 }
 
 impl Validatable for IsConstraint {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         self.variable.validate()
     }
 }

@@ -20,11 +20,7 @@
  *
  */
 
-use crate::common::{
-    error::{ErrorReport, INVALID_IID_STRING},
-    token,
-    validatable::Validatable,
-};
+use crate::common::{error::INVALID_IID_STRING, token, validatable::Validatable, Result};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -43,12 +39,11 @@ impl IIDConstraint {
 }
 
 impl Validatable for IIDConstraint {
-    fn validate(&self) -> Result<(), ErrorReport> {
-        if is_valid_iid(&self.iid) {
-            Ok(())
-        } else {
-            Err(ErrorReport::from(INVALID_IID_STRING.format(&[&self.iid])))
+    fn validate(&self) -> Result<()> {
+        if !is_valid_iid(&self.iid) {
+            Err(INVALID_IID_STRING.format(&[&self.iid]))?
         }
+        Ok(())
     }
 }
 

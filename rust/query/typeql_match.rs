@@ -29,6 +29,7 @@ use crate::{
         },
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::{Conjunction, Pattern, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
@@ -87,7 +88,7 @@ impl TypeQLMatch {
 }
 
 impl Validatable for TypeQLMatch {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         collect_err(
             &mut [
                 expect_has_bounding_conjunction(&self.conjunction),
@@ -106,22 +107,22 @@ impl Validatable for TypeQLMatch {
     }
 }
 
-fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<(), ErrorReport> {
+fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
     if conjunction.has_named_variables() {
         Ok(())
     } else {
-        Err(ErrorReport::from(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE.format(&[])))
+        Err(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE.format(&[]))?
     }
 }
 
-fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<(), ErrorReport> {
+fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<()> {
     let bounds = conjunction.names();
     collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
 }
 
 fn expect_each_variable_is_bounded_by_named<'a>(
     patterns: impl Iterator<Item = &'a Pattern>,
-) -> Result<(), ErrorReport> {
+) -> Result<()> {
     collect_err(&mut patterns.map(|p| match p {
         Pattern::Variable(v) => {
             v.references().any(|r| r.is_name()).then_some(()).ok_or_else(|| {
@@ -138,10 +139,7 @@ fn expect_each_variable_is_bounded_by_named<'a>(
     }))
 }
 
-fn expect_filters_are_in_scope(
-    conjunction: &Conjunction,
-    filter: &Option<Filter>,
-) -> Result<(), ErrorReport> {
+fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result<()> {
     let bounds = conjunction.names();
     let mut seen = HashSet::new();
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
@@ -162,7 +160,7 @@ fn expect_sort_vars_are_in_scope(
     conjunction: &Conjunction,
     filter: &Option<Filter>,
     sorting: &Option<Sorting>,
-) -> Result<(), ErrorReport> {
+) -> Result<()> {
     let scope = filter
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())

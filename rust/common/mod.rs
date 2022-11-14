@@ -25,3 +25,5 @@ pub mod error;
 pub mod string;
 pub mod token;
 pub mod validatable;
+
+pub type Result<T> = std::result::Result<T, error::ErrorReport>;

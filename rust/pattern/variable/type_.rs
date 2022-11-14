@@ -21,10 +21,7 @@
  */
 
 use crate::{
-    common::{
-        error::{collect_err, ErrorReport},
-        validatable::Validatable,
-    },
+    common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
         AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
         RegexConstraint, RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
@@ -83,7 +80,7 @@ impl TypeVariable {
 }
 
 impl Validatable for TypeVariable {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         collect_err(
             &mut std::iter::once(self.reference.validate())
                 .chain(self.label.iter().map(Validatable::validate))

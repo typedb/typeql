@@ -23,13 +23,11 @@
 use crate::{
     common::{
         date_time,
-        error::{
-            collect_err, ErrorReport, INVALID_CONSTRAINT_DATETIME_PRECISION,
-            INVALID_CONSTRAINT_PREDICATE,
-        },
+        error::{collect_err, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
         string::{escape_regex, format_double, quote},
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::{Reference, ThingVariable, UnboundVariable},
 };
@@ -56,7 +54,7 @@ impl ValueConstraint {
 }
 
 impl Validatable for ValueConstraint {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         collect_err(
             &mut [
                 expect_string_value_with_substring_predicate(self.predicate, &self.value),
@@ -70,14 +68,11 @@ impl Validatable for ValueConstraint {
 fn expect_string_value_with_substring_predicate(
     predicate: token::Predicate,
     value: &Value,
-) -> Result<(), ErrorReport> {
+) -> Result<()> {
     if predicate.is_substring() && !matches!(value, Value::String(_)) {
-        Err(ErrorReport::from(
-            INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]),
-        ))
-    } else {
-        Ok(())
+        Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))?
     }
+    Ok(())
 }
 
 impl fmt::Display for ValueConstraint {
@@ -107,17 +102,14 @@ pub enum Value {
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
 impl Validatable for Value {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
-                    Err(ErrorReport::from(
-                        INVALID_CONSTRAINT_DATETIME_PRECISION
-                            .format(&[date_time.to_string().as_str()]),
-                    ))
-                } else {
-                    Ok(())
+                    Err(INVALID_CONSTRAINT_DATETIME_PRECISION
+                        .format(&[date_time.to_string().as_str()]))?
                 }
+                Ok(())
             }
             Self::Variable(variable) => variable.validate(),
             _ => Ok(()),

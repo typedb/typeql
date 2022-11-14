@@ -22,9 +22,10 @@
 
 use crate::{
     common::{
-        error::{collect_err, ErrorReport, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        error::{collect_err, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
         string::indent,
         validatable::Validatable,
+        Result,
     },
     pattern::{Pattern, Reference},
 };
@@ -61,12 +62,10 @@ impl Conjunction {
         self.references().filter(|r| r.is_name()).cloned().collect()
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<(), ErrorReport> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         let names = self.names();
         if names.is_disjoint(bounds) {
-            Err(ErrorReport::from(
-                MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")]),
-            ))?;
+            Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")]))?;
         }
         let bounds = bounds.union(&names).cloned().collect();
         collect_err(&mut self.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
@@ -74,7 +73,7 @@ impl Conjunction {
 }
 
 impl Validatable for Conjunction {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         Ok(())
     }
 }

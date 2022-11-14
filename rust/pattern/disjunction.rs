@@ -21,12 +21,7 @@
  */
 
 use crate::{
-    common::{
-        error::{collect_err, ErrorReport},
-        string::indent,
-        token,
-        validatable::Validatable,
-    },
+    common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
     pattern::{Pattern, Reference},
 };
 use std::{collections::HashSet, fmt};
@@ -41,13 +36,13 @@ impl Disjunction {
         Disjunction { patterns }
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<(), ErrorReport> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         collect_err(&mut self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)))
     }
 }
 
 impl Validatable for Disjunction {
-    fn validate(&self) -> Result<(), ErrorReport> {
+    fn validate(&self) -> Result<()> {
         Ok(())
     }
 }
