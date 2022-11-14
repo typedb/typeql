@@ -175,7 +175,7 @@ error_messages! {
    INVALID_RULE_WHEN_NESTED_NEGATION = 30: "Rule '{}' 'when' contains a nested negation.",
    INVALID_RULE_THEN = 31: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
    INVALID_RULE_THEN_HAS = 32: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
-   INVALID_RULE_THEN_VARIABLES = 33: "Rule '{}' 'then' variables must be present in rule 'when'.",
+   INVALID_RULE_THEN_VARIABLES = 33: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
    INVALID_RULE_THEN_ROLES = 34: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
    REDUNDANT_NESTED_NEGATION = 35: "Invalid query containing redundant nested negations.",
    VARIABLE_NOT_SORTED = 36: "Variable '{}' does not exist in the sorting clause.",
