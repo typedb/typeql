@@ -83,7 +83,14 @@ impl Validatable for Query {
         use Query::*;
         match self {
             Match(query) => query.validate(),
-            _ => Ok(()),
+            Insert(query) => query.validate(),
+            Delete(query) => query.validate(),
+            Update(query) => query.validate(),
+            Define(query) => query.validate(),
+            Undefine(query) => query.validate(),
+            Aggregate(query) => query.validate(),
+            Group(query) => query.validate(),
+            GroupAggregate(query) => query.validate(),
         }
     }
 
