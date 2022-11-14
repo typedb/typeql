@@ -21,7 +21,11 @@
  */
 
 use crate::{
-    common::{error::collect_err, validatable::Validatable, Result},
+    common::{
+        error::{collect_err, INVALID_DEFINE_QUERY_VARIABLE},
+        validatable::Validatable,
+        Result,
+    },
     pattern::{
         AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
         RegexConstraint, RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
@@ -76,6 +80,13 @@ impl TypeVariable {
             || !self.relates.is_empty()
             || self.sub.is_some()
             || self.value_type.is_some()
+    }
+
+    pub fn validate_definable(&self) -> Result<()> {
+        if self.label.is_none() {
+            Err(INVALID_DEFINE_QUERY_VARIABLE.format(&[]))?;
+        }
+        Ok(())
     }
 }
 

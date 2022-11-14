@@ -64,6 +64,7 @@ impl Validatable for TypeQLDefine {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut (self.variables.iter().map(Validatable::validate))
+                .chain(self.variables.iter().map(TypeVariable::validate_definable))
                 .chain(self.rules.iter().map(Validatable::validate)),
         )
     }

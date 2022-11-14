@@ -62,7 +62,7 @@ impl TypeQLMatch {
         if let Some(filter) = &self.modifiers.filter {
             filter.vars.iter().map(|v| v.reference.clone()).collect()
         } else {
-            self.conjunction.references().collect()
+            self.conjunction.references().cloned().collect()
         }
     }
 

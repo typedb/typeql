@@ -55,7 +55,7 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
     }
 }
 
-impl<T: AggregateQueryBuilder> Validatable for TypeQLMatchAggregate {
+impl Validatable for TypeQLMatchAggregate {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
@@ -65,7 +65,7 @@ impl<T: AggregateQueryBuilder> Validatable for TypeQLMatchAggregate {
     }
 }
 
-impl<T: AggregateQueryBuilder> Validatable for TypeQLMatchGroupAggregate {
+impl Validatable for TypeQLMatchGroupAggregate {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]

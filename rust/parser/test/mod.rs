@@ -902,15 +902,6 @@ rule r;"#;
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
-/*
-#[test]  // TODO validation???
-fn when_parse_undefine_rule_with_body_throw() {
-    let query = r#"undefine rule r: when { $x isa thing; } then { $x has name "a"; };"#;
-    let parsed = parse_query(query);
-    assert!(parsed.is_err());
-}
- */
-
 #[test]
 fn test_match_insert_query() {
     let query = r#"match

@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, INVALID_RULE_WHEN_MISSING_PATTERNS},
+        error::{collect_err, INVALID_UNDEFINE_QUERY_RULE},
         token,
         validatable::Validatable,
         Result,
@@ -45,8 +45,7 @@ impl TypeQLUndefine {
                 Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
                 Definable::TypeVariable(var) => undefine.add_definition(var),
                 Definable::RuleDefinition(r) => {
-                    // TODO new error message
-                    panic!("{}", INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
+                    panic!("{}", INVALID_UNDEFINE_QUERY_RULE.format(&[&r.label.to_string()]))
                 }
             }
         })
@@ -67,6 +66,7 @@ impl Validatable for TypeQLUndefine {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut (self.variables.iter().map(Validatable::validate))
+                .chain(self.variables.iter().map(TypeVariable::validate_definable))
                 .chain(self.rules.iter().map(Validatable::validate)),
         )
     }
