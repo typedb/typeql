@@ -21,9 +21,7 @@
  */
 
 mod conjunction;
-
 pub use conjunction::Conjunction;
-use std::collections::HashSet;
 
 mod constraint;
 pub use constraint::{
@@ -60,7 +58,7 @@ use crate::{
     common::{validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
