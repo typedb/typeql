@@ -142,14 +142,14 @@ impl fmt::Display for Pattern {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Definable {
-    RuleDefinition(RuleDefinition),
     RuleDeclaration(RuleDeclaration),
+    RuleDefinition(RuleDefinition),
     TypeVariable(TypeVariable),
 }
 
 impl Definable {
-    enum_getter!(into_rule, RuleDefinition, RuleDefinition);
     enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
+    enum_getter!(into_rule, RuleDefinition, RuleDefinition);
     enum_getter!(into_type_variable, TypeVariable, TypeVariable);
 }
 
@@ -157,16 +157,16 @@ impl Validatable for Definable {
     fn validate(&self) -> Result<()> {
         use Definable::*;
         match self {
-            RuleDefinition(rule) => rule.validate(),
             RuleDeclaration(rule) => rule.validate(),
+            RuleDefinition(rule) => rule.validate(),
             TypeVariable(variable) => variable.validate(),
         }
     }
 }
 
 enum_wrapper! { Definable
-    RuleDefinition => RuleDefinition,
     RuleDeclaration => RuleDeclaration,
+    RuleDefinition => RuleDefinition,
     TypeVariable => TypeVariable,
 }
 
@@ -174,8 +174,8 @@ impl fmt::Display for Definable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Definable::*;
         match self {
-            RuleDefinition(rule) => write!(f, "{}", rule),
             RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
+            RuleDefinition(rule) => write!(f, "{}", rule),
             TypeVariable(variable) => write!(f, "{}", variable),
         }
     }
