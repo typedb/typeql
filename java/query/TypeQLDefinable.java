@@ -53,7 +53,7 @@ abstract class TypeQLDefinable extends TypeQLQuery {
         for (Definable definable : definables) {
             if (definable.isRule()) {
                 Rule rule = definable.asRule();
-                if (rule.when() != null || rule.then() != null) {
+                if (command == UNDEFINE && (rule.when() != null || rule.then() != null)) {
                     throw TypeQLException.of(ErrorMessage.INVALID_UNDEFINE_QUERY_RULE.message(rule.label()));
                 }
                 rules.add(rule);
