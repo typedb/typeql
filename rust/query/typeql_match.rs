@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, Pattern, UnboundVariable},
+    pattern::{Conjunction, Pattern, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
@@ -56,6 +56,14 @@ impl TypeQLMatch {
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         Self::new(self.conjunction, self.modifiers.filter(vars))
+    }
+
+    pub fn scope(&self) -> HashSet<Reference> {
+        if let Some(filter) = &self.modifiers.filter {
+            filter.vars.iter().map(|v| v.reference.clone()).collect()
+        } else {
+            self.conjunction.references().collect()
+        }
     }
 
     pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {

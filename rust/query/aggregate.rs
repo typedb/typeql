@@ -21,11 +21,16 @@
  */
 
 use crate::{
-    common::{token, validatable::Validatable, Result},
-    pattern::UnboundVariable,
+    common::{
+        error::{collect_err, INVALID_COUNT_VARIABLE_ARGUMENT, VARIABLE_OUT_OF_SCOPE_MATCH},
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{Reference, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>
@@ -41,19 +46,52 @@ pub type TypeQLMatchAggregate = AggregateQuery<TypeQLMatch>;
 pub type TypeQLMatchGroupAggregate = AggregateQuery<TypeQLMatchGroup>;
 
 impl<T: AggregateQueryBuilder> AggregateQuery<T> {
-    pub fn new_count(base: T) -> Self {
+    fn new_count(base: T) -> Self {
         Self { query: base, method: token::Aggregate::Count, var: None }
     }
 
-    pub fn new(base: T, method: token::Aggregate, var: UnboundVariable) -> Self {
+    fn new(base: T, method: token::Aggregate, var: UnboundVariable) -> Self {
         Self { query: base, method, var: Some(var) }
     }
 }
 
-impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
+impl<T: AggregateQueryBuilder> Validatable for TypeQLMatchAggregate {
     fn validate(&self) -> Result<()> {
-        self.query.validate()
+        collect_err(
+            &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
+                .into_iter()
+                .chain(self.var.iter().map(|v| expect_variable_in_scope(v, self.query.scope()))),
+        )
     }
+}
+
+impl<T: AggregateQueryBuilder> Validatable for TypeQLMatchGroupAggregate {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
+                .into_iter()
+                .chain(
+                    self.var.iter().map(|v| expect_variable_in_scope(v, self.query.query.scope())),
+                ),
+        )
+    }
+}
+
+fn expect_method_variable_compatible(
+    method: token::Aggregate,
+    var: &Option<UnboundVariable>,
+) -> Result<()> {
+    if method == token::Aggregate::Count && var.is_some() {
+        Err(INVALID_COUNT_VARIABLE_ARGUMENT.format(&[]))?;
+    }
+    Ok(())
+}
+
+fn expect_variable_in_scope(var: &UnboundVariable, scope: HashSet<Reference>) -> Result<()> {
+    if !scope.contains(&var.reference) {
+        Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[]))?;
+    }
+    Ok(())
 }
 
 impl fmt::Display for TypeQLMatchAggregate {
