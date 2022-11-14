@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        error::{collect_err, ErrorReport, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
         string::indent,
         validatable::Validatable,
         Result,
@@ -64,11 +64,17 @@ impl Conjunction {
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         let names = self.names();
-        if names.is_disjoint(bounds) {
-            Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")]))?;
-        }
+        let self_is_bounded_result = (!names.is_disjoint(bounds)).then_some(()).ok_or_else(|| {
+            ErrorReport::from(
+                MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")]),
+            )
+        });
+
         let bounds = bounds.union(&names).cloned().collect();
-        collect_err(&mut self.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
+        collect_err(
+            &mut std::iter::once(self_is_bounded_result)
+                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds))),
+        )
     }
 }
 
