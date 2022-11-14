@@ -50,7 +50,6 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ROLES;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_CONTAINS_DISJUNCTION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
@@ -108,9 +107,6 @@ public class Rule implements Definable {
         if (when.patterns().size() == 0) throw TypeQLException.of(INVALID_RULE_WHEN_MISSING_PATTERNS.message(label));
         if (findNegations(when).anyMatch(negation -> findNegations(negation.pattern()).findAny().isPresent())) {
             throw TypeQLException.of(INVALID_RULE_WHEN_NESTED_NEGATION.message(label));
-        }
-        if (findDisjunctions(when).findAny().isPresent()) {
-            throw TypeQLException.of(INVALID_RULE_WHEN_CONTAINS_DISJUNCTION.message(label));
         }
     }
 
