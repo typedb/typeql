@@ -25,17 +25,17 @@ use std::{convert::Infallible, fmt};
 
 #[derive(Debug)]
 pub struct ErrorReport {
-    messages: Vec<ErrorMessage>,
+    messages: Vec<Error>,
 }
 
-impl From<ErrorMessage> for ErrorReport {
-    fn from(message: ErrorMessage) -> Self {
+impl From<Error> for ErrorReport {
+    fn from(message: Error) -> Self {
         Self { messages: vec![message] }
     }
 }
 
-impl From<Vec<ErrorMessage>> for ErrorReport {
-    fn from(messages: Vec<ErrorMessage>) -> Self {
+impl From<Vec<Error>> for ErrorReport {
+    fn from(messages: Vec<Error>) -> Self {
         assert!(!messages.is_empty());
         Self { messages }
     }
@@ -59,18 +59,18 @@ pub fn collect_err(
 }
 
 #[derive(Debug)]
-pub struct ErrorMessage {
+pub struct Error {
     pub code: usize,
     pub message: String,
 }
 
-impl From<Infallible> for ErrorMessage {
+impl From<Infallible> for Error {
     fn from(_: Infallible) -> Self {
         unreachable!()
     }
 }
 
-impl fmt::Display for ErrorMessage {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
@@ -84,7 +84,7 @@ pub struct ErrorTemplate {
 }
 
 impl ErrorTemplate {
-    pub fn format(&self, args: &[&str]) -> ErrorMessage {
+    pub fn format(&self, args: &[&str]) -> Error {
         let expected_arg_count = self.template.matches("{}").count();
         assert_eq!(
             expected_arg_count,
@@ -101,7 +101,7 @@ impl ErrorTemplate {
             }
             buffer += fragment;
         }
-        ErrorMessage { code: self.code, message: buffer }
+        Error { code: self.code, message: buffer }
     }
 }
 
