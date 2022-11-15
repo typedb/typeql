@@ -40,7 +40,7 @@ impl<const N: usize> Writable for [ThingVariable; N] {
 
 impl Writable for Vec<ThingVariable> {
     fn vars(self) -> Vec<ThingVariable> {
-        self.to_vec()
+        self
     }
 }
 
