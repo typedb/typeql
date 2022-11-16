@@ -41,6 +41,9 @@ rust_library(
     deps = [
         "@vaticle_dependencies//library/crates:antlr_rust",
         "@vaticle_dependencies//library/crates:chrono",
+        "@vaticle_dependencies//library/crates:core_foundation_sys", # transitive dependency of 'chrono', included to patch cfg('unix') issue (dependencies#385)
+        "@vaticle_dependencies//library/crates:libc", # transitive dependency of 'antlr_rust', included to patch cfg('unix') issue (dependencies#385)
+
         # External Vaticle Dependencies
         "//grammar/rust:typeql_grammar",
     ],
