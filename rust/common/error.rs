@@ -24,53 +24,51 @@ use crate::write_joined;
 use std::{convert::Infallible, fmt};
 
 #[derive(Debug)]
-pub struct ErrorReport {
-    messages: Vec<Error>,
+pub struct Error {
+    messages: Vec<Message>,
 }
 
-impl From<Error> for ErrorReport {
-    fn from(message: Error) -> Self {
+impl From<Message> for Error {
+    fn from(message: Message) -> Self {
         Self { messages: vec![message] }
     }
 }
 
-impl From<Vec<Error>> for ErrorReport {
-    fn from(messages: Vec<Error>) -> Self {
+impl From<Vec<Message>> for Error {
+    fn from(messages: Vec<Message>) -> Self {
         assert!(!messages.is_empty());
         Self { messages }
     }
 }
 
-impl fmt::Display for ErrorReport {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write_joined!(f, "\n\n", self.messages)
     }
 }
 
-pub fn collect_err(
-    i: &mut dyn Iterator<Item = Result<(), ErrorReport>>,
-) -> Result<(), ErrorReport> {
+pub fn collect_err(i: &mut dyn Iterator<Item = Result<(), Error>>) -> Result<(), Error> {
     let messages = i.filter_map(Result::err).flat_map(|e| e.messages).collect::<Vec<_>>();
     if messages.is_empty() {
         Ok(())
     } else {
-        Err(ErrorReport { messages })
+        Err(Error { messages })
     }
 }
 
 #[derive(Debug)]
-pub struct Error {
+pub struct Message {
     pub code: usize,
     pub message: String,
 }
 
-impl From<Infallible> for Error {
+impl From<Infallible> for Message {
     fn from(_: Infallible) -> Self {
         unreachable!()
     }
 }
 
-impl fmt::Display for Error {
+impl fmt::Display for Message {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
@@ -84,7 +82,7 @@ pub struct ErrorTemplate {
 }
 
 impl ErrorTemplate {
-    pub fn format(&self, args: &[&str]) -> Error {
+    pub fn format(&self, args: &[&str]) -> Message {
         let expected_arg_count = self.template.matches("{}").count();
         assert_eq!(
             expected_arg_count,
@@ -101,7 +99,7 @@ impl ErrorTemplate {
             }
             buffer += fragment;
         }
-        Error { code: self.code, message: buffer }
+        Message { code: self.code, message: buffer }
     }
 }
 

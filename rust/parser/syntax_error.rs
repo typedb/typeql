@@ -22,7 +22,10 @@
 
 use std::fmt;
 
-use crate::common::error::{Error, SYNTAX_ERROR_DETAILED, SYNTAX_ERROR_NO_DETAILS};
+use crate::common::{
+    error,
+    error::{SYNTAX_ERROR_DETAILED, SYNTAX_ERROR_NO_DETAILS},
+};
 
 #[derive(Clone, Debug)]
 pub struct SyntaxError {
@@ -32,7 +35,7 @@ pub struct SyntaxError {
     pub message: String,
 }
 
-impl From<SyntaxError> for Error {
+impl From<SyntaxError> for error::Message {
     fn from(syntax_error: SyntaxError) -> Self {
         if let Some(query_line) = &syntax_error.query_line {
             // Error message appearance:
@@ -56,6 +59,6 @@ impl From<SyntaxError> for Error {
 
 impl fmt::Display for SyntaxError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", Error::from(self.clone()).message)
+        write!(f, "{}", error::Message::from(self.clone()).message)
     }
 }
