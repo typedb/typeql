@@ -29,7 +29,7 @@ use crate::{
     },
     pattern::{Pattern, Reference},
 };
-use std::{collections::HashSet, fmt};
+use std::{collections::HashSet, fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -72,7 +72,7 @@ impl Conjunction {
 
         let bounds = bounds.union(&names).cloned().collect();
         collect_err(
-            &mut std::iter::once(self_is_bounded_result)
+            &mut iter::once(self_is_bounded_result)
                 .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds))),
         )
     }

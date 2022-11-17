@@ -30,7 +30,7 @@ use crate::{
         TypeVariable, ValueConstraint, ValueTypeConstraint, Visibility,
     },
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundVariable {
@@ -63,7 +63,7 @@ impl UnboundVariable {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(std::iter::once(&self.reference))
+        Box::new(iter::once(&self.reference))
     }
 }
 

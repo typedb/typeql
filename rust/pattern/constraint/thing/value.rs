@@ -32,7 +32,7 @@ use crate::{
     pattern::{Reference, ThingVariable, UnboundVariable},
 };
 use chrono::{NaiveDateTime, Timelike};
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueConstraint {
@@ -47,8 +47,8 @@ impl ValueConstraint {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         match &self.value {
-            Value::Variable(v) => Box::new(std::iter::once(&v.reference)),
-            _ => Box::new(std::iter::empty()),
+            Value::Variable(v) => Box::new(iter::once(&v.reference)),
+            _ => Box::new(iter::empty()),
         }
     }
 }

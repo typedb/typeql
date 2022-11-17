@@ -32,7 +32,7 @@ use crate::{
     },
     write_joined,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
@@ -64,7 +64,7 @@ impl TypeVariable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            std::iter::once(&self.reference)
+            iter::once(&self.reference)
                 .chain(self.owns.iter().flat_map(|c| c.references()))
                 .chain(self.plays.iter().flat_map(|c| c.references()))
                 .chain(self.relates.iter().flat_map(|c| c.references()))
@@ -93,7 +93,7 @@ impl TypeVariable {
 impl Validatable for TypeVariable {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut std::iter::once(self.reference.validate())
+            &mut iter::once(self.reference.validate())
                 .chain(self.label.iter().map(Validatable::validate))
                 .chain(self.owns.iter().map(Validatable::validate))
                 .chain(self.plays.iter().map(Validatable::validate))

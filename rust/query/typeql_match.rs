@@ -35,7 +35,7 @@ use crate::{
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
-use std::{collections::HashSet, fmt};
+use std::{collections::HashSet, fmt, iter};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -140,7 +140,7 @@ fn expect_each_variable_is_bounded_by_named<'a>(
         Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
         Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
         Pattern::Negation(n) => {
-            expect_each_variable_is_bounded_by_named(std::iter::once(n.pattern.as_ref()))
+            expect_each_variable_is_bounded_by_named(iter::once(n.pattern.as_ref()))
         }
     }))
 }

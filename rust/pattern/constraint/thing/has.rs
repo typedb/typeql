@@ -27,7 +27,7 @@ use crate::{
         UnboundVariable, Value, ValueConstraint,
     },
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {
@@ -38,8 +38,7 @@ pub struct HasConstraint {
 impl HasConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            (self.type_.iter().map(|t| &t.reference))
-                .chain(std::iter::once(&self.attribute.reference)),
+            (self.type_.iter().map(|t| &t.reference)).chain(iter::once(&self.attribute.reference)),
         )
     }
 }
@@ -47,7 +46,7 @@ impl HasConstraint {
 impl Validatable for HasConstraint {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut std::iter::once(self.attribute.validate())
+            &mut iter::once(self.attribute.validate())
                 .chain(self.type_.iter().map(Validatable::validate)),
         )
     }

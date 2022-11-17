@@ -27,7 +27,7 @@ use crate::{
         variable::{builder::ConceptConstrainable, Reference},
     },
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConceptVariable {
@@ -42,7 +42,7 @@ impl ConceptVariable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            std::iter::once(&self.reference)
+            iter::once(&self.reference)
                 .chain(self.is_constraint.iter().map(|is| &is.variable.reference)),
         )
     }
@@ -51,7 +51,7 @@ impl ConceptVariable {
 impl Validatable for ConceptVariable {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut std::iter::once(self.reference.validate())
+            &mut iter::once(self.reference.validate())
                 .chain(self.is_constraint.iter().map(Validatable::validate)),
         )
     }

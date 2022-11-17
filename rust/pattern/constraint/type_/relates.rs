@@ -25,7 +25,7 @@ use crate::{
     pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelatesConstraint {
@@ -36,7 +36,7 @@ pub struct RelatesConstraint {
 impl RelatesConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            std::iter::once(&self.role_type.reference)
+            iter::once(&self.role_type.reference)
                 .chain(self.overridden_role_type.iter().map(|v| &v.reference)),
         )
     }
@@ -45,7 +45,7 @@ impl RelatesConstraint {
 impl Validatable for RelatesConstraint {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut std::iter::once(self.role_type.validate())
+            &mut iter::once(self.role_type.validate())
                 .chain(self.overridden_role_type.iter().map(Validatable::validate)),
         )
     }

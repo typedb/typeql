@@ -28,7 +28,7 @@ use crate::{
     },
     write_joined,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
@@ -54,7 +54,7 @@ impl ThingVariable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
-            std::iter::once(&self.reference)
+            iter::once(&self.reference)
                 .chain(self.isa.iter().flat_map(|c| c.references()))
                 .chain(self.has.iter().flat_map(|c| c.references()))
                 .chain(self.relation.iter().flat_map(|c| c.references()))
@@ -87,7 +87,7 @@ impl ThingVariable {
 impl Validatable for ThingVariable {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut std::iter::once(self.reference.validate())
+            &mut iter::once(self.reference.validate())
                 .chain(self.iid.iter().map(Validatable::validate))
                 .chain(self.isa.iter().map(Validatable::validate))
                 .chain(self.has.iter().map(Validatable::validate))
