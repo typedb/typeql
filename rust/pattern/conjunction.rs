@@ -27,7 +27,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Pattern, Reference, Scope},
+    pattern::{Pattern, Reference, NamedReferences},
 };
 use std::{collections::HashSet, fmt, iter};
 
@@ -58,30 +58,30 @@ impl Conjunction {
         self.references().any(|r| r.is_name())
     }
 
-    pub fn expect_is_bounded_by(&self, outer_scope: &HashSet<Reference>) -> Result<()> {
-        let inner_scope = self.scope();
-        let combined_scope = outer_scope.union(&inner_scope).cloned().collect();
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+        let names = self.named_references();
+        let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
-            &mut iter::once(expect_scopes_intersect(&inner_scope, &outer_scope, &self))
-                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_scope))),
+            &mut iter::once(expect_bounded(&names, &bounds, &self))
+                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_bounds))),
         )
     }
 }
 
-fn expect_scopes_intersect(
-    scope1: &HashSet<Reference>,
-    scope2: &HashSet<Reference>,
+fn expect_bounded(
+    names: &HashSet<Reference>,
+    bounds: &HashSet<Reference>,
     conjunction: &Conjunction,
 ) -> Result<()> {
-    if scope1.is_disjoint(scope2) {
+    if bounds.is_disjoint(names) {
         Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
             .format(&[&conjunction.to_string().replace('\n', " ")]))?;
     }
     Ok(())
 }
 
-impl Scope for Conjunction {
-    fn scope(&self) -> HashSet<Reference> {
+impl NamedReferences for Conjunction {
+    fn named_references(&self) -> HashSet<Reference> {
         self.references().filter(|r| r.is_name()).cloned().collect()
     }
 }

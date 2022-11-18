@@ -23,6 +23,6 @@
 use crate::pattern::Reference;
 use std::collections::HashSet;
 
-pub trait Scope {
-    fn scope(&self) -> HashSet<Reference>;
+pub trait NamedReferences {
+    fn named_references(&self) -> HashSet<Reference>;
 }

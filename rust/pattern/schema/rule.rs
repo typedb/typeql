@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, Pattern, Scope, ThingVariable},
+    pattern::{Conjunction, Pattern, NamedReferences, ThingVariable},
     Label,
 };
 use std::fmt;
@@ -161,8 +161,8 @@ fn expect_then_bounded_by_when(
     when: &Conjunction,
     rule_label: &Label,
 ) -> Result<()> {
-    let scope = when.scope();
-    if !then.references().filter(|r| r.is_name()).all(|r| scope.contains(r)) {
+    let bounds = when.named_references();
+    if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
         Err(INVALID_RULE_THEN_VARIABLES.format(&[&rule_label.to_string()]))?
     }
     Ok(())

@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, Pattern, Reference, Scope, UnboundVariable},
+    pattern::{Conjunction, Pattern, Reference, NamedReferences, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
@@ -107,12 +107,12 @@ impl Validatable for TypeQLMatch {
     }
 }
 
-impl Scope for TypeQLMatch {
-    fn scope(&self) -> HashSet<Reference> {
+impl NamedReferences for TypeQLMatch {
+    fn named_references(&self) -> HashSet<Reference> {
         if let Some(filter) = &self.modifiers.filter {
             filter.vars.iter().map(|v| v.reference.clone()).collect()
         } else {
-            self.conjunction.scope()
+            self.conjunction.named_references()
         }
     }
 }
@@ -126,8 +126,8 @@ fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
 }
 
 fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<()> {
-    let scope = conjunction.scope();
-    collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&scope)))
+    let bounds = conjunction.named_references();
+    collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
 }
 
 fn expect_each_variable_is_bounded_by_named<'a>(
@@ -148,12 +148,12 @@ fn expect_each_variable_is_bounded_by_named<'a>(
 }
 
 fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result<()> {
-    let scope = conjunction.scope();
+    let names_in_scope = conjunction.named_references();
     let mut seen = HashSet::new();
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
             Err(Error::from(VARIABLE_NOT_NAMED.format(&[])))
-        } else if !scope.contains(r) {
+        } else if !names_in_scope.contains(r) {
             Err(Error::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))
         } else if seen.contains(&r) {
             Err(Error::from(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&r.to_string()])))
@@ -169,13 +169,13 @@ fn expect_sort_vars_are_in_scope(
     filter: &Option<Filter>,
     sorting: &Option<Sorting>,
 ) -> Result<()> {
-    let scope = filter
+    let names_in_scope = filter
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())
-        .unwrap_or_else(|| conjunction.scope());
+        .unwrap_or_else(|| conjunction.named_references());
     collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(
         |r| {
-            scope
+            names_in_scope
                 .contains(&r)
                 .then_some(())
                 .ok_or_else(|| Error::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))

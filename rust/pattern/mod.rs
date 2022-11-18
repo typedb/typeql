@@ -43,8 +43,8 @@ pub use negation::Negation;
 mod schema;
 pub use schema::{RuleDeclaration, RuleDefinition};
 
-mod scope;
-pub use scope::Scope;
+mod named_references;
+pub use named_references::NamedReferences;
 
 mod variable;
 pub use variable::{

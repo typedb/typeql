@@ -22,7 +22,7 @@
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{Reference, Scope, UnboundVariable},
+    pattern::{Reference, NamedReferences, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLMatch},
 };
 use std::{collections::HashSet, fmt};
@@ -41,9 +41,9 @@ impl Validatable for TypeQLMatchGroup {
     }
 }
 
-impl Scope for TypeQLMatchGroup {
-    fn scope(&self) -> HashSet<Reference> {
-        self.match_query.scope()
+impl NamedReferences for TypeQLMatchGroup {
+    fn named_references(&self) -> HashSet<Reference> {
+        self.match_query.named_references()
     }
 }
 
