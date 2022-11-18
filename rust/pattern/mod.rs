@@ -37,11 +37,14 @@ pub use disjunction::Disjunction;
 mod label;
 pub use label::{Label, Type};
 
+mod negation;
+pub use negation::Negation;
+
 mod schema;
 pub use schema::{RuleDeclaration, RuleDefinition};
 
-mod negation;
-pub use negation::Negation;
+mod scope;
+pub use scope::Scope;
 
 mod variable;
 pub use variable::{

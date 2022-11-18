@@ -27,7 +27,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::ThingVariable,
+    pattern::{Scope, ThingVariable},
     query::{writable::expect_non_empty, TypeQLMatch, TypeQLUpdate, Writable},
     write_joined,
 };
@@ -63,10 +63,10 @@ fn expect_delete_in_scope_of_match(
     match_query: &TypeQLMatch,
     variables: &[ThingVariable],
 ) -> Result<()> {
-    let bounds = match_query.conjunction.names();
+    let scope = match_query.scope();
     collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(
         |r| -> Result<()> {
-            if bounds.contains(r) {
+            if scope.contains(r) {
                 Ok(())
             } else {
                 Err(VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()]))?

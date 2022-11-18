@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, Pattern, Reference, UnboundVariable},
+    pattern::{Conjunction, Pattern, Reference, Scope, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
@@ -56,14 +56,6 @@ impl TypeQLMatch {
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         Self::new(self.conjunction, self.modifiers.filter(vars))
-    }
-
-    pub fn scope(&self) -> HashSet<Reference> {
-        if let Some(filter) = &self.modifiers.filter {
-            filter.vars.iter().map(|v| v.reference.clone()).collect()
-        } else {
-            self.conjunction.references().cloned().collect()
-        }
     }
 
     pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
@@ -91,7 +83,7 @@ impl TypeQLMatch {
     }
 
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLMatchGroup {
-        TypeQLMatchGroup { query: self, group_var: var.into() }
+        TypeQLMatchGroup { match_query: self, group_var: var.into() }
     }
 }
 
@@ -115,6 +107,16 @@ impl Validatable for TypeQLMatch {
     }
 }
 
+impl Scope for TypeQLMatch {
+    fn scope(&self) -> HashSet<Reference> {
+        if let Some(filter) = &self.modifiers.filter {
+            filter.vars.iter().map(|v| v.reference.clone()).collect()
+        } else {
+            self.conjunction.scope()
+        }
+    }
+}
+
 fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
     if conjunction.has_named_variables() {
         Ok(())
@@ -124,8 +126,8 @@ fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
 }
 
 fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<()> {
-    let bounds = conjunction.names();
-    collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
+    let scope = conjunction.scope();
+    collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&scope)))
 }
 
 fn expect_each_variable_is_bounded_by_named<'a>(
@@ -146,12 +148,12 @@ fn expect_each_variable_is_bounded_by_named<'a>(
 }
 
 fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result<()> {
-    let bounds = conjunction.names();
+    let scope = conjunction.scope();
     let mut seen = HashSet::new();
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
             Err(Error::from(VARIABLE_NOT_NAMED.format(&[])))
-        } else if !bounds.contains(r) {
+        } else if !scope.contains(r) {
             Err(Error::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))
         } else if seen.contains(&r) {
             Err(Error::from(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&r.to_string()])))
@@ -170,7 +172,7 @@ fn expect_sort_vars_are_in_scope(
     let scope = filter
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())
-        .unwrap_or_else(|| conjunction.names());
+        .unwrap_or_else(|| conjunction.scope());
     collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(
         |r| {
             scope

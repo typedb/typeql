@@ -27,7 +27,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::ThingVariable,
+    pattern::{Scope, ThingVariable},
     query::{writable::expect_non_empty, TypeQLMatch},
     write_joined,
 };
@@ -64,17 +64,17 @@ fn expect_insert_in_scope_of_match(
     variables: &[ThingVariable],
 ) -> Result<()> {
     if let Some(match_query) = match_query {
-        let bounds = match_query.conjunction.names();
+        let scope = match_query.scope();
         if variables.iter().any(|v| {
-            v.reference.is_name() && bounds.contains(&v.reference)
-                || v.references().any(|w| bounds.contains(w))
+            v.reference.is_name() && scope.contains(&v.reference)
+                || v.references().any(|w| scope.contains(w))
         }) {
             Ok(())
         } else {
             let variables_str =
                 variables.iter().map(ThingVariable::to_string).collect::<Vec<String>>().join(", ");
             let bounds_str =
-                bounds.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
+                scope.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
             Err(NO_VARIABLE_IN_SCOPE_INSERT.format(&[&variables_str, &bounds_str]))?
         }
     } else {

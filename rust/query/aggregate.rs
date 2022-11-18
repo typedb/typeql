@@ -27,7 +27,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, UnboundVariable},
+    pattern::{Reference, Scope, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
 use std::{collections::HashSet, fmt};
@@ -55,24 +55,12 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
     }
 }
 
-impl Validatable for TypeQLMatchAggregate {
+impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
                 .into_iter()
                 .chain(self.var.iter().map(|v| expect_variable_in_scope(v, self.query.scope()))),
-        )
-    }
-}
-
-impl Validatable for TypeQLMatchGroupAggregate {
-    fn validate(&self) -> Result<()> {
-        collect_err(
-            &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
-                .into_iter()
-                .chain(
-                    self.var.iter().map(|v| expect_variable_in_scope(v, self.query.query.scope())),
-                ),
         )
     }
 }
@@ -115,7 +103,7 @@ impl fmt::Display for TypeQLMatchGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + Validatable
+    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + Scope + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)

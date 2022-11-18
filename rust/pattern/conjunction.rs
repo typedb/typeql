@@ -22,12 +22,12 @@
 
 use crate::{
     common::{
-        error::{collect_err, Error, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        error::{collect_err, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
         string::indent,
         validatable::Validatable,
         Result,
     },
-    pattern::{Pattern, Reference},
+    pattern::{Pattern, Reference, Scope},
 };
 use std::{collections::HashSet, fmt, iter};
 
@@ -58,23 +58,31 @@ impl Conjunction {
         self.references().any(|r| r.is_name())
     }
 
-    pub fn names(&self) -> HashSet<Reference> {
-        self.references().filter(|r| r.is_name()).cloned().collect()
-    }
-
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
-        let names = self.names();
-        let self_is_bounded_result = (!names.is_disjoint(bounds)).then_some(()).ok_or_else(|| {
-            Error::from(
-                MATCH_HAS_UNBOUNDED_NESTED_PATTERN.format(&[&self.to_string().replace('\n', " ")]),
-            )
-        });
-
-        let bounds = bounds.union(&names).cloned().collect();
+    pub fn expect_is_bounded_by(&self, outer_scope: &HashSet<Reference>) -> Result<()> {
+        let inner_scope = self.scope();
+        let combined_scope = outer_scope.union(&inner_scope).cloned().collect();
         collect_err(
-            &mut iter::once(self_is_bounded_result)
-                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds))),
+            &mut iter::once(expect_scopes_intersect(&inner_scope, &outer_scope, &self))
+                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_scope))),
         )
+    }
+}
+
+fn expect_scopes_intersect(
+    scope1: &HashSet<Reference>,
+    scope2: &HashSet<Reference>,
+    conjunction: &Conjunction,
+) -> Result<()> {
+    if scope1.is_disjoint(scope2) {
+        Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
+            .format(&[&conjunction.to_string().replace('\n', " ")]))?;
+    }
+    Ok(())
+}
+
+impl Scope for Conjunction {
+    fn scope(&self) -> HashSet<Reference> {
+        self.references().filter(|r| r.is_name()).cloned().collect()
     }
 }
 

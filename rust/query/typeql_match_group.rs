@@ -22,14 +22,14 @@
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::UnboundVariable,
+    pattern::{Reference, Scope, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLMatch},
 };
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatchGroup {
-    pub query: TypeQLMatch,
+    pub match_query: TypeQLMatch,
     pub group_var: UnboundVariable,
 }
 
@@ -37,12 +37,18 @@ impl AggregateQueryBuilder for TypeQLMatchGroup {}
 
 impl Validatable for TypeQLMatchGroup {
     fn validate(&self) -> Result<()> {
-        collect_err(&mut [self.query.validate(), self.group_var.validate()].into_iter())
+        collect_err(&mut [self.match_query.validate(), self.group_var.validate()].into_iter())
+    }
+}
+
+impl Scope for TypeQLMatchGroup {
+    fn scope(&self) -> HashSet<Reference> {
+        self.match_query.scope()
     }
 }
 
 impl fmt::Display for TypeQLMatchGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{} {};", self.query, token::Command::Group, self.group_var)
+        write!(f, "{}\n{} {};", self.match_query, token::Command::Group, self.group_var)
     }
 }
