@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, Pattern, NamedReferences, ThingVariable},
+    pattern::{Conjunction, NamedReferences, Pattern, ThingVariable},
     Label,
 };
 use std::fmt;

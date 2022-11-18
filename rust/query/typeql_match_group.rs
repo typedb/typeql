@@ -22,7 +22,7 @@
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{Reference, NamedReferences, UnboundVariable},
+    pattern::{NamedReferences, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLMatch},
 };
 use std::{collections::HashSet, fmt};

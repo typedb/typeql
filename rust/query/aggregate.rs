@@ -27,7 +27,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, NamedReferences, UnboundVariable},
+    pattern::{NamedReferences, Reference, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
 use std::{collections::HashSet, fmt};
@@ -60,7 +60,11 @@ impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
         collect_err(
             &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
                 .into_iter()
-                .chain(self.var.iter().map(|v| expect_variable_in_scope(v, self.query.named_references()))),
+                .chain(
+                    self.var
+                        .iter()
+                        .map(|v| expect_variable_in_scope(v, self.query.named_references())),
+                ),
         )
     }
 }
@@ -75,7 +79,10 @@ fn expect_method_variable_compatible(
     Ok(())
 }
 
-fn expect_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Reference>) -> Result<()> {
+fn expect_variable_in_scope(
+    var: &UnboundVariable,
+    names_in_scope: HashSet<Reference>,
+) -> Result<()> {
     if !names_in_scope.contains(&var.reference) {
         Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[]))?;
     }

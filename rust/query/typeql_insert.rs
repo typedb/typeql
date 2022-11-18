@@ -73,8 +73,11 @@ fn expect_insert_in_scope_of_match(
         } else {
             let variables_str =
                 variables.iter().map(ThingVariable::to_string).collect::<Vec<String>>().join(", ");
-            let bounds_str =
-                names_in_scope.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
+            let bounds_str = names_in_scope
+                .into_iter()
+                .map(|r| r.to_string())
+                .collect::<Vec<String>>()
+                .join(", ");
             Err(NO_VARIABLE_IN_SCOPE_INSERT.format(&[&variables_str, &bounds_str]))?
         }
     } else {

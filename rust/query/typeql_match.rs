@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, Pattern, Reference, NamedReferences, UnboundVariable},
+    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };

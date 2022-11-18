@@ -27,7 +27,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Pattern, Reference, NamedReferences},
+    pattern::{NamedReferences, Pattern, Reference},
 };
 use std::{collections::HashSet, fmt, iter};
 
