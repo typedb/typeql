@@ -34,9 +34,10 @@ pub struct RegexConstraint {
 
 impl Validatable for RegexConstraint {
     fn validate(&self) -> Result<()> {
-        Regex::new(&self.regex)
-            .map(|_| ())
-            .or_else(|_| Err(INVALID_ATTRIBUTE_TYPE_REGEX.format(&[&self.regex]))?)
+        if Regex::new(&self.regex).is_err() {
+            Err(INVALID_ATTRIBUTE_TYPE_REGEX.format(&[&self.regex]))?;
+        }
+        Ok(())
     }
 }
 
