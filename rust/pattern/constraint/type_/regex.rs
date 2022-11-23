@@ -36,7 +36,7 @@ impl Validatable for RegexConstraint {
     fn validate(&self) -> Result<()> {
         Regex::new(&self.regex)
             .map(|_| ())
-            .or_else(|_| Err(INVALID_ATTRIBUTE_TYPE_REGEX.format(&[&self.regex])?))
+            .or_else(|_| Err(INVALID_ATTRIBUTE_TYPE_REGEX.format(&[&self.regex]))?)
     }
 }
 
