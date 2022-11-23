@@ -60,7 +60,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage NO_VARIABLE_IN_SCOPE_INSERT =
             new ErrorMessage(18, "None of the variables in 'insert' ('%s') is within scope of 'match' ('%s')");
     public static final ErrorMessage VARIABLE_NOT_NAMED =
-            new ErrorMessage(19, "The variable '%s' is not named and cannot be used as a filter for match query.");
+            new ErrorMessage(19, "Anonymous variable encountered in a match query filter.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
             new ErrorMessage(20, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
     public static final ErrorMessage ILLEGAL_CONSTRAINT_REPETITION =
@@ -75,30 +75,32 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(26, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
             new ErrorMessage(27, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
+    public static final ErrorMessage INVALID_UNDEFINE_QUERY_RULE =
+            new ErrorMessage(28, "Invalid undefine query: the rule body of '%s' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.");
     public static final ErrorMessage INVALID_RULE_WHEN_MISSING_PATTERNS =
-            new ErrorMessage(28, "Rule '%s' 'when' has not been provided with any patterns.");
+            new ErrorMessage(29, "Rule '%s' 'when' has not been provided with any patterns.");
     public static final ErrorMessage INVALID_RULE_WHEN_NESTED_NEGATION =
-            new ErrorMessage(29, "Rule '%s' 'when' contains a nested negation.");
+            new ErrorMessage(30, "Rule '%s' 'when' contains a nested negation.");
     public static final ErrorMessage INVALID_RULE_THEN =
-            new ErrorMessage(30, "Rule '%s' 'then' '%s': must be exactly one attribute ownership, or exactly one relation.");
+            new ErrorMessage(31, "Rule '%s' 'then' '%s': must be exactly one attribute ownership, or exactly one relation.");
     public static final ErrorMessage INVALID_RULE_THEN_HAS =
-            new ErrorMessage(31, "Rule '%s' 'then' '%s' tries to assign type '%s' to variable '%s', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.");
+            new ErrorMessage(32, "Rule '%s' 'then' '%s' tries to assign type '%s' to variable '%s', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
-            new ErrorMessage(32, "Rule '%s' 'then' variables must be present in the 'when', outside of nested patterns.");
+            new ErrorMessage(33, "Rule '%s' 'then' variables must be present in the 'when', outside of nested patterns.");
     public static final ErrorMessage INVALID_RULE_THEN_ROLES =
-            new ErrorMessage(33, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
+            new ErrorMessage(34, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(34, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(35, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage VARIABLE_NOT_SORTED =
-            new ErrorMessage(35, "Variable '%s' does not exist in the sorting clause.");
+            new ErrorMessage(36, "Variable '%s' does not exist in the sorting clause.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
-            new ErrorMessage(36, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
+            new ErrorMessage(37, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
-            new ErrorMessage(37, "Aggregate COUNT does not accept a Variable.");
+            new ErrorMessage(38, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(38, "Illegal grammar!");
+            new ErrorMessage(39, "Illegal grammar!");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
-            new ErrorMessage(39, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
+            new ErrorMessage(40, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
 
 
     private static final String codePrefix = "TQL";

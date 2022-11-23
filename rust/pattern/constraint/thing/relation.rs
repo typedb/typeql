@@ -21,16 +21,21 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    common::{
+        error::{collect_err, MISSING_CONSTRAINT_RELATION_PLAYER},
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
     write_joined, Label,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
-    role_players: Vec<RolePlayerConstraint>,
-    scope: Label,
+    pub role_players: Vec<RolePlayerConstraint>,
+    pub scope: Label,
 }
 
 impl RelationConstraint {
@@ -41,6 +46,26 @@ impl RelationConstraint {
     pub fn add(&mut self, role_player: RolePlayerConstraint) {
         self.role_players.push(role_player);
     }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.role_players.iter().flat_map(|rp| rp.references()))
+    }
+}
+
+impl Validatable for RelationConstraint {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut iter::once(expect_role_players_present(&self.role_players))
+                .chain(self.role_players.iter().map(Validatable::validate)),
+        )
+    }
+}
+
+fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result<()> {
+    if role_players.is_empty() {
+        Err(MISSING_CONSTRAINT_RELATION_PLAYER.format(&[]))?
+    }
+    Ok(())
 }
 
 impl From<RolePlayerConstraint> for RelationConstraint {
@@ -67,6 +92,21 @@ pub struct RolePlayerConstraint {
 impl RolePlayerConstraint {
     pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> Self {
         RolePlayerConstraint { role_type, player, repetition: 0 }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            (self.role_type.iter().map(|r| &r.reference)).chain(iter::once(&self.player.reference)),
+        )
+    }
+}
+
+impl Validatable for RolePlayerConstraint {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut (self.role_type.iter().map(Validatable::validate))
+                .chain(iter::once(self.player.validate())),
+        )
     }
 }
 

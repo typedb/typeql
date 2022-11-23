@@ -20,17 +20,57 @@
  *
  */
 
-use std::convert::Infallible;
+use crate::write_joined;
+use std::{convert::Infallible, fmt};
 
 #[derive(Debug)]
-pub struct ErrorMessage {
+pub struct Error {
+    messages: Vec<Message>,
+}
+
+impl From<Message> for Error {
+    fn from(message: Message) -> Self {
+        Self { messages: vec![message] }
+    }
+}
+
+impl From<Vec<Message>> for Error {
+    fn from(messages: Vec<Message>) -> Self {
+        assert!(!messages.is_empty());
+        Self { messages }
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write_joined!(f, "\n\n", self.messages)
+    }
+}
+
+pub fn collect_err(i: &mut dyn Iterator<Item = Result<(), Error>>) -> Result<(), Error> {
+    let messages = i.filter_map(Result::err).flat_map(|e| e.messages).collect::<Vec<_>>();
+    if messages.is_empty() {
+        Ok(())
+    } else {
+        Err(Error { messages })
+    }
+}
+
+#[derive(Debug)]
+pub struct Message {
     pub code: usize,
     pub message: String,
 }
 
-impl From<Infallible> for ErrorMessage {
+impl From<Infallible> for Message {
     fn from(_: Infallible) -> Self {
         unreachable!()
+    }
+}
+
+impl fmt::Display for Message {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.message)
     }
 }
 
@@ -42,7 +82,7 @@ pub struct ErrorTemplate {
 }
 
 impl ErrorTemplate {
-    pub fn format(&self, args: &[&str]) -> ErrorMessage {
+    pub fn format(&self, args: &[&str]) -> Message {
         let expected_arg_count = self.template.matches("{}").count();
         assert_eq!(
             expected_arg_count,
@@ -59,7 +99,7 @@ impl ErrorTemplate {
             }
             buffer += fragment;
         }
-        ErrorMessage { code: self.code, message: buffer }
+        Message { code: self.code, message: buffer }
     }
 }
 
@@ -119,8 +159,8 @@ error_messages! {
    VARIABLE_OUT_OF_SCOPE_MATCH = 16: "The variable '{}' is out of scope of the match query.",
    VARIABLE_OUT_OF_SCOPE_DELETE = 17: "The deleted variable '{}' is out of scope of the match query.",
    NO_VARIABLE_IN_SCOPE_INSERT = 18: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
-   VARIABLE_NOT_NAMED = 19: "The variable '{}' is not named and cannot be used as a filter for match query.",
-   INVALID_VARIABLE_NAME = 20: "The variable name '{}' is invalid; variables must match the following regular expression: '{}'.",
+   VARIABLE_NOT_NAMED = 19: "Anonymous variable encountered in a match query filter.",
+   INVALID_VARIABLE_NAME = 20: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
    ILLEGAL_CONSTRAINT_REPETITION = 21: "The variable '{}' contains illegally repeating constraints: '{}' and '{}'.",
    MISSING_CONSTRAINT_RELATION_PLAYER = 22: "A relation variable has not been provided with role players.",
    MISSING_CONSTRAINT_VALUE = 23: "A value constraint has not been provided with a variable or literal value.",
@@ -128,12 +168,12 @@ error_messages! {
    INVALID_CONSTRAINT_PREDICATE = 25: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
    INVALID_CONSTRAINT_DATETIME_PRECISION = 26: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
    INVALID_DEFINE_QUERY_VARIABLE = 27: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
-   INVALID_RULE_WHEN_MISSING_PATTERNS = 28: "Rule '{}' 'when' has not been provided with any patterns.",
-   INVALID_RULE_WHEN_NESTED_NEGATION = 29: "Rule '{}' 'when' contains a nested negation.",
-   INVALID_RULE_WHEN_CONTAINS_DISJUNCTION = 30: "Rule '{}' 'when' contains a disjunction.",
+   INVALID_UNDEFINE_QUERY_RULE = 28: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
+   INVALID_RULE_WHEN_MISSING_PATTERNS = 29: "Rule '{}' 'when' has not been provided with any patterns.",
+   INVALID_RULE_WHEN_NESTED_NEGATION = 30: "Rule '{}' 'when' contains a nested negation.",
    INVALID_RULE_THEN = 31: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
    INVALID_RULE_THEN_HAS = 32: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
-   INVALID_RULE_THEN_VARIABLES = 33: "Rule '{}' 'then' variables must be present in rule 'when'.",
+   INVALID_RULE_THEN_VARIABLES = 33: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
    INVALID_RULE_THEN_ROLES = 34: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
    REDUNDANT_NESTED_NEGATION = 35: "Invalid query containing redundant nested negations.",
    VARIABLE_NOT_SORTED = 36: "Variable '{}' does not exist in the sorting clause.",

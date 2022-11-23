@@ -20,11 +20,14 @@
  *
  */
 
-use crate::pattern::{
-    constraint::IsConstraint,
-    variable::{builder::ConceptConstrainable, Reference},
+use crate::{
+    common::{error::collect_err, validatable::Validatable, Result},
+    pattern::{
+        constraint::IsConstraint,
+        variable::{builder::ConceptConstrainable, Reference},
+    },
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConceptVariable {
@@ -35,6 +38,22 @@ pub struct ConceptVariable {
 impl ConceptVariable {
     pub fn new(reference: Reference) -> ConceptVariable {
         ConceptVariable { reference, is_constraint: None }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            iter::once(&self.reference)
+                .chain(self.is_constraint.iter().map(|is| &is.variable.reference)),
+        )
+    }
+}
+
+impl Validatable for ConceptVariable {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut iter::once(self.reference.validate())
+                .chain(self.is_constraint.iter().map(Validatable::validate)),
+        )
     }
 }
 

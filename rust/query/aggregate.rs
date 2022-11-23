@@ -21,11 +21,16 @@
  */
 
 use crate::{
-    common::token,
-    pattern::UnboundVariable,
+    common::{
+        error::{collect_err, INVALID_COUNT_VARIABLE_ARGUMENT, VARIABLE_OUT_OF_SCOPE_MATCH},
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{NamedReferences, Reference, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>
@@ -41,13 +46,47 @@ pub type TypeQLMatchAggregate = AggregateQuery<TypeQLMatch>;
 pub type TypeQLMatchGroupAggregate = AggregateQuery<TypeQLMatchGroup>;
 
 impl<T: AggregateQueryBuilder> AggregateQuery<T> {
-    pub fn new_count(base: T) -> Self {
+    fn new_count(base: T) -> Self {
         Self { query: base, method: token::Aggregate::Count, var: None }
     }
 
-    pub fn new(base: T, method: token::Aggregate, var: UnboundVariable) -> Self {
+    fn new(base: T, method: token::Aggregate, var: UnboundVariable) -> Self {
         Self { query: base, method, var: Some(var) }
     }
+}
+
+impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
+                .into_iter()
+                .chain(
+                    self.var
+                        .iter()
+                        .map(|v| expect_variable_in_scope(v, self.query.named_references())),
+                ),
+        )
+    }
+}
+
+fn expect_method_variable_compatible(
+    method: token::Aggregate,
+    var: &Option<UnboundVariable>,
+) -> Result<()> {
+    if method == token::Aggregate::Count && var.is_some() {
+        Err(INVALID_COUNT_VARIABLE_ARGUMENT.format(&[]))?;
+    }
+    Ok(())
+}
+
+fn expect_variable_in_scope(
+    var: &UnboundVariable,
+    names_in_scope: HashSet<Reference>,
+) -> Result<()> {
+    if !names_in_scope.contains(&var.reference) {
+        Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[]))?;
+    }
+    Ok(())
 }
 
 impl fmt::Display for TypeQLMatchAggregate {
@@ -71,7 +110,7 @@ impl fmt::Display for TypeQLMatchGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq
+    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + NamedReferences + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)

@@ -20,8 +20,16 @@
  *
  */
 
-use crate::{common::string::indent, pattern::Pattern};
-use std::fmt;
+use crate::{
+    common::{
+        error::{collect_err, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        string::indent,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{NamedReferences, Pattern, Reference},
+};
+use std::{collections::HashSet, fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -31,6 +39,56 @@ pub struct Conjunction {
 impl Conjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Conjunction { patterns }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            self.patterns
+                .iter()
+                .filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_)))
+                .flat_map(|p| match p {
+                    Pattern::Variable(v) => v.references(),
+                    Pattern::Conjunction(c) => c.references(),
+                    _ => unreachable!(),
+                }),
+        )
+    }
+
+    pub fn has_named_variables(&self) -> bool {
+        self.references().any(|r| r.is_name())
+    }
+
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+        let names = self.named_references();
+        let combined_bounds = bounds.union(&names).cloned().collect();
+        collect_err(
+            &mut iter::once(expect_bounded(&names, &bounds, &self))
+                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_bounds))),
+        )
+    }
+}
+
+fn expect_bounded(
+    names: &HashSet<Reference>,
+    bounds: &HashSet<Reference>,
+    conjunction: &Conjunction,
+) -> Result<()> {
+    if bounds.is_disjoint(names) {
+        Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
+            .format(&[&conjunction.to_string().replace('\n', " ")]))?;
+    }
+    Ok(())
+}
+
+impl NamedReferences for Conjunction {
+    fn named_references(&self) -> HashSet<Reference> {
+        self.references().filter(|r| r.is_name()).cloned().collect()
+    }
+}
+
+impl Validatable for Conjunction {
+    fn validate(&self) -> Result<()> {
+        Ok(())
     }
 }
 

@@ -51,7 +51,13 @@ abstract class TypeQLDefinable extends TypeQLQuery {
         if (definables == null || definables.isEmpty()) throw TypeQLException.of(MISSING_DEFINABLES.message());
         this.definables = new ArrayList<>(definables);
         for (Definable definable : definables) {
-            if (definable.isRule()) rules.add(definable.asRule());
+            if (definable.isRule()) {
+                Rule rule = definable.asRule();
+                if (command == UNDEFINE && (rule.when() != null || rule.then() != null)) {
+                    throw TypeQLException.of(ErrorMessage.INVALID_UNDEFINE_QUERY_RULE.message(rule.label()));
+                }
+                rules.add(rule);
+            }
             if (definable.isTypeVariable()) variables.add(definable.asTypeVariable());
         }
         LinkedList<TypeVariable> typeVarsToVerify = new LinkedList<>(variables);

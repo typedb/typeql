@@ -21,13 +21,14 @@
  */
 
 use crate::{
+    common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable, ValueConstraint,
     },
     write_joined,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {
@@ -51,6 +52,16 @@ impl ThingVariable {
         }
     }
 
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            iter::once(&self.reference)
+                .chain(self.isa.iter().flat_map(|c| c.references()))
+                .chain(self.has.iter().flat_map(|c| c.references()))
+                .chain(self.relation.iter().flat_map(|c| c.references()))
+                .chain(self.value.iter().flat_map(|c| c.references())),
+        )
+    }
+
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;
@@ -70,6 +81,19 @@ impl ThingVariable {
 
     fn is_thing_constrained(&self) -> bool {
         self.isa.is_some() || self.iid.is_some() || !self.has.is_empty()
+    }
+}
+
+impl Validatable for ThingVariable {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut iter::once(self.reference.validate())
+                .chain(self.iid.iter().map(Validatable::validate))
+                .chain(self.isa.iter().map(Validatable::validate))
+                .chain(self.has.iter().map(Validatable::validate))
+                .chain(self.relation.iter().map(Validatable::validate))
+                .chain(self.value.iter().map(Validatable::validate)),
+        )
     }
 }
 

@@ -21,9 +21,14 @@
  */
 
 use crate::{
-    common::token,
-    pattern::ThingVariable,
-    query::{TypeQLMatch, TypeQLUpdate, Writable},
+    common::{
+        error::{collect_err, VARIABLE_OUT_OF_SCOPE_DELETE},
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{NamedReferences, ThingVariable},
+    query::{writable::expect_non_empty, TypeQLMatch, TypeQLUpdate, Writable},
     write_joined,
 };
 use std::fmt;
@@ -38,6 +43,36 @@ impl TypeQLDelete {
     pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
         TypeQLUpdate { delete_query: self, insert_variables: vars.vars() }
     }
+}
+
+impl Validatable for TypeQLDelete {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut ([
+                expect_delete_in_scope_of_match(&self.match_query, &self.variables),
+                expect_non_empty(&self.variables),
+                self.match_query.validate(),
+            ]
+            .into_iter())
+            .chain(self.variables.iter().map(Validatable::validate)),
+        )
+    }
+}
+
+fn expect_delete_in_scope_of_match(
+    match_query: &TypeQLMatch,
+    variables: &[ThingVariable],
+) -> Result<()> {
+    let names_in_scope = match_query.named_references();
+    collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(
+        |r| -> Result<()> {
+            if names_in_scope.contains(r) {
+                Ok(())
+            } else {
+                Err(VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()]))?
+            }
+        },
+    ))
 }
 
 impl fmt::Display for TypeQLDelete {

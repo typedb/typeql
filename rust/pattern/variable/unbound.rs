@@ -20,14 +20,17 @@
  *
  */
 
-use crate::pattern::{
-    ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
-    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint,
-    RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
-    SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable,
-    ValueConstraint, ValueTypeConstraint, Visibility,
+use crate::{
+    common::{validatable::Validatable, Result},
+    pattern::{
+        ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
+        IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
+        RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint,
+        RolePlayerConstraint, SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable,
+        TypeVariable, ValueConstraint, ValueTypeConstraint, Visibility,
+    },
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundVariable {
@@ -57,6 +60,16 @@ impl UnboundVariable {
 
     pub fn hidden() -> UnboundVariable {
         UnboundVariable { reference: Reference::Anonymous(Visibility::Invisible) }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(iter::once(&self.reference))
+    }
+}
+
+impl Validatable for UnboundVariable {
+    fn validate(&self) -> Result<()> {
+        self.reference.validate()
     }
 }
 

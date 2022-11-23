@@ -20,15 +20,16 @@
  *
  */
 
+use crate::common::{error::INVALID_VARIABLE_NAME, validatable::Validatable, Result};
 use std::fmt;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Visibility {
     Visible,
     Invisible,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Reference {
     Anonymous(Visibility),
     Name(String),
@@ -42,6 +43,24 @@ impl Reference {
     pub fn is_visible(&self) -> bool {
         !matches!(self, Reference::Anonymous(Visibility::Invisible))
     }
+}
+
+impl Validatable for Reference {
+    fn validate(&self) -> Result<()> {
+        match self {
+            Self::Anonymous(_) => Ok(()),
+            Self::Name(n) => expect_valid_identifier(n),
+        }
+    }
+}
+
+fn expect_valid_identifier(name: &str) -> Result<()> {
+    if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
+        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    {
+        Err(INVALID_VARIABLE_NAME.format(&[name]))?
+    }
+    Ok(())
 }
 
 impl fmt::Display for Reference {

@@ -20,25 +20,16 @@
  *
  */
 
-use crate::{
-    common::{token, validatable::Validatable, Result},
-    Label,
-};
-use std::fmt;
+use crate::common::Result;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct LabelConstraint {
-    pub label: Label,
-}
+pub trait Validatable: Sized {
+    fn validate(&self) -> Result<()>;
 
-impl Validatable for LabelConstraint {
-    fn validate(&self) -> Result<()> {
-        Ok(())
+    fn validated(self) -> Result<Self> {
+        self.validate().map(|_| self)
     }
-}
 
-impl fmt::Display for LabelConstraint {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Constraint::Type, self.label)
+    fn is_valid(&self) -> bool {
+        self.validate().is_ok()
     }
 }

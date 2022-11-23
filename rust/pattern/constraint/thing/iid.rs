@@ -20,10 +20,7 @@
  *
  */
 
-use crate::{
-    common::{error::INVALID_IID_STRING, token},
-    ErrorMessage,
-};
+use crate::common::{error::INVALID_IID_STRING, token, validatable::Validatable, Result};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -36,27 +33,28 @@ fn is_valid_iid(iid: &str) -> bool {
 }
 
 impl IIDConstraint {
-    pub fn new(iid: String) -> Result<Self, ErrorMessage> {
-        if is_valid_iid(&iid) {
-            Ok(IIDConstraint { iid })
-        } else {
-            Err(INVALID_IID_STRING.format(&[&iid]))
-        }
+    pub fn new(iid: String) -> Self {
+        IIDConstraint { iid }
     }
 }
 
-impl TryFrom<&str> for IIDConstraint {
-    type Error = ErrorMessage;
+impl Validatable for IIDConstraint {
+    fn validate(&self) -> Result<()> {
+        if !is_valid_iid(&self.iid) {
+            Err(INVALID_IID_STRING.format(&[&self.iid]))?
+        }
+        Ok(())
+    }
+}
 
-    fn try_from(iid: &str) -> Result<Self, Self::Error> {
+impl From<&str> for IIDConstraint {
+    fn from(iid: &str) -> Self {
         IIDConstraint::new(iid.to_string())
     }
 }
 
-impl TryFrom<String> for IIDConstraint {
-    type Error = ErrorMessage;
-
-    fn try_from(iid: String) -> Result<Self, Self::Error> {
+impl From<String> for IIDConstraint {
+    fn from(iid: String) -> Self {
         IIDConstraint::new(iid)
     }
 }

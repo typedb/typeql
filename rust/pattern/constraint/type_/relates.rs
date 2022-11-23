@@ -21,16 +21,34 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    common::{error::collect_err, token, validatable::Validatable, Result},
+    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelatesConstraint {
     pub role_type: TypeVariable,
     pub overridden_role_type: Option<TypeVariable>,
+}
+
+impl RelatesConstraint {
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            iter::once(&self.role_type.reference)
+                .chain(self.overridden_role_type.iter().map(|v| &v.reference)),
+        )
+    }
+}
+
+impl Validatable for RelatesConstraint {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut iter::once(self.role_type.validate())
+                .chain(self.overridden_role_type.iter().map(Validatable::validate)),
+        )
+    }
 }
 
 impl From<&str> for RelatesConstraint {

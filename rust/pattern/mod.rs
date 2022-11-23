@@ -37,11 +37,14 @@ pub use disjunction::Disjunction;
 mod label;
 pub use label::{Label, Type};
 
+mod negation;
+pub use negation::Negation;
+
 mod schema;
 pub use schema::{RuleDeclaration, RuleDefinition};
 
-mod negation;
-pub use negation::Negation;
+mod named_references;
+pub use named_references::NamedReferences;
 
 mod variable;
 pub use variable::{
@@ -54,16 +57,17 @@ pub use variable::{
 #[cfg(test)]
 mod test;
 
-use crate::{enum_getter, enum_wrapper};
-use std::fmt;
+use crate::{
+    common::{validatable::Validatable, Result},
+    enum_getter, enum_wrapper,
+};
+use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
-    Rule(RuleDefinition),
-    RuleDeclaration(RuleDeclaration),
     Variable(Variable),
 }
 
@@ -71,17 +75,35 @@ impl Pattern {
     enum_getter!(into_conjunction, Conjunction, Conjunction);
     enum_getter!(into_disjunction, Disjunction, Disjunction);
     enum_getter!(into_negation, Negation, Negation);
-    enum_getter!(into_rule, Rule, RuleDefinition);
-    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
     enum_getter!(into_variable, Variable, Variable);
+
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
+            Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
+            Negation(negation) => negation.expect_is_bounded_by(bounds),
+            Variable(variable) => variable.expect_is_bounded_by(bounds),
+        }
+    }
+}
+
+impl Validatable for Pattern {
+    fn validate(&self) -> Result<()> {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.validate(),
+            Disjunction(disjunction) => disjunction.validate(),
+            Negation(negation) => negation.validate(),
+            Variable(variable) => variable.validate(),
+        }
+    }
 }
 
 enum_wrapper! { Pattern
     Conjunction => Conjunction,
     Disjunction => Disjunction,
     Negation => Negation,
-    RuleDefinition => Rule,
-    RuleDeclaration => RuleDeclaration,
     Variable => Variable,
 }
 
@@ -116,9 +138,48 @@ impl fmt::Display for Pattern {
             Conjunction(conjunction) => write!(f, "{}", conjunction),
             Disjunction(disjunction) => write!(f, "{}", disjunction),
             Negation(negation) => write!(f, "{}", negation),
-            Rule(rule) => write!(f, "{}", rule),
-            RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
             Variable(variable) => write!(f, "{}", variable),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Definable {
+    RuleDeclaration(RuleDeclaration),
+    RuleDefinition(RuleDefinition),
+    TypeVariable(TypeVariable),
+}
+
+impl Definable {
+    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
+    enum_getter!(into_rule, RuleDefinition, RuleDefinition);
+    enum_getter!(into_type_variable, TypeVariable, TypeVariable);
+}
+
+impl Validatable for Definable {
+    fn validate(&self) -> Result<()> {
+        use Definable::*;
+        match self {
+            RuleDeclaration(rule) => rule.validate(),
+            RuleDefinition(rule) => rule.validate(),
+            TypeVariable(variable) => variable.validate(),
+        }
+    }
+}
+
+enum_wrapper! { Definable
+    RuleDeclaration => RuleDeclaration,
+    RuleDefinition => RuleDefinition,
+    TypeVariable => TypeVariable,
+}
+
+impl fmt::Display for Definable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Definable::*;
+        match self {
+            RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
+            RuleDefinition(rule) => write!(f, "{}", rule),
+            TypeVariable(variable) => write!(f, "{}", variable),
         }
     }
 }

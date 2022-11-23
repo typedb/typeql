@@ -21,13 +21,18 @@
  */
 
 use crate::{
+    common::{
+        error::{collect_err, INVALID_DEFINE_QUERY_VARIABLE},
+        validatable::Validatable,
+        Result,
+    },
     pattern::{
         AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
         RegexConstraint, RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
     },
     write_joined,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
@@ -57,6 +62,16 @@ impl TypeVariable {
         }
     }
 
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            iter::once(&self.reference)
+                .chain(self.owns.iter().flat_map(|c| c.references()))
+                .chain(self.plays.iter().flat_map(|c| c.references()))
+                .chain(self.relates.iter().flat_map(|c| c.references()))
+                .chain(self.sub.iter().flat_map(|c| c.references())),
+        )
+    }
+
     fn is_type_constrained(&self) -> bool {
         self.abstract_.is_some()
             || !self.owns.is_empty()
@@ -65,6 +80,29 @@ impl TypeVariable {
             || !self.relates.is_empty()
             || self.sub.is_some()
             || self.value_type.is_some()
+    }
+
+    pub fn validate_definable(&self) -> Result<()> {
+        if self.label.is_none() {
+            Err(INVALID_DEFINE_QUERY_VARIABLE.format(&[]))?;
+        }
+        Ok(())
+    }
+}
+
+impl Validatable for TypeVariable {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut iter::once(self.reference.validate())
+                .chain(self.label.iter().map(Validatable::validate))
+                .chain(self.owns.iter().map(Validatable::validate))
+                .chain(self.plays.iter().map(Validatable::validate))
+                .chain(self.regex.iter().map(Validatable::validate))
+                .chain(self.relates.iter().map(Validatable::validate))
+                .chain(self.sub.iter().map(Validatable::validate))
+                .chain(self.value_type.iter().map(Validatable::validate))
+                .chain(self.abstract_.iter().map(Validatable::validate)),
+        )
     }
 }
 

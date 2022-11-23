@@ -21,8 +21,13 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{Pattern, RuleDefinition, TypeVariable, Variable},
+    common::{
+        error::{collect_err, INVALID_RULE_WHEN_MISSING_PATTERNS},
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{Definable, RuleDefinition, TypeVariable},
     write_joined,
 };
 use std::fmt;
@@ -34,23 +39,34 @@ pub struct TypeQLDefine {
 }
 
 impl TypeQLDefine {
-    pub fn new(definables: Vec<Pattern>) -> Self {
-        definables.into_iter().fold(TypeQLDefine::default(), |mut define, definable| {
-            match definable {
-                Pattern::Rule(rule) => define.add_rule(rule),
-                Pattern::Variable(Variable::Type(var)) => define.add_definition(var),
-                _ => unreachable!(),
+    pub fn new(definables: Vec<Definable>) -> Self {
+        definables.into_iter().fold(TypeQLDefine::default(), |define, definable| match definable {
+            Definable::RuleDefinition(rule) => define.add_rule(rule),
+            Definable::TypeVariable(var) => define.add_definition(var),
+            Definable::RuleDeclaration(r) => {
+                panic!("{}", INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
             }
-            define
         })
     }
 
-    pub fn add_definition(&mut self, variable: TypeVariable) {
-        self.variables.push(variable)
+    fn add_definition(mut self, variable: TypeVariable) -> Self {
+        self.variables.push(variable);
+        self
     }
 
-    pub fn add_rule(&mut self, rule: RuleDefinition) {
-        self.rules.push(rule)
+    fn add_rule(mut self, rule: RuleDefinition) -> Self {
+        self.rules.push(rule);
+        self
+    }
+}
+
+impl Validatable for TypeQLDefine {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut (self.variables.iter().map(Validatable::validate))
+                .chain(self.variables.iter().map(TypeVariable::validate_definable))
+                .chain(self.rules.iter().map(Validatable::validate)),
+        )
     }
 }
 

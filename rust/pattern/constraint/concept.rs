@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token,
+    common::{token, validatable::Validatable, Result},
     pattern::{ConceptVariable, UnboundVariable},
     var,
 };
@@ -29,12 +29,18 @@ use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {
-    variable: Box<ConceptVariable>,
+    pub variable: Box<ConceptVariable>,
 }
 
 impl IsConstraint {
     fn new(var: ConceptVariable) -> Self {
         Self { variable: Box::new(var) }
+    }
+}
+
+impl Validatable for IsConstraint {
+    fn validate(&self) -> Result<()> {
+        self.variable.validate()
     }
 }
 

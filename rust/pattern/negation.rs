@@ -20,8 +20,12 @@
  *
  */
 
-use crate::{common::token, pattern::Pattern};
+use crate::{
+    common::{error::REDUNDANT_NESTED_NEGATION, token, validatable::Validatable, Result},
+    pattern::{Pattern, Reference},
+};
 use core::fmt;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Negation {
@@ -30,7 +34,20 @@ pub struct Negation {
 
 impl Negation {
     pub fn new(pattern: Pattern) -> Self {
-        Negation { pattern: Box::new(pattern) }
+        Self { pattern: Box::new(pattern) }
+    }
+
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+        self.pattern.expect_is_bounded_by(bounds)
+    }
+}
+
+impl Validatable for Negation {
+    fn validate(&self) -> Result<()> {
+        match self.pattern.as_ref() {
+            Pattern::Negation(_) => Err(REDUNDANT_NESTED_NEGATION.format(&[]))?,
+            _ => Ok(()),
+        }
     }
 }
 

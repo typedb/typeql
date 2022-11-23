@@ -51,6 +51,8 @@ pub use typeql_update::TypeQLUpdate;
 mod writable;
 pub use writable::Writable;
 
+use crate::common::{validatable::Validatable, Result};
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Match(TypeQLMatch),
@@ -74,6 +76,38 @@ impl Query {
     enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
     enum_getter!(into_group, Group, TypeQLMatchGroup);
     enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
+}
+
+impl Validatable for Query {
+    fn validate(&self) -> Result<()> {
+        use Query::*;
+        match self {
+            Match(query) => query.validate(),
+            Insert(query) => query.validate(),
+            Delete(query) => query.validate(),
+            Update(query) => query.validate(),
+            Define(query) => query.validate(),
+            Undefine(query) => query.validate(),
+            Aggregate(query) => query.validate(),
+            Group(query) => query.validate(),
+            GroupAggregate(query) => query.validate(),
+        }
+    }
+
+    fn validated(self) -> Result<Self> {
+        use Query::*;
+        match self {
+            Match(query) => query.validated().map(TypeQLMatch::into),
+            Insert(query) => query.validated().map(TypeQLInsert::into),
+            Delete(query) => query.validated().map(TypeQLDelete::into),
+            Update(query) => query.validated().map(TypeQLUpdate::into),
+            Define(query) => query.validated().map(TypeQLDefine::into),
+            Undefine(query) => query.validated().map(TypeQLUndefine::into),
+            Aggregate(query) => query.validated().map(TypeQLMatchAggregate::into),
+            Group(query) => query.validated().map(TypeQLMatchGroup::into),
+            GroupAggregate(query) => query.validated().map(TypeQLMatchGroupAggregate::into),
+        }
+    }
 }
 
 enum_wrapper! { Query

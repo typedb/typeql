@@ -21,9 +21,14 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{RuleDeclaration, TypeVariable, Variable},
-    write_joined, Pattern,
+    common::{
+        error::{collect_err, INVALID_UNDEFINE_QUERY_RULE},
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{Definable, RuleDeclaration, TypeVariable},
+    write_joined,
 };
 use std::fmt;
 
@@ -34,23 +39,36 @@ pub struct TypeQLUndefine {
 }
 
 impl TypeQLUndefine {
-    pub fn new(undefinables: Vec<Pattern>) -> Self {
-        undefinables.into_iter().fold(TypeQLUndefine::default(), |mut undefine, undefinable| {
+    pub fn new(undefinables: Vec<Definable>) -> Self {
+        undefinables.into_iter().fold(TypeQLUndefine::default(), |undefine, undefinable| {
             match undefinable {
-                Pattern::RuleDeclaration(rule) => undefine.add_rule(rule),
-                Pattern::Variable(Variable::Type(var)) => undefine.add_definition(var),
-                _ => unreachable!(),
+                Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
+                Definable::TypeVariable(var) => undefine.add_definition(var),
+                Definable::RuleDefinition(r) => {
+                    panic!("{}", INVALID_UNDEFINE_QUERY_RULE.format(&[&r.label.to_string()]))
+                }
             }
-            undefine
         })
     }
 
-    pub fn add_definition(&mut self, variable: TypeVariable) {
-        self.variables.push(variable)
+    fn add_definition(mut self, variable: TypeVariable) -> Self {
+        self.variables.push(variable);
+        self
     }
 
-    pub fn add_rule(&mut self, rule: RuleDeclaration) {
-        self.rules.push(rule)
+    fn add_rule(mut self, rule: RuleDeclaration) -> Self {
+        self.rules.push(rule);
+        self
+    }
+}
+
+impl Validatable for TypeQLUndefine {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut (self.variables.iter().map(Validatable::validate))
+                .chain(self.variables.iter().map(TypeVariable::validate_definable))
+                .chain(self.rules.iter().map(Validatable::validate)),
+        )
     }
 }
 

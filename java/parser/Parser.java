@@ -535,18 +535,18 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public ThingVariable.Thing visitVariable_thing(TypeQLParser.Variable_thingContext ctx) {
-        UnboundVariable unscoped = getVar(ctx.VAR_());
+        UnboundVariable unbound = getVar(ctx.VAR_());
         ThingVariable.Thing thing = null;
 
         if (ctx.ISA_() != null) {
-            thing = unscoped.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
+            thing = unbound.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
         } else if (ctx.IID() != null) {
-            thing = unscoped.iid(ctx.IID_().getText());
+            thing = unbound.iid(ctx.IID_().getText());
         }
 
         if (ctx.attributes() != null) {
             for (ThingConstraint.Has hasAttribute : visitAttributes(ctx.attributes())) {
-                if (thing == null) thing = unscoped.constrain(hasAttribute);
+                if (thing == null) thing = unbound.constrain(hasAttribute);
                 else thing = thing.constrain(hasAttribute);
             }
         }
@@ -555,11 +555,11 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public ThingVariable.Relation visitVariable_relation(TypeQLParser.Variable_relationContext ctx) {
-        UnboundVariable unscoped;
-        if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
-        else unscoped = hidden();
+        UnboundVariable unbound;
+        if (ctx.VAR_() != null) unbound = getVar(ctx.VAR_());
+        else unbound = hidden();
 
-        ThingVariable.Relation relation = unscoped.constrain(visitRelation(ctx.relation()));
+        ThingVariable.Relation relation = unbound.constrain(visitRelation(ctx.relation()));
         if (ctx.ISA_() != null) relation = relation.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
@@ -572,11 +572,11 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public ThingVariable.Attribute visitVariable_attribute(TypeQLParser.Variable_attributeContext ctx) {
-        UnboundVariable unscoped;
-        if (ctx.VAR_() != null) unscoped = getVar(ctx.VAR_());
-        else unscoped = hidden();
+        UnboundVariable unbound;
+        if (ctx.VAR_() != null) unbound = getVar(ctx.VAR_());
+        else unbound = hidden();
 
-        ThingVariable.Attribute attribute = unscoped.constrain(visitPredicate(ctx.predicate()));
+        ThingVariable.Attribute attribute = unbound.constrain(visitPredicate(ctx.predicate()));
         if (ctx.ISA_() != null) attribute = attribute.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {

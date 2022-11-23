@@ -198,9 +198,9 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     private void filtersAreInScope() {
         Set<UnboundVariable> duplicates = new HashSet<>();
         for (UnboundVariable var : modifiers.filter) {
+            if (!var.isNamed()) throw TypeQLException.of(VARIABLE_NOT_NAMED);
             if (!namedVariablesUnbound().contains(var))
                 throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
-            if (!var.isNamed()) throw TypeQLException.of(VARIABLE_NOT_NAMED.message(var));
             if (duplicates.contains(var)) throw TypeQLException.of(ILLEGAL_FILTER_VARIABLE_REPEATING.message(var));
             else duplicates.add(var);
         }

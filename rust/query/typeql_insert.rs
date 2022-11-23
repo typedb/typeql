@@ -20,7 +20,17 @@
  *
  */
 
-use crate::{common::token, pattern::ThingVariable, query::TypeQLMatch, write_joined};
+use crate::{
+    common::{
+        error::{collect_err, NO_VARIABLE_IN_SCOPE_INSERT},
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{NamedReferences, ThingVariable},
+    query::{writable::expect_non_empty, TypeQLMatch},
+    write_joined,
+};
 use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -32,6 +42,46 @@ pub struct TypeQLInsert {
 impl TypeQLInsert {
     pub fn new(variables: Vec<ThingVariable>) -> Self {
         TypeQLInsert { match_query: None, variables }
+    }
+}
+
+impl Validatable for TypeQLInsert {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut [
+                expect_non_empty(&self.variables),
+                expect_insert_in_scope_of_match(&self.match_query, &self.variables),
+            ]
+            .into_iter()
+            .chain(self.match_query.iter().map(Validatable::validate))
+            .chain(self.variables.iter().map(Validatable::validate)),
+        )
+    }
+}
+
+fn expect_insert_in_scope_of_match(
+    match_query: &Option<TypeQLMatch>,
+    variables: &[ThingVariable],
+) -> Result<()> {
+    if let Some(match_query) = match_query {
+        let names_in_scope = match_query.named_references();
+        if variables.iter().any(|v| {
+            v.reference.is_name() && names_in_scope.contains(&v.reference)
+                || v.references().any(|w| names_in_scope.contains(w))
+        }) {
+            Ok(())
+        } else {
+            let variables_str =
+                variables.iter().map(ThingVariable::to_string).collect::<Vec<String>>().join(", ");
+            let bounds_str = names_in_scope
+                .into_iter()
+                .map(|r| r.to_string())
+                .collect::<Vec<String>>()
+                .join(", ");
+            Err(NO_VARIABLE_IN_SCOPE_INSERT.format(&[&variables_str, &bounds_str]))?
+        }
+    } else {
+        Ok(())
     }
 }
 

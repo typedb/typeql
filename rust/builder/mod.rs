@@ -26,13 +26,13 @@ use crate::{
         Negation, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable,
         TypeVariable, TypeVariableBuilder, UnboundVariable, Value, ValueConstraint,
     },
-    ErrorMessage, Pattern,
+    Pattern,
 };
 
 #[macro_export]
 macro_rules! typeql_match {
     ($($pattern:expr),* $(,)?) => {{
-        TypeQLMatch::new(vec![$($pattern.into()),*])
+        TypeQLMatch::from_patterns(vec![$($pattern.into()),*])
     }}
 }
 
@@ -95,52 +95,34 @@ pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
     UnboundVariable::hidden().rel(value)
 }
 
-pub fn eq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
-{
-    ValueConstraint::new(Predicate::Eq, value.try_into()?)
+pub fn eq<T: Into<Value>>(value: T) -> ValueConstraint {
+    ValueConstraint::new(Predicate::Eq, value.into())
 }
 
-pub fn neq<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
-{
-    ValueConstraint::new(Predicate::Neq, value.try_into()?)
+pub fn neq<T: Into<Value>>(value: T) -> ValueConstraint {
+    ValueConstraint::new(Predicate::Neq, value.into())
 }
 
-pub fn lt<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
-{
-    ValueConstraint::new(Predicate::Lt, value.try_into()?)
+pub fn lt<T: Into<Value>>(value: T) -> ValueConstraint {
+    ValueConstraint::new(Predicate::Lt, value.into())
 }
 
-pub fn lte<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
-{
-    ValueConstraint::new(Predicate::Lte, value.try_into()?)
+pub fn lte<T: Into<Value>>(value: T) -> ValueConstraint {
+    ValueConstraint::new(Predicate::Lte, value.into())
 }
 
-pub fn gt<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
-{
-    ValueConstraint::new(Predicate::Gt, value.try_into()?)
+pub fn gt<T: Into<Value>>(value: T) -> ValueConstraint {
+    ValueConstraint::new(Predicate::Gt, value.into())
 }
 
-pub fn gte<T: TryInto<Value>>(value: T) -> Result<ValueConstraint, ErrorMessage>
-where
-    ErrorMessage: From<<T as TryInto<Value>>::Error>,
-{
-    ValueConstraint::new(Predicate::Gte, value.try_into()?)
+pub fn gte<T: Into<Value>>(value: T) -> ValueConstraint {
+    ValueConstraint::new(Predicate::Gte, value.into())
 }
 
-pub fn contains<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage> {
+pub fn contains<T: Into<String>>(value: T) -> ValueConstraint {
     ValueConstraint::new(Predicate::Contains, Value::from(value.into()))
 }
 
-pub fn like<T: Into<String>>(value: T) -> Result<ValueConstraint, ErrorMessage> {
+pub fn like<T: Into<String>>(value: T) -> ValueConstraint {
     ValueConstraint::new(Predicate::Like, Value::from(value.into()))
 }

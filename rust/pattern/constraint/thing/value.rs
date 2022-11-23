@@ -23,15 +23,16 @@
 use crate::{
     common::{
         date_time,
-        error::{INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
+        error::{collect_err, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
         string::{escape_regex, format_double, quote},
         token,
+        validatable::Validatable,
+        Result,
     },
-    pattern::{ThingVariable, UnboundVariable},
-    ErrorMessage,
+    pattern::{Reference, ThingVariable, UnboundVariable},
 };
 use chrono::{NaiveDateTime, Timelike};
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueConstraint {
@@ -40,13 +41,38 @@ pub struct ValueConstraint {
 }
 
 impl ValueConstraint {
-    pub fn new(predicate: token::Predicate, value: Value) -> Result<Self, ErrorMessage> {
-        if predicate.is_substring() && !matches!(value, Value::String(_)) {
-            Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))
-        } else {
-            Ok(ValueConstraint { predicate, value })
+    pub fn new(predicate: token::Predicate, value: Value) -> Self {
+        ValueConstraint { predicate, value }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        match &self.value {
+            Value::Variable(v) => Box::new(iter::once(&v.reference)),
+            _ => Box::new(iter::empty()),
         }
     }
+}
+
+impl Validatable for ValueConstraint {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut [
+                expect_string_value_with_substring_predicate(self.predicate, &self.value),
+                self.value.validate(),
+            ]
+            .into_iter(),
+        )
+    }
+}
+
+fn expect_string_value_with_substring_predicate(
+    predicate: token::Predicate,
+    value: &Value,
+) -> Result<()> {
+    if predicate.is_substring() && !matches!(value, Value::String(_)) {
+        Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))?
+    }
+    Ok(())
 }
 
 impl fmt::Display for ValueConstraint {
@@ -75,6 +101,22 @@ pub enum Value {
 }
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
+impl Validatable for Value {
+    fn validate(&self) -> Result<()> {
+        match &self {
+            Self::DateTime(date_time) => {
+                if date_time.nanosecond() % 1000000 > 0 {
+                    Err(INVALID_CONSTRAINT_DATETIME_PRECISION
+                        .format(&[date_time.to_string().as_str()]))?
+                }
+                Ok(())
+            }
+            Self::Variable(variable) => variable.validate(),
+            _ => Ok(()),
+        }
+    }
+}
+
 impl From<i64> for Value {
     fn from(long: i64) -> Self {
         Value::Long(long)
@@ -98,22 +140,16 @@ impl From<&str> for Value {
         Value::String(String::from(string))
     }
 }
+
 impl From<String> for Value {
     fn from(string: String) -> Self {
         Value::String(string)
     }
 }
 
-impl TryFrom<NaiveDateTime> for Value {
-    type Error = ErrorMessage;
-
-    fn try_from(date_time: NaiveDateTime) -> Result<Self, ErrorMessage> {
-        if date_time.nanosecond() % 1000000 > 0 {
-            return Err(
-                INVALID_CONSTRAINT_DATETIME_PRECISION.format(&[date_time.to_string().as_str()])
-            );
-        }
-        Ok(Value::DateTime(date_time))
+impl From<NaiveDateTime> for Value {
+    fn from(date_time: NaiveDateTime) -> Self {
+        Value::DateTime(date_time)
     }
 }
 

@@ -20,25 +20,9 @@
  *
  */
 
-use crate::{
-    common::{token, validatable::Validatable, Result},
-    Label,
-};
-use std::fmt;
+use crate::pattern::Reference;
+use std::collections::HashSet;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct LabelConstraint {
-    pub label: Label,
-}
-
-impl Validatable for LabelConstraint {
-    fn validate(&self) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl fmt::Display for LabelConstraint {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Constraint::Type, self.label)
-    }
+pub trait NamedReferences {
+    fn named_references(&self) -> HashSet<Reference>;
 }

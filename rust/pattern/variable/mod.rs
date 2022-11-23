@@ -21,7 +21,9 @@
  */
 
 mod reference;
+
 pub use reference::{Reference, Visibility};
+use std::collections::HashSet;
 
 mod concept;
 pub use concept::ConceptVariable;
@@ -41,7 +43,10 @@ pub use builder::{
     ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
 };
 
-use crate::enum_wrapper;
+use crate::{
+    common::{error::MATCH_HAS_UNBOUNDED_NESTED_PATTERN, validatable::Validatable, Result},
+    enum_wrapper,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -50,6 +55,43 @@ pub enum Variable {
     Thing(ThingVariable),
     Type(TypeVariable),
     Unbound(UnboundVariable),
+}
+
+impl Variable {
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        use Variable::*;
+        match self {
+            Unbound(unbound) => unbound.references(),
+            Concept(concept) => concept.references(),
+            Thing(thing) => thing.references(),
+            Type(type_) => type_.references(),
+        }
+    }
+
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+        match self {
+            Self::Unbound(_) => unreachable!(),
+            _ => {
+                if !self.references().any(|r| r.is_name() && bounds.contains(r)) {
+                    Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
+                        .format(&[&self.to_string().replace('\n', " ")]))?
+                }
+                Ok(())
+            }
+        }
+    }
+}
+
+impl Validatable for Variable {
+    fn validate(&self) -> Result<()> {
+        use Variable::*;
+        match self {
+            Unbound(unbound) => unbound.validate(),
+            Concept(concept) => concept.validate(),
+            Thing(thing) => thing.validate(),
+            Type(type_) => type_.validate(),
+        }
+    }
 }
 
 enum_wrapper! { Variable

@@ -21,15 +21,27 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    common::{token, validatable::Validatable, Result},
+    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
     pub type_: Box<TypeVariable>,
+}
+
+impl SubConstraint {
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(iter::once(&self.type_.reference))
+    }
+}
+
+impl Validatable for SubConstraint {
+    fn validate(&self) -> Result<()> {
+        self.type_.validate()
+    }
 }
 
 impl<T: Into<Label>> From<T> for SubConstraint {

@@ -21,11 +21,11 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    common::{error::collect_err, token, validatable::Validatable, Result},
+    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum IsKeyAttribute {
@@ -67,6 +67,22 @@ impl OwnsConstraint {
         is_key: IsKeyAttribute,
     ) -> Self {
         OwnsConstraint { attribute_type, overridden_attribute_type, is_key }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            iter::once(&self.attribute_type.reference)
+                .chain(self.overridden_attribute_type.iter().map(|v| &v.reference)),
+        )
+    }
+}
+
+impl Validatable for OwnsConstraint {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut iter::once(self.attribute_type.validate())
+                .chain(self.overridden_attribute_type.iter().map(Validatable::validate)),
+        )
     }
 }
 

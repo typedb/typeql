@@ -21,11 +21,11 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{IsExplicit, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    common::{token, validatable::Validatable, Result},
+    pattern::{IsExplicit, Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
@@ -36,6 +36,16 @@ pub struct IsaConstraint {
 impl IsaConstraint {
     fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
         IsaConstraint { type_, is_explicit }
+    }
+
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(iter::once(&self.type_.reference))
+    }
+}
+
+impl Validatable for IsaConstraint {
+    fn validate(&self) -> Result<()> {
+        self.type_.validate()
     }
 }
 

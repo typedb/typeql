@@ -21,12 +21,21 @@
  */
 
 use crate::{
-    common::token,
-    pattern::{Conjunction, Pattern, UnboundVariable},
+    common::{
+        error::{
+            collect_err, Error, ILLEGAL_FILTER_VARIABLE_REPEATING,
+            MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE, MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE,
+            VARIABLE_NOT_NAMED, VARIABLE_OUT_OF_SCOPE_MATCH,
+        },
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
-use std::fmt;
+use std::{collections::HashSet, fmt, iter};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -37,12 +46,16 @@ pub struct TypeQLMatch {
 impl AggregateQueryBuilder for TypeQLMatch {}
 
 impl TypeQLMatch {
-    pub fn new(patterns: Vec<Pattern>) -> Self {
-        Self { conjunction: Conjunction::new(patterns), modifiers: Modifiers::default() }
+    pub fn new(conjunction: Conjunction, modifiers: Modifiers) -> Self {
+        Self { conjunction, modifiers }
+    }
+
+    pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
+        Self::new(Conjunction::new(patterns), Modifiers::default())
     }
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
-        TypeQLMatch { modifiers: self.modifiers.filter(vars), ..self }
+        Self::new(self.conjunction, self.modifiers.filter(vars))
     }
 
     pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
@@ -50,7 +63,7 @@ impl TypeQLMatch {
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
-        TypeQLMatch { modifiers: self.modifiers.sort(sorting), ..self }
+        Self::new(self.conjunction, self.modifiers.sort(sorting))
     }
 
     pub fn limit(self, limit: usize) -> Self {
@@ -70,8 +83,104 @@ impl TypeQLMatch {
     }
 
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLMatchGroup {
-        TypeQLMatchGroup { query: self, group_var: var.into() }
+        TypeQLMatchGroup { match_query: self, group_var: var.into() }
     }
+}
+
+impl Validatable for TypeQLMatch {
+    fn validate(&self) -> Result<()> {
+        collect_err(
+            &mut [
+                expect_has_bounding_conjunction(&self.conjunction),
+                expect_nested_patterns_are_bounded(&self.conjunction),
+                expect_each_variable_is_bounded_by_named(self.conjunction.patterns.iter()),
+                expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
+                expect_sort_vars_are_in_scope(
+                    &self.conjunction,
+                    &self.modifiers.filter,
+                    &self.modifiers.sorting,
+                ),
+            ]
+            .into_iter()
+            .chain(self.conjunction.patterns.iter().map(|p| p.validate())),
+        )
+    }
+}
+
+impl NamedReferences for TypeQLMatch {
+    fn named_references(&self) -> HashSet<Reference> {
+        if let Some(filter) = &self.modifiers.filter {
+            filter.vars.iter().map(|v| v.reference.clone()).collect()
+        } else {
+            self.conjunction.named_references()
+        }
+    }
+}
+
+fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
+    if conjunction.has_named_variables() {
+        Ok(())
+    } else {
+        Err(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE.format(&[]))?
+    }
+}
+
+fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<()> {
+    let bounds = conjunction.named_references();
+    collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
+}
+
+fn expect_each_variable_is_bounded_by_named<'a>(
+    patterns: impl Iterator<Item = &'a Pattern>,
+) -> Result<()> {
+    collect_err(&mut patterns.map(|p| match p {
+        Pattern::Variable(v) => {
+            v.references().any(|r| r.is_name()).then_some(()).ok_or_else(|| {
+                Error::from(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()]))
+            })
+        }
+        Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
+        Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
+        Pattern::Negation(n) => {
+            expect_each_variable_is_bounded_by_named(iter::once(n.pattern.as_ref()))
+        }
+    }))
+}
+
+fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result<()> {
+    let names_in_scope = conjunction.named_references();
+    let mut seen = HashSet::new();
+    collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
+        if !r.is_name() {
+            Err(Error::from(VARIABLE_NOT_NAMED.format(&[])))
+        } else if !names_in_scope.contains(r) {
+            Err(Error::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))
+        } else if seen.contains(&r) {
+            Err(Error::from(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&r.to_string()])))
+        } else {
+            seen.insert(r);
+            Ok(())
+        }
+    }))
+}
+
+fn expect_sort_vars_are_in_scope(
+    conjunction: &Conjunction,
+    filter: &Option<Filter>,
+    sorting: &Option<Sorting>,
+) -> Result<()> {
+    let names_in_scope = filter
+        .as_ref()
+        .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())
+        .unwrap_or_else(|| conjunction.named_references());
+    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(
+        |r| {
+            names_in_scope
+                .contains(&r)
+                .then_some(())
+                .ok_or_else(|| Error::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))
+        },
+    ))
 }
 
 impl fmt::Display for TypeQLMatch {

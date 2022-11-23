@@ -20,11 +20,17 @@
  *
  */
 
-use crate::common::token;
+use crate::common::{token, validatable::Validatable, Result};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AbstractConstraint;
+
+impl Validatable for AbstractConstraint {
+    fn validate(&self) -> Result<()> {
+        Ok(())
+    }
+}
 
 impl fmt::Display for AbstractConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
