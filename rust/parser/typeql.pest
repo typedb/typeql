@@ -189,18 +189,18 @@ THEN = { "then" }
 
 // THING VARIABLE CONSTRAINT KEYWORDS
 
-IID = { "iid" }
+IID = { "iid" ~ WB }
 ISA_ = { ISA | ISAX }
-ISA = { "isa" }
-ISAX = { "isa!" }
-HAS = { "has" }
-VALUE = { "value" }
-IS = { "is" }
+ISA = { "isa" ~ WB }
+ISAX = { "isa!" ~ WB }
+HAS = { "has" ~ WB }
+VALUE = { "value" ~ WB }
+IS = { "is" ~ WB }
 
 // OPERATOR KEYWORDS
 
-OR = { "or" }
-NOT = { "not" }
+OR = { "or" ~ WB }
+NOT = { "not" ~ WB }
 
 // PREDICATE KEYWORDS
 
@@ -210,46 +210,47 @@ GT = { ">" }
 GTE = { ">=" }
 LT = { "<" }
 LTE = { "<=" }
-LIKE = { "like" }
-CONTAINS = { "contains" }
+LIKE = { "like" ~ WB }
+CONTAINS = { "contains" ~ WB }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
-GROUP = { "group" }
-COUNT = { "count" }
-MAX = { "max" }
-MIN = { "min" }
-MEAN = { "mean" }
-MEDIAN = { "median" }
-STD = { "std" }
-SUM = { "sum" }
+GROUP = { "group" ~ WB }
+COUNT = { "count" ~ WB }
+MAX = { "max" ~ WB }
+MIN = { "min" ~ WB }
+MEAN = { "mean" ~ WB }
+MEDIAN = { "median" ~ WB }
+STD = { "std" ~ WB }
+SUM = { "sum" ~ WB }
 
 // VALUE TYPE KEYWORDS
 
-LONG = { "long" }
-DOUBLE = { "double" }
-STRING = { "string" }
-BOOLEAN = { "boolean" }
-DATETIME = { "datetime" }
+LONG = { "long" ~ WB }
+DOUBLE = { "double" ~ WB }
+STRING = { "string" ~ WB }
+BOOLEAN = { "boolean" ~ WB }
+DATETIME = { "datetime" ~ WB }
 
 // LITERAL VALUE KEYWORDS
 BOOLEAN_ = { TRUE | FALSE } // order of lexer declaration matters
-TRUE = { "true" }
-FALSE = { "false" }
-STRING_ = @{ "\"" ~ (!"\"" ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "\"" | "'" ~ (!"'" ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "'" }
-LONG_ = @{ ("+" | "-")? ~ ASCII_DIGIT+ }
-DOUBLE_ = @{ ("+" | "-")? ~ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
-DATE_ = @{ DATE_FRAGMENT_ }
-DATETIME_ = @{ DATE_FRAGMENT_ ~ "T" ~ TIME_ }
+TRUE = { "true" ~ WB }
+FALSE = { "false" ~ WB }
+STRING_ = @{ "\"" ~ (!"\"" ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "\""
+           | "'"  ~ (!"'"  ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "'"  }
+LONG_ = @{ ("+" | "-")? ~ ASCII_DIGIT+ ~ WB }
+DOUBLE_ = @{ ("+" | "-")? ~ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ WB }
+DATE_ = @{ DATE_FRAGMENT_ ~ WB }
+DATETIME_ = @{ DATE_FRAGMENT_ ~ "T" ~ TIME_ ~ WB }
 
 // TYPEQL INPUT TOKEN PATTERNS
 // All token names must end with an underscore ("_")
 VAR_ = @{ VAR_ANONYMOUS_ | VAR_NAMED_ }
-VAR_ANONYMOUS_ = @{ "$_" }
-VAR_NAMED_ = @{ "$" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* }
-IID_ = @{ "0x" ~ ASCII_HEX_DIGIT+ }
-LABEL_ = @{ TYPE_CHAR_H_ ~ TYPE_CHAR_T_* }
-LABEL_SCOPED_ = { LABEL_ ~ ":" ~ LABEL_ }
+VAR_ANONYMOUS_ = @{ "$_" ~ WB }
+VAR_NAMED_ = @{ "$" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* ~ WB }
+IID_ = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
+LABEL_ = @{ TYPE_CHAR_H_ ~ TYPE_CHAR_T_* ~ WB }
+LABEL_SCOPED_ = { LABEL_ ~ ":" ~ LABEL_ ~ WB }
 
 
 // FRAGMENTS OF KEYWORDS =======================================================
@@ -286,7 +287,9 @@ SECOND_ = { ('0'..'6') ~ ASCII_DIGIT }
 SECOND_FRACTION_ = { ASCII_DIGIT{1,3} } // between 1 and 3 digits
 ESCAPE_SEQ_ = { "\\" ~ ANY }
 
+WB = _{ &(PUNCTUATION | WS | EOL_COMMENT) } // Word boundary
+
 SEMICOLON = { ";" }
 
-COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
-WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+EOL_COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
+WS = _{ " " | "\t" | "\r" | "\n" }
