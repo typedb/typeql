@@ -33,7 +33,7 @@ mod plays;
 pub use plays::PlaysConstraint;
 
 mod regex;
-pub use regex::RegexConstraint;
+pub use self::regex::RegexConstraint;
 
 mod relates;
 pub use relates::RelatesConstraint;

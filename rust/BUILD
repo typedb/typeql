@@ -41,7 +41,7 @@ rust_library(
     deps = [
         "@vaticle_dependencies//library/crates:antlr_rust",
         "@vaticle_dependencies//library/crates:chrono",
-
+        "@vaticle_dependencies//library/crates:regex",
         # External Vaticle Dependencies
         "//grammar/rust:typeql_grammar",
     ],

@@ -20,7 +20,11 @@
  *
  */
 
-use crate::common::{string::escape_regex, token, validatable::Validatable, Result};
+use crate::common::{
+    error::INVALID_ATTRIBUTE_TYPE_REGEX, string::escape_regex, token, validatable::Validatable,
+    Result,
+};
+use regex::Regex;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -30,7 +34,9 @@ pub struct RegexConstraint {
 
 impl Validatable for RegexConstraint {
     fn validate(&self) -> Result<()> {
-        Ok(()) // TODO validate regex using external crate
+        Regex::new(&self.regex)
+            .map(|_| ())
+            .or_else(|_| Err(INVALID_ATTRIBUTE_TYPE_REGEX.format(&[&self.regex])?))
     }
 }
 
