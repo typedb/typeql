@@ -20,7 +20,7 @@
  *
  */
 
-use cucumber::{gherkin::Step, given, when, then, World};
+use cucumber::{gherkin::Step, given, then, when, World};
 
 use typeql_lang::parse_query;
 
@@ -28,9 +28,11 @@ use typeql_lang::parse_query;
 pub struct TypeQLWorld;
 
 fn main() {
-    futures::executor::block_on(TypeQLWorld::cucumber().filter_run(
-        "../vaticle_typedb_behaviour", |_, _, sc| !sc.tags.iter().any(|t| t == "ignore")
-    ));
+    futures::executor::block_on(
+        TypeQLWorld::cucumber().filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
+            !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
+        }),
+    );
 }
 
 #[given("reasoning schema")]
