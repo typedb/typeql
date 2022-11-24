@@ -59,12 +59,12 @@ type Children<'a> = pest::iterators::Pairs<'a, Rule>;
 
 trait TreeChildren {
     type Items;
-    fn children(self) -> Self::Items;
+    fn into_children(self) -> Self::Items;
 }
 
 impl<'a> TreeChildren for SyntaxTree<'a> {
     type Items = Children<'a>;
-    fn children(self) -> Self::Items {
+    fn into_children(self) -> Self::Items {
         self.into_inner()
     }
 }
@@ -117,7 +117,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<SyntaxTree> {
 }
 
 fn unwrap_single(outer: SyntaxTree) -> SyntaxTree {
-    outer.children().consume_any()
+    outer.into_children().consume_any()
 }
 
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
@@ -128,7 +128,7 @@ pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Re
     let mut qs = Vec::new();
     for p in TypeQLParser::parse(Rule::eof_queries, queries)?
         .consume(Rule::eof_queries)
-        .children()
+        .into_children()
         .filter(|r| matches!(r.as_rule(), Rule::query))
     {
         qs.push(visit_query(p).validated());
@@ -137,13 +137,13 @@ pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Re
 }
 
 pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
-    visit_pattern(parse_single(Rule::eof_pattern, pattern)?.children().consume(Rule::pattern))
+    visit_pattern(parse_single(Rule::eof_pattern, pattern)?.into_children().consume(Rule::pattern))
         .validated()
 }
 
 pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
     visit_patterns(
-        parse_single(Rule::eof_patterns, patterns)?.children().consume(Rule::eof_patterns),
+        parse_single(Rule::eof_patterns, patterns)?.into_children().consume(Rule::eof_patterns),
     )
     .into_iter()
     .map(Validatable::validated)
@@ -222,7 +222,7 @@ fn get_isa_constraint(_isa: SyntaxTree, tree: SyntaxTree) -> IsaConstraint {
 }
 
 fn get_role_player_constraint(tree: SyntaxTree) -> RolePlayerConstraint {
-    let mut tree = tree.children().rev();
+    let mut tree = tree.into_children().rev();
     let player = get_var(tree.consume(Rule::player));
     if let Some(type_) = tree.try_consume(Rule::type_) {
         match visit_type(type_) {
@@ -235,7 +235,7 @@ fn get_role_player_constraint(tree: SyntaxTree) -> RolePlayerConstraint {
 }
 
 fn get_role_players(tree: SyntaxTree) -> Vec<RolePlayerConstraint> {
-    tree.children().map(get_role_player_constraint).collect()
+    tree.into_children().map(get_role_player_constraint).collect()
 }
 
 fn visit_query(tree: SyntaxTree) -> Query {
@@ -256,18 +256,18 @@ fn visit_query(tree: SyntaxTree) -> Query {
 
 fn visit_query_define(tree: SyntaxTree) -> TypeQLDefine {
     TypeQLDefine::new(visit_definables(
-        tree.children().omit(Rule::DEFINE).consume(Rule::definables),
+        tree.into_children().omit(Rule::DEFINE).consume(Rule::definables),
     ))
 }
 
 fn visit_query_undefine(tree: SyntaxTree) -> TypeQLUndefine {
     TypeQLUndefine::new(visit_definables(
-        tree.children().omit(Rule::UNDEFINE).consume(Rule::definables),
+        tree.into_children().omit(Rule::UNDEFINE).consume(Rule::definables),
     ))
 }
 
 fn visit_query_insert(tree: SyntaxTree) -> TypeQLInsert {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     match children.consume_any().as_rule() {
         Rule::MATCH => TypeQLMatch::from_patterns(visit_patterns(children.consume(Rule::patterns)))
             .insert(visit_variable_things(
@@ -281,33 +281,33 @@ fn visit_query_insert(tree: SyntaxTree) -> TypeQLInsert {
 }
 
 fn visit_query_delete(tree: SyntaxTree) -> TypeQLDelete {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     TypeQLMatch::from_patterns(visit_patterns(children.omit(Rule::MATCH).consume(Rule::patterns)))
         .delete(visit_variable_things(children.omit(Rule::DELETE).consume(Rule::variable_things)))
 }
 
 fn visit_query_update(tree: SyntaxTree) -> TypeQLUpdate {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     visit_query_delete(children.consume(Rule::query_delete))
         .insert(visit_variable_things(children.omit(Rule::INSERT).consume(Rule::variable_things)))
 }
 
 fn visit_query_match(tree: SyntaxTree) -> TypeQLMatch {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     let mut match_query = TypeQLMatch::from_patterns(visit_patterns(
         children.omit(Rule::MATCH).consume(Rule::patterns),
     ));
     if let Some(modifiers) = children.try_consume(Rule::modifiers) {
-        for modifier in modifiers.children() {
+        for modifier in modifiers.into_children() {
             match_query = match modifier.as_rule() {
                 Rule::filter => match_query.filter(visit_filter(modifier)),
                 Rule::sort => match_query.sort(visit_sort(modifier)),
-                Rule::offset => match_query
-                    .offset(get_long(modifier.children().omit(Rule::OFFSET).consume(Rule::LONG_))
-                        as usize),
-                Rule::limit => match_query
-                    .limit(get_long(modifier.children().omit(Rule::LIMIT).consume(Rule::LONG_))
-                        as usize),
+                Rule::offset => match_query.offset(get_long(
+                    modifier.into_children().omit(Rule::OFFSET).consume(Rule::LONG_),
+                ) as usize),
+                Rule::limit => match_query.limit(get_long(
+                    modifier.into_children().omit(Rule::LIMIT).consume(Rule::LONG_),
+                ) as usize),
                 _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&modifier.as_str()])),
             };
         }
@@ -316,9 +316,9 @@ fn visit_query_match(tree: SyntaxTree) -> TypeQLMatch {
 }
 
 fn visit_query_match_aggregate(tree: SyntaxTree) -> TypeQLMatchAggregate {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     let match_query = visit_query_match(children.consume(Rule::query_match));
-    let mut function = children.consume(Rule::match_aggregate).children();
+    let mut function = children.consume(Rule::match_aggregate).into_children();
     match visit_aggregate_method(function.consume(Rule::aggregate_method)) {
         token::Aggregate::Count => match_query.count(),
         method => match_query.aggregate(method, get_var(function.consume(Rule::VAR_))),
@@ -326,18 +326,18 @@ fn visit_query_match_aggregate(tree: SyntaxTree) -> TypeQLMatchAggregate {
 }
 
 fn visit_query_match_group(tree: SyntaxTree) -> TypeQLMatchGroup {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     visit_query_match(children.consume(Rule::query_match)).group(get_var(
-        children.consume(Rule::match_group).children().omit(Rule::GROUP).consume(Rule::VAR_),
+        children.consume(Rule::match_group).into_children().omit(Rule::GROUP).consume(Rule::VAR_),
     ))
 }
 
 fn visit_query_match_group_agg(tree: SyntaxTree) -> TypeQLMatchGroupAggregate {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     let group = visit_query_match(children.consume(Rule::query_match)).group(get_var(
-        children.consume(Rule::match_group).children().omit(Rule::GROUP).consume(Rule::VAR_),
+        children.consume(Rule::match_group).into_children().omit(Rule::GROUP).consume(Rule::VAR_),
     ));
-    let mut function = children.consume(Rule::match_aggregate).children();
+    let mut function = children.consume(Rule::match_aggregate).into_children();
     match visit_aggregate_method(function.consume(Rule::aggregate_method)) {
         token::Aggregate::Count => group.count(),
         method => group.aggregate(method, get_var(function.consume(Rule::VAR_))),
@@ -345,15 +345,15 @@ fn visit_query_match_group_agg(tree: SyntaxTree) -> TypeQLMatchGroupAggregate {
 }
 
 fn visit_filter(tree: SyntaxTree) -> Vec<UnboundVariable> {
-    tree.children().omit(Rule::GET).map(get_var).collect()
+    tree.into_children().omit(Rule::GET).map(get_var).collect()
 }
 
 fn visit_sort(tree: SyntaxTree) -> Sorting {
-    Sorting::new(tree.children().omit(Rule::SORT).map(visit_var_order).collect())
+    Sorting::new(tree.into_children().omit(Rule::SORT).map(visit_var_order).collect())
 }
 
 fn visit_var_order(tree: SyntaxTree) -> sorting::OrderedVariable {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     sorting::OrderedVariable {
         var: get_var(children.consume(Rule::VAR_)),
         order: children.try_consume(Rule::ORDER_).map(|p| p.as_str().to_owned()),
@@ -365,7 +365,7 @@ fn visit_aggregate_method(tree: SyntaxTree) -> token::Aggregate {
 }
 
 fn visit_definables(tree: SyntaxTree) -> Vec<Definable> {
-    tree.children().map(visit_definable).collect()
+    tree.into_children().map(visit_definable).collect()
 }
 
 fn visit_definable(tree: SyntaxTree) -> Definable {
@@ -379,7 +379,7 @@ fn visit_definable(tree: SyntaxTree) -> Definable {
 }
 
 fn visit_patterns(tree: SyntaxTree) -> Vec<Pattern> {
-    tree.children().map(visit_pattern).collect()
+    tree.into_children().map(visit_pattern).collect()
 }
 
 fn visit_pattern(tree: SyntaxTree) -> Pattern {
@@ -399,7 +399,7 @@ fn visit_pattern_conjunction(tree: SyntaxTree) -> Conjunction {
 
 fn visit_pattern_disjunction(tree: SyntaxTree) -> Disjunction {
     Disjunction::new(
-        tree.children()
+        tree.into_children()
             .filter(|child| matches!(child.as_rule(), Rule::patterns))
             .map(visit_patterns)
             .map(|mut nested| match nested.len() {
@@ -411,7 +411,7 @@ fn visit_pattern_disjunction(tree: SyntaxTree) -> Disjunction {
 }
 
 fn visit_pattern_negation(tree: SyntaxTree) -> Negation {
-    let mut patterns = visit_patterns(tree.children().omit(Rule::NOT).consume(Rule::patterns));
+    let mut patterns = visit_patterns(tree.into_children().omit(Rule::NOT).consume(Rule::patterns));
     match patterns.len() {
         1 => Negation::new(patterns.pop().unwrap()),
         _ => Negation::new(Conjunction::new(patterns).into()),
@@ -429,63 +429,65 @@ fn visit_pattern_variable(tree: SyntaxTree) -> Variable {
 }
 
 fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     get_var(children.consume(Rule::VAR_)).is(get_var(children.omit(Rule::IS).consume(Rule::VAR_)))
 }
 
 fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     let mut var_type = visit_type_any(children.consume(Rule::type_any)).into_type_variable();
-    var_type = children.map(SyntaxTree::children).fold(var_type, |var_type, mut constraint| {
-        match constraint.consume_any().as_rule() {
-            Rule::ABSTRACT => var_type.abstract_(),
-            Rule::OWNS => {
-                let type_ = visit_type(constraint.consume(Rule::type_));
-                let overridden = match constraint.peek().map(|child| child.as_rule()) {
-                    Some(Rule::AS) => {
-                        Some(visit_type(constraint.omit(Rule::AS).consume(Rule::type_)))
-                    }
-                    _ => None,
-                };
-                let is_key = IsKeyAttribute::from(constraint.try_consume(Rule::IS_KEY).is_some());
-                var_type.constrain_owns(OwnsConstraint::from((type_, overridden, is_key)))
+    var_type =
+        children.map(SyntaxTree::into_children).fold(var_type, |var_type, mut constraint| {
+            match constraint.consume_any().as_rule() {
+                Rule::ABSTRACT => var_type.abstract_(),
+                Rule::OWNS => {
+                    let type_ = visit_type(constraint.consume(Rule::type_));
+                    let overridden = match constraint.peek().map(|child| child.as_rule()) {
+                        Some(Rule::AS) => {
+                            Some(visit_type(constraint.omit(Rule::AS).consume(Rule::type_)))
+                        }
+                        _ => None,
+                    };
+                    let is_key =
+                        IsKeyAttribute::from(constraint.try_consume(Rule::IS_KEY).is_some());
+                    var_type.constrain_owns(OwnsConstraint::from((type_, overridden, is_key)))
+                }
+                Rule::PLAYS => {
+                    let type_ = visit_type_scoped(constraint.consume(Rule::type_scoped));
+                    let overridden = match constraint.peek().map(|child| child.as_rule()) {
+                        Some(Rule::AS) => {
+                            Some(visit_type(constraint.omit(Rule::AS).consume(Rule::type_)))
+                        }
+                        _ => None,
+                    };
+                    var_type.constrain_plays(PlaysConstraint::from((type_, overridden)))
+                }
+                Rule::REGEX => var_type.regex(get_regex(constraint.consume(Rule::STRING_))),
+                Rule::RELATES => {
+                    let type_ = visit_type(constraint.consume(Rule::type_));
+                    let overridden = match constraint.peek().map(|child| child.as_rule()) {
+                        Some(Rule::AS) => {
+                            Some(visit_type(constraint.omit(Rule::AS).consume(Rule::type_)))
+                        }
+                        _ => None,
+                    };
+                    var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
+                }
+                Rule::SUB_ => var_type.constrain_sub(SubConstraint::from(visit_type_any(
+                    constraint.consume(Rule::type_any),
+                ))),
+                Rule::TYPE => var_type.type_(visit_label_any(constraint.consume(Rule::label_any))),
+                Rule::VALUE => var_type
+                    .value(token::ValueType::from(constraint.consume(Rule::value_type).as_str())),
+                _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&constraint.as_str()])),
             }
-            Rule::PLAYS => {
-                let type_ = visit_type_scoped(constraint.consume(Rule::type_scoped));
-                let overridden = match constraint.peek().map(|child| child.as_rule()) {
-                    Some(Rule::AS) => {
-                        Some(visit_type(constraint.omit(Rule::AS).consume(Rule::type_)))
-                    }
-                    _ => None,
-                };
-                var_type.constrain_plays(PlaysConstraint::from((type_, overridden)))
-            }
-            Rule::REGEX => var_type.regex(get_regex(constraint.consume(Rule::STRING_))),
-            Rule::RELATES => {
-                let type_ = visit_type(constraint.consume(Rule::type_));
-                let overridden = match constraint.peek().map(|child| child.as_rule()) {
-                    Some(Rule::AS) => {
-                        Some(visit_type(constraint.omit(Rule::AS).consume(Rule::type_)))
-                    }
-                    _ => None,
-                };
-                var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
-            }
-            Rule::SUB_ => var_type.constrain_sub(SubConstraint::from(visit_type_any(
-                constraint.consume(Rule::type_any),
-            ))),
-            Rule::TYPE => var_type.type_(visit_label_any(constraint.consume(Rule::label_any))),
-            Rule::VALUE => var_type
-                .value(token::ValueType::from(constraint.consume(Rule::value_type).as_str())),
-            _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&constraint.as_str()])),
-        }
-    });
+        });
 
     var_type
 }
 
 fn visit_variable_things(tree: SyntaxTree) -> Vec<ThingVariable> {
-    tree.children().map(visit_variable_thing_any).collect()
+    tree.into_children().map(visit_variable_thing_any).collect()
 }
 
 fn visit_variable_thing_any(tree: SyntaxTree) -> ThingVariable {
@@ -499,7 +501,7 @@ fn visit_variable_thing_any(tree: SyntaxTree) -> ThingVariable {
 }
 
 fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     let mut var_thing = get_var(children.consume(Rule::VAR_)).into_thing();
     if children.peek().unwrap().as_rule() != Rule::attributes {
         let keyword = children.consume_any();
@@ -520,7 +522,7 @@ fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
 }
 
 fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     let mut relation = match children.peek().unwrap().as_rule() {
         Rule::VAR_ => get_var(children.consume(Rule::VAR_)),
         _ => UnboundVariable::hidden(),
@@ -542,7 +544,7 @@ fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
 }
 
 fn visit_variable_attribute(tree: SyntaxTree) -> ThingVariable {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     let mut attribute = match children.peek().unwrap().as_rule() {
         Rule::VAR_ => get_var(children.consume(Rule::VAR_)),
         _ => UnboundVariable::hidden(),
@@ -568,11 +570,11 @@ fn visit_relation(tree: SyntaxTree) -> RelationConstraint {
 }
 
 fn visit_attributes(tree: SyntaxTree) -> Vec<HasConstraint> {
-    tree.children().map(visit_attribute).collect()
+    tree.into_children().map(visit_attribute).collect()
 }
 
 fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
 
     match children.omit(Rule::HAS).peek().unwrap().as_rule() {
         Rule::label => {
@@ -591,7 +593,7 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
 }
 
 fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     match children.peek().unwrap().as_rule() {
         Rule::value => {
             ValueConstraint::new(token::Predicate::Eq, visit_value(children.consume(Rule::value)))
@@ -625,7 +627,7 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
 }
 
 fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {
-    let mut children = tree.children();
+    let mut children = tree.into_children();
     RuleDeclaration::new(Label::from(children.omit(Rule::RULE).consume(Rule::label).as_str()))
         .when(Conjunction::new(visit_patterns(children.omit(Rule::WHEN).consume(Rule::patterns))))
         .then(visit_variable_thing_any(children.omit(Rule::THEN).consume(Rule::variable_thing_any)))
@@ -633,7 +635,7 @@ fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {
 
 fn visit_schema_rule_declaration(tree: SyntaxTree) -> RuleDeclaration {
     RuleDeclaration::new(Label::from(
-        tree.children().omit(Rule::RULE).consume(Rule::label).as_str(),
+        tree.into_children().omit(Rule::RULE).consume(Rule::label).as_str(),
     ))
 }
 
