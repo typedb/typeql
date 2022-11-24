@@ -125,15 +125,11 @@ pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
 }
 
 pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
-    let mut qs = Vec::new();
-    for p in TypeQLParser::parse(Rule::eof_queries, queries)?
+    Ok(TypeQLParser::parse(Rule::eof_queries, queries)?
         .consume(Rule::eof_queries)
         .into_children()
-        .filter(|r| matches!(r.as_rule(), Rule::query))
-    {
-        qs.push(visit_query(p).validated());
-    }
-    Ok(qs.into_iter())
+        .filter(|child| matches!(child.as_rule(), Rule::query))
+        .map(|query| visit_query(query).validated()))
 }
 
 pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
@@ -356,7 +352,7 @@ fn visit_var_order(tree: SyntaxTree) -> sorting::OrderedVariable {
     let mut children = tree.into_children();
     sorting::OrderedVariable {
         var: get_var(children.consume(Rule::VAR_)),
-        order: children.try_consume(Rule::ORDER_).map(|p| p.as_str().to_owned()),
+        order: children.try_consume(Rule::ORDER_).map(|child| child.as_str().to_owned()),
     }
 }
 
