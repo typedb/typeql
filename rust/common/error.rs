@@ -41,6 +41,21 @@ impl From<Vec<Message>> for Error {
     }
 }
 
+impl<T: pest::RuleType> From<pest::error::Error<T>> for Error {
+    fn from(error: pest::error::Error<T>) -> Self {
+        let (line, col) = match error.line_col {
+            pest::error::LineColLocation::Pos((line, col)) => (line, col),
+            pest::error::LineColLocation::Span((line, col), _) => (line, col),
+        };
+        Self::from(SYNTAX_ERROR_DETAILED.format(&[
+            &line.to_string(),
+            error.line(),
+            &(" ".repeat(col - 1) + "^"),
+            &error.to_string(),
+        ]))
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write_joined!(f, "\n\n", self.messages)

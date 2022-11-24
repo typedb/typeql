@@ -30,7 +30,7 @@ query = { query_define          | query_undefine
 
 // MATCH QUERY MODIFIERS =======================================================
 
-modifiers = { (filter ~ SEMICOLON)? ~ (sort ~ SEMICOLON)? ~ (offset ~ SEMICOLON)? ~ (limit ~ SEMICOLON)? }
+modifiers = { (filter ~ ";")? ~ (sort ~ ";")? ~ (offset ~ ";")? ~ (limit ~ ";")? }
 
 filter = { GET ~ VAR_ ~ ( "," ~ VAR_ )* }
 sort = { SORT ~ var_order ~ ( "," ~ var_order )* }
@@ -44,21 +44,21 @@ limit = { LIMIT ~ LONG_ }
 // An aggregate function is composed of 2 things=
 // The aggregate method name, followed by the variable to apply the function to
 
-match_aggregate = { aggregate_method ~ VAR_? ~ SEMICOLON } // method and, optionally, a variable
-aggregate_method = { COUNT | MAX | MEAN | MEDIAN | MIN | STD | SUM }
+match_aggregate = { (COUNT | aggregate_method ~ VAR_) ~ ";" } // method and, sometimes, a variable
+aggregate_method = { MAX | MEAN | MEDIAN | MIN | STD | SUM }
 
 // GET GROUP QUERY =============================================================
 
-match_group = { GROUP ~ VAR_ ~ SEMICOLON }
+match_group = { GROUP ~ VAR_ ~ ";" }
 
 // SCHEMA QUERY ===============================================================
 
-definables = { ( definable ~ SEMICOLON )+ }
-definable = { variable_type | schema_rule }
+definables = { ( definable ~ ";" )+ }
+definable = { variable_type | schema_rule | schema_rule_declaration }
 
 // QUERY PATTERNS ==============================================================
 
-patterns = { ( pattern ~ SEMICOLON )+ }
+patterns = { ( pattern ~ ";" )+ }
 pattern = { pattern_variable | pattern_disjunction | pattern_conjunction | pattern_negation }
 
 pattern_conjunction = { "{" ~ patterns ~ "}" }
@@ -76,20 +76,31 @@ variable_concept = { VAR_ ~ IS ~ VAR_ }
 // TYPE VARIABLES ==============================================================
 
 variable_type = { type_any ~ type_constraint ~ ( "," ~ type_constraint )* }
-type_constraint = { ABSTRACT | SUB_ ~ type_any | OWNS ~ type_ ~ ( AS ~ type_)? ~ ( IS_KEY )? | RELATES ~ type_ ~ ( AS ~ type_)? | PLAYS ~ type_scoped ~ ( AS ~ type_)? | VALUE ~ value_type | REGEX ~ STRING_ | TYPE ~ label_any }
-
+type_constraint = { ABSTRACT
+                  | OWNS ~ type_ ~ ( AS ~ type_)? ~ ( IS_KEY )?
+                  | PLAYS ~ type_scoped ~ ( AS ~ type_)?
+                  | REGEX ~ STRING_
+                  | RELATES ~ type_ ~ ( AS ~ type_)?
+                  | SUB_ ~ type_any
+                  | TYPE ~ label_any
+                  | VALUE ~ value_type
+                  }
 
 // THING VARIABLES =============================================================
 
-variable_things = { ( variable_thing_any ~ SEMICOLON )+ }
+variable_things = { ( variable_thing_any ~ ";" )+ }
 variable_thing_any = { variable_thing | variable_relation | variable_attribute }
 
-variable_thing = { VAR_ ~ ISA_ ~ type_ ~ ( "," ~ attributes )? | VAR_ ~ IID ~ IID_ ~ ( "," ~ attributes )? | VAR_ ~ attributes }
+variable_thing = { VAR_ ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+                 | VAR_ ~ IID ~ IID_ ~ ( "," ~ attributes )?
+                 | VAR_ ~ attributes
+                 }
 
-variable_relation = { VAR_? ~ relation ~ ISA_ ~ type_ ~ ( "," ~ attributes )? | VAR_? ~ relation ~ attributes? }
+variable_relation = { VAR_? ~ relation ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+                    | VAR_? ~ relation ~ attributes? }
 
-variable_attribute = { VAR_? ~ predicate ~ ISA_ ~ type_ ~ ( "," ~ attributes )? | VAR_? ~ predicate ~ attributes? }
-
+variable_attribute = { VAR_? ~ predicate ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+                     | VAR_? ~ predicate ~ attributes? }
 
 // RELATION CONSTRUCT ==========================================================
 
@@ -113,7 +124,8 @@ predicate_value = { value | VAR_ }
 
 // SCHEMA CONSTRUCT =============================================================
 
-schema_rule = { RULE ~ label ~ (":" ~ WHEN ~ "{" ~ patterns ~ "}" ~ THEN ~ "{" ~ variable_thing_any ~ SEMICOLON ~ "}")? }
+schema_rule_declaration = { RULE ~ label }
+schema_rule = { RULE ~ label ~ ":" ~ WHEN ~ "{" ~ patterns ~ "}" ~ THEN ~ "{" ~ variable_thing_any ~ ";" ~ "}" }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
@@ -145,97 +157,97 @@ unreserved = { VALUE | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT | GET | SORT
 
 // QUERY COMMAND KEYWORDS
 
-MATCH = { "match" }
-GET = { "get" }
-DEFINE = { "define" }
-UNDEFINE = { "undefine" }
-INSERT = { "insert" }
-DELETE = { "delete" }
-COMPUTE = { "compute" }
+MATCH = @{ "match" ~ WB }
+GET = @{ "get" ~ WB }
+DEFINE = @{ "define" ~ WB }
+UNDEFINE = @{ "undefine" ~ WB }
+INSERT = @{ "insert" ~ WB }
+DELETE = @{ "delete" ~ WB }
+COMPUTE = @{ "compute" ~ WB }
 
 // NATIVE TYPE KEYWORDS
 
-THING = { "thing" }
-ENTITY = { "entity" }
-ATTRIBUTE = { "attribute" }
-RELATION = { "relation" }
-ROLE = { "role" }
-RULE = { "rule" }
+THING = @{ "thing" ~ WB }
+ENTITY = @{ "entity" ~ WB }
+ATTRIBUTE = @{ "attribute" ~ WB }
+RELATION = @{ "relation" ~ WB }
+ROLE = @{ "role" ~ WB }
+RULE = @{ "rule" ~ WB }
 
 // DELETE AND GET QUERY MODIFIER KEYWORDS
 
-OFFSET = { "offset" }
-LIMIT = { "limit" }
-SORT = { "sort" }
-ORDER_ = { ASC | DESC }
-ASC = { "asc" }
-DESC = { "desc" }
+OFFSET = @{ "offset" ~ WB }
+LIMIT = @{ "limit" ~ WB }
+SORT = @{ "sort" ~ WB }
+ORDER_ = @{ ASC | DESC }
+ASC = @{ "asc" ~ WB }
+DESC = @{ "desc" ~ WB }
 
 // TYPE VARIABLE CONSTRAINT KEYWORDS
 
-TYPE = { "type" }
-ABSTRACT = { "abstract" }
-SUB_ = { SUB | SUBX }
-SUB = { "sub" }
-SUBX = { "sub!" }
-OWNS = { "owns" }
-IS_KEY = { "@key" }
-REGEX = { "regex" }
-AS = { "as" }
-PLAYS = { "plays" }
-RELATES = { "relates" }
-WHEN = { "when" }
-THEN = { "then" }
+TYPE = @{ "type" ~ WB }
+ABSTRACT = @{ "abstract" ~ WB }
+SUB_ = @{ SUB | SUBX }
+SUB = @{ "sub" ~ WB }
+SUBX = @{ "sub!" ~ WB }
+OWNS = @{ "owns" ~ WB }
+IS_KEY = @{ "@key" ~ WB }
+REGEX = @{ "regex" ~ WB }
+AS = @{ "as" ~ WB }
+PLAYS = @{ "plays" ~ WB }
+RELATES = @{ "relates" ~ WB }
+WHEN = @{ "when" ~ WB }
+THEN = @{ "then" ~ WB }
 
 // THING VARIABLE CONSTRAINT KEYWORDS
 
-IID = { "iid" ~ WB }
-ISA_ = { ISA | ISAX }
-ISA = { "isa" ~ WB }
-ISAX = { "isa!" ~ WB }
-HAS = { "has" ~ WB }
-VALUE = { "value" ~ WB }
-IS = { "is" ~ WB }
+IID = @{ "iid" ~ WB }
+ISA_ = @{ ISA | ISAX }
+ISA = @{ "isa" ~ WB }
+ISAX = @{ "isa!" ~ WB }
+HAS = @{ "has" ~ WB }
+VALUE = @{ "value" ~ WB }
+IS = @{ "is" ~ WB }
 
 // OPERATOR KEYWORDS
 
-OR = { "or" ~ WB }
-NOT = { "not" ~ WB }
+OR = @{ "or" ~ WB }
+NOT = @{ "not" ~ WB }
 
 // PREDICATE KEYWORDS
 
-EQ = { "=" }
-NEQ = { "!=" }
-GT = { ">" }
-GTE = { ">=" }
-LT = { "<" }
-LTE = { "<=" }
-LIKE = { "like" ~ WB }
-CONTAINS = { "contains" ~ WB }
+EQ = @{ "=" }
+NEQ = @{ "!=" }
+GT = @{ ">" }
+GTE = @{ ">=" }
+LT = @{ "<" }
+LTE = @{ "<=" }
+LIKE = @{ "like" ~ WB }
+CONTAINS = @{ "contains" ~ WB }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
-GROUP = { "group" ~ WB }
-COUNT = { "count" ~ WB }
-MAX = { "max" ~ WB }
-MIN = { "min" ~ WB }
-MEAN = { "mean" ~ WB }
-MEDIAN = { "median" ~ WB }
-STD = { "std" ~ WB }
-SUM = { "sum" ~ WB }
+GROUP = @{ "group" ~ WB }
+COUNT = @{ "count" ~ WB }
+MAX = @{ "max" ~ WB }
+MIN = @{ "min" ~ WB }
+MEAN = @{ "mean" ~ WB }
+MEDIAN = @{ "median" ~ WB }
+STD = @{ "std" ~ WB }
+SUM = @{ "sum" ~ WB }
 
 // VALUE TYPE KEYWORDS
 
-LONG = { "long" ~ WB }
-DOUBLE = { "double" ~ WB }
-STRING = { "string" ~ WB }
-BOOLEAN = { "boolean" ~ WB }
-DATETIME = { "datetime" ~ WB }
+LONG = @{ "long" ~ WB }
+DOUBLE = @{ "double" ~ WB }
+STRING = @{ "string" ~ WB }
+BOOLEAN = @{ "boolean" ~ WB }
+DATETIME = @{ "datetime" ~ WB }
 
 // LITERAL VALUE KEYWORDS
-BOOLEAN_ = { TRUE | FALSE } // order of lexer declaration matters
-TRUE = { "true" ~ WB }
-FALSE = { "false" ~ WB }
+BOOLEAN_ = @{ TRUE | FALSE } // order of lexer declaration matters
+TRUE = @{ "true" ~ WB }
+FALSE = @{ "false" ~ WB }
 STRING_ = @{ "\"" ~ (!"\"" ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "\""
            | "'"  ~ (!"'"  ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "'"  }
 LONG_ = @{ ("+" | "-")? ~ ASCII_DIGIT+ ~ WB }
@@ -250,12 +262,12 @@ VAR_ANONYMOUS_ = @{ "$_" ~ WB }
 VAR_NAMED_ = @{ "$" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* ~ WB }
 IID_ = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
 LABEL_ = @{ TYPE_CHAR_H_ ~ TYPE_CHAR_T_* ~ WB }
-LABEL_SCOPED_ = { LABEL_ ~ ":" ~ LABEL_ ~ WB }
+LABEL_SCOPED_ = @{ LABEL_ ~ ":" ~ LABEL_ ~ WB }
 
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
-TYPE_CHAR_H_ = { 'A'..'Z' | 'a'..'z'
+TYPE_CHAR_H_ = @{ 'A'..'Z' | 'a'..'z'
                | '\u{00C0}'..'\u{00D6}'
                | '\u{00D8}'..'\u{00F6}'
                | '\u{00F8}'..'\u{02FF}'
@@ -268,7 +280,7 @@ TYPE_CHAR_H_ = { 'A'..'Z' | 'a'..'z'
                | '\u{F900}'..'\u{FDCF}'
                | '\u{FDF0}'..'\u{FFFD}'
                }
-TYPE_CHAR_T_ = { TYPE_CHAR_H_
+TYPE_CHAR_T_ = @{ TYPE_CHAR_H_
                | ASCII_DIGIT
                | "_"
                | "-"
@@ -276,20 +288,18 @@ TYPE_CHAR_T_ = { TYPE_CHAR_H_
                | '\u{0300}'..'\u{036F}'
                | '\u{203F}'..'\u{2040}'
                }
-DATE_FRAGMENT_ = { YEAR_ ~ "-" ~ MONTH_ ~ "-" ~ DAY_ }
-MONTH_ = { ('0'..'1') ~ ASCII_DIGIT }
-DAY_ = { ('0'..'3') ~ ASCII_DIGIT }
-YEAR_ = { ASCII_DIGIT{4} | ("+" | "-") ~ ASCII_DIGIT+ }
-TIME_ = { HOUR_ ~ ":" ~ MINUTE_ ~ (":" ~ SECOND_ ~ ("." ~ SECOND_FRACTION_)? )? }
-HOUR_ = { ('0'..'2') ~ ASCII_DIGIT }
-MINUTE_ = { ('0'..'6') ~ ASCII_DIGIT }
-SECOND_ = { ('0'..'6') ~ ASCII_DIGIT }
-SECOND_FRACTION_ = { ASCII_DIGIT{1,3} } // between 1 and 3 digits
-ESCAPE_SEQ_ = { "\\" ~ ANY }
+DATE_FRAGMENT_ = @{ YEAR_ ~ "-" ~ MONTH_ ~ "-" ~ DAY_ }
+MONTH_ = @{ ('0'..'1') ~ ASCII_DIGIT }
+DAY_ = @{ ('0'..'3') ~ ASCII_DIGIT }
+YEAR_ = @{ ASCII_DIGIT{4} | ("+" | "-") ~ ASCII_DIGIT+ }
+TIME_ = @{ HOUR_ ~ ":" ~ MINUTE_ ~ (":" ~ SECOND_ ~ ("." ~ SECOND_FRACTION_)? )? }
+HOUR_ = @{ ('0'..'2') ~ ASCII_DIGIT }
+MINUTE_ = @{ ('0'..'6') ~ ASCII_DIGIT }
+SECOND_ = @{ ('0'..'6') ~ ASCII_DIGIT }
+SECOND_FRACTION_ = @{ ASCII_DIGIT{1,3} } // between 1 and 3 digits
+ESCAPE_SEQ_ = @{ "\\" ~ ANY }
 
-WB = _{ &(PUNCTUATION | WS | EOL_COMMENT) } // Word boundary
+WB = _{ &(PUNCTUATION | WHITESPACE | COMMENT) } // Word boundary
 
-SEMICOLON = { ";" }
-
-EOL_COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
-WS = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
