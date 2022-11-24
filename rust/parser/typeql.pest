@@ -209,7 +209,7 @@ DESC = @{ "desc" ~ WB }
 
 TYPE = @{ "type" ~ WB }
 ABSTRACT = @{ "abstract" ~ WB }
-SUB_ = @{ SUB | SUBX }
+SUB_ = @{ SUBX | SUB }
 SUB = @{ "sub" ~ WB }
 SUBX = @{ "sub!" ~ WB }
 OWNS = @{ "owns" ~ WB }
@@ -224,7 +224,7 @@ THEN = @{ "then" ~ WB }
 // THING VARIABLE CONSTRAINT KEYWORDS
 
 IID = @{ "iid" ~ WB }
-ISA_ = @{ ISA | ISAX }
+ISA_ = @{ ISAX | ISA }
 ISA = @{ "isa" ~ WB }
 ISAX = @{ "isa!" ~ WB }
 HAS = @{ "has" ~ WB }
