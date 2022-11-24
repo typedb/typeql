@@ -28,9 +28,9 @@ use typeql_lang::parse_query;
 pub struct TypeQLWorld;
 
 fn main() {
-    futures::executor::block_on(TypeQLWorld::run(
-        "../bazel-typeql/external/vaticle_typedb_behaviour/typeql",
-    ))
+    futures::executor::block_on(TypeQLWorld::cucumber().filter_run(
+        "../vaticle_typedb_behaviour", |_, _, sc| !sc.tags.iter().any(|t| t == "ignore")
+    ));
 }
 
 #[given("reasoning schema")]
@@ -39,14 +39,14 @@ fn main() {
 #[when("typeql define")]
 async fn typeql_define(_: &mut TypeQLWorld, step: &Step) {
     let parsed = parse_query(&step.docstring.as_ref().unwrap());
-    assert_eq!(parsed, parse_query(&parsed.as_ref().unwrap().to_string()));
+    assert_eq!(parsed.as_ref().unwrap(), &parse_query(&parsed.as_ref().unwrap().to_string()).unwrap());
 }
 
 #[given("typeql undefine")]
 #[when("typeql undefine")]
 async fn typeql_undefine(_: &mut TypeQLWorld, step: &Step) {
     let parsed = parse_query(&step.docstring.as_ref().unwrap());
-    assert_eq!(parsed, parse_query(&parsed.as_ref().unwrap().to_string()));
+    assert_eq!(parsed.as_ref().unwrap(), &parse_query(&parsed.as_ref().unwrap().to_string()).unwrap());
 }
 
 #[given("reasoning data")]
@@ -56,7 +56,7 @@ async fn typeql_undefine(_: &mut TypeQLWorld, step: &Step) {
 #[when("typeql insert")]
 async fn typeql_insert(_: &mut TypeQLWorld, step: &Step) {
     let parsed = parse_query(&step.docstring.as_ref().unwrap());
-    assert_eq!(parsed, parse_query(&parsed.as_ref().unwrap().to_string()));
+    assert_eq!(parsed.as_ref().unwrap(), &parse_query(&parsed.as_ref().unwrap().to_string()).unwrap());
     // parsed.as_ref().match().ifPresent(match -> match.conjunction().normalise());  // TODO
 }
 
@@ -65,14 +65,14 @@ async fn typeql_insert(_: &mut TypeQLWorld, step: &Step) {
 #[when("typeql delete")]
 async fn typeql_delete(_: &mut TypeQLWorld, step: &Step) {
     let parsed = parse_query(&step.docstring.as_ref().unwrap());
-    assert_eq!(parsed, parse_query(&parsed.as_ref().unwrap().to_string()));
+    assert_eq!(parsed.as_ref().unwrap(), &parse_query(&parsed.as_ref().unwrap().to_string()).unwrap());
     // parsed.as_ref().match().conjunction().normalise();  // TODO
 }
 
 #[when("typeql update")]
 async fn typeql_update(_: &mut TypeQLWorld, step: &Step) {
     let parsed = parse_query(&step.docstring.as_ref().unwrap());
-    assert_eq!(parsed, parse_query(&parsed.as_ref().unwrap().to_string()));
+    assert_eq!(parsed.as_ref().unwrap(), &parse_query(&parsed.as_ref().unwrap().to_string()).unwrap());
     // parsed.as_ref().match().conjunction().normalise();  // TODO
 }
 
@@ -89,7 +89,7 @@ async fn typeql_update(_: &mut TypeQLWorld, step: &Step) {
 #[when("get answers of typeql match")]
 async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
     let parsed = parse_query(&step.docstring.as_ref().unwrap());
-    assert_eq!(parsed, parse_query(&parsed.as_ref().unwrap().to_string()));
+    assert_eq!(parsed.as_ref().unwrap(), &parse_query(&parsed.as_ref().unwrap().to_string()).unwrap());
 
     // if parsed.as_ref().unwrap().is_match() {
     // parsed.as_ref().asMatch().conjunction().normalise();  // TODO

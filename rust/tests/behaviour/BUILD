@@ -23,14 +23,16 @@ load("@rules_rust//rust:defs.bzl", "rust_test")
 
 rust_test(
     name = "typeql_lang_behaviour_test",
-    crate = "//rust:typeql_lang",
+    srcs = ["main.rs"],
     data = [
         "@vaticle_typedb_behaviour//typeql/explanation:features",
         "@vaticle_typedb_behaviour//typeql/language:features",
         "@vaticle_typedb_behaviour//typeql/reasoner:features",
     ],
     deps = [
+        "//rust:typeql_lang",
         "@vaticle_dependencies//library/crates:cucumber",
         "@vaticle_dependencies//library/crates:futures",
-    ]
+    ],
+    use_libtest_harness = False,
 )
