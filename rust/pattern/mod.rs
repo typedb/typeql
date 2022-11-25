@@ -88,6 +88,13 @@ impl Pattern {
     }
 }
 
+enum_wrapper! { Pattern
+    Conjunction => Conjunction,
+    Disjunction => Disjunction,
+    Negation => Negation,
+    Variable => Variable,
+}
+
 impl Validatable for Pattern {
     fn validate(&self) -> Result<()> {
         use Pattern::*;
@@ -100,11 +107,20 @@ impl Validatable for Pattern {
     }
 }
 
-enum_wrapper! { Pattern
-    Conjunction => Conjunction,
-    Disjunction => Disjunction,
-    Negation => Negation,
-    Variable => Variable,
+pub trait Normalisable {
+    fn normalise(&mut self) -> Pattern;
+}
+
+impl Normalisable for Pattern {
+    fn normalise(&mut self) -> Pattern {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.normalise(),
+            Disjunction(disjunction) => disjunction.normalise(),
+            Negation(negation) => negation.normalise(),
+            Variable(variable) => variable.normalise(),
+        }
+    }
 }
 
 impl From<ConceptVariable> for Pattern {

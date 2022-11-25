@@ -43,6 +43,7 @@ rust_library(
     ],
     deps = [
         "@vaticle_dependencies//library/crates:chrono",
+        "@vaticle_dependencies//library/crates:itertools",
         "@vaticle_dependencies//library/crates:pest",
         "@vaticle_dependencies//library/crates:regex",
     ],

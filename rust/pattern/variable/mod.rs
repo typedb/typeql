@@ -46,6 +46,7 @@ pub use builder::{
 use crate::{
     common::{error::MATCH_HAS_UNBOUNDED_NESTED_PATTERN, validatable::Validatable, Result},
     enum_wrapper,
+    pattern::{Normalisable, Pattern},
 };
 use std::fmt;
 
@@ -82,6 +83,13 @@ impl Variable {
     }
 }
 
+enum_wrapper! { Variable
+    ConceptVariable => Concept,
+    ThingVariable => Thing,
+    TypeVariable => Type,
+    UnboundVariable => Unbound,
+}
+
 impl Validatable for Variable {
     fn validate(&self) -> Result<()> {
         use Variable::*;
@@ -94,11 +102,10 @@ impl Validatable for Variable {
     }
 }
 
-enum_wrapper! { Variable
-    ConceptVariable => Concept,
-    ThingVariable => Thing,
-    TypeVariable => Type,
-    UnboundVariable => Unbound,
+impl Normalisable for Variable {
+    fn normalise(&mut self) -> Pattern {
+        self.clone().into()
+    }
 }
 
 impl fmt::Display for Variable {

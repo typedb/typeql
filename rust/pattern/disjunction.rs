@@ -22,18 +22,25 @@
 
 use crate::{
     common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
-    pattern::{Pattern, Reference},
+    pattern::{Conjunction, Normalisable, Pattern, Reference},
 };
 use std::{collections::HashSet, fmt};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq)]
 pub struct Disjunction {
     pub patterns: Vec<Pattern>,
+    normalised: Option<Box<Disjunction>>,
+}
+
+impl PartialEq for Disjunction {
+    fn eq(&self, other: &Self) -> bool {
+        self.patterns == other.patterns
+    }
 }
 
 impl Disjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
-        Disjunction { patterns }
+        Disjunction { patterns, normalised: None }
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
@@ -44,6 +51,34 @@ impl Disjunction {
 impl Validatable for Disjunction {
     fn validate(&self) -> Result<()> {
         Ok(())
+    }
+}
+
+impl Normalisable for Disjunction {
+    fn normalise(&mut self) -> Pattern {
+        if self.normalised.is_none() {
+            self.normalised = Some(Box::new(Disjunction::new(
+                self.patterns
+                    .iter_mut()
+                    .flat_map(|pattern| match pattern {
+                        Pattern::Conjunction(conjunction) => {
+                            conjunction.normalise().into_disjunction().patterns.into_iter()
+                        }
+                        Pattern::Disjunction(disjunction) => {
+                            disjunction.normalise().into_disjunction().patterns.into_iter()
+                        }
+                        Pattern::Negation(negation) => {
+                            vec![Conjunction::new(vec![negation.normalise().into()]).into()]
+                                .into_iter()
+                        }
+                        Pattern::Variable(variable) => {
+                            vec![Conjunction::new(vec![variable.clone().into()]).into()].into_iter()
+                        }
+                    })
+                    .collect(),
+            )));
+        }
+        self.normalised.as_ref().unwrap().as_ref().clone().into()
     }
 }
 

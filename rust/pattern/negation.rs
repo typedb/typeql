@@ -22,19 +22,26 @@
 
 use crate::{
     common::{error::REDUNDANT_NESTED_NEGATION, token, validatable::Validatable, Result},
-    pattern::{Pattern, Reference},
+    pattern::{Conjunction, Disjunction, Normalisable, Pattern, Reference},
 };
 use core::fmt;
 use std::collections::HashSet;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq)]
 pub struct Negation {
     pub pattern: Box<Pattern>,
+    normalised: Option<Box<Negation>>,
+}
+
+impl PartialEq for Negation {
+    fn eq(&self, other: &Self) -> bool {
+        self.pattern == other.pattern
+    }
 }
 
 impl Negation {
     pub fn new(pattern: Pattern) -> Self {
-        Self { pattern: Box::new(pattern) }
+        Self { pattern: Box::new(pattern), normalised: None }
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
@@ -48,6 +55,23 @@ impl Validatable for Negation {
             Pattern::Negation(_) => Err(REDUNDANT_NESTED_NEGATION.format(&[]))?,
             _ => Ok(()),
         }
+    }
+}
+
+impl Normalisable for Negation {
+    fn normalise(&mut self) -> Pattern {
+        if self.normalised.is_none() {
+            self.normalised = Some(Box::new(Negation::new(match self.pattern.as_mut() {
+                Pattern::Conjunction(conjunction) => conjunction.normalise(),
+                Pattern::Disjunction(disjunction) => disjunction.normalise(),
+                Pattern::Negation(_) => panic!("{}", REDUNDANT_NESTED_NEGATION.format(&[])),
+                Pattern::Variable(variable) => {
+                    Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()])
+                        .into()
+                }
+            })));
+        }
+        self.normalised.as_ref().unwrap().as_ref().clone().into()
     }
 }
 

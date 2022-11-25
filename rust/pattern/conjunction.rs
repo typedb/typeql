@@ -27,18 +27,26 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedReferences, Pattern, Reference},
+    pattern::{Disjunction, NamedReferences, Normalisable, Pattern, Reference},
 };
+use itertools::Itertools;
 use std::{collections::HashSet, fmt, iter};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq)]
 pub struct Conjunction {
     pub patterns: Vec<Pattern>,
+    normalised: Option<Disjunction>,
+}
+
+impl PartialEq for Conjunction {
+    fn eq(&self, other: &Self) -> bool {
+        self.patterns == other.patterns
+    }
 }
 
 impl Conjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
-        Conjunction { patterns }
+        Conjunction { patterns, normalised: None }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -89,6 +97,42 @@ impl NamedReferences for Conjunction {
 impl Validatable for Conjunction {
     fn validate(&self) -> Result<()> {
         Ok(())
+    }
+}
+
+impl Normalisable for Conjunction {
+    fn normalise(&mut self) -> Pattern {
+        if self.normalised.is_none() {
+            let mut conjunctables = Vec::new();
+            let mut disjunctions = Vec::new();
+            self.patterns.iter_mut().for_each(|pattern| match pattern {
+                Pattern::Conjunction(conjunction) => {
+                    disjunctions.push(conjunction.normalise().into_disjunction().patterns)
+                }
+                Pattern::Disjunction(disjunction) => {
+                    disjunctions.push(disjunction.normalise().into_disjunction().patterns)
+                }
+                Pattern::Negation(negation) => conjunctables.push(negation.normalise()),
+                Pattern::Variable(variable) => conjunctables.push(variable.normalise()),
+            });
+            disjunctions.push(vec![Conjunction::new(conjunctables).into()]);
+
+            self.normalised = Some(Disjunction::new(
+                disjunctions
+                    .into_iter()
+                    .multi_cartesian_product()
+                    .map(|v| {
+                        Conjunction::new(
+                            v.into_iter()
+                                .flat_map(|c| c.into_conjunction().patterns.into_iter())
+                                .collect(),
+                        )
+                        .into()
+                    })
+                    .collect(),
+            ));
+        }
+        self.normalised.as_ref().unwrap().clone().into()
     }
 }
 
