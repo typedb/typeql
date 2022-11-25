@@ -382,7 +382,7 @@ fn visit_var_order(tree: SyntaxTree) -> sorting::OrderedVariable {
     let mut children = tree.into_children();
     sorting::OrderedVariable {
         var: get_var(children.consume_expected(Rule::VAR_)),
-        order: children.consume_if_matches(Rule::ORDER_).map(|child| child.as_str().to_owned()),
+        order: children.consume_if_matches(Rule::ORDER_).map(|child| token::Order::from(child.as_str())),
     }
 }
 

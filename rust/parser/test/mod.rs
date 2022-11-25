@@ -32,6 +32,7 @@ use crate::{
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use crate::common::token::Order::{Asc, Desc};
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
@@ -407,7 +408,7 @@ $x plays starring:actor;
 sort $x asc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([("x", "asc")]);
+    let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([("x", Asc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -421,7 +422,7 @@ sort $r desc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected =
-        typeql_match!(var("x").isa("movie").has(("rating", var("r")))).sort([("r", "desc")]);
+        typeql_match!(var("x").isa("movie").has(("rating", var("r")))).sort([("r", Desc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -449,7 +450,7 @@ sort $r desc; offset 10; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var("x").isa("movie").has(("rating", var("r"))))
-        .sort([("r", "desc")])
+        .sort([("r", Desc)])
         .offset(10)
         .limit(10);
 

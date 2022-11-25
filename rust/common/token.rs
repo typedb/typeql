@@ -153,3 +153,8 @@ string_enum! { ValueType
     Long = "long",
     String = "string",
 }
+
+string_enum! { Order
+    Asc = "asc",
+    Desc = "desc",
+}

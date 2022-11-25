@@ -258,22 +258,17 @@ impl fmt::Display for Filter {
 pub mod sorting {
     use crate::pattern::UnboundVariable;
     use std::fmt;
+    use crate::common::token;
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {
         pub var: UnboundVariable,
-        pub order: Option<String>, // FIXME
+        pub order: Option<token::Order>,
     }
 
     impl OrderedVariable {
-        pub fn new(var: UnboundVariable, order: &str) -> Self {
-            OrderedVariable {
-                var,
-                order: match order {
-                    "" => None,
-                    order => Some(order.to_string()),
-                },
-            }
+        pub fn new(var: UnboundVariable, order: Option<token::Order>) -> Self {
+            OrderedVariable { var, order }
         }
     }
 
@@ -301,15 +296,15 @@ impl Sorting {
 
 impl From<&str> for Sorting {
     fn from(var_name: &str) -> Self {
-        Self::from([(var_name, "")])
+        Self::from(vec![var(var_name)])
     }
 }
 
-impl<const N: usize> From<([(&str, &str); N])> for Sorting {
-    fn from(ordered_vars: [(&str, &str); N]) -> Self {
+impl<const N: usize> From<([(&str, token::Order); N])> for Sorting {
+    fn from(ordered_vars: [(&str, token::Order); N]) -> Self {
         Self::new(
             ordered_vars
-                .map(|(name, order)| sorting::OrderedVariable::new(var(name), order))
+                .map(|(name, order)| sorting::OrderedVariable::new(var(name), Some(order)))
                 .to_vec(),
         )
     }
@@ -318,7 +313,7 @@ impl<const N: usize> From<([(&str, &str); N])> for Sorting {
 impl From<Vec<UnboundVariable>> for Sorting {
     fn from(vars: Vec<UnboundVariable>) -> Self {
         Self::new(
-            vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), "")).collect(),
+            vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), None)).collect(),
         )
     }
 }
