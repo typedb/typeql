@@ -192,12 +192,12 @@ fn get_boolean(boolean: SyntaxTree) -> bool {
 }
 
 fn get_date(date: SyntaxTree) -> NaiveDate {
-    NaiveDate::parse_from_str(&date.as_str(), "%Y-%m-%d")
+    NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
         .expect(&ILLEGAL_GRAMMAR.format(&[date.as_str()]).message)
 }
 
 fn get_date_time(date_time: SyntaxTree) -> NaiveDateTime {
-    date_time::parse(&date_time.as_str())
+    date_time::parse(date_time.as_str())
         .expect(&ILLEGAL_GRAMMAR.format(&[date_time.as_str()]).message)
 }
 
@@ -251,7 +251,7 @@ fn visit_query(tree: SyntaxTree) -> Query {
         Rule::query_match_aggregate => visit_query_match_aggregate(child).into(),
         Rule::query_match_group => visit_query_match_group(child).into(),
         Rule::query_match_group_agg => visit_query_match_group_agg(child).into(),
-        _ => unreachable!("{:?}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{:?}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -279,7 +279,7 @@ fn visit_query_insert(tree: SyntaxTree) -> TypeQLInsert {
         Rule::INSERT => TypeQLInsert::new(visit_variable_things(
             children.consume_expected(Rule::variable_things),
         )),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&children.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[children.as_str()])),
     }
 }
 
@@ -322,7 +322,7 @@ fn visit_query_match(tree: SyntaxTree) -> TypeQLMatch {
                         .skip_expected(Rule::LIMIT)
                         .consume_expected(Rule::LONG_),
                 ) as usize),
-                _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&modifier.as_str()])),
+                _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[modifier.as_str()])),
             };
         }
     }
@@ -396,7 +396,7 @@ fn visit_definable(tree: SyntaxTree) -> Definable {
         Rule::variable_type => visit_variable_type(child).into(),
         Rule::schema_rule => visit_schema_rule(child).into(),
         Rule::schema_rule_declaration => visit_schema_rule_declaration(child).into(),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -411,7 +411,7 @@ fn visit_pattern(tree: SyntaxTree) -> Pattern {
         Rule::pattern_disjunction => visit_pattern_disjunction(child).into(),
         Rule::pattern_conjunction => visit_pattern_conjunction(child).into(),
         Rule::pattern_negation => visit_pattern_negation(child).into(),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -448,7 +448,7 @@ fn visit_pattern_variable(tree: SyntaxTree) -> Variable {
         Rule::variable_thing_any => visit_variable_thing_any(child).into(),
         Rule::variable_type => visit_variable_type(child).into(),
         Rule::variable_concept => visit_variable_concept(child).into(),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -501,7 +501,7 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
                 Rule::VALUE => var_type.value(token::ValueType::from(
                     constraint.consume_expected(Rule::value_type).as_str(),
                 )),
-                _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&constraint.as_str()])),
+                _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[constraint.as_str()])),
             }
         });
 
@@ -518,7 +518,7 @@ fn visit_variable_thing_any(tree: SyntaxTree) -> ThingVariable {
         Rule::variable_thing => visit_variable_thing(child),
         Rule::variable_relation => visit_variable_relation(child),
         Rule::variable_attribute => visit_variable_attribute(child),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -531,7 +531,7 @@ fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
             Rule::IID => var_thing.iid(children.consume_expected(Rule::IID_).as_str()),
             Rule::ISA_ => var_thing
                 .constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_))),
-            _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&children.as_str()])),
+            _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[children.as_str()])),
         }
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
@@ -547,7 +547,7 @@ fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
     let mut relation = children
         .consume_if_matches(Rule::VAR_)
         .map(get_var)
-        .unwrap_or_else(|| UnboundVariable::hidden())
+        .unwrap_or_else(UnboundVariable::hidden)
         .constrain_relation(visit_relation(children.consume_expected(Rule::relation)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
@@ -568,7 +568,7 @@ fn visit_variable_attribute(tree: SyntaxTree) -> ThingVariable {
     let mut attribute = children
         .consume_if_matches(Rule::VAR_)
         .map(get_var)
-        .unwrap_or_else(|| UnboundVariable::hidden())
+        .unwrap_or_else(UnboundVariable::hidden)
         .constrain_value(visit_predicate(children.consume_expected(Rule::predicate)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
@@ -606,11 +606,11 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
                     label,
                     visit_predicate(children.consume_expected(Rule::predicate)),
                 )),
-                _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&children.as_str()])),
+                _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[children.as_str()])),
             }
         }
         Some(Rule::VAR_) => HasConstraint::from(get_var(children.consume_expected(Rule::VAR_))),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&children.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[children.as_str()])),
     }
 }
 
@@ -628,7 +628,7 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
                 match predicate_value.as_rule() {
                     Rule::value => visit_value(predicate_value),
                     Rule::VAR_ => Value::from(get_var(predicate_value)),
-                    _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&children.as_str()])),
+                    _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[children.as_str()])),
                 }
             },
         ),
@@ -646,13 +646,13 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
                         token::Predicate::Contains => {
                             get_string(children.consume_expected(Rule::STRING_))
                         }
-                        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&children.as_str()])),
+                        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[children.as_str()])),
                     }
                 }
                 .into(),
             )
         }
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&children.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[children.as_str()])),
     }
 }
 
@@ -681,7 +681,7 @@ fn visit_type_any(tree: SyntaxTree) -> Type {
         Rule::VAR_ => Type::Variable(get_var(child)),
         Rule::type_ => visit_type(child),
         Rule::type_scoped => visit_type_scoped(child),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -690,7 +690,7 @@ fn visit_type_scoped(tree: SyntaxTree) -> Type {
     match child.as_rule() {
         Rule::label_scoped => Type::Label(visit_label_scoped(child)),
         Rule::VAR_ => Type::Variable(get_var(child)),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -699,7 +699,7 @@ fn visit_type(tree: SyntaxTree) -> Type {
     match child.as_rule() {
         Rule::label => Type::Label(child.as_str().into()),
         Rule::VAR_ => Type::Variable(get_var(child)),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -708,7 +708,7 @@ fn visit_label_any(tree: SyntaxTree) -> Label {
     match child.as_rule() {
         Rule::label => Label::from(child.as_str()),
         Rule::label_scoped => visit_label_scoped(child),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }
 
@@ -727,6 +727,6 @@ fn visit_value(tree: SyntaxTree) -> Value {
         Rule::BOOLEAN_ => Value::from(get_boolean(child)),
         Rule::DATE_ => Value::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
         Rule::DATETIME_ => Value::from(get_date_time(child)),
-        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[&child.as_str()])),
+        _ => unreachable!("{}", ILLEGAL_GRAMMAR.format(&[child.as_str()])),
     }
 }

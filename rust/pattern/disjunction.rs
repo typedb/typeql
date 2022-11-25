@@ -68,7 +68,7 @@ impl Normalisable for Disjunction {
                             disjunction.normalise().into_disjunction().patterns.into_iter()
                         }
                         Pattern::Negation(negation) => {
-                            vec![Conjunction::new(vec![negation.normalise().into()]).into()]
+                            vec![Conjunction::new(vec![negation.normalise()]).into()]
                                 .into_iter()
                         }
                         Pattern::Variable(variable) => {

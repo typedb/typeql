@@ -70,7 +70,7 @@ impl Conjunction {
         let names = self.named_references();
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
-            &mut iter::once(expect_bounded(&names, &bounds, &self))
+            &mut iter::once(expect_bounded(&names, bounds, self))
                 .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_bounds))),
         )
     }
