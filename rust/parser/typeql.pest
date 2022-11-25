@@ -37,18 +37,19 @@ query = { query_define          | query_undefine
         | query_match_group_agg | query_match_group
         | query_match_aggregate | query_match
         }
-    query_define = { DEFINE ~ definables }
-    query_undefine = { UNDEFINE ~ definables }
-    query_insert = { (MATCH ~ patterns)? ~ INSERT ~ variable_things }
-    query_update = { query_delete ~ INSERT ~ variable_things }
-    query_delete = { MATCH ~ patterns ~ DELETE ~ variable_things }
-    query_match = { MATCH ~ patterns ~ modifiers }
+
+query_define = { DEFINE ~ definables }
+query_undefine = { UNDEFINE ~ definables }
+query_insert = { (MATCH ~ patterns)? ~ INSERT ~ variable_things }
+query_update = { query_delete ~ INSERT ~ variable_things }
+query_delete = { MATCH ~ patterns ~ DELETE ~ variable_things }
+query_match = { MATCH ~ patterns ~ modifiers }
 
 // MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
 
-    query_match_aggregate = { query_match ~ match_aggregate }
-    query_match_group = { query_match ~ match_group }
-    query_match_group_agg = { query_match ~ match_group ~ match_aggregate }
+query_match_aggregate = { query_match ~ match_aggregate }
+query_match_group = { query_match ~ match_group }
+query_match_group_agg = { query_match ~ match_group ~ match_aggregate }
 
 // MATCH QUERY MODIFIERS =======================================================
 
@@ -63,13 +64,16 @@ limit = { LIMIT ~ LONG_ }
 
 // GET AGGREGATE QUERY =========================================================
 //
-// An aggregate function is composed of 2 things=
+// An aggregate function is composed of 2 things:
 // The aggregate method name, followed by the variable to apply the function to
 
-match_aggregate = { aggregate_method ~ VAR_? ~ ";" } // method and, sometimes, a variable
+match_aggregate = { aggregate_method ~ VAR_? ~ ";" }
 aggregate_method = { COUNT | MAX | MEAN | MEDIAN | MIN | STD | SUM }
 
 // GET GROUP QUERY =============================================================
+//
+// A group function is composed of 2 things:
+// The 'GROUP' method name, followed by the variable to group the results by
 
 match_group = { GROUP ~ VAR_ ~ ";" }
 
@@ -126,14 +130,14 @@ variable_attribute = { VAR_? ~ predicate ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
 
 // RELATION CONSTRUCT ==========================================================
 
-relation = { "(" ~ role_player ~ ( "," ~ role_player )* ~ ")" } // A list of role players in a Relations
-role_player = { type_ ~ ":" ~ player | player } // The Role type and player variable or just the player variable
-player = { VAR_ } // A player is just a variable
+relation = { "(" ~ role_player ~ ( "," ~ role_player )* ~ ")" }                 // A list of role players in a Relations
+role_player = { type_ ~ ":" ~ player | player }                                 // The Role type and player variable or just the player variable
+player = { VAR_ }                                                               // A player is just a variable
 
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes = { attribute ~ ( "," ~ attribute )* }
-attribute = { HAS ~ label ~ ( VAR_ | predicate ) | HAS ~ VAR_ } // ownership by labeled variable or value or just value
+attribute = { HAS ~ label ~ ( VAR_ | predicate ) | HAS ~ VAR_ }                 // ownership by labeled variable or value or just value
 
 // ATTRIBUTE VALUATION CONSTRUCTS ==============================================
 
@@ -172,7 +176,10 @@ regex = { STRING_ }
 // UNRESERVED KEYWORDS =========================================================
 // Most of TypeQL syntax should not be reserved from being used as identifiers
 
-unreserved = { VALUE | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT | GET | SORT | LIMIT | OFFSET | GROUP | CONTAINS }
+unreserved = { VALUE
+             | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
+             | GET | SORT | LIMIT | OFFSET | GROUP | CONTAINS
+             }
 
 
 // TYPEQL SYNTAX KEYWORDS =======================================================
@@ -289,7 +296,7 @@ LABEL_SCOPED_ = @{ LABEL_ ~ ":" ~ LABEL_ ~ WB }
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
-TYPE_CHAR_H_ = @{ 'A'..'Z' | 'a'..'z'
+TYPE_CHAR_H_ = @{ ASCII_ALPHA
                | '\u{00C0}'..'\u{00D6}'
                | '\u{00D8}'..'\u{00F6}'
                | '\u{00F8}'..'\u{02FF}'
