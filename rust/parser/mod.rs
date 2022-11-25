@@ -218,10 +218,11 @@ fn get_var(var: SyntaxTree) -> UnboundVariable {
     }
 }
 
-fn get_isa_constraint(_isa: SyntaxTree, tree: SyntaxTree) -> IsaConstraint {
+fn get_isa_constraint(isa: SyntaxTree, tree: SyntaxTree) -> IsaConstraint {
+    let is_explicit = matches!(isa.into_child().as_rule(), Rule::ISAX).into();
     match visit_type(tree) {
-        Type::Label(label) => IsaConstraint::from(label),
-        Type::Variable(var) => IsaConstraint::from(var),
+        Type::Label(label) => IsaConstraint::from((label, is_explicit)),
+        Type::Variable(var) => IsaConstraint::from((var, is_explicit)),
     }
 }
 
@@ -467,7 +468,8 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
         visit_type_any(children.consume_expected(Rule::type_any)).into_type_variable();
     var_type =
         children.map(SyntaxTree::into_children).fold(var_type, |var_type, mut constraint| {
-            match constraint.consume_any().as_rule() {
+            let keyword = constraint.consume_any();
+            match keyword.as_rule() {
                 Rule::ABSTRACT => var_type.abstract_(),
                 Rule::OWNS => {
                     let type_ = visit_type(constraint.consume_expected(Rule::type_));
@@ -495,8 +497,9 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
                         .and_then(|_| Some(visit_type(constraint.consume_expected(Rule::type_))));
                     var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
                 }
-                Rule::SUB_ => var_type.constrain_sub(SubConstraint::from(visit_type_any(
-                    constraint.consume_expected(Rule::type_any),
+                Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
+                    visit_type_any(constraint.consume_expected(Rule::type_any)),
+                    matches!(keyword.into_child().as_rule(), Rule::SUBX).into(),
                 ))),
                 Rule::TYPE => {
                     var_type.type_(visit_label_any(constraint.consume_expected(Rule::label_any)))

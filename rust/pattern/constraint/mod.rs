@@ -40,3 +40,12 @@ pub enum IsExplicit {
     Yes,
     No,
 }
+
+impl From<bool> for IsExplicit {
+    fn from(is_explicit: bool) -> Self {
+        match is_explicit {
+            true => IsExplicit::Yes,
+            false => IsExplicit::No,
+        }
+    }
+}

@@ -22,7 +22,9 @@
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{
+        variable::Reference, IsExplicit, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
+    },
     Label,
 };
 use std::{fmt, iter};
@@ -30,9 +32,14 @@ use std::{fmt, iter};
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
     pub type_: Box<TypeVariable>,
+    pub is_explicit: IsExplicit,
 }
 
 impl SubConstraint {
+    fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
+        Self { type_: Box::new(type_), is_explicit }
+    }
+
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(iter::once(&self.type_.reference))
     }
@@ -46,7 +53,7 @@ impl Validatable for SubConstraint {
 
 impl<T: Into<Label>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
-        SubConstraint { type_: Box::new(UnboundVariable::hidden().type_(scoped_type)) }
+        Self::from(UnboundVariable::hidden().type_(scoped_type))
     }
 }
 
@@ -57,18 +64,49 @@ impl From<UnboundVariable> for SubConstraint {
 }
 impl From<TypeVariable> for SubConstraint {
     fn from(type_: TypeVariable) -> Self {
-        SubConstraint { type_: Box::new(type_) }
+        Self::new(type_, IsExplicit::No)
     }
 }
 
 impl From<Type> for SubConstraint {
     fn from(type_: Type) -> Self {
-        SubConstraint::from(type_.into_type_variable())
+        Self::from(type_.into_type_variable())
+    }
+}
+
+impl<T: Into<Label>> From<(T, IsExplicit)> for SubConstraint {
+    fn from((scoped_type, is_explicit): (T, IsExplicit)) -> Self {
+        Self::from((UnboundVariable::hidden().type_(scoped_type), is_explicit))
+    }
+}
+
+impl From<(UnboundVariable, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (UnboundVariable, IsExplicit)) -> Self {
+        Self::from((type_.into_type(), is_explicit))
+    }
+}
+impl From<(TypeVariable, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (TypeVariable, IsExplicit)) -> Self {
+        Self::new(type_, is_explicit)
+    }
+}
+
+impl From<(Type, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (Type, IsExplicit)) -> Self {
+        Self::from((type_.into_type_variable(), is_explicit))
     }
 }
 
 impl fmt::Display for SubConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Constraint::Sub, self.type_)
+        write!(
+            f,
+            "{} {}",
+            match self.is_explicit {
+                IsExplicit::Yes => token::Constraint::SubX,
+                IsExplicit::No => token::Constraint::Sub,
+            },
+            self.type_
+        )
     }
 }
