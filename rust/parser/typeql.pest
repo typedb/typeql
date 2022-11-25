@@ -328,7 +328,7 @@ SECOND_ = @{ ('0'..'6') ~ ASCII_DIGIT }
 SECOND_FRACTION_ = @{ ASCII_DIGIT{1,3} } // between 1 and 3 digits
 ESCAPE_SEQ_ = @{ "\\" ~ ANY }
 
-WB = _{ &(PUNCTUATION | WHITESPACE | COMMENT) } // Word boundary
+WB = _{ &(PUNCTUATION | WHITESPACE | COMMENT | EOI) } // Word boundary
 
 COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }

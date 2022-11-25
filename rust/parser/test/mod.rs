@@ -1106,7 +1106,7 @@ fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error(
     assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
     assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n   ^"));
+    assert!(report.contains("\n      ^"));
 }
 
 #[test]
@@ -1117,7 +1117,7 @@ fn when_parse_incorrect_syntax_trailing_query_whitespace_is_ignored() {
     assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
     assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n   ^"));
+    assert!(report.contains("\n      ^"));
 }
 
 #[test]

@@ -26,7 +26,7 @@ mod test;
 use crate::{
     common::{
         date_time,
-        error::ILLEGAL_GRAMMAR,
+        error::{ILLEGAL_CHAR_IN_LABEL, ILLEGAL_GRAMMAR},
         string::{unescape_regex, unquote},
         token,
         validatable::Validatable,
@@ -163,8 +163,11 @@ pub(crate) fn visit_eof_variable(variable: &str) -> Result<Variable> {
 }
 
 pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
-    // TODO validation
-    Ok(parse_single(Rule::label, label)?.as_str().into())
+    let parsed = parse_single(Rule::eof_label, label)?.into_child().as_str();
+    if parsed != label {
+        Err(ILLEGAL_CHAR_IN_LABEL.format(&[label]))?;
+    }
+    Ok(parsed.into())
 }
 
 pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<RuleDefinition> {
