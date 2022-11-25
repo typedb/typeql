@@ -146,7 +146,7 @@ macro_rules! error_messages {
     };
     ($code_pfx:literal, $code_len:expr, $message_pfx:literal, $(($error_name:ident, $code:literal, $body:literal)),* $(,)?) => {
         $(
-        pub const $error_name: ErrorTemplate = ErrorTemplate {
+        pub(crate) const $error_name: ErrorTemplate = ErrorTemplate {
             template: concat!($message_pfx, ": ", $body),
             prefix: $code_pfx,
             code: $code,
@@ -158,16 +158,13 @@ macro_rules! error_messages {
 
 error_messages! {
    code: "TQL", type: "TypeQL Error",
-   SYNTAX_ERROR_NO_DETAILS = 2: "There is a syntax error at line {}:\n{}",
    SYNTAX_ERROR_DETAILED = 3: "There is a syntax error at line {}:\n{}\n{}\n{}",
-   INVALID_CASTING = 4: "The class '{}' cannot be casted to '{}'.",
+   INVALID_CASTING = 4: "The enum does not match '{}', and cannot be unwrapped into '{}'.",
    MISSING_PATTERNS = 5: "The query has not been provided with any patterns.",
    MISSING_DEFINABLES = 6: "The query has not been provided with any definables.",
    MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE = 7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
-   MATCH_HAS_NO_NAMED_VARIABLE = 8: "The match query has no named variables to retrieve.",
    MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE = 9: "The pattern '{}' has no named variable.",
    MATCH_HAS_UNBOUNDED_NESTED_PATTERN = 10: "The match query contains a nested pattern is not bounded: '{}'.",
-   MISSING_MATCH_FILTER = 11: "The match query cannot be constructed with NULL filter variable collection.",
    EMPTY_MATCH_FILTER = 12: "The match query cannot be filtered with an empty list of variables.",
    INVALID_IID_STRING = 13: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
    INVALID_ATTRIBUTE_TYPE_REGEX = 14: "Invalid regular expression '{}'.",
@@ -177,10 +174,7 @@ error_messages! {
    NO_VARIABLE_IN_SCOPE_INSERT = 18: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
    VARIABLE_NOT_NAMED = 19: "Anonymous variable encountered in a match query filter.",
    INVALID_VARIABLE_NAME = 20: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
-   ILLEGAL_CONSTRAINT_REPETITION = 21: "The variable '{}' contains illegally repeating constraints: '{}' and '{}'.",
    MISSING_CONSTRAINT_RELATION_PLAYER = 22: "A relation variable has not been provided with role players.",
-   MISSING_CONSTRAINT_VALUE = 23: "A value constraint has not been provided with a variable or literal value.",
-   MISSING_CONSTRAINT_PREDICATE = 24: "A value constraint has not been provided with a predicate.",
    INVALID_CONSTRAINT_PREDICATE = 25: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
    INVALID_CONSTRAINT_DATETIME_PRECISION = 26: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
    INVALID_DEFINE_QUERY_VARIABLE = 27: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
@@ -193,7 +187,6 @@ error_messages! {
    INVALID_RULE_THEN_ROLES = 34: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
    REDUNDANT_NESTED_NEGATION = 35: "Invalid query containing redundant nested negations.",
    VARIABLE_NOT_SORTED = 36: "Variable '{}' does not exist in the sorting clause.",
-   INVALID_SORTING_ORDER = 37: "Invalid sorting order '{}'. Valid options: '{}' or '{}'.",
    INVALID_COUNT_VARIABLE_ARGUMENT = 38: "Aggregate COUNT does not accept a Variable.",
    ILLEGAL_GRAMMAR = 39: "Illegal grammar: '{}'",
    ILLEGAL_CHAR_IN_LABEL = 40: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",

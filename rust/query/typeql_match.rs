@@ -36,6 +36,7 @@ use crate::{
     var, write_joined,
 };
 use std::{collections::HashSet, fmt, iter};
+use crate::common::error::EMPTY_MATCH_FILTER;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -150,6 +151,9 @@ fn expect_each_variable_is_bounded_by_named<'a>(
 fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result<()> {
     let names_in_scope = conjunction.named_references();
     let mut seen = HashSet::new();
+    if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
+        Err(EMPTY_MATCH_FILTER.format(&[]))?;
+    }
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
             Err(Error::from(VARIABLE_NOT_NAMED.format(&[])))

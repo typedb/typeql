@@ -58,7 +58,7 @@ pub use variable::{
 mod test;
 
 use crate::{
-    common::{validatable::Validatable, Result},
+    common::{error::INVALID_CASTING, validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
 use std::{collections::HashSet, fmt};

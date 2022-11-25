@@ -26,7 +26,10 @@ macro_rules! enum_getter {
         pub fn $fn_name(self) -> $classname {
             match self {
                 Self::$enum_value(x) => x,
-                _ => panic!(""),
+                _ => panic!(
+                    "{}",
+                    INVALID_CASTING.format(&[stringify!($enum_value), stringify!($classname)])
+                ),
             }
         }
     };

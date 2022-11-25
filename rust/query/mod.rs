@@ -20,10 +20,6 @@
  *
  */
 
-use std::fmt;
-
-use crate::{enum_getter, enum_wrapper};
-
 mod aggregate;
 pub use aggregate::{AggregateQueryBuilder, TypeQLMatchAggregate, TypeQLMatchGroupAggregate};
 
@@ -51,7 +47,11 @@ pub use typeql_update::TypeQLUpdate;
 mod writable;
 pub use writable::Writable;
 
-use crate::common::{validatable::Validatable, Result};
+use crate::{
+    common::{error::INVALID_CASTING, validatable::Validatable, Result},
+    enum_getter, enum_wrapper,
+};
+use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {

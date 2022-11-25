@@ -34,7 +34,7 @@ macro_rules! string_enum {
                 use $name::*;
                 match string {
                     $($value => $item,)*
-                    _ => panic!(""),  // TODO TryFrom + ErrorMessage
+                    _ => panic!(""),
                 }
             }
         }
