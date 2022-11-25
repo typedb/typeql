@@ -34,7 +34,7 @@ macro_rules! string_enum {
                 use $name::*;
                 match string {
                     $($value => $item,)*
-                    _ => panic!(""),
+                    _ => panic!("Unexpected input while parsing {}: '{}'", stringify!($name), string),
                 }
             }
         }
