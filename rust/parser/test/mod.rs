@@ -22,7 +22,13 @@
 
 use crate::{
     and,
-    common::{token::ValueType, validatable::Validatable},
+    common::{
+        token::{
+            Order::{Asc, Desc},
+            ValueType,
+        },
+        validatable::Validatable,
+    },
     gte, lt, lte, not, or, parse_pattern, parse_queries, parse_query,
     pattern::{
         ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
@@ -32,7 +38,6 @@ use crate::{
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
 };
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
-use crate::common::token::Order::{Asc, Desc};
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {

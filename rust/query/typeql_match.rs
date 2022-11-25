@@ -23,9 +23,9 @@
 use crate::{
     common::{
         error::{
-            collect_err, Error, ILLEGAL_FILTER_VARIABLE_REPEATING,
+            collect_err, Error, EMPTY_MATCH_FILTER, ILLEGAL_FILTER_VARIABLE_REPEATING,
             MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE, MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE,
-            VARIABLE_NOT_NAMED, VARIABLE_OUT_OF_SCOPE_MATCH,
+            VARIABLE_NOT_NAMED, VARIABLE_NOT_SORTED, VARIABLE_OUT_OF_SCOPE_MATCH,
         },
         token,
         validatable::Validatable,
@@ -36,7 +36,6 @@ use crate::{
     var, write_joined,
 };
 use std::{collections::HashSet, fmt, iter};
-use crate::common::error::EMPTY_MATCH_FILTER;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -256,9 +255,8 @@ impl fmt::Display for Filter {
 }
 
 pub mod sorting {
-    use crate::pattern::UnboundVariable;
+    use crate::{common::token, pattern::UnboundVariable};
     use std::fmt;
-    use crate::common::token;
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {
@@ -291,6 +289,13 @@ pub struct Sorting {
 impl Sorting {
     pub fn new(vars: Vec<sorting::OrderedVariable>) -> Self {
         Sorting { vars }
+    }
+
+    pub fn get_order(&self, var: UnboundVariable) -> Result<token::Order> {
+        self.vars
+            .iter()
+            .find_map(|v| (v.var == var).then_some(v.order.unwrap_or(token::Order::Asc)))
+            .ok_or_else(|| VARIABLE_NOT_SORTED.format(&[&var.to_string()]).into())
     }
 }
 
