@@ -38,12 +38,16 @@ rust_library(
         "*.rs",
         "**/*.rs",
     ]),
+    compile_data = [
+        "parser/typeql.pest",
+    ],
     deps = [
-        "@vaticle_dependencies//library/crates:antlr_rust",
         "@vaticle_dependencies//library/crates:chrono",
+        "@vaticle_dependencies//library/crates:pest",
         "@vaticle_dependencies//library/crates:regex",
-        # External Vaticle Dependencies
-        "//grammar/rust:typeql_grammar",
+    ],
+    proc_macro_deps = [
+        "@vaticle_dependencies//library/crates:pest_derive",
     ],
 )
 rust_test(

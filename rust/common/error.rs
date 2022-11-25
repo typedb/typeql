@@ -21,6 +21,7 @@
  */
 
 use crate::write_joined;
+use pest::error::{Error as PestError, LineColLocation};
 use std::{convert::Infallible, fmt};
 
 #[derive(Debug)]
@@ -38,6 +39,21 @@ impl From<Vec<Message>> for Error {
     fn from(messages: Vec<Message>) -> Self {
         assert!(!messages.is_empty());
         Self { messages }
+    }
+}
+
+impl<T: pest::RuleType> From<PestError<T>> for Error {
+    fn from(error: PestError<T>) -> Self {
+        let (line, col) = match error.line_col {
+            LineColLocation::Pos((line, col)) => (line, col),
+            LineColLocation::Span((line, col), _) => (line, col),
+        };
+        Self::from(SYNTAX_ERROR_DETAILED.format(&[
+            &line.to_string(),
+            error.line(),
+            &(" ".repeat(col - 1) + "^"),
+            &error.variant.message(),
+        ]))
     }
 }
 

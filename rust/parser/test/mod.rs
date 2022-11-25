@@ -371,7 +371,7 @@ $x has release-date 1000-11-12T13:14:15.000123456;"#;
 
     let parsed = parse_query(query);
     assert!(parsed.is_err());
-    assert!(parsed.unwrap_err().to_string().contains("no viable alternative"));
+    assert!(parsed.unwrap_err().to_string().contains("expected"));
 }
 
 #[test]
@@ -1106,7 +1106,7 @@ fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error(
     assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
     assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n      ^"));
+    assert!(report.contains("\n   ^"));
 }
 
 #[test]
@@ -1117,7 +1117,7 @@ fn when_parse_incorrect_syntax_trailing_query_whitespace_is_ignored() {
     assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
     assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n      ^"));
+    assert!(report.contains("\n   ^"));
 }
 
 #[test]
@@ -1230,7 +1230,7 @@ fn test_parse_list() {
 
 #[test]
 fn test_parse_many_match_insert_without_stack_overflow() {
-    let num_queries = 10; //_000;  // FIXME antlr4rust slow
+    let num_queries = 10_000;
     let query = "match\n$x isa person; insert $x has name 'bob';\n";
     let queries = query.repeat(num_queries);
 
