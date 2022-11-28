@@ -57,27 +57,33 @@ impl Validatable for Disjunction {
 impl Normalisable for Disjunction {
     fn normalise(&mut self) -> Pattern {
         if self.normalised.is_none() {
-            self.normalised = Some(Box::new(Disjunction::new(
-                self.patterns
-                    .iter_mut()
-                    .flat_map(|pattern| match pattern {
-                        Pattern::Conjunction(conjunction) => {
-                            conjunction.normalise().into_disjunction().patterns.into_iter()
-                        }
-                        Pattern::Disjunction(disjunction) => {
-                            disjunction.normalise().into_disjunction().patterns.into_iter()
-                        }
-                        Pattern::Negation(negation) => {
-                            vec![Conjunction::new(vec![negation.normalise()]).into()].into_iter()
-                        }
-                        Pattern::Variable(variable) => {
-                            vec![Conjunction::new(vec![variable.clone().into()]).into()].into_iter()
-                        }
-                    })
-                    .collect(),
-            )));
+            self.normalised = Some(Box::new(self.compute_normalised().into_disjunction()));
         }
         self.normalised.as_ref().unwrap().as_ref().clone().into()
+    }
+
+    fn compute_normalised(&self) -> Pattern {
+        Disjunction::new(
+            self.patterns
+                .iter()
+                .flat_map(|pattern| match pattern {
+                    Pattern::Conjunction(conjunction) => {
+                        conjunction.compute_normalised().into_disjunction().patterns.into_iter()
+                    }
+                    Pattern::Disjunction(disjunction) => {
+                        disjunction.compute_normalised().into_disjunction().patterns.into_iter()
+                    }
+                    Pattern::Negation(negation) => {
+                        vec![Conjunction::new(vec![negation.compute_normalised()]).into()]
+                            .into_iter()
+                    }
+                    Pattern::Variable(variable) => {
+                        vec![Conjunction::new(vec![variable.clone().into()]).into()].into_iter()
+                    }
+                })
+                .collect(),
+        )
+        .into()
     }
 }
 

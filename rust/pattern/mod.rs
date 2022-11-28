@@ -111,6 +111,7 @@ impl Validatable for Pattern {
 
 pub trait Normalisable {
     fn normalise(&mut self) -> Pattern;
+    fn compute_normalised(&self) -> Pattern;
 }
 
 impl Normalisable for Pattern {
@@ -121,6 +122,16 @@ impl Normalisable for Pattern {
             Disjunction(disjunction) => disjunction.normalise(),
             Negation(negation) => negation.normalise(),
             Variable(variable) => variable.normalise(),
+        }
+    }
+
+    fn compute_normalised(&self) -> Pattern {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.compute_normalised(),
+            Disjunction(disjunction) => disjunction.compute_normalised(),
+            Negation(negation) => negation.compute_normalised(),
+            Variable(variable) => variable.compute_normalised(),
         }
     }
 }

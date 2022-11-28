@@ -61,17 +61,22 @@ impl Validatable for Negation {
 impl Normalisable for Negation {
     fn normalise(&mut self) -> Pattern {
         if self.normalised.is_none() {
-            self.normalised = Some(Box::new(Negation::new(match self.pattern.as_mut() {
-                Pattern::Conjunction(conjunction) => conjunction.normalise(),
-                Pattern::Disjunction(disjunction) => disjunction.normalise(),
-                Pattern::Negation(_) => panic!("{}", REDUNDANT_NESTED_NEGATION.format(&[])),
-                Pattern::Variable(variable) => {
-                    Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()])
-                        .into()
-                }
-            })));
+            self.normalised = Some(Box::new(self.compute_normalised().into_negation()));
         }
         self.normalised.as_ref().unwrap().as_ref().clone().into()
+    }
+
+    fn compute_normalised(&self) -> Pattern {
+        Negation::new(match self.pattern.as_ref() {
+            Pattern::Conjunction(conjunction) => conjunction.compute_normalised(),
+            Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
+            Pattern::Negation(_) => panic!("{}", REDUNDANT_NESTED_NEGATION.format(&[])),
+            Pattern::Variable(variable) => {
+                Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()])
+                    .into()
+            }
+        })
+        .into()
     }
 }
 

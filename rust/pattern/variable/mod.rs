@@ -104,6 +104,10 @@ impl Validatable for Variable {
 
 impl Normalisable for Variable {
     fn normalise(&mut self) -> Pattern {
+        self.compute_normalised()
+    }
+
+    fn compute_normalised(&self) -> Pattern {
         self.clone().into()
     }
 }

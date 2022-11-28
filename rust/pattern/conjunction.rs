@@ -103,36 +103,41 @@ impl Validatable for Conjunction {
 impl Normalisable for Conjunction {
     fn normalise(&mut self) -> Pattern {
         if self.normalised.is_none() {
-            let mut conjunctables = Vec::new();
-            let mut disjunctions = Vec::new();
-            self.patterns.iter_mut().for_each(|pattern| match pattern {
-                Pattern::Conjunction(conjunction) => {
-                    disjunctions.push(conjunction.normalise().into_disjunction().patterns)
-                }
-                Pattern::Disjunction(disjunction) => {
-                    disjunctions.push(disjunction.normalise().into_disjunction().patterns)
-                }
-                Pattern::Negation(negation) => conjunctables.push(negation.normalise()),
-                Pattern::Variable(variable) => conjunctables.push(variable.normalise()),
-            });
-            disjunctions.push(vec![Conjunction::new(conjunctables).into()]);
-
-            self.normalised = Some(Disjunction::new(
-                disjunctions
-                    .into_iter()
-                    .multi_cartesian_product()
-                    .map(|v| {
-                        Conjunction::new(
-                            v.into_iter()
-                                .flat_map(|c| c.into_conjunction().patterns.into_iter())
-                                .collect(),
-                        )
-                        .into()
-                    })
-                    .collect(),
-            ));
+            self.normalised = Some(self.compute_normalised().into_disjunction());
         }
         self.normalised.as_ref().unwrap().clone().into()
+    }
+
+    fn compute_normalised(&self) -> Pattern {
+        let mut conjunctables = Vec::new();
+        let mut disjunctions = Vec::new();
+        self.patterns.iter().for_each(|pattern| match pattern {
+            Pattern::Conjunction(conjunction) => {
+                disjunctions.push(conjunction.compute_normalised().into_disjunction().patterns)
+            }
+            Pattern::Disjunction(disjunction) => {
+                disjunctions.push(disjunction.compute_normalised().into_disjunction().patterns)
+            }
+            Pattern::Negation(negation) => conjunctables.push(negation.compute_normalised()),
+            Pattern::Variable(variable) => conjunctables.push(variable.compute_normalised()),
+        });
+        disjunctions.push(vec![Conjunction::new(conjunctables).into()]);
+
+        Disjunction::new(
+            disjunctions
+                .into_iter()
+                .multi_cartesian_product()
+                .map(|v| {
+                    Conjunction::new(
+                        v.into_iter()
+                            .flat_map(|c| c.into_conjunction().patterns.into_iter())
+                            .collect(),
+                    )
+                    .into()
+                })
+                .collect(),
+        )
+        .into()
     }
 }
 
