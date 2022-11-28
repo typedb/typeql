@@ -78,6 +78,18 @@ enum_getter! { Query
     into_group_aggregate(GroupAggregate) => TypeQLMatchGroupAggregate,
 }
 
+enum_wrapper! { Query
+    TypeQLMatch => Match,
+    TypeQLInsert => Insert,
+    TypeQLDelete => Delete,
+    TypeQLUpdate => Update,
+    TypeQLDefine => Define,
+    TypeQLUndefine => Undefine,
+    TypeQLMatchAggregate => Aggregate,
+    TypeQLMatchGroup => Group,
+    TypeQLMatchGroupAggregate => GroupAggregate,
+}
+
 impl Validatable for Query {
     fn validate(&self) -> Result<()> {
         use Query::*;
@@ -108,18 +120,6 @@ impl Validatable for Query {
             GroupAggregate(query) => query.validated().map(TypeQLMatchGroupAggregate::into),
         }
     }
-}
-
-enum_wrapper! { Query
-    TypeQLMatch => Match,
-    TypeQLInsert => Insert,
-    TypeQLDelete => Delete,
-    TypeQLUpdate => Update,
-    TypeQLDefine => Define,
-    TypeQLUndefine => Undefine,
-    TypeQLMatchAggregate => Aggregate,
-    TypeQLMatchGroup => Group,
-    TypeQLMatchGroupAggregate => GroupAggregate,
 }
 
 impl fmt::Display for Query {
