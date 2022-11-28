@@ -20,6 +20,7 @@
 #
 
 load("@rules_rust//rust:defs.bzl", "rust_test")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 rust_test(
     name = "typeql_lang_behaviour_test",
@@ -35,4 +36,12 @@ rust_test(
         "@vaticle_dependencies//library/crates:futures",
     ],
     use_libtest_harness = False,
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob([
+        "*",
+    ]),
+    license_type = "apache-header",
 )
