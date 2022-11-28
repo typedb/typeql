@@ -66,16 +66,16 @@ pub enum Query {
     GroupAggregate(TypeQLMatchGroupAggregate),
 }
 
-impl Query {
-    enum_getter!(into_match, Match, TypeQLMatch);
-    enum_getter!(into_insert, Insert, TypeQLInsert);
-    enum_getter!(into_delete, Delete, TypeQLDelete);
-    enum_getter!(into_update, Update, TypeQLUpdate);
-    enum_getter!(into_define, Define, TypeQLDefine);
-    enum_getter!(into_undefine, Undefine, TypeQLUndefine);
-    enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
-    enum_getter!(into_group, Group, TypeQLMatchGroup);
-    enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
+enum_getter! { Query
+    into_match(Match) => TypeQLMatch,
+    into_insert(Insert) => TypeQLInsert,
+    into_delete(Delete) => TypeQLDelete,
+    into_update(Update) => TypeQLUpdate,
+    into_define(Define) => TypeQLDefine,
+    into_undefine(Undefine) => TypeQLUndefine,
+    into_aggregate(Aggregate) => TypeQLMatchAggregate,
+    into_group(Group) => TypeQLMatchGroup,
+    into_group_aggregate(GroupAggregate) => TypeQLMatchGroupAggregate,
 }
 
 impl Validatable for Query {

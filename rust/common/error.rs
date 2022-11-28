@@ -159,7 +159,7 @@ macro_rules! error_messages {
 error_messages! {
    code: "TQL", type: "TypeQL Error",
    SYNTAX_ERROR_DETAILED = 3: "There is a syntax error at line {}:\n{}\n{}\n{}",
-   INVALID_CASTING = 4: "The enum does not match '{}', and cannot be unwrapped into '{}'.",
+   INVALID_CASTING = 4: "Enum '{}::{}' does not match '{}', and cannot be unwrapped into '{}'.",
    MISSING_PATTERNS = 5: "The query has not been provided with any patterns.",
    MISSING_DEFINABLES = 6: "The query has not been provided with any definables.",
    MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE = 7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",

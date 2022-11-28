@@ -72,11 +72,6 @@ pub enum Pattern {
 }
 
 impl Pattern {
-    enum_getter!(into_conjunction, Conjunction, Conjunction);
-    enum_getter!(into_disjunction, Disjunction, Disjunction);
-    enum_getter!(into_negation, Negation, Negation);
-    enum_getter!(into_variable, Variable, Variable);
-
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         use Pattern::*;
         match self {
@@ -86,6 +81,13 @@ impl Pattern {
             Variable(variable) => variable.expect_is_bounded_by(bounds),
         }
     }
+}
+
+enum_getter! { Pattern
+    into_conjunction(Conjunction) => Conjunction,
+    into_disjunction(Disjunction) => Disjunction,
+    into_negation(Negation) => Negation,
+    into_variable(Variable) => Variable,
 }
 
 enum_wrapper! { Pattern
@@ -166,10 +168,16 @@ pub enum Definable {
     TypeVariable(TypeVariable),
 }
 
-impl Definable {
-    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
-    enum_getter!(into_rule, RuleDefinition, RuleDefinition);
-    enum_getter!(into_type_variable, TypeVariable, TypeVariable);
+enum_getter! { Definable
+    into_rule_declaration(RuleDeclaration) => RuleDeclaration,
+    into_rule(RuleDefinition) => RuleDefinition,
+    into_type_variable(TypeVariable) => TypeVariable,
+}
+
+enum_wrapper! { Definable
+    RuleDeclaration => RuleDeclaration,
+    RuleDefinition => RuleDefinition,
+    TypeVariable => TypeVariable,
 }
 
 impl Validatable for Definable {
@@ -181,12 +189,6 @@ impl Validatable for Definable {
             TypeVariable(variable) => variable.validate(),
         }
     }
-}
-
-enum_wrapper! { Definable
-    RuleDeclaration => RuleDeclaration,
-    RuleDefinition => RuleDefinition,
-    TypeVariable => TypeVariable,
 }
 
 impl fmt::Display for Definable {
