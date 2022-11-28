@@ -24,7 +24,7 @@
 macro_rules! enum_getter {
     {$enum_name:ident $($fn_name:ident ( $enum_variant:ident ) => $classname:ty),* $(,)?} => {
         impl $enum_name {
-            fn get_name(&self) -> &'static str {
+            fn __enum_getter__get_name(&self) -> &'static str {
                 match self {
                     $(
                     Self::$enum_variant(_) => stringify!($enum_variant),
@@ -37,7 +37,10 @@ macro_rules! enum_getter {
                 match self {
                     Self::$enum_variant(x) => x,
                     _ => panic!("{}", INVALID_CASTING.format(&[
-                        stringify!($enum_name), self.get_name(), stringify!($enum_variant), stringify!($classname)
+                        stringify!($enum_name),
+                        self.__enum_getter__get_name(),
+                        stringify!($enum_variant),
+                        stringify!($classname)
                     ])),
                 }
             }
