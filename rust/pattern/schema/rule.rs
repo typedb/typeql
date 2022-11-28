@@ -34,7 +34,7 @@ use crate::{
     pattern::{Conjunction, NamedReferences, Pattern, ThingVariable},
     Label,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RuleDeclaration {
@@ -91,7 +91,7 @@ impl Validatable for RuleDefinition {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [
-                expect_no_negations(self.when.patterns.iter(), &self.label),
+                expect_no_nested_negations(self.when.patterns.iter(), &self.label),
                 expect_infer_single_edge(&self.then, &self.label),
                 expect_valid_inference(&self.then, &self.label),
                 expect_then_bounded_by_when(&self.then, &self.when, &self.label),
@@ -103,20 +103,33 @@ impl Validatable for RuleDefinition {
     }
 }
 
-fn expect_no_negations<'a>(
+fn expect_no_nested_negations<'a>(
     patterns: impl Iterator<Item = &'a Pattern>,
     rule_label: &Label,
 ) -> Result<()> {
     collect_err(&mut patterns.map(|p| -> Result<()> {
         match p {
-            Pattern::Conjunction(c) => expect_no_negations(c.patterns.iter(), rule_label),
+            Pattern::Conjunction(c) => expect_no_nested_negations(c.patterns.iter(), rule_label),
             Pattern::Variable(_) => Ok(()),
-            Pattern::Disjunction(d) => expect_no_negations(d.patterns.iter(), rule_label),
-            Pattern::Negation(_) => {
-                Err(INVALID_RULE_WHEN_NESTED_NEGATION.format(&[&rule_label.to_string()]))?
+            Pattern::Disjunction(d) => expect_no_nested_negations(d.patterns.iter(), rule_label),
+            Pattern::Negation(n) => {
+                if contains_negations(iter::once(n.pattern.as_ref())) {
+                    Err(INVALID_RULE_WHEN_NESTED_NEGATION.format(&[&rule_label.to_string()]))?
+                } else {
+                    Ok(())
+                }
             }
         }
     }))
+}
+
+fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bool {
+    patterns.any(|p| match p {
+        Pattern::Conjunction(c) => contains_negations(c.patterns.iter()),
+        Pattern::Variable(_) => false,
+        Pattern::Disjunction(d) => contains_negations(d.patterns.iter()),
+        Pattern::Negation(_) => true,
+    })
 }
 
 fn expect_infer_single_edge(then: &ThingVariable, rule_label: &Label) -> Result<()> {
