@@ -60,7 +60,6 @@ build:
       image: vaticle-ubuntu-22.04
       command: |
         bazel test //rust/... --test_output=errors
-        bazel test //rust/tests/behaviour/... --test_output=errors
     #    TODO: enable this
     #    deploy-crate-snapshot:
     #      image: vaticle-ubuntu-22.04
