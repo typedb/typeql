@@ -58,7 +58,7 @@ pub use variable::{
 mod test;
 
 use crate::{
-    common::{validatable::Validatable, Result},
+    common::{error::INVALID_CASTING, validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
 use std::{collections::HashSet, fmt};
@@ -72,11 +72,6 @@ pub enum Pattern {
 }
 
 impl Pattern {
-    enum_getter!(into_conjunction, Conjunction, Conjunction);
-    enum_getter!(into_disjunction, Disjunction, Disjunction);
-    enum_getter!(into_negation, Negation, Negation);
-    enum_getter!(into_variable, Variable, Variable);
-
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         use Pattern::*;
         match self {
@@ -86,6 +81,20 @@ impl Pattern {
             Variable(variable) => variable.expect_is_bounded_by(bounds),
         }
     }
+}
+
+enum_getter! { Pattern
+    into_conjunction(Conjunction) => Conjunction,
+    into_disjunction(Disjunction) => Disjunction,
+    into_negation(Negation) => Negation,
+    into_variable(Variable) => Variable,
+}
+
+enum_wrapper! { Pattern
+    Conjunction => Conjunction,
+    Disjunction => Disjunction,
+    Negation => Negation,
+    Variable => Variable,
 }
 
 impl Validatable for Pattern {
@@ -100,11 +109,31 @@ impl Validatable for Pattern {
     }
 }
 
-enum_wrapper! { Pattern
-    Conjunction => Conjunction,
-    Disjunction => Disjunction,
-    Negation => Negation,
-    Variable => Variable,
+pub trait Normalisable {
+    fn normalise(&mut self) -> Pattern;
+    fn compute_normalised(&self) -> Pattern;
+}
+
+impl Normalisable for Pattern {
+    fn normalise(&mut self) -> Pattern {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.normalise(),
+            Disjunction(disjunction) => disjunction.normalise(),
+            Negation(negation) => negation.normalise(),
+            Variable(variable) => variable.normalise(),
+        }
+    }
+
+    fn compute_normalised(&self) -> Pattern {
+        use Pattern::*;
+        match self {
+            Conjunction(conjunction) => conjunction.compute_normalised(),
+            Disjunction(disjunction) => disjunction.compute_normalised(),
+            Negation(negation) => negation.compute_normalised(),
+            Variable(variable) => variable.compute_normalised(),
+        }
+    }
 }
 
 impl From<ConceptVariable> for Pattern {
@@ -150,10 +179,16 @@ pub enum Definable {
     TypeVariable(TypeVariable),
 }
 
-impl Definable {
-    enum_getter!(into_rule_declaration, RuleDeclaration, RuleDeclaration);
-    enum_getter!(into_rule, RuleDefinition, RuleDefinition);
-    enum_getter!(into_type_variable, TypeVariable, TypeVariable);
+enum_getter! { Definable
+    into_rule_declaration(RuleDeclaration) => RuleDeclaration,
+    into_rule(RuleDefinition) => RuleDefinition,
+    into_type_variable(TypeVariable) => TypeVariable,
+}
+
+enum_wrapper! { Definable
+    RuleDeclaration => RuleDeclaration,
+    RuleDefinition => RuleDefinition,
+    TypeVariable => TypeVariable,
 }
 
 impl Validatable for Definable {
@@ -165,12 +200,6 @@ impl Validatable for Definable {
             TypeVariable(variable) => variable.validate(),
         }
     }
-}
-
-enum_wrapper! { Definable
-    RuleDeclaration => RuleDeclaration,
-    RuleDefinition => RuleDefinition,
-    TypeVariable => TypeVariable,
 }
 
 impl fmt::Display for Definable {

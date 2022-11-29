@@ -19,3 +19,71 @@
  * under the License.
  *
  */
+
+use crate::{
+    and, not, or, parse_query,
+    pattern::{Conjunction, Disjunction, Normalisable, ThingVariableBuilder},
+    var,
+};
+
+#[test]
+fn disjunction() {
+    let query = r#"match
+$com isa company;
+{
+    $com has name $n1;
+    $n1 "the-company";
+} or {
+    $com has name $n2;
+    $n2 "another-company";
+};"#;
+
+    let mut parsed = parse_query(query).unwrap().into_match();
+    let normalised = parsed.conjunction.normalise().into_disjunction();
+
+    assert_eq!(
+        normalised,
+        or!(
+            and!(
+                var("com").has(("name", var("n1"))),
+                var("n1").eq("the-company"),
+                var("com").isa("company"),
+            ),
+            and!(
+                var("com").has(("name", var("n2"))),
+                var("n2").eq("another-company"),
+                var("com").isa("company"),
+            )
+        )
+        .into_disjunction()
+    );
+}
+
+#[test]
+fn negated_disjunction() {
+    let query = r#"match
+$com isa company;
+not {
+    $com has name $n1;
+    {
+        $n1 "the-company";
+    } or {
+        $n1 "another-company";
+    };
+};"#;
+
+    let mut parsed = parse_query(query).unwrap().into_match();
+    let normalised = parsed.conjunction.normalise().into_disjunction();
+
+    assert_eq!(
+        normalised,
+        Disjunction::new(vec![and!(
+            var("com").isa("company"),
+            not(or!(
+                and!(var("n1").eq("the-company"), var("com").has(("name", var("n1")))),
+                and!(var("n1").eq("another-company"), var("com").has(("name", var("n1")))),
+            ))
+        )
+        .into()])
+    );
+}

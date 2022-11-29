@@ -22,7 +22,13 @@
 
 use crate::{
     and,
-    common::{token::ValueType, validatable::Validatable},
+    common::{
+        token::{
+            Order::{Asc, Desc},
+            ValueType,
+        },
+        validatable::Validatable,
+    },
     gte, lt, lte, not, or, parse_pattern, parse_queries, parse_query,
     pattern::{
         ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
@@ -407,7 +413,7 @@ $x plays starring:actor;
 sort $x asc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([("x", "asc")]);
+    let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([("x", Asc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -421,7 +427,7 @@ sort $r desc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected =
-        typeql_match!(var("x").isa("movie").has(("rating", var("r")))).sort([("r", "desc")]);
+        typeql_match!(var("x").isa("movie").has(("rating", var("r")))).sort([("r", Desc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -449,7 +455,7 @@ sort $r desc; offset 10; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var("x").isa("movie").has(("rating", var("r"))))
-        .sort([("r", "desc")])
+        .sort([("r", Desc)])
         .offset(10)
         .limit(10);
 
@@ -1106,7 +1112,7 @@ fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error(
     assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
     assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n   ^"));
+    assert!(report.contains("\n      ^"));
 }
 
 #[test]
@@ -1117,7 +1123,7 @@ fn when_parse_incorrect_syntax_trailing_query_whitespace_is_ignored() {
     assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
     assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n   ^"));
+    assert!(report.contains("\n      ^"));
 }
 
 #[test]

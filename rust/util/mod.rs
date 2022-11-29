@@ -22,19 +22,35 @@
 
 #[macro_export]
 macro_rules! enum_getter {
-    ($fn_name:ident, $enum_value:ident, $classname:ty) => {
-        pub fn $fn_name(self) -> $classname {
-            match self {
-                Self::$enum_value(x) => x,
-                _ => panic!(""),
+    {$enum_name:ident $($fn_name:ident ( $enum_variant:ident ) => $classname:ty),* $(,)?} => {
+        impl $enum_name {
+            fn __enum_getter_get_name(&self) -> &'static str {
+                match self {
+                    $(
+                    Self::$enum_variant(_) => stringify!($enum_variant),
+                    )*
+                }
             }
         }
+        $(impl $enum_name {
+            pub fn $fn_name(self) -> $classname {
+                match self {
+                    Self::$enum_variant(x) => x,
+                    _ => panic!("{}", INVALID_CASTING.format(&[
+                        stringify!($enum_name),
+                        self.__enum_getter_get_name(),
+                        stringify!($enum_variant),
+                        stringify!($classname)
+                    ])),
+                }
+            }
+        })*
     };
 }
 
 #[macro_export]
 macro_rules! enum_wrapper {
-    {$enum_name:ident $($classname:ty => $enum_value:ident),* $(,)*} => {
+    {$enum_name:ident $($classname:ty => $enum_value:ident),* $(,)?} => {
         $(impl From<$classname> for $enum_name {
             fn from(x: $classname) -> Self {
                 Self::$enum_value(x)
@@ -45,7 +61,7 @@ macro_rules! enum_wrapper {
 
 #[macro_export]
 macro_rules! write_joined {
-    ($f:ident, $joiner:expr, $($iterable:expr),* $(,)*) => {{
+    ($f:ident, $joiner:expr, $($iterable:expr),* $(,)?) => {{
         let mut result: std::fmt::Result = Ok(());
         let mut _is_first = true;
         $(

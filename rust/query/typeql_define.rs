@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, INVALID_RULE_WHEN_MISSING_PATTERNS},
+        error::{collect_err, INVALID_RULE_WHEN_MISSING_PATTERNS, MISSING_DEFINABLES},
         token,
         validatable::Validatable,
         Result,
@@ -30,7 +30,7 @@ use crate::{
     pattern::{Definable, RuleDefinition, TypeVariable},
     write_joined,
 };
-use std::fmt;
+use std::{fmt, iter};
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLDefine {
@@ -63,11 +63,19 @@ impl TypeQLDefine {
 impl Validatable for TypeQLDefine {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut (self.variables.iter().map(Validatable::validate))
+            &mut iter::once(expect_non_empty(&self.variables, &self.rules))
+                .chain(self.variables.iter().map(Validatable::validate))
                 .chain(self.variables.iter().map(TypeVariable::validate_definable))
                 .chain(self.rules.iter().map(Validatable::validate)),
         )
     }
+}
+
+fn expect_non_empty(variables: &[TypeVariable], rules: &[RuleDefinition]) -> Result<()> {
+    if variables.is_empty() && rules.is_empty() {
+        Err(MISSING_DEFINABLES.format(&[]))?
+    }
+    Ok(())
 }
 
 impl fmt::Display for TypeQLDefine {

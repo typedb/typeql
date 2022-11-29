@@ -34,7 +34,7 @@ macro_rules! string_enum {
                 use $name::*;
                 match string {
                     $($value => $item,)*
-                    _ => panic!(""),  // TODO TryFrom + ErrorMessage
+                    _ => panic!("Unexpected input while parsing {}: '{}'", stringify!($name), string),
                 }
             }
         }
@@ -152,4 +152,9 @@ string_enum! { ValueType
     Double = "double",
     Long = "long",
     String = "string",
+}
+
+string_enum! { Order
+    Asc = "asc",
+    Desc = "desc",
 }

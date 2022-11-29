@@ -23,9 +23,9 @@
 use crate::{
     common::{
         error::{
-            collect_err, Error, ILLEGAL_FILTER_VARIABLE_REPEATING,
+            collect_err, Error, EMPTY_MATCH_FILTER, ILLEGAL_FILTER_VARIABLE_REPEATING,
             MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE, MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE,
-            VARIABLE_NOT_NAMED, VARIABLE_OUT_OF_SCOPE_MATCH,
+            VARIABLE_NOT_NAMED, VARIABLE_NOT_SORTED, VARIABLE_OUT_OF_SCOPE_MATCH,
         },
         token,
         validatable::Validatable,
@@ -150,6 +150,9 @@ fn expect_each_variable_is_bounded_by_named<'a>(
 fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result<()> {
     let names_in_scope = conjunction.named_references();
     let mut seen = HashSet::new();
+    if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
+        Err(EMPTY_MATCH_FILTER.format(&[]))?;
+    }
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
             Err(Error::from(VARIABLE_NOT_NAMED.format(&[])))
@@ -252,24 +255,18 @@ impl fmt::Display for Filter {
 }
 
 pub mod sorting {
-    use crate::pattern::UnboundVariable;
+    use crate::{common::token, pattern::UnboundVariable};
     use std::fmt;
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {
         pub var: UnboundVariable,
-        pub order: Option<String>, // FIXME
+        pub order: Option<token::Order>,
     }
 
     impl OrderedVariable {
-        pub fn new(var: UnboundVariable, order: &str) -> Self {
-            OrderedVariable {
-                var,
-                order: match order {
-                    "" => None,
-                    order => Some(order.to_string()),
-                },
-            }
+        pub fn new(var: UnboundVariable, order: Option<token::Order>) -> Self {
+            OrderedVariable { var, order }
         }
     }
 
@@ -293,19 +290,26 @@ impl Sorting {
     pub fn new(vars: Vec<sorting::OrderedVariable>) -> Self {
         Sorting { vars }
     }
+
+    pub fn get_order(&self, var: UnboundVariable) -> Result<token::Order> {
+        self.vars
+            .iter()
+            .find_map(|v| (v.var == var).then_some(v.order.unwrap_or(token::Order::Asc)))
+            .ok_or_else(|| VARIABLE_NOT_SORTED.format(&[&var.to_string()]).into())
+    }
 }
 
 impl From<&str> for Sorting {
     fn from(var_name: &str) -> Self {
-        Self::from([(var_name, "")])
+        Self::from(vec![var(var_name)])
     }
 }
 
-impl<const N: usize> From<([(&str, &str); N])> for Sorting {
-    fn from(ordered_vars: [(&str, &str); N]) -> Self {
+impl<const N: usize> From<([(&str, token::Order); N])> for Sorting {
+    fn from(ordered_vars: [(&str, token::Order); N]) -> Self {
         Self::new(
             ordered_vars
-                .map(|(name, order)| sorting::OrderedVariable::new(var(name), order))
+                .map(|(name, order)| sorting::OrderedVariable::new(var(name), Some(order)))
                 .to_vec(),
         )
     }
@@ -314,7 +318,7 @@ impl<const N: usize> From<([(&str, &str); N])> for Sorting {
 impl From<Vec<UnboundVariable>> for Sorting {
     fn from(vars: Vec<UnboundVariable>) -> Self {
         Self::new(
-            vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), "")).collect(),
+            vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), None)).collect(),
         )
     }
 }

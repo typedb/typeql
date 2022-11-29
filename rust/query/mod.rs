@@ -20,10 +20,6 @@
  *
  */
 
-use std::fmt;
-
-use crate::{enum_getter, enum_wrapper};
-
 mod aggregate;
 pub use aggregate::{AggregateQueryBuilder, TypeQLMatchAggregate, TypeQLMatchGroupAggregate};
 
@@ -51,7 +47,11 @@ pub use typeql_update::TypeQLUpdate;
 mod writable;
 pub use writable::Writable;
 
-use crate::common::{validatable::Validatable, Result};
+use crate::{
+    common::{error::INVALID_CASTING, validatable::Validatable, Result},
+    enum_getter, enum_wrapper,
+};
+use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
@@ -66,16 +66,28 @@ pub enum Query {
     GroupAggregate(TypeQLMatchGroupAggregate),
 }
 
-impl Query {
-    enum_getter!(into_match, Match, TypeQLMatch);
-    enum_getter!(into_insert, Insert, TypeQLInsert);
-    enum_getter!(into_delete, Delete, TypeQLDelete);
-    enum_getter!(into_update, Update, TypeQLUpdate);
-    enum_getter!(into_define, Define, TypeQLDefine);
-    enum_getter!(into_undefine, Undefine, TypeQLUndefine);
-    enum_getter!(into_aggregate, Aggregate, TypeQLMatchAggregate);
-    enum_getter!(into_group, Group, TypeQLMatchGroup);
-    enum_getter!(into_group_aggregate, GroupAggregate, TypeQLMatchGroupAggregate);
+enum_getter! { Query
+    into_match(Match) => TypeQLMatch,
+    into_insert(Insert) => TypeQLInsert,
+    into_delete(Delete) => TypeQLDelete,
+    into_update(Update) => TypeQLUpdate,
+    into_define(Define) => TypeQLDefine,
+    into_undefine(Undefine) => TypeQLUndefine,
+    into_aggregate(Aggregate) => TypeQLMatchAggregate,
+    into_group(Group) => TypeQLMatchGroup,
+    into_group_aggregate(GroupAggregate) => TypeQLMatchGroupAggregate,
+}
+
+enum_wrapper! { Query
+    TypeQLMatch => Match,
+    TypeQLInsert => Insert,
+    TypeQLDelete => Delete,
+    TypeQLUpdate => Update,
+    TypeQLDefine => Define,
+    TypeQLUndefine => Undefine,
+    TypeQLMatchAggregate => Aggregate,
+    TypeQLMatchGroup => Group,
+    TypeQLMatchGroupAggregate => GroupAggregate,
 }
 
 impl Validatable for Query {
@@ -108,18 +120,6 @@ impl Validatable for Query {
             GroupAggregate(query) => query.validated().map(TypeQLMatchGroupAggregate::into),
         }
     }
-}
-
-enum_wrapper! { Query
-    TypeQLMatch => Match,
-    TypeQLInsert => Insert,
-    TypeQLDelete => Delete,
-    TypeQLUpdate => Update,
-    TypeQLDefine => Define,
-    TypeQLUndefine => Undefine,
-    TypeQLMatchAggregate => Aggregate,
-    TypeQLMatchGroup => Group,
-    TypeQLMatchGroupAggregate => GroupAggregate,
 }
 
 impl fmt::Display for Query {

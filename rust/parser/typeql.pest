@@ -216,7 +216,7 @@ DESC = @{ "desc" ~ WB }
 
 TYPE = @{ "type" ~ WB }
 ABSTRACT = @{ "abstract" ~ WB }
-SUB_ = @{ SUBX | SUB }
+SUB_ = ${ SUBX | SUB }
 SUB = @{ "sub" ~ WB }
 SUBX = @{ "sub!" ~ WB }
 OWNS = @{ "owns" ~ WB }
@@ -231,7 +231,7 @@ THEN = @{ "then" ~ WB }
 // THING VARIABLE CONSTRAINT KEYWORDS
 
 IID = @{ "iid" ~ WB }
-ISA_ = @{ ISAX | ISA }
+ISA_ = ${ ISAX | ISA }
 ISA = @{ "isa" ~ WB }
 ISAX = @{ "isa!" ~ WB }
 HAS = @{ "has" ~ WB }
@@ -328,7 +328,7 @@ SECOND_ = @{ ('0'..'6') ~ ASCII_DIGIT }
 SECOND_FRACTION_ = @{ ASCII_DIGIT{1,3} } // between 1 and 3 digits
 ESCAPE_SEQ_ = @{ "\\" ~ ANY }
 
-WB = _{ &(PUNCTUATION | WHITESPACE | COMMENT) } // Word boundary
+WB = _{ &(PUNCTUATION | WHITESPACE | COMMENT | EOI) } // Word boundary
 
 COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
