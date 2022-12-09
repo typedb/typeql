@@ -134,6 +134,7 @@ macro_rules! format_message {
     };
 }
 
+#[macro_export]
 macro_rules! error_messages {
     {$name:ident code: $code_pfx:literal, type: $message_pfx:literal,
     $(
