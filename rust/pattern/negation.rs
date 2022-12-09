@@ -20,12 +20,13 @@
  *
  */
 
+use core::fmt;
+use std::collections::HashSet;
+
 use crate::{
     common::{error::ErrorMessage, token, validatable::Validatable, Result},
     pattern::{Conjunction, Disjunction, Normalisable, Pattern, Reference},
 };
-use core::fmt;
-use std::collections::HashSet;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Negation {

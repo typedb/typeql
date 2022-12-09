@@ -20,13 +20,14 @@
  *
  */
 
+use std::fmt;
+
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::ThingVariable,
     query::{writable::expect_non_empty, TypeQLDelete},
     write_joined,
 };
-use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {

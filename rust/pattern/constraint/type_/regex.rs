@@ -20,11 +20,13 @@
  *
  */
 
+use std::fmt;
+
+use regex::Regex;
+
 use crate::common::{
     error::ErrorMessage, string::escape_regex, token, validatable::Validatable, Result,
 };
-use regex::Regex;
-use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RegexConstraint {

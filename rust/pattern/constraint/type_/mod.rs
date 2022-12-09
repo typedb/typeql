@@ -21,25 +21,20 @@
  */
 
 mod abstract_;
-pub use abstract_::AbstractConstraint;
-
 mod label;
-pub use label::LabelConstraint;
-
 mod owns;
-pub use owns::{IsKeyAttribute, OwnsConstraint, KEY};
-
 mod plays;
-pub use plays::PlaysConstraint;
-
 mod regex;
-pub use self::regex::RegexConstraint;
-
 mod relates;
-pub use relates::RelatesConstraint;
-
 mod sub;
-pub use sub::SubConstraint;
-
 mod value_type;
+
+pub use abstract_::AbstractConstraint;
+pub use label::LabelConstraint;
+pub use owns::{IsKeyAttribute, OwnsConstraint, KEY};
+pub use plays::PlaysConstraint;
+pub use relates::RelatesConstraint;
+pub use sub::SubConstraint;
 pub use value_type::ValueTypeConstraint;
+
+pub use self::regex::RegexConstraint;

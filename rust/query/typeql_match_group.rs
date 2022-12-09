@@ -20,12 +20,13 @@
  *
  */
 
+use std::{collections::HashSet, fmt};
+
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{NamedReferences, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLMatch},
 };
-use std::{collections::HashSet, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatchGroup {

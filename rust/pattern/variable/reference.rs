@@ -20,8 +20,9 @@
  *
  */
 
-use crate::common::{error::ErrorMessage, validatable::Validatable, Result};
 use std::fmt;
+
+use crate::common::{error::ErrorMessage, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Visibility {

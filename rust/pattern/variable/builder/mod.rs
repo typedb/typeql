@@ -21,12 +21,9 @@
  */
 
 mod concept;
-pub use concept::{ConceptConstrainable, ConceptVariableBuilder};
-
 mod thing;
-pub use thing::{
-    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder,
-};
-
 mod type_;
+
+pub use concept::{ConceptConstrainable, ConceptVariableBuilder};
+pub use thing::{ RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder, };
 pub use type_::{TypeConstrainable, TypeVariableBuilder};

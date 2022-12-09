@@ -26,7 +26,6 @@ pub mod common;
 pub mod parser;
 pub mod pattern;
 pub mod query;
-
 #[macro_use]
 mod util;
 

@@ -20,6 +20,8 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{
         error::{collect_err, ErrorMessage},
@@ -30,7 +32,6 @@ use crate::{
     pattern::{Definable, RuleDeclaration, TypeVariable},
     write_joined,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLUndefine {

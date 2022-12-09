@@ -20,14 +20,16 @@
  *
  */
 
+use std::fmt;
+
+use chrono::NaiveDateTime;
+use pest::error::{Error as PestError, LineColLocation};
+
 use crate::{
     common::token,
     pattern::{Label, Pattern, Reference, ThingVariable, TypeVariable, UnboundVariable, Value},
     write_joined,
 };
-use chrono::NaiveDateTime;
-use pest::error::{Error as PestError, LineColLocation};
-use std::fmt;
 
 #[derive(Debug)]
 pub struct Error {

@@ -20,6 +20,8 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{
         error::{collect_err, ErrorMessage},
@@ -30,7 +32,6 @@ use crate::{
     pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
     write_joined, Label,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {

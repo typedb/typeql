@@ -20,6 +20,8 @@
  *
  */
 
+use std::fmt;
+
 use crate::{
     common::{
         error::{collect_err, ErrorMessage},
@@ -31,7 +33,6 @@ use crate::{
     query::{writable::expect_non_empty, TypeQLMatch},
     write_joined,
 };
-use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {

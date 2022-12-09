@@ -20,11 +20,12 @@
  *
  */
 
+use std::fmt;
+
 use crate::{
     common::{token, validatable::Validatable, Result},
     Label,
 };
-use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct LabelConstraint {

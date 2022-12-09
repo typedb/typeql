@@ -23,6 +23,10 @@
 #[cfg(test)]
 mod test;
 
+use chrono::{NaiveDate, NaiveDateTime};
+use pest::Parser;
+use pest_derive::Parser;
+
 use crate::{
     common::{
         date_time,
@@ -46,9 +50,6 @@ use crate::{
         TypeQLUndefine, TypeQLUpdate,
     },
 };
-use chrono::{NaiveDate, NaiveDateTime};
-use pest::Parser;
-use pest_derive::Parser;
 
 #[derive(Parser)]
 #[grammar = "parser/typeql.pest"]

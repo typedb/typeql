@@ -20,6 +20,8 @@
  *
  */
 
+use std::{collections::HashSet, fmt, iter};
+
 use crate::{
     common::{
         error::{collect_err, Error, ErrorMessage},
@@ -31,7 +33,6 @@ use crate::{
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
-use std::{collections::HashSet, fmt, iter};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -251,8 +252,9 @@ impl fmt::Display for Filter {
 }
 
 pub mod sorting {
-    use crate::{common::token, pattern::UnboundVariable};
     use std::fmt;
+
+    use crate::{common::token, pattern::UnboundVariable};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {

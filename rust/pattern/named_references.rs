@@ -20,8 +20,9 @@
  *
  */
 
-use crate::pattern::Reference;
 use std::collections::HashSet;
+
+use crate::pattern::Reference;
 
 pub trait NamedReferences {
     fn named_references(&self) -> HashSet<Reference>;

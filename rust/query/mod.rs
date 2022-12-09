@@ -21,37 +21,31 @@
  */
 
 mod aggregate;
-pub use aggregate::{AggregateQueryBuilder, TypeQLMatchAggregate, TypeQLMatchGroupAggregate};
-
 mod typeql_define;
-pub use typeql_define::TypeQLDefine;
-
 mod typeql_delete;
-pub use typeql_delete::TypeQLDelete;
-
 mod typeql_insert;
-pub use typeql_insert::TypeQLInsert;
-
 mod typeql_match;
-pub use typeql_match::{sorting, Filter, Limit, Offset, Sorting, TypeQLMatch};
-
 mod typeql_match_group;
-pub use typeql_match_group::TypeQLMatchGroup;
-
 mod typeql_undefine;
-pub use typeql_undefine::TypeQLUndefine;
-
 mod typeql_update;
-pub use typeql_update::TypeQLUpdate;
-
 mod writable;
+
+use std::fmt;
+
+pub use aggregate::{AggregateQueryBuilder, TypeQLMatchAggregate, TypeQLMatchGroupAggregate};
+pub use typeql_define::TypeQLDefine;
+pub use typeql_delete::TypeQLDelete;
+pub use typeql_insert::TypeQLInsert;
+pub use typeql_match::{sorting, Filter, Limit, Offset, Sorting, TypeQLMatch};
+pub use typeql_match_group::TypeQLMatchGroup;
+pub use typeql_undefine::TypeQLUndefine;
+pub use typeql_update::TypeQLUpdate;
 pub use writable::Writable;
 
 use crate::{
     common::{error::ErrorMessage, validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
-use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {

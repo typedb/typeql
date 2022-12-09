@@ -20,8 +20,9 @@
  *
  */
 
-use crate::common::{error::ErrorMessage, token, validatable::Validatable, Result};
 use std::fmt;
+
+use crate::common::{error::ErrorMessage, token, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {

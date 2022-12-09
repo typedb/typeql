@@ -20,12 +20,13 @@
  *
  */
 
+use std::fmt;
+
 use crate::{
     common::{token, validatable::Validatable, Result},
     pattern::{ConceptVariable, UnboundVariable},
     var,
 };
-use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {

@@ -20,11 +20,12 @@
  *
  */
 
+use std::{collections::HashSet, fmt};
+
 use crate::{
     common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
     pattern::{Conjunction, Normalisable, Pattern, Reference},
 };
-use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, Eq)]
 pub struct Disjunction {

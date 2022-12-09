@@ -21,18 +21,17 @@
  */
 
 mod concept;
-pub use concept::IsConstraint;
-
-mod type_;
-pub use type_::{
-    AbstractConstraint, IsKeyAttribute, LabelConstraint, OwnsConstraint, PlaysConstraint,
-    RegexConstraint, RelatesConstraint, SubConstraint, ValueTypeConstraint, KEY,
-};
-
 mod thing;
+mod type_;
+
+pub use concept::IsConstraint;
 pub use thing::{
     HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint, Value,
     ValueConstraint,
+};
+pub use type_::{
+    AbstractConstraint, IsKeyAttribute, LabelConstraint, OwnsConstraint, PlaysConstraint,
+    RegexConstraint, RelatesConstraint, SubConstraint, ValueTypeConstraint, KEY,
 };
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]

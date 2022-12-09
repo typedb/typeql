@@ -20,6 +20,8 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
@@ -27,7 +29,6 @@ use crate::{
         UnboundVariable, Value, ValueConstraint,
     },
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {

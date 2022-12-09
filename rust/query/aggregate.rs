@@ -20,6 +20,8 @@
  *
  */
 
+use std::{collections::HashSet, fmt};
+
 use crate::{
     common::{
         error::{collect_err, ErrorMessage},
@@ -30,7 +32,6 @@ use crate::{
     pattern::{NamedReferences, Reference, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
-use std::{collections::HashSet, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>

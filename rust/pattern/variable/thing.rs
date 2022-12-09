@@ -20,6 +20,8 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
@@ -28,7 +30,6 @@ use crate::{
     },
     write_joined,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingVariable {

@@ -21,7 +21,6 @@
  */
 
 use cucumber::{gherkin::Step, given, then, when, World};
-
 use typeql_lang::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]

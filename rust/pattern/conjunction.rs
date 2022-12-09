@@ -20,6 +20,10 @@
  *
  */
 
+use std::{collections::HashSet, fmt, iter};
+
+use itertools::Itertools;
+
 use crate::{
     common::{
         error::{collect_err, ErrorMessage},
@@ -29,8 +33,6 @@ use crate::{
     },
     pattern::{Disjunction, NamedReferences, Normalisable, Pattern, Reference},
 };
-use itertools::Itertools;
-use std::{collections::HashSet, fmt, iter};
 
 #[derive(Debug, Clone, Eq)]
 pub struct Conjunction {

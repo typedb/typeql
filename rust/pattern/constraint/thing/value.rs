@@ -20,6 +20,10 @@
  *
  */
 
+use std::{fmt, iter};
+
+use chrono::{NaiveDateTime, Timelike};
+
 use crate::{
     common::{
         date_time,
@@ -31,8 +35,6 @@ use crate::{
     },
     pattern::{Reference, ThingVariable, UnboundVariable},
 };
-use chrono::{NaiveDateTime, Timelike};
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueConstraint {
