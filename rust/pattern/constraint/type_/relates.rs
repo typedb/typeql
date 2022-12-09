@@ -20,12 +20,13 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelatesConstraint {

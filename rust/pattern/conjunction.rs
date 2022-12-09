@@ -20,17 +20,19 @@
  *
  */
 
+use std::{collections::HashSet, fmt, iter};
+
+use itertools::Itertools;
+
 use crate::{
     common::{
-        error::{collect_err, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        error::{collect_err, TypeQLError},
         string::indent,
         validatable::Validatable,
         Result,
     },
     pattern::{Disjunction, NamedReferences, Normalisable, Pattern, Reference},
 };
-use itertools::Itertools;
-use std::{collections::HashSet, fmt, iter};
 
 #[derive(Debug, Clone, Eq)]
 pub struct Conjunction {
@@ -82,8 +84,7 @@ fn expect_bounded(
     conjunction: &Conjunction,
 ) -> Result<()> {
     if bounds.is_disjoint(names) {
-        Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
-            .format(&[&conjunction.to_string().replace('\n', " ")]))?;
+        Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
     Ok(())
 }

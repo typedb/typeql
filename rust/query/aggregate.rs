@@ -20,9 +20,11 @@
  *
  */
 
+use std::{collections::HashSet, fmt};
+
 use crate::{
     common::{
-        error::{collect_err, INVALID_COUNT_VARIABLE_ARGUMENT, VARIABLE_OUT_OF_SCOPE_MATCH},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -30,7 +32,6 @@ use crate::{
     pattern::{NamedReferences, Reference, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
-use std::{collections::HashSet, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>
@@ -74,7 +75,7 @@ fn expect_method_variable_compatible(
     var: &Option<UnboundVariable>,
 ) -> Result<()> {
     if method == token::Aggregate::Count && var.is_some() {
-        Err(INVALID_COUNT_VARIABLE_ARGUMENT.format(&[]))?;
+        Err(TypeQLError::InvalidCountVariableArgument())?
     }
     Ok(())
 }
@@ -84,7 +85,7 @@ fn expect_variable_in_scope(
     names_in_scope: HashSet<Reference>,
 ) -> Result<()> {
     if !names_in_scope.contains(&var.reference) {
-        Err(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[]))?;
+        Err(TypeQLError::VariableOutOfScopeMatch(var.reference.clone()))?;
     }
     Ok(())
 }

@@ -20,9 +20,11 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{
-        error::{collect_err, INVALID_RULE_WHEN_MISSING_PATTERNS, MISSING_DEFINABLES},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -30,7 +32,6 @@ use crate::{
     pattern::{Definable, RuleDefinition, TypeVariable},
     write_joined,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLDefine {
@@ -44,7 +45,7 @@ impl TypeQLDefine {
             Definable::RuleDefinition(rule) => define.add_rule(rule),
             Definable::TypeVariable(var) => define.add_definition(var),
             Definable::RuleDeclaration(r) => {
-                panic!("{}", INVALID_RULE_WHEN_MISSING_PATTERNS.format(&[&r.to_string()]))
+                panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns(r.label))
             }
         })
     }
@@ -73,7 +74,7 @@ impl Validatable for TypeQLDefine {
 
 fn expect_non_empty(variables: &[TypeVariable], rules: &[RuleDefinition]) -> Result<()> {
     if variables.is_empty() && rules.is_empty() {
-        Err(MISSING_DEFINABLES.format(&[]))?
+        Err(TypeQLError::MissingDefinables())?
     }
     Ok(())
 }

@@ -20,9 +20,11 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{
-        error::{collect_err, MISSING_CONSTRAINT_RELATION_PLAYER},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -30,7 +32,6 @@ use crate::{
     pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
     write_joined, Label,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
@@ -63,7 +64,7 @@ impl Validatable for RelationConstraint {
 
 fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result<()> {
     if role_players.is_empty() {
-        Err(MISSING_CONSTRAINT_RELATION_PLAYER.format(&[]))?
+        Err(TypeQLError::MissingConstraintRelationPlayer())?
     }
     Ok(())
 }

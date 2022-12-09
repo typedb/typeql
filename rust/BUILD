@@ -50,7 +50,7 @@ rust_library(
     proc_macro_deps = [
         "@vaticle_dependencies//library/crates:pest_derive",
     ],
-    visibility = ["//rust:__subpackages__"]
+    visibility = ["//visibility:public"]
 )
 
 rust_test(

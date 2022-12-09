@@ -20,6 +20,8 @@
  *
  */
 
+use std::fmt;
+
 use crate::{
     common::token,
     pattern::{
@@ -27,7 +29,6 @@ use crate::{
         TypeVariableBuilder,
     },
 };
-use std::fmt;
 
 #[derive(Debug)]
 pub enum Type {

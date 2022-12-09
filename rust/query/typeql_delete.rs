@@ -20,9 +20,11 @@
  *
  */
 
+use std::fmt;
+
 use crate::{
     common::{
-        error::{collect_err, VARIABLE_OUT_OF_SCOPE_DELETE},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -31,7 +33,6 @@ use crate::{
     query::{writable::expect_non_empty, TypeQLMatch, TypeQLUpdate, Writable},
     write_joined,
 };
-use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDelete {
@@ -69,7 +70,7 @@ fn expect_delete_in_scope_of_match(
             if names_in_scope.contains(r) {
                 Ok(())
             } else {
-                Err(VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()]))?
+                Err(TypeQLError::VariableOutOfScopeDelete(r.clone()))?
             }
         },
     ))

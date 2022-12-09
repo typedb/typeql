@@ -20,9 +20,11 @@
  *
  */
 
+use std::fmt;
+
 use crate::{
     common::{
-        error::{collect_err, NO_VARIABLE_IN_SCOPE_INSERT},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -31,7 +33,6 @@ use crate::{
     query::{writable::expect_non_empty, TypeQLMatch},
     write_joined,
 };
-use std::fmt;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {
@@ -78,7 +79,7 @@ fn expect_insert_in_scope_of_match(
                 .map(|r| r.to_string())
                 .collect::<Vec<String>>()
                 .join(", ");
-            Err(NO_VARIABLE_IN_SCOPE_INSERT.format(&[&variables_str, &bounds_str]))?
+            Err(TypeQLError::NoVariableInScopeInsert(variables_str, bounds_str))?
         }
     } else {
         Ok(())

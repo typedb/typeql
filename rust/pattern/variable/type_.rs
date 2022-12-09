@@ -20,9 +20,11 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{
-        error::{collect_err, INVALID_DEFINE_QUERY_VARIABLE},
+        error::{collect_err, TypeQLError},
         validatable::Validatable,
         Result,
     },
@@ -32,7 +34,6 @@ use crate::{
     },
     write_joined,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeVariable {
@@ -84,7 +85,7 @@ impl TypeVariable {
 
     pub fn validate_definable(&self) -> Result<()> {
         if self.label.is_none() {
-            Err(INVALID_DEFINE_QUERY_VARIABLE.format(&[]))?;
+            Err(TypeQLError::InvalidDefineQueryVariable())?;
         }
         Ok(())
     }

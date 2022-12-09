@@ -21,4 +21,5 @@
 #
 
 imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
 use_small_heuristics = "Max"

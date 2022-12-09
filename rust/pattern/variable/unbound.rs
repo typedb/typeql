@@ -20,6 +20,8 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
@@ -30,7 +32,6 @@ use crate::{
         TypeVariable, ValueConstraint, ValueTypeConstraint, Visibility,
     },
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundVariable {

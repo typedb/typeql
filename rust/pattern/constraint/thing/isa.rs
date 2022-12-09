@@ -20,12 +20,13 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{token, validatable::Validatable, Result},
     pattern::{IsExplicit, Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {

@@ -20,6 +20,8 @@
  *
  */
 
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+
 use crate::{
     and,
     common::{
@@ -37,7 +39,6 @@ use crate::{
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
 };
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {

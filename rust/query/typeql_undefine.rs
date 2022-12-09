@@ -20,9 +20,11 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{
-        error::{collect_err, INVALID_UNDEFINE_QUERY_RULE, MISSING_DEFINABLES},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -30,7 +32,6 @@ use crate::{
     pattern::{Definable, RuleDeclaration, TypeVariable},
     write_joined,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLUndefine {
@@ -45,7 +46,7 @@ impl TypeQLUndefine {
                 Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
                 Definable::TypeVariable(var) => undefine.add_definition(var),
                 Definable::RuleDefinition(r) => {
-                    panic!("{}", INVALID_UNDEFINE_QUERY_RULE.format(&[&r.label.to_string()]))
+                    panic!("{}", TypeQLError::InvalidUndefineQueryRule(r.label))
                 }
             }
         })
@@ -75,7 +76,7 @@ impl Validatable for TypeQLUndefine {
 
 fn expect_non_empty(variables: &[TypeVariable], rules: &[RuleDeclaration]) -> Result<()> {
     if variables.is_empty() && rules.is_empty() {
-        Err(MISSING_DEFINABLES.format(&[]))?
+        Err(TypeQLError::MissingDefinables())?
     }
     Ok(())
 }

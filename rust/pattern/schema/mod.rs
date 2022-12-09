@@ -21,4 +21,5 @@
  */
 
 mod rule;
+
 pub use rule::{RuleDeclaration, RuleDefinition};

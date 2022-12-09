@@ -20,35 +20,30 @@
  *
  */
 
-mod reference;
-
-pub use reference::{Reference, Visibility};
-use std::collections::HashSet;
-
-mod concept;
-pub use concept::ConceptVariable;
-
-mod thing;
-pub use thing::ThingVariable;
-
-mod type_;
-pub use type_::TypeVariable;
-
-mod unbound;
-pub use unbound::UnboundVariable;
-
 mod builder;
+mod concept;
+mod reference;
+mod thing;
+mod type_;
+mod unbound;
+
+use std::{collections::HashSet, fmt};
+
 pub use builder::{
     ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder,
     ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
 };
+pub use concept::ConceptVariable;
+pub use reference::{Reference, Visibility};
+pub use thing::ThingVariable;
+pub use type_::TypeVariable;
+pub use unbound::UnboundVariable;
 
 use crate::{
-    common::{error::MATCH_HAS_UNBOUNDED_NESTED_PATTERN, validatable::Validatable, Result},
+    common::{error::TypeQLError, validatable::Validatable, Result},
     enum_wrapper,
     pattern::{Normalisable, Pattern},
 };
-use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
@@ -74,8 +69,7 @@ impl Variable {
             Self::Unbound(_) => unreachable!(),
             _ => {
                 if !self.references().any(|r| r.is_name() && bounds.contains(r)) {
-                    Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
-                        .format(&[&self.to_string().replace('\n', " ")]))?
+                    Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
                 }
                 Ok(())
             }

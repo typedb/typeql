@@ -20,13 +20,11 @@
  *
  */
 
+use std::{collections::HashSet, fmt, iter};
+
 use crate::{
     common::{
-        error::{
-            collect_err, Error, EMPTY_MATCH_FILTER, ILLEGAL_FILTER_VARIABLE_REPEATING,
-            MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE, MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE,
-            VARIABLE_NOT_NAMED, VARIABLE_NOT_SORTED, VARIABLE_OUT_OF_SCOPE_MATCH,
-        },
+        error::{collect_err, Error, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -35,7 +33,6 @@ use crate::{
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
-use std::{collections::HashSet, fmt, iter};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -121,7 +118,7 @@ fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
     if conjunction.has_named_variables() {
         Ok(())
     } else {
-        Err(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE.format(&[]))?
+        Err(TypeQLError::MatchHasNoBoundingNamedVariable())?
     }
 }
 
@@ -136,7 +133,7 @@ fn expect_each_variable_is_bounded_by_named<'a>(
     collect_err(&mut patterns.map(|p| match p {
         Pattern::Variable(v) => {
             v.references().any(|r| r.is_name()).then_some(()).ok_or_else(|| {
-                Error::from(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.format(&[&p.to_string()]))
+                Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))
             })
         }
         Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
@@ -151,15 +148,15 @@ fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter
     let names_in_scope = conjunction.named_references();
     let mut seen = HashSet::new();
     if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
-        Err(EMPTY_MATCH_FILTER.format(&[]))?;
+        Err(TypeQLError::EmptyMatchFilter())?;
     }
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
-            Err(Error::from(VARIABLE_NOT_NAMED.format(&[])))
+            Err(TypeQLError::VariableNotNamed().into())
         } else if !names_in_scope.contains(r) {
-            Err(Error::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))
+            Err(TypeQLError::VariableOutOfScopeMatch(r.clone()).into())
         } else if seen.contains(&r) {
-            Err(Error::from(ILLEGAL_FILTER_VARIABLE_REPEATING.format(&[&r.to_string()])))
+            Err(TypeQLError::IllegalFilterVariableRepeating(r.clone()).into())
         } else {
             seen.insert(r);
             Ok(())
@@ -181,7 +178,7 @@ fn expect_sort_vars_are_in_scope(
             names_in_scope
                 .contains(&r)
                 .then_some(())
-                .ok_or_else(|| Error::from(VARIABLE_OUT_OF_SCOPE_MATCH.format(&[&r.to_string()])))
+                .ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
         },
     ))
 }
@@ -255,8 +252,9 @@ impl fmt::Display for Filter {
 }
 
 pub mod sorting {
-    use crate::{common::token, pattern::UnboundVariable};
     use std::fmt;
+
+    use crate::{common::token, pattern::UnboundVariable};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {
@@ -295,7 +293,7 @@ impl Sorting {
         self.vars
             .iter()
             .find_map(|v| (v.var == var).then_some(v.order.unwrap_or(token::Order::Asc)))
-            .ok_or_else(|| VARIABLE_NOT_SORTED.format(&[&var.to_string()]).into())
+            .ok_or_else(|| TypeQLError::VariableNotSorted(var).into())
     }
 }
 

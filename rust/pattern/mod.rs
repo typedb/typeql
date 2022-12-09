@@ -21,32 +21,30 @@
  */
 
 mod conjunction;
-pub use conjunction::Conjunction;
-
 mod constraint;
+mod disjunction;
+mod label;
+mod named_references;
+mod negation;
+mod schema;
+#[cfg(test)]
+mod test;
+mod variable;
+
+use std::{collections::HashSet, fmt};
+
+pub use conjunction::Conjunction;
 pub use constraint::{
     AbstractConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsKeyAttribute,
     IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
     RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value,
     ValueConstraint, ValueTypeConstraint, KEY,
 };
-
-mod disjunction;
 pub use disjunction::Disjunction;
-
-mod label;
 pub use label::{Label, Type};
-
-mod negation;
-pub use negation::Negation;
-
-mod schema;
-pub use schema::{RuleDeclaration, RuleDefinition};
-
-mod named_references;
 pub use named_references::NamedReferences;
-
-mod variable;
+pub use negation::Negation;
+pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
     ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference,
     RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable,
@@ -54,14 +52,10 @@ pub use variable::{
     Variable, Visibility,
 };
 
-#[cfg(test)]
-mod test;
-
 use crate::{
-    common::{error::INVALID_CASTING, validatable::Validatable, Result},
+    common::{error::TypeQLError, validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
-use std::{collections::HashSet, fmt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {

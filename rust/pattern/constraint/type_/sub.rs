@@ -20,6 +20,8 @@
  *
  */
 
+use std::{fmt, iter};
+
 use crate::{
     common::{token, validatable::Validatable, Result},
     pattern::{
@@ -27,7 +29,6 @@ use crate::{
     },
     Label,
 };
-use std::{fmt, iter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
