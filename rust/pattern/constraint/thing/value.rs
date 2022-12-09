@@ -27,7 +27,7 @@ use chrono::{NaiveDateTime, Timelike};
 use crate::{
     common::{
         date_time,
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         string::{escape_regex, format_double, quote},
         token,
         validatable::Validatable,
@@ -72,7 +72,7 @@ fn expect_string_value_with_substring_predicate(
     value: &Value,
 ) -> Result<()> {
     if predicate.is_substring() && !matches!(value, Value::String(_)) {
-        Err(ErrorMessage::InvalidConstraintPredicate(predicate, value.clone()))?
+        Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
     Ok(())
 }
@@ -108,7 +108,7 @@ impl Validatable for Value {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
-                    Err(ErrorMessage::InvalidConstraintDatetimePrecision(date_time.clone()))?
+                    Err(TypeQLError::InvalidConstraintDatetimePrecision(date_time.clone()))?
                 }
                 Ok(())
             }

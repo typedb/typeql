@@ -24,7 +24,7 @@ use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -75,7 +75,7 @@ fn expect_method_variable_compatible(
     var: &Option<UnboundVariable>,
 ) -> Result<()> {
     if method == token::Aggregate::Count && var.is_some() {
-        Err(ErrorMessage::InvalidCountVariableArgument())?
+        Err(TypeQLError::InvalidCountVariableArgument())?
     }
     Ok(())
 }
@@ -85,7 +85,7 @@ fn expect_variable_in_scope(
     names_in_scope: HashSet<Reference>,
 ) -> Result<()> {
     if !names_in_scope.contains(&var.reference) {
-        Err(ErrorMessage::VariableOutOfScopeMatch(var.reference.clone()))?;
+        Err(TypeQLError::VariableOutOfScopeMatch(var.reference.clone()))?;
     }
     Ok(())
 }

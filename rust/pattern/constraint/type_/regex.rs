@@ -25,7 +25,7 @@ use std::fmt;
 use regex::Regex;
 
 use crate::common::{
-    error::ErrorMessage, string::escape_regex, token, validatable::Validatable, Result,
+    error::TypeQLError, string::escape_regex, token, validatable::Validatable, Result,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -36,7 +36,7 @@ pub struct RegexConstraint {
 impl Validatable for RegexConstraint {
     fn validate(&self) -> Result<()> {
         if Regex::new(&self.regex).is_err() {
-            Err(ErrorMessage::InvalidAttributeTypeRegex(self.regex.clone()))?;
+            Err(TypeQLError::InvalidAttributeTypeRegex(self.regex.clone()))?;
         }
         Ok(())
     }

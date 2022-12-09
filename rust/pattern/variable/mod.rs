@@ -40,7 +40,7 @@ pub use type_::TypeVariable;
 pub use unbound::UnboundVariable;
 
 use crate::{
-    common::{error::ErrorMessage, validatable::Validatable, Result},
+    common::{error::TypeQLError, validatable::Validatable, Result},
     enum_wrapper,
     pattern::{Normalisable, Pattern},
 };
@@ -69,7 +69,7 @@ impl Variable {
             Self::Unbound(_) => unreachable!(),
             _ => {
                 if !self.references().any(|r| r.is_name() && bounds.contains(r)) {
-                    Err(ErrorMessage::MatchHasUnboundedNestedPattern(self.clone().into()))?
+                    Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
                 }
                 Ok(())
             }

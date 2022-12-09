@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         validatable::Validatable,
         Result,
     },
@@ -85,7 +85,7 @@ impl TypeVariable {
 
     pub fn validate_definable(&self) -> Result<()> {
         if self.label.is_none() {
-            Err(ErrorMessage::InvalidDefineQueryVariable())?;
+            Err(TypeQLError::InvalidDefineQueryVariable())?;
         }
         Ok(())
     }

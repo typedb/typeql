@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -45,7 +45,7 @@ impl TypeQLDefine {
             Definable::RuleDefinition(rule) => define.add_rule(rule),
             Definable::TypeVariable(var) => define.add_definition(var),
             Definable::RuleDeclaration(r) => {
-                panic!("{}", ErrorMessage::InvalidRuleWhenMissingPatterns(r.label))
+                panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns(r.label))
             }
         })
     }
@@ -74,7 +74,7 @@ impl Validatable for TypeQLDefine {
 
 fn expect_non_empty(variables: &[TypeVariable], rules: &[RuleDefinition]) -> Result<()> {
     if variables.is_empty() && rules.is_empty() {
-        Err(ErrorMessage::MissingDefinables())?
+        Err(TypeQLError::MissingDefinables())?
     }
     Ok(())
 }

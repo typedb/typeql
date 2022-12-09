@@ -24,7 +24,7 @@ use std::{collections::HashSet, fmt, iter};
 
 use crate::{
     common::{
-        error::{collect_err, Error, ErrorMessage},
+        error::{collect_err, Error, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -118,7 +118,7 @@ fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
     if conjunction.has_named_variables() {
         Ok(())
     } else {
-        Err(ErrorMessage::MatchHasNoBoundingNamedVariable())?
+        Err(TypeQLError::MatchHasNoBoundingNamedVariable())?
     }
 }
 
@@ -133,7 +133,7 @@ fn expect_each_variable_is_bounded_by_named<'a>(
     collect_err(&mut patterns.map(|p| match p {
         Pattern::Variable(v) => {
             v.references().any(|r| r.is_name()).then_some(()).ok_or_else(|| {
-                Error::from(ErrorMessage::MatchPatternVariableHasNoNamedVariable(p.clone()))
+                Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))
             })
         }
         Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
@@ -148,15 +148,15 @@ fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter
     let names_in_scope = conjunction.named_references();
     let mut seen = HashSet::new();
     if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
-        Err(ErrorMessage::EmptyMatchFilter())?;
+        Err(TypeQLError::EmptyMatchFilter())?;
     }
     collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
         if !r.is_name() {
-            Err(ErrorMessage::VariableNotNamed().into())
+            Err(TypeQLError::VariableNotNamed().into())
         } else if !names_in_scope.contains(r) {
-            Err(ErrorMessage::VariableOutOfScopeMatch(r.clone()).into())
+            Err(TypeQLError::VariableOutOfScopeMatch(r.clone()).into())
         } else if seen.contains(&r) {
-            Err(ErrorMessage::IllegalFilterVariableRepeating(r.clone()).into())
+            Err(TypeQLError::IllegalFilterVariableRepeating(r.clone()).into())
         } else {
             seen.insert(r);
             Ok(())
@@ -178,7 +178,7 @@ fn expect_sort_vars_are_in_scope(
             names_in_scope
                 .contains(&r)
                 .then_some(())
-                .ok_or_else(|| ErrorMessage::VariableOutOfScopeMatch(r).into())
+                .ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
         },
     ))
 }
@@ -293,7 +293,7 @@ impl Sorting {
         self.vars
             .iter()
             .find_map(|v| (v.var == var).then_some(v.order.unwrap_or(token::Order::Asc)))
-            .ok_or_else(|| ErrorMessage::VariableNotSorted(var).into())
+            .ok_or_else(|| TypeQLError::VariableNotSorted(var).into())
     }
 }
 

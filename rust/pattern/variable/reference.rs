@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::common::{error::ErrorMessage, validatable::Validatable, Result};
+use crate::common::{error::TypeQLError, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Visibility {
@@ -59,7 +59,7 @@ fn expect_valid_identifier(name: &str) -> Result<()> {
     if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
         || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
     {
-        Err(ErrorMessage::InvalidVariableName(name.to_string()))?
+        Err(TypeQLError::InvalidVariableName(name.to_string()))?
     }
     Ok(())
 }

@@ -26,7 +26,7 @@ use itertools::Itertools;
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         string::indent,
         validatable::Validatable,
         Result,
@@ -84,7 +84,7 @@ fn expect_bounded(
     conjunction: &Conjunction,
 ) -> Result<()> {
     if bounds.is_disjoint(names) {
-        Err(ErrorMessage::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
+        Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
     Ok(())
 }

@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         string::indent,
         token,
         validatable::Validatable,
@@ -112,7 +112,7 @@ fn expect_no_nested_negations<'a>(
             Pattern::Disjunction(d) => expect_no_nested_negations(d.patterns.iter(), rule_label),
             Pattern::Negation(n) => {
                 if contains_negations(iter::once(n.pattern.as_ref())) {
-                    Err(ErrorMessage::InvalidRuleWhenNestedNegation(rule_label.clone()))?
+                    Err(TypeQLError::InvalidRuleWhenNestedNegation(rule_label.clone()))?
                 } else {
                     Ok(())
                 }
@@ -142,14 +142,14 @@ fn expect_infer_single_edge(then: &ThingVariable, rule_label: &Label) -> Result<
     {
         Ok(())
     } else {
-        Err(ErrorMessage::InvalidRuleThen(rule_label.clone(), then.clone()))?
+        Err(TypeQLError::InvalidRuleThen(rule_label.clone(), then.clone()))?
     }
 }
 
 fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
     if let Some(has) = then.has.get(0) {
         if has.type_.is_some() && has.attribute.reference.is_name() {
-            Err(ErrorMessage::InvalidRuleThenHas(
+            Err(TypeQLError::InvalidRuleThenHas(
                 rule_label.clone(),
                 then.clone(),
                 has.attribute.reference.clone(),
@@ -159,7 +159,7 @@ fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()
         Ok(())
     } else if let Some(relation) = &then.relation {
         if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
-            Err(ErrorMessage::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
+            Err(TypeQLError::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
         }
         Ok(())
     } else {
@@ -174,7 +174,7 @@ fn expect_then_bounded_by_when(
 ) -> Result<()> {
     let bounds = when.named_references();
     if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
-        Err(ErrorMessage::InvalidRuleThenVariables(rule_label.clone()))?
+        Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
     }
     Ok(())
 }

@@ -53,7 +53,7 @@ pub use variable::{
 };
 
 use crate::{
-    common::{error::ErrorMessage, validatable::Validatable, Result},
+    common::{error::TypeQLError, validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
 

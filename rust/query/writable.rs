@@ -20,7 +20,7 @@
  *
  */
 
-use crate::{common::error::ErrorMessage, pattern::ThingVariable, Result};
+use crate::{common::error::TypeQLError, pattern::ThingVariable, Result};
 
 pub trait Writable {
     fn vars(self) -> Vec<ThingVariable>;
@@ -46,7 +46,7 @@ impl Writable for Vec<ThingVariable> {
 
 pub(crate) fn expect_non_empty(variables: &[ThingVariable]) -> Result<()> {
     if variables.is_empty() {
-        Err(ErrorMessage::MissingPatterns())?
+        Err(TypeQLError::MissingPatterns())?
     }
     Ok(())
 }

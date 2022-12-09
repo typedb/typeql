@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::common::{error::ErrorMessage, token, validatable::Validatable, Result};
+use crate::common::{error::TypeQLError, token, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IIDConstraint {
@@ -42,7 +42,7 @@ impl IIDConstraint {
 impl Validatable for IIDConstraint {
     fn validate(&self) -> Result<()> {
         if !is_valid_iid(&self.iid) {
-            Err(ErrorMessage::InvalidIIDString(self.iid.clone()))?
+            Err(TypeQLError::InvalidIIDString(self.iid.clone()))?
         }
         Ok(())
     }

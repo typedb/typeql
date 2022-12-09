@@ -33,19 +33,19 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Error {
-    parse_errors: Vec<ErrorMessage>,
+    errors: Vec<TypeQLError>,
 }
 
-impl From<ErrorMessage> for Error {
-    fn from(parse_error: ErrorMessage) -> Self {
-        Self { parse_errors: vec![parse_error] }
+impl From<TypeQLError> for Error {
+    fn from(error: TypeQLError) -> Self {
+        Self { errors: vec![error] }
     }
 }
 
-impl From<Vec<ErrorMessage>> for Error {
-    fn from(parse_errors: Vec<ErrorMessage>) -> Self {
-        assert!(!parse_errors.is_empty());
-        Self { parse_errors }
+impl From<Vec<TypeQLError>> for Error {
+    fn from(errors: Vec<TypeQLError>) -> Self {
+        assert!(!errors.is_empty());
+        Self { errors }
     }
 }
 
@@ -55,7 +55,7 @@ impl<T: pest::RuleType> From<PestError<T>> for Error {
             LineColLocation::Pos((line, col)) => (line, col),
             LineColLocation::Span((line, col), _) => (line, col),
         };
-        Self::from(ErrorMessage::SyntaxErrorDetailed(
+        Self::from(TypeQLError::SyntaxErrorDetailed(
             line,
             error.line().to_owned(),
             " ".repeat(col - 1) + "^",
@@ -66,16 +66,16 @@ impl<T: pest::RuleType> From<PestError<T>> for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_joined!(f, "\n\n", self.parse_errors)
+        write_joined!(f, "\n\n", self.errors)
     }
 }
 
 pub fn collect_err(i: &mut dyn Iterator<Item = Result<(), Error>>) -> Result<(), Error> {
-    let messages = i.filter_map(Result::err).flat_map(|e| e.parse_errors).collect::<Vec<_>>();
-    if messages.is_empty() {
+    let errors = i.filter_map(Result::err).flat_map(|e| e.errors).collect::<Vec<_>>();
+    if errors.is_empty() {
         Ok(())
     } else {
-        Err(Error { parse_errors: messages })
+        Err(Error { errors })
     }
 }
 
@@ -181,7 +181,7 @@ macro_rules! error_messages {
     };
 }
 
-error_messages! { ErrorMessage
+error_messages! { TypeQLError
     code: "TQL", type: "TypeQL Error",
     SyntaxErrorDetailed(usize, String, String, String) =
         3: "There is a syntax error at line {}:\n{}\n{}\n{}",

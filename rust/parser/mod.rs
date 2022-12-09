@@ -30,7 +30,7 @@ use pest_derive::Parser;
 use crate::{
     common::{
         date_time,
-        error::ErrorMessage,
+        error::TypeQLError,
         string::{unescape_regex, unquote},
         token,
         validatable::Validatable,
@@ -166,7 +166,7 @@ pub(crate) fn visit_eof_variable(variable: &str) -> Result<Variable> {
 pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
     let parsed = parse_single(Rule::eof_label, label)?.into_child().as_str();
     if parsed != label {
-        Err(ErrorMessage::IllegalCharInLabel(label.to_string()))?;
+        Err(TypeQLError::IllegalCharInLabel(label.to_string()))?;
     }
     Ok(parsed.into())
 }
@@ -184,25 +184,25 @@ fn get_regex(string: SyntaxTree) -> String {
 }
 
 fn get_long(long: SyntaxTree) -> i64 {
-    long.as_str().parse().expect(&ErrorMessage::IllegalGrammar(long.to_string()).to_string())
+    long.as_str().parse().expect(&TypeQLError::IllegalGrammar(long.to_string()).to_string())
 }
 
 fn get_double(double: SyntaxTree) -> f64 {
-    double.as_str().parse().expect(&ErrorMessage::IllegalGrammar(double.to_string()).to_string())
+    double.as_str().parse().expect(&TypeQLError::IllegalGrammar(double.to_string()).to_string())
 }
 
 fn get_boolean(boolean: SyntaxTree) -> bool {
-    boolean.as_str().parse().expect(&ErrorMessage::IllegalGrammar(boolean.to_string()).to_string())
+    boolean.as_str().parse().expect(&TypeQLError::IllegalGrammar(boolean.to_string()).to_string())
 }
 
 fn get_date(date: SyntaxTree) -> NaiveDate {
     NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
-        .expect(&ErrorMessage::IllegalGrammar(date.to_string()).to_string())
+        .expect(&TypeQLError::IllegalGrammar(date.to_string()).to_string())
 }
 
 fn get_date_time(date_time: SyntaxTree) -> NaiveDateTime {
     date_time::parse(date_time.as_str())
-        .expect(&ErrorMessage::IllegalGrammar(date_time.to_string()).to_string())
+        .expect(&TypeQLError::IllegalGrammar(date_time.to_string()).to_string())
 }
 
 fn get_var(var: SyntaxTree) -> UnboundVariable {
@@ -256,7 +256,7 @@ fn visit_query(tree: SyntaxTree) -> Query {
         Rule::query_match_aggregate => visit_query_match_aggregate(child).into(),
         Rule::query_match_group => visit_query_match_group(child).into(),
         Rule::query_match_group_agg => visit_query_match_group_agg(child).into(),
-        _ => unreachable!("{:?}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{:?}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -284,7 +284,7 @@ fn visit_query_insert(tree: SyntaxTree) -> TypeQLInsert {
         Rule::INSERT => TypeQLInsert::new(visit_variable_things(
             children.consume_expected(Rule::variable_things),
         )),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(children.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
 
@@ -327,7 +327,7 @@ fn visit_query_match(tree: SyntaxTree) -> TypeQLMatch {
                         .skip_expected(Rule::LIMIT)
                         .consume_expected(Rule::LONG_),
                 ) as usize),
-                _ => unreachable!("{}", ErrorMessage::IllegalGrammar(modifier.to_string())),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar(modifier.to_string())),
             };
         }
     }
@@ -403,7 +403,7 @@ fn visit_definable(tree: SyntaxTree) -> Definable {
         Rule::variable_type => visit_variable_type(child).into(),
         Rule::schema_rule => visit_schema_rule(child).into(),
         Rule::schema_rule_declaration => visit_schema_rule_declaration(child).into(),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -418,7 +418,7 @@ fn visit_pattern(tree: SyntaxTree) -> Pattern {
         Rule::pattern_disjunction => visit_pattern_disjunction(child).into(),
         Rule::pattern_conjunction => visit_pattern_conjunction(child).into(),
         Rule::pattern_negation => visit_pattern_negation(child).into(),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -455,7 +455,7 @@ fn visit_pattern_variable(tree: SyntaxTree) -> Variable {
         Rule::variable_thing_any => visit_variable_thing_any(child).into(),
         Rule::variable_type => visit_variable_type(child).into(),
         Rule::variable_concept => visit_variable_concept(child).into(),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -510,7 +510,7 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
                 Rule::VALUE => var_type.value(token::ValueType::from(
                     constraint.consume_expected(Rule::value_type).as_str(),
                 )),
-                _ => unreachable!("{}", ErrorMessage::IllegalGrammar(constraint.to_string())),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar(constraint.to_string())),
             }
         });
 
@@ -527,7 +527,7 @@ fn visit_variable_thing_any(tree: SyntaxTree) -> ThingVariable {
         Rule::variable_thing => visit_variable_thing(child),
         Rule::variable_relation => visit_variable_relation(child),
         Rule::variable_attribute => visit_variable_attribute(child),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -540,7 +540,7 @@ fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
             Rule::IID => var_thing.iid(children.consume_expected(Rule::IID_).as_str()),
             Rule::ISA_ => var_thing
                 .constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_))),
-            _ => unreachable!("{}", ErrorMessage::IllegalGrammar(children.to_string())),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
         }
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
@@ -615,11 +615,11 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
                     label,
                     visit_predicate(children.consume_expected(Rule::predicate)),
                 )),
-                _ => unreachable!("{}", ErrorMessage::IllegalGrammar(children.to_string())),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
             }
         }
         Some(Rule::VAR_) => HasConstraint::from(get_var(children.consume_expected(Rule::VAR_))),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(children.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
 
@@ -637,7 +637,7 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
                 match predicate_value.as_rule() {
                     Rule::value => visit_value(predicate_value),
                     Rule::VAR_ => Value::from(get_var(predicate_value)),
-                    _ => unreachable!("{}", ErrorMessage::IllegalGrammar(children.to_string())),
+                    _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
                 }
             },
         ),
@@ -655,13 +655,13 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
                         token::Predicate::Contains => {
                             get_string(children.consume_expected(Rule::STRING_))
                         }
-                        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(children.to_string())),
+                        _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
                     }
                 }
                 .into(),
             )
         }
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(children.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
 
@@ -690,7 +690,7 @@ fn visit_type_any(tree: SyntaxTree) -> Type {
         Rule::VAR_ => Type::Variable(get_var(child)),
         Rule::type_ => visit_type(child),
         Rule::type_scoped => visit_type_scoped(child),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -699,7 +699,7 @@ fn visit_type_scoped(tree: SyntaxTree) -> Type {
     match child.as_rule() {
         Rule::label_scoped => Type::Label(visit_label_scoped(child)),
         Rule::VAR_ => Type::Variable(get_var(child)),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -708,7 +708,7 @@ fn visit_type(tree: SyntaxTree) -> Type {
     match child.as_rule() {
         Rule::label => Type::Label(child.as_str().into()),
         Rule::VAR_ => Type::Variable(get_var(child)),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -717,7 +717,7 @@ fn visit_label_any(tree: SyntaxTree) -> Label {
     match child.as_rule() {
         Rule::label => Label::from(child.as_str()),
         Rule::label_scoped => visit_label_scoped(child),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -736,6 +736,6 @@ fn visit_value(tree: SyntaxTree) -> Value {
         Rule::BOOLEAN_ => Value::from(get_boolean(child)),
         Rule::DATE_ => Value::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
         Rule::DATETIME_ => Value::from(get_date_time(child)),
-        _ => unreachable!("{}", ErrorMessage::IllegalGrammar(child.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }

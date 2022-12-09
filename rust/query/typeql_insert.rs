@@ -24,7 +24,7 @@ use std::fmt;
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -79,7 +79,7 @@ fn expect_insert_in_scope_of_match(
                 .map(|r| r.to_string())
                 .collect::<Vec<String>>()
                 .join(", ");
-            Err(ErrorMessage::NoVariableInScopeInsert(variables_str, bounds_str))?
+            Err(TypeQLError::NoVariableInScopeInsert(variables_str, bounds_str))?
         }
     } else {
         Ok(())

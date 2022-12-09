@@ -24,7 +24,7 @@ use std::fmt;
 
 use crate::{
     common::{
-        error::{collect_err, ErrorMessage},
+        error::{collect_err, TypeQLError},
         token,
         validatable::Validatable,
         Result,
@@ -70,7 +70,7 @@ fn expect_delete_in_scope_of_match(
             if names_in_scope.contains(r) {
                 Ok(())
             } else {
-                Err(ErrorMessage::VariableOutOfScopeDelete(r.clone()))?
+                Err(TypeQLError::VariableOutOfScopeDelete(r.clone()))?
             }
         },
     ))
