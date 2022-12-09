@@ -184,25 +184,33 @@ fn get_regex(string: SyntaxTree) -> String {
 }
 
 fn get_long(long: SyntaxTree) -> i64 {
-    long.as_str().parse().expect(&TypeQLError::IllegalGrammar(long.to_string()).to_string())
+    long.as_str()
+        .parse()
+        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(long.to_string())))
 }
 
 fn get_double(double: SyntaxTree) -> f64 {
-    double.as_str().parse().expect(&TypeQLError::IllegalGrammar(double.to_string()).to_string())
+    double
+        .as_str()
+        .parse()
+        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(double.to_string())))
 }
 
 fn get_boolean(boolean: SyntaxTree) -> bool {
-    boolean.as_str().parse().expect(&TypeQLError::IllegalGrammar(boolean.to_string()).to_string())
+    boolean
+        .as_str()
+        .parse()
+        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(boolean.to_string())))
 }
 
 fn get_date(date: SyntaxTree) -> NaiveDate {
     NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
-        .expect(&TypeQLError::IllegalGrammar(date.to_string()).to_string())
+        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(date.to_string())))
 }
 
 fn get_date_time(date_time: SyntaxTree) -> NaiveDateTime {
     date_time::parse(date_time.as_str())
-        .expect(&TypeQLError::IllegalGrammar(date_time.to_string()).to_string())
+        .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar(date_time.to_string())))
 }
 
 fn get_var(var: SyntaxTree) -> UnboundVariable {
