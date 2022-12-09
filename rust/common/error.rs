@@ -136,10 +136,12 @@ macro_rules! format_message {
 
 #[macro_export]
 macro_rules! error_messages {
-    {$name:ident code: $code_pfx:literal, type: $message_pfx:literal,
-    $(
-        $error_name:ident( $($inner:ty),* $(,)? ) = $code:literal: $body:literal
-    ),* $(,)?} => {
+    {
+        $name:ident code: $code_pfx:literal, type: $message_pfx:literal,
+        $(
+            $error_name:ident( $($inner:ty),* $(,)? ) = $code:literal: $body:literal
+        ),* $(,)?
+    } => {
         error_messages!(
             $name, $code_pfx, num_digits(max!($($code),*)), $message_pfx,
             $(($error_name, $code, $body, ($($inner),*))),*
