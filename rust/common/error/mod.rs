@@ -20,6 +20,9 @@
  *
  */
 
+#[macro_use]
+mod macros;
+
 use std::fmt;
 
 use chrono::NaiveDateTime;
@@ -27,6 +30,7 @@ use pest::error::{Error as PestError, LineColLocation};
 
 use crate::{
     common::token,
+    error_messages,
     pattern::{Label, Pattern, Reference, ThingVariable, TypeVariable, UnboundVariable, Value},
     write_joined,
 };
@@ -77,110 +81,6 @@ pub fn collect_err(i: &mut dyn Iterator<Item = Result<(), Error>>) -> Result<(),
     } else {
         Err(Error { errors })
     }
-}
-
-const fn num_digits(x: usize) -> usize {
-    if x < 10 {
-        1
-    } else {
-        1 + num_digits(x / 10)
-    }
-}
-
-const fn max(x: usize, y: usize) -> usize {
-    if x > y {
-        x
-    } else {
-        y
-    }
-}
-
-macro_rules! max {
-    ($x:literal) => ($x);
-    ($x:literal, $($xs:literal),*) => (max($x, max!($($xs),*)));
-}
-
-macro_rules! format_message {
-    ($self:ident, $error_name:ident, $body:literal, ) => {
-        format!($body)
-    };
-    ($self:ident, $error_name:ident, $body:literal, $t1:ty) => {
-        if let Self::$error_name(a) = &$self {
-            format!($body, a)
-        } else {
-            unreachable!()
-        }
-    };
-    ($self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty) => {
-        if let Self::$error_name(a, b) = &$self {
-            format!($body, a, b)
-        } else {
-            unreachable!()
-        }
-    };
-    ($self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty, $t3:ty) => {
-        if let Self::$error_name(a, b, c) = &$self {
-            format!($body, a, b, c)
-        } else {
-            unreachable!()
-        }
-    };
-    ($self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
-        if let Self::$error_name(a, b, c, d) = &$self {
-            format!($body, a, b, c, d)
-        } else {
-            unreachable!()
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! error_messages {
-    {
-        $name:ident code: $code_pfx:literal, type: $message_pfx:literal,
-        $(
-            $error_name:ident( $($inner:ty),* $(,)? ) = $code:literal: $body:literal
-        ),* $(,)?
-    } => {
-        error_messages!(
-            $name, $code_pfx, num_digits(max!($($code),*)), $message_pfx,
-            $(($error_name, $code, $body, ($($inner),*))),*
-        );
-    };
-
-    (
-        $name:ident, $code_pfx:literal, $code_len:expr, $message_pfx:literal,
-        $(($error_name:ident, $code:literal, $body:literal, ($($inner:ty),*))),*
-    ) => {
-        #[derive(Clone, Debug, Eq, PartialEq)]
-        pub enum $name {$(
-            $error_name($($inner),*),
-        )*}
-
-        impl $name {
-            pub fn code(&self) -> usize {
-                match self {$(
-                    Self::$error_name(..) => $code,
-                )*}
-            }
-            fn padding_len(&self) -> usize {
-                match self {$(
-                    Self::$error_name(..) => $code_len - num_digits($code),
-                )*}
-            }
-            pub fn message(&self) -> String {
-                match self {$(
-                    Self::$error_name(..) => format_message!(self, $error_name, $body, $($inner),*),
-                )*}
-            }
-        }
-
-        impl std::fmt::Display for $name {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(f, concat!("[", $code_pfx, "{}{}] ", $message_pfx, ": {}"), "0".repeat(self.padding_len()), self.code(), self.message())
-            }
-        }
-    };
 }
 
 error_messages! { TypeQLError
