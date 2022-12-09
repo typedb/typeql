@@ -44,7 +44,7 @@ pub use builder::{
 };
 
 use crate::{
-    common::{error::MATCH_HAS_UNBOUNDED_NESTED_PATTERN, validatable::Validatable, Result},
+    common::{error::ErrorMessage, validatable::Validatable, Result},
     enum_wrapper,
     pattern::{Normalisable, Pattern},
 };
@@ -74,8 +74,7 @@ impl Variable {
             Self::Unbound(_) => unreachable!(),
             _ => {
                 if !self.references().any(|r| r.is_name() && bounds.contains(r)) {
-                    Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
-                        .format(&[&self.to_string().replace('\n', " ")]))?
+                    Err(ErrorMessage::MatchHasUnboundedNestedPattern(self.clone().into()))?
                 }
                 Ok(())
             }

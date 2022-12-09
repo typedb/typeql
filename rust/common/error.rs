@@ -20,25 +20,30 @@
  *
  */
 
-use crate::write_joined;
+use crate::{
+    common::token,
+    pattern::{Label, Pattern, Reference, ThingVariable, TypeVariable, UnboundVariable, Value},
+    write_joined,
+};
+use chrono::NaiveDateTime;
 use pest::error::{Error as PestError, LineColLocation};
-use std::{convert::Infallible, fmt};
+use std::fmt;
 
 #[derive(Debug)]
 pub struct Error {
-    messages: Vec<Message>,
+    parse_errors: Vec<ErrorMessage>,
 }
 
-impl From<Message> for Error {
-    fn from(message: Message) -> Self {
-        Self { messages: vec![message] }
+impl From<ErrorMessage> for Error {
+    fn from(parse_error: ErrorMessage) -> Self {
+        Self { parse_errors: vec![parse_error] }
     }
 }
 
-impl From<Vec<Message>> for Error {
-    fn from(messages: Vec<Message>) -> Self {
-        assert!(!messages.is_empty());
-        Self { messages }
+impl From<Vec<ErrorMessage>> for Error {
+    fn from(parse_errors: Vec<ErrorMessage>) -> Self {
+        assert!(!parse_errors.is_empty());
+        Self { parse_errors }
     }
 }
 
@@ -48,74 +53,27 @@ impl<T: pest::RuleType> From<PestError<T>> for Error {
             LineColLocation::Pos((line, col)) => (line, col),
             LineColLocation::Span((line, col), _) => (line, col),
         };
-        Self::from(SYNTAX_ERROR_DETAILED.format(&[
-            &line.to_string(),
-            error.line(),
-            &(" ".repeat(col - 1) + "^"),
-            &error.variant.message(),
-        ]))
+        Self::from(ErrorMessage::SyntaxErrorDetailed(
+            line,
+            error.line().to_owned(),
+            " ".repeat(col - 1) + "^",
+            error.variant.message().to_string(),
+        ))
     }
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_joined!(f, "\n\n", self.messages)
+        write_joined!(f, "\n\n", self.parse_errors)
     }
 }
 
 pub fn collect_err(i: &mut dyn Iterator<Item = Result<(), Error>>) -> Result<(), Error> {
-    let messages = i.filter_map(Result::err).flat_map(|e| e.messages).collect::<Vec<_>>();
+    let messages = i.filter_map(Result::err).flat_map(|e| e.parse_errors).collect::<Vec<_>>();
     if messages.is_empty() {
         Ok(())
     } else {
-        Err(Error { messages })
-    }
-}
-
-#[derive(Debug)]
-pub struct Message {
-    pub code: usize,
-    pub message: String,
-}
-
-impl From<Infallible> for Message {
-    fn from(_: Infallible) -> Self {
-        unreachable!()
-    }
-}
-
-impl fmt::Display for Message {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.message)
-    }
-}
-
-pub struct ErrorTemplate {
-    template: &'static str,
-    prefix: &'static str,
-    code: usize,
-    padding_len: usize,
-}
-
-impl ErrorTemplate {
-    pub fn format(&self, args: &[&str]) -> Message {
-        let expected_arg_count = self.template.matches("{}").count();
-        assert_eq!(
-            expected_arg_count,
-            args.len(),
-            "Message template `{:?}` takes `{}` args but `{}` were provided",
-            self.template,
-            expected_arg_count,
-            args.len()
-        );
-        let mut buffer = format!("[{}{}{}] ", self.prefix, "0".repeat(self.padding_len), self.code);
-        for (i, fragment) in self.template.split("{}").enumerate() {
-            if i > 0 {
-                buffer += args.get(i - 1).unwrap_or(&"{}");
-            }
-            buffer += fragment;
-        }
-        Message { code: self.code, message: buffer }
+        Err(Error { parse_errors: messages })
     }
 }
 
@@ -140,54 +98,150 @@ macro_rules! max {
     ($x:literal, $($xs:literal),*) => (max($x, max!($($xs),*)));
 }
 
-macro_rules! error_messages {
-    {code: $code_pfx:literal, type: $message_pfx:literal, $($error_name:ident = $code:literal: $body:literal),* $(,)?} => {
-        error_messages!($code_pfx, num_digits(max!($($code),*)), $message_pfx, $(($error_name, $code, $body)),*);
+macro_rules! format_message {
+    ($self:ident, $error_name:ident, $body:literal, ) => {
+        format!($body)
     };
-    ($code_pfx:literal, $code_len:expr, $message_pfx:literal, $(($error_name:ident, $code:literal, $body:literal)),* $(,)?) => {
-        $(
-        pub(crate) const $error_name: ErrorTemplate = ErrorTemplate {
-            template: concat!($message_pfx, ": ", $body),
-            prefix: $code_pfx,
-            code: $code,
-            padding_len: $code_len - num_digits($code),
-        };
-        )*
+    ($self:ident, $error_name:ident, $body:literal, $t1:ty) => {
+        if let Self::$error_name(a) = &$self {
+            format!($body, a)
+        } else {
+            unreachable!()
+        }
+    };
+    ($self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty) => {
+        if let Self::$error_name(a, b) = &$self {
+            format!($body, a, b)
+        } else {
+            unreachable!()
+        }
+    };
+    ($self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty, $t3:ty) => {
+        if let Self::$error_name(a, b, c) = &$self {
+            format!($body, a, b, c)
+        } else {
+            unreachable!()
+        }
+    };
+    ($self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
+        if let Self::$error_name(a, b, c, d) = &$self {
+            format!($body, a, b, c, d)
+        } else {
+            unreachable!()
+        }
     };
 }
 
-error_messages! {
-   code: "TQL", type: "TypeQL Error",
-   SYNTAX_ERROR_DETAILED = 3: "There is a syntax error at line {}:\n{}\n{}\n{}",
-   INVALID_CASTING = 4: "Enum '{}::{}' does not match '{}', and cannot be unwrapped into '{}'.",
-   MISSING_PATTERNS = 5: "The query has not been provided with any patterns.",
-   MISSING_DEFINABLES = 6: "The query has not been provided with any definables.",
-   MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE = 7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
-   MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE = 9: "The pattern '{}' has no named variable.",
-   MATCH_HAS_UNBOUNDED_NESTED_PATTERN = 10: "The match query contains a nested pattern is not bounded: '{}'.",
-   EMPTY_MATCH_FILTER = 12: "The match query cannot be filtered with an empty list of variables.",
-   INVALID_IID_STRING = 13: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
-   INVALID_ATTRIBUTE_TYPE_REGEX = 14: "Invalid regular expression '{}'.",
-   ILLEGAL_FILTER_VARIABLE_REPEATING = 15: "The variable '{}' occurred more than once in match query filter.",
-   VARIABLE_OUT_OF_SCOPE_MATCH = 16: "The variable '{}' is out of scope of the match query.",
-   VARIABLE_OUT_OF_SCOPE_DELETE = 17: "The deleted variable '{}' is out of scope of the match query.",
-   NO_VARIABLE_IN_SCOPE_INSERT = 18: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
-   VARIABLE_NOT_NAMED = 19: "Anonymous variable encountered in a match query filter.",
-   INVALID_VARIABLE_NAME = 20: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
-   MISSING_CONSTRAINT_RELATION_PLAYER = 22: "A relation variable has not been provided with role players.",
-   INVALID_CONSTRAINT_PREDICATE = 25: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
-   INVALID_CONSTRAINT_DATETIME_PRECISION = 26: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
-   INVALID_DEFINE_QUERY_VARIABLE = 27: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
-   INVALID_UNDEFINE_QUERY_RULE = 28: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
-   INVALID_RULE_WHEN_MISSING_PATTERNS = 29: "Rule '{}' 'when' has not been provided with any patterns.",
-   INVALID_RULE_WHEN_NESTED_NEGATION = 30: "Rule '{}' 'when' contains a nested negation.",
-   INVALID_RULE_THEN = 31: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
-   INVALID_RULE_THEN_HAS = 32: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
-   INVALID_RULE_THEN_VARIABLES = 33: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
-   INVALID_RULE_THEN_ROLES = 34: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
-   REDUNDANT_NESTED_NEGATION = 35: "Invalid query containing redundant nested negations.",
-   VARIABLE_NOT_SORTED = 36: "Variable '{}' does not exist in the sorting clause.",
-   INVALID_COUNT_VARIABLE_ARGUMENT = 38: "Aggregate COUNT does not accept a Variable.",
-   ILLEGAL_GRAMMAR = 39: "Illegal grammar: '{}'",
-   ILLEGAL_CHAR_IN_LABEL = 40: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
+macro_rules! error_messages {
+    {$name:ident code: $code_pfx:literal, type: $message_pfx:literal,
+    $(
+        $error_name:ident( $($inner:ty),* $(,)? ) = $code:literal: $body:literal
+    ),* $(,)?} => {
+        error_messages!(
+            $name, $code_pfx, num_digits(max!($($code),*)), $message_pfx,
+            $(($error_name, $code, $body, ($($inner),*))),*
+        );
+    };
+
+    (
+        $name:ident, $code_pfx:literal, $code_len:expr, $message_pfx:literal,
+        $(($error_name:ident, $code:literal, $body:literal, ($($inner:ty),*))),*
+    ) => {
+        #[derive(Clone, Debug, Eq, PartialEq)]
+        pub enum $name {$(
+            $error_name($($inner),*),
+        )*}
+
+        impl $name {
+            pub fn code(&self) -> usize {
+                match self {$(
+                    Self::$error_name(..) => $code,
+                )*}
+            }
+            fn padding_len(&self) -> usize {
+                match self {$(
+                    Self::$error_name(..) => $code_len - num_digits($code),
+                )*}
+            }
+            pub fn message(&self) -> String {
+                match self {$(
+                    Self::$error_name(..) => format_message!(self, $error_name, $body, $($inner),*),
+                )*}
+            }
+        }
+
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(f, concat!("[", $code_pfx, "{}{}] ", $message_pfx, ": {}"), "0".repeat(self.padding_len()), self.code(), self.message())
+            }
+        }
+    };
+}
+
+error_messages! { ErrorMessage
+    code: "TQL", type: "TypeQL Error",
+    SyntaxErrorDetailed(usize, String, String, String) =
+        3: "There is a syntax error at line {}:\n{}\n{}\n{}",
+    InvalidCasting(&'static str, &'static str, &'static str, &'static str) =
+        4: "Enum '{}::{}' does not match '{}', and cannot be unwrapped into '{}'.",
+    MissingPatterns() =
+        5: "The query has not been provided with any patterns.",
+    MissingDefinables() =
+        6: "The query has not been provided with any definables.",
+    MatchHasNoBoundingNamedVariable() =
+        7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
+    MatchPatternVariableHasNoNamedVariable(Pattern) =
+        9: "The pattern '{}' has no named variable.",
+    MatchHasUnboundedNestedPattern(Pattern) =
+        10: "The match query contains a nested pattern is not bounded: '{}'.",
+    EmptyMatchFilter() =
+        12: "The match query cannot be filtered with an empty list of variables.",
+    InvalidIIDString(String) =
+        13: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
+    InvalidAttributeTypeRegex(String) =
+        14: "Invalid regular expression '{}'.",
+    IllegalFilterVariableRepeating(Reference) =
+        15: "The variable '{}' occurred more than once in match query filter.",
+    VariableOutOfScopeMatch(Reference) =
+        16: "The variable '{}' is out of scope of the match query.",
+    VariableOutOfScopeDelete(Reference) =
+        17: "The deleted variable '{}' is out of scope of the match query.",
+    NoVariableInScopeInsert(String, String) =
+        18: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
+    VariableNotNamed() =
+        19: "Anonymous variable encountered in a match query filter.",
+    InvalidVariableName(String) =
+        20: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
+    MissingConstraintRelationPlayer() =
+        22: "A relation variable has not been provided with role players.",
+    InvalidConstraintPredicate(token::Predicate, Value) =
+        25: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
+    InvalidConstraintDatetimePrecision(NaiveDateTime) =
+        26: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
+    InvalidDefineQueryVariable() =
+        27: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
+    InvalidUndefineQueryRule(Label) =
+        28: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
+    InvalidRuleWhenMissingPatterns(Label) =
+        29: "Rule '{}' 'when' has not been provided with any patterns.",
+    InvalidRuleWhenNestedNegation(Label) =
+        30: "Rule '{}' 'when' contains a nested negation.",
+    InvalidRuleThen(Label, ThingVariable) =
+        31: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
+    InvalidRuleThenHas(Label, ThingVariable, Reference, TypeVariable) =
+        32: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
+    InvalidRuleThenVariables(Label) =
+        33: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
+    InvalidRuleThenRoles(Label, ThingVariable) =
+        34: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
+    RedundantNestedNegation() =
+        35: "Invalid query containing redundant nested negations.",
+    VariableNotSorted(UnboundVariable) =
+        36: "Variable '{}' does not exist in the sorting clause.",
+    InvalidCountVariableArgument() =
+        38: "Aggregate COUNT does not accept a Variable.",
+    IllegalGrammar(String) =
+        39: "Illegal grammar: '{}'",
+    IllegalCharInLabel(String) =
+        40: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
 }

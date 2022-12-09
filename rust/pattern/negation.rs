@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::{error::REDUNDANT_NESTED_NEGATION, token, validatable::Validatable, Result},
+    common::{error::ErrorMessage, token, validatable::Validatable, Result},
     pattern::{Conjunction, Disjunction, Normalisable, Pattern, Reference},
 };
 use core::fmt;
@@ -52,7 +52,7 @@ impl Negation {
 impl Validatable for Negation {
     fn validate(&self) -> Result<()> {
         match self.pattern.as_ref() {
-            Pattern::Negation(_) => Err(REDUNDANT_NESTED_NEGATION.format(&[]))?,
+            Pattern::Negation(_) => Err(ErrorMessage::RedundantNestedNegation())?,
             _ => Ok(()),
         }
     }
@@ -70,7 +70,7 @@ impl Normalisable for Negation {
         Negation::new(match self.pattern.as_ref() {
             Pattern::Conjunction(conjunction) => conjunction.compute_normalised(),
             Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
-            Pattern::Negation(_) => panic!("{}", REDUNDANT_NESTED_NEGATION.format(&[])),
+            Pattern::Negation(_) => panic!("{}", ErrorMessage::RedundantNestedNegation()),
             Pattern::Variable(variable) => {
                 Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()])
                     .into()

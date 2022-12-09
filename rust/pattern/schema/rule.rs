@@ -22,10 +22,7 @@
 
 use crate::{
     common::{
-        error::{
-            collect_err, INVALID_RULE_THEN, INVALID_RULE_THEN_HAS, INVALID_RULE_THEN_ROLES,
-            INVALID_RULE_THEN_VARIABLES, INVALID_RULE_WHEN_NESTED_NEGATION,
-        },
+        error::{collect_err, ErrorMessage},
         string::indent,
         token,
         validatable::Validatable,
@@ -114,7 +111,7 @@ fn expect_no_nested_negations<'a>(
             Pattern::Disjunction(d) => expect_no_nested_negations(d.patterns.iter(), rule_label),
             Pattern::Negation(n) => {
                 if contains_negations(iter::once(n.pattern.as_ref())) {
-                    Err(INVALID_RULE_WHEN_NESTED_NEGATION.format(&[&rule_label.to_string()]))?
+                    Err(ErrorMessage::InvalidRuleWhenNestedNegation(rule_label.clone()))?
                 } else {
                     Ok(())
                 }
@@ -144,24 +141,24 @@ fn expect_infer_single_edge(then: &ThingVariable, rule_label: &Label) -> Result<
     {
         Ok(())
     } else {
-        Err(INVALID_RULE_THEN.format(&[&rule_label.to_string(), &then.to_string()]))?
+        Err(ErrorMessage::InvalidRuleThen(rule_label.clone(), then.clone()))?
     }
 }
 
 fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
     if let Some(has) = then.has.get(0) {
         if has.type_.is_some() && has.attribute.reference.is_name() {
-            Err(vec![INVALID_RULE_THEN_HAS.format(&[
-                &rule_label.to_string(),
-                &then.to_string(),
-                &has.attribute.reference.to_string(),
-                &has.type_.as_ref().unwrap().to_string(),
-            ])])?
+            Err(ErrorMessage::InvalidRuleThenHas(
+                rule_label.clone(),
+                then.clone(),
+                has.attribute.reference.clone(),
+                has.type_.clone().unwrap(),
+            ))?
         }
         Ok(())
     } else if let Some(relation) = &then.relation {
         if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
-            Err(INVALID_RULE_THEN_ROLES.format(&[&rule_label.to_string(), &then.to_string()]))?
+            Err(ErrorMessage::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
         }
         Ok(())
     } else {
@@ -176,7 +173,7 @@ fn expect_then_bounded_by_when(
 ) -> Result<()> {
     let bounds = when.named_references();
     if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
-        Err(INVALID_RULE_THEN_VARIABLES.format(&[&rule_label.to_string()]))?
+        Err(ErrorMessage::InvalidRuleThenVariables(rule_label.clone()))?
     }
     Ok(())
 }

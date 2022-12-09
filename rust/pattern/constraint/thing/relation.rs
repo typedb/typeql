@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, MISSING_CONSTRAINT_RELATION_PLAYER},
+        error::{collect_err, ErrorMessage},
         token,
         validatable::Validatable,
         Result,
@@ -63,7 +63,7 @@ impl Validatable for RelationConstraint {
 
 fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result<()> {
     if role_players.is_empty() {
-        Err(MISSING_CONSTRAINT_RELATION_PLAYER.format(&[]))?
+        Err(ErrorMessage::MissingConstraintRelationPlayer())?
     }
     Ok(())
 }

@@ -48,7 +48,7 @@ mod writable;
 pub use writable::Writable;
 
 use crate::{
-    common::{error::INVALID_CASTING, validatable::Validatable, Result},
+    common::{error::ErrorMessage, validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
 use std::fmt;

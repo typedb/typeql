@@ -23,7 +23,7 @@
 use crate::{
     common::{
         date_time,
-        error::{collect_err, INVALID_CONSTRAINT_DATETIME_PRECISION, INVALID_CONSTRAINT_PREDICATE},
+        error::{collect_err, ErrorMessage},
         string::{escape_regex, format_double, quote},
         token,
         validatable::Validatable,
@@ -70,7 +70,7 @@ fn expect_string_value_with_substring_predicate(
     value: &Value,
 ) -> Result<()> {
     if predicate.is_substring() && !matches!(value, Value::String(_)) {
-        Err(INVALID_CONSTRAINT_PREDICATE.format(&[&predicate.to_string(), &value.to_string()]))?
+        Err(ErrorMessage::InvalidConstraintPredicate(predicate, value.clone()))?
     }
     Ok(())
 }
@@ -106,8 +106,7 @@ impl Validatable for Value {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
-                    Err(INVALID_CONSTRAINT_DATETIME_PRECISION
-                        .format(&[date_time.to_string().as_str()]))?
+                    Err(ErrorMessage::InvalidConstraintDatetimePrecision(date_time.clone()))?
                 }
                 Ok(())
             }

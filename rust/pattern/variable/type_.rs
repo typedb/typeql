@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, INVALID_DEFINE_QUERY_VARIABLE},
+        error::{collect_err, ErrorMessage},
         validatable::Validatable,
         Result,
     },
@@ -84,7 +84,7 @@ impl TypeVariable {
 
     pub fn validate_definable(&self) -> Result<()> {
         if self.label.is_none() {
-            Err(INVALID_DEFINE_QUERY_VARIABLE.format(&[]))?;
+            Err(ErrorMessage::InvalidDefineQueryVariable())?;
         }
         Ok(())
     }

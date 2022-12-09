@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, MATCH_HAS_UNBOUNDED_NESTED_PATTERN},
+        error::{collect_err, ErrorMessage},
         string::indent,
         validatable::Validatable,
         Result,
@@ -82,8 +82,7 @@ fn expect_bounded(
     conjunction: &Conjunction,
 ) -> Result<()> {
     if bounds.is_disjoint(names) {
-        Err(MATCH_HAS_UNBOUNDED_NESTED_PATTERN
-            .format(&[&conjunction.to_string().replace('\n', " ")]))?;
+        Err(ErrorMessage::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
     Ok(())
 }

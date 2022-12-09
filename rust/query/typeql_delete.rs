@@ -22,7 +22,7 @@
 
 use crate::{
     common::{
-        error::{collect_err, VARIABLE_OUT_OF_SCOPE_DELETE},
+        error::{collect_err, ErrorMessage},
         token,
         validatable::Validatable,
         Result,
@@ -69,7 +69,7 @@ fn expect_delete_in_scope_of_match(
             if names_in_scope.contains(r) {
                 Ok(())
             } else {
-                Err(VARIABLE_OUT_OF_SCOPE_DELETE.format(&[&r.to_string()]))?
+                Err(ErrorMessage::VariableOutOfScopeDelete(r.clone()))?
             }
         },
     ))
