@@ -70,6 +70,8 @@
 @maven//:org_hamcrest_hamcrest_core_1_3
 @maven//:org_hamcrest_hamcrest_library
 @maven//:org_hamcrest_hamcrest_library_1_3
+@maven//:org_jetbrains_compose_compiler_compiler
+@maven//:org_jetbrains_compose_compiler_compiler_1_3_2
 @maven//:org_slf4j_slf4j_api
 @maven//:org_slf4j_slf4j_api_1_7_32
 @maven//:org_yaml_snakeyaml
