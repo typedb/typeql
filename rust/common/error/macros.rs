@@ -32,24 +32,6 @@ macro_rules! error_messages {
         )*}
 
         impl $name {
-            const fn __max_code() -> usize {
-                let mut max = usize::MIN;
-                $(max = if $code > max { $code } else { max };)*
-                max
-            }
-            const fn __num_digits(x: usize) -> usize {
-                if (x < 10) { 1 } else { 1 + Self::__num_digits(x/10) }
-            }
-            const fn __padding(&self) -> &'static str {
-                match Self::__num_digits(Self::__max_code()) - Self::__num_digits(self.code()) {
-                    0 => "",
-                    1 => "0",
-                    2 => "00",
-                    3 => "000",
-                    _ => unreachable!(),
-                }
-            }
-
             pub const fn code(&self) -> usize {
                 match self {$(
                     Self::$error_name(..) => $code,
@@ -60,6 +42,26 @@ macro_rules! error_messages {
                 $(error_messages!(@format self, $error_name, $body $(, $inner)*);)*
                 unreachable!()
             }
+
+            const fn max_code() -> usize {
+                let mut max = usize::MIN;
+                $(max = if $code > max { $code } else { max };)*
+                max
+            }
+
+            const fn num_digits(x: usize) -> usize {
+                if (x < 10) { 1 } else { 1 + Self::num_digits(x/10) }
+            }
+
+            const fn padding(&self) -> &'static str {
+                match Self::num_digits(Self::max_code()) - Self::num_digits(self.code()) {
+                    0 => "",
+                    1 => "0",
+                    2 => "00",
+                    3 => "000",
+                    _ => unreachable!(),
+                }
+            }
         }
 
         impl std::fmt::Display for $name {
@@ -67,7 +69,7 @@ macro_rules! error_messages {
                 write!(
                     f,
                     concat!("[", $code_pfx, "{}{}] ", $message_pfx, ": {}"),
-                    self.__padding(),
+                    self.padding(),
                     self.code(),
                     self.message()
                 )
