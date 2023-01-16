@@ -42,13 +42,13 @@ rust_library(
         "parser/typeql.pest",
     ],
     deps = [
-        "@vaticle_dependencies//library/crates:chrono",
-        "@vaticle_dependencies//library/crates:itertools",
-        "@vaticle_dependencies//library/crates:pest",
-        "@vaticle_dependencies//library/crates:regex",
+        "@crates//:chrono",
+        "@crates//:itertools",
+        "@crates//:pest",
+        "@crates//:regex",
     ],
     proc_macro_deps = [
-        "@vaticle_dependencies//library/crates:pest_derive",
+        "@crates//:pest_derive",
     ],
     visibility = ["//visibility:public"]
 )

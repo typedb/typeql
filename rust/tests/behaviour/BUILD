@@ -32,8 +32,8 @@ rust_test(
     ],
     deps = [
         "//rust:typeql_lang",
-        "@vaticle_dependencies//library/crates:cucumber",
-        "@vaticle_dependencies//library/crates:futures",
+        "@crates//:cucumber",
+        "@crates//:futures",
     ],
     use_libtest_harness = False,
 )

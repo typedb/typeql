@@ -60,9 +60,10 @@ load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_regi
 rules_rust_dependencies()
 rust_register_toolchains(include_rustc_srcs = True, edition="2021")
 
-load("@vaticle_dependencies//library/crates:crates.bzl", "raze_fetch_remote_crates")
-raze_fetch_remote_crates()
-
+load("@vaticle_dependencies//library/crates:crates.bzl", "fetch_crates")
+fetch_crates()
+load("@crates//:defs.bzl", "crate_repositories")
+crate_repositories()
 
 load("@rules_antlr//antlr:lang.bzl", "JAVA")
 load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
