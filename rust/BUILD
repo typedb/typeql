@@ -38,6 +38,7 @@ rust_library(
         "*.rs",
         "**/*.rs",
     ]),
+    crate_root = "typeql_lang.rs",
     compile_data = [
         "parser/typeql.pest",
     ],
