@@ -513,6 +513,19 @@ public class Parser extends TypeQLBaseVisitor {
         return type;
     }
 
+    @Override
+    public TypeConstraint.Owns.Annotations visitOwns_annotations(TypeQLParser.Owns_annotationsContext ctx) {
+        Set<TypeQLToken.Annotation> annotations = new HashSet<>();
+        if (ctx.ANNOTATION_KEY() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_KEY()));
+        else if (ctx.ANNOTATION_UNIQUE() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_UNIQUE()));
+        return new TypeConstraint.Owns.Annotations(annotations);
+    }
+
+    private TypeQLToken.Annotation parseAnnotation(TerminalNode terminalNode) {
+        assert !terminalNode.getText().isEmpty() && terminalNode.getText().startsWith(TypeQLToken.Char.AT.toString());
+        return TypeQLToken.Annotation.of(terminalNode.getText().substring(1));
+    }
+
     // THING VARIABLES =========================================================
 
     @Override

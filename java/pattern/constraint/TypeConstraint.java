@@ -25,6 +25,7 @@ import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLToken.Annotation;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
@@ -38,10 +39,11 @@ import java.util.regex.PatternSyntaxException;
 
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Annotation.UNIQUE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Annotation.KEY;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.AS;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.IS_KEY;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.OWNS;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.PLAYS;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.REGEX;
@@ -218,7 +220,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Sub(Either<Pair<String, String>, UnboundVariable> typeArg, boolean isExplicit) {
             this(typeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())),
-                               UnboundVariable::toType), isExplicit);
+                    UnboundVariable::toType), isExplicit);
         }
 
         private Sub(TypeVariable type, boolean isExplicit) {
@@ -399,46 +401,48 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public static class Owns extends TypeConstraint {
 
+        private static final Set<Annotation> VALID_ANNOTATIONS = set(KEY, UNIQUE);
+
         private final TypeVariable attributeType;
         private final TypeVariable overriddenAttributeType;
-        private final boolean isKey;
+        private final Set<Annotation> annotations;
         private final int hash;
 
-        public Owns(String attributeType, boolean isKey) {
-            this(hidden().type(attributeType), null, isKey);
+        public Owns(String attributeType, Set<Annotation> annotations) {
+            this(hidden().type(attributeType), null, annotations);
         }
 
-        public Owns(UnboundVariable attributeTypeVar, boolean isKey) {
-            this(attributeTypeVar.toType(), null, isKey);
+        public Owns(UnboundVariable attributeTypeVar, Set<Annotation> annotations) {
+            this(attributeTypeVar.toType(), null, annotations);
         }
 
-        public Owns(String attributeType, String overriddenAttributeType, boolean isKey) {
-            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
+        public Owns(String attributeType, String overriddenAttributeType, Set<Annotation> annotations) {
+            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
         }
 
-        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, boolean isKey) {
-            this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), isKey);
+        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, Set<Annotation> annotations) {
+            this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
         }
 
-        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
-            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), isKey);
+        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, Set<Annotation> annotations) {
+            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
         }
 
-        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, boolean isKey) {
-            this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), isKey);
+        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, Set<Annotation> annotations) {
+            this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
         }
 
-        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, boolean isKey) {
+        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, Set<Annotation> annotations) {
             this(attributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
-                 overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
-                 isKey);
+                    overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
+                    annotations);
         }
 
-        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, boolean isKey) {
+        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, Set<Annotation> annotations) {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
-            this.isKey = isKey;
-            this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.isKey);
+            this.annotations = annotations;
+            this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.annotations);
         }
 
         public TypeVariable attribute() {
@@ -491,6 +495,44 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public int hashCode() {
             return hash;
         }
+
+        public static class Annotations {
+
+            private static final Set<Annotation> VALID_ANNOTATIONS = set(KEY, UNIQUE);
+            private final Set<Annotation> annotations;
+
+            public Annotations(Set<Annotation> annotations) {
+                validateAnnotations(annotations);
+                this.annotations = annotations;
+            }
+
+            private static void validateAnnotations(Set<Annotation> annotations) {
+                for (Annotation annotation : annotations) {
+                    if (!VALID_ANNOTATIONS.contains(annotation)) {
+                        throw null; // TODO
+                    }
+                }
+            }
+
+            @Override
+            public int hashCode() {
+                return annotations.hashCode();
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Annotations that = (Annotations) o;
+                return annotations.equals(that.annotations);
+            }
+
+            @Override
+            public String toString() {
+                // TODO sort and print
+                return null;
+            }
+        }
     }
 
     public static class Plays extends TypeConstraint {
@@ -526,7 +568,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Plays(Either<Pair<String, String>, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
             this(roleTypeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundVariable::toType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Plays::scopedType, UnboundVariable::toType));
+                    overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Plays::scopedType, UnboundVariable::toType));
         }
 
         private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
@@ -631,7 +673,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         public Relates(Either<String, UnboundVariable> roleTypeArg, Either<String, UnboundVariable> overriddenRoleTypeArg) {
             this(roleTypeArg.apply(Relates::scopedType, UnboundVariable::toType),
-                 overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Relates::scopedType, UnboundVariable::toType));
+                    overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Relates::scopedType, UnboundVariable::toType));
         }
 
         private Relates(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
