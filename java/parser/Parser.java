@@ -491,7 +491,7 @@ public class Parser extends TypeQLBaseVisitor {
                 type = type.constrain(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == TypeQLToken.Constraint.SUBX));
             } else if (constraint.OWNS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
-                type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, constraint.IS_KEY() != null));
+                type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, visitOwns_annotations(constraint.owns_annotations())));
             } else if (constraint.PLAYS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(0));
                 type = type.constrain(new TypeConstraint.Plays(visitType_scoped(constraint.type_scoped()), overridden));
@@ -514,11 +514,11 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public TypeConstraint.Owns.Annotations visitOwns_annotations(TypeQLParser.Owns_annotationsContext ctx) {
+    public Set<TypeQLToken.Annotation> visitOwns_annotations(TypeQLParser.Owns_annotationsContext ctx) {
         Set<TypeQLToken.Annotation> annotations = new HashSet<>();
         if (ctx.ANNOTATION_KEY() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_KEY()));
         else if (ctx.ANNOTATION_UNIQUE() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_UNIQUE()));
-        return new TypeConstraint.Owns.Annotations(annotations);
+        return annotations;
     }
 
     private TypeQLToken.Annotation parseAnnotation(TerminalNode terminalNode) {
