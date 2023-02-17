@@ -113,13 +113,19 @@ variable_concept      :   VAR_  IS  VAR_  ;
 variable_type         :   type_any    type_constraint ( ',' type_constraint )*  ;
 type_constraint       :   ABSTRACT
                       |   SUB_        type_any
-                      |   OWNS        type         ( AS type )? ( IS_KEY )?
-                      |   RELATES     type         ( AS type )?
+                      |   OWNS        type         ( AS type )?     owns_annotations //value_annotations
+                      |   RELATES     type         ( AS type )?   //relates_annotations
                       |   PLAYS       type_scoped  ( AS type )?
                       |   VALUE       value_type
                       |   REGEX       STRING_
                       |   TYPE        label_any
+                      // value_annotations
                       ;
+//annotations           :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?          ;
+
+owns_annotations      :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?          ;
+//relates_annotations :
+//value_annotations   :   ( ANNOTATION_RANGE | ANNOTATION_REGEX )?
 
 // THING VARIABLES =============================================================
 
@@ -225,10 +231,15 @@ ASC             : 'asc'         ;   DESC            : 'desc'        ;
 TYPE            : 'type'        ;
 ABSTRACT        : 'abstract'    ;   SUB_            : SUB | SUBX    ;
 SUB             : 'sub'         ;   SUBX            : 'sub!'        ;
-OWNS            : 'owns'        ;   IS_KEY          : '@key'        ;
+OWNS            : 'owns'        ;
 REGEX           : 'regex'       ;   AS              : 'as'          ;
 PLAYS           : 'plays'       ;   RELATES         : 'relates'     ;
 WHEN            : 'when'        ;   THEN            : 'then'        ;
+
+// TYPE ANNOTATIONS
+
+ANNOTATION_KEY            : '@key';
+ANNOTATION_UNIQUE         : '@unique';
 
 // THING VARIABLE CONSTRAINT KEYWORDS
 

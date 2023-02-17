@@ -125,6 +125,7 @@ public class TypeQLToken {
         SPACE(" "),
         COMMA(","),
         COMMA_SPACE(", "),
+        AT("@"),
         COMMA_NEW_LINE(",\n"),
         CURLY_OPEN("{"),
         CURLY_CLOSE("}"),
@@ -316,7 +317,6 @@ public class TypeQLToken {
         HAS("has"),
         IID("iid"),
         IS("is"),
-        IS_KEY("@key"),
         ISA("isa"),
         ISAX("isa!"),
         OWNS("owns"),
@@ -344,6 +344,31 @@ public class TypeQLToken {
             for (Constraint c : Constraint.values()) {
                 if (c.name.equals(value)) {
                     return c;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum Annotation {
+        KEY("key"),
+        UNIQUE("unique");
+
+        private final String name;
+
+        Annotation(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return Char.AT + name;
+        }
+
+        public static Annotation of(String value) {
+            for (Annotation annotation: Annotation.values()) {
+                if (annotation.name.equals(value)) {
+                    return annotation;
                 }
             }
             return null;
