@@ -121,7 +121,7 @@ type_constraint       :   ABSTRACT
                       |   TYPE        label_any
                       // value_annotations
                       ;
-//annotations           :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?          ;
+//annotations           :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?  ( ANNOTATION_RANGE | ANNOTATION_REGEX )?     ;
 
 owns_annotations      :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?          ;
 //relates_annotations :
