@@ -97,8 +97,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         return false;
     }
 
-    public boolean isOwns() {
-        return false;
+    public Set<Annotation> annotations() {
+        return set();
     }
 
     public boolean isPlays() {
@@ -408,24 +408,48 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final Set<Annotation> annotations;
         private final int hash;
 
+        public Owns(String attributeType) {
+            this(hidden().type(attributeType), null, set());
+        }
+
         public Owns(String attributeType, Set<Annotation> annotations) {
             this(hidden().type(attributeType), null, annotations);
+        }
+
+        public Owns(UnboundVariable attributeTypeVar) {
+            this(attributeTypeVar.toType(), null, set());
         }
 
         public Owns(UnboundVariable attributeTypeVar, Set<Annotation> annotations) {
             this(attributeTypeVar.toType(), null, annotations);
         }
 
+        public Owns(String attributeType, String overriddenAttributeType) {
+            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), set());
+        }
+
         public Owns(String attributeType, String overriddenAttributeType, Set<Annotation> annotations) {
             this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
+        }
+
+        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType) {
+            this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), set());
         }
 
         public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, Set<Annotation> annotations) {
             this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
         }
 
+        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar) {
+            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), set());
+        }
+
         public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, Set<Annotation> annotations) {
             this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
+        }
+
+        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar) {
+            this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), set());
         }
 
         public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, Set<Annotation> annotations) {
@@ -445,16 +469,20 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.annotations);
         }
 
+        private static void validateAnnotations(Set<Annotation> annotations) {
+            for (Annotation annotation : annotations) {
+                if (!VALID_ANNOTATIONS.contains(annotation)) {
+                    throw null; // TODO
+                }
+            }
+        }
+
         public TypeVariable attribute() {
             return attributeType;
         }
 
         public Optional<TypeVariable> overridden() {
             return Optional.ofNullable(overriddenAttributeType);
-        }
-
-        public boolean isKey() {
-            return isKey;
         }
 
         @Override
@@ -465,11 +493,10 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public boolean isOwns() {
-            return true;
+        public Set<Annotation> annotations() {
+            return annotations;
         }
 
-        @Override
         public TypeConstraint.Owns asOwns() {
             return this;
         }
@@ -494,44 +521,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public int hashCode() {
             return hash;
-        }
-
-        public static class Annotations {
-
-            private static final Set<Annotation> VALID_ANNOTATIONS = set(KEY, UNIQUE);
-            private final Set<Annotation> annotations;
-
-            public Annotations(Set<Annotation> annotations) {
-                validateAnnotations(annotations);
-                this.annotations = annotations;
-            }
-
-            private static void validateAnnotations(Set<Annotation> annotations) {
-                for (Annotation annotation : annotations) {
-                    if (!VALID_ANNOTATIONS.contains(annotation)) {
-                        throw null; // TODO
-                    }
-                }
-            }
-
-            @Override
-            public int hashCode() {
-                return annotations.hashCode();
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                Annotations that = (Annotations) o;
-                return annotations.equals(that.annotations);
-            }
-
-            @Override
-            public String toString() {
-                // TODO sort and print
-                return null;
-            }
         }
     }
 
