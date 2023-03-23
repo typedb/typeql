@@ -32,11 +32,13 @@ import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 
+import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Annotation.UNIQUE;
@@ -53,6 +55,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.SUBX;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.TYPE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.VALUE_TYPE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Type.RELATION;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_ANNOTATION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
@@ -97,8 +100,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         return false;
     }
 
-    public Set<Annotation> annotations() {
-        return set();
+    public List<Annotation> annotations() {
+        return list();
     }
 
     public boolean isPlays() {
@@ -405,74 +408,75 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         private final TypeVariable attributeType;
         private final TypeVariable overriddenAttributeType;
-        private final Set<Annotation> annotations;
+        private final List<Annotation> annotations;
         private final int hash;
 
         public Owns(String attributeType) {
-            this(hidden().type(attributeType), null, set());
+            this(hidden().type(attributeType), null, list());
         }
 
-        public Owns(String attributeType, Set<Annotation> annotations) {
+        public Owns(String attributeType, List<Annotation> annotations) {
             this(hidden().type(attributeType), null, annotations);
         }
 
         public Owns(UnboundVariable attributeTypeVar) {
-            this(attributeTypeVar.toType(), null, set());
+            this(attributeTypeVar.toType(), null, list());
         }
 
-        public Owns(UnboundVariable attributeTypeVar, Set<Annotation> annotations) {
+        public Owns(UnboundVariable attributeTypeVar, List<Annotation> annotations) {
             this(attributeTypeVar.toType(), null, annotations);
         }
 
         public Owns(String attributeType, String overriddenAttributeType) {
-            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), set());
+            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), list());
         }
 
-        public Owns(String attributeType, String overriddenAttributeType, Set<Annotation> annotations) {
+        public Owns(String attributeType, String overriddenAttributeType, List<Annotation> annotations) {
             this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
         }
 
         public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType) {
-            this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), set());
+            this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), list());
         }
 
-        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, Set<Annotation> annotations) {
+        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, List<Annotation> annotations) {
             this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
         }
 
         public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar) {
-            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), set());
+            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), list());
         }
 
-        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, Set<Annotation> annotations) {
+        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, List<Annotation> annotations) {
             this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
         }
 
         public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar) {
-            this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), set());
+            this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), list());
         }
 
-        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, Set<Annotation> annotations) {
+        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, List<Annotation> annotations) {
             this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
         }
 
-        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, Set<Annotation> annotations) {
+        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, List<Annotation> annotations) {
             this(attributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
                     overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
                     annotations);
         }
 
-        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, Set<Annotation> annotations) {
+        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, List<Annotation> annotations) {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
+            validateAnnotations(annotations);
             this.annotations = annotations;
             this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.annotations);
         }
 
-        private static void validateAnnotations(Set<Annotation> annotations) {
+        private static void validateAnnotations(List<Annotation> annotations) {
             for (Annotation annotation : annotations) {
                 if (!VALID_ANNOTATIONS.contains(annotation)) {
-                    throw null; // TODO
+                    throw TypeQLException.of(INVALID_ANNOTATION.message("owns", annotation));
                 }
             }
         }
@@ -493,7 +497,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public Set<Annotation> annotations() {
+        public List<Annotation> annotations() {
             return annotations;
         }
 
@@ -505,7 +509,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             return "" + OWNS + SPACE + attributeType +
                     (overriddenAttributeType != null ? "" + SPACE + AS + SPACE + overriddenAttributeType : "") +
-                    (isKey ? "" + SPACE + IS_KEY : "");
+                    annotations.stream().map(a -> a.toString()).reduce("", (x,y) -> x + SPACE + y);
         }
 
         @Override
@@ -515,7 +519,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             Owns that = (Owns) o;
             return (this.attributeType.equals(that.attributeType) &&
                     Objects.equals(this.overriddenAttributeType, that.overriddenAttributeType) &&
-                    this.isKey == that.isKey);
+                    this.annotations.equals(that.annotations));
         }
 
         @Override

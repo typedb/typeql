@@ -56,7 +56,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -491,7 +490,7 @@ public class Parser extends TypeQLBaseVisitor {
                 type = type.constrain(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == TypeQLToken.Constraint.SUBX));
             } else if (constraint.OWNS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
-                type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, visitOwns_annotations(constraint.owns_annotations())));
+                type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, visitAnnotations_owns(constraint.annotations_owns())));
             } else if (constraint.PLAYS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(0));
                 type = type.constrain(new TypeConstraint.Plays(visitType_scoped(constraint.type_scoped()), overridden));
@@ -514,8 +513,8 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public Set<TypeQLToken.Annotation> visitOwns_annotations(TypeQLParser.Owns_annotationsContext ctx) {
-        Set<TypeQLToken.Annotation> annotations = new HashSet<>();
+    public List<TypeQLToken.Annotation> visitAnnotations_owns(TypeQLParser.Annotations_ownsContext ctx) {
+        List<TypeQLToken.Annotation> annotations = new ArrayList<>();
         if (ctx.ANNOTATION_KEY() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_KEY()));
         else if (ctx.ANNOTATION_UNIQUE() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_UNIQUE()));
         return annotations;
