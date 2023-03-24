@@ -100,8 +100,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         return false;
     }
 
-    public List<Annotation> annotations() {
-        return list();
+    public boolean isOwns() {
+        return false;
     }
 
     public boolean isPlays() {
@@ -110,6 +110,10 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public boolean isRelates() {
         return false;
+    }
+
+    public List<Annotation> annotations() {
+        return list();
     }
 
     public TypeConstraint.Label asLabel() {
@@ -497,6 +501,11 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
+        public boolean isOwns() {
+            return true;
+        }
+
+        @Override
         public List<Annotation> annotations() {
             return annotations;
         }
@@ -509,7 +518,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             return "" + OWNS + SPACE + attributeType +
                     (overriddenAttributeType != null ? "" + SPACE + AS + SPACE + overriddenAttributeType : "") +
-                    annotations.stream().map(a -> a.toString()).reduce("", (x,y) -> x + SPACE + y);
+                    annotations.stream().map(a -> a.toString()).reduce("", (x, y) -> x + SPACE + y);
         }
 
         @Override
