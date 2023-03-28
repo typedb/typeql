@@ -408,11 +408,12 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public static class Owns extends TypeConstraint {
 
-        private static final Set<Annotation> VALID_ANNOTATIONS = set(KEY, UNIQUE);
+        private static final Set<Annotation> VALID_ANNOTATIONS = set(Annotation.KEY, Annotation.UNIQUE);
 
         private final TypeVariable attributeType;
         private final TypeVariable overriddenAttributeType;
         private final List<Annotation> annotations;
+        private final Annotation uniqueness;
         private final int hash;
 
         public Owns(String attributeType) {
@@ -474,6 +475,9 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             this.overriddenAttributeType = overriddenAttributeType;
             validateAnnotations(annotations);
             this.annotations = annotations;
+            if (annotations.contains(KEY)) this.uniqueness = KEY;
+            else if (annotations.contains(UNIQUE)) this.uniqueness = UNIQUE;
+            else this.uniqueness = null;
             this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.annotations);
         }
 
@@ -505,13 +509,17 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             return true;
         }
 
+        public TypeConstraint.Owns asOwns() {
+            return this;
+        }
+
         @Override
         public List<Annotation> annotations() {
             return annotations;
         }
 
-        public TypeConstraint.Owns asOwns() {
-            return this;
+        public Optional<Annotation> uniqueness() {
+            return Optional.ofNullable(uniqueness);
         }
 
         @Override
