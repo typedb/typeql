@@ -41,8 +41,6 @@ import java.util.regex.PatternSyntaxException;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Annotation.UNIQUE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Annotation.KEY;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.AS;
@@ -413,7 +411,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final TypeVariable attributeType;
         private final TypeVariable overriddenAttributeType;
         private final List<Annotation> annotations;
-        private final Annotation uniqueness;
         private final int hash;
 
         public Owns(String attributeType) {
@@ -475,9 +472,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             this.overriddenAttributeType = overriddenAttributeType;
             validateAnnotations(annotations);
             this.annotations = annotations;
-            if (annotations.contains(KEY)) this.uniqueness = KEY;
-            else if (annotations.contains(UNIQUE)) this.uniqueness = UNIQUE;
-            else this.uniqueness = null;
             this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.annotations);
         }
 
@@ -516,10 +510,6 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         @Override
         public List<Annotation> annotations() {
             return annotations;
-        }
-
-        public Optional<Annotation> uniqueness() {
-            return Optional.ofNullable(uniqueness);
         }
 
         @Override
