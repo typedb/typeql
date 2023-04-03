@@ -27,8 +27,6 @@ import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
-
 public interface TypeVariableBuilder {
 
     default TypeVariable type(TypeQLToken.Type type) {
@@ -79,52 +77,29 @@ public interface TypeVariableBuilder {
         return constrain(new TypeConstraint.Sub(typeVar, true));
     }
 
-    default TypeVariable owns(String attributeType) {
-        return constrain(new TypeConstraint.Owns(attributeType));
-    }
-
     default TypeVariable owns(String attributeType, TypeQLToken.Annotation... annotations) {
-        return constrain(new TypeConstraint.Owns(attributeType, list(annotations)));
-    }
-
-    default TypeVariable owns(UnboundVariable attributeTypeVar) {
-        return constrain(new TypeConstraint.Owns(attributeTypeVar));
+        return constrain(new TypeConstraint.Owns(attributeType, annotations));
     }
 
     default TypeVariable owns(UnboundVariable attributeTypeVar, TypeQLToken.Annotation... annotations) {
-        return constrain(new TypeConstraint.Owns(attributeTypeVar, list(annotations)));
+        return constrain(new TypeConstraint.Owns(attributeTypeVar, annotations));
     }
 
-    default TypeVariable owns(String attributeType, String overriddenAttributeType) {
-        return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeType));
-    }
 
     default TypeVariable owns(String attributeType, String overriddenAttributeType, TypeQLToken.Annotation... annotations) {
-        return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeType, list(annotations)));
-    }
-
-    default TypeVariable owns(String attributeType, UnboundVariable overriddenAttributeTypeVar) {
-        return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeTypeVar));
+        return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeType, annotations));
     }
 
     default TypeVariable owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, TypeQLToken.Annotation... annotations) {
-        return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeTypeVar, list(annotations)));
-    }
-
-    default TypeVariable owns(UnboundVariable attributeTypeVar, String overriddenAttributeType) {
-        return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeType));
+        return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeTypeVar, annotations));
     }
 
     default TypeVariable owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, TypeQLToken.Annotation... annotations) {
-        return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeType, list(annotations)));
-    }
-
-    default TypeVariable owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar) {
-        return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeTypeVar));
+        return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeType, annotations));
     }
 
     default TypeVariable owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, TypeQLToken.Annotation... annotations) {
-        return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeTypeVar, list(annotations)));
+        return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeTypeVar, annotations));
     }
 
     default TypeVariable plays(String relationType, String roleType) {

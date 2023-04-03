@@ -413,69 +413,45 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private final List<Annotation> annotations;
         private final int hash;
 
-        public Owns(String attributeType) {
-            this(hidden().type(attributeType), null, list());
-        }
-
-        public Owns(String attributeType, List<Annotation> annotations) {
+        public Owns(String attributeType, Annotation... annotations) {
             this(hidden().type(attributeType), null, annotations);
         }
 
-        public Owns(UnboundVariable attributeTypeVar) {
-            this(attributeTypeVar.toType(), null, list());
-        }
-
-        public Owns(UnboundVariable attributeTypeVar, List<Annotation> annotations) {
+        public Owns(UnboundVariable attributeTypeVar, Annotation... annotations) {
             this(attributeTypeVar.toType(), null, annotations);
         }
 
-        public Owns(String attributeType, String overriddenAttributeType) {
-            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), list());
-        }
-
-        public Owns(String attributeType, String overriddenAttributeType, List<Annotation> annotations) {
+        public Owns(String attributeType, String overriddenAttributeType, Annotation... annotations) {
             this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
         }
 
-        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType) {
-            this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), list());
-        }
-
-        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, List<Annotation> annotations) {
+        public Owns(UnboundVariable attributeTypeVar, String overriddenAttributeType, Annotation... annotations) {
             this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
         }
 
-        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar) {
-            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), list());
-        }
-
-        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, List<Annotation> annotations) {
+        public Owns(String attributeType, UnboundVariable overriddenAttributeTypeVar, Annotation... annotations) {
             this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
         }
 
-        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar) {
-            this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), list());
-        }
-
-        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, List<Annotation> annotations) {
+        public Owns(UnboundVariable attributeTypeVar, UnboundVariable overriddenAttributeTypeVar, Annotation... annotations) {
             this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
         }
 
-        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, List<Annotation> annotations) {
+        public Owns(Either<String, UnboundVariable> attributeTypeArg, Either<String, UnboundVariable> overriddenAttributeTypeArg, Annotation... annotations) {
             this(attributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
                     overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundVariable::toType),
                     annotations);
         }
 
-        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, List<Annotation> annotations) {
+        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, Annotation... annotations) {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
             validateAnnotations(annotations);
-            this.annotations = annotations;
+            this.annotations = List.of(annotations);
             this.hash = Objects.hash(Owns.class, this.attributeType, this.overriddenAttributeType, this.annotations);
         }
 
-        private static void validateAnnotations(List<Annotation> annotations) {
+        private static void validateAnnotations(Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 if (!VALID_ANNOTATIONS.contains(annotation)) {
                     throw TypeQLException.of(INVALID_ANNOTATION.message("owns", annotation));
