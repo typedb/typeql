@@ -31,6 +31,7 @@ import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -38,7 +39,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
@@ -111,7 +111,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
     }
 
     public List<Annotation> annotations() {
-        return list();
+        return Collections.emptyList();
     }
 
     public TypeConstraint.Label asLabel() {
@@ -454,7 +454,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         private static void validateAnnotations(Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 if (!VALID_ANNOTATIONS.contains(annotation)) {
-                    throw TypeQLException.of(INVALID_ANNOTATION.message("owns", annotation));
+                    throw TypeQLException.of(INVALID_ANNOTATION.message(annotation, "owns"));
                 }
             }
         }
@@ -492,7 +492,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             return "" + OWNS + SPACE + attributeType +
                     (overriddenAttributeType != null ? "" + SPACE + AS + SPACE + overriddenAttributeType : "") +
-                    annotations.stream().map(a -> a.toString()).reduce("", (x, y) -> x + SPACE + y);
+                    annotations.stream().map(Annotation::toString).collect(SPACE.joiner());
         }
 
         @Override
