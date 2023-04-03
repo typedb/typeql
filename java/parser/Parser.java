@@ -513,10 +513,22 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public List<TypeQLToken.Annotation> visitAnnotations_owns(TypeQLParser.Annotations_ownsContext ctx) {
-        List<TypeQLToken.Annotation> annotations = new ArrayList<>();
-        if (ctx.ANNOTATION_KEY() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_KEY()));
-        else if (ctx.ANNOTATION_UNIQUE() != null) annotations.add(parseAnnotation(ctx.ANNOTATION_UNIQUE()));
+    public TypeQLToken.Annotation[] visitAnnotations_owns(TypeQLParser.Annotations_ownsContext ctx) {
+        // precompute array length to avoid double allocation of arrays
+        int count = 0;
+        if (ctx.ANNOTATION_KEY() != null) count++;
+        if (ctx.ANNOTATION_UNIQUE() != null) count++;
+        TypeQLToken.Annotation[] annotations = new TypeQLToken.Annotation[count];
+        int index = 0;
+        if (ctx.ANNOTATION_KEY() != null) {
+            annotations[index] = parseAnnotation(ctx.ANNOTATION_KEY());
+            index++;
+        }
+        if (ctx.ANNOTATION_UNIQUE() != null) {
+            annotations[index] = parseAnnotation(ctx.ANNOTATION_UNIQUE());
+            index++;
+        }
+        assert index == count;
         return annotations;
     }
 
