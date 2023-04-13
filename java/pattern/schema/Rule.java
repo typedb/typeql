@@ -175,13 +175,11 @@ public class Rule implements Definable {
         StringBuilder rule = new StringBuilder("" + RULE + SPACE + label);
         if (when != null) {
             if (pretty) {
-                rule.append(COLON).append(NEW_LINE);
-                StringBuilder body = new StringBuilder();
-                body.append(WHEN).append(SPACE).append(when.toString(pretty)).append(NEW_LINE);
-                body.append(THEN).append(SPACE).append(CURLY_OPEN).append(NEW_LINE);
-                body.append(indent(then)).append(SEMICOLON);
-                body.append(NEW_LINE).append(CURLY_CLOSE);
-                rule.append(indent(body));
+                rule.append(COLON).append(SPACE).append(WHEN).append(SPACE);
+                rule.append(when.toString(pretty))
+                        .append(SPACE).append(THEN).append(SPACE).append(CURLY_OPEN).append(NEW_LINE)
+                        .append(indent(then.toString(true))).append(SEMICOLON).append(NEW_LINE)
+                        .append(CURLY_CLOSE);
             } else {
                 rule.append(COLON).append(SPACE);
                 String content = String.valueOf(WHEN) + SPACE + when.toString(pretty) + THEN + SPACE + CURLY_OPEN +
