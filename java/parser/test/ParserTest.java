@@ -994,13 +994,11 @@ public class ParserTest {
 
         TypeQLDefine expected = define(rule("all-movies-are-drama").when(whenPattern).then(thenPattern));
         final String query = "define\n" +
-                "rule all-movies-are-drama:\n" +
-                "    when {\n" +
-                "        " + when + "\n" +
-                "    }\n" +
-                "    then {\n" +
-                "        " + then + "\n" +
-                "    };";
+                "rule all-movies-are-drama: when {\n" +
+                "    " + when + "\n" +
+                "} then {\n" +
+                "    " + then + "\n" +
+                "};";
         TypeQLDefine parsed = TypeQL.parseQuery(query).asDefine();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
