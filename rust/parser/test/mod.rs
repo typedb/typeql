@@ -1033,16 +1033,29 @@ fn test_parsing_pattern() {
 #[test]
 fn test_define_rules() {
     let query = r#"define
-rule all-movies-are-drama: when {
-    $x isa movie;
+rule a-rule: when {
+    $x isa person;
+    not {
+        $x has name "Alice";
+        $x has name "Bob";
+    };
+    {
+        ($x) isa friendship;
+    } or {
+        ($x) isa employment;
+    };
 } then {
-    $x has genre "drama";
+    $x has is_interesting true;
 };"#;
 
     let parsed = parse_query(&query).unwrap().into_define();
-    let expected = typeql_define!(rule("all-movies-are-drama")
-        .when(and!(var("x").isa("movie")))
-        .then(var("x").has(("genre", "drama"))));
+    let expected = typeql_define!(rule("a-rule")
+        .when(and!(
+            var("x").isa("person"),
+            not(and!(var("x").has(("name", "Alice")), var("x").has(("name", "Bob")))),
+            or!(rel(var("x")).isa("friendship"), rel(var("x")).isa("employment"))
+        ))
+        .then(var("x").has(("is_interesting", true))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
