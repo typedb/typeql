@@ -987,15 +987,29 @@ public class ParserTest {
 
     @Test
     public void testDefineRules() {
-        final String when = "$x isa movie;";
-        final String then = "$x has genre 'drama';";
-        Conjunction<? extends Pattern> whenPattern = and((var("x").isa("movie")));
-        ThingVariable<?> thenPattern = var("x").has("genre", "drama");
+        final String when =
+                "    $x isa person;\n" +
+                "    not {\n" +
+                "        $x has name 'Alice';\n" +
+                "        $x has name 'Bob';\n" +
+                "    };\n" +
+                "    {\n" +
+                "        ($x) isa friendship;\n" +
+                "    } or {\n" +
+                "        ($x) isa employment;\n" +
+                "    };";
+        final String then = "$x has is_interesting true;";
+        Conjunction<? extends Pattern> whenPattern = and(
+                var("x").isa("person"),
+                not(and(var("x").has("name", "Alice"), var("x").has("name", "Bob"))),
+                or(rel(var("x")).isa("friendship"), rel(var("x")).isa("employment"))
+        );
+        ThingVariable<?> thenPattern = var("x").has("is_interesting", true);
 
         TypeQLDefine expected = define(rule("all-movies-are-drama").when(whenPattern).then(thenPattern));
         final String query = "define\n" +
                 "rule all-movies-are-drama: when {\n" +
-                "    " + when + "\n" +
+                when + "\n" +
                 "} then {\n" +
                 "    " + then + "\n" +
                 "};";

@@ -24,7 +24,7 @@ use core::fmt;
 use std::collections::HashSet;
 
 use crate::{
-    common::{error::TypeQLError, token, validatable::Validatable, Result},
+    common::{error::TypeQLError, string::indent, token, validatable::Validatable, Result},
     pattern::{Conjunction, Disjunction, Normalisable, Pattern, Reference},
 };
 
@@ -83,6 +83,13 @@ impl Normalisable for Negation {
 
 impl fmt::Display for Negation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {{ {}; }}", token::Operator::Not, self.pattern)
+        let pattern_string = self.pattern.to_string();
+        if matches!(*self.pattern, Pattern::Conjunction(_)) {
+            write!(f, "{} {}", token::Operator::Not, pattern_string)
+        } else if pattern_string.lines().count() > 1 {
+            write!(f, "{} {{\n{};\n}}", token::Operator::Not, indent(&pattern_string))
+        } else {
+            write!(f, "{} {{ {}; }}", token::Operator::Not, pattern_string)
+        }
     }
 }

@@ -16,4 +16,4 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-bazel run @vaticle_dependencies//ide/rust:sync
+bazel run @vaticle_dependencies//tool/cargo:sync
