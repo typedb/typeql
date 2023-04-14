@@ -183,16 +183,13 @@ impl fmt::Display for RuleDefinition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{} {}:\n{}",
+            "{} {}: {} {} {} {{\n    {};\n}}",
             token::Schema::Rule,
             self.label,
-            indent(&format!(
-                "{} {}\n{} {{\n    {};\n}}",
-                token::Schema::When,
-                self.when,
-                token::Schema::Then,
-                self.then
-            ))
+            token::Schema::When,
+            self.when,
+            token::Schema::Then,
+            self.then
         )
     }
 }

@@ -1033,13 +1033,11 @@ fn test_parsing_pattern() {
 #[test]
 fn test_define_rules() {
     let query = r#"define
-rule all-movies-are-drama:
-    when {
-        $x isa movie;
-    }
-    then {
-        $x has genre "drama";
-    };"#;
+rule all-movies-are-drama: when {
+    $x isa movie;
+} then {
+    $x has genre "drama";
+};"#;
 
     let parsed = parse_query(&query).unwrap().into_define();
     let expected = typeql_define!(rule("all-movies-are-drama")
