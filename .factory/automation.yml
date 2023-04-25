@@ -39,7 +39,6 @@ build:
     build:
       image: vaticle-ubuntu-22.04
       command: |
-        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel build //... --test_output=errors
         bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
@@ -52,7 +51,6 @@ build:
         bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
     test-java:
       image: vaticle-ubuntu-22.04
-      dependencies: [build]
       command: |
         bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel test //java/common/... --test_output=errors
@@ -62,7 +60,6 @@ build:
         bazel test //java/test/... --test_output=errors
     test-rust:
       image: vaticle-ubuntu-22.04
-      dependencies: [build]
       command: |
         bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel test //rust/... --test_output=errors
