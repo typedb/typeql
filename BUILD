@@ -43,6 +43,8 @@ checkstyle_test(
     name = "checkstyle",
     include = [
         ".bazelrc",
+        ".bazel-remote-cache.rc",
+        ".bazel-cache-credential.json",
         ".gitignore",
         ".factory/automation.yml",
         "BUILD",
@@ -65,6 +67,7 @@ filegroup(
     data = [
         "@vaticle_dependencies//library/maven:update",
         "@vaticle_dependencies//tool/cargo:sync",
+        "@vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh",
         "@vaticle_dependencies//tool/checkstyle:test-coverage",
         "@vaticle_dependencies//tool/release/notes:create",
         "@vaticle_dependencies//tool/sonarcloud:code-analysis",

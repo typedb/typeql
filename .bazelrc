@@ -17,11 +17,12 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#s
+#
+
+try-import ./.bazel-remote-cache.rc
 
 build --incompatible_strict_action_env --java_language_version=11 --javacopt='--release 11'
 run --incompatible_strict_action_env
 test --incompatible_strict_action_env
 
-# try-import /opt/credentials/bazel-remote-cache.rc
 

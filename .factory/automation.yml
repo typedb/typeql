@@ -39,18 +39,22 @@ build:
     build:
       image: vaticle-ubuntu-22.04
       command: |
+        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel build //... --test_output=errors
         bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
     build-dependency:
       image: vaticle-ubuntu-22.04
       command: |
+        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
     test-java:
       image: vaticle-ubuntu-22.04
+      dependencies: [build]
       command: |
+        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel test //java/common/... --test_output=errors
         bazel test //java/parser/... --test_output=errors
         bazel test //java/pattern/... --test_output=errors
@@ -58,7 +62,9 @@ build:
         bazel test //java/test/... --test_output=errors
     test-rust:
       image: vaticle-ubuntu-22.04
+      dependencies: [build]
       command: |
+        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel test //rust/... --test_output=errors
     #    TODO: enable this
     #    deploy-crate-snapshot:
@@ -76,6 +82,7 @@ build:
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
+        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/pattern:deploy-maven -- snapshot

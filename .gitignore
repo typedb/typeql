@@ -24,6 +24,8 @@
 
 # Bazel files #
 bazel-*
+.bazel-remote-cache.rc
+.bazel-cache-credential.json
 
 # IDE files #
 .idea/
