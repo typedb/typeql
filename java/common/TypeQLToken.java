@@ -151,6 +151,10 @@ public class TypeQLToken {
             return Collectors.joining(character);
         }
 
+        public Collector<CharSequence, ?, String> joiner(CharSequence prefix, CharSequence suffix) {
+            return Collectors.joining(character, prefix, suffix);
+        }
+
         @Override
         public String toString() {
             return this.character;
