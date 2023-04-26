@@ -492,7 +492,7 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             return "" + OWNS + SPACE + attributeType +
                     (overriddenAttributeType != null ? "" + SPACE + AS + SPACE + overriddenAttributeType : "") +
-                    annotations.stream().map(Annotation::toString).collect(SPACE.joiner(SPACE.toString(), ""));
+                    (!annotations.isEmpty() ? SPACE + annotations.stream().map(Annotation::toString).collect(SPACE.joiner()) : "");
         }
 
         @Override
