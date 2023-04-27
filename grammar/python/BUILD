@@ -30,11 +30,23 @@ python_grammar_adapter(
 )
 
 antlr(
-    name = "python-src",
+    name = "python-antlr",
     srcs = [":python-grammar"],
     language = "Python3",
     visitor = True,
     package = "com.vaticle.typeql.grammar",
+)
+
+genrule(
+    name = "python-src",
+    outs = [
+        "TypeQLPythonLexer.py",
+        "TypeQLPythonListener.py",
+        "TypeQLPythonParser.py",
+        "TypeQLPythonVisitor.py",
+    ],
+    srcs = [":python-antlr"],
+    cmd = "mv $(execpath :python-src)/com/vaticle/typeql/grammar/*.py $(@D)",
 )
 
 py_library(
