@@ -43,9 +43,9 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
 
     static List<ThingVariable<?>> validInsertVars(@Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         if (match != null) {
-            if (variables.stream().noneMatch(var -> var.isReferable() && match.referableVariablesUnbound().contains(var.toUnbound())
-                    || var.variables().anyMatch(nestedVar -> match.referableVariablesUnbound().contains(nestedVar.toUnbound())))) {
-                throw TypeQLException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.referableVariablesUnbound()));
+            if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound())
+                    || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
+                throw TypeQLException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.namedVariablesUnbound()));
             }
         }
         return variables;

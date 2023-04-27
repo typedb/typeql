@@ -456,7 +456,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         public String toString() {
             return String.valueOf(HAS) + SPACE +
                     (type != null ? type.label().get().label() + SPACE : "") +
-                    (attribute.isNamed() ? attribute.reference() : attribute.predicate().get());
+                    (attribute.isNamedConcept() ? attribute.reference() : attribute.predicate().get());
         }
 
         @Override

@@ -83,6 +83,7 @@ public abstract class Variable {
     public String name() {
         switch (reference.type()) {
             case NAME_CONCEPT:
+            case NAME_VALUE:
                 return reference.name();
             case LABEL:
             case ANONYMOUS:
@@ -97,12 +98,16 @@ public abstract class Variable {
         return reference;
     }
 
-    public boolean isReferable() {
+    public boolean isNamed() {
         return reference.isName();
     }
 
-    public boolean isNamed() {
+    public boolean isNamedConcept() {
         return reference.isNameConcept();
+    }
+
+    public boolean isNamedValue() {
+        return reference.isNameValue();
     }
 
     public boolean isLabelled() {
