@@ -43,14 +43,16 @@ checkstyle_test(
     name = "checkstyle",
     include = [
         ".bazelrc",
-        ".bazel-remote-cache.rc",
-        ".bazel-cache-credential.json",
         ".gitignore",
         ".factory/automation.yml",
         "BUILD",
         "WORKSPACE",
         "deployment.bzl",
         "requirements.txt",
+    ],
+    exclude = [
+        ".bazel-remote-cache.rc",
+        ".bazel-cache-credential.json",
     ],
     license_type = "apache-header",
 )
