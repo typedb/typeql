@@ -46,7 +46,7 @@ genrule(
         "TypeQLPythonVisitor.py",
     ],
     srcs = [":python-antlr"],
-    cmd = "mv $(execpath :python-src)/com/vaticle/typeql/grammar/*.py $(@D)",
+    cmd = "mv $(execpath :python-antlr)/com/vaticle/typeql/grammar/*.py $(@D)",
 )
 
 py_library(
