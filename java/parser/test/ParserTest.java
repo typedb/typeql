@@ -92,7 +92,7 @@ public class ParserTest {
         try {
             function.run();
             fail();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             assertTrue(true);
         }
     }
@@ -432,6 +432,14 @@ public class ParserTest {
                 vVar("x").assign(Expression.constant(5)),
                 cVar("a").eq(vVar("x")).isa("age"));
         assertQueryEquals(expected, parsed, query);
+    }
+
+    @Test
+    public void testVariableNameClashThrows() {
+        final String query = "match\n" +
+                "$z isa person, has age $y;\n" +
+                "?y = $y;\n";
+        assertThrows(() -> parseQuery(query));
     }
 
     @Test

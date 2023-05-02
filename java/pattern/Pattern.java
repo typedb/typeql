@@ -23,13 +23,17 @@ package com.vaticle.typeql.lang.pattern;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.Reference;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NAME_CONFLICT;
 
 public interface Pattern {
 
@@ -67,6 +71,24 @@ public interface Pattern {
 
     default Conjunctable asConjunctable() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Negation.class)));
+    }
+
+    static void validateNamesUnique(Stream<? extends Pattern> patterns) {
+        Set<String> conceptNames = new HashSet<>();
+        Set<String> valueNames = new HashSet<>();
+        patterns.flatMap(p -> {
+            if (p.isVariable()) return Stream.of(p);
+            else if (p.isConjunction()) return p.asConjunction().variables();
+            else return Stream.empty();
+        }).filter(Pattern::isVariable).forEach(p -> {
+            Reference reference = p.asVariable().reference();
+            if (reference.isNameValue()) valueNames.add(reference.name());
+            else if (reference.isNameConcept()) conceptNames.add(reference.name());
+        });
+        conceptNames.retainAll(valueNames);
+        if (!conceptNames.isEmpty()) {
+            throw TypeQLException.of(VARIABLE_NAME_CONFLICT.message(String.join(",", conceptNames)));
+        }
     }
 
     @Override
