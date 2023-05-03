@@ -56,7 +56,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -491,7 +490,7 @@ public class Parser extends TypeQLBaseVisitor {
                 type = type.constrain(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == TypeQLToken.Constraint.SUBX));
             } else if (constraint.OWNS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
-                type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, constraint.IS_KEY() != null));
+                type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, visitAnnotations_owns(constraint.annotations_owns())));
             } else if (constraint.PLAYS() != null) {
                 Either<String, UnboundVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(0));
                 type = type.constrain(new TypeConstraint.Plays(visitType_scoped(constraint.type_scoped()), overridden));
@@ -511,6 +510,31 @@ public class Parser extends TypeQLBaseVisitor {
         }
 
         return type;
+    }
+
+    @Override
+    public TypeQLToken.Annotation[] visitAnnotations_owns(TypeQLParser.Annotations_ownsContext ctx) {
+        // precompute array length to avoid double allocation of arrays
+        int count = 0;
+        if (ctx.ANNOTATION_KEY() != null) count++;
+        if (ctx.ANNOTATION_UNIQUE() != null) count++;
+        TypeQLToken.Annotation[] annotations = new TypeQLToken.Annotation[count];
+        int index = 0;
+        if (ctx.ANNOTATION_KEY() != null) {
+            annotations[index] = parseAnnotation(ctx.ANNOTATION_KEY());
+            index++;
+        }
+        if (ctx.ANNOTATION_UNIQUE() != null) {
+            annotations[index] = parseAnnotation(ctx.ANNOTATION_UNIQUE());
+            index++;
+        }
+        assert index == count;
+        return annotations;
+    }
+
+    private TypeQLToken.Annotation parseAnnotation(TerminalNode terminalNode) {
+        assert !terminalNode.getText().isEmpty() && terminalNode.getText().startsWith(TypeQLToken.Char.AT.toString());
+        return TypeQLToken.Annotation.of(terminalNode.getText().substring(1));
     }
 
     // THING VARIABLES =========================================================

@@ -101,7 +101,8 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(39, "Illegal grammar!");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
             new ErrorMessage(40, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
-
+    public static final ErrorMessage INVALID_ANNOTATION =
+            new ErrorMessage(41, "Invalid annotation '%s' on '%s' constraint");
 
     private static final String codePrefix = "TQL";
     private static final String messagePrefix = "TypeQL Error";

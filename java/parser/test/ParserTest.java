@@ -23,6 +23,7 @@ package com.vaticle.typeql.lang.parser.test;
 
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.TypeQLArg;
+import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
@@ -1143,8 +1144,15 @@ public class ParserTest {
     }
 
     @Test
-    public void testParseKey() {
-        assertEquals("match\n$x owns name @key;\nget $x;", parseQuery("match\n$x owns name @key;\nget $x;").toString());
+    public void testParseAnnotations() {
+        final String defineString = "define\n" +
+                "e1 owns a1 @key;\n" +
+                "e2 owns a2 @unique;";
+        assertEquals(
+                TypeQL.define(
+                        type("e1").owns("a1", TypeQLToken.Annotation.KEY),
+                        type("e2").owns("a2", TypeQLToken.Annotation.UNIQUE)),
+                parseQuery(defineString));
     }
 
     @Test
