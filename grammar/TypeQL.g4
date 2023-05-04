@@ -176,11 +176,13 @@ predicate_value       :   value | VAR_CONCEPT_  | VAR_VALUE_ ;
 // EXPRESSION CONSTRUCTS =======================================================
 
 expression                  :   <assoc=right> expression POW expression         // exponentiation is right-associative
-                            |   expression  (TIMES | DIV | MOD)  expression
+                            |   expression  (MUL | DIV | MOD)  expression
                             |   expression  (PLUS  | MINUS) expression
-                            |   '(' expression ')'
-                            |   VAR_CONCEPT_            | VAR_VALUE_
+                            |   expression_base
+                            ;
+expression_base             :   VAR_CONCEPT_            | VAR_VALUE_
                             |   expression_function     | value
+                            |   '(' expression ')'
                             ;
 expression_function         :   expression_function_name '('  expression_arguments? ')' ;
 expression_function_name    :   EXPR_FUNC_NAME | MAX | MIN                              ;
@@ -284,7 +286,7 @@ LIKE            : 'like'        ;   CONTAINS        : 'contains'    ;
 ASSIGN          : '='         ;
 PAREN_OPEN      : '('         ;     PAREN_CLOSE         : ')'       ;
 POW             : '^'         ;
-DIV             : '/'         ;     TIMES               : '*'       ;      MOD                 : '%'         ;
+DIV             : '/'         ;     MUL                 : '*'       ;      MOD                 : '%'         ;
 PLUS            : '+'         ;     MINUS               : '-'       ;
 
 // Incomplete list of function names usable in expressions. Use `func_name` as source of truth.

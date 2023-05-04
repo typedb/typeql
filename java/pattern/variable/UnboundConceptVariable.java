@@ -21,19 +21,16 @@
 
 package com.vaticle.typeql.lang.pattern.variable;
 
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.Constraint;
+import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.variable.builder.ConceptVariableBuilder;
-import com.vaticle.typeql.lang.pattern.variable.builder.ExpressionBuilder;
+import com.vaticle.typeql.lang.pattern.variable.builder.Expression;
 import com.vaticle.typeql.lang.pattern.variable.builder.ThingVariableBuilder;
 import com.vaticle.typeql.lang.pattern.variable.builder.TypeVariableBuilder;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 public class UnboundConceptVariable extends UnboundVariable implements
         ConceptVariableBuilder,
@@ -42,7 +39,7 @@ public class UnboundConceptVariable extends UnboundVariable implements
         ThingVariableBuilder.Thing,
         ThingVariableBuilder.Relation,
         ThingVariableBuilder.Attribute,
-        ExpressionBuilder<ValueConstraint.Assignment.Expression.ThingVar> {
+        Expression {
 
     UnboundConceptVariable(Reference reference) {
         super(reference);
@@ -83,13 +80,9 @@ public class UnboundConceptVariable extends UnboundVariable implements
         return new ThingVariable.Thing(reference);
     }
 
-    public ValueConstraint.Assignment.Expression.ThingVar toExpression() {
-        return new ValueConstraint.Assignment.Expression.ThingVar(toThing());
-    }
-
     @Override
-    public List<Constraint<?>> constraints() {
-        return Collections.emptyList();
+    public void collectVariables(Set<UnboundVariable> collector) {
+        collector.add(this);
     }
 
     @Override

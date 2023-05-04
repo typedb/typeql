@@ -34,20 +34,21 @@ import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.Disjunction;
 import com.vaticle.typeql.lang.pattern.Negation;
 import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint.Assignment.Expression.Operation;
+import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
+import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
-import com.vaticle.typeql.lang.pattern.variable.ValueVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ValueVariable;
+import com.vaticle.typeql.lang.pattern.variable.builder.Expression;
+import com.vaticle.typeql.lang.pattern.variable.builder.Expression.Operation;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
@@ -680,7 +681,7 @@ public class Parser extends TypeQLBaseVisitor {
                 return new ThingConstraint.Has(ctx.label().getText(), getVarConcept(ctx.VAR_CONCEPT_()));
             }
             if (ctx.VAR_VALUE_() != null) {
-                Predicate.ValueVariable pred = new Predicate.ValueVariable(TypeQLToken.Predicate.Equality.EQ, getVarValue(ctx.VAR_VALUE_()).toValue());
+                Predicate.Variable pred = new Predicate.Variable(TypeQLToken.Predicate.Equality.EQ, getVarValue(ctx.VAR_VALUE_()));
                 return new ThingConstraint.Has(ctx.label().getText(), new ThingConstraint.Predicate(pred));
             }
             if (ctx.predicate() != null) {
@@ -748,40 +749,50 @@ public class Parser extends TypeQLBaseVisitor {
 
     // ARITHMETIC EXPRESSIONS ==================================================
 
-    public ValueConstraint.Assignment.Expression visitExpression(TypeQLParser.ExpressionContext ctx) {
+    @Override
+    public Expression visitExpression(TypeQLParser.ExpressionContext ctx) {
         if (ctx.POW() != null) {
             return new Operation(TypeQLToken.Expression.Operation.POW, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
         } else if (ctx.DIV() != null) {
             return new Operation(TypeQLToken.Expression.Operation.DIV, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
-        } else if (ctx.TIMES() != null) {
-            return new Operation(TypeQLToken.Expression.Operation.TIMES, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
+        } else if (ctx.MUL() != null) {
+            return new Operation(TypeQLToken.Expression.Operation.MUL, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
         } else if (ctx.MOD() != null) {
             return new Operation(TypeQLToken.Expression.Operation.MOD, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
         } else if (ctx.PLUS() != null) {
             return new Operation(TypeQLToken.Expression.Operation.PLUS, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
         } else if (ctx.MINUS() != null) {
             return new Operation(TypeQLToken.Expression.Operation.MINUS, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
-        } else if (ctx.expression_function() != null) {
+        } else if (ctx.expression_base() != null) {
+            return visitExpression_base(ctx.expression_base());
+        } else {
+            throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
+        }
+    }
+
+    @Override
+    public Expression visitExpression_base(TypeQLParser.Expression_baseContext ctx) {
+        if (ctx.expression_function() != null) {
             return visitExpression_function(ctx.expression_function());
         } else if (ctx.PAREN_OPEN() != null || ctx.PAREN_CLOSE() != null) {
             assert ctx.PAREN_OPEN() != null && ctx.PAREN_CLOSE() != null;
-            return new ValueConstraint.Assignment.Expression.Bracketed(visitExpression(ctx.expression(0)));
+            return new Expression.Parenthesis(visitExpression(ctx.expression()));
         } else if (ctx.VAR_CONCEPT_() != null) {
-            return new ValueConstraint.Assignment.Expression.ThingVar(getVarConcept(ctx.VAR_CONCEPT_()).toThing());
+            return getVarConcept(ctx.VAR_CONCEPT_());
         } else if (ctx.VAR_VALUE_() != null) {
-            return new ValueConstraint.Assignment.Expression.ValueVar(getVarValue(ctx.VAR_VALUE_()).toValue());
+            return getVarValue(ctx.VAR_VALUE_());
         } else if (ctx.value() != null) {
             Object value = visitValue(ctx.value());
             if (value instanceof Long) {
-                return new ValueConstraint.Assignment.Expression.Constant.Long((Long) value);
+                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Long((Long) value);
             } else if (value instanceof Double) {
-                return new ValueConstraint.Assignment.Expression.Constant.Double((Double) value);
+                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Double((Double) value);
             } else if (value instanceof Boolean) {
-                return new ValueConstraint.Assignment.Expression.Constant.Boolean((Boolean) value);
+                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Boolean((Boolean) value);
             } else if (value instanceof String) {
-                return new ValueConstraint.Assignment.Expression.Constant.String((String) value);
+                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.String((String) value);
             } else if (value instanceof LocalDateTime) {
-                return new ValueConstraint.Assignment.Expression.Constant.DateTime((LocalDateTime) value);
+                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.DateTime((LocalDateTime) value);
             } else {
                 throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
@@ -791,18 +802,18 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public ValueConstraint.Assignment.Expression.Function visitExpression_function(TypeQLParser.Expression_functionContext ctx) {
+    public com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function visitExpression_function(TypeQLParser.Expression_functionContext ctx) {
         TypeQLToken.Expression.Function function = Arrays.stream(TypeQLToken.Expression.Function.values())
                 .filter(f -> f.toString().equals(ctx.expression_function_name().getText()))
                 .findFirst().orElse(null);
         if (function != null) {
-            return new ValueConstraint.Assignment.Expression.Function(function, visitExpression_arguments(ctx.expression_arguments()));
+            return new Expression.Function(function, visitExpression_arguments(ctx.expression_arguments()));
         } else throw TypeQLException.of(ILLEGAL_STATE); // Should always match
     }
 
     @Override
-    public List<ValueConstraint.Assignment.Expression> visitExpression_arguments(TypeQLParser.Expression_argumentsContext ctx) {
-        List<ValueConstraint.Assignment.Expression> args = new ArrayList<>();
+    public List<Expression> visitExpression_arguments(TypeQLParser.Expression_argumentsContext ctx) {
+        List<Expression> args = new ArrayList<>();
         if (ctx != null) {
             ctx.expression().forEach(expression -> args.add(visitExpression(expression)));
         }
@@ -848,10 +859,8 @@ public class Parser extends TypeQLBaseVisitor {
             return new Predicate.String(predicate, (String) value);
         } else if (value instanceof LocalDateTime) {
             return new Predicate.DateTime(predicate.asEquality(), (LocalDateTime) value);
-        } else if (value instanceof UnboundConceptVariable) {
-            return new Predicate.ThingVariable(predicate.asEquality(), ((UnboundConceptVariable) value).toThing());
-        } else if (value instanceof UnboundValueVariable) {
-            return new Predicate.ValueVariable(predicate.asEquality(), ((UnboundValueVariable) value).toValue());
+        } else if (value instanceof UnboundVariable) {
+            return new Predicate.Variable(predicate.asEquality(), ((UnboundVariable) value));
         } else {
             throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }

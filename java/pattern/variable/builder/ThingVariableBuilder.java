@@ -22,8 +22,8 @@
 package com.vaticle.typeql.lang.pattern.variable.builder;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
@@ -81,7 +81,7 @@ public interface ThingVariableBuilder {
         }
 
         default T has(String type, UnboundValueVariable value) {
-            return has(type, new ThingConstraint.Predicate(new Predicate.ValueVariable(EQ, value.toValue())));
+            return has(type, new ThingConstraint.Predicate(new Predicate.Variable(EQ, value)));
         }
 
         default T has(String type, ThingConstraint.Predicate predicate) {

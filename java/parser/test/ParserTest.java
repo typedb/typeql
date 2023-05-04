@@ -24,7 +24,6 @@ package com.vaticle.typeql.lang.parser.test;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.TypeQL.Expression;
 import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
@@ -454,10 +453,11 @@ public class ParserTest {
         TypeQLMatch expected = match(
                 cVar("x").isa("commodity").has("price", cVar("p")),
                 rel("commodity", TypeQL.cVar("x")).rel("qty", TypeQL.cVar("q")).isa("order"),
-                vVar("net").assign(Expression.times(cVar("p"), cVar("q"))),
-                vVar("gross").assign(Expression.times(
-                        vVar("net"),
-                        Expression.bracketed(Expression.plus(Expression.constant(1.0), Expression.constant(0.21))))));
+                vVar("net").assign(cVar("p").mul(cVar("q"))),
+                vVar("gross").assign(
+                        vVar("net").mul(Expression.parenthesis(Expression.constant(1.0).plus(Expression.constant(0.21))))
+                )
+        );
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -469,19 +469,12 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 vVar("res").assign(
-                        Expression.plus(
-                                Expression.times(
-                                        Expression.div(
-                                                cVar("a"),
-                                                cVar("b")),
-                                        cVar("c")),
-                                Expression.div(
-                                        Expression.pow(
-                                                cVar("d"),
-                                                Expression.pow(
-                                                        cVar("e"),
-                                                        cVar("f"))),
-                                        cVar("g")))));
+                        cVar("a")
+                                .div(cVar("b"))
+                                .mul(cVar("c"))
+                                .plus(cVar("d").pow(cVar("e").pow(cVar("f"))).div(cVar("g")))
+                )
+        );
         assertQueryEquals(expected, parsed, query);
     }
 
@@ -493,15 +486,9 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 vVar("res").assign(
-                        Expression.plus(
-                                cVar("a"),
-                                Expression.times(
-                                        Expression.bracketed(
-                                                Expression.plus(
-                                                        Expression.func(TypeQLToken.Expression.Function.ROUND,
-                                                                Expression.plus(cVar("b"), vVar("c"))),
-                                                        cVar("d"))),
-                                        vVar("e")))));
+                        cVar("a").plus(Expression.parenthesis(
+                                Expression.round(cVar("b").plus(vVar("c"))).plus(cVar("d"))
+                        ).mul(vVar("e")))));
         assertQueryEquals(expected, parsed, query);
     }
 
@@ -518,10 +505,12 @@ public class ParserTest {
         TypeQLMatch expected = match(
                 cVar("x").isa("commodity").has("price", cVar("p")),
                 rel("commodity", TypeQL.cVar("x")).rel("qty", TypeQL.cVar("q")).isa("order"),
-                vVar("net").assign(Expression.times(cVar("p"), cVar("q"))),
-                vVar("gross").assign(Expression.func(TypeQLToken.Expression.Function.MIN,
-                        Expression.times(vVar("net"), Expression.constant(1.21)),
-                        Expression.plus(vVar("net"), Expression.constant(100.0)))));
+                vVar("net").assign(cVar("p").mul(cVar("q"))),
+                vVar("gross").assign(Expression.min(
+                        vVar("net").mul(Expression.constant(1.21)),
+                        vVar("net").plus(Expression.constant(100.0))
+                ))
+        );
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -559,9 +548,11 @@ public class ParserTest {
                 "?l = 100 - $r;\n" +
                 "sort ?l desc;";
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        com.vaticle.typeql.lang.pattern.variable.builder.Expression a = Expression.constant(100);
+        com.vaticle.typeql.lang.pattern.variable.builder.Expression b = cVar("r");
         TypeQLMatch expected = match(
                 cVar("x").isa("movie").has("rating", cVar("r")),
-                vVar("l").assign(Expression.minus(Expression.constant(100), cVar("r")))
+                vVar("l").assign(a.minus(b))
         ).sort(pair(vVar("l"), "desc"));
 
         assertQueryEquals(expected, parsed, query);
@@ -786,10 +777,12 @@ public class ParserTest {
                 "get $x, ?t;\n" +
                 "group $x; sum ?t;";
         TypeQLMatch.Group.Aggregate parsed = parseQuery(query).asMatchGroupAggregate();
+        com.vaticle.typeql.lang.pattern.variable.builder.Expression a = cVar("r");
+        com.vaticle.typeql.lang.pattern.variable.builder.Expression b = cVar("v");
         TypeQLMatch.Group.Aggregate expected = match(
                 cVar("i").rel(cVar("x")).rel(cVar("s")).isa("income-source"),
                 cVar("i").has("value", cVar("v")).has("tax-rate", cVar("r")),
-                vVar("t").assign(Expression.times(cVar("r"), cVar("v")))
+                vVar("t").assign(a.mul(b))
         ).get(list(cVar("x"), vVar("t"))).group(cVar("x")).sum(vVar("t"));
 
         assertQueryEquals(expected, parsed, query);
@@ -1143,15 +1136,15 @@ public class ParserTest {
     public void testDefineRules() {
         final String when =
                 "    $x isa person;\n" +
-                "    not {\n" +
-                "        $x has name 'Alice';\n" +
-                "        $x has name 'Bob';\n" +
-                "    };\n" +
-                "    {\n" +
-                "        ($x) isa friendship;\n" +
-                "    } or {\n" +
-                "        ($x) isa employment;\n" +
-                "    };";
+                        "    not {\n" +
+                        "        $x has name 'Alice';\n" +
+                        "        $x has name 'Bob';\n" +
+                        "    };\n" +
+                        "    {\n" +
+                        "        ($x) isa friendship;\n" +
+                        "    } or {\n" +
+                        "        ($x) isa employment;\n" +
+                        "    };";
         final String then = "$x has is_interesting true;";
         Conjunction<? extends Pattern> whenPattern = and(
                 cVar("x").isa("person"),
@@ -1174,9 +1167,11 @@ public class ParserTest {
 
     @Test
     public void testRuleAttachAttributeByValue() {
+        com.vaticle.typeql.lang.pattern.variable.builder.Expression a = cVar("a");
+        com.vaticle.typeql.lang.pattern.variable.builder.Expression b = Expression.constant(365);
         Conjunction<? extends Pattern> whenPattern = and(
                 cVar("x").has("age", cVar("a")),
-                vVar("d").assign(Expression.times(cVar("a"), Expression.constant(365)))
+                vVar("d").assign(a.mul(b))
         );
         ThingVariable<?> thenPattern = cVar("x").has("days", vVar("d"));
         TypeQLDefine expected = define(rule("attach-val").when(whenPattern).then(thenPattern));

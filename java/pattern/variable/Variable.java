@@ -22,10 +22,6 @@
 package com.vaticle.typeql.lang.pattern.variable;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.constraint.Constraint;
-
-import java.util.List;
-import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
@@ -38,29 +34,11 @@ public abstract class Variable {
         this.reference = reference;
     }
 
-    public abstract List<? extends Constraint<?>> constraints();
-
     public boolean isUnbound() {
         return false;
     }
 
     public boolean isBound() {
-        return false;
-    }
-
-    public boolean isConcept() {
-        return false;
-    }
-
-    public boolean isType() {
-        return false;
-    }
-
-    public boolean isThing() {
-        return false;
-    }
-
-    public boolean isValue() {
         return false;
     }
 
@@ -70,10 +48,6 @@ public abstract class Variable {
 
     public BoundVariable asBound() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
-    }
-
-    public Stream<BoundVariable> variables() {
-        return constraints().stream().flatMap(constraint -> constraint.variables().stream());
     }
 
     public Reference.Type type() {

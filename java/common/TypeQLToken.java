@@ -438,7 +438,7 @@ public class TypeQLToken {
     public static class Expression {
         public enum Operation {
             POW("^"),
-            TIMES("*"),
+            MUL("*"),
             DIV("/"),
             MOD("%"),
             PLUS("+"),
@@ -466,8 +466,12 @@ public class TypeQLToken {
         }
 
         public enum Function {
-            MAX("max"), MIN("min"),
-            FLOOR("floor"), CEIL("ceil"), ROUND("round"), ABS("abs");
+            MAX("max"),
+            MIN("min"),
+            FLOOR("floor"),
+            CEIL("ceil"),
+            ROUND("round"),
+            ABS("abs");
 
             private final String symbol;
 

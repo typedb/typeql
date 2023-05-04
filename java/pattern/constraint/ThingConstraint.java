@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.pair;
@@ -476,16 +477,21 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
     public static class Predicate extends ThingConstraint {
 
         private final com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate;
+        private final Set<BoundVariable> variables;
         private final int hash;
 
         public Predicate(com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate) {
             this.predicate = predicate;
+            this.variables = predicate.variables().stream().map(v -> {
+                if (v.isValueVariable()) return v.asValueVariable().toBound();
+                else return v.asConceptVariable().toThing();
+            }).collect(Collectors.toSet());
             this.hash = Objects.hash(Predicate.class, predicate);
         }
 
         @Override
         public Set<BoundVariable> variables() {
-            return predicate.variables();
+            return variables;
         }
 
         public com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate() {

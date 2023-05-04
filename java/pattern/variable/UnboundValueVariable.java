@@ -21,20 +21,19 @@
 
 package com.vaticle.typeql.lang.pattern.variable;
 
-import com.vaticle.typeql.lang.pattern.constraint.Constraint;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
-import com.vaticle.typeql.lang.pattern.variable.builder.ExpressionBuilder;
+import com.vaticle.typeql.lang.pattern.variable.builder.Expression;
 import com.vaticle.typeql.lang.pattern.variable.builder.PredicateBuilder;
 import com.vaticle.typeql.lang.pattern.variable.builder.ValueVariableBuilder;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 public class UnboundValueVariable extends UnboundVariable implements
         ValueVariableBuilder,
         PredicateBuilder<ValueVariable>,
-        ExpressionBuilder<ValueConstraint.Assignment.Expression.ValueVar> {
+        Expression {
+
     UnboundValueVariable(Reference.Name.Value reference) {
         super(reference);
     }
@@ -53,6 +52,10 @@ public class UnboundValueVariable extends UnboundVariable implements
         return this;
     }
 
+    public BoundVariable toBound() {
+        return new ValueVariable(reference.asName().asValue());
+    }
+
     public ValueVariable constrain(ValueConstraint.Assignment constraint) {
         return new ValueVariable(reference.asName().asValue()).constrain(constraint);
     }
@@ -65,17 +68,9 @@ public class UnboundValueVariable extends UnboundVariable implements
         return new ValueVariable(reference.asName().asValue()).constrain(constraint);
     }
 
-    public ValueVariable toValue() {
-        return new ValueVariable(reference.asName().asValue());
-    }
-
-    public ValueConstraint.Assignment.Expression.ValueVar toExpression() {
-        return new ValueConstraint.Assignment.Expression.ValueVar(toValue());
-    }
-
     @Override
-    public List<? extends Constraint<?>> constraints() {
-        return Collections.emptyList();
+    public void collectVariables(Set<UnboundVariable> collector) {
+        collector.add(this);
     }
 
     @Override

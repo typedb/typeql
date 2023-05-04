@@ -27,6 +27,7 @@ import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class UnboundVariable extends Variable {
+
     UnboundVariable(Reference reference) {
         super(reference);
     }
@@ -45,12 +46,12 @@ public abstract class UnboundVariable extends Variable {
         return false;
     }
 
-    public boolean isValueVariable() {
-        return false;
-    }
-
     public UnboundConceptVariable asConceptVariable() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundConceptVariable.class)));
+    }
+
+    public boolean isValueVariable() {
+        return false;
     }
 
     public UnboundValueVariable asValueVariable() {

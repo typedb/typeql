@@ -32,14 +32,13 @@ import com.vaticle.typeql.lang.pattern.Negation;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
-import com.vaticle.typeql.lang.pattern.variable.builder.ExpressionBuilder;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
@@ -48,7 +47,6 @@ import com.vaticle.typeql.lang.query.TypeQLUndefine;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
@@ -223,12 +221,8 @@ public class TypeQL {
         return new ThingConstraint.Predicate(new Predicate.DateTime(EQ, value));
     }
 
-    public static ThingConstraint.Predicate eq(UnboundConceptVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ThingVariable(EQ, variable.toThing()));
-    }
-
-    public static ThingConstraint.Predicate eq(UnboundValueVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ValueVariable(EQ, variable.toValue()));
+    public static ThingConstraint.Predicate eq(UnboundVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.Variable(EQ, variable));
     }
 
     public static ThingConstraint.Predicate neq(long value) {
@@ -251,12 +245,8 @@ public class TypeQL {
         return new ThingConstraint.Predicate(new Predicate.DateTime(NEQ, value));
     }
 
-    public static ThingConstraint.Predicate neq(UnboundConceptVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ThingVariable(NEQ, variable.toThing()));
-    }
-
-    public static ThingConstraint.Predicate neq(UnboundValueVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ValueVariable(NEQ, variable.toValue()));
+    public static ThingConstraint.Predicate neq(UnboundVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.Variable(NEQ, variable));
     }
 
     public static ThingConstraint.Predicate gt(long value) {
@@ -279,12 +269,8 @@ public class TypeQL {
         return new ThingConstraint.Predicate(new Predicate.DateTime(GT, value));
     }
 
-    public static ThingConstraint.Predicate gt(UnboundConceptVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ThingVariable(GT, variable.toThing()));
-    }
-
-    public static ThingConstraint.Predicate gt(UnboundValueVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ValueVariable(GT, variable.toValue()));
+    public static ThingConstraint.Predicate gt(UnboundVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.Variable(GT, variable));
     }
 
     public static ThingConstraint.Predicate gte(long value) {
@@ -307,12 +293,8 @@ public class TypeQL {
         return new ThingConstraint.Predicate(new Predicate.DateTime(GTE, value));
     }
 
-    public static ThingConstraint.Predicate gte(UnboundConceptVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ThingVariable(GTE, variable.toThing()));
-    }
-
-    public static ThingConstraint.Predicate gte(UnboundValueVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ValueVariable(GTE, variable.toValue()));
+    public static ThingConstraint.Predicate gte(UnboundVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.Variable(GTE, variable));
     }
 
     public static ThingConstraint.Predicate lt(long value) {
@@ -335,12 +317,8 @@ public class TypeQL {
         return new ThingConstraint.Predicate(new Predicate.DateTime(LT, value));
     }
 
-    public static ThingConstraint.Predicate lt(UnboundConceptVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ThingVariable(LT, variable.toThing()));
-    }
-
-    public static ThingConstraint.Predicate lt(UnboundValueVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ValueVariable(LT, variable.toValue()));
+    public static ThingConstraint.Predicate lt(UnboundVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.Variable(LT, variable));
     }
 
     public static ThingConstraint.Predicate lte(long value) {
@@ -363,12 +341,8 @@ public class TypeQL {
         return new ThingConstraint.Predicate(new Predicate.DateTime(LTE, value));
     }
 
-    public static ThingConstraint.Predicate lte(UnboundConceptVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ThingVariable(LTE, variable.toThing()));
-    }
-
-    public static ThingConstraint.Predicate lte(UnboundValueVariable variable) {
-        return new ThingConstraint.Predicate(new Predicate.ValueVariable(LTE, variable.toValue()));
+    public static ThingConstraint.Predicate lte(UnboundVariable variable) {
+        return new ThingConstraint.Predicate(new Predicate.Variable(LTE, variable));
     }
 
     public static ThingConstraint.Predicate contains(String value) {
@@ -380,56 +354,124 @@ public class TypeQL {
     }
 
     public static abstract class Expression {
-        public static ValueConstraint.Assignment.Expression.Operation plus(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
-            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.PLUS, a.toExpression(), b.toExpression());
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function min(com.vaticle.typeql.lang.pattern.variable.builder.Expression... args) {
+            return min(list(args));
         }
 
-        public static ValueConstraint.Assignment.Expression.Operation minus(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
-            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.MINUS, a.toExpression(), b.toExpression());
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function min(List<com.vaticle.typeql.lang.pattern.variable.builder.Expression> args) {
+            return function(TypeQLToken.Expression.Function.MIN, args);
         }
 
-        public static ValueConstraint.Assignment.Expression.Operation times(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
-            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.TIMES, a.toExpression(), b.toExpression());
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function max(com.vaticle.typeql.lang.pattern.variable.builder.Expression... args) {
+            return max(list(args));
         }
 
-        public static ValueConstraint.Assignment.Expression.Operation div(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
-            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.DIV, a.toExpression(), b.toExpression());
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function max(List<com.vaticle.typeql.lang.pattern.variable.builder.Expression> args) {
+            return function(TypeQLToken.Expression.Function.MAX, args);
         }
 
-        public static ValueConstraint.Assignment.Expression.Operation pow(ExpressionBuilder<?> a, ExpressionBuilder<?> b) {
-            return new ValueConstraint.Assignment.Expression.Operation(TypeQLToken.Expression.Operation.POW, a.toExpression(), b.toExpression());
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function floor(com.vaticle.typeql.lang.pattern.variable.builder.Expression... args) {
+            return floor(list(args));
         }
 
-        public static ValueConstraint.Assignment.Expression.Function func(TypeQLToken.Expression.Function funcId, ExpressionBuilder<?>... args) {
-            return func(funcId, list(args));
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function floor(List<com.vaticle.typeql.lang.pattern.variable.builder.Expression> args) {
+            return function(TypeQLToken.Expression.Function.FLOOR, args);
         }
 
-        public static ValueConstraint.Assignment.Expression.Function func(TypeQLToken.Expression.Function funcId, List<ExpressionBuilder<?>> args) {
-            return new ValueConstraint.Assignment.Expression.Function(funcId, args.stream().map(ExpressionBuilder::toExpression).collect(Collectors.toList()));
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function ceil(com.vaticle.typeql.lang.pattern.variable.builder.Expression... args) {
+            return ceil(list(args));
         }
 
-        public static ValueConstraint.Assignment.Expression.Bracketed bracketed(ExpressionBuilder<?> nestedExpr) {
-            return new ValueConstraint.Assignment.Expression.Bracketed(nestedExpr.toExpression());
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function ceil(List<com.vaticle.typeql.lang.pattern.variable.builder.Expression> args) {
+            return function(TypeQLToken.Expression.Function.CEIL, args);
         }
 
-        public static ValueConstraint.Assignment.Expression.Constant.Boolean constant(boolean value) {
-            return new ValueConstraint.Assignment.Expression.Constant.Boolean(value);
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function round(com.vaticle.typeql.lang.pattern.variable.builder.Expression... args) {
+            return round(list(args));
         }
 
-        public static ValueConstraint.Assignment.Expression.Constant.Long constant(long value) {
-            return new ValueConstraint.Assignment.Expression.Constant.Long(value);
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function round(List<com.vaticle.typeql.lang.pattern.variable.builder.Expression> args) {
+            return function(TypeQLToken.Expression.Function.ROUND, args);
         }
 
-        public static ValueConstraint.Assignment.Expression.Constant.Double constant(double value) {
-            return new ValueConstraint.Assignment.Expression.Constant.Double(value);
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function abs(com.vaticle.typeql.lang.pattern.variable.builder.Expression... args) {
+            return abs(list(args));
         }
 
-        public static ValueConstraint.Assignment.Expression.Constant.String constant(String value) {
-            return new ValueConstraint.Assignment.Expression.Constant.String(value);
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function abs(List<com.vaticle.typeql.lang.pattern.variable.builder.Expression> args) {
+            return function(TypeQLToken.Expression.Function.ABS, args);
         }
 
-        public static ValueConstraint.Assignment.Expression.Constant.DateTime constant(LocalDateTime value) {
-            return new ValueConstraint.Assignment.Expression.Constant.DateTime(value);
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function function(TypeQLToken.Expression.Function function, List<com.vaticle.typeql.lang.pattern.variable.builder.Expression> args) {
+            return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function(function, args);
         }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Parenthesis parenthesis(com.vaticle.typeql.lang.pattern.variable.builder.Expression expression) {
+            return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Parenthesis(expression);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Boolean constant(boolean value) {
+            return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Boolean(value);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Long constant(long value) {
+            return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Long(value);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Double constant(double value) {
+            return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Double(value);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.String constant(String value) {
+            return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.String(value);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.DateTime constant(LocalDateTime value) {
+            return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.DateTime(value);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression plus(
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression b
+        ) {
+            return a.plus(b);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression minus(
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression b
+        ) {
+            return a.minus(b);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression mul(
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression b
+        ) {
+            return a.mul(b);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression div(
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression b
+        ) {
+            return a.div(b);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression mod(
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression b
+        ) {
+            return a.mod(b);
+        }
+
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression pow(
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
+                com.vaticle.typeql.lang.pattern.variable.builder.Expression b
+        ) {
+            return a.pow(b);
+        }
+
     }
 }

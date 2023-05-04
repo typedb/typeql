@@ -24,7 +24,7 @@ package com.vaticle.typeql.lang.pattern.constraint;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.common.util.Strings;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -41,6 +41,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONS
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
 import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
 import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
+import static java.util.Collections.emptySet;
 
 public abstract class Predicate<T> {
 
@@ -52,10 +53,7 @@ public abstract class Predicate<T> {
         if (predicate == null) throw TypeQLException.of(MISSING_CONSTRAINT_PREDICATE);
         else if (value == null) throw TypeQLException.of(MISSING_CONSTRAINT_VALUE);
 
-        assert !predicate.isEquality() || value instanceof Comparable
-                || value instanceof com.vaticle.typeql.lang.pattern.variable.ThingVariable<?>
-                || value instanceof com.vaticle.typeql.lang.pattern.variable.ValueVariable
-                || value instanceof ValueConstraint.Assignment.Expression;
+        assert !predicate.isEquality() || value instanceof Comparable || value instanceof UnboundVariable;
         assert !predicate.isSubString() || value instanceof java.lang.String;
 
         this.predicate = predicate;
@@ -63,8 +61,8 @@ public abstract class Predicate<T> {
         this.hash = Objects.hash(Predicate.class, this.predicate, this.value);
     }
 
-    public Set<BoundVariable> variables() {
-        return set();
+    public Set<UnboundVariable> variables() {
+        return emptySet();
     }
 
     public TypeQLToken.Predicate predicate() {
@@ -95,11 +93,7 @@ public abstract class Predicate<T> {
         return false;
     }
 
-    public boolean isThingVariable() {
-        return false;
-    }
-
-    public boolean isValueVariable() {
+    public boolean isVariable() {
         return false;
     }
 
@@ -123,17 +117,13 @@ public abstract class Predicate<T> {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Predicate.DateTime.class)));
     }
 
-    public Predicate.ThingVariable asThingVariable() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Predicate.ThingVariable.class)));
-    }
-
-    public ValueVariable asValueVariable() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ValueVariable.class)));
+    public Predicate.Variable asVariable() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
     }
 
     @Override
     public java.lang.String toString() {
-        if (predicate.equals(EQ) && !isThingVariable() && !isValueVariable()) return Strings.valueToString(value);
+        if (predicate.equals(EQ) && !isVariable()) return Strings.valueToString(value);
         else return predicate.toString() + SPACE + Strings.valueToString(value);
     }
 
@@ -257,47 +247,26 @@ public abstract class Predicate<T> {
         }
     }
 
-    public static class ThingVariable extends Predicate<com.vaticle.typeql.lang.pattern.variable.ThingVariable<?>> {
+    public static class Variable extends Predicate<UnboundVariable> {
 
-        public ThingVariable(TypeQLToken.Predicate.Equality predicate, com.vaticle.typeql.lang.pattern.variable.ThingVariable<?> variable) {
+        public Variable(TypeQLToken.Predicate.Equality predicate, UnboundVariable variable) {
             super(predicate, variable);
         }
 
         @Override
-        public Set<BoundVariable> variables() {
+        public Set<UnboundVariable> variables() {
             return set(value());
         }
 
         @Override
-        public boolean isThingVariable() {
+        public boolean isVariable() {
             return true;
         }
 
         @Override
-        public ThingVariable asThingVariable() {
+        public Variable asVariable() {
             return this;
         }
     }
 
-    public static class ValueVariable extends Predicate<com.vaticle.typeql.lang.pattern.variable.ValueVariable> {
-
-        public ValueVariable(TypeQLToken.Predicate.Equality predicate, com.vaticle.typeql.lang.pattern.variable.ValueVariable variable) {
-            super(predicate, variable);
-        }
-
-        @Override
-        public Set<BoundVariable> variables() {
-            return set(value());
-        }
-
-        @Override
-        public boolean isValueVariable() {
-            return true;
-        }
-
-        @Override
-        public ValueVariable asValueVariable() {
-            return this;
-        }
-    }
 }

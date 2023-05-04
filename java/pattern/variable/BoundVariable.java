@@ -24,6 +24,8 @@ package com.vaticle.typeql.lang.pattern.variable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunctable;
 import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.constraint.Constraint;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -38,6 +40,12 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
     BoundVariable(Reference reference) {
         super(reference);
     }
+
+    public Stream<BoundVariable> variables() {
+        return constraints().stream().flatMap(constraint -> constraint.variables().stream());
+    }
+
+    public abstract List<? extends Constraint<?>> constraints();
 
     @Override
     public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
@@ -58,16 +66,32 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
 
     public abstract UnboundVariable toUnbound();
 
+    public boolean isConcept() {
+        return false;
+    }
+
     public ConceptVariable asConcept() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptVariable.class)));
+    }
+
+    public boolean isType() {
+        return false;
     }
 
     public TypeVariable asType() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
     }
 
+    public boolean isThing() {
+        return false;
+    }
+
     public ThingVariable<?> asThing() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
+    }
+
+    public boolean isValue() {
+        return false;
     }
 
     public ValueVariable asValue() {
@@ -75,13 +99,19 @@ public abstract class BoundVariable extends Variable implements Conjunctable {
     }
 
     @Override
-    public BoundVariable normalise() { return this; }
+    public BoundVariable normalise() {
+        return this;
+    }
 
     @Override
-    public boolean isVariable() { return true; }
+    public boolean isVariable() {
+        return true;
+    }
 
     @Override
-    public BoundVariable asVariable() { return this; }
+    public BoundVariable asVariable() {
+        return this;
+    }
 
     @Override
     public List<? extends Pattern> patterns() {
