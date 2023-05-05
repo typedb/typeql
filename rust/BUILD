@@ -27,11 +27,6 @@ load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
 load("//:deployment.bzl", deployment_github = "deployment")
 
-exports_files(
-    ["VERSION", "RELEASE_TEMPLATE.md", "README.md"],
-    visibility = ["//visibility:public"]
-)
-
 rust_library(
     name = "typeql_lang",
     srcs = glob([
@@ -80,7 +75,7 @@ deploy_crate(
 
 deploy_github(
     name = "deploy_github",
-    release_description = "//:RELEASE_TEMPLATE.md",
+    release_description = "//:LATEST_RELEASE_NOTES.md",
     title = "TypeQL",
     title_append_version = True,
     organisation = deployment_github['github.organisation'],
@@ -94,7 +89,7 @@ checkstyle_test(
         "*",
         "**/*",
     ]),
-    exclude = ["LICENSE", "README.md"],
+    exclude = ["LICENSE"],
     license_type = "apache-header",
 )
 checkstyle_test(

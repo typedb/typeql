@@ -25,13 +25,13 @@ load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("//:deployment.bzl", "deployment")
 
 exports_files(
-    ["VERSION", "RELEASE_TEMPLATE.md", "requirements.txt", "README.md"],
+    ["VERSION", "LATEST_RELEASE_NOTES.md", "requirements.txt", "README.md"],
     visibility = ["//visibility:public"]
 )
 
 deploy_github(
     name = "deploy-github",
-    release_description = "//:RELEASE_TEMPLATE.md",
+    release_description = "//:LATEST_RELEASE_NOTES.md",
     title = "TypeQL",
     title_append_version = True,
     organisation = deployment['github.organisation'],

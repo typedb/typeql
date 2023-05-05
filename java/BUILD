@@ -29,11 +29,6 @@ load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_dep
 load("//:deployment.bzl", github_deployment = "deployment")
 
 
-exports_files(
-    ["VERSION", "RELEASE_TEMPLATE.md"],
-    visibility = ["//visibility:public"]
-)
-
 java_library(
     name = "typeql-lang",
     srcs = ["TypeQL.java"],
@@ -70,7 +65,7 @@ deploy_maven(
 
 deploy_github(
     name = "deploy-github",
-    release_description = "//:RELEASE_TEMPLATE.md",
+    release_description = "//:LATEST_RELEASE_NOTES.md",
     title = "TypeQL language library for Java",
     title_append_version = True,
     organisation = github_deployment['github.organisation'],
