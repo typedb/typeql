@@ -271,7 +271,10 @@ $x has release-date < 1986-03-03T00:00,
     let expected = typeql_match!(var("x")
         .has((
             "release-date",
-            lt(NaiveDateTime::new(NaiveDate::from_ymd(1986, 3, 3), NaiveTime::from_hms(0, 0, 0)))
+            lt(NaiveDateTime::new(
+                NaiveDate::from_ymd_opt(1986, 3, 3).unwrap(),
+                NaiveTime::from_hms_opt(0, 0, 0).unwrap()
+            ))
         ))
         .has(("tmdb-vote-count", 100))
         .has(("tmdb-vote-average", lte(9.0))));
@@ -287,7 +290,10 @@ $x has release-date 1000-11-12T13:14:15;"#;
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var("x").has((
         "release-date",
-        NaiveDateTime::new(NaiveDate::from_ymd(1000, 11, 12), NaiveTime::from_hms(13, 14, 15)),
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
+            NaiveTime::from_hms_opt(13, 14, 15).unwrap()
+        ),
     )));
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -301,7 +307,10 @@ $x has release-date +12345-12-25T00:00;"#;
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var("x").has((
         "release-date",
-        NaiveDateTime::new(NaiveDate::from_ymd(12345, 12, 25), NaiveTime::from_hms(0, 0, 0)),
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(12345, 12, 25).unwrap(),
+            NaiveTime::from_hms_opt(0, 0, 0).unwrap()
+        ),
     )));
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -315,7 +324,10 @@ $x has release-date 0867-01-01T00:00;"#;
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var("x").has((
         "release-date",
-        NaiveDateTime::new(NaiveDate::from_ymd(867, 1, 1), NaiveTime::from_hms(0, 0, 0)),
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(867, 1, 1).unwrap(),
+            NaiveTime::from_hms_opt(0, 0, 0).unwrap()
+        ),
     )));
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -329,7 +341,10 @@ $x has release-date -3200-01-01T00:00;"#;
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var("x").has((
         "release-date",
-        NaiveDateTime::new(NaiveDate::from_ymd(-3200, 1, 1), NaiveTime::from_hms(0, 0, 0)),
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(-3200, 1, 1).unwrap(),
+            NaiveTime::from_hms_opt(0, 0, 0).unwrap()
+        ),
     )));
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -344,8 +359,8 @@ $x has release-date 1000-11-12T13:14:15.123;"#;
     let expected = typeql_match!(var("x").has((
         "release-date",
         NaiveDateTime::new(
-            NaiveDate::from_ymd(1000, 11, 12),
-            NaiveTime::from_hms_milli(13, 14, 15, 123),
+            NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
+            NaiveTime::from_hms_milli_opt(13, 14, 15, 123).unwrap(),
         ),
     )));
 
@@ -361,8 +376,8 @@ $x has release-date 1000-11-12T13:14:15.1;"#;
     let expected = typeql_match!(var("x").has((
         "release-date",
         NaiveDateTime::new(
-            NaiveDate::from_ymd(1000, 11, 12),
-            NaiveTime::from_hms_milli(13, 14, 15, 100),
+            NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
+            NaiveTime::from_hms_milli_opt(13, 14, 15, 100).unwrap(),
         ),
     )));
 
@@ -386,8 +401,8 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
     let validated = typeql_match!(var("x").has((
         "release-date",
         NaiveDateTime::new(
-            NaiveDate::from_ymd(1000, 11, 12),
-            NaiveTime::from_hms_nano(13, 14, 15, 123450000),
+            NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
+            NaiveTime::from_hms_nano_opt(13, 14, 15, 123450000).unwrap(),
         ),
     )))
     .validated();
