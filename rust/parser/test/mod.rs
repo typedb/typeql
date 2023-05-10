@@ -1005,8 +1005,7 @@ fn test_escape_string() {
     let query = format!(
         r#"insert
 $_ isa movie,
-    has title "{}";"#,
-        input
+    has title "{input}";"#
     );
 
     let parsed = parse_query(&query).unwrap().into_insert();
@@ -1396,8 +1395,7 @@ fn test_iid_constraint() {
     let iid = "0x0123456789abcdefdeadbeef";
     let query = format!(
         r#"match
-$x iid {};"#,
-        iid
+$x iid {iid};"#
     );
 
     let parsed = parse_query(&query).unwrap().into_match();
@@ -1410,8 +1408,7 @@ fn when_parsing_invalid_iid_throw() {
     let iid = "invalid";
     let query = format!(
         r#"match
-$x iid {};"#,
-        iid
+$x iid {iid};"#
     );
 
     let parsed = parse_query(&query);

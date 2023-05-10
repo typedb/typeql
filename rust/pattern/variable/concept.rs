@@ -68,7 +68,7 @@ impl fmt::Display for ConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)?;
         if let Some(is) = &self.is_constraint {
-            write!(f, " {}", is)?;
+            write!(f, " {is}")?;
         }
         Ok(())
     }

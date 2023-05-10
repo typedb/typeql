@@ -170,9 +170,9 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
-            Long(long) => write!(f, "{}", long),
+            Long(long) => write!(f, "{long}"),
             Double(double) => write!(f, "{}", format_double(*double)),
-            Boolean(boolean) => write!(f, "{}", boolean),
+            Boolean(boolean) => write!(f, "{boolean}"),
             String(string) => write!(f, "{}", quote(string)),
             DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
             Variable(var) => write!(f, "{}", var.reference),

@@ -158,10 +158,10 @@ impl fmt::Display for Pattern {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Pattern::*;
         match self {
-            Conjunction(conjunction) => write!(f, "{}", conjunction),
-            Disjunction(disjunction) => write!(f, "{}", disjunction),
-            Negation(negation) => write!(f, "{}", negation),
-            Variable(variable) => write!(f, "{}", variable),
+            Conjunction(conjunction) => write!(f, "{conjunction}"),
+            Disjunction(disjunction) => write!(f, "{disjunction}"),
+            Negation(negation) => write!(f, "{negation}"),
+            Variable(variable) => write!(f, "{variable}"),
         }
     }
 }
@@ -200,9 +200,9 @@ impl fmt::Display for Definable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Definable::*;
         match self {
-            RuleDeclaration(rule_declaration) => write!(f, "{}", rule_declaration),
-            RuleDefinition(rule) => write!(f, "{}", rule),
-            TypeVariable(variable) => write!(f, "{}", variable),
+            RuleDeclaration(rule_declaration) => write!(f, "{rule_declaration}"),
+            RuleDefinition(rule) => write!(f, "{rule}"),
+            TypeVariable(variable) => write!(f, "{variable}"),
         }
     }
 }

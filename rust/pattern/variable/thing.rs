@@ -72,9 +72,9 @@ impl ThingVariable {
         }
 
         if let Some(value) = &self.value {
-            write!(f, "{}", value)?;
+            write!(f, "{value}")?;
         } else if let Some(relation) = &self.relation {
-            write!(f, "{}", relation)?;
+            write!(f, "{relation}")?;
         }
 
         Ok(())

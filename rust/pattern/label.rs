@@ -84,7 +84,7 @@ impl From<(String, String)> for Label {
 impl fmt::Display for Label {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(scope) = &self.scope {
-            write!(f, "{}:", scope)?;
+            write!(f, "{scope}:")?;
         }
         write!(f, "{}", self.name)
     }

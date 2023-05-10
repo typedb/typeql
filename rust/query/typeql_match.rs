@@ -188,7 +188,7 @@ impl fmt::Display for TypeQLMatch {
         write!(f, "{}", token::Command::Match)?;
 
         for pattern in &self.conjunction.patterns {
-            write!(f, "\n{};", pattern)?;
+            write!(f, "\n{pattern};")?;
         }
 
         if !self.modifiers.is_empty() {
@@ -272,7 +272,7 @@ pub mod sorting {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(f, "{}", self.var)?;
             if let Some(order) = &self.order {
-                write!(f, " {}", order)?;
+                write!(f, " {order}")?;
             }
             Ok(())
         }

@@ -110,10 +110,10 @@ impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Variable::*;
         match self {
-            Unbound(unbound) => write!(f, "{}", unbound),
-            Concept(concept) => write!(f, "{}", concept),
-            Thing(thing) => write!(f, "{}", thing),
-            Type(type_) => write!(f, "{}", type_),
+            Unbound(unbound) => write!(f, "{unbound}"),
+            Concept(concept) => write!(f, "{concept}"),
+            Thing(thing) => write!(f, "{thing}"),
+            Type(type_) => write!(f, "{type_}"),
         }
     }
 }

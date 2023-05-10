@@ -89,7 +89,7 @@ fn expect_insert_in_scope_of_match(
 impl fmt::Display for TypeQLInsert {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(match_query) = &self.match_query {
-            writeln!(f, "{}", match_query)?;
+            writeln!(f, "{match_query}")?;
         }
 
         writeln!(f, "{}", token::Command::Insert)?;
