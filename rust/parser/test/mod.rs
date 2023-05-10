@@ -1062,7 +1062,7 @@ rule a-rule: when {
     $x has is_interesting true;
 };"#;
 
-    let parsed = parse_query(&query).unwrap().into_define();
+    let parsed = parse_query(query).unwrap().into_define();
     let expected = typeql_define!(rule("a-rule")
         .when(and!(
             var("x").isa("person"),
