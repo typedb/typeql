@@ -23,6 +23,8 @@
 #[cfg(test)]
 mod test;
 
+use std::collections::HashSet;
+
 use chrono::{NaiveDate, NaiveDateTime};
 use pest::Parser;
 use pest_derive::Parser;
@@ -37,12 +39,12 @@ use crate::{
         Result,
     },
     pattern::{
-        ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction,
-        HasConstraint, IsKeyAttribute, IsaConstraint, Label, Negation, OwnsConstraint, Pattern,
-        PlaysConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
-        RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable,
-        ThingVariableBuilder, Type, TypeConstrainable, TypeVariable, TypeVariableBuilder,
-        UnboundVariable, Value, ValueConstraint, Variable,
+        Annotation, ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction,
+        HasConstraint, IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint,
+        RelatesConstraint, RelationConstraint, RolePlayerConstraint, RuleDeclaration,
+        RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
+        Type, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable, Value,
+        ValueConstraint, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert,
@@ -483,13 +485,14 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
             match keyword.as_rule() {
                 Rule::ABSTRACT => var_type.abstract_(),
                 Rule::OWNS => {
-                    let type_ = visit_type(constraint.consume_expected(Rule::type_));
-                    let overridden = constraint
-                        .consume_if_matches(Rule::AS)
-                        .and_then(|_| Some(visit_type(constraint.consume_expected(Rule::type_))));
-                    let is_key =
-                        IsKeyAttribute::from(constraint.consume_if_matches(Rule::IS_KEY).is_some());
-                    var_type.constrain_owns(OwnsConstraint::from((type_, overridden, is_key)))
+                    let type_ =
+                        visit_type(constraint.consume_expected(Rule::type_)).into_type_variable();
+                    let overridden = constraint.consume_if_matches(Rule::AS).map(|_| {
+                        visit_type(constraint.consume_expected(Rule::type_)).into_type_variable()
+                    });
+                    let annotations =
+                        visit_annotations_owns(constraint.consume_expected(Rule::annotations_owns));
+                    var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
                 }
                 Rule::PLAYS => {
                     let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped));
@@ -523,6 +526,16 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
         });
 
     var_type
+}
+
+fn visit_annotations_owns(tree: SyntaxTree) -> HashSet<Annotation> {
+    tree.into_children()
+        .map(|annotation| match annotation.as_rule() {
+            Rule::ANNOTATION_KEY => Annotation::Key,
+            Rule::ANNOTATION_UNIQUE => Annotation::Unique,
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar(annotation.to_string())),
+        })
+        .collect()
 }
 
 fn visit_variable_things(tree: SyntaxTree) -> Vec<ThingVariable> {

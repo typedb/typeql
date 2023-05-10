@@ -33,8 +33,8 @@ use crate::{
     },
     gte, lt, lte, not, or, parse_pattern, parse_queries, parse_query,
     pattern::{
-        ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
-        ThingVariableBuilder, TypeVariableBuilder, KEY,
+        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
+        ThingVariableBuilder, TypeVariableBuilder,
     },
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
@@ -1204,7 +1204,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").owns(("name", KEY))).get(["x"]);
+    let expected = typeql_match!(var("x").owns(("name", Key))).get(["x"]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 

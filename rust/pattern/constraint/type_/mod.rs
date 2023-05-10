@@ -31,7 +31,7 @@ mod value_type;
 
 pub use abstract_::AbstractConstraint;
 pub use label::LabelConstraint;
-pub use owns::{IsKeyAttribute, OwnsConstraint, KEY};
+pub use owns::{Annotation, OwnsConstraint};
 pub use plays::PlaysConstraint;
 pub use relates::RelatesConstraint;
 pub use sub::SubConstraint;

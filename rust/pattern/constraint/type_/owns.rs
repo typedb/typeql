@@ -20,7 +20,7 @@
  *
  */
 
-use std::{fmt, iter};
+use std::{collections::HashSet, fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
@@ -28,29 +28,19 @@ use crate::{
     Label,
 };
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum IsKeyAttribute {
-    Yes,
-    No,
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
+pub enum Annotation {
+    Key,
+    Unique,
 }
 
-impl From<bool> for IsKeyAttribute {
-    fn from(is_key: bool) -> Self {
-        match is_key {
-            true => IsKeyAttribute::Yes,
-            false => IsKeyAttribute::No,
-        }
-    }
-}
-
-pub const KEY: IsKeyAttribute = IsKeyAttribute::Yes;
-
-impl fmt::Display for IsKeyAttribute {
+impl fmt::Display for Annotation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if *self == IsKeyAttribute::Yes {
-            write!(f, " {}", token::Constraint::IsKey)?;
+        write!(f, "@")?;
+        match self {
+            Self::Key => write!(f, "{}", token::Annotation::Key),
+            Self::Unique => write!(f, "{}", token::Annotation::Unique),
         }
-        Ok(())
     }
 }
 
@@ -58,16 +48,16 @@ impl fmt::Display for IsKeyAttribute {
 pub struct OwnsConstraint {
     pub attribute_type: TypeVariable,
     pub overridden_attribute_type: Option<TypeVariable>,
-    pub is_key: IsKeyAttribute,
+    pub annotations: HashSet<Annotation>,
 }
 
 impl OwnsConstraint {
-    fn new(
+    pub(crate) fn new(
         attribute_type: TypeVariable,
         overridden_attribute_type: Option<TypeVariable>,
-        is_key: IsKeyAttribute,
+        annotations: HashSet<Annotation>,
     ) -> Self {
-        OwnsConstraint { attribute_type, overridden_attribute_type, is_key }
+        OwnsConstraint { attribute_type, overridden_attribute_type, annotations }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -89,43 +79,19 @@ impl Validatable for OwnsConstraint {
 
 impl From<&str> for OwnsConstraint {
     fn from(attribute_type: &str) -> Self {
-        OwnsConstraint::from((attribute_type, IsKeyAttribute::No))
+        OwnsConstraint::from(Label::from(attribute_type))
     }
 }
 
-impl From<(&str, IsKeyAttribute)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (&str, IsKeyAttribute)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), is_key))
+impl From<String> for OwnsConstraint {
+    fn from(attribute_type: String) -> Self {
+        OwnsConstraint::from(Label::from(attribute_type))
     }
 }
 
-impl From<(String, IsKeyAttribute)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (String, IsKeyAttribute)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), is_key))
-    }
-}
-
-impl From<(Label, IsKeyAttribute)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (Label, IsKeyAttribute)) -> Self {
-        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), is_key))
-    }
-}
-
-impl From<(UnboundVariable, IsKeyAttribute)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (UnboundVariable, IsKeyAttribute)) -> Self {
-        OwnsConstraint::from((attribute_type.into_type(), is_key))
-    }
-}
-
-impl From<TypeVariable> for OwnsConstraint {
-    fn from(attribute_type: TypeVariable) -> Self {
-        OwnsConstraint::new(attribute_type, None, IsKeyAttribute::No)
-    }
-}
-
-impl From<(TypeVariable, IsKeyAttribute)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (TypeVariable, IsKeyAttribute)) -> Self {
-        OwnsConstraint::new(attribute_type, None, is_key)
+impl From<Label> for OwnsConstraint {
+    fn from(attribute_type: Label) -> Self {
+        OwnsConstraint::from(UnboundVariable::hidden().type_(attribute_type))
     }
 }
 
@@ -135,67 +101,180 @@ impl From<Type> for OwnsConstraint {
     }
 }
 
-impl From<(Type, IsKeyAttribute)> for OwnsConstraint {
-    fn from((attribute_type, is_key): (Type, IsKeyAttribute)) -> Self {
-        OwnsConstraint::new(attribute_type.into_type_variable(), None, is_key)
+impl From<UnboundVariable> for OwnsConstraint {
+    fn from(attribute_type: UnboundVariable) -> Self {
+        OwnsConstraint::from(attribute_type.into_type())
+    }
+}
+
+impl From<TypeVariable> for OwnsConstraint {
+    fn from(attribute_type: TypeVariable) -> Self {
+        OwnsConstraint::new(attribute_type, None, HashSet::new())
     }
 }
 
 impl From<(&str, &str)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (&str, &str)) -> Self {
-        OwnsConstraint::from((attribute_type, overridden_attribute_type, IsKeyAttribute::No))
+        OwnsConstraint::from((Label::from(attribute_type), Label::from(overridden_attribute_type)))
     }
 }
 
-impl From<(&str, &str, IsKeyAttribute)> for OwnsConstraint {
-    fn from(
-        (attribute_type, overridden_attribute_type, is_key): (&str, &str, IsKeyAttribute),
-    ) -> Self {
+impl From<(String, String)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (String, String)) -> Self {
+        OwnsConstraint::from((Label::from(attribute_type), Label::from(overridden_attribute_type)))
+    }
+}
+
+impl From<(Label, Label)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (Label, Label)) -> Self {
         OwnsConstraint::from((
-            Label::from(attribute_type),
-            Label::from(overridden_attribute_type),
-            is_key,
+            UnboundVariable::hidden().type_(attribute_type),
+            UnboundVariable::hidden().type_(overridden_attribute_type),
         ))
     }
 }
 
-impl From<(Label, Label, IsKeyAttribute)> for OwnsConstraint {
+impl From<(Type, Type)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (Type, Type)) -> Self {
+        OwnsConstraint::from((
+            attribute_type.into_type_variable(),
+            overridden_attribute_type.into_type_variable(),
+        ))
+    }
+}
+
+impl From<(UnboundVariable, UnboundVariable)> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, is_key): (Label, Label, IsKeyAttribute),
+        (attribute_type, overridden_attribute_type): (UnboundVariable, UnboundVariable),
     ) -> Self {
-        OwnsConstraint::new(
+        OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type()))
+    }
+}
+
+impl From<(TypeVariable, TypeVariable)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (TypeVariable, TypeVariable)) -> Self {
+        OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), HashSet::new())
+    }
+}
+
+impl From<(&str, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (&str, Annotation)) -> Self {
+        OwnsConstraint::from((Label::from(attribute_type), annotation))
+    }
+}
+
+impl From<(String, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (String, Annotation)) -> Self {
+        OwnsConstraint::from((Label::from(attribute_type), annotation))
+    }
+}
+
+impl From<(Label, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (Label, Annotation)) -> Self {
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), annotation))
+    }
+}
+
+impl From<(Type, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (Type, Annotation)) -> Self {
+        OwnsConstraint::from((attribute_type.into_type_variable(), annotation))
+    }
+}
+
+impl From<(UnboundVariable, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (UnboundVariable, Annotation)) -> Self {
+        OwnsConstraint::from((attribute_type.into_type(), annotation))
+    }
+}
+
+impl From<(TypeVariable, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (TypeVariable, Annotation)) -> Self {
+        OwnsConstraint::new(attribute_type, None, [annotation].into())
+    }
+}
+
+impl From<(&str, &str, Annotation)> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotation): (&str, &str, Annotation),
+    ) -> Self {
+        OwnsConstraint::from((
+            Label::from(attribute_type),
+            Label::from(overridden_attribute_type),
+            annotation,
+        ))
+    }
+}
+
+impl From<(String, String, Annotation)> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotation): (String, String, Annotation),
+    ) -> Self {
+        OwnsConstraint::from((
+            Label::from(attribute_type),
+            Label::from(overridden_attribute_type),
+            annotation,
+        ))
+    }
+}
+
+impl From<(Label, Label, Annotation)> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotation): (Label, Label, Annotation),
+    ) -> Self {
+        OwnsConstraint::from((
             UnboundVariable::hidden().type_(attribute_type),
-            Some(UnboundVariable::hidden().type_(overridden_attribute_type)),
-            is_key,
-        )
+            UnboundVariable::hidden().type_(overridden_attribute_type),
+            annotation,
+        ))
     }
 }
 
-impl From<(Type, Option<Type>)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (Type, Option<Type>)) -> Self {
-        OwnsConstraint::new(
-            attribute_type.into_type_variable(),
-            overridden_attribute_type.map(Type::into_type_variable),
-            IsKeyAttribute::No,
-        )
-    }
-}
-
-impl From<(Type, Option<Type>, IsKeyAttribute)> for OwnsConstraint {
+impl From<(Type, Type, Annotation)> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, is_key): (Type, Option<Type>, IsKeyAttribute),
+        (attribute_type, overridden_attribute_type, annotation): (Type, Type, Annotation),
     ) -> Self {
-        OwnsConstraint::new(
+        OwnsConstraint::from((
             attribute_type.into_type_variable(),
-            overridden_attribute_type.map(Type::into_type_variable),
-            is_key,
-        )
+            overridden_attribute_type.into_type_variable(),
+            annotation,
+        ))
+    }
+}
+
+impl From<(UnboundVariable, UnboundVariable, Annotation)> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotation): (
+            UnboundVariable,
+            UnboundVariable,
+            Annotation,
+        ),
+    ) -> Self {
+        OwnsConstraint::from((
+            attribute_type.into_type(),
+            overridden_attribute_type.into_type(),
+            annotation,
+        ))
+    }
+}
+
+impl From<(TypeVariable, TypeVariable, Annotation)> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotation): (
+            TypeVariable,
+            TypeVariable,
+            Annotation,
+        ),
+    ) -> Self {
+        OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), [annotation].into())
     }
 }
 
 impl fmt::Display for OwnsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}{}", token::Constraint::Owns, self.attribute_type, self.is_key)?;
+        write!(f, "{} {}", token::Constraint::Owns, self.attribute_type)?;
+        for annotation in &self.annotations {
+            write!(f, " {}", annotation)?;
+        }
         if let Some(overridden) = &self.overridden_attribute_type {
             write!(f, " {} {}", token::Constraint::As, overridden)?;
         }

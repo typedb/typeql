@@ -30,8 +30,8 @@ pub use thing::{
     ValueConstraint,
 };
 pub use type_::{
-    AbstractConstraint, IsKeyAttribute, LabelConstraint, OwnsConstraint, PlaysConstraint,
-    RegexConstraint, RelatesConstraint, SubConstraint, ValueTypeConstraint, KEY,
+    AbstractConstraint, Annotation, LabelConstraint, OwnsConstraint, PlaysConstraint,
+    RegexConstraint, RelatesConstraint, SubConstraint, ValueTypeConstraint,
 };
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
