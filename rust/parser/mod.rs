@@ -498,7 +498,7 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
                     let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped));
                     let overridden = constraint
                         .consume_if_matches(Rule::AS)
-                        .and_then(|_| Some(visit_type(constraint.consume_expected(Rule::type_))));
+                        .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
                     var_type.constrain_plays(PlaysConstraint::from((type_, overridden)))
                 }
                 Rule::REGEX => {
@@ -508,7 +508,7 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
                     let type_ = visit_type(constraint.consume_expected(Rule::type_));
                     let overridden = constraint
                         .consume_if_matches(Rule::AS)
-                        .and_then(|_| Some(visit_type(constraint.consume_expected(Rule::type_))));
+                        .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
                     var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
                 }
                 Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
