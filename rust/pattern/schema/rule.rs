@@ -25,7 +25,6 @@ use std::{fmt, iter};
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        string::indent,
         token,
         validatable::Validatable,
         Result,
