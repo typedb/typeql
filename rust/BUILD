@@ -89,9 +89,10 @@ checkstyle_test(
         "*",
         "**/*",
     ]),
-    exclude = ["LICENSE"],
+    exclude = ["LICENSE", "README.md"],
     license_type = "apache-header",
 )
+
 checkstyle_test(
     name = "checkstyle-license",
     include = ["LICENSE"],
