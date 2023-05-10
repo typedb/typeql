@@ -108,7 +108,7 @@ impl Validatable for Value {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
-                    Err(TypeQLError::InvalidConstraintDatetimePrecision(date_time.clone()))?
+                    Err(TypeQLError::InvalidConstraintDatetimePrecision(*date_time))?
                 }
                 Ok(())
             }
