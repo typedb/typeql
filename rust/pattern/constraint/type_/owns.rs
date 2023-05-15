@@ -159,31 +159,31 @@ impl From<(TypeVariable, TypeVariable)> for OwnsConstraint {
 
 impl From<(&str, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (&str, Annotation)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), annotation))
+        OwnsConstraint::from((Label::from(attribute_type), [annotation]))
     }
 }
 
 impl From<(String, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (String, Annotation)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), annotation))
+        OwnsConstraint::from((Label::from(attribute_type), [annotation]))
     }
 }
 
 impl From<(Label, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (Label, Annotation)) -> Self {
-        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), annotation))
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), [annotation]))
     }
 }
 
 impl From<(Type, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (Type, Annotation)) -> Self {
-        OwnsConstraint::from((attribute_type.into_type_variable(), annotation))
+        OwnsConstraint::from((attribute_type.into_type_variable(), [annotation]))
     }
 }
 
 impl From<(UnboundVariable, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (UnboundVariable, Annotation)) -> Self {
-        OwnsConstraint::from((attribute_type.into_type(), annotation))
+        OwnsConstraint::from((attribute_type.into_type(), [annotation]))
     }
 }
 
@@ -200,7 +200,7 @@ impl From<(&str, &str, Annotation)> for OwnsConstraint {
         OwnsConstraint::from((
             Label::from(attribute_type),
             Label::from(overridden_attribute_type),
-            annotation,
+            [annotation],
         ))
     }
 }
@@ -212,7 +212,7 @@ impl From<(String, String, Annotation)> for OwnsConstraint {
         OwnsConstraint::from((
             Label::from(attribute_type),
             Label::from(overridden_attribute_type),
-            annotation,
+            [annotation],
         ))
     }
 }
@@ -224,7 +224,7 @@ impl From<(Label, Label, Annotation)> for OwnsConstraint {
         OwnsConstraint::from((
             UnboundVariable::hidden().type_(attribute_type),
             UnboundVariable::hidden().type_(overridden_attribute_type),
-            annotation,
+            [annotation],
         ))
     }
 }
@@ -236,7 +236,7 @@ impl From<(Type, Type, Annotation)> for OwnsConstraint {
         OwnsConstraint::from((
             attribute_type.into_type_variable(),
             overridden_attribute_type.into_type_variable(),
-            annotation,
+            [annotation],
         ))
     }
 }
@@ -252,7 +252,7 @@ impl From<(UnboundVariable, UnboundVariable, Annotation)> for OwnsConstraint {
         OwnsConstraint::from((
             attribute_type.into_type(),
             overridden_attribute_type.into_type(),
-            annotation,
+            [annotation],
         ))
     }
 }
@@ -266,6 +266,118 @@ impl From<(TypeVariable, TypeVariable, Annotation)> for OwnsConstraint {
         ),
     ) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), [annotation].into())
+    }
+}
+
+impl<const N: usize> From<(&str, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (&str, [Annotation; N])) -> Self {
+        OwnsConstraint::from((Label::from(attribute_type), annotations))
+    }
+}
+
+impl<const N: usize> From<(String, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (String, [Annotation; N])) -> Self {
+        OwnsConstraint::from((Label::from(attribute_type), annotations))
+    }
+}
+
+impl<const N: usize> From<(Label, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (Label, [Annotation; N])) -> Self {
+        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), annotations))
+    }
+}
+
+impl<const N: usize> From<(Type, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (Type, [Annotation; N])) -> Self {
+        OwnsConstraint::from((attribute_type.into_type_variable(), annotations))
+    }
+}
+
+impl<const N: usize> From<(UnboundVariable, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (UnboundVariable, [Annotation; N])) -> Self {
+        OwnsConstraint::from((attribute_type.into_type(), annotations))
+    }
+}
+
+impl<const N: usize> From<(TypeVariable, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (TypeVariable, [Annotation; N])) -> Self {
+        OwnsConstraint::new(attribute_type, None, annotations.into())
+    }
+}
+
+impl<const N: usize> From<(&str, &str, [Annotation; N])> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotations): (&str, &str, [Annotation; N]),
+    ) -> Self {
+        OwnsConstraint::from((
+            Label::from(attribute_type),
+            Label::from(overridden_attribute_type),
+            annotations,
+        ))
+    }
+}
+
+impl<const N: usize> From<(String, String, [Annotation; N])> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotations): (String, String, [Annotation; N]),
+    ) -> Self {
+        OwnsConstraint::from((
+            Label::from(attribute_type),
+            Label::from(overridden_attribute_type),
+            annotations,
+        ))
+    }
+}
+
+impl<const N: usize> From<(Label, Label, [Annotation; N])> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotations): (Label, Label, [Annotation; N]),
+    ) -> Self {
+        OwnsConstraint::from((
+            UnboundVariable::hidden().type_(attribute_type),
+            UnboundVariable::hidden().type_(overridden_attribute_type),
+            annotations,
+        ))
+    }
+}
+
+impl<const N: usize> From<(Type, Type, [Annotation; N])> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotations): (Type, Type, [Annotation; N]),
+    ) -> Self {
+        OwnsConstraint::from((
+            attribute_type.into_type_variable(),
+            overridden_attribute_type.into_type_variable(),
+            annotations,
+        ))
+    }
+}
+
+impl<const N: usize> From<(UnboundVariable, UnboundVariable, [Annotation; N])> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotations): (
+            UnboundVariable,
+            UnboundVariable,
+            [Annotation; N],
+        ),
+    ) -> Self {
+        OwnsConstraint::from((
+            attribute_type.into_type(),
+            overridden_attribute_type.into_type(),
+            annotations,
+        ))
+    }
+}
+
+impl<const N: usize> From<(TypeVariable, TypeVariable, [Annotation; N])> for OwnsConstraint {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotations): (
+            TypeVariable,
+            TypeVariable,
+            [Annotation; N],
+        ),
+    ) -> Self {
+        OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), annotations.into())
     }
 }
 
