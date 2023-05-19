@@ -52,7 +52,7 @@ public class UnboundValueVariable extends UnboundVariable implements
         return this;
     }
 
-    public BoundVariable toBound() {
+    public ValueVariable toBound() {
         return new ValueVariable(reference.asName().asValue());
     }
 
