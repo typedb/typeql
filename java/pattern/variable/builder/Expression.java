@@ -402,16 +402,16 @@ public interface Expression {
     }
 
     class Parenthesis implements Expression {
-        private final Expression nestedExpression;
+        private final Expression inner;
         private final int hash;
 
-        public Parenthesis(Expression nestedExpression) {
-            this.nestedExpression = nestedExpression;
-            this.hash = Objects.hash(Parenthesis.class, nestedExpression);
+        public Parenthesis(Expression inner) {
+            this.inner = inner;
+            this.hash = Objects.hash(Parenthesis.class, inner);
         }
 
-        public Expression nestedExpression() {
-            return nestedExpression;
+        public Expression inner() {
+            return inner;
         }
 
         @Override
@@ -426,12 +426,12 @@ public interface Expression {
 
         @Override
         public void collectVariables(Set<UnboundVariable> collector) {
-            nestedExpression.collectVariables(collector);
+            inner.collectVariables(collector);
         }
 
         @Override
         public String toString() {
-            return PARAN_OPEN.toString() + SPACE + nestedExpression.toString() + SPACE + PARAN_CLOSE;
+            return PARAN_OPEN.toString() + SPACE + inner.toString() + SPACE + PARAN_CLOSE;
         }
 
         @Override
@@ -439,7 +439,7 @@ public interface Expression {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Parenthesis that = (Parenthesis) o;
-            return this.nestedExpression.equals(that.nestedExpression);
+            return this.inner.equals(that.inner);
         }
 
         @Override
