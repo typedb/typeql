@@ -437,12 +437,12 @@ public class TypeQLToken {
 
     public static class Expression {
         public enum Operation {
-            POW("^"),
-            MUL("*"),
-            DIV("/"),
-            MOD("%"),
-            PLUS("+"),
-            MINUS("-");
+            ADD("+"),
+            SUBTRACT("-"),
+            MULTIPLY("*"),
+            DIVIDE("/"),
+            MODULO("%"),
+            POWER("^");
 
             private final String symbol;
 

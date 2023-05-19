@@ -751,18 +751,18 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Expression visitExpression(TypeQLParser.ExpressionContext ctx) {
-        if (ctx.POW() != null) {
-            return new Operation(TypeQLToken.Expression.Operation.POW, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
-        } else if (ctx.DIV() != null) {
-            return new Operation(TypeQLToken.Expression.Operation.DIV, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
-        } else if (ctx.MUL() != null) {
-            return new Operation(TypeQLToken.Expression.Operation.MUL, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
-        } else if (ctx.MOD() != null) {
-            return new Operation(TypeQLToken.Expression.Operation.MOD, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
-        } else if (ctx.PLUS() != null) {
-            return new Operation(TypeQLToken.Expression.Operation.PLUS, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
-        } else if (ctx.MINUS() != null) {
-            return new Operation(TypeQLToken.Expression.Operation.MINUS, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
+        if (ctx.ADD() != null) {
+            return new Operation(TypeQLToken.Expression.Operation.ADD, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
+        } else if (ctx.SUBTRACT() != null) {
+            return new Operation(TypeQLToken.Expression.Operation.SUBTRACT, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
+        } else if (ctx.DIVIDE() != null) {
+            return new Operation(TypeQLToken.Expression.Operation.DIVIDE, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
+        } else if (ctx.MULTIPLY() != null) {
+            return new Operation(TypeQLToken.Expression.Operation.MULTIPLY, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
+        } else if (ctx.MODULO() != null) {
+            return new Operation(TypeQLToken.Expression.Operation.MODULO, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
+        } else if (ctx.POWER() != null) {
+            return new Operation(TypeQLToken.Expression.Operation.POWER, visitExpression(ctx.expression(0)), visitExpression(ctx.expression(1)));
         } else if (ctx.expression_base() != null) {
             return visitExpression_base(ctx.expression_base());
         } else {
@@ -916,12 +916,16 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Long visitSigned_long(TypeQLParser.Signed_longContext number) {
-        return (number.MINUS() != null ? -1 : 1) * getLong(number.LONG_());
+        if (number.sign() != null && number.sign().SUBTRACT() != null) {
+            return -1 * getLong(number.LONG_());
+        } else return getLong(number.LONG_());
     }
 
     @Override
     public Double visitSigned_double(TypeQLParser.Signed_doubleContext real) {
-        return (real.MINUS() != null ? -1 : 1) * getDouble(real.DOUBLE_());
+        if (real.sign() != null && real.sign().SUBTRACT() != null) {
+            return -1 * getDouble(real.DOUBLE_());
+        } else return getDouble(real.DOUBLE_());
     }
 
     private String getString(TerminalNode string) {

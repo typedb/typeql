@@ -55,11 +55,11 @@ query_match_group_agg :   query_match   match_group       match_aggregate  ;
 
 // MATCH QUERY MODIFIERS =======================================================
 
-modifiers             : ( filter ';' )? ( sort ';' )? ( offset ';' )? ( limit ';' )?;
+modifiers             :   ( filter ';' )? ( sort ';' )? ( offset ';' )? ( limit ';' )?                  ;
 
 filter                :   GET        (VAR_CONCEPT_ | VAR_VALUE_)   ( ',' (VAR_CONCEPT_ | VAR_VALUE_) )* ;
 sort                  :   SORT        var_order     ( ',' var_order    )*                               ;
-var_order             :  (VAR_CONCEPT_  | VAR_VALUE_)  ORDER_?                                          ;
+var_order             :   (VAR_CONCEPT_  | VAR_VALUE_)  ORDER_?                                         ;
 offset                :   OFFSET      LONG_                                                             ;
 limit                 :   LIMIT       LONG_                                                             ;
 
@@ -175,9 +175,9 @@ predicate_value       :   value | VAR_CONCEPT_  | VAR_VALUE_ ;
 
 // EXPRESSION CONSTRUCTS =======================================================
 
-expression                  :   <assoc=right> expression POW expression         // exponentiation is right-associative
-                            |   expression  (MUL | DIV | MOD)  expression
-                            |   expression  (PLUS  | MINUS) expression
+expression                  :   <assoc=right> expression POWER expression         // exponentiation is right-associative
+                            |   expression  (MULTIPLY | DIVIDE | MODULO)  expression
+                            |   expression  (ADD | SUBTRACT) expression
                             |   expression_base
                             ;
 expression_base             :   VAR_CONCEPT_            | VAR_VALUE_
@@ -216,8 +216,9 @@ value                 :   STRING_         |   BOOLEAN_
                       |   DATE_           |   DATETIME_
                       |   signed_long     |   signed_double   ;
 
-signed_long           :   (PLUS | MINUS)?  LONG_              ;
-signed_double         :   (PLUS | MINUS)?  DOUBLE_            ;
+signed_long           :   sign?  LONG_    ;
+signed_double         :   sign?  DOUBLE_  ;
+sign                  :   ADD             |  SUBTRACT         ;
 
 // UNRESERVED KEYWORDS =========================================================
 // Most of TypeQL syntax should not be reserved from being used as identifiers
@@ -281,16 +282,16 @@ GT              : '>'           ;   GTE             : '>='          ;
 LT              : '<'           ;   LTE             : '<='          ;
 LIKE            : 'like'        ;   CONTAINS        : 'contains'    ;
 
-// EXPRESSION KEYWORDS
+// ASSIGNMENT AND EXPRESSION KEYWORDS
 
-ASSIGN          : '='         ;
-PAREN_OPEN      : '('         ;     PAREN_CLOSE         : ')'       ;
-POW             : '^'         ;
-DIV             : '/'         ;     MUL                 : '*'       ;      MOD                 : '%'         ;
-PLUS            : '+'         ;     MINUS               : '-'       ;
+ASSIGN          : '='           ;
+ADD             : '+'           ;   SUBTRACT        : '-'           ;
+DIVIDE          : '/'           ;   MULTIPLY        : '*'           ;
+POWER           : '^'           ;   MODULO          : '%'           ;
+PAREN_OPEN      : '('           ;   PAREN_CLOSE     : ')'           ;
 
-// Incomplete list of function names usable in expressions. Use `func_name` as source of truth.
-EXPR_FUNC_NAME  :  'floor' | 'ceil' | 'round' | 'abs' ;
+// Incomplete list of function names usable in expressions. The 'func_name' rule references all function names.
+EXPR_FUNC_NAME  :  'floor' | 'ceil' | 'round' | 'abs'               ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 

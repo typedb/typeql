@@ -431,18 +431,18 @@ public class TypeQL {
             return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.DateTime(value);
         }
 
-        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression plus(
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression add(
                 com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
                 com.vaticle.typeql.lang.pattern.variable.builder.Expression b
         ) {
-            return a.plus(b);
+            return a.add(b);
         }
 
-        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression minus(
+        public static com.vaticle.typeql.lang.pattern.variable.builder.Expression sub(
                 com.vaticle.typeql.lang.pattern.variable.builder.Expression a,
                 com.vaticle.typeql.lang.pattern.variable.builder.Expression b
         ) {
-            return a.minus(b);
+            return a.sub(b);
         }
 
         public static com.vaticle.typeql.lang.pattern.variable.builder.Expression mul(

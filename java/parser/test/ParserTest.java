@@ -456,7 +456,7 @@ public class ParserTest {
                 rel("commodity", TypeQL.cVar("x")).rel("qty", TypeQL.cVar("q")).isa("order"),
                 vVar("net").assign(cVar("p").mul(cVar("q"))),
                 vVar("gross").assign(
-                        vVar("net").mul(Expression.parenthesis(Expression.constant(1.0).plus(Expression.constant(0.21))))
+                        vVar("net").mul(Expression.parenthesis(Expression.constant(1.0).add(Expression.constant(0.21))))
                 )
         );
 
@@ -473,7 +473,7 @@ public class ParserTest {
                         cVar("a")
                                 .div(cVar("b"))
                                 .mul(cVar("c"))
-                                .plus(cVar("d").pow(cVar("e").pow(cVar("f"))).div(cVar("g")))
+                                .add(cVar("d").pow(cVar("e").pow(cVar("f"))).div(cVar("g")))
                 )
         );
         assertQueryEquals(expected, parsed, query);
@@ -487,8 +487,8 @@ public class ParserTest {
         TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
         TypeQLMatch expected = match(
                 vVar("res").assign(
-                        cVar("a").plus(Expression.parenthesis(
-                                Expression.round(cVar("b").plus(vVar("c"))).plus(cVar("d"))
+                        cVar("a").add(Expression.parenthesis(
+                                Expression.round(cVar("b").add(vVar("c"))).add(cVar("d"))
                         ).mul(vVar("e")))));
         assertQueryEquals(expected, parsed, query);
     }
@@ -509,7 +509,7 @@ public class ParserTest {
                 vVar("net").assign(cVar("p").mul(cVar("q"))),
                 vVar("gross").assign(Expression.min(
                         vVar("net").mul(Expression.constant(1.21)),
-                        vVar("net").plus(Expression.constant(100.0))
+                        vVar("net").add(Expression.constant(100.0))
                 ))
         );
 
@@ -553,7 +553,7 @@ public class ParserTest {
         com.vaticle.typeql.lang.pattern.variable.builder.Expression b = cVar("r");
         TypeQLMatch expected = match(
                 cVar("x").isa("movie").has("rating", cVar("r")),
-                vVar("l").assign(a.minus(b))
+                vVar("l").assign(a.sub(b))
         ).sort(pair(vVar("l"), "desc"));
 
         assertQueryEquals(expected, parsed, query);

@@ -50,28 +50,28 @@ public interface Expression {
 
     void collectVariables(Set<UnboundVariable> collector);
 
-    default Expression.Operation plus(Expression other) {
-        return new Expression.Operation(TypeQLToken.Expression.Operation.PLUS, this, other);
+    default Expression.Operation add(Expression other) {
+        return new Expression.Operation(TypeQLToken.Expression.Operation.ADD, this, other);
     }
 
-    default Expression.Operation minus(Expression other) {
-        return new Expression.Operation(TypeQLToken.Expression.Operation.MINUS, this, other);
+    default Expression.Operation sub(Expression other) {
+        return new Expression.Operation(TypeQLToken.Expression.Operation.SUBTRACT, this, other);
     }
 
     default Expression.Operation mul(Expression other) {
-        return new Expression.Operation(TypeQLToken.Expression.Operation.MUL, this, other);
+        return new Expression.Operation(TypeQLToken.Expression.Operation.MULTIPLY, this, other);
     }
 
     default Expression.Operation div(Expression other) {
-        return new Expression.Operation(TypeQLToken.Expression.Operation.DIV, this, other);
+        return new Expression.Operation(TypeQLToken.Expression.Operation.DIVIDE, this, other);
     }
 
     default Expression.Operation mod(Expression other) {
-        return new Expression.Operation(TypeQLToken.Expression.Operation.MOD, this, other);
+        return new Expression.Operation(TypeQLToken.Expression.Operation.MODULO, this, other);
     }
 
     default Expression.Operation pow(Expression other) {
-        return new Expression.Operation(TypeQLToken.Expression.Operation.POW, this, other);
+        return new Expression.Operation(TypeQLToken.Expression.Operation.POWER, this, other);
     }
 
     default boolean isOperation() {
