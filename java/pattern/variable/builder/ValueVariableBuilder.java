@@ -24,10 +24,7 @@ package com.vaticle.typeql.lang.pattern.variable.builder;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ValueVariable;
 
-public interface ValueVariableBuilder {
-
-
-    // TODO: what about predicates?
+public interface ValueVariableBuilder extends PredicateBuilder<ValueVariable> {
 
     default ValueVariable assign(Expression expression) {
         return constrain(new ValueConstraint.Assignment(expression));

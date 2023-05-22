@@ -31,7 +31,6 @@ import java.util.Set;
 
 public class UnboundValueVariable extends UnboundVariable implements
         ValueVariableBuilder,
-        PredicateBuilder<ValueVariable>,
         Expression {
 
     UnboundValueVariable(Reference.Name.Value reference) {
