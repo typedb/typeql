@@ -163,19 +163,5 @@ public abstract class ValueConstraint extends Constraint<BoundVariable> {
         public int hashCode() {
             return hash;
         }
-
-        public abstract static class ExpressionT implements com.vaticle.typeql.lang.pattern.variable.builder.Expression {
-
-
-            @Override
-            public abstract String toString();
-
-            @Override
-            public abstract boolean equals(Object o);
-
-            @Override
-            public abstract int hashCode();
-
-        }
     }
 }

@@ -175,7 +175,7 @@ predicate_value       :   value | VAR_CONCEPT_  | VAR_VALUE_ ;
 
 // EXPRESSION CONSTRUCTS =======================================================
 
-expression                  :   <assoc=right> expression POWER expression         // exponentiation is right-associative
+expression                  :   <assoc=right> expression POWER expression       // exponentiation is right-associative
                             |   expression  (MULTIPLY | DIVIDE | MODULO)  expression
                             |   expression  (ADD | SUBTRACT) expression
                             |   expression_base
