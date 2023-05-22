@@ -303,7 +303,7 @@ impl From<&str> for Sorting {
     }
 }
 
-impl<const N: usize> From<([(&str, token::Order); N])> for Sorting {
+impl<const N: usize> From<[(&str, token::Order); N]> for Sorting {
     fn from(ordered_vars: [(&str, token::Order); N]) -> Self {
         Self::new(
             ordered_vars
