@@ -105,6 +105,8 @@ public class TypeQLSteps {
     @Given("typeql match; throws exception containing {string}")
     public void do_nothing_with_throws_exception_containing(String exception, String query) { }
 
+    @Given("typedb starts")
+    @Given("connection opens with default authentication")
     @Given("transaction commits")
     @Given("aggregate answer is not a number")
     @Given("connection has been opened")
