@@ -153,7 +153,6 @@ fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()
     } else {
         Err(TypeQLError::InvalidRuleThen(rule_label.clone(), then.clone()))?
     }
-
 }
 
 fn expect_then_bounded_by_when(then: &ThingVariable, when: &Conjunction, rule_label: &Label) -> Result<()> {
