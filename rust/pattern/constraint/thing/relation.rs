@@ -96,18 +96,13 @@ impl RolePlayerConstraint {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(
-            (self.role_type.iter().map(|r| &r.reference)).chain(iter::once(&self.player.reference)),
-        )
+        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(iter::once(&self.player.reference)))
     }
 }
 
 impl Validatable for RolePlayerConstraint {
     fn validate(&self) -> Result<()> {
-        collect_err(
-            &mut (self.role_type.iter().map(Validatable::validate))
-                .chain(iter::once(self.player.validate())),
-        )
+        collect_err(&mut (self.role_type.iter().map(Validatable::validate)).chain(iter::once(self.player.validate())))
     }
 }
 

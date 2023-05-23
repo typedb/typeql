@@ -39,17 +39,15 @@ use crate::{
         Result,
     },
     pattern::{
-        Annotation, ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction,
-        HasConstraint, IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint,
-        RelatesConstraint, RelationConstraint, RolePlayerConstraint, RuleDeclaration,
-        RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
-        Type, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable, Value,
-        ValueConstraint, Variable,
+        Annotation, ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction, HasConstraint,
+        IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint, RelatesConstraint,
+        RelationConstraint, RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable,
+        ThingVariable, ThingVariableBuilder, Type, TypeConstrainable, TypeVariable, TypeVariableBuilder,
+        UnboundVariable, Value, ValueConstraint, Variable,
     },
     query::{
-        sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert,
-        TypeQLMatch, TypeQLMatchAggregate, TypeQLMatchGroup, TypeQLMatchGroupAggregate,
-        TypeQLUndefine, TypeQLUpdate,
+        sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
+        TypeQLMatchAggregate, TypeQLMatchGroup, TypeQLMatchGroupAggregate, TypeQLUndefine, TypeQLUpdate,
     },
 };
 
@@ -137,28 +135,18 @@ pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Re
 }
 
 pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
-    visit_pattern(
-        parse_single(Rule::eof_pattern, pattern)?.into_children().consume_expected(Rule::pattern),
-    )
-    .validated()
+    visit_pattern(parse_single(Rule::eof_pattern, pattern)?.into_children().consume_expected(Rule::pattern)).validated()
 }
 
 pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
-    visit_patterns(
-        parse_single(Rule::eof_patterns, patterns)?
-            .into_children()
-            .consume_expected(Rule::eof_patterns),
-    )
-    .into_iter()
-    .map(Validatable::validated)
-    .collect()
-}
-
-pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
-    visit_definables(parse_single(Rule::eof_definables, definables)?)
+    visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::eof_patterns))
         .into_iter()
         .map(Validatable::validated)
         .collect()
+}
+
+pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
+    visit_definables(parse_single(Rule::eof_definables, definables)?).into_iter().map(Validatable::validated).collect()
 }
 
 pub(crate) fn visit_eof_variable(variable: &str) -> Result<Variable> {
@@ -186,23 +174,15 @@ fn get_regex(string: SyntaxTree) -> String {
 }
 
 fn get_long(long: SyntaxTree) -> i64 {
-    long.as_str()
-        .parse()
-        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(long.to_string())))
+    long.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(long.to_string())))
 }
 
 fn get_double(double: SyntaxTree) -> f64 {
-    double
-        .as_str()
-        .parse()
-        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(double.to_string())))
+    double.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(double.to_string())))
 }
 
 fn get_boolean(boolean: SyntaxTree) -> bool {
-    boolean
-        .as_str()
-        .parse()
-        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(boolean.to_string())))
+    boolean.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(boolean.to_string())))
 }
 
 fn get_date(date: SyntaxTree) -> NaiveDate {
@@ -285,34 +265,24 @@ fn visit_query_undefine(tree: SyntaxTree) -> TypeQLUndefine {
 fn visit_query_insert(tree: SyntaxTree) -> TypeQLInsert {
     let mut children = tree.into_children();
     match children.consume_any().as_rule() {
-        Rule::MATCH => {
-            TypeQLMatch::from_patterns(visit_patterns(children.consume_expected(Rule::patterns)))
-                .insert(visit_variable_things(
-                    children.skip_expected(Rule::INSERT).consume_expected(Rule::variable_things),
-                ))
-        }
-        Rule::INSERT => TypeQLInsert::new(visit_variable_things(
-            children.consume_expected(Rule::variable_things),
-        )),
+        Rule::MATCH => TypeQLMatch::from_patterns(visit_patterns(children.consume_expected(Rule::patterns))).insert(
+            visit_variable_things(children.skip_expected(Rule::INSERT).consume_expected(Rule::variable_things)),
+        ),
+        Rule::INSERT => TypeQLInsert::new(visit_variable_things(children.consume_expected(Rule::variable_things))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
 
 fn visit_query_delete(tree: SyntaxTree) -> TypeQLDelete {
     let mut children = tree.into_children();
-    TypeQLMatch::from_patterns(visit_patterns(
-        children.skip_expected(Rule::MATCH).consume_expected(Rule::patterns),
-    ))
-    .delete(visit_variable_things(
-        children.skip_expected(Rule::DELETE).consume_expected(Rule::variable_things),
-    ))
+    TypeQLMatch::from_patterns(visit_patterns(children.skip_expected(Rule::MATCH).consume_expected(Rule::patterns)))
+        .delete(visit_variable_things(children.skip_expected(Rule::DELETE).consume_expected(Rule::variable_things)))
 }
 
 fn visit_query_update(tree: SyntaxTree) -> TypeQLUpdate {
     let mut children = tree.into_children();
-    visit_query_delete(children.consume_expected(Rule::query_delete)).insert(visit_variable_things(
-        children.skip_expected(Rule::INSERT).consume_expected(Rule::variable_things),
-    ))
+    visit_query_delete(children.consume_expected(Rule::query_delete))
+        .insert(visit_variable_things(children.skip_expected(Rule::INSERT).consume_expected(Rule::variable_things)))
 }
 
 fn visit_query_match(tree: SyntaxTree) -> TypeQLMatch {
@@ -326,17 +296,11 @@ fn visit_query_match(tree: SyntaxTree) -> TypeQLMatch {
                 Rule::filter => match_query.filter(visit_filter(modifier)),
                 Rule::sort => match_query.sort(visit_sort(modifier)),
                 Rule::offset => match_query.offset(get_long(
-                    modifier
-                        .into_children()
-                        .skip_expected(Rule::OFFSET)
-                        .consume_expected(Rule::LONG_),
+                    modifier.into_children().skip_expected(Rule::OFFSET).consume_expected(Rule::LONG_),
                 ) as usize),
-                Rule::limit => match_query.limit(get_long(
-                    modifier
-                        .into_children()
-                        .skip_expected(Rule::LIMIT)
-                        .consume_expected(Rule::LONG_),
-                ) as usize),
+                Rule::limit => match_query
+                    .limit(get_long(modifier.into_children().skip_expected(Rule::LIMIT).consume_expected(Rule::LONG_))
+                        as usize),
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar(modifier.to_string())),
             };
         }
@@ -393,9 +357,7 @@ fn visit_var_order(tree: SyntaxTree) -> sorting::OrderedVariable {
     let mut children = tree.into_children();
     sorting::OrderedVariable {
         var: get_var(children.consume_expected(Rule::VAR_)),
-        order: children
-            .consume_if_matches(Rule::ORDER_)
-            .map(|child| token::Order::from(child.as_str())),
+        order: children.consume_if_matches(Rule::ORDER_).map(|child| token::Order::from(child.as_str())),
     }
 }
 
@@ -450,9 +412,7 @@ fn visit_pattern_disjunction(tree: SyntaxTree) -> Disjunction {
 }
 
 fn visit_pattern_negation(tree: SyntaxTree) -> Negation {
-    let mut patterns = visit_patterns(
-        tree.into_children().skip_expected(Rule::NOT).consume_expected(Rule::patterns),
-    );
+    let mut patterns = visit_patterns(tree.into_children().skip_expected(Rule::NOT).consume_expected(Rule::patterns));
     match patterns.len() {
         1 => Negation::new(patterns.pop().unwrap()),
         _ => Negation::new(Conjunction::new(patterns).into()),
@@ -477,53 +437,45 @@ fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
 
 fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
     let mut children = tree.into_children();
-    let mut var_type =
-        visit_type_any(children.consume_expected(Rule::type_any)).into_type_variable();
-    var_type =
-        children.map(SyntaxTree::into_children).fold(var_type, |var_type, mut constraint| {
-            let keyword = constraint.consume_any();
-            match keyword.as_rule() {
-                Rule::ABSTRACT => var_type.abstract_(),
-                Rule::OWNS => {
-                    let type_ =
-                        visit_type(constraint.consume_expected(Rule::type_)).into_type_variable();
-                    let overridden = constraint.consume_if_matches(Rule::AS).map(|_| {
-                        visit_type(constraint.consume_expected(Rule::type_)).into_type_variable()
-                    });
-                    let annotations =
-                        visit_annotations_owns(constraint.consume_expected(Rule::annotations_owns));
-                    var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
-                }
-                Rule::PLAYS => {
-                    let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped));
-                    let overridden = constraint
-                        .consume_if_matches(Rule::AS)
-                        .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
-                    var_type.constrain_plays(PlaysConstraint::from((type_, overridden)))
-                }
-                Rule::REGEX => {
-                    var_type.regex(get_regex(constraint.consume_expected(Rule::STRING_)))
-                }
-                Rule::RELATES => {
-                    let type_ = visit_type(constraint.consume_expected(Rule::type_));
-                    let overridden = constraint
-                        .consume_if_matches(Rule::AS)
-                        .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
-                    var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
-                }
-                Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
-                    visit_type_any(constraint.consume_expected(Rule::type_any)),
-                    matches!(keyword.into_child().as_rule(), Rule::SUBX).into(),
-                ))),
-                Rule::TYPE => {
-                    var_type.type_(visit_label_any(constraint.consume_expected(Rule::label_any)))
-                }
-                Rule::VALUE => var_type.value(token::ValueType::from(
-                    constraint.consume_expected(Rule::value_type).as_str(),
-                )),
-                _ => unreachable!("{}", TypeQLError::IllegalGrammar(constraint.to_string())),
+    let mut var_type = visit_type_any(children.consume_expected(Rule::type_any)).into_type_variable();
+    var_type = children.map(SyntaxTree::into_children).fold(var_type, |var_type, mut constraint| {
+        let keyword = constraint.consume_any();
+        match keyword.as_rule() {
+            Rule::ABSTRACT => var_type.abstract_(),
+            Rule::OWNS => {
+                let type_ = visit_type(constraint.consume_expected(Rule::type_)).into_type_variable();
+                let overridden = constraint
+                    .consume_if_matches(Rule::AS)
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_variable());
+                let annotations = visit_annotations_owns(constraint.consume_expected(Rule::annotations_owns));
+                var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
             }
-        });
+            Rule::PLAYS => {
+                let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped));
+                let overridden = constraint
+                    .consume_if_matches(Rule::AS)
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
+                var_type.constrain_plays(PlaysConstraint::from((type_, overridden)))
+            }
+            Rule::REGEX => var_type.regex(get_regex(constraint.consume_expected(Rule::STRING_))),
+            Rule::RELATES => {
+                let type_ = visit_type(constraint.consume_expected(Rule::type_));
+                let overridden = constraint
+                    .consume_if_matches(Rule::AS)
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
+                var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
+            }
+            Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
+                visit_type_any(constraint.consume_expected(Rule::type_any)),
+                matches!(keyword.into_child().as_rule(), Rule::SUBX).into(),
+            ))),
+            Rule::TYPE => var_type.type_(visit_label_any(constraint.consume_expected(Rule::label_any))),
+            Rule::VALUE => {
+                var_type.value(token::ValueType::from(constraint.consume_expected(Rule::value_type).as_str()))
+            }
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar(constraint.to_string())),
+        }
+    });
 
     var_type
 }
@@ -559,15 +511,13 @@ fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
         let keyword = children.consume_any();
         var_thing = match keyword.as_rule() {
             Rule::IID => var_thing.iid(children.consume_expected(Rule::IID_).as_str()),
-            Rule::ISA_ => var_thing
-                .constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_))),
+            Rule::ISA_ => var_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_))),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
         }
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
-        var_thing = visit_attributes(attributes)
-            .into_iter()
-            .fold(var_thing, |var_thing, has| var_thing.constrain_has(has));
+        var_thing =
+            visit_attributes(attributes).into_iter().fold(var_thing, |var_thing, has| var_thing.constrain_has(has));
     }
     var_thing
 }
@@ -585,9 +535,7 @@ fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
         relation = relation.constrain_isa(get_isa_constraint(isa, type_));
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
-        relation = visit_attributes(attributes)
-            .into_iter()
-            .fold(relation, |relation, has| relation.constrain_has(has));
+        relation = visit_attributes(attributes).into_iter().fold(relation, |relation, has| relation.constrain_has(has));
     }
 
     relation
@@ -606,9 +554,8 @@ fn visit_variable_attribute(tree: SyntaxTree) -> ThingVariable {
         attribute = attribute.constrain_isa(get_isa_constraint(isa, type_));
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
-        attribute = visit_attributes(attributes)
-            .into_iter()
-            .fold(attribute, |attribute, has| attribute.constrain_has(has));
+        attribute =
+            visit_attributes(attributes).into_iter().fold(attribute, |attribute, has| attribute.constrain_has(has));
     }
 
     attribute
@@ -629,13 +576,10 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
         Some(Rule::label) => {
             let label = children.consume_expected(Rule::label).as_str().to_owned();
             match children.peek_rule() {
-                Some(Rule::VAR_) => {
-                    HasConstraint::from((label, get_var(children.consume_expected(Rule::VAR_))))
+                Some(Rule::VAR_) => HasConstraint::from((label, get_var(children.consume_expected(Rule::VAR_)))),
+                Some(Rule::predicate) => {
+                    HasConstraint::new((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }
-                Some(Rule::predicate) => HasConstraint::new((
-                    label,
-                    visit_predicate(children.consume_expected(Rule::predicate)),
-                )),
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
             }
         }
@@ -647,10 +591,9 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
 fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
     let mut children = tree.into_children();
     match children.peek_rule() {
-        Some(Rule::value) => ValueConstraint::new(
-            token::Predicate::Eq,
-            visit_value(children.consume_expected(Rule::value)),
-        ),
+        Some(Rule::value) => {
+            ValueConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value)))
+        }
         Some(Rule::predicate_equality) => ValueConstraint::new(
             token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
             {
@@ -663,19 +606,13 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
             },
         ),
         Some(Rule::predicate_substring) => {
-            let predicate = token::Predicate::from(
-                children.consume_expected(Rule::predicate_substring).as_str(),
-            );
+            let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
             ValueConstraint::new(
                 predicate,
                 {
                     match predicate {
-                        token::Predicate::Like => {
-                            get_regex(children.consume_expected(Rule::STRING_))
-                        }
-                        token::Predicate::Contains => {
-                            get_string(children.consume_expected(Rule::STRING_))
-                        }
+                        token::Predicate::Like => get_regex(children.consume_expected(Rule::STRING_)),
+                        token::Predicate::Contains => get_string(children.consume_expected(Rule::STRING_)),
                         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
                     }
                 }
@@ -688,15 +625,9 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
 
 fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {
     let mut children = tree.into_children();
-    RuleDeclaration::new(Label::from(
-        children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str(),
-    ))
-    .when(Conjunction::new(visit_patterns(
-        children.skip_expected(Rule::WHEN).consume_expected(Rule::patterns),
-    )))
-    .then(visit_variable_thing_any(
-        children.skip_expected(Rule::THEN).consume_expected(Rule::variable_thing_any),
-    ))
+    RuleDeclaration::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
+        .when(Conjunction::new(visit_patterns(children.skip_expected(Rule::WHEN).consume_expected(Rule::patterns))))
+        .then(visit_variable_thing_any(children.skip_expected(Rule::THEN).consume_expected(Rule::variable_thing_any)))
 }
 
 fn visit_schema_rule_declaration(tree: SyntaxTree) -> RuleDeclaration {

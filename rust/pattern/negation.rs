@@ -73,8 +73,7 @@ impl Normalisable for Negation {
             Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
             Pattern::Negation(_) => panic!("{}", TypeQLError::RedundantNestedNegation()),
             Pattern::Variable(variable) => {
-                Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()])
-                    .into()
+                Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()]).into()
             }
         })
         .into()

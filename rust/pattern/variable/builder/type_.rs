@@ -23,8 +23,8 @@
 use crate::{
     common::token::ValueType,
     pattern::{
-        LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint,
-        SubConstraint, TypeVariable, ValueTypeConstraint,
+        LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, SubConstraint,
+        TypeVariable, ValueTypeConstraint,
     },
     Label,
 };

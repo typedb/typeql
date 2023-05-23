@@ -23,8 +23,8 @@
 use crate::{
     common::token::Predicate,
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint,
-        ThingVariable, Value, ValueConstraint,
+        HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint, ThingVariable, Value,
+        ValueConstraint,
     },
 };
 

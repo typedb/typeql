@@ -29,8 +29,8 @@ use crate::{
         Result,
     },
     pattern::{
-        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
-        RegexConstraint, RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
+        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint,
+        RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
     },
     write_joined,
 };

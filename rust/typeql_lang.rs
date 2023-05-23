@@ -32,8 +32,8 @@ mod util;
 pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_, var};
 use common::Result;
 use parser::{
-    visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns,
-    visit_eof_queries, visit_eof_query, visit_eof_schema_rule, visit_eof_variable,
+    visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
+    visit_eof_schema_rule, visit_eof_variable,
 };
 use pattern::{Definable, Label, Pattern, RuleDefinition, Variable};
 use query::Query;

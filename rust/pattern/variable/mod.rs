@@ -30,8 +30,8 @@ mod unbound;
 use std::{collections::HashSet, fmt};
 
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder,
-    ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
+    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
+    ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
 };
 pub use concept::ConceptVariable;
 pub use reference::{Reference, Visibility};

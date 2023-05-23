@@ -38,9 +38,10 @@ pub struct PlaysConstraint {
 impl PlaysConstraint {
     fn new(role_type: TypeVariable, overridden_role_type: Option<TypeVariable>) -> Self {
         PlaysConstraint {
-            relation_type: role_type.label.as_ref().map(|label| {
-                UnboundVariable::hidden().type_(label.label.scope.as_ref().cloned().unwrap())
-            }),
+            relation_type: role_type
+                .label
+                .as_ref()
+                .map(|label| UnboundVariable::hidden().type_(label.label.scope.as_ref().cloned().unwrap())),
             role_type,
             overridden_role_type,
         }
@@ -89,10 +90,7 @@ impl From<(String, String)> for PlaysConstraint {
 
 impl From<(String, String, String)> for PlaysConstraint {
     fn from((relation_type, role_type, overridden_role_type): (String, String, String)) -> Self {
-        PlaysConstraint::from((
-            Label::from((relation_type, role_type)),
-            Label::from(overridden_role_type),
-        ))
+        PlaysConstraint::from((Label::from((relation_type, role_type)), Label::from(overridden_role_type)))
     }
 }
 
@@ -125,10 +123,7 @@ impl From<Type> for PlaysConstraint {
 
 impl From<(Type, Option<Type>)> for PlaysConstraint {
     fn from((role_type, overridden_role_type): (Type, Option<Type>)) -> Self {
-        PlaysConstraint::new(
-            role_type.into_type_variable(),
-            overridden_role_type.map(Type::into_type_variable),
-        )
+        PlaysConstraint::new(role_type.into_type_variable(), overridden_role_type.map(Type::into_type_variable))
     }
 }
 

@@ -38,9 +38,8 @@ pub struct TypeQLUpdate {
 impl Validatable for TypeQLUpdate {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut ([expect_non_empty(&self.insert_variables), self.delete_query.validate()]
-                .into_iter())
-            .chain(self.insert_variables.iter().map(Validatable::validate)),
+            &mut ([expect_non_empty(&self.insert_variables), self.delete_query.validate()].into_iter())
+                .chain(self.insert_variables.iter().map(Validatable::validate)),
         )
     }
 }

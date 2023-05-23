@@ -92,11 +92,7 @@ impl Validatable for TypeQLMatch {
                 expect_nested_patterns_are_bounded(&self.conjunction),
                 expect_each_variable_is_bounded_by_named(self.conjunction.patterns.iter()),
                 expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
-                expect_sort_vars_are_in_scope(
-                    &self.conjunction,
-                    &self.modifiers.filter,
-                    &self.modifiers.sorting,
-                ),
+                expect_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
             ]
             .into_iter()
             .chain(self.conjunction.patterns.iter().map(|p| p.validate())),
@@ -127,19 +123,17 @@ fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<()> {
     collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
 }
 
-fn expect_each_variable_is_bounded_by_named<'a>(
-    patterns: impl Iterator<Item = &'a Pattern>,
-) -> Result<()> {
-    collect_err(&mut patterns.map(|p| match p {
-        Pattern::Variable(v) => {
-            v.references().any(|r| r.is_name()).then_some(()).ok_or_else(|| {
-                Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))
-            })
-        }
-        Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
-        Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
-        Pattern::Negation(n) => {
-            expect_each_variable_is_bounded_by_named(iter::once(n.pattern.as_ref()))
+fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item = &'a Pattern>) -> Result<()> {
+    collect_err(&mut patterns.map(|p| {
+        match p {
+            Pattern::Variable(v) => v
+                .references()
+                .any(|r| r.is_name())
+                .then_some(())
+                .ok_or_else(|| Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))),
+            Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
+            Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
+            Pattern::Negation(n) => expect_each_variable_is_bounded_by_named(iter::once(n.pattern.as_ref())),
         }
     }))
 }
@@ -173,14 +167,9 @@ fn expect_sort_vars_are_in_scope(
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())
         .unwrap_or_else(|| conjunction.named_references());
-    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(
-        |r| {
-            names_in_scope
-                .contains(&r)
-                .then_some(())
-                .ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
-        },
-    ))
+    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(|r| {
+        names_in_scope.contains(&r).then_some(()).ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
+    }))
 }
 
 impl fmt::Display for TypeQLMatch {
@@ -209,10 +198,7 @@ pub struct Modifiers {
 
 impl Modifiers {
     pub fn is_empty(&self) -> bool {
-        self.filter.is_none()
-            && self.sorting.is_none()
-            && self.limit.is_none()
-            && self.offset.is_none()
+        self.filter.is_none() && self.sorting.is_none() && self.limit.is_none() && self.offset.is_none()
     }
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
@@ -305,19 +291,13 @@ impl From<&str> for Sorting {
 
 impl<const N: usize> From<[(&str, token::Order); N]> for Sorting {
     fn from(ordered_vars: [(&str, token::Order); N]) -> Self {
-        Self::new(
-            ordered_vars
-                .map(|(name, order)| sorting::OrderedVariable::new(var(name), Some(order)))
-                .to_vec(),
-        )
+        Self::new(ordered_vars.map(|(name, order)| sorting::OrderedVariable::new(var(name), Some(order))).to_vec())
     }
 }
 
 impl From<Vec<UnboundVariable>> for Sorting {
     fn from(vars: Vec<UnboundVariable>) -> Self {
-        Self::new(
-            vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), None)).collect(),
-        )
+        Self::new(vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), None)).collect())
     }
 }
 

@@ -35,10 +35,9 @@ use std::{collections::HashSet, fmt};
 
 pub use conjunction::Conjunction;
 pub use constraint::{
-    AbstractConstraint, Annotation, HasConstraint, IIDConstraint, IsConstraint, IsExplicit,
-    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
-    RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value,
-    ValueConstraint, ValueTypeConstraint,
+    AbstractConstraint, Annotation, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsaConstraint,
+    LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, RelationConstraint,
+    RolePlayerConstraint, SubConstraint, Value, ValueConstraint, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
 pub use label::{Label, Type};
@@ -46,10 +45,9 @@ pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
-    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference,
-    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable,
-    ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable,
-    Variable, Visibility,
+    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference, RelationConstrainable,
+    RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable,
+    TypeVariableBuilder, UnboundVariable, Variable, Visibility,
 };
 
 use crate::{

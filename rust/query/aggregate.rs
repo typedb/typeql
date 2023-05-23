@@ -61,29 +61,19 @@ impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
         collect_err(
             &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
                 .into_iter()
-                .chain(
-                    self.var
-                        .iter()
-                        .map(|v| expect_variable_in_scope(v, self.query.named_references())),
-                ),
+                .chain(self.var.iter().map(|v| expect_variable_in_scope(v, self.query.named_references()))),
         )
     }
 }
 
-fn expect_method_variable_compatible(
-    method: token::Aggregate,
-    var: &Option<UnboundVariable>,
-) -> Result<()> {
+fn expect_method_variable_compatible(method: token::Aggregate, var: &Option<UnboundVariable>) -> Result<()> {
     if method == token::Aggregate::Count && var.is_some() {
         Err(TypeQLError::InvalidCountVariableArgument())?
     }
     Ok(())
 }
 
-fn expect_variable_in_scope(
-    var: &UnboundVariable,
-    names_in_scope: HashSet<Reference>,
-) -> Result<()> {
+fn expect_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Reference>) -> Result<()> {
     if !names_in_scope.contains(&var.reference) {
         Err(TypeQLError::VariableOutOfScopeMatch(var.reference.clone()))?;
     }

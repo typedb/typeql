@@ -24,9 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{
-        variable::Reference, IsExplicit, Type, TypeVariable, TypeVariableBuilder, UnboundVariable,
-    },
+    pattern::{variable::Reference, IsExplicit, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 
