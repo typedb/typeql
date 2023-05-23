@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{variable::Reference, IsExplicit, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{variable::Reference, IsExplicit, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 
@@ -67,12 +67,6 @@ impl From<TypeVariable> for SubConstraint {
     }
 }
 
-impl From<Type> for SubConstraint {
-    fn from(type_: Type) -> Self {
-        Self::from(type_.into_type_variable())
-    }
-}
-
 impl<T: Into<Label>> From<(T, IsExplicit)> for SubConstraint {
     fn from((scoped_type, is_explicit): (T, IsExplicit)) -> Self {
         Self::from((UnboundVariable::hidden().type_(scoped_type), is_explicit))
@@ -87,12 +81,6 @@ impl From<(UnboundVariable, IsExplicit)> for SubConstraint {
 impl From<(TypeVariable, IsExplicit)> for SubConstraint {
     fn from((type_, is_explicit): (TypeVariable, IsExplicit)) -> Self {
         Self::new(type_, is_explicit)
-    }
-}
-
-impl From<(Type, IsExplicit)> for SubConstraint {
-    fn from((type_, is_explicit): (Type, IsExplicit)) -> Self {
-        Self::from((type_.into_type_variable(), is_explicit))
     }
 }
 

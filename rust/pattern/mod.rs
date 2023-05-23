@@ -40,7 +40,7 @@ pub use constraint::{
     RolePlayerConstraint, SubConstraint, Value, ValueConstraint, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
-pub use label::{Label, Type};
+pub use label::Label;
 pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};

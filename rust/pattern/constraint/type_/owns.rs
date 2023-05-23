@@ -24,7 +24,7 @@ use std::{collections::HashSet, fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{variable::Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 
@@ -95,12 +95,6 @@ impl From<Label> for OwnsConstraint {
     }
 }
 
-impl From<Type> for OwnsConstraint {
-    fn from(attribute_type: Type) -> Self {
-        OwnsConstraint::from(attribute_type.into_type_variable())
-    }
-}
-
 impl From<UnboundVariable> for OwnsConstraint {
     fn from(attribute_type: UnboundVariable) -> Self {
         OwnsConstraint::from(attribute_type.into_type())
@@ -134,12 +128,6 @@ impl From<(Label, Label)> for OwnsConstraint {
     }
 }
 
-impl From<(Type, Type)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (Type, Type)) -> Self {
-        OwnsConstraint::from((attribute_type.into_type_variable(), overridden_attribute_type.into_type_variable()))
-    }
-}
-
 impl From<(UnboundVariable, UnboundVariable)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (UnboundVariable, UnboundVariable)) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type()))
@@ -167,12 +155,6 @@ impl From<(String, Annotation)> for OwnsConstraint {
 impl From<(Label, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (Label, Annotation)) -> Self {
         OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), [annotation]))
-    }
-}
-
-impl From<(Type, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (Type, Annotation)) -> Self {
-        OwnsConstraint::from((attribute_type.into_type_variable(), [annotation]))
     }
 }
 
@@ -210,16 +192,6 @@ impl From<(Label, Label, Annotation)> for OwnsConstraint {
     }
 }
 
-impl From<(Type, Type, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotation): (Type, Type, Annotation)) -> Self {
-        OwnsConstraint::from((
-            attribute_type.into_type_variable(),
-            overridden_attribute_type.into_type_variable(),
-            [annotation],
-        ))
-    }
-}
-
 impl From<(UnboundVariable, UnboundVariable, Annotation)> for OwnsConstraint {
     fn from(
         (attribute_type, overridden_attribute_type, annotation): (UnboundVariable, UnboundVariable, Annotation),
@@ -252,12 +224,6 @@ impl<const N: usize> From<(Label, [Annotation; N])> for OwnsConstraint {
     }
 }
 
-impl<const N: usize> From<(Type, [Annotation; N])> for OwnsConstraint {
-    fn from((attribute_type, annotations): (Type, [Annotation; N])) -> Self {
-        OwnsConstraint::from((attribute_type.into_type_variable(), annotations))
-    }
-}
-
 impl<const N: usize> From<(UnboundVariable, [Annotation; N])> for OwnsConstraint {
     fn from((attribute_type, annotations): (UnboundVariable, [Annotation; N])) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), annotations))
@@ -287,16 +253,6 @@ impl<const N: usize> From<(Label, Label, [Annotation; N])> for OwnsConstraint {
         OwnsConstraint::from((
             UnboundVariable::hidden().type_(attribute_type),
             UnboundVariable::hidden().type_(overridden_attribute_type),
-            annotations,
-        ))
-    }
-}
-
-impl<const N: usize> From<(Type, Type, [Annotation; N])> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotations): (Type, Type, [Annotation; N])) -> Self {
-        OwnsConstraint::from((
-            attribute_type.into_type_variable(),
-            overridden_attribute_type.into_type_variable(),
             annotations,
         ))
     }

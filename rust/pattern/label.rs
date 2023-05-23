@@ -22,28 +22,7 @@
 
 use std::fmt;
 
-use crate::{
-    common::token,
-    pattern::{
-        variable::{TypeVariable, UnboundVariable},
-        TypeVariableBuilder,
-    },
-};
-
-#[derive(Debug)]
-pub enum Type {
-    Label(Label),
-    Variable(UnboundVariable),
-}
-
-impl Type {
-    pub fn into_type_variable(self) -> TypeVariable {
-        match self {
-            Self::Label(label) => UnboundVariable::hidden().type_(label),
-            Self::Variable(var) => var.into_type(),
-        }
-    }
-}
+use crate::common::token;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {

@@ -42,8 +42,8 @@ use crate::{
         Annotation, ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction, HasConstraint,
         IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint, RelatesConstraint,
         RelationConstraint, RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable,
-        ThingVariable, ThingVariableBuilder, Type, TypeConstrainable, TypeVariable, TypeVariableBuilder,
-        UnboundVariable, Value, ValueConstraint, Variable,
+        ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable,
+        Value, ValueConstraint, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
@@ -115,6 +115,21 @@ impl<'a, T: Iterator<Item = SyntaxTree<'a>> + Clone> RuleIterator for T {
 
     fn try_consume_any(&mut self) -> Option<Self::Item> {
         self.next()
+    }
+}
+
+#[derive(Debug)]
+enum Type {
+    Label(Label),
+    Variable(UnboundVariable),
+}
+
+impl Type {
+    pub fn into_type_variable(self) -> TypeVariable {
+        match self {
+            Self::Label(label) => UnboundVariable::hidden().type_(label),
+            Self::Variable(var) => var.into_type(),
+        }
     }
 }
 
@@ -451,22 +466,22 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
                 var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
             }
             Rule::PLAYS => {
-                let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped));
+                let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped)).into_type_variable();
                 let overridden = constraint
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
-                var_type.constrain_plays(PlaysConstraint::from((type_, overridden)))
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_variable());
+                var_type.constrain_plays(PlaysConstraint::new(type_, overridden))
             }
             Rule::REGEX => var_type.regex(get_regex(constraint.consume_expected(Rule::STRING_))),
             Rule::RELATES => {
-                let type_ = visit_type(constraint.consume_expected(Rule::type_));
+                let type_ = visit_type(constraint.consume_expected(Rule::type_)).into_type_variable();
                 let overridden = constraint
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)));
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_variable());
                 var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
             }
             Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
-                visit_type_any(constraint.consume_expected(Rule::type_any)),
+                visit_type_any(constraint.consume_expected(Rule::type_any)).into_type_variable(),
                 matches!(keyword.into_child().as_rule(), Rule::SUBX).into(),
             ))),
             Rule::TYPE => var_type.type_(visit_label_any(constraint.consume_expected(Rule::label_any))),
