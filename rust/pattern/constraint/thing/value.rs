@@ -58,19 +58,13 @@ impl ValueConstraint {
 impl Validatable for ValueConstraint {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut [
-                expect_string_value_with_substring_predicate(self.predicate, &self.value),
-                self.value.validate(),
-            ]
-            .into_iter(),
+            &mut [expect_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
+                .into_iter(),
         )
     }
 }
 
-fn expect_string_value_with_substring_predicate(
-    predicate: token::Predicate,
-    value: &Value,
-) -> Result<()> {
+fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result<()> {
     if predicate.is_substring() && !matches!(value, Value::String(_)) {
         Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
@@ -82,9 +76,7 @@ impl fmt::Display for ValueConstraint {
         if self.predicate == token::Predicate::Like {
             assert!(matches!(self.value, Value::String(_)));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
-        } else if self.predicate == token::Predicate::Eq
-            && !matches!(self.value, Value::Variable(_))
-        {
+        } else if self.predicate == token::Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)
@@ -108,7 +100,7 @@ impl Validatable for Value {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
-                    Err(TypeQLError::InvalidConstraintDatetimePrecision(date_time.clone()))?
+                    Err(TypeQLError::InvalidConstraintDatetimePrecision(*date_time))?
                 }
                 Ok(())
             }
@@ -170,9 +162,9 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
-            Long(long) => write!(f, "{}", long),
+            Long(long) => write!(f, "{long}"),
             Double(double) => write!(f, "{}", format_double(*double)),
-            Boolean(boolean) => write!(f, "{}", boolean),
+            Boolean(boolean) => write!(f, "{boolean}"),
             String(string) => write!(f, "{}", quote(string)),
             DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
             Variable(var) => write!(f, "{}", var.reference),

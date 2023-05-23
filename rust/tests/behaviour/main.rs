@@ -38,7 +38,7 @@ fn main() {
 }
 
 fn parse_query_in_step(step: &Step) -> Query {
-    parse_query(&step.docstring.as_ref().unwrap()).unwrap()
+    parse_query(step.docstring.as_ref().unwrap()).unwrap()
 }
 
 fn reparse_query(parsed: &Query) -> Query {
@@ -61,13 +61,13 @@ generic_step_impl! {
 #[step("reasoning schema")]
 #[step("typeql define")]
 async fn typeql_define(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(&step);
+    let parsed = parse_query_in_step(step);
     assert_eq!(parsed, reparse_query(&parsed));
 }
 
 #[step("typeql undefine")]
 async fn typeql_undefine(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(&step);
+    let parsed = parse_query_in_step(step);
     assert_eq!(parsed, reparse_query(&parsed));
 }
 
@@ -75,19 +75,19 @@ async fn typeql_undefine(_: &mut TypeQLWorld, step: &Step) {
 #[step("reasoning data")]
 #[step("typeql insert")]
 async fn typeql_insert(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(&step);
+    let parsed = parse_query_in_step(step);
     assert_eq!(parsed, reparse_query(&parsed));
 }
 
 #[step("typeql delete")]
 async fn typeql_delete(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(&step);
+    let parsed = parse_query_in_step(step);
     assert_eq!(parsed, reparse_query(&parsed));
 }
 
 #[step("typeql update")]
 async fn typeql_update(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(&step);
+    let parsed = parse_query_in_step(step);
     assert_eq!(parsed, reparse_query(&parsed));
 }
 
@@ -98,7 +98,7 @@ async fn typeql_update(_: &mut TypeQLWorld, step: &Step) {
 #[step("reasoning query")]
 #[step("verify answer set is equivalent for query")]
 async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(&step);
+    let parsed = parse_query_in_step(step);
     assert_eq!(parsed, reparse_query(&parsed));
 }
 

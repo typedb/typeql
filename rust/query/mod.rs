@@ -120,15 +120,15 @@ impl fmt::Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Query::*;
         match self {
-            Match(query) => write!(f, "{}", query),
-            Insert(query) => write!(f, "{}", query),
-            Delete(query) => write!(f, "{}", query),
-            Update(query) => write!(f, "{}", query),
-            Define(query) => write!(f, "{}", query),
-            Undefine(query) => write!(f, "{}", query),
-            Aggregate(query) => write!(f, "{}", query),
-            Group(query) => write!(f, "{}", query),
-            GroupAggregate(query) => write!(f, "{}", query),
+            Match(query) => write!(f, "{query}"),
+            Insert(query) => write!(f, "{query}"),
+            Delete(query) => write!(f, "{query}"),
+            Update(query) => write!(f, "{query}"),
+            Define(query) => write!(f, "{query}"),
+            Undefine(query) => write!(f, "{query}"),
+            Aggregate(query) => write!(f, "{query}"),
+            Group(query) => write!(f, "{query}"),
+            GroupAggregate(query) => write!(f, "{query}"),
         }
     }
 }

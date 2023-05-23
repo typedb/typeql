@@ -23,8 +23,8 @@
 use crate::{
     common::token::Predicate,
     pattern::{
-        Negation, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable,
-        TypeVariable, TypeVariableBuilder, UnboundVariable, Value, ValueConstraint,
+        Negation, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable, TypeVariable,
+        TypeVariableBuilder, UnboundVariable, Value, ValueConstraint,
     },
     Pattern,
 };

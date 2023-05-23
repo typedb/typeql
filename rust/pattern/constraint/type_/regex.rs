@@ -24,9 +24,7 @@ use std::fmt;
 
 use regex::Regex;
 
-use crate::common::{
-    error::TypeQLError, string::escape_regex, token, validatable::Validatable, Result,
-};
+use crate::common::{error::TypeQLError, string::escape_regex, token, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RegexConstraint {

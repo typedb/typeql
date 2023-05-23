@@ -25,8 +25,8 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
-        Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
-        UnboundVariable, Value, ValueConstraint,
+        Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable, Value,
+        ValueConstraint,
     },
 };
 
@@ -38,18 +38,13 @@ pub struct HasConstraint {
 
 impl HasConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(
-            (self.type_.iter().map(|t| &t.reference)).chain(iter::once(&self.attribute.reference)),
-        )
+        Box::new((self.type_.iter().map(|t| &t.reference)).chain(iter::once(&self.attribute.reference)))
     }
 }
 
 impl Validatable for HasConstraint {
     fn validate(&self) -> Result<()> {
-        collect_err(
-            &mut iter::once(self.attribute.validate())
-                .chain(self.type_.iter().map(Validatable::validate)),
-        )
+        collect_err(&mut iter::once(self.attribute.validate()).chain(self.type_.iter().map(Validatable::validate)))
     }
 }
 
@@ -62,14 +57,12 @@ impl From<UnboundVariable> for HasConstraint {
 impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
     fn from((type_name, value): (S, T)) -> Self {
         match value.into() {
-            Value::Variable(variable) => HasConstraint {
-                type_: Some(UnboundVariable::hidden().type_(type_name.into())),
-                attribute: *variable,
-            },
+            Value::Variable(variable) => {
+                HasConstraint { type_: Some(UnboundVariable::hidden().type_(type_name.into())), attribute: *variable }
+            }
             value => HasConstraint {
                 type_: Some(UnboundVariable::hidden().type_(type_name.into())),
-                attribute: UnboundVariable::hidden()
-                    .constrain_value(ValueConstraint::new(token::Predicate::Eq, value)),
+                attribute: UnboundVariable::hidden().constrain_value(ValueConstraint::new(token::Predicate::Eq, value)),
             },
         }
     }

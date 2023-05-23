@@ -60,10 +60,7 @@ impl Validatable for TypeQLInsert {
     }
 }
 
-fn expect_insert_in_scope_of_match(
-    match_query: &Option<TypeQLMatch>,
-    variables: &[ThingVariable],
-) -> Result<()> {
+fn expect_insert_in_scope_of_match(match_query: &Option<TypeQLMatch>, variables: &[ThingVariable]) -> Result<()> {
     if let Some(match_query) = match_query {
         let names_in_scope = match_query.named_references();
         if variables.iter().any(|v| {
@@ -72,13 +69,8 @@ fn expect_insert_in_scope_of_match(
         }) {
             Ok(())
         } else {
-            let variables_str =
-                variables.iter().map(ThingVariable::to_string).collect::<Vec<String>>().join(", ");
-            let bounds_str = names_in_scope
-                .into_iter()
-                .map(|r| r.to_string())
-                .collect::<Vec<String>>()
-                .join(", ");
+            let variables_str = variables.iter().map(ThingVariable::to_string).collect::<Vec<String>>().join(", ");
+            let bounds_str = names_in_scope.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
             Err(TypeQLError::NoVariableInScopeInsert(variables_str, bounds_str))?
         }
     } else {
@@ -89,7 +81,7 @@ fn expect_insert_in_scope_of_match(
 impl fmt::Display for TypeQLInsert {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(match_query) = &self.match_query {
-            writeln!(f, "{}", match_query)?;
+            writeln!(f, "{match_query}")?;
         }
 
         writeln!(f, "{}", token::Command::Insert)?;

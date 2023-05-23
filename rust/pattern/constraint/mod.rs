@@ -26,12 +26,11 @@ mod type_;
 
 pub use concept::IsConstraint;
 pub use thing::{
-    HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint, Value,
-    ValueConstraint,
+    HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint, Value, ValueConstraint,
 };
 pub use type_::{
-    AbstractConstraint, IsKeyAttribute, LabelConstraint, OwnsConstraint, PlaysConstraint,
-    RegexConstraint, RelatesConstraint, SubConstraint, ValueTypeConstraint, KEY,
+    AbstractConstraint, Annotation, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
+    RelatesConstraint, SubConstraint, ValueTypeConstraint,
 };
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]

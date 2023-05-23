@@ -30,8 +30,8 @@ mod unbound;
 use std::{collections::HashSet, fmt};
 
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder,
-    ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
+    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
+    ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
 };
 pub use concept::ConceptVariable;
 pub use reference::{Reference, Visibility};
@@ -110,10 +110,10 @@ impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Variable::*;
         match self {
-            Unbound(unbound) => write!(f, "{}", unbound),
-            Concept(concept) => write!(f, "{}", concept),
-            Thing(thing) => write!(f, "{}", thing),
-            Type(type_) => write!(f, "{}", type_),
+            Unbound(unbound) => write!(f, "{unbound}"),
+            Concept(concept) => write!(f, "{concept}"),
+            Thing(thing) => write!(f, "{thing}"),
+            Type(type_) => write!(f, "{type_}"),
         }
     }
 }

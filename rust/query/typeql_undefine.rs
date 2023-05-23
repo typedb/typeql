@@ -41,13 +41,11 @@ pub struct TypeQLUndefine {
 
 impl TypeQLUndefine {
     pub fn new(undefinables: Vec<Definable>) -> Self {
-        undefinables.into_iter().fold(TypeQLUndefine::default(), |undefine, undefinable| {
-            match undefinable {
-                Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
-                Definable::TypeVariable(var) => undefine.add_definition(var),
-                Definable::RuleDefinition(r) => {
-                    panic!("{}", TypeQLError::InvalidUndefineQueryRule(r.label))
-                }
+        undefinables.into_iter().fold(TypeQLUndefine::default(), |undefine, undefinable| match undefinable {
+            Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
+            Definable::TypeVariable(var) => undefine.add_definition(var),
+            Definable::RuleDefinition(r) => {
+                panic!("{}", TypeQLError::InvalidUndefineQueryRule(r.label))
             }
         })
     }

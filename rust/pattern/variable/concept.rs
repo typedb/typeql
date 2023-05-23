@@ -42,18 +42,14 @@ impl ConceptVariable {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(
-            iter::once(&self.reference)
-                .chain(self.is_constraint.iter().map(|is| &is.variable.reference)),
-        )
+        Box::new(iter::once(&self.reference).chain(self.is_constraint.iter().map(|is| &is.variable.reference)))
     }
 }
 
 impl Validatable for ConceptVariable {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut iter::once(self.reference.validate())
-                .chain(self.is_constraint.iter().map(Validatable::validate)),
+            &mut iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
         )
     }
 }
@@ -68,7 +64,7 @@ impl fmt::Display for ConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)?;
         if let Some(is) = &self.is_constraint {
-            write!(f, " {}", is)?;
+            write!(f, " {is}")?;
         }
         Ok(())
     }

@@ -44,16 +44,8 @@ $com isa company;
     assert_eq!(
         normalised,
         or!(
-            and!(
-                var("com").has(("name", var("n1"))),
-                var("n1").eq("the-company"),
-                var("com").isa("company"),
-            ),
-            and!(
-                var("com").has(("name", var("n2"))),
-                var("n2").eq("another-company"),
-                var("com").isa("company"),
-            )
+            and!(var("com").has(("name", var("n1"))), var("n1").eq("the-company"), var("com").isa("company"),),
+            and!(var("com").has(("name", var("n2"))), var("n2").eq("another-company"), var("com").isa("company"),)
         )
         .into_disjunction()
     );

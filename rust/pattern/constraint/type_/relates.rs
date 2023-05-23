@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, Type, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{variable::Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
     Label,
 };
 
@@ -36,10 +36,7 @@ pub struct RelatesConstraint {
 
 impl RelatesConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(
-            iter::once(&self.role_type.reference)
-                .chain(self.overridden_role_type.iter().map(|v| &v.reference)),
-        )
+        Box::new(iter::once(&self.role_type.reference).chain(self.overridden_role_type.iter().map(|v| &v.reference)))
     }
 }
 
@@ -75,10 +72,7 @@ impl From<(&str, &str)> for RelatesConstraint {
 
 impl From<Label> for RelatesConstraint {
     fn from(type_: Label) -> Self {
-        RelatesConstraint {
-            role_type: UnboundVariable::hidden().type_(type_),
-            overridden_role_type: None,
-        }
+        RelatesConstraint { role_type: UnboundVariable::hidden().type_(type_), overridden_role_type: None }
     }
 }
 
@@ -97,21 +91,6 @@ impl From<TypeVariable> for RelatesConstraint {
 impl From<(TypeVariable, Option<TypeVariable>)> for RelatesConstraint {
     fn from((role_type, overridden_role_type): (TypeVariable, Option<TypeVariable>)) -> Self {
         RelatesConstraint { role_type, overridden_role_type }
-    }
-}
-
-impl From<Type> for RelatesConstraint {
-    fn from(role_type: Type) -> Self {
-        RelatesConstraint::from(role_type.into_type_variable())
-    }
-}
-
-impl From<(Type, Option<Type>)> for RelatesConstraint {
-    fn from((role_type, overridden): (Type, Option<Type>)) -> Self {
-        RelatesConstraint::from((
-            role_type.into_type_variable(),
-            overridden.map(Type::into_type_variable),
-        ))
     }
 }
 

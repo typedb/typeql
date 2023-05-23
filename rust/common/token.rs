@@ -123,7 +123,6 @@ string_enum! { Constraint
     Has = "has",
     IID = "iid",
     Is = "is",
-    IsKey = "@key",
     Isa = "isa",
     IsaX = "isa!",
     Owns = "owns",
@@ -134,6 +133,11 @@ string_enum! { Constraint
     SubX = "sub!",
     Type = "type",
     ValueType = "value",
+}
+
+string_enum! { Annotation
+    Key = "key",
+    Unique = "unique",
 }
 
 string_enum! { Aggregate

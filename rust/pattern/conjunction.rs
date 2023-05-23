@@ -52,16 +52,13 @@ impl Conjunction {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(
-            self.patterns
-                .iter()
-                .filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_)))
-                .flat_map(|p| match p {
-                    Pattern::Variable(v) => v.references(),
-                    Pattern::Conjunction(c) => c.references(),
-                    _ => unreachable!(),
-                }),
-        )
+        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_))).flat_map(
+            |p| match p {
+                Pattern::Variable(v) => v.references(),
+                Pattern::Conjunction(c) => c.references(),
+                _ => unreachable!(),
+            },
+        ))
     }
 
     pub fn has_named_variables(&self) -> bool {
@@ -78,11 +75,7 @@ impl Conjunction {
     }
 }
 
-fn expect_bounded(
-    names: &HashSet<Reference>,
-    bounds: &HashSet<Reference>,
-    conjunction: &Conjunction,
-) -> Result<()> {
+fn expect_bounded(names: &HashSet<Reference>, bounds: &HashSet<Reference>, conjunction: &Conjunction) -> Result<()> {
     if bounds.is_disjoint(names) {
         Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
@@ -129,12 +122,8 @@ impl Normalisable for Conjunction {
                 .into_iter()
                 .multi_cartesian_product()
                 .map(|v| {
-                    Conjunction::new(
-                        v.into_iter()
-                            .flat_map(|c| c.into_conjunction().patterns.into_iter())
-                            .collect(),
-                    )
-                    .into()
+                    Conjunction::new(v.into_iter().flat_map(|c| c.into_conjunction().patterns.into_iter()).collect())
+                        .into()
                 })
                 .collect(),
         )
@@ -145,9 +134,7 @@ impl Normalisable for Conjunction {
 impl fmt::Display for Conjunction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("{\n")?;
-        f.write_str(
-            &self.patterns.iter().map(|p| indent(&p.to_string()) + ";\n").collect::<String>(),
-        )?;
+        f.write_str(&self.patterns.iter().map(|p| indent(&p.to_string()) + ";\n").collect::<String>())?;
         f.write_str("}")
     }
 }

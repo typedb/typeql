@@ -29,8 +29,8 @@ use crate::{
         Result,
     },
     pattern::{
-        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference,
-        RegexConstraint, RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
+        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint,
+        RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
     },
     write_joined,
 };
@@ -149,7 +149,7 @@ impl fmt::Display for TypeVariable {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;
             if let Some(type_) = &self.label {
-                write!(f, " {}", type_)?;
+                write!(f, " {type_}")?;
             }
         } else {
             write!(f, "{}", self.label.as_ref().unwrap().label)?;

@@ -61,29 +61,19 @@ impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
         collect_err(
             &mut [expect_method_variable_compatible(self.method, &self.var), self.query.validate()]
                 .into_iter()
-                .chain(
-                    self.var
-                        .iter()
-                        .map(|v| expect_variable_in_scope(v, self.query.named_references())),
-                ),
+                .chain(self.var.iter().map(|v| expect_variable_in_scope(v, self.query.named_references()))),
         )
     }
 }
 
-fn expect_method_variable_compatible(
-    method: token::Aggregate,
-    var: &Option<UnboundVariable>,
-) -> Result<()> {
+fn expect_method_variable_compatible(method: token::Aggregate, var: &Option<UnboundVariable>) -> Result<()> {
     if method == token::Aggregate::Count && var.is_some() {
         Err(TypeQLError::InvalidCountVariableArgument())?
     }
     Ok(())
 }
 
-fn expect_variable_in_scope(
-    var: &UnboundVariable,
-    names_in_scope: HashSet<Reference>,
-) -> Result<()> {
+fn expect_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Reference>) -> Result<()> {
     if !names_in_scope.contains(&var.reference) {
         Err(TypeQLError::VariableOutOfScopeMatch(var.reference.clone()))?;
     }
@@ -94,7 +84,7 @@ impl fmt::Display for TypeQLMatchAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}\n{}", self.query, self.method)?;
         if let Some(var) = &self.var {
-            write!(f, " {}", var)?;
+            write!(f, " {var}")?;
         }
         f.write_str(";")
     }
@@ -104,7 +94,7 @@ impl fmt::Display for TypeQLMatchGroupAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.query, self.method)?;
         if let Some(var) = &self.var {
-            write!(f, " {}", var)?;
+            write!(f, " {var}")?;
         }
         f.write_str(";")
     }

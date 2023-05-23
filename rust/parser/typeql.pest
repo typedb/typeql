@@ -103,7 +103,7 @@ variable_concept = { VAR_ ~ IS ~ VAR_ }
 
 variable_type = { type_any ~ type_constraint ~ ( "," ~ type_constraint )* }
 type_constraint = { ABSTRACT
-                  | OWNS ~ type_ ~ ( AS ~ type_)? ~ ( IS_KEY )?
+                  | OWNS ~ type_ ~ ( AS ~ type_)? ~ annotations_owns
                   | PLAYS ~ type_scoped ~ ( AS ~ type_)?
                   | REGEX ~ STRING_
                   | RELATES ~ type_ ~ ( AS ~ type_)?
@@ -111,6 +111,8 @@ type_constraint = { ABSTRACT
                   | TYPE ~ label_any
                   | VALUE ~ value_type
                   }
+
+annotations_owns = { ( ANNOTATION_KEY )? ~ ( ANNOTATION_UNIQUE )? }
 
 // THING VARIABLES =============================================================
 
@@ -220,13 +222,17 @@ SUB_ = ${ SUBX | SUB }
 SUB = @{ "sub" ~ WB }
 SUBX = @{ "sub!" ~ WB }
 OWNS = @{ "owns" ~ WB }
-IS_KEY = @{ "@key" ~ WB }
 REGEX = @{ "regex" ~ WB }
 AS = @{ "as" ~ WB }
 PLAYS = @{ "plays" ~ WB }
 RELATES = @{ "relates" ~ WB }
 WHEN = @{ "when" ~ WB }
 THEN = @{ "then" ~ WB }
+
+// TYPE ANNOTATIONS
+
+ANNOTATION_KEY = @{ "@key" ~ WB }
+ANNOTATION_UNIQUE = @{ "@unique" ~ WB}
 
 // THING VARIABLE CONSTRAINT KEYWORDS
 
