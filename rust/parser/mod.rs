@@ -23,8 +23,6 @@
 #[cfg(test)]
 mod test;
 
-use std::collections::HashSet;
-
 use chrono::{NaiveDate, NaiveDateTime};
 use pest::Parser;
 use pest_derive::Parser;
@@ -495,7 +493,7 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
     var_type
 }
 
-fn visit_annotations_owns(tree: SyntaxTree) -> HashSet<Annotation> {
+fn visit_annotations_owns(tree: SyntaxTree) -> Vec<Annotation> {
     tree.into_children()
         .map(|annotation| match annotation.as_rule() {
             Rule::ANNOTATION_KEY => Annotation::Key,

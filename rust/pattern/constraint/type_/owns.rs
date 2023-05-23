@@ -20,7 +20,7 @@
  *
  */
 
-use std::{collections::HashSet, fmt, iter};
+use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
@@ -48,14 +48,14 @@ impl fmt::Display for Annotation {
 pub struct OwnsConstraint {
     pub attribute_type: TypeVariable,
     pub overridden_attribute_type: Option<TypeVariable>,
-    pub annotations: HashSet<Annotation>,
+    pub annotations: Vec<Annotation>,
 }
 
 impl OwnsConstraint {
     pub(crate) fn new(
         attribute_type: TypeVariable,
         overridden_attribute_type: Option<TypeVariable>,
-        annotations: HashSet<Annotation>,
+        annotations: Vec<Annotation>,
     ) -> Self {
         OwnsConstraint { attribute_type, overridden_attribute_type, annotations }
     }
@@ -103,7 +103,7 @@ impl From<UnboundVariable> for OwnsConstraint {
 
 impl From<TypeVariable> for OwnsConstraint {
     fn from(attribute_type: TypeVariable) -> Self {
-        OwnsConstraint::new(attribute_type, None, HashSet::new())
+        OwnsConstraint::new(attribute_type, None, vec![])
     }
 }
 
@@ -136,7 +136,7 @@ impl From<(UnboundVariable, UnboundVariable)> for OwnsConstraint {
 
 impl From<(TypeVariable, TypeVariable)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (TypeVariable, TypeVariable)) -> Self {
-        OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), HashSet::new())
+        OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), vec![])
     }
 }
 
