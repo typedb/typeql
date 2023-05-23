@@ -89,7 +89,6 @@ impl Validatable for RuleDefinition {
         collect_err(
             &mut [
                 expect_no_nested_negations(self.when.patterns.iter(), &self.label),
-                expect_infer_single_edge(&self.then, &self.label),
                 expect_valid_inference(&self.then, &self.label),
                 expect_then_bounded_by_when(&self.then, &self.when, &self.label),
                 self.when.validate(),
@@ -126,38 +125,35 @@ fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bo
     })
 }
 
-fn expect_infer_single_edge(then: &ThingVariable, rule_label: &Label) -> Result<()> {
+fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
     if then.has.len() == 1
         && (then.iid.is_none() && then.isa.is_none() && then.value.is_none() && then.relation.is_none())
         || then.relation.is_some()
             && then.isa.is_some()
             && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
     {
-        Ok(())
+        if let Some(has) = then.has.get(0) {
+            if has.type_.is_some() && has.attribute.reference.is_name() {
+                Err(TypeQLError::InvalidRuleThenHas(
+                    rule_label.clone(),
+                    then.clone(),
+                    has.attribute.reference.clone(),
+                    has.type_.clone().unwrap(),
+                ))?
+            }
+            Ok(())
+        } else if let Some(relation) = &then.relation {
+            if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
+                Err(TypeQLError::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
+            }
+            Ok(())
+        } else {
+            unreachable!()
+        }
     } else {
         Err(TypeQLError::InvalidRuleThen(rule_label.clone(), then.clone()))?
     }
-}
 
-fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
-    if let Some(has) = then.has.get(0) {
-        if has.type_.is_some() && has.attribute.reference.is_name() {
-            Err(TypeQLError::InvalidRuleThenHas(
-                rule_label.clone(),
-                then.clone(),
-                has.attribute.reference.clone(),
-                has.type_.clone().unwrap(),
-            ))?
-        }
-        Ok(())
-    } else if let Some(relation) = &then.relation {
-        if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
-            Err(TypeQLError::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
-        }
-        Ok(())
-    } else {
-        unreachable!()
-    }
 }
 
 fn expect_then_bounded_by_when(then: &ThingVariable, when: &Conjunction, rule_label: &Label) -> Result<()> {
