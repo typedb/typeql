@@ -26,7 +26,7 @@ macro_rules! error_messages {
         $name:ident code: $code_pfx:literal, type: $message_pfx:literal,
         $($error_name:ident( $($inner:ty),* $(,)? ) = $code:literal: $body:literal),+ $(,)?
     } => {
-        #[derive(Clone, Debug, Eq, PartialEq)]
+        #[derive(Clone, Eq, PartialEq)]
         pub enum $name {$(
             $error_name($($inner),*),
         )*}
@@ -62,6 +62,12 @@ macro_rules! error_messages {
                     _ => unreachable!(),
                 }
             }
+
+            const fn name(&self) -> &'static str {
+                match self {$(
+                    Self::$error_name(..) => std::stringify!($error_name),
+                )*}
+            }
         }
 
         impl std::fmt::Display for $name {
@@ -73,6 +79,15 @@ macro_rules! error_messages {
                     self.code(),
                     self.message()
                 )
+            }
+        }
+
+        impl std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                f.debug_struct(&self.name())
+                    .field("code", &self.code())
+                    .field("message", &self.message())
+                    .finish()
             }
         }
 
