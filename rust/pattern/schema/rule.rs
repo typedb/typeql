@@ -126,9 +126,7 @@ fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bo
 }
 
 fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
-    if then.has.len() == 1
-        && (then.iid.is_none() && then.isa.is_none() && then.value.is_none() && then.relation.is_none())
-    {
+    if infers_ownership(then) {
         let has = then.has.get(0).unwrap();
         if has.type_.is_some() && has.attribute.reference.is_name() {
             Err(TypeQLError::InvalidRuleThenHas(
@@ -139,10 +137,7 @@ fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()
             ))?
         }
         Ok(())
-    } else if then.relation.is_some()
-        && then.isa.is_some()
-        && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
-    {
+    } else if infers_relation(then) {
         let relation = then.relation.as_ref().unwrap();
         if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
             Err(TypeQLError::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
@@ -151,6 +146,14 @@ fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()
     } else {
         Err(TypeQLError::InvalidRuleThen(rule_label.clone(), then.clone()))?
     }
+}
+
+fn infers_ownership(then: &ThingVariable) -> bool {
+    then.has.len() == 1 && (then.iid.is_none() && then.isa.is_none() && then.value.is_none() && then.relation.is_none())
+}
+
+fn infers_relation(then: &ThingVariable) -> bool {
+    then.relation.is_some() && then.isa.is_some() && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
 }
 
 fn expect_then_bounded_by_when(then: &ThingVariable, when: &Conjunction, rule_label: &Label) -> Result<()> {
