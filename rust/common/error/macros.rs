@@ -146,11 +146,11 @@ mod tests {
         ];
 
         for error in errors {
-            let display = format!("{error}").replace('\n', &"\\n");
+            let display = format!("{error}");
             let compact_debug = format!("{error:?}");
             let expanded_debug = format!("{error:#?}");
-            assert!(compact_debug.contains(&display));
-            assert!(expanded_debug.contains(&display));
+            assert!(compact_debug.contains(&display.replace('\n', &"\\n")));
+            assert!(expanded_debug.contains(&display.replace('\n', &"\\n")));
         }
     }
 }
