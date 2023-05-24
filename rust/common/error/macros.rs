@@ -132,7 +132,7 @@ mod tests {
         BasicError() =
             1: "This is a basic error.",
         ErrorWithAttributes(i32, String) =
-            2: "This is an error with i32 {} and string {}.",
+            2: "This is an error with i32 {} and string '{}'.",
         MultiLine() =
             3: "This is an error,\nthat spans,\nmultiple lines."
     }
