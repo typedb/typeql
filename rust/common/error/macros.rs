@@ -68,6 +68,11 @@ macro_rules! error_messages {
                     Self::$error_name(..) => std::stringify!($error_name),
                 )*}
             }
+
+            const fn payload(&self) -> String {
+                $(error_messages!(@payload self, $error_name $(, $inner)*);)*
+                unreachable!()
+            }
         }
 
         impl std::fmt::Display for $name {
@@ -85,6 +90,7 @@ macro_rules! error_messages {
         impl std::fmt::Debug for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 f.debug_struct(&self.name())
+                    .field("payload", &self.payload())
                     .field("code", &self.code())
                     .field("message", &format!("{self}"))
                     .finish()
@@ -123,6 +129,36 @@ macro_rules! error_messages {
             return format!($body, _0, _1, _2, _3)
         }
     };
+
+    (@payload $self:ident, $error_name:ident) => {
+        if let Self::$error_name() = &$self {
+            return format!("{:?}", ())
+        }
+    };
+
+    (@payload $self:ident, $error_name:ident, $t1:ty) => {
+        if let Self::$error_name(_0) = &$self {
+            return format!("{:?}", (_0))
+        }
+    };
+
+    (@payload $self:ident, $error_name:ident, $t1:ty, $t2:ty) => {
+        if let Self::$error_name(_0, _1) = &$self {
+            return format!("{:?}", (_0, _1))
+        }
+    };
+
+    (@payload $self:ident, $error_name:ident, $t1:ty, $t2:ty, $t3:ty) => {
+        if let Self::$error_name(_0, _1, _2) = &$self {
+            return format!("{:?}", (_0, _1, _2))
+        }
+    };
+
+    (@payload $self:ident, $error_name:ident, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
+        if let Self::$error_name(_0, _1, _2, _3) = &$self {
+            return format!("{:?}", (_0, _1, _2, _3))
+        }
+    };
 }
 
 #[cfg(test)]
@@ -152,5 +188,6 @@ mod tests {
             assert!(compact_debug.contains(&display.replace('\n', &"\\n")));
             assert!(expanded_debug.contains(&display.replace('\n', &"\\n")));
         }
+        panic!();
     }
 }
