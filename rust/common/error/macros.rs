@@ -86,7 +86,7 @@ macro_rules! error_messages {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 f.debug_struct(&self.name())
                     .field("code", &self.code())
-                    .field("message", &self.message())
+                    .field("message", &format!("{self}"))
                     .finish()
             }
         }
@@ -123,4 +123,34 @@ macro_rules! error_messages {
             return format!($body, _0, _1, _2, _3)
         }
     };
+}
+
+#[cfg(test)]
+mod tests {
+    error_messages! { TestError
+        code: "TST", type: "Test Error",
+        BasicError() =
+            1: "This is a basic error.",
+        ErrorWithAttributes(i32, String) =
+            2: "This is an error with i32 {} and string {}.",
+        MultiLine() =
+            3: "This is an error,\nthat spans,\nmultiple lines."
+    }
+
+    #[test]
+    pub fn debug_includes_display() {
+        let errors = [
+            TestError::BasicError(),
+            TestError::ErrorWithAttributes(1, "error message".to_string()),
+            TestError::MultiLine(),
+        ];
+
+        for error in errors {
+            let display = format!("{error}").replace('\n', &"\\n");
+            let compact_debug = format!("{error:?}");
+            let expanded_debug = format!("{error:#?}");
+            assert!(compact_debug.contains(&display));
+            assert!(expanded_debug.contains(&display));
+        }
+    }
 }
