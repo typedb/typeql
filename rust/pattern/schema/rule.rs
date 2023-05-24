@@ -128,28 +128,26 @@ fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bo
 fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
     if then.has.len() == 1
         && (then.iid.is_none() && then.isa.is_none() && then.value.is_none() && then.relation.is_none())
-        || then.relation.is_some()
-            && then.isa.is_some()
-            && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
     {
-        if let Some(has) = then.has.get(0) {
-            if has.type_.is_some() && has.attribute.reference.is_name() {
-                Err(TypeQLError::InvalidRuleThenHas(
-                    rule_label.clone(),
-                    then.clone(),
-                    has.attribute.reference.clone(),
-                    has.type_.clone().unwrap(),
-                ))?
-            }
-            Ok(())
-        } else if let Some(relation) = &then.relation {
-            if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
-                Err(TypeQLError::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
-            }
-            Ok(())
-        } else {
-            unreachable!()
+        let has = then.has.get(0).unwrap();
+        if has.type_.is_some() && has.attribute.reference.is_name() {
+            Err(TypeQLError::InvalidRuleThenHas(
+                rule_label.clone(),
+                then.clone(),
+                has.attribute.reference.clone(),
+                has.type_.clone().unwrap(),
+            ))?
         }
+        Ok(())
+    } else if then.relation.is_some()
+        && then.isa.is_some()
+        && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
+    {
+        let relation = then.relation.as_ref().unwrap();
+        if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
+            Err(TypeQLError::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
+        }
+        Ok(())
     } else {
         Err(TypeQLError::InvalidRuleThen(rule_label.clone(), then.clone()))?
     }
