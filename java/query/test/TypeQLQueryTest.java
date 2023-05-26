@@ -22,6 +22,7 @@
 package com.vaticle.typeql.lang.query.test;
 
 import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.TypeQL.Expression;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
@@ -30,13 +31,14 @@ import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
 import static com.vaticle.typeql.lang.TypeQL.and;
+import static com.vaticle.typeql.lang.TypeQL.cVar;
 import static com.vaticle.typeql.lang.TypeQL.lte;
 import static com.vaticle.typeql.lang.TypeQL.match;
 import static com.vaticle.typeql.lang.TypeQL.or;
 import static com.vaticle.typeql.lang.TypeQL.rel;
 import static com.vaticle.typeql.lang.TypeQL.rule;
 import static com.vaticle.typeql.lang.TypeQL.type;
-import static com.vaticle.typeql.lang.TypeQL.var;
+import static com.vaticle.typeql.lang.TypeQL.vVar;
 import static org.junit.Assert.assertEquals;
 
 // TODO: This test should be split into one TypeQL query test class each
@@ -44,55 +46,55 @@ public class TypeQLQueryTest {
 
     @Test
     public void testSimpleGetQueryToString() {
-        assertSameStringRepresentation(match(var("x").isa("movie").has("title", "Godfather")));
+        assertSameStringRepresentation(match(cVar("x").isa("movie").has("title", "Godfather")));
     }
 
     @Test
     public void testComplexQueryToString() {
         TypeQLMatch query = match(
-                var("x").isa("movie"),
-                var().rel("x").rel("y"),
+                cVar("x").isa("movie"),
+                cVar().rel(cVar("x")).rel(cVar("y")),
                 or(
-                        var("y").isa("person"),
+                        cVar("y").isa("person"),
                         and(
-                                var("y").neq("crime"),
-                                var("y").neq("book")
+                                cVar("y").neq("crime"),
+                                cVar("y").neq("book")
                         )
                 ),
-                var("y").has("name", var("n"))
-        ).get("x", "y", "n").sort("n").offset(4).limit(8);
+                cVar("y").has("name", cVar("n"))
+        ).get(cVar("x"), cVar("y"), cVar("n")).sort(cVar("n")).offset(4).limit(8);
 
         assertEquivalent(query, query.toString());
     }
 
     @Test
     public void testQueryWithResourcesToString() {
-        assertSameStringRepresentation(match(var("x").has("tmdb-vote-count", lte(400))));
+        assertSameStringRepresentation(match(cVar("x").has("tmdb-vote-count", lte(400))));
     }
 
     @Test
     public void testQueryWithSubToString() {
-        assertSameStringRepresentation(match(var("x").sub(var("y"))));
+        assertSameStringRepresentation(match(cVar("x").sub(cVar("y"))));
     }
 
     @Test
     public void testQueryWithPlaysToString() {
-        assertSameStringRepresentation(match(var("x").plays(var("y"))));
+        assertSameStringRepresentation(match(cVar("x").plays(cVar("y"))));
     }
 
     @Test
     public void testQueryWithRelatesToString() {
-        assertSameStringRepresentation(match(var("x").relates(var("y"))));
+        assertSameStringRepresentation(match(cVar("x").relates(cVar("y"))));
     }
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(match(var("x").value(TypeQLArg.ValueType.LONG)));
+        assertSameStringRepresentation(match(cVar("x").value(TypeQLArg.ValueType.LONG)));
     }
 
     @Test
     public void testQueryIsAbstractToString() {
-        assertSameStringRepresentation(match(var("x").isAbstract()));
+        assertSameStringRepresentation(match(cVar("x").isAbstract()));
     }
 
     @Test
@@ -109,13 +111,13 @@ public class TypeQLQueryTest {
 
     @Test
     public void testInsertQueryToString() {
-        assertEquals("insert\n$x isa movie;", TypeQL.insert(var("x").isa("movie")).toString());
+        assertEquals("insert\n$x isa movie;", TypeQL.insert(cVar("x").isa("movie")).toString());
     }
 
     @Test
     public void testEscapeStrings() {
-        assertEquals("insert\n$x \"hello\nworld\";", TypeQL.insert(var("x").eq("hello\nworld")).toString());
-        assertEquals("insert\n$x \"hello\\nworld\";", TypeQL.insert(var("x").eq("hello\\nworld")).toString());
+        assertEquals("insert\n$x \"hello\nworld\";", TypeQL.insert(cVar("x").eq("hello\nworld")).toString());
+        assertEquals("insert\n$x \"hello\\nworld\";", TypeQL.insert(cVar("x").eq("hello\\nworld")).toString());
     }
 
     @Test
@@ -125,28 +127,42 @@ public class TypeQLQueryTest {
 
     @Test
     public void testRepeatRoleplayerToString() {
-        assertEquals("match\n($x, $x);", match(rel("x").rel("x")).toString());
+        assertEquals("match\n($x, $x);", match(rel(cVar("x")).rel(cVar("x"))).toString());
     }
 
     @Test
     public void testMatchInsertToString() {
-        TypeQLInsert query = match(var("x").isa("movie")).insert(var("x").has("title", "hello"));
+        TypeQLInsert query = match(cVar("x").isa("movie")).insert(cVar("x").has("title", "hello"));
         assertEquals("match\n$x isa movie;\ninsert\n$x has title \"hello\";", query.toString());
     }
 
     @Test
+    public void testMatchInsertWithValueVariable() {
+        TypeQLInsert query = match(vVar("x").assign(Expression.constant(2))).insert(cVar("a").eq(vVar("x")).isa("prime"));
+        assertEquals("match\n?x = 2;\ninsert\n$a == ?x isa prime;", query.toString());
+    }
+
+    @Test
+    public void testMatchInsertOwnershipWithValueVariable() {
+        TypeQLInsert query = match(
+                vVar("x").assign(Expression.constant(2))
+        ).insert(cVar("p").has("prime", vVar("x")));
+        assertEquals("match\n?x = 2;\ninsert\n$p has prime == ?x;", query.toString());
+    }
+
+    @Test
     public void testZeroToString() {
-        assertEquals("match\n$x 0.0;", match(var("x").eq(0.0)).toString());
+        assertEquals("match\n$x 0.0;", match(cVar("x").eq(0.0)).toString());
     }
 
     @Test
     public void testExponentsToString() {
-        assertEquals("match\n$x 1000000000.0;", match(var("x").eq(1_000_000_000.0)).toString());
+        assertEquals("match\n$x 1000000000.0;", match(cVar("x").eq(1_000_000_000.0)).toString());
     }
 
     @Test
     public void testDecimalToString() {
-        assertEquals("match\n$x 0.0001;", match(var("x").eq(0.0001)).toString());
+        assertEquals("match\n$x 0.0001;", match(cVar("x").eq(0.0001)).toString());
     }
 
     @Test

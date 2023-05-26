@@ -73,7 +73,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
     }
 
     public Stream<UnboundVariable> namedVariablesUnbound() {
-        return variables().filter(Variable::isNamed).map(v -> UnboundVariable.named(v.name())).distinct();
+        return variables().filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct();
     }
 
     @Override

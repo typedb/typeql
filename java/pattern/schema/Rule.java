@@ -132,13 +132,13 @@ public class Rule implements Definable {
         }
 
         // rule 'has' cannot assign both an attribute type and a named variable
-        if (then.has().size() == 1 && then.has().get(0).type().isPresent() && then.has().get(0).attribute().isNamed()) {
+        if (then.has().size() == 1 && then.has().get(0).type().isPresent() && then.has().get(0).attribute().isNamedConcept()) {
             String attrVar = then.has().get(0).attribute().name();
             String attrType;
             if (then.has().get(0).type().get().label().isPresent()) {
                 attrType = then.has().get(0).type().get().label().get().label();
             } else {
-                assert then.has().get(0).type().get().isNamed();
+                assert then.has().get(0).type().get().isNamedConcept();
                 attrType = then.has().get(0).type().get().name();
             }
             throw TypeQLException.of(INVALID_RULE_THEN_HAS.message(label, then, attrType, attrVar));

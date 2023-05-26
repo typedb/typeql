@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
@@ -52,18 +53,17 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.GET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.FILTER_VARIABLE_ANONYMOUS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_NAMED;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_MATCH;
+import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 
 public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch.Aggregate> {
 
@@ -94,10 +94,10 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         eachPatternVariableHasNamedVariable(conjunction.patterns());
         filtersAreInScope();
         sortVarsAreInScope();
+        validateNamesUnique(patternsRecursive(conjunction));
 
         this.hash = Objects.hash(this.conjunction, this.modifiers);
     }
-
 
     public class Modifiers {
 
@@ -184,10 +184,19 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         if (namedVariablesUnbound().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
     }
 
+    public Stream<Pattern> patternsRecursive() {
+        return patternsRecursive(conjunction);
+    }
+
+    private Stream<Pattern> patternsRecursive(Pattern pattern) {
+        return Stream.concat(Stream.of(pattern), pattern.patterns().stream().filter(p -> !p.equals(pattern))
+                .flatMap(this::patternsRecursive));
+    }
+
     private void eachPatternVariableHasNamedVariable(List<? extends Pattern> patterns) {
         patterns.forEach(pattern -> {
-            if (pattern.isVariable() && !pattern.asVariable().reference().isName()
-                    && pattern.asVariable().variables().noneMatch(constraintVar -> constraintVar.reference().isName())) {
+            if (pattern.isVariable() && !pattern.asVariable().isNamed()
+                    && pattern.asVariable().variables().noneMatch(constraintVar -> constraintVar.isNamed())) {
                 throw TypeQLException.of(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.message(pattern));
             } else if (!pattern.isVariable()) {
                 eachPatternVariableHasNamedVariable(pattern.patterns());
@@ -198,7 +207,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     private void filtersAreInScope() {
         Set<UnboundVariable> duplicates = new HashSet<>();
         for (UnboundVariable var : modifiers.filter) {
-            if (!var.isNamed()) throw TypeQLException.of(VARIABLE_NOT_NAMED);
+            if (!var.isNamed()) throw TypeQLException.of(FILTER_VARIABLE_ANONYMOUS);
             if (!namedVariablesUnbound().contains(var))
                 throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (duplicates.contains(var)) throw TypeQLException.of(ILLEGAL_FILTER_VARIABLE_REPEATING.message(var));
@@ -216,10 +225,6 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     @Override
     public Aggregate aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var) {
         return new Aggregate(this, method, var);
-    }
-
-    public Group group(String var) {
-        return group(UnboundVariable.named(var));
     }
 
     public Group group(UnboundVariable var) {
@@ -287,10 +292,6 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         static Conjunction<? extends Pattern> validConjunction(List<? extends Pattern> patterns) {
             if (patterns.size() == 0) throw TypeQLException.of(MISSING_PATTERNS.message());
             return new Conjunction<>(patterns);
-        }
-
-        public TypeQLMatch.Filtered get(String var, String... vars) {
-            return get(concat(of(var), of(vars)).map(UnboundVariable::named).collect(toList()));
         }
 
         public TypeQLMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {

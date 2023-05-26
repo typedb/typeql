@@ -56,10 +56,16 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
 
     TypeVariable(Reference reference) {
         super(reference);
+        assert !reference.isNameValue();
         this.ownsConstraints = new LinkedList<>();
         this.playsConstraints = new LinkedList<>();
         this.relatesConstraints = new LinkedList<>();
         this.constraints = new LinkedList<>();
+    }
+
+    @Override
+    public UnboundConceptVariable toUnbound() {
+        return new UnboundConceptVariable(reference);
     }
 
     @Override

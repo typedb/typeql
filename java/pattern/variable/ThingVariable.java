@@ -22,7 +22,6 @@
 package com.vaticle.typeql.lang.pattern.variable;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.builder.ThingVariableBuilder;
 
@@ -42,19 +41,24 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     ThingConstraint.IID iidConstraint;
     ThingConstraint.Isa isaConstraint;
-    ConceptConstraint.Is isConstraint;
-    ThingConstraint.Value<?> valueConstraint;
+    ThingConstraint.Predicate predicateConstraint;
     ThingConstraint.Relation relationConstraint;
     List<ThingConstraint.Has> hasConstraints;
     List<ThingConstraint> constraints;
 
     ThingVariable(Reference reference) {
         super(reference);
+        assert !reference.isNameValue();
         this.hasConstraints = new LinkedList<>();
         this.constraints = new LinkedList<>();
     }
 
     abstract T getThis();
+
+    @Override
+    public UnboundConceptVariable toUnbound() {
+        return new UnboundConceptVariable(reference);
+    }
 
     @Override
     public List<ThingConstraint> constraints() {
@@ -79,12 +83,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         return Optional.ofNullable(isaConstraint);
     }
 
-    public Optional<ConceptConstraint.Is> is() {
-        return Optional.ofNullable(isConstraint);
-    }
-
-    public Optional<ThingConstraint.Value<?>> value() {
-        return Optional.ofNullable(valueConstraint);
+    public Optional<ThingConstraint.Predicate> predicate() {
+        return Optional.ofNullable(predicateConstraint);
     }
 
     public Optional<ThingConstraint.Relation> relation() {
@@ -155,7 +155,6 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         private String thingSyntax() {
             if (isa().isPresent()) return isaSyntax();
             else if (iid().isPresent()) return iid().get().toString();
-            else if (is().isPresent()) return is().get().toString();
             else return "";
         }
 
@@ -216,10 +215,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
 
-        Attribute(Reference reference, ThingConstraint.Value<?> valueConstraint) {
+        Attribute(Reference reference, ThingConstraint.Predicate predicateConstraint) {
             super(reference);
-            this.valueConstraint = valueConstraint;
-            constraints.add(valueConstraint);
+            this.predicateConstraint = predicateConstraint;
+            constraints.add(predicateConstraint);
         }
 
         @Override
@@ -229,10 +228,10 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
         @Override
         public String toString(boolean pretty) {
-            assert value().isPresent();
+            assert predicate().isPresent();
             StringBuilder attribute = new StringBuilder();
             if (isVisible()) attribute.append(reference.syntax()).append(SPACE);
-            attribute.append(value().get());
+            attribute.append(predicate().get());
             String constraints;
             if (pretty) {
                 constraints = Stream.of(isaSyntax(), hasSyntax())

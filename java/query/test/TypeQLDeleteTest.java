@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.TypeQL.var;
+import static com.vaticle.typeql.lang.TypeQL.cVar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -43,11 +43,11 @@ public class TypeQLDeleteTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private final TypeQLMatch.Unfiltered match1 = TypeQL.match(var("x").isa("movie"));
-    private final TypeQLMatch.Unfiltered match2 = TypeQL.match(var("y").isa("movie"));
+    private final TypeQLMatch.Unfiltered match1 = TypeQL.match(cVar("x").isa("movie"));
+    private final TypeQLMatch.Unfiltered match2 = TypeQL.match(cVar("y").isa("movie"));
 
-    private final List<ThingVariable<?>> delete1 = list(var("x").isa("movie"));
-    private final List<ThingVariable<?>> delete2 = list(var("y").isa("movie"));
+    private final List<ThingVariable<?>> delete1 = list(cVar("x").isa("movie"));
+    private final List<ThingVariable<?>> delete2 = list(cVar("y").isa("movie"));
 
     @Test
     public void deleteQueriesWithTheSameMatchAndVarsAreEqual() {

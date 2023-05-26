@@ -9,7 +9,7 @@ match $x isa person, has name "alice", has age 32;
 The native TypeQL query above can be constructed programmatically in Java using this library, in the following way.
 
 ```java
-TypeQL.match(var("x").isa("person").has("name", "alice").has("age", 32));
+TypeQL.match(cVar("x").isa("person").has("name", "alice").has("age", 32));
 ```
 
 You can learn more about TypeQL Language Library for Java from [docs.vaticle.com](https://docs.vaticle.com/docs/query/overview). You can find TypeDB and TypeQL repositories at [vaticle/typedb](https://github.com/vaticle/typedb) and [vaticle/typeql](https://github.com/vaticle/typeql).

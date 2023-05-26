@@ -22,14 +22,19 @@
 package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
+import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
+import static java.util.stream.Stream.concat;
 
 public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
 
@@ -39,6 +44,11 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
 
     TypeQLInsert(@Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
         super(INSERT, match, validInsertVars(match, variables));
+        Stream<Pattern> patterns = concat(
+                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(TypeQLMatch::patternsRecursive),
+                variables.stream()
+        );
+        validateNamesUnique(patterns);
     }
 
     static List<ThingVariable<?>> validInsertVars(@Nullable TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
@@ -55,5 +65,7 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
         return Optional.ofNullable(match);
     }
 
-    public List<ThingVariable<?>> variables() { return variables; }
+    public List<ThingVariable<?>> variables() {
+        return variables;
+    }
 }

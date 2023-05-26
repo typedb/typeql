@@ -21,6 +21,7 @@
 
 package com.vaticle.typeql.lang.query;
 
+import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
+import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static com.vaticle.typeql.lang.query.TypeQLDelete.validDeleteVars;
 import static com.vaticle.typeql.lang.query.TypeQLInsert.validInsertVars;
 import static java.util.stream.Collectors.toList;
@@ -52,6 +54,11 @@ public class TypeQLUpdate extends TypeQLWritable {
         super(match);
         this.deleteVariables = validDeleteVars(match, deleteVariables);
         this.insertVariables = validInsertVars(match, insertVariables);
+        Stream<Pattern> patterns = concat(
+                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(TypeQLMatch::patternsRecursive),
+                concat(deleteVariables.stream(), insertVariables.stream())
+        );
+        validateNamesUnique(patterns);
         this.hash = Objects.hash(match, deleteVariables, insertVariables);
     }
 
@@ -72,7 +79,7 @@ public class TypeQLUpdate extends TypeQLWritable {
     public List<UnboundVariable> namedDeleteVariablesUnbound() {
         if (namedDeleteVariablesUnbound == null) {
             namedDeleteVariablesUnbound = deleteVariables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
-                    .filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct().collect(toList());
+                    .filter(Variable::isNamedConcept).map(BoundVariable::toUnbound).distinct().collect(toList());
         }
         return namedDeleteVariablesUnbound;
     }

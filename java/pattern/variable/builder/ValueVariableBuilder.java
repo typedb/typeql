@@ -21,19 +21,16 @@
 
 package com.vaticle.typeql.lang.pattern.variable.builder;
 
-import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
-import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
+import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
+import com.vaticle.typeql.lang.pattern.variable.ValueVariable;
 
-public interface ConceptVariableBuilder {
+public interface ValueVariableBuilder extends PredicateBuilder<ValueVariable> {
 
-    default ConceptVariable is(String var) {
-        return is(UnboundConceptVariable.named(var));
+    default ValueVariable assign(Expression expression) {
+        return constrain(new ValueConstraint.Assignment(expression));
     }
 
-    default ConceptVariable is(UnboundConceptVariable var) {
-        return constrain(new ConceptConstraint.Is(var));
-    }
+    ValueVariable constrain(ValueConstraint.Predicate constraint);
 
-    ConceptVariable constrain(ConceptConstraint.Is constraint);
+    ValueVariable constrain(ValueConstraint.Assignment constraint);
 }

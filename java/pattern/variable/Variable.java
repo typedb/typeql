@@ -22,10 +22,6 @@
 package com.vaticle.typeql.lang.pattern.variable;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.constraint.Constraint;
-
-import java.util.List;
-import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
@@ -38,8 +34,6 @@ public abstract class Variable {
         this.reference = reference;
     }
 
-    public abstract List<? extends Constraint<?>> constraints();
-
     public boolean isUnbound() {
         return false;
     }
@@ -48,28 +42,12 @@ public abstract class Variable {
         return false;
     }
 
-    public boolean isConcept() {
-        return false;
-    }
-
-    public boolean isType() {
-        return false;
-    }
-
-    public boolean isThing() {
-        return false;
-    }
-
     public UnboundVariable asUnbound() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundVariable.class)));
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundConceptVariable.class)));
     }
 
     public BoundVariable asBound() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
-    }
-
-    public Stream<BoundVariable> variables() {
-        return constraints().stream().flatMap(constraint -> constraint.variables().stream());
     }
 
     public Reference.Type type() {
@@ -78,8 +56,9 @@ public abstract class Variable {
 
     public String name() {
         switch (reference.type()) {
-            case NAME:
-                return reference.asName().name();
+            case NAME_CONCEPT:
+            case NAME_VALUE:
+                return reference.name();
             case LABEL:
             case ANONYMOUS:
                 return null;
@@ -95,6 +74,14 @@ public abstract class Variable {
 
     public boolean isNamed() {
         return reference.isName();
+    }
+
+    public boolean isNamedConcept() {
+        return reference.isNameConcept();
+    }
+
+    public boolean isNamedValue() {
+        return reference.isNameValue();
     }
 
     public boolean isLabelled() {
