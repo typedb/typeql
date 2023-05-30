@@ -69,8 +69,10 @@ macro_rules! error_messages {
                 )*}
             }
 
-            const fn payload(&self) -> String {
-                $(error_messages!(@payload self, $error_name $(, $inner)*);)*
+            fn format_payload<'a, 'b>(&'a self, debug_struct: &'a mut std::fmt::DebugStruct<'a, 'b>) -> &mut std::fmt::DebugStruct<'a, 'b>
+                where 'b: 'a
+            {
+                $(error_messages!(@payload self, debug_struct, $error_name $(, $inner)*);)*
                 unreachable!()
             }
         }
@@ -89,11 +91,11 @@ macro_rules! error_messages {
 
         impl std::fmt::Debug for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                f.debug_struct(&self.name())
-                    .field("payload", &self.payload())
-                    .field("code", &self.code())
-                    .field("message", &format!("{self}"))
-                    .finish()
+                let mut debug_struct = f.debug_struct(&self.name());
+                let mut repr = debug_struct
+                    .field("message", &format!("{}", self));
+                repr = self.format_payload(repr);
+                repr.finish()
             }
         }
 
@@ -130,39 +132,40 @@ macro_rules! error_messages {
         }
     };
 
-    (@payload $self:ident, $error_name:ident) => {
+    (@payload $self:ident, $format:ident, $error_name:ident) => {
         if let Self::$error_name() = &$self {
-            return format!("{:?}", ())
+            return $format.field("payload", &())
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $t1:ty) => {
+    (@payload $self:ident, $format:ident, $error_name:ident, $t1:ty) => {
         if let Self::$error_name(_0) = &$self {
-            return format!("{:?}", (_0))
+            return $format.field("payload", &(_0))
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $t1:ty, $t2:ty) => {
+    (@payload $self:ident, $format:ident, $error_name:ident, $t1:ty, $t2:ty) => {
         if let Self::$error_name(_0, _1) = &$self {
-            return format!("{:?}", (_0, _1))
+            return $format.field("payload", &(_0, _1))
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $t1:ty, $t2:ty, $t3:ty) => {
+    (@payload $self:ident, $format:ident, $error_name:ident, $t1:ty, $t2:ty, $t3:ty) => {
         if let Self::$error_name(_0, _1, _2) = &$self {
-            return format!("{:?}", (_0, _1, _2))
+            return $format.field("payload", &(_0, _1, _2))
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
+    (@payload $self:ident, $format:ident, $error_name:ident, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
         if let Self::$error_name(_0, _1, _2, _3) = &$self {
-            return format!("{:?}", (_0, _1, _2, _3))
+            return $format.field("payload", &(_0, _1, _2, _3))
         }
     };
 }
 
 #[cfg(test)]
 mod tests {
+    use std::fmt::Debug;
     error_messages! { TestError
         code: "TST", type: "Test Error",
         BasicError() =
@@ -185,6 +188,9 @@ mod tests {
             let display = format!("{error}");
             let compact_debug = format!("{error:?}");
             let expanded_debug = format!("{error:#?}");
+            println!("display:\n{}", display);
+            println!("compact_debug:\n{}", compact_debug);
+            println!("expanded_debug:\n{}", expanded_debug);
             assert!(compact_debug.contains(&display.replace('\n', &"\\n")));
             assert!(expanded_debug.contains(&display.replace('\n', &"\\n")));
         }
