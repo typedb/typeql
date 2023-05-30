@@ -188,12 +188,8 @@ mod tests {
             let display = format!("{error}");
             let compact_debug = format!("{error:?}");
             let expanded_debug = format!("{error:#?}");
-            println!("display:\n{}", display);
-            println!("compact_debug:\n{}", compact_debug);
-            println!("expanded_debug:\n{}", expanded_debug);
             assert!(compact_debug.contains(&display.replace('\n', &"\\n")));
             assert!(expanded_debug.contains(&display.replace('\n', &"\\n")));
         }
-        panic!();
     }
 }
