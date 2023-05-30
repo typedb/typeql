@@ -31,7 +31,7 @@ exports_files(
 
 deploy_github(
     name = "deploy-github",
-    release_description = "//:LATEST_RELEASE_NOTES.md",
+    release_description = "//:RELEASE_NOTES_LATEST.md",
     title = "TypeQL",
     title_append_version = True,
     organisation = deployment['github.organisation'],

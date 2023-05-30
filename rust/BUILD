@@ -75,7 +75,7 @@ deploy_crate(
 
 deploy_github(
     name = "deploy_github",
-    release_description = "//:LATEST_RELEASE_NOTES.md",
+    release_description = "//:RELEASE_NOTES_LATEST.md",
     title = "TypeQL",
     title_append_version = True,
     organisation = deployment_github['github.organisation'],

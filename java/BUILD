@@ -65,7 +65,7 @@ deploy_maven(
 
 deploy_github(
     name = "deploy-github",
-    release_description = "//:LATEST_RELEASE_NOTES.md",
+    release_description = "//:RELEASE_NOTES_LATEST.md",
     title = "TypeQL language library for Java",
     title_append_version = True,
     organisation = github_deployment['github.organisation'],

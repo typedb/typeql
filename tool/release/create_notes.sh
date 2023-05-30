@@ -19,4 +19,4 @@
 # under the License.
 #
 
-bazel run @vaticle_dependencies//tool/release/notes:create -- vaticle typeql HEAD $(cat VERSION) ./RELEASE_TEMPLATE.md ./LATEST_RELEASE_NOTES.md
+bazel run @vaticle_dependencies//tool/release/notes:create -- vaticle typeql HEAD $(cat VERSION) ./RELEASE_TEMPLATE.md ./RELEASE_NOTES_LATEST.md

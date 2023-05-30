@@ -1,3 +1,5 @@
+# TypeQL
+
 ## TypeQL Grammar and Language Library distributions for Java
 
 ```xml
