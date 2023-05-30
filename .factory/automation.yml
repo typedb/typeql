@@ -117,7 +117,7 @@ release:
     validate-release-notes:
       image: vaticle-ubuntu-22.04
       command: |
-        export VALIDATE_NOTES_TOKEN=$REPO_GITHUB_TOKEN
+        export NOTES_VALIDATE_TOKEN=$REPO_GITHUB_TOKEN
         bazel run @vaticle_dependencies//tool/release/notes:validate --test_output=streamed -- $FACTORY_OWNER $FACTORY_REPO ./RELEASE_NOTES_LATEST.md
   deployment:
     deploy-github:
