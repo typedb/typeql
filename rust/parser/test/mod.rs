@@ -1057,6 +1057,21 @@ rule a-rule: when {
 }
 
 #[test]
+fn test_parse_definables() {
+    let query = r#"athlete sub person;
+      runner sub athlete;
+      sprinter sub runner;"#;
+
+    let parsed = parse_definables(query).unwrap().into_iter().map(|p| p.into_type_variable()).collect::<Vec<_>>();
+    let expected =
+        vec![type_("athlete").sub("person"), type_("runner").sub("athlete"), type_("sprinter").sub("runner")];
+
+    for i in 1..expected.len() {
+        assert_eq!(expected[i], parsed[i]);
+    }
+}
+
+#[test]
 fn test_parse_variable_rel() {
     let variable = "(wife: $a, husband: $b) isa marriage";
 
