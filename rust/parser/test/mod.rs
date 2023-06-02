@@ -31,9 +31,9 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, not, or, parse_label, parse_pattern, parse_queries, parse_query, parse_variable,
+    gte, lt, lte, not, or, parse_definables, parse_label, parse_pattern, parse_queries, parse_query, parse_variable,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
+        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Label, RelationVariableBuilder,
         ThingVariableBuilder, TypeVariableBuilder, Variable,
     },
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
@@ -1060,6 +1060,15 @@ fn test_parse_variable_has() {
     } else {
         panic!("Expected ThingVariable, found {variable:?}.");
     }
+}
+
+#[test]
+fn test_parse_label() {
+    let label = "label_with-symbols";
+
+    let parsed = parse_label(label).unwrap();
+    let expected = Label { scope: None, name: String::from(label) };
+    assert_eq!(expected, parsed);
 }
 
 #[test]
