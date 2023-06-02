@@ -152,7 +152,7 @@ pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
 }
 
 pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
-    visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::eof_patterns))
+    visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::patterns))
         .into_iter()
         .map(Validatable::validated)
         .collect()

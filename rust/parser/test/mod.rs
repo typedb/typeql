@@ -31,7 +31,8 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, not, or, parse_definables, parse_label, parse_pattern, parse_queries, parse_query, parse_variable,
+    gte, lt, lte, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries, parse_query,
+    parse_variable,
     pattern::{
         Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Label, RelationVariableBuilder,
         ThingVariableBuilder, TypeVariableBuilder, Variable,
@@ -1004,6 +1005,25 @@ fn test_parsing_pattern() {
     );
 
     assert_valid_eq_repr!(expected, parsed, pattern);
+}
+
+#[test]
+fn test_parsing_patterns() {
+    let patterns = r#"(wife: $a, husband: $b) isa marriage;
+    $a has gender "male";
+    $b has gender "female";
+"#;
+
+    let parsed = parse_patterns(patterns).unwrap().into_iter().map(|p| p.into_variable()).collect::<Vec<_>>();
+    let expected: Vec<Variable> = vec![
+        Variable::Thing(rel(("wife", "a")).rel(("husband", "b")).isa("marriage")),
+        Variable::Thing(var("a").has(("gender", "male"))),
+        Variable::Thing(var("b").has(("gender", "female"))),
+    ];
+
+    for i in 1..expected.len() {
+        assert_eq!(expected[i], parsed[i]);
+    }
 }
 
 #[test]
