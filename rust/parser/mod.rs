@@ -163,7 +163,9 @@ pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
 }
 
 pub(crate) fn visit_eof_variable(variable: &str) -> Result<Variable> {
-    visit_pattern_variable(parse_single(Rule::eof_variable, variable)?).validated()
+    visit_pattern_variable(
+        parse_single(Rule::eof_variable, variable)?.into_children().consume_expected(Rule::pattern_variable)
+    ).validated()
 }
 
 pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
