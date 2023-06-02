@@ -31,10 +31,10 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, not, or, parse_pattern, parse_queries, parse_query,
+    gte, lt, lte, not, or, parse_label, parse_pattern, parse_queries, parse_query, parse_variable,
     pattern::{
         Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, RelationVariableBuilder,
-        ThingVariableBuilder, TypeVariableBuilder,
+        ThingVariableBuilder, TypeVariableBuilder, Variable,
     },
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
@@ -1034,6 +1034,32 @@ rule a-rule: when {
         .then(var("x").has(("is_interesting", true))));
 
     assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_parse_variable_rel() {
+    let variable = "(wife: $a, husband: $b) isa marriage";
+
+    let parsed = parse_variable(variable).unwrap();
+    if let Variable::Thing(parsed_var) = parsed {
+        let expected = rel(("wife", "a")).rel(("husband", "b")).isa("marriage");
+        assert_valid_eq_repr!(expected, parsed_var, variable);
+    } else {
+        panic!("Expected ThingVariable, found {variable:?}.");
+    }
+}
+
+#[test]
+fn test_parse_variable_has() {
+    let variable = "$x has is_interesting true";
+
+    let parsed = parse_variable(variable).unwrap();
+    if let Variable::Thing(parsed_var) = parsed {
+        let expected = var("x").has(("is_interesting", true));
+        assert_valid_eq_repr!(expected, parsed_var, variable);
+    } else {
+        panic!("Expected ThingVariable, found {variable:?}.");
+    }
 }
 
 #[test]
