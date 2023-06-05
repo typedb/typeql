@@ -152,18 +152,24 @@ pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
 }
 
 pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
-    visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::eof_patterns))
+    visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::patterns))
         .into_iter()
         .map(Validatable::validated)
         .collect()
 }
 
 pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
-    visit_definables(parse_single(Rule::eof_definables, definables)?).into_iter().map(Validatable::validated).collect()
+    visit_definables(parse_single(Rule::eof_definables, definables)?.into_children().consume_expected(Rule::definables))
+        .into_iter()
+        .map(Validatable::validated)
+        .collect()
 }
 
 pub(crate) fn visit_eof_variable(variable: &str) -> Result<Variable> {
-    visit_pattern_variable(parse_single(Rule::eof_variable, variable)?).validated()
+    visit_pattern_variable(
+        parse_single(Rule::eof_variable, variable)?.into_children().consume_expected(Rule::pattern_variable),
+    )
+    .validated()
 }
 
 pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
