@@ -65,7 +65,7 @@ macro_rules! error_messages {
 
             const fn name(&self) -> &'static str {
                 match self {$(
-                    Self::$error_name(..) => concat!(std::stringify!($name), "::", std::stringify!($error_name)),
+                    Self::$error_name(..) => concat!(stringify!($name), "::", stringify!($error_name)),
                 )*}
             }
         }
@@ -84,14 +84,15 @@ macro_rules! error_messages {
 
         impl std::fmt::Debug for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                let mut binding = f.debug_struct(self.name());
-                || { $(error_messages!(@payload
+                let mut debug_struct = f.debug_struct(self.name());
+                debug_struct.field("message", &format!("{}", self));
+                $(error_messages!(@payload
                     self,
                     $error_name,
-                    binding.field("message", &format!("{}", self))
-                    $(, $inner)*);
-                )* }();
-                binding.finish()
+                    debug_struct
+                    $(, $inner)*
+                );)*
+                debug_struct.finish()
             }
         }
 
@@ -128,33 +129,33 @@ macro_rules! error_messages {
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:expr) => {
+    (@payload $self:ident, $error_name:ident, $debug_struct:expr) => {
         if let Self::$error_name() = &$self {
-            return $format.field("payload", &());
+            $debug_struct.field("payload", &());
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty) => {
+    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty) => {
         if let Self::$error_name(_0) = &$self {
-            return $format.field("payload", &(_0));
+            $debug_struct.field("payload", &(_0));
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty) => {
+    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty, $t2:ty) => {
         if let Self::$error_name(_0, _1) = &$self {
-            return $format.field("payload", &(_0, _1));
+            $debug_struct.field("payload", &(_0, _1));
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty, $t3:ty) => {
+    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty, $t2:ty, $t3:ty) => {
         if let Self::$error_name(_0, _1, _2) = &$self {
-            return $format.field("payload", &(_0, _1, _2));
+            $debug_struct.field("payload", &(_0, _1, _2));
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
+    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
         if let Self::$error_name(_0, _1, _2, _3) = &$self {
-            return $format.field("payload", &(_0, _1, _2, _3));
+            $debug_struct.field("payload", &(_0, _1, _2, _3));
         }
     };
 }
