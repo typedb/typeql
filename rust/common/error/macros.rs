@@ -85,7 +85,12 @@ macro_rules! error_messages {
         impl std::fmt::Debug for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 let mut binding = f.debug_struct(self.name());
-                $(error_messages!(@payload self, $error_name, binding.field("message", &format!("{}", self)) $(, $inner)*);)*
+                || { $(error_messages!(@payload
+                    self,
+                    $error_name,
+                    binding.field("message", &format!("{}", self))
+                    $(, $inner)*);
+                )* }();
                 binding.finish()
             }
         }
@@ -125,31 +130,31 @@ macro_rules! error_messages {
 
     (@payload $self:ident, $error_name:ident, $format:expr) => {
         if let Self::$error_name() = &$self {
-            $format.field("payload", &());
+            return $format.field("payload", &());
         }
     };
 
     (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty) => {
         if let Self::$error_name(_0) = &$self {
-            $format.field("payload", &(_0));
+            return $format.field("payload", &(_0));
         }
     };
 
     (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty) => {
         if let Self::$error_name(_0, _1) = &$self {
-            $format.field("payload", &(_0, _1));
+            return $format.field("payload", &(_0, _1));
         }
     };
 
     (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty, $t3:ty) => {
         if let Self::$error_name(_0, _1, _2) = &$self {
-            $format.field("payload", &(_0, _1, _2));
+            return $format.field("payload", &(_0, _1, _2));
         }
     };
 
     (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
         if let Self::$error_name(_0, _1, _2, _3) = &$self {
-            $format.field("payload", &(_0, _1, _2, _3));
+            return $format.field("payload", &(_0, _1, _2, _3));
         }
     };
 }
