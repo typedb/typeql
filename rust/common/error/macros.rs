@@ -63,9 +63,9 @@ macro_rules! error_messages {
                 }
             }
 
-            fn name(&self) -> String {
+            const fn name(&self) -> &'static str {
                 match self {$(
-                    Self::$error_name(..) => format!("{}::{}", std::any::type_name::<Self>(), std::stringify!($error_name)),
+                    Self::$error_name(..) => concat!(std::stringify!($name), "::", std::stringify!($error_name)),
                 )*}
             }
         }
@@ -84,11 +84,9 @@ macro_rules! error_messages {
 
         impl std::fmt::Debug for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                let mut binding = f.debug_struct(&self.name());
-                let mut debug_struct = binding
-                    .field("message", &format!("{}", self));
-                $(error_messages!(@payload self, $error_name, debug_struct $(, $inner)*);)*
-                debug_struct.finish()
+                let mut binding = f.debug_struct(self.name());
+                $(error_messages!(@payload self, $error_name, binding.field("message", &format!("{}", self)) $(, $inner)*);)*
+                binding.finish()
             }
         }
 
@@ -125,31 +123,31 @@ macro_rules! error_messages {
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:ident) => {
+    (@payload $self:ident, $error_name:ident, $format:expr) => {
         if let Self::$error_name() = &$self {
             $format.field("payload", &());
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:ident, $t1:ty) => {
+    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty) => {
         if let Self::$error_name(_0) = &$self {
             $format.field("payload", &(_0));
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:ident, $t1:ty, $t2:ty) => {
+    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty) => {
         if let Self::$error_name(_0, _1) = &$self {
             $format.field("payload", &(_0, _1));
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:ident, $t1:ty, $t2:ty, $t3:ty) => {
+    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty, $t3:ty) => {
         if let Self::$error_name(_0, _1, _2) = &$self {
             $format.field("payload", &(_0, _1, _2));
         }
     };
 
-    (@payload $self:ident, $error_name:ident, $format:ident, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
+    (@payload $self:ident, $error_name:ident, $format:expr, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
         if let Self::$error_name(_0, _1, _2, _3) = &$self {
             $format.field("payload", &(_0, _1, _2, _3));
         }
@@ -181,8 +179,12 @@ mod tests {
             let display = format!("{error}");
             let compact_debug = format!("{error:?}");
             let expanded_debug = format!("{error:#?}");
+            println!("display:\n{display}");
+            println!("compact_debug:\n{compact_debug}");
+            println!("expanded_debug:\n{expanded_debug}");
             assert!(compact_debug.contains(&display.replace('\n', &"\\n")));
             assert!(expanded_debug.contains(&display.replace('\n', &"\\n")));
         }
+        panic!()
     }
 }
