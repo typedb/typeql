@@ -73,7 +73,7 @@ get $a;"#;
 }
 
 #[test]
-fn test_parse_string_with_slash() {
+fn test_parsing_string_with_slash() {
     let query = r#"match
 $x isa person,
     has name "alice/bob";"#;
@@ -490,7 +490,7 @@ has-genre relates $p;"#;
 }
 
 #[test]
-fn test_parse_relates_type_variable() {
+fn test_parsing_relates_type_variable() {
     let query = r#"match
 $x isa $type;
 $type relates someRole;"#;
@@ -928,7 +928,7 @@ $x value double;"#;
 }
 
 #[test]
-fn test_parse_without_var() {
+fn test_parsing_without_var() {
     let query = r#"match
 $_ isa person;"#;
 
@@ -1021,9 +1021,7 @@ fn test_parsing_patterns() {
         Variable::Thing(var("b").has(("gender", "female"))),
     ];
 
-    for i in 1..expected.len() {
-        assert_eq!(expected[i], parsed[i]);
-    }
+    assert_eq!(expected, parsed);
 }
 
 #[test]
@@ -1057,7 +1055,7 @@ rule a-rule: when {
 }
 
 #[test]
-fn test_parse_definables() {
+fn test_parsing_definables() {
     let query = r#"athlete sub person;
       runner sub athlete;
       sprinter sub runner;"#;
@@ -1066,13 +1064,11 @@ fn test_parse_definables() {
     let expected =
         vec![type_("athlete").sub("person"), type_("runner").sub("athlete"), type_("sprinter").sub("runner")];
 
-    for i in 1..expected.len() {
-        assert_eq!(expected[i], parsed[i]);
-    }
+    assert_eq!(expected, parsed);
 }
 
 #[test]
-fn test_parse_variable_rel() {
+fn test_parsing_variable_rel() {
     let variable = "(wife: $a, husband: $b) isa marriage";
 
     let parsed = parse_variable(variable).unwrap();
@@ -1085,7 +1081,7 @@ fn test_parse_variable_rel() {
 }
 
 #[test]
-fn test_parse_variable_has() {
+fn test_parsing_variable_has() {
     let variable = "$x has is_interesting true";
 
     let parsed = parse_variable(variable).unwrap();
@@ -1098,7 +1094,7 @@ fn test_parse_variable_has() {
 }
 
 #[test]
-fn test_parse_label() {
+fn test_parsing_label() {
     let label = "label_with-symbols";
 
     let parsed = parse_label(label).unwrap();
@@ -1107,7 +1103,7 @@ fn test_parse_label() {
 }
 
 #[test]
-fn test_parse_boolean() {
+fn test_parsing_boolean() {
     let query = r#"insert
 $_ has flag true;"#;
 
@@ -1117,7 +1113,7 @@ $_ has flag true;"#;
 }
 
 #[test]
-fn test_parse_aggregate_group() {
+fn test_parsing_aggregate_group() {
     let query = r#"match
 $x isa movie;
 group $x;"#;
@@ -1129,7 +1125,7 @@ group $x;"#;
 }
 
 #[test]
-fn test_parse_aggregate_group_count() {
+fn test_parsing_aggregate_group_count() {
     let query = r#"match
 $x isa movie;
 group $x; count;"#;
@@ -1141,7 +1137,7 @@ group $x; count;"#;
 }
 
 #[test]
-fn test_parse_aggregate_std() {
+fn test_parsing_aggregate_std() {
     let query = r#"match
 $x isa movie;
 std $x;"#;
@@ -1153,7 +1149,7 @@ std $x;"#;
 }
 
 #[test]
-fn test_parse_aggregate_to_string() {
+fn test_parsing_aggregate_to_string() {
     let query = r#"match
 $x isa movie;
 get $x;
@@ -1163,7 +1159,7 @@ group $x; count;"#;
 }
 
 #[test]
-fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error() {
+fn when_parsing_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error() {
     let parsed = parse_query("match\n$x isa");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
@@ -1174,7 +1170,7 @@ fn when_parse_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_error(
 }
 
 #[test]
-fn when_parse_incorrect_syntax_trailing_query_whitespace_is_ignored() {
+fn when_parsing_incorrect_syntax_trailing_query_whitespace_is_ignored() {
     let parsed = parse_query("match\n$x isa \n");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
@@ -1185,7 +1181,7 @@ fn when_parse_incorrect_syntax_trailing_query_whitespace_is_ignored() {
 }
 
 #[test]
-fn when_parse_incorrect_syntax_error_message_should_retain_whitespace() {
+fn when_parsing_incorrect_syntax_error_message_should_retain_whitespace() {
     let parsed = parse_query("match\n$x isa ");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
@@ -1223,12 +1219,12 @@ $x regex "(fe)male";"#;
 }
 
 #[test]
-fn test_typeql_parse_query() {
+fn test_typeql_parsing_query() {
     assert!(matches!(parse_query("match\n$x isa movie;"), Ok(Query::Match(_))));
 }
 
 #[test]
-fn test_parse_key() {
+fn test_parsing_key() {
     let query = r#"match
 $x owns name @key;
 get $x;"#;
@@ -1239,12 +1235,12 @@ get $x;"#;
 }
 
 #[test]
-fn test_parse_empty_string() {
+fn test_parsing_empty_string() {
     assert!(parse_query("").is_err());
 }
 
 #[test]
-fn test_parse_list_one_match() {
+fn test_parsing_list_one_match() {
     let queries = "match $y isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_match()).collect::<Vec<_>>();
     let expected = vec![typeql_match!(var("y").isa("movie"))];
@@ -1252,7 +1248,7 @@ fn test_parse_list_one_match() {
 }
 
 #[test]
-fn test_parse_list_one_insert() {
+fn test_parsing_list_one_insert() {
     let queries = "insert $x isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
     let expected = vec![typeql_insert!(var("x").isa("movie"))];
@@ -1260,7 +1256,7 @@ fn test_parse_list_one_insert() {
 }
 
 #[test]
-fn test_parse_list_one_insert_with_whitespace_prefix() {
+fn test_parsing_list_one_insert_with_whitespace_prefix() {
     let queries = " insert $x isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
     let expected = vec![typeql_insert!(var("x").isa("movie"))];
@@ -1268,7 +1264,7 @@ fn test_parse_list_one_insert_with_whitespace_prefix() {
 }
 
 #[test]
-fn test_parse_list_one_insert_with_prefix_comment() {
+fn test_parsing_list_one_insert_with_prefix_comment() {
     let queries = r#"#hola
 insert $x isa movie;"#;
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
@@ -1277,7 +1273,7 @@ insert $x isa movie;"#;
 }
 
 #[test]
-fn test_parse_list() {
+fn test_parsing_list() {
     let queries = "insert $x isa movie; match $y isa movie;";
     let parsed = parse_queries(queries).unwrap().collect::<Result<Vec<_>, _>>().unwrap();
     let expected = vec![typeql_insert!(var("x").isa("movie")).into(), typeql_match!(var("y").isa("movie")).into()];
@@ -1285,7 +1281,7 @@ fn test_parse_list() {
 }
 
 #[test]
-fn test_parse_many_match_insert_without_stack_overflow() {
+fn test_parsing_many_match_insert_without_stack_overflow() {
     let num_queries = 10_000;
     let query = "match\n$x isa person; insert $x has name 'bob';\n";
     let queries = query.repeat(num_queries);
