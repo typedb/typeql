@@ -23,7 +23,7 @@
 #[macro_use]
 mod macros;
 
-use std::fmt;
+use std::{error::Error as StdError, fmt};
 
 use chrono::NaiveDateTime;
 use pest::error::{Error as PestError, LineColLocation};
@@ -35,10 +35,12 @@ use crate::{
     write_joined,
 };
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Error {
     errors: Vec<TypeQLError>,
 }
+
+impl StdError for Error {}
 
 impl From<TypeQLError> for Error {
     fn from(error: TypeQLError) -> Self {
