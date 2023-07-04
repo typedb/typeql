@@ -55,9 +55,9 @@ query_match_group_agg = { query_match ~ match_group ~ match_aggregate }
 
 modifiers = { (filter ~ ";")? ~ (sort ~ ";")? ~ (offset ~ ";")? ~ (limit ~ ";")? }
 
-filter = { GET ~ VAR_ ~ ( "," ~ VAR_ )* }
+filter = { GET ~ ( VAR_CONCEPT_ | VAR_VALUE_ ) ~ ( "," ~ ( VAR_CONCEPT_ | VAR_VALUE_ ) )* }
 sort = { SORT ~ var_order ~ ( "," ~ var_order )* }
-var_order = { VAR_ ~ ORDER_? }
+var_order = { ( VAR_CONCEPT_ | VAR_VALUE_ ) ~ ORDER_? }
 offset = { OFFSET ~ LONG_ }
 limit = { LIMIT ~ LONG_ }
 
@@ -67,7 +67,7 @@ limit = { LIMIT ~ LONG_ }
 // An aggregate function is composed of 2 things:
 // The aggregate method name, followed by the variable to apply the function to
 
-match_aggregate = { aggregate_method ~ VAR_? ~ ";" }
+match_aggregate = { aggregate_method ~ ( VAR_CONCEPT_ | VAR_VALUE_ )? ~ ";" }
 aggregate_method = { COUNT | MAX | MEAN | MEDIAN | MIN | STD | SUM }
 
 // GET GROUP QUERY =============================================================
@@ -75,9 +75,9 @@ aggregate_method = { COUNT | MAX | MEAN | MEDIAN | MIN | STD | SUM }
 // A group function is composed of 2 things:
 // The 'GROUP' method name, followed by the variable to group the results by
 
-match_group = { GROUP ~ VAR_ ~ ";" }
+match_group = { GROUP ~ ( VAR_CONCEPT_ | VAR_VALUE_ ) ~ ";" }
 
-// SCHEMA QUERY ===============================================================
+// SCHEMA QUERY ================================================================
 
 definables = { ( definable ~ ";" )+ }
 definable = { variable_type | schema_rule | schema_rule_declaration }
@@ -93,11 +93,11 @@ pattern_negation = { NOT ~ "{" ~ patterns ~ "}" }
 
 // VARIABLE PATTERNS ===========================================================
 
-pattern_variable = { variable_concept | variable_type | variable_thing_any }
+pattern_variable = { variable_concept | variable_type | variable_thing_any | variable_value }
 
 // CONCEPT VARAIBLES ===========================================================
 
-variable_concept = { VAR_ ~ IS ~ VAR_ }
+variable_concept = { VAR_CONCEPT_ ~ IS ~ VAR_CONCEPT_ }
 
 // TYPE VARIABLES ==============================================================
 
@@ -114,72 +114,105 @@ type_constraint = { ABSTRACT
 
 annotations_owns = { ( ANNOTATION_KEY )? ~ ( ANNOTATION_UNIQUE )? }
 
+// VALUE VARIABLES =============================================================
+
+variable_value = { VAR_VALUE_ ~ ASSIGN ~ expression
+                 | VAR_VALUE_ ~ predicate
+                 }
+
 // THING VARIABLES =============================================================
 
 variable_things = { ( variable_thing_any ~ ";" )+ }
 variable_thing_any = { variable_thing | variable_relation | variable_attribute }
 
-variable_thing = { VAR_ ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
-                 | VAR_ ~ IID ~ IID_ ~ ( "," ~ attributes )?
-                 | VAR_ ~ attributes
+variable_thing = { VAR_CONCEPT_ ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+                 | VAR_CONCEPT_ ~ IID ~ IID_ ~ ( "," ~ attributes )?
+                 | VAR_CONCEPT_ ~ attributes
                  }
 
-variable_relation = { VAR_? ~ relation ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
-                    | VAR_? ~ relation ~ attributes? }
+variable_relation = { VAR_CONCEPT_? ~ relation ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+                    | VAR_CONCEPT_? ~ relation ~ attributes? }
 
-variable_attribute = { VAR_? ~ predicate ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
-                     | VAR_? ~ predicate ~ attributes? }
+variable_attribute = { VAR_CONCEPT_? ~ predicate ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+                     | VAR_CONCEPT_? ~ predicate ~ attributes? }
 
 // RELATION CONSTRUCT ==========================================================
 
 relation = { "(" ~ role_player ~ ( "," ~ role_player )* ~ ")" }                 // A list of role players in a Relations
 role_player = { type_ ~ ":" ~ player | player }                                 // The Role type and player variable or just the player variable
-player = { VAR_ }                                                               // A player is just a variable
+player = { VAR_CONCEPT_ }                                                       // A player is just a variable
 
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes = { attribute ~ ( "," ~ attribute )* }
-attribute = { HAS ~ label ~ ( VAR_ | predicate ) | HAS ~ VAR_ }                 // ownership by labeled variable or value or just value
+attribute = { HAS ~ label ~ ( VAR_CONCEPT_ | VAR_VALUE_ | predicate )
+            | HAS ~ VAR_CONCEPT_
+            }                                                                   // ownership by labeled variable or value or just value
 
-// ATTRIBUTE VALUATION CONSTRUCTS ==============================================
+// PREDICATE CONSTRUCTS ========================================================
 
 predicate = { value | predicate_equality ~ predicate_value | predicate_substring ~ STRING_ }
 
-predicate_equality = { EQ | NEQ | GTE | GT | LTE | LT }
+predicate_equality = { EQ | NEQ | GTE | GT | LTE | LT
+                     | ASSIGN                                                   // Backwards compatibility till 3.0
+                     }
+
 predicate_substring = { CONTAINS | LIKE }
 
-predicate_value = { value | VAR_ }
+predicate_value = { value | VAR_CONCEPT_ | VAR_VALUE_ }
 
-// SCHEMA CONSTRUCT =============================================================
+// EXPRESSION CONSTRUCTS =======================================================
+
+expression = { expression ~ POWER ~ expression                                // exponentiation is right-associative
+             | expression ~ ( MULTIPLY | DIVIDE | MODULO ) ~ expression
+             | expression ~ ( ADD | SUBTRACT ) ~ expression
+             | expression_base
+             }
+
+expression_base = { VAR_CONCEPT_ | VAR_VALUE_
+                  | expression_function | value
+                  | "(" ~ expression ~ ")"
+                  }
+
+expression_function = { expression_function_name ~ "(" ~ expression_arguments? ~ ")" }
+expression_function_name = { EXPR_FUNC_NAME | MAX | MIN }
+expression_arguments = { expression ~ ( "," ~ expression )* }
+
+// SCHEMA CONSTRUCT ============================================================
 
 schema_rule_declaration = { RULE ~ label }
 schema_rule = { RULE ~ label ~ ":" ~ WHEN ~ "{" ~ patterns ~ "}" ~ THEN ~ "{" ~ variable_thing_any ~ ";" ~ "}" }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type_any = { type_scoped | type_ | VAR_ }
-type_scoped = { label_scoped | VAR_ }
-type_ = { label | VAR_ } // A type_can be a label or variable
+type_any = { type_scoped | type_ | VAR_CONCEPT_ }
+type_scoped = { label_scoped | VAR_CONCEPT_ }
+type_ = { label | VAR_CONCEPT_ } // A type_can be a label or variable
 
 label_any = { label_scoped | label }
 label_scoped = { LABEL_SCOPED_ }
 label = { LABEL_ | schema_native | type_native | unreserved }
 
-// LITERAL INPUT VALUES =======================================================
+// LITERAL INPUT VALUES ========================================================
 
 schema_native = { RULE }
 
 type_native = { THING | ENTITY | ATTRIBUTE | RELATION | ROLE }
 
 value_type = { LONG | DOUBLE | STRING | BOOLEAN | DATETIME }
-value = { STRING_ | DATETIME_ | DATE_ | DOUBLE_ | LONG_ | BOOLEAN_ }
-regex = { STRING_ }
+value = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
+        | signed_long | signed_double
+        }
+
+signed_long = { sign? ~ LONG_ }
+signed_double = { sign? ~ DOUBLE_ }
+sign = { ADD | SUBTRACT }
 
 // UNRESERVED KEYWORDS =========================================================
 // Most of TypeQL syntax should not be reserved from being used as identifiers
 
-unreserved = { VALUE
-             | MIN | MAX| MEDIAN | MEAN | STD | SUM | COUNT
+unreserved = { VALUE | EXPR_FUNC_NAME
+             | MIN | MAX | MEDIAN | MEAN | STD | SUM | COUNT
              | GET | SORT | LIMIT | OFFSET | GROUP | CONTAINS
              }
 
@@ -251,7 +284,7 @@ NOT = @{ "not" ~ WB }
 
 // PREDICATE KEYWORDS
 
-EQ = @{ "=" }
+EQ = @{ "==" }
 NEQ = @{ "!=" }
 GT = @{ ">" }
 GTE = @{ ">=" }
@@ -259,6 +292,21 @@ LT = @{ "<" }
 LTE = @{ "<=" }
 LIKE = @{ "like" ~ WB }
 CONTAINS = @{ "contains" ~ WB }
+
+// ASSIGNMENT AND EXPRESSION KEYWORDS
+
+ASSIGN = @{ "=" }
+ADD = @{ "+" }
+SUBTRACT = @{ "-" }
+DIVIDE = @{ "/" }
+MULTIPLY = @{ "*" }
+POWER = @{ "^" }
+MODULO = @{ "%" }
+PAREN_OPEN = @{ "(" }
+PAREN_CLOSE = @{ ")" }
+
+// Incomplete list of function names usable in expressions. The 'func_name' rule references all function names.
+EXPR_FUNC_NAME = @{ "floor" | "ceil" | "round" | "abs" }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
@@ -285,16 +333,17 @@ TRUE = @{ "true" ~ WB }
 FALSE = @{ "false" ~ WB }
 STRING_ = @{ "\"" ~ (!"\"" ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "\""
            | "'"  ~ (!"'"  ~ !"\\" ~ ANY | ESCAPE_SEQ_ )* ~ "'"  }
-LONG_ = @{ ("+" | "-")? ~ ASCII_DIGIT+ ~ WB }
-DOUBLE_ = @{ ("+" | "-")? ~ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ WB }
+LONG_ = @{ ASCII_DIGIT+ ~ WB }
+DOUBLE_ = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ WB }
 DATE_ = @{ DATE_FRAGMENT_ ~ WB }
 DATETIME_ = @{ DATE_FRAGMENT_ ~ "T" ~ TIME_ ~ WB }
 
 // TYPEQL INPUT TOKEN PATTERNS
 // All token names must end with an underscore ("_")
-VAR_ = @{ VAR_ANONYMOUS_ | VAR_NAMED_ }
-VAR_ANONYMOUS_ = @{ "$_" ~ WB }
-VAR_NAMED_ = @{ "$" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* ~ WB }
+VAR_CONCEPT_ = @{ VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_ }
+VAR_CONCEPT_ANONYMOUS_ = @{ "$_" ~ WB }
+VAR_CONCEPT_NAMED_ = @{ "$" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* ~ WB }
+VAR_VALUE_ = @{ "?" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* ~ WB }
 IID_ = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
 LABEL_ = @{ TYPE_CHAR_H_ ~ TYPE_CHAR_T_* ~ WB }
 LABEL_SCOPED_ = @{ LABEL_ ~ ":" ~ LABEL_ ~ WB }
