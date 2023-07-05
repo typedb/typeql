@@ -163,16 +163,14 @@ predicate_value = { value | VAR_CONCEPT_ | VAR_VALUE_ }
 
 // EXPRESSION CONSTRUCTS =======================================================
 
-expression = { expression ~ POWER ~ expression                                // exponentiation is right-associative
-             | expression ~ ( MULTIPLY | DIVIDE | MODULO ) ~ expression
-             | expression ~ ( ADD | SUBTRACT ) ~ expression
-             | expression_base
-             }
+expression = { expression_base ~ ( infix ~ expression_base )* }
 
 expression_base = { VAR_CONCEPT_ | VAR_VALUE_
                   | expression_function | value
                   | "(" ~ expression ~ ")"
                   }
+
+infix = { POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 
 expression_function = { expression_function_name ~ "(" ~ expression_arguments? ~ ")" }
 expression_function_name = { EXPR_FUNC_NAME | MAX | MIN }
