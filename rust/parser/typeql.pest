@@ -55,9 +55,9 @@ query_match_group_agg = { query_match ~ match_group ~ match_aggregate }
 
 modifiers = { (filter ~ ";")? ~ (sort ~ ";")? ~ (offset ~ ";")? ~ (limit ~ ";")? }
 
-filter = { GET ~ ( VAR_CONCEPT_ | VAR_VALUE_ ) ~ ( "," ~ ( VAR_CONCEPT_ | VAR_VALUE_ ) )* }
+filter = { GET ~ VAR_ ~ ( "," ~ VAR_ )* }
 sort = { SORT ~ var_order ~ ( "," ~ var_order )* }
-var_order = { ( VAR_CONCEPT_ | VAR_VALUE_ ) ~ ORDER_? }
+var_order = { VAR_ ~ ORDER_? }
 offset = { OFFSET ~ LONG_ }
 limit = { LIMIT ~ LONG_ }
 
@@ -67,7 +67,7 @@ limit = { LIMIT ~ LONG_ }
 // An aggregate function is composed of 2 things:
 // The aggregate method name, followed by the variable to apply the function to
 
-match_aggregate = { aggregate_method ~ ( VAR_CONCEPT_ | VAR_VALUE_ )? ~ ";" }
+match_aggregate = { aggregate_method ~ VAR_? ~ ";" }
 aggregate_method = { COUNT | MAX | MEAN | MEDIAN | MIN | STD | SUM }
 
 // GET GROUP QUERY =============================================================
@@ -75,7 +75,7 @@ aggregate_method = { COUNT | MAX | MEAN | MEDIAN | MIN | STD | SUM }
 // A group function is composed of 2 things:
 // The 'GROUP' method name, followed by the variable to group the results by
 
-match_group = { GROUP ~ ( VAR_CONCEPT_ | VAR_VALUE_ ) ~ ";" }
+match_group = { GROUP ~ VAR_ ~ ";" }
 
 // SCHEMA QUERY ================================================================
 
@@ -145,7 +145,7 @@ player = { VAR_CONCEPT_ }                                                       
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes = { attribute ~ ( "," ~ attribute )* }
-attribute = { HAS ~ label ~ ( VAR_CONCEPT_ | VAR_VALUE_ | predicate )
+attribute = { HAS ~ label ~ ( VAR_ | predicate )
             | HAS ~ VAR_CONCEPT_
             }                                                                   // ownership by labeled variable or value or just value
 
@@ -159,13 +159,13 @@ predicate_equality = { EQ | NEQ | GTE | GT | LTE | LT
 
 predicate_substring = { CONTAINS | LIKE }
 
-predicate_value = { value | VAR_CONCEPT_ | VAR_VALUE_ }
+predicate_value = { value | VAR_ }
 
 // EXPRESSION CONSTRUCTS =======================================================
 
 expression = { expression_base ~ ( infix ~ expression_base )* }
 
-expression_base = { VAR_CONCEPT_ | VAR_VALUE_
+expression_base = { VAR_
                   | expression_function | value
                   | "(" ~ expression ~ ")"
                   }
@@ -338,6 +338,7 @@ DATETIME_ = @{ DATE_FRAGMENT_ ~ "T" ~ TIME_ ~ WB }
 
 // TYPEQL INPUT TOKEN PATTERNS
 // All token names must end with an underscore ("_")
+VAR_ = @{ VAR_CONCEPT_ | VAR_VALUE_ }
 VAR_CONCEPT_ = @{ VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_ }
 VAR_CONCEPT_ANONYMOUS_ = @{ "$_" ~ WB }
 VAR_CONCEPT_NAMED_ = @{ "$" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* ~ WB }
