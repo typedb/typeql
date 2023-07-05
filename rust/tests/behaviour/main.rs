@@ -20,21 +20,21 @@
  *
  */
 
-use cucumber::{gherkin::Step, given, then, when, World};
+use cucumber::{gherkin::Step, given, StatsWriter, then, when, World, WriterExt};
 use typeql_lang::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
 
 fn main() {
-    futures::executor::block_on(
+    assert!(!futures::executor::block_on(
         // Bazel specific path: when running the test in bazel, the external data from
         // @vaticle_typedb_behaviour is stored in a directory that is a  sibling to
         // the working directory.
-        TypeQLWorld::cucumber().filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
+        TypeQLWorld::cucumber().fail_on_skipped().filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
         }),
-    );
+    ).execution_has_failed());
 }
 
 fn parse_query_in_step(step: &Step) -> Query {
