@@ -20,6 +20,8 @@
  *
  */
 
+#![recursion_limit = "256"]
+
 use cucumber::{gherkin::Step, given, StatsWriter, then, when, World, WriterExt};
 use typeql_lang::{parse_query, query::Query};
 
@@ -108,6 +110,7 @@ async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
 #[step("concept identifiers are")]
 #[step("connection close all sessions")]
 #[step("connection does not have any database")]
+#[step("connection opens with default authentication")]
 #[step("connection has been opened")]
 #[step("each answer satisfies")]
 #[step("group aggregate values are")]
@@ -126,6 +129,7 @@ async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
 #[step("typeql insert; throws exception")]
 #[step("typeql match aggregate; throws exception")]
 #[step("typeql match group; throws exception")]
+#[step("typedb starts")]
 #[step("typeql match; throws exception")]
 #[step("typeql undefine; throws exception")]
 #[step("typeql update; throws exception")]
