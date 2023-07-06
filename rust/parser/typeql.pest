@@ -199,7 +199,7 @@ type_native = { THING | ENTITY | ATTRIBUTE | RELATION | ROLE }
 
 value_type = { LONG | DOUBLE | STRING | BOOLEAN | DATETIME }
 value = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
-        | signed_long | signed_double
+        | signed_double | signed_long
         }
 
 signed_long = { sign? ~ LONG_ }
@@ -338,7 +338,7 @@ DATETIME_ = @{ DATE_FRAGMENT_ ~ "T" ~ TIME_ ~ WB }
 
 // TYPEQL INPUT TOKEN PATTERNS
 // All token names must end with an underscore ("_")
-VAR_ = @{ VAR_CONCEPT_ | VAR_VALUE_ }
+VAR_ = ${ VAR_CONCEPT_ | VAR_VALUE_ }
 VAR_CONCEPT_ = @{ VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_ }
 VAR_CONCEPT_ANONYMOUS_ = @{ "$_" ~ WB }
 VAR_CONCEPT_NAMED_ = @{ "$" ~ ASCII_ALPHANUMERIC ~ (ASCII_ALPHANUMERIC | "-" | "_")* ~ WB }

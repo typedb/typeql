@@ -47,7 +47,7 @@ pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
     ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference, RelationConstrainable,
     RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable,
-    TypeVariableBuilder, UnboundVariable, Variable, Visibility,
+    TypeVariableBuilder, UnboundVariable, ValueVariable, Variable, Visibility,
 };
 
 use crate::{

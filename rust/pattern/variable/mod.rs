@@ -25,6 +25,7 @@ mod concept;
 mod reference;
 mod thing;
 mod type_;
+mod value;
 mod unbound;
 
 use std::{collections::HashSet, fmt};
@@ -37,6 +38,7 @@ pub use concept::ConceptVariable;
 pub use reference::{Reference, Visibility};
 pub use thing::ThingVariable;
 pub use type_::TypeVariable;
+pub use value::ValueVariable;
 pub use unbound::UnboundVariable;
 
 use crate::{
@@ -50,6 +52,7 @@ pub enum Variable {
     Concept(ConceptVariable),
     Thing(ThingVariable),
     Type(TypeVariable),
+    Value(ValueVariable),
     Unbound(UnboundVariable),
 }
 
@@ -61,6 +64,7 @@ impl Variable {
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
             Type(type_) => type_.references(),
+            Value(value) => value.references(),
         }
     }
 
@@ -81,6 +85,7 @@ enum_wrapper! { Variable
     ConceptVariable => Concept,
     ThingVariable => Thing,
     TypeVariable => Type,
+    ValueVariable => Value,
     UnboundVariable => Unbound,
 }
 
@@ -92,6 +97,7 @@ impl Validatable for Variable {
             Concept(concept) => concept.validate(),
             Thing(thing) => thing.validate(),
             Type(type_) => type_.validate(),
+            Value(value) => value.validate(),
         }
     }
 }
@@ -114,6 +120,7 @@ impl fmt::Display for Variable {
             Concept(concept) => write!(f, "{concept}"),
             Thing(thing) => write!(f, "{thing}"),
             Type(type_) => write!(f, "{type_}"),
+            Value(value) => write!(f, "{value}"),
         }
     }
 }

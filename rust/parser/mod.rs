@@ -41,7 +41,7 @@ use crate::{
         IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint, RelatesConstraint,
         RelationConstraint, RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable,
         ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable,
-        Value, ValueConstraint, Variable,
+        Value, ValueConstraint, ValueVariable, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
@@ -444,6 +444,16 @@ fn visit_pattern_variable(tree: SyntaxTree) -> Variable {
         Rule::variable_thing_any => visit_variable_thing_any(child).into(),
         Rule::variable_type => visit_variable_type(child).into(),
         Rule::variable_concept => visit_variable_concept(child).into(),
+        Rule::variable_value => visit_variable_value(child).into(),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
+    }
+}
+
+fn visit_variable(tree: SyntaxTree) -> Variable {
+    let child = tree.into_child();
+    match child.as_rule() {
+        Rule::variable_concept => visit_variable_concept(child).into(),
+        Rule::variable_value => visit_variable_value(child).into(),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
@@ -454,6 +464,12 @@ fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
         .is(get_var(children.skip_expected(Rule::IS).consume_expected(Rule::VAR_CONCEPT_)))
 }
 
+//FIXME: It's still just a copy of visit_variable_concept
+fn visit_variable_value(tree: SyntaxTree) -> ValueVariable {
+    let mut children = tree.into_children();
+    get_var(children.consume_expected(Rule::VAR_VALUE_)).into_value()
+        // .is(get_var(children.skip_expected(Rule::IS).consume_expected(Rule::VAR_CONCEPT_)))
+}
 fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
     let mut children = tree.into_children();
     let mut var_type = visit_type_any(children.consume_expected(Rule::type_any)).into_type_variable();
@@ -702,8 +718,8 @@ fn visit_value(tree: SyntaxTree) -> Value {
     let child = tree.into_child();
     match child.as_rule() {
         Rule::STRING_ => Value::from(get_string(child)),
-        Rule::LONG_ => Value::from(get_long(child)),
-        Rule::DOUBLE_ => Value::from(get_double(child)),
+        Rule::signed_long => Value::from(get_long(child)),
+        Rule::signed_double => Value::from(get_double(child)),
         Rule::BOOLEAN_ => Value::from(get_boolean(child)),
         Rule::DATE_ => Value::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
         Rule::DATETIME_ => Value::from(get_date_time(child)),

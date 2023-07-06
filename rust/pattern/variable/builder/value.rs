@@ -20,12 +20,19 @@
  *
  */
 
-mod concept;
-mod thing;
-mod type_;
-mod value;
+use crate::pattern::{ValueVariable, IsConstraint};
 
-pub use concept::{ConceptConstrainable, ConceptVariableBuilder};
-pub use thing::{RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder};
-pub use type_::{TypeConstrainable, TypeVariableBuilder};
-pub use value::{ValueConstrainable, ValueVariableBuilder};
+//FIXME: It's still just a copy of ConceptConstrainable
+pub trait ValueConstrainable {
+    fn constrain_is(self, is: IsConstraint) -> ValueVariable;
+}
+
+pub trait ValueVariableBuilder: Sized {
+    fn is(self, is: impl Into<IsConstraint>) -> ValueVariable;
+}
+
+impl<U: ValueConstrainable> ValueVariableBuilder for U {
+    fn is(self, is: impl Into<IsConstraint>) -> ValueVariable {
+        self.constrain_is(is.into())
+    }
+}

@@ -255,7 +255,7 @@ fn test_predicate() {
     let query = r#"match
 $x has release-date < 1986-03-03T00:00,
     has tmdb-vote-count 100,
-    has tmdb-vote-average <= 9.0;"#;
+    has tmdb-vote-average <= - 9.0;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var("x")
@@ -267,7 +267,7 @@ $x has release-date < 1986-03-03T00:00,
             ))
         ))
         .has(("tmdb-vote-count", 100))
-        .has(("tmdb-vote-average", lte(9.0))));
+        .has(("tmdb-vote-average", lte(- 9.0))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1441,3 +1441,19 @@ fn when_building_invalid_iid_throw() {
     let expected = typeql_match!(var("x").iid(iid)).validated();
     assert!(expected.is_err());
 }
+
+#[test]
+fn test_expressions() {
+    let query = format!(
+        r#"match
+        $z isa person, has name $x, has age $y;
+        ?y2 = $y * 2;
+        not {{ $y > ?y2; }};
+      get $x, $y;"#
+    );
+
+    let parsed = parse_query(&query).unwrap().into_match();
+    // let expected = typeql_match!(var("x").iid(iid));
+    // assert_valid_eq_repr!(expected, parsed, query);
+}
+

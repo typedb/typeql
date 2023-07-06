@@ -28,7 +28,7 @@ use crate::{
         ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint, IsaConstraint,
         LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint, RelatesConstraint,
         RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint, ThingConstrainable,
-        ThingVariable, TypeConstrainable, TypeVariable, ValueConstraint, ValueTypeConstraint, Visibility,
+        ThingVariable, TypeConstrainable, TypeVariable, ValueConstraint, ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
 
@@ -48,6 +48,10 @@ impl UnboundVariable {
 
     pub fn into_type(self) -> TypeVariable {
         TypeVariable::new(self.reference)
+    }
+
+    pub fn into_value(self) -> ValueVariable {
+        ValueVariable::new(self.reference)
     }
 
     pub fn named(name: String) -> UnboundVariable {
