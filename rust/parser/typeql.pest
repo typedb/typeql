@@ -202,8 +202,8 @@ value = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
         | signed_double | signed_long
         }
 
-signed_long = { sign? ~ LONG_ }
 signed_double = { sign? ~ DOUBLE_ }
+signed_long = { sign? ~ LONG_ }
 sign = { ADD | SUBTRACT }
 
 // UNRESERVED KEYWORDS =========================================================

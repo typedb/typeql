@@ -637,7 +637,9 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
         Some(Rule::label) => {
             let label = children.consume_expected(Rule::label).as_str().to_owned();
             match children.peek_rule() {
-                Some(Rule::VAR_CONCEPT_) => HasConstraint::from((label, get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_)))),
+                Some(Rule::VAR_) => {
+                    HasConstraint::from((label, get_var_concept(children.consume_expected(Rule::VAR_).into_children().consume_expected(Rule::VAR_CONCEPT_))))
+                },
                 Some(Rule::predicate) => {
                     HasConstraint::new((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }
@@ -661,8 +663,8 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
                 let predicate_value = children.consume_expected(Rule::predicate_value).into_child();
                 match predicate_value.as_rule() {
                     Rule::value => visit_value(predicate_value),
-                    Rule::VAR_CONCEPT_ => Value::from(get_var_concept(predicate_value)),
-                    _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
+                    Rule::VAR_ => Value::from(get_var_concept(predicate_value.into_children().consume_expected(Rule::VAR_CONCEPT_))),
+                    _ => unreachable!("{}", TypeQLError::IllegalGrammar(predicate_value.to_string())),
                 }
             },
         ),

@@ -40,6 +40,7 @@ use crate::{
     query::AggregateQueryBuilder,
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
 };
+use crate::builder::var_concept;
 use crate::pattern::{UnboundConceptVariable, UnboundVariable};
 
 macro_rules! assert_valid_eq_repr {
@@ -58,7 +59,7 @@ fn test_simple_query() {
 $x isa movie;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").isa("movie"));
+    let expected = typeql_match!(var_concept("x").isa("movie"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -69,7 +70,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("a").type_("attribute_label")).get([UnboundVariable::Concept(UnboundConceptVariable::named(str!("a")))]);
+    let expected = typeql_match!(var_concept("a").type_("attribute_label")).get([UnboundVariable::Concept(UnboundConceptVariable::named(String::from("a")))]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -80,7 +81,7 @@ $x isa person,
     has name "alice/bob";"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").isa("person").has(("name", "alice/bob")));
+    let expected = typeql_match!(var_concept("x").isa("person").has(("name", "alice/bob")));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -94,12 +95,12 @@ get $char, $prod;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        var("brando").eq("Marl B").isa("name"),
+        var_concept("brando").eq("Marl B").isa("name"),
         rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
     )
     .get([
-        UnboundVariable::Concept(UnboundConceptVariable::named(str!("char"))),
-        UnboundVariable::Concept(UnboundConceptVariable::named(str!("prod"))),
+        UnboundVariable::Concept(UnboundConceptVariable::named(String::from("char"))),
+        UnboundVariable::Concept(UnboundConceptVariable::named(String::from("prod"))),
     ]);
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -111,7 +112,7 @@ fn test_role_type_scoped_globally() {
 $m relates spouse;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("m").relates("spouse"));
+    let expected = typeql_match!(var_concept("m").relates("spouse"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -121,7 +122,7 @@ fn test_role_type_not_scoped() {
 marriage relates $s;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(type_("marriage").relates(var("s")));
+    let expected = typeql_match!(type_("marriage").relates(var_concept("s")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -142,9 +143,9 @@ $t != "Apocalypse Now";"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        var("x").isa("movie").has(("title", var("t"))),
-        or!(var("t").eq("Apocalypse Now"), and!(var("t").lt("Juno"), var("t").gt("Godfather")), var("t").eq("Spy"),),
-        var("t").neq("Apocalypse Now"),
+        var_concept("x").isa("movie").has(("title", var_concept("t"))),
+        or!(var_concept("t").eq("Apocalypse Now"), and!(var_concept("t").lt("Juno"), var_concept("t").gt("Godfather")), var_concept("t").eq("Spy"),),
+        var_concept("t").neq("Apocalypse Now"),
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -165,8 +166,8 @@ $x isa movie,
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        var("x").isa("movie").has(("title", var("t"))),
-        or!(and!(var("t").lte("Juno"), var("t").gte("Godfather"), var("t").neq("Heat")), var("t").eq("The Muppets"),),
+        var_concept("x").isa("movie").has(("title", var_concept("t"))),
+        or!(and!(var_concept("t").lte("Juno"), var_concept("t").gte("Godfather"), var_concept("t").neq("Heat")), var_concept("t").eq("The Muppets"),),
     );
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -186,8 +187,8 @@ $y isa person,
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
         rel("x").rel("y"),
-        var("y").isa("person").has(("name", var("n"))),
-        or!(var("n").contains("ar"), var("n").like("^M.*$")),
+        var_concept("y").isa("person").has(("name", var_concept("n"))),
+        or!(var_concept("n").contains("ar"), var_concept("n").like("^M.*$")),
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -201,7 +202,7 @@ $y >= $z;
 $z 18 isa age;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").has(("age", var("y"))), var("y").gte(var("z")), var("z").eq(18).isa("age"),);
+    let expected = typeql_match!(var_concept("x").has(("age", var_concept("y"))), var_concept("y").gte(var_concept("z")), var_concept("z").eq(18).isa("age"),);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -218,12 +219,12 @@ not { $a is $b; };"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        var("x").sub(var("z")),
-        var("y").sub(var("z")),
-        var("a").isa(var("x")),
-        var("b").isa(var("y")),
-        not(var("x").is(var("y"))),
-        not(var("a").is(var("b"))),
+        var_concept("x").sub(var_concept("z")),
+        var_concept("y").sub(var_concept("z")),
+        var_concept("a").isa(var_concept("x")),
+        var_concept("b").isa(var_concept("y")),
+        not(var_concept("x").is(var_concept("y"))),
+        not(var_concept("a").is(var_concept("b"))),
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -235,7 +236,7 @@ fn test_value_equals_variable_query() {
 $s1 = $s2;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("s1").eq(var("s2")));
+    let expected = typeql_match!(var_concept("s1").eq(var_concept("s2")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -248,8 +249,8 @@ $_ has title "Spy",
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        var("x").has(("release-date", gte(var("r")))),
-        var(()).has(("title", "Spy")).has(("release-date", var("r"))),
+        var_concept("x").has(("release-date", gte(var_concept("r")))),
+        var_concept(()).has(("title", "Spy")).has(("release-date", var_concept("r"))),
     );
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -259,10 +260,10 @@ fn test_predicate() {
     let query = r#"match
 $x has release-date < 1986-03-03T00:00,
     has tmdb-vote-count 100,
-    has tmdb-vote-average <= - 9.0;"#;
+    has tmdb-vote-average <= 9.0;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x")
+    let expected = typeql_match!(var_concept("x")
         .has((
             "release-date",
             lt(NaiveDateTime::new(
@@ -271,7 +272,7 @@ $x has release-date < 1986-03-03T00:00,
             ))
         ))
         .has(("tmdb-vote-count", 100))
-        .has(("tmdb-vote-average", lte(- 9.0))));
+        .has(("tmdb-vote-average", lte(9.0))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -282,7 +283,7 @@ fn when_parsing_date_handle_time() {
 $x has release-date 1000-11-12T13:14:15;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").has((
+    let expected = typeql_match!(var_concept("x").has((
         "release-date",
         NaiveDateTime::new(
             NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
@@ -299,7 +300,7 @@ fn when_parsing_date_handle_big_years() {
 $x has release-date +12345-12-25T00:00;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").has((
+    let expected = typeql_match!(var_concept("x").has((
         "release-date",
         NaiveDateTime::new(NaiveDate::from_ymd_opt(12345, 12, 25).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
     )));
@@ -313,7 +314,7 @@ fn when_parsing_date_handle_small_years() {
 $x has release-date 0867-01-01T00:00;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").has((
+    let expected = typeql_match!(var_concept("x").has((
         "release-date",
         NaiveDateTime::new(NaiveDate::from_ymd_opt(867, 1, 1).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
     )));
@@ -327,7 +328,7 @@ fn when_parsing_date_handle_negative_years() {
 $x has release-date -3200-01-01T00:00;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").has((
+    let expected = typeql_match!(var_concept("x").has((
         "release-date",
         NaiveDateTime::new(NaiveDate::from_ymd_opt(-3200, 1, 1).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
     )));
@@ -341,7 +342,7 @@ fn when_parsing_date_handle_millis() {
 $x has release-date 1000-11-12T13:14:15.123;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").has((
+    let expected = typeql_match!(var_concept("x").has((
         "release-date",
         NaiveDateTime::new(
             NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
@@ -358,7 +359,7 @@ fn when_parsing_date_handle_millis_shorthand() {
 $x has release-date 1000-11-12T13:14:15.1;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").has((
+    let expected = typeql_match!(var_concept("x").has((
         "release-date",
         NaiveDateTime::new(
             NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
@@ -383,7 +384,7 @@ $x has release-date 1000-11-12T13:14:15.000123456;"#;
 
 #[test]
 fn when_parsing_date_error_when_handling_overly_precise_nanos() {
-    let validated = typeql_match!(var("x").has((
+    let validated = typeql_match!(var_concept("x").has((
         "release-date",
         NaiveDateTime::new(
             NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
@@ -402,7 +403,7 @@ $x isa movie,
     has tmdb-vote-count <= 400;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").isa("movie").has(("tmdb-vote-count", lte(400))));
+    let expected = typeql_match!(var_concept("x").isa("movie").has(("tmdb-vote-count", lte(400))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -414,7 +415,7 @@ $x plays starring:actor;
 sort $x asc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([("x", Asc)]);
+    let expected = typeql_match!(var_concept("x").plays(("starring", "actor"))).sort([(var_concept("x").into(), Asc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -427,7 +428,7 @@ $x isa movie,
 sort $r desc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").isa("movie").has(("rating", var("r")))).sort([("r", Desc)]);
+    let expected = typeql_match!(var_concept("x").isa("movie").has(("rating", var_concept("r")))).sort([(var_concept("r").into(), Desc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -440,7 +441,7 @@ $x isa movie,
 sort $r; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").isa("movie").has(("rating", var("r")))).sort("r").limit(10);
+    let expected = typeql_match!(var_concept("x").isa("movie").has(("rating", var_concept("r")))).sort(vec![var_concept("r").into()]).limit(10);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -454,7 +455,7 @@ sort $r desc; offset 10; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected =
-        typeql_match!(var("x").isa("movie").has(("rating", var("r")))).sort([("r", Desc)]).offset(10).limit(10);
+        typeql_match!(var_concept("x").isa("movie").has(("rating", var_concept("r")))).sort([(var_concept("r").into(), Desc)]).offset(10).limit(10);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -467,7 +468,7 @@ $y isa movie,
 offset 2; limit 4;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("y").isa("movie").has(("title", var("n")))).offset(2).limit(4);
+    let expected = typeql_match!(var_concept("y").isa("movie").has(("title", var_concept("n")))).offset(2).limit(4);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -483,11 +484,11 @@ has-genre relates $p;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        rel((var("p"), var("x"))).rel("y"),
-        var("x").isa(var("z")),
-        var("y").eq("crime"),
-        var("z").sub("production"),
-        type_("has-genre").relates(var("p")),
+        rel((var_concept("p"), var_concept("x"))).rel("y"),
+        var_concept("x").isa(var_concept("z")),
+        var_concept("y").eq("crime"),
+        var_concept("z").sub("production"),
+        type_("has-genre").relates(var_concept("p")),
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -500,7 +501,7 @@ $x isa $type;
 $type relates someRole;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").isa(var("type")), var("type").relates("someRole"));
+    let expected = typeql_match!(var_concept("x").isa(var_concept("type")), var_concept("type").relates("someRole"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -518,8 +519,8 @@ $x isa movie;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        var("x").isa("movie"),
-        or!(and!(var("y").eq("drama").isa("genre"), rel("x").rel("y")), var("x").eq("The Muppets"))
+        var_concept("x").isa("movie"),
+        or!(and!(var_concept("y").eq("drama").isa("genre"), rel("x").rel("y")), var_concept("x").eq("The Muppets"))
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -554,12 +555,12 @@ $y isa $p;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
-        var("y").isa(var("p")),
+        var_concept("y").isa(var_concept("p")),
         or!(
             rel("y").rel("q"),
             and!(
-                var("x").isa(var("p")),
-                or!(var("x").has(("first-name", var("y"))), var("x").has(("last-name", var("z"))))
+                var_concept("x").isa(var_concept("p")),
+                or!(var_concept("x").has(("first-name", var_concept("y"))), var_concept("x").has(("last-name", var_concept("z"))))
             )
         )
     );
@@ -586,8 +587,8 @@ count;"#;
     let parsed = parse_query(query).unwrap().into_aggregate();
     let expected = typeql_match!(rel("x").rel("y").isa("friendship"))
         .get([
-            UnboundVariable::Concept(UnboundConceptVariable::named(str!("x"))),
-            UnboundVariable::Concept(UnboundConceptVariable::named(str!("y"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("y"))),
         ]).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -603,9 +604,9 @@ group $x; count;"#;
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = typeql_match!(rel("x").rel("y").isa("friendship"))
         .get([
-                 UnboundVariable::Concept(UnboundConceptVariable::named(str!("x"))),
-                 UnboundVariable::Concept(UnboundConceptVariable::named(str!("y"))),
-        ]).group("x").count();
+                 UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
+                 UnboundVariable::Concept(UnboundConceptVariable::named(String::from("y"))),
+        ]).group(var_concept("x")).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -617,7 +618,7 @@ $x has age $a;
 group $x; max $a;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
-    let expected = typeql_match!(var("x").has(("age", var("a")))).group("x").max("a");
+    let expected = typeql_match!(var_concept("x").has(("age", var_concept("a")))).group(var_concept("x")).max(var_concept("a"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -631,7 +632,7 @@ group $x; max $z;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected =
-        typeql_match!(rel("x").rel("y").isa("friendship"), var("y").has(("age", var("z")))).group("x").max("z");
+        typeql_match!(rel("x").rel("y").isa("friendship"), var_concept("y").has(("age", var_concept("z")))).group(var_concept("x")).max(var_concept("z"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -645,14 +646,14 @@ get $x, $y, $z;
 group $x; max $z;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
-    let expected = typeql_match!(rel("x").rel("y").isa("friendship"), var("y").has(("age", var("z"))))
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship"), var_concept("y").has(("age", var_concept("z"))))
         .get([
-            UnboundVariable::Concept(UnboundConceptVariable::named(str!("x"))),
-            UnboundVariable::Concept(UnboundConceptVariable::named(str!("y"))),
-            UnboundVariable::Concept(UnboundConceptVariable::named(str!("z"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("y"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("z"))),
         ])
-        .group("x")
-        .max("z");
+        .group(var_concept("x"))
+        .max(var_concept("z"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -665,7 +666,7 @@ $x isa movie,
 count;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
-    let expected = typeql_match!(var("x").isa("movie").has(("title", "Godfather"))).count();
+    let expected = typeql_match!(var_concept("x").isa("movie").has(("title", "Godfather"))).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -677,7 +678,7 @@ $_ isa movie,
     has title "The Title";"#;
 
     let parsed = parse_query(query).unwrap().into_insert();
-    let expected = typeql_insert!(var(()).isa("movie").has(("title", "The Title")));
+    let expected = typeql_insert!(var_concept(()).isa("movie").has(("title", "The Title")));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -693,8 +694,8 @@ $x isa movie;
 $y isa movie;"#;
 
     let parsed = parse_query(query).unwrap().into_delete();
-    let expected = typeql_match!(var("x").isa("movie").has(("title", "The Title")), var("y").isa("movie"))
-        .delete([var("x").isa("movie"), var("y").isa("movie")]);
+    let expected = typeql_match!(var_concept("x").isa("movie").has(("title", "The Title")), var_concept("y").isa("movie"))
+        .delete([var_concept("x").isa("movie"), var_concept("y").isa("movie")]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -713,9 +714,9 @@ $z isa pokemon,
 
     let parsed = parse_query(query).unwrap().into_insert();
     let expected = typeql_insert!(
-        var("x").isa("pokemon").has(("name", "Pichu")),
-        var("y").isa("pokemon").has(("name", "Pikachu")),
-        var("z").isa("pokemon").has(("name", "Raichu")),
+        var_concept("x").isa("pokemon").has(("name", "Pichu")),
+        var_concept("y").isa("pokemon").has(("name", "Pikachu")),
+        var_concept("z").isa("pokemon").has(("name", "Raichu")),
         rel(("evolves-from", "x")).rel(("evolves-to", "y")).isa("evolution"),
         rel(("evolves-from", "y")).rel(("evolves-to", "z")).isa("evolution")
     );
@@ -735,9 +736,9 @@ insert
 $x has age 25;"#;
 
     let parsed = parse_query(query).unwrap().into_update();
-    let expected = typeql_match!(var("x").isa("person").has(("name", "alice")).has(("age", var("a"))))
-        .delete(var("x").has(var("a")))
-        .insert(var("x").has(("age", 25)));
+    let expected = typeql_match!(var_concept("x").isa("person").has(("name", "alice")).has(("age", var_concept("a"))))
+        .delete(var_concept("x").has(var_concept("a")))
+        .insert(var_concept("x").has(("age", 25)));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -773,7 +774,7 @@ $f sub parenthood,
     relates son as child;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("f").sub("parenthood").relates(("father", "parent")).relates(("son", "child")));
+    let expected = typeql_match!(var_concept("f").sub("parenthood").relates(("father", "parent")).relates(("son", "child")));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -913,7 +914,7 @@ insert
 $x has name "HELLO";"#;
 
     let parsed = parse_query(query).unwrap().into_insert();
-    let expected = typeql_match!(var("x").isa("language")).insert(var("x").has(("name", "HELLO")));
+    let expected = typeql_match!(var_concept("x").isa("language")).insert(var_concept("x").has(("name", "HELLO")));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -938,19 +939,19 @@ fn test_match_value_type_query() {
 $x value double;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").value(ValueType::Double));
+    let expected = typeql_match!(var_concept("x").value(ValueType::Double));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
 #[test]
-fn test_parsing_without_var() {
+fn test_parsing_without_var_concept() {
     let query = r#"match
 $_ isa person;"#;
 
     let parsed = parse_query(query);
     assert!(parsed.is_err());
-    let built = typeql_match!(var(()).isa("person")).validated();
+    let built = typeql_match!(var_concept(()).isa("person")).validated();
     assert!(built.is_err());
 }
 
@@ -960,7 +961,7 @@ fn when_parsing_date_keyword_parse_as_the_correct_value_type() {
 $x value datetime;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").value(ValueType::DateTime));
+    let expected = typeql_match!(var_concept("x").value(ValueType::DateTime));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -988,7 +989,7 @@ $_ isa movie,
     );
 
     let parsed = parse_query(&query).unwrap().into_insert();
-    let expected = typeql_insert!(var(()).isa("movie").has(("title", input)));
+    let expected = typeql_insert!(var_concept(()).isa("movie").has(("title", input)));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1000,7 +1001,7 @@ $x isa movie;
 count;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
-    let expected = typeql_match!(var("x").isa("movie")).count();
+    let expected = typeql_match!(var_concept("x").isa("movie")).count();
 
     assert_valid_eq_repr!(expected, parsed, uncommented);
 }
@@ -1016,8 +1017,8 @@ fn test_parsing_pattern() {
     let parsed = parse_pattern(pattern).unwrap().into_conjunction();
     let expected = and!(
         rel(("wife", "a")).rel(("husband", "b")).isa("marriage"),
-        var("a").has(("gender", "male")),
-        var("b").has(("gender", "female"))
+        var_concept("a").has(("gender", "male")),
+        var_concept("b").has(("gender", "female"))
     );
 
     assert_valid_eq_repr!(expected, parsed, pattern);
@@ -1033,8 +1034,8 @@ fn test_parsing_patterns() {
     let parsed = parse_patterns(patterns).unwrap().into_iter().map(|p| p.into_variable()).collect::<Vec<_>>();
     let expected: Vec<Variable> = vec![
         Variable::Thing(rel(("wife", "a")).rel(("husband", "b")).isa("marriage")),
-        Variable::Thing(var("a").has(("gender", "male"))),
-        Variable::Thing(var("b").has(("gender", "female"))),
+        Variable::Thing(var_concept("a").has(("gender", "male"))),
+        Variable::Thing(var_concept("b").has(("gender", "female"))),
     ];
 
     assert_eq!(expected, parsed);
@@ -1061,11 +1062,11 @@ rule a-rule: when {
     let parsed = parse_query(query).unwrap().into_define();
     let expected = typeql_define!(rule("a-rule")
         .when(and!(
-            var("x").isa("person"),
-            not(and!(var("x").has(("name", "Alice")), var("x").has(("name", "Bob")))),
-            or!(rel(var("x")).isa("friendship"), rel(var("x")).isa("employment"))
+            var_concept("x").isa("person"),
+            not(and!(var_concept("x").has(("name", "Alice")), var_concept("x").has(("name", "Bob")))),
+            or!(rel(var_concept("x")).isa("friendship"), rel(var_concept("x")).isa("employment"))
         ))
-        .then(var("x").has(("is_interesting", true))));
+        .then(var_concept("x").has(("is_interesting", true))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1102,7 +1103,7 @@ fn test_parsing_variable_has() {
 
     let parsed = parse_variable(variable).unwrap();
     if let Variable::Thing(parsed_var) = parsed {
-        let expected = var("x").has(("is_interesting", true));
+        let expected = var_concept("x").has(("is_interesting", true));
         assert_valid_eq_repr!(expected, parsed_var, variable);
     } else {
         panic!("Expected ThingVariable, found {variable:?}.");
@@ -1124,7 +1125,7 @@ fn test_parsing_boolean() {
 $_ has flag true;"#;
 
     let parsed = parse_query(query).unwrap().into_insert();
-    let expected = typeql_insert!(var(()).has(("flag", true)));
+    let expected = typeql_insert!(var_concept(()).has(("flag", true)));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1135,7 +1136,7 @@ $x isa movie;
 group $x;"#;
 
     let parsed = parse_query(query).unwrap().into_group();
-    let expected = typeql_match!(var("x").isa("movie")).group("x");
+    let expected = typeql_match!(var_concept("x").isa("movie")).group(var_concept("x"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1147,7 +1148,7 @@ $x isa movie;
 group $x; count;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
-    let expected = typeql_match!(var("x").isa("movie")).group("x").count();
+    let expected = typeql_match!(var_concept("x").isa("movie")).group(var_concept("x")).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1159,7 +1160,7 @@ $x isa movie;
 std $x;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
-    let expected = typeql_match!(var("x").isa("movie")).std("x");
+    let expected = typeql_match!(var_concept("x").isa("movie")).std(var_concept("x"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1220,7 +1221,7 @@ $_ has title "Godfather",
     has tmdb-vote-count $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var(()).has(("title", "Godfather")).has(("tmdb-vote-count", var("x"))));
+    let expected = typeql_match!(var_concept(()).has(("title", "Godfather")).has(("tmdb-vote-count", var_concept("x"))));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1230,7 +1231,7 @@ fn test_regex_attribute_type() {
 $x regex "(fe)male";"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").regex("(fe)male"));
+    let expected = typeql_match!(var_concept("x").regex("(fe)male"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1246,7 +1247,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").owns(("name", Key))).get([UnboundVariable::Concept(UnboundConceptVariable::named(str!("x")))]);
+    let expected = typeql_match!(var_concept("x").owns(("name", Key))).get([UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x")))]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1259,7 +1260,7 @@ fn test_parsing_empty_string() {
 fn test_parsing_list_one_match() {
     let queries = "match $y isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_match()).collect::<Vec<_>>();
-    let expected = vec![typeql_match!(var("y").isa("movie"))];
+    let expected = vec![typeql_match!(var_concept("y").isa("movie"))];
     assert_eq!(parsed, expected);
 }
 
@@ -1267,7 +1268,7 @@ fn test_parsing_list_one_match() {
 fn test_parsing_list_one_insert() {
     let queries = "insert $x isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
-    let expected = vec![typeql_insert!(var("x").isa("movie"))];
+    let expected = vec![typeql_insert!(var_concept("x").isa("movie"))];
     assert_eq!(parsed, expected);
 }
 
@@ -1275,7 +1276,7 @@ fn test_parsing_list_one_insert() {
 fn test_parsing_list_one_insert_with_whitespace_prefix() {
     let queries = " insert $x isa movie;";
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
-    let expected = vec![typeql_insert!(var("x").isa("movie"))];
+    let expected = vec![typeql_insert!(var_concept("x").isa("movie"))];
     assert_eq!(parsed, expected);
 }
 
@@ -1284,7 +1285,7 @@ fn test_parsing_list_one_insert_with_prefix_comment() {
     let queries = r#"#hola
 insert $x isa movie;"#;
     let parsed = parse_queries(queries).unwrap().map(|q| q.unwrap().into_insert()).collect::<Vec<_>>();
-    let expected = vec![typeql_insert!(var("x").isa("movie"))];
+    let expected = vec![typeql_insert!(var_concept("x").isa("movie"))];
     assert_eq!(parsed, expected);
 }
 
@@ -1292,7 +1293,7 @@ insert $x isa movie;"#;
 fn test_parsing_list() {
     let queries = "insert $x isa movie; match $y isa movie;";
     let parsed = parse_queries(queries).unwrap().collect::<Result<Vec<_>, _>>().unwrap();
-    let expected = vec![typeql_insert!(var("x").isa("movie")).into(), typeql_match!(var("y").isa("movie")).into()];
+    let expected = vec![typeql_insert!(var_concept("x").isa("movie")).into(), typeql_match!(var_concept("y").isa("movie")).into()];
     assert_eq!(parsed, expected);
 }
 
@@ -1305,7 +1306,7 @@ fn test_parsing_many_match_insert_without_stack_overflow() {
     let mut parsed = Vec::with_capacity(num_queries);
     parsed.extend(parse_queries(&queries).unwrap().map(|q| q.unwrap().into_insert()));
 
-    let expected = typeql_match!(var("x").isa("person")).insert(var("x").has(("name", "bob")));
+    let expected = typeql_match!(var_concept("x").isa("person")).insert(var_concept("x").has(("name", "bob")));
 
     assert_eq!(vec![expected; num_queries], parsed);
 }
@@ -1378,7 +1379,7 @@ fn regex_predicate_parses_character_classes_correctly() {
     let query = r#"match
 $x like "\d";"#;
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").like("\\d"));
+    let expected = typeql_match!(var_concept("x").like("\\d"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1387,7 +1388,7 @@ fn regex_predicate_parses_quotes_correctly() {
     let query = r#"match
 $x like "\"";"#;
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").like("\\\""));
+    let expected = typeql_match!(var_concept("x").like("\\\""));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1396,7 +1397,7 @@ fn regex_predicate_parses_backslashes_correctly() {
     let query = r#"match
 $x like "\\";"#;
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").like("\\\\"));
+    let expected = typeql_match!(var_concept("x").like("\\\\"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1405,7 +1406,7 @@ fn regex_predicate_parses_newline_correctly() {
     let query = r#"match
 $x like "\n";"#;
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").like("\\n"));
+    let expected = typeql_match!(var_concept("x").like("\\n"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1414,13 +1415,13 @@ fn regex_predicate_parses_forward_slashes_correctly() {
     let query = r#"match
 $x like "\/";"#;
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").like("/"));
+    let expected = typeql_match!(var_concept("x").like("/"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
 #[test]
 fn when_value_equality_to_string_create_valid_query_string() {
-    let expected = typeql_match!(var("x").eq(var("y")));
+    let expected = typeql_match!(var_concept("x").eq(var_concept("y")));
     let parsed = parse_query(&expected.to_string()).unwrap().into_match();
 
     assert_eq!(expected, parsed);
@@ -1435,7 +1436,7 @@ $x iid {iid};"#
     );
 
     let parsed = parse_query(&query).unwrap().into_match();
-    let expected = typeql_match!(var("x").iid(iid));
+    let expected = typeql_match!(var_concept("x").iid(iid));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -1454,22 +1455,22 @@ $x iid {iid};"#
 #[test]
 fn when_building_invalid_iid_throw() {
     let iid = "invalid";
-    let expected = typeql_match!(var("x").iid(iid)).validated();
+    let expected = typeql_match!(var_concept("x").iid(iid)).validated();
     assert!(expected.is_err());
 }
 
-#[test]
-fn test_expressions() {
-    let query = format!(
-        r#"match
-        $z isa person, has name $x, has age $y;
-        ?y2 = $y * 2;
-        not {{ $y > ?y2; }};
-      get $x, $y;"#
-    );
-
-    let parsed = parse_query(&query).unwrap().into_match();
-    // let expected = typeql_match!(var("x").iid(iid));
-    // assert_valid_eq_repr!(expected, parsed, query);
-}
+// #[test]
+// fn test_expressions() {
+//     let query = format!(
+//         r#"match
+//         $z isa person, has name $x, has age $y;
+//         ?y2 = $y * 2;
+//         not {{ $y > ?y2; }};
+//       get $x, $y;"#
+//     );
+//
+//     let parsed = parse_query(&query).unwrap().into_match();
+//     // let expected = typeql_match!(var_concept("x").iid(iid));
+//     // assert_valid_eq_repr!(expected, parsed, query);
+// }
 

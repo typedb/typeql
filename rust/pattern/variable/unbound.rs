@@ -65,6 +65,18 @@ impl Validatable for UnboundVariable {
     }
 }
 
+impl From<UnboundConceptVariable> for UnboundVariable {
+    fn from(concept: UnboundConceptVariable) -> Self {
+        UnboundVariable::Concept(concept)
+    }
+}
+
+impl From<UnboundValueVariable> for UnboundVariable {
+    fn from(value: UnboundValueVariable) -> Self {
+        UnboundVariable::Value(value)
+    }
+}
+
 impl fmt::Display for UnboundVariable {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {

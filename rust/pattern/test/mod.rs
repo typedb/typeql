@@ -25,6 +25,7 @@ use crate::{
     pattern::{Disjunction, Normalisable, ThingVariableBuilder},
     var,
 };
+use crate::builder::var_concept;
 
 #[test]
 fn disjunction() {
@@ -44,8 +45,8 @@ $com isa company;
     assert_eq!(
         normalised,
         or!(
-            and!(var("com").has(("name", var("n1"))), var("n1").eq("the-company"), var("com").isa("company"),),
-            and!(var("com").has(("name", var("n2"))), var("n2").eq("another-company"), var("com").isa("company"),)
+            and!(var_concept("com").has(("name", "n1")), var_concept("n1").eq("the-company"), var_concept("com").isa("company"),),
+            and!(var_concept("com").has(("name", "n2")), var_concept("n2").eq("another-company"), var_concept("com").isa("company"),)
         )
         .into_disjunction()
     );
@@ -70,10 +71,10 @@ not {
     assert_eq!(
         normalised,
         Disjunction::new(vec![and!(
-            var("com").isa("company"),
+            var_concept("com").isa("company"),
             not(or!(
-                and!(var("n1").eq("the-company"), var("com").has(("name", var("n1")))),
-                and!(var("n1").eq("another-company"), var("com").has(("name", var("n1")))),
+                and!(var_concept("n1").eq("the-company"), var_concept("com").has(("name", var_concept("n1")))),
+                and!(var_concept("n1").eq("another-company"), var_concept("com").has(("name", var_concept("n1")))),
             ))
         )
         .into()])
