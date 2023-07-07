@@ -21,7 +21,6 @@
  */
 
 use std::{fmt, iter};
-use std::fmt::Formatter;
 
 use crate::{
     common::{validatable::Validatable, Result},
@@ -32,44 +31,50 @@ use crate::{
         ThingVariable, TypeConstrainable, TypeVariable, ValueConstraint, ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
-use crate::pattern::{UnboundConceptVariable, UnboundValueVariable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum UnboundVariable {
-    Concept(UnboundConceptVariable),
-    Value(UnboundValueVariable),
+pub struct UnboundValueVariable {
+    pub reference: Reference,
 }
 
-impl UnboundVariable {
-    pub fn reference(&self) -> &Reference {
-        match self {
-            UnboundVariable::Concept(concept_variable) => &concept_variable.reference,
-            UnboundVariable::Value(value_variable) => &value_variable.reference,
-        }
+impl UnboundValueVariable {
+    pub fn into_value(self) -> ValueVariable {
+        ValueVariable::new(self.reference)
+    }
+
+    pub fn named(name: String) -> UnboundValueVariable {
+        UnboundValueVariable { reference: Reference::Name(name) }
+    }
+
+    pub fn hidden() -> UnboundValueVariable {
+        UnboundValueVariable { reference: Reference::Anonymous(Visibility::Invisible) }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        match self {
-            UnboundVariable::Concept(concept_variable) => concept_variable.references(),
-            UnboundVariable::Value(value_variable) => value_variable.references(),
-        }
+        Box::new(iter::once(&self.reference))
     }
 }
 
-impl Validatable for UnboundVariable {
+impl Validatable for UnboundValueVariable {
     fn validate(&self) -> Result<()> {
-        match self {
-            UnboundVariable::Concept(concept_variable) => concept_variable.validate(),
-            UnboundVariable::Value(value_variable) => value_variable.validate(),
-        }
+        self.reference.validate()
     }
 }
 
-impl fmt::Display for UnboundVariable {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            UnboundVariable::Concept(concept_variable) => write!(f, "{concept_variable}"),
-            UnboundVariable::Value(value_variable) => write!(f, "{value_variable}"),
-        }
+impl From<&str> for UnboundValueVariable {
+    fn from(name: &str) -> Self {
+        UnboundValueVariable::named(name.to_string())
+    }
+}
+
+impl From<String> for UnboundValueVariable {
+    fn from(name: String) -> Self {
+        UnboundValueVariable::named(name)
+    }
+}
+
+impl fmt::Display for UnboundValueVariable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.reference)
     }
 }

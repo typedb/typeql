@@ -24,10 +24,11 @@ use crate::{
     common::token::Predicate,
     pattern::{
         Negation, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable, TypeVariable,
-        TypeVariableBuilder, UnboundVariable, Value, ValueConstraint,
+        TypeVariableBuilder, UnboundConceptVariable, Value, ValueConstraint,
     },
     Pattern,
 };
+use crate::pattern::{UnboundValueVariable, UnboundVariable};
 
 #[macro_export]
 macro_rules! typeql_match {
@@ -87,12 +88,20 @@ pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
     var.into()
 }
 
+pub fn var_concept(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
+    var.into()
+}
+
+pub fn var_value(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
+    var.into()
+}
+
 pub fn type_(name: impl Into<String>) -> TypeVariable {
-    UnboundVariable::hidden().type_(name.into())
+    UnboundConceptVariable::hidden().type_(name.into())
 }
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
-    UnboundVariable::hidden().rel(value)
+    UnboundConceptVariable::hidden().rel(value)
 }
 
 pub fn eq<T: Into<Value>>(value: T) -> ValueConstraint {

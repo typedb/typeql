@@ -47,7 +47,7 @@ pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
     ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference, RelationConstrainable,
     RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable,
-    TypeVariableBuilder, UnboundVariable, ValueVariable, Variable, Visibility,
+    TypeVariableBuilder, UnboundVariable, UnboundConceptVariable, UnboundValueVariable, ValueVariable, Variable, Visibility,
 };
 
 use crate::{
@@ -146,8 +146,8 @@ impl From<TypeVariable> for Pattern {
     }
 }
 
-impl From<UnboundVariable> for Pattern {
-    fn from(variable: UnboundVariable) -> Self {
+impl From<UnboundConceptVariable> for Pattern {
+    fn from(variable: UnboundConceptVariable) -> Self {
         Variable::from(variable).into()
     }
 }

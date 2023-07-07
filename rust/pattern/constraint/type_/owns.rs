@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{variable::Reference, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
@@ -91,12 +91,12 @@ impl From<String> for OwnsConstraint {
 
 impl From<Label> for OwnsConstraint {
     fn from(attribute_type: Label) -> Self {
-        OwnsConstraint::from(UnboundVariable::hidden().type_(attribute_type))
+        OwnsConstraint::from(UnboundConceptVariable::hidden().type_(attribute_type))
     }
 }
 
-impl From<UnboundVariable> for OwnsConstraint {
-    fn from(attribute_type: UnboundVariable) -> Self {
+impl From<UnboundConceptVariable> for OwnsConstraint {
+    fn from(attribute_type: UnboundConceptVariable) -> Self {
         OwnsConstraint::from(attribute_type.into_type())
     }
 }
@@ -122,14 +122,14 @@ impl From<(String, String)> for OwnsConstraint {
 impl From<(Label, Label)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (Label, Label)) -> Self {
         OwnsConstraint::from((
-            UnboundVariable::hidden().type_(attribute_type),
-            UnboundVariable::hidden().type_(overridden_attribute_type),
+            UnboundConceptVariable::hidden().type_(attribute_type),
+            UnboundConceptVariable::hidden().type_(overridden_attribute_type),
         ))
     }
 }
 
-impl From<(UnboundVariable, UnboundVariable)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (UnboundVariable, UnboundVariable)) -> Self {
+impl From<(UnboundConceptVariable, UnboundConceptVariable)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (UnboundConceptVariable, UnboundConceptVariable)) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type()))
     }
 }
@@ -154,12 +154,12 @@ impl From<(String, Annotation)> for OwnsConstraint {
 
 impl From<(Label, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (Label, Annotation)) -> Self {
-        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), [annotation]))
+        OwnsConstraint::from((UnboundConceptVariable::hidden().type_(attribute_type), [annotation]))
     }
 }
 
-impl From<(UnboundVariable, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (UnboundVariable, Annotation)) -> Self {
+impl From<(UnboundConceptVariable, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (UnboundConceptVariable, Annotation)) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), [annotation]))
     }
 }
@@ -185,16 +185,16 @@ impl From<(String, String, Annotation)> for OwnsConstraint {
 impl From<(Label, Label, Annotation)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type, annotation): (Label, Label, Annotation)) -> Self {
         OwnsConstraint::from((
-            UnboundVariable::hidden().type_(attribute_type),
-            UnboundVariable::hidden().type_(overridden_attribute_type),
+            UnboundConceptVariable::hidden().type_(attribute_type),
+            UnboundConceptVariable::hidden().type_(overridden_attribute_type),
             [annotation],
         ))
     }
 }
 
-impl From<(UnboundVariable, UnboundVariable, Annotation)> for OwnsConstraint {
+impl From<(UnboundConceptVariable, UnboundConceptVariable, Annotation)> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotation): (UnboundVariable, UnboundVariable, Annotation),
+        (attribute_type, overridden_attribute_type, annotation): (UnboundConceptVariable, UnboundConceptVariable, Annotation),
     ) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type(), [annotation]))
     }
@@ -220,12 +220,12 @@ impl<const N: usize> From<(String, [Annotation; N])> for OwnsConstraint {
 
 impl<const N: usize> From<(Label, [Annotation; N])> for OwnsConstraint {
     fn from((attribute_type, annotations): (Label, [Annotation; N])) -> Self {
-        OwnsConstraint::from((UnboundVariable::hidden().type_(attribute_type), annotations))
+        OwnsConstraint::from((UnboundConceptVariable::hidden().type_(attribute_type), annotations))
     }
 }
 
-impl<const N: usize> From<(UnboundVariable, [Annotation; N])> for OwnsConstraint {
-    fn from((attribute_type, annotations): (UnboundVariable, [Annotation; N])) -> Self {
+impl<const N: usize> From<(UnboundConceptVariable, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (UnboundConceptVariable, [Annotation; N])) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), annotations))
     }
 }
@@ -251,16 +251,16 @@ impl<const N: usize> From<(String, String, [Annotation; N])> for OwnsConstraint 
 impl<const N: usize> From<(Label, Label, [Annotation; N])> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type, annotations): (Label, Label, [Annotation; N])) -> Self {
         OwnsConstraint::from((
-            UnboundVariable::hidden().type_(attribute_type),
-            UnboundVariable::hidden().type_(overridden_attribute_type),
+            UnboundConceptVariable::hidden().type_(attribute_type),
+            UnboundConceptVariable::hidden().type_(overridden_attribute_type),
             annotations,
         ))
     }
 }
 
-impl<const N: usize> From<(UnboundVariable, UnboundVariable, [Annotation; N])> for OwnsConstraint {
+impl<const N: usize> From<(UnboundConceptVariable, UnboundConceptVariable, [Annotation; N])> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotations): (UnboundVariable, UnboundVariable, [Annotation; N]),
+        (attribute_type, overridden_attribute_type, annotations): (UnboundConceptVariable, UnboundConceptVariable, [Annotation; N]),
     ) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type(), annotations))
     }

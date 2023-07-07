@@ -33,7 +33,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingVariable, UnboundVariable},
+    pattern::{Reference, ThingVariable, UnboundConceptVariable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -146,8 +146,8 @@ impl From<NaiveDateTime> for Value {
     }
 }
 
-impl From<UnboundVariable> for Value {
-    fn from(variable: UnboundVariable) -> Self {
+impl From<UnboundConceptVariable> for Value {
+    fn from(variable: UnboundConceptVariable) -> Self {
         Value::Variable(Box::new(variable.into_thing()))
     }
 }

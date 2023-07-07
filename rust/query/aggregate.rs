@@ -29,9 +29,10 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedReferences, Reference, UnboundVariable},
+    pattern::{NamedReferences, Reference, UnboundConceptVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
+use crate::pattern::UnboundVariable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>
@@ -74,8 +75,8 @@ fn expect_method_variable_compatible(method: token::Aggregate, var: &Option<Unbo
 }
 
 fn expect_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Reference>) -> Result<()> {
-    if !names_in_scope.contains(&var.reference) {
-        Err(TypeQLError::VariableOutOfScopeMatch(var.reference.clone()))?;
+    if !names_in_scope.contains(&var.reference()) {
+        Err(TypeQLError::VariableOutOfScopeMatch(var.reference().clone()))?;
     }
     Ok(())
 }

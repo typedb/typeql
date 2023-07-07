@@ -29,10 +29,11 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundVariable},
+    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundConceptVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
+use crate::pattern::UnboundVariable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -55,8 +56,12 @@ impl TypeQLMatch {
         Self::new(self.conjunction, self.modifiers.filter(vars))
     }
 
-    pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
-        self.filter(vars.into_iter().map(|s| UnboundVariable::named(s.into())).collect())
+    // pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
+    //     self.filter(vars.into_iter().map(|s| UnboundConceptVariable::named(s.into())).collect())
+    // }
+
+    pub fn get<const N: usize>(self, vars: [UnboundVariable; N]) -> Self {
+        self.filter(Vec::from(vars))
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
@@ -103,7 +108,7 @@ impl Validatable for TypeQLMatch {
 impl NamedReferences for TypeQLMatch {
     fn named_references(&self) -> HashSet<Reference> {
         if let Some(filter) = &self.modifiers.filter {
-            filter.vars.iter().map(|v| v.reference.clone()).collect()
+            filter.vars.iter().map(|v| v.reference().clone()).collect()
         } else {
             self.conjunction.named_references()
         }
@@ -144,7 +149,7 @@ fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter
     if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
         Err(TypeQLError::EmptyMatchFilter())?;
     }
-    collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| &v.reference).map(|r| {
+    collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| v.reference()).map(|r| {
         if !r.is_name() {
             Err(TypeQLError::VariableNotNamed().into())
         } else if !names_in_scope.contains(r) {
@@ -165,9 +170,9 @@ fn expect_sort_vars_are_in_scope(
 ) -> Result<()> {
     let names_in_scope = filter
         .as_ref()
-        .map(|f| f.vars.iter().map(|v| v.reference.clone()).collect())
+        .map(|f| f.vars.iter().map(|v| v.reference().clone()).collect())
         .unwrap_or_else(|| conjunction.named_references());
-    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference.clone()).map(|r| {
+    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference().clone()).map(|r| {
         names_in_scope.contains(&r).then_some(()).ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
     }))
 }
@@ -240,7 +245,8 @@ impl fmt::Display for Filter {
 pub mod sorting {
     use std::fmt;
 
-    use crate::{common::token, pattern::UnboundVariable};
+    use crate::{common::token, pattern::UnboundConceptVariable};
+    use crate::pattern::UnboundVariable;
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {
@@ -283,14 +289,14 @@ impl Sorting {
     }
 }
 
-impl From<&str> for Sorting {
-    fn from(var_name: &str) -> Self {
-        Self::from(vec![var(var_name)])
-    }
-}
+// impl From<&str> for Sorting {
+//     fn from(var_name: &str) -> Self {
+//         Self::from(vec![var(var_name)])
+//     }
+// }
 
-impl<const N: usize> From<[(&str, token::Order); N]> for Sorting {
-    fn from(ordered_vars: [(&str, token::Order); N]) -> Self {
+impl<const N: usize> From<[(UnboundVariable, token::Order); N]> for Sorting {
+    fn from(ordered_vars: [(UnboundVariable, token::Order); N]) -> Self {
         Self::new(ordered_vars.map(|(name, order)| sorting::OrderedVariable::new(var(name), Some(order))).to_vec())
     }
 }

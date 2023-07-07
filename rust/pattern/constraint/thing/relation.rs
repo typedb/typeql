@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable},
+    pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
     write_joined, Label,
 };
 
@@ -114,7 +114,7 @@ impl From<&str> for RolePlayerConstraint {
 
 impl From<String> for RolePlayerConstraint {
     fn from(player_var: String) -> Self {
-        Self::from(UnboundVariable::named(player_var))
+        Self::from(UnboundConceptVariable::named(player_var))
     }
 }
 
@@ -126,42 +126,42 @@ impl From<(&str, &str)> for RolePlayerConstraint {
 
 impl From<(String, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, String)) -> Self {
-        Self::from((role_type, UnboundVariable::named(player_var)))
+        Self::from((role_type, UnboundConceptVariable::named(player_var)))
     }
 }
 
 impl From<(Label, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, String)) -> Self {
-        Self::from((role_type, UnboundVariable::named(player_var)))
+        Self::from((role_type, UnboundConceptVariable::named(player_var)))
     }
 }
 
-impl From<UnboundVariable> for RolePlayerConstraint {
-    fn from(player_var: UnboundVariable) -> Self {
+impl From<UnboundConceptVariable> for RolePlayerConstraint {
+    fn from(player_var: UnboundConceptVariable) -> Self {
         Self::new(None, player_var.into_thing())
     }
 }
 
-impl From<(String, UnboundVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (String, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type), player_var))
+impl From<(String, UnboundConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (String, UnboundConceptVariable)) -> Self {
+        Self::from((UnboundConceptVariable::hidden().type_(role_type), player_var))
     }
 }
 
-impl From<(Label, UnboundVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (Label, UnboundVariable)) -> Self {
-        Self::from((UnboundVariable::hidden().type_(role_type), player_var))
+impl From<(Label, UnboundConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (Label, UnboundConceptVariable)) -> Self {
+        Self::from((UnboundConceptVariable::hidden().type_(role_type), player_var))
     }
 }
 
-impl From<(UnboundVariable, UnboundVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (UnboundVariable, UnboundVariable)) -> Self {
+impl From<(UnboundConceptVariable, UnboundConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (UnboundConceptVariable, UnboundConceptVariable)) -> Self {
         Self::new(Some(role_type.into_type()), player_var.into_thing())
     }
 }
 
-impl From<(TypeVariable, UnboundVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (TypeVariable, UnboundVariable)) -> Self {
+impl From<(TypeVariable, UnboundConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (TypeVariable, UnboundConceptVariable)) -> Self {
         Self::new(Some(role_type), player_var.into_thing())
     }
 }

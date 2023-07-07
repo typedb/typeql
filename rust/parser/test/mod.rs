@@ -40,6 +40,7 @@ use crate::{
     query::AggregateQueryBuilder,
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
 };
+use crate::pattern::{UnboundConceptVariable, UnboundVariable};
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
@@ -68,7 +69,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("a").type_("attribute_label")).get(["a"]);
+    let expected = typeql_match!(var("a").type_("attribute_label")).get([UnboundVariable::Concept(UnboundConceptVariable::named(str!("a")))]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -96,7 +97,10 @@ get $char, $prod;"#;
         var("brando").eq("Marl B").isa("name"),
         rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
     )
-    .get(["char", "prod"]);
+    .get([
+        UnboundVariable::Concept(UnboundConceptVariable::named(str!("char"))),
+        UnboundVariable::Concept(UnboundConceptVariable::named(str!("prod"))),
+    ]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -580,7 +584,11 @@ get $x, $y;
 count;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
-    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get(["x", "y"]).count();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship"))
+        .get([
+            UnboundVariable::Concept(UnboundConceptVariable::named(str!("x"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(str!("y"))),
+        ]).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -593,7 +601,11 @@ get $x, $y;
 group $x; count;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
-    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get(["x", "y"]).group("x").count();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship"))
+        .get([
+                 UnboundVariable::Concept(UnboundConceptVariable::named(str!("x"))),
+                 UnboundVariable::Concept(UnboundConceptVariable::named(str!("y"))),
+        ]).group("x").count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -634,7 +646,11 @@ group $x; max $z;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = typeql_match!(rel("x").rel("y").isa("friendship"), var("y").has(("age", var("z"))))
-        .get(["x", "y", "z"])
+        .get([
+            UnboundVariable::Concept(UnboundConceptVariable::named(str!("x"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(str!("y"))),
+            UnboundVariable::Concept(UnboundConceptVariable::named(str!("z"))),
+        ])
         .group("x")
         .max("z");
 
@@ -1230,7 +1246,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var("x").owns(("name", Key))).get(["x"]);
+    let expected = typeql_match!(var("x").owns(("name", Key))).get([UnboundVariable::Concept(UnboundConceptVariable::named(str!("x")))]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 

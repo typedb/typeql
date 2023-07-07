@@ -26,7 +26,9 @@ mod reference;
 mod thing;
 mod type_;
 mod value;
+mod unbound_concept;
 mod unbound;
+mod unbound_value;
 
 use std::{collections::HashSet, fmt};
 
@@ -40,6 +42,8 @@ pub use thing::ThingVariable;
 pub use type_::TypeVariable;
 pub use value::ValueVariable;
 pub use unbound::UnboundVariable;
+pub use unbound_concept::UnboundConceptVariable;
+pub use unbound_value::UnboundValueVariable;
 
 use crate::{
     common::{error::TypeQLError, validatable::Validatable, Result},
@@ -53,7 +57,7 @@ pub enum Variable {
     Thing(ThingVariable),
     Type(TypeVariable),
     Value(ValueVariable),
-    Unbound(UnboundVariable),
+    Unbound(UnboundConceptVariable),
 }
 
 impl Variable {
@@ -86,7 +90,7 @@ enum_wrapper! { Variable
     ThingVariable => Thing,
     TypeVariable => Type,
     ValueVariable => Value,
-    UnboundVariable => Unbound,
+    UnboundConceptVariable => Unbound,
 }
 
 impl Validatable for Variable {
