@@ -20,14 +20,37 @@
  *
  */
 
-mod concept;
-mod thing;
-mod type_;
-mod value;
-mod expression;
+use crate::common::token::{Function as FunctionToken, Operation as OperationToken};
+use crate::pattern::{UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value};
 
-pub use concept::{ConceptConstrainable, ConceptVariableBuilder};
-pub use expression::{Constant, Expression, Function, Operation, Parenthesis};
-pub use thing::{RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder};
-pub use type_::{TypeConstrainable, TypeVariableBuilder};
-pub use value::{ValueConstrainable, ValueVariableBuilder};
+#[derive(Debug, Clone, PartialEq)]
+pub enum Expression {
+    Operation(Operation),
+    Function(Function),
+    Constant(Constant),
+    Parenthesis(Parenthesis),
+    Variable(UnboundVariable),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Constant {
+    pub value: Value,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Operation {
+    pub op: OperationToken,
+    pub left: Box<Expression>,
+    pub right: Box<Expression>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Function {
+    symbol: FunctionToken,
+    arg: Vec<Box<Expression>>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Parenthesis {
+    inner: Box<Expression>,
+}

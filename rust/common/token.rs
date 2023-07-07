@@ -88,7 +88,7 @@ string_enum! { Operator
 
 string_enum! { Predicate
     // equality
-    Eq = "=",
+    Eq = "==",
     Neq = "!=",
     Gt = ">",
     Gte = ">=",
@@ -161,4 +161,22 @@ string_enum! { ValueType
 string_enum! { Order
     Asc = "asc",
     Desc = "desc",
+}
+
+string_enum! { Operation
+    Add = "+",
+    Subtract = "-",
+    Multiply = "*",
+    Divide = "/",
+    Modulo = "%",
+    Power = "^",
+}
+
+string_enum! { Function
+    Max = "max",
+    Min = "min",
+    Floor = "floor",
+    Ceil = "ceil",
+    Round = "round",
+    Abs = "abs",
 }

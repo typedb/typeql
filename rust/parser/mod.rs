@@ -25,6 +25,8 @@ mod test;
 
 use chrono::{NaiveDate, NaiveDateTime};
 use pest::Parser;
+use pest::pratt_parser::PrattParser;
+use pest::pratt_parser::{Assoc::{Left, Right}, Op};
 use pest_derive::Parser;
 
 use crate::{
@@ -48,6 +50,7 @@ use crate::{
         TypeQLMatchAggregate, TypeQLMatchGroup, TypeQLMatchGroupAggregate, TypeQLUndefine, TypeQLUpdate,
     },
 };
+use crate::pattern::{Constant, Expression, Function, Operation, Parenthesis};
 
 #[derive(Parser)]
 #[grammar = "parser/typeql.pest"]
@@ -684,6 +687,38 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
+}
+
+fn visit_expression(tree: SyntaxTree) -> Expression {
+    let pratt_parser: PrattParser<Rule> = PrattParser::new()
+        .op(Op::infix(Rule::ADD, Left) | Op::infix(Rule::SUBTRACT, Left))
+        .op(Op::infix(Rule::MULTIPLY, Left) | Op::infix(Rule::DIVIDE, Left) | Op::infix(Rule::MODULO, Left))
+        .op(Op::infix(Rule::POWER, Right) );
+
+    pratt_parser
+        .map_primary(|primary| match primary.as_rule() {
+            Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
+        })
+        .map_infix(|left, op, right| {
+            let op = match op.as_rule() {
+                Rule::ADD => token::Operation::Add,
+                Rule::SUBTRACT => token::Operation::Subtract,
+                Rule::MULTIPLY => token::Operation::Multiply,
+                Rule::DIVIDE => token::Operation::Divide,
+                Rule::MODULO => token::Operation::Modulo,
+                Rule::POWER => token::Operation::Power,
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar(op.to_string())),
+            };
+            Expression::Operation(Operation {
+                op,
+                left: Box::new(left),
+                right: Box::new(right),
+            })
+        })
+        .parse(tree.into_children())
+
+    // todo!();
 }
 
 fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {

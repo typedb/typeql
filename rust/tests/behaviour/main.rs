@@ -144,6 +144,7 @@ async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
 #[step(regex = r"^connection open schema session for database: .*$")]
 #[step(regex = r"^rules contain: .*$")]
 #[step(regex = r"^rules do not contain: .*$")]
+#[step(regex = r"^typeql match; throws exception containing .*$")]
 #[step(regex = r"^verify answer size is: .*$")]
 #[step(regex = r"^verify answers are consistent across .* executions$")]
 async fn do_nothing(_: &mut TypeQLWorld) {}

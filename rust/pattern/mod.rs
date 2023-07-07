@@ -45,7 +45,7 @@ pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
-    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference, RelationConstrainable,
+    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Constant, Expression, Function, Operation, Parenthesis, Reference, RelationConstrainable,
     RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable,
     TypeVariableBuilder, UnboundVariable, UnboundConceptVariable, UnboundValueVariable, ValueVariable, Variable, Visibility,
 };

@@ -33,7 +33,7 @@ mod unbound_value;
 use std::{collections::HashSet, fmt};
 
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
+    ConceptConstrainable, ConceptVariableBuilder, Constant, Expression, Function, Operation, Parenthesis, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
     ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
 };
 pub use concept::ConceptVariable;
