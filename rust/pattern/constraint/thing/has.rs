@@ -26,7 +26,7 @@ use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
         Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, Value,
-        ValueConstraint,
+        Predicate,
     },
 };
 
@@ -57,31 +57,31 @@ impl From<UnboundConceptVariable> for HasConstraint {
 impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
     fn from((type_name, value): (S, T)) -> Self {
         match value.into() {
-            Value::Variable(variable) => {
+            Value::ThingVariable(variable) => {
                 HasConstraint { type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())), attribute: *variable }
             }
             value => HasConstraint {
                 type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-                attribute: UnboundConceptVariable::hidden().constrain_value(ValueConstraint::new(token::Predicate::Eq, value)),
+                attribute: UnboundConceptVariable::hidden().constrain_predicate(Predicate::new(token::Predicate::Eq, value)),
             },
         }
     }
 }
 
-impl<S: Into<String>> From<(S, ValueConstraint)> for HasConstraint {
-    fn from((type_name, value): (S, ValueConstraint)) -> Self {
+impl<S: Into<String>> From<(S, Predicate)> for HasConstraint {
+    fn from((type_name, predicate): (S, Predicate)) -> Self {
         HasConstraint {
             type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-            attribute: UnboundConceptVariable::hidden().constrain_value(value),
+            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
         }
     }
 }
 
 impl HasConstraint {
-    pub fn new((type_name, value_constraint): (String, ValueConstraint)) -> Self {
+    pub fn new((type_name, predicate): (String, Predicate)) -> Self {
         HasConstraint {
             type_: Some(UnboundConceptVariable::hidden().type_(type_name)),
-            attribute: UnboundConceptVariable::hidden().constrain_value(value_constraint),
+            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
         }
     }
 }

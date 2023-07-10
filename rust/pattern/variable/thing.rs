@@ -26,7 +26,7 @@ use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable, RelationConstraint,
-        RolePlayerConstraint, ThingConstrainable, ValueConstraint,
+        RolePlayerConstraint, ThingConstrainable, Predicate,
     },
     write_joined,
 };
@@ -37,13 +37,13 @@ pub struct ThingVariable {
     pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
-    pub value: Option<ValueConstraint>,
+    pub value: Option<Predicate>,
     pub relation: Option<RelationConstraint>,
 }
 
 impl ThingVariable {
     pub fn new(reference: Reference) -> ThingVariable {
-        ThingVariable { reference, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
+        ThingVariable { reference, iid: None, isa: None, has: Vec::new(), value: None::<Predicate>, relation: None }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -105,7 +105,7 @@ impl ThingConstrainable for ThingVariable {
         ThingVariable { isa: Some(isa), ..self }
     }
 
-    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
+    fn constrain_predicate(self, value: Predicate) -> ThingVariable {
         ThingVariable { value: Some(value), ..self }
     }
 

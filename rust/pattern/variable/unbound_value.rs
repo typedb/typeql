@@ -28,9 +28,11 @@ use crate::{
         ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint, IsaConstraint,
         LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint, RelatesConstraint,
         RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint, ThingConstrainable,
-        ThingVariable, TypeConstrainable, TypeVariable, ValueConstraint, ValueTypeConstraint, ValueVariable, Visibility,
+        ThingVariable, TypeConstrainable, TypeVariable, Predicate, ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
+use crate::pattern::AssignConstraint;
+use crate::pattern::variable::ValueConstrainable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct UnboundValueVariable {
@@ -38,7 +40,7 @@ pub struct UnboundValueVariable {
 }
 
 impl UnboundValueVariable {
-    pub fn into_value(self) -> ValueVariable {
+    pub fn into_value_variable(self) -> ValueVariable {
         ValueVariable::new(self.reference)
     }
 
@@ -52,6 +54,16 @@ impl UnboundValueVariable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(iter::once(&self.reference))
+    }
+}
+
+impl ValueConstrainable for UnboundValueVariable {
+    fn constrain_assign(self, assign: AssignConstraint) -> ValueVariable {
+        self.into_value_variable().constrain_assign(assign)
+    }
+
+    fn constrain_predicate(self, predicate: Predicate) -> ValueVariable {
+        self.into_value_variable().constrain_predicate(predicate)
     }
 }
 

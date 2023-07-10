@@ -34,7 +34,7 @@ use std::{collections::HashSet, fmt};
 
 pub use builder::{
     ConceptConstrainable, ConceptVariableBuilder, Constant, Expression, Function, Operation, Parenthesis, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
-    ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
+    ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder, ValueConstrainable, ValueVariableBuilder
 };
 pub use concept::ConceptVariable;
 pub use reference::{Reference, Visibility};

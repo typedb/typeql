@@ -35,9 +35,9 @@ use std::{collections::HashSet, fmt};
 
 pub use conjunction::Conjunction;
 pub use constraint::{
-    AbstractConstraint, Annotation, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsaConstraint,
+    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsaConstraint,
     LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, RelationConstraint,
-    RolePlayerConstraint, SubConstraint, Value, ValueConstraint, ValueTypeConstraint,
+    RolePlayerConstraint, SubConstraint, Value, Predicate, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
 pub use label::Label;

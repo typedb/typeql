@@ -28,7 +28,7 @@ use crate::{
         ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint, IsaConstraint,
         LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint, RelatesConstraint,
         RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint, ThingConstrainable,
-        ThingVariable, TypeConstrainable, TypeVariable, ValueConstraint, ValueTypeConstraint, ValueVariable, Visibility,
+        ThingVariable, TypeConstrainable, TypeVariable, Predicate, ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
 
@@ -92,8 +92,8 @@ impl ThingConstrainable for UnboundConceptVariable {
         self.into_thing().constrain_isa(isa)
     }
 
-    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
-        self.into_thing().constrain_value(value)
+    fn constrain_predicate(self, predicate: Predicate) -> ThingVariable {
+        self.into_thing().constrain_predicate(predicate)
     }
 
     fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {

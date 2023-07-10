@@ -20,24 +20,6 @@
  *
  */
 
-use crate::pattern::{ValueVariable, AssignConstraint, Predicate};
+mod assign;
 
-//FIXME: It's still just a copy of ConceptConstrainable
-pub trait ValueConstrainable {
-    fn constrain_assign(self, assign: AssignConstraint) -> ValueVariable;
-    fn constrain_predicate(self, predicate: Predicate) -> ValueVariable;
-}
-
-pub trait ValueVariableBuilder: Sized {
-    fn assign(self, assign: impl Into<AssignConstraint>) -> ValueVariable;
-    fn predicate(self, predicate: impl Into<Predicate>) -> ValueVariable;
-}
-
-impl<U: ValueConstrainable> ValueVariableBuilder for U {
-    fn assign(self, assign: impl Into<AssignConstraint>) -> ValueVariable {
-        self.constrain_assign(assign.into())
-    }
-    fn predicate(self, predicate: impl Into<Predicate>) -> ValueVariable {
-        self.constrain_predicate(predicate.into())
-    }
-}
+pub use assign::AssignConstraint;

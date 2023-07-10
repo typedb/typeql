@@ -29,44 +29,53 @@ use crate::{
         variable::{builder::ValueConstrainable, Reference},
     },
 };
-use crate::pattern::ConceptVariable;
+use crate::common::token;
+use crate::pattern::{AssignConstraint, ConceptVariable, Predicate};
 
-//FIXME: It's still just a copy of ConceptVariable
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueVariable {
     pub reference: Reference,
-    pub is_constraint: Option<IsConstraint>,
+    pub assign_constraint: Option<AssignConstraint>,
+    pub predicate_constraint: Option<Predicate>,
 }
 
 impl ValueVariable {
     pub fn new(reference: Reference) -> ValueVariable {
-        ValueVariable { reference, is_constraint: None }
+        ValueVariable { reference, assign_constraint: None, predicate_constraint: None }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.reference).chain(self.is_constraint.iter().map(|is| &is.variable.reference)))
+        todo!();
+        // Box::new(iter::once(&self.reference).chain(self.is_constraint.iter().map(|is| &is.variable.reference)))
     }
 }
 
 impl Validatable for ValueVariable {
     fn validate(&self) -> Result<()> {
-        collect_err(
-            &mut iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
-        )
+        todo!();
+        // collect_err(
+        //     &mut iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
+        // )
     }
 }
 
 impl ValueConstrainable for ValueVariable {
-    fn constrain_is(self, is: IsConstraint) -> ValueVariable {
-        Self { is_constraint: Some(is), ..self }
+    fn constrain_assign(self, assign: AssignConstraint) -> ValueVariable {
+        Self { assign_constraint: Some(assign), ..self }
+    }
+
+    fn constrain_predicate(self, predicate: Predicate) -> ValueVariable {
+        Self { predicate_constraint: Some(predicate), ..self }
     }
 }
 
 impl fmt::Display for ValueVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)?;
-        if let Some(is) = &self.is_constraint {
-            write!(f, " {is}")?;
+        if let Some(assign) = &self.assign_constraint {
+            write!(f, " {} {}", token::Constraint::Assign, assign)?;
+        } else if let Some(predicate) = &self.predicate_constraint {
+            write!(f, " {} {}", predicate.predicate, predicate.value)?;
         }
         Ok(())
     }

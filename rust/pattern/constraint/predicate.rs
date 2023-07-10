@@ -35,27 +35,29 @@ use crate::{
     },
     pattern::{Reference, ThingVariable, UnboundConceptVariable},
 };
+use crate::pattern::ValueVariable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ValueConstraint {
+pub struct Predicate {
     pub predicate: token::Predicate,
     pub value: Value,
 }
 
-impl ValueConstraint {
+impl Predicate {
     pub fn new(predicate: token::Predicate, value: Value) -> Self {
-        ValueConstraint { predicate, value }
+        Predicate { predicate, value }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         match &self.value {
-            Value::Variable(v) => Box::new(iter::once(&v.reference)),
+            Value::ThingVariable(v) => Box::new(iter::once(&v.reference)),
+            Value::ValueVariable(v) => Box::new(iter::once(&v.reference)),
             _ => Box::new(iter::empty()),
         }
     }
 }
 
-impl Validatable for ValueConstraint {
+impl Validatable for Predicate {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [expect_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
@@ -71,12 +73,12 @@ fn expect_string_value_with_substring_predicate(predicate: token::Predicate, val
     Ok(())
 }
 
-impl fmt::Display for ValueConstraint {
+impl fmt::Display for Predicate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.predicate == token::Predicate::Like {
             assert!(matches!(self.value, Value::String(_)));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
-        } else if self.predicate == token::Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
+        } else if self.predicate == token::Predicate::Eq && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_))) {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)
@@ -91,7 +93,8 @@ pub enum Value {
     Boolean(bool),
     String(String),
     DateTime(NaiveDateTime),
-    Variable(Box<ThingVariable>),
+    ThingVariable(Box<ThingVariable>),
+    ValueVariable(Box<ValueVariable>),
 }
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
@@ -104,7 +107,8 @@ impl Validatable for Value {
                 }
                 Ok(())
             }
-            Self::Variable(variable) => variable.validate(),
+            Self::ThingVariable(variable) => variable.validate(),
+            Self::ValueVariable(variable) => variable.validate(),
             _ => Ok(()),
         }
     }
@@ -148,13 +152,19 @@ impl From<NaiveDateTime> for Value {
 
 impl From<UnboundConceptVariable> for Value {
     fn from(variable: UnboundConceptVariable) -> Self {
-        Value::Variable(Box::new(variable.into_thing()))
+        Value::ThingVariable(Box::new(variable.into_thing()))
     }
 }
 
 impl From<ThingVariable> for Value {
     fn from(variable: ThingVariable) -> Self {
-        Value::Variable(Box::new(variable))
+        Value::ThingVariable(Box::new(variable))
+    }
+}
+
+impl From<ValueVariable> for Value {
+    fn from(variable: ValueVariable) -> Self {
+        Value::ValueVariable(Box::new(variable))
     }
 }
 
@@ -167,7 +177,8 @@ impl fmt::Display for Value {
             Boolean(boolean) => write!(f, "{boolean}"),
             String(string) => write!(f, "{}", quote(string)),
             DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
-            Variable(var) => write!(f, "{}", var.reference),
+            ThingVariable(var) => write!(f, "{}", var.reference),
+            ValueVariable(var) => write!(f, "{}", var.reference),
         }
     }
 }

@@ -24,10 +24,8 @@ mod has;
 mod iid;
 mod isa;
 mod relation;
-mod value;
 
 pub use has::HasConstraint;
 pub use iid::IIDConstraint;
 pub use isa::IsaConstraint;
 pub use relation::{RelationConstraint, RolePlayerConstraint};
-pub use value::{Value, ValueConstraint};

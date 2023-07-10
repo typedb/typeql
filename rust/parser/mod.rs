@@ -43,14 +43,14 @@ use crate::{
         IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint, RelatesConstraint,
         RelationConstraint, RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable,
         ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable, UnboundConceptVariable, UnboundValueVariable,
-        Value, ValueConstraint, ValueVariable, Variable,
+        Value, Predicate, ValueVariable, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
         TypeQLMatchAggregate, TypeQLMatchGroup, TypeQLMatchGroupAggregate, TypeQLUndefine, TypeQLUpdate,
     },
 };
-use crate::pattern::{Constant, Expression, Function, Operation, Parenthesis};
+use crate::pattern::{AssignConstraint, Constant, Expression, Function, Operation, Parenthesis};
 
 #[derive(Parser)]
 #[grammar = "parser/typeql.pest"]
@@ -496,7 +496,16 @@ fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
 //FIXME: It's still just a copy of visit_variable_concept
 fn visit_variable_value(tree: SyntaxTree) -> ValueVariable {
     let mut children = tree.into_children();
-    get_var_value(children.consume_expected(Rule::VAR_VALUE_)).into_value()
+    let mut var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_)).into_value_variable();
+    let mut right = children.consume_any();
+    match right.as_rule() {
+        Rule::ASSIGN => {
+            let expression = visit_expression(right.into_children().consume_expected(Rule::ASSIGN));
+            // var_value.constrain_assign(AssignConstraint::)
+            todo!()
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(right.to_string())),
+    }
         // .is(get_var(children.skip_expected(Rule::IS).consume_expected(Rule::VAR_CONCEPT_)))
 }
 fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
@@ -611,7 +620,7 @@ fn visit_variable_attribute(tree: SyntaxTree) -> ThingVariable {
         .consume_if_matches(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
         .unwrap_or_else(UnboundConceptVariable::hidden)
-        .constrain_value(visit_predicate(children.consume_expected(Rule::predicate)));
+        .constrain_predicate(visit_predicate(children.consume_expected(Rule::predicate)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
         let type_ = children.consume_expected(Rule::type_);
@@ -654,13 +663,13 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
     }
 }
 
-fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
+fn visit_predicate(tree: SyntaxTree) -> Predicate {
     let mut children = tree.into_children();
     match children.peek_rule() {
         Some(Rule::value) => {
-            ValueConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value)))
+            Predicate::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value)))
         }
-        Some(Rule::predicate_equality) => ValueConstraint::new(
+        Some(Rule::predicate_equality) => Predicate::new(
             token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
             {
                 let predicate_value = children.consume_expected(Rule::predicate_value).into_child();
@@ -673,7 +682,7 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
         ),
         Some(Rule::predicate_substring) => {
             let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
-            ValueConstraint::new(
+            Predicate::new(
                 predicate,
                 {
                     match predicate {
@@ -698,6 +707,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
     pratt_parser
         .map_primary(|primary| match primary.as_rule() {
             Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
+            Rule::VAR_ => Expression::Variable(get_var(primary)),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
         })
         .map_infix(|left, op, right| {

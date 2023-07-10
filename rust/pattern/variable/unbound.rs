@@ -29,7 +29,7 @@ use crate::{
         ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint, IsaConstraint,
         LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint, RelatesConstraint,
         RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint, ThingConstrainable,
-        ThingVariable, TypeConstrainable, TypeVariable, ValueConstraint, ValueTypeConstraint, ValueVariable, Visibility,
+        ThingVariable, TypeConstrainable, TypeVariable, Predicate, ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
 use crate::pattern::{UnboundConceptVariable, UnboundValueVariable};

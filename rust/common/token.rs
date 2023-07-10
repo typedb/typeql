@@ -120,6 +120,7 @@ string_enum! { Schema
 string_enum! { Constraint
     Abstract = "abstract",
     As = "as",
+    Assign = "=",
     Has = "has",
     IID = "iid",
     Is = "is",
