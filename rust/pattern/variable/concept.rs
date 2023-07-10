@@ -21,6 +21,7 @@
  */
 
 use std::{fmt, iter};
+use std::hash::{Hash, Hasher};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
@@ -67,5 +68,11 @@ impl fmt::Display for ConceptVariable {
             write!(f, " {is}")?;
         }
         Ok(())
+    }
+}
+
+impl Hash for ConceptVariable {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.reference.hash(state);
     }
 }

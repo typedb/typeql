@@ -34,7 +34,7 @@ use crate::{
 use crate::pattern::AssignConstraint;
 use crate::pattern::variable::ValueConstrainable;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct UnboundValueVariable {
     pub reference: Reference,
 }

@@ -29,6 +29,7 @@ mod value;
 mod unbound_concept;
 mod unbound;
 mod unbound_value;
+mod _bound;
 
 use std::{collections::HashSet, fmt};
 
@@ -51,7 +52,7 @@ use crate::{
     pattern::{Normalisable, Pattern},
 };
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Variable {
     Concept(ConceptVariable),
     Thing(ThingVariable),

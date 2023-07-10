@@ -20,9 +20,10 @@
  *
  */
 
+use std::collections::HashSet;
 use std::fmt;
 use crate::common::token::{self, Function as FunctionToken, Operation as OperationToken};
-use crate::pattern::{UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value};
+use crate::pattern::{UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value, Variable};
 use crate::pattern::Value::String;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -47,9 +48,27 @@ impl fmt::Display for Expression {
     }
 }
 
+impl Expression {
+    pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
+        match self {
+            Expression::Operation(operation) => operation.collect_variables(collector),
+            Expression::Function(function) => function.collect_variables(collector),
+            Expression::Constant(constant) => constant.collect_variables(collector),
+            Expression::Parenthesis(parenthesis) => parenthesis.collect_variables(collector),
+            Expression::Variable(variable) => {
+                collector.insert(variable.clone());
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constant {
     pub value: Value,
+}
+
+impl Constant {
+    pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {}
 }
 
 impl fmt::Display for Constant {
@@ -65,6 +84,13 @@ pub struct Operation {
     pub right: Box<Expression>,
 }
 
+impl Operation {
+    pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
+        self.left.collect_variables(collector);
+        self.right.collect_variables(collector);
+    }
+}
+
 impl fmt::Display for Operation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {} {}", self.left, self.op, self.right)
@@ -77,6 +103,11 @@ pub struct Function {
     args: Vec<Box<Expression>>,
 }
 
+impl Function {
+    pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
+        let _ = self.args.iter().map(|arg| arg.collect_variables(collector));
+    }
+}
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}({})", self.symbol, self.args.iter().map(|expr| expr.to_string()).collect::<Vec<_>>().join(", "))
@@ -88,6 +119,11 @@ pub struct Parenthesis {
     inner: Box<Expression>,
 }
 
+impl Parenthesis {
+    pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
+        self.inner.collect_variables(collector);
+    }
+}
 impl fmt::Display for Parenthesis {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "( {} )", self.inner)

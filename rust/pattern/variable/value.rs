@@ -21,6 +21,7 @@
  */
 
 use std::{fmt, iter};
+use std::hash::{Hash, Hasher};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
@@ -45,8 +46,9 @@ impl ValueVariable {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        todo!();
-        // Box::new(iter::once(&self.reference).chain(self.is_constraint.iter().map(|is| &is.variable.reference)))
+        // FIXME
+        Box::new(iter::once(&self.reference)
+            .chain(self.assign_constraint.unwrap().variables().iter().map(|var| var.references())))
     }
 }
 
@@ -78,5 +80,11 @@ impl fmt::Display for ValueVariable {
             write!(f, " {} {}", predicate.predicate, predicate.value)?;
         }
         Ok(())
+    }
+}
+
+impl Hash for ValueVariable {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.reference.hash(state);
     }
 }

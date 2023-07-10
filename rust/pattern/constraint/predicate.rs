@@ -21,6 +21,7 @@
  */
 
 use std::{fmt, iter};
+use std::collections::HashSet;
 
 use chrono::{NaiveDateTime, Timelike};
 
@@ -35,7 +36,7 @@ use crate::{
     },
     pattern::{Reference, ThingVariable, UnboundConceptVariable},
 };
-use crate::pattern::ValueVariable;
+use crate::pattern::{UnboundValueVariable, UnboundVariable, ValueVariable, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Predicate {
@@ -153,6 +154,21 @@ impl From<NaiveDateTime> for Value {
 impl From<UnboundConceptVariable> for Value {
     fn from(variable: UnboundConceptVariable) -> Self {
         Value::ThingVariable(Box::new(variable.into_thing()))
+    }
+}
+
+impl From<UnboundValueVariable> for Value {
+    fn from(variable: UnboundValueVariable) -> Self {
+        Value::ValueVariable(Box::new(variable.into_value_variable()))
+    }
+}
+
+impl From<UnboundVariable> for Value {
+    fn from(variable: UnboundVariable) -> Self {
+        match variable {
+            UnboundVariable::Concept(concept) => Value::from(concept),
+            UnboundVariable::Value(value) => Value::from(value),
+        }
     }
 }
 

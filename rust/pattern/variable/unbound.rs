@@ -34,7 +34,7 @@ use crate::{
 };
 use crate::pattern::{UnboundConceptVariable, UnboundValueVariable};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum UnboundVariable {
     Concept(UnboundConceptVariable),
     Value(UnboundValueVariable),

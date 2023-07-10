@@ -165,10 +165,10 @@ predicate_value = { value | VAR_ }
 
 expression = { expression_base ~ ( infix ~ expression_base )* }
 
-expression_base = { VAR_
-                  | expression_function | value
-                  | "(" ~ expression ~ ")"
-                  }
+expression_base = _{ VAR_
+                   | expression_function | value
+                   | "(" ~ expression ~ ")"
+                   }
 
 infix = { POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 

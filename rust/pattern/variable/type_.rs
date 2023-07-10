@@ -21,6 +21,7 @@
  */
 
 use std::{fmt, iter};
+use std::hash::{Hash, Hasher};
 
 use crate::{
     common::{
@@ -172,5 +173,11 @@ impl fmt::Display for TypeVariable {
             )?;
         }
         Ok(())
+    }
+}
+
+impl Hash for TypeVariable {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.reference.hash(state);
     }
 }

@@ -32,7 +32,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct UnboundConceptVariable {
     pub reference: Reference,
 }

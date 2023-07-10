@@ -20,6 +20,7 @@
  *
  */
 
+use std::collections::HashSet;
 use std::fmt;
 
 use crate::{
@@ -28,17 +29,21 @@ use crate::{
     var,
 };
 use crate::builder::{var_value};
-use crate::pattern::Expression;
+use crate::pattern::{Expression, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AssignConstraint {
     pub expression: Expression,
-    // pub inputs: HashSet<BoundVariable>,
+    pub inputs: HashSet<Variable>,
 }
 
 impl AssignConstraint {
     fn new(expr: Expression) -> Self {
-        Self { expression: expr }
+        Self { expression: expr, inputs: HashSet::new() }
+    }
+
+    pub(crate) fn variables(&self) -> &HashSet<Variable> {
+        &self.inputs
     }
 }
 

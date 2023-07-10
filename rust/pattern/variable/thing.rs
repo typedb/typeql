@@ -21,6 +21,7 @@
  */
 
 use std::{fmt, iter};
+use std::hash::{Hash, Hasher};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
@@ -134,5 +135,11 @@ impl fmt::Display for ThingVariable {
         }
 
         Ok(())
+    }
+}
+
+impl Hash for ThingVariable {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.reference.hash(state);
     }
 }
