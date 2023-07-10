@@ -32,10 +32,16 @@ macro_rules! error_messages {
         )*}
 
         impl $name {
+            pub const PREFIX: &'static str = $code_pfx;
+
             pub const fn code(&self) -> usize {
                 match self {$(
                     Self::$error_name(..) => $code,
                 )*}
+            }
+
+            pub fn format_code(&self) -> String {
+                format!(concat!("[", $code_pfx, "{}{}]"), self.padding(), self.code())
             }
 
             pub fn message(&self) -> String {
