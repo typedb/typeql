@@ -650,7 +650,7 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
             let label = children.consume_expected(Rule::label).as_str().to_owned();
             match children.peek_rule() {
                 Some(Rule::VAR_) => {
-                    HasConstraint::from((label, get_var_concept(children.consume_expected(Rule::VAR_).into_children().consume_expected(Rule::VAR_CONCEPT_))))
+                    HasConstraint::from((label, get_var(children.consume_expected(Rule::VAR_).into_children().consume_any())))
                 },
                 Some(Rule::predicate) => {
                     HasConstraint::new((label, visit_predicate(children.consume_expected(Rule::predicate))))

@@ -1462,17 +1462,8 @@ macro_rules! assert_valid_eq_repr {
 #[test]
 fn test_expressions() {
     let query = format!(
-        r#"match
-        $p isa person, has name $name,
-         has age $a, has weight $w, has height $h;
-
-        ?bmi = $w/($h/100 * $h/100);
-
-        ?days-since-18 = ($a - 18) * 365.25;
-        ?hours-per-day = 24;
-        ?hours-since-18 = ?hours-per-day * ?days-since-18;
-      get
-        $name, ?hours-since-18, ?bmi;"#
+        r#"match  ?a = 25;
+      insert $x isa person, has name "Wilhelmina", has age ?a, has ref 0;"#
     );
 
     let parsed = parse_query(&query).unwrap();//.into_match();
@@ -1484,4 +1475,3 @@ fn test_expressions() {
 fn reparse_query(parsed: &Query) -> Query {
     parse_query(&parsed.to_string()).unwrap()
 }
-
