@@ -708,6 +708,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
         .map_primary(|mut primary| match primary.as_rule() {
             Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
             Rule::VAR_ => Expression::Variable(get_var(primary)),
+            Rule::expression_function => Expression::Function(visit_function(primary)),
             Rule::paren_expr => Expression::Parenthesis(Parenthesis { inner: Box::new(visit_expression(primary.into_children().skip_expected(Rule::PAREN_OPEN).consume_any())) }),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
         })
@@ -728,8 +729,31 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
             })
         })
         .parse(tree.into_children())
+}
 
-    // todo!();
+fn visit_function(tree: SyntaxTree) -> Function {
+    let mut children = tree.into_children();
+    let symbol = visit_function_name(children.consume_expected(Rule::expression_function_name));
+    let args = children.map(visit_function_argument).collect();
+    Function::new(symbol, args)
+}
+
+fn visit_function_name(tree: SyntaxTree) -> token::Function {
+    let child = tree.into_child();
+    match child.as_rule() {
+        Rule::ABS => token::Function::Abs,
+        Rule::CEIL => token::Function::Ceil,
+        Rule::FLOOR => token::Function::Floor,
+        Rule::MAX => token::Function::Max,
+        Rule::MIN => token::Function::Min,
+        Rule::ROUND => token::Function::Round,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
+    }
+}
+
+fn visit_function_argument(tree: SyntaxTree) -> Box<Expression> {
+    let mut child = tree.into_child();
+    Box::new(visit_expression(child))
 }
 
 fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {

@@ -304,8 +304,12 @@ MODULO = @{ "%" }
 PAREN_OPEN = @{ "(" }
 PAREN_CLOSE = @{ ")" }
 
-// Incomplete list of function names usable in expressions. The 'func_name' rule references all function names.
-EXPR_FUNC_NAME = @{ "floor" | "ceil" | "round" | "abs" }
+// Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
+EXPR_FUNC_NAME = _{ ABS | CEIL | FLOOR | ROUND }
+ABS = @{ "abs" }
+CEIL = @{ "ceil" }
+FLOOR = @{ "floor" }
+ROUND = @{ "round" }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 

@@ -104,6 +104,10 @@ pub struct Function {
 }
 
 impl Function {
+    pub fn new(symbol: FunctionToken, args: Vec<Box<Expression>>) -> Self {
+        Function { symbol, args }
+    }
+
     pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
         let _ = self.args.iter().map(|arg| arg.collect_variables(collector));
     }

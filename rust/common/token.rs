@@ -174,10 +174,10 @@ string_enum! { Operation
 }
 
 string_enum! { Function
+    Abs = "abs",
+    Ceil = "ceil",
+    Floor = "floor",
     Max = "max",
     Min = "min",
-    Floor = "floor",
-    Ceil = "ceil",
     Round = "round",
-    Abs = "abs",
 }

@@ -1462,8 +1462,11 @@ macro_rules! assert_valid_eq_repr {
 #[test]
 fn test_expressions() {
     let query = format!(
-        r#"match  ?a = 25;
-      insert $x isa person, has name "Wilhelmina", has age ?a, has ref 0;"#
+        r#"match
+        ?a = floor(3/2);
+        ?b = ceil(3/2);
+      get
+        ?a, ?b;"#
     );
 
     let parsed = parse_query(&query).unwrap();//.into_match();
