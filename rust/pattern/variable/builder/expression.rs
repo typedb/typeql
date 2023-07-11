@@ -64,7 +64,7 @@ impl Expression {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constant {
-    pub value: Value,
+    pub(crate) value: Value,
 }
 
 impl Constant {
@@ -79,9 +79,9 @@ impl fmt::Display for Constant {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Operation {
-    pub op: OperationToken,
-    pub left: Box<Expression>,
-    pub right: Box<Expression>,
+    pub(crate) op: OperationToken,
+    pub(crate) left: Box<Expression>,
+    pub(crate) right: Box<Expression>,
 }
 
 impl Operation {
@@ -99,8 +99,8 @@ impl fmt::Display for Operation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Function {
-    symbol: FunctionToken,
-    args: Vec<Box<Expression>>,
+    pub(crate) symbol: FunctionToken,
+    pub(crate) args: Vec<Box<Expression>>,
 }
 
 impl Function {
@@ -116,7 +116,7 @@ impl fmt::Display for Function {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Parenthesis {
-    inner: Box<Expression>,
+    pub(crate) inner: Box<Expression>,
 }
 
 impl Parenthesis {

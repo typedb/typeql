@@ -705,10 +705,10 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
         .op(Op::infix(Rule::POWER, Right) );
 
     pratt_parser
-        .map_primary(|primary| match primary.as_rule() {
+        .map_primary(|mut primary| match primary.as_rule() {
             Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
             Rule::VAR_ => Expression::Variable(get_var(primary)),
-            Rule::expression => visit_expression(primary.into_inner().consume_any()),
+            Rule::paren_expr => Expression::Parenthesis(Parenthesis { inner: Box::new(visit_expression(primary.into_children().skip_expected(Rule::PAREN_OPEN).consume_any())) }),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
         })
         .map_infix(|left, op, right| {

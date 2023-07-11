@@ -1476,7 +1476,7 @@ fn test_expressions() {
     );
 
     let parsed = parse_query(&query).unwrap();//.into_match();
-    assert_eq!(parsed, reparse_query(&parsed));
+    assert_eq!(parsed, reparse_query(&parsed), "{}", &parsed.to_string());
     // let expected = typeql_match!(var_concept("x").iid(iid));
     // assert_valid_eq_repr!(expected, parsed, query);
 }

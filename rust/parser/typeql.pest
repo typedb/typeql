@@ -167,10 +167,11 @@ expression = { expression_base ~ ( infix ~ expression_base )* }
 
 expression_base = _{ VAR_
                    | expression_function | value
-                   | "(" ~ expression ~ ")"
+                   | paren_expr
                    }
 
 infix = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
+paren_expr = { PAREN_OPEN ~ expression ~ PAREN_CLOSE }
 
 expression_function = { expression_function_name ~ "(" ~ expression_arguments? ~ ")" }
 expression_function_name = { EXPR_FUNC_NAME | MAX | MIN }
