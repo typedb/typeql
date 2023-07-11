@@ -33,51 +33,62 @@ eof_schema_rule       :   schema_rule      EOF ;
 
 query                 :   query_define           |   query_undefine
                       |   query_insert           |   query_update
-                      |   query_delete           |   query_match
-                      |   query_match_aggregate  |   query_match_group
-                      |   query_match_group_agg                                 ;
+                      |   query_delete           |   query_match_get
+                      |   query_match_aggregate  |   query_match_fetch          ;
 
-query_define          :   DEFINE      definables  ;
-query_undefine        :   UNDEFINE    definables  ;
 
-query_insert          :   MATCH       patterns      INSERT  variable_things
-                      |                             INSERT  variable_things     ;
-query_update          :   query_delete              INSERT  variable_things     ;
-query_delete          :   MATCH       patterns      DELETE  variable_things     ;
+query_define          :   clause_define   ;
+query_undefine        :   clause_undefine ;
 
-query_match           :   MATCH       patterns            ( modifiers )         ;
+query_insert          :   clause_match  clause_insert  ( modifiers )
+                      |   clause_insert                                                 ;
+query_update          :   clause_match  clause_delete  clause_insert  ( modifiers )     ;
+query_delete          :   clause_match  clause_delete  ( modifiers )                    ;
 
-// MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
+query_match_get       :   clause_match  clause_get     ( modifiers )                    ;
+query_match_aggregate :   clause_match  clause_get     ( modifiers )  clause_aggregate  ;
+query_match_fetch     :   clause_match  clause_fetch   ( modifiers )                    ;
 
-query_match_aggregate :   query_match   match_aggregate   ;
-query_match_group     :   query_match   match_group       ;
-query_match_group_agg :   query_match   match_group       match_aggregate  ;
+clause_define         :   DEFINE      definables        ;
+clause_undefine       :   UNDEFINE    definables        ;
+clause_match          :   MATCH       patterns          ;
+clause_insert         :   INSERT      variable_things   ;
+clause_delete         :   DELETE      variable_things   ;
+clause_get            :   GET         (VAR_CONCEPT_ | VAR_VALUE_)   ( ',' (VAR_CONCEPT_ | VAR_VALUE_) )*  ';' ;
 
-// MATCH QUERY MODIFIERS =======================================================
+clause_fetch          :  'fetch' fetchables             ;
 
-modifiers             :   ( filter ';' )? ( sort ';' )? ( offset ';' )? ( limit ';' )?                  ;
-
-filter                :   GET        (VAR_CONCEPT_ | VAR_VALUE_)   ( ',' (VAR_CONCEPT_ | VAR_VALUE_) )* ;
-sort                  :   SORT        var_order     ( ',' var_order    )*                               ;
-var_order             :   (VAR_CONCEPT_  | VAR_VALUE_)  ORDER_?                                         ;
-offset                :   OFFSET      LONG_                                                             ;
-limit                 :   LIMIT       LONG_                                                             ;
-
-// GET AGGREGATE QUERY =========================================================
-//
-// An aggregate function is composed of 2 things:
-// The aggregate method name, followed by the variable to apply the function to
-
-match_aggregate       :   aggregate_method  (VAR_CONCEPT_  | VAR_VALUE_)?   ';' ;   // method and, optionally, a variable
+clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?   ';' ;   // method and, optionally, a variable
 aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
 
-// GET GROUP QUERY =============================================================
-//
-// An group function is composed of 2 things:
-// The 'GROUP' method name, followed by the variable to group the results by
 
-match_group           :   GROUP   (VAR_CONCEPT_  | VAR_VALUE_)  ';'             ;
+// MATCH QUERY MODIFIERS =======================================================
+
+modifiers             :    ( sort ';' )? ( offset ';' )? ( limit ';' )?                  ;
+
+sort                  :   SORT        var_order     ( ',' var_order    )*                ;
+var_order             :   ( VAR_CONCEPT_  | VAR_VALUE_ )  ORDER_?                        ;
+offset                :   OFFSET      LONG_                                              ;
+limit                 :   LIMIT       LONG_                                              ;
+
+// FETCH QUERY =================================================================
+
+fetchables            : ( fetchable ';' )+    ;
+fetchable             : fetch_var
+                      | fetch_var   ':' fetch_var_attributes
+                      | fetch_name  ':' '{' fetch_subquery '}'  ;
+
+fetch_var             : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( fetch_as )? ;
+
+fetch_var_attributes  :  fetch_var_attribute  ( ',' fetch_var_attribute )*  ;
+fetch_var_attribute   : label ( fetch_as )?         ;
+
+fetch_as              : 'as' fetch_name ;
+fetch_name            : QUOTED_STRING | LABEL_  ;
+
+fetch_subquery        : query_match_fetch | query_match_aggregate ;
+
 
 // SCHEMA QUERY ================================================================
 
@@ -118,7 +129,7 @@ type_constraint       :   ABSTRACT
                       |   RELATES     type         ( AS type )?
                       |   PLAYS       type_scoped  ( AS type )?
                       |   VALUE       value_type
-                      |   REGEX       STRING_
+                      |   REGEX       QUOTED_STRING
                       |   TYPE        label_any
                       ;
 
@@ -165,7 +176,7 @@ attribute             :   HAS label ( VAR_CONCEPT_ | VAR_VALUE_ | predicate )   
 
 predicate             :   value
                       |   predicate_equality   predicate_value
-                      |   predicate_substring  STRING_
+                      |   predicate_substring  QUOTED_STRING
                       ;
 predicate_equality    :   EQ | NEQ | GT | GTE | LT | LTE
                       |   ASSIGN ;                                              // Backwards compatibility till 3.0
@@ -210,7 +221,7 @@ type_native           :   THING           |   ENTITY          |   ATTRIBUTE
 
 value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;
-value                 :   STRING_         |   BOOLEAN_
+value                 :   QUOTED_STRING   |   BOOLEAN_
                       |   DATE_           |   DATETIME_
                       |   signed_long     |   signed_double   ;
 
@@ -309,8 +320,9 @@ DATETIME        : 'datetime'    ;
 BOOLEAN_        : TRUE | FALSE  ; // order of lexer declaration matters
 TRUE            : 'true'        ;
 FALSE           : 'false'       ;
-STRING_         : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
+QUOTED_STRING   : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
                 | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''    ;
+//WORD            :  ( ~[ \n\t\r] )+                      ;
 LONG_           : [0-9]+                                ;
 DOUBLE_         : [0-9]+ '.' [0-9]+                     ;
 DATE_           : DATE_FRAGMENT_                        ;
