@@ -31,7 +31,7 @@ use crate::{
         ThingVariable, TypeConstrainable, TypeVariable, Predicate, ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
-use crate::pattern::AssignConstraint;
+use crate::pattern::{AssignConstraint, ValueReference};
 use crate::pattern::variable::ValueConstrainable;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -45,12 +45,12 @@ impl UnboundValueVariable {
     }
 
     pub fn named(name: String) -> UnboundValueVariable {
-        UnboundValueVariable { reference: Reference::Name(name) }
+        UnboundValueVariable { reference: Reference::Value(ValueReference::Name(name)) }
     }
 
-    pub fn hidden() -> UnboundValueVariable {
-        UnboundValueVariable { reference: Reference::Anonymous(Visibility::Invisible) }
-    }
+    // pub fn hidden() -> UnboundValueVariable {
+    //     UnboundValueVariable { reference: Reference::Anonymous(Visibility::Invisible) }
+    // }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(iter::once(&self.reference))

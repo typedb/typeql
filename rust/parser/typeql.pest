@@ -170,7 +170,7 @@ expression_base = _{ VAR_
                    | "(" ~ expression ~ ")"
                    }
 
-infix = { POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
+infix = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 
 expression_function = { expression_function_name ~ "(" ~ expression_arguments? ~ ")" }
 expression_function_name = { EXPR_FUNC_NAME | MAX | MIN }

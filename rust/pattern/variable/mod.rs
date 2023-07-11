@@ -38,7 +38,7 @@ pub use builder::{
     ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder, ValueConstrainable, ValueVariableBuilder
 };
 pub use concept::ConceptVariable;
-pub use reference::{Reference, Visibility};
+pub use reference::{ConceptReference, Reference, ValueReference, Visibility};
 pub use thing::ThingVariable;
 pub use type_::TypeVariable;
 pub use value::ValueVariable;

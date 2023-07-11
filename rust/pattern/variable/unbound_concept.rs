@@ -31,6 +31,7 @@ use crate::{
         ThingVariable, TypeConstrainable, TypeVariable, Predicate, ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
+use crate::pattern::ConceptReference;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct UnboundConceptVariable {
@@ -51,15 +52,15 @@ impl UnboundConceptVariable {
     }
 
     pub fn named(name: String) -> UnboundConceptVariable {
-        UnboundConceptVariable { reference: Reference::Name(name) }
+        UnboundConceptVariable { reference: Reference::Concept(ConceptReference::Name(name)) }
     }
 
     pub fn anonymous() -> UnboundConceptVariable {
-        UnboundConceptVariable { reference: Reference::Anonymous(Visibility::Visible) }
+        UnboundConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Visible)) }
     }
 
     pub fn hidden() -> UnboundConceptVariable {
-        UnboundConceptVariable { reference: Reference::Anonymous(Visibility::Invisible) }
+        UnboundConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Invisible)) }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {

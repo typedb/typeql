@@ -1463,14 +1463,25 @@ macro_rules! assert_valid_eq_repr {
 fn test_expressions() {
     let query = format!(
         r#"match
-        $z isa person, has name $x, has age $y;
-        ?y2 = 2;
-        not {{ $y > ?y2; }};
-      get $x, $y;"#
+        $p isa person, has name $name,
+         has age $a, has weight $w, has height $h;
+
+        ?bmi = $w/($h/100 * $h/100);
+
+        ?days-since-18 = ($a - 18) * 365.25;
+        ?hours-per-day = 24;
+        ?hours-since-18 = ?hours-per-day * ?days-since-18;
+      get
+        $name, ?hours-since-18, ?bmi;"#
     );
 
-    let parsed = parse_query(&query).unwrap().into_match();
+    let parsed = parse_query(&query).unwrap();//.into_match();
+    assert_eq!(parsed, reparse_query(&parsed));
     // let expected = typeql_match!(var_concept("x").iid(iid));
     // assert_valid_eq_repr!(expected, parsed, query);
+}
+
+fn reparse_query(parsed: &Query) -> Query {
+    parse_query(&parsed.to_string()).unwrap()
 }
 

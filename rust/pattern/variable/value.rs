@@ -78,7 +78,7 @@ impl fmt::Display for ValueVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)?;
         if let Some(assign) = &self.assign_constraint {
-            write!(f, " {} {}", token::Constraint::Assign, assign)?;
+            write!(f, " {assign}")?;
         } else if let Some(predicate) = &self.predicate_constraint {
             write!(f, " {} {}", predicate.predicate, predicate.value)?;
         }
