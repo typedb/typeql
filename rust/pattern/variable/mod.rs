@@ -62,6 +62,17 @@ pub enum Variable {
 }
 
 impl Variable {
+    pub fn reference(&self) -> &Reference {
+        use Variable::*;
+        match self {
+            Unbound(unbound) => &unbound.reference,
+            Concept(concept) => &concept.reference,
+            Thing(thing) => &thing.reference,
+            Type(type_) => &type_.reference,
+            Value(value) => &value.reference,
+        }
+    }
+
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         use Variable::*;
         match self {

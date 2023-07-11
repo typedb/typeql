@@ -48,16 +48,19 @@ impl ValueVariable {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         // FIXME
         Box::new(iter::once(&self.reference)
-            .chain(self.assign_constraint.unwrap().variables().iter().map(|var| var.references())))
+            .chain(self.assign_constraint.iter().flat_map(|assign| assign.references()))
+            .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.references()))
+        )
     }
 }
 
 impl Validatable for ValueVariable {
     fn validate(&self) -> Result<()> {
-        todo!();
-        // collect_err(
-        //     &mut iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
-        // )
+        collect_err(
+            &mut iter::once(self.reference.validate())
+                .chain(self.assign_constraint.iter().map(Validatable::validate))
+                .chain(self.predicate_constraint.iter().map(Validatable::validate)),
+        )
     }
 }
 

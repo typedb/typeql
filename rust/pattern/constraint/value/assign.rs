@@ -29,7 +29,7 @@ use crate::{
     var,
 };
 use crate::builder::{var_value};
-use crate::pattern::{Expression, Variable};
+use crate::pattern::{Expression, Reference, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AssignConstraint {
@@ -42,9 +42,13 @@ impl AssignConstraint {
         Self { expression: expr, inputs: HashSet::new() }
     }
 
-    pub(crate) fn variables(&self) -> &HashSet<Variable> {
-        &self.inputs
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.inputs.iter().map(|input| input.reference()))
     }
+
+    // pub(crate) fn variables(&self) -> &HashSet<Variable> {
+    //     &self.inputs
+    // }
 }
 
 impl Validatable for AssignConstraint {

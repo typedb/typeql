@@ -49,6 +49,13 @@ impl Predicate {
         Predicate { predicate, value }
     }
 
+    // pub fn reference(&self) -> Option<&Reference> {
+    //     match &self.value {
+    //         Value::ThingVariable(v) => Some(&v.reference),
+    //         Value::ValueVariable(v) => Some(&v.reference),
+    //         _ => None,
+    //     }
+    // }
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         match &self.value {
             Value::ThingVariable(v) => Box::new(iter::once(&v.reference)),
