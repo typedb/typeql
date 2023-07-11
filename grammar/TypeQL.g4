@@ -290,7 +290,7 @@ DIVIDE          : '/'           ;   MULTIPLY        : '*'           ;
 POWER           : '^'           ;   MODULO          : '%'           ;
 PAREN_OPEN      : '('           ;   PAREN_CLOSE     : ')'           ;
 
-// Incomplete list of function names usable in expressions. The 'func_name' rule references all function names.
+// Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
 EXPR_FUNC_NAME  :  'floor' | 'ceil' | 'round' | 'abs'               ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
