@@ -20,7 +20,7 @@
  *
  */
 
-use crate::pattern::{ValueVariable, AssignConstraint, Predicate};
+use crate::pattern::{AssignConstraint, Predicate, ValueVariable};
 
 //FIXME: It's still just a copy of ConceptConstrainable
 pub trait ValueConstrainable {

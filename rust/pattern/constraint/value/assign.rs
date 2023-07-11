@@ -20,16 +20,14 @@
  *
  */
 
-use std::collections::HashSet;
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 use crate::{
+    builder::var_value,
     common::{token, validatable::Validatable, Result},
-    pattern::{ValueVariable, UnboundValueVariable},
+    pattern::{Expression, Reference, UnboundValueVariable, ValueVariable, Variable},
     var,
 };
-use crate::builder::{var_value};
-use crate::pattern::{Expression, Reference, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AssignConstraint {

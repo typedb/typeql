@@ -20,14 +20,17 @@
  *
  */
 
-use std::{fmt, iter};
-use std::hash::{Hash, Hasher};
+use std::{
+    fmt,
+    hash::{Hash, Hasher},
+    iter,
+};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable, RelationConstraint,
-        RolePlayerConstraint, ThingConstrainable, Predicate,
+        HasConstraint, IIDConstraint, IsaConstraint, Predicate, Reference, RelationConstrainable, RelationConstraint,
+        RolePlayerConstraint, ThingConstrainable,
     },
     write_joined,
 };

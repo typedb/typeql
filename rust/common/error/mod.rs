@@ -31,7 +31,7 @@ use pest::error::{Error as PestError, LineColLocation};
 use crate::{
     common::token,
     error_messages,
-    pattern::{Label, Pattern, Reference, ThingVariable, TypeVariable, UnboundVariable, UnboundConceptVariable, Value},
+    pattern::{Label, Pattern, Reference, ThingVariable, TypeVariable, UnboundConceptVariable, UnboundVariable, Value},
     write_joined,
 };
 

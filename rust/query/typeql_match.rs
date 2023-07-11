@@ -29,11 +29,10 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundConceptVariable},
+    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundConceptVariable, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
-use crate::pattern::UnboundVariable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatch {
@@ -245,8 +244,10 @@ impl fmt::Display for Filter {
 pub mod sorting {
     use std::fmt;
 
-    use crate::{common::token, pattern::UnboundConceptVariable};
-    use crate::pattern::UnboundVariable;
+    use crate::{
+        common::token,
+        pattern::{UnboundConceptVariable, UnboundVariable},
+    };
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {

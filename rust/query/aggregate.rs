@@ -29,10 +29,9 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedReferences, Reference, UnboundConceptVariable},
+    pattern::{NamedReferences, Reference, UnboundConceptVariable, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
-use crate::pattern::UnboundVariable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>

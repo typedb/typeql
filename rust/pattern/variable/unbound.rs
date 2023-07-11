@@ -20,19 +20,18 @@
  *
  */
 
-use std::{fmt, iter};
-use std::fmt::Formatter;
+use std::{fmt, fmt::Formatter, iter};
 
 use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
         ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint, IsaConstraint,
-        LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint, RelatesConstraint,
+        LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, Reference, RegexConstraint, RelatesConstraint,
         RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint, ThingConstrainable,
-        ThingVariable, TypeConstrainable, TypeVariable, Predicate, ValueTypeConstraint, ValueVariable, Visibility,
+        ThingVariable, TypeConstrainable, TypeVariable, UnboundConceptVariable, UnboundValueVariable,
+        ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
-use crate::pattern::{UnboundConceptVariable, UnboundValueVariable};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum UnboundVariable {

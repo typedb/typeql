@@ -24,10 +24,9 @@ use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{NamedReferences, Reference, UnboundConceptVariable},
+    pattern::{NamedReferences, Reference, UnboundConceptVariable, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLMatch},
 };
-use crate::pattern::UnboundVariable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLMatchGroup {

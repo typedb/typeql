@@ -25,8 +25,8 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
-        Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, Value,
-        Predicate,
+        Predicate, Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
+        UnboundConceptVariable, Value,
     },
 };
 
@@ -57,12 +57,14 @@ impl From<UnboundConceptVariable> for HasConstraint {
 impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
     fn from((type_name, value): (S, T)) -> Self {
         match value.into() {
-            Value::ThingVariable(variable) => {
-                HasConstraint { type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())), attribute: *variable }
-            }
+            Value::ThingVariable(variable) => HasConstraint {
+                type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
+                attribute: *variable,
+            },
             value => HasConstraint {
                 type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-                attribute: UnboundConceptVariable::hidden().constrain_predicate(Predicate::new(token::Predicate::Eq, value)),
+                attribute: UnboundConceptVariable::hidden()
+                    .constrain_predicate(Predicate::new(token::Predicate::Eq, value)),
             },
         }
     }

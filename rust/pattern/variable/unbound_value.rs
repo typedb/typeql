@@ -25,14 +25,13 @@ use std::{fmt, iter};
 use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
-        ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint, IsaConstraint,
-        LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint, RelatesConstraint,
-        RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint, ThingConstrainable,
-        ThingVariable, TypeConstrainable, TypeVariable, Predicate, ValueTypeConstraint, ValueVariable, Visibility,
+        variable::ValueConstrainable, AssignConstraint, ConceptConstrainable, ConceptVariable, HasConstraint,
+        IIDConstraint, IsConstraint, IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate,
+        Reference, RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
+        SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueReference,
+        ValueTypeConstraint, ValueVariable, Visibility,
     },
 };
-use crate::pattern::{AssignConstraint, ValueReference};
-use crate::pattern::variable::ValueConstrainable;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct UnboundValueVariable {

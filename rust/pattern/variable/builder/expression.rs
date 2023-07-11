@@ -20,11 +20,12 @@
  *
  */
 
-use std::collections::HashSet;
-use std::fmt;
-use crate::common::token::{self, Function as FunctionToken, Operation as OperationToken};
-use crate::pattern::{UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value, Variable};
-use crate::pattern::Value::String;
+use std::{collections::HashSet, fmt};
+
+use crate::{
+    common::token::{self, Function as FunctionToken, Operation as OperationToken},
+    pattern::{UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value, Value::String, Variable},
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
@@ -38,13 +39,22 @@ pub enum Expression {
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Expression::Operation(operation) => { write!(f, "{operation}") }
-            Expression::Function(function) => { write!(f, "{function}") }
-            Expression::Constant(constant) => { write!(f, "{constant}") }
-            Expression::Parenthesis(parenthesis) => { write!(f, "{parenthesis}") }
-            Expression::Variable(variable) => { write!(f, "{variable}") }
+            Expression::Operation(operation) => {
+                write!(f, "{operation}")
+            }
+            Expression::Function(function) => {
+                write!(f, "{function}")
+            }
+            Expression::Constant(constant) => {
+                write!(f, "{constant}")
+            }
+            Expression::Parenthesis(parenthesis) => {
+                write!(f, "{parenthesis}")
+            }
+            Expression::Variable(variable) => {
+                write!(f, "{variable}")
+            }
         }
-
     }
 }
 

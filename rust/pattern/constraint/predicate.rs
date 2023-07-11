@@ -20,8 +20,7 @@
  *
  */
 
-use std::{fmt, iter};
-use std::collections::HashSet;
+use std::{collections::HashSet, fmt, iter};
 
 use chrono::{NaiveDateTime, Timelike};
 
@@ -34,9 +33,11 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingVariable, UnboundConceptVariable},
+    pattern::{
+        Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariable,
+        Variable,
+    },
 };
-use crate::pattern::{UnboundValueVariable, UnboundVariable, ValueVariable, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Predicate {
@@ -86,7 +87,9 @@ impl fmt::Display for Predicate {
         if self.predicate == token::Predicate::Like {
             assert!(matches!(self.value, Value::String(_)));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
-        } else if self.predicate == token::Predicate::Eq && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_))) {
+        } else if self.predicate == token::Predicate::Eq
+            && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_)))
+        {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)

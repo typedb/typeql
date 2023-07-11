@@ -194,7 +194,11 @@ impl From<(Label, Label, Annotation)> for OwnsConstraint {
 
 impl From<(UnboundConceptVariable, UnboundConceptVariable, Annotation)> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotation): (UnboundConceptVariable, UnboundConceptVariable, Annotation),
+        (attribute_type, overridden_attribute_type, annotation): (
+            UnboundConceptVariable,
+            UnboundConceptVariable,
+            Annotation,
+        ),
     ) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type(), [annotation]))
     }
@@ -260,7 +264,11 @@ impl<const N: usize> From<(Label, Label, [Annotation; N])> for OwnsConstraint {
 
 impl<const N: usize> From<(UnboundConceptVariable, UnboundConceptVariable, [Annotation; N])> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotations): (UnboundConceptVariable, UnboundConceptVariable, [Annotation; N]),
+        (attribute_type, overridden_attribute_type, annotations): (
+            UnboundConceptVariable,
+            UnboundConceptVariable,
+            [Annotation; N],
+        ),
     ) -> Self {
         OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type(), annotations))
     }

@@ -24,9 +24,13 @@
 mod test;
 
 use chrono::{NaiveDate, NaiveDateTime};
-use pest::Parser;
-use pest::pratt_parser::PrattParser;
-use pest::pratt_parser::{Assoc::{Left, Right}, Op};
+use pest::{
+    pratt_parser::{
+        Assoc::{Left, Right},
+        Op, PrattParser,
+    },
+    Parser,
+};
 use pest_derive::Parser;
 
 use crate::{
@@ -39,18 +43,18 @@ use crate::{
         Result,
     },
     pattern::{
-        Annotation, ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction, HasConstraint,
-        IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint, RelatesConstraint,
-        RelationConstraint, RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable,
-        ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable, UnboundConceptVariable, UnboundValueVariable,
-        Value, Predicate, ValueConstrainable, ValueVariable, Variable,
+        Annotation, AssignConstraint, ConceptVariable, ConceptVariableBuilder, Conjunction, Constant, Definable,
+        Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
+        Parenthesis, Pattern, PlaysConstraint, Predicate, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
+        RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
+        TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
+        UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
         TypeQLMatchAggregate, TypeQLMatchGroup, TypeQLMatchGroupAggregate, TypeQLUndefine, TypeQLUpdate,
     },
 };
-use crate::pattern::{AssignConstraint, Constant, Expression, Function, Operation, Parenthesis};
 
 #[derive(Parser)]
 #[grammar = "parser/typeql.pest"]
@@ -649,9 +653,10 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
         Some(Rule::label) => {
             let label = children.consume_expected(Rule::label).as_str().to_owned();
             match children.peek_rule() {
-                Some(Rule::VAR_) => {
-                    HasConstraint::from((label, get_var(children.consume_expected(Rule::VAR_).into_children().consume_any())))
-                },
+                Some(Rule::VAR_) => HasConstraint::from((
+                    label,
+                    get_var(children.consume_expected(Rule::VAR_).into_children().consume_any()),
+                )),
                 Some(Rule::predicate) => {
                     HasConstraint::new((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }
@@ -666,20 +671,17 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
 fn visit_predicate(tree: SyntaxTree) -> Predicate {
     let mut children = tree.into_children();
     match children.peek_rule() {
-        Some(Rule::value) => {
-            Predicate::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value)))
-        }
-        Some(Rule::predicate_equality) => Predicate::new(
-            token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
-            {
+        Some(Rule::value) => Predicate::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value))),
+        Some(Rule::predicate_equality) => {
+            Predicate::new(token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()), {
                 let predicate_value = children.consume_expected(Rule::predicate_value).into_child();
                 match predicate_value.as_rule() {
                     Rule::value => visit_value(predicate_value),
                     Rule::VAR_ => Value::from(get_var(predicate_value.into_children().consume_any())),
                     _ => unreachable!("{}", TypeQLError::IllegalGrammar(predicate_value.to_string())),
                 }
-            },
-        ),
+            })
+        }
         Some(Rule::predicate_substring) => {
             let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
             Predicate::new(
@@ -702,14 +704,18 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
         .op(Op::infix(Rule::ADD, Left) | Op::infix(Rule::SUBTRACT, Left))
         .op(Op::infix(Rule::MULTIPLY, Left) | Op::infix(Rule::DIVIDE, Left) | Op::infix(Rule::MODULO, Left))
-        .op(Op::infix(Rule::POWER, Right) );
+        .op(Op::infix(Rule::POWER, Right));
 
     pratt_parser
         .map_primary(|mut primary| match primary.as_rule() {
             Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
             Rule::VAR_ => Expression::Variable(get_var(primary)),
             Rule::expression_function => Expression::Function(visit_function(primary)),
-            Rule::paren_expr => Expression::Parenthesis(Parenthesis { inner: Box::new(visit_expression(primary.into_children().skip_expected(Rule::PAREN_OPEN).consume_any())) }),
+            Rule::paren_expr => Expression::Parenthesis(Parenthesis {
+                inner: Box::new(visit_expression(
+                    primary.into_children().skip_expected(Rule::PAREN_OPEN).consume_any(),
+                )),
+            }),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
         })
         .map_infix(|left, op, right| {
@@ -722,11 +728,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
                 Rule::POWER => token::Operation::Power,
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar(op.to_string())),
             };
-            Expression::Operation(Operation {
-                op,
-                left: Box::new(left),
-                right: Box::new(right),
-            })
+            Expression::Operation(Operation { op, left: Box::new(left), right: Box::new(right) })
         })
         .parse(tree.into_children())
 }

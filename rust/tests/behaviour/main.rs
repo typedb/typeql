@@ -22,7 +22,7 @@
 
 #![recursion_limit = "256"]
 
-use cucumber::{gherkin::Step, given, StatsWriter, then, when, World, WriterExt};
+use cucumber::{gherkin::Step, given, then, when, StatsWriter, World, WriterExt};
 use typeql_lang::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]
@@ -36,7 +36,8 @@ fn main() {
         TypeQLWorld::cucumber().fail_on_skipped().filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
         }),
-    ).execution_has_failed());
+    )
+    .execution_has_failed());
 }
 
 fn parse_query_in_step(step: &Step) -> Query {

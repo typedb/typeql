@@ -20,18 +20,20 @@
  *
  */
 
-use std::{fmt, iter};
-use std::hash::{Hash, Hasher};
+use std::{
+    fmt,
+    hash::{Hash, Hasher},
+    iter,
+};
 
 use crate::{
-    common::{error::collect_err, validatable::Validatable, Result},
+    common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
         constraint::IsConstraint,
         variable::{builder::ValueConstrainable, Reference},
+        AssignConstraint, ConceptVariable, Predicate,
     },
 };
-use crate::common::token;
-use crate::pattern::{AssignConstraint, ConceptVariable, Predicate};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueVariable {
@@ -47,9 +49,10 @@ impl ValueVariable {
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         // FIXME
-        Box::new(iter::once(&self.reference)
-            .chain(self.assign_constraint.iter().flat_map(|assign| assign.references()))
-            .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.references()))
+        Box::new(
+            iter::once(&self.reference)
+                .chain(self.assign_constraint.iter().flat_map(|assign| assign.references()))
+                .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.references())),
         )
     }
 }

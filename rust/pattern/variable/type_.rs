@@ -20,8 +20,11 @@
  *
  */
 
-use std::{fmt, iter};
-use std::hash::{Hash, Hasher};
+use std::{
+    fmt,
+    hash::{Hash, Hasher},
+    iter,
+};
 
 use crate::{
     common::{

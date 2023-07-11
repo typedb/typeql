@@ -21,10 +21,10 @@
  */
 
 mod concept;
+mod expression;
 mod thing;
 mod type_;
 mod value;
-mod expression;
 
 pub use concept::{ConceptConstrainable, ConceptVariableBuilder};
 pub use expression::{Constant, Expression, Function, Operation, Parenthesis};

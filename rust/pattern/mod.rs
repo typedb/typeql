@@ -35,9 +35,9 @@ use std::{collections::HashSet, fmt};
 
 pub use conjunction::Conjunction;
 pub use constraint::{
-    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsaConstraint,
-    LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, RelationConstraint,
-    RolePlayerConstraint, SubConstraint, Value, Predicate, ValueTypeConstraint,
+    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, RegexConstraint, RelatesConstraint,
+    RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
 pub use label::Label;
@@ -45,9 +45,10 @@ pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
-    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, ConceptReference, Constant, Expression, Function, Operation, Parenthesis, Reference, RelationConstrainable,
-    RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable,
-    TypeVariableBuilder, UnboundVariable, UnboundConceptVariable, ValueReference, UnboundValueVariable, ValueVariable, ValueConstrainable, Variable, Visibility,
+    ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, Constant, Expression, Function,
+    Operation, Parenthesis, Reference, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
+    ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
+    UnboundValueVariable, UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, Variable, Visibility,
 };
 
 use crate::{

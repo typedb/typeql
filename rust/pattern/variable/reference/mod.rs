@@ -25,10 +25,10 @@ mod value;
 
 use std::fmt;
 
-use crate::common::{error::TypeQLError, validatable::Validatable, Result};
-
 pub use concept::{ConceptReference, Visibility};
 pub use value::ValueReference;
+
+use crate::common::{error::TypeQLError, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Reference {

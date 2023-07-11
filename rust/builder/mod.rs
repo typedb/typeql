@@ -23,12 +23,11 @@
 use crate::{
     common::token,
     pattern::{
-        Negation, Predicate, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable, TypeVariable,
-        TypeVariableBuilder, UnboundConceptVariable, Value,
+        Negation, Predicate, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable,
+        TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value,
     },
     Pattern,
 };
-use crate::pattern::{UnboundValueVariable, UnboundVariable};
 
 #[macro_export]
 macro_rules! typeql_match {

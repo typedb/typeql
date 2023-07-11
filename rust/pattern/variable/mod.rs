@@ -20,31 +20,32 @@
  *
  */
 
+mod _bound;
 mod builder;
 mod concept;
 mod reference;
 mod thing;
 mod type_;
-mod value;
-mod unbound_concept;
 mod unbound;
+mod unbound_concept;
 mod unbound_value;
-mod _bound;
+mod value;
 
 use std::{collections::HashSet, fmt};
 
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, Constant, Expression, Function, Operation, Parenthesis, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
-    ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder, ValueConstrainable, ValueVariableBuilder
+    ConceptConstrainable, ConceptVariableBuilder, Constant, Expression, Function, Operation, Parenthesis,
+    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder, TypeConstrainable,
+    TypeVariableBuilder, ValueConstrainable, ValueVariableBuilder,
 };
 pub use concept::ConceptVariable;
 pub use reference::{ConceptReference, Reference, ValueReference, Visibility};
 pub use thing::ThingVariable;
 pub use type_::TypeVariable;
-pub use value::ValueVariable;
 pub use unbound::UnboundVariable;
 pub use unbound_concept::UnboundConceptVariable;
 pub use unbound_value::UnboundValueVariable;
+pub use value::ValueVariable;
 
 use crate::{
     common::{error::TypeQLError, validatable::Validatable, Result},

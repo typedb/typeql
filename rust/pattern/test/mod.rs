@@ -21,11 +21,12 @@
  */
 
 use crate::{
-    and, not, or, parse_query,
-    pattern::{Disjunction, Normalisable, ThingVariableBuilder},
+    and,
+    builder::var_concept,
+    not, or, parse_query,
+    pattern::{Conjunction, Disjunction, Normalisable, ThingVariableBuilder},
     var,
 };
-use crate::builder::var_concept;
 
 #[test]
 fn disjunction() {
@@ -45,8 +46,16 @@ $com isa company;
     assert_eq!(
         normalised,
         or!(
-            and!(var_concept("com").has(("name", "n1")), var_concept("n1").eq("the-company"), var_concept("com").isa("company"),),
-            and!(var_concept("com").has(("name", "n2")), var_concept("n2").eq("another-company"), var_concept("com").isa("company"),)
+            and!(
+                var_concept("com").has(("name", "n1")),
+                var_concept("n1").eq("the-company"),
+                var_concept("com").isa("company"),
+            ),
+            and!(
+                var_concept("com").has(("name", "n2")),
+                var_concept("n2").eq("another-company"),
+                var_concept("com").isa("company"),
+            )
         )
         .into_disjunction()
     );
