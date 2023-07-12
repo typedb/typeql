@@ -47,12 +47,12 @@ $com isa company;
         normalised,
         or!(
             and!(
-                var_concept("com").has(("name", "n1")),
+                var_concept("com").has(("name", var_concept("n1"))),
                 var_concept("n1").eq("the-company"),
                 var_concept("com").isa("company"),
             ),
             and!(
-                var_concept("com").has(("name", "n2")),
+                var_concept("com").has(("name", var_concept("n2"))),
                 var_concept("n2").eq("another-company"),
                 var_concept("com").isa("company"),
             )
