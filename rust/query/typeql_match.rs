@@ -21,6 +21,7 @@
  */
 
 use std::{collections::HashSet, fmt, iter};
+use itertools::{all, Itertools};
 
 use crate::{
     common::{
@@ -97,6 +98,7 @@ impl Validatable for TypeQLMatch {
                 expect_each_variable_is_bounded_by_named(self.conjunction.patterns.iter()),
                 expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
                 expect_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
+                expect_variable_names_are_unique(&self.conjunction),
             ]
             .into_iter()
             .chain(self.conjunction.patterns.iter().map(|p| p.validate())),
@@ -174,6 +176,18 @@ fn expect_sort_vars_are_in_scope(
     collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference().clone()).map(|r| {
         names_in_scope.contains(&r).then_some(()).ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
     }))
+}
+
+fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result<()> {
+    let all_refs = conjunction.references();
+    let (concept_refs, value_refs): (HashSet<&Reference>, HashSet<&Reference>) = all_refs.partition(|r| r.is_concept());
+    let concept_names = concept_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
+    let value_names = value_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
+    let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
+    if !common_refs.is_empty() {
+        Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")))?
+    }
+    Ok(())
 }
 
 impl fmt::Display for TypeQLMatch {

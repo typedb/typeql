@@ -97,6 +97,8 @@ error_messages! { TypeQLError
         6: "The query has not been provided with any definables.",
     MatchHasNoBoundingNamedVariable() =
         7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
+    VariableNameConflict(String) =
+        8: "The variable(s) named '{}' cannot be used for both concept variables and a value variables.",
     MatchPatternVariableHasNoNamedVariable(Pattern) =
         9: "The pattern '{}' has no named variable.",
     MatchHasUnboundedNestedPattern(Pattern) =

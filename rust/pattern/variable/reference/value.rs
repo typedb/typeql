@@ -37,6 +37,11 @@ impl ValueReference {
     pub fn is_visible(&self) -> bool {
         true
     }
+
+    pub fn name(&self) -> &str {
+        let Self::Name(name) = self;
+        name
+    }
 }
 
 impl Validatable for ValueReference {
@@ -62,9 +67,7 @@ impl fmt::Display for ValueReference {
         write!(
             f,
             "?{}",
-            match self {
-                Name(name) => name,
-            }
+            self.name()
         )
     }
 }

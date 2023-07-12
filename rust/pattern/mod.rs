@@ -31,7 +31,7 @@ mod schema;
 mod test;
 mod variable;
 
-use std::{collections::HashSet, fmt};
+use std::{collections::HashSet, fmt, iter};
 
 pub use conjunction::Conjunction;
 pub use constraint::{
@@ -65,6 +65,15 @@ pub enum Pattern {
 }
 
 impl Pattern {
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(match self {
+            Pattern::Conjunction(c) => c.references(),
+            Pattern::Disjunction(c) => c.references(),
+            Pattern::Negation(c) => c.references(),
+            Pattern::Variable(v) => v.references(),
+        })
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         use Pattern::*;
         match self {

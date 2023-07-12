@@ -21,6 +21,7 @@
  */
 
 use std::fmt;
+use crate::common;
 
 use crate::common::{error::TypeQLError, validatable::Validatable, Result};
 
@@ -37,12 +38,21 @@ pub enum ConceptReference {
 }
 
 impl ConceptReference {
+    pub(crate) const ANONYMOUS_NAME: &'static str = "_";
+
     pub fn is_name(&self) -> bool {
         matches!(self, ConceptReference::Name(_))
     }
 
     pub fn is_visible(&self) -> bool {
         !matches!(self, ConceptReference::Anonymous(Visibility::Invisible))
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Anonymous(_) => Self::ANONYMOUS_NAME,
+            Self::Name(name) => name,
+        }
     }
 }
 
@@ -70,10 +80,7 @@ impl fmt::Display for ConceptReference {
         write!(
             f,
             "${}",
-            match self {
-                Anonymous(_) => "_",
-                Name(name) => name,
-            }
+            self.name()
         )
     }
 }

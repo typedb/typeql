@@ -52,13 +52,15 @@ impl Conjunction {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_))).flat_map(
-            |p| match p {
-                Pattern::Variable(v) => v.references(),
-                Pattern::Conjunction(c) => c.references(),
-                _ => unreachable!(),
-            },
-        ))
+        // Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_))).flat_map(
+        //     |p| match p {
+        //         Pattern::Conjunction(c) => c.references(),
+        //         Pattern::Disjunction(c) => c.references(),
+        //         Pattern::Negation(c) => c.references(),
+        //         Pattern::Variable(v) => v.references(),
+        //     },
+        // ))
+        Box::new(self.patterns.iter().flat_map(|p| p.references()))
     }
 
     pub fn has_named_variables(&self) -> bool {

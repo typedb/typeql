@@ -58,6 +58,13 @@ impl Reference {
     pub fn is_value(&self) -> bool {
         matches!(self, Reference::Value(_))
     }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Concept(concept) => concept.name(),
+            Self::Value(value) => value.name(),
+        }
+    }
 }
 
 impl Validatable for Reference {

@@ -45,6 +45,10 @@ impl Negation {
         Self { pattern: Box::new(pattern), normalised: None }
     }
 
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        self.pattern.references()
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         self.pattern.expect_is_bounded_by(bounds)
     }
