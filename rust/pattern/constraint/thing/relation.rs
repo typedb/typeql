@@ -96,7 +96,7 @@ impl RolePlayerConstraint {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(iter::once(&self.player.reference)))
+        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(self.player.references()))
     }
 }
 
