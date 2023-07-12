@@ -52,7 +52,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.RELATION_NOT_ANONYMOUS;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.RELATION_IN_THEN_NOT_ANONYMOUS;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
 public class Rule implements Definable {
@@ -166,10 +166,8 @@ public class Rule implements Definable {
         }
 
         // relation variables used to infer new relations in then clause should be anonymous
-        if (then.relation().isPresent())
-        {
-            if (then.reference().isName())
-                throw TypeQLException.of(RELATION_NOT_ANONYMOUS.message(label, then));
+        if (then.relation().isPresent()&&then.reference().isName()) {
+                throw TypeQLException.of(RELATION_IN_THEN_NOT_ANONYMOUS.message(label, then));
         }
     }
 

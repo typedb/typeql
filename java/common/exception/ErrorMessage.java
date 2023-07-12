@@ -91,22 +91,22 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(34, "Rule '%s' 'then' variables must be present in the 'when', outside of nested patterns.");
     public static final ErrorMessage INVALID_RULE_THEN_ROLES =
             new ErrorMessage(35, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
+    public static final ErrorMessage   RELATION_IN_THEN_NOT_ANONYMOUS =
+            new ErrorMessage(36, "Relation in then clause used to infer new relations should be anonymous");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(36, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(37, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage VARIABLE_NOT_SORTED =
-            new ErrorMessage(37, "Variable '%s' does not exist in the sorting clause.");
+            new ErrorMessage(38, "Variable '%s' does not exist in the sorting clause.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
-            new ErrorMessage(38, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
+            new ErrorMessage(39, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
-            new ErrorMessage(39, "Aggregate COUNT does not accept a Variable.");
+            new ErrorMessage(40, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(40, "Illegal grammar!");
+            new ErrorMessage(41, "Illegal grammar!");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
-            new ErrorMessage(41, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
+            new ErrorMessage(42, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
     public static final ErrorMessage INVALID_ANNOTATION =
-            new ErrorMessage(42, "Invalid annotation '%s' on '%s' constraint");
-    public static final ErrorMessage RELATION_NOT_ANONYMOUS =
-            new ErrorMessage(43, "Relation in then clause used to infer new relations should be anonymous");
+            new ErrorMessage(43, "Invalid annotation '%s' on '%s' constraint");
 
     private static final String codePrefix = "TQL";
     private static final String messagePrefix = "TypeQL Error";
