@@ -52,6 +52,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.RELATION_NOT_ANONYMOUS;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
 public class Rule implements Definable {
@@ -163,7 +164,14 @@ public class Rule implements Definable {
                 .reduce(true, Boolean::logicalAnd)) {
             throw TypeQLException.of(INVALID_RULE_THEN_ROLES.message(label, then));
         }
+        // variable declared in when cannot be redeclared in then
+        if (then.relation().isPresent())
+        {
+            if (then.reference().isName())
+                throw TypeQLException.of(RELATION_NOT_ANONYMOUS.message(label, then));
+        }
     }
+
 
     @Override
     public String toString() {

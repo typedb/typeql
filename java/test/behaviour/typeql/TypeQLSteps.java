@@ -139,6 +139,7 @@ public class TypeQLSteps {
     @Given("for each session, open transactions of type: {}")
     @Given("for each session, open transactions with reasoning of type: {}")
     @Given("verify answers are consistent across {} executions")
+    @Given("set time-zone is: {}")
     public void do_nothing_with_arg(String ignored) { }
 
     @Given("connection open data sessions for databases:")

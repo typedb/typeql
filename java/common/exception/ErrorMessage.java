@@ -105,6 +105,8 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(41, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
     public static final ErrorMessage INVALID_ANNOTATION =
             new ErrorMessage(42, "Invalid annotation '%s' on '%s' constraint");
+    public static final ErrorMessage RELATION_NOT_ANONYMOUS =
+            new ErrorMessage(43, "Relation in then clause should be anonymous");
 
     private static final String codePrefix = "TQL";
     private static final String messagePrefix = "TypeQL Error";
