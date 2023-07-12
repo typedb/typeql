@@ -164,7 +164,8 @@ public class Rule implements Definable {
                 .reduce(true, Boolean::logicalAnd)) {
             throw TypeQLException.of(INVALID_RULE_THEN_ROLES.message(label, then));
         }
-        // variable declared in when cannot be redeclared in then
+
+        // relation variables used to infer new relations in then clause should be anonymous
         if (then.relation().isPresent())
         {
             if (then.reference().isName())
