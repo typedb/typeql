@@ -62,13 +62,15 @@ impl Validatable for TypeQLDelete {
 
 fn expect_delete_in_scope_of_match(match_query: &TypeQLMatch, variables: &[ThingVariable]) -> Result<()> {
     let names_in_scope = match_query.named_references();
-    collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(|r| -> Result<()> {
-        if names_in_scope.contains(r) {
-            Ok(())
-        } else {
-            Err(TypeQLError::VariableOutOfScopeDelete(r.clone()))?
-        }
-    }))
+    collect_err(&mut variables.iter().flat_map(|v| v.references_recursive()).filter(|r| r.is_name()).map(
+        |r| -> Result<()> {
+            if names_in_scope.contains(r) {
+                Ok(())
+            } else {
+                Err(TypeQLError::VariableOutOfScopeDelete(r.clone()))?
+            }
+        },
+    ))
 }
 
 impl fmt::Display for TypeQLDelete {

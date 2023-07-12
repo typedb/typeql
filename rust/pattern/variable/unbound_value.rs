@@ -41,10 +41,6 @@ impl UnboundValueVariable {
         UnboundValueVariable { reference: Reference::Value(ValueReference::Name(name)) }
     }
 
-    // pub fn hidden() -> UnboundValueVariable {
-    //     UnboundValueVariable { reference: Reference::Anonymous(Visibility::Invisible) }
-    // }
-
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(iter::once(&self.reference))
     }

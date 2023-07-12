@@ -85,11 +85,22 @@ impl Variable {
         }
     }
 
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        use Variable::*;
+        match self {
+            Unbound(unbound) => unbound.references(),
+            Concept(concept) => concept.references(),
+            Thing(thing) => thing.references(),
+            Type(type_) => type_.references(),
+            Value(value) => value.references_recursive(),
+        }
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         match self {
             Self::Unbound(_) => unreachable!(),
             _ => {
-                if !self.references().any(|r| r.is_name() && bounds.contains(r)) {
+                if !self.references_recursive().any(|r| r.is_name() && bounds.contains(r)) {
                     Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
                 }
                 Ok(())

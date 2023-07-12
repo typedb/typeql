@@ -51,6 +51,10 @@ impl RelationConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(self.role_players.iter().flat_map(|rp| rp.references()))
     }
+
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.role_players.iter().flat_map(|rp| rp.references_recursive()))
+    }
 }
 
 impl Validatable for RelationConstraint {
@@ -96,7 +100,11 @@ impl RolePlayerConstraint {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(self.player.references()))
+        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(iter::once(&self.player.reference)))
+    }
+
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(self.player.references_recursive()))
     }
 }
 

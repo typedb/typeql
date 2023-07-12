@@ -46,10 +46,18 @@ impl ValueVariable {
         ValueVariable { reference, assign_constraint: None, predicate_constraint: None }
     }
 
+    // TODO: Check it!
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
+            iter::once(&self.reference), // .chain(self.assign_constraint.iter().flat_map(|assign| assign.references_recursive()))
+                                         // .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.references())),
+        )
+    }
+
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
             iter::once(&self.reference)
-                .chain(self.assign_constraint.iter().flat_map(|assign| assign.references()))
+                .chain(self.assign_constraint.iter().flat_map(|assign| assign.references_recursive()))
                 .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.references())),
         )
     }

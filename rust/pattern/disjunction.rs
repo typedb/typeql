@@ -44,8 +44,8 @@ impl Disjunction {
         Disjunction { patterns, normalised: None }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.patterns.iter().flat_map(|p| p.references()))
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.patterns.iter().flat_map(|p| p.references_recursive()))
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {

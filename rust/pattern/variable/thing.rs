@@ -60,6 +60,16 @@ impl ThingVariable {
         )
     }
 
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            iter::once(&self.reference)
+                .chain(self.isa.iter().flat_map(|c| c.references_recursive()))
+                .chain(self.has.iter().flat_map(|c| c.references_recursive()))
+                .chain(self.relation.iter().flat_map(|c| c.references_recursive()))
+                .chain(self.value.iter().flat_map(|c| c.references())),
+        )
+    }
+
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;

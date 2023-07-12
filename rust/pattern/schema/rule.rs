@@ -158,7 +158,7 @@ fn infers_relation(then: &ThingVariable) -> bool {
 
 fn expect_then_bounded_by_when(then: &ThingVariable, when: &Conjunction, rule_label: &Label) -> Result<()> {
     let bounds = when.named_references();
-    if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
+    if !then.references_recursive().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
     }
     Ok(())

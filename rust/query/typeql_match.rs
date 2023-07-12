@@ -134,7 +134,7 @@ fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item = &
     collect_err(&mut patterns.map(|p| {
         match p {
             Pattern::Variable(v) => v
-                .references()
+                .references_recursive()
                 .any(|r| r.is_name())
                 .then_some(())
                 .ok_or_else(|| Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))),
@@ -180,7 +180,7 @@ fn expect_sort_vars_are_in_scope(
 }
 
 fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result<()> {
-    let all_refs = conjunction.references();
+    let all_refs = conjunction.references_recursive();
     let (concept_refs, value_refs): (HashSet<&Reference>, HashSet<&Reference>) = all_refs.partition(|r| r.is_concept());
     let concept_names = concept_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
     let value_names = value_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();

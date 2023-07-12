@@ -550,8 +550,8 @@ fn test_disjunction_not_in_conjunction() {
 } or {
     $x isa company;
 };"#;
-
-    assert!(parse_query(query).is_err())
+    let res = parse_query(query);
+    assert!(res.is_err(), "{res:?}")
 }
 
 #[test]

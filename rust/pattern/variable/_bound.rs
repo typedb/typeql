@@ -48,10 +48,10 @@
 //         }
 //     }
 //
-//     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+//     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
 //         match self {
-//             BoundVariable::Concept(concept_variable) => concept_variable.references(),
-//             BoundVariable::Value(value_variable) => value_variable.references(),
+//             BoundVariable::Concept(concept_variable) => concept_variable.references_recursive(),
+//             BoundVariable::Value(value_variable) => value_variable.references_recursive(),
 //         }
 //     }
 // }

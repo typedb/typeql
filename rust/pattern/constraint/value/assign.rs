@@ -38,8 +38,8 @@ impl AssignConstraint {
         Self { expression: expr, inputs: HashSet::new() }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.inputs.iter().map(|input| input.reference()))
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.inputs.iter().map(|input| input.reference())) // Don't need to be recursive?
     }
 
     // pub(crate) fn variables(&self) -> &HashSet<Variable> {

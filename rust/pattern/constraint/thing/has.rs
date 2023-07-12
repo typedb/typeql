@@ -38,7 +38,11 @@ pub struct HasConstraint {
 
 impl HasConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.reference)).chain(self.attribute.references()))
+        Box::new((self.type_.iter().map(|t| &t.reference)).chain(iter::once(&self.attribute.reference)))
+    }
+
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new((self.type_.iter().map(|t| &t.reference)).chain(self.attribute.references_recursive()))
     }
 }
 
