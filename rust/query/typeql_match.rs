@@ -21,7 +21,8 @@
  */
 
 use std::{collections::HashSet, fmt, iter};
-use itertools::{all, Itertools};
+
+use itertools::Itertools;
 
 use crate::{
     common::{
@@ -30,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundConceptVariable, UnboundVariable},
+    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
     var, write_joined,
 };
@@ -303,12 +304,6 @@ impl Sorting {
             .ok_or_else(|| TypeQLError::VariableNotSorted(var).into())
     }
 }
-
-// impl From<&str> for Sorting {
-//     fn from(var_name: &str) -> Self {
-//         Self::from(vec![var(var_name)])
-//     }
-// }
 
 impl<const N: usize> From<[(UnboundVariable, token::Order); N]> for Sorting {
     fn from(ordered_vars: [(UnboundVariable, token::Order); N]) -> Self {

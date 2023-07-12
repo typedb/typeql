@@ -26,7 +26,6 @@ use crate::{
     builder::var_concept,
     common::{token, validatable::Validatable, Result},
     pattern::{ConceptVariable, UnboundConceptVariable},
-    var,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

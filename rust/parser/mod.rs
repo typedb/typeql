@@ -226,15 +226,14 @@ fn get_var(var: SyntaxTree) -> UnboundVariable {
 
     assert!(name.len() > 1);
     assert!(name.starts_with('$') || name.starts_with('?'));
-    if name.starts_with('$') {
-        let name = &name[1..];
+    let (prefix, name) = name.split_at(1);
+    if prefix == "$" {
         if name == "_" {
             UnboundVariable::Concept(UnboundConceptVariable::anonymous())
         } else {
             UnboundVariable::Concept(UnboundConceptVariable::named(String::from(name)))
         }
     } else {
-        let name = &name[1..];
         UnboundVariable::Value(UnboundValueVariable::named(String::from(name)))
     }
 }
@@ -482,14 +481,14 @@ fn visit_pattern_variable(tree: SyntaxTree) -> Variable {
     }
 }
 
-fn visit_variable(tree: SyntaxTree) -> Variable {
-    let child = tree.into_child();
-    match child.as_rule() {
-        Rule::variable_concept => visit_variable_concept(child).into(),
-        Rule::variable_value => visit_variable_value(child).into(),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
-    }
-}
+// fn visit_variable(tree: SyntaxTree) -> Variable {
+//     let child = tree.into_child();
+//     match child.as_rule() {
+//         Rule::variable_concept => visit_variable_concept(child).into(),
+//         Rule::variable_value => visit_variable_value(child).into(),
+//         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
+//     }
+// }
 
 fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
     let mut children = tree.into_children();
@@ -499,7 +498,7 @@ fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
 
 fn visit_variable_value(tree: SyntaxTree) -> ValueVariable {
     let mut children = tree.into_children();
-    let mut var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
+    let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
     match children.peek_rule() {
         Some(Rule::ASSIGN) => {
             let expression = visit_expression(children.skip_expected(Rule::ASSIGN).consume_any());
@@ -707,7 +706,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
         .op(Op::infix(Rule::POWER, Right));
 
     pratt_parser
-        .map_primary(|mut primary| match primary.as_rule() {
+        .map_primary(|primary| match primary.as_rule() {
             Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
             Rule::VAR_ => Expression::Variable(get_var(primary)),
             Rule::expression_function => Expression::Function(visit_function(primary)),
@@ -754,8 +753,7 @@ fn visit_function_name(tree: SyntaxTree) -> token::Function {
 }
 
 fn visit_function_argument(tree: SyntaxTree) -> Box<Expression> {
-    let mut child = tree.into_child();
-    Box::new(visit_expression(child))
+    Box::new(visit_expression(tree.into_child()))
 }
 
 fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {

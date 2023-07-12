@@ -22,7 +22,7 @@
 
 #![recursion_limit = "256"]
 
-use cucumber::{gherkin::Step, given, then, when, StatsWriter, World, WriterExt};
+use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
 use typeql_lang::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]

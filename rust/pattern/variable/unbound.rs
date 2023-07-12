@@ -20,17 +20,11 @@
  *
  */
 
-use std::{fmt, fmt::Formatter, iter};
+use std::{fmt, fmt::Formatter};
 
 use crate::{
     common::{validatable::Validatable, Result},
-    pattern::{
-        ConceptConstrainable, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint, IsaConstraint,
-        LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, Reference, RegexConstraint, RelatesConstraint,
-        RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint, ThingConstrainable,
-        ThingVariable, TypeConstrainable, TypeVariable, UnboundConceptVariable, UnboundValueVariable,
-        ValueTypeConstraint, ValueVariable, Visibility,
-    },
+    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]

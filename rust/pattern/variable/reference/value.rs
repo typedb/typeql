@@ -63,11 +63,6 @@ fn expect_valid_identifier(name: &str) -> Result<()> {
 
 impl fmt::Display for ValueReference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use ValueReference::*;
-        write!(
-            f,
-            "?{}",
-            self.name()
-        )
+        write!(f, "?{}", self.name())
     }
 }

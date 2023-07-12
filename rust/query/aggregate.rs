@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedReferences, Reference, UnboundConceptVariable, UnboundVariable},
+    pattern::{NamedReferences, Reference, UnboundVariable},
     query::{TypeQLMatch, TypeQLMatchGroup},
 };
 
@@ -74,7 +74,7 @@ fn expect_method_variable_compatible(method: token::Aggregate, var: &Option<Unbo
 }
 
 fn expect_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Reference>) -> Result<()> {
-    if !names_in_scope.contains(&var.reference()) {
+    if !names_in_scope.contains(var.reference()) {
         Err(TypeQLError::VariableOutOfScopeMatch(var.reference().clone()))?;
     }
     Ok(())

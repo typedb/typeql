@@ -21,7 +21,6 @@
  */
 
 use std::fmt;
-use crate::common;
 
 use crate::common::{error::TypeQLError, validatable::Validatable, Result};
 
@@ -76,11 +75,6 @@ fn expect_valid_identifier(name: &str) -> Result<()> {
 
 impl fmt::Display for ConceptReference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use ConceptReference::*;
-        write!(
-            f,
-            "${}",
-            self.name()
-        )
+        write!(f, "${}", self.name())
     }
 }

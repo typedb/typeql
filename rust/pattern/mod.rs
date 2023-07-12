@@ -31,7 +31,7 @@ mod schema;
 mod test;
 mod variable;
 
-use std::{collections::HashSet, fmt, iter};
+use std::{collections::HashSet, fmt};
 
 pub use conjunction::Conjunction;
 pub use constraint::{

@@ -24,13 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{validatable::Validatable, Result},
-    pattern::{
-        variable::ValueConstrainable, AssignConstraint, ConceptConstrainable, ConceptVariable, HasConstraint,
-        IIDConstraint, IsConstraint, IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate,
-        Reference, RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
-        SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueReference,
-        ValueTypeConstraint, ValueVariable, Visibility,
-    },
+    pattern::{variable::ValueConstrainable, AssignConstraint, Predicate, Reference, ValueReference, ValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]

@@ -28,8 +28,7 @@ use crate::{
         ConceptConstrainable, ConceptReference, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
         IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, Reference, RegexConstraint,
         RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint,
-        ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint, ValueVariable,
-        Visibility,
+        ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint, Visibility,
     },
 };
 

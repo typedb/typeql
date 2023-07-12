@@ -22,7 +22,6 @@
 
 use crate::pattern::{AssignConstraint, Predicate, ValueVariable};
 
-//FIXME: It's still just a copy of ConceptConstrainable
 pub trait ValueConstrainable {
     fn constrain_assign(self, assign: AssignConstraint) -> ValueVariable;
     fn constrain_predicate(self, predicate: Predicate) -> ValueVariable;

@@ -20,7 +20,7 @@
  *
  */
 
-use std::{collections::HashSet, fmt, iter};
+use std::{fmt, iter};
 
 use chrono::{NaiveDateTime, Timelike};
 
@@ -33,10 +33,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{
-        Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariable,
-        Variable,
-    },
+    pattern::{Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

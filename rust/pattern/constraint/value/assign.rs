@@ -23,10 +23,8 @@
 use std::{collections::HashSet, fmt};
 
 use crate::{
-    builder::var_value,
     common::{token, validatable::Validatable, Result},
-    pattern::{Expression, Reference, UnboundValueVariable, ValueVariable, Variable},
-    var,
+    pattern::{Expression, Reference, Variable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

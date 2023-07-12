@@ -76,15 +76,6 @@ impl Validatable for Reference {
     }
 }
 
-fn expect_valid_identifier(name: &str) -> Result<()> {
-    if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
-        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
-    {
-        Err(TypeQLError::InvalidVariableName(name.to_string()))?
-    }
-    Ok(())
-}
-
 impl fmt::Display for Reference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
