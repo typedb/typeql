@@ -92,7 +92,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage INVALID_RULE_THEN_ROLES =
             new ErrorMessage(35, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
     public static final ErrorMessage   RELATION_IN_THEN_NOT_ANONYMOUS =
-            new ErrorMessage(36, "Relation in then clause used to infer new relations should be anonymous");
+            new ErrorMessage(36, "Rule '%s': relation variable '%s' in 'then' must not be explicit.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(37, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage VARIABLE_NOT_SORTED =

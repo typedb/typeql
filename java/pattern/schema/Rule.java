@@ -165,12 +165,11 @@ public class Rule implements Definable {
             throw TypeQLException.of(INVALID_RULE_THEN_ROLES.message(label, then));
         }
 
-        // relation variables used to infer new relations in then clause should be anonymous
+        // relation variable in 'then' must not be explicit
         if (then.relation().isPresent()&&then.reference().isName()) {
-                throw TypeQLException.of(RELATION_IN_THEN_NOT_ANONYMOUS.message(label, then));
+                throw TypeQLException.of(RELATION_IN_THEN_NOT_ANONYMOUS.message(label, then.reference()));
         }
     }
-
 
     @Override
     public String toString() {
