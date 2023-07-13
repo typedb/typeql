@@ -52,6 +52,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_RELATION_VARIABLE;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
 public class Rule implements Definable {
@@ -162,6 +163,11 @@ public class Rule implements Definable {
                 .map(player -> player.roleType().isPresent())
                 .reduce(true, Boolean::logicalAnd)) {
             throw TypeQLException.of(INVALID_RULE_THEN_ROLES.message(label, then));
+        }
+
+        // relation variable name in 'then' must not be present
+        if (then.relation().isPresent() && then.reference().isName()) {
+            throw TypeQLException.of(INVALID_RULE_THEN_RELATION_VARIABLE.message(label, then.reference()));
         }
     }
 
