@@ -91,7 +91,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(34, "Rule '%s' 'then' variables must be present in the 'when', outside of nested patterns.");
     public static final ErrorMessage INVALID_RULE_THEN_ROLES =
             new ErrorMessage(35, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
-    public static final ErrorMessage   RELATION_IN_THEN_NOT_ANONYMOUS =
+    public static final ErrorMessage INVALID_RULE_THEN_EXPLICIT_VARIABLE =
             new ErrorMessage(36, "Rule '%s': relation variable '%s' in 'then' must not be explicit.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
             new ErrorMessage(37, "Invalid query containing redundant nested negations.");
