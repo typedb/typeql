@@ -89,6 +89,7 @@ string_enum! { Operator
 string_enum! { Predicate
     // equality
     Eq = "==",
+    EqLegacy = "=",   // TODO: Deprecate '=' as equality in 3.0
     Neq = "!=",
     Gt = ">",
     Gte = ">=",
@@ -102,7 +103,7 @@ string_enum! { Predicate
 impl Predicate {
     pub fn is_equality(&self) -> bool {
         use Predicate::*;
-        matches!(self, Eq | Neq | Gt | Gte | Lt | Lte)
+        matches!(self, Eq | EqLegacy | Neq | Gt | Gte | Lt | Lte)   // TODO: Deprecate '=' as equality in 3.0
     }
 
     pub fn is_substring(&self) -> bool {
