@@ -20,11 +20,7 @@
  *
  */
 
-use std::{
-    fmt,
-    hash::{Hash, Hasher},
-    iter,
-};
+use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
@@ -63,7 +59,7 @@ impl ThingVariable {
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(
             iter::once(&self.reference)
-                .chain(self.isa.iter().flat_map(|c| c.references_recursive()))
+                .chain(self.isa.iter().flat_map(|c| c.references()))
                 .chain(self.has.iter().flat_map(|c| c.references_recursive()))
                 .chain(self.relation.iter().flat_map(|c| c.references_recursive()))
                 .chain(self.value.iter().flat_map(|c| c.references())),
@@ -148,11 +144,5 @@ impl fmt::Display for ThingVariable {
         }
 
         Ok(())
-    }
-}
-
-impl Hash for ThingVariable {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.reference.hash(state);
     }
 }

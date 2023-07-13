@@ -25,7 +25,6 @@ use crate::{
     builder::var_concept,
     not, or, parse_query,
     pattern::{Conjunction, Disjunction, Normalisable, ThingVariableBuilder},
-    var,
 };
 
 #[test]

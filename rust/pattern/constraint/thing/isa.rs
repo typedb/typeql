@@ -42,10 +42,6 @@ impl IsaConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(iter::once(&self.type_.reference))
     }
-
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        self.references()
-    }
 }
 
 impl Validatable for IsaConstraint {

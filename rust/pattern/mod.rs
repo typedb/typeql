@@ -66,11 +66,12 @@ pub enum Pattern {
 
 impl Pattern {
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        use Pattern::*;
         Box::new(match self {
-            Pattern::Conjunction(c) => c.references_recursive(),
-            Pattern::Disjunction(c) => c.references_recursive(),
-            Pattern::Negation(c) => c.references_recursive(),
-            Pattern::Variable(v) => v.references_recursive(),
+            Conjunction(conjunction) => conjunction.references_recursive(),
+            Disjunction(disjunction) => disjunction.references_recursive(),
+            Negation(negation) => negation.references_recursive(),
+            Variable(variable) => variable.references_recursive(),
         })
     }
 

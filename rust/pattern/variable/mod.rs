@@ -20,7 +20,6 @@
  *
  */
 
-mod _bound;
 mod builder;
 mod concept;
 mod reference;
@@ -53,7 +52,7 @@ use crate::{
     pattern::{Normalisable, Pattern},
 };
 
-#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
     Concept(ConceptVariable),
     Thing(ThingVariable),

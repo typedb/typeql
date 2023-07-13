@@ -24,7 +24,7 @@ use crate::{
     common::token,
     pattern::{
         Negation, Predicate, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable,
-        TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value,
+        TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundVariable, Value,
     },
     Pattern,
 };
@@ -88,10 +88,6 @@ pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
 }
 
 pub fn var_concept(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
-    var.into()
-}
-
-pub fn var_value(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
     var.into()
 }
 

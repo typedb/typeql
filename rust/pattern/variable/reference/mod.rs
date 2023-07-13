@@ -28,7 +28,7 @@ use std::fmt;
 pub use concept::{ConceptReference, Visibility};
 pub use value::ValueReference;
 
-use crate::common::{error::TypeQLError, validatable::Validatable, Result};
+use crate::common::{validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Reference {

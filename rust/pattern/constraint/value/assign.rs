@@ -20,31 +20,22 @@
  *
  */
 
-use std::{collections::HashSet, fmt};
+use std::fmt;
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{Expression, Reference, Variable},
+    pattern::{Expression, Reference},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AssignConstraint {
     pub expression: Expression,
-    pub inputs: HashSet<Variable>,
 }
 
 impl AssignConstraint {
-    fn new(expr: Expression) -> Self {
-        Self { expression: expr, inputs: HashSet::new() }
-    }
-
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.inputs.iter().map(|input| input.reference())) // Don't need to be recursive?
+        self.expression.references_recursive()
     }
-
-    // pub(crate) fn variables(&self) -> &HashSet<Variable> {
-    //     &self.inputs
-    // }
 }
 
 impl Validatable for AssignConstraint {
@@ -53,21 +44,9 @@ impl Validatable for AssignConstraint {
     }
 }
 
-// impl From<&str> for AssignConstraint {
-//     fn from(string: &str) -> Self {
-//         Self::from(var_value(string))
-//     }
-// }
-//
-// impl From<String> for AssignConstraint {
-//     fn from(string: String) -> Self {
-//         Self::from(var_value(string))
-//     }
-// }
-
 impl From<Expression> for AssignConstraint {
     fn from(expr: Expression) -> Self {
-        Self::new(expr)
+        Self { expression: expr }
     }
 }
 

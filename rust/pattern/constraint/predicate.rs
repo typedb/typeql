@@ -45,8 +45,8 @@ pub struct Predicate {
 impl Predicate {
     pub fn new(predicate: token::Predicate, value: Value) -> Self {
         match predicate {
-            token::Predicate::EqLegacy => Predicate { predicate: token::Predicate::Eq, value },   // TODO: Deprecate '=' as equality in 3.0
-            predicate => Predicate { predicate, value }
+            token::Predicate::EqLegacy => Predicate { predicate: token::Predicate::Eq, value }, // TODO: Deprecate '=' as equality in 3.0
+            predicate => Predicate { predicate, value },
         }
     }
 

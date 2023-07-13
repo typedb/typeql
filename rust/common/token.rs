@@ -103,7 +103,7 @@ string_enum! { Predicate
 impl Predicate {
     pub fn is_equality(&self) -> bool {
         use Predicate::*;
-        matches!(self, Eq | EqLegacy | Neq | Gt | Gte | Lt | Lte)   // TODO: Deprecate '=' as equality in 3.0
+        matches!(self, Eq | EqLegacy | Neq | Gt | Gte | Lt | Lte) // TODO: Deprecate '=' as equality in 3.0
     }
 
     pub fn is_substring(&self) -> bool {

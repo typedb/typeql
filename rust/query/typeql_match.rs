@@ -57,10 +57,6 @@ impl TypeQLMatch {
         Self::new(self.conjunction, self.modifiers.filter(vars))
     }
 
-    // pub fn get<T: Into<String>, const N: usize>(self, vars: [T; N]) -> Self {
-    //     self.filter(vars.into_iter().map(|s| UnboundConceptVariable::named(s.into())).collect())
-    // }
-
     pub fn get<const N: usize>(self, vars: [UnboundVariable; N]) -> Self {
         self.filter(Vec::from(vars))
     }
@@ -134,7 +130,7 @@ fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item = &
     collect_err(&mut patterns.map(|p| {
         match p {
             Pattern::Variable(v) => v
-                .references_recursive()
+                .references()
                 .any(|r| r.is_name())
                 .then_some(())
                 .ok_or_else(|| Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))),
@@ -259,10 +255,7 @@ impl fmt::Display for Filter {
 pub mod sorting {
     use std::fmt;
 
-    use crate::{
-        common::token,
-        pattern::{UnboundConceptVariable, UnboundVariable},
-    };
+    use crate::{common::token, pattern::UnboundVariable};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {

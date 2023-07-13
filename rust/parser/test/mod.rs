@@ -38,8 +38,8 @@ use crate::{
         Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Label, RelationVariableBuilder,
         ThingVariableBuilder, TypeVariableBuilder, UnboundConceptVariable, UnboundVariable, Variable,
     },
-    query::AggregateQueryBuilder,
-    rel, rule, type_, typeql_insert, typeql_match, var, Query,
+    query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
+    rel, rule, type_, typeql_insert, typeql_match, Query,
 };
 
 macro_rules! assert_valid_eq_repr {
@@ -249,6 +249,19 @@ $s1 == $s2;"#;
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(var_concept("s1").eq(var_concept("s2")));
     assert_valid_eq_repr!(expected, parsed, query);
+}
+
+// TODO: Remove when we fully deprecate '=' for ThingVariable equality.
+#[test]
+fn test_value_equals_variable_query_backwards_compatibility() {
+    let query = r#"match
+$s1 = $s2;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(var_concept("s1").eq(var_concept("s2")));
+
+    assert_eq!(expected, parsed);
+    assert_eq!(expected, parse_query(parsed.to_string().as_str()).unwrap().into_match());
 }
 
 #[test]
@@ -1486,21 +1499,4 @@ fn when_building_invalid_iid_throw() {
     let iid = "invalid";
     let expected = typeql_match!(var_concept("x").iid(iid)).validated();
     assert!(expected.is_err());
-}
-
-#[test]
-fn test_expressions() {
-    // let query = r#"match $x has age ?a;
-    // ?a = 18;"#;
-    let query = r#"match ?a = 25;
-      insert $x isa person, has age ?a, has ref 0;"#;
-
-    let parsed = parse_query(&query).unwrap(); //.into_match();
-    assert_eq!(parsed, reparse_query(&parsed), "{}", &parsed.to_string());
-    // let expected = typeql_match!(var_concept("x").iid(iid));
-    // assert_valid_eq_repr!(expected, parsed, query);
-}
-
-fn reparse_query(parsed: &Query) -> Query {
-    parse_query(&parsed.to_string()).unwrap()
 }

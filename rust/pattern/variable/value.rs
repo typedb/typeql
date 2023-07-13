@@ -20,11 +20,7 @@
  *
  */
 
-use std::{
-    fmt,
-    hash::{Hash, Hasher},
-    iter,
-};
+use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
@@ -46,12 +42,8 @@ impl ValueVariable {
         ValueVariable { reference, assign_constraint: None, predicate_constraint: None }
     }
 
-    // TODO: Check it!
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(
-            iter::once(&self.reference), // .chain(self.assign_constraint.iter().flat_map(|assign| assign.references_recursive()))
-                                         // .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.references())),
-        )
+        Box::new(iter::once(&self.reference))
     }
 
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -92,11 +84,5 @@ impl fmt::Display for ValueVariable {
             write!(f, " {} {}", predicate.predicate, predicate.value)?;
         }
         Ok(())
-    }
-}
-
-impl Hash for ValueVariable {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.reference.hash(state);
     }
 }

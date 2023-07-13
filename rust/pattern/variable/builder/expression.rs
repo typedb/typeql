@@ -20,11 +20,11 @@
  *
  */
 
-use std::{collections::HashSet, fmt};
+use std::{fmt, iter};
 
 use crate::{
     common::token::{Function as FunctionToken, Operation as OperationToken},
-    pattern::{UnboundVariable, Value},
+    pattern::{Reference, UnboundVariable, Value},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -39,47 +39,31 @@ pub enum Expression {
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Expression::Operation(operation) => {
-                write!(f, "{operation}")
-            }
-            Expression::Function(function) => {
-                write!(f, "{function}")
-            }
-            Expression::Constant(constant) => {
-                write!(f, "{constant}")
-            }
-            Expression::Parenthesis(parenthesis) => {
-                write!(f, "{parenthesis}")
-            }
-            Expression::Variable(variable) => {
-                write!(f, "{variable}")
-            }
+            Expression::Operation(operation) => write!(f, "{operation}"),
+            Expression::Function(function) => write!(f, "{function}"),
+            Expression::Constant(constant) => write!(f, "{constant}"),
+            Expression::Parenthesis(parenthesis) => write!(f, "{parenthesis}"),
+            Expression::Variable(variable) => write!(f, "{variable}"),
         }
     }
 }
 
-// impl Expression {
-//     pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
-//         match self {
-//             Expression::Operation(operation) => operation.collect_variables(collector),
-//             Expression::Function(function) => function.collect_variables(collector),
-//             Expression::Constant(constant) => constant.collect_variables(collector),
-//             Expression::Parenthesis(parenthesis) => parenthesis.collect_variables(collector),
-//             Expression::Variable(variable) => {
-//                 collector.insert(variable.clone());
-//             }
-//         }
-//     }
-// }
+impl Expression {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        match self {
+            Expression::Operation(operation) => operation.references_recursive(),
+            Expression::Function(function) => function.references_recursive(),
+            Expression::Constant(_constant) => Box::new(iter::empty()),
+            Expression::Parenthesis(parenthesis) => parenthesis.references_recursive(),
+            Expression::Variable(variable) => variable.references(),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constant {
     pub(crate) value: Value,
 }
-
-// impl Constant {
-//     pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {}
-// }
 
 impl fmt::Display for Constant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -94,12 +78,11 @@ pub struct Operation {
     pub(crate) right: Box<Expression>,
 }
 
-// impl Operation {
-//     pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
-//         self.left.collect_variables(collector);
-//         self.right.collect_variables(collector);
-//     }
-// }
+impl Operation {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.left.references_recursive().chain(self.right.references_recursive()))
+    }
+}
 
 impl fmt::Display for Operation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -114,14 +97,11 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn new(symbol: FunctionToken, args: Vec<Box<Expression>>) -> Self {
-        Function { symbol, args }
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.args.iter().flat_map(|expr| expr.references_recursive()))
     }
-
-    // pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
-    //     let _ = self.args.iter().map(|arg| arg.collect_variables(collector));
-    // }
 }
+
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}({})", self.symbol, self.args.iter().map(|expr| expr.to_string()).collect::<Vec<_>>().join(", "))
@@ -133,11 +113,12 @@ pub struct Parenthesis {
     pub(crate) inner: Box<Expression>,
 }
 
-// impl Parenthesis {
-//     pub(crate) fn collect_variables(&self, collector: &mut HashSet<UnboundVariable>) {
-//         self.inner.collect_variables(collector);
-//     }
-// }
+impl Parenthesis {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        self.inner.references_recursive()
+    }
+}
+
 impl fmt::Display for Parenthesis {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "( {} )", self.inner)
