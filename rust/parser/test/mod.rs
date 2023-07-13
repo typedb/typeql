@@ -24,7 +24,7 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use crate::{
     and,
-    builder::var_concept,
+    builder::{var_concept, var_value},
     common::{
         token::{
             Order::{Asc, Desc},
@@ -32,14 +32,15 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries, parse_query,
-    parse_variable,
+    gte, lt, lte, max, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
+    parse_query, parse_variable,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Label, RelationVariableBuilder,
-        ThingVariableBuilder, TypeVariableBuilder, UnboundConceptVariable, UnboundVariable, Variable,
+        Annotation::Key, ConceptVariableBuilder, Conjunction, Constant, Disjunction, Expression,
+        Expression::Parenthesis, ExpressionBuilder, Label, RelationVariableBuilder, ThingVariableBuilder,
+        TypeVariableBuilder, UnboundConceptVariable, UnboundVariable, ValueVariableBuilder, Variable,
     },
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
-    rel, rule, type_, typeql_insert, typeql_match, Query,
+    rel, rule, type_, typeql_insert, typeql_match, var, Query,
 };
 
 macro_rules! assert_valid_eq_repr {
@@ -431,6 +432,81 @@ $x isa movie,
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn test_attribute_query_by_value_variable() {
+    let query = r#"match
+?x = 5;
+$a == ?x isa age;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        var_value("x").assign(Expression::Constant(5.into())),
+        var_concept("a").eq(var_value("x")).isa("age"),
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_variable_name_clash_throws() {
+    let query = r#"match\n
+$z isa person, has age $y;
+?y = $y;"#;
+
+    let parsed = parse_query(query);
+    assert!(parsed.is_err());
+}
+
+#[test]
+fn test_assign_ops() {
+    let query = r#"match
+$x isa commodity,
+    has price $p;
+(commodity: $x, qty: $q) isa order;
+?net = $p * $q;
+?gross = ?net * ( 1.0 + 0.21 );"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        var_concept("x").isa("commodity").has(("price", var_concept("p"))),
+        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
+        var_value("net").assign(var_concept("p").multiply(var_concept("q"))),
+        var_value("gross").assign(var_value("net").multiply(Expression::Parenthesis(1.0.add(0.21).into()))),
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+// #[test]
+// fn () {
+// let query = r#""#;
+//
+// let parsed = parse_query(query).unwrap().into_match();
+// let expected = typeql_match!(var_concept("x").isa("movie").has(("tmdb-vote-count", lte(400))));
+//
+// assert_valid_eq_repr!(expected, parsed, query);
+// }
+//
+// #[test]
+// fn () {
+// let query = r#""#;
+//
+// let parsed = parse_query(query).unwrap().into_match();
+// let expected = typeql_match!(var_concept("x").isa("movie").has(("tmdb-vote-count", lte(400))));
+//
+// assert_valid_eq_repr!(expected, parsed, query);
+// }
+//
+// #[test]
+// fn () {
+// let query = r#""#;
+//
+// let parsed = parse_query(query).unwrap().into_match();
+// let expected = typeql_match!(var_concept("x").isa("movie").has(("tmdb-vote-count", lte(400))));
+//
+// assert_valid_eq_repr!(expected, parsed, query);
+// }
 
 #[test]
 fn test_schema_query() {

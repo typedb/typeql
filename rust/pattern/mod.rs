@@ -45,10 +45,11 @@ pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
-    ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, Constant, Expression, Function,
-    Operation, Parenthesis, Reference, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
-    ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
-    UnboundValueVariable, UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, Variable, Visibility,
+    ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, Constant, Expression,
+    ExpressionBuilder, Function, Operation, Parenthesis, Reference, RelationConstrainable, RelationVariableBuilder,
+    ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder,
+    UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueConstrainable, ValueReference, ValueVariable,
+    ValueVariableBuilder, Variable, Visibility,
 };
 
 use crate::{
@@ -159,6 +160,12 @@ impl From<TypeVariable> for Pattern {
 
 impl From<UnboundConceptVariable> for Pattern {
     fn from(variable: UnboundConceptVariable) -> Self {
+        Variable::from(variable).into()
+    }
+}
+
+impl From<ValueVariable> for Pattern {
+    fn from(variable: ValueVariable) -> Self {
         Variable::from(variable).into()
     }
 }

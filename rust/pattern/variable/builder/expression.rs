@@ -22,10 +22,107 @@
 
 use std::{fmt, iter};
 
+use chrono::NaiveDateTime;
+
 use crate::{
     common::token::{Function as FunctionToken, Operation as OperationToken},
-    pattern::{Reference, UnboundVariable, Value},
+    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value},
 };
+
+pub trait ExpressionBuilder {
+    fn add(self, right: impl Into<Expression>) -> Expression;
+    fn subtract(self, right: impl Into<Expression>) -> Expression;
+    fn multiply(self, right: impl Into<Expression>) -> Expression;
+    fn divide(self, right: impl Into<Expression>) -> Expression;
+    fn modulo(self, right: impl Into<Expression>) -> Expression;
+    fn power(self, right: impl Into<Expression>) -> Expression;
+    fn abs(arg: impl Into<Expression>) -> Expression;
+    fn ceil(arg: impl Into<Expression>) -> Expression;
+    fn floor(arg: impl Into<Expression>) -> Expression;
+    fn max<const N: usize>(args: [impl Into<Expression>; N]) -> Expression;
+    fn min<const N: usize>(args: [impl Into<Expression>; N]) -> Expression;
+    fn round(arg: impl Into<Expression>) -> Expression;
+}
+
+impl<T: Into<Expression>> ExpressionBuilder for T {
+    fn add(self, right: impl Into<Expression>) -> Expression {
+        Expression::Operation(Operation {
+            op: OperationToken::Add,
+            left: Box::new(self.into()),
+            right: Box::new(right.into()),
+        })
+    }
+
+    fn subtract(self, right: impl Into<Expression>) -> Expression {
+        Expression::Operation(Operation {
+            op: OperationToken::Subtract,
+            left: Box::new(self.into()),
+            right: Box::new(right.into()),
+        })
+    }
+
+    fn multiply(self, right: impl Into<Expression>) -> Expression {
+        Expression::Operation(Operation {
+            op: OperationToken::Multiply,
+            left: Box::new(self.into()),
+            right: Box::new(right.into()),
+        })
+    }
+
+    fn divide(self, right: impl Into<Expression>) -> Expression {
+        Expression::Operation(Operation {
+            op: OperationToken::Divide,
+            left: Box::new(self.into()),
+            right: Box::new(right.into()),
+        })
+    }
+
+    fn modulo(self, right: impl Into<Expression>) -> Expression {
+        Expression::Operation(Operation {
+            op: OperationToken::Modulo,
+            left: Box::new(self.into()),
+            right: Box::new(right.into()),
+        })
+    }
+
+    fn power(self, right: impl Into<Expression>) -> Expression {
+        Expression::Operation(Operation {
+            op: OperationToken::Power,
+            left: Box::new(self.into()),
+            right: Box::new(right.into()),
+        })
+    }
+
+    fn abs(arg: impl Into<Expression>) -> Expression {
+        Expression::Function(Function { symbol: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+    }
+
+    fn ceil(arg: impl Into<Expression>) -> Expression {
+        Expression::Function(Function { symbol: FunctionToken::Ceil, args: vec![Box::from(arg.into())] })
+    }
+
+    fn floor(arg: impl Into<Expression>) -> Expression {
+        Expression::Function(Function { symbol: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+    }
+
+    fn max<const N: usize>(args: [impl Into<Expression>; N]) -> Expression {
+        Expression::Function(Function {
+            symbol: FunctionToken::Max,
+            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+        })
+    }
+
+    fn min<const N: usize>(args: [impl Into<Expression>; N]) -> Expression {
+        Expression::Function(Function {
+            symbol: FunctionToken::Min,
+            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+        })
+    }
+
+    fn round(arg: impl Into<Expression>) -> Expression {
+        Expression::Function(Function { symbol: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
@@ -58,11 +155,73 @@ impl Expression {
             Expression::Variable(variable) => variable.references(),
         }
     }
+
+    pub fn add(self, right: impl Into<Expression>) -> Expression {
+        Expression::Operation(Operation {
+            op: OperationToken::Add,
+            left: Box::new(self),
+            right: Box::new(right.into()),
+        })
+    }
+}
+
+impl From<UnboundValueVariable> for Expression {
+    fn from(variable: UnboundValueVariable) -> Self {
+        Self::Variable(variable.into())
+    }
+}
+
+impl From<UnboundConceptVariable> for Expression {
+    fn from(variable: UnboundConceptVariable) -> Self {
+        Self::Variable(variable.into())
+    }
+}
+
+impl From<i64> for Expression {
+    fn from(value: i64) -> Self {
+        Self::Constant(value.into())
+    }
+}
+
+impl From<f64> for Expression {
+    fn from(value: f64) -> Self {
+        Self::Constant(value.into())
+    }
+}
+
+impl From<bool> for Expression {
+    fn from(value: bool) -> Self {
+        Self::Constant(value.into())
+    }
+}
+
+impl From<String> for Expression {
+    fn from(value: String) -> Self {
+        Self::Constant(value.into())
+    }
+}
+
+impl From<&str> for Expression {
+    fn from(value: &str) -> Self {
+        Self::Constant(value.into())
+    }
+}
+
+impl From<NaiveDateTime> for Expression {
+    fn from(value: NaiveDateTime) -> Self {
+        Self::Constant(value.into())
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constant {
     pub(crate) value: Value,
+}
+
+impl<T: Into<Value>> From<T> for Constant {
+    fn from(value: T) -> Self {
+        Constant { value: value.into() }
+    }
 }
 
 impl fmt::Display for Constant {
@@ -114,8 +273,18 @@ pub struct Parenthesis {
 }
 
 impl Parenthesis {
+    pub fn new(expression: Expression) -> Self {
+        Self { inner: Box::new(expression) }
+    }
+
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         self.inner.references_recursive()
+    }
+}
+
+impl From<Expression> for Parenthesis {
+    fn from(expression: Expression) -> Self {
+        Parenthesis { inner: Box::new(expression) }
     }
 }
 
@@ -123,4 +292,18 @@ impl fmt::Display for Parenthesis {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "( {} )", self.inner)
     }
+}
+
+#[macro_export]
+macro_rules! max {
+    ($($args:expr),*) => {{
+        Expression::max([$($args, )*])
+    }}
+}
+
+#[macro_export]
+macro_rules! min {
+    ($($args:expr),*) => {{
+        Expression::min([$($args, )*])
+    }}
 }
