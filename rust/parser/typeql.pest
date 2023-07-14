@@ -301,8 +301,8 @@ DIVIDE = @{ "/" }
 MULTIPLY = @{ "*" }
 POWER = @{ "^" }
 MODULO = @{ "%" }
-PAREN_OPEN = @{ "(" }
-PAREN_CLOSE = @{ ")" }
+PAREN_OPEN = _{ "(" }
+PAREN_CLOSE = _{ ")" }
 
 // Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
 EXPR_FUNC_NAME = _{ ABS | CEIL | FLOOR | ROUND }

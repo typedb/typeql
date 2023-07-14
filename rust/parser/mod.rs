@@ -701,11 +701,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
             Rule::VAR_ => Expression::Variable(get_var(primary)),
             Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
             Rule::expression_function => Expression::Function(visit_function(primary)),
-            Rule::paren_expr => Expression::Parenthesis(Parenthesis {
-                inner: Box::new(visit_expression(
-                    primary.into_children().skip_expected(Rule::PAREN_OPEN).consume_any(),
-                )),
-            }),
+            Rule::paren_expr => visit_expression(primary.into_children().consume_any()),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
         })
         .map_infix(|left, op, right| {
@@ -718,7 +714,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
                 Rule::POWER => token::Operation::Power,
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar(op.to_string())),
             };
-            Expression::Operation(Operation { op, left: Box::new(left), right: Box::new(right) })
+            Expression::Operation(Operation::new(op, left, right))
         })
         .parse(tree.into_children())
 }

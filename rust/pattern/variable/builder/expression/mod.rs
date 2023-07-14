@@ -20,9 +20,18 @@
  *
  */
 
+mod constant;
+mod function;
+mod operation;
+mod parenthesis;
+
 use std::{fmt, iter};
 
 use chrono::NaiveDateTime;
+pub use constant::Constant;
+pub use function::Function;
+pub use operation::Operation;
+pub use parenthesis::Parenthesis;
 
 use crate::{
     common::token::{Function as FunctionToken, Operation as OperationToken},
@@ -46,51 +55,27 @@ pub trait ExpressionBuilder {
 
 impl<T: Into<Expression>> ExpressionBuilder for T {
     fn add(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation {
-            op: OperationToken::Add,
-            left: Box::new(self.into()),
-            right: Box::new(right.into()),
-        })
+        Expression::Operation(Operation::new(OperationToken::Add, self, right))
     }
 
     fn subtract(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation {
-            op: OperationToken::Subtract,
-            left: Box::new(self.into()),
-            right: Box::new(right.into()),
-        })
+        Expression::Operation(Operation::new(OperationToken::Subtract, self, right))
     }
 
     fn multiply(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation {
-            op: OperationToken::Multiply,
-            left: Box::new(self.into()),
-            right: Box::new(right.into()),
-        })
+        Expression::Operation(Operation::new(OperationToken::Multiply, self, right))
     }
 
     fn divide(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation {
-            op: OperationToken::Divide,
-            left: Box::new(self.into()),
-            right: Box::new(right.into()),
-        })
+        Expression::Operation(Operation::new(OperationToken::Divide, self, right))
     }
 
     fn modulo(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation {
-            op: OperationToken::Modulo,
-            left: Box::new(self.into()),
-            right: Box::new(right.into()),
-        })
+        Expression::Operation(Operation::new(OperationToken::Modulo, self, right))
     }
 
     fn power(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation {
-            op: OperationToken::Power,
-            left: Box::new(self.into()),
-            right: Box::new(right.into()),
-        })
+        Expression::Operation(Operation::new(OperationToken::Power, self, right))
     }
 
     fn abs(arg: impl Into<Expression>) -> Expression {
@@ -155,14 +140,6 @@ impl Expression {
             Expression::Variable(variable) => variable.references(),
         }
     }
-
-    pub fn add(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation {
-            op: OperationToken::Add,
-            left: Box::new(self),
-            right: Box::new(right.into()),
-        })
-    }
 }
 
 impl From<UnboundValueVariable> for Expression {
@@ -210,87 +187,6 @@ impl From<&str> for Expression {
 impl From<NaiveDateTime> for Expression {
     fn from(value: NaiveDateTime) -> Self {
         Self::Constant(value.into())
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Constant {
-    pub(crate) value: Value,
-}
-
-impl<T: Into<Value>> From<T> for Constant {
-    fn from(value: T) -> Self {
-        Constant { value: value.into() }
-    }
-}
-
-impl fmt::Display for Constant {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.value)
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Operation {
-    pub(crate) op: OperationToken,
-    pub(crate) left: Box<Expression>,
-    pub(crate) right: Box<Expression>,
-}
-
-impl Operation {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.left.references_recursive().chain(self.right.references_recursive()))
-    }
-}
-
-impl fmt::Display for Operation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {}", self.left, self.op, self.right)
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Function {
-    pub(crate) symbol: FunctionToken,
-    pub(crate) args: Vec<Box<Expression>>,
-}
-
-impl Function {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.args.iter().flat_map(|expr| expr.references_recursive()))
-    }
-}
-
-impl fmt::Display for Function {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}({})", self.symbol, self.args.iter().map(|expr| expr.to_string()).collect::<Vec<_>>().join(", "))
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Parenthesis {
-    pub(crate) inner: Box<Expression>,
-}
-
-impl Parenthesis {
-    pub fn new(expression: Expression) -> Self {
-        Self { inner: Box::new(expression) }
-    }
-
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        self.inner.references_recursive()
-    }
-}
-
-impl From<Expression> for Parenthesis {
-    fn from(expression: Expression) -> Self {
-        Parenthesis { inner: Box::new(expression) }
-    }
-}
-
-impl fmt::Display for Parenthesis {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "( {} )", self.inner)
     }
 }
 

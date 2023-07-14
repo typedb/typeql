@@ -472,7 +472,7 @@ $x isa commodity,
         var_concept("x").isa("commodity").has(("price", var_concept("p"))),
         rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
         var_value("net").assign(var_concept("p").multiply(var_concept("q"))),
-        var_value("gross").assign(var_value("net").multiply(Expression::Parenthesis(1.0.add(0.21).into()))),
+        var_value("gross").assign(var_value("net").multiply(1.0.add(0.21))),
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -484,10 +484,12 @@ fn test_op_precedence() {
 ?res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(
-        var_value("res").assign(
-            var_concept("a").divide(var_concept("b")).multiply(var_concept("c"))
-            .add(var_concept("d").power(var_concept("e").power(var_concept("f"))).divide(var_concept("g")))));
+    let expected = typeql_match!(var_value("res").assign(
+        var_concept("a")
+            .divide(var_concept("b"))
+            .multiply(var_concept("c"))
+            .add(var_concept("d").power(var_concept("e").power(var_concept("f"))).divide(var_concept("g")))
+    ));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -497,10 +499,44 @@ fn test_func_parenthesis_precedence() {
 ?res = $a + ( round($b + ?c) + $d ) * ?e;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(var_value("res").assign(
-        var_concept("a").add(Expression::Parenthesis(Expression::round(var_concept("b").add(var_value("c"))).add(var_concept("d")).into()).multiply(var_value("e")))
-    ));
+    let expected =
+        typeql_match!(var_value("res").assign(var_concept("a").add(
+            Expression::round(var_concept("b").add(var_value("c"))).add(var_concept("d")).multiply(var_value("e"))
+        )));
 
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_builder_precedence() {
+    let query = r#"match
+?a = ( $b + $c ) * $d;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected =
+        typeql_match!(var_value("a").assign(var_concept("b").add(var_concept("c")).multiply(var_concept("d"))));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_builder_left_associativity() {
+    let query = r#"match
+?a = $b - ( $c - $d );"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected =
+        typeql_match!(var_value("a").assign(var_concept("b").subtract(var_concept("c").subtract(var_concept("d")))));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_builder_right_associativity() {
+    let query = r#"match
+?a = ( $b ^ $c ) ^ $d;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected =
+        typeql_match!(var_value("a").assign(var_concept("b").power(var_concept("c")).power(var_concept("d"))));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
