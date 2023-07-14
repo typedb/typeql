@@ -35,7 +35,7 @@ pub use parenthesis::Parenthesis;
 
 use crate::{
     common::token::{Function as FunctionToken, Operation as OperationToken},
-    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value},
+    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable},
 };
 
 pub trait ExpressionBuilder {

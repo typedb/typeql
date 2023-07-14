@@ -42,10 +42,10 @@ use crate::{
     pattern::{
         Annotation, AssignConstraint, ConceptVariable, ConceptVariableBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
-        Parenthesis, Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint,
-        RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable,
-        ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
-        UnboundValueVariable, UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
+        Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
+        RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
+        TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
+        UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,

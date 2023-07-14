@@ -20,7 +20,7 @@
  *
  */
 
-use std::{fmt, iter};
+use std::fmt;
 
 use super::Expression;
 use crate::{common::token::Function as FunctionToken, pattern::Reference};

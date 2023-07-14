@@ -32,16 +32,14 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, max, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
+    gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
     parse_query, parse_variable,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, Conjunction, Constant, Disjunction, Expression,
-        Expression::Parenthesis, ExpressionBuilder, Label, RelationVariableBuilder, ThingVariableBuilder,
-        TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariableBuilder,
-        Variable,
+        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Expression, ExpressionBuilder, Label,
+        RelationVariableBuilder, ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Variable,
     },
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
-    rel, rule, type_, typeql_insert, typeql_match, var, Query,
+    rel, rule, type_, typeql_insert, typeql_match, Query,
 };
 
 macro_rules! assert_valid_eq_repr {
@@ -71,8 +69,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("a").type_("attribute_label"))
-        .get([UnboundVariable::Concept(UnboundConceptVariable::named(String::from("a")))]);
+    let expected = typeql_match!(cvar("a").type_("attribute_label")).get([cvar("a").into()]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -100,10 +97,7 @@ get $char, $prod;"#;
         cvar("brando").eq("Marl B").isa("name"),
         rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
     )
-    .get([
-        UnboundVariable::Concept(UnboundConceptVariable::named(String::from("char"))),
-        UnboundVariable::Concept(UnboundConceptVariable::named(String::from("prod"))),
-    ]);
+    .get([cvar("char").into(), cvar("prod").into()]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -744,12 +738,7 @@ get $x, $y;
 count;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
-    let expected = typeql_match!(rel("x").rel("y").isa("friendship"))
-        .get([
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("y"))),
-        ])
-        .count();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get([cvar("x").into(), cvar("y").into()]).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -763,10 +752,7 @@ group $x; count;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = typeql_match!(rel("x").rel("y").isa("friendship"))
-        .get([
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("y"))),
-        ])
+        .get([cvar("x").into(), cvar("y").into()])
         .group(cvar("x"))
         .count();
 
@@ -810,11 +796,7 @@ group $x; max $z;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = typeql_match!(rel("x").rel("y").isa("friendship"), cvar("y").has(("age", cvar("z"))))
-        .get([
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("y"))),
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from("z"))),
-        ])
+        .get([cvar("x").into(), cvar("y").into(), cvar("z").into()])
         .group(cvar("x"))
         .max(cvar("z"));
 
@@ -837,10 +819,7 @@ group $x; sum ?t;"#;
         cvar("i").has(("value", cvar("v"))).has(("tax-rate", cvar("r"))),
         vvar("t").assign(cvar("r").multiply(cvar("v"))),
     )
-    .get([
-        UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
-        UnboundVariable::Value(UnboundValueVariable::named(String::from("t"))),
-    ])
+    .get([cvar("x").into(), vvar("t").into()])
     .group(cvar("x"))
     .sum(vvar("t"));
 
@@ -1454,8 +1433,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").owns(("name", Key)))
-        .get([UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x")))]);
+    let expected = typeql_match!(cvar("x").owns(("name", Key))).get([cvar("x").into()]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 

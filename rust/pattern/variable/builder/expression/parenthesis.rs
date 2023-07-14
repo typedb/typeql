@@ -23,7 +23,7 @@
 use std::fmt;
 
 use super::Expression;
-use crate::{common::token::Function as FunctionToken, pattern::Reference};
+use crate::pattern::Reference;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Parenthesis {
