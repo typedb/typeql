@@ -478,6 +478,32 @@ $x isa commodity,
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
+#[test]
+fn test_op_precedence() {
+    let query = r#"match
+?res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        var_value("res").assign(
+            var_concept("a").divide(var_concept("b")).multiply(var_concept("c"))
+            .add(var_concept("d").power(var_concept("e").power(var_concept("f"))).divide(var_concept("g")))));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_func_parenthesis_precedence() {
+    let query = r#"match
+?res = $a + ( round($b + ?c) + $d ) * ?e;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(var_value("res").assign(
+        var_concept("a").add(Expression::Parenthesis(Expression::round(var_concept("b").add(var_value("c"))).add(var_concept("d")).into()).multiply(var_value("e")))
+    ));
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
 // #[test]
 // fn () {
 // let query = r#""#;
@@ -487,7 +513,7 @@ $x isa commodity,
 //
 // assert_valid_eq_repr!(expected, parsed, query);
 // }
-//
+
 // #[test]
 // fn () {
 // let query = r#""#;

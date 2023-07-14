@@ -102,7 +102,7 @@ impl<T: Into<Expression>> ExpressionBuilder for T {
     }
 
     fn floor(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { symbol: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+        Expression::Function(Function { symbol: FunctionToken::Floor, args: vec![Box::from(arg.into())] })
     }
 
     fn max<const N: usize>(args: [impl Into<Expression>; N]) -> Expression {
@@ -120,7 +120,7 @@ impl<T: Into<Expression>> ExpressionBuilder for T {
     }
 
     fn round(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { symbol: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+        Expression::Function(Function { symbol: FunctionToken::Round, args: vec![Box::from(arg.into())] })
     }
 }
 
