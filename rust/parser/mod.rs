@@ -45,7 +45,7 @@ use crate::{
     pattern::{
         Annotation, AssignConstraint, ConceptVariable, ConceptVariableBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
-        Parenthesis, Pattern, PlaysConstraint, Predicate, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
+        Parenthesis, Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
         RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
         TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
         UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
@@ -658,12 +658,12 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
     }
 }
 
-fn visit_predicate(tree: SyntaxTree) -> Predicate {
+fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
     let mut children = tree.into_children();
     match children.peek_rule() {
-        Some(Rule::value) => Predicate::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value))),
+        Some(Rule::value) => PredicateConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value))),
         Some(Rule::predicate_equality) => {
-            Predicate::new(token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()), {
+            PredicateConstraint::new(token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()), {
                 let predicate_value = children.consume_expected(Rule::predicate_value).into_child();
                 match predicate_value.as_rule() {
                     Rule::value => visit_value(predicate_value),
@@ -674,7 +674,7 @@ fn visit_predicate(tree: SyntaxTree) -> Predicate {
         }
         Some(Rule::predicate_substring) => {
             let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
-            Predicate::new(
+            PredicateConstraint::new(
                 predicate,
                 {
                     match predicate {

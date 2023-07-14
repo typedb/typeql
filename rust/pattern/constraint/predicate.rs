@@ -37,16 +37,16 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Predicate {
+pub struct PredicateConstraint {
     pub predicate: token::Predicate,
     pub value: Value,
 }
 
-impl Predicate {
+impl PredicateConstraint {
     pub fn new(predicate: token::Predicate, value: Value) -> Self {
         match predicate {
-            token::Predicate::EqLegacy => Predicate { predicate: token::Predicate::Eq, value }, // TODO: Deprecate '=' as equality in 3.0
-            predicate => Predicate { predicate, value },
+            token::Predicate::EqLegacy => PredicateConstraint { predicate: token::Predicate::Eq, value }, // TODO: Deprecate '=' as equality in 3.0
+            predicate => PredicateConstraint { predicate, value },
         }
     }
 
@@ -59,7 +59,7 @@ impl Predicate {
     }
 }
 
-impl Validatable for Predicate {
+impl Validatable for PredicateConstraint {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [expect_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
@@ -75,7 +75,7 @@ fn expect_string_value_with_substring_predicate(predicate: token::Predicate, val
     Ok(())
 }
 
-impl fmt::Display for Predicate {
+impl fmt::Display for PredicateConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.predicate == token::Predicate::Like {
             assert!(matches!(self.value, Value::String(_)));

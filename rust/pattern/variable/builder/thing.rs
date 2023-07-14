@@ -23,7 +23,7 @@
 use crate::{
     common::token,
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, Predicate, RelationConstraint, RolePlayerConstraint,
+        HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, RelationConstraint, RolePlayerConstraint,
         ThingVariable, Value,
     },
 };
@@ -32,7 +32,7 @@ pub trait ThingConstrainable {
     fn constrain_has(self, has: HasConstraint) -> ThingVariable;
     fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable;
     fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable;
-    fn constrain_predicate(self, value: Predicate) -> ThingVariable;
+    fn constrain_predicate(self, value: PredicateConstraint) -> ThingVariable;
     fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable;
 }
 
@@ -64,35 +64,35 @@ impl<U: ThingConstrainable> ThingVariableBuilder for U {
     }
 
     fn eq(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Eq, value.into()))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Eq, value.into()))
     }
 
     fn neq(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Neq, value.into()))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Neq, value.into()))
     }
 
     fn gt(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Gt, value.into()))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Gt, value.into()))
     }
 
     fn gte(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Gte, value.into()))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Gte, value.into()))
     }
 
     fn lt(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Lt, value.into()))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Lt, value.into()))
     }
 
     fn lte(self, value: impl Into<Value>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Lte, value.into()))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Lte, value.into()))
     }
 
     fn contains(self, string: impl Into<String>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Contains, Value::from(string.into())))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Contains, Value::from(string.into())))
     }
 
     fn like(self, string: impl Into<String>) -> ThingVariable {
-        self.constrain_predicate(Predicate::new(token::Predicate::Like, Value::from(string.into())))
+        self.constrain_predicate(PredicateConstraint::new(token::Predicate::Like, Value::from(string.into())))
     }
 }
 

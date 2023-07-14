@@ -26,7 +26,7 @@ use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
         ConceptConstrainable, ConceptReference, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
-        IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, Reference, RegexConstraint,
+        IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference, RegexConstraint,
         RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint,
         ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint, Visibility,
     },
@@ -92,7 +92,7 @@ impl ThingConstrainable for UnboundConceptVariable {
         self.into_thing().constrain_isa(isa)
     }
 
-    fn constrain_predicate(self, predicate: Predicate) -> ThingVariable {
+    fn constrain_predicate(self, predicate: PredicateConstraint) -> ThingVariable {
         self.into_thing().constrain_predicate(predicate)
     }
 

@@ -26,7 +26,7 @@ use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
         variable::{builder::ValueConstrainable, Reference},
-        AssignConstraint, Predicate,
+        AssignConstraint, PredicateConstraint,
     },
 };
 
@@ -34,7 +34,7 @@ use crate::{
 pub struct ValueVariable {
     pub reference: Reference,
     pub assign_constraint: Option<AssignConstraint>,
-    pub predicate_constraint: Option<Predicate>,
+    pub predicate_constraint: Option<PredicateConstraint>,
 }
 
 impl ValueVariable {
@@ -70,7 +70,7 @@ impl ValueConstrainable for ValueVariable {
         Self { assign_constraint: Some(assign), ..self }
     }
 
-    fn constrain_predicate(self, predicate: Predicate) -> ValueVariable {
+    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueVariable {
         Self { predicate_constraint: Some(predicate), ..self }
     }
 }

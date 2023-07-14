@@ -25,7 +25,7 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
-        Predicate, Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
+        PredicateConstraint, Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
         UnboundConceptVariable, Value,
     },
 };
@@ -68,14 +68,14 @@ impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
             value => HasConstraint {
                 type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
                 attribute: UnboundConceptVariable::hidden()
-                    .constrain_predicate(Predicate::new(token::Predicate::Eq, value)),
+                    .constrain_predicate(PredicateConstraint::new(token::Predicate::Eq, value)),
             },
         }
     }
 }
 
-impl<S: Into<String>> From<(S, Predicate)> for HasConstraint {
-    fn from((type_name, predicate): (S, Predicate)) -> Self {
+impl<S: Into<String>> From<(S, PredicateConstraint)> for HasConstraint {
+    fn from((type_name, predicate): (S, PredicateConstraint)) -> Self {
         HasConstraint {
             type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
             attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
@@ -84,7 +84,7 @@ impl<S: Into<String>> From<(S, Predicate)> for HasConstraint {
 }
 
 impl HasConstraint {
-    pub fn new((type_name, predicate): (String, Predicate)) -> Self {
+    pub fn new((type_name, predicate): (String, PredicateConstraint)) -> Self {
         HasConstraint {
             type_: Some(UnboundConceptVariable::hidden().type_(type_name)),
             attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),

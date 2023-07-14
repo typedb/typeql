@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{validatable::Validatable, Result},
-    pattern::{variable::ValueConstrainable, AssignConstraint, Predicate, Reference, ValueReference, ValueVariable},
+    pattern::{variable::ValueConstrainable, AssignConstraint, PredicateConstraint, Reference, ValueReference, ValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -51,7 +51,7 @@ impl ValueConstrainable for UnboundValueVariable {
         self.into_value_variable().constrain_assign(assign)
     }
 
-    fn constrain_predicate(self, predicate: Predicate) -> ValueVariable {
+    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueVariable {
         self.into_value_variable().constrain_predicate(predicate)
     }
 }
