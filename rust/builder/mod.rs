@@ -87,11 +87,11 @@ pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
     var.into()
 }
 
-pub fn var_concept(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
+pub fn cvar(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
     var.into()
 }
 
-pub fn var_value(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
+pub fn vvar(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
     var.into()
 }
 

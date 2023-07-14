@@ -79,33 +79,33 @@ impl<T: Into<Expression>> ExpressionBuilder for T {
     }
 
     fn abs(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { symbol: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+        Expression::Function(Function { function_name: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
     }
 
     fn ceil(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { symbol: FunctionToken::Ceil, args: vec![Box::from(arg.into())] })
+        Expression::Function(Function { function_name: FunctionToken::Ceil, args: vec![Box::from(arg.into())] })
     }
 
     fn floor(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { symbol: FunctionToken::Floor, args: vec![Box::from(arg.into())] })
+        Expression::Function(Function { function_name: FunctionToken::Floor, args: vec![Box::from(arg.into())] })
     }
 
     fn max<const N: usize>(args: [impl Into<Expression>; N]) -> Expression {
         Expression::Function(Function {
-            symbol: FunctionToken::Max,
+            function_name: FunctionToken::Max,
             args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
         })
     }
 
     fn min<const N: usize>(args: [impl Into<Expression>; N]) -> Expression {
         Expression::Function(Function {
-            symbol: FunctionToken::Min,
+            function_name: FunctionToken::Min,
             args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
         })
     }
 
     fn round(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { symbol: FunctionToken::Round, args: vec![Box::from(arg.into())] })
+        Expression::Function(Function { function_name: FunctionToken::Round, args: vec![Box::from(arg.into())] })
     }
 }
 

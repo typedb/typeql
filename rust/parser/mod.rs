@@ -25,10 +25,7 @@ mod test;
 
 use chrono::{NaiveDate, NaiveDateTime};
 use pest::{
-    pratt_parser::{
-        Assoc::{Left, Right},
-        Op, PrattParser,
-    },
+    pratt_parser::{Assoc, Op, PrattParser},
     Parser,
 };
 use pest_derive::Parser;
@@ -45,10 +42,10 @@ use crate::{
     pattern::{
         Annotation, AssignConstraint, ConceptVariable, ConceptVariableBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
-        Parenthesis, Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
-        RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
-        TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
-        UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
+        Parenthesis, Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint,
+        RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable,
+        ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
+        UnboundValueVariable, UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
@@ -224,18 +221,11 @@ fn get_date_time(date_time: SyntaxTree) -> NaiveDateTime {
 fn get_var(var: SyntaxTree) -> UnboundVariable {
     let name = var.as_str();
 
-    assert!(name.len() > 1);
-    assert!(name.starts_with('$') || name.starts_with('?'));
-
-    let (prefix, name) = name.split_at(1);
-    if prefix == "$" {
-        if name == "_" {
-            UnboundVariable::Concept(UnboundConceptVariable::anonymous())
-        } else {
-            UnboundVariable::Concept(UnboundConceptVariable::named(String::from(name)))
-        }
-    } else {
-        UnboundVariable::Value(UnboundValueVariable::named(String::from(name)))
+    let (prefix, _name) = name.split_at(1);
+    match prefix {
+        "$" => UnboundVariable::Concept(get_var_concept(var)),
+        "?" => UnboundVariable::Value(get_var_value(var)),
+        _ => unreachable!(),
     }
 }
 
@@ -661,17 +651,20 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
 fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
     let mut children = tree.into_children();
     match children.peek_rule() {
-        Some(Rule::value) => PredicateConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value))),
-        Some(Rule::predicate_equality) => {
-            PredicateConstraint::new(token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()), {
+        Some(Rule::value) => {
+            PredicateConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value)))
+        }
+        Some(Rule::predicate_equality) => PredicateConstraint::new(
+            token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
+            {
                 let predicate_value = children.consume_expected(Rule::predicate_value).into_child();
                 match predicate_value.as_rule() {
                     Rule::value => visit_value(predicate_value),
                     Rule::VAR_ => Value::from(get_var(predicate_value.into_children().consume_any())),
                     _ => unreachable!("{}", TypeQLError::IllegalGrammar(predicate_value.to_string())),
                 }
-            })
-        }
+            },
+        ),
         Some(Rule::predicate_substring) => {
             let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
             PredicateConstraint::new(
@@ -692,9 +685,11 @@ fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
 
 fn visit_expression(tree: SyntaxTree) -> Expression {
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
-        .op(Op::infix(Rule::ADD, Left) | Op::infix(Rule::SUBTRACT, Left))
-        .op(Op::infix(Rule::MULTIPLY, Left) | Op::infix(Rule::DIVIDE, Left) | Op::infix(Rule::MODULO, Left))
-        .op(Op::infix(Rule::POWER, Right));
+        .op(Op::infix(Rule::ADD, Assoc::Left) | Op::infix(Rule::SUBTRACT, Assoc::Left))
+        .op(Op::infix(Rule::MULTIPLY, Assoc::Left)
+            | Op::infix(Rule::DIVIDE, Assoc::Left)
+            | Op::infix(Rule::MODULO, Assoc::Left))
+        .op(Op::infix(Rule::POWER, Assoc::Right));
 
     pratt_parser
         .map_primary(|primary| match primary.as_rule() {
@@ -721,9 +716,9 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
 
 fn visit_function(tree: SyntaxTree) -> Function {
     let mut children = tree.into_children();
-    let symbol = visit_function_name(children.consume_expected(Rule::expression_function_name));
+    let function_name = visit_function_name(children.consume_expected(Rule::expression_function_name));
     let args = children.map(|arg| Box::new(visit_expression(arg))).collect();
-    Function { symbol, args }
+    Function { function_name, args }
 }
 
 fn visit_function_name(tree: SyntaxTree) -> token::Function {

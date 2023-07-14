@@ -26,9 +26,10 @@ use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
         ConceptConstrainable, ConceptReference, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
-        IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference, RegexConstraint,
-        RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint, SubConstraint,
-        ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint, Visibility,
+        IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference,
+        RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
+        SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint,
+        Visibility,
     },
 };
 

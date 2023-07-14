@@ -24,7 +24,9 @@ use std::{fmt, iter};
 
 use crate::{
     common::{validatable::Validatable, Result},
-    pattern::{variable::ValueConstrainable, AssignConstraint, PredicateConstraint, Reference, ValueReference, ValueVariable},
+    pattern::{
+        variable::ValueConstrainable, AssignConstraint, PredicateConstraint, Reference, ValueReference, ValueVariable,
+    },
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]

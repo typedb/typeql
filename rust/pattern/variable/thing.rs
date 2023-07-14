@@ -25,8 +25,8 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, Reference, RelationConstrainable, RelationConstraint,
-        RolePlayerConstraint, ThingConstrainable,
+        HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, Reference, RelationConstrainable,
+        RelationConstraint, RolePlayerConstraint, ThingConstrainable,
     },
     write_joined,
 };
@@ -43,7 +43,7 @@ pub struct ThingVariable {
 
 impl ThingVariable {
     pub fn new(reference: Reference) -> ThingVariable {
-        ThingVariable { reference, iid: None, isa: None, has: Vec::new(), value: None::<PredicateConstraint>, relation: None }
+        ThingVariable { reference, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
