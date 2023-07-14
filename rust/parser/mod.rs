@@ -722,7 +722,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
 fn visit_function(tree: SyntaxTree) -> Function {
     let mut children = tree.into_children();
     let symbol = visit_function_name(children.consume_expected(Rule::expression_function_name));
-    let args = children.map(visit_function_argument).collect();
+    let args = children.map(|arg| Box::new(visit_expression(arg))).collect();
     Function { symbol, args }
 }
 
@@ -737,10 +737,6 @@ fn visit_function_name(tree: SyntaxTree) -> token::Function {
         Rule::ROUND => token::Function::Round,
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
-}
-
-fn visit_function_argument(tree: SyntaxTree) -> Box<Expression> {
-    Box::new(visit_expression(tree.into_child()))
 }
 
 fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {

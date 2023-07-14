@@ -175,7 +175,7 @@ paren_expr = { PAREN_OPEN ~ expression ~ PAREN_CLOSE }
 
 expression_function = { expression_function_name ~ "(" ~ expression_arguments? ~ ")" }
 expression_function_name = { EXPR_FUNC_NAME | MAX | MIN }
-expression_arguments = { expression ~ ( "," ~ expression )* }
+expression_arguments = _{ expression ~ ( "," ~ expression )* }
 
 // SCHEMA CONSTRUCT ============================================================
 
