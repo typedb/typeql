@@ -85,7 +85,9 @@ impl Operation {
     fn precedence(&self) -> Precedence {
         match self {
             Operation::Addition { .. } | Operation::Subtraction { .. } => Precedence::Addition,
-            Operation::Multiplication { .. } | Operation::Division { .. } | Operation::Modulo { .. } => Precedence::Multiplication,
+            Operation::Multiplication { .. } | Operation::Division { .. } | Operation::Modulo { .. } => {
+                Precedence::Multiplication
+            }
             Operation::Power { .. } => Precedence::Exponentiation,
         }
     }
@@ -93,7 +95,9 @@ impl Operation {
     fn associativity(&self) -> Associativity {
         match self {
             Operation::Addition { .. } | Operation::Multiplication { .. } => Associativity::Associative,
-            Operation::Subtraction { .. } | Operation::Division { .. } | Operation::Modulo { .. } => Associativity::Left,
+            Operation::Subtraction { .. } | Operation::Division { .. } | Operation::Modulo { .. } => {
+                Associativity::Left
+            }
             Operation::Power { .. } => Associativity::Right,
         }
     }

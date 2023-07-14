@@ -37,7 +37,8 @@ use crate::{
     pattern::{
         Annotation::Key, ConceptVariableBuilder, Conjunction, Constant, Disjunction, Expression,
         Expression::Parenthesis, ExpressionBuilder, Label, RelationVariableBuilder, ThingVariableBuilder,
-        TypeVariableBuilder, UnboundConceptVariable, UnboundVariable, ValueVariableBuilder, Variable,
+        TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariableBuilder,
+        Variable,
     },
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
@@ -540,35 +541,43 @@ fn test_builder_right_associativity() {
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
-// #[test]
-// fn () {
-// let query = r#""#;
-//
-// let parsed = parse_query(query).unwrap().into_match();
-// let expected = typeql_match!(var_concept("x").isa("movie").has(("tmdb-vote-count", lte(400))));
-//
-// assert_valid_eq_repr!(expected, parsed, query);
-// }
+#[test]
+fn test_assign_function() {
+    let query = r#"match
+$x isa commodity,
+    has price $p;
+(commodity: $x, qty: $q) isa order;
+?net = $p * $q;
+?gross = min(?net * 1.21, ?net + 100.0);"#;
 
-// #[test]
-// fn () {
-// let query = r#""#;
-//
-// let parsed = parse_query(query).unwrap().into_match();
-// let expected = typeql_match!(var_concept("x").isa("movie").has(("tmdb-vote-count", lte(400))));
-//
-// assert_valid_eq_repr!(expected, parsed, query);
-// }
-//
-// #[test]
-// fn () {
-// let query = r#""#;
-//
-// let parsed = parse_query(query).unwrap().into_match();
-// let expected = typeql_match!(var_concept("x").isa("movie").has(("tmdb-vote-count", lte(400))));
-//
-// assert_valid_eq_repr!(expected, parsed, query);
-// }
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        var_concept("x").isa("commodity").has(("price", var_concept("p"))),
+        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
+        var_value("net").assign(var_concept("p").multiply(var_concept("q"))),
+        var_value("gross").assign(min!(var_value("net").multiply(1.21), var_value("net").add(100.0)))
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_get_sort_on_value_variable() {
+    let query = r#"match
+$x isa movie,
+    has rating $r;
+?l = 100 - $r;
+sort ?l desc;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        var_concept("x").isa("movie").has(("rating", var_concept("r"))),
+        var_value("l").assign(Expression::Constant(100.into()).subtract(var_concept("r")))
+    )
+    .sort([(var_value("l").into(), Desc)]);
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
 
 #[test]
 fn test_schema_query() {
@@ -829,6 +838,32 @@ group $x; max $z;"#;
         ])
         .group(var_concept("x"))
         .max(var_concept("z"));
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_filtered_group_aggregates_on_value_variable() {
+    let query = r#"match
+$i ($x, $s) isa income-source;
+$i has value $v,
+    has tax-rate $r;
+?t = $r * $v;
+get $x, ?t;
+group $x; sum ?t;"#;
+
+    let parsed = parse_query(query).unwrap().into_group_aggregate();
+    let expected = typeql_match!(
+        var_concept("i").rel("x").rel("s").isa("income-source"),
+        var_concept("i").has(("value", var_concept("v"))).has(("tax-rate", var_concept("r"))),
+        var_value("t").assign(var_concept("r").multiply(var_concept("v"))),
+    )
+    .get([
+        UnboundVariable::Concept(UnboundConceptVariable::named(String::from("x"))),
+        UnboundVariable::Value(UnboundValueVariable::named(String::from("t"))),
+    ])
+    .group(var_concept("x"))
+    .sum(var_value("t"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1294,6 +1329,27 @@ fn test_parsing_label() {
     let parsed = parse_label(label).unwrap();
     let expected = Label { scope: None, name: String::from(label) };
     assert_eq!(expected, parsed);
+}
+
+#[test]
+fn test_rule_attach_attribute_by_value() {
+    let query = r#"define
+rule attach-val: when {
+    $x has age $a;
+    ?d = $a * 365;
+} then {
+    $x has days == ?d;
+};"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(rule("attach-val")
+        .when(and!(
+            var_concept("x").has(("age", var_concept("a"))),
+            var_value("d").assign(var_concept("a").multiply(365)),
+        ))
+        .then(var_concept("x").has(("days", var_value("d")))));
+
+    assert_valid_eq_repr!(expected, parsed, query);
 }
 
 #[test]
