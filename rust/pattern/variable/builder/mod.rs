@@ -27,7 +27,7 @@ mod type_;
 mod value;
 
 pub use concept::{ConceptConstrainable, ConceptVariableBuilder};
-pub use expression::{Constant, Expression, ExpressionBuilder, Function, Operation, Parenthesis};
+pub use expression::ExpressionBuilder;
 pub use thing::{RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder};
 pub use type_::{TypeConstrainable, TypeVariableBuilder};
 pub use value::{ValueConstrainable, ValueVariableBuilder};

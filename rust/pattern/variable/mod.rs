@@ -33,8 +33,7 @@ mod value;
 use std::{collections::HashSet, fmt};
 
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, Constant, Expression, ExpressionBuilder, Function, Operation,
-    Parenthesis, RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder,
+    ConceptConstrainable, ConceptVariableBuilder, ExpressionBuilder, RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder,
     TypeConstrainable, TypeVariableBuilder, ValueConstrainable, ValueVariableBuilder,
 };
 pub use concept::ConceptVariable;

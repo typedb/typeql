@@ -30,6 +30,7 @@ mod schema;
 #[cfg(test)]
 mod test;
 mod variable;
+mod expression;
 
 use std::{collections::HashSet, fmt};
 
@@ -40,13 +41,14 @@ pub use constraint::{
     RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
+pub use expression::{Constant, Expression, Function, Operation};
 pub use label::Label;
 pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
-    ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, Constant, Expression,
-    ExpressionBuilder, Function, Operation, Parenthesis, Reference, RelationConstrainable, RelationVariableBuilder,
+    ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder,
+    ExpressionBuilder, Reference, RelationConstrainable, RelationVariableBuilder,
     ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder,
     UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueConstrainable, ValueReference, ValueVariable,
     ValueVariableBuilder, Variable, Visibility,
