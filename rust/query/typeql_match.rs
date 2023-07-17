@@ -57,8 +57,8 @@ impl TypeQLMatch {
         Self::new(self.conjunction, self.modifiers.filter(vars))
     }
 
-    pub fn get<const N: usize>(self, vars: [UnboundVariable; N]) -> Self {
-        self.filter(Vec::from(vars))
+    pub fn get<const N: usize, T: Into<UnboundVariable>>(self, vars: [T; N]) -> Self {
+        self.filter(vars.into_iter().map(|var| var.into()).collect::<Vec<_>>())
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
@@ -182,9 +182,10 @@ fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result<()> {
     let value_names = value_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
     let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
     if !common_refs.is_empty() {
-        Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")))?
+        Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into())
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 impl fmt::Display for TypeQLMatch {
@@ -269,6 +270,19 @@ pub mod sorting {
         }
     }
 
+    impl<T: Into<UnboundVariable>> From<(T, token::Order)> for OrderedVariable {
+        fn from(ordered_var: (T, token::Order)) -> Self {
+            let (variable, order) = ordered_var;
+            Self::new(variable.into(), Some(order))
+        }
+    }
+
+    impl<T: Into<UnboundVariable>> From<T> for OrderedVariable {
+        fn from(variable: T) -> Self {
+            Self::new(variable.into(), None)
+        }
+    }
+
     impl fmt::Display for OrderedVariable {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(f, "{}", self.var)?;
@@ -298,17 +312,15 @@ impl Sorting {
     }
 }
 
-impl<const N: usize, T: Into<UnboundVariable>> From<[(T, token::Order); N]> for Sorting {
-    fn from(ordered_vars: [(T, token::Order); N]) -> Self {
-        Self::new(
-            ordered_vars.map(|(name, order)| sorting::OrderedVariable::new(var(name.into()), Some(order))).to_vec(),
-        )
+impl<const N: usize, T: Into<sorting::OrderedVariable>> From<[T; N]> for Sorting {
+    fn from(ordered_vars: [T; N]) -> Self {
+        Self::new(ordered_vars.map(|ordered_var| ordered_var.into()).to_vec())
     }
 }
 
-impl<T: Into<UnboundVariable>> From<Vec<T>> for Sorting {
-    fn from(vars: Vec<T>) -> Self {
-        Self::new(vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name.into()), None)).collect())
+impl<'a, T: Into<sorting::OrderedVariable> + Clone> From<&'a [T]> for Sorting {
+    fn from(ordered_vars: &'a [T]) -> Self {
+        Self::new(ordered_vars.iter().map(|ordered_var| ordered_var.clone().into()).collect())
     }
 }
 

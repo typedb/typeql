@@ -36,10 +36,14 @@ use crate::{
     parse_query, parse_variable,
     pattern::{
         Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, ExpressionBuilder, Label,
-        RelationVariableBuilder, ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Variable,
+        RelationVariableBuilder, ThingVariableBuilder, TypeVariableBuilder, UnboundVariable, ValueVariableBuilder,
+        Variable,
     },
-    query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
-    rel, rule, type_, typeql_insert, typeql_match, Query,
+    query::{
+        sorting::OrderedVariable, AggregateQueryBuilder, Sorting, TypeQLDefine, TypeQLInsert, TypeQLMatch,
+        TypeQLUndefine,
+    },
+    rel, rule, sort_vars, type_, typeql_insert, typeql_match, Query,
 };
 
 macro_rules! assert_valid_eq_repr {
@@ -69,7 +73,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("a").type_("attribute_label")).get(filter!(cvar("a")));
+    let expected = typeql_match!(cvar("a").type_("attribute_label")).get([cvar("a")]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -585,6 +589,25 @@ sort $r desc;"#;
 }
 
 #[test]
+fn test_get_sort_multiple() {
+    let query = r#"match
+$x isa movie,
+    has title $t,
+    has rating $r;
+?rate = $r * 100;
+sort ?rate desc, $t;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        cvar("x").isa("movie").has(("title", cvar("t"))).has(("rating", cvar("r"))),
+        vvar("rate").assign(cvar("r").multiply(100)),
+    )
+    .sort(sort_vars!((vvar("rate"), Desc), cvar("t")));
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
 fn test_get_sort_limit() {
     let query = r#"match
 $x isa movie,
@@ -592,7 +615,7 @@ $x isa movie,
 sort $r; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort(vec![cvar("r")]).limit(10);
+    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort([cvar("r")]).limit(10);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1429,7 +1452,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").owns(("name", Key))).get(filter!(cvar("x")));
+    let expected = typeql_match!(cvar("x").owns(("name", Key))).get([cvar("x")]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 

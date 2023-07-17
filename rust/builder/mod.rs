@@ -78,22 +78,29 @@ macro_rules! or {
 
 #[macro_export]
 macro_rules! max {
-    ($($args:expr),*) => {{
+    ($($args:expr),* $(,)?) => {{
         max([$($args, )*])
     }}
 }
 
 #[macro_export]
 macro_rules! min {
-    ($($args:expr),*) => {{
+    ($($args:expr),* $(,)?) => {{
         min([$($args, )*])
     }}
 }
 
 #[macro_export]
 macro_rules! filter {
-    ($($args:expr),*) => {{
-        [$($args.into(), )*]
+    ($($arg:expr),* $(,)?) => {{
+        [$(Into::<UnboundVariable>::into($arg)),*]
+    }}
+}
+
+#[macro_export]
+macro_rules! sort_vars {
+    ($($arg:expr),*) => {{
+        Sorting::new(vec![$(Into::<OrderedVariable>::into($arg), )*])
     }}
 }
 

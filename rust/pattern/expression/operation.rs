@@ -163,18 +163,19 @@ enum Precedence {
     Exponentiation,
 }
 
-impl Ord for Precedence {
-    fn cmp(&self, other: &Precedence) -> Ordering {
+impl Precedence {
+    fn discriminant(&self) -> usize {
         match self {
             Precedence::Addition => 3,
             Precedence::Multiplication => 2,
             Precedence::Exponentiation => 1,
         }
-        .cmp(&match other {
-            Precedence::Addition => 3,
-            Precedence::Multiplication => 2,
-            Precedence::Exponentiation => 1,
-        })
+    }
+}
+
+impl Ord for Precedence {
+    fn cmp(&self, other: &Precedence) -> Ordering {
+        self.discriminant().cmp(&other.discriminant())
     }
 }
 
