@@ -22,10 +22,7 @@
 
 use crate::{
     common::token::ArithmeticOperator,
-    pattern::{
-        expression::{Expression, Operation},
-        Constant,
-    },
+    pattern::expression::{Expression, Operation},
 };
 
 pub trait SubExpression {

@@ -20,7 +20,7 @@
  *
  */
 
-use std::fmt;
+use std::{cmp::Ordering, fmt};
 
 use super::Expression;
 use crate::{
@@ -131,22 +131,22 @@ impl fmt::Display for Operation {
                 let mut left_operand = format!("{}", self.left().unwrap());
                 if let Some(Expression::Operation(left_operation)) = self.left() {
                     if let Associativity::Right = self.associativity() {
-                        if left_operation.precedence().level() == self.precedence().level() {
+                        if left_operation.precedence() == self.precedence() {
                             left_operand = format!("( {left_operand} )");
                         }
                     }
-                    if left_operation.precedence().level() > self.precedence().level() {
+                    if left_operation.precedence() > self.precedence() {
                         left_operand = format!("( {left_operand} )");
                     }
                 }
                 let mut right_operand = format!("{}", self.right().unwrap());
                 if let Some(Expression::Operation(right_operation)) = self.right() {
                     if let Associativity::Left = self.associativity() {
-                        if right_operation.precedence().level() == self.precedence().level() {
+                        if right_operation.precedence() == self.precedence() {
                             right_operand = format!("( {right_operand} )");
                         }
                     }
-                    if right_operation.precedence().level() > self.precedence().level() {
+                    if right_operation.precedence() > self.precedence() {
                         right_operand = format!("( {right_operand} )");
                     }
                 }
@@ -156,31 +156,42 @@ impl fmt::Display for Operation {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum Precedence {
     Addition,
     Multiplication,
     Exponentiation,
 }
 
-impl Precedence {
-    pub(crate) fn level(&self) -> usize {
+impl Ord for Precedence {
+    fn cmp(&self, other: &Precedence) -> Ordering {
         match self {
             Precedence::Addition => 3,
             Precedence::Multiplication => 2,
             Precedence::Exponentiation => 1,
         }
+        .cmp(&match other {
+            Precedence::Addition => 3,
+            Precedence::Multiplication => 2,
+            Precedence::Exponentiation => 1,
+        })
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+impl PartialOrd for Precedence {
+    fn partial_cmp(&self, other: &Precedence) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum Associativity {
     Associative,
     Left,
     Right,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum Arity {
     Binary,
 }

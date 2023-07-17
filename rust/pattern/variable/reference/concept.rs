@@ -24,7 +24,7 @@ use std::fmt;
 
 use crate::common::{error::TypeQLError, validatable::Validatable, Result};
 
-#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum Visibility {
     Visible,
     Invisible,

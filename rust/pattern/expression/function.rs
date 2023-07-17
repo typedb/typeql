@@ -26,6 +26,7 @@ use super::Expression;
 use crate::{
     common::token::Function as FunctionToken,
     pattern::{Reference, SubExpression},
+    write_joined,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -48,11 +49,8 @@ impl SubExpression for Function {
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}({})",
-            self.function_name,
-            self.args.iter().map(|expr| expr.to_string()).collect::<Vec<_>>().join(", ")
-        )
+        write!(f, "{}(", self.function_name)?;
+        write_joined!(f, ", ", self.args)?;
+        write!(f, ")")
     }
 }
