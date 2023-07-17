@@ -21,10 +21,11 @@
  */
 
 use crate::{
-    common::token::Predicate,
+    common::token::{Function as FunctionToken, Predicate},
     pattern::{
-        Negation, PredicateConstraint, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable,
-        TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, Value,
+        Constant, Expression, Function, Negation, PredicateConstraint, RelationVariableBuilder, RolePlayerConstraint,
+        RuleDeclaration, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
+        UnboundValueVariable, UnboundVariable, Value,
     },
     Pattern,
 };
@@ -75,6 +76,27 @@ macro_rules! or {
     }}
 }
 
+#[macro_export]
+macro_rules! max {
+    ($($args:expr),*) => {{
+        max([$($args, )*])
+    }}
+}
+
+#[macro_export]
+macro_rules! min {
+    ($($args:expr),*) => {{
+        min([$($args, )*])
+    }}
+}
+
+#[macro_export]
+macro_rules! filter {
+    ($($args:expr),*) => {{
+        [$($args.into(), )*]
+    }}
+}
+
 pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
     Negation::new(pattern.into())
 }
@@ -93,6 +115,10 @@ pub fn cvar(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
 
 pub fn vvar(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
     var.into()
+}
+
+pub fn constant(value: impl Into<Value>) -> Expression {
+    Expression::Constant(Constant { value: value.into() })
 }
 
 pub fn type_(name: impl Into<String>) -> TypeVariable {
@@ -133,4 +159,34 @@ pub fn contains<T: Into<String>>(value: T) -> PredicateConstraint {
 
 pub fn like<T: Into<String>>(value: T) -> PredicateConstraint {
     PredicateConstraint::new(Predicate::Like, Value::from(value.into()))
+}
+
+pub fn abs<T: Into<Expression>>(arg: T) -> Expression {
+    Expression::Function(Function { function_name: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+}
+
+pub fn ceil<T: Into<Expression>>(arg: T) -> Expression {
+    Expression::Function(Function { function_name: FunctionToken::Ceil, args: vec![Box::from(arg.into())] })
+}
+
+pub fn floor<T: Into<Expression>>(arg: T) -> Expression {
+    Expression::Function(Function { function_name: FunctionToken::Floor, args: vec![Box::from(arg.into())] })
+}
+
+pub fn max<const N: usize, T: Into<Expression>>(args: [T; N]) -> Expression {
+    Expression::Function(Function {
+        function_name: FunctionToken::Max,
+        args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+    })
+}
+
+pub fn min<const N: usize, T: Into<Expression>>(args: [T; N]) -> Expression {
+    Expression::Function(Function {
+        function_name: FunctionToken::Min,
+        args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+    })
+}
+
+pub fn round<T: Into<Expression>>(arg: T) -> Expression {
+    Expression::Function(Function { function_name: FunctionToken::Round, args: vec![Box::from(arg.into())] })
 }

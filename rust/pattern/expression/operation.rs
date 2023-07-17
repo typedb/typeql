@@ -23,7 +23,10 @@
 use std::fmt;
 
 use super::Expression;
-use crate::{common::token::ArithmeticOperator as OperationToken, pattern::Reference};
+use crate::{
+    common::token::ArithmeticOperator,
+    pattern::{Reference, SubExpression},
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Operation {
@@ -36,16 +39,16 @@ pub enum Operation {
 }
 
 impl Operation {
-    pub fn new(op: OperationToken, left: impl Into<Expression>, right: impl Into<Expression>) -> Self {
+    pub fn new(op: ArithmeticOperator, left: impl Into<Expression>, right: impl Into<Expression>) -> Self {
         let left = Box::new(left.into());
         let right = Box::new(right.into());
         match op {
-            OperationToken::Add => Operation::Addition { left, right },
-            OperationToken::Subtract => Operation::Subtraction { left, right },
-            OperationToken::Multiply => Operation::Multiplication { left, right },
-            OperationToken::Divide => Operation::Division { left, right },
-            OperationToken::Modulo => Operation::Modulo { left, right },
-            OperationToken::Power => Operation::Power { left, right },
+            ArithmeticOperator::Add => Operation::Addition { left, right },
+            ArithmeticOperator::Subtract => Operation::Subtraction { left, right },
+            ArithmeticOperator::Multiply => Operation::Multiplication { left, right },
+            ArithmeticOperator::Divide => Operation::Division { left, right },
+            ArithmeticOperator::Modulo => Operation::Modulo { left, right },
+            ArithmeticOperator::Power => Operation::Power { left, right },
         }
     }
 
@@ -71,14 +74,14 @@ impl Operation {
         }
     }
 
-    fn op_token(&self) -> OperationToken {
+    fn op_token(&self) -> ArithmeticOperator {
         match self {
-            Operation::Addition { .. } => OperationToken::Add,
-            Operation::Subtraction { .. } => OperationToken::Subtract,
-            Operation::Multiplication { .. } => OperationToken::Multiply,
-            Operation::Division { .. } => OperationToken::Divide,
-            Operation::Modulo { .. } => OperationToken::Modulo,
-            Operation::Power { .. } => OperationToken::Power,
+            Operation::Addition { .. } => ArithmeticOperator::Add,
+            Operation::Subtraction { .. } => ArithmeticOperator::Subtract,
+            Operation::Multiplication { .. } => ArithmeticOperator::Multiply,
+            Operation::Division { .. } => ArithmeticOperator::Divide,
+            Operation::Modulo { .. } => ArithmeticOperator::Modulo,
+            Operation::Power { .. } => ArithmeticOperator::Power,
         }
     }
 
@@ -112,6 +115,12 @@ impl Operation {
                 self.left().unwrap().references_recursive().chain(self.right().unwrap().references_recursive()),
             ),
         }
+    }
+}
+
+impl SubExpression for Operation {
+    fn into_expression(self) -> Expression {
+        Expression::Operation(self)
     }
 }
 

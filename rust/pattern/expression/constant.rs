@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::pattern::Value;
+use crate::pattern::{Expression, SubExpression, Value};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constant {
@@ -32,6 +32,12 @@ pub struct Constant {
 impl<T: Into<Value>> From<T> for Constant {
     fn from(value: T) -> Self {
         Constant { value: value.into() }
+    }
+}
+
+impl SubExpression for Constant {
+    fn into_expression(self) -> Expression {
+        Expression::Constant(self)
     }
 }
 

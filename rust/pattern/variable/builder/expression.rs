@@ -21,9 +21,16 @@
  */
 
 use crate::{
-    common::token::{ArithmeticOperator as OperationToken, Function as FunctionToken},
-    pattern::expression::{Expression, Function, Operation},
+    common::token::ArithmeticOperator,
+    pattern::{
+        expression::{Expression, Operation},
+        Constant,
+    },
 };
+
+pub trait SubExpression {
+    fn into_expression(self) -> Expression;
+}
 
 pub trait ExpressionBuilder {
     fn add(self, right: impl Into<Expression>) -> Expression;
@@ -32,80 +39,56 @@ pub trait ExpressionBuilder {
     fn divide(self, right: impl Into<Expression>) -> Expression;
     fn modulo(self, right: impl Into<Expression>) -> Expression;
     fn power(self, right: impl Into<Expression>) -> Expression;
-    fn abs(arg: impl Into<Expression>) -> Expression;
-    fn ceil(arg: impl Into<Expression>) -> Expression;
-    fn floor(arg: impl Into<Expression>) -> Expression;
-    fn max<const N: usize>(args: [impl Into<Expression>; N]) -> Expression;
-    fn min<const N: usize>(args: [impl Into<Expression>; N]) -> Expression;
-    fn round(arg: impl Into<Expression>) -> Expression;
 }
 
-impl<T: Into<Expression>> ExpressionBuilder for T {
+impl ExpressionBuilder for Expression {
     fn add(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(OperationToken::Add, self, right))
+        Expression::Operation(Operation::new(ArithmeticOperator::Add, self, right))
     }
 
     fn subtract(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(OperationToken::Subtract, self, right))
+        Expression::Operation(Operation::new(ArithmeticOperator::Subtract, self, right))
     }
 
     fn multiply(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(OperationToken::Multiply, self, right))
+        Expression::Operation(Operation::new(ArithmeticOperator::Multiply, self, right))
     }
 
     fn divide(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(OperationToken::Divide, self, right))
+        Expression::Operation(Operation::new(ArithmeticOperator::Divide, self, right))
     }
 
     fn modulo(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(OperationToken::Modulo, self, right))
+        Expression::Operation(Operation::new(ArithmeticOperator::Modulo, self, right))
     }
 
     fn power(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(OperationToken::Power, self, right))
-    }
-
-    fn abs(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { function_name: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
-    }
-
-    fn ceil(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { function_name: FunctionToken::Ceil, args: vec![Box::from(arg.into())] })
-    }
-
-    fn floor(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { function_name: FunctionToken::Floor, args: vec![Box::from(arg.into())] })
-    }
-
-    fn max<const N: usize>(args: [impl Into<Expression>; N]) -> Expression {
-        Expression::Function(Function {
-            function_name: FunctionToken::Max,
-            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
-        })
-    }
-
-    fn min<const N: usize>(args: [impl Into<Expression>; N]) -> Expression {
-        Expression::Function(Function {
-            function_name: FunctionToken::Min,
-            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
-        })
-    }
-
-    fn round(arg: impl Into<Expression>) -> Expression {
-        Expression::Function(Function { function_name: FunctionToken::Round, args: vec![Box::from(arg.into())] })
+        Expression::Operation(Operation::new(ArithmeticOperator::Power, self, right))
     }
 }
 
-#[macro_export]
-macro_rules! max {
-    ($($args:expr),*) => {{
-        Expression::max([$($args, )*])
-    }}
-}
+impl<U: SubExpression> ExpressionBuilder for U {
+    fn add(self, right: impl Into<Expression>) -> Expression {
+        self.into_expression().add(right)
+    }
 
-#[macro_export]
-macro_rules! min {
-    ($($args:expr),*) => {{
-        Expression::min([$($args, )*])
-    }}
+    fn subtract(self, right: impl Into<Expression>) -> Expression {
+        self.into_expression().subtract(right)
+    }
+
+    fn multiply(self, right: impl Into<Expression>) -> Expression {
+        self.into_expression().multiply(right)
+    }
+
+    fn divide(self, right: impl Into<Expression>) -> Expression {
+        self.into_expression().divide(right)
+    }
+
+    fn modulo(self, right: impl Into<Expression>) -> Expression {
+        self.into_expression().modulo(right)
+    }
+
+    fn power(self, right: impl Into<Expression>) -> Expression {
+        self.into_expression().power(right)
+    }
 }

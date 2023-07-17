@@ -24,7 +24,7 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use crate::{
     and,
-    builder::{cvar, vvar},
+    builder::{constant, cvar, min, round, vvar},
     common::{
         token::{
             Order::{Asc, Desc},
@@ -32,10 +32,10 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
+    filter, gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
     parse_query, parse_variable,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Expression, ExpressionBuilder, Label,
+        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, ExpressionBuilder, Label,
         RelationVariableBuilder, ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Variable,
     },
     query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
@@ -69,7 +69,7 @@ $a type attribute_label;
 get $a;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("a").type_("attribute_label")).get([cvar("a").into()]);
+    let expected = typeql_match!(cvar("a").type_("attribute_label")).get(filter!(cvar("a")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -97,7 +97,7 @@ get $char, $prod;"#;
         cvar("brando").eq("Marl B").isa("name"),
         rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
     )
-    .get([cvar("char").into(), cvar("prod").into()]);
+    .get(filter!(cvar("char"), cvar("prod")));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -428,7 +428,7 @@ fn test_attribute_query_by_value_variable() {
 $a == ?x isa age;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(vvar("x").assign(Expression::Constant(5.into())), cvar("a").eq(vvar("x")).isa("age"),);
+    let expected = typeql_match!(vvar("x").assign(5), cvar("a").eq(vvar("x")).isa("age"),);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -457,7 +457,7 @@ $x isa commodity,
         cvar("x").isa("commodity").has(("price", cvar("p"))),
         rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
         vvar("net").assign(cvar("p").multiply(cvar("q"))),
-        vvar("gross").assign(vvar("net").multiply(1.0.add(0.21))),
+        vvar("gross").assign(vvar("net").multiply(constant(1.0).add(0.21))),
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -484,8 +484,9 @@ fn test_func_parenthesis_precedence() {
 ?res = $a + ( round($b + ?c) + $d ) * ?e;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(vvar("res")
-        .assign(cvar("a").add(Expression::round(cvar("b").add(vvar("c"))).add(cvar("d")).multiply(vvar("e")))));
+    let expected = typeql_match!(
+        vvar("res").assign(cvar("a").add(round(cvar("b").add(vvar("c"))).add(cvar("d")).multiply(vvar("e"))))
+    );
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -551,9 +552,9 @@ sort ?l desc;"#;
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
         cvar("x").isa("movie").has(("rating", cvar("r"))),
-        vvar("l").assign(Expression::Constant(100.into()).subtract(cvar("r")))
+        vvar("l").assign(constant(100).subtract(cvar("r")))
     )
-    .sort([(vvar("l").into(), Desc)]);
+    .sort([(vvar("l"), Desc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -565,7 +566,7 @@ $x plays starring:actor;
 sort $x asc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").plays(("starring", "actor"))).sort([(cvar("x").into(), Asc)]);
+    let expected = typeql_match!(cvar("x").plays(("starring", "actor"))).sort([(cvar("x"), Asc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -578,7 +579,7 @@ $x isa movie,
 sort $r desc;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort([(cvar("r").into(), Desc)]);
+    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort([(cvar("r"), Desc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -591,8 +592,7 @@ $x isa movie,
 sort $r; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected =
-        typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort(vec![cvar("r").into()]).limit(10);
+    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort(vec![cvar("r")]).limit(10);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -605,10 +605,8 @@ $x isa movie,
 sort $r desc; offset 10; limit 10;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r"))))
-        .sort([(cvar("r").into(), Desc)])
-        .offset(10)
-        .limit(10);
+    let expected =
+        typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort([(cvar("r"), Desc)]).offset(10).limit(10);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -738,7 +736,7 @@ get $x, $y;
 count;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
-    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get([cvar("x").into(), cvar("y").into()]).count();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get(filter!(cvar("x"), cvar("y"))).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -751,10 +749,8 @@ get $x, $y;
 group $x; count;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
-    let expected = typeql_match!(rel("x").rel("y").isa("friendship"))
-        .get([cvar("x").into(), cvar("y").into()])
-        .group(cvar("x"))
-        .count();
+    let expected =
+        typeql_match!(rel("x").rel("y").isa("friendship")).get(filter!(cvar("x"), cvar("y"))).group(cvar("x")).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -796,7 +792,7 @@ group $x; max $z;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = typeql_match!(rel("x").rel("y").isa("friendship"), cvar("y").has(("age", cvar("z"))))
-        .get([cvar("x").into(), cvar("y").into(), cvar("z").into()])
+        .get(filter!(cvar("x"), cvar("y"), cvar("z")))
         .group(cvar("x"))
         .max(cvar("z"));
 
@@ -819,7 +815,7 @@ group $x; sum ?t;"#;
         cvar("i").has(("value", cvar("v"))).has(("tax-rate", cvar("r"))),
         vvar("t").assign(cvar("r").multiply(cvar("v"))),
     )
-    .get([cvar("x").into(), vvar("t").into()])
+    .get(filter!(cvar("x"), vvar("t")))
     .group(cvar("x"))
     .sum(vvar("t"));
 
@@ -1433,7 +1429,7 @@ $x owns name @key;
 get $x;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").owns(("name", Key))).get([cvar("x").into()]);
+    let expected = typeql_match!(cvar("x").owns(("name", Key))).get(filter!(cvar("x")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 

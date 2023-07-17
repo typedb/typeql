@@ -298,15 +298,17 @@ impl Sorting {
     }
 }
 
-impl<const N: usize> From<[(UnboundVariable, token::Order); N]> for Sorting {
-    fn from(ordered_vars: [(UnboundVariable, token::Order); N]) -> Self {
-        Self::new(ordered_vars.map(|(name, order)| sorting::OrderedVariable::new(var(name), Some(order))).to_vec())
+impl<const N: usize, T: Into<UnboundVariable>> From<[(T, token::Order); N]> for Sorting {
+    fn from(ordered_vars: [(T, token::Order); N]) -> Self {
+        Self::new(
+            ordered_vars.map(|(name, order)| sorting::OrderedVariable::new(var(name.into()), Some(order))).to_vec(),
+        )
     }
 }
 
-impl From<Vec<UnboundVariable>> for Sorting {
-    fn from(vars: Vec<UnboundVariable>) -> Self {
-        Self::new(vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name), None)).collect())
+impl<T: Into<UnboundVariable>> From<Vec<T>> for Sorting {
+    fn from(vars: Vec<T>) -> Self {
+        Self::new(vars.into_iter().map(|name| sorting::OrderedVariable::new(var(name.into()), None)).collect())
     }
 }
 

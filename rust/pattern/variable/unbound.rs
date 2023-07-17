@@ -24,7 +24,7 @@ use std::{fmt, fmt::Formatter};
 
 use crate::{
     common::{validatable::Validatable, Result},
-    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable},
+    pattern::{Expression, Reference, SubExpression, UnboundConceptVariable, UnboundValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -67,6 +67,12 @@ impl From<UnboundConceptVariable> for UnboundVariable {
 impl From<UnboundValueVariable> for UnboundVariable {
     fn from(value: UnboundValueVariable) -> Self {
         UnboundVariable::Value(value)
+    }
+}
+
+impl<T: Into<UnboundVariable>> SubExpression for T {
+    fn into_expression(self) -> Expression {
+        Expression::Variable(self.into())
     }
 }
 

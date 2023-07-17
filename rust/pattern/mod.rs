@@ -48,9 +48,10 @@ pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub use variable::{
     ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, ExpressionBuilder, Reference,
-    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder,
-    TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
-    UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder, Variable, Visibility,
+    RelationConstrainable, RelationVariableBuilder, SubExpression, ThingConstrainable, ThingVariable,
+    ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
+    UnboundValueVariable, UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder,
+    Variable, Visibility,
 };
 
 use crate::{

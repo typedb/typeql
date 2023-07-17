@@ -23,7 +23,10 @@
 use std::fmt;
 
 use super::Expression;
-use crate::{common::token::Function as FunctionToken, pattern::Reference};
+use crate::{
+    common::token::Function as FunctionToken,
+    pattern::{Reference, SubExpression},
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Function {
@@ -34,6 +37,12 @@ pub struct Function {
 impl Function {
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(self.args.iter().flat_map(|expr| expr.references_recursive()))
+    }
+}
+
+impl SubExpression for Function {
+    fn into_expression(self) -> Expression {
+        Expression::Function(self)
     }
 }
 

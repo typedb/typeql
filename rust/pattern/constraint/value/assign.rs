@@ -24,7 +24,7 @@ use std::fmt;
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{Expression, Reference},
+    pattern::{Constant, Expression, Reference},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -47,6 +47,12 @@ impl Validatable for AssignConstraint {
 impl From<Expression> for AssignConstraint {
     fn from(expr: Expression) -> Self {
         Self { expression: expr }
+    }
+}
+
+impl<T: Into<Constant>> From<T> for AssignConstraint {
+    fn from(expr: T) -> Self {
+        Self { expression: Expression::Constant(expr.into()) }
     }
 }
 
