@@ -20,8 +20,6 @@
  *
  */
 
-#![recursion_limit = "256"]
-
 use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
 use typeql_lang::{parse_query, query::Query};
 
@@ -61,92 +59,94 @@ macro_rules! generic_step_impl {
 }
 
 generic_step_impl! {
-#[step("reasoning schema")]
-#[step("typeql define")]
-async fn typeql_define(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(step);
-    assert_eq!(parsed, reparse_query(&parsed));
-}
+    #[step("reasoning schema")]
+    #[step("typeql define")]
+    async fn typeql_define(_: &mut TypeQLWorld, step: &Step) {
+        let parsed = parse_query_in_step(step);
+        assert_eq!(parsed, reparse_query(&parsed));
+    }
 
-#[step("typeql undefine")]
-async fn typeql_undefine(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(step);
-    assert_eq!(parsed, reparse_query(&parsed));
-}
+    #[step("typeql undefine")]
+    async fn typeql_undefine(_: &mut TypeQLWorld, step: &Step) {
+        let parsed = parse_query_in_step(step);
+        assert_eq!(parsed, reparse_query(&parsed));
+    }
 
-#[step("get answers of typeql insert")]
-#[step("reasoning data")]
-#[step("typeql insert")]
-async fn typeql_insert(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(step);
-    assert_eq!(parsed, reparse_query(&parsed));
-}
+    #[step("get answers of typeql insert")]
+    #[step("reasoning data")]
+    #[step("typeql insert")]
+    async fn typeql_insert(_: &mut TypeQLWorld, step: &Step) {
+        let parsed = parse_query_in_step(step);
+        assert_eq!(parsed, reparse_query(&parsed));
+    }
 
-#[step("typeql delete")]
-async fn typeql_delete(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(step);
-    assert_eq!(parsed, reparse_query(&parsed));
-}
+    #[step("typeql delete")]
+    async fn typeql_delete(_: &mut TypeQLWorld, step: &Step) {
+        let parsed = parse_query_in_step(step);
+        assert_eq!(parsed, reparse_query(&parsed));
+    }
 
-#[step("typeql update")]
-async fn typeql_update(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(step);
-    assert_eq!(parsed, reparse_query(&parsed));
-}
+    #[step("typeql update")]
+    async fn typeql_update(_: &mut TypeQLWorld, step: &Step) {
+        let parsed = parse_query_in_step(step);
+        assert_eq!(parsed, reparse_query(&parsed));
+    }
 
-#[step("get answer of typeql match aggregate")]
-#[step("get answers of typeql match group aggregate")]
-#[step("get answers of typeql match group")]
-#[step("get answers of typeql match")]
-#[step("reasoning query")]
-#[step("verify answer set is equivalent for query")]
-async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
-    let parsed = parse_query_in_step(step);
-    assert_eq!(parsed, reparse_query(&parsed));
-}
+    #[step("get answer of typeql match aggregate")]
+    #[step("get answers of typeql match group aggregate")]
+    #[step("get answers of typeql match group")]
+    #[step("get answers of typeql match")]
+    #[step("reasoning query")]
+    #[step("verify answer set is equivalent for query")]
+    async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
+        let parsed = parse_query_in_step(step);
+        assert_eq!(parsed, reparse_query(&parsed));
+    }
 
-#[step("aggregate answer is not a number")]
-#[step("answer groups are")]
-#[step("answers contain explanation tree")]
-#[step("concept identifiers are")]
-#[step("connection close all sessions")]
-#[step("connection does not have any database")]
-#[step("connection opens with default authentication")]
-#[step("connection has been opened")]
-#[step("each answer satisfies")]
-#[step("group aggregate values are")]
-#[step("order of answer concepts is")]
-#[step("rules are")]
-#[step("session opens transaction of type: read")]
-#[step("session opens transaction of type: write")]
-#[step("session transaction closes")]
-#[step("session transaction is open: false")]
-#[step("templated typeql match; throws exception")]
-#[step("transaction commits")]
-#[step("transaction commits; throws exception")]
-#[step("transaction is initialised")]
-#[step("typeql define; throws exception")]
-#[step("typeql delete; throws exception")]
-#[step("typeql insert; throws exception")]
-#[step("typeql match aggregate; throws exception")]
-#[step("typeql match group; throws exception")]
-#[step("typedb starts")]
-#[step("typeql match; throws exception")]
-#[step("typeql undefine; throws exception")]
-#[step("typeql update; throws exception")]
-#[step("uniquely identify answer concepts")]
-#[step("verifier is initialised")]
-#[step("verify answers are complete")]
-#[step("verify answers are sound")]
-#[step(regex = "connection create database: .*")]
-#[step(regex = r"^aggregate value is: .*$")]
-#[step(regex = r"^answer size is: .*$")]
-#[step(regex = r"^connection open data session for database: .*$")]
-#[step(regex = r"^connection open schema session for database: .*$")]
-#[step(regex = r"^rules contain: .*$")]
-#[step(regex = r"^rules do not contain: .*$")]
-#[step(regex = r"^typeql match; throws exception containing .*$")]
-#[step(regex = r"^verify answer size is: .*$")]
-#[step(regex = r"^verify answers are consistent across .* executions$")]
-async fn do_nothing(_: &mut TypeQLWorld) {}
+    #[step("aggregate answer is not a number")]
+    #[step("answer groups are")]
+    #[step("answers contain explanation tree")]
+    #[step("concept identifiers are")]
+    #[step("connection close all sessions")]
+    #[step("connection does not have any database")]
+    #[step("connection opens with default authentication")]
+    #[step("connection has been opened")]
+    #[step("each answer satisfies")]
+    #[step("group aggregate values are")]
+    #[step("order of answer concepts is")]
+    #[step("rules are")]
+    #[step("session opens transaction of type: read")]
+    #[step("session opens transaction of type: write")]
+    #[step("session transaction closes")]
+    #[step("session transaction is open: false")]
+    #[step("templated typeql match; throws exception")]
+    #[step("transaction commits")]
+    #[step("transaction commits; throws exception")]
+    #[step("transaction is initialised")]
+    #[step("typedb starts")]
+    #[step("uniquely identify answer concepts")]
+    #[step("verifier is initialised")]
+    #[step("verify answers are complete")]
+    #[step("verify answers are sound")]
+    #[step(regex = "connection create database: .*")]
+    #[step(regex = r"^aggregate value is: .*$")]
+    #[step(regex = r"^answer size is: .*$")]
+    #[step(regex = r"^connection open data session for database: .*$")]
+    #[step(regex = r"^connection open schema session for database: .*$")]
+    #[step(regex = r"^rules contain: .*$")]
+    #[step(regex = r"^rules do not contain: .*$")]
+    #[step(regex = r"^verify answer size is: .*$")]
+    #[step(regex = r"^verify answers are consistent across .* executions$")]
+    async fn do_nothing_no_connection(_: &mut TypeQLWorld) {}
+
+    #[step("typeql define; throws exception")]
+    #[step("typeql delete; throws exception")]
+    #[step("typeql insert; throws exception")]
+    #[step("typeql match aggregate; throws exception")]
+    #[step("typeql match group; throws exception")]
+    #[step("typeql match; throws exception")]
+    #[step("typeql undefine; throws exception")]
+    #[step("typeql update; throws exception")]
+    #[step(regex = r"^typeql match; throws exception containing .*$")]
+    async fn do_nothing_unknown_exception(_: &mut TypeQLWorld) {}
 }
