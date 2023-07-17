@@ -22,9 +22,8 @@
 
 use crate::{
     common::token::{Function as FunctionToken, Operation as OperationToken},
-    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable},
+    pattern::expression::{Expression, Function, Operation},
 };
-use crate::pattern::expression::{Expression, Function, Operation};
 
 pub trait ExpressionBuilder {
     fn add(self, right: impl Into<Expression>) -> Expression;

@@ -33,8 +33,9 @@ mod value;
 use std::{collections::HashSet, fmt};
 
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, ExpressionBuilder, RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder,
-    TypeConstrainable, TypeVariableBuilder, ValueConstrainable, ValueVariableBuilder,
+    ConceptConstrainable, ConceptVariableBuilder, ExpressionBuilder, RelationConstrainable, RelationVariableBuilder,
+    ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder, ValueConstrainable,
+    ValueVariableBuilder,
 };
 pub use concept::ConceptVariable;
 pub use reference::{ConceptReference, Reference, ValueReference, Visibility};

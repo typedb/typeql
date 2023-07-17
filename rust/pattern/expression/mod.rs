@@ -23,7 +23,6 @@
 mod constant;
 mod function;
 mod operation;
-mod parenthesis;
 
 use std::{fmt, iter};
 
@@ -31,19 +30,14 @@ use chrono::NaiveDateTime;
 pub use constant::Constant;
 pub use function::Function;
 pub use operation::Operation;
-pub use parenthesis::Parenthesis;
 
-use crate::{
-    common::token::{Function as FunctionToken, Operation as OperationToken},
-    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable},
-};
+use crate::pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
     Operation(Operation),
     Function(Function),
     Constant(Constant),
-    Parenthesis(Parenthesis),
     Variable(UnboundVariable),
 }
 
@@ -53,7 +47,6 @@ impl fmt::Display for Expression {
             Expression::Operation(operation) => write!(f, "{operation}"),
             Expression::Function(function) => write!(f, "{function}"),
             Expression::Constant(constant) => write!(f, "{constant}"),
-            Expression::Parenthesis(parenthesis) => write!(f, "{parenthesis}"),
             Expression::Variable(variable) => write!(f, "{variable}"),
         }
     }
@@ -65,7 +58,6 @@ impl Expression {
             Expression::Operation(operation) => operation.references_recursive(),
             Expression::Function(function) => function.references_recursive(),
             Expression::Constant(_constant) => Box::new(iter::empty()),
-            Expression::Parenthesis(parenthesis) => parenthesis.references_recursive(),
             Expression::Variable(variable) => variable.references(),
         }
     }
