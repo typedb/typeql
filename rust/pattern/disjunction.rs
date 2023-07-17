@@ -102,7 +102,7 @@ impl fmt::Display for Disjunction {
                     other => format!("{{\n{};\n}}", indent(&other.to_string())),
                 })
                 .collect::<Vec<_>>()
-                .join(&format!(" {} ", token::Operator::Or)),
+                .join(&format!(" {} ", token::LogicOperator::Or)),
         )
     }
 }

@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token::{Function as FunctionToken, Operation as OperationToken},
+    common::token::{ArithmeticOperator as OperationToken, Function as FunctionToken},
     pattern::expression::{Expression, Function, Operation},
 };
 

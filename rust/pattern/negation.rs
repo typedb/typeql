@@ -88,11 +88,11 @@ impl fmt::Display for Negation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let pattern_string = self.pattern.to_string();
         if matches!(*self.pattern, Pattern::Conjunction(_)) {
-            write!(f, "{} {}", token::Operator::Not, pattern_string)
+            write!(f, "{} {}", token::LogicOperator::Not, pattern_string)
         } else if pattern_string.lines().count() > 1 {
-            write!(f, "{} {{\n{};\n}}", token::Operator::Not, indent(&pattern_string))
+            write!(f, "{} {{\n{};\n}}", token::LogicOperator::Not, indent(&pattern_string))
         } else {
-            write!(f, "{} {{ {}; }}", token::Operator::Not, pattern_string)
+            write!(f, "{} {{ {}; }}", token::LogicOperator::Not, pattern_string)
         }
     }
 }

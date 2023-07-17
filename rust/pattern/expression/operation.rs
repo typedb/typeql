@@ -23,7 +23,7 @@
 use std::fmt;
 
 use super::Expression;
-use crate::{common::token::Operation as OperationToken, pattern::Reference};
+use crate::{common::token::ArithmeticOperator as OperationToken, pattern::Reference};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Operation {

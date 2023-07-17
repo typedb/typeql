@@ -80,7 +80,7 @@ string_enum! { Filter
     Limit = "limit",
 }
 
-string_enum! { Operator
+string_enum! { LogicOperator
     And = "and",
     Or = "or",
     Not = "not",
@@ -165,7 +165,7 @@ string_enum! { Order
     Desc = "desc",
 }
 
-string_enum! { Operation
+string_enum! { ArithmeticOperator
     Add = "+",
     Subtract = "-",
     Multiply = "*",

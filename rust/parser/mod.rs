@@ -701,12 +701,12 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
         })
         .map_infix(|left, op, right| {
             let op = match op.as_rule() {
-                Rule::ADD => token::Operation::Add,
-                Rule::SUBTRACT => token::Operation::Subtract,
-                Rule::MULTIPLY => token::Operation::Multiply,
-                Rule::DIVIDE => token::Operation::Divide,
-                Rule::MODULO => token::Operation::Modulo,
-                Rule::POWER => token::Operation::Power,
+                Rule::ADD => token::ArithmeticOperator::Add,
+                Rule::SUBTRACT => token::ArithmeticOperator::Subtract,
+                Rule::MULTIPLY => token::ArithmeticOperator::Multiply,
+                Rule::DIVIDE => token::ArithmeticOperator::Divide,
+                Rule::MODULO => token::ArithmeticOperator::Modulo,
+                Rule::POWER => token::ArithmeticOperator::Power,
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar(op.to_string())),
             };
             Expression::Operation(Operation::new(op, left, right))
