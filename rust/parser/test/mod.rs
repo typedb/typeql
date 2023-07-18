@@ -24,9 +24,10 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use crate::{
     and,
-    builder::{constant, cvar, min, round, vvar},
+    builder::{constant, cvar, round, vvar},
     common::{
         token::{
+            self,
             Order::{Asc, Desc},
             ValueType,
         },
@@ -35,9 +36,9 @@ use crate::{
     filter, gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
     parse_query, parse_variable,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, ExpressionBuilder, Label,
-        RelationVariableBuilder, ThingVariableBuilder, TypeVariableBuilder, UnboundVariable, ValueVariableBuilder,
-        Variable,
+        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Expression, ExpressionBuilder, Function,
+        Label, RelationVariableBuilder, ThingVariableBuilder, TypeVariableBuilder, UnboundVariable,
+        ValueVariableBuilder, Variable,
     },
     query::{
         sorting::OrderedVariable, AggregateQueryBuilder, Sorting, TypeQLDefine, TypeQLInsert, TypeQLMatch,

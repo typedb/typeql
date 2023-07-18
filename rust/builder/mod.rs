@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token::{Function as FunctionToken, Predicate},
+    common::token::{self, Predicate},
     pattern::{
         Constant, Expression, Function, Negation, PredicateConstraint, RelationVariableBuilder, RolePlayerConstraint,
         RuleDeclaration, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
@@ -78,15 +78,23 @@ macro_rules! or {
 
 #[macro_export]
 macro_rules! max {
-    ($($args:expr),* $(,)?) => {{
-        max([$($args, )*])
+    ($($arg:expr),* $(,)?) => {{
+            let args = [$($arg, )*];
+            Expression::Function(Function {
+            function_name: token::Function::Max,
+            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+        })
     }}
 }
 
 #[macro_export]
 macro_rules! min {
-    ($($args:expr),* $(,)?) => {{
-        min([$($args, )*])
+    ($($arg:expr),* $(,)?) => {{
+            let args = [$($arg, )*];
+            Expression::Function(Function {
+            function_name: token::Function::Min,
+            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+        })
     }}
 }
 
@@ -169,31 +177,17 @@ pub fn like<T: Into<String>>(value: T) -> PredicateConstraint {
 }
 
 pub fn abs<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: FunctionToken::Abs, args: vec![Box::from(arg.into())] })
+    Expression::Function(Function { function_name: token::Function::Abs, args: vec![Box::from(arg.into())] })
 }
 
 pub fn ceil<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: FunctionToken::Ceil, args: vec![Box::from(arg.into())] })
+    Expression::Function(Function { function_name: token::Function::Ceil, args: vec![Box::from(arg.into())] })
 }
 
 pub fn floor<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: FunctionToken::Floor, args: vec![Box::from(arg.into())] })
-}
-
-pub fn max<const N: usize, T: Into<Expression>>(args: [T; N]) -> Expression {
-    Expression::Function(Function {
-        function_name: FunctionToken::Max,
-        args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
-    })
-}
-
-pub fn min<const N: usize, T: Into<Expression>>(args: [T; N]) -> Expression {
-    Expression::Function(Function {
-        function_name: FunctionToken::Min,
-        args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
-    })
+    Expression::Function(Function { function_name: token::Function::Floor, args: vec![Box::from(arg.into())] })
 }
 
 pub fn round<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: FunctionToken::Round, args: vec![Box::from(arg.into())] })
+    Expression::Function(Function { function_name: token::Function::Round, args: vec![Box::from(arg.into())] })
 }

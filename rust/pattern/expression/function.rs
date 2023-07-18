@@ -24,14 +24,14 @@ use std::fmt;
 
 use super::Expression;
 use crate::{
-    common::token::Function as FunctionToken,
+    common::token,
     pattern::{Reference, SubExpression},
     write_joined,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Function {
-    pub(crate) function_name: FunctionToken,
+    pub(crate) function_name: token::Function,
     pub(crate) args: Vec<Box<Expression>>,
 }
 
