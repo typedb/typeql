@@ -30,7 +30,6 @@ use chrono::NaiveDateTime;
 pub use constant::Constant;
 pub use function::Function;
 pub use operation::Operation;
-use pest::pratt_parser::Op;
 
 use crate::pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable};
 

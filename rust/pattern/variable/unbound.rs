@@ -24,7 +24,7 @@ use std::{fmt, fmt::Formatter};
 
 use crate::{
     common::{validatable::Validatable, Result},
-    pattern::{Expression, Reference, SubExpression, UnboundConceptVariable, UnboundValueVariable},
+    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]

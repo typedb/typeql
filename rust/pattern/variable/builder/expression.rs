@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token::ArithmeticOperator,
+    common::token,
     pattern::expression::{Expression, Operation},
 };
 
@@ -38,27 +38,27 @@ pub trait ExpressionBuilder {
 
 impl ExpressionBuilder for Expression {
     fn add(self, right: impl Into<Expression>) -> Operation {
-        Operation::new(ArithmeticOperator::Add, self, right)
+        Operation::new(token::ArithmeticOperator::Add, self, right)
     }
 
     fn subtract(self, right: impl Into<Expression>) -> Operation {
-        Operation::new(ArithmeticOperator::Subtract, self, right)
+        Operation::new(token::ArithmeticOperator::Subtract, self, right)
     }
 
     fn multiply(self, right: impl Into<Expression>) -> Operation {
-        Operation::new(ArithmeticOperator::Multiply, self, right)
+        Operation::new(token::ArithmeticOperator::Multiply, self, right)
     }
 
     fn divide(self, right: impl Into<Expression>) -> Operation {
-        Operation::new(ArithmeticOperator::Divide, self, right)
+        Operation::new(token::ArithmeticOperator::Divide, self, right)
     }
 
     fn modulo(self, right: impl Into<Expression>) -> Operation {
-        Operation::new(ArithmeticOperator::Modulo, self, right)
+        Operation::new(token::ArithmeticOperator::Modulo, self, right)
     }
 
     fn power(self, right: impl Into<Expression>) -> Operation {
-        Operation::new(ArithmeticOperator::Power, self, right)
+        Operation::new(token::ArithmeticOperator::Power, self, right)
     }
 }
 

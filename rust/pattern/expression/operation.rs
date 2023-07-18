@@ -24,7 +24,7 @@ use std::{cmp::Ordering, fmt};
 
 use super::Expression;
 use crate::{
-    common::token::ArithmeticOperator,
+    common::token,
     pattern::{Reference, SubExpression},
 };
 
@@ -39,16 +39,16 @@ pub enum Operation {
 }
 
 impl Operation {
-    pub fn new(op: ArithmeticOperator, left: impl Into<Expression>, right: impl Into<Expression>) -> Self {
+    pub fn new(op: token::ArithmeticOperator, left: impl Into<Expression>, right: impl Into<Expression>) -> Self {
         let left = Box::new(left.into());
         let right = Box::new(right.into());
         match op {
-            ArithmeticOperator::Add => Operation::Addition { left, right },
-            ArithmeticOperator::Subtract => Operation::Subtraction { left, right },
-            ArithmeticOperator::Multiply => Operation::Multiplication { left, right },
-            ArithmeticOperator::Divide => Operation::Division { left, right },
-            ArithmeticOperator::Modulo => Operation::Modulo { left, right },
-            ArithmeticOperator::Power => Operation::Power { left, right },
+            token::ArithmeticOperator::Add => Operation::Addition { left, right },
+            token::ArithmeticOperator::Subtract => Operation::Subtraction { left, right },
+            token::ArithmeticOperator::Multiply => Operation::Multiplication { left, right },
+            token::ArithmeticOperator::Divide => Operation::Division { left, right },
+            token::ArithmeticOperator::Modulo => Operation::Modulo { left, right },
+            token::ArithmeticOperator::Power => Operation::Power { left, right },
         }
     }
 
@@ -74,14 +74,14 @@ impl Operation {
         }
     }
 
-    fn op_token(&self) -> ArithmeticOperator {
+    fn op_token(&self) -> token::ArithmeticOperator {
         match self {
-            Operation::Addition { .. } => ArithmeticOperator::Add,
-            Operation::Subtraction { .. } => ArithmeticOperator::Subtract,
-            Operation::Multiplication { .. } => ArithmeticOperator::Multiply,
-            Operation::Division { .. } => ArithmeticOperator::Divide,
-            Operation::Modulo { .. } => ArithmeticOperator::Modulo,
-            Operation::Power { .. } => ArithmeticOperator::Power,
+            Operation::Addition { .. } => token::ArithmeticOperator::Add,
+            Operation::Subtraction { .. } => token::ArithmeticOperator::Subtract,
+            Operation::Multiplication { .. } => token::ArithmeticOperator::Multiply,
+            Operation::Division { .. } => token::ArithmeticOperator::Divide,
+            Operation::Modulo { .. } => token::ArithmeticOperator::Modulo,
+            Operation::Power { .. } => token::ArithmeticOperator::Power,
         }
     }
 

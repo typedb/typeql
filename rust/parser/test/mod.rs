@@ -102,7 +102,7 @@ get $char, $prod;"#;
         cvar("brando").eq("Marl B").isa("name"),
         rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
     )
-    .get(filter!(cvar("char"), cvar("prod")));
+    .get([cvar("char"), cvar("prod")]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -760,7 +760,7 @@ get $x, $y;
 count;"#;
 
     let parsed = parse_query(query).unwrap().into_aggregate();
-    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get(filter!(cvar("x"), cvar("y"))).count();
+    let expected = typeql_match!(rel("x").rel("y").isa("friendship")).get([cvar("x"), cvar("y")]).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -774,7 +774,7 @@ group $x; count;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected =
-        typeql_match!(rel("x").rel("y").isa("friendship")).get(filter!(cvar("x"), cvar("y"))).group(cvar("x")).count();
+        typeql_match!(rel("x").rel("y").isa("friendship")).get([cvar("x"), cvar("y")]).group(cvar("x")).count();
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -816,7 +816,7 @@ group $x; max $z;"#;
 
     let parsed = parse_query(query).unwrap().into_group_aggregate();
     let expected = typeql_match!(rel("x").rel("y").isa("friendship"), cvar("y").has(("age", cvar("z"))))
-        .get(filter!(cvar("x"), cvar("y"), cvar("z")))
+        .get([cvar("x"), cvar("y"), cvar("z")])
         .group(cvar("x"))
         .max(cvar("z"));
 

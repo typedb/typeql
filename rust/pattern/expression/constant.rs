@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::pattern::{Expression, SubExpression, Value};
+use crate::pattern::{SubExpression, Value};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constant {

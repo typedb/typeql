@@ -21,7 +21,7 @@
  */
 
 use crate::{
-    common::token::ValueType,
+    common::token,
     pattern::{
         LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, SubConstraint,
         TypeVariable, ValueTypeConstraint,
@@ -48,7 +48,7 @@ pub trait TypeVariableBuilder: Sized {
     fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeVariable;
     fn sub(self, sub: impl Into<SubConstraint>) -> TypeVariable;
     fn type_(self, type_name: impl Into<Label>) -> TypeVariable;
-    fn value(self, value_type: ValueType) -> TypeVariable;
+    fn value(self, value_type: token::ValueType) -> TypeVariable;
 }
 
 impl<U: TypeConstrainable> TypeVariableBuilder for U {
@@ -80,7 +80,7 @@ impl<U: TypeConstrainable> TypeVariableBuilder for U {
         self.constrain_label(LabelConstraint { label: type_name.into() })
     }
 
-    fn value(self, value_type: ValueType) -> TypeVariable {
+    fn value(self, value_type: token::ValueType) -> TypeVariable {
         self.constrain_value_type(ValueTypeConstraint { value_type })
     }
 }

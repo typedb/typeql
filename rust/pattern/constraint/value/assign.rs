@@ -24,7 +24,7 @@ use std::fmt;
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{Constant, Expression, Reference},
+    pattern::{Expression, Reference},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

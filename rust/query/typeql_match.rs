@@ -182,10 +182,9 @@ fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result<()> {
     let value_names = value_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
     let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
     if !common_refs.is_empty() {
-        Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into())
-    } else {
-        Ok(())
+        return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());
     }
+    Ok(())
 }
 
 impl fmt::Display for TypeQLMatch {
