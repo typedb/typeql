@@ -135,6 +135,7 @@ generic_step_impl! {
     #[step(regex = r"^connection open schema session for database: .*$")]
     #[step(regex = r"^rules contain: .*$")]
     #[step(regex = r"^rules do not contain: .*$")]
+    #[step(regex = r"^set time-zone is: .*$")]
     #[step(regex = r"^verify answer size is: .*$")]
     #[step(regex = r"^verify answers are consistent across .* executions$")]
     async fn do_nothing_no_connection(_: &mut TypeQLWorld) {}
