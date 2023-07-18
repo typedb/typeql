@@ -35,11 +35,7 @@ impl<T: Into<Value>> From<T> for Constant {
     }
 }
 
-impl SubExpression for Constant {
-    fn into_expression(self) -> Expression {
-        Expression::Constant(self)
-    }
-}
+impl SubExpression for Constant {}
 
 impl fmt::Display for Constant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

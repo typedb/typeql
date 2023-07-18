@@ -30,6 +30,7 @@ use chrono::NaiveDateTime;
 pub use constant::Constant;
 pub use function::Function;
 pub use operation::Operation;
+use pest::pratt_parser::Op;
 
 use crate::pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable};
 
@@ -60,6 +61,24 @@ impl Expression {
             Expression::Constant(_constant) => Box::new(iter::empty()),
             Expression::Variable(variable) => variable.references(),
         }
+    }
+}
+
+impl From<Operation> for Expression {
+    fn from(operation: Operation) -> Self {
+        Self::Operation(operation)
+    }
+}
+
+impl From<Function> for Expression {
+    fn from(function: Function) -> Self {
+        Self::Function(function)
+    }
+}
+
+impl From<Constant> for Expression {
+    fn from(constant: Constant) -> Self {
+        Self::Constant(constant)
     }
 }
 

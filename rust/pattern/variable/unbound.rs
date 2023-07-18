@@ -70,12 +70,6 @@ impl From<UnboundValueVariable> for UnboundVariable {
     }
 }
 
-impl<T: Into<UnboundVariable>> SubExpression for T {
-    fn into_expression(self) -> Expression {
-        Expression::Variable(self.into())
-    }
-}
-
 impl fmt::Display for UnboundVariable {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {

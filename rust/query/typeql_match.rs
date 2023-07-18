@@ -33,7 +33,7 @@ use crate::{
     },
     pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
-    var, write_joined,
+    write_joined,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]

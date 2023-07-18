@@ -118,11 +118,7 @@ impl Operation {
     }
 }
 
-impl SubExpression for Operation {
-    fn into_expression(self) -> Expression {
-        Expression::Operation(self)
-    }
-}
+impl SubExpression for Operation {}
 
 impl fmt::Display for Operation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

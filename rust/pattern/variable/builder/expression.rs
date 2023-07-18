@@ -25,67 +25,65 @@ use crate::{
     pattern::expression::{Expression, Operation},
 };
 
-pub trait SubExpression {
-    fn into_expression(self) -> Expression;
-}
+pub trait SubExpression: Into<Expression> {}
 
 pub trait ExpressionBuilder {
-    fn add(self, right: impl Into<Expression>) -> Expression;
-    fn subtract(self, right: impl Into<Expression>) -> Expression;
-    fn multiply(self, right: impl Into<Expression>) -> Expression;
-    fn divide(self, right: impl Into<Expression>) -> Expression;
-    fn modulo(self, right: impl Into<Expression>) -> Expression;
-    fn power(self, right: impl Into<Expression>) -> Expression;
+    fn add(self, right: impl Into<Expression>) -> Operation;
+    fn subtract(self, right: impl Into<Expression>) -> Operation;
+    fn multiply(self, right: impl Into<Expression>) -> Operation;
+    fn divide(self, right: impl Into<Expression>) -> Operation;
+    fn modulo(self, right: impl Into<Expression>) -> Operation;
+    fn power(self, right: impl Into<Expression>) -> Operation;
 }
 
 impl ExpressionBuilder for Expression {
-    fn add(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(ArithmeticOperator::Add, self, right))
+    fn add(self, right: impl Into<Expression>) -> Operation {
+        Operation::new(ArithmeticOperator::Add, self, right)
     }
 
-    fn subtract(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(ArithmeticOperator::Subtract, self, right))
+    fn subtract(self, right: impl Into<Expression>) -> Operation {
+        Operation::new(ArithmeticOperator::Subtract, self, right)
     }
 
-    fn multiply(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(ArithmeticOperator::Multiply, self, right))
+    fn multiply(self, right: impl Into<Expression>) -> Operation {
+        Operation::new(ArithmeticOperator::Multiply, self, right)
     }
 
-    fn divide(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(ArithmeticOperator::Divide, self, right))
+    fn divide(self, right: impl Into<Expression>) -> Operation {
+        Operation::new(ArithmeticOperator::Divide, self, right)
     }
 
-    fn modulo(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(ArithmeticOperator::Modulo, self, right))
+    fn modulo(self, right: impl Into<Expression>) -> Operation {
+        Operation::new(ArithmeticOperator::Modulo, self, right)
     }
 
-    fn power(self, right: impl Into<Expression>) -> Expression {
-        Expression::Operation(Operation::new(ArithmeticOperator::Power, self, right))
+    fn power(self, right: impl Into<Expression>) -> Operation {
+        Operation::new(ArithmeticOperator::Power, self, right)
     }
 }
 
 impl<U: SubExpression> ExpressionBuilder for U {
-    fn add(self, right: impl Into<Expression>) -> Expression {
-        self.into_expression().add(right)
+    fn add(self, right: impl Into<Expression>) -> Operation {
+        self.into().add(right)
     }
 
-    fn subtract(self, right: impl Into<Expression>) -> Expression {
-        self.into_expression().subtract(right)
+    fn subtract(self, right: impl Into<Expression>) -> Operation {
+        self.into().subtract(right)
     }
 
-    fn multiply(self, right: impl Into<Expression>) -> Expression {
-        self.into_expression().multiply(right)
+    fn multiply(self, right: impl Into<Expression>) -> Operation {
+        self.into().multiply(right)
     }
 
-    fn divide(self, right: impl Into<Expression>) -> Expression {
-        self.into_expression().divide(right)
+    fn divide(self, right: impl Into<Expression>) -> Operation {
+        self.into().divide(right)
     }
 
-    fn modulo(self, right: impl Into<Expression>) -> Expression {
-        self.into_expression().modulo(right)
+    fn modulo(self, right: impl Into<Expression>) -> Operation {
+        self.into().modulo(right)
     }
 
-    fn power(self, right: impl Into<Expression>) -> Expression {
-        self.into_expression().power(right)
+    fn power(self, right: impl Into<Expression>) -> Operation {
+        self.into().power(right)
     }
 }

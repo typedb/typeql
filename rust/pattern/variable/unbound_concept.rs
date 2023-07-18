@@ -28,8 +28,8 @@ use crate::{
         ConceptConstrainable, ConceptReference, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
         IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference,
         RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
-        SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint,
-        Visibility,
+        SubConstraint, SubExpression, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable,
+        ValueTypeConstraint, Visibility,
     },
 };
 
@@ -159,6 +159,8 @@ impl From<String> for UnboundConceptVariable {
         UnboundConceptVariable::named(name)
     }
 }
+
+impl SubExpression for UnboundConceptVariable {}
 
 impl fmt::Display for UnboundConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

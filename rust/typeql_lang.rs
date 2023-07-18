@@ -29,7 +29,7 @@ pub mod query;
 #[macro_use]
 mod util;
 
-pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_, var};
+pub use builder::{contains, eq, gt, gte, like, lt, lte, neq, not, rel, rule, type_};
 use common::Result;
 use parser::{
     visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,

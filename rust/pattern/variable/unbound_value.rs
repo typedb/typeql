@@ -25,7 +25,8 @@ use std::{fmt, iter};
 use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
-        variable::ValueConstrainable, AssignConstraint, PredicateConstraint, Reference, ValueReference, ValueVariable,
+        variable::ValueConstrainable, AssignConstraint, PredicateConstraint, Reference, SubExpression, ValueReference,
+        ValueVariable,
     },
 };
 
@@ -75,6 +76,8 @@ impl From<String> for UnboundValueVariable {
         UnboundValueVariable::named(name)
     }
 }
+
+impl SubExpression for UnboundValueVariable {}
 
 impl fmt::Display for UnboundValueVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

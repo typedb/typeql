@@ -120,10 +120,6 @@ pub fn rule(name: &str) -> RuleDeclaration {
     RuleDeclaration::from(name)
 }
 
-pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
-    var.into()
-}
-
 pub fn cvar(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
     var.into()
 }
@@ -132,8 +128,8 @@ pub fn vvar(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
     var.into()
 }
 
-pub fn constant(value: impl Into<Value>) -> Expression {
-    Expression::Constant(Constant { value: value.into() })
+pub fn constant(value: impl Into<Value>) -> Constant {
+    Constant { value: value.into() }
 }
 
 pub fn type_(name: impl Into<String>) -> TypeVariable {
@@ -176,18 +172,18 @@ pub fn like<T: Into<String>>(value: T) -> PredicateConstraint {
     PredicateConstraint::new(Predicate::Like, Value::from(value.into()))
 }
 
-pub fn abs<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: token::Function::Abs, args: vec![Box::from(arg.into())] })
+pub fn abs<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Abs, args: vec![Box::from(arg.into())] }
 }
 
-pub fn ceil<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: token::Function::Ceil, args: vec![Box::from(arg.into())] })
+pub fn ceil<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Ceil, args: vec![Box::from(arg.into())] }
 }
 
-pub fn floor<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: token::Function::Floor, args: vec![Box::from(arg.into())] })
+pub fn floor<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Floor, args: vec![Box::from(arg.into())] }
 }
 
-pub fn round<T: Into<Expression>>(arg: T) -> Expression {
-    Expression::Function(Function { function_name: token::Function::Round, args: vec![Box::from(arg.into())] })
+pub fn round<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Round, args: vec![Box::from(arg.into())] }
 }

@@ -41,11 +41,7 @@ impl Function {
     }
 }
 
-impl SubExpression for Function {
-    fn into_expression(self) -> Expression {
-        Expression::Function(self)
-    }
-}
+impl SubExpression for Function {}
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

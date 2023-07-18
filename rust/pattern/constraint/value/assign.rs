@@ -44,15 +44,9 @@ impl Validatable for AssignConstraint {
     }
 }
 
-impl From<Expression> for AssignConstraint {
-    fn from(expr: Expression) -> Self {
-        Self { expression: expr }
-    }
-}
-
-impl<T: Into<Constant>> From<T> for AssignConstraint {
+impl<T: Into<Expression>> From<T> for AssignConstraint {
     fn from(expr: T) -> Self {
-        Self { expression: Expression::Constant(expr.into()) }
+        Self { expression: expr.into() }
     }
 }
 
