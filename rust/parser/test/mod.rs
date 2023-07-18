@@ -24,7 +24,7 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use crate::{
     and,
-    builder::{constant, cvar, round, vvar},
+    builder::{abs, ceil, constant, cvar, floor, round, vvar},
     common::{
         token::{
             self,
@@ -541,6 +541,66 @@ $x isa commodity,
         rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
         vvar("net").assign(cvar("p").multiply(cvar("q"))),
         vvar("gross").assign(min!(vvar("net").multiply(1.21), vvar("net").add(100.0)))
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_abs_function() {
+    let query = r#"match
+$x isa commodity,
+    has price $p;
+(commodity: $x, qty: $q) isa order;
+?net = $p * $q;
+?value = abs(?net * 1.21);"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        cvar("x").isa("commodity").has(("price", cvar("p"))),
+        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
+        vvar("net").assign(cvar("p").multiply(cvar("q"))),
+        vvar("value").assign(abs(vvar("net").multiply(1.21)))
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_ceil_function() {
+    let query = r#"match
+$x isa commodity,
+    has price $p;
+(commodity: $x, qty: $q) isa order;
+?net = $p * $q;
+?value = ceil(?net * 1.21);"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        cvar("x").isa("commodity").has(("price", cvar("p"))),
+        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
+        vvar("net").assign(cvar("p").multiply(cvar("q"))),
+        vvar("value").assign(ceil(vvar("net").multiply(1.21)))
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_floor_function() {
+    let query = r#"match
+$x isa commodity,
+    has price $p;
+(commodity: $x, qty: $q) isa order;
+?net = $p * $q;
+?value = floor(?net * 1.21);"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        cvar("x").isa("commodity").has(("price", cvar("p"))),
+        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
+        vvar("net").assign(cvar("p").multiply(cvar("q"))),
+        vvar("value").assign(floor(vvar("net").multiply(1.21)))
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
