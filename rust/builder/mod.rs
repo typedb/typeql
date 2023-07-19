@@ -32,35 +32,35 @@ use crate::{
 #[macro_export]
 macro_rules! typeql_match {
     ($($pattern:expr),* $(,)?) => {{
-        TypeQLMatch::from_patterns(vec![$($pattern.into()),*])
+        $crate::query::TypeQLMatch::from_patterns(vec![$($pattern.into()),*])
     }}
 }
 
 #[macro_export]
 macro_rules! typeql_insert {
     ($($thing_variable:expr),* $(,)?) => {{
-        TypeQLInsert::new(vec![$($thing_variable),*])
+        $crate::query::TypeQLInsert::new(vec![$($thing_variable),*])
     }}
 }
 
 #[macro_export]
 macro_rules! typeql_define {
     ($($pattern:expr),* $(,)?) => {{
-        TypeQLDefine::new(vec![$($pattern.into()),*])
+        $crate::query::TypeQLDefine::new(vec![$($pattern.into()),*])
     }}
 }
 
 #[macro_export]
 macro_rules! typeql_undefine {
     ($($pattern:expr),* $(,)?) => {{
-        TypeQLUndefine::new(vec![$($pattern.into()),*])
+        $crate::query::TypeQLUndefine::new(vec![$($pattern.into()),*])
     }}
 }
 
 #[macro_export]
 macro_rules! and {
     ($($pattern:expr),* $(,)?) => {{
-        Conjunction::new(vec![$($pattern.into()),*])
+        $crate::pattern::Conjunction::new(vec![$($pattern.into()),*])
     }}
 }
 
@@ -70,7 +70,7 @@ macro_rules! or {
         let mut patterns = vec![$($pattern.into()),*];
         match patterns.len() {
             1 => patterns.pop().unwrap(),
-            _ => Disjunction::new(patterns).into(),
+            _ => $crate::pattern::Disjunction::new(patterns).into(),
         }
     }}
 }

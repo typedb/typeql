@@ -34,10 +34,10 @@ use crate::{
     gte, lt, lte, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries, parse_query,
     parse_variable,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, Label, RelationVariableBuilder,
-        ThingVariableBuilder, TypeVariableBuilder, Variable,
+        Annotation::Key, ConceptVariableBuilder, Label, RelationVariableBuilder, ThingVariableBuilder,
+        TypeVariableBuilder, Variable,
     },
-    query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
+    query::AggregateQueryBuilder,
     rel, rule, type_, typeql_insert, typeql_match, var, Query,
 };
 
