@@ -79,9 +79,9 @@ macro_rules! or {
 #[macro_export]
 macro_rules! max {
     ($($arg:expr),* $(,)?) => {{
-            let args = [$($arg, )*];
-            Expression::Function(Function {
-            function_name: token::Function::Max,
+        let args = [$($arg, )*];
+        $crate::pattern::Expression::Function($crate::pattern::Function {
+            function_name: $crate::common::token::Function::Max,
             args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
         })
     }}
@@ -90,8 +90,8 @@ macro_rules! max {
 #[macro_export]
 macro_rules! min {
     ($($arg:expr),* $(,)?) => {{
-            let args = [$($arg, )*];
-            Expression::Function(Function {
+        let args = [$($arg, )*];
+        $crate::pattern::Expression::Function($crate::pattern::Function {
             function_name: token::Function::Min,
             args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
         })
@@ -101,14 +101,14 @@ macro_rules! min {
 #[macro_export]
 macro_rules! filter {
     ($($arg:expr),* $(,)?) => {{
-        [$(Into::<UnboundVariable>::into($arg)),*]
+        [$(Into::<$crate::pattern::UnboundVariable>::into($arg)),*]
     }}
 }
 
 #[macro_export]
 macro_rules! sort_vars {
     ($($arg:expr),*) => {{
-        Sorting::new(vec![$(Into::<OrderedVariable>::into($arg), )*])
+        $crate::query::Sorting::new(vec![$(Into::<$crate::query::sorting::OrderedVariable>::into($arg), )*])
     }}
 }
 
