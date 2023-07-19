@@ -36,7 +36,7 @@ macro_rules! enum_getter {
             pub fn $fn_name(self) -> $classname {
                 match self {
                     Self::$enum_variant(x) => x,
-                    _ => panic!("{}", TypeQLError::InvalidCasting(
+                    _ => panic!("{}", $crate::common::error::TypeQLError::InvalidCasting(
                         stringify!($enum_name),
                         self.enum_getter_get_name(),
                         stringify!($enum_variant),

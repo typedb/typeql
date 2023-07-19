@@ -22,7 +22,7 @@
 
 use crate::{
     and, not, or, parse_query,
-    pattern::{Conjunction, Disjunction, Normalisable, ThingVariableBuilder},
+    pattern::{Disjunction, Normalisable, ThingVariableBuilder},
     var,
 };
 

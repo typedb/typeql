@@ -51,7 +51,7 @@ pub use variable::{
 };
 
 use crate::{
-    common::{error::TypeQLError, validatable::Validatable, Result},
+    common::{validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
 
