@@ -97,10 +97,13 @@ impl Operation {
 
     fn associativity(&self) -> Associativity {
         match self {
-            Operation::Addition { .. } | Operation::Multiplication { .. } => Associativity::Associative,
-            Operation::Subtraction { .. } | Operation::Division { .. } | Operation::Modulo { .. } => {
-                Associativity::Left
-            }
+            // Addition and multiplication are treated as left-associative in order to preserve
+            // parenthesis in expressions like a + (b + c)
+            Operation::Addition { .. }
+            | Operation::Multiplication { .. }
+            | Operation::Subtraction { .. }
+            | Operation::Division { .. }
+            | Operation::Modulo { .. } => Associativity::Left,
             Operation::Power { .. } => Associativity::Right,
         }
     }
@@ -128,22 +131,22 @@ impl fmt::Display for Operation {
                 if let Some(Expression::Operation(left_operation)) = self.left() {
                     if let Associativity::Right = self.associativity() {
                         if left_operation.precedence() == self.precedence() {
-                            left_operand = format!("( {left_operand} )");
+                            left_operand = format!("({left_operand})");
                         }
                     }
                     if left_operation.precedence() > self.precedence() {
-                        left_operand = format!("( {left_operand} )");
+                        left_operand = format!("({left_operand})");
                     }
                 }
                 let mut right_operand = format!("{}", self.right().unwrap());
                 if let Some(Expression::Operation(right_operation)) = self.right() {
                     if let Associativity::Left = self.associativity() {
                         if right_operation.precedence() == self.precedence() {
-                            right_operand = format!("( {right_operand} )");
+                            right_operand = format!("({right_operand})");
                         }
                     }
                     if right_operation.precedence() > self.precedence() {
-                        right_operand = format!("( {right_operand} )");
+                        right_operand = format!("({right_operand})");
                     }
                 }
                 write!(f, "{} {} {}", left_operand, self.op_token(), right_operand)
@@ -183,7 +186,6 @@ impl PartialOrd for Precedence {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum Associativity {
-    Associative,
     Left,
     Right,
 }

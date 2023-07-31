@@ -411,7 +411,7 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
 }
 
 #[test]
-fn test_long_predicate_query() {
+fn test_parsing_long_predicate_query() {
     let query = r#"match
 $x isa movie,
     has tmdb-vote-count <= 400;"#;
@@ -423,7 +423,7 @@ $x isa movie,
 }
 
 #[test]
-fn test_attribute_query_by_value_variable() {
+fn test_parsing_attribute_query_by_value_variable() {
     let query = r#"match
 ?x = 5;
 $a == ?x isa age;"#;
@@ -435,7 +435,7 @@ $a == ?x isa age;"#;
 }
 
 #[test]
-fn test_variable_name_clash_throws() {
+fn test_parsing_variable_name_clash_throws() {
     let query = r#"match\n
 $z isa person, has age $y;
 ?y = $y;"#;
@@ -445,13 +445,13 @@ $z isa person, has age $y;
 }
 
 #[test]
-fn test_assign_ops() {
+fn test_parsing_expression_assigning() {
     let query = r#"match
 $x isa commodity,
     has price $p;
 (commodity: $x, qty: $q) isa order;
 ?net = $p * $q;
-?gross = ?net * ( 1.0 + 0.21 );"#;
+?gross = ?net * (1.0 + 0.21);"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
@@ -465,7 +465,7 @@ $x isa commodity,
 }
 
 #[test]
-fn test_op_precedence() {
+fn test_parsing_ops_precedence() {
     let query = r#"match
 ?res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
 
@@ -480,9 +480,9 @@ fn test_op_precedence() {
 }
 
 #[test]
-fn test_func_parenthesis_precedence() {
+fn test_parsing_func_parenthesis_precedence() {
     let query = r#"match
-?res = $a + ( round($b + ?c) + $d ) * ?e;"#;
+?res = $a + (round($b + ?c) + $d) * ?e;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(
@@ -493,9 +493,9 @@ fn test_func_parenthesis_precedence() {
 }
 
 #[test]
-fn test_builder_precedence() {
+fn test_builder_ops_precedence() {
     let query = r#"match
-?a = ( $b + $c ) * $d;"#;
+?a = ($b + $c) * $d;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(vvar("a").assign(cvar("b").add(cvar("c")).multiply(cvar("d"))));
@@ -505,7 +505,7 @@ fn test_builder_precedence() {
 #[test]
 fn test_builder_left_associativity() {
     let query = r#"match
-?a = $b - ( $c - $d );"#;
+?a = $b - ($c - $d);"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(vvar("a").assign(cvar("b").subtract(cvar("c").subtract(cvar("d")))));
@@ -515,7 +515,7 @@ fn test_builder_left_associativity() {
 #[test]
 fn test_builder_right_associativity() {
     let query = r#"match
-?a = ( $b ^ $c ) ^ $d;"#;
+?a = ($b ^ $c) ^ $d;"#;
 
     let parsed = parse_query(query).unwrap().into_match();
     let expected = typeql_match!(vvar("a").assign(cvar("b").power(cvar("c")).power(cvar("d"))));
@@ -523,7 +523,29 @@ fn test_builder_right_associativity() {
 }
 
 #[test]
-fn test_assign_function() {
+fn test_preserving_parenthesis() {
+    let query = r#"match
+?a = $b + ($c + $d) + $e * ($f * $g);"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(vvar("a")
+        .assign(cvar("b").add(cvar("c").add(cvar("d"))).add(cvar("e").multiply(cvar("f").multiply(cvar("g"))))));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_not_adding_unnecessary_parenthesis() {
+    let query = r#"match
+?a = $b + $c + $d + $e * $f * $g;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(vvar("a")
+        .assign(cvar("b").add(cvar("c")).add(cvar("d")).add(cvar("e").multiply(cvar("f")).multiply(cvar("g")))));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_min_function() {
     let query = r#"match
 $x isa commodity,
     has price $p;
@@ -537,6 +559,26 @@ $x isa commodity,
         rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
         vvar("net").assign(cvar("p").multiply(cvar("q"))),
         vvar("gross").assign(min!(vvar("net").multiply(1.21), vvar("net").add(100.0)))
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_max_function() {
+    let query = r#"match
+$x isa commodity,
+    has price $p;
+(commodity: $x, qty: $q) isa order;
+?net = $p * $q;
+?gross = max(?net * 1.21, ?net + 100.0);"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        cvar("x").isa("commodity").has(("price", cvar("p"))),
+        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
+        vvar("net").assign(cvar("p").multiply(cvar("q"))),
+        vvar("gross").assign(max!(vvar("net").multiply(1.21), vvar("net").add(100.0)))
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
@@ -597,6 +639,26 @@ $x isa commodity,
         rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
         vvar("net").assign(cvar("p").multiply(cvar("q"))),
         vvar("value").assign(floor(vvar("net").multiply(1.21)))
+    );
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_round_function() {
+    let query = r#"match
+$x isa commodity,
+    has price $p;
+(commodity: $x, qty: $q) isa order;
+?net = $p * $q;
+?value = round(?net * 1.21);"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(
+        cvar("x").isa("commodity").has(("price", cvar("p"))),
+        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
+        vvar("net").assign(cvar("p").multiply(cvar("q"))),
+        vvar("value").assign(round(vvar("net").multiply(1.21)))
     );
 
     assert_valid_eq_repr!(expected, parsed, query);
