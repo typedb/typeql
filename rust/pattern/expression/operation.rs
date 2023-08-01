@@ -25,7 +25,7 @@ use std::{cmp::Ordering, fmt};
 use super::Expression;
 use crate::{
     common::token,
-    pattern::{Reference, SubExpression},
+    pattern::{LeftOperand, Reference},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -121,7 +121,7 @@ impl Operation {
     }
 }
 
-impl SubExpression for Operation {}
+impl LeftOperand for Operation {}
 
 impl fmt::Display for Operation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -22,18 +22,17 @@
 
 use std::{fmt, iter};
 
-use chrono::{NaiveDateTime, Timelike};
-
 use crate::{
     common::{
-        date_time,
         error::{collect_err, TypeQLError},
-        string::{escape_regex, format_double, quote},
+        string::escape_regex,
         token,
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariable},
+    pattern::{
+        Literal, Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariable,
+    },
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -69,7 +68,7 @@ impl Validatable for PredicateConstraint {
 }
 
 fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result<()> {
-    if predicate.is_substring() && !matches!(value, Value::String(_)) {
+    if predicate.is_substring() && !matches!(value, Value::Literal(Literal::String(_))) {
         Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
     Ok(())
@@ -78,7 +77,7 @@ fn expect_string_value_with_substring_predicate(predicate: token::Predicate, val
 impl fmt::Display for PredicateConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.predicate == token::Predicate::Like {
-            assert!(matches!(self.value, Value::String(_)));
+            assert!(matches!(self.value, Value::Literal(Literal::String(_))));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
         } else if self.predicate == token::Predicate::Eq
             && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_)))
@@ -92,11 +91,7 @@ impl fmt::Display for PredicateConstraint {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    Long(i64),
-    Double(f64),
-    Boolean(bool),
-    String(String),
-    DateTime(NaiveDateTime),
+    Literal(Literal),
     ThingVariable(Box<ThingVariable>),
     ValueVariable(Box<ValueVariable>),
 }
@@ -105,52 +100,16 @@ impl Eq for Value {} // can't derive, because floating point types do not implem
 impl Validatable for Value {
     fn validate(&self) -> Result<()> {
         match &self {
-            Self::DateTime(date_time) => {
-                if date_time.nanosecond() % 1000000 > 0 {
-                    Err(TypeQLError::InvalidConstraintDatetimePrecision(*date_time))?
-                }
-                Ok(())
-            }
+            Self::Literal(literal) => literal.validate(),
             Self::ThingVariable(variable) => variable.validate(),
             Self::ValueVariable(variable) => variable.validate(),
-            _ => Ok(()),
         }
     }
 }
 
-impl From<i64> for Value {
-    fn from(long: i64) -> Self {
-        Value::Long(long)
-    }
-}
-
-impl From<f64> for Value {
-    fn from(double: f64) -> Self {
-        Value::Double(double)
-    }
-}
-
-impl From<bool> for Value {
-    fn from(bool: bool) -> Self {
-        Value::Boolean(bool)
-    }
-}
-
-impl From<&str> for Value {
-    fn from(string: &str) -> Self {
-        Value::String(String::from(string))
-    }
-}
-
-impl From<String> for Value {
-    fn from(string: String) -> Self {
-        Value::String(string)
-    }
-}
-
-impl From<NaiveDateTime> for Value {
-    fn from(date_time: NaiveDateTime) -> Self {
-        Value::DateTime(date_time)
+impl<T: Into<Literal>> From<T> for Value {
+    fn from(literal: T) -> Self {
+        Value::Literal(literal.into())
     }
 }
 
@@ -191,11 +150,7 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
-            Long(long) => write!(f, "{long}"),
-            Double(double) => write!(f, "{}", format_double(*double)),
-            Boolean(boolean) => write!(f, "{boolean}"),
-            String(string) => write!(f, "{}", quote(string)),
-            DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
+            Literal(literal) => write!(f, "{literal}"),
             ThingVariable(var) => write!(f, "{}", var.reference),
             ValueVariable(var) => write!(f, "{}", var.reference),
         }

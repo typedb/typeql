@@ -25,7 +25,7 @@ use std::fmt;
 use super::Expression;
 use crate::{
     common::token,
-    pattern::{Reference, SubExpression},
+    pattern::{LeftOperand, Reference},
     write_joined,
 };
 
@@ -41,7 +41,7 @@ impl Function {
     }
 }
 
-impl SubExpression for Function {}
+impl LeftOperand for Function {}
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

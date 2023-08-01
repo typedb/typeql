@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::pattern::{SubExpression, Value};
+use crate::pattern::{LeftOperand, Value};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constant {
@@ -35,7 +35,7 @@ impl<T: Into<Value>> From<T> for Constant {
     }
 }
 
-impl SubExpression for Constant {}
+impl LeftOperand for Constant {}
 
 impl fmt::Display for Constant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -25,7 +25,7 @@ use crate::{
     pattern::expression::{Expression, Operation},
 };
 
-pub trait SubExpression: Into<Expression> {}
+pub(crate) trait LeftOperand: Into<Expression> {}
 
 pub trait ExpressionBuilder {
     fn add(self, right: impl Into<Expression>) -> Operation;
@@ -62,7 +62,7 @@ impl ExpressionBuilder for Expression {
     }
 }
 
-impl<U: SubExpression> ExpressionBuilder for U {
+impl<U: LeftOperand> ExpressionBuilder for U {
     fn add(self, right: impl Into<Expression>) -> Operation {
         self.into().add(right)
     }

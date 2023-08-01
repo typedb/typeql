@@ -26,10 +26,10 @@ use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
         ConceptConstrainable, ConceptReference, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
-        IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference,
+        IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference,
         RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
-        SubConstraint, SubExpression, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable,
-        ValueTypeConstraint, Visibility,
+        SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint,
+        Visibility,
     },
 };
 
@@ -160,7 +160,7 @@ impl From<String> for UnboundConceptVariable {
     }
 }
 
-impl SubExpression for UnboundConceptVariable {}
+impl LeftOperand for UnboundConceptVariable {}
 
 impl fmt::Display for UnboundConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

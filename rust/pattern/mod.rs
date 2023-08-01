@@ -25,6 +25,7 @@ mod constraint;
 mod disjunction;
 mod expression;
 mod label;
+mod literal;
 mod named_references;
 mod negation;
 mod schema;
@@ -43,15 +44,16 @@ pub use constraint::{
 pub use disjunction::Disjunction;
 pub use expression::{Constant, Expression, Function, Operation};
 pub use label::Label;
+pub use literal::Literal;
 pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
+pub(crate) use variable::LeftOperand;
 pub use variable::{
     ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, ExpressionBuilder, Reference,
-    RelationConstrainable, RelationVariableBuilder, SubExpression, ThingConstrainable, ThingVariable,
-    ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
-    UnboundValueVariable, UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder,
-    Variable, Visibility,
+    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder,
+    TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
+    UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder, Variable, Visibility,
 };
 
 use crate::{
