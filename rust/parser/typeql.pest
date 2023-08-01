@@ -145,13 +145,17 @@ player = { VAR_CONCEPT_ }                                                       
 // ATTRIBUTE CONSTRUCT =========================================================
 
 attributes = { attribute ~ ( "," ~ attribute )* }
-attribute = { HAS ~ label ~ ( VAR_ | predicate )
+attribute = { HAS ~ label ~ ( VAR_ | predicate )                                // ownership by labeled variable or value or just value
             | HAS ~ VAR_CONCEPT_
-            }                                                                   // ownership by labeled variable or value or just value
+            }
+
+// VALUE CONSTRUCT =============================================================
+
+value = { literal | VAR_ }
 
 // PREDICATE CONSTRUCTS ========================================================
 
-predicate = { value | predicate_equality ~ predicate_value | predicate_substring ~ STRING_ }
+predicate = { literal | predicate_equality ~ value | predicate_substring ~ STRING_ }
 
 predicate_equality = { EQ | NEQ | GTE | GT | LTE | LT
                      | ASSIGN                                                   // Backwards compatibility till 3.0
@@ -159,16 +163,11 @@ predicate_equality = { EQ | NEQ | GTE | GT | LTE | LT
 
 predicate_substring = { CONTAINS | LIKE }
 
-predicate_value = { value | VAR_ }
-
 // EXPRESSION CONSTRUCTS =======================================================
 
 expression = { expression_base ~ ( infix ~ expression_base )* }
 
-expression_base = _{ VAR_
-                   | expression_function | value
-                   | paren_expr
-                   }
+expression_base = _{ VAR_ | expression_function | literal | paren_expr }
 
 infix = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 paren_expr = { PAREN_OPEN ~ expression ~ PAREN_CLOSE }
@@ -197,9 +196,9 @@ label = { LABEL_ | type_native | unreserved }
 type_native = { THING | ENTITY | ATTRIBUTE | RELATION | ROLE }
 
 value_type = { LONG | DOUBLE | STRING | BOOLEAN | DATETIME }
-value = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
-        | signed_double | signed_long
-        }
+literal = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
+          | signed_double | signed_long
+          }
 
 signed_double = { sign? ~ DOUBLE_ }
 signed_long = { sign? ~ LONG_ }

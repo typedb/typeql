@@ -651,15 +651,15 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
 fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
     let mut children = tree.into_children();
     match children.peek_rule() {
-        Some(Rule::value) => {
-            PredicateConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value)))
+        Some(Rule::literal) => {
+            PredicateConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::literal)))
         }
         Some(Rule::predicate_equality) => PredicateConstraint::new(
             token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
             {
-                let predicate_value = children.consume_expected(Rule::predicate_value).into_child();
+                let predicate_value = children.consume_expected(Rule::value).into_child();
                 match predicate_value.as_rule() {
-                    Rule::value => visit_value(predicate_value),
+                    Rule::literal => visit_value(predicate_value),
                     Rule::VAR_ => Value::from(get_var(predicate_value.into_children().consume_any())),
                     _ => unreachable!("{}", TypeQLError::IllegalGrammar(predicate_value.to_string())),
                 }
@@ -694,7 +694,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
     pratt_parser
         .map_primary(|primary| match primary.as_rule() {
             Rule::VAR_ => Expression::Variable(get_var(primary)),
-            Rule::value => Expression::Constant(Constant { value: visit_value(primary) }),
+            Rule::literal => Expression::Constant(Constant { value: visit_value(primary) }),
             Rule::expression_function => Expression::Function(visit_function(primary)),
             Rule::paren_expr => visit_expression(primary.into_children().consume_any()),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
