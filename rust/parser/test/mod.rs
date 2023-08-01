@@ -445,7 +445,7 @@ $z isa person, has age $y;
 }
 
 #[test]
-fn test_parsing_operators_precedence() {
+fn test_parsing_precedence_operators() {
     let query = r#"match
 ?res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
 
@@ -460,7 +460,7 @@ fn test_parsing_operators_precedence() {
 }
 
 #[test]
-fn test_parsing_func_parenthesis_precedence() {
+fn test_parsing_precedence_function_and_parenthesis() {
     let query = r#"match
 ?res = $a + (round($b + ?c) + $d) * ?e;"#;
 
@@ -473,7 +473,7 @@ fn test_parsing_func_parenthesis_precedence() {
 }
 
 #[test]
-fn test_builder_operators_precedence() {
+fn test_builder_precedence_operators() {
     let query = r#"match
 ?a = ($b + $c) * $d;"#;
 
@@ -483,7 +483,7 @@ fn test_builder_operators_precedence() {
 }
 
 #[test]
-fn test_builder_left_associativity() {
+fn test_builder_associativity_left() {
     let query = r#"match
 ?a = $b - ($c - $d);"#;
 
@@ -493,7 +493,7 @@ fn test_builder_left_associativity() {
 }
 
 #[test]
-fn test_builder_right_associativity() {
+fn test_builder_associativity_right() {
     let query = r#"match
 ?a = ($b ^ $c) ^ $d;"#;
 
@@ -503,7 +503,7 @@ fn test_builder_right_associativity() {
 }
 
 #[test]
-fn test_preserving_parenthesis() {
+fn test_parenthesis_preserving() {
     let query = r#"match
 ?a = $b + ($c + $d) + $e * ($f * $g);"#;
 
@@ -514,7 +514,7 @@ fn test_preserving_parenthesis() {
 }
 
 #[test]
-fn test_not_adding_unnecessary_parenthesis() {
+fn test_parenthesis_not_adding_unnecessary() {
     let query = r#"match
 ?a = $b + $c + $d + $e * $f * $g;"#;
 
@@ -525,7 +525,7 @@ fn test_not_adding_unnecessary_parenthesis() {
 }
 
 #[test]
-fn test_min_function() {
+fn test_function_min() {
     let query = r#"match
 $x isa commodity,
     has price $p;
@@ -545,7 +545,7 @@ $x isa commodity,
 }
 
 #[test]
-fn test_max_function() {
+fn test_function_max() {
     let query = r#"match
 $x isa commodity,
     has price $p;
@@ -565,7 +565,7 @@ $x isa commodity,
 }
 
 #[test]
-fn test_abs_function() {
+fn test_function_abs() {
     let query = r#"match
 $x isa commodity,
     has price $p;
@@ -585,7 +585,7 @@ $x isa commodity,
 }
 
 #[test]
-fn test_ceil_function() {
+fn test_function_ceil() {
     let query = r#"match
 $x isa commodity,
     has price $p;
@@ -605,7 +605,7 @@ $x isa commodity,
 }
 
 #[test]
-fn test_floor_function() {
+fn test_function_floor() {
     let query = r#"match
 $x isa commodity,
     has price $p;
@@ -625,7 +625,7 @@ $x isa commodity,
 }
 
 #[test]
-fn test_round_function() {
+fn test_function_round() {
     let query = r#"match
 $x isa commodity,
     has price $p;
@@ -645,6 +645,31 @@ $x isa commodity,
 }
 
 #[test]
+fn test_schema_query() {
+    let query = r#"match
+$x plays starring:actor;
+sort $x asc;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(cvar("x").plays(("starring", "actor"))).sort([(cvar("x"), Asc)]);
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_get_sort_on_concept_variable() {
+    let query = r#"match
+$x isa movie,
+    has rating $r;
+sort $r desc;"#;
+
+    let parsed = parse_query(query).unwrap().into_match();
+    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort([(cvar("r"), Desc)]);
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
 fn test_get_sort_on_value_variable() {
     let query = r#"match
 $x isa movie,
@@ -658,31 +683,6 @@ sort ?l desc;"#;
         vvar("l").assign(constant(100).subtract(cvar("r")))
     )
     .sort([(vvar("l"), Desc)]);
-
-    assert_valid_eq_repr!(expected, parsed, query);
-}
-
-#[test]
-fn test_schema_query() {
-    let query = r#"match
-$x plays starring:actor;
-sort $x asc;"#;
-
-    let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").plays(("starring", "actor"))).sort([(cvar("x"), Asc)]);
-
-    assert_valid_eq_repr!(expected, parsed, query);
-}
-
-#[test]
-fn test_get_sort() {
-    let query = r#"match
-$x isa movie,
-    has rating $r;
-sort $r desc;"#;
-
-    let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(cvar("x").isa("movie").has(("rating", cvar("r")))).sort([(cvar("r"), Desc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
