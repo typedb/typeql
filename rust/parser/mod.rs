@@ -651,15 +651,16 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
 fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
     let mut children = tree.into_children();
     match children.peek_rule() {
-        Some(Rule::literal) => {
-            PredicateConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::literal)))
-        }
+        Some(Rule::constant) => PredicateConstraint::new(
+            token::Predicate::Eq,
+            visit_constant(children.consume_expected(Rule::constant)).into(),
+        ),
         Some(Rule::predicate_equality) => PredicateConstraint::new(
             token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
             {
                 let predicate_value = children.consume_expected(Rule::value).into_child();
                 match predicate_value.as_rule() {
-                    Rule::literal => visit_value(predicate_value),
+                    Rule::constant => visit_constant(predicate_value).into(),
                     Rule::VAR_ => Value::from(get_var(predicate_value.into_children().consume_any())),
                     _ => unreachable!("{}", TypeQLError::IllegalGrammar(predicate_value.to_string())),
                 }
@@ -694,7 +695,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
     pratt_parser
         .map_primary(|primary| match primary.as_rule() {
             Rule::VAR_ => Expression::Variable(get_var(primary)),
-            Rule::literal => Expression::Constant(Constant { value: visit_value(primary) }),
+            Rule::constant => Expression::Constant(visit_constant(primary)),
             Rule::expression_function => Expression::Function(visit_function(primary)),
             Rule::paren_expr => visit_expression(primary.into_children().consume_any()),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
@@ -790,15 +791,15 @@ fn visit_label_scoped(tree: SyntaxTree) -> Label {
     Label::from((parts[0].clone(), parts[1].clone()))
 }
 
-fn visit_value(tree: SyntaxTree) -> Value {
+fn visit_constant(tree: SyntaxTree) -> Constant {
     let child = tree.into_child();
     match child.as_rule() {
-        Rule::STRING_ => Value::from(get_string(child)),
-        Rule::signed_long => Value::from(get_long(child)),
-        Rule::signed_double => Value::from(get_double(child)),
-        Rule::BOOLEAN_ => Value::from(get_boolean(child)),
-        Rule::DATE_ => Value::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
-        Rule::DATETIME_ => Value::from(get_date_time(child)),
+        Rule::STRING_ => Constant::from(get_string(child)),
+        Rule::signed_long => Constant::from(get_long(child)),
+        Rule::signed_double => Constant::from(get_double(child)),
+        Rule::BOOLEAN_ => Constant::from(get_boolean(child)),
+        Rule::DATE_ => Constant::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
+        Rule::DATETIME_ => Constant::from(get_date_time(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }

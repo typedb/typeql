@@ -20,18 +20,16 @@
  *
  */
 
-mod constant;
 mod function;
 mod operation;
 
 use std::{fmt, iter};
 
 use chrono::NaiveDateTime;
-pub use constant::Constant;
 pub use function::Function;
 pub use operation::Operation;
 
-use crate::pattern::{Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable};
+use crate::pattern::{Constant, Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {

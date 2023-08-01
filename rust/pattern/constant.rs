@@ -24,25 +24,31 @@ use std::fmt;
 
 use chrono::{NaiveDateTime, Timelike};
 
-use crate::common::{
-    date_time,
-    error::TypeQLError,
-    string::{format_double, quote},
-    validatable::Validatable,
-    Result,
+use crate::{
+    common::{
+        date_time,
+        error::TypeQLError,
+        string::{format_double, quote},
+        validatable::Validatable,
+        Result,
+    },
+    pattern::LeftOperand,
 };
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Literal {
+pub enum Constant {
     Long(i64),
     Double(f64),
     Boolean(bool),
     String(String),
     DateTime(NaiveDateTime),
 }
-impl Eq for Literal {} // can't derive, because floating point types do not implement Eq
 
-impl Validatable for Literal {
+impl Eq for Constant {} // can't derive, because floating point types do not implement Eq
+
+impl LeftOperand for Constant {}
+
+impl Validatable for Constant {
     fn validate(&self) -> Result<()> {
         match &self {
             Self::DateTime(date_time) => {
@@ -56,45 +62,45 @@ impl Validatable for Literal {
     }
 }
 
-impl From<i64> for Literal {
+impl From<i64> for Constant {
     fn from(long: i64) -> Self {
-        Literal::Long(long)
+        Constant::Long(long)
     }
 }
 
-impl From<f64> for Literal {
+impl From<f64> for Constant {
     fn from(double: f64) -> Self {
-        Literal::Double(double)
+        Constant::Double(double)
     }
 }
 
-impl From<bool> for Literal {
+impl From<bool> for Constant {
     fn from(bool: bool) -> Self {
-        Literal::Boolean(bool)
+        Constant::Boolean(bool)
     }
 }
 
-impl From<&str> for Literal {
+impl From<&str> for Constant {
     fn from(string: &str) -> Self {
-        Literal::String(String::from(string))
+        Constant::String(String::from(string))
     }
 }
 
-impl From<String> for Literal {
+impl From<String> for Constant {
     fn from(string: String) -> Self {
-        Literal::String(string)
+        Constant::String(string)
     }
 }
 
-impl From<NaiveDateTime> for Literal {
+impl From<NaiveDateTime> for Constant {
     fn from(date_time: NaiveDateTime) -> Self {
-        Literal::DateTime(date_time)
+        Constant::DateTime(date_time)
     }
 }
 
-impl fmt::Display for Literal {
+impl fmt::Display for Constant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Literal::*;
+        use Constant::*;
         match self {
             Long(long) => write!(f, "{long}"),
             Double(double) => write!(f, "{}", format_double(*double)),

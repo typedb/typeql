@@ -31,7 +31,8 @@ use crate::{
         Result,
     },
     pattern::{
-        Literal, Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable, ValueVariable,
+        Constant, Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable,
+        ValueVariable,
     },
 };
 
@@ -68,7 +69,7 @@ impl Validatable for PredicateConstraint {
 }
 
 fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result<()> {
-    if predicate.is_substring() && !matches!(value, Value::Literal(Literal::String(_))) {
+    if predicate.is_substring() && !matches!(value, Value::Literal(Constant::String(_))) {
         Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
     Ok(())
@@ -77,7 +78,7 @@ fn expect_string_value_with_substring_predicate(predicate: token::Predicate, val
 impl fmt::Display for PredicateConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.predicate == token::Predicate::Like {
-            assert!(matches!(self.value, Value::Literal(Literal::String(_))));
+            assert!(matches!(self.value, Value::Literal(Constant::String(_))));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
         } else if self.predicate == token::Predicate::Eq
             && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_)))
@@ -91,7 +92,7 @@ impl fmt::Display for PredicateConstraint {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    Literal(Literal),
+    Literal(Constant),
     ThingVariable(Box<ThingVariable>),
     ValueVariable(Box<ValueVariable>),
 }
@@ -107,7 +108,7 @@ impl Validatable for Value {
     }
 }
 
-impl<T: Into<Literal>> From<T> for Value {
+impl<T: Into<Constant>> From<T> for Value {
     fn from(literal: T) -> Self {
         Value::Literal(literal.into())
     }

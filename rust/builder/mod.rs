@@ -128,8 +128,8 @@ pub fn vvar(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
     var.into()
 }
 
-pub fn constant(value: impl Into<Value>) -> Constant {
-    Constant { value: value.into() }
+pub fn constant(constant: impl Into<Constant>) -> Constant {
+    constant.into()
 }
 
 pub fn type_(name: impl Into<String>) -> TypeVariable {

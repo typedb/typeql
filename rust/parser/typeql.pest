@@ -151,11 +151,11 @@ attribute = { HAS ~ label ~ ( VAR_ | predicate )                                
 
 // VALUE CONSTRUCT =============================================================
 
-value = { literal | VAR_ }
+value = { constant | VAR_ }
 
 // PREDICATE CONSTRUCTS ========================================================
 
-predicate = { literal | predicate_equality ~ value | predicate_substring ~ STRING_ }
+predicate = { constant | predicate_equality ~ value | predicate_substring ~ STRING_ }
 
 predicate_equality = { EQ | NEQ | GTE | GT | LTE | LT
                      | ASSIGN                                                   // Backwards compatibility till 3.0
@@ -167,7 +167,7 @@ predicate_substring = { CONTAINS | LIKE }
 
 expression = { expression_base ~ ( infix ~ expression_base )* }
 
-expression_base = _{ VAR_ | expression_function | literal | paren_expr }
+expression_base = _{ VAR_ | expression_function | constant | paren_expr }
 
 infix = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 paren_expr = { PAREN_OPEN ~ expression ~ PAREN_CLOSE }
@@ -196,7 +196,7 @@ label = { LABEL_ | type_native | unreserved }
 type_native = { THING | ENTITY | ATTRIBUTE | RELATION | ROLE }
 
 value_type = { LONG | DOUBLE | STRING | BOOLEAN | DATETIME }
-literal = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
+constant = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
           | signed_double | signed_long
           }
 

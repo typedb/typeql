@@ -21,11 +21,11 @@
  */
 
 mod conjunction;
+mod constant;
 mod constraint;
 mod disjunction;
 mod expression;
 mod label;
-mod literal;
 mod named_references;
 mod negation;
 mod schema;
@@ -36,15 +36,15 @@ mod variable;
 use std::{collections::HashSet, fmt};
 
 pub use conjunction::Conjunction;
+pub use constant::Constant;
 pub use constraint::{
     AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit,
     IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, RegexConstraint,
     RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
-pub use expression::{Constant, Expression, Function, Operation};
+pub use expression::{Expression, Function, Operation};
 pub use label::Label;
-pub use literal::Literal;
 pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
