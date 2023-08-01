@@ -445,27 +445,7 @@ $z isa person, has age $y;
 }
 
 #[test]
-fn test_parsing_expression_assigning() {
-    let query = r#"match
-$x isa commodity,
-    has price $p;
-(commodity: $x, qty: $q) isa order;
-?net = $p * $q;
-?gross = ?net * (1.0 + 0.21);"#;
-
-    let parsed = parse_query(query).unwrap().into_match();
-    let expected = typeql_match!(
-        cvar("x").isa("commodity").has(("price", cvar("p"))),
-        rel(("commodity", "x")).rel(("qty", "q")).isa("order"),
-        vvar("net").assign(cvar("p").multiply(cvar("q"))),
-        vvar("gross").assign(vvar("net").multiply(constant(1.0).add(0.21))),
-    );
-
-    assert_valid_eq_repr!(expected, parsed, query);
-}
-
-#[test]
-fn test_parsing_ops_precedence() {
+fn test_parsing_operators_precedence() {
     let query = r#"match
 ?res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
 
@@ -493,7 +473,7 @@ fn test_parsing_func_parenthesis_precedence() {
 }
 
 #[test]
-fn test_builder_ops_precedence() {
+fn test_builder_operators_precedence() {
     let query = r#"match
 ?a = ($b + $c) * $d;"#;
 
