@@ -49,20 +49,20 @@ public class TypeQLUpdate extends TypeQLWritable {
     private List<UnboundVariable> namedDeleteVariablesUnbound;
     private List<UnboundVariable> namedInsertVariablesUnbound;
 
-    public TypeQLUpdate(TypeQLMatch.Unfiltered match, List<ThingVariable<?>> deleteVariables,
+    public TypeQLUpdate(TypeQLGet.Unfiltered match, List<ThingVariable<?>> deleteVariables,
                         List<ThingVariable<?>> insertVariables) {
         super(match);
         this.deleteVariables = validDeleteVars(match, deleteVariables);
         this.insertVariables = validInsertVars(match, insertVariables);
         Stream<Pattern> patterns = concat(
-                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(TypeQLMatch::patternsRecursive),
+                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(TypeQLGet::patternsRecursive),
                 concat(deleteVariables.stream(), insertVariables.stream())
         );
         validateNamesUnique(patterns);
         this.hash = Objects.hash(match, deleteVariables, insertVariables);
     }
 
-    public TypeQLMatch.Unfiltered match() {
+    public TypeQLGet.Unfiltered match() {
         assert match != null;
         return match;
     }

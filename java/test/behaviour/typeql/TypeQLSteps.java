@@ -26,7 +26,7 @@ import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import io.cucumber.java.en.Given;
@@ -82,7 +82,7 @@ public class TypeQLSteps {
     public void typeql_match(String query) {
         TypeQLQuery parsed = TypeQL.parseQuery(query);
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
-        if (parsed instanceof TypeQLMatch) {
+        if (parsed instanceof TypeQLGet) {
             parsed.asMatch().conjunction().normalise();
         }
     }

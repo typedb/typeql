@@ -33,26 +33,19 @@ import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.builder.Aggregatable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.GROUP;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.MATCH;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.GET;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.FILTER_VARIABLE_ANONYMOUS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
@@ -65,150 +58,38 @@ import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch.Aggregate> {
+public class TypeQLGet extends TypeQLQuery implements Aggregatable<TypeQLGet.Aggregate> {
 
-    private final Conjunction<? extends Pattern> conjunction;
+    final MatchClause match;
     private final Modifiers modifiers;
 
     private final int hash;
 
-    private List<BoundVariable> variables;
-    private List<UnboundVariable> variablesNamedUnbound;
 
-    TypeQLMatch(Conjunction<? extends Pattern> conjunction) {
-        this(conjunction, new ArrayList<>());
+    TypeQLGet(MatchClause match) {
+        this(match, new ArrayList<>());
     }
 
-    TypeQLMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter) {
-        this(conjunction, filter, null, null, null);
+    TypeQLGet(MatchClause match, List<UnboundVariable> filter) {
+        this(match, filter, null, null, null);
     }
 
-    public TypeQLMatch(Conjunction<? extends Pattern> conjunction, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
+    public TypeQLGet(MatchClause match, List<UnboundVariable> filter, Sortable.Sorting sorting, Long offset, Long limit) {
         if (filter == null) throw TypeQLException.of(ErrorMessage.MISSING_MATCH_FILTER.message());
-        this.conjunction = conjunction;
-        this.modifiers = new Modifiers(filter, sorting, offset, limit);
+        this.match = match;
+        this.modifiers = new Modifiers(this, filter, sorting, offset, limit);
 
-        hasBoundingConjunction();
-        nestedPatternsAreBounded();
-        queryHasNamedVariable();
-        eachPatternVariableHasNamedVariable(conjunction.patterns());
         filtersAreInScope();
         sortVarsAreInScope();
-        validateNamesUnique(patternsRecursive(conjunction));
-
-        this.hash = Objects.hash(this.conjunction, this.modifiers);
-    }
-
-    public class Modifiers {
-
-        private final List<UnboundVariable> filter;
-        private final Sortable.Sorting sorting;
-        private final Long offset;
-        private final Long limit;
-
-        private final int hash;
-
-        public Modifiers(List<UnboundVariable> filter, @Nullable Sortable.Sorting sorting, @Nullable Long offset,
-                         @Nullable Long limit) {
-            this.filter = list(filter);
-            this.sorting = sorting;
-            this.offset = offset;
-            this.limit = limit;
-            this.hash = Objects.hash(this.filter, this.sorting, this.offset, this.limit);
-        }
-
-        public List<UnboundVariable> filter() {
-            if (filter.isEmpty()) return namedVariablesUnbound();
-            else return filter;
-        }
-
-        public Optional<Long> offset() {
-            return Optional.ofNullable(offset);
-        }
-
-        public Optional<Long> limit() {
-            return Optional.ofNullable(limit);
-        }
-
-        public Optional<Sortable.Sorting> sort() {
-            return Optional.ofNullable(sorting);
-        }
-
-        public boolean isEmpty() {
-            return filter.isEmpty() && sorting == null && offset == null && limit == null;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder syntax = new StringBuilder();
-            if (!filter.isEmpty()) {
-                syntax.append(GET);
-                String vars = filter.stream().map(UnboundVariable::toString).collect(COMMA_SPACE.joiner());
-                syntax.append(SPACE).append(vars);
-                syntax.append(SEMICOLON).append(SPACE);
-            }
-            if (sorting != null) syntax.append(SORT).append(SPACE).append(sorting).append(SEMICOLON).append(SPACE);
-            if (offset != null) syntax.append(OFFSET).append(SPACE).append(offset).append(SEMICOLON).append(SPACE);
-            if (limit != null) syntax.append(LIMIT).append(SPACE).append(limit).append(SEMICOLON).append(SPACE);
-            return syntax.toString().trim();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Modifiers modifiers = (Modifiers) o;
-            return Objects.equals(filter, modifiers.filter) && Objects.equals(sorting, modifiers.sorting)
-                    && Objects.equals(offset, modifiers.offset) && Objects.equals(limit, modifiers.limit);
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-    }
-
-    private void hasBoundingConjunction() {
-        if (!conjunction.namedVariablesUnbound().findAny().isPresent()) {
-            throw TypeQLException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
-        }
-    }
-
-    private void nestedPatternsAreBounded() {
-        conjunction.patterns().stream().filter(pattern -> !pattern.isVariable()).forEach(pattern -> {
-            pattern.validateIsBoundedBy(conjunction.namedVariablesUnbound().collect(toSet()));
-        });
-    }
-
-    private void queryHasNamedVariable() {
-        if (namedVariablesUnbound().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
-    }
-
-    public Stream<Pattern> patternsRecursive() {
-        return patternsRecursive(conjunction);
-    }
-
-    private Stream<Pattern> patternsRecursive(Pattern pattern) {
-        return Stream.concat(Stream.of(pattern), pattern.patterns().stream().filter(p -> !p.equals(pattern))
-                .flatMap(this::patternsRecursive));
-    }
-
-    private void eachPatternVariableHasNamedVariable(List<? extends Pattern> patterns) {
-        patterns.forEach(pattern -> {
-            if (pattern.isVariable() && !pattern.asVariable().isNamed()
-                    && pattern.asVariable().variables().noneMatch(constraintVar -> constraintVar.isNamed())) {
-                throw TypeQLException.of(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.message(pattern));
-            } else if (!pattern.isVariable()) {
-                eachPatternVariableHasNamedVariable(pattern.patterns());
-            }
-        });
+        validateNamesUnique(match.patternsRecursive());
+        this.hash = Objects.hash(this.match, this.modifiers);
     }
 
     private void filtersAreInScope() {
         Set<UnboundVariable> duplicates = new HashSet<>();
         for (UnboundVariable var : modifiers.filter) {
             if (!var.isNamed()) throw TypeQLException.of(FILTER_VARIABLE_ANONYMOUS);
-            if (!namedVariablesUnbound().contains(var))
+            if (!match.namedVariablesUnbound().contains(var))
                 throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(var));
             if (duplicates.contains(var)) throw TypeQLException.of(ILLEGAL_FILTER_VARIABLE_REPEATING.message(var));
             else duplicates.add(var);
@@ -216,7 +97,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     }
 
     private void sortVarsAreInScope() {
-        List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? namedVariablesUnbound() : modifiers.filter;
+        List<UnboundVariable> sortableVars = modifiers.filter.isEmpty() ? match.namedVariablesUnbound() : modifiers.filter;
         if (modifiers.sorting != null && modifiers.sorting.variables().stream().anyMatch(v -> !sortableVars.contains(v))) {
             throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_MATCH.message(modifiers.sorting.variables()));
         }
@@ -234,22 +115,6 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
     @Override
     public TypeQLArg.QueryType type() {
         return TypeQLArg.QueryType.READ;
-    }
-
-    public Conjunction<? extends Pattern> conjunction() {
-        return conjunction;
-    }
-
-    public List<BoundVariable> variables() {
-        if (variables == null) variables = conjunction.variables().collect(toList());
-        return variables;
-    }
-
-    public List<UnboundVariable> namedVariablesUnbound() {
-        if (variablesNamedUnbound == null) {
-            variablesNamedUnbound = conjunction.namedVariablesUnbound().collect(toList());
-        }
-        return variablesNamedUnbound;
     }
 
     public Modifiers modifiers() {
@@ -274,8 +139,8 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
             return false;
         }
-        TypeQLMatch that = (TypeQLMatch) o;
-        return Objects.equals(this.conjunction, that.conjunction) && Objects.equals(this.modifiers, that.modifiers);
+        TypeQLGet that = (TypeQLGet) o;
+        return Objects.equals(this.match, that.match) && Objects.equals(this.modifiers, that.modifiers);
     }
 
     @Override
@@ -283,7 +148,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         return hash;
     }
 
-    public static class Unfiltered extends TypeQLMatch implements Sortable<Sorted, Offset, Limited> {
+    public static class Unfiltered extends TypeQLGet implements Sortable<Sorted, Offset, Limited> {
 
         public Unfiltered(List<? extends Pattern> patterns) {
             super(validConjunction(patterns));
@@ -294,20 +159,20 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
             return new Conjunction<>(patterns);
         }
 
-        public TypeQLMatch.Filtered get(UnboundVariable var, UnboundVariable... vars) {
+        public TypeQLGet.Filtered get(UnboundVariable var, UnboundVariable... vars) {
             List<UnboundVariable> varList = new ArrayList<>();
             varList.add(var);
             varList.addAll(list(vars));
             return get(varList);
         }
 
-        public TypeQLMatch.Filtered get(List<UnboundVariable> vars) {
-            return new TypeQLMatch.Filtered(this, vars);
+        public TypeQLGet.Filtered get(List<UnboundVariable> vars) {
+            return new TypeQLGet.Filtered(this, vars);
         }
 
         @Override
-        public TypeQLMatch.Sorted sort(Sorting sorting) {
-            return new TypeQLMatch.Sorted(this, sorting);
+        public TypeQLGet.Sorted sort(Sorting sorting) {
+            return new TypeQLGet.Sorted(this, sorting);
         }
 
         @Override
@@ -316,8 +181,8 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
 
         @Override
-        public TypeQLMatch.Limited limit(long limit) {
-            return new TypeQLMatch.Limited(this, limit);
+        public TypeQLGet.Limited limit(long limit) {
+            return new TypeQLGet.Limited(this, limit);
         }
 
         public TypeQLInsert insert(ThingVariable<?>... things) {
@@ -337,7 +202,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
     }
 
-    public static class Filtered extends TypeQLMatch implements Sortable<Sorted, Offset, Limited> {
+    public static class Filtered extends TypeQLGet implements Sortable<Sorted, Offset, Limited> {
 
         public Filtered(Unfiltered unfiltered, List<UnboundVariable> filter) {
             super(unfiltered.conjunction(), filter, null, null, null);
@@ -345,8 +210,8 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
 
         @Override
-        public TypeQLMatch.Sorted sort(Sorting sorting) {
-            return new TypeQLMatch.Sorted(this, sorting);
+        public TypeQLGet.Sorted sort(Sorting sorting) {
+            return new TypeQLGet.Sorted(this, sorting);
         }
 
         @Override
@@ -355,14 +220,14 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
         }
 
         @Override
-        public TypeQLMatch.Limited limit(long limit) {
-            return new TypeQLMatch.Limited(this, limit);
+        public TypeQLGet.Limited limit(long limit) {
+            return new TypeQLGet.Limited(this, limit);
         }
     }
 
-    public static class Sorted extends TypeQLMatch {
+    public static class Sorted extends TypeQLGet {
 
-        public Sorted(TypeQLMatch match, Sortable.Sorting sorting) {
+        public Sorted(TypeQLGet match, Sortable.Sorting sorting) {
             super(match.conjunction, match.modifiers.filter, sorting, match.modifiers.offset, match.modifiers.limit);
         }
 
@@ -370,37 +235,37 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
             return new Offset(this, offset);
         }
 
-        public TypeQLMatch.Limited limit(long limit) {
-            return new TypeQLMatch.Limited(this, limit);
+        public TypeQLGet.Limited limit(long limit) {
+            return new TypeQLGet.Limited(this, limit);
         }
     }
 
-    public static class Offset extends TypeQLMatch {
+    public static class Offset extends TypeQLGet {
 
-        public Offset(TypeQLMatch match, long offset) {
+        public Offset(TypeQLGet match, long offset) {
             super(match.conjunction, match.modifiers.filter, match.modifiers.sorting, offset, match.modifiers.limit);
         }
 
-        public TypeQLMatch.Limited limit(long limit) {
-            return new TypeQLMatch.Limited(this, limit);
+        public TypeQLGet.Limited limit(long limit) {
+            return new TypeQLGet.Limited(this, limit);
         }
     }
 
-    public static class Limited extends TypeQLMatch {
+    public static class Limited extends TypeQLGet {
 
-        public Limited(TypeQLMatch match, long limit) {
+        public Limited(TypeQLGet match, long limit) {
             super(match.conjunction, match.modifiers.filter, match.modifiers.sorting, match.modifiers.offset, limit);
         }
     }
 
     public static class Aggregate extends TypeQLQuery {
 
-        private final TypeQLMatch query;
+        private final TypeQLGet query;
         private final TypeQLToken.Aggregate.Method method;
         private final UnboundVariable var;
         private final int hash;
 
-        public Aggregate(TypeQLMatch query, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
+        public Aggregate(TypeQLGet query, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
             if (query == null) throw new NullPointerException("MatchQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
@@ -423,7 +288,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
             return TypeQLArg.QueryType.READ;
         }
 
-        public TypeQLMatch match() {
+        public TypeQLGet match() {
             return query;
         }
 
@@ -463,11 +328,11 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
 
     public static class Group extends TypeQLQuery implements Aggregatable<Group.Aggregate> {
 
-        private final TypeQLMatch query;
+        private final TypeQLGet query;
         private final UnboundVariable var;
         private final int hash;
 
-        public Group(TypeQLMatch query, UnboundVariable var) {
+        public Group(TypeQLGet query, UnboundVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.modifiers.filter().contains(var)) {
@@ -484,7 +349,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
             return TypeQLArg.QueryType.READ;
         }
 
-        public TypeQLMatch match() {
+        public TypeQLGet match() {
             return query;
         }
 
@@ -519,12 +384,12 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
 
         public static class Aggregate extends TypeQLQuery {
 
-            private final TypeQLMatch.Group group;
+            private final TypeQLGet.Group group;
             private final TypeQLToken.Aggregate.Method method;
             private final UnboundVariable var;
             private final int hash;
 
-            public Aggregate(TypeQLMatch.Group group, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
+            public Aggregate(TypeQLGet.Group group, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
                 if (group == null) throw new NullPointerException("TypeQLMatch.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
                 if (var == null && !method.equals(TypeQLToken.Aggregate.Method.COUNT)) {
@@ -546,7 +411,7 @@ public class TypeQLMatch extends TypeQLQuery implements Aggregatable<TypeQLMatch
                 return TypeQLArg.QueryType.READ;
             }
 
-            public TypeQLMatch.Group group() {
+            public TypeQLGet.Group group() {
                 return group;
             }
 

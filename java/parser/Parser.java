@@ -52,7 +52,7 @@ import com.vaticle.typeql.lang.pattern.variable.builder.Expression.Operation;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import com.vaticle.typeql.lang.query.TypeQLUpdate;
@@ -308,7 +308,7 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public TypeQLInsert visitQuery_insert(TypeQLParser.Query_insertContext ctx) {
         if (ctx.patterns() != null) {
-            return new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()))
+            return new TypeQLGet.Unfiltered(visitPatterns(ctx.patterns()))
                     .insert(visitVariable_things(ctx.variable_things()));
         } else {
             return new TypeQLInsert(visitVariable_things(ctx.variable_things()));
@@ -317,7 +317,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public TypeQLDelete visitQuery_delete(TypeQLParser.Query_deleteContext ctx) {
-        return new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()))
+        return new TypeQLGet.Unfiltered(visitPatterns(ctx.patterns()))
                 .delete(visitVariable_things(ctx.variable_things()));
     }
 
@@ -328,8 +328,8 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public TypeQLMatch visitQuery_match(TypeQLParser.Query_matchContext ctx) {
-        TypeQLMatch match = new TypeQLMatch.Unfiltered(visitPatterns(ctx.patterns()));
+    public TypeQLGet visitQuery_match(TypeQLParser.Query_matchContext ctx) {
+        TypeQLGet match = new TypeQLGet.Unfiltered(visitPatterns(ctx.patterns()));
 
         if (ctx.modifiers() != null) {
             List<UnboundVariable> variables = new ArrayList<>();
@@ -340,7 +340,7 @@ public class Parser extends TypeQLBaseVisitor {
             if (ctx.modifiers().sort() != null) sorting = visitSort(ctx.modifiers().sort());
             if (ctx.modifiers().offset() != null) offset = getLong(ctx.modifiers().offset().LONG_());
             if (ctx.modifiers().limit() != null) limit = getLong(ctx.modifiers().limit().LONG_());
-            match = new TypeQLMatch(match.conjunction(), variables, sorting, offset, limit);
+            match = new TypeQLGet(match.conjunction(), variables, sorting, offset, limit);
         }
 
         return match;
@@ -354,7 +354,7 @@ public class Parser extends TypeQLBaseVisitor {
      * @return An AggregateQuery object
      */
     @Override
-    public TypeQLMatch.Aggregate visitQuery_match_aggregate(TypeQLParser.Query_match_aggregateContext ctx) {
+    public TypeQLGet.Aggregate visitQuery_match_aggregate(TypeQLParser.Query_match_aggregateContext ctx) {
         TypeQLParser.Match_aggregateContext function = ctx.match_aggregate();
         UnboundVariable aggregateOn;
         if (function.VAR_CONCEPT_() != null) aggregateOn = getVarConcept(function.VAR_CONCEPT_());
@@ -367,7 +367,7 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public TypeQLMatch.Group visitQuery_match_group(TypeQLParser.Query_match_groupContext ctx) {
+    public TypeQLGet.Group visitQuery_match_group(TypeQLParser.Query_match_groupContext ctx) {
         UnboundVariable var;
         if (ctx.match_group().VAR_CONCEPT_() != null) var = getVarConcept(ctx.match_group().VAR_CONCEPT_());
         else if (ctx.match_group().VAR_VALUE_() != null) var = getVarValue(ctx.match_group().VAR_VALUE_());
@@ -376,7 +376,7 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public TypeQLMatch.Group.Aggregate visitQuery_match_group_agg(TypeQLParser.Query_match_group_aggContext ctx) {
+    public TypeQLGet.Group.Aggregate visitQuery_match_group_agg(TypeQLParser.Query_match_group_aggContext ctx) {
         UnboundVariable groupVar;
         if (ctx.match_group().VAR_CONCEPT_() != null) groupVar = getVarConcept(ctx.match_group().VAR_CONCEPT_());
         else if (ctx.match_group().VAR_VALUE_() != null) groupVar = getVarValue(ctx.match_group().VAR_VALUE_());

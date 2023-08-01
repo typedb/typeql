@@ -41,7 +41,7 @@ import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 
@@ -109,12 +109,12 @@ public class TypeQL {
         return parser.lexer(string);
     }
 
-    public static TypeQLMatch.Unfiltered match(Pattern... patterns) {
+    public static TypeQLGet.Unfiltered match(Pattern... patterns) {
         return match(list(patterns));
     }
 
-    public static TypeQLMatch.Unfiltered match(List<? extends Pattern> patterns) {
-        return new TypeQLMatch.Unfiltered(patterns);
+    public static TypeQLGet.Unfiltered match(List<? extends Pattern> patterns) {
+        return new TypeQLGet.Unfiltered(patterns);
     }
 
     public static TypeQLInsert insert(ThingVariable<?>... things) {

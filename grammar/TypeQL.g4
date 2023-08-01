@@ -33,62 +33,63 @@ eof_schema_rule       :   schema_rule      EOF ;
 
 query                 :   query_define           |   query_undefine
                       |   query_insert           |   query_update
-                      |   query_delete           |   query_match_get
-                      |   query_match_aggregate  |   query_match_fetch          ;
+                      |   query_delete           |   query_get
+                      |   query_get_aggregate    |   query_fetch          ;
 
 
 query_define          :   clause_define   ;
 query_undefine        :   clause_undefine ;
 
-query_insert          :   clause_match  clause_insert  ( modifiers )
-                      |   clause_insert                                                 ;
-query_update          :   clause_match  clause_delete  clause_insert  ( modifiers )     ;
-query_delete          :   clause_match  clause_delete  ( modifiers )                    ;
+query_insert          :   clause_match  clause_insert  modifiers
+                      |   clause_insert  modifiers                                 ;
+query_update          :   clause_match  clause_delete  clause_insert  modifiers    ;
+query_delete          :   clause_match  clause_delete  modifiers                   ;
 
-query_match_get       :   clause_match  clause_get     ( modifiers )                    ;
-query_match_aggregate :   clause_match  clause_get     ( modifiers )  clause_aggregate  ;
-query_match_fetch     :   clause_match  clause_fetch   ( modifiers )                    ;
+query_get             :   clause_match  clause_get  modifiers                      ;
+query_get_aggregate   :   query_get  clause_aggregate                              ;
+query_get_group       :   query_get  clause_group                                  ;
+query_get_group_agg   :   query_get  clause_group clause_aggregate                 ;
+
+query_fetch           :   clause_match  clause_fetch  modifiers                    ;
 
 clause_define         :   DEFINE      definables        ;
 clause_undefine       :   UNDEFINE    definables        ;
 clause_match          :   MATCH       patterns          ;
 clause_insert         :   INSERT      variable_things   ;
 clause_delete         :   DELETE      variable_things   ;
-clause_get            :   GET         (VAR_CONCEPT_ | VAR_VALUE_)   ( ',' (VAR_CONCEPT_ | VAR_VALUE_) )*  ';' ;
-
-clause_fetch          :  'fetch' fetchables             ;
-
-clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?   ';' ;   // method and, optionally, a variable
-aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                // calculate statistical values
+clause_get            :   GET       ( VAR_CONCEPT_ | VAR_VALUE_ )   ( ',' ( VAR_CONCEPT_ | VAR_VALUE_ ) )*  ';' ;
+clause_group          :   GROUP     ( VAR_CONCEPT_ | VAR_VALUE_ ) ';'            ;
+clause_fetch          :   FETCH       fetchables        ;
+clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?  ';' ;  // method and, optionally, a variable
+aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                 // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
 
 
 // MATCH QUERY MODIFIERS =======================================================
 
-modifiers             :    ( sort ';' )? ( offset ';' )? ( limit ';' )?                  ;
+modifiers             : ( sort ';' )? ( offset ';' )? ( limit ';' )?                     ;
 
 sort                  :   SORT        var_order     ( ',' var_order    )*                ;
-var_order             :   ( VAR_CONCEPT_  | VAR_VALUE_ )  ORDER_?                        ;
+var_order             : ( VAR_CONCEPT_  | VAR_VALUE_ )  ORDER_?                          ;
 offset                :   OFFSET      LONG_                                              ;
 limit                 :   LIMIT       LONG_                                              ;
 
 // FETCH QUERY =================================================================
 
-fetchables            : ( fetchable ';' )+    ;
-fetchable             : fetch_var
-                      | fetch_var   ':' fetch_var_attributes
-                      | fetch_name  ':' '{' fetch_subquery '}'  ;
+fetchables            : ( fetchable ';' )+      ;
+fetchable             :   fetch_variable
+                      |   fetch_into_attributes
+                      |   fetch_subquery        ;
 
-fetch_var             : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( fetch_as )? ;
+fetch_into_attributes :   fetch_variable  ':' fetch_variable_attrs ;
+fetch_variable_attrs  :   fetch_variable_attr  ( ',' fetch_variable_attr )*  ;
+fetch_variable_attr   :   label  ( fetch_as )?         ;
 
-fetch_var_attributes  :  fetch_var_attribute  ( ',' fetch_var_attribute )*  ;
-fetch_var_attribute   : label ( fetch_as )?         ;
+fetch_subquery        :   fetch_name ':' '{' ( query_fetch | query_get_aggregate )  '}'  ;
 
-fetch_as              : 'as' fetch_name ;
-fetch_name            : QUOTED_STRING | LABEL_  ;
-
-fetch_subquery        : query_match_fetch | query_match_aggregate ;
-
+fetch_variable        : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( fetch_as )? ;
+fetch_as              :   AS  fetch_name ;
+fetch_name            :   QUOTED_STRING | LABEL_  ;
 
 // SCHEMA QUERY ================================================================
 
@@ -245,7 +246,7 @@ unreserved            : VALUE | EXPR_FUNC_NAME
 MATCH           : 'match'       ;   GET             : 'get'         ;
 DEFINE          : 'define'      ;   UNDEFINE        : 'undefine'    ;
 INSERT          : 'insert'      ;   DELETE          : 'delete'      ;
-COMPUTE         : 'compute'     ;
+COMPUTE         : 'compute'     ;   FETCH           : 'fetch'       ;
 
 // NATIVE TYPE KEYWORDS
 

@@ -33,11 +33,11 @@ import static java.util.Objects.requireNonNull;
 
 public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
 
-    TypeQLDelete(TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    TypeQLDelete(TypeQLGet.Unfiltered match, List<ThingVariable<?>> variables) {
         super(DELETE, requireNonNull(match), validDeleteVars(match, variables));
     }
 
-    static List<ThingVariable<?>> validDeleteVars(TypeQLMatch.Unfiltered match, List<ThingVariable<?>> variables) {
+    static List<ThingVariable<?>> validDeleteVars(TypeQLGet.Unfiltered match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
             if (var.isNamedConcept() && !match.namedVariablesUnbound().contains(var.toUnbound())) {
                 throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(var.reference()));
@@ -51,7 +51,7 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
         return variables;
     }
 
-    public TypeQLMatch.Unfiltered match() {
+    public TypeQLGet.Unfiltered match() {
         assert match != null;
         return match;
     }

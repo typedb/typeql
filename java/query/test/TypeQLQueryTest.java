@@ -26,7 +26,7 @@ import com.vaticle.typeql.lang.TypeQL.Expression;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
@@ -51,7 +51,7 @@ public class TypeQLQueryTest {
 
     @Test
     public void testComplexQueryToString() {
-        TypeQLMatch query = match(
+        TypeQLGet query = match(
                 cVar("x").isa("movie"),
                 cVar().rel(cVar("x")).rel(cVar("y")),
                 or(
@@ -172,7 +172,7 @@ public class TypeQLQueryTest {
         assertEquals(query, TypeQL.parseQuery(query).toString());
     }
 
-    private void assertSameStringRepresentation(TypeQLMatch query) {
+    private void assertSameStringRepresentation(TypeQLGet query) {
         assertEquals(query.toString(), TypeQL.parseQuery(query.toString()).toString());
     }
 

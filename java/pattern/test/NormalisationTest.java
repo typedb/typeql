@@ -27,7 +27,7 @@ import com.vaticle.typeql.lang.pattern.Conjunctable;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Disjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
@@ -49,7 +49,7 @@ public class NormalisationTest {
                 "    $com has name $n2;\n" +
                 "    $n2 \"another-company\";\n" +
                 "};";
-        TypeQLMatch typeqlMatch = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet typeqlMatch = TypeQL.parseQuery(query).asMatch();
         Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
 
         List<Conjunction<Conjunctable>> disjunction = normalised.patterns();
@@ -76,7 +76,7 @@ public class NormalisationTest {
                 "        $n1 \"other-company\";\n" +
                 "    };\n" +
                 "}; ";
-        TypeQLMatch typeqlMatch = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet typeqlMatch = TypeQL.parseQuery(query).asMatch();
         Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
 
         String expected = "match\n" +
