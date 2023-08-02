@@ -69,7 +69,7 @@ impl Validatable for PredicateConstraint {
 }
 
 fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result<()> {
-    if predicate.is_substring() && !matches!(value, Value::Literal(Constant::String(_))) {
+    if predicate.is_substring() && !matches!(value, Value::Constant(Constant::String(_))) {
         Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
     Ok(())
@@ -78,7 +78,7 @@ fn expect_string_value_with_substring_predicate(predicate: token::Predicate, val
 impl fmt::Display for PredicateConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.predicate == token::Predicate::Like {
-            assert!(matches!(self.value, Value::Literal(Constant::String(_))));
+            assert!(matches!(self.value, Value::Constant(Constant::String(_))));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
         } else if self.predicate == token::Predicate::Eq
             && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_)))
@@ -92,7 +92,7 @@ impl fmt::Display for PredicateConstraint {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    Literal(Constant),
+    Constant(Constant),
     ThingVariable(Box<ThingVariable>),
     ValueVariable(Box<ValueVariable>),
 }
@@ -101,7 +101,7 @@ impl Eq for Value {} // can't derive, because floating point types do not implem
 impl Validatable for Value {
     fn validate(&self) -> Result<()> {
         match &self {
-            Self::Literal(literal) => literal.validate(),
+            Self::Constant(constant) => constant.validate(),
             Self::ThingVariable(variable) => variable.validate(),
             Self::ValueVariable(variable) => variable.validate(),
         }
@@ -109,8 +109,8 @@ impl Validatable for Value {
 }
 
 impl<T: Into<Constant>> From<T> for Value {
-    fn from(literal: T) -> Self {
-        Value::Literal(literal.into())
+    fn from(constant: T) -> Self {
+        Value::Constant(constant.into())
     }
 }
 
@@ -151,7 +151,7 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
-            Literal(literal) => write!(f, "{literal}"),
+            Constant(constant) => write!(f, "{constant}"),
             ThingVariable(var) => write!(f, "{}", var.reference),
             ValueVariable(var) => write!(f, "{}", var.reference),
         }

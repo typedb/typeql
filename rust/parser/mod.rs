@@ -697,7 +697,7 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
             Rule::VAR_ => Expression::Variable(get_var(primary)),
             Rule::constant => Expression::Constant(visit_constant(primary)),
             Rule::expression_function => Expression::Function(visit_function(primary)),
-            Rule::paren_expr => visit_expression(primary.into_children().consume_any()),
+            Rule::expression_parenthesis => visit_expression(primary.into_children().consume_any()),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
         })
         .map_infix(|left, op, right| {

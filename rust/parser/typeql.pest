@@ -165,12 +165,12 @@ predicate_substring = { CONTAINS | LIKE }
 
 // EXPRESSION CONSTRUCTS =======================================================
 
-expression = { expression_base ~ ( infix ~ expression_base )* }
+expression = { expression_base ~ ( expression_operator ~ expression_base )* }
 
-expression_base = _{ VAR_ | expression_function | constant | paren_expr }
+expression_base = _{ VAR_ | expression_function | constant | expression_parenthesis }
 
-infix = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
-paren_expr = { PAREN_OPEN ~ expression ~ PAREN_CLOSE }
+expression_operator = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
+expression_parenthesis = { PAREN_OPEN ~ expression ~ PAREN_CLOSE }
 
 expression_function = { expression_function_name ~ "(" ~ expression_arguments? ~ ")" }
 expression_function_name = { EXPR_FUNC_NAME | MAX | MIN }
@@ -197,8 +197,8 @@ type_native = { THING | ENTITY | ATTRIBUTE | RELATION | ROLE }
 
 value_type = { LONG | DOUBLE | STRING | BOOLEAN | DATETIME }
 constant = { STRING_ | DATETIME_ | DATE_ | BOOLEAN_
-          | signed_double | signed_long
-          }
+           | signed_double | signed_long
+           }
 
 signed_double = { sign? ~ DOUBLE_ }
 signed_long = { sign? ~ LONG_ }

@@ -59,14 +59,12 @@ pub enum Variable {
     Thing(ThingVariable),
     Type(TypeVariable),
     Value(ValueVariable),
-    Unbound(UnboundConceptVariable),
 }
 
 impl Variable {
     pub fn reference(&self) -> &Reference {
         use Variable::*;
         match self {
-            Unbound(unbound) => &unbound.reference,
             Concept(concept) => &concept.reference,
             Thing(thing) => &thing.reference,
             Type(type_) => &type_.reference,
@@ -77,7 +75,6 @@ impl Variable {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         use Variable::*;
         match self {
-            Unbound(unbound) => unbound.references(),
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
             Type(type_) => type_.references(),
@@ -88,7 +85,6 @@ impl Variable {
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         use Variable::*;
         match self {
-            Unbound(unbound) => unbound.references(),
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
             Type(type_) => type_.references(),
@@ -97,15 +93,10 @@ impl Variable {
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
-        match self {
-            Self::Unbound(_) => unreachable!(),
-            _ => {
-                if !self.references_recursive().any(|r| r.is_name() && bounds.contains(r)) {
-                    Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
-                }
-                Ok(())
-            }
+        if !self.references_recursive().any(|r| r.is_name() && bounds.contains(r)) {
+            Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
         }
+        Ok(())
     }
 }
 
@@ -114,14 +105,12 @@ enum_wrapper! { Variable
     ThingVariable => Thing,
     TypeVariable => Type,
     ValueVariable => Value,
-    UnboundConceptVariable => Unbound,
 }
 
 impl Validatable for Variable {
     fn validate(&self) -> Result<()> {
         use Variable::*;
         match self {
-            Unbound(unbound) => unbound.validate(),
             Concept(concept) => concept.validate(),
             Thing(thing) => thing.validate(),
             Type(type_) => type_.validate(),
@@ -144,7 +133,6 @@ impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Variable::*;
         match self {
-            Unbound(unbound) => write!(f, "{unbound}"),
             Concept(concept) => write!(f, "{concept}"),
             Thing(thing) => write!(f, "{thing}"),
             Type(type_) => write!(f, "{type_}"),

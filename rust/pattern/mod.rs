@@ -162,12 +162,6 @@ impl From<TypeVariable> for Pattern {
     }
 }
 
-impl From<UnboundConceptVariable> for Pattern {
-    fn from(variable: UnboundConceptVariable) -> Self {
-        Variable::from(variable).into()
-    }
-}
-
 impl From<ValueVariable> for Pattern {
     fn from(variable: ValueVariable) -> Self {
         Variable::from(variable).into()
