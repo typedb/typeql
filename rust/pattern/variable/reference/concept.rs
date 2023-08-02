@@ -37,7 +37,7 @@ pub enum ConceptReference {
 }
 
 impl ConceptReference {
-    pub(crate) const ANONYMOUS_NAME: &'static str = "_";
+    const ANONYMOUS_NAME: &'static str = "_";
 
     pub fn is_name(&self) -> bool {
         matches!(self, ConceptReference::Name(_))
