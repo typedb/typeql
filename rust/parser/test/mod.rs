@@ -1424,6 +1424,33 @@ rule attach-val: when {
 }
 
 #[test]
+fn test_rule_attach_attribute_by_value_implicit_equals() {
+    let query = r#"define
+rule attach-val: when {
+    $x has age $a;
+    ?d = $a * 365;
+} then {
+    $x has days ?d;
+};"#;
+
+    let expected_query = r#"define
+rule attach-val: when {
+    $x has age $a;
+    ?d = $a * 365;
+} then {
+    $x has days == ?d;
+};"#;
+
+    let parsed = parse_query(query).unwrap().into_define();
+    let expected = typeql_define!(rule("attach-val")
+        .when(and!(cvar("x").has(("age", cvar("a"))), vvar("d").assign(cvar("a").multiply(365)),))
+        .then(cvar("x").has(("days", vvar("d")))));
+
+    assert_eq!(expected, parsed);
+    assert_eq!(expected_query, parsed.to_string());
+}
+
+#[test]
 fn test_parsing_boolean() {
     let query = r#"insert
 $_ has flag true;"#;
