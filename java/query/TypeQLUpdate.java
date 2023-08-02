@@ -49,7 +49,7 @@ public class TypeQLUpdate extends TypeQLWritable {
     private List<UnboundVariable> namedDeleteVariablesUnbound;
     private List<UnboundVariable> namedInsertVariablesUnbound;
 
-    public TypeQLUpdate(TypeQLGet.Unfiltered match, List<ThingVariable<?>> deleteVariables,
+    public TypeQLUpdate(TypeQLGet.Unmodified match, List<ThingVariable<?>> deleteVariables,
                         List<ThingVariable<?>> insertVariables) {
         super(match);
         this.deleteVariables = validDeleteVars(match, deleteVariables);
@@ -62,7 +62,7 @@ public class TypeQLUpdate extends TypeQLWritable {
         this.hash = Objects.hash(match, deleteVariables, insertVariables);
     }
 
-    public TypeQLGet.Unfiltered match() {
+    public TypeQLGet.Unmodified match() {
         assert match != null;
         return match;
     }
@@ -96,9 +96,9 @@ public class TypeQLUpdate extends TypeQLWritable {
     public String toString(boolean pretty) {
         StringBuilder query = new StringBuilder();
         query.append(match.toString(pretty)).append(NEW_LINE);
-        appendSubQuery(query, DELETE, deleteVariables.stream().map(v -> v.toString(pretty)), pretty);
+        appendClause(query, DELETE, deleteVariables.stream().map(v -> v.toString(pretty)), pretty);
         query.append(NEW_LINE);
-        appendSubQuery(query, INSERT, insertVariables.stream().map(v -> v.toString(pretty)), pretty);
+        appendClause(query, INSERT, insertVariables.stream().map(v -> v.toString(pretty)), pretty);
         return query.toString();
     }
 

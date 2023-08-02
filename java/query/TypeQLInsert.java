@@ -39,19 +39,24 @@ import static java.util.stream.Stream.concat;
 public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
 
     public TypeQLInsert(List<ThingVariable<?>> variables) {
-        this(null, variables, null);
+        super(INSERT, null, variables, Modifiers.EMPTY);
+        validateNamesUnique(patterns);
     }
 
-    TypeQLInsert(@Nullable TypeQLGet.Unfiltered match, List<ThingVariable<?>> variables, @Nullable Modifiers modifiers) {
+    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables) {
+        this(match, variables, Modifiers.EMPTY);
+    }
+
+    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables, Modifiers modifiers) {
         super(INSERT, match, validInsertVars(match, variables), modifiers);
         Stream<Pattern> patterns = concat(
-                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(TypeQLGet::patternsRecursive),
+                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(MatchClause::patternsRecursive),
                 variables.stream()
         );
         validateNamesUnique(patterns);
     }
 
-    static List<ThingVariable<?>> validInsertVars(@Nullable TypeQLGet.Unfiltered match, List<ThingVariable<?>> variables) {
+    static List<ThingVariable<?>> validInsertVars(@Nullable MatchClause match, List<ThingVariable<?>> variables) {
         if (match != null) {
             if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound())
                     || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
@@ -61,7 +66,7 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
         return variables;
     }
 
-    public Optional<TypeQLGet.Unfiltered> match() {
+    public Optional<MatchClause> match() {
         return Optional.ofNullable(match);
     }
 

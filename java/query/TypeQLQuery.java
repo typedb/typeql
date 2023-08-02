@@ -27,13 +27,17 @@ import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
@@ -44,6 +48,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.MATCH;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.GET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
@@ -55,11 +60,11 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTER
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public abstract class TypeQLQuery {
+public interface TypeQLQuery {
 
-    public abstract TypeQLArg.QueryType type();
+    TypeQLArg.QueryType type();
 
-    public TypeQLDefine asDefine() {
+    default TypeQLDefine asDefine() {
         if (this instanceof TypeQLDefine) {
             return (TypeQLDefine) this;
         } else {
@@ -67,7 +72,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLUndefine asUndefine() {
+    default TypeQLUndefine asUndefine() {
         if (this instanceof TypeQLUndefine) {
             return (TypeQLUndefine) this;
         } else {
@@ -75,7 +80,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLInsert asInsert() {
+    default TypeQLInsert asInsert() {
         if (this instanceof TypeQLInsert) {
             return (TypeQLInsert) this;
         } else {
@@ -83,7 +88,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLDelete asDelete() {
+    default TypeQLDelete asDelete() {
         if (this instanceof TypeQLDelete) {
             return (TypeQLDelete) this;
         } else {
@@ -91,7 +96,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLUpdate asUpdate() {
+    default TypeQLUpdate asUpdate() {
         if (this instanceof TypeQLUpdate) {
             return (TypeQLUpdate) this;
         } else {
@@ -99,7 +104,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLGet asMatch() {
+    default TypeQLGet asMatch() {
         if (this instanceof TypeQLGet) {
             return (TypeQLGet) this;
         } else {
@@ -107,7 +112,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLGet.Aggregate asMatchAggregate() {
+    default TypeQLGet.Aggregate asMatchAggregate() {
         if (this instanceof TypeQLGet.Aggregate) {
             return (TypeQLGet.Aggregate) this;
         } else {
@@ -115,7 +120,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLGet.Group asMatchGroup() {
+    default TypeQLGet.Group asMatchGroup() {
         if (this instanceof TypeQLGet.Group) {
             return (TypeQLGet.Group) this;
         } else {
@@ -123,7 +128,7 @@ public abstract class TypeQLQuery {
         }
     }
 
-    public TypeQLGet.Group.Aggregate asMatchGroupAggregate() {
+    default TypeQLGet.Group.Aggregate asMatchGroupAggregate() {
         if (this instanceof TypeQLGet.Group.Aggregate) {
             return (TypeQLGet.Group.Aggregate) this;
         } else {
@@ -131,26 +136,56 @@ public abstract class TypeQLQuery {
         }
     }
 
-    protected void appendSubQuery(StringBuilder query, TypeQLToken.Command command, Stream<String> elements, boolean pretty) {
-        query.append(command).append(NEW_LINE);
-        if (pretty) query.append(elements.collect(SEMICOLON_NEW_LINE.joiner()));
-        else query.append(elements.collect(SEMICOLON_SPACE.joiner()));
-        query.append(SEMICOLON);
+    static void appendClause(StringBuilder builder, TypeQLToken.Command command, Stream<String> elements, boolean pretty) {
+        builder.append(command).append(NEW_LINE);
+        if (pretty) builder.append(elements.collect(SEMICOLON_NEW_LINE.joiner()));
+        else builder.append(elements.collect(SEMICOLON_SPACE.joiner()));
+        builder.append(SEMICOLON);
     }
 
     @Override
-    public String toString() {
+    default String toString() {
         return toString(true);
     }
 
-    public abstract String toString(boolean pretty);
+    String toString(boolean pretty);
 
-    static class MatchClause {
+    interface Unmodified extends TypeQLQuery {
+
+        Sorted sort(Sortable.Sorting sorting);
+
+        Offsetted offset(long offset);
+
+        Limited limit(long limit);
+    }
+
+    interface Sorted extends TypeQLQuery {
+
+        Modifiers modifiers();
+
+        Offsetted offset(long offset);
+
+        Limited limit(long limit);
+    }
+
+    interface Offsetted extends TypeQLQuery {
+
+        Modifiers modifiers();
+
+        Limited limit(long offset);
+    }
+
+    interface Limited extends TypeQLQuery {
+
+        Modifiers modifiers();
+    }
+
+    class MatchClause {
 
         private final Conjunction<? extends Pattern> conjunction;
 
         private List<BoundVariable> variables;
-        private List<UnboundVariable> variablesNamedUnbound;
+        private Set<UnboundVariable> variablesNamedUnbound;
 
         MatchClause(Conjunction<? extends Pattern> conjunction) {
             this.conjunction = conjunction;
@@ -189,6 +224,33 @@ public abstract class TypeQLQuery {
             });
         }
 
+        public TypeQLGet.Unmodified get(UnboundVariable var, UnboundVariable... vars) {
+            List<UnboundVariable> varList = new ArrayList<>();
+            varList.add(var);
+            varList.addAll(list(vars));
+            return get(varList);
+        }
+
+        public TypeQLGet.Unmodified get(List<UnboundVariable> vars) {
+            return new TypeQLGet.Unmodified(this, vars);
+        }
+
+        public TypeQLInsert insert(ThingVariable<?>... things) {
+            return insert(list(things));
+        }
+
+        public TypeQLInsert insert(List<ThingVariable<?>> things) {
+            return new TypeQLInsert(this, things);
+        }
+
+        public TypeQLDelete delete(ThingVariable<?>... things) {
+            return delete(list(things));
+        }
+
+        public TypeQLDelete delete(List<ThingVariable<?>> things) {
+            return new TypeQLDelete(this, things);
+        }
+
         public Stream<Pattern> patternsRecursive() {
             return patternsRecursive(conjunction);
         }
@@ -207,9 +269,9 @@ public abstract class TypeQLQuery {
             return variables;
         }
 
-        public List<UnboundVariable> namedVariablesUnbound() {
+        public Set<UnboundVariable> namedVariablesUnbound() {
             if (variablesNamedUnbound == null) {
-                variablesNamedUnbound = conjunction.namedVariablesUnbound().collect(toList());
+                variablesNamedUnbound = conjunction.namedVariablesUnbound().collect(toSet());
             }
             return variablesNamedUnbound;
         }
@@ -227,31 +289,34 @@ public abstract class TypeQLQuery {
         public int hashCode() {
             return conjunction.hashCode();
         }
+
+        @Override
+        public String toString() {
+            return toString(true);
+        }
+
+        public String toString(boolean pretty) {
+            StringBuilder query = new StringBuilder();
+            appendClause(query, MATCH, conjunction.patterns().stream().map(p -> p.toString(pretty)), pretty);
+            return query.toString();
+        }
     }
 
-    public static class Modifiers {
+    class Modifiers {
 
-        final TypeQLGet typeQLGet;
-        final List<UnboundVariable> filter;
+        static Modifiers EMPTY = new Modifiers(null, null, null);
+
         final Sortable.Sorting sorting;
         final Long offset;
         final Long limit;
 
         private final int hash;
 
-        public Modifiers(TypeQLGet typeQLGet, List<UnboundVariable> filter, @Nullable Sortable.Sorting sorting, @Nullable Long offset,
-                         @Nullable Long limit) {
-            this.typeQLGet = typeQLGet;
-            this.filter = list(filter);
+        public Modifiers(@Nullable Sortable.Sorting sorting, @Nullable Long offset, @Nullable Long limit) {
             this.sorting = sorting;
             this.offset = offset;
             this.limit = limit;
-            this.hash = Objects.hash(this.filter, this.sorting, this.offset, this.limit);
-        }
-
-        public List<UnboundVariable> filter() {
-            if (filter.isEmpty()) return typeQLGet.namedVariablesUnbound();
-            else return filter;
+            this.hash = Objects.hash(this.sorting, this.offset, this.limit);
         }
 
         public Optional<Long> offset() {
@@ -267,18 +332,12 @@ public abstract class TypeQLQuery {
         }
 
         public boolean isEmpty() {
-            return filter.isEmpty() && sorting == null && offset == null && limit == null;
+            sorting == null && offset == null && limit == null;
         }
 
         @Override
         public String toString() {
             StringBuilder syntax = new StringBuilder();
-            if (!filter.isEmpty()) {
-                syntax.append(GET);
-                String vars = filter.stream().map(UnboundVariable::toString).collect(COMMA_SPACE.joiner());
-                syntax.append(SPACE).append(vars);
-                syntax.append(SEMICOLON).append(SPACE);
-            }
             if (sorting != null) syntax.append(SORT).append(SPACE).append(sorting).append(SEMICOLON).append(SPACE);
             if (offset != null) syntax.append(OFFSET).append(SPACE).append(offset).append(SEMICOLON).append(SPACE);
             if (limit != null) syntax.append(LIMIT).append(SPACE).append(limit).append(SEMICOLON).append(SPACE);
@@ -290,7 +349,7 @@ public abstract class TypeQLQuery {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Modifiers modifiers = (Modifiers) o;
-            return Objects.equals(filter, modifiers.filter) && Objects.equals(sorting, modifiers.sorting)
+            return Objects.equals(sorting, modifiers.sorting)
                     && Objects.equals(offset, modifiers.offset) && Objects.equals(limit, modifiers.limit);
         }
 

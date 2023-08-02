@@ -109,12 +109,12 @@ public class TypeQL {
         return parser.lexer(string);
     }
 
-    public static TypeQLGet.Unfiltered match(Pattern... patterns) {
+    public static TypeQLGet.Unmodified match(Pattern... patterns) {
         return match(list(patterns));
     }
 
-    public static TypeQLGet.Unfiltered match(List<? extends Pattern> patterns) {
-        return new TypeQLGet.Unfiltered(patterns);
+    public static TypeQLGet.Unmodified match(List<? extends Pattern> patterns) {
+        return new TypeQLGet.Unmodified(patterns);
     }
 
     public static TypeQLInsert insert(ThingVariable<?>... things) {

@@ -308,7 +308,7 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public TypeQLInsert visitQuery_insert(TypeQLParser.Query_insertContext ctx) {
         if (ctx.patterns() != null) {
-            return new TypeQLGet.Unfiltered(visitPatterns(ctx.patterns()))
+            return new TypeQLGet.Unmodified(visitPatterns(ctx.patterns()))
                     .insert(visitVariable_things(ctx.variable_things()));
         } else {
             return new TypeQLInsert(visitVariable_things(ctx.variable_things()));
@@ -317,7 +317,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public TypeQLDelete visitQuery_delete(TypeQLParser.Query_deleteContext ctx) {
-        return new TypeQLGet.Unfiltered(visitPatterns(ctx.patterns()))
+        return new TypeQLGet.Unmodified(visitPatterns(ctx.patterns()))
                 .delete(visitVariable_things(ctx.variable_things()));
     }
 
@@ -329,7 +329,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public TypeQLGet visitQuery_match(TypeQLParser.Query_matchContext ctx) {
-        TypeQLGet match = new TypeQLGet.Unfiltered(visitPatterns(ctx.patterns()));
+        TypeQLGet match = new TypeQLGet.Unmodified(visitPatterns(ctx.patterns()));
 
         if (ctx.modifiers() != null) {
             List<UnboundVariable> variables = new ArrayList<>();

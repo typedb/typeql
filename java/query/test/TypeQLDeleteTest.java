@@ -43,8 +43,8 @@ public class TypeQLDeleteTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private final TypeQLGet.Unfiltered match1 = TypeQL.match(cVar("x").isa("movie"));
-    private final TypeQLGet.Unfiltered match2 = TypeQL.match(cVar("y").isa("movie"));
+    private final TypeQLGet.Unmodified match1 = TypeQL.match(cVar("x").isa("movie"));
+    private final TypeQLGet.Unmodified match2 = TypeQL.match(cVar("y").isa("movie"));
 
     private final List<ThingVariable<?>> delete1 = list(cVar("x").isa("movie"));
     private final List<ThingVariable<?>> delete2 = list(cVar("y").isa("movie"));

@@ -48,6 +48,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -60,6 +61,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     public Conjunction(List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
+        else if (patterns.size() == 0) throw TypeQLException.of(MISSING_PATTERNS);
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
     }
