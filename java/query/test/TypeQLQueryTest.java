@@ -25,8 +25,8 @@ import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.TypeQL.Expression;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
-import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLGet;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
@@ -46,7 +46,7 @@ public class TypeQLQueryTest {
 
     @Test
     public void testSimpleGetQueryToString() {
-        assertSameStringRepresentation(match(cVar("x").isa("movie").has("title", "Godfather")));
+        assertSameStringRepresentation(match(cVar("x").isa("movie").has("title", "Godfather")).get());
     }
 
     @Test
@@ -69,32 +69,32 @@ public class TypeQLQueryTest {
 
     @Test
     public void testQueryWithResourcesToString() {
-        assertSameStringRepresentation(match(cVar("x").has("tmdb-vote-count", lte(400))));
+        assertSameStringRepresentation(match(cVar("x").has("tmdb-vote-count", lte(400))).get());
     }
 
     @Test
     public void testQueryWithSubToString() {
-        assertSameStringRepresentation(match(cVar("x").sub(cVar("y"))));
+        assertSameStringRepresentation(match(cVar("x").sub(cVar("y"))).get());
     }
 
     @Test
     public void testQueryWithPlaysToString() {
-        assertSameStringRepresentation(match(cVar("x").plays(cVar("y"))));
+        assertSameStringRepresentation(match(cVar("x").plays(cVar("y"))).get());
     }
 
     @Test
     public void testQueryWithRelatesToString() {
-        assertSameStringRepresentation(match(cVar("x").relates(cVar("y"))));
+        assertSameStringRepresentation(match(cVar("x").relates(cVar("y"))).get());
     }
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(match(cVar("x").value(TypeQLArg.ValueType.LONG)));
+        assertSameStringRepresentation(match(cVar("x").value(TypeQLArg.ValueType.LONG)).get());
     }
 
     @Test
     public void testQueryIsAbstractToString() {
-        assertSameStringRepresentation(match(cVar("x").isAbstract()));
+        assertSameStringRepresentation(match(cVar("x").isAbstract()).get());
     }
 
     @Test

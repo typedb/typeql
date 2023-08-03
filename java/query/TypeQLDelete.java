@@ -24,6 +24,7 @@ package com.vaticle.typeql.lang.query;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
@@ -33,11 +34,15 @@ import static java.util.Objects.requireNonNull;
 
 public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
 
-    TypeQLDelete(TypeQLGet.Unmodified match, List<ThingVariable<?>> variables) {
-        super(DELETE, requireNonNull(match), validDeleteVars(match, variables), modifiers);
+    TypeQLDelete(MatchClause match, List<ThingVariable<?>> variables) {
+        this(match, variables, Modifiers.EMPTY);
     }
 
-    static List<ThingVariable<?>> validDeleteVars(TypeQLGet.Unmodified query, List<ThingVariable<?>> variables) {
+    TypeQLDelete(MatchClause match, List<ThingVariable<?>> variables, @Nullable Modifiers modifiers) {
+        super(DELETE, requireNonNull(match), validDeleteVars(match, variables), modifiers == null ? Modifiers.EMPTY : modifiers);
+    }
+
+    static List<ThingVariable<?>> validDeleteVars(MatchClause match, List<ThingVariable<?>> variables) {
         variables.forEach(var -> {
             if (var.isNamedConcept() && !match.namedVariablesUnbound().contains(var.toUnbound())) {
                 throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE_DELETE.message(var.reference()));
@@ -51,11 +56,6 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
         return variables;
     }
 
-    public TypeQLGet.Unmodified match() {
-        assert match != null;
-        return match;
-    }
-
     public List<ThingVariable<?>> variables() { return variables; }
 
     public TypeQLUpdate insert(ThingVariable<?>... things) {
@@ -63,6 +63,6 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
     }
 
     public TypeQLUpdate insert(List<ThingVariable<?>> things) {
-        return new TypeQLUpdate(this.match(), variables, things);
+        return new TypeQLUpdate(this.match().get(), variables, things);
     }
 }

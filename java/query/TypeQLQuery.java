@@ -21,6 +21,7 @@
 
 package com.vaticle.typeql.lang.query;
 
+import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
@@ -37,19 +38,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.MATCH;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.GET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
@@ -57,6 +55,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CAST
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -104,7 +103,7 @@ public interface TypeQLQuery {
         }
     }
 
-    default TypeQLGet asMatch() {
+    default TypeQLGet asGet() {
         if (this instanceof TypeQLGet) {
             return (TypeQLGet) this;
         } else {
@@ -112,7 +111,7 @@ public interface TypeQLQuery {
         }
     }
 
-    default TypeQLGet.Aggregate asMatchAggregate() {
+    default TypeQLGet.Aggregate asGetAggregate() {
         if (this instanceof TypeQLGet.Aggregate) {
             return (TypeQLGet.Aggregate) this;
         } else {
@@ -120,7 +119,7 @@ public interface TypeQLQuery {
         }
     }
 
-    default TypeQLGet.Group asMatchGroup() {
+    default TypeQLGet.Group asGetGroup() {
         if (this instanceof TypeQLGet.Group) {
             return (TypeQLGet.Group) this;
         } else {
@@ -128,11 +127,19 @@ public interface TypeQLQuery {
         }
     }
 
-    default TypeQLGet.Group.Aggregate asMatchGroupAggregate() {
+    default TypeQLGet.Group.Aggregate asGetGroupAggregate() {
         if (this instanceof TypeQLGet.Group.Aggregate) {
             return (TypeQLGet.Group.Aggregate) this;
         } else {
             throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLGet.Group.Aggregate.class)));
+        }
+    }
+
+    default TypeQLFetch asFetch() {
+        if (this instanceof TypeQLFetch) {
+            return (TypeQLFetch) this;
+        } else {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLFetch.class)));
         }
     }
 
@@ -143,36 +150,60 @@ public interface TypeQLQuery {
         builder.append(SEMICOLON);
     }
 
-    @Override
-    default String toString() {
-        return toString(true);
-    }
-
     String toString(boolean pretty);
 
-    interface Unmodified extends TypeQLQuery {
+    interface Unmodified<S extends Sorted<O, L>, O extends Offset<L>, L extends Limited>
+            extends TypeQLQuery {
 
-        Sorted sort(Sortable.Sorting sorting);
+        default S sort(UnboundVariable var, UnboundVariable... vars) {
+            List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
+            pairs.add(new Pair<>(var, null));
+            for (UnboundVariable v : vars) pairs.add(new Pair<>(v, null));
+            return sort(pairs);
+        }
 
-        Offsetted offset(long offset);
+        default S sort(Pair<UnboundVariable, String> varOrder1) {
+            return sort(list(parseVarOrder(varOrder1)));
+        }
 
-        Limited limit(long limit);
+        default S sort(Pair<UnboundVariable, String> varOrder1, Pair<UnboundVariable, String> varOrder2) {
+            return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2)));
+        }
+
+        default S sort(Pair<UnboundVariable, String> varOrder1, Pair<UnboundVariable, String> varOrder2,
+                       Pair<UnboundVariable, String> varOrder3) {
+            return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2), parseVarOrder(varOrder3)));
+        }
+
+        static Pair<UnboundVariable, TypeQLArg.Order> parseVarOrder(Pair<UnboundVariable, String> varOrder) {
+            return new Pair<>(varOrder.first(), TypeQLArg.Order.of(varOrder.second()));
+        }
+
+        default S sort(List<Pair<UnboundVariable, TypeQLArg.Order>> varOrders) {
+            return sort(Sortable.Sorting.create(varOrders));
+        }
+
+        S sort(Sortable.Sorting sorting);
+
+        O offset(long offset);
+
+        L limit(long limit);
     }
 
-    interface Sorted extends TypeQLQuery {
+    interface Sorted<O extends Offset<L>, L extends Limited> extends TypeQLQuery {
 
         Modifiers modifiers();
 
-        Offsetted offset(long offset);
+        O offset(long offset);
 
-        Limited limit(long limit);
+        L limit(long limit);
     }
 
-    interface Offsetted extends TypeQLQuery {
+    interface Offset<L extends Limited> extends TypeQLQuery {
 
         Modifiers modifiers();
 
-        Limited limit(long offset);
+        L limit(long offset);
     }
 
     interface Limited extends TypeQLQuery {
@@ -187,7 +218,7 @@ public interface TypeQLQuery {
         private List<BoundVariable> variables;
         private Set<UnboundVariable> variablesNamedUnbound;
 
-        MatchClause(Conjunction<? extends Pattern> conjunction) {
+        public MatchClause(Conjunction<? extends Pattern> conjunction) {
             this.conjunction = conjunction;
 
             // TODO: these can be minimised
@@ -224,11 +255,9 @@ public interface TypeQLQuery {
             });
         }
 
-        public TypeQLGet.Unmodified get(UnboundVariable var, UnboundVariable... vars) {
-            List<UnboundVariable> varList = new ArrayList<>();
-            varList.add(var);
-            varList.addAll(list(vars));
-            return get(varList);
+        public TypeQLGet.Unmodified get(UnboundVariable... vars) {
+            if (vars.length == 0) return get(emptyList());
+            else return get(list(vars));
         }
 
         public TypeQLGet.Unmodified get(List<UnboundVariable> vars) {
@@ -304,7 +333,7 @@ public interface TypeQLQuery {
 
     class Modifiers {
 
-        static Modifiers EMPTY = new Modifiers(null, null, null);
+        public static Modifiers EMPTY = new Modifiers(null, null, null);
 
         final Sortable.Sorting sorting;
         final Long offset;
@@ -332,7 +361,7 @@ public interface TypeQLQuery {
         }
 
         public boolean isEmpty() {
-            sorting == null && offset == null && limit == null;
+            return sorting == null && offset == null && limit == null;
         }
 
         @Override

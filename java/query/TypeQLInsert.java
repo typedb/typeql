@@ -22,14 +22,10 @@
 package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
@@ -40,34 +36,24 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
 
     public TypeQLInsert(List<ThingVariable<?>> variables) {
         super(INSERT, null, variables, Modifiers.EMPTY);
-        validateNamesUnique(patterns);
+        validateNamesUnique(variables.stream());
     }
 
     public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables) {
         this(match, variables, Modifiers.EMPTY);
     }
 
-    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables, Modifiers modifiers) {
-        super(INSERT, match, validInsertVars(match, variables), modifiers);
-        Stream<Pattern> patterns = concat(
-                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(MatchClause::patternsRecursive),
-                variables.stream()
-        );
-        validateNamesUnique(patterns);
+    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables, @Nullable Modifiers modifiers) {
+        super(INSERT, match, validInsertVars(match, variables), modifiers == null ? Modifiers.EMPTY : modifiers);
+        validateNamesUnique(concat(match.patternsRecursive(), variables.stream()));
     }
 
-    static List<ThingVariable<?>> validInsertVars(@Nullable MatchClause match, List<ThingVariable<?>> variables) {
-        if (match != null) {
-            if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound())
-                    || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
-                throw TypeQLException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.namedVariablesUnbound()));
-            }
+    static List<ThingVariable<?>> validInsertVars(MatchClause match, List<ThingVariable<?>> variables) {
+        if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound())
+                || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
+            throw TypeQLException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.namedVariablesUnbound()));
         }
         return variables;
-    }
-
-    public Optional<MatchClause> match() {
-        return Optional.ofNullable(match);
     }
 
     public List<ThingVariable<?>> variables() {

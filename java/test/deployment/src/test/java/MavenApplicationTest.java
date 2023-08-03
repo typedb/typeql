@@ -45,7 +45,7 @@ public class MavenApplicationTest {
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        TypeQLGet parsed = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
         TypeQLGet expected = match(
                 TypeQL.cVar("brando").eq("Marl B").isa("name"),
@@ -69,7 +69,7 @@ public class MavenApplicationTest {
                 "    $t 'Spy';\n" +
                 "};\n" +
                 "$t != 'Apocalypse Now';";
-        TypeQLGet parsed = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
         TypeQLGet expected = match(
                 TypeQL.cVar("x").isa("movie").has("title", TypeQL.cVar("t")),

@@ -49,8 +49,8 @@ public class NormalisationTest {
                 "    $com has name $n2;\n" +
                 "    $n2 \"another-company\";\n" +
                 "};";
-        TypeQLGet typeqlMatch = TypeQL.parseQuery(query).asMatch();
-        Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
+        TypeQLGet getQuery = TypeQL.parseQuery(query).asGet();
+        Disjunction<Conjunction<Conjunctable>> normalised = getQuery.match().conjunction().normalise();
 
         List<Conjunction<Conjunctable>> disjunction = normalised.patterns();
         assertTrue(disjunction.size() == 2);
@@ -76,8 +76,8 @@ public class NormalisationTest {
                 "        $n1 \"other-company\";\n" +
                 "    };\n" +
                 "}; ";
-        TypeQLGet typeqlMatch = TypeQL.parseQuery(query).asMatch();
-        Disjunction<Conjunction<Conjunctable>> normalised = typeqlMatch.conjunction().normalise();
+        TypeQLGet getQuery = TypeQL.parseQuery(query).asGet();
+        Disjunction<Conjunction<Conjunctable>> normalised = getQuery.match().conjunction().normalise();
 
         String expected = "match\n" +
                 "$com isa company;\n" +
@@ -91,7 +91,7 @@ public class NormalisationTest {
                 "    };\n" +
                 "};";
         TypeQLQuery expectedQuery = TypeQL.parseQuery(expected);
-        Disjunction<? extends Pattern> inner = expectedQuery.asMatch().conjunction().patterns().get(1).asNegation().pattern().asDisjunction();
+        Disjunction<? extends Pattern> inner = expectedQuery.asGet().match().conjunction().patterns().get(1).asNegation().pattern().asDisjunction();
         assertEquals(expected, expectedQuery.toString());
     }
 }

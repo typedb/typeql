@@ -37,6 +37,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
 import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static com.vaticle.typeql.lang.query.TypeQLDelete.validDeleteVars;
 import static com.vaticle.typeql.lang.query.TypeQLInsert.validInsertVars;
+import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
@@ -49,24 +50,17 @@ public class TypeQLUpdate extends TypeQLWritable {
     private List<UnboundVariable> namedDeleteVariablesUnbound;
     private List<UnboundVariable> namedInsertVariablesUnbound;
 
-    public TypeQLUpdate(TypeQLGet.Unmodified match, List<ThingVariable<?>> deleteVariables,
+    public TypeQLUpdate(MatchClause match, List<ThingVariable<?>> deleteVariables,
                         List<ThingVariable<?>> insertVariables) {
         super(match);
         this.deleteVariables = validDeleteVars(match, deleteVariables);
         this.insertVariables = validInsertVars(match, insertVariables);
         Stream<Pattern> patterns = concat(
-                Stream.ofNullable(match).filter(Objects::nonNull).flatMap(TypeQLGet::patternsRecursive),
-                concat(deleteVariables.stream(), insertVariables.stream())
+                match.patternsRecursive(), concat(deleteVariables.stream(), insertVariables.stream())
         );
         validateNamesUnique(patterns);
         this.hash = Objects.hash(match, deleteVariables, insertVariables);
     }
-
-    public TypeQLGet.Unmodified match() {
-        assert match != null;
-        return match;
-    }
-
 
     public List<ThingVariable<?>> deleteVariables() {
         return deleteVariables;
@@ -107,8 +101,7 @@ public class TypeQLUpdate extends TypeQLWritable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TypeQLUpdate that = (TypeQLUpdate) o;
-        return (this.match.equals(that.match) &&
-                this.deleteVariables.equals(that.deleteVariables) &&
+        return (this.match.equals(that.match) && this.deleteVariables.equals(that.deleteVariables) &&
                 this.insertVariables.equals(that.insertVariables));
     }
 

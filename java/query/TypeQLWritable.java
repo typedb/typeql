@@ -32,6 +32,7 @@ import com.vaticle.typeql.lang.pattern.variable.Variable;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
@@ -50,10 +51,20 @@ public abstract class TypeQLWritable implements TypeQLQuery {
         this.match = match;
     }
 
+    public Optional<MatchClause> match() {
+        return Optional.ofNullable(match);
+    }
+
     @Override
     public TypeQLArg.QueryType type() {
         return TypeQLArg.QueryType.WRITE;
     }
+
+    @Override
+    public String toString() {
+        return toString(true);
+    }
+
 
     abstract static class InsertOrDelete extends TypeQLWritable {
 
@@ -66,6 +77,7 @@ public abstract class TypeQLWritable implements TypeQLQuery {
         InsertOrDelete(TypeQLToken.Command command, @Nullable MatchClause match, List<ThingVariable<?>> variables, Modifiers modifiers) {
             super(match);
             assert command == INSERT || command == DELETE;
+            assert modifiers != null;
             if (variables == null || variables.isEmpty()) throw TypeQLException.of(MISSING_PATTERNS.message());
             this.command = command;
             this.variables = variables;

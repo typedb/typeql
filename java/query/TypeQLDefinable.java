@@ -37,8 +37,9 @@ import java.util.Objects;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DEFINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.UNDEFINE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
+import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 
-abstract class TypeQLDefinable extends TypeQLQuery {
+abstract class TypeQLDefinable implements TypeQLQuery {
 
     private final TypeQLToken.Command command;
     private final List<Definable> definables;
@@ -82,6 +83,11 @@ abstract class TypeQLDefinable extends TypeQLQuery {
 
     public final List<Rule> rules() {
         return rules;
+    }
+
+    @Override
+    public String toString() {
+        return toString(true);
     }
 
     @Override

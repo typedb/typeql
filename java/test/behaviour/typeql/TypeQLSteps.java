@@ -25,8 +25,8 @@ package com.vaticle.typeql.lang.test.behaviour.typeql;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
-import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLGet;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import io.cucumber.java.en.Given;
@@ -69,40 +69,40 @@ public class TypeQLSteps {
     public void typeql_delete(String query) {
         TypeQLDelete parsed = TypeQL.parseQuery(query);
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
-        parsed.match().conjunction().normalise();
+        parsed.match().get().conjunction().normalise();
     }
 
     @Given("for typeql query")
     @Given("reasoning query")
-    @Given("get answers of typeql match")
-    @Given("get answers of typeql match group")
-    @Given("get answer of typeql match aggregate")
-    @Given("get answers of typeql match group aggregate")
+    @Given("get answers of typeql get")
+    @Given("get answers of typeql get group")
+    @Given("get answer of typeql get aggregate")
+    @Given("get answers of typeql get group aggregate")
     @Given("verify answer set is equivalent for query")
     public void typeql_match(String query) {
         TypeQLQuery parsed = TypeQL.parseQuery(query);
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
         if (parsed instanceof TypeQLGet) {
-            parsed.asMatch().conjunction().normalise();
+            parsed.asGet().match().conjunction().normalise();
         }
     }
 
-    @Given("typeql match throws")
+    @Given("typeql get throws")
     @Given("typeql insert throws")
     @Given("typeql delete throws")
     @Given("typeql define throws")
     @Given("typeql undefine throws")
-    @Given("typeql match; throws exception")
-    @Given("typeql match group; throws exception")
-    @Given("typeql match aggregate; throws exception")
-    @Given("templated typeql match; throws exception")
+    @Given("typeql get; throws exception")
+    @Given("typeql get group; throws exception")
+    @Given("typeql get aggregate; throws exception")
+    @Given("templated typeql get; throws exception")
     @Given("typeql insert; throws exception")
     @Given("typeql delete; throws exception")
     @Given("typeql define; throws exception")
     @Given("typeql undefine; throws exception")
     public void do_nothing_with_throws(String query) { }
 
-    @Given("typeql match; throws exception containing {string}")
+    @Given("typeql get; throws exception containing {string}")
     public void do_nothing_with_throws_exception_containing(String exception, String query) { }
 
     @Given("typedb starts")
@@ -123,6 +123,7 @@ public class TypeQLSteps {
     @Given("for each session, transaction commits")
     public void do_nothing() { }
 
+    @Given("set time-zone is: {}")
     @Given("rules contain: {}")
     @Given("answer size is: {}")
     @Given("each answer satisfies")
