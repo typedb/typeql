@@ -24,7 +24,10 @@
 mod test;
 
 use chrono::{NaiveDate, NaiveDateTime};
-use pest::Parser;
+use pest::{
+    pratt_parser::{Assoc, Op, PrattParser},
+    Parser,
+};
 use pest_derive::Parser;
 
 use crate::{
@@ -37,11 +40,12 @@ use crate::{
         Result,
     },
     pattern::{
-        Annotation, ConceptVariable, ConceptVariableBuilder, Conjunction, Definable, Disjunction, HasConstraint,
-        IsaConstraint, Label, Negation, OwnsConstraint, Pattern, PlaysConstraint, RelatesConstraint,
-        RelationConstraint, RolePlayerConstraint, RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable,
-        ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundVariable,
-        Value, ValueConstraint, Variable,
+        Annotation, AssignConstraint, ConceptVariable, ConceptVariableBuilder, Conjunction, Constant, Definable,
+        Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
+        Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
+        RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
+        TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
+        UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
     },
     query::{
         sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
@@ -119,13 +123,13 @@ impl<'a, T: Iterator<Item = SyntaxTree<'a>> + Clone> RuleIterator for T {
 #[derive(Debug)]
 enum Type {
     Label(Label),
-    Variable(UnboundVariable),
+    Variable(UnboundConceptVariable),
 }
 
 impl Type {
     pub fn into_type_variable(self) -> TypeVariable {
         match self {
-            Self::Label(label) => UnboundVariable::hidden().type_(label),
+            Self::Label(label) => UnboundConceptVariable::hidden().type_(label),
             Self::Variable(var) => var.into_type(),
         }
     }
@@ -217,15 +221,33 @@ fn get_date_time(date_time: SyntaxTree) -> NaiveDateTime {
 fn get_var(var: SyntaxTree) -> UnboundVariable {
     let name = var.as_str();
 
+    let (prefix, _name) = name.split_at(1);
+    match prefix {
+        "$" => UnboundVariable::Concept(get_var_concept(var)),
+        "?" => UnboundVariable::Value(get_var_value(var)),
+        _ => unreachable!(),
+    }
+}
+
+fn get_var_concept(var: SyntaxTree) -> UnboundConceptVariable {
+    let name = var.as_str();
+
     assert!(name.len() > 1);
     assert!(name.starts_with('$'));
     let name = &name[1..];
 
     if name == "_" {
-        UnboundVariable::anonymous()
+        UnboundConceptVariable::anonymous()
     } else {
-        UnboundVariable::named(String::from(name))
+        UnboundConceptVariable::named(String::from(name))
     }
+}
+
+fn get_var_value(var: SyntaxTree) -> UnboundValueVariable {
+    let name = var.as_str();
+    assert!(name.len() > 1);
+    assert!(name.starts_with('?'));
+    UnboundValueVariable::named(String::from(&name[1..]))
 }
 
 fn get_isa_constraint(isa: SyntaxTree, tree: SyntaxTree) -> IsaConstraint {
@@ -238,7 +260,7 @@ fn get_isa_constraint(isa: SyntaxTree, tree: SyntaxTree) -> IsaConstraint {
 
 fn get_role_player_constraint(tree: SyntaxTree) -> RolePlayerConstraint {
     let mut tree = tree.into_children().rev();
-    let player = get_var(tree.consume_expected(Rule::player));
+    let player = get_var_concept(tree.consume_expected(Rule::player));
     if let Some(type_) = tree.consume_if_matches(Rule::type_) {
         match visit_type(type_) {
             Type::Label(label) => RolePlayerConstraint::from((label, player)),
@@ -444,16 +466,32 @@ fn visit_pattern_variable(tree: SyntaxTree) -> Variable {
         Rule::variable_thing_any => visit_variable_thing_any(child).into(),
         Rule::variable_type => visit_variable_type(child).into(),
         Rule::variable_concept => visit_variable_concept(child).into(),
+        Rule::variable_value => visit_variable_value(child).into(),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
 fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
     let mut children = tree.into_children();
-    get_var(children.consume_expected(Rule::VAR_))
-        .is(get_var(children.skip_expected(Rule::IS).consume_expected(Rule::VAR_)))
+    get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))
+        .is(get_var_concept(children.skip_expected(Rule::IS).consume_expected(Rule::VAR_CONCEPT_)))
 }
 
+fn visit_variable_value(tree: SyntaxTree) -> ValueVariable {
+    let mut children = tree.into_children();
+    let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
+    match children.peek_rule() {
+        Some(Rule::ASSIGN) => {
+            let expression = visit_expression(children.skip_expected(Rule::ASSIGN).consume_any());
+            var_value.constrain_assign(AssignConstraint::from(expression))
+        }
+        Some(Rule::predicate) => {
+            let predicate = visit_predicate(children.consume_any());
+            var_value.constrain_predicate(predicate)
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
+    }
+}
 fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
     let mut children = tree.into_children();
     let mut var_type = visit_type_any(children.consume_expected(Rule::type_any)).into_type_variable();
@@ -525,7 +563,7 @@ fn visit_variable_thing_any(tree: SyntaxTree) -> ThingVariable {
 
 fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
     let mut children = tree.into_children();
-    let mut var_thing = get_var(children.consume_expected(Rule::VAR_)).into_thing();
+    let mut var_thing = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_)).into_thing();
     if children.peek_rule() != Some(Rule::attributes) {
         let keyword = children.consume_any();
         var_thing = match keyword.as_rule() {
@@ -544,9 +582,9 @@ fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
 fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
     let mut children = tree.into_children();
     let mut relation = children
-        .consume_if_matches(Rule::VAR_)
-        .map(get_var)
-        .unwrap_or_else(UnboundVariable::hidden)
+        .consume_if_matches(Rule::VAR_CONCEPT_)
+        .map(get_var_concept)
+        .unwrap_or_else(UnboundConceptVariable::hidden)
         .constrain_relation(visit_relation(children.consume_expected(Rule::relation)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
@@ -563,10 +601,10 @@ fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
 fn visit_variable_attribute(tree: SyntaxTree) -> ThingVariable {
     let mut children = tree.into_children();
     let mut attribute = children
-        .consume_if_matches(Rule::VAR_)
-        .map(get_var)
-        .unwrap_or_else(UnboundVariable::hidden)
-        .constrain_value(visit_predicate(children.consume_expected(Rule::predicate)));
+        .consume_if_matches(Rule::VAR_CONCEPT_)
+        .map(get_var_concept)
+        .unwrap_or_else(UnboundConceptVariable::hidden)
+        .constrain_predicate(visit_predicate(children.consume_expected(Rule::predicate)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
         let type_ = children.consume_expected(Rule::type_);
@@ -595,38 +633,42 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
         Some(Rule::label) => {
             let label = children.consume_expected(Rule::label).as_str().to_owned();
             match children.peek_rule() {
-                Some(Rule::VAR_) => HasConstraint::from((label, get_var(children.consume_expected(Rule::VAR_)))),
+                Some(Rule::VAR_) => HasConstraint::from((
+                    label,
+                    get_var(children.consume_expected(Rule::VAR_).into_children().consume_any()),
+                )),
                 Some(Rule::predicate) => {
                     HasConstraint::new((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
             }
         }
-        Some(Rule::VAR_) => HasConstraint::from(get_var(children.consume_expected(Rule::VAR_))),
+        Some(Rule::VAR_CONCEPT_) => HasConstraint::from(get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
 
-fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
+fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
     let mut children = tree.into_children();
     match children.peek_rule() {
-        Some(Rule::value) => {
-            ValueConstraint::new(token::Predicate::Eq, visit_value(children.consume_expected(Rule::value)))
-        }
-        Some(Rule::predicate_equality) => ValueConstraint::new(
+        Some(Rule::constant) => PredicateConstraint::new(
+            token::Predicate::Eq,
+            visit_constant(children.consume_expected(Rule::constant)).into(),
+        ),
+        Some(Rule::predicate_equality) => PredicateConstraint::new(
             token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
             {
-                let predicate_value = children.consume_expected(Rule::predicate_value).into_child();
+                let predicate_value = children.consume_expected(Rule::value).into_child();
                 match predicate_value.as_rule() {
-                    Rule::value => visit_value(predicate_value),
-                    Rule::VAR_ => Value::from(get_var(predicate_value)),
-                    _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
+                    Rule::constant => visit_constant(predicate_value).into(),
+                    Rule::VAR_ => Value::from(get_var(predicate_value.into_children().consume_any())),
+                    _ => unreachable!("{}", TypeQLError::IllegalGrammar(predicate_value.to_string())),
                 }
             },
         ),
         Some(Rule::predicate_substring) => {
             let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
-            ValueConstraint::new(
+            PredicateConstraint::new(
                 predicate,
                 {
                     match predicate {
@@ -639,6 +681,57 @@ fn visit_predicate(tree: SyntaxTree) -> ValueConstraint {
             )
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
+    }
+}
+
+fn visit_expression(tree: SyntaxTree) -> Expression {
+    let pratt_parser: PrattParser<Rule> = PrattParser::new()
+        .op(Op::infix(Rule::ADD, Assoc::Left) | Op::infix(Rule::SUBTRACT, Assoc::Left))
+        .op(Op::infix(Rule::MULTIPLY, Assoc::Left)
+            | Op::infix(Rule::DIVIDE, Assoc::Left)
+            | Op::infix(Rule::MODULO, Assoc::Left))
+        .op(Op::infix(Rule::POWER, Assoc::Right));
+
+    pratt_parser
+        .map_primary(|primary| match primary.as_rule() {
+            Rule::VAR_ => Expression::Variable(get_var(primary)),
+            Rule::constant => Expression::Constant(visit_constant(primary)),
+            Rule::expression_function => Expression::Function(visit_function(primary)),
+            Rule::expression_parenthesis => visit_expression(primary.into_children().consume_any()),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar(primary.to_string())),
+        })
+        .map_infix(|left, op, right| {
+            let op = match op.as_rule() {
+                Rule::ADD => token::ArithmeticOperator::Add,
+                Rule::SUBTRACT => token::ArithmeticOperator::Subtract,
+                Rule::MULTIPLY => token::ArithmeticOperator::Multiply,
+                Rule::DIVIDE => token::ArithmeticOperator::Divide,
+                Rule::MODULO => token::ArithmeticOperator::Modulo,
+                Rule::POWER => token::ArithmeticOperator::Power,
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar(op.to_string())),
+            };
+            Expression::Operation(Operation::new(op, left, right))
+        })
+        .parse(tree.into_children())
+}
+
+fn visit_function(tree: SyntaxTree) -> Function {
+    let mut children = tree.into_children();
+    let function_name = visit_function_name(children.consume_expected(Rule::expression_function_name));
+    let args = children.map(|arg| Box::new(visit_expression(arg))).collect();
+    Function { function_name, args }
+}
+
+fn visit_function_name(tree: SyntaxTree) -> token::Function {
+    let child = tree.into_child();
+    match child.as_rule() {
+        Rule::ABS => token::Function::Abs,
+        Rule::CEIL => token::Function::Ceil,
+        Rule::FLOOR => token::Function::Floor,
+        Rule::MAX => token::Function::Max,
+        Rule::MIN => token::Function::Min,
+        Rule::ROUND => token::Function::Round,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
@@ -658,7 +751,7 @@ fn visit_schema_rule_declaration(tree: SyntaxTree) -> RuleDeclaration {
 fn visit_type_any(tree: SyntaxTree) -> Type {
     let child = tree.into_child();
     match child.as_rule() {
-        Rule::VAR_ => Type::Variable(get_var(child)),
+        Rule::VAR_CONCEPT_ => Type::Variable(get_var_concept(child)),
         Rule::type_ => visit_type(child),
         Rule::type_scoped => visit_type_scoped(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
@@ -669,7 +762,7 @@ fn visit_type_scoped(tree: SyntaxTree) -> Type {
     let child = tree.into_child();
     match child.as_rule() {
         Rule::label_scoped => Type::Label(visit_label_scoped(child)),
-        Rule::VAR_ => Type::Variable(get_var(child)),
+        Rule::VAR_CONCEPT_ => Type::Variable(get_var_concept(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
@@ -678,7 +771,7 @@ fn visit_type(tree: SyntaxTree) -> Type {
     let child = tree.into_child();
     match child.as_rule() {
         Rule::label => Type::Label(child.as_str().into()),
-        Rule::VAR_ => Type::Variable(get_var(child)),
+        Rule::VAR_CONCEPT_ => Type::Variable(get_var_concept(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
@@ -698,15 +791,15 @@ fn visit_label_scoped(tree: SyntaxTree) -> Label {
     Label::from((parts[0].clone(), parts[1].clone()))
 }
 
-fn visit_value(tree: SyntaxTree) -> Value {
+fn visit_constant(tree: SyntaxTree) -> Constant {
     let child = tree.into_child();
     match child.as_rule() {
-        Rule::STRING_ => Value::from(get_string(child)),
-        Rule::LONG_ => Value::from(get_long(child)),
-        Rule::DOUBLE_ => Value::from(get_double(child)),
-        Rule::BOOLEAN_ => Value::from(get_boolean(child)),
-        Rule::DATE_ => Value::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
-        Rule::DATETIME_ => Value::from(get_date_time(child)),
+        Rule::STRING_ => Constant::from(get_string(child)),
+        Rule::signed_long => Constant::from(get_long(child)),
+        Rule::signed_double => Constant::from(get_double(child)),
+        Rule::BOOLEAN_ => Constant::from(get_boolean(child)),
+        Rule::DATE_ => Constant::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
+        Rule::DATETIME_ => Constant::from(get_date_time(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }

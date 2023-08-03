@@ -80,7 +80,7 @@ string_enum! { Filter
     Limit = "limit",
 }
 
-string_enum! { Operator
+string_enum! { LogicOperator
     And = "and",
     Or = "or",
     Not = "not",
@@ -88,7 +88,8 @@ string_enum! { Operator
 
 string_enum! { Predicate
     // equality
-    Eq = "=",
+    Eq = "==",
+    EqLegacy = "=",   // TODO: Deprecate '=' as equality in 3.0
     Neq = "!=",
     Gt = ">",
     Gte = ">=",
@@ -102,7 +103,7 @@ string_enum! { Predicate
 impl Predicate {
     pub fn is_equality(&self) -> bool {
         use Predicate::*;
-        matches!(self, Eq | Neq | Gt | Gte | Lt | Lte)
+        matches!(self, Eq | EqLegacy | Neq | Gt | Gte | Lt | Lte) // TODO: Deprecate '=' as equality in 3.0
     }
 
     pub fn is_substring(&self) -> bool {
@@ -120,6 +121,7 @@ string_enum! { Schema
 string_enum! { Constraint
     Abstract = "abstract",
     As = "as",
+    Assign = "=",
     Has = "has",
     IID = "iid",
     Is = "is",
@@ -161,4 +163,22 @@ string_enum! { ValueType
 string_enum! { Order
     Asc = "asc",
     Desc = "desc",
+}
+
+string_enum! { ArithmeticOperator
+    Add = "+",
+    Subtract = "-",
+    Multiply = "*",
+    Divide = "/",
+    Modulo = "%",
+    Power = "^",
+}
+
+string_enum! { Function
+    Abs = "abs",
+    Ceil = "ceil",
+    Floor = "floor",
+    Max = "max",
+    Min = "min",
+    Round = "round",
 }

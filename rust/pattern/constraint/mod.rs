@@ -21,17 +21,19 @@
  */
 
 mod concept;
+mod predicate;
 mod thing;
 mod type_;
+mod value;
 
 pub use concept::IsConstraint;
-pub use thing::{
-    HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint, Value, ValueConstraint,
-};
+pub use predicate::{PredicateConstraint, Value};
+pub use thing::{HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint};
 pub use type_::{
     AbstractConstraint, Annotation, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
     RelatesConstraint, SubConstraint, ValueTypeConstraint,
 };
+pub use value::AssignConstraint;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum IsExplicit {

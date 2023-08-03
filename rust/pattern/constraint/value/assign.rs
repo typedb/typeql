@@ -20,12 +20,38 @@
  *
  */
 
-mod has;
-mod iid;
-mod isa;
-mod relation;
+use std::fmt;
 
-pub use has::HasConstraint;
-pub use iid::IIDConstraint;
-pub use isa::IsaConstraint;
-pub use relation::{RelationConstraint, RolePlayerConstraint};
+use crate::{
+    common::{token, validatable::Validatable, Result},
+    pattern::{Expression, Reference},
+};
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct AssignConstraint {
+    pub expression: Expression,
+}
+
+impl AssignConstraint {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        self.expression.references_recursive()
+    }
+}
+
+impl Validatable for AssignConstraint {
+    fn validate(&self) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl<T: Into<Expression>> From<T> for AssignConstraint {
+    fn from(expr: T) -> Self {
+        Self { expression: expr.into() }
+    }
+}
+
+impl fmt::Display for AssignConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Constraint::Assign, self.expression)
+    }
+}

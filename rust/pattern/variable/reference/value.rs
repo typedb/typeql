@@ -25,31 +25,28 @@ use std::fmt;
 use crate::common::{error::TypeQLError, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub enum Visibility {
-    Visible,
-    Invisible,
-}
-
-#[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub enum Reference {
-    Anonymous(Visibility),
+pub enum ValueReference {
     Name(String),
 }
 
-impl Reference {
+impl ValueReference {
     pub fn is_name(&self) -> bool {
-        matches!(self, Reference::Name(_))
+        true
     }
 
     pub fn is_visible(&self) -> bool {
-        !matches!(self, Reference::Anonymous(Visibility::Invisible))
+        true
+    }
+
+    pub fn name(&self) -> &str {
+        let Self::Name(name) = self;
+        name
     }
 }
 
-impl Validatable for Reference {
+impl Validatable for ValueReference {
     fn validate(&self) -> Result<()> {
         match self {
-            Self::Anonymous(_) => Ok(()),
             Self::Name(n) => expect_valid_identifier(n),
         }
     }
@@ -64,16 +61,8 @@ fn expect_valid_identifier(name: &str) -> Result<()> {
     Ok(())
 }
 
-impl fmt::Display for Reference {
+impl fmt::Display for ValueReference {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Reference::*;
-        write!(
-            f,
-            "${}",
-            match self {
-                Anonymous(_) => "_",
-                Name(name) => name,
-            }
-        )
+        write!(f, "?{}", self.name())
     }
 }

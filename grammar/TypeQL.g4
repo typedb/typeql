@@ -201,11 +201,9 @@ type                  :   label                         | VAR_CONCEPT_          
 
 label_any             :   label_scoped  | label         ;
 label_scoped          :   LABEL_SCOPED_ ;
-label                 :   LABEL_        | schema_native | type_native   | unreserved    ;
+label                 :   LABEL_        | type_native   | unreserved    ;
 
 // LITERAL INPUT VALUES ========================================================
-
-schema_native         :   RULE            ;
 
 type_native           :   THING           |   ENTITY          |   ATTRIBUTE
                       |   RELATION        |   ROLE            ;
@@ -226,6 +224,7 @@ sign                  :   ADD             |  SUBTRACT         ;
 unreserved            : VALUE | EXPR_FUNC_NAME
                       | MIN | MAX | MEDIAN | MEAN | STD | SUM | COUNT
                       | GET | SORT | LIMIT | OFFSET | GROUP | CONTAINS
+                      | RULE
                       ;
 
 // TYPEQL SYNTAX KEYWORDS =======================================================
@@ -290,7 +289,7 @@ DIVIDE          : '/'           ;   MULTIPLY        : '*'           ;
 POWER           : '^'           ;   MODULO          : '%'           ;
 PAREN_OPEN      : '('           ;   PAREN_CLOSE     : ')'           ;
 
-// Incomplete list of function names usable in expressions. The 'func_name' rule references all function names.
+// Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
 EXPR_FUNC_NAME  :  'floor' | 'ceil' | 'round' | 'abs'               ;
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)

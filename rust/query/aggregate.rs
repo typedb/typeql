@@ -74,8 +74,8 @@ fn expect_method_variable_compatible(method: token::Aggregate, var: &Option<Unbo
 }
 
 fn expect_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Reference>) -> Result<()> {
-    if !names_in_scope.contains(&var.reference) {
-        Err(TypeQLError::VariableOutOfScopeMatch(var.reference.clone()))?;
+    if !names_in_scope.contains(var.reference()) {
+        Err(TypeQLError::VariableOutOfScopeMatch(var.reference().clone()))?;
     }
     Ok(())
 }

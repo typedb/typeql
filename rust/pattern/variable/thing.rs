@@ -25,8 +25,8 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, Reference, RelationConstrainable, RelationConstraint,
-        RolePlayerConstraint, ThingConstrainable, ValueConstraint,
+        HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, Reference, RelationConstrainable,
+        RelationConstraint, RolePlayerConstraint, ThingConstrainable,
     },
     write_joined,
 };
@@ -37,7 +37,7 @@ pub struct ThingVariable {
     pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
-    pub value: Option<ValueConstraint>,
+    pub value: Option<PredicateConstraint>,
     pub relation: Option<RelationConstraint>,
 }
 
@@ -52,6 +52,16 @@ impl ThingVariable {
                 .chain(self.isa.iter().flat_map(|c| c.references()))
                 .chain(self.has.iter().flat_map(|c| c.references()))
                 .chain(self.relation.iter().flat_map(|c| c.references()))
+                .chain(self.value.iter().flat_map(|c| c.references())),
+        )
+    }
+
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(
+            iter::once(&self.reference)
+                .chain(self.isa.iter().flat_map(|c| c.references()))
+                .chain(self.has.iter().flat_map(|c| c.references_recursive()))
+                .chain(self.relation.iter().flat_map(|c| c.references_recursive()))
                 .chain(self.value.iter().flat_map(|c| c.references())),
         )
     }
@@ -105,7 +115,7 @@ impl ThingConstrainable for ThingVariable {
         ThingVariable { isa: Some(isa), ..self }
     }
 
-    fn constrain_value(self, value: ValueConstraint) -> ThingVariable {
+    fn constrain_predicate(self, value: PredicateConstraint) -> ThingVariable {
         ThingVariable { value: Some(value), ..self }
     }
 

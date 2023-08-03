@@ -65,7 +65,7 @@ fn expect_insert_in_scope_of_match(match_query: &Option<TypeQLMatch>, variables:
         let names_in_scope = match_query.named_references();
         if variables.iter().any(|v| {
             v.reference.is_name() && names_in_scope.contains(&v.reference)
-                || v.references().any(|w| names_in_scope.contains(w))
+                || v.references_recursive().any(|w| names_in_scope.contains(w))
         }) {
             Ok(())
         } else {

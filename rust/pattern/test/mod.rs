@@ -21,9 +21,10 @@
  */
 
 use crate::{
-    and, not, or, parse_query,
-    pattern::{Disjunction, Normalisable, ThingVariableBuilder},
-    var,
+    and,
+    builder::cvar,
+    not, or, parse_query,
+    pattern::{Conjunction, Disjunction, Normalisable, ThingVariableBuilder},
 };
 
 #[test]
@@ -44,8 +45,8 @@ $com isa company;
     assert_eq!(
         normalised,
         or!(
-            and!(var("com").has(("name", var("n1"))), var("n1").eq("the-company"), var("com").isa("company"),),
-            and!(var("com").has(("name", var("n2"))), var("n2").eq("another-company"), var("com").isa("company"),)
+            and!(cvar("com").has(("name", cvar("n1"))), cvar("n1").eq("the-company"), cvar("com").isa("company"),),
+            and!(cvar("com").has(("name", cvar("n2"))), cvar("n2").eq("another-company"), cvar("com").isa("company"),)
         )
         .into_disjunction()
     );
@@ -70,10 +71,10 @@ not {
     assert_eq!(
         normalised,
         Disjunction::new(vec![and!(
-            var("com").isa("company"),
+            cvar("com").isa("company"),
             not(or!(
-                and!(var("n1").eq("the-company"), var("com").has(("name", var("n1")))),
-                and!(var("n1").eq("another-company"), var("com").has(("name", var("n1")))),
+                and!(cvar("n1").eq("the-company"), cvar("com").has(("name", cvar("n1")))),
+                and!(cvar("n1").eq("another-company"), cvar("com").has(("name", cvar("n1")))),
             ))
         )
         .into()])

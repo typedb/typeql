@@ -20,12 +20,33 @@
  *
  */
 
-mod has;
-mod iid;
-mod isa;
-mod relation;
+use std::fmt;
 
-pub use has::HasConstraint;
-pub use iid::IIDConstraint;
-pub use isa::IsaConstraint;
-pub use relation::{RelationConstraint, RolePlayerConstraint};
+use super::Expression;
+use crate::{
+    common::token,
+    pattern::{LeftOperand, Reference},
+    write_joined,
+};
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Function {
+    pub(crate) function_name: token::Function,
+    pub(crate) args: Vec<Box<Expression>>,
+}
+
+impl Function {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.args.iter().flat_map(|expr| expr.references_recursive()))
+    }
+}
+
+impl LeftOperand for Function {}
+
+impl fmt::Display for Function {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}(", self.function_name)?;
+        write_joined!(f, ", ", self.args)?;
+        write!(f, ")")
+    }
+}

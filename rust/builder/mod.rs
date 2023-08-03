@@ -21,10 +21,11 @@
  */
 
 use crate::{
-    common::token::Predicate,
+    common::token,
     pattern::{
-        Negation, RelationVariableBuilder, RolePlayerConstraint, RuleDeclaration, ThingVariable, TypeVariable,
-        TypeVariableBuilder, UnboundVariable, Value, ValueConstraint,
+        Constant, Expression, Function, Negation, PredicateConstraint, RelationVariableBuilder, RolePlayerConstraint,
+        RuleDeclaration, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
+        UnboundValueVariable, Value,
     },
     Pattern,
 };
@@ -75,6 +76,42 @@ macro_rules! or {
     }}
 }
 
+#[macro_export]
+macro_rules! max {
+    ($($arg:expr),* $(,)?) => {{
+        let args = [$($arg, )*];
+        $crate::pattern::Expression::Function($crate::pattern::Function {
+            function_name: $crate::common::token::Function::Max,
+            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+        })
+    }}
+}
+
+#[macro_export]
+macro_rules! min {
+    ($($arg:expr),* $(,)?) => {{
+        let args = [$($arg, )*];
+        $crate::pattern::Expression::Function($crate::pattern::Function {
+            function_name: token::Function::Min,
+            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+        })
+    }}
+}
+
+#[macro_export]
+macro_rules! filter {
+    ($($arg:expr),* $(,)?) => {{
+        [$(Into::<$crate::pattern::UnboundVariable>::into($arg)),*]
+    }}
+}
+
+#[macro_export]
+macro_rules! sort_vars {
+    ($($arg:expr),*) => {{
+        $crate::query::Sorting::new(vec![$(Into::<$crate::query::sorting::OrderedVariable>::into($arg), )*])
+    }}
+}
+
 pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
     Negation::new(pattern.into())
 }
@@ -83,46 +120,70 @@ pub fn rule(name: &str) -> RuleDeclaration {
     RuleDeclaration::from(name)
 }
 
-pub fn var(var: impl Into<UnboundVariable>) -> UnboundVariable {
+pub fn cvar(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
     var.into()
 }
 
+pub fn vvar(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
+    var.into()
+}
+
+pub fn constant(constant: impl Into<Constant>) -> Constant {
+    constant.into()
+}
+
 pub fn type_(name: impl Into<String>) -> TypeVariable {
-    UnboundVariable::hidden().type_(name.into())
+    UnboundConceptVariable::hidden().type_(name.into())
 }
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
-    UnboundVariable::hidden().rel(value)
+    UnboundConceptVariable::hidden().rel(value)
 }
 
-pub fn eq<T: Into<Value>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Eq, value.into())
+pub fn eq<T: Into<Value>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Eq, value.into())
 }
 
-pub fn neq<T: Into<Value>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Neq, value.into())
+pub fn neq<T: Into<Value>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Neq, value.into())
 }
 
-pub fn lt<T: Into<Value>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Lt, value.into())
+pub fn lt<T: Into<Value>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Lt, value.into())
 }
 
-pub fn lte<T: Into<Value>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Lte, value.into())
+pub fn lte<T: Into<Value>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Lte, value.into())
 }
 
-pub fn gt<T: Into<Value>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Gt, value.into())
+pub fn gt<T: Into<Value>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Gt, value.into())
 }
 
-pub fn gte<T: Into<Value>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Gte, value.into())
+pub fn gte<T: Into<Value>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Gte, value.into())
 }
 
-pub fn contains<T: Into<String>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Contains, Value::from(value.into()))
+pub fn contains<T: Into<String>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Contains, Value::from(value.into()))
 }
 
-pub fn like<T: Into<String>>(value: T) -> ValueConstraint {
-    ValueConstraint::new(Predicate::Like, Value::from(value.into()))
+pub fn like<T: Into<String>>(value: T) -> PredicateConstraint {
+    PredicateConstraint::new(token::Predicate::Like, Value::from(value.into()))
+}
+
+pub fn abs<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Abs, args: vec![Box::from(arg.into())] }
+}
+
+pub fn ceil<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Ceil, args: vec![Box::from(arg.into())] }
+}
+
+pub fn floor<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Floor, args: vec![Box::from(arg.into())] }
+}
+
+pub fn round<T: Into<Expression>>(arg: T) -> Function {
+    Function { function_name: token::Function::Round, args: vec![Box::from(arg.into())] }
 }

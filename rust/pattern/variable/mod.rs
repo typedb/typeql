@@ -26,18 +26,26 @@ mod reference;
 mod thing;
 mod type_;
 mod unbound;
+mod unbound_concept;
+mod unbound_value;
+mod value;
 
 use std::{collections::HashSet, fmt};
 
+pub(crate) use builder::LeftOperand;
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, RelationConstrainable, RelationVariableBuilder, ThingConstrainable,
-    ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder,
+    ConceptConstrainable, ConceptVariableBuilder, ExpressionBuilder, RelationConstrainable, RelationVariableBuilder,
+    ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder, ValueConstrainable,
+    ValueVariableBuilder,
 };
 pub use concept::ConceptVariable;
-pub use reference::{Reference, Visibility};
+pub use reference::{ConceptReference, Reference, ValueReference, Visibility};
 pub use thing::ThingVariable;
 pub use type_::TypeVariable;
 pub use unbound::UnboundVariable;
+pub use unbound_concept::UnboundConceptVariable;
+pub use unbound_value::UnboundValueVariable;
+pub use value::ValueVariable;
 
 use crate::{
     common::{error::TypeQLError, validatable::Validatable, Result},
@@ -50,30 +58,45 @@ pub enum Variable {
     Concept(ConceptVariable),
     Thing(ThingVariable),
     Type(TypeVariable),
-    Unbound(UnboundVariable),
+    Value(ValueVariable),
 }
 
 impl Variable {
+    pub fn reference(&self) -> &Reference {
+        use Variable::*;
+        match self {
+            Concept(concept) => &concept.reference,
+            Thing(thing) => &thing.reference,
+            Type(type_) => &type_.reference,
+            Value(value) => &value.reference,
+        }
+    }
+
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         use Variable::*;
         match self {
-            Unbound(unbound) => unbound.references(),
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
             Type(type_) => type_.references(),
+            Value(value) => value.references(),
+        }
+    }
+
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        use Variable::*;
+        match self {
+            Concept(concept) => concept.references(),
+            Thing(thing) => thing.references(),
+            Type(type_) => type_.references(),
+            Value(value) => value.references_recursive(),
         }
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
-        match self {
-            Self::Unbound(_) => unreachable!(),
-            _ => {
-                if !self.references().any(|r| r.is_name() && bounds.contains(r)) {
-                    Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
-                }
-                Ok(())
-            }
+        if !self.references_recursive().any(|r| r.is_name() && bounds.contains(r)) {
+            Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
         }
+        Ok(())
     }
 }
 
@@ -81,17 +104,17 @@ enum_wrapper! { Variable
     ConceptVariable => Concept,
     ThingVariable => Thing,
     TypeVariable => Type,
-    UnboundVariable => Unbound,
+    ValueVariable => Value,
 }
 
 impl Validatable for Variable {
     fn validate(&self) -> Result<()> {
         use Variable::*;
         match self {
-            Unbound(unbound) => unbound.validate(),
             Concept(concept) => concept.validate(),
             Thing(thing) => thing.validate(),
             Type(type_) => type_.validate(),
+            Value(value) => value.validate(),
         }
     }
 }
@@ -110,10 +133,10 @@ impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Variable::*;
         match self {
-            Unbound(unbound) => write!(f, "{unbound}"),
             Concept(concept) => write!(f, "{concept}"),
             Thing(thing) => write!(f, "{thing}"),
             Type(type_) => write!(f, "{type_}"),
+            Value(value) => write!(f, "{value}"),
         }
     }
 }

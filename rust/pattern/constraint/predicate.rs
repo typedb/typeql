@@ -22,40 +22,44 @@
 
 use std::{fmt, iter};
 
-use chrono::{NaiveDateTime, Timelike};
-
 use crate::{
     common::{
-        date_time,
         error::{collect_err, TypeQLError},
-        string::{escape_regex, format_double, quote},
+        string::escape_regex,
         token,
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingVariable, UnboundVariable},
+    pattern::{
+        Constant, Reference, ThingVariable, UnboundConceptVariable, UnboundValueVariable, UnboundVariable,
+        ValueVariable,
+    },
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ValueConstraint {
+pub struct PredicateConstraint {
     pub predicate: token::Predicate,
     pub value: Value,
 }
 
-impl ValueConstraint {
+impl PredicateConstraint {
     pub fn new(predicate: token::Predicate, value: Value) -> Self {
-        ValueConstraint { predicate, value }
+        match predicate {
+            token::Predicate::EqLegacy => PredicateConstraint { predicate: token::Predicate::Eq, value }, // TODO: Deprecate '=' as equality in 3.0
+            predicate => PredicateConstraint { predicate, value },
+        }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         match &self.value {
-            Value::Variable(v) => Box::new(iter::once(&v.reference)),
+            Value::ThingVariable(v) => Box::new(iter::once(&v.reference)),
+            Value::ValueVariable(v) => Box::new(iter::once(&v.reference)),
             _ => Box::new(iter::empty()),
         }
     }
 }
 
-impl Validatable for ValueConstraint {
+impl Validatable for PredicateConstraint {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [expect_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
@@ -65,18 +69,20 @@ impl Validatable for ValueConstraint {
 }
 
 fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result<()> {
-    if predicate.is_substring() && !matches!(value, Value::String(_)) {
+    if predicate.is_substring() && !matches!(value, Value::Constant(Constant::String(_))) {
         Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
     Ok(())
 }
 
-impl fmt::Display for ValueConstraint {
+impl fmt::Display for PredicateConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.predicate == token::Predicate::Like {
-            assert!(matches!(self.value, Value::String(_)));
+            assert!(matches!(self.value, Value::Constant(Constant::String(_))));
             write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
-        } else if self.predicate == token::Predicate::Eq && !matches!(self.value, Value::Variable(_)) {
+        } else if self.predicate == token::Predicate::Eq
+            && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_)))
+        {
             write!(f, "{}", self.value)
         } else {
             write!(f, "{} {}", self.predicate, self.value)
@@ -86,75 +92,58 @@ impl fmt::Display for ValueConstraint {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    Long(i64),
-    Double(f64),
-    Boolean(bool),
-    String(String),
-    DateTime(NaiveDateTime),
-    Variable(Box<ThingVariable>),
+    Constant(Constant),
+    ThingVariable(Box<ThingVariable>),
+    ValueVariable(Box<ValueVariable>),
 }
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
 impl Validatable for Value {
     fn validate(&self) -> Result<()> {
         match &self {
-            Self::DateTime(date_time) => {
-                if date_time.nanosecond() % 1000000 > 0 {
-                    Err(TypeQLError::InvalidConstraintDatetimePrecision(*date_time))?
-                }
-                Ok(())
-            }
-            Self::Variable(variable) => variable.validate(),
-            _ => Ok(()),
+            Self::Constant(constant) => constant.validate(),
+            Self::ThingVariable(variable) => variable.validate(),
+            Self::ValueVariable(variable) => variable.validate(),
         }
     }
 }
 
-impl From<i64> for Value {
-    fn from(long: i64) -> Self {
-        Value::Long(long)
+impl<T: Into<Constant>> From<T> for Value {
+    fn from(constant: T) -> Self {
+        Value::Constant(constant.into())
     }
 }
 
-impl From<f64> for Value {
-    fn from(double: f64) -> Self {
-        Value::Double(double)
+impl From<UnboundConceptVariable> for Value {
+    fn from(variable: UnboundConceptVariable) -> Self {
+        Value::ThingVariable(Box::new(variable.into_thing()))
     }
 }
 
-impl From<bool> for Value {
-    fn from(bool: bool) -> Self {
-        Value::Boolean(bool)
-    }
-}
-
-impl From<&str> for Value {
-    fn from(string: &str) -> Self {
-        Value::String(String::from(string))
-    }
-}
-
-impl From<String> for Value {
-    fn from(string: String) -> Self {
-        Value::String(string)
-    }
-}
-
-impl From<NaiveDateTime> for Value {
-    fn from(date_time: NaiveDateTime) -> Self {
-        Value::DateTime(date_time)
+impl From<UnboundValueVariable> for Value {
+    fn from(variable: UnboundValueVariable) -> Self {
+        Value::ValueVariable(Box::new(variable.into_value_variable()))
     }
 }
 
 impl From<UnboundVariable> for Value {
     fn from(variable: UnboundVariable) -> Self {
-        Value::Variable(Box::new(variable.into_thing()))
+        match variable {
+            UnboundVariable::Concept(concept) => Value::from(concept),
+            UnboundVariable::Value(value) => Value::from(value),
+        }
     }
 }
 
 impl From<ThingVariable> for Value {
     fn from(variable: ThingVariable) -> Self {
-        Value::Variable(Box::new(variable))
+        Value::ThingVariable(Box::new(variable))
+    }
+}
+
+impl From<ValueVariable> for Value {
+    fn from(variable: ValueVariable) -> Self {
+        Value::ValueVariable(Box::new(variable))
     }
 }
 
@@ -162,12 +151,9 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
-            Long(long) => write!(f, "{long}"),
-            Double(double) => write!(f, "{}", format_double(*double)),
-            Boolean(boolean) => write!(f, "{boolean}"),
-            String(string) => write!(f, "{}", quote(string)),
-            DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
-            Variable(var) => write!(f, "{}", var.reference),
+            Constant(constant) => write!(f, "{constant}"),
+            ThingVariable(var) => write!(f, "{}", var.reference),
+            ValueVariable(var) => write!(f, "{}", var.reference),
         }
     }
 }

@@ -21,8 +21,10 @@
  */
 
 mod conjunction;
+mod constant;
 mod constraint;
 mod disjunction;
+mod expression;
 mod label;
 mod named_references;
 mod negation;
@@ -34,20 +36,24 @@ mod variable;
 use std::{collections::HashSet, fmt};
 
 pub use conjunction::Conjunction;
+pub use constant::Constant;
 pub use constraint::{
-    AbstractConstraint, Annotation, HasConstraint, IIDConstraint, IsConstraint, IsExplicit, IsaConstraint,
-    LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, RelationConstraint,
-    RolePlayerConstraint, SubConstraint, Value, ValueConstraint, ValueTypeConstraint,
+    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, RegexConstraint,
+    RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
+pub use expression::{Expression, Function, Operation};
 pub use label::Label;
 pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
+pub(crate) use variable::LeftOperand;
 pub use variable::{
-    ConceptConstrainable, ConceptVariable, ConceptVariableBuilder, Reference, RelationConstrainable,
-    RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder, TypeConstrainable, TypeVariable,
-    TypeVariableBuilder, UnboundVariable, Variable, Visibility,
+    ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, ExpressionBuilder, Reference,
+    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder,
+    TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
+    UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder, Variable, Visibility,
 };
 
 use crate::{
@@ -64,6 +70,16 @@ pub enum Pattern {
 }
 
 impl Pattern {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        use Pattern::*;
+        Box::new(match self {
+            Conjunction(conjunction) => conjunction.references_recursive(),
+            Disjunction(disjunction) => disjunction.references_recursive(),
+            Negation(negation) => negation.references_recursive(),
+            Variable(variable) => variable.references_recursive(),
+        })
+    }
+
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
         use Pattern::*;
         match self {
@@ -146,8 +162,8 @@ impl From<TypeVariable> for Pattern {
     }
 }
 
-impl From<UnboundVariable> for Pattern {
-    fn from(variable: UnboundVariable) -> Self {
+impl From<ValueVariable> for Pattern {
+    fn from(variable: ValueVariable) -> Self {
         Variable::from(variable).into()
     }
 }

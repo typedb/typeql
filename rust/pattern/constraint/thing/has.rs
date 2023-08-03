@@ -25,8 +25,8 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
-        Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundVariable, Value,
-        ValueConstraint,
+        PredicateConstraint, Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
+        UnboundConceptVariable, Value,
     },
 };
 
@@ -40,6 +40,10 @@ impl HasConstraint {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new((self.type_.iter().map(|t| &t.reference)).chain(iter::once(&self.attribute.reference)))
     }
+
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new((self.type_.iter().map(|t| &t.reference)).chain(self.attribute.references_recursive()))
+    }
 }
 
 impl Validatable for HasConstraint {
@@ -48,8 +52,8 @@ impl Validatable for HasConstraint {
     }
 }
 
-impl From<UnboundVariable> for HasConstraint {
-    fn from(variable: UnboundVariable) -> Self {
+impl From<UnboundConceptVariable> for HasConstraint {
+    fn from(variable: UnboundConceptVariable) -> Self {
         HasConstraint { type_: None, attribute: variable.into_thing() }
     }
 }
@@ -57,31 +61,33 @@ impl From<UnboundVariable> for HasConstraint {
 impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
     fn from((type_name, value): (S, T)) -> Self {
         match value.into() {
-            Value::Variable(variable) => {
-                HasConstraint { type_: Some(UnboundVariable::hidden().type_(type_name.into())), attribute: *variable }
-            }
+            Value::ThingVariable(variable) => HasConstraint {
+                type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
+                attribute: *variable,
+            },
             value => HasConstraint {
-                type_: Some(UnboundVariable::hidden().type_(type_name.into())),
-                attribute: UnboundVariable::hidden().constrain_value(ValueConstraint::new(token::Predicate::Eq, value)),
+                type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
+                attribute: UnboundConceptVariable::hidden()
+                    .constrain_predicate(PredicateConstraint::new(token::Predicate::Eq, value)),
             },
         }
     }
 }
 
-impl<S: Into<String>> From<(S, ValueConstraint)> for HasConstraint {
-    fn from((type_name, value): (S, ValueConstraint)) -> Self {
+impl<S: Into<String>> From<(S, PredicateConstraint)> for HasConstraint {
+    fn from((type_name, predicate): (S, PredicateConstraint)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name.into())),
-            attribute: UnboundVariable::hidden().constrain_value(value),
+            type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
+            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
         }
     }
 }
 
 impl HasConstraint {
-    pub fn new((type_name, value_constraint): (String, ValueConstraint)) -> Self {
+    pub fn new((type_name, predicate): (String, PredicateConstraint)) -> Self {
         HasConstraint {
-            type_: Some(UnboundVariable::hidden().type_(type_name)),
-            attribute: UnboundVariable::hidden().constrain_value(value_constraint),
+            type_: Some(UnboundConceptVariable::hidden().type_(type_name)),
+            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
         }
     }
 }

@@ -61,6 +61,10 @@ impl Conjunction {
         ))
     }
 
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+        Box::new(self.patterns.iter().flat_map(|p| p.references_recursive()))
+    }
+
     pub fn has_named_variables(&self) -> bool {
         self.references().any(|r| r.is_name())
     }

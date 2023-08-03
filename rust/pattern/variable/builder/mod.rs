@@ -21,9 +21,14 @@
  */
 
 mod concept;
+mod expression;
 mod thing;
 mod type_;
+mod value;
 
 pub use concept::{ConceptConstrainable, ConceptVariableBuilder};
+pub use expression::ExpressionBuilder;
+pub(crate) use expression::LeftOperand;
 pub use thing::{RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariableBuilder};
 pub use type_::{TypeConstrainable, TypeVariableBuilder};
+pub use value::{ValueConstrainable, ValueVariableBuilder};

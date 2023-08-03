@@ -23,9 +23,9 @@
 use std::fmt;
 
 use crate::{
+    builder::cvar,
     common::{token, validatable::Validatable, Result},
-    pattern::{ConceptVariable, UnboundVariable},
-    var,
+    pattern::{ConceptVariable, UnboundConceptVariable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -47,17 +47,18 @@ impl Validatable for IsConstraint {
 
 impl From<&str> for IsConstraint {
     fn from(string: &str) -> Self {
-        Self::from(var(string))
-    }
-}
-impl From<String> for IsConstraint {
-    fn from(string: String) -> Self {
-        Self::from(var(string))
+        Self::from(cvar(string))
     }
 }
 
-impl From<UnboundVariable> for IsConstraint {
-    fn from(var: UnboundVariable) -> Self {
+impl From<String> for IsConstraint {
+    fn from(string: String) -> Self {
+        Self::from(cvar(string))
+    }
+}
+
+impl From<UnboundConceptVariable> for IsConstraint {
+    fn from(var: UnboundConceptVariable) -> Self {
         Self::new(var.into_concept())
     }
 }
