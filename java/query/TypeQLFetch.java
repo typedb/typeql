@@ -26,6 +26,7 @@ import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.pattern.variable.Reference;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -43,9 +44,9 @@ import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
 
 public class TypeQLFetch implements TypeQLQuery {
 
-    private final MatchClause match;
-    private final List<Projection> projections;
-    private final Modifiers modifiers;
+    final MatchClause match;
+    final List<Projection> projections;
+    final Modifiers modifiers;
 
     TypeQLFetch(MatchClause match, List<Projection> projections) {
         this(match, projections, Modifiers.EMPTY);
@@ -60,6 +61,10 @@ public class TypeQLFetch implements TypeQLQuery {
     @Override
     public TypeQLArg.QueryType type() {
         return TypeQLArg.QueryType.READ;
+    }
+
+    public Modifiers modifiers() {
+        return modifiers;
     }
 
     @Override
@@ -91,7 +96,68 @@ public class TypeQLFetch implements TypeQLQuery {
         return Objects.hash(match, projections, modifiers);
     }
 
-    // TODO modifiers
+    public static class Unmodified extends TypeQLFetch implements TypeQLQuery.Unmodified<TypeQLFetch, TypeQLFetch.Sorted, TypeQLFetch.Offset, TypeQLFetch.Limited> {
+
+        public Unmodified(MatchClause match, List<Projection> projections) {
+            super(match, projections, Modifiers.EMPTY);
+        }
+
+        @Override
+        public TypeQLFetch modifier(Modifiers modifier) {
+            return new TypeQLFetch(match, projections, modifier);
+        }
+
+        @Override
+        public TypeQLFetch.Sorted sort(Sortable.Sorting sorting) {
+            return new TypeQLFetch.Sorted(this, sorting);
+        }
+
+        @Override
+        public TypeQLFetch.Offset offset(long offset) {
+            return new TypeQLFetch.Offset(this, offset);
+        }
+
+        @Override
+        public TypeQLFetch.Limited limit(long limit) {
+            return new TypeQLFetch.Limited(this, limit);
+        }
+    }
+
+    public static class Sorted extends TypeQLFetch implements TypeQLQuery.Sorted<TypeQLFetch.Offset, TypeQLFetch.Limited> {
+
+        public Sorted(TypeQLFetch delete, Sortable.Sorting sorting) {
+            super(delete.match, delete.projections, new Modifiers(sorting, delete.modifiers.offset, delete.modifiers.limit));
+        }
+
+        @Override
+        public TypeQLFetch.Offset offset(long offset) {
+            return new TypeQLFetch.Offset(this, offset);
+        }
+
+        @Override
+        public TypeQLFetch.Limited limit(long limit) {
+            return new TypeQLFetch.Limited(this, limit);
+        }
+    }
+
+    public static class Offset extends TypeQLFetch implements TypeQLQuery.Offset<TypeQLFetch.Limited> {
+
+        public Offset(TypeQLFetch delete, long offset) {
+            super(delete.match, delete.projections, new Modifiers(delete.modifiers.sorting, offset, delete.modifiers.limit));
+        }
+
+        @Override
+        public TypeQLFetch.Limited limit(long limit) {
+            return new TypeQLFetch.Limited(this, limit);
+        }
+    }
+
+    public static class Limited extends TypeQLFetch implements TypeQLQuery.Limited {
+
+        public Limited(TypeQLFetch delete, long limit) {
+            super(delete.match, delete.projections, new Modifiers(delete.modifiers.sorting, delete.modifiers.offset, limit));
+        }
+    }
 
     public static abstract class Projection {
 

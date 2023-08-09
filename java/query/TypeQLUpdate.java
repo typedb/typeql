@@ -151,7 +151,6 @@ public class TypeQLUpdate extends TypeQLWritable {
         public TypeQLUpdate.Limited limit(long limit) {
             return new TypeQLUpdate.Limited(this, limit);
         }
-
     }
 
     public static class Sorted extends TypeQLUpdate implements TypeQLQuery.Sorted<TypeQLUpdate.Offset, TypeQLUpdate.Limited> {

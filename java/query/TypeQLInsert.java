@@ -81,7 +81,6 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
         public TypeQLInsert.Limited limit(long limit) {
             return new TypeQLInsert.Limited(this, limit);
         }
-
     }
 
     public static class Sorted extends TypeQLInsert implements TypeQLQuery.Sorted<TypeQLInsert.Offset, TypeQLInsert.Limited> {

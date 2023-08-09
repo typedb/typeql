@@ -24,7 +24,6 @@ package com.vaticle.typeql.lang.pattern.variable;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.variable.builder.Expression;
-import com.vaticle.typeql.lang.pattern.variable.builder.PredicateBuilder;
 import com.vaticle.typeql.lang.pattern.variable.builder.ValueVariableBuilder;
 
 import java.util.Set;

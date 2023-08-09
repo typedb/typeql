@@ -90,7 +90,6 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
         public TypeQLDelete.Limited limit(long limit) {
             return new TypeQLDelete.Limited(this, limit);
         }
-
     }
 
     public static class Sorted extends TypeQLDelete implements TypeQLQuery.Sorted<TypeQLDelete.Offset, TypeQLDelete.Limited> {

@@ -77,10 +77,10 @@ limit                 :   LIMIT       LONG_                                     
 
 // FETCH QUERY =================================================================
 
-projections        : ( projection ';' )+      ;
-projection         :   projection_key_var
-                   |   projection_key_var ':' projection_attributes
-                   |   projection_key_label ':' '{' projection_subquery  '}'  ;
+projections           : ( projection ';' )+      ;
+projection            :   projection_key_var
+                      |   projection_key_var ':' projection_attributes
+                      |   projection_key_label ':' '{' projection_subquery  '}'  ;
 
 projection_attributes    :   projection_attribute  ( ',' projection_attribute )*  ;
 projection_attribute     :   label  ( projection_key_as_label )?         ;

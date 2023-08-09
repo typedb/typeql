@@ -183,7 +183,6 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         public TypeQLGet.Limited limit(long limit) {
             return new TypeQLGet.Limited(this, limit);
         }
-
     }
 
     public static class Sorted extends TypeQLGet implements TypeQLQuery.Sorted<Offset, Limited> {
