@@ -23,8 +23,8 @@ package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.query.builder.Sortable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
@@ -43,8 +43,8 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
         this(match, variables, Modifiers.EMPTY);
     }
 
-    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables, @Nullable Modifiers modifiers) {
-        super(INSERT, match, validInsertVars(match, variables), modifiers == null ? Modifiers.EMPTY : modifiers);
+    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables, Modifiers modifiers) {
+        super(INSERT, match, validInsertVars(match, variables), modifiers);
         validateNamesUnique(concat(match.patternsRecursive(), variables.stream()));
     }
 
@@ -56,7 +56,67 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
         return variables;
     }
 
-    public List<ThingVariable<?>> variables() {
-        return variables;
+    public static class Unmodified extends TypeQLInsert implements TypeQLQuery.Unmodified<TypeQLInsert, TypeQLInsert.Sorted, TypeQLInsert.Offset, TypeQLInsert.Limited> {
+
+        public Unmodified(MatchClause match, List<ThingVariable<?>> variables) {
+            super(match, variables, Modifiers.EMPTY);
+        }
+
+        @Override
+        public TypeQLInsert modifier(Modifiers modifier) {
+            return new TypeQLInsert(match, variables, modifier);
+        }
+
+        @Override
+        public TypeQLInsert.Sorted sort(Sortable.Sorting sorting) {
+            return new TypeQLInsert.Sorted(this, sorting);
+        }
+
+        @Override
+        public TypeQLInsert.Offset offset(long offset) {
+            return new TypeQLInsert.Offset(this, offset);
+        }
+
+        @Override
+        public TypeQLInsert.Limited limit(long limit) {
+            return new TypeQLInsert.Limited(this, limit);
+        }
+
+    }
+
+    public static class Sorted extends TypeQLInsert implements TypeQLQuery.Sorted<TypeQLInsert.Offset, TypeQLInsert.Limited> {
+
+        public Sorted(TypeQLInsert insert, Sortable.Sorting sorting) {
+            super(insert.match, insert.variables, new Modifiers(sorting, insert.modifiers.offset, insert.modifiers.limit));
+        }
+
+        @Override
+        public TypeQLInsert.Offset offset(long offset) {
+            return new TypeQLInsert.Offset(this, offset);
+        }
+
+        @Override
+        public TypeQLInsert.Limited limit(long limit) {
+            return new TypeQLInsert.Limited(this, limit);
+        }
+    }
+
+    public static class Offset extends TypeQLInsert implements TypeQLQuery.Offset<TypeQLInsert.Limited> {
+
+        public Offset(TypeQLInsert insert, long offset) {
+            super(insert.match, insert.variables, new Modifiers(insert.modifiers.sorting, offset, insert.modifiers.limit));
+        }
+
+        @Override
+        public TypeQLInsert.Limited limit(long limit) {
+            return new TypeQLInsert.Limited(this, limit);
+        }
+    }
+
+    public static class Limited extends TypeQLInsert implements TypeQLQuery.Limited {
+
+        public Limited(TypeQLInsert insert, long limit) {
+            super(insert.match, insert.variables, new Modifiers(insert.modifiers.sorting, insert.modifiers.offset, limit));
+        }
     }
 }

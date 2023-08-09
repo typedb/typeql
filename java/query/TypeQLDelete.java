@@ -23,6 +23,7 @@ package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -56,13 +57,75 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
         return variables;
     }
 
-    public List<ThingVariable<?>> variables() { return variables; }
+    public static class Unmodified extends TypeQLDelete implements TypeQLQuery.Unmodified<TypeQLDelete, TypeQLDelete.Sorted, TypeQLDelete.Offset, TypeQLDelete.Limited> {
 
-    public TypeQLUpdate insert(ThingVariable<?>... things) {
-        return insert(list(things));
+        public Unmodified(MatchClause match, List<ThingVariable<?>> variables) {
+            super(match, variables, Modifiers.EMPTY);
+        }
+
+        public TypeQLUpdate.Unmodified insert(ThingVariable<?>... things) {
+            return insert(list(things));
+        }
+
+        public TypeQLUpdate.Unmodified insert(List<ThingVariable<?>> things) {
+            return new TypeQLUpdate.Unmodified(this.match().get(), variables, things);
+        }
+
+        @Override
+        public TypeQLDelete modifier(Modifiers modifier) {
+            return new TypeQLDelete(match, variables, modifier);
+        }
+
+        @Override
+        public TypeQLDelete.Sorted sort(Sortable.Sorting sorting) {
+            return new TypeQLDelete.Sorted(this, sorting);
+        }
+
+        @Override
+        public TypeQLDelete.Offset offset(long offset) {
+            return new TypeQLDelete.Offset(this, offset);
+        }
+
+        @Override
+        public TypeQLDelete.Limited limit(long limit) {
+            return new TypeQLDelete.Limited(this, limit);
+        }
+
     }
 
-    public TypeQLUpdate insert(List<ThingVariable<?>> things) {
-        return new TypeQLUpdate(this.match().get(), variables, things);
+    public static class Sorted extends TypeQLDelete implements TypeQLQuery.Sorted<TypeQLDelete.Offset, TypeQLDelete.Limited> {
+
+        public Sorted(TypeQLDelete delete, Sortable.Sorting sorting) {
+            super(delete.match, delete.variables, new Modifiers(sorting, delete.modifiers.offset, delete.modifiers.limit));
+        }
+
+        @Override
+        public TypeQLDelete.Offset offset(long offset) {
+            return new TypeQLDelete.Offset(this, offset);
+        }
+
+        @Override
+        public TypeQLDelete.Limited limit(long limit) {
+            return new TypeQLDelete.Limited(this, limit);
+        }
+    }
+
+    public static class Offset extends TypeQLDelete implements TypeQLQuery.Offset<TypeQLDelete.Limited> {
+
+        public Offset(TypeQLDelete delete, long offset) {
+            super(delete.match, delete.variables, new Modifiers(delete.modifiers.sorting, offset, delete.modifiers.limit));
+        }
+
+        @Override
+        public TypeQLDelete.Limited limit(long limit) {
+            return new TypeQLDelete.Limited(this, limit);
+        }
+    }
+
+    public static class Limited extends TypeQLDelete implements TypeQLQuery.Limited {
+
+        public Limited(TypeQLDelete delete, long limit) {
+            super(delete.match, delete.variables, new Modifiers(delete.modifiers.sorting, delete.modifiers.offset, limit));
+        }
     }
 }

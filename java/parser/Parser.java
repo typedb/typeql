@@ -41,6 +41,7 @@ import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
+import com.vaticle.typeql.lang.pattern.variable.Reference;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
@@ -51,6 +52,7 @@ import com.vaticle.typeql.lang.pattern.variable.builder.Expression;
 import com.vaticle.typeql.lang.pattern.variable.builder.Expression.Operation;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
+import com.vaticle.typeql.lang.query.TypeQLFetch;
 import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
@@ -315,7 +317,8 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public TypeQLInsert visitQuery_insert(TypeQLParser.Query_insertContext ctx) {
         if (ctx.clause_match() != null) {
-            return visitClause_match(ctx.clause_match()).insert(visitClause_insert(ctx.clause_insert()));
+            return visitClause_match(ctx.clause_match()).insert(visitClause_insert(ctx.clause_insert()))
+                    .modifier(visitModifiers(ctx.modifiers()));
         } else {
             return new TypeQLInsert(visitClause_insert(ctx.clause_insert()));
         }
@@ -328,13 +331,14 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public TypeQLDelete visitQuery_delete(TypeQLParser.Query_deleteContext ctx) {
-        return visitClause_match(ctx.clause_match()).delete(visitClause_delete(ctx.clause_delete()));
+        return visitClause_match(ctx.clause_match()).delete(visitClause_delete(ctx.clause_delete()))
+                .modifier(visitModifiers(ctx.modifiers()));
     }
 
     @Override
     public TypeQLUpdate visitQuery_update(TypeQLParser.Query_updateContext ctx) {
         return visitClause_match(ctx.clause_match()).delete(visitClause_delete(ctx.clause_delete()))
-                .insert(visitClause_insert(ctx.clause_insert()));
+                .insert(visitClause_insert(ctx.clause_insert())).modifier(visitModifiers(ctx.modifiers()));
     }
 
     @Override
@@ -348,16 +352,7 @@ public class Parser extends TypeQLBaseVisitor {
         List<UnboundVariable> filter;
         if (ctx.clause_get() != null) filter = visitClause_get(ctx.clause_get());
         else filter = emptyList();
-        Modifiers modifiers;
-        if (ctx.modifiers() != null) {
-            Sortable.Sorting sorting = null;
-            Long offset = null, limit = null;
-            if (ctx.modifiers().sort() != null) sorting = visitSort(ctx.modifiers().sort());
-            if (ctx.modifiers().offset() != null) offset = getLong(ctx.modifiers().offset().LONG_());
-            if (ctx.modifiers().limit() != null) limit = getLong(ctx.modifiers().limit().LONG_());
-            modifiers = new Modifiers(sorting, offset, limit);
-        } else modifiers = Modifiers.EMPTY;
-
+        Modifiers modifiers = visitModifiers(ctx.modifiers());
         return new TypeQLGet(match, filter, modifiers);
     }
 
@@ -426,8 +421,35 @@ public class Parser extends TypeQLBaseVisitor {
         return visitQuery_get_group(ctx.query_get_group()).aggregate(agg.first(), agg.second());
     }
 
+    @Override
+    public TypeQLFetch visitQuery_fetch(TypeQLParser.Query_fetchContext ctx) {
+        MatchClause matchClause = visitClause_match(ctx.clause_match());
+        Modifiers modifiers = visitModifiers(ctx.modifiers());
+        List<TypeQLFetch.Projection> projections = visitClause_fetch(ctx.clause_fetch());
+        return new TypeQLFetch(matchClause, projections, modifiers);
+    }
+
+    @Override
+    public List<TypeQLFetch.Projection> visitClause_fetch(TypeQLParser.Clause_fetchContext ctx) {
+        List<TypeQLFetch.Projection> projections = new ArrayList<>();
+        ctx.projections().projection().forEach(projection -> {
+            projections.add(visitProjection(projection));
+        });
+        return projections;
+    }
 
     // QUERY MODIFIERS ==========================================
+
+    @Override
+    public Modifiers visitModifiers(TypeQLParser.ModifiersContext ctx) {
+        Sortable.Sorting sorting = null;
+        Long offset = null, limit = null;
+        if (ctx.sort() != null) sorting = visitSort(ctx.sort());
+        if (ctx.offset() != null) offset = getLong(ctx.offset().LONG_());
+        if (ctx.limit() != null) limit = getLong(ctx.limit().LONG_());
+        if (sorting == null && offset == null && limit == null) return Modifiers.EMPTY;
+        else return new Modifiers(sorting, offset, limit);
+    }
 
     @Override
     public Sortable.Sorting visitSort(TypeQLParser.SortContext ctx) {
@@ -889,6 +911,80 @@ public class Parser extends TypeQLBaseVisitor {
         } else {
             throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
+    }
+
+    // PROJECTIONS =============================================================
+
+    public TypeQLFetch.Projection visitProjection(TypeQLParser.ProjectionContext ctx) {
+        if (ctx.projection_key_var() != null) {
+            TypeQLFetch.Projection.Key.Variable key = visitProjection_key_var(ctx.projection_key_var());
+            if (ctx.projection_attributes() == null) {
+                return new TypeQLFetch.Projection.Variable(key);
+            } else {
+                return new TypeQLFetch.Projection.Attribute(key, visitProjection_attributes(ctx.projection_attributes()));
+            }
+        } else if (ctx.projection_key_label() != null && ctx.projection_subquery() != null) {
+            return new TypeQLFetch.Projection.Subquery(
+                    visitProjection_key_label(ctx.projection_key_label()),
+                    visitProjection_subquery(ctx.projection_subquery())
+            );
+        } else throw TypeQLException.of(ILLEGAL_GRAMMAR);
+    }
+
+    @Override
+    public TypeQLFetch.Projection.Key.Variable visitProjection_key_var(TypeQLParser.Projection_key_varContext ctx) {
+        UnboundVariable variable;
+        if (ctx.VAR_CONCEPT_() != null) variable = getVarConcept(ctx.VAR_CONCEPT_());
+        else if (ctx.VAR_VALUE_() != null) variable = getVarValue(ctx.VAR_VALUE_());
+        else throw TypeQLException.of(ILLEGAL_GRAMMAR);
+
+        TypeQLFetch.Projection.Key.Label label;
+        if (ctx.projection_key_as_label() != null) {
+            label = visitProjection_key_label(ctx.projection_key_as_label().projection_key_label());
+        } else label = null;
+        return new TypeQLFetch.Projection.Key.Variable(variable, label);
+    }
+
+    @Override
+    public TypeQLFetch.Projection.Key.Label visitProjection_key_label(TypeQLParser.Projection_key_labelContext ctx) {
+        if (ctx.QUOTED_STRING() != null) {
+            return new TypeQLFetch.Projection.Key.Label(Either.first(ctx.QUOTED_STRING().getText()));
+        } else if (ctx.LABEL_() != null) {
+            return new TypeQLFetch.Projection.Key.Label(Either.second(ctx.LABEL_().getText()));
+        } else throw TypeQLException.of(ILLEGAL_GRAMMAR);
+    }
+
+    @Override
+    public List<Pair<Reference.Label, TypeQLFetch.Projection.Key.Label>> visitProjection_attributes(
+            TypeQLParser.Projection_attributesContext ctx
+    ) {
+        List<Pair<Reference.Label, TypeQLFetch.Projection.Key.Label>> attributes = new ArrayList<>();
+        ctx.projection_attribute().forEach(attribute -> {
+            attributes.add(visitProjection_attribute(attribute));
+        });
+        return attributes;
+    }
+
+    @Override
+    public Pair<Reference.Label, TypeQLFetch.Projection.Key.Label> visitProjection_attribute(
+            TypeQLParser.Projection_attributeContext ctx
+    ) {
+        Reference.Label attributeLabel = Reference.Label.label(ctx.label().getText());
+        if (ctx.projection_key_as_label() == null) return new Pair<>(attributeLabel, null);
+        else {
+            return new Pair<>(
+                    attributeLabel, visitProjection_key_label(ctx.projection_key_as_label().projection_key_label())
+            );
+        }
+    }
+
+    @Override
+    public Either<TypeQLFetch, TypeQLGet.Aggregate> visitProjection_subquery(TypeQLParser.Projection_subqueryContext ctx) {
+        if (ctx.query_fetch() != null) {
+            return Either.first(visitQuery_fetch(ctx.query_fetch()));
+        } else if (ctx.query_get_aggregate() != null) {
+            return Either.second(visitQuery_get_aggregate(ctx.query_get_aggregate()));
+        } else throw TypeQLException.of(ILLEGAL_GRAMMAR);
     }
 
     // LITERAL INPUT VALUES ====================================================

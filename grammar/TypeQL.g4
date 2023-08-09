@@ -49,7 +49,7 @@ query_delete          :   clause_match  clause_delete  modifiers                
 query_get             :   clause_match  ( clause_get )?  modifiers                 ;
 query_get_aggregate   :   query_get  clause_aggregate                              ;
 query_get_group       :   query_get  clause_group                                  ;
-query_get_group_agg   :   query_get_group clause_aggregate                 ;
+query_get_group_agg   :   query_get_group clause_aggregate                         ;
 
 query_fetch           :   clause_match  clause_fetch  modifiers                    ;
 
@@ -60,7 +60,7 @@ clause_insert         :   INSERT      variable_things     ;
 clause_delete         :   DELETE      variable_things     ;
 clause_get            :   GET       ( VAR_CONCEPT_ | VAR_VALUE_ )?   ( ',' ( VAR_CONCEPT_ | VAR_VALUE_ ) )*  ';' ;
 clause_group          :   GROUP     ( VAR_CONCEPT_ | VAR_VALUE_ ) ';'            ;
-clause_fetch          :   FETCH       fetch_entry    ;
+clause_fetch          :   FETCH       projections         ;
 clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?  ';' ;  // method and, optionally, a variable
 aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                 // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
@@ -77,34 +77,19 @@ limit                 :   LIMIT       LONG_                                     
 
 // FETCH QUERY =================================================================
 
-//fetch_operations      : ( fetch_operation ';' )+      ;
-//fetch_operation       :   fetch_operation_var
-//                      |   fetch_operation_var_attrs
-//                      |   fetch_operation_subquery    ;
-//
-//fetch_operation_var_attrs  :   fetch_operation_var  ':' fetch_operation_attrs ;
-//fetch_operation_attrs      :   fetch_operation_attr  ( ',' fetch_operation_attr )*  ;
-//fetch_operation_attr       :   label  ( fetch_as )?         ;
-//
-//fetch_operation_subquery   :   fetch_label ':' '{' ( query_fetch | query_get_aggregate )  '}'  ;
-//
-//fetch_operation_var   : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( fetch_as )? ;
-//fetch_as              :   AS  fetch_label ;
-//fetch_label           :   QUOTED_STRING | LABEL_  ;
+projections        : ( projection ';' )+      ;
+projection         :   projection_key_var
+                   |   projection_key_var ':' projection_attributes
+                   |   projection_key_label ':' '{' projection_subquery  '}'  ;
 
-fetch_entries        : ( fetch_entry ';' )+      ;
-fetch_entry          :   fetch_name_var
-                     |   fetch_name_var ':' fetch_attrs
-                     |   fetch_name     ':' '{' fetch_subquery  '}'  ;
+projection_attributes    :   projection_attribute  ( ',' projection_attribute )*  ;
+projection_attribute     :   label  ( projection_key_as_label )?         ;
 
-fetch_attrs          :   fetch_attr  ( ',' fetch_attr )*  ;
-fetch_attr           :   label  ( fetch_as_name )?         ;
+projection_subquery      : ( query_fetch | query_get_aggregate )  ;
 
-fetch_subquery       : ( query_fetch | query_get_aggregate )  ;
-
-fetch_name_var       : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( fetch_as_name )? ;
-fetch_as_name        :   AS  fetch_name ;
-fetch_name           :   QUOTED_STRING | LABEL_  ;
+projection_key_var       : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( projection_key_as_label )? ;
+projection_key_as_label  :   AS  projection_key_label ;
+projection_key_label     :   QUOTED_STRING | LABEL_  ;
 
 // SCHEMA QUERY ================================================================
 

@@ -40,6 +40,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
+import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
@@ -65,13 +66,12 @@ public abstract class TypeQLWritable implements TypeQLQuery {
         return toString(true);
     }
 
-
     abstract static class InsertOrDelete extends TypeQLWritable {
 
         private List<UnboundVariable> namedVariablesUnbound;
         private final TypeQLToken.Command command;
-        protected final List<ThingVariable<?>> variables;
-        private final Modifiers modifiers;
+        final List<ThingVariable<?>> variables;
+        final Modifiers modifiers;
         private final int hash;
 
         InsertOrDelete(TypeQLToken.Command command, @Nullable MatchClause match, List<ThingVariable<?>> variables, Modifiers modifiers) {
@@ -82,7 +82,7 @@ public abstract class TypeQLWritable implements TypeQLQuery {
             this.command = command;
             this.variables = variables;
             this.modifiers = modifiers;
-            this.hash = Objects.hash(this.command, this.match, this.variables);
+            this.hash = Objects.hash(this.command, this.match, this.variables, this.modifiers);
         }
 
         public List<UnboundVariable> namedVariablesUnbound() {
@@ -97,22 +97,30 @@ public abstract class TypeQLWritable implements TypeQLQuery {
             return modifiers;
         }
 
+        public List<ThingVariable<?>> variables() {
+            return variables;
+        }
+
         @Override
         public String toString(boolean pretty) {
             StringBuilder query = new StringBuilder();
             if (match != null) query.append(match.toString(pretty)).append(NEW_LINE);
             appendClause(query, command, variables.stream().map(v -> v.toString(pretty)), pretty);
+            appendModifiers(query, modifiers, pretty);
             return query.toString();
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
+                return false;
+            }
             InsertOrDelete that = (InsertOrDelete) o;
             return (this.command.equals(that.command) &&
                     Objects.equals(this.match, that.match) &&
-                    this.variables.equals(that.variables));
+                    this.variables.equals(that.variables)) &&
+                    this.modifiers.equals(that.modifiers);
         }
 
         @Override

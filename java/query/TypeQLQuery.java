@@ -150,10 +150,19 @@ public interface TypeQLQuery {
         builder.append(SEMICOLON);
     }
 
+    static void appendModifiers(StringBuilder builder, Modifiers modifiers, boolean pretty) {
+        if (!modifiers.isEmpty()) {
+            if (pretty) builder.append(NEW_LINE);
+            builder.append(modifiers);
+        }
+    }
+
     String toString(boolean pretty);
 
-    interface Unmodified<S extends Sorted<O, L>, O extends Offset<L>, L extends Limited>
+    interface Unmodified<Q, S extends Sorted<O, L>, O extends Offset<L>, L extends Limited>
             extends TypeQLQuery {
+
+        Q modifier(Modifiers modifier);
 
         default S sort(UnboundVariable var, UnboundVariable... vars) {
             List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
@@ -264,20 +273,20 @@ public interface TypeQLQuery {
             return new TypeQLGet.Unmodified(this, vars);
         }
 
-        public TypeQLInsert insert(ThingVariable<?>... things) {
+        public TypeQLInsert.Unmodified insert(ThingVariable<?>... things) {
             return insert(list(things));
         }
 
-        public TypeQLInsert insert(List<ThingVariable<?>> things) {
-            return new TypeQLInsert(this, things);
+        public TypeQLInsert.Unmodified insert(List<ThingVariable<?>> things) {
+            return new TypeQLInsert.Unmodified(this, things);
         }
 
-        public TypeQLDelete delete(ThingVariable<?>... things) {
+        public TypeQLDelete.Unmodified delete(ThingVariable<?>... things) {
             return delete(list(things));
         }
 
-        public TypeQLDelete delete(List<ThingVariable<?>> things) {
-            return new TypeQLDelete(this, things);
+        public TypeQLDelete.Unmodified delete(List<ThingVariable<?>> things) {
+            return new TypeQLDelete.Unmodified(this, things);
         }
 
         public Stream<Pattern> patternsRecursive() {

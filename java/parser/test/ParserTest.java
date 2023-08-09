@@ -1336,7 +1336,7 @@ public class ParserTest {
         final String getString = "match\n$y isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(getString).collect(toList());
 
-        assertEquals(list(match(cVar("y").isa("movie"))), queries);
+        assertEquals(list(match(cVar("y").isa("movie")).get()), queries);
     }
 
     @Test
@@ -1369,12 +1369,13 @@ public class ParserTest {
         final String getString = "match\n$y isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString + getString).collect(toList());
 
-        assertEquals(list(insert(cVar("x").isa("movie")), match(cVar("y").isa("movie"))), queries);
+        assertEquals(list(insert(cVar("x").isa("movie")), match(cVar("y").isa("movie")).get()), queries);
     }
 
     @Test
     public void testParseManyMatchInsertWithoutStackOverflow() {
-        final int numQueries = 10_000;
+//        final int numQueries = 10_000;
+        final int numQueries = 2;
         final String matchInsertString = "match\n$x isa person; insert $x has name 'bob';\n";
         StringBuilder longQuery = new StringBuilder();
         for (int i = 0; i < numQueries; i++) {

@@ -65,8 +65,10 @@ public class TypeQLToken {
         INSERT("insert"),
         DELETE("delete"),
         MATCH("match"),
+        GET("get"),
         AGGREGATE("aggregate"),
-        GROUP("group");
+        GROUP("group"),
+        FETCH("fetch");
 
         private final String command;
 
@@ -90,7 +92,6 @@ public class TypeQLToken {
     }
 
     public enum Filter {
-        GET("get"),
         SORT("sort"),
         OFFSET("offset"),
         LIMIT("limit");
@@ -371,6 +372,30 @@ public class TypeQLToken {
             for (Annotation annotation: Annotation.values()) {
                 if (annotation.name.equals(value)) {
                     return annotation;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum Projection {
+        AS("as");
+
+        private final String name;
+
+        Projection(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return Char.AT + name;
+        }
+
+        public static Projection of(String value) {
+            for (Projection projection: Projection.values()) {
+                if (projection.name.equals(value)) {
+                    return projection;
                 }
             }
             return null;

@@ -22,6 +22,7 @@
 package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typedb.common.collection.Either;
+import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.pattern.variable.Reference;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
@@ -29,15 +30,31 @@ import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
+
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.QUOTE_DOUBLE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Command.FETCH;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Projection.AS;
+import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
+import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
 
 public class TypeQLFetch implements TypeQLQuery {
 
     private final MatchClause match;
-    private final List<Entry> entries;
+    private final List<Projection> projections;
+    private final Modifiers modifiers;
 
-    TypeQLFetch(MatchClause match, List<Entry> entries) {
+    TypeQLFetch(MatchClause match, List<Projection> projections) {
+        this(match, projections, Modifiers.EMPTY);
+    }
+
+    public TypeQLFetch(MatchClause match, List<Projection> projections, Modifiers modifiers) {
         this.match = match;
-        this.entries = entries;
+        this.projections = projections;
+        this.modifiers = modifiers;
     }
 
     @Override
@@ -52,19 +69,40 @@ public class TypeQLFetch implements TypeQLQuery {
 
     @Override
     public String toString(boolean pretty) {
-        return null;
+        StringBuilder query = new StringBuilder(match.toString(pretty));
+        Stream<String> projections = this.projections.stream().map(projection -> projection.toString(pretty));
+        appendClause(query, FETCH, projections, pretty);
+        appendModifiers(query, modifiers, pretty);
+        return query.toString();
     }
 
-    static abstract class Entry {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!getClass().isAssignableFrom(o.getClass()) && !o.getClass().isAssignableFrom(getClass())) {
+            return false;
+        }
+        TypeQLFetch that = (TypeQLFetch) o;
+        return match.equals(that.match) && projections.equals(that.projections) && modifiers.equals(that.modifiers);
+    }
 
-        final Name name;
+    @Override
+    public int hashCode() {
+        return Objects.hash(match, projections, modifiers);
+    }
 
-        Entry(Name name) {
-            this.name = name;
+    // TODO modifiers
+
+    public static abstract class Projection {
+
+        final Key key;
+
+        Projection(Key key) {
+            this.key = key;
         }
 
-        public Name name() {
-            return name;
+        public Key key() {
+            return key;
         }
 
         @Override
@@ -72,15 +110,21 @@ public class TypeQLFetch implements TypeQLQuery {
             return toString(true);
         }
 
-        public String toString(boolean pretty) {
-            // TODO
-            return "";
-        }
+        abstract String toString(boolean pretty);
 
-        static class Variable extends Entry {
+        public abstract int hashCode();
 
-            Variable(Name name) {
-                super(name);
+        public abstract boolean equals(Object object);
+
+        public static class Variable extends Projection {
+
+            public Variable(Key.Variable key) {
+                super(key);
+            }
+
+            @Override
+            public String toString(boolean pretty) {
+                return key.toString(pretty);
             }
 
             @Override
@@ -88,74 +132,103 @@ public class TypeQLFetch implements TypeQLQuery {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Variable that = (Variable) o;
-                return this.name.equals(that.name);
+                return this.key.equals(that.key);
             }
 
             @Override
             public int hashCode() {
-                return name.hashCode();
+                return key.hashCode();
             }
         }
 
-        static class Attributes extends Entry {
+        public static class Attribute extends Projection {
 
-            private final List<Attribute> attributes;
+            private final List<Pair<Reference.Label, Key.Label>> attributes;
 
-            Attributes(Name name, List<Attribute> attributes) {
-                super(name);
+            public Attribute(Key.Variable key, List<Pair<Reference.Label, Key.Label>> attributes) {
+                super(key);
                 this.attributes = attributes;
             }
 
-            static class Attribute {
+            @Override
+            String toString(boolean pretty) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(key.toString(pretty)).append(COLON).append(SPACE);
+                String attrs = attributes.stream().map(pair -> {
+                    if (pair.second() == null) return pair.first().toString();
+                    else return pair.first() + SPACE.toString() + AS + SPACE + pair.second();
+                }).collect(COMMA_SPACE.joiner());
+                builder.append(attrs);
+                return builder.toString();
+            }
 
-                private final Reference.Label attribute;
-                private final Name.String name;
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Attribute that = (Attribute) o;
+                return attributes.equals(that.attributes);
+            }
 
-                Attribute(Reference.Label attribute, @Nullable Name.String name) {
-                    this.attribute = attribute;
-                    this.name = name;
-                }
-
-                @Override
-                public boolean equals(Object o) {
-                    if (this == o) return true;
-                    if (o == null || getClass() != o.getClass()) return false;
-                    Attribute that = (Attribute) o;
-                    return attribute.equals(that.attribute) && Objects.equals(name, that.name);
-                }
-
-                @Override
-                public int hashCode() {
-                    return Objects.hash(attribute, name);
-                }
+            @Override
+            public int hashCode() {
+                return attributes.hashCode();
             }
         }
 
-        static class Subquery extends Entry {
+        public static class Subquery extends Projection {
 
             private final Either<TypeQLFetch, TypeQLGet.Aggregate> subquery;
 
-            Subquery(Name name, Either<TypeQLFetch, TypeQLGet.Aggregate> subquery) {
-                super(name);
+            public Subquery(Key.Label key, Either<TypeQLFetch, TypeQLGet.Aggregate> subquery) {
+                super(key);
                 this.subquery = subquery;
             }
 
+            @Override
+            public String toString(boolean pretty) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(key.toString(pretty)).append(COLON).append(SPACE);
+                if (subquery.isFirst()) builder.append(subquery.first().toString(pretty));
+                else builder.append(subquery.second().toString(pretty));
+                return builder.toString();
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Subquery that = (Subquery) o;
+                return subquery.equals(that.subquery);
+            }
+
+            @Override
+            public int hashCode() {
+                return subquery.hashCode();
+            }
         }
 
-        interface Name {
+        public interface Key {
 
-            class Variable implements Name {
+            String toString(boolean pretty);
+
+            class Variable implements Key {
 
                 private final UnboundVariable variable;
-                private final String name;
+                private final Label label;
 
                 Variable(UnboundVariable variable) {
                     this(variable, null);
                 }
 
-                public Variable(UnboundVariable variable, @Nullable String name) {
+                public Variable(UnboundVariable variable, @Nullable Label label) {
                     this.variable = variable;
-                    this.name = name;
+                    this.label = label;
+                }
+
+                @Override
+                public String toString(boolean pretty) {
+                    return label == null ? variable.toString(pretty) : variable.toString(pretty) + AS + label.toString(pretty);
                 }
 
                 @Override
@@ -163,33 +236,41 @@ public class TypeQLFetch implements TypeQLQuery {
                     if (this == o) return true;
                     if (o == null || getClass() != o.getClass()) return false;
                     Variable that = (Variable) o;
-                    return variable.equals(that.variable) && Objects.equals(name, that.name);
+                    return variable.equals(that.variable) && Objects.equals(label, that.label);
                 }
 
                 @Override
                 public int hashCode() {
-                    return Objects.hash(variable, name);
+                    return Objects.hash(variable, label);
                 }
             }
 
-            class String implements Name {
-                java.lang.String name;
+            class Label implements Key {
 
-                String(java.lang.String name) {
-                    this.name = name;
+                Either<String, String> quotedOrUnquoted;
+
+                public Label(Either<String, String> quotedOrUnquoted) {
+                    this.quotedOrUnquoted = quotedOrUnquoted;
+                }
+
+                @Override
+                public String toString(boolean pretty) {
+                    // TODO: what about escape behaviour?
+                    if (quotedOrUnquoted.isFirst()) return QUOTE_DOUBLE + quotedOrUnquoted.first() + QUOTE_DOUBLE;
+                    else return quotedOrUnquoted.second();
                 }
 
                 @Override
                 public boolean equals(Object o) {
                     if (this == o) return true;
                     if (o == null || getClass() != o.getClass()) return false;
-                    String that = (String) o;
-                    return name.equals(that.name);
+                    Label that = (Label) o;
+                    return quotedOrUnquoted.equals(that.quotedOrUnquoted);
                 }
 
                 @Override
                 public int hashCode() {
-                    return name.hashCode();
+                    return quotedOrUnquoted.hashCode();
                 }
             }
         }
