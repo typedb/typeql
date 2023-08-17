@@ -24,12 +24,12 @@ package com.vaticle.typeql.lang.query;
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
@@ -164,31 +164,31 @@ public interface TypeQLQuery {
 
         Q modifier(Modifiers modifier);
 
-        default S sort(UnboundVariable var, UnboundVariable... vars) {
-            List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
+        default S sort(TypeQLVariable var, TypeQLVariable... vars) {
+            List<Pair<TypeQLVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
             pairs.add(new Pair<>(var, null));
-            for (UnboundVariable v : vars) pairs.add(new Pair<>(v, null));
+            for (TypeQLVariable v : vars) pairs.add(new Pair<>(v, null));
             return sort(pairs);
         }
 
-        default S sort(Pair<UnboundVariable, String> varOrder1) {
+        default S sort(Pair<TypeQLVariable, String> varOrder1) {
             return sort(list(parseVarOrder(varOrder1)));
         }
 
-        default S sort(Pair<UnboundVariable, String> varOrder1, Pair<UnboundVariable, String> varOrder2) {
+        default S sort(Pair<TypeQLVariable, String> varOrder1, Pair<TypeQLVariable, String> varOrder2) {
             return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2)));
         }
 
-        default S sort(Pair<UnboundVariable, String> varOrder1, Pair<UnboundVariable, String> varOrder2,
-                       Pair<UnboundVariable, String> varOrder3) {
+        default S sort(Pair<TypeQLVariable, String> varOrder1, Pair<TypeQLVariable, String> varOrder2,
+                       Pair<TypeQLVariable, String> varOrder3) {
             return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2), parseVarOrder(varOrder3)));
         }
 
-        static Pair<UnboundVariable, TypeQLArg.Order> parseVarOrder(Pair<UnboundVariable, String> varOrder) {
+        static Pair<TypeQLVariable, TypeQLArg.Order> parseVarOrder(Pair<TypeQLVariable, String> varOrder) {
             return new Pair<>(varOrder.first(), TypeQLArg.Order.of(varOrder.second()));
         }
 
-        default S sort(List<Pair<UnboundVariable, TypeQLArg.Order>> varOrders) {
+        default S sort(List<Pair<TypeQLVariable, TypeQLArg.Order>> varOrders) {
             return sort(Sortable.Sorting.create(varOrders));
         }
 
@@ -224,8 +224,8 @@ public interface TypeQLQuery {
 
         private final Conjunction<? extends Pattern> conjunction;
 
-        private List<BoundVariable> variables;
-        private Set<UnboundVariable> variablesNamedUnbound;
+        private List<Statement> statements;
+        private Set<TypeQLVariable> variablesNamed;
 
         public MatchClause(Conjunction<? extends Pattern> conjunction) {
             this.conjunction = conjunction;
@@ -238,54 +238,53 @@ public interface TypeQLQuery {
         }
 
         private void hasBoundingConjunction() {
-            if (!conjunction.namedVariablesUnbound().findAny().isPresent()) {
+            if (!conjunction.namedVariables().findAny().isPresent()) {
                 throw TypeQLException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
             }
         }
 
         private void nestedPatternsAreBounded() {
-            conjunction.patterns().stream().filter(pattern -> !pattern.isVariable()).forEach(pattern -> {
-                pattern.validateIsBoundedBy(conjunction.namedVariablesUnbound().collect(toSet()));
+            conjunction.patterns().stream().filter(pattern -> !pattern.isStatement()).forEach(pattern -> {
+                pattern.validateIsBoundedBy(conjunction.namedVariables().collect(toSet()));
             });
         }
 
         private void queryHasNamedVariable() {
-            if (namedVariablesUnbound().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
+            if (namedVariables().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
         }
 
         private void eachPatternVariableHasNamedVariable(List<? extends Pattern> patterns) {
             patterns.forEach(pattern -> {
-                if (pattern.isVariable() && !pattern.asVariable().isNamed()
-                        && pattern.asVariable().variables().noneMatch(constraintVar -> constraintVar.isNamed())) {
+                if (pattern.isStatement() && pattern.asStatement().variables().noneMatch(TypeQLVariable::isNamed)) {
                     throw TypeQLException.of(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.message(pattern));
-                } else if (!pattern.isVariable()) {
+                } else if (!pattern.isStatement()) {
                     eachPatternVariableHasNamedVariable(pattern.patterns());
                 }
             });
         }
 
-        public TypeQLGet.Unmodified get(UnboundVariable... vars) {
+        public TypeQLGet.Unmodified get(TypeQLVariable... vars) {
             if (vars.length == 0) return get(emptyList());
             else return get(list(vars));
         }
 
-        public TypeQLGet.Unmodified get(List<UnboundVariable> vars) {
+        public TypeQLGet.Unmodified get(List<TypeQLVariable> vars) {
             return new TypeQLGet.Unmodified(this, vars);
         }
 
-        public TypeQLInsert.Unmodified insert(ThingVariable<?>... things) {
+        public TypeQLInsert.Unmodified insert(ThingStatement<?>... things) {
             return insert(list(things));
         }
 
-        public TypeQLInsert.Unmodified insert(List<ThingVariable<?>> things) {
+        public TypeQLInsert.Unmodified insert(List<ThingStatement<?>> things) {
             return new TypeQLInsert.Unmodified(this, things);
         }
 
-        public TypeQLDelete.Unmodified delete(ThingVariable<?>... things) {
+        public TypeQLDelete.Unmodified delete(ThingStatement<?>... things) {
             return delete(list(things));
         }
 
-        public TypeQLDelete.Unmodified delete(List<ThingVariable<?>> things) {
+        public TypeQLDelete.Unmodified delete(List<ThingStatement<?>> things) {
             return new TypeQLDelete.Unmodified(this, things);
         }
 
@@ -302,16 +301,16 @@ public interface TypeQLQuery {
             return conjunction;
         }
 
-        public List<BoundVariable> variables() {
-            if (variables == null) variables = conjunction.variables().collect(toList());
-            return variables;
+        public List<Statement> statements() {
+            if (statements == null) statements = conjunction.statements().collect(toList());
+            return statements;
         }
 
-        public Set<UnboundVariable> namedVariablesUnbound() {
-            if (variablesNamedUnbound == null) {
-                variablesNamedUnbound = conjunction.namedVariablesUnbound().collect(toSet());
+        public Set<TypeQLVariable> namedVariables() {
+            if (variablesNamed == null) {
+                variablesNamed = conjunction.namedVariables().collect(toSet());
             }
-            return variablesNamedUnbound;
+            return variablesNamed;
         }
 
         @Override

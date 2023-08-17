@@ -31,10 +31,10 @@ java_library(
         "*.java",
         "constraint/*.java",
         "expression/*.java",
-        "util/*.java",
-        "variable/*.java",
-        "variable/builder/*.java",
         "schema/*.java",
+        "statement/*.java",
+        "statement/builder/*.java",
+        "util/*.java",
     ]),
     deps = [
         # Internal Package Dependencies
@@ -69,8 +69,9 @@ checkstyle_test(
         "constraint/*.java",
         "expression/*.java",
         "schema/*.java",
-        "variable/*.java",
-        "variable/builder/*.java"
+        "statement/*.java",
+        "statement/builder/*.java",
+        "util/*.java",
     ]),
     license_type = "apache-header",
 )

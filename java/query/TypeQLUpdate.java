@@ -21,11 +21,10 @@
 
 package com.vaticle.typeql.lang.query;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-import com.vaticle.typeql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import java.util.List;
@@ -36,8 +35,8 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
 import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
-import static com.vaticle.typeql.lang.query.TypeQLDelete.validDeleteVars;
-import static com.vaticle.typeql.lang.query.TypeQLInsert.validInsertVars;
+import static com.vaticle.typeql.lang.query.TypeQLDelete.validDeleteStatements;
+import static com.vaticle.typeql.lang.query.TypeQLInsert.validInsertStatements;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
 import static java.util.stream.Collectors.toList;
@@ -45,67 +44,67 @@ import static java.util.stream.Stream.concat;
 
 public class TypeQLUpdate extends TypeQLWritable {
 
-    private final List<ThingVariable<?>> deleteVariables;
-    private final List<ThingVariable<?>> insertVariables;
+    private final List<ThingStatement<?>> deleteStatements;
+    private final List<ThingStatement<?>> insertStatements;
     private final int hash;
 
-    private List<UnboundVariable> namedDeleteVariablesUnbound;
-    private List<UnboundVariable> namedInsertVariablesUnbound;
+    private List<TypeQLVariable> namedDeleteVariables;
+    private List<TypeQLVariable> namedInsertVariables;
     private final Modifiers modifiers;
 
-    public TypeQLUpdate(MatchClause match, List<ThingVariable<?>> deleteVariables,
-                        List<ThingVariable<?>> insertVariables) {
-        this(match, deleteVariables, insertVariables, Modifiers.EMPTY);
+    public TypeQLUpdate(MatchClause match, List<ThingStatement<?>> deleteStatements,
+                        List<ThingStatement<?>> insertStatements) {
+        this(match, deleteStatements, insertStatements, Modifiers.EMPTY);
     }
 
-    public TypeQLUpdate(MatchClause match, List<ThingVariable<?>> deleteVariables,
-                        List<ThingVariable<?>> insertVariables, Modifiers modifiers) {
+    public TypeQLUpdate(MatchClause match, List<ThingStatement<?>> deleteStatements,
+                        List<ThingStatement<?>> insertStatements, Modifiers modifiers) {
         super(match);
-        this.deleteVariables = validDeleteVars(match, deleteVariables);
-        this.insertVariables = validInsertVars(match, insertVariables);
+        this.deleteStatements = validDeleteStatements(match, deleteStatements);
+        this.insertStatements = validInsertStatements(match, insertStatements);
         this.modifiers = modifiers;
         Stream<Pattern> patterns = concat(
-                match.patternsRecursive(), concat(deleteVariables.stream(), insertVariables.stream())
+                match.patternsRecursive(), concat(deleteStatements.stream(), insertStatements.stream())
         );
         validateNamesUnique(patterns);
-        this.hash = Objects.hash(match, deleteVariables, insertVariables, modifiers);
+        this.hash = Objects.hash(match, deleteStatements, insertStatements, modifiers);
     }
 
-    public List<ThingVariable<?>> deleteVariables() {
-        return deleteVariables;
+    public List<ThingStatement<?>> deleteStatements() {
+        return deleteStatements;
     }
 
-    public List<ThingVariable<?>> insertVariables() {
-        return insertVariables;
+    public List<ThingStatement<?>> insertStatements() {
+        return insertStatements;
     }
 
     public Modifiers modifiers() {
         return modifiers;
     }
 
-    public List<UnboundVariable> namedDeleteVariablesUnbound() {
-        if (namedDeleteVariablesUnbound == null) {
-            namedDeleteVariablesUnbound = deleteVariables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
-                    .filter(Variable::isNamedConcept).map(BoundVariable::toUnbound).distinct().collect(toList());
+    public List<TypeQLVariable> namedDeleteVariables() {
+        if (namedDeleteVariables == null) {
+            namedDeleteVariables = deleteStatements.stream().flatMap(Statement::variables)
+                    .filter(TypeQLVariable::isNamed).distinct().collect(toList());
         }
-        return namedDeleteVariablesUnbound;
+        return namedDeleteVariables;
     }
 
-    public List<UnboundVariable> namedInsertVariablesUnbound() {
-        if (namedInsertVariablesUnbound == null) {
-            namedInsertVariablesUnbound = insertVariables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
-                    .filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct().collect(toList());
+    public List<TypeQLVariable> namedInsertVariables() {
+        if (namedInsertVariables == null) {
+            namedInsertVariables = insertStatements.stream().flatMap(Statement::variables)
+                    .filter(TypeQLVariable::isNamed).distinct().collect(toList());
         }
-        return namedInsertVariablesUnbound;
+        return namedInsertVariables;
     }
 
     @Override
     public String toString(boolean pretty) {
         StringBuilder query = new StringBuilder();
         query.append(match.toString(pretty)).append(NEW_LINE);
-        appendClause(query, DELETE, deleteVariables.stream().map(v -> v.toString(pretty)), pretty);
+        appendClause(query, DELETE, deleteStatements.stream().map(v -> v.toString(pretty)), pretty);
         query.append(NEW_LINE);
-        appendClause(query, INSERT, insertVariables.stream().map(v -> v.toString(pretty)), pretty);
+        appendClause(query, INSERT, insertStatements.stream().map(v -> v.toString(pretty)), pretty);
         appendModifiers(query, modifiers, pretty);
         return query.toString();
     }
@@ -117,8 +116,8 @@ public class TypeQLUpdate extends TypeQLWritable {
             return false;
         }
         TypeQLUpdate that = (TypeQLUpdate) o;
-        return (this.match.equals(that.match) && this.deleteVariables.equals(that.deleteVariables) &&
-                this.insertVariables.equals(that.insertVariables)) && this.modifiers.equals(that.modifiers);
+        return (this.match.equals(that.match) && this.deleteStatements.equals(that.deleteStatements) &&
+                this.insertStatements.equals(that.insertStatements)) && this.modifiers.equals(that.modifiers);
     }
 
     @Override
@@ -128,13 +127,13 @@ public class TypeQLUpdate extends TypeQLWritable {
 
     public static class Unmodified extends TypeQLUpdate implements TypeQLQuery.Unmodified<TypeQLUpdate, TypeQLUpdate.Sorted, TypeQLUpdate.Offset, TypeQLUpdate.Limited> {
 
-        public Unmodified(MatchClause match, List<ThingVariable<?>> deleteVariables, List<ThingVariable<?>> insertVariables) {
-            super(match, deleteVariables, insertVariables, Modifiers.EMPTY);
+        public Unmodified(MatchClause match, List<ThingStatement<?>> deleteStatements, List<ThingStatement<?>> insertStatements) {
+            super(match, deleteStatements, insertStatements, Modifiers.EMPTY);
         }
 
         @Override
         public TypeQLUpdate modifier(Modifiers modifier) {
-            return new TypeQLUpdate(match, deleteVariables(), insertVariables(), modifier);
+            return new TypeQLUpdate(match, deleteStatements(), insertStatements(), modifier);
         }
 
         @Override
@@ -156,7 +155,7 @@ public class TypeQLUpdate extends TypeQLWritable {
     public static class Sorted extends TypeQLUpdate implements TypeQLQuery.Sorted<TypeQLUpdate.Offset, TypeQLUpdate.Limited> {
 
         public Sorted(TypeQLUpdate delete, Sortable.Sorting sorting) {
-            super(delete.match, delete.deleteVariables, delete.insertVariables, new Modifiers(sorting, delete.modifiers.offset, delete.modifiers.limit));
+            super(delete.match, delete.deleteStatements, delete.insertStatements, new Modifiers(sorting, delete.modifiers.offset, delete.modifiers.limit));
         }
 
         @Override
@@ -173,7 +172,7 @@ public class TypeQLUpdate extends TypeQLWritable {
     public static class Offset extends TypeQLUpdate implements TypeQLQuery.Offset<TypeQLUpdate.Limited> {
 
         public Offset(TypeQLUpdate delete, long offset) {
-            super(delete.match, delete.deleteVariables, delete.insertVariables, new Modifiers(delete.modifiers.sorting, offset, delete.modifiers.limit));
+            super(delete.match, delete.deleteStatements, delete.insertStatements, new Modifiers(delete.modifiers.sorting, offset, delete.modifiers.limit));
         }
 
         @Override
@@ -185,7 +184,7 @@ public class TypeQLUpdate extends TypeQLWritable {
     public static class Limited extends TypeQLUpdate implements TypeQLQuery.Limited {
 
         public Limited(TypeQLUpdate delete, long limit) {
-            super(delete.match, delete.deleteVariables, delete.insertVariables, new Modifiers(delete.modifiers.sorting, delete.modifiers.offset, limit));
+            super(delete.match, delete.deleteStatements, delete.insertStatements, new Modifiers(delete.modifiers.sorting, delete.modifiers.offset, limit));
         }
     }
 }

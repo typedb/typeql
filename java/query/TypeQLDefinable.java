@@ -27,10 +27,9 @@ import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +42,7 @@ abstract class TypeQLDefinable implements TypeQLQuery {
 
     private final TypeQLToken.Command command;
     private final List<Definable> definables;
-    private final List<TypeVariable> variables = new ArrayList<>();
+    private final List<TypeStatement> statements = new ArrayList<>();
     private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
@@ -59,17 +58,14 @@ abstract class TypeQLDefinable implements TypeQLQuery {
                 }
                 rules.add(rule);
             }
-            if (definable.isTypeVariable()) variables.add(definable.asTypeVariable());
+            if (definable.isTypeStatement()) statements.add(definable.asTypeStatement());
         }
-        LinkedList<TypeVariable> typeVarsToVerify = new LinkedList<>(variables);
-        while (!typeVarsToVerify.isEmpty()) {
-            TypeVariable v = typeVarsToVerify.removeFirst();
-            if (!v.isLabelled()) throw TypeQLException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
-            else v.constraints().forEach(c -> typeVarsToVerify.addAll(c.variables()));
-        }
+        statements.stream().flatMap(TypeStatement::variables).forEach(var -> {
+            if (!var.isLabelled()) throw TypeQLException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
+        });
 
         this.command = command;
-        this.hash = Objects.hash(this.command, this.variables, this.rules);
+        this.hash = Objects.hash(this.command, this.statements, this.rules);
     }
 
     @Override
@@ -77,8 +73,8 @@ abstract class TypeQLDefinable implements TypeQLQuery {
         return TypeQLArg.QueryType.WRITE;
     }
 
-    public final List<TypeVariable> variables() {
-        return variables;
+    public final List<TypeStatement> statements() {
+        return statements;
     }
 
     public final List<Rule> rules() {

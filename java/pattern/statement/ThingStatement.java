@@ -19,11 +19,12 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.statement;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.variable.builder.ThingVariableBuilder;
+import com.vaticle.typeql.lang.pattern.statement.builder.ThingStatementBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -37,8 +38,9 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
-public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVariable {
+public abstract class ThingStatement<T extends ThingStatement<T>> extends Statement {
 
+    final TypeQLVariable.Concept variable;
     ThingConstraint.IID iidConstraint;
     ThingConstraint.Isa isaConstraint;
     ThingConstraint.Predicate predicateConstraint;
@@ -46,9 +48,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     List<ThingConstraint.Has> hasConstraints;
     List<ThingConstraint> constraints;
 
-    ThingVariable(Reference reference) {
-        super(reference);
-        assert !reference.isNameValue();
+    ThingStatement(TypeQLVariable.Concept variable) {
+        this.variable = variable;
         this.hasConstraints = new LinkedList<>();
         this.constraints = new LinkedList<>();
     }
@@ -56,8 +57,8 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     abstract T getThis();
 
     @Override
-    public UnboundConceptVariable toUnbound() {
-        return new UnboundConceptVariable(reference);
+    public TypeQLVariable.Concept headVariable() {
+        return variable;
     }
 
     @Override
@@ -71,7 +72,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     }
 
     @Override
-    public ThingVariable<?> asThing() {
+    public ThingStatement<?> asThing() {
         return this;
     }
 
@@ -97,9 +98,9 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
 
     public T constrain(ThingConstraint.Isa constraint) {
         if (isaConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ThingConstraint.Isa.class, constraint));
-        } else if (constraint.type().label().isPresent() && relation().isPresent()) {
-            relationConstraint.setScope(constraint.type().label().get().label());
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, ThingConstraint.Isa.class, constraint));
+        } else if (constraint.type().isLabelled() && relation().isPresent()) {
+            relationConstraint.setScope(constraint.type().reference().asLabel().label());
         }
         isaConstraint = constraint;
         constraints.add(constraint);
@@ -124,31 +125,39 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !ThingVariable.class.isAssignableFrom(o.getClass())) return false;
-        ThingVariable<?> that = (ThingVariable<?>) o;
+        if (o == null || !ThingStatement.class.isAssignableFrom(o.getClass())) return false;
+        ThingStatement<?> that = (ThingStatement<?>) o;
 
-        return (this.reference.equals(that.reference) && this.constraints.equals(that.constraints));
+        return (this.variable.equals(that.variable) && this.constraints.equals(that.constraints));
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(reference, constraints);
+        return Objects.hash(variable, constraints);
     }
 
-    public static class Thing extends ThingVariable<Thing> implements ThingVariableBuilder.Common<Thing> {
+    public static class Thing extends ThingStatement<Thing> implements ThingStatementBuilder.Common<Thing> {
 
-        Thing(Reference reference) {
-            super(reference);
+        private Thing(TypeQLVariable.Concept variable) {
+            super(variable);
         }
 
-        Thing(Reference reference, ThingConstraint.IID iidConstraint) {
-            super(reference);
+        private Thing(TypeQLVariable.Concept variable, ThingConstraint.IID iidConstraint) {
+            super(variable);
             this.iidConstraint = iidConstraint;
             constraints.add(iidConstraint);
         }
 
+        public static Thing of(TypeQLVariable.Concept variable) {
+            return new Thing(variable);
+        }
+
+        public static Thing of(TypeQLVariable.Concept variable, ThingConstraint.IID iidConstraint) {
+            return new Thing(variable, iidConstraint);
+        }
+
         @Override
-        ThingVariable.Thing getThis() {
+        ThingStatement.Thing getThis() {
             return this;
         }
 
@@ -161,7 +170,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         @Override
         public String toString(boolean pretty) {
             StringBuilder thing = new StringBuilder();
-            if (isVisible()) thing.append(reference.syntax());
+            if (variable.isVisible()) thing.append(variable);
             String constraints;
             if (pretty) {
                 constraints = Stream.of(thingSyntax(), hasSyntax()).filter(s -> !s.isEmpty()).collect(COMMA_NEW_LINE.joiner());
@@ -174,22 +183,26 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    public static class Relation extends ThingVariable<Relation> implements ThingVariableBuilder.Relation,
-            ThingVariableBuilder.Common<Relation> {
+    public static class Relation extends ThingStatement<Relation> implements ThingStatementBuilder.Relation,
+            ThingStatementBuilder.Common<Relation> {
 
-        Relation(Reference reference, ThingConstraint.Relation relationConstraint) {
-            super(reference);
+        private Relation(TypeQLVariable.Concept variable, ThingConstraint.Relation relationConstraint) {
+            super(variable);
             this.relationConstraint = relationConstraint;
             constraints.add(relationConstraint);
         }
 
+        public static Relation of(TypeQLVariable.Concept variable, ThingConstraint.Relation relationConstraint) {
+            return new Relation(variable, relationConstraint);
+        }
+
         @Override
-        ThingVariable.Relation getThis() {
+        ThingStatement.Relation getThis() {
             return this;
         }
 
         @Override
-        public ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
+        public ThingStatement.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer) {
             relationConstraint.addPlayers(rolePlayer);
             return this;
         }
@@ -198,7 +211,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         public String toString(boolean pretty) {
             assert relation().isPresent();
             StringBuilder relation = new StringBuilder();
-            if (isVisible()) relation.append(reference.syntax()).append(SPACE);
+            if (variable.isVisible()) relation.append(variable).append(SPACE);
             relation.append(relation().get());
             String constraints;
             if (pretty) {
@@ -213,16 +226,24 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         }
     }
 
-    public static class Attribute extends ThingVariable<Attribute> implements ThingVariableBuilder.Common<Attribute> {
+    public static class Attribute extends ThingStatement<Attribute> implements ThingStatementBuilder.Common<Attribute> {
 
-        Attribute(Reference reference, ThingConstraint.Predicate predicateConstraint) {
-            super(reference);
+        private Attribute(TypeQLVariable.Concept variable, ThingConstraint.Predicate predicateConstraint) {
+            super(variable);
             this.predicateConstraint = predicateConstraint;
             constraints.add(predicateConstraint);
         }
 
+        public static Attribute of(TypeQLVariable.Concept variable) {
+            return new Attribute(variable, null);
+        }
+
+        public static Attribute of(TypeQLVariable.Concept variable, ThingConstraint.Predicate predicateConstraint) {
+            return new Attribute(variable, predicateConstraint);
+        }
+
         @Override
-        ThingVariable.Attribute getThis() {
+        ThingStatement.Attribute getThis() {
             return this;
         }
 
@@ -230,7 +251,7 @@ public abstract class ThingVariable<T extends ThingVariable<T>> extends BoundVar
         public String toString(boolean pretty) {
             assert predicate().isPresent();
             StringBuilder attribute = new StringBuilder();
-            if (isVisible()) attribute.append(reference.syntax()).append(SPACE);
+            if (variable.isVisible()) attribute.append(variable).append(SPACE);
             attribute.append(predicate().get());
             String constraints;
             if (pretty) {

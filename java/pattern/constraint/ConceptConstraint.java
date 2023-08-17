@@ -21,10 +21,11 @@
 
 package com.vaticle.typeql.lang.pattern.constraint;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
+import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -33,8 +34,9 @@ import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.IS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static java.util.Collections.singleton;
 
-public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
+public abstract class ConceptConstraint extends Constraint<TypeQLVariable.Concept> {
 
     @Override
     public boolean isConcept() {
@@ -44,11 +46,6 @@ public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
     @Override
     public ConceptConstraint asConcept() {
         return this;
-    }
-
-    @Override
-    public Set<ConceptVariable> variables() {
-        return null;
     }
 
     public boolean isIs() {
@@ -61,26 +58,22 @@ public abstract class ConceptConstraint extends Constraint<ConceptVariable> {
 
     public static class Is extends ConceptConstraint {
 
-        private final ConceptVariable variable;
+        private final TypeQLVariable.Concept variable;
         private final int hash;
 
-        public Is(UnboundConceptVariable variable) {
-            this(variable.toConcept());
-        }
-
-        private Is(ConceptVariable variable) {
+        public Is(TypeQLVariable.Concept variable) {
             if (variable == null) throw new NullPointerException("Null var");
             this.variable = variable;
             this.hash = Objects.hash(Is.class, this.variable);
         }
 
-        public ConceptVariable variable() {
+        public TypeQLVariable.Concept variable() {
             return variable;
         }
 
         @Override
-        public Set<ConceptVariable> variables() {
-            return set(variable());
+        public Set<TypeQLVariable.Concept> variables() {
+            return singleton(variable());
         }
 
         @Override

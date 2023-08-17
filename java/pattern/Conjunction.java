@@ -22,11 +22,10 @@
 package com.vaticle.typeql.lang.pattern;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-import com.vaticle.typeql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -51,7 +50,6 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UN
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
 
 public class Conjunction<T extends Pattern> implements Pattern {
 
@@ -66,16 +64,16 @@ public class Conjunction<T extends Pattern> implements Pattern {
         this.hash = Objects.hash(this.patterns);
     }
 
-    public Stream<BoundVariable> variables() {
+    public Stream<Statement> statements() {
         return patterns.stream().flatMap(pattern -> {
-            if (pattern.isVariable()) return concat(Stream.of(pattern.asVariable()), pattern.asVariable().variables());
-            else if (pattern.isConjunction()) return pattern.asConjunction().variables();
+            if (pattern.isStatement()) return Stream.of(pattern.asStatement());
+            else if (pattern.isConjunction()) return pattern.asConjunction().statements();
             else return Stream.of();
         });
     }
 
-    public Stream<UnboundVariable> namedVariablesUnbound() {
-        return variables().filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct();
+    public Stream<TypeQLVariable> namedVariables() {
+        return statements().flatMap(Statement::variables).filter(TypeQLVariable::isNamed).distinct();
     }
 
     @Override
@@ -84,14 +82,14 @@ public class Conjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
-        if (variables().noneMatch(v -> bounds.contains(v.toUnbound()))) {
+    public void validateIsBoundedBy(Set<TypeQLVariable> bounds) {
+        if (namedVariables().noneMatch(bounds::contains)) {
             String str = toString().replace("\n", " ");
             throw TypeQLException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(str));
         }
-        HashSet<UnboundVariable> union = new HashSet<>(bounds);
-        union.addAll(variables().map(BoundVariable::toUnbound).collect(Collectors.toSet()));
-        patterns.stream().filter(pattern -> !pattern.isVariable()).forEach(pattern -> {
+        HashSet<TypeQLVariable> union = new HashSet<>(bounds);
+        namedVariables().forEach(union::add);
+        patterns.stream().filter(pattern -> !pattern.isStatement()).forEach(pattern -> {
             pattern.validateIsBoundedBy(union);
         });
     }
@@ -106,7 +104,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
             List<Conjunctable> conjunctables = new ArrayList<>();
             List<List<Conjunction<Conjunctable>>> listOfDisj = new ArrayList<>();
             patterns.forEach(pattern -> {
-                if (pattern.isVariable()) conjunctables.add(pattern.asVariable().normalise());
+                if (pattern.isStatement()) conjunctables.add(pattern.asStatement().normalise());
                 else if (pattern.isNegation()) conjunctables.add(pattern.asNegation().normalise());
                 else if (pattern.isConjunction()) listOfDisj.add(pattern.asConjunction().normalise().patterns());
                 else listOfDisj.add(pattern.asDisjunction().normalise().patterns());

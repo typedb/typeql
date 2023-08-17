@@ -19,8 +19,9 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.statement;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunctable;
 import com.vaticle.typeql.lang.pattern.Pattern;
@@ -35,86 +36,81 @@ import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
 
-public abstract class BoundVariable extends Variable implements Conjunctable {
+public abstract class Statement implements Conjunctable {
 
-    BoundVariable(Reference reference) {
-        super(reference);
+    public abstract TypeQLVariable headVariable();
+
+    public Stream<TypeQLVariable> constraintVariables() {
+        return constraints().stream().flatMap(constraint -> constraint.variables().stream());
     }
 
-    public Stream<BoundVariable> variables() {
-        return constraints().stream().flatMap(constraint -> constraint.variables().stream());
+    public Stream<TypeQLVariable> variables() {
+        return Stream.concat(Stream.of(headVariable()), constraintVariables());
     }
 
     public abstract List<? extends Constraint<?>> constraints();
 
     @Override
-    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
-        if (Stream.concat(Stream.of(this), variables()).noneMatch(v -> bounds.contains(v.toUnbound()))) {
+    public void validateIsBoundedBy(Set<TypeQLVariable> bounds) {
+        if (variables().noneMatch(bounds::contains)) {
             throw TypeQLException.of(MATCH_HAS_UNBOUNDED_NESTED_PATTERN.message(toString()));
         }
     }
-
-    @Override
-    public boolean isBound() {
-        return true;
-    }
-
-    @Override
-    public BoundVariable asBound() {
-        return this;
-    }
-
-    public abstract UnboundVariable toUnbound();
 
     public boolean isConcept() {
         return false;
     }
 
-    public ConceptVariable asConcept() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptVariable.class)));
+    public ConceptStatement asConcept() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ConceptStatement.class)));
     }
 
     public boolean isType() {
         return false;
     }
 
-    public TypeVariable asType() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
+    public TypeStatement asType() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeStatement.class)));
     }
 
     public boolean isThing() {
         return false;
     }
 
-    public ThingVariable<?> asThing() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingVariable.class)));
+    public ThingStatement<?> asThing() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ThingStatement.class)));
     }
 
     public boolean isValue() {
         return false;
     }
 
-    public ValueVariable asValue() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ValueVariable.class)));
+    public ValueStatement asValue() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(ValueStatement.class)));
     }
 
     @Override
-    public BoundVariable normalise() {
+    public Statement normalise() {
         return this;
     }
 
     @Override
-    public boolean isVariable() {
+    public boolean isStatement() {
         return true;
     }
 
     @Override
-    public BoundVariable asVariable() {
+    public Statement asStatement() {
         return this;
     }
 
     @Override
     public List<? extends Pattern> patterns() {
         return list(this);
+    }
+
+    @Override
+    public String toString() {
+        return toString(true);
     }
 }

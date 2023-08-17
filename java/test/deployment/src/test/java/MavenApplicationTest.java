@@ -82,7 +82,7 @@ public class MavenApplicationTest {
                         TypeQL.cVar("t").eq("Spy")
                 ),
                 TypeQL.cVar("t").neq("Apocalypse Now")
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }

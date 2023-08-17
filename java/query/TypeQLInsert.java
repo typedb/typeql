@@ -22,7 +22,7 @@
 package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import java.util.List;
@@ -34,37 +34,36 @@ import static java.util.stream.Stream.concat;
 
 public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
 
-    public TypeQLInsert(List<ThingVariable<?>> variables) {
-        super(INSERT, null, variables, Modifiers.EMPTY);
-        validateNamesUnique(variables.stream());
+    public TypeQLInsert(List<ThingStatement<?>> statements) {
+        super(INSERT, null, statements, Modifiers.EMPTY);
+        validateNamesUnique(statements.stream());
     }
 
-    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables) {
-        this(match, variables, Modifiers.EMPTY);
+    public TypeQLInsert(MatchClause match, List<ThingStatement<?>> statements) {
+        this(match, statements, Modifiers.EMPTY);
     }
 
-    public TypeQLInsert(MatchClause match, List<ThingVariable<?>> variables, Modifiers modifiers) {
-        super(INSERT, match, validInsertVars(match, variables), modifiers);
-        validateNamesUnique(concat(match.patternsRecursive(), variables.stream()));
+    public TypeQLInsert(MatchClause match, List<ThingStatement<?>> statements, Modifiers modifiers) {
+        super(INSERT, match, validInsertStatements(match, statements), modifiers);
+        validateNamesUnique(concat(match.patternsRecursive(), statements.stream()));
     }
 
-    static List<ThingVariable<?>> validInsertVars(MatchClause match, List<ThingVariable<?>> variables) {
-        if (variables.stream().noneMatch(var -> var.isNamed() && match.namedVariablesUnbound().contains(var.toUnbound())
-                || var.variables().anyMatch(nestedVar -> match.namedVariablesUnbound().contains(nestedVar.toUnbound())))) {
-            throw TypeQLException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(variables, match.namedVariablesUnbound()));
+    static List<ThingStatement<?>> validInsertStatements(MatchClause match, List<ThingStatement<?>> statements) {
+        if (statements.stream().flatMap(ThingStatement::variables).noneMatch(var -> var.isNamed() && match.namedVariables().contains(var))) {
+            throw TypeQLException.of(NO_VARIABLE_IN_SCOPE_INSERT.message(statements, match.namedVariables()));
         }
-        return variables;
+        return statements;
     }
 
     public static class Unmodified extends TypeQLInsert implements TypeQLQuery.Unmodified<TypeQLInsert, TypeQLInsert.Sorted, TypeQLInsert.Offset, TypeQLInsert.Limited> {
 
-        public Unmodified(MatchClause match, List<ThingVariable<?>> variables) {
-            super(match, variables, Modifiers.EMPTY);
+        public Unmodified(MatchClause match, List<ThingStatement<?>> statements) {
+            super(match, statements, Modifiers.EMPTY);
         }
 
         @Override
         public TypeQLInsert modifier(Modifiers modifier) {
-            return new TypeQLInsert(match, variables, modifier);
+            return new TypeQLInsert(match, statements, modifier);
         }
 
         @Override
@@ -86,7 +85,7 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
     public static class Sorted extends TypeQLInsert implements TypeQLQuery.Sorted<TypeQLInsert.Offset, TypeQLInsert.Limited> {
 
         public Sorted(TypeQLInsert insert, Sortable.Sorting sorting) {
-            super(insert.match, insert.variables, new Modifiers(sorting, insert.modifiers.offset, insert.modifiers.limit));
+            super(insert.match, insert.statements, new Modifiers(sorting, insert.modifiers.offset, insert.modifiers.limit));
         }
 
         @Override
@@ -103,7 +102,7 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
     public static class Offset extends TypeQLInsert implements TypeQLQuery.Offset<TypeQLInsert.Limited> {
 
         public Offset(TypeQLInsert insert, long offset) {
-            super(insert.match, insert.variables, new Modifiers(insert.modifiers.sorting, offset, insert.modifiers.limit));
+            super(insert.match, insert.statements, new Modifiers(insert.modifiers.sorting, offset, insert.modifiers.limit));
         }
 
         @Override
@@ -115,7 +114,7 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
     public static class Limited extends TypeQLInsert implements TypeQLQuery.Limited {
 
         public Limited(TypeQLInsert insert, long limit) {
-            super(insert.match, insert.variables, new Modifiers(insert.modifiers.sorting, insert.modifiers.offset, limit));
+            super(insert.match, insert.statements, new Modifiers(insert.modifiers.sorting, insert.modifiers.offset, limit));
         }
     }
 }

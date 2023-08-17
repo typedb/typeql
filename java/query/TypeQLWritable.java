@@ -23,17 +23,15 @@ package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-import com.vaticle.typeql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
@@ -42,7 +40,6 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATT
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
 
 public abstract class TypeQLWritable implements TypeQLQuery {
 
@@ -68,44 +65,44 @@ public abstract class TypeQLWritable implements TypeQLQuery {
 
     abstract static class InsertOrDelete extends TypeQLWritable {
 
-        private List<UnboundVariable> namedVariablesUnbound;
+        private List<TypeQLVariable> namedVariables;
         private final TypeQLToken.Command command;
-        final List<ThingVariable<?>> variables;
+        final List<ThingStatement<?>> statements;
         final Modifiers modifiers;
         private final int hash;
 
-        InsertOrDelete(TypeQLToken.Command command, @Nullable MatchClause match, List<ThingVariable<?>> variables, Modifiers modifiers) {
+        InsertOrDelete(TypeQLToken.Command command, @Nullable MatchClause match, List<ThingStatement<?>> statements, Modifiers modifiers) {
             super(match);
             assert command == INSERT || command == DELETE;
             assert modifiers != null;
-            if (variables == null || variables.isEmpty()) throw TypeQLException.of(MISSING_PATTERNS.message());
+            if (statements == null || statements.isEmpty()) throw TypeQLException.of(MISSING_PATTERNS.message());
             this.command = command;
-            this.variables = variables;
+            this.statements = statements;
             this.modifiers = modifiers;
-            this.hash = Objects.hash(this.command, this.match, this.variables, this.modifiers);
+            this.hash = Objects.hash(this.command, this.match, this.statements, this.modifiers);
         }
 
-        public List<UnboundVariable> namedVariablesUnbound() {
-            if (namedVariablesUnbound == null) {
-                namedVariablesUnbound = variables.stream().flatMap(v -> concat(Stream.of(v), v.variables()))
-                        .filter(Variable::isNamed).map(BoundVariable::toUnbound).distinct().collect(toList());
+        public List<TypeQLVariable> namedVariables() {
+            if (namedVariables == null) {
+                namedVariables = statements.stream().flatMap(Statement::variables)
+                        .filter(TypeQLVariable::isNamed).distinct().collect(toList());
             }
-            return namedVariablesUnbound;
+            return namedVariables;
         }
 
         public Modifiers modifiers() {
             return modifiers;
         }
 
-        public List<ThingVariable<?>> variables() {
-            return variables;
+        public List<ThingStatement<?>> statements() {
+            return statements;
         }
 
         @Override
         public String toString(boolean pretty) {
             StringBuilder query = new StringBuilder();
             if (match != null) query.append(match.toString(pretty)).append(NEW_LINE);
-            appendClause(query, command, variables.stream().map(v -> v.toString(pretty)), pretty);
+            appendClause(query, command, statements.stream().map(v -> v.toString(pretty)), pretty);
             appendModifiers(query, modifiers, pretty);
             return query.toString();
         }
@@ -119,7 +116,7 @@ public abstract class TypeQLWritable implements TypeQLQuery {
             InsertOrDelete that = (InsertOrDelete) o;
             return (this.command.equals(that.command) &&
                     Objects.equals(this.match, that.match) &&
-                    this.variables.equals(that.variables)) &&
+                    this.statements.equals(that.statements)) &&
                     this.modifiers.equals(that.modifiers);
         }
 

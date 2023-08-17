@@ -19,18 +19,22 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable.builder;
+package com.vaticle.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
-import com.vaticle.typeql.lang.pattern.variable.ValueVariable;
+import com.vaticle.typeql.lang.common.Reference;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
+import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
+import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;
 
-public interface ValueVariableBuilder extends PredicateBuilder<ValueVariable> {
+public interface ConceptStatementBuilder {
 
-    default ValueVariable assign(Expression expression) {
-        return constrain(new ValueConstraint.Assignment(expression));
+    default ConceptStatement is(String name) {
+        return is(TypeQLVariable.Concept.nameVar(name));
     }
 
-    ValueVariable constrain(ValueConstraint.Predicate constraint);
+    default ConceptStatement is(TypeQLVariable.Concept var) {
+        return constrain(new ConceptConstraint.Is(var));
+    }
 
-    ValueVariable constrain(ValueConstraint.Assignment constraint);
+    ConceptStatement constrain(ConceptConstraint.Is constraint);
 }

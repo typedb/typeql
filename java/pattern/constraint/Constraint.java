@@ -21,17 +21,17 @@
 
 package com.vaticle.typeql.lang.pattern.constraint;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
 
 import java.util.Set;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-public abstract class Constraint<VARIABLE extends BoundVariable> {
+public abstract class Constraint<VARIABLE extends TypeQLVariable> {
 
-    public abstract Set<VARIABLE> variables();
+    public abstract Set<? extends VARIABLE> variables();
 
     public boolean isConcept() {
         return false;

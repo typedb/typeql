@@ -24,8 +24,8 @@ package com.vaticle.typeql.lang.query;
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.pattern.variable.Reference;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.Reference;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
@@ -280,14 +280,14 @@ public class TypeQLFetch implements TypeQLQuery {
 
             class Variable implements Key {
 
-                private final UnboundVariable variable;
+                private final TypeQLVariable variable;
                 private final Label label;
 
-                Variable(UnboundVariable variable) {
+                Variable(TypeQLVariable variable) {
                     this(variable, null);
                 }
 
-                public Variable(UnboundVariable variable, @Nullable Label label) {
+                public Variable(TypeQLVariable variable, @Nullable Label label) {
                     this.variable = variable;
                     this.label = label;
                 }

@@ -24,7 +24,7 @@ package com.vaticle.typeql.lang.query.builder;
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,31 +39,31 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT
 
 public interface Sortable<S, O, L> {
 
-    default S sort(UnboundVariable var, UnboundVariable... vars) {
-        List<Pair<UnboundVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
+    default S sort(TypeQLVariable var, TypeQLVariable... vars) {
+        List<Pair<TypeQLVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
         pairs.add(new Pair<>(var, null));
-        for (UnboundVariable v : vars) pairs.add(new Pair<>(v, null));
+        for (TypeQLVariable v : vars) pairs.add(new Pair<>(v, null));
         return sort(pairs);
     }
 
-    default S sort(Pair<UnboundVariable, String> varOrder1) {
+    default S sort(Pair<TypeQLVariable, String> varOrder1) {
         return sort(list(parseVarOrder(varOrder1)));
     }
 
-    default S sort(Pair<UnboundVariable, String> varOrder1, Pair<UnboundVariable, String> varOrder2) {
+    default S sort(Pair<TypeQLVariable, String> varOrder1, Pair<TypeQLVariable, String> varOrder2) {
         return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2)));
     }
 
-    default S sort(Pair<UnboundVariable, String> varOrder1, Pair<UnboundVariable, String> varOrder2,
-                   Pair<UnboundVariable, String> varOrder3) {
+    default S sort(Pair<TypeQLVariable, String> varOrder1, Pair<TypeQLVariable, String> varOrder2,
+                   Pair<TypeQLVariable, String> varOrder3) {
         return sort(list(parseVarOrder(varOrder1), parseVarOrder(varOrder2), parseVarOrder(varOrder3)));
     }
 
-    static Pair<UnboundVariable, TypeQLArg.Order> parseVarOrder(Pair<UnboundVariable, String> varOrder) {
+    static Pair<TypeQLVariable, TypeQLArg.Order> parseVarOrder(Pair<TypeQLVariable, String> varOrder) {
         return new Pair<>(varOrder.first(), TypeQLArg.Order.of(varOrder.second()));
     }
 
-    default S sort(List<Pair<UnboundVariable, TypeQLArg.Order>> varOrders) {
+    default S sort(List<Pair<TypeQLVariable, TypeQLArg.Order>> varOrders) {
         return sort(Sorting.create(varOrders));
     }
 
@@ -76,18 +76,18 @@ public interface Sortable<S, O, L> {
     class Sorting {
 
         private final int hash;
-        private final List<UnboundVariable> variables;
-        private final Map<UnboundVariable, TypeQLArg.Order> orders;
+        private final List<TypeQLVariable> variables;
+        private final Map<TypeQLVariable, TypeQLArg.Order> orders;
 
-        private Sorting(List<UnboundVariable> variables, Map<UnboundVariable, TypeQLArg.Order> orders) {
+        private Sorting(List<TypeQLVariable> variables, Map<TypeQLVariable, TypeQLArg.Order> orders) {
             this.variables = variables;
             this.orders = orders;
             this.hash = Objects.hash(variables, orders);
         }
 
-        public static Sorting create(List<Pair<UnboundVariable, TypeQLArg.Order>> sorting) {
-            List<UnboundVariable> vars = new ArrayList<>();
-            Map<UnboundVariable, TypeQLArg.Order> orders = new HashMap<>();
+        public static Sorting create(List<Pair<TypeQLVariable, TypeQLArg.Order>> sorting) {
+            List<TypeQLVariable> vars = new ArrayList<>();
+            Map<TypeQLVariable, TypeQLArg.Order> orders = new HashMap<>();
             sorting.forEach(pair -> {
                 vars.add(pair.first());
                 orders.put(pair.first(), pair.second());
@@ -95,11 +95,11 @@ public interface Sortable<S, O, L> {
             return new Sorting(vars, orders);
         }
 
-        public List<UnboundVariable> variables() {
+        public List<TypeQLVariable> variables() {
             return variables;
         }
 
-        public TypeQLArg.Order getOrder(UnboundVariable var) {
+        public TypeQLArg.Order getOrder(TypeQLVariable var) {
             if (!variables.contains(var)) throw TypeQLException.of(VARIABLE_NOT_SORTED.message(var));
             TypeQLArg.Order order = orders.get(var);
             return order == null ? TypeQLArg.Order.ASC : order;

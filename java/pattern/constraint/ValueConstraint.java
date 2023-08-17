@@ -22,9 +22,10 @@
 package com.vaticle.typeql.lang.pattern.constraint;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.builder.Expression;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.pattern.expression.Expression;
 
 import java.util.Objects;
 import java.util.Set;
@@ -34,7 +35,7 @@ import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-public abstract class ValueConstraint extends Constraint<BoundVariable> {
+public abstract class ValueConstraint extends Constraint<TypeQLVariable> {
 
     @Override
     public boolean isValue() {
@@ -65,20 +66,17 @@ public abstract class ValueConstraint extends Constraint<BoundVariable> {
     public static class Predicate extends ValueConstraint {
 
         private final com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate;
-        private final Set<BoundVariable> variables;
+        private final Set<TypeQLVariable> variables;
         private final int hash;
 
         public Predicate(com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate) {
             this.predicate = predicate;
-            this.variables = predicate.variables().stream().map(v -> {
-                if (v.isValueVariable()) return v.asValueVariable().toBound();
-                else return v.asConceptVariable().toThing();
-            }).collect(Collectors.toSet());
+            this.variables = predicate.variables().stream().map(TypeQLVariable::cloneTypeQLVar).collect(Collectors.toSet());
             this.hash = Objects.hash(Predicate.class, this.predicate);
         }
 
         @Override
-        public Set<BoundVariable> variables() {
+        public Set<TypeQLVariable> variables() {
             return variables;
         }
 
@@ -117,15 +115,12 @@ public abstract class ValueConstraint extends Constraint<BoundVariable> {
 
     public static class Assignment extends ValueConstraint {
         private final Expression expression;
-        private final Set<BoundVariable> inputs;
+        private final Set<TypeQLVariable> inputs;
         private final int hash;
 
         public Assignment(Expression expression) {
             this.expression = expression;
-            this.inputs = expression.variables().stream().map(v -> {
-                if (v.isValueVariable()) return v.asValueVariable().toBound();
-                else return v.asConceptVariable().toThing();
-            }).collect(Collectors.toSet());
+            this.inputs = expression.variables().stream().collect(Collectors.toSet());
             this.hash = Objects.hash(Assignment.class, this.expression);
         }
 
@@ -134,7 +129,7 @@ public abstract class ValueConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public Set<BoundVariable> variables() {
+        public Set<TypeQLVariable> variables() {
             return inputs;
         }
 

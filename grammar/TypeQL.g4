@@ -25,7 +25,7 @@ eof_queries           :   query+           EOF ;
 eof_pattern           :   pattern          EOF ;
 eof_patterns          :   patterns         EOF ;
 eof_definables        :   definables       EOF ;
-eof_variable          :   pattern_variable EOF ;
+eof_statement         :   statement        EOF ;
 eof_label             :   label            EOF ;
 eof_schema_rule       :   schema_rule      EOF ;
 
@@ -56,12 +56,12 @@ query_fetch           :   clause_match  clause_fetch  modifiers                 
 clause_define         :   DEFINE      definables          ;
 clause_undefine       :   UNDEFINE    definables          ;
 clause_match          :   MATCH       patterns            ;
-clause_insert         :   INSERT      variable_things     ;
-clause_delete         :   DELETE      variable_things     ;
+clause_insert         :   INSERT      statement_things    ;
+clause_delete         :   DELETE      statement_things    ;
 clause_get            :   GET       ( VAR_CONCEPT_ | VAR_VALUE_ )?   ( ',' ( VAR_CONCEPT_ | VAR_VALUE_ ) )*  ';' ;
 clause_group          :   GROUP     ( VAR_CONCEPT_ | VAR_VALUE_ ) ';'            ;
 clause_fetch          :   FETCH       projections         ;
-clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?  ';' ;  // method and, optionally, a variable
+clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?  ';' ;   // method and, optionally, a variable
 aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                 // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
 
@@ -94,13 +94,13 @@ projection_key_label     :   QUOTED_STRING | LABEL_  ;
 // SCHEMA QUERY ================================================================
 
 definables            : ( definable ';' )+    ;
-definable             :   variable_type
+definable             :   statement_type
                       |   schema_rule         ;
 
 // QUERY PATTERNS ==============================================================
 
 patterns              : ( pattern ';' )+      ;
-pattern               :   pattern_variable
+pattern               :   statement
                       |   pattern_conjunction
                       |   pattern_disjunction
                       |   pattern_negation
@@ -109,21 +109,21 @@ pattern_conjunction   :   '{' patterns '}'                            ;
 pattern_disjunction   :   '{' patterns '}'  ( OR '{' patterns '}' )+  ;
 pattern_negation      :   NOT '{' patterns '}'                        ;
 
-// VARIABLE PATTERNS ===========================================================
+// STATEMENT PATTERNS ===========================================================
 
-pattern_variable      :   variable_concept
-                      |   variable_type
-                      |   variable_thing_any
-                      |   variable_value
+statement             :   statement_concept
+                      |   statement_type
+                      |   statement_thing_any
+                      |   statement_value
                       ;
 
 // CONCEPT VARAIBLES ===========================================================
 
-variable_concept      :   VAR_CONCEPT_  IS  VAR_CONCEPT_  ;
+statement_concept     :   VAR_CONCEPT_  IS  VAR_CONCEPT_  ;
 
-// TYPE VARIABLES ==============================================================
+// TYPE STATEMENTS ==============================================================
 
-variable_type         :   type_any    type_constraint ( ',' type_constraint )*  ;
+statement_type        :   type_any    type_constraint ( ',' type_constraint )*  ;
 type_constraint       :   ABSTRACT
                       |   SUB_        type_any
                       |   OWNS        type         ( AS type )?     annotations_owns
@@ -136,27 +136,27 @@ type_constraint       :   ABSTRACT
 
 annotations_owns      :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?          ;
 
-// VALUE VARIABLES =============================================================
+// VALUE STATEMENTS =============================================================
 
-variable_value        :   VAR_VALUE_ ASSIGN expression
+statement_value       :   VAR_VALUE_ ASSIGN expression
                       |   VAR_VALUE_ predicate
                       ;
 
-// THING VARIABLES =============================================================
+// THING STATEMENTS =============================================================
 
-variable_things       : ( variable_thing_any ';' )+ ;
-variable_thing_any    :   variable_thing
-                      |   variable_relation
-                      |   variable_attribute
+statement_things      : ( statement_thing_any ';' )+ ;
+statement_thing_any   :   statement_thing
+                      |   statement_relation
+                      |   statement_attribute
                       ;
-variable_thing        :   VAR_CONCEPT_            ISA_ type   ( ',' attributes )?
+statement_thing       :   VAR_CONCEPT_            ISA_ type   ( ',' attributes )?
                       |   VAR_CONCEPT_            IID  IID_   ( ',' attributes )?
                       |   VAR_CONCEPT_            attributes
                       ;
-variable_relation     :   VAR_CONCEPT_? relation  ISA_ type   ( ',' attributes )?
+statement_relation    :   VAR_CONCEPT_? relation  ISA_ type   ( ',' attributes )?
                       |   VAR_CONCEPT_? relation  attributes?
                       ;
-variable_attribute    :   VAR_CONCEPT_? predicate ISA_ type   ( ',' attributes )?
+statement_attribute   :   VAR_CONCEPT_? predicate ISA_ type   ( ',' attributes )?
                       |   VAR_CONCEPT_? predicate attributes?
                       ;
 
@@ -203,7 +203,7 @@ expression_arguments        :   expression   (',' expression)*                  
 // SCHEMA CONSTRUCT ============================================================
 
 schema_rule           :   RULE label
-                      |   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
+                      |   RULE label ':' WHEN '{' patterns '}' THEN '{' statement_thing_any ';' '}' ;
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
@@ -260,7 +260,7 @@ OFFSET          : 'offset'      ;   LIMIT           : 'limit'       ;
 SORT            : 'sort'        ;   ORDER_          : ASC | DESC    ;
 ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
-// TYPE VARIABLE CONSTRAINT KEYWORDS
+// TYPE STATEMENT CONSTRAINT KEYWORDS
 
 TYPE            : 'type'        ;
 ABSTRACT        : 'abstract'    ;   SUB_            : SUB | SUBX    ;
@@ -275,7 +275,7 @@ WHEN            : 'when'        ;   THEN            : 'then'        ;
 ANNOTATION_KEY            : '@key';
 ANNOTATION_UNIQUE         : '@unique';
 
-// THING VARIABLE CONSTRAINT KEYWORDS
+// THING STATEMENT CONSTRAINT KEYWORDS
 
 IID             : 'iid'         ;   ISA_            : ISA | ISAX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;

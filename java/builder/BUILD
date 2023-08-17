@@ -26,33 +26,25 @@ load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
 
 java_library(
-    name = "parser",
+    name = "builder",
     srcs = glob([
         "*.java",
-        "builder/*.java",
+        "*/*.java"
     ]),
     deps = [
-        # Internal Package Dependencies
-        "//java/common:common",
-        "//java/builder:builder",
-        "//java/pattern:pattern",
-        "//java/query:query",
+        "//java/common",
+        "//java/pattern",
 
         # Internal Repository Dependencies
-        "@vaticle_typeql//grammar/java:typeql-grammar",
         "@vaticle_typedb_common//:common",
-
-        # External dependencies
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
     ],
-    tags = ["maven_coordinates=com.vaticle.typeql:typeql-parser:{pom_version}"],
+    tags = ["maven_coordinates=com.vaticle.typeql:typeql-builder:{pom_version}"],
 )
 
 assemble_maven(
-    name = "assemble-maven",
-    target = ":parser",
-    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
+  name = "assemble-maven",
+  target = ":builder",
+  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(
@@ -64,6 +56,8 @@ deploy_maven(
 
 checkstyle_test(
     name = "checkstyle",
-    include = glob(["*"]),
+    include = glob([
+        "**/*",
+    ]),
     license_type = "apache-header",
 )

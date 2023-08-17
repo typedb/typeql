@@ -21,15 +21,17 @@
 
 package com.vaticle.typeql.lang.pattern.schema;
 
+import com.vaticle.typeql.lang.common.Reference;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.Disjunction;
 import com.vaticle.typeql.lang.pattern.Negation;
 import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.variable.Reference;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.Variable;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -58,14 +60,14 @@ import static com.vaticle.typeql.lang.common.util.Strings.indent;
 public class Rule implements Definable {
     private final String label;
     private Conjunction<? extends Pattern> when;
-    private ThingVariable<?> then;
+    private ThingStatement<?> then;
     private int hash = 0;
 
     public Rule(String label) {
         this.label = label;
     }
 
-    public Rule(String label, Conjunction<? extends Pattern> when, ThingVariable<?> variable) {
+    public Rule(String label, Conjunction<? extends Pattern> when, ThingStatement<?> variable) {
         validate(label, when, variable);
         this.label = label;
         this.when = when;
@@ -90,7 +92,7 @@ public class Rule implements Definable {
         return when;
     }
 
-    public ThingVariable<?> then() {
+    public ThingStatement<?> then() {
         return then;
     }
 
@@ -98,7 +100,7 @@ public class Rule implements Definable {
         return new IncompleteRule(label, when);
     }
 
-    public static void validate(String label, Conjunction<? extends Pattern> when, ThingVariable<?> then) {
+    public static void validate(String label, Conjunction<? extends Pattern> when, ThingStatement<?> then) {
         validateWhen(label, when);
         validateThen(label, when, then);
     }
@@ -113,45 +115,42 @@ public class Rule implements Definable {
 
     private static Stream<Negation<?>> findNegations(Pattern pattern) {
         if (pattern.isNegation()) return Stream.of(pattern.asNegation());
-        if (pattern.isVariable()) return Stream.empty();
+        if (pattern.isStatement()) return Stream.empty();
         return pattern.patterns().stream().flatMap(Rule::findNegations);
     }
 
     private static Stream<Disjunction<?>> findDisjunctions(Pattern pattern) {
         if (pattern.isDisjunction()) return Stream.of(pattern.asDisjunction());
-        if (pattern.isVariable()) return Stream.empty();
+        if (pattern.isStatement()) return Stream.empty();
         return pattern.patterns().stream().flatMap(Rule::findDisjunctions);
     }
 
-    private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingVariable<?> then) {
+    private static void validateThen(String label, @Nullable Conjunction<? extends Pattern> when, ThingStatement<?> then) {
         if (then == null) throw new NullPointerException("Null then pattern");
         int numConstraints = then.constraints().size();
 
-        // rules must contain contain either 1 has constraint, or a isa and relation constrain
+        // rules must contain either 1 has constraint, or an isa and relation constrain
         if (!((numConstraints == 1 && then.has().size() == 1) || (numConstraints == 2 && then.relation().isPresent() && then.isa().isPresent()))) {
             throw TypeQLException.of(INVALID_RULE_THEN.message(label, then));
         }
 
-        // rule 'has' cannot assign both an attribute type and a named variable
-        if (then.has().size() == 1 && then.has().get(0).type().isPresent() && then.has().get(0).attribute().isNamedConcept()) {
-            String attrVar = then.has().get(0).attribute().name();
-            String attrType;
-            if (then.has().get(0).type().get().label().isPresent()) {
-                attrType = then.has().get(0).type().get().label().get().label();
-            } else {
-                assert then.has().get(0).type().get().isNamedConcept();
-                attrType = then.has().get(0).type().get().name();
+        // rule 'has' cannot assign both an attribute type and a named concept variable
+        if (then.has().size() == 1 && then.has().get(0).type().isPresent()) {
+            ThingConstraint.Has has = then.has().get(0);
+            if (has.attribute().isFirst() && has.attribute().first().isNamedConcept()) {
+                throw TypeQLException.of(INVALID_RULE_THEN_HAS.message(label, then, has.type().get(), has.attribute().first()));
+            } else if (has.attribute().isSecond() && has.attribute().second().headVariable().isNamedConcept()) {
+                throw TypeQLException.of(INVALID_RULE_THEN_HAS.message(label, then, has.type().get(), has.attribute().second().headVariable().toString()));
             }
-            throw TypeQLException.of(INVALID_RULE_THEN_HAS.message(label, then, attrType, attrVar));
         }
 
         // all user-written variables in the 'then' must be present in the 'when', if it exists.
         if (when != null) {
-            Set<Reference> thenReferences = Stream.concat(Stream.of(then), then.variables())
-                    .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
+            Set<Reference> thenReferences = then.variables().filter(TypeQLVariable::isNamed)
+                    .map(TypeQLVariable::reference).collect(Collectors.toSet());
 
-            Set<Reference> whenReferences = when.variables()
-                    .filter(Variable::isNamed).map(Variable::reference).collect(Collectors.toSet());
+            Set<Reference> whenReferences = when.statements().flatMap(Statement::variables)
+                    .filter(TypeQLVariable::isNamed).map(TypeQLVariable::reference).collect(Collectors.toSet());
 
             if (!whenReferences.containsAll(thenReferences)) {
                 throw TypeQLException.of(INVALID_RULE_THEN_VARIABLES.message(label));
@@ -223,7 +222,7 @@ public class Rule implements Definable {
             this.when = when;
         }
 
-        public Rule then(ThingVariable<?> then) {
+        public Rule then(ThingStatement<?> then) {
             return new Rule(label, when, then);
         }
     }

@@ -19,14 +19,12 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable.builder;
+package com.vaticle.typeql.lang.pattern.expression;
 
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -42,35 +40,35 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CAST
 
 public interface Expression {
 
-    default Set<UnboundVariable> variables() {
-        Set<UnboundVariable> collector = new HashSet<>();
+    default Set<TypeQLVariable> variables() {
+        Set<TypeQLVariable> collector = new HashSet<>();
         collectVariables(collector);
         return collector;
     }
 
-    void collectVariables(Set<UnboundVariable> collector);
+    void collectVariables(Set<TypeQLVariable> collector);
 
     default Expression.Operation add(Expression other) {
         return new Expression.Operation(TypeQLToken.Expression.Operation.ADD, this, other);
     }
 
-    default Expression.Operation sub(Expression other) {
+    default Expression.Operation subtract(Expression other) {
         return new Expression.Operation(TypeQLToken.Expression.Operation.SUBTRACT, this, other);
     }
 
-    default Expression.Operation mul(Expression other) {
+    default Expression.Operation multiply(Expression other) {
         return new Expression.Operation(TypeQLToken.Expression.Operation.MULTIPLY, this, other);
     }
 
-    default Expression.Operation div(Expression other) {
+    default Expression.Operation divide(Expression other) {
         return new Expression.Operation(TypeQLToken.Expression.Operation.DIVIDE, this, other);
     }
 
-    default Expression.Operation mod(Expression other) {
+    default Expression.Operation modulo(Expression other) {
         return new Expression.Operation(TypeQLToken.Expression.Operation.MODULO, this, other);
     }
 
-    default Expression.Operation pow(Expression other) {
+    default Expression.Operation power(Expression other) {
         return new Expression.Operation(TypeQLToken.Expression.Operation.POWER, this, other);
     }
 
@@ -110,16 +108,16 @@ public interface Expression {
         return false;
     }
 
-    default UnboundValueVariable asValueVariable() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundValueVariable.class)));
+    default TypeQLVariable.Value asValueVariable() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLVariable.Value.class)));
     }
 
     default boolean isConceptVariable() {
         return false;
     }
 
-    default UnboundConceptVariable asConceptVariable() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(UnboundConceptVariable.class)));
+    default TypeQLVariable.Concept asConceptVariable() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLVariable.Concept.class)));
     }
 
     class Operation implements Expression {
@@ -155,7 +153,7 @@ public interface Expression {
         }
 
         @Override
-        public void collectVariables(Set<UnboundVariable> collector) {
+        public void collectVariables(Set<TypeQLVariable> collector) {
             a.collectVariables(collector);
             b.collectVariables(collector);
         }
@@ -209,7 +207,7 @@ public interface Expression {
         }
 
         @Override
-        public void collectVariables(Set<UnboundVariable> collector) {
+        public void collectVariables(Set<TypeQLVariable> collector) {
             args.forEach(arg -> arg.collectVariables(collector));
         }
 
@@ -250,7 +248,7 @@ public interface Expression {
         }
 
         @Override
-        public void collectVariables(Set<UnboundVariable> collector) {
+        public void collectVariables(Set<TypeQLVariable> collector) {
         }
 
         @Override
@@ -425,7 +423,7 @@ public interface Expression {
         }
 
         @Override
-        public void collectVariables(Set<UnboundVariable> collector) {
+        public void collectVariables(Set<TypeQLVariable> collector) {
             inner.collectVariables(collector);
         }
 

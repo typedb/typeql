@@ -23,14 +23,14 @@ package com.vaticle.typeql.lang.pattern;
 
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 
 public interface Conjunctable extends Pattern {
 
     @Override
-    default boolean isVariable() { return false; }
+    default boolean isStatement() { return false; }
 
     @Override
     default boolean isNegation() { return false; }
@@ -39,8 +39,8 @@ public interface Conjunctable extends Pattern {
     default boolean isConjunctable() { return true; }
 
     @Override
-    default BoundVariable asVariable() {
-        throw TypeQLException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
+    default Statement asStatement() {
+        throw TypeQLException.of(ErrorMessage.INVALID_CASTING.message(className(this.getClass()), className(Statement.class)));
     }
 
     @Override

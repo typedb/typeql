@@ -23,9 +23,9 @@ package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.builder.Aggregatable;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
@@ -54,18 +54,18 @@ import static java.util.Collections.unmodifiableList;
 public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate> {
 
     final MatchClause match;
-    final List<UnboundVariable> filter;
-    private final List<UnboundVariable> effectiveFilter;
+    final List<TypeQLVariable> filter;
+    private final List<TypeQLVariable> effectiveFilter;
     final Modifiers modifiers;
 
     private final int hash;
 
-    public TypeQLGet(MatchClause match, List<UnboundVariable> filter, Modifiers modifiers) {
+    public TypeQLGet(MatchClause match, List<TypeQLVariable> filter, Modifiers modifiers) {
         if (filter == null) throw TypeQLException.of(ErrorMessage.MISSING_GET_FILTER.message());
         this.match = match;
         if (filter.isEmpty()) {
             this.filter = emptyList();
-            this.effectiveFilter = list(match.namedVariablesUnbound());
+            this.effectiveFilter = list(match.namedVariables());
         } else {
             this.filter = unmodifiableList(filter);
             this.effectiveFilter = this.filter;
@@ -79,17 +79,17 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
     }
 
     private void sortVarsAreInScope() {
-        Collection<UnboundVariable> sortableVars = filter.isEmpty() ? match.namedVariablesUnbound() : filter;
+        Collection<TypeQLVariable> sortableVars = filter.isEmpty() ? match.namedVariables() : filter;
         if (modifiers.sorting != null && modifiers.sorting.variables().stream().anyMatch(v -> !sortableVars.contains(v))) {
             throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE.message(modifiers.sorting.variables()));
         }
     }
 
     private void filtersAreInScope() {
-        Set<UnboundVariable> duplicates = new HashSet<>();
-        for (UnboundVariable var : filter) {
+        Set<TypeQLVariable> duplicates = new HashSet<>();
+        for (TypeQLVariable var : filter) {
             if (!var.isNamed()) throw TypeQLException.of(FILTER_VARIABLE_ANONYMOUS);
-            if (!match.namedVariablesUnbound().contains(var))
+            if (!match.namedVariables().contains(var))
                 throw TypeQLException.of(VARIABLE_OUT_OF_SCOPE.message(var));
             if (duplicates.contains(var)) throw TypeQLException.of(ILLEGAL_FILTER_VARIABLE_REPEATING.message(var));
             else duplicates.add(var);
@@ -100,20 +100,20 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         return match;
     }
 
-    public List<UnboundVariable> effectiveFilter() {
+    public List<TypeQLVariable> effectiveFilter() {
         return effectiveFilter;
     }
 
-    public List<UnboundVariable> filter() {
+    public List<TypeQLVariable> filter() {
         return filter;
     }
 
     @Override
-    public Aggregate aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var) {
+    public Aggregate aggregate(TypeQLToken.Aggregate.Method method, TypeQLVariable var) {
         return new Aggregate(this, method, var);
     }
 
-    public Group group(UnboundVariable var) {
+    public Group group(TypeQLVariable var) {
         return new Group(this, var);
     }
 
@@ -133,7 +133,7 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         if (!filter.isEmpty()) {
             if (pretty) query.append(NEW_LINE);
             query.append(GET);
-            String vars = filter.stream().map(UnboundVariable::toString).collect(COMMA_SPACE.joiner());
+            String vars = filter.stream().map(TypeQLVariable::toString).collect(COMMA_SPACE.joiner());
             query.append(SPACE).append(vars);
             query.append(SEMICOLON);
         }
@@ -160,7 +160,7 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
 
     public static class Unmodified extends TypeQLGet implements TypeQLQuery.Unmodified<TypeQLGet, Sorted, Offset, Limited> {
 
-        public Unmodified(MatchClause match, List<UnboundVariable> filter) {
+        public Unmodified(MatchClause match, List<TypeQLVariable> filter) {
             super(match, filter, Modifiers.EMPTY);
         }
 
@@ -240,10 +240,10 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
 
         private final TypeQLGet query;
         private final TypeQLToken.Aggregate.Method method;
-        private final UnboundVariable var;
+        private final TypeQLVariable var;
         private final int hash;
 
-        public Aggregate(TypeQLGet query, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
+        public Aggregate(TypeQLGet query, TypeQLToken.Aggregate.Method method, TypeQLVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (method == null) throw new NullPointerException("Method is null");
 
@@ -274,7 +274,7 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
             return method;
         }
 
-        public UnboundVariable var() {
+        public TypeQLVariable var() {
             return var;
         }
 
@@ -312,10 +312,10 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
     public static class Group implements TypeQLQuery, Aggregatable<Group.Aggregate> {
 
         private final TypeQLGet query;
-        private final UnboundVariable var;
+        private final TypeQLVariable var;
         private final int hash;
 
-        public Group(TypeQLGet query, UnboundVariable var) {
+        public Group(TypeQLGet query, TypeQLVariable var) {
             if (query == null) throw new NullPointerException("GetQuery is null");
             if (var == null) throw new NullPointerException("Variable is null");
             else if (!query.effectiveFilter().contains(var)) {
@@ -336,12 +336,12 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
             return query;
         }
 
-        public UnboundVariable var() {
+        public TypeQLVariable var() {
             return var;
         }
 
         @Override
-        public Aggregate aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var) {
+        public Aggregate aggregate(TypeQLToken.Aggregate.Method method, TypeQLVariable var) {
             return new Aggregate(this, method, var);
         }
 
@@ -374,10 +374,10 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
 
             private final TypeQLGet.Group group;
             private final TypeQLToken.Aggregate.Method method;
-            private final UnboundVariable var;
+            private final TypeQLVariable var;
             private final int hash;
 
-            public Aggregate(TypeQLGet.Group group, TypeQLToken.Aggregate.Method method, UnboundVariable var) {
+            public Aggregate(TypeQLGet.Group group, TypeQLToken.Aggregate.Method method, TypeQLVariable var) {
                 if (group == null) throw new NullPointerException("TypeQLGet.Group is null");
                 if (method == null) throw new NullPointerException("Method is null");
                 if (var == null && !method.equals(TypeQLToken.Aggregate.Method.COUNT)) {
@@ -407,7 +407,7 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
                 return method;
             }
 
-            public UnboundVariable var() {
+            public TypeQLVariable var() {
                 return var;
             }
 

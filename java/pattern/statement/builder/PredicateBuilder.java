@@ -19,12 +19,12 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable.builder;
+package com.vaticle.typeql.lang.pattern.statement.builder;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
@@ -38,7 +38,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
 
-public interface PredicateBuilder<VAR_TYPE extends BoundVariable> {
+public interface PredicateBuilder<VAR_TYPE extends Statement> {
 
     default VAR_TYPE eq(long value) {
         return eq(Predicate.Long::new, value);
@@ -60,7 +60,7 @@ public interface PredicateBuilder<VAR_TYPE extends BoundVariable> {
         return eq(Predicate.DateTime::new, value);
     }
 
-    default VAR_TYPE eq(UnboundVariable variable) {
+    default VAR_TYPE eq(TypeQLVariable variable) {
         return eq(Predicate.Variable::new, variable);
     }
 
@@ -89,7 +89,7 @@ public interface PredicateBuilder<VAR_TYPE extends BoundVariable> {
         return neq(Predicate.DateTime::new, value);
     }
 
-    default VAR_TYPE neq(UnboundVariable variable) {
+    default VAR_TYPE neq(TypeQLVariable variable) {
         return neq(Predicate.Variable::new, variable);
     }
 
@@ -119,7 +119,7 @@ public interface PredicateBuilder<VAR_TYPE extends BoundVariable> {
         return gt(Predicate.DateTime::new, value);
     }
 
-    default VAR_TYPE gt(UnboundVariable variable) {
+    default VAR_TYPE gt(TypeQLVariable variable) {
         return gt(Predicate.Variable::new, variable);
     }
 
@@ -149,7 +149,7 @@ public interface PredicateBuilder<VAR_TYPE extends BoundVariable> {
         return gte(Predicate.DateTime::new, value);
     }
 
-    default VAR_TYPE gte(UnboundVariable variable) {
+    default VAR_TYPE gte(TypeQLVariable variable) {
         return gte(Predicate.Variable::new, variable);
     }
 
@@ -179,7 +179,7 @@ public interface PredicateBuilder<VAR_TYPE extends BoundVariable> {
         return lt(Predicate.DateTime::new, value);
     }
 
-    default VAR_TYPE lt(UnboundVariable variable) {
+    default VAR_TYPE lt(TypeQLVariable variable) {
         return lt(Predicate.Variable::new, variable);
     }
 
@@ -209,7 +209,7 @@ public interface PredicateBuilder<VAR_TYPE extends BoundVariable> {
         return lte(Predicate.DateTime::new, value);
     }
 
-    default VAR_TYPE lte(UnboundVariable variable) {
+    default VAR_TYPE lte(TypeQLVariable variable) {
         return lte(Predicate.Variable::new, variable);
     }
 

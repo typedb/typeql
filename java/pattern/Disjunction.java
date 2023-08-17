@@ -21,7 +21,7 @@
 
 package com.vaticle.typeql.lang.pattern;
 
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +57,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     }
 
     @Override
-    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+    public void validateIsBoundedBy(Set<TypeQLVariable> bounds) {
         patterns.forEach(pattern -> pattern.validateIsBoundedBy(bounds));
     }
 
@@ -65,7 +65,7 @@ public class Disjunction<T extends Pattern> implements Pattern {
     public Disjunction<Conjunction<Conjunctable>> normalise() {
         if (normalised == null) {
             List<Conjunction<Conjunctable>> conjunctions = patterns.stream().flatMap(p -> {
-                if (p.isVariable()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
+                if (p.isStatement()) return Stream.of(new Conjunction<>(list(p.asConjunctable())));
                 else if (p.isNegation())
                     return Stream.of(new Conjunction<>(list(p.asNegation().normalise().asConjunctable())));
                 else if (p.isConjunction()) return p.asConjunction().normalise().patterns().stream();

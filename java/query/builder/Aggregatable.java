@@ -22,7 +22,7 @@
 package com.vaticle.typeql.lang.query.builder;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 
 public interface Aggregatable<T extends TypeQLQuery> {
@@ -31,29 +31,29 @@ public interface Aggregatable<T extends TypeQLQuery> {
         return aggregate(TypeQLToken.Aggregate.Method.COUNT, null);
     }
 
-    default T max(UnboundVariable var) {
+    default T max(TypeQLVariable var) {
         return aggregate(TypeQLToken.Aggregate.Method.MAX, var);
     }
 
-    default T mean(UnboundVariable var) {
+    default T mean(TypeQLVariable var) {
         return aggregate(TypeQLToken.Aggregate.Method.MEAN, var);
     }
 
-    default T median(UnboundVariable var) {
+    default T median(TypeQLVariable var) {
         return aggregate(TypeQLToken.Aggregate.Method.MEDIAN, var);
     }
 
-    default T min(UnboundVariable var) {
+    default T min(TypeQLVariable var) {
         return aggregate(TypeQLToken.Aggregate.Method.MIN, var);
     }
 
-    default T std(UnboundVariable var) {
+    default T std(TypeQLVariable var) {
         return aggregate(TypeQLToken.Aggregate.Method.STD, var);
     }
 
-    default T sum(UnboundVariable var) {
+    default T sum(TypeQLVariable var) {
         return aggregate(TypeQLToken.Aggregate.Method.SUM, var);
     }
 
-    T aggregate(TypeQLToken.Aggregate.Method method, UnboundVariable var);
+    T aggregate(TypeQLToken.Aggregate.Method method, TypeQLVariable var);
 }

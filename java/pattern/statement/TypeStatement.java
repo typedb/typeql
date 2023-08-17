@@ -19,13 +19,14 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.statement;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Definable;
 import com.vaticle.typeql.lang.pattern.constraint.Constraint;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.variable.builder.TypeVariableBuilder;
+import com.vaticle.typeql.lang.pattern.statement.builder.TypeStatementBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,8 +41,9 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 
-public class TypeVariable extends BoundVariable implements TypeVariableBuilder, Definable {
+public class TypeStatement extends Statement implements TypeStatementBuilder, Definable {
 
+    private final TypeQLVariable.Concept variable;
     private TypeConstraint.Label labelConstraint;
     private TypeConstraint.Sub subConstraint;
     private TypeConstraint.Abstract abstractConstraint;
@@ -54,18 +56,21 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
 
     private final List<TypeConstraint> constraints;
 
-    TypeVariable(Reference reference) {
-        super(reference);
-        assert !reference.isNameValue();
+    private TypeStatement(TypeQLVariable.Concept variable) {
+        this.variable = variable;
         this.ownsConstraints = new LinkedList<>();
         this.playsConstraints = new LinkedList<>();
         this.relatesConstraints = new LinkedList<>();
         this.constraints = new LinkedList<>();
     }
 
+    public static TypeStatement of(TypeQLVariable.Concept variable) {
+        return new TypeStatement(variable);
+    }
+
     @Override
-    public UnboundConceptVariable toUnbound() {
-        return new UnboundConceptVariable(reference);
+    public TypeQLVariable.Concept headVariable() {
+        return variable;
     }
 
     @Override
@@ -79,14 +84,14 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable asType() {
+    public TypeStatement asType() {
         return this;
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Label constraint) {
+    public TypeStatement constrain(TypeConstraint.Label constraint) {
         if (labelConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Label.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, TypeConstraint.Label.class, constraint));
         }
         labelConstraint = constraint;
         constraints.add(constraint);
@@ -95,9 +100,9 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Sub constraint) {
+    public TypeStatement constrain(TypeConstraint.Sub constraint) {
         if (subConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Sub.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, TypeConstraint.Sub.class, constraint));
         }
         subConstraint = constraint;
         constraints.add(constraint);
@@ -105,9 +110,9 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Abstract constraint) {
+    public TypeStatement constrain(TypeConstraint.Abstract constraint) {
         if (abstractConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Abstract.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, TypeConstraint.Abstract.class, constraint));
         }
         abstractConstraint = constraint;
         constraints.add(constraint);
@@ -115,9 +120,9 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.ValueType constraint) {
+    public TypeStatement constrain(TypeConstraint.ValueType constraint) {
         if (valueTypeConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.ValueType.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, TypeConstraint.ValueType.class, constraint));
         }
         valueTypeConstraint = constraint;
         constraints.add(constraint);
@@ -125,9 +130,9 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Regex constraint) {
+    public TypeStatement constrain(TypeConstraint.Regex constraint) {
         if (regexConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, TypeConstraint.Regex.class, constraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, TypeConstraint.Regex.class, constraint));
         }
         regexConstraint = constraint;
         constraints.add(constraint);
@@ -136,21 +141,21 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
 
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Owns constraint) {
+    public TypeStatement constrain(TypeConstraint.Owns constraint) {
         ownsConstraints.add(constraint);
         constraints.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Plays constraint) {
+    public TypeStatement constrain(TypeConstraint.Plays constraint) {
         playsConstraints.add(constraint);
         constraints.add(constraint);
         return this;
     }
 
     @Override
-    public TypeVariable constrain(TypeConstraint.Relates constraint) {
+    public TypeStatement constrain(TypeConstraint.Relates constraint) {
         if (label().isPresent()) {
             constraint.setScope(label().get().label());
         }
@@ -194,9 +199,9 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     @Override
     public String toString(boolean pretty) {
         StringBuilder syntax = new StringBuilder();
-        if (isVisible() || label().isPresent()) {
-            syntax.append(isVisible() ? reference.syntax() : label().get().scopedLabel());
-            Stream<TypeConstraint> consStream = isVisible() ? constraints.stream() : constraints.stream().skip(1);
+        if (variable.isVisible() || variable.isLabelled()) {
+            syntax.append(variable.isVisible() ? variable : variable.reference().asLabel().scopedLabel());
+            Stream<TypeConstraint> consStream = variable.isLabelled() ? constraints().stream().filter(c -> !c.isLabel()) : constraints.stream();
             String consStr;
             if (pretty) {
                 consStr = indent(consStream.map(Constraint::toString).collect(COMMA_NEW_LINE.joiner())).trim();
@@ -206,7 +211,7 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
             if (!consStr.isEmpty()) syntax.append(SPACE).append(consStr);
         } else {
             // This should only be called by debuggers trying to print nested variables
-            syntax.append(reference);
+            syntax.append(variable);
         }
         return syntax.toString();
     }
@@ -215,23 +220,23 @@ public class TypeVariable extends BoundVariable implements TypeVariableBuilder, 
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TypeVariable that = (TypeVariable) o;
-        return (this.reference.equals(that.reference) &&
+        TypeStatement that = (TypeStatement) o;
+        return (this.variable.equals(that.variable) &&
                 set(this.constraints).equals(set(that.constraints)));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.reference, set(this.constraints));
+        return Objects.hash(this.variable, set(this.constraints));
     }
 
     @Override
-    public boolean isTypeVariable() {
+    public boolean isTypeStatement() {
         return true;
     }
 
     @Override
-    public TypeVariable asTypeVariable() {
+    public TypeStatement asTypeStatement() {
         return this;
     }
 }

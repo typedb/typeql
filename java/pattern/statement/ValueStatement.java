@@ -19,8 +19,9 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.statement;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 
@@ -31,34 +32,38 @@ import java.util.Objects;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 
-public class ValueVariable extends BoundVariable {
+public class ValueStatement extends Statement {
+    private final TypeQLVariable.Value variable;
     private ValueConstraint.Assignment assignmentConstraint;
     private ValueConstraint.Predicate predicateConstraint;
     private final List<ValueConstraint> constraints;
 
-    public ValueVariable(Reference.Name.Value reference) {
-        super(reference);
-        assert reference.isNameValue();
+    private ValueStatement(TypeQLVariable.Value variable) {
+        this.variable = variable;
         constraints = new ArrayList<>();
     }
 
-    @Override
-    public UnboundValueVariable toUnbound() {
-        return new UnboundValueVariable(reference.asName().asValue());
+    public static ValueStatement of(TypeQLVariable.Value variable) {
+        return new ValueStatement(variable);
     }
 
-    public ValueVariable constrain(ValueConstraint.Assignment assignmentConstraint) {
+    @Override
+    public TypeQLVariable.Value headVariable() {
+        return variable;
+    }
+
+    public ValueStatement constrain(ValueConstraint.Assignment assignmentConstraint) {
         if (this.assignmentConstraint != null || this.predicateConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ValueConstraint.class, assignmentConstraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, ValueConstraint.class, assignmentConstraint));
         }
         this.assignmentConstraint = assignmentConstraint;
         this.constraints.add(assignmentConstraint);
         return this;
     }
 
-    public ValueVariable constrain(ValueConstraint.Predicate predicateConstraint) {
+    public ValueStatement constrain(ValueConstraint.Predicate predicateConstraint) {
         if (this.assignmentConstraint != null || this.predicateConstraint != null) {
-            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(reference, ValueConstraint.class, predicateConstraint));
+            throw TypeQLException.of(ILLEGAL_CONSTRAINT_REPETITION.message(variable, ValueConstraint.class, predicateConstraint));
         }
         this.predicateConstraint = predicateConstraint;
         this.constraints.add(predicateConstraint);
@@ -76,26 +81,26 @@ public class ValueVariable extends BoundVariable {
     }
 
     @Override
-    public ValueVariable asValue() {
+    public ValueStatement asValue() {
         return this;
     }
 
     @Override
     public String toString(boolean pretty) {
         assert constraints.size() <= 1;
-        return reference().syntax() + ((constraints.isEmpty()) ? "" : (SPACE + constraints.get(0).toString()));
+        return variable + ((constraints.isEmpty()) ? "" : (SPACE + constraints.get(0).toString()));
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ValueVariable that = (ValueVariable) o;
-        return this.reference.equals(that.reference) && this.constraints.equals(that.constraints);
+        ValueStatement that = (ValueStatement) o;
+        return this.variable.equals(that.variable) && this.constraints.equals(that.constraints);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reference, constraints);
+        return Objects.hash(variable, constraints);
     }
 }

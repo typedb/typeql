@@ -22,9 +22,9 @@
 package com.vaticle.typeql.lang.pattern.constraint;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.common.util.Strings;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -42,6 +42,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONS
 import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
 import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 
 public abstract class Predicate<T> {
 
@@ -53,7 +54,7 @@ public abstract class Predicate<T> {
         if (predicate == null) throw TypeQLException.of(MISSING_CONSTRAINT_PREDICATE);
         else if (value == null) throw TypeQLException.of(MISSING_CONSTRAINT_VALUE);
 
-        assert !predicate.isEquality() || value instanceof Comparable || value instanceof UnboundVariable;
+        assert !predicate.isEquality() || value instanceof Comparable || value instanceof TypeQLVariable;
         assert !predicate.isSubString() || value instanceof java.lang.String;
 
         this.predicate = predicate;
@@ -61,7 +62,7 @@ public abstract class Predicate<T> {
         this.hash = Objects.hash(Predicate.class, this.predicate, this.value);
     }
 
-    public Set<UnboundVariable> variables() {
+    public Set<TypeQLVariable> variables() {
         return emptySet();
     }
 
@@ -247,15 +248,15 @@ public abstract class Predicate<T> {
         }
     }
 
-    public static class Variable extends Predicate<UnboundVariable> {
+    public static class Variable extends Predicate<TypeQLVariable> {
 
-        public Variable(TypeQLToken.Predicate.Equality predicate, UnboundVariable variable) {
+        public Variable(TypeQLToken.Predicate.Equality predicate, TypeQLVariable variable) {
             super(predicate, variable);
         }
 
         @Override
-        public Set<UnboundVariable> variables() {
-            return set(value());
+        public Set<TypeQLVariable> variables() {
+            return singleton(value());
         }
 
         @Override
@@ -268,5 +269,4 @@ public abstract class Predicate<T> {
             return this;
         }
     }
-
 }

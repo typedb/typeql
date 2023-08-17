@@ -19,15 +19,17 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable;
+package com.vaticle.typeql.lang.common;
 
-import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
@@ -52,7 +54,11 @@ public abstract class Reference {
     }
 
     public static Reference.Label label(String label) {
-        return new Label(label);
+        return new Label(label, null);
+    }
+
+    public static Reference.Label label(String label, String scope) {
+        return new Label(label, scope);
     }
 
     public static Reference.Anonymous anonymous(boolean isVisible) {
@@ -66,7 +72,8 @@ public abstract class Reference {
     public abstract String name();
 
     public String syntax() {
-        return (type == Type.NAME_VALUE ? TypeQLToken.Char.QUESTION_MARK : TypeQLToken.Char.$) + name();
+        if (type == Type.LABEL) return asLabel().scopedLabel();
+        else return (type == Type.NAME_VALUE ? TypeQLToken.Char.QUESTION_MARK : TypeQLToken.Char.$) + name();
     }
 
     protected boolean isVisible() {
@@ -121,7 +128,6 @@ public abstract class Reference {
         private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         final String name;
         private final int hash;
-
 
         Name(Type type, String name, boolean isVisible) {
             super(type, isVisible);
@@ -204,21 +210,33 @@ public abstract class Reference {
     public static class Label extends Reference {
 
         private final String label;
+        private final String scope;
+
         private final int hash;
 
-        Label(String label) {
+        Label(String label, @Nullable String scope) {
             super(Type.LABEL, false);
             this.label = label;
-            this.hash = Objects.hash(this.type, this.isVisible, this.label);
+            this.scope = scope;
+            this.hash = Objects.hash(this.type, this.isVisible, this.label, this.scope);
         }
 
         public String label() {
             return label;
         }
 
+        public Optional<String> scope() {
+            return Optional.ofNullable(scope);
+        }
+
+        public String scopedLabel() {
+            if (scope == null) return label;
+            else return scope + COLON + label;
+        }
+
         @Override
         public String name() {
-            return TypeQLToken.Char.UNDERSCORE.toString() + label;
+            return TypeQLToken.Char.UNDERSCORE + scopedLabel();
         }
 
         @Override

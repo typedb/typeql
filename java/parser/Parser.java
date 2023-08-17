@@ -26,8 +26,11 @@ import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.grammar.TypeQLBaseVisitor;
 import com.vaticle.typeql.grammar.TypeQLLexer;
 import com.vaticle.typeql.grammar.TypeQLParser;
+import com.vaticle.typeql.lang.builder.ConceptVariableBuilder;
+import com.vaticle.typeql.lang.builder.ValueVariableBuilder;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Definable;
@@ -39,17 +42,14 @@ import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.ConceptVariable;
-import com.vaticle.typeql.lang.pattern.variable.Reference;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
-import com.vaticle.typeql.lang.pattern.variable.ValueVariable;
-import com.vaticle.typeql.lang.pattern.variable.builder.Expression;
-import com.vaticle.typeql.lang.pattern.variable.builder.Expression.Operation;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;
+import com.vaticle.typeql.lang.common.Reference;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
+import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
+import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
+import com.vaticle.typeql.lang.pattern.expression.Expression;
+import com.vaticle.typeql.lang.pattern.expression.Expression.Operation;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
 import com.vaticle.typeql.lang.query.TypeQLFetch;
@@ -90,7 +90,6 @@ import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
 import static com.vaticle.typeql.lang.common.util.Strings.unescapeRegex;
-import static com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable.hidden;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.antlr.v4.runtime.atn.PredictionMode.LL_EXACT_AMBIG_DETECTION;
@@ -182,8 +181,8 @@ public class Parser extends TypeQLBaseVisitor {
         return parse(definablesString, TypeQLParser::eof_definables, this::visitEof_definables);
     }
 
-    public BoundVariable parseVariableEOF(String variableString) {
-        return parse(variableString, TypeQLParser::eof_variable, this::visitEof_variable);
+    public Statement parseStatementEOF(String statementString) {
+        return parse(statementString, TypeQLParser::eof_statement, this::visitEof_statement);
     }
 
     public String parseLabelEOF(String labelString) {
@@ -196,21 +195,22 @@ public class Parser extends TypeQLBaseVisitor {
 
     // GLOBAL HELPER METHODS ===================================================
 
-    private UnboundConceptVariable getVarConcept(TerminalNode variable) {
+    private ConceptVariableBuilder getVarConcept(TerminalNode statement) {
         // Remove '$' prefix
-        String name = variable.getSymbol().getText().substring(1);
+        String name = statement.getSymbol().getText().substring(1);
         if (name.equals(TypeQLToken.Char.UNDERSCORE.toString())) {
-            return UnboundConceptVariable.anonymous();
+            return ConceptVariableBuilder.anonymous();
         } else {
-            return UnboundConceptVariable.named(name);
+            return ConceptVariableBuilder.named(name);
         }
     }
 
-    private UnboundValueVariable getVarValue(TerminalNode variable) {
+    private ValueVariableBuilder getVarValue(TerminalNode statement) {
         // Remove '?' prefix
-        String name = variable.getSymbol().getText().substring(1);
-        return UnboundValueVariable.named(name);
+        String name = statement.getSymbol().getText().substring(1);
+        return ValueVariableBuilder.named(name);
     }
+
     // PARSER VISITORS =========================================================
 
     @Override
@@ -239,8 +239,8 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public BoundVariable visitEof_variable(TypeQLParser.Eof_variableContext ctx) {
-        return visitPattern_variable(ctx.pattern_variable());
+    public Statement visitEof_statement(TypeQLParser.Eof_statementContext ctx) {
+        return visitStatement(ctx.statement());
     }
 
     @Override
@@ -305,9 +305,9 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public Rule visitSchema_rule(TypeQLParser.Schema_ruleContext ctx) {
         String label = ctx.label().getText();
-        if (ctx.patterns() != null && ctx.variable_thing_any() != null) {
+        if (ctx.patterns() != null && ctx.statement_thing_any() != null) {
             List<? extends Pattern> when = visitPatterns(ctx.patterns());
-            ThingVariable<?> then = visitVariable_thing_any(ctx.variable_thing_any());
+            ThingStatement<?> then = visitStatement_thing_any(ctx.statement_thing_any());
             return new Rule(label, new Conjunction<>(when), then);
         } else {
             return new Rule(label);
@@ -325,8 +325,8 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public List<ThingVariable<?>> visitClause_insert(TypeQLParser.Clause_insertContext ctx) {
-        return visitVariable_things(ctx.variable_things());
+    public List<ThingStatement<?>> visitClause_insert(TypeQLParser.Clause_insertContext ctx) {
+        return visitStatement_things(ctx.statement_things());
     }
 
     @Override
@@ -342,14 +342,14 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public List<ThingVariable<?>> visitClause_delete(TypeQLParser.Clause_deleteContext ctx) {
-        return visitVariable_things(ctx.variable_things());
+    public List<ThingStatement<?>> visitClause_delete(TypeQLParser.Clause_deleteContext ctx) {
+        return visitStatement_things(ctx.statement_things());
     }
 
     @Override
     public TypeQLGet visitQuery_get(TypeQLParser.Query_getContext ctx) {
         MatchClause match = visitClause_match(ctx.clause_match());
-        List<UnboundVariable> filter;
+        List<TypeQLVariable> filter;
         if (ctx.clause_get() != null) filter = visitClause_get(ctx.clause_get());
         else filter = emptyList();
         Modifiers modifiers = visitModifiers(ctx.modifiers());
@@ -362,8 +362,8 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public List<UnboundVariable> visitClause_get(TypeQLParser.Clause_getContext ctx) {
-        List<UnboundVariable> variables = new ArrayList<>();
+    public List<TypeQLVariable> visitClause_get(TypeQLParser.Clause_getContext ctx) {
+        List<TypeQLVariable> variables = new ArrayList<>();
         for (ParseTree child : ctx.children) {
             if (child instanceof TerminalNode) {
                 TerminalNode terminal = (TerminalNode) child;
@@ -387,13 +387,13 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public TypeQLGet.Aggregate visitQuery_get_aggregate(TypeQLParser.Query_get_aggregateContext ctx) {
         TypeQLGet get = visitQuery_get(ctx.query_get());
-        Pair<TypeQLToken.Aggregate.Method, UnboundVariable> agg = visitClause_aggregate(ctx.clause_aggregate());
+        Pair<TypeQLToken.Aggregate.Method, TypeQLVariable> agg = visitClause_aggregate(ctx.clause_aggregate());
         return get.aggregate(agg.first(), agg.second());
     }
 
     @Override
-    public Pair<TypeQLToken.Aggregate.Method, UnboundVariable> visitClause_aggregate(TypeQLParser.Clause_aggregateContext ctx) {
-        UnboundVariable aggregateVariable;
+    public Pair<TypeQLToken.Aggregate.Method, TypeQLVariable> visitClause_aggregate(TypeQLParser.Clause_aggregateContext ctx) {
+        TypeQLVariable aggregateVariable;
         if (ctx.VAR_CONCEPT_() != null) aggregateVariable = getVarConcept(ctx.VAR_CONCEPT_());
         else if (ctx.VAR_VALUE_() != null) aggregateVariable = getVarValue(ctx.VAR_VALUE_());
         else aggregateVariable = null;
@@ -407,7 +407,7 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public UnboundVariable visitClause_group(TypeQLParser.Clause_groupContext ctx) {
+    public TypeQLVariable visitClause_group(TypeQLParser.Clause_groupContext ctx) {
         if (ctx.VAR_CONCEPT_() != null) {
             return getVarConcept(ctx.VAR_CONCEPT_());
         } else if (ctx.VAR_VALUE_() != null) {
@@ -417,7 +417,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public TypeQLGet.Group.Aggregate visitQuery_get_group_agg(TypeQLParser.Query_get_group_aggContext ctx) {
-        Pair<TypeQLToken.Aggregate.Method, UnboundVariable> agg = visitClause_aggregate(ctx.clause_aggregate());
+        Pair<TypeQLToken.Aggregate.Method, TypeQLVariable> agg = visitClause_aggregate(ctx.clause_aggregate());
         return visitQuery_get_group(ctx.query_get_group()).aggregate(agg.first(), agg.second());
     }
 
@@ -453,12 +453,12 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Sortable.Sorting visitSort(TypeQLParser.SortContext ctx) {
-        List<Pair<UnboundVariable, TypeQLArg.Order>> sorting = ctx.var_order().stream().map(this::visitVar_order).collect(toList());
+        List<Pair<TypeQLVariable, TypeQLArg.Order>> sorting = ctx.var_order().stream().map(this::visitVar_order).collect(toList());
         return Sortable.Sorting.create(sorting);
     }
 
     @Override
-    public Pair<UnboundVariable, TypeQLArg.Order> visitVar_order(TypeQLParser.Var_orderContext ctx) {
+    public Pair<TypeQLVariable, TypeQLArg.Order> visitVar_order(TypeQLParser.Var_orderContext ctx) {
         return new Pair<>(ctx.VAR_VALUE_() != null ? getVarValue(ctx.VAR_VALUE_()) : getVarConcept(ctx.VAR_CONCEPT_()),
                 ctx.ORDER_() == null ? null : TypeQLArg.Order.of(ctx.ORDER_().getText()));
     }
@@ -472,8 +472,8 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Pattern visitPattern(TypeQLParser.PatternContext ctx) {
-        if (ctx.pattern_variable() != null) {
-            return visitPattern_variable(ctx.pattern_variable());
+        if (ctx.statement() != null) {
+            return visitStatement(ctx.statement());
         } else if (ctx.pattern_disjunction() != null) {
             return visitPattern_disjunction(ctx.pattern_disjunction());
         } else if (ctx.pattern_conjunction() != null) {
@@ -515,8 +515,8 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Definable visitDefinable(TypeQLParser.DefinableContext ctx) {
-        if (ctx.variable_type() != null) {
-            return visitVariable_type(ctx.variable_type());
+        if (ctx.statement_type() != null) {
+            return visitStatement_type(ctx.statement_type());
         } else {
             return visitSchema_rule(ctx.schema_rule());
         }
@@ -531,15 +531,15 @@ public class Parser extends TypeQLBaseVisitor {
     // VARIABLE PATTERNS =======================================================
 
     @Override
-    public BoundVariable visitPattern_variable(TypeQLParser.Pattern_variableContext ctx) {
-        if (ctx.variable_thing_any() != null) {
-            return visitVariable_thing_any(ctx.variable_thing_any());
-        } else if (ctx.variable_type() != null) {
-            return visitVariable_type(ctx.variable_type());
-        } else if (ctx.variable_concept() != null) {
-            return visitVariable_concept(ctx.variable_concept());
-        } else if (ctx.variable_value() != null) {
-            return visitVariable_value(ctx.variable_value());
+    public Statement visitStatement(TypeQLParser.StatementContext ctx) {
+        if (ctx.statement_thing_any() != null) {
+            return visitStatement_thing_any(ctx.statement_thing_any());
+        } else if (ctx.statement_type() != null) {
+            return visitStatement_type(ctx.statement_type());
+        } else if (ctx.statement_concept() != null) {
+            return visitStatement_concept(ctx.statement_concept());
+        } else if (ctx.statement_value() != null) {
+            return visitStatement_value(ctx.statement_value());
         } else {
             throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
@@ -548,17 +548,17 @@ public class Parser extends TypeQLBaseVisitor {
     // CONCEPT VARIABLES =======================================================
 
     @Override
-    public ConceptVariable visitVariable_concept(TypeQLParser.Variable_conceptContext ctx) {
+    public ConceptStatement visitStatement_concept(TypeQLParser.Statement_conceptContext ctx) {
         return getVarConcept(ctx.VAR_CONCEPT_(0)).is(getVarConcept(ctx.VAR_CONCEPT_(1)));
     }
 
     // TYPE VARIABLES ==========================================================
 
     @Override
-    public TypeVariable visitVariable_type(TypeQLParser.Variable_typeContext ctx) {
-        TypeVariable type = visitType_any(ctx.type_any()).apply(
-                scopedLabel -> hidden().constrain(new TypeConstraint.Label(scopedLabel.first(), scopedLabel.second())),
-                UnboundConceptVariable::toType
+    public TypeStatement visitStatement_type(TypeQLParser.Statement_typeContext ctx) {
+        TypeStatement type = visitType_any(ctx.type_any()).apply(
+                scopedLabel -> ConceptVariableBuilder.label(scopedLabel.second(), scopedLabel.first()),
+                ConceptVariableBuilder::toTypeStatement
         );
 
         for (TypeQLParser.Type_constraintContext constraint : ctx.type_constraint()) {
@@ -568,13 +568,13 @@ public class Parser extends TypeQLBaseVisitor {
                 TypeQLToken.Constraint sub = TypeQLToken.Constraint.of(constraint.SUB_().getText());
                 type = type.constrain(new TypeConstraint.Sub(visitType_any(constraint.type_any()), sub == TypeQLToken.Constraint.SUBX));
             } else if (constraint.OWNS() != null) {
-                Either<String, UnboundConceptVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
+                Either<String, ConceptVariableBuilder> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
                 type = type.constrain(new TypeConstraint.Owns(visitType(constraint.type(0)), overridden, visitAnnotations_owns(constraint.annotations_owns())));
             } else if (constraint.PLAYS() != null) {
-                Either<String, UnboundConceptVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(0));
+                Either<String, ConceptVariableBuilder> overridden = constraint.AS() == null ? null : visitType(constraint.type(0));
                 type = type.constrain(new TypeConstraint.Plays(visitType_scoped(constraint.type_scoped()), overridden));
             } else if (constraint.RELATES() != null) {
-                Either<String, UnboundConceptVariable> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
+                Either<String, ConceptVariableBuilder> overridden = constraint.AS() == null ? null : visitType(constraint.type(1));
                 type = type.constrain(new TypeConstraint.Relates(visitType(constraint.type(0)), overridden));
             } else if (constraint.VALUE() != null) {
                 type = type.value(TypeQLArg.ValueType.of(constraint.value_type().getText()));
@@ -619,49 +619,49 @@ public class Parser extends TypeQLBaseVisitor {
     // VALUE VARIABLES =========================================================
 
     @Override
-    public ValueVariable visitVariable_value(TypeQLParser.Variable_valueContext ctx) {
-        UnboundValueVariable unbound = getVarValue(ctx.VAR_VALUE_());
+    public ValueStatement visitStatement_value(TypeQLParser.Statement_valueContext ctx) {
+        ValueVariableBuilder value = getVarValue(ctx.VAR_VALUE_());
         if (ctx.predicate() != null) {
-            return unbound.constrain(new ValueConstraint.Predicate(visitPredicate(ctx.predicate())));
+            return value.constrain(new ValueConstraint.Predicate(visitPredicate(ctx.predicate())));
         } else if (ctx.ASSIGN() != null) {
-            return unbound.constrain(new ValueConstraint.Assignment(visitExpression(ctx.expression())));
+            return value.constrain(new ValueConstraint.Assignment(visitExpression(ctx.expression())));
         } else throw TypeQLException.of(ILLEGAL_STATE);
     }
 
     // THING VARIABLES =========================================================
 
     @Override
-    public List<ThingVariable<?>> visitVariable_things(TypeQLParser.Variable_thingsContext ctx) {
-        return ctx.variable_thing_any().stream().map(this::visitVariable_thing_any).collect(toList());
+    public List<ThingStatement<?>> visitStatement_things(TypeQLParser.Statement_thingsContext ctx) {
+        return ctx.statement_thing_any().stream().map(this::visitStatement_thing_any).collect(toList());
     }
 
     @Override
-    public ThingVariable<?> visitVariable_thing_any(TypeQLParser.Variable_thing_anyContext ctx) {
-        if (ctx.variable_thing() != null) {
-            return visitVariable_thing(ctx.variable_thing());
-        } else if (ctx.variable_relation() != null) {
-            return visitVariable_relation(ctx.variable_relation());
-        } else if (ctx.variable_attribute() != null) {
-            return visitVariable_attribute(ctx.variable_attribute());
+    public ThingStatement<?> visitStatement_thing_any(TypeQLParser.Statement_thing_anyContext ctx) {
+        if (ctx.statement_thing() != null) {
+            return visitStatement_thing(ctx.statement_thing());
+        } else if (ctx.statement_relation() != null) {
+            return visitStatement_relation(ctx.statement_relation());
+        } else if (ctx.statement_attribute() != null) {
+            return visitStatement_attribute(ctx.statement_attribute());
         } else {
             throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
     }
 
     @Override
-    public ThingVariable.Thing visitVariable_thing(TypeQLParser.Variable_thingContext ctx) {
-        UnboundConceptVariable unbound = getVarConcept(ctx.VAR_CONCEPT_());
-        ThingVariable.Thing thing = null;
+    public ThingStatement.Thing visitStatement_thing(TypeQLParser.Statement_thingContext ctx) {
+        ConceptVariableBuilder builder = getVarConcept(ctx.VAR_CONCEPT_());
+        ThingStatement.Thing thing = null;
 
         if (ctx.ISA_() != null) {
-            thing = unbound.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
+            thing = builder.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
         } else if (ctx.IID() != null) {
-            thing = unbound.iid(ctx.IID_().getText());
+            thing = builder.iid(ctx.IID_().getText());
         }
 
         if (ctx.attributes() != null) {
             for (ThingConstraint.Has hasAttribute : visitAttributes(ctx.attributes())) {
-                if (thing == null) thing = unbound.constrain(hasAttribute);
+                if (thing == null) thing = builder.constrain(hasAttribute);
                 else thing = thing.constrain(hasAttribute);
             }
         }
@@ -669,12 +669,12 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public ThingVariable.Relation visitVariable_relation(TypeQLParser.Variable_relationContext ctx) {
-        UnboundConceptVariable unbound;
-        if (ctx.VAR_CONCEPT_() != null) unbound = getVarConcept(ctx.VAR_CONCEPT_());
-        else unbound = hidden();
+    public ThingStatement.Relation visitStatement_relation(TypeQLParser.Statement_relationContext ctx) {
+        ConceptVariableBuilder builder;
+        if (ctx.VAR_CONCEPT_() != null) builder = getVarConcept(ctx.VAR_CONCEPT_());
+        else builder = ConceptVariableBuilder.hidden();
 
-        ThingVariable.Relation relation = unbound.constrain(visitRelation(ctx.relation()));
+        ThingStatement.Relation relation = builder.constrain(visitRelation(ctx.relation()));
         if (ctx.ISA_() != null) relation = relation.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
@@ -686,12 +686,12 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public ThingVariable.Attribute visitVariable_attribute(TypeQLParser.Variable_attributeContext ctx) {
-        UnboundConceptVariable unbound;
-        if (ctx.VAR_CONCEPT_() != null) unbound = getVarConcept(ctx.VAR_CONCEPT_());
-        else unbound = hidden();
+    public ThingStatement.Attribute visitStatement_attribute(TypeQLParser.Statement_attributeContext ctx) {
+        ConceptVariableBuilder builder;
+        if (ctx.VAR_CONCEPT_() != null) builder = getVarConcept(ctx.VAR_CONCEPT_());
+        else builder = ConceptVariableBuilder.hidden();
 
-        ThingVariable.Attribute attribute = unbound.constrain(new ThingConstraint.Predicate(visitPredicate(ctx.predicate())));
+        ThingStatement.Attribute attribute = builder.constrain(new ThingConstraint.Predicate(visitPredicate(ctx.predicate())));
         if (ctx.ISA_() != null) attribute = attribute.constrain(getIsaConstraint(ctx.ISA_(), ctx.type()));
 
         if (ctx.attributes() != null) {
@@ -727,6 +727,7 @@ public class Parser extends TypeQLBaseVisitor {
             if (ctx.VAR_CONCEPT_() != null) {
                 return new ThingConstraint.Has(ctx.label().getText(), getVarConcept(ctx.VAR_CONCEPT_()));
             }
+            // TODO replace this with 'native' value
             if (ctx.VAR_VALUE_() != null) {
                 Predicate.Variable pred = new Predicate.Variable(TypeQLToken.Predicate.Equality.EQ, getVarValue(ctx.VAR_VALUE_()));
                 return new ThingConstraint.Has(ctx.label().getText(), new ThingConstraint.Predicate(pred));
@@ -745,9 +746,9 @@ public class Parser extends TypeQLBaseVisitor {
         List<ThingConstraint.Relation.RolePlayer> rolePlayers = new ArrayList<>();
 
         for (TypeQLParser.Role_playerContext rolePlayerCtx : ctx.role_player()) {
-            UnboundConceptVariable player = getVarConcept(rolePlayerCtx.player().VAR_CONCEPT_());
+            ConceptVariableBuilder player = getVarConcept(rolePlayerCtx.player().VAR_CONCEPT_());
             if (rolePlayerCtx.type() != null) {
-                Either<String, UnboundConceptVariable> roleType = visitType(rolePlayerCtx.type());
+                Either<String, ConceptVariableBuilder> roleType = visitType(rolePlayerCtx.type());
                 rolePlayers.add(new ThingConstraint.Relation.RolePlayer(roleType, player));
             } else {
                 rolePlayers.add(new ThingConstraint.Relation.RolePlayer(player));
@@ -759,7 +760,7 @@ public class Parser extends TypeQLBaseVisitor {
     // TYPE, LABEL, AND IDENTIFIER CONSTRUCTS ==================================
 
     @Override
-    public Either<Pair<String, String>, UnboundConceptVariable> visitType_any(TypeQLParser.Type_anyContext ctx) {
+    public Either<Pair<String, String>, ConceptVariableBuilder> visitType_any(TypeQLParser.Type_anyContext ctx) {
         if (ctx.VAR_CONCEPT_() != null) return Either.second(getVarConcept(ctx.VAR_CONCEPT_()));
         else if (ctx.type() != null)
             return visitType(ctx.type()).apply(s -> Either.first(pair(null, s)), Either::second);
@@ -768,14 +769,14 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public Either<Pair<String, String>, UnboundConceptVariable> visitType_scoped(TypeQLParser.Type_scopedContext ctx) {
+    public Either<Pair<String, String>, ConceptVariableBuilder> visitType_scoped(TypeQLParser.Type_scopedContext ctx) {
         if (ctx.label_scoped() != null) return Either.first(visitLabel_scoped(ctx.label_scoped()));
         else if (ctx.VAR_CONCEPT_() != null) return Either.second(getVarConcept(ctx.VAR_CONCEPT_()));
         else return null;
     }
 
     @Override
-    public Either<String, UnboundConceptVariable> visitType(TypeQLParser.TypeContext ctx) {
+    public Either<String, ConceptVariableBuilder> visitType(TypeQLParser.TypeContext ctx) {
         if (ctx.label() != null) return Either.first(ctx.label().getText());
         else if (ctx.VAR_CONCEPT_() != null) return Either.second(getVarConcept(ctx.VAR_CONCEPT_()));
         else return null;
@@ -831,15 +832,15 @@ public class Parser extends TypeQLBaseVisitor {
         } else if (ctx.value() != null) {
             Object value = visitValue(ctx.value());
             if (value instanceof Long) {
-                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Long((Long) value);
+                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Long((Long) value);
             } else if (value instanceof Double) {
-                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Double((Double) value);
+                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Double((Double) value);
             } else if (value instanceof Boolean) {
-                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.Boolean((Boolean) value);
+                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Boolean((Boolean) value);
             } else if (value instanceof String) {
-                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.String((String) value);
+                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.String((String) value);
             } else if (value instanceof LocalDateTime) {
-                return new com.vaticle.typeql.lang.pattern.variable.builder.Expression.Constant.DateTime((LocalDateTime) value);
+                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.DateTime((LocalDateTime) value);
             } else {
                 throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
@@ -849,7 +850,7 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public com.vaticle.typeql.lang.pattern.variable.builder.Expression.Function visitExpression_function(TypeQLParser.Expression_functionContext ctx) {
+    public com.vaticle.typeql.lang.pattern.expression.Expression.Function visitExpression_function(TypeQLParser.Expression_functionContext ctx) {
         TypeQLToken.Expression.Function function = Arrays.stream(TypeQLToken.Expression.Function.values())
                 .filter(f -> f.toString().equals(ctx.expression_function_name().getText()))
                 .findFirst().orElse(null);
@@ -906,8 +907,8 @@ public class Parser extends TypeQLBaseVisitor {
             return new Predicate.String(predicate, (String) value);
         } else if (value instanceof LocalDateTime) {
             return new Predicate.DateTime(predicate.asEquality(), (LocalDateTime) value);
-        } else if (value instanceof UnboundVariable) {
-            return new Predicate.Variable(predicate.asEquality(), ((UnboundVariable) value));
+        } else if (value instanceof TypeQLVariable) {
+            return new Predicate.Variable(predicate.asEquality(), ((TypeQLVariable) value));
         } else {
             throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
@@ -933,7 +934,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public TypeQLFetch.Projection.Key.Variable visitProjection_key_var(TypeQLParser.Projection_key_varContext ctx) {
-        UnboundVariable variable;
+        TypeQLVariable variable;
         if (ctx.VAR_CONCEPT_() != null) variable = getVarConcept(ctx.VAR_CONCEPT_());
         else if (ctx.VAR_VALUE_() != null) variable = getVarValue(ctx.VAR_VALUE_());
         else throw TypeQLException.of(ILLEGAL_GRAMMAR);

@@ -19,158 +19,158 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable.builder;
+package com.vaticle.typeql.lang.pattern.statement.builder;
 
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
+import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
 
-public interface TypeVariableBuilder {
+public interface TypeStatementBuilder {
 
-    default TypeVariable type(TypeQLToken.Type type) {
+    default TypeStatement type(TypeQLToken.Type type) {
         return type(type.toString());
     }
 
-    default TypeVariable type(String label) {
+    default TypeStatement type(String label) {
         return constrain(new TypeConstraint.Label(label));
     }
 
-    default TypeVariable type(String scope, String label) {
+    default TypeStatement type(String scope, String label) {
         return constrain(new TypeConstraint.Label(scope, label));
     }
 
-    default TypeVariable isAbstract() {
+    default TypeStatement isAbstract() {
         return constrain(new TypeConstraint.Abstract());
     }
 
-    default TypeVariable sub(TypeQLToken.Type type) {
+    default TypeStatement sub(TypeQLToken.Type type) {
         return sub(type.toString());
     }
 
-    default TypeVariable sub(String typeLabel) {
+    default TypeStatement sub(String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeLabel, false));
     }
 
-    default TypeVariable sub(String typeScope, String typeLabel) {
+    default TypeStatement sub(String typeScope, String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeScope, typeLabel, false));
     }
 
-    default TypeVariable sub(UnboundConceptVariable typeVar) {
+    default TypeStatement sub(TypeQLVariable.Concept typeVar) {
         return constrain(new TypeConstraint.Sub(typeVar, false));
     }
 
-    default TypeVariable subX(TypeQLToken.Type type) {
+    default TypeStatement subX(TypeQLToken.Type type) {
         return subX(type.toString());
     }
 
-    default TypeVariable subX(String typeLabel) {
+    default TypeStatement subX(String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeLabel, true));
     }
 
-    default TypeVariable subX(String typeScope, String typeLabel) {
+    default TypeStatement subX(String typeScope, String typeLabel) {
         return constrain(new TypeConstraint.Sub(typeScope, typeLabel, true));
     }
 
-    default TypeVariable subX(UnboundConceptVariable typeVar) {
+    default TypeStatement subX(TypeQLVariable.Concept typeVar) {
         return constrain(new TypeConstraint.Sub(typeVar, true));
     }
 
-    default TypeVariable owns(String attributeType, TypeQLToken.Annotation... annotations) {
+    default TypeStatement owns(String attributeType, TypeQLToken.Annotation... annotations) {
         return constrain(new TypeConstraint.Owns(attributeType, annotations));
     }
 
-    default TypeVariable owns(UnboundConceptVariable attributeTypeVar, TypeQLToken.Annotation... annotations) {
+    default TypeStatement owns(TypeQLVariable.Concept attributeTypeVar, TypeQLToken.Annotation... annotations) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, annotations));
     }
 
 
-    default TypeVariable owns(String attributeType, String overriddenAttributeType, TypeQLToken.Annotation... annotations) {
+    default TypeStatement owns(String attributeType, String overriddenAttributeType, TypeQLToken.Annotation... annotations) {
         return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeType, annotations));
     }
 
-    default TypeVariable owns(String attributeType, UnboundConceptVariable overriddenAttributeTypeVar, TypeQLToken.Annotation... annotations) {
+    default TypeStatement owns(String attributeType, TypeQLVariable.Concept overriddenAttributeTypeVar, TypeQLToken.Annotation... annotations) {
         return constrain(new TypeConstraint.Owns(attributeType, overriddenAttributeTypeVar, annotations));
     }
 
-    default TypeVariable owns(UnboundConceptVariable attributeTypeVar, String overriddenAttributeType, TypeQLToken.Annotation... annotations) {
+    default TypeStatement owns(TypeQLVariable.Concept attributeTypeVar, String overriddenAttributeType, TypeQLToken.Annotation... annotations) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeType, annotations));
     }
 
-    default TypeVariable owns(UnboundConceptVariable attributeTypeVar, UnboundConceptVariable overriddenAttributeTypeVar, TypeQLToken.Annotation... annotations) {
+    default TypeStatement owns(TypeQLVariable.Concept attributeTypeVar, TypeQLVariable.Concept overriddenAttributeTypeVar, TypeQLToken.Annotation... annotations) {
         return constrain(new TypeConstraint.Owns(attributeTypeVar, overriddenAttributeTypeVar, annotations));
     }
 
-    default TypeVariable plays(String relationType, String roleType) {
+    default TypeStatement plays(String relationType, String roleType) {
         return constrain(new TypeConstraint.Plays(relationType, roleType));
     }
 
-    default TypeVariable plays(UnboundConceptVariable roleTypevar) {
+    default TypeStatement plays(TypeQLVariable.Concept roleTypevar) {
         return constrain(new TypeConstraint.Plays(roleTypevar));
     }
 
-    default TypeVariable plays(String relationType, String roleType, String overriddenRoleType) {
+    default TypeStatement plays(String relationType, String roleType, String overriddenRoleType) {
         return constrain(new TypeConstraint.Plays(relationType, roleType, overriddenRoleType));
     }
 
-    default TypeVariable plays(String relationType, String roleType, UnboundConceptVariable overriddenRoleTypeVar) {
+    default TypeStatement plays(String relationType, String roleType, TypeQLVariable.Concept overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Plays(relationType, roleType, overriddenRoleTypeVar));
     }
 
-    default TypeVariable plays(UnboundConceptVariable roleTypeVar, String overriddenRoleType) {
+    default TypeStatement plays(TypeQLVariable.Concept roleTypeVar, String overriddenRoleType) {
         return constrain(new TypeConstraint.Plays(roleTypeVar, overriddenRoleType));
     }
 
-    default TypeVariable plays(UnboundConceptVariable roleTypeVar, UnboundConceptVariable overriddenRoleTypeVar) {
+    default TypeStatement plays(TypeQLVariable.Concept roleTypeVar, TypeQLVariable.Concept overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Plays(roleTypeVar, overriddenRoleTypeVar));
     }
 
-    default TypeVariable relates(String roleType) {
+    default TypeStatement relates(String roleType) {
         return constrain(new TypeConstraint.Relates(roleType));
     }
 
-    default TypeVariable relates(UnboundConceptVariable roleTypeVar) {
+    default TypeStatement relates(TypeQLVariable.Concept roleTypeVar) {
         return constrain(new TypeConstraint.Relates(roleTypeVar));
     }
 
-    default TypeVariable relates(String roleType, String overriddenRoleType) {
+    default TypeStatement relates(String roleType, String overriddenRoleType) {
         return constrain(new TypeConstraint.Relates(roleType, overriddenRoleType));
     }
 
-    default TypeVariable relates(String roleType, UnboundConceptVariable overriddenRoleTypeVar) {
+    default TypeStatement relates(String roleType, TypeQLVariable.Concept overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Relates(roleType, overriddenRoleTypeVar));
     }
 
-    default TypeVariable relates(UnboundConceptVariable roleTypeVar, String overriddenRoleType) {
+    default TypeStatement relates(TypeQLVariable.Concept roleTypeVar, String overriddenRoleType) {
         return constrain(new TypeConstraint.Relates(roleTypeVar, overriddenRoleType));
     }
 
-    default TypeVariable relates(UnboundConceptVariable roleTypeVar, UnboundConceptVariable overriddenRoleTypeVar) {
+    default TypeStatement relates(TypeQLVariable.Concept roleTypeVar, TypeQLVariable.Concept overriddenRoleTypeVar) {
         return constrain(new TypeConstraint.Relates(roleTypeVar, overriddenRoleTypeVar));
     }
 
-    default TypeVariable value(TypeQLArg.ValueType ValueType) {
+    default TypeStatement value(TypeQLArg.ValueType ValueType) {
         return constrain(new TypeConstraint.ValueType(ValueType));
     }
 
-    default TypeVariable regex(String regex) {
+    default TypeStatement regex(String regex) {
         return constrain(new TypeConstraint.Regex(regex));
     }
 
-    TypeVariable constrain(TypeConstraint.Label constraint);
+    TypeStatement constrain(TypeConstraint.Label constraint);
 
-    TypeVariable constrain(TypeConstraint.Sub constraint);
+    TypeStatement constrain(TypeConstraint.Sub constraint);
 
-    TypeVariable constrain(TypeConstraint.Abstract constraint);
+    TypeStatement constrain(TypeConstraint.Abstract constraint);
 
-    TypeVariable constrain(TypeConstraint.ValueType constraint);
+    TypeStatement constrain(TypeConstraint.ValueType constraint);
 
-    TypeVariable constrain(TypeConstraint.Regex constraint);
+    TypeStatement constrain(TypeConstraint.Regex constraint);
 
-    TypeVariable constrain(TypeConstraint.Owns constraint);
+    TypeStatement constrain(TypeConstraint.Owns constraint);
 
-    TypeVariable constrain(TypeConstraint.Plays constraint);
+    TypeStatement constrain(TypeConstraint.Plays constraint);
 
-    TypeVariable constrain(TypeConstraint.Relates constraint);
+    TypeStatement constrain(TypeConstraint.Relates constraint);
 }

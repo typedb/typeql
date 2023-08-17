@@ -19,37 +19,43 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable;
+package com.vaticle.typeql.lang.pattern.statement;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static java.util.Collections.emptyList;
 
-public class ConceptVariable extends BoundVariable {
+public class ConceptStatement extends Statement {
 
+    private final TypeQLVariable.Concept variable;
     private final ConceptConstraint.Is isConstraint;
     private final int hash;
 
-    ConceptVariable(Reference reference) {
-        this(reference, null);
+    private ConceptStatement(TypeQLVariable.Concept variable, @Nullable ConceptConstraint.Is isConstraint) {
+        this.variable = variable;
+        this.isConstraint = isConstraint;
+        this.hash = Objects.hash(this.variable, this.isConstraint);
     }
 
-    ConceptVariable(Reference reference, @Nullable ConceptConstraint.Is isConstraint) {
-        super(reference);
-        this.isConstraint = isConstraint;
-        this.hash = Objects.hash(this.reference, this.isConstraint);
+    public static ConceptStatement of(TypeQLVariable.Concept var) {
+        return new ConceptStatement(var, null);
+    }
+
+    public static ConceptStatement of(TypeQLVariable.Concept var, @Nullable ConceptConstraint.Is isConstraint) {
+        return new ConceptStatement(var, isConstraint);
     }
 
     @Override
-    public UnboundConceptVariable toUnbound() {
-        return new UnboundConceptVariable(reference);
+    public TypeQLVariable.Concept headVariable() {
+        return variable;
     }
 
     @Override
@@ -58,13 +64,13 @@ public class ConceptVariable extends BoundVariable {
     }
 
     @Override
-    public ConceptVariable asConcept() {
+    public ConceptStatement asConcept() {
         return this;
     }
 
     @Override
     public List<ConceptConstraint> constraints() {
-        return (isConstraint != null) ? list(isConstraint) : Collections.emptyList();
+        return (isConstraint != null) ? list(isConstraint) : emptyList();
     }
 
     public Optional<ConceptConstraint.Is> is() {
@@ -73,17 +79,16 @@ public class ConceptVariable extends BoundVariable {
 
     @Override
     public String toString(boolean pretty) {
-        if (isConstraint == null) return reference.toString();
-        return reference.toString() + SPACE + isConstraint;
+        if (isConstraint == null) return variable.toString();
+        return variable.toString() + SPACE + isConstraint;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ConceptVariable that = (ConceptVariable) o;
-        return (this.reference.equals(that.reference) &&
-                Objects.equals(this.isConstraint, that.isConstraint));
+        ConceptStatement that = (ConceptStatement) o;
+        return (this.variable.equals(that.variable) && Objects.equals(this.isConstraint, that.isConstraint));
     }
 
     @Override

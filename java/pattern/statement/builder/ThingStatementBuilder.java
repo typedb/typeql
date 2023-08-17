@@ -19,20 +19,19 @@
  * under the License.
  */
 
-package com.vaticle.typeql.lang.pattern.variable.builder;
+package com.vaticle.typeql.lang.pattern.statement.builder;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundValueVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 
 import java.time.LocalDateTime;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
 
-public interface ThingVariableBuilder {
+public interface ThingStatementBuilder {
 
     interface Common<T> {
 
@@ -44,7 +43,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Isa(type, false));
         }
 
-        default T isa(UnboundConceptVariable var) {
+        default T isa(TypeQLVariable.Concept var) {
             return constrain(new ThingConstraint.Isa(var, false));
         }
 
@@ -56,7 +55,7 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Isa(type, true));
         }
 
-        default T isaX(UnboundConceptVariable var) {
+        default T isaX(TypeQLVariable.Concept var) {
             return constrain(new ThingConstraint.Isa(var, true));
         }
 
@@ -80,7 +79,7 @@ public interface ThingVariableBuilder {
             return has(type, new ThingConstraint.Predicate(new Predicate.DateTime(EQ, value)));
         }
 
-        default T has(String type, UnboundValueVariable value) {
+        default T has(String type, TypeQLVariable.Value value) {
             return has(type, new ThingConstraint.Predicate(new Predicate.Variable(EQ, value)));
         }
 
@@ -88,11 +87,11 @@ public interface ThingVariableBuilder {
             return constrain(new ThingConstraint.Has(type, predicate));
         }
 
-        default T has(String type, UnboundConceptVariable variable) {
+        default T has(String type, TypeQLVariable.Concept variable) {
             return constrain(new ThingConstraint.Has(type, variable));
         }
 
-        default T has(UnboundConceptVariable variable) {
+        default T has(TypeQLVariable.Concept variable) {
             return constrain(new ThingConstraint.Has(variable));
         }
 
@@ -103,32 +102,32 @@ public interface ThingVariableBuilder {
 
     interface Thing {
 
-        default ThingVariable.Thing iid(String iid) {
+        default ThingStatement.Thing iid(String iid) {
             return constrain(new ThingConstraint.IID(iid));
         }
 
-        ThingVariable.Thing constrain(ThingConstraint.IID constraint);
+        ThingStatement.Thing constrain(ThingConstraint.IID constraint);
     }
 
     interface Relation {
 
-        default ThingVariable.Relation rel(UnboundConceptVariable playerVar) {
+        default ThingStatement.Relation rel(TypeQLVariable.Concept playerVar) {
             return constrain(new ThingConstraint.Relation.RolePlayer(playerVar));
         }
 
-        default ThingVariable.Relation rel(String roleType, UnboundConceptVariable playerVar) {
+        default ThingStatement.Relation rel(String roleType, TypeQLVariable.Concept playerVar) {
             return constrain(new ThingConstraint.Relation.RolePlayer(roleType, playerVar));
         }
 
-        default ThingVariable.Relation rel(UnboundConceptVariable roleTypeVar, UnboundConceptVariable playerVar) {
+        default ThingStatement.Relation rel(TypeQLVariable.Concept roleTypeVar, TypeQLVariable.Concept playerVar) {
             return constrain(new ThingConstraint.Relation.RolePlayer(roleTypeVar, playerVar));
         }
 
-        ThingVariable.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer);
+        ThingStatement.Relation constrain(ThingConstraint.Relation.RolePlayer rolePlayer);
     }
 
-    interface Attribute extends PredicateBuilder<ThingVariable.Attribute> {
+    interface Attribute extends PredicateBuilder<ThingStatement.Attribute> {
 
-        ThingVariable.Attribute constrain(ThingConstraint.Predicate constraint);
+        ThingStatement.Attribute constrain(ThingConstraint.Predicate constraint);
     }
 }

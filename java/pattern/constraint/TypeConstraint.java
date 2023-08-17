@@ -26,9 +26,8 @@ import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.TypeQLToken.Annotation;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -59,13 +58,14 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CAST
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
 import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
 import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
-import static com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable.hidden;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 
-public abstract class TypeConstraint extends Constraint<TypeVariable> {
+public abstract class TypeConstraint extends Constraint<TypeQLVariable.Concept> {
 
     @Override
-    public Set<TypeVariable> variables() {
-        return set();
+    public Set<TypeQLVariable.Concept> variables() {
+        return emptySet();
     }
 
     @Override
@@ -207,35 +207,33 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public static class Sub extends TypeConstraint {
 
-        private final TypeVariable type;
+        private final TypeQLVariable.Concept type;
         private final boolean isExplicit;
         private final int hash;
 
         public Sub(String typeLabel, boolean isExplicit) {
-            this(hidden().type(typeLabel), isExplicit);
+            this(TypeQLVariable.Concept.labelVar(typeLabel), isExplicit);
         }
 
         public Sub(String typeScope, String typeLabel, boolean isExplicit) {
-            this(hidden().type(typeScope, typeLabel), isExplicit);
+            this(TypeQLVariable.Concept.labelVar(typeLabel, typeScope), isExplicit);
         }
 
-        public Sub(UnboundConceptVariable typeVar, boolean isExplicit) {
-            this(typeVar.toType(), isExplicit);
+        public Sub(Either<Pair<String, String>, ? extends TypeQLVariable.Concept> typeArg, boolean isExplicit) {
+            this((TypeQLVariable.Concept) typeArg.apply(
+                    scoped -> TypeQLVariable.Concept.labelVar(scoped.second(), scoped.first()),
+                    v -> v
+            ), isExplicit);
         }
 
-        public Sub(Either<Pair<String, String>, UnboundConceptVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())),
-                               UnboundConceptVariable::toType), isExplicit);
-        }
-
-        private Sub(TypeVariable type, boolean isExplicit) {
+        public Sub(TypeQLVariable.Concept type, boolean isExplicit) {
             if (type == null) throw new NullPointerException("Null superType");
             this.type = type;
             this.isExplicit = isExplicit;
             this.hash = Objects.hash(Sub.class, this.type, this.isExplicit);
         }
 
-        public TypeVariable type() {
+        public TypeQLVariable.Concept type() {
             return type;
         }
 
@@ -244,8 +242,8 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         }
 
         @Override
-        public Set<TypeVariable> variables() {
-            return set(type);
+        public Set<TypeQLVariable.Concept> variables() {
+            return singleton(type);
         }
 
         @Override
@@ -408,42 +406,38 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
         private static final Set<Annotation> VALID_ANNOTATIONS = set(Annotation.KEY, Annotation.UNIQUE);
 
-        private final TypeVariable attributeType;
-        private final TypeVariable overriddenAttributeType;
+        private final TypeQLVariable.Concept attributeType;
+        private final TypeQLVariable.Concept overriddenAttributeType;
         private final List<Annotation> annotations;
         private final int hash;
 
         public Owns(String attributeType, Annotation... annotations) {
-            this(hidden().type(attributeType), null, annotations);
+            this(TypeQLVariable.Concept.labelVar(attributeType), (TypeQLVariable.Concept) null, annotations);
         }
 
-        public Owns(UnboundConceptVariable attributeTypeVar, Annotation... annotations) {
-            this(attributeTypeVar.toType(), null, annotations);
+        public Owns(TypeQLVariable.Concept attributeTypeVar, Annotation... annotations) {
+            this(attributeTypeVar, (TypeQLVariable.Concept) null, annotations);
         }
 
         public Owns(String attributeType, String overriddenAttributeType, Annotation... annotations) {
-            this(hidden().type(attributeType), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
+            this(TypeQLVariable.Concept.labelVar(attributeType), overriddenAttributeType == null ? null : TypeQLVariable.Concept.labelVar(overriddenAttributeType), annotations);
         }
 
-        public Owns(UnboundConceptVariable attributeTypeVar, String overriddenAttributeType, Annotation... annotations) {
-            this(attributeTypeVar.toType(), overriddenAttributeType == null ? null : hidden().type(overriddenAttributeType), annotations);
+        public Owns(TypeQLVariable.Concept attributeTypeVar, @Nullable String overriddenAttributeType, Annotation... annotations) {
+            this(attributeTypeVar, overriddenAttributeType == null ? null : TypeQLVariable.Concept.labelVar(overriddenAttributeType), annotations);
         }
 
-        public Owns(String attributeType, UnboundConceptVariable overriddenAttributeTypeVar, Annotation... annotations) {
-            this(hidden().type(attributeType), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
+        public Owns(String attributeType, TypeQLVariable.Concept overriddenAttributeTypeVar, Annotation... annotations) {
+            this(TypeQLVariable.Concept.labelVar(attributeType), overriddenAttributeTypeVar, annotations);
         }
 
-        public Owns(UnboundConceptVariable attributeTypeVar, UnboundConceptVariable overriddenAttributeTypeVar, Annotation... annotations) {
-            this(attributeTypeVar.toType(), overriddenAttributeTypeVar == null ? null : overriddenAttributeTypeVar.toType(), annotations);
-        }
-
-        public Owns(Either<String, UnboundConceptVariable> attributeTypeArg, Either<String, UnboundConceptVariable> overriddenAttributeTypeArg, Annotation... annotations) {
-            this(attributeTypeArg.apply(label -> hidden().type(label), UnboundConceptVariable::toType),
-                    overriddenAttributeTypeArg == null ? null : overriddenAttributeTypeArg.apply(label -> hidden().type(label), UnboundConceptVariable::toType),
+        public Owns(Either<String, ? extends TypeQLVariable.Concept> attributeTypeArg, Either<String, ? extends TypeQLVariable.Concept> overriddenAttributeTypeArg, Annotation... annotations) {
+            this((TypeQLVariable.Concept) attributeTypeArg.apply(TypeQLVariable.Concept::labelVar, v -> v),
+                    overriddenAttributeTypeArg == null ? (TypeQLVariable.Concept) null : overriddenAttributeTypeArg.apply(TypeQLVariable.Concept::labelVar, v -> v),
                     annotations);
         }
 
-        private Owns(TypeVariable attributeType, @Nullable TypeVariable overriddenAttributeType, Annotation... annotations) {
+        public Owns(TypeQLVariable.Concept attributeType, @Nullable TypeQLVariable.Concept overriddenAttributeType, Annotation... annotations) {
             this.attributeType = attributeType;
             this.overriddenAttributeType = overriddenAttributeType;
             validateAnnotations(annotations);
@@ -459,18 +453,18 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
             }
         }
 
-        public TypeVariable attribute() {
+        public TypeQLVariable.Concept attribute() {
             return attributeType;
         }
 
-        public Optional<TypeVariable> overridden() {
+        public Optional<TypeQLVariable.Concept> overridden() {
             return Optional.ofNullable(overriddenAttributeType);
         }
 
         @Override
-        public Set<TypeVariable> variables() {
+        public Set<TypeQLVariable.Concept> variables() {
             return overriddenAttributeType == null
-                    ? set(attributeType)
+                    ? singleton(attributeType)
                     : set(attributeType, overriddenAttributeType);
         }
 
@@ -513,67 +507,65 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public static class Plays extends TypeConstraint {
 
-        private final TypeVariable roleType;
-        private final TypeVariable relationType;
-        private final TypeVariable overriddenRoleType;
+        private final TypeQLVariable.Concept roleType;
+        private final TypeQLVariable.Concept relationType;
+        private final TypeQLVariable.Concept overriddenRoleType;
         private final int hash;
 
         public Plays(String relationType, String roleType) {
-            this(hidden().type(relationType, roleType), null);
+            this(TypeQLVariable.Concept.labelVar(roleType, relationType), (TypeQLVariable.Concept) null);
         }
 
-        public Plays(UnboundConceptVariable var) {
-            this(var.toType(), null);
+        public Plays(TypeQLVariable.Concept var) {
+            this(var, (TypeQLVariable.Concept) null);
         }
 
-        public Plays(String relationType, String roleType, String overriddenRoleType) {
-            this(hidden().type(relationType, roleType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
+        public Plays(String relationType, String roleType, @Nullable String overriddenRoleType) {
+            this(TypeQLVariable.Concept.labelVar(roleType, relationType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Plays(UnboundConceptVariable roleTypeVar, String overriddenRoleType) {
-            this(roleTypeVar.toType(), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
+        public Plays(TypeQLVariable.Concept roleTypeVar, @Nullable String overriddenRoleType) {
+            this(roleTypeVar, overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Plays(String relationType, String roleType, UnboundConceptVariable overriddenRoleTypeVar) {
-            this(hidden().type(relationType, roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
+        public Plays(String relationType, String roleType, @Nullable TypeQLVariable.Concept overriddenRoleTypeVar) {
+            this(TypeQLVariable.Concept.labelVar(roleType, relationType), overriddenRoleTypeVar);
         }
 
-        public Plays(UnboundConceptVariable roleTypeVar, UnboundConceptVariable overriddenRoleTypeVar) {
-            this(roleTypeVar.toType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
+        public Plays(Either<Pair<String, String>, ? extends TypeQLVariable.Concept> roleTypeArg, Either<String, ? extends TypeQLVariable.Concept> overriddenRoleTypeArg) {
+            this(roleTypeArg.apply(
+                    scoped -> TypeQLVariable.Concept.labelVar(scoped.second(), scoped.first()),
+                    v -> v
+            ), overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Plays::scopedType, v -> v));
         }
 
-        public Plays(Either<Pair<String, String>, UnboundConceptVariable> roleTypeArg, Either<String, UnboundConceptVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(scoped -> hidden().constrain(new TypeConstraint.Label(scoped.first(), scoped.second())), UnboundConceptVariable::toType),
-                    overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Plays::scopedType, UnboundConceptVariable::toType));
-        }
-
-        private Plays(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
+        public Plays(TypeQLVariable.Concept roleType, @Nullable TypeQLVariable.Concept overriddenRoleType) {
             if (roleType == null) throw TypeQLException.of(MISSING_PATTERNS.message());
-            this.relationType = roleType.label().map(l -> hidden().type(l.scope().get())).orElse(null);
+            this.relationType = roleType.reference().isLabel() ? roleType.reference().asLabel().scope().map(TypeQLVariable.Concept::labelVar).orElse(null) : null;
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
             this.hash = Objects.hash(Plays.class, this.relationType, this.roleType, this.overriddenRoleType);
         }
 
-        public Optional<TypeVariable> relation() {
+        public Optional<TypeQLVariable.Concept> relation() {
             return Optional.ofNullable(relationType);
         }
 
-        public TypeVariable role() {
+        public TypeQLVariable.Concept role() {
             return roleType;
         }
 
-        public Optional<TypeVariable> overridden() {
+        public Optional<TypeQLVariable.Concept> overridden() {
             return Optional.ofNullable(overriddenRoleType);
         }
 
-        private static TypeVariable scopedType(String roleType) {
-            return hidden().type(RELATION.toString(), roleType);
+        private static TypeQLVariable.Concept scopedType(String roleType) {
+            return TypeQLVariable.Concept.labelVar(roleType, RELATION.toString());
         }
 
         @Override
-        public Set<TypeVariable> variables() {
-            Set<TypeVariable> variables = new HashSet<>();
+        public Set<TypeQLVariable.Concept> variables() {
+            Set<TypeQLVariable.Concept> variables = new HashSet<>();
             variables.add(roleType);
             if (relationType != null) variables.add(relationType);
             if (overriddenRoleType != null) variables.add(overriddenRoleType);
@@ -594,9 +586,9 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             String syntax = PLAYS.toString() + SPACE + roleType;
             if (overriddenRoleType != null) {
-                String overriddenRoleTypeString = overriddenRoleType.label().isPresent() ?
-                        overriddenRoleType.label().get().label() :
-                        overriddenRoleType.reference().syntax();
+                String overriddenRoleTypeString = overriddenRoleType.isLabelled() ?
+                        overriddenRoleType.reference().asLabel().label() :
+                        overriddenRoleType.toString();
                 syntax += "" + SPACE + AS + SPACE + overriddenRoleTypeString;
             }
             return syntax;
@@ -620,68 +612,64 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
 
     public static class Relates extends TypeConstraint {
 
-        private TypeVariable roleType;
-        private TypeVariable overriddenRoleType;
+        private TypeQLVariable.Concept roleType;
+        private TypeQLVariable.Concept overriddenRoleType;
 
         public Relates(String roleType) {
-            this(scopedType(roleType), null);
+            this(scopedType(roleType), (TypeQLVariable.Concept) null);
         }
 
-        public Relates(UnboundConceptVariable roleTypeVar) {
-            this(roleTypeVar.toType(), null);
+        public Relates(TypeQLVariable.Concept roleTypeVar) {
+            this(roleTypeVar, (TypeQLVariable.Concept) null);
         }
 
-        public Relates(String roleType, String overriddenRoleType) {
+        public Relates(String roleType, @Nullable String overriddenRoleType) {
             this(scopedType(roleType), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Relates(UnboundConceptVariable roleTypeVar, String overriddenRoleType) {
-            this(roleTypeVar.toType(), overriddenRoleType == null ? null : scopedType(overriddenRoleType));
+        public Relates(TypeQLVariable.Concept roleTypeVar, @Nullable String overriddenRoleType) {
+            this(roleTypeVar, overriddenRoleType == null ? null : scopedType(overriddenRoleType));
         }
 
-        public Relates(String roleType, UnboundConceptVariable overriddenRoleTypeVar) {
-            this(scopedType(roleType), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
+        public Relates(String roleType, @Nullable TypeQLVariable.Concept overriddenRoleTypeVar) {
+            this(scopedType(roleType), overriddenRoleTypeVar);
         }
 
-        public Relates(UnboundConceptVariable roleTypeVar, UnboundConceptVariable overriddenRoleTypeVar) {
-            this(roleTypeVar.toType(), overriddenRoleTypeVar == null ? null : overriddenRoleTypeVar.toType());
+        public Relates(Either<String, ? extends TypeQLVariable.Concept> roleTypeArg, @Nullable Either<String, ? extends TypeQLVariable.Concept> overriddenRoleTypeArg) {
+            this(roleTypeArg.apply(Relates::scopedType, v -> v),
+                    overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Relates::scopedType, v -> v));
         }
 
-        public Relates(Either<String, UnboundConceptVariable> roleTypeArg, Either<String, UnboundConceptVariable> overriddenRoleTypeArg) {
-            this(roleTypeArg.apply(Relates::scopedType, UnboundConceptVariable::toType),
-                    overriddenRoleTypeArg == null ? null : overriddenRoleTypeArg.apply(Relates::scopedType, UnboundConceptVariable::toType));
-        }
-
-        private Relates(TypeVariable roleType, @Nullable TypeVariable overriddenRoleType) {
+        public Relates(TypeQLVariable.Concept roleType, @Nullable TypeQLVariable.Concept overriddenRoleType) {
             if (roleType == null) throw new NullPointerException("Null role");
             this.roleType = roleType;
             this.overriddenRoleType = overriddenRoleType;
         }
 
-        private static TypeVariable scopedType(String roleType) {
-            return hidden().type(RELATION.toString(), roleType);
+        private static TypeQLVariable.Concept scopedType(String roleType) {
+            return TypeQLVariable.Concept.labelVar(roleType, RELATION.toString());
         }
 
         public void setScope(String relationLabel) {
-            if (roleType.label().isPresent()) {
-                this.roleType = hidden().type(relationLabel, roleType.label().get().label());
+            if (roleType.isLabelled() && roleType.reference().asLabel().scope().isPresent()) {
+                this.roleType = TypeQLVariable.Concept.labelVar(roleType.reference().asLabel().scope().get(), relationLabel);
             }
-            if (overriddenRoleType != null && overriddenRoleType.label().isPresent()) {
-                this.overriddenRoleType = hidden().type(relationLabel, overriddenRoleType.label().get().label());
+            if (overriddenRoleType != null && overriddenRoleType.isLabelled() && overriddenRoleType.reference().asLabel().scope().isPresent()) {
+                this.overriddenRoleType = TypeQLVariable.Concept.labelVar(overriddenRoleType.reference().asLabel().scope().get(), relationLabel);
             }
         }
 
-        public TypeVariable role() {
+        public TypeQLVariable.Concept role() {
             return roleType;
         }
 
-        public Optional<TypeVariable> overridden() {
+        public Optional<TypeQLVariable.Concept> overridden() {
             return Optional.ofNullable(overriddenRoleType);
         }
 
         @Override
-        public Set<TypeVariable> variables() {
-            return overriddenRoleType == null ? set(roleType) : set(roleType, overriddenRoleType);
+        public Set<TypeQLVariable.Concept> variables() {
+            return overriddenRoleType == null ? singleton(roleType) : set(roleType, overriddenRoleType);
         }
 
         @Override
@@ -698,12 +686,12 @@ public abstract class TypeConstraint extends Constraint<TypeVariable> {
         public String toString() {
             StringBuilder syntax = new StringBuilder();
             syntax.append(RELATES).append(SPACE);
-            if (!roleType.label().isPresent()) syntax.append(roleType);
-            else syntax.append(roleType.label().get().label());
+            if (!roleType.isLabelled()) syntax.append(roleType);
+            else syntax.append(roleType.reference().asLabel().label());
             if (overriddenRoleType != null) {
                 syntax.append(SPACE).append(AS).append(SPACE);
-                if (!overriddenRoleType.label().isPresent()) syntax.append(overriddenRoleType);
-                else syntax.append(overriddenRoleType.label().get().label());
+                if (!overriddenRoleType.isLabelled()) syntax.append(overriddenRoleType);
+                else syntax.append(overriddenRoleType.reference().asLabel().label());
             }
             return syntax.toString();
         }

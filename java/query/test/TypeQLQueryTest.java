@@ -99,7 +99,7 @@ public class TypeQLQueryTest {
 
     @Test
     public void testQueryWithRuleThenToString() {
-        TypeQLDefine query = TypeQL.define(rule("a-rule").when(and(TypeQL.parsePatterns("$x isa movie;"))).then(TypeQL.parseVariable("$x has name 'Ghostbusters'").asThing()));
+        TypeQLDefine query = TypeQL.define(rule("a-rule").when(and(TypeQL.parsePatterns("$x isa movie;"))).then(TypeQL.parseStatement("$x has name 'Ghostbusters'").asThing()));
         assertValidToString(query);
     }
 

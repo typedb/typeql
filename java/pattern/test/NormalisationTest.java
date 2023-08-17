@@ -56,11 +56,11 @@ public class NormalisationTest {
         assertTrue(disjunction.size() == 2);
         Conjunction<? extends Pattern> partA = TypeQL.parsePattern("{ $com isa company; $com has name $n1; $n1 \"the-company\"; }").asConjunction();
         Conjunction<? extends Pattern> partB = TypeQL.parsePattern("{ $com isa company; $com has name $n2; $n2 \"another-company\";}").asConjunction();
-        disjunction.get(0).variables().forEach(var -> {
-            assertEquals(partA.variables().filter(variable -> variable.equals(var)).count(), 1);
+        disjunction.get(0).statements().forEach(var -> {
+            assertEquals(partA.statements().filter(stmt -> stmt.equals(var)).count(), 1);
         });
-        disjunction.get(1).variables().forEach(var -> {
-            assertEquals(partB.variables().filter(variable -> variable.equals(var)).count(), 1);
+        disjunction.get(1).statements().forEach(var -> {
+            assertEquals(partB.statements().filter(stmt -> stmt.equals(var)).count(), 1);
         });
     }
 
