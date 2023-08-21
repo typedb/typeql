@@ -52,6 +52,7 @@ import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.cVar;
 import static com.vaticle.typeql.lang.TypeQL.define;
+import static com.vaticle.typeql.lang.TypeQL.fetchLabel;
 import static com.vaticle.typeql.lang.TypeQL.gte;
 import static com.vaticle.typeql.lang.TypeQL.insert;
 import static com.vaticle.typeql.lang.TypeQL.lt;
@@ -831,14 +832,28 @@ public class ParserTest {
                 "   count;\n" +
                 "};";
 
-//        TypeQLFetch expected = match(
-//                cVar("x").isa("movie").has("title", "Godfather").has("release-date", cVar("d"))
-//        ).fetch(
-//                cVar("d"),
-//                cVar("d").as("date"),
-//                cVar("x").attributes("name")
-//        );
+        TypeQLFetch expected = match(
+                cVar("x").isa("movie").has("title", "Godfather").has("release-date", cVar("d"))
+        ).fetch(
+                cVar("d"),
+                cVar("d").asLabel("date"),
+                cVar("x").projectAttr("name").projectAttr("title", "t").projectAttr("name", "Movie name"),
+                cVar("x").asLabel("movie").projectAttr("name"),
+                fetchLabel("label-a").subquery(
+                        match(
+                                rel(cVar("d"), cVar("c")).isa("director")
+                        ).fetch(
+                                cVar("d").projectAttr("name")
+                        )
+                ),
+                fetchLabel("label-b").subquery(
+                        match(
+                                rel(cVar("d"), cVar("c")).isa("director")
+                        ).get(cVar("d")).count()
+                )
+        );
 
+        assertQueryEquals(expected, TypeQL.parseQuery(query), query);
     }
 
     @Test

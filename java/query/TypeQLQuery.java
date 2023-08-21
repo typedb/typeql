@@ -272,6 +272,14 @@ public interface TypeQLQuery {
             return new TypeQLGet.Unmodified(this, vars);
         }
 
+        public TypeQLFetch.Unmodified fetch(TypeQLFetch.Projection... projections) {
+            return new TypeQLFetch.Unmodified(this, list(projections));
+        }
+
+        public TypeQLFetch.Unmodified fetch(List<TypeQLFetch.Projection> projections) {
+            return new TypeQLFetch.Unmodified(this, projections);
+        }
+
         public TypeQLInsert.Unmodified insert(ThingStatement<?>... things) {
             return insert(list(things));
         }

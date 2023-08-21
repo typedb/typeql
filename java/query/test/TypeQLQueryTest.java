@@ -172,6 +172,23 @@ public class TypeQLQueryTest {
         assertEquals(query, TypeQL.parseQuery(query).toString());
     }
 
+    @Test
+    public void testFetch() {
+        String query = "match\n" +
+                "$x isa person,\n" +
+                "    has id $id;\n" +
+                "fetch\n" +
+                "$id;\n" +
+                "$x: name, age, email;\n" +
+                "children: {\n" +
+                "    match\n" +
+                "    ($c, $x) isa parenthood;\n" +
+                "    fetch\n" +
+                "    $c: name;\n" +
+                "};";
+        assertEquivalent(TypeQL.parseQuery(query), query);
+    }
+
     private void assertSameStringRepresentation(TypeQLGet query) {
         assertEquals(query.toString(), TypeQL.parseQuery(query.toString()).toString());
     }

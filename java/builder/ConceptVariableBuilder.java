@@ -21,6 +21,7 @@
 
 package com.vaticle.typeql.lang.builder;
 
+import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.Reference;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
@@ -34,8 +35,13 @@ import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
 import com.vaticle.typeql.lang.pattern.statement.builder.ConceptStatementBuilder;
 import com.vaticle.typeql.lang.pattern.statement.builder.ThingStatementBuilder;
 import com.vaticle.typeql.lang.pattern.statement.builder.TypeStatementBuilder;
+import com.vaticle.typeql.lang.query.TypeQLFetch;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.vaticle.typedb.common.collection.Collections.list;
 
 public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
         ConceptStatementBuilder,
@@ -44,7 +50,8 @@ public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
         ThingStatementBuilder.Thing,
         ThingStatementBuilder.Relation,
         ThingStatementBuilder.Attribute,
-        Expression {
+        Expression,
+        TypeQLFetch.Key.Variable {
 
     private ConceptVariableBuilder(Reference reference) {
         super(reference);
@@ -100,7 +107,8 @@ public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
     @Override
     public TypeStatement constrain(TypeConstraint.Label constraint) {
         TypeQLVariable.Concept variable;
-        if (reference.isAnonymous()) variable = TypeQLVariable.Concept.labelVar(constraint.label(), constraint.scope().orElse(null));
+        if (reference.isAnonymous())
+            variable = TypeQLVariable.Concept.labelVar(constraint.label(), constraint.scope().orElse(null));
         else variable = this;
         return TypeStatement.of(variable).constrain(constraint);
     }
@@ -177,5 +185,25 @@ public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
 
     public ThingStatement.Relation constrain(ThingConstraint.Relation constraint) {
         return ThingStatement.Relation.of(this, constraint);
+    }
+
+    @Override
+    public VariableAsLabel asLabel(String label) {
+        return new VariableAsLabel(this, TypeQLFetch.Key.Label.of(label));
+    }
+
+    @Override
+    public TypeQLFetch.Key key() {
+        return this;
+    }
+
+    @Override
+    public Attribute projectAttr(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
+        return new Attribute(this, list(attribute));
+    }
+
+    @Override
+    public Attribute projectAttrs(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
+        return new Attribute(this, attributes.collect(Collectors.toList()));
     }
 }

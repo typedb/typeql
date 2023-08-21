@@ -38,6 +38,7 @@ import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
+import com.vaticle.typeql.lang.query.TypeQLFetch;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
@@ -139,8 +140,6 @@ public class TypeQL {
         return new TypeQLUndefine(definables);
     }
 
-    // Pattern Builder Methods
-
     public static Conjunction<? extends Pattern> and(Pattern... patterns) {
         return and(list(patterns));
     }
@@ -165,6 +164,10 @@ public class TypeQL {
 
     public static Rule rule(String label) {
         return new Rule(label);
+    }
+
+    public static TypeQLFetch.Key.Label fetchLabel(String label) {
+        return TypeQLFetch.Key.Label.of(label);
     }
 
     public static ConceptVariableBuilder cVar() {

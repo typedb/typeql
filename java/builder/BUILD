@@ -34,6 +34,10 @@ java_library(
     deps = [
         "//java/common",
         "//java/pattern",
+        "//java/query",
+
+        # Internal Repository Dependencies
+        "@vaticle_typedb_common//:common",
     ],
     tags = ["maven_coordinates=com.vaticle.typeql:typeql-builder:{pom_version}"],
 )

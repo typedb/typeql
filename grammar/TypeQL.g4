@@ -37,7 +37,6 @@ query                 :   query_define           |   query_undefine
                       |   query_get_aggregate    |   query_get_group
                       |   query_get_group_agg    |   query_fetch          ;
 
-
 query_define          :   clause_define   ;
 query_undefine        :   clause_undefine ;
 
@@ -64,7 +63,6 @@ clause_fetch          :   FETCH       projections         ;
 clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?  ';' ;   // method and, optionally, a variable
 aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                 // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
-
 
 // QUERY MODIFIERS =======================================================
 
@@ -247,7 +245,7 @@ unreserved            : VALUE | EXPR_FUNC_NAME
 MATCH           : 'match'       ;   GET             : 'get'         ;
 DEFINE          : 'define'      ;   UNDEFINE        : 'undefine'    ;
 INSERT          : 'insert'      ;   DELETE          : 'delete'      ;
-COMPUTE         : 'compute'     ;   FETCH           : 'fetch'       ;
+FETCH           : 'fetch'       ;   COMPUTE         : 'compute'     ;
 
 // NATIVE TYPE KEYWORDS
 
@@ -324,7 +322,6 @@ TRUE            : 'true'        ;
 FALSE           : 'false'       ;
 QUOTED_STRING   : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
                 | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''    ;
-//WORD            :  ( ~[ \n\t\r] )+                      ;
 LONG_           : [0-9]+                                ;
 DOUBLE_         : [0-9]+ '.' [0-9]+                     ;
 DATE_           : DATE_FRAGMENT_                        ;

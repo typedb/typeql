@@ -21,19 +21,26 @@
 
 package com.vaticle.typeql.lang.builder;
 
+import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.Reference;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
 import com.vaticle.typeql.lang.pattern.expression.Expression;
-import com.vaticle.typeql.lang.pattern.statement.builder.ValueStatementBuilder;
 import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
+import com.vaticle.typeql.lang.pattern.statement.builder.ValueStatementBuilder;
+import com.vaticle.typeql.lang.query.TypeQLFetch;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.vaticle.typedb.common.collection.Collections.list;
 
 public class ValueVariableBuilder extends TypeQLVariable.Value implements
         ValueStatementBuilder,
-        Expression {
+        Expression,
+        TypeQLFetch.Key.Variable {
 
     ValueVariableBuilder(Reference.Name.Value reference) {
         super(reference);
@@ -71,5 +78,25 @@ public class ValueVariableBuilder extends TypeQLVariable.Value implements
 
     public void collectVariables(Set<TypeQLVariable> collector) {
         collector.add(this);
+    }
+
+    @Override
+    public TypeQLFetch.Key key() {
+        return this;
+    }
+
+    @Override
+    public VariableAsLabel asLabel(String label) {
+        return new VariableAsLabel(this, Label.of(label));
+    }
+
+    @Override
+    public Attribute projectAttr(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
+        return new Attribute(this, list(attribute));
+    }
+
+    @Override
+    public Attribute projectAttrs(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
+        return new Attribute(this, attributes.collect(Collectors.toList()));
     }
 }

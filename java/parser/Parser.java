@@ -275,6 +275,8 @@ public class Parser extends TypeQLBaseVisitor {
             return visitQuery_get_group(ctx.query_get_group());
         } else if (ctx.query_get_group_agg() != null) {
             return visitQuery_get_group_agg(ctx.query_get_group_agg());
+        } else if (ctx.query_fetch() != null) {
+            return visitQuery_fetch(ctx.query_fetch());
         } else {
             throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
         }
@@ -425,13 +427,13 @@ public class Parser extends TypeQLBaseVisitor {
     public TypeQLFetch visitQuery_fetch(TypeQLParser.Query_fetchContext ctx) {
         MatchClause matchClause = visitClause_match(ctx.clause_match());
         Modifiers modifiers = visitModifiers(ctx.modifiers());
-        List<TypeQLFetch.Projection<?>> projections = visitClause_fetch(ctx.clause_fetch());
+        List<TypeQLFetch.Projection> projections = visitClause_fetch(ctx.clause_fetch());
         return new TypeQLFetch(matchClause, projections, modifiers);
     }
 
     @Override
-    public List<TypeQLFetch.Projection<?>> visitClause_fetch(TypeQLParser.Clause_fetchContext ctx) {
-        List<TypeQLFetch.Projection<?>> projections = new ArrayList<>();
+    public List<TypeQLFetch.Projection> visitClause_fetch(TypeQLParser.Clause_fetchContext ctx) {
+        List<TypeQLFetch.Projection> projections = new ArrayList<>();
         ctx.projections().projection().forEach(projection -> {
             projections.add(visitProjection(projection));
         });
@@ -916,13 +918,13 @@ public class Parser extends TypeQLBaseVisitor {
 
     // PROJECTIONS =============================================================
 
-    public TypeQLFetch.Projection<?> visitProjection(TypeQLParser.ProjectionContext ctx) {
+    public TypeQLFetch.Projection visitProjection(TypeQLParser.ProjectionContext ctx) {
         if (ctx.projection_key_var() != null) {
-            TypeQLFetch.Projection.Key.Variable key = visitProjection_key_var(ctx.projection_key_var());
+            TypeQLFetch.Key.Variable key = visitProjection_key_var(ctx.projection_key_var());
             if (ctx.projection_attributes() == null) {
-                return new TypeQLFetch.Projection.Variable(key);
+                return key;
             } else {
-                return new TypeQLFetch.Projection.Variable(key).projectAttrs(visitProjection_attributes(ctx.projection_attributes()));
+                return key.projectAttrs(visitProjection_attributes(ctx.projection_attributes()).stream());
             }
         } else if (ctx.projection_key_label() != null && ctx.projection_subquery() != null) {
             return new TypeQLFetch.Projection.Subquery(
@@ -933,39 +935,38 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public TypeQLFetch.Projection.Key.Variable visitProjection_key_var(TypeQLParser.Projection_key_varContext ctx) {
-        TypeQLVariable variable;
-        if (ctx.VAR_CONCEPT_() != null) variable = getVarConcept(ctx.VAR_CONCEPT_());
-        else if (ctx.VAR_VALUE_() != null) variable = getVarValue(ctx.VAR_VALUE_());
+    public TypeQLFetch.Key visitProjection_key_var(TypeQLParser.Projection_key_varContext ctx) {
+        TypeQLFetch.Key.Variable key;
+        if (ctx.VAR_CONCEPT_() != null) key = getVarConcept(ctx.VAR_CONCEPT_());
+        else if (ctx.VAR_VALUE_() != null) key = getVarValue(ctx.VAR_VALUE_());
         else throw TypeQLException.of(ILLEGAL_GRAMMAR);
 
-        TypeQLFetch.Projection.Key.Label label;
         if (ctx.projection_key_as_label() != null) {
-            label = visitProjection_key_label(ctx.projection_key_as_label().projection_key_label());
-        } else label = null;
-        return new TypeQLFetch.Projection.Key.Variable(variable, label);
+            return key.asLabel(visitProjection_key_label(ctx.projection_key_as_label().projection_key_label()));
+        } else return key;
+        return new TypeQLFetch.Key.Variable(variable, label);
     }
 
     @Override
-    public TypeQLFetch.Projection.Key.Label visitProjection_key_label(TypeQLParser.Projection_key_labelContext ctx) {
+    public TypeQLFetch.Key.Label visitProjection_key_label(TypeQLParser.Projection_key_labelContext ctx) {
         if (ctx.QUOTED_STRING() != null) {
-            return TypeQLFetch.Projection.Key.Label.quoted(ctx.QUOTED_STRING().getText());
+            return TypeQLFetch.Key.Label.quoted(ctx.QUOTED_STRING().getText());
         } else if (ctx.label() != null) {
-            return TypeQLFetch.Projection.Key.Label.unquoted(ctx.label().getText());
+            return TypeQLFetch.Key.Label.unquoted(ctx.label().getText());
         } else throw TypeQLException.of(ILLEGAL_GRAMMAR);
     }
 
     @Override
-    public List<Pair<Reference.Label, TypeQLFetch.Projection.Key.Label>> visitProjection_attributes(
+    public List<Pair<Reference.Label, TypeQLFetch.Key.Label>> visitProjection_attributes(
             TypeQLParser.Projection_attributesContext ctx
     ) {
-        List<Pair<Reference.Label, TypeQLFetch.Projection.Key.Label>> attributes = new ArrayList<>();
+        List<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes = new ArrayList<>();
         ctx.projection_attribute().forEach(attribute -> attributes.add(visitProjection_attribute(attribute)));
         return attributes;
     }
 
     @Override
-    public Pair<Reference.Label, TypeQLFetch.Projection.Key.Label> visitProjection_attribute(
+    public Pair<Reference.Label, TypeQLFetch.Key.Label> visitProjection_attribute(
             TypeQLParser.Projection_attributeContext ctx
     ) {
         Reference.Label attributeLabel = Reference.Label.label(ctx.label().getText());
