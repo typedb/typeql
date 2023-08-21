@@ -125,7 +125,7 @@ public abstract class Reference {
 
     public static abstract class Name extends Reference {
 
-        private static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
+        public static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         final String name;
         private final int hash;
 

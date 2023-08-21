@@ -28,6 +28,7 @@ import com.vaticle.typeql.grammar.TypeQLLexer;
 import com.vaticle.typeql.grammar.TypeQLParser;
 import com.vaticle.typeql.lang.builder.ConceptVariableBuilder;
 import com.vaticle.typeql.lang.builder.ValueVariableBuilder;
+import com.vaticle.typeql.lang.common.Reference;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
@@ -41,15 +42,14 @@ import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
+import com.vaticle.typeql.lang.pattern.expression.Expression;
+import com.vaticle.typeql.lang.pattern.expression.Expression.Operation;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
 import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;
-import com.vaticle.typeql.lang.common.Reference;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
 import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
 import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
-import com.vaticle.typeql.lang.pattern.expression.Expression;
-import com.vaticle.typeql.lang.pattern.expression.Expression.Operation;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
 import com.vaticle.typeql.lang.query.TypeQLFetch;
@@ -425,13 +425,13 @@ public class Parser extends TypeQLBaseVisitor {
     public TypeQLFetch visitQuery_fetch(TypeQLParser.Query_fetchContext ctx) {
         MatchClause matchClause = visitClause_match(ctx.clause_match());
         Modifiers modifiers = visitModifiers(ctx.modifiers());
-        List<TypeQLFetch.Projection> projections = visitClause_fetch(ctx.clause_fetch());
+        List<TypeQLFetch.Projection<?>> projections = visitClause_fetch(ctx.clause_fetch());
         return new TypeQLFetch(matchClause, projections, modifiers);
     }
 
     @Override
-    public List<TypeQLFetch.Projection> visitClause_fetch(TypeQLParser.Clause_fetchContext ctx) {
-        List<TypeQLFetch.Projection> projections = new ArrayList<>();
+    public List<TypeQLFetch.Projection<?>> visitClause_fetch(TypeQLParser.Clause_fetchContext ctx) {
+        List<TypeQLFetch.Projection<?>> projections = new ArrayList<>();
         ctx.projections().projection().forEach(projection -> {
             projections.add(visitProjection(projection));
         });
@@ -916,13 +916,13 @@ public class Parser extends TypeQLBaseVisitor {
 
     // PROJECTIONS =============================================================
 
-    public TypeQLFetch.Projection visitProjection(TypeQLParser.ProjectionContext ctx) {
+    public TypeQLFetch.Projection<?> visitProjection(TypeQLParser.ProjectionContext ctx) {
         if (ctx.projection_key_var() != null) {
             TypeQLFetch.Projection.Key.Variable key = visitProjection_key_var(ctx.projection_key_var());
             if (ctx.projection_attributes() == null) {
                 return new TypeQLFetch.Projection.Variable(key);
             } else {
-                return new TypeQLFetch.Projection.Attribute(key, visitProjection_attributes(ctx.projection_attributes()));
+                return new TypeQLFetch.Projection.Variable(key).projectAttrs(visitProjection_attributes(ctx.projection_attributes()));
             }
         } else if (ctx.projection_key_label() != null && ctx.projection_subquery() != null) {
             return new TypeQLFetch.Projection.Subquery(
@@ -949,9 +949,9 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public TypeQLFetch.Projection.Key.Label visitProjection_key_label(TypeQLParser.Projection_key_labelContext ctx) {
         if (ctx.QUOTED_STRING() != null) {
-            return new TypeQLFetch.Projection.Key.Label(Either.first(ctx.QUOTED_STRING().getText()));
-        } else if (ctx.LABEL_() != null) {
-            return new TypeQLFetch.Projection.Key.Label(Either.second(ctx.LABEL_().getText()));
+            return TypeQLFetch.Projection.Key.Label.quoted(ctx.QUOTED_STRING().getText());
+        } else if (ctx.label() != null) {
+            return TypeQLFetch.Projection.Key.Label.unquoted(ctx.label().getText());
         } else throw TypeQLException.of(ILLEGAL_GRAMMAR);
     }
 
@@ -960,9 +960,7 @@ public class Parser extends TypeQLBaseVisitor {
             TypeQLParser.Projection_attributesContext ctx
     ) {
         List<Pair<Reference.Label, TypeQLFetch.Projection.Key.Label>> attributes = new ArrayList<>();
-        ctx.projection_attribute().forEach(attribute -> {
-            attributes.add(visitProjection_attribute(attribute));
-        });
+        ctx.projection_attribute().forEach(attribute -> attributes.add(visitProjection_attribute(attribute)));
         return attributes;
     }
 

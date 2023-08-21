@@ -89,7 +89,7 @@ projection_subquery      : ( query_fetch | query_get_aggregate )  ;
 
 projection_key_var       : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( projection_key_as_label )? ;
 projection_key_as_label  :   AS  projection_key_label ;
-projection_key_label     :   QUOTED_STRING | LABEL_  ;
+projection_key_label     :   QUOTED_STRING | label  ;
 
 // SCHEMA QUERY ================================================================
 
@@ -214,6 +214,7 @@ type                  :   label                         | VAR_CONCEPT_          
 label_any             :   label_scoped  | label         ;
 label_scoped          :   LABEL_SCOPED_ ;
 label                 :   LABEL_        | type_native   | unreserved    ;
+
 
 // LITERAL INPUT VALUES ========================================================
 
