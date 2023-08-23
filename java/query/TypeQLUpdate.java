@@ -132,7 +132,7 @@ public class TypeQLUpdate extends TypeQLWritable {
         }
 
         @Override
-        public TypeQLUpdate modifier(Modifiers modifier) {
+        public TypeQLUpdate modifiers(Modifiers modifier) {
             return new TypeQLUpdate(match, deleteStatements(), insertStatements(), modifier);
         }
 

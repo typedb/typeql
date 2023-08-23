@@ -59,7 +59,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONS
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
-public abstract class ThingConstraint extends Constraint<TypeQLVariable> {
+public abstract class ThingConstraint extends Constraint {
 
     @Override
     public Set<? extends TypeQLVariable> variables() {
@@ -360,7 +360,7 @@ public abstract class ThingConstraint extends Constraint<TypeQLVariable> {
             }
 
             private void setScope(String relationLabel) {
-                if (roleType != null && roleType.isLabelled() && roleType.reference().asLabel().scope().isPresent()) {
+                if (roleType != null && roleType.isLabelled()) {
                     this.roleType = TypeQLVariable.Concept.labelVar(roleType.reference().asLabel().label(), relationLabel);
                 }
             }
@@ -405,13 +405,17 @@ public abstract class ThingConstraint extends Constraint<TypeQLVariable> {
         private final Either<TypeQLVariable, ThingStatement.Attribute> attribute;
         private final int hash;
 
-        // TODO: this is missing the capability to set a type on a value variable
         public Has(String type, Predicate predicate) {
-            this(type, Either.second(ThingStatement.Attribute.of(TypeQLVariable.Concept.hiddenVar(), predicate).constrain(new Isa(TypeQLVariable.Concept.labelVar(type), false, true))));
+            this(type, Either.second(
+                    ThingStatement.Attribute.of(TypeQLVariable.Concept.hiddenVar(), predicate)
+                            .constrain(new Isa(TypeQLVariable.Concept.labelVar(type), false, true))
+            ));
         }
 
         public Has(String type, TypeQLVariable.Concept var) {
-            this(type, Either.second(ThingStatement.Attribute.of(var).constrain(new Isa(TypeQLVariable.Concept.labelVar(type), false, true))));
+            this(type, Either.second(ThingStatement.Attribute.of(var)
+                    .constrain(new Isa(TypeQLVariable.Concept.labelVar(type), false, true))
+            ));
         }
 
         public Has(String type, TypeQLVariable.Value var) {
@@ -494,10 +498,7 @@ public abstract class ThingConstraint extends Constraint<TypeQLVariable> {
 
         public Predicate(com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate) {
             this.predicate = predicate;
-            this.variables = predicate.variables().stream().map(v -> {
-                if (v.isValue()) return v.asValue().cloneTypeQLVar();
-                else return v.asConcept().cloneTypeQLVar();
-            }).collect(Collectors.toSet());
+            this.variables = predicate.variables().stream().map(TypeQLVariable::cloneVar).collect(Collectors.toSet());
             this.hash = Objects.hash(Predicate.class, predicate);
         }
 

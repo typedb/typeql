@@ -52,8 +52,6 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -162,7 +160,7 @@ public interface TypeQLQuery {
     interface Unmodified<Q, S extends Sorted<O, L>, O extends Offset<L>, L extends Limited>
             extends TypeQLQuery {
 
-        Q modifier(Modifiers modifier);
+        Q modifiers(Modifiers modifier);
 
         default S sort(TypeQLVariable var, TypeQLVariable... vars) {
             List<Pair<TypeQLVariable, TypeQLArg.Order>> pairs = new ArrayList<>();
@@ -230,27 +228,13 @@ public interface TypeQLQuery {
         public MatchClause(Conjunction<? extends Pattern> conjunction) {
             this.conjunction = conjunction;
 
-            // TODO: these can be minimised
-            hasBoundingConjunction();
-            nestedPatternsAreBounded();
-            queryHasNamedVariable();
             eachPatternVariableHasNamedVariable(conjunction.patterns());
-        }
-
-        private void hasBoundingConjunction() {
-            if (!conjunction.namedVariables().findAny().isPresent()) {
-                throw TypeQLException.of(MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE);
-            }
+            nestedPatternsAreBounded();
         }
 
         private void nestedPatternsAreBounded() {
-            conjunction.patterns().stream().filter(pattern -> !pattern.isStatement()).forEach(pattern -> {
-                pattern.validateIsBoundedBy(conjunction.namedVariables().collect(toSet()));
-            });
-        }
-
-        private void queryHasNamedVariable() {
-            if (namedVariables().isEmpty()) throw TypeQLException.of(MATCH_HAS_NO_NAMED_VARIABLE);
+            conjunction.patterns().stream().filter(pattern -> !pattern.isStatement())
+                    .forEach(pattern -> pattern.validateIsBoundedBy(namedVariables()));
         }
 
         private void eachPatternVariableHasNamedVariable(List<? extends Pattern> patterns) {

@@ -96,10 +96,7 @@ public abstract class TypeQLVariable {
         return reference.isVisible();
     }
 
-    public final TypeQLVariable cloneTypeQLVar() {
-        if (isConcept()) return new Concept(reference());
-        else return new Value(reference().asName().asValue());
-    }
+    public abstract TypeQLVariable cloneVar();
 
     @Override
     public String toString() {
@@ -163,6 +160,11 @@ public abstract class TypeQLVariable {
         public Concept asConcept() {
             return this;
         }
+
+        @Override
+        public final TypeQLVariable.Concept cloneVar() {
+            return new Concept(reference);
+        }
     }
 
     public static class Value extends TypeQLVariable {
@@ -174,6 +176,7 @@ public abstract class TypeQLVariable {
         public static Value nameVar(String name) {
             return new Value(Reference.Name.value(name));
         }
+
         @Override
         public boolean isValue() {
             return true;
@@ -185,13 +188,8 @@ public abstract class TypeQLVariable {
         }
 
         @Override
-        public String toString(boolean pretty) {
-            return reference.syntax();
-        }
-
-        @Override
-        public int hashCode() {
-            return reference.hashCode();
+        public final TypeQLVariable.Value cloneVar() {
+            return new Value(reference.asName().asValue());
         }
     }
 }

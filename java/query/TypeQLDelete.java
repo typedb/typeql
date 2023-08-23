@@ -69,7 +69,7 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
         }
 
         @Override
-        public TypeQLDelete modifier(Modifiers modifier) {
+        public TypeQLDelete modifiers(Modifiers modifier) {
             return new TypeQLDelete(match, statements, modifier);
         }
 

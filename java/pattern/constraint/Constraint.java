@@ -29,9 +29,9 @@ import java.util.Set;
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-public abstract class Constraint<VARIABLE extends TypeQLVariable> {
+public abstract class Constraint {
 
-    public abstract Set<? extends VARIABLE> variables();
+    public abstract Set<? extends TypeQLVariable> variables();
 
     public boolean isConcept() {
         return false;

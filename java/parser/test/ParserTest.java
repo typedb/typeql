@@ -811,25 +811,25 @@ public class ParserTest {
     public void testFetchQuery() {
         String query = "match\n" +
                 "$x isa movie,\n" +
-                "   has title \"Godfather\",\n" +
-                "   has release-date $d;\n" +
+                "    has title \"Godfather\",\n" +
+                "    has release-date $d;\n" +
                 "fetch\n" +
                 "$d;\n" +
                 "$d as date;\n" +
                 "$x: name, title as t, name as \"Movie name\";\n" +
                 "$x as movie: name;\n" +
-                "$x has \"Movie\": name;\n" +
+                "$x as \"Movie name\": name;\n" +
                 "label-a: {\n" +
-                "   match\n" +
-                "   ($d, $c) isa director;\n" +
-                "   fetch\n" +
-                "   $d: name;\n" +
+                "    match\n" +
+                "    ($d, $c) isa director;\n" +
+                "    fetch\n" +
+                "    $d: name;\n" +
                 "};\n" +
                 "label-b: {\n" +
-                "   match\n" +
-                "   ($d, $c) isa director;\n" +
-                "   get $d;\n" +
-                "   count;\n" +
+                "    match\n" +
+                "    ($d, $c) isa director;\n" +
+                "    get $d;\n" +
+                "    count;\n" +
                 "};";
 
         TypeQLFetch expected = match(
@@ -839,16 +839,17 @@ public class ParserTest {
                 cVar("d").asLabel("date"),
                 cVar("x").projectAttr("name").projectAttr("title", "t").projectAttr("name", "Movie name"),
                 cVar("x").asLabel("movie").projectAttr("name"),
+                cVar("x").asLabel("Movie name").projectAttr("name"),
                 fetchLabel("label-a").subquery(
                         match(
-                                rel(cVar("d"), cVar("c")).isa("director")
+                                rel(cVar("d")).rel(cVar("c")).isa("director")
                         ).fetch(
                                 cVar("d").projectAttr("name")
                         )
                 ),
                 fetchLabel("label-b").subquery(
                         match(
-                                rel(cVar("d"), cVar("c")).isa("director")
+                                rel(cVar("d")).rel(cVar("c")).isa("director")
                         ).get(cVar("d")).count()
                 )
         );

@@ -62,7 +62,7 @@ public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {
         }
 
         @Override
-        public TypeQLInsert modifier(Modifiers modifier) {
+        public TypeQLInsert modifiers(Modifiers modifier) {
             return new TypeQLInsert(match, statements, modifier);
         }
 

@@ -48,7 +48,7 @@ public abstract class Statement implements Conjunctable {
         return Stream.concat(Stream.of(headVariable()), constraintVariables());
     }
 
-    public abstract List<? extends Constraint<?>> constraints();
+    public abstract List<? extends Constraint> constraints();
 
     @Override
     public void validateIsBoundedBy(Set<TypeQLVariable> bounds) {

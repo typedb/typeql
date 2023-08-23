@@ -39,11 +39,11 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.QUOTE_DOUBLE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.FETCH;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Projection.AS;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
+import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
 import static java.util.stream.Collectors.toList;
@@ -109,7 +109,7 @@ public class TypeQLFetch implements TypeQLQuery {
         }
 
         @Override
-        public TypeQLFetch modifier(Modifiers modifier) {
+        public TypeQLFetch modifiers(Modifiers modifier) {
             return new TypeQLFetch(match, projections, modifier);
         }
 
@@ -169,52 +169,68 @@ public class TypeQLFetch implements TypeQLQuery {
 
         String toString(boolean pretty);
 
-        interface Variable extends Key, Projection, ProjectionBuilder.Attribute {
+        interface Var extends Key, Projection, ProjectionBuilder.Attribute {
 
-            VariableAsLabel asLabel(String label);
-        }
-
-        class VariableAsLabel implements Key, Projection, ProjectionBuilder.Attribute {
-
-            private final TypeQLVariable variable;
-            private final Key.Label label;
-
-            public VariableAsLabel(TypeQLVariable variable, Key.Label label) {
-                this.variable = variable;
-                this.label = label;
-            }
-
-            @Override
-            public VariableAsLabel key() {
+            default Var key() {
                 return this;
             }
 
-            @Override
-            public Attribute projectAttr(Pair<Reference.Label, Key.Label> attribute) {
-                return new Attribute(this, list(attribute));
+            interface UnlabelledVar extends Var {
+                default LabelledVar asLabel(String label) {
+                    return asLabel(Label.of(label));
+                }
+
+                LabelledVar asLabel(Label label);
+
             }
 
-            @Override
-            public Attribute projectAttrs(Stream<Pair<Reference.Label, Key.Label>> attributes) {
-                return new Attribute(this, attributes.collect(toList()));
-            }
+            class LabelledVar implements Var {
 
-            @Override
-            public String toString(boolean pretty) {
-                return variable.toString(pretty) + SPACE + AS + SPACE + label.toString(pretty);
-            }
+                private final TypeQLVariable variable;
+                private final Label label;
 
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                VariableAsLabel that = (VariableAsLabel) o;
-                return variable.equals(that.variable) && label.equals(that.label);
-            }
+                public LabelledVar(TypeQLVariable variable, Label label) {
+                    this.variable = variable;
+                    this.label = label;
+                }
 
-            @Override
-            public int hashCode() {
-                return Objects.hash(variable, label);
+                @Override
+                public LabelledVar key() {
+                    return this;
+                }
+
+                @Override
+                public Attribute projectAttr(Pair<Reference.Label, Label> attribute) {
+                    return new Attribute(this, list(attribute));
+                }
+
+                @Override
+                public Attribute projectAttrs(Stream<Pair<Reference.Label, Label>> attributes) {
+                    return new Attribute(this, attributes.collect(toList()));
+                }
+
+                @Override
+                public String toString() {
+                    return toString(true);
+                }
+
+                @Override
+                public String toString(boolean pretty) {
+                    return variable.toString(pretty) + SPACE + AS + SPACE + label.toString(pretty);
+                }
+
+                @Override
+                public boolean equals(Object o) {
+                    if (this == o) return true;
+                    if (o == null || getClass() != o.getClass()) return false;
+                    LabelledVar that = (LabelledVar) o;
+                    return variable.equals(that.variable) && label.equals(that.label);
+                }
+
+                @Override
+                public int hashCode() {
+                    return Objects.hash(variable, label);
+                }
             }
         }
 
@@ -243,9 +259,13 @@ public class TypeQLFetch implements TypeQLQuery {
             }
 
             @Override
+            public String toString() {
+                return toString(true);
+            }
+
+            @Override
             public String toString(boolean pretty) {
-                // TODO: what about escape behaviour?
-                if (quotedOrUnquoted.isFirst()) return QUOTE_DOUBLE + quotedOrUnquoted.first() + QUOTE_DOUBLE;
+                if (quotedOrUnquoted.isFirst()) return quoteString(quotedOrUnquoted.first());
                 else return quotedOrUnquoted.second();
             }
 
@@ -307,12 +327,12 @@ public class TypeQLFetch implements TypeQLQuery {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Attribute that = (Attribute) o;
-                return attributes.equals(that.attributes);
+                return key.equals(that.key) && attributes.equals(that.attributes);
             }
 
             @Override
             public int hashCode() {
-                return attributes.hashCode();
+                return Objects.hash(key, attributes);
             }
 
             @Override
@@ -344,10 +364,14 @@ public class TypeQLFetch implements TypeQLQuery {
             @Override
             public String toString(boolean pretty) {
                 StringBuilder builder = new StringBuilder();
-                builder.append(key.toString(pretty)).append(COLON).append(SPACE).append(CURLY_OPEN).append(NEW_LINE);
+                builder.append(key.toString(pretty)).append(COLON).append(SPACE).append(CURLY_OPEN);
+                if (pretty) builder.append(NEW_LINE);
+                else builder.append(SPACE);
                 if (subquery.isFirst()) builder.append(indent(subquery.first().toString(pretty)));
                 else builder.append(indent(subquery.second().toString(pretty)));
-                return builder.append(NEW_LINE).append(CURLY_CLOSE).toString();
+                if (pretty) builder.append(NEW_LINE);
+                else builder.append(SPACE);
+                return builder.append(CURLY_CLOSE).toString();
             }
 
             @Override
@@ -355,37 +379,13 @@ public class TypeQLFetch implements TypeQLQuery {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Subquery that = (Subquery) o;
-                return subquery.equals(that.subquery);
+                return key.equals(that.key) && subquery.equals(that.subquery);
             }
 
             @Override
             public int hashCode() {
-                return subquery.hashCode();
+                return Objects.hash(key, subquery);
             }
         }
     }
-//
-//    public abstract static class Projection2<K extends Key> {
-//
-//        final K key;
-//
-//        Projection2(K key) {
-//            this.key = key;
-//        }
-//
-//        public K key() {
-//            return key;
-//        }
-//
-//        @Override
-//        public String toString() {
-//            return toString(true);
-//        }
-//
-//        abstract String toString(boolean pretty);
-//
-//        public abstract int hashCode();
-//
-//        public abstract boolean equals(Object object);
-//    }
 }

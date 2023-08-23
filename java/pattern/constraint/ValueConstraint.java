@@ -24,7 +24,6 @@ package com.vaticle.typeql.lang.pattern.constraint;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
 import com.vaticle.typeql.lang.pattern.expression.Expression;
 
 import java.util.Objects;
@@ -35,7 +34,7 @@ import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
-public abstract class ValueConstraint extends Constraint<TypeQLVariable> {
+public abstract class ValueConstraint extends Constraint {
 
     @Override
     public boolean isValue() {
@@ -71,7 +70,7 @@ public abstract class ValueConstraint extends Constraint<TypeQLVariable> {
 
         public Predicate(com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate) {
             this.predicate = predicate;
-            this.variables = predicate.variables().stream().map(TypeQLVariable::cloneTypeQLVar).collect(Collectors.toSet());
+            this.variables = predicate.variables().stream().map(TypeQLVariable::cloneVar).collect(Collectors.toSet());
             this.hash = Objects.hash(Predicate.class, this.predicate);
         }
 

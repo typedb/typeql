@@ -36,7 +36,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.IS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static java.util.Collections.singleton;
 
-public abstract class ConceptConstraint extends Constraint<TypeQLVariable.Concept> {
+public abstract class ConceptConstraint extends Constraint {
 
     @Override
     public boolean isConcept() {

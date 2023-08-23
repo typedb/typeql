@@ -320,7 +320,7 @@ public class Parser extends TypeQLBaseVisitor {
     public TypeQLInsert visitQuery_insert(TypeQLParser.Query_insertContext ctx) {
         if (ctx.clause_match() != null) {
             return visitClause_match(ctx.clause_match()).insert(visitClause_insert(ctx.clause_insert()))
-                    .modifier(visitModifiers(ctx.modifiers()));
+                    .modifiers(visitModifiers(ctx.modifiers()));
         } else {
             return new TypeQLInsert(visitClause_insert(ctx.clause_insert()));
         }
@@ -334,13 +334,13 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public TypeQLDelete visitQuery_delete(TypeQLParser.Query_deleteContext ctx) {
         return visitClause_match(ctx.clause_match()).delete(visitClause_delete(ctx.clause_delete()))
-                .modifier(visitModifiers(ctx.modifiers()));
+                .modifiers(visitModifiers(ctx.modifiers()));
     }
 
     @Override
     public TypeQLUpdate visitQuery_update(TypeQLParser.Query_updateContext ctx) {
         return visitClause_match(ctx.clause_match()).delete(visitClause_delete(ctx.clause_delete()))
-                .insert(visitClause_insert(ctx.clause_insert())).modifier(visitModifiers(ctx.modifiers()));
+                .insert(visitClause_insert(ctx.clause_insert())).modifiers(visitModifiers(ctx.modifiers()));
     }
 
     @Override
@@ -920,7 +920,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     public TypeQLFetch.Projection visitProjection(TypeQLParser.ProjectionContext ctx) {
         if (ctx.projection_key_var() != null) {
-            TypeQLFetch.Key.Variable key = visitProjection_key_var(ctx.projection_key_var());
+            TypeQLFetch.Key.Var key = visitProjection_key_var(ctx.projection_key_var());
             if (ctx.projection_attributes() == null) {
                 return key;
             } else {
@@ -935,8 +935,8 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public TypeQLFetch.Key visitProjection_key_var(TypeQLParser.Projection_key_varContext ctx) {
-        TypeQLFetch.Key.Variable key;
+    public TypeQLFetch.Key.Var visitProjection_key_var(TypeQLParser.Projection_key_varContext ctx) {
+        TypeQLFetch.Key.Var.UnlabelledVar key;
         if (ctx.VAR_CONCEPT_() != null) key = getVarConcept(ctx.VAR_CONCEPT_());
         else if (ctx.VAR_VALUE_() != null) key = getVarValue(ctx.VAR_VALUE_());
         else throw TypeQLException.of(ILLEGAL_GRAMMAR);
@@ -944,13 +944,12 @@ public class Parser extends TypeQLBaseVisitor {
         if (ctx.projection_key_as_label() != null) {
             return key.asLabel(visitProjection_key_label(ctx.projection_key_as_label().projection_key_label()));
         } else return key;
-        return new TypeQLFetch.Key.Variable(variable, label);
     }
 
     @Override
     public TypeQLFetch.Key.Label visitProjection_key_label(TypeQLParser.Projection_key_labelContext ctx) {
         if (ctx.QUOTED_STRING() != null) {
-            return TypeQLFetch.Key.Label.quoted(ctx.QUOTED_STRING().getText());
+            return TypeQLFetch.Key.Label.quoted(unquoteString(ctx.QUOTED_STRING()));
         } else if (ctx.label() != null) {
             return TypeQLFetch.Key.Label.unquoted(ctx.label().getText());
         } else throw TypeQLException.of(ILLEGAL_GRAMMAR);

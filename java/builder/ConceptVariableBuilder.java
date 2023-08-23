@@ -51,7 +51,7 @@ public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
         ThingStatementBuilder.Relation,
         ThingStatementBuilder.Attribute,
         Expression,
-        TypeQLFetch.Key.Variable {
+        TypeQLFetch.Key.Var.UnlabelledVar {
 
     private ConceptVariableBuilder(Reference reference) {
         super(reference);
@@ -188,13 +188,8 @@ public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
     }
 
     @Override
-    public VariableAsLabel asLabel(String label) {
-        return new VariableAsLabel(this, TypeQLFetch.Key.Label.of(label));
-    }
-
-    @Override
-    public TypeQLFetch.Key key() {
-        return this;
+    public LabelledVar asLabel(TypeQLFetch.Key.Label label) {
+        return new LabelledVar(this, label);
     }
 
     @Override

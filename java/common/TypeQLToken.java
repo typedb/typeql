@@ -389,7 +389,7 @@ public class TypeQLToken {
 
         @Override
         public String toString() {
-            return Char.AT + name;
+            return this.name;
         }
 
         public static Projection of(String value) {

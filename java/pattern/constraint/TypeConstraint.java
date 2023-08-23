@@ -61,7 +61,7 @@ import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
-public abstract class TypeConstraint extends Constraint<TypeQLVariable.Concept> {
+public abstract class TypeConstraint extends Constraint {
 
     @Override
     public Set<TypeQLVariable.Concept> variables() {

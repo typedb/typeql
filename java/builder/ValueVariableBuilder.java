@@ -40,7 +40,7 @@ import static com.vaticle.typedb.common.collection.Collections.list;
 public class ValueVariableBuilder extends TypeQLVariable.Value implements
         ValueStatementBuilder,
         Expression,
-        TypeQLFetch.Key.Variable {
+        TypeQLFetch.Key.Var.UnlabelledVar {
 
     ValueVariableBuilder(Reference.Name.Value reference) {
         super(reference);
@@ -81,13 +81,8 @@ public class ValueVariableBuilder extends TypeQLVariable.Value implements
     }
 
     @Override
-    public TypeQLFetch.Key key() {
-        return this;
-    }
-
-    @Override
-    public VariableAsLabel asLabel(String label) {
-        return new VariableAsLabel(this, Label.of(label));
+    public LabelledVar asLabel(TypeQLFetch.Key.Label label) {
+        return new LabelledVar(this, label);
     }
 
     @Override

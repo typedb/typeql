@@ -54,10 +54,9 @@ import static java.util.Collections.unmodifiableList;
 public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate> {
 
     final MatchClause match;
+    final Modifiers modifiers;
     final List<TypeQLVariable> filter;
     private final List<TypeQLVariable> effectiveFilter;
-    final Modifiers modifiers;
-
     private final int hash;
 
     public TypeQLGet(MatchClause match, List<TypeQLVariable> filter, Modifiers modifiers) {
@@ -98,6 +97,10 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
 
     public MatchClause match() {
         return match;
+    }
+
+    public Modifiers modifiers() {
+        return modifiers;
     }
 
     public List<TypeQLVariable> effectiveFilter() {
@@ -165,7 +168,7 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         }
 
         @Override
-        public TypeQLGet modifier(Modifiers modifier) {
+        public TypeQLGet modifiers(Modifiers modifier) {
             return new TypeQLGet(match, filter, modifier);
         }
 
@@ -192,11 +195,6 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         }
 
         @Override
-        public Modifiers modifiers() {
-            return modifiers;
-        }
-
-        @Override
         public TypeQLGet.Offset offset(long offset) {
             return new TypeQLGet.Offset(this, offset);
         }
@@ -214,11 +212,6 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         }
 
         @Override
-        public Modifiers modifiers() {
-            return modifiers;
-        }
-
-        @Override
         public TypeQLGet.Limited limit(long limit) {
             return new TypeQLGet.Limited(this, limit);
         }
@@ -228,11 +221,6 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
 
         public Limited(TypeQLGet get, long limit) {
             super(get.match, get.filter, new Modifiers(get.modifiers.sorting, get.modifiers.offset, limit));
-        }
-
-        @Override
-        public Modifiers modifiers() {
-            return modifiers;
         }
     }
 
@@ -360,7 +348,6 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-
             Group that = (Group) o;
             return this.query.equals(that.query) && this.var.equals(that.var);
         }

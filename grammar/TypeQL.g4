@@ -115,7 +115,7 @@ statement             :   statement_concept
                       |   statement_value
                       ;
 
-// CONCEPT VARAIBLES ===========================================================
+// CONCEPT STATEMENTS ===========================================================
 
 statement_concept     :   VAR_CONCEPT_  IS  VAR_CONCEPT_  ;
 
