@@ -104,19 +104,19 @@ public interface Expression {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Expression.Constant.class)));
     }
 
-    default boolean isValueVariable() {
+    default boolean isValueVar() {
         return false;
     }
 
-    default TypeQLVariable.Value asValueVariable() {
+    default TypeQLVariable.Value asValueVar() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLVariable.Value.class)));
     }
 
-    default boolean isConceptVariable() {
+    default boolean isConceptVar() {
         return false;
     }
 
-    default TypeQLVariable.Concept asConceptVariable() {
+    default TypeQLVariable.Concept asConceptVar() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLVariable.Concept.class)));
     }
 

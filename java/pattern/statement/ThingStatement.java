@@ -26,6 +26,7 @@ import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.statement.builder.ThingStatementBuilder;
 
+import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -228,10 +229,10 @@ public abstract class ThingStatement<T extends ThingStatement<T>> extends Statem
 
     public static class Attribute extends ThingStatement<Attribute> implements ThingStatementBuilder.Common<Attribute> {
 
-        private Attribute(TypeQLVariable.Concept variable, ThingConstraint.Predicate predicateConstraint) {
+        private Attribute(TypeQLVariable.Concept variable, @Nullable ThingConstraint.Predicate predicateConstraint) {
             super(variable);
             this.predicateConstraint = predicateConstraint;
-            constraints.add(predicateConstraint);
+            if (predicateConstraint != null) constraints.add(predicateConstraint);
         }
 
         public static Attribute of(TypeQLVariable.Concept variable) {
@@ -249,10 +250,9 @@ public abstract class ThingStatement<T extends ThingStatement<T>> extends Statem
 
         @Override
         public String toString(boolean pretty) {
-            assert predicate().isPresent();
             StringBuilder attribute = new StringBuilder();
             if (variable.isVisible()) attribute.append(variable).append(SPACE);
-            attribute.append(predicate().get());
+            predicate().ifPresent(attribute::append);
             String constraints;
             if (pretty) {
                 constraints = Stream.of(isaSyntax(), hasSyntax())

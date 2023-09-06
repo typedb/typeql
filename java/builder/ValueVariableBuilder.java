@@ -51,12 +51,12 @@ public class ValueVariableBuilder extends TypeQLVariable.Value implements
     }
 
     @Override
-    public boolean isValue() {
+    public boolean isValueVar() {
         return true;
     }
 
     @Override
-    public ValueVariableBuilder asValue() {
+    public ValueVariableBuilder asValueVar() {
         return this;
     }
 

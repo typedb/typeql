@@ -78,12 +78,12 @@ public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
     }
 
     @Override
-    public boolean isConcept() {
+    public boolean isConceptVar() {
         return true;
     }
 
     @Override
-    public ConceptVariableBuilder asConcept() {
+    public ConceptVariableBuilder asConceptVar() {
         return this;
     }
 

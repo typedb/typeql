@@ -59,7 +59,9 @@ public class Conjunction<T extends Pattern> implements Pattern {
 
     public Conjunction(List<T> patterns) {
         if (patterns == null) throw new NullPointerException("Null patterns");
-        else if (patterns.size() == 0) throw TypeQLException.of(MISSING_PATTERNS);
+        else if (patterns.size() == 0) {
+            throw TypeQLException.of(MISSING_PATTERNS);
+        }
         this.patterns = patterns.stream().map(Objects::requireNonNull).collect(toList());
         this.hash = Objects.hash(this.patterns);
     }
@@ -109,7 +111,7 @@ public class Conjunction<T extends Pattern> implements Pattern {
                 else if (pattern.isConjunction()) listOfDisj.add(pattern.asConjunction().normalise().patterns());
                 else listOfDisj.add(pattern.asDisjunction().normalise().patterns());
             });
-            listOfDisj.add(list(new Conjunction<>(conjunctables)));
+            if (!conjunctables.isEmpty()) listOfDisj.add(list(new Conjunction<>(conjunctables)));
             List<Conjunction<Conjunctable>> listOfConjunctions = new CartesianList<>(listOfDisj)
                     .stream().map(Conjunction::merge)
                     .collect(toList());

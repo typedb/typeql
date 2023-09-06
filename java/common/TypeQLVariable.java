@@ -34,19 +34,19 @@ public abstract class TypeQLVariable {
         this.reference = reference;
     }
 
-    public boolean isConcept() {
+    public boolean isConceptVar() {
         return false;
     }
 
-    public Concept asConcept() {
+    public Concept asConceptVar() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Concept.class)));
     }
 
-    public boolean isValue() {
+    public boolean isValueVar() {
         return false;
     }
 
-    public Value asValue() {
+    public Value asValueVar() {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Value.class)));
     }
 
@@ -58,6 +58,7 @@ public abstract class TypeQLVariable {
         switch (reference.type()) {
             case NAME_CONCEPT:
             case NAME_VALUE:
+                // TODO this method should only exist on Named references
                 return reference.name();
             case LABEL:
             case ANONYMOUS:
@@ -152,12 +153,12 @@ public abstract class TypeQLVariable {
         }
 
         @Override
-        public boolean isConcept() {
+        public boolean isConceptVar() {
             return true;
         }
 
         @Override
-        public Concept asConcept() {
+        public Concept asConceptVar() {
             return this;
         }
 
@@ -178,12 +179,12 @@ public abstract class TypeQLVariable {
         }
 
         @Override
-        public boolean isValue() {
+        public boolean isValueVar() {
             return true;
         }
 
         @Override
-        public Value asValue() {
+        public Value asValueVar() {
             return this;
         }
 

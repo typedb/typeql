@@ -236,7 +236,7 @@ public abstract class Reference {
 
         @Override
         public String name() {
-            return TypeQLToken.Char.UNDERSCORE + scopedLabel();
+            return scopedLabel();
         }
 
         @Override
@@ -251,7 +251,9 @@ public abstract class Reference {
             Label that = (Label) o;
             return (this.type == that.type &&
                     this.isVisible == that.isVisible &&
-                    this.label.equals(that.label));
+                    this.label.equals(that.label) &&
+                    Objects.equals(this.scope, that.scope));
+
         }
 
         @Override

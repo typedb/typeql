@@ -39,6 +39,14 @@ import static org.junit.Assert.assertTrue;
 public class NormalisationTest {
 
     @Test
+    public void test() {
+        String query = "match $x has name $y; get $x;";
+        TypeQLGet get = TypeQL.parseQuery(query).asGet();
+
+        System.out.println(query);
+    }
+
+    @Test
     public void disjunction() {
         String query = "match\n" +
                 "$com isa company;\n" +

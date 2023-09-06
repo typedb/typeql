@@ -376,7 +376,7 @@ public abstract class ThingConstraint extends Constraint {
                 } else {
                     StringBuilder syntax = new StringBuilder();
                     if (roleType.isVisible()) syntax.append(roleType.reference().toString());
-                    else syntax.append(roleType.reference().asLabel().scopedLabel());
+                    else syntax.append(roleType.reference().asLabel().label());
                     syntax.append(COLON).append(SPACE).append(player);
                     return syntax.toString();
                 }
@@ -447,8 +447,7 @@ public abstract class ThingConstraint extends Constraint {
             if (attribute.isFirst()) {
                 variables.add(attribute.first());
             } else {
-                variables.add(attribute.second().headVariable());
-                attribute.second().predicate().ifPresent(pred -> variables.addAll(pred.variables()));
+                attribute.second().variables().forEach(variables::add);
             }
             return variables;
         }
