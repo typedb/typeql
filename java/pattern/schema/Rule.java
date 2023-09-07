@@ -165,8 +165,8 @@ public class Rule implements Definable {
         }
 
         // relation variable name in 'then' must not be present
-        if (then.relation().isPresent() && then.reference().isName()) {
-            throw TypeQLException.of(INVALID_RULE_THEN_RELATION_VARIABLE.message(label, then.reference()));
+        if (then.relation().isPresent() && then.headVariable().reference().isName()) {
+            throw TypeQLException.of(INVALID_RULE_THEN_RELATION_VARIABLE.message(label, then.headVariable().reference()));
         }
     }
 
