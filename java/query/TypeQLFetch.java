@@ -73,6 +73,10 @@ public class TypeQLFetch implements TypeQLQuery {
         return modifiers;
     }
 
+    public MatchClause match() {
+        return match;
+    }
+
     @Override
     public String toString() {
         return toString(true);

@@ -25,6 +25,7 @@ package com.vaticle.typeql.lang.test.behaviour.typeql;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
+import com.vaticle.typeql.lang.query.TypeQLFetch;
 import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
@@ -79,7 +80,7 @@ public class TypeQLSteps {
     @Given("get answer of typeql get aggregate")
     @Given("get answers of typeql get group aggregate")
     @Given("verify answer set is equivalent for query")
-    public void typeql_match(String query) {
+    public void typeql_get(String query) {
         TypeQLQuery parsed = TypeQL.parseQuery(query);
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
         if (parsed instanceof TypeQLGet) {
@@ -87,14 +88,19 @@ public class TypeQLSteps {
         }
     }
 
-    @Given("typeql get throws")
-    @Given("typeql insert throws")
-    @Given("typeql delete throws")
-    @Given("typeql define throws")
-    @Given("typeql undefine throws")
+    @Given("get answers of typeql fetch")
+    public void typeql_fetch(String query) {
+        TypeQLQuery parsed = TypeQL.parseQuery(query);
+        assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
+        if (parsed instanceof TypeQLFetch) {
+            parsed.asFetch().match().conjunction().normalise();
+        }
+    }
+
     @Given("typeql get; throws exception")
     @Given("typeql get group; throws exception")
     @Given("typeql get aggregate; throws exception")
+    @Given("typeql fetch; throws exception")
     @Given("templated typeql get; throws exception")
     @Given("typeql insert; throws exception")
     @Given("typeql delete; throws exception")
