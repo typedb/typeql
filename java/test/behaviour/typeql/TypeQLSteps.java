@@ -133,6 +133,7 @@ public class TypeQLSteps {
     @Given("rules contain: {}")
     @Given("answer size is: {}")
     @Given("each answer satisfies")
+    @Given("fetch answers are")
     @Given("aggregate value is: {}")
     @Given("number of groups is: {}")
     @Given("rules do not contain: {}")
@@ -146,7 +147,6 @@ public class TypeQLSteps {
     @Given("for each session, open transactions of type: {}")
     @Given("for each session, open transactions with reasoning of type: {}")
     @Given("verify answers are consistent across {} executions")
-    @Given("set time-zone is: {}")
     public void do_nothing_with_arg(String ignored) { }
 
     @Given("connection open data sessions for databases:")

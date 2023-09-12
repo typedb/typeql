@@ -52,7 +52,7 @@ import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.cVar;
 import static com.vaticle.typeql.lang.TypeQL.define;
-import static com.vaticle.typeql.lang.TypeQL.fetchLabel;
+import static com.vaticle.typeql.lang.TypeQL.label;
 import static com.vaticle.typeql.lang.TypeQL.gte;
 import static com.vaticle.typeql.lang.TypeQL.insert;
 import static com.vaticle.typeql.lang.TypeQL.lt;
@@ -837,17 +837,17 @@ public class ParserTest {
         ).fetch(
                 cVar("d"),
                 cVar("d").asLabel("date"),
-                cVar("x").projectAttr("name").projectAttr("title", "t").projectAttr("name", "Movie name"),
-                cVar("x").asLabel("movie").projectAttr("name"),
-                cVar("x").asLabel("Movie name").projectAttr("name"),
-                fetchLabel("label-a").subquery(
+                cVar("x").map("name").map("title", "t").map("name", "Movie name"),
+                cVar("x").asLabel("movie").map("name"),
+                cVar("x").asLabel("Movie name").map("name"),
+                label("label-a").map(
                         match(
                                 rel(cVar("d")).rel(cVar("c")).isa("director")
                         ).fetch(
-                                cVar("d").projectAttr("name")
+                                cVar("d").map("name")
                         )
                 ),
-                fetchLabel("label-b").subquery(
+                label("label-b").map(
                         match(
                                 rel(cVar("d")).rel(cVar("c")).isa("director")
                         ).get(cVar("d")).count()

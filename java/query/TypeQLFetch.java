@@ -26,14 +26,17 @@ import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.Reference;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
+import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.query.builder.ProjectionBuilder;
 import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
@@ -42,6 +45,8 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Command.FETCH;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Projection.AS;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
@@ -75,6 +80,10 @@ public class TypeQLFetch implements TypeQLQuery {
 
     public MatchClause match() {
         return match;
+    }
+
+    public List<Projection> projections() {
+        return projections;
     }
 
     @Override
@@ -173,13 +182,73 @@ public class TypeQLFetch implements TypeQLQuery {
 
         String toString(boolean pretty);
 
-        interface Var extends Key, Projection, ProjectionBuilder.Attribute {
+        default boolean isVariable() {
+            return false;
+        }
 
+        default Key.Var asVariable() {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Key.Var.class)));
+        }
+
+        default boolean isLabel() {
+            return false;
+        }
+
+        default Key.Label asLabel() {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Key.Label.class)));
+        }
+
+        interface Var extends Key, Projection.Variable, ProjectionBuilder.Attribute {
+
+            TypeQLVariable typeQLVar();
+
+            Optional<Label> label();
+
+            @Override
             default Var key() {
                 return this;
             }
 
+            @Override
+            default boolean isVariable() {
+                return true;
+            }
+
+            @Override
+            default Var asVariable() {
+                return this;
+            }
+
             interface UnlabelledVar extends Var {
+
+                default boolean isConceptVar() {
+                    return false;
+                }
+
+                default TypeQLVariable.Concept asConceptVar() {
+                    throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLVariable.Concept.class)));
+                }
+
+                default boolean isValueVar() {
+                    return false;
+                }
+
+                default TypeQLVariable.Value asValueVar() {
+                    throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeQLVariable.Value.class)));
+                }
+
+                @Override
+                default TypeQLVariable typeQLVar() {
+                    if (isConceptVar()) return asConceptVar();
+                    else if (isValueVar()) return asValueVar();
+                    else throw TypeQLException.of(ILLEGAL_STATE);
+                }
+
+                @Override
+                default Optional<Label> label() {
+                    return Optional.empty();
+                }
+
                 default LabelledVar asLabel(String label) {
                     return asLabel(Label.of(label));
                 }
@@ -194,8 +263,19 @@ public class TypeQLFetch implements TypeQLQuery {
                 private final Label label;
 
                 public LabelledVar(TypeQLVariable variable, Label label) {
+                    assert variable.isNamed();
                     this.variable = variable;
                     this.label = label;
+                }
+
+                @Override
+                public TypeQLVariable typeQLVar() {
+                    return variable;
+                }
+
+                @Override
+                public Optional<Label> label() {
+                    return Optional.of(label);
                 }
 
                 @Override
@@ -204,12 +284,12 @@ public class TypeQLFetch implements TypeQLQuery {
                 }
 
                 @Override
-                public Attribute projectAttr(Pair<Reference.Label, Label> attribute) {
+                public Attribute project(Pair<Reference.Label, Label> attribute) {
                     return new Attribute(this, list(attribute));
                 }
 
                 @Override
-                public Attribute projectAttrs(Stream<Pair<Reference.Label, Label>> attributes) {
+                public Attribute project(Stream<Pair<Reference.Label, Label>> attributes) {
                     return new Attribute(this, attributes.collect(toList()));
                 }
 
@@ -262,6 +342,20 @@ public class TypeQLFetch implements TypeQLQuery {
                 return new Label(Either.second(label));
             }
 
+            public String label() {
+                return quotedOrUnquoted.isFirst() ? quotedOrUnquoted.first() : quotedOrUnquoted.second();
+            }
+
+            @Override
+            public boolean isLabel() {
+                return true;
+            }
+
+            @Override
+            public Label asLabel() {
+                return this;
+            }
+
             @Override
             public String toString() {
                 return toString(true);
@@ -287,7 +381,7 @@ public class TypeQLFetch implements TypeQLQuery {
             }
 
             @Override
-            public Projection.Subquery projectSubquery(Either<TypeQLFetch, TypeQLGet.Aggregate> subquery) {
+            public Projection.Subquery map(Either<TypeQLFetch, TypeQLGet.Aggregate> subquery) {
                 return new Projection.Subquery(this, subquery);
             }
         }
@@ -299,19 +393,83 @@ public class TypeQLFetch implements TypeQLQuery {
 
         String toString(boolean pretty);
 
+        default boolean isVariable() {
+            return false;
+        }
+
+        default Projection.Variable asVariable() {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Variable.class)));
+        }
+
+        default boolean isAttribute() {
+            return false;
+        }
+
+        default Projection.Attribute asAttribute() {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Attribute.class)));
+        }
+
+        default boolean isSubquery() {
+            return false;
+        }
+
+        default Projection.Subquery asSubquery() {
+            throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Subquery.class)));
+        }
+
+        interface Variable extends Projection {
+
+            @Override
+            default boolean isVariable() {
+                return true;
+            }
+
+            @Override
+            default Variable asVariable() {
+                return this;
+            }
+
+            @Override
+            Key.Var key();
+        }
+
         class Attribute implements Projection, ProjectionBuilder.Attribute {
 
-            private final Key key;
+            private final Key.Var key;
             private final List<Pair<Reference.Label, Key.Label>> attributes;
 
-            public Attribute(Key key, List<Pair<Reference.Label, Key.Label>> attributes) {
+            public Attribute(Key.Var key, List<Pair<Reference.Label, Key.Label>> attributes) {
                 this.key = key;
                 this.attributes = attributes;
             }
 
             @Override
-            public Key key() {
+            public Key.Var key() {
                 return key;
+            }
+
+            @Override
+            public Attribute map(Pair<Reference.Label, Key.Label> attribute) {
+                return new Attribute(key(), list(attributes, attribute));
+            }
+
+            @Override
+            public Attribute map(Stream<Pair<Reference.Label, Key.Label>> attributes) {
+                return new Attribute(key(), Stream.concat(this.attributes.stream(), attributes).collect(toList()));
+            }
+
+            public List<Pair<Reference.Label, Key.Label>> attributes() {
+                return attributes;
+            }
+
+            @Override
+            public boolean isAttribute() {
+                return true;
+            }
+
+            @Override
+            public Attribute asAttribute() {
+                return this;
             }
 
             @Override
@@ -339,15 +497,6 @@ public class TypeQLFetch implements TypeQLQuery {
                 return Objects.hash(key, attributes);
             }
 
-            @Override
-            public Attribute projectAttr(Pair<Reference.Label, Key.Label> attribute) {
-                return new Attribute(key(), list(attributes, attribute));
-            }
-
-            @Override
-            public Attribute projectAttrs(Stream<Pair<Reference.Label, Key.Label>> attributes) {
-                return new Attribute(key(), Stream.concat(this.attributes.stream(), attributes).collect(toList()));
-            }
         }
 
         class Subquery implements Projection {
@@ -361,8 +510,22 @@ public class TypeQLFetch implements TypeQLQuery {
             }
 
             @Override
-            public Key key() {
+            public Key.Label key() {
                 return key;
+            }
+
+            public Either<TypeQLFetch, TypeQLGet.Aggregate> subquery() {
+                return subquery;
+            }
+
+            @Override
+            public boolean isSubquery() {
+                return true;
+            }
+
+            @Override
+            public Subquery asSubquery() {
+                return this;
             }
 
             @Override

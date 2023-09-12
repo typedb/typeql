@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.cVar;
+import static com.vaticle.typeql.lang.TypeQL.label;
 import static com.vaticle.typeql.lang.TypeQL.lte;
 import static com.vaticle.typeql.lang.TypeQL.match;
 import static com.vaticle.typeql.lang.TypeQL.or;
@@ -187,6 +188,24 @@ public class TypeQLQueryTest {
                 "    $c: name;\n" +
                 "};";
         assertEquivalent(TypeQL.parseQuery(query), query);
+    }
+
+    @Test
+    public void testFetchBuilder() {
+        match(
+                cVar("x").isa("person").has("id", cVar("id"))
+        ).fetch(
+                cVar("id"),
+                cVar("x").map("name").map("age").map("email"),
+                label("children").map(
+                        match(
+                                rel(cVar("c")).rel(cVar("x")).isa("parenthood)")
+                        ).fetch(
+                                cVar("c").map("name")
+                        )
+                )
+        );
+        // TODO make test
     }
 
     private void assertSameStringRepresentation(TypeQLGet query) {

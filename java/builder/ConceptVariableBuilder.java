@@ -193,12 +193,12 @@ public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
     }
 
     @Override
-    public Attribute projectAttr(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
+    public Attribute project(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
         return new Attribute(this, list(attribute));
     }
 
     @Override
-    public Attribute projectAttrs(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
+    public Attribute project(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
         return new Attribute(this, attributes.collect(Collectors.toList()));
     }
 }

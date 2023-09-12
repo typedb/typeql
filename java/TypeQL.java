@@ -166,7 +166,7 @@ public class TypeQL {
         return new Rule(label);
     }
 
-    public static TypeQLFetch.Key.Label fetchLabel(String label) {
+    public static TypeQLFetch.Key.Label label(String label) {
         return TypeQLFetch.Key.Label.of(label);
     }
 

@@ -924,7 +924,7 @@ public class Parser extends TypeQLBaseVisitor {
             if (ctx.projection_attributes() == null) {
                 return key;
             } else {
-                return key.projectAttrs(visitProjection_attributes(ctx.projection_attributes()).stream());
+                return key.map(visitProjection_attributes(ctx.projection_attributes()).stream());
             }
         } else if (ctx.projection_key_label() != null && ctx.projection_subquery() != null) {
             return new TypeQLFetch.Projection.Subquery(
