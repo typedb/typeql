@@ -92,9 +92,11 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage INVALID_RULE_THEN_RELATION_VARIABLE =
             new ErrorMessage(35, "Rule '%s': relation variable name '%s' in 'then' must not be present.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(37, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(36, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage VARIABLE_NOT_SORTED =
-            new ErrorMessage(38, "Variable '%s' does not exist in the sorting clause.");
+            new ErrorMessage(37, "Variable '%s' does not exist in the sorting clause.");
+    public static final ErrorMessage INVALID_SORTING_VARIABLE_NOT_MATCHED =
+            new ErrorMessage(38, "Sort variable '%s' is not present in the match clause.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
             new ErrorMessage(39, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =

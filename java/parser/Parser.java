@@ -60,7 +60,6 @@ import com.vaticle.typeql.lang.query.TypeQLQuery.MatchClause;
 import com.vaticle.typeql.lang.query.TypeQLQuery.Modifiers;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import com.vaticle.typeql.lang.query.TypeQLUpdate;
-import com.vaticle.typeql.lang.query.builder.Sortable;
 import org.antlr.v4.runtime.ANTLRErrorStrategy;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
@@ -428,7 +427,7 @@ public class Parser extends TypeQLBaseVisitor {
         MatchClause matchClause = visitClause_match(ctx.clause_match());
         Modifiers modifiers = visitModifiers(ctx.modifiers());
         List<TypeQLFetch.Projection> projections = visitClause_fetch(ctx.clause_fetch());
-        return new TypeQLFetch(matchClause, projections, modifiers);
+        return matchClause.fetch(projections).modifiers(modifiers);
     }
 
     @Override
@@ -444,7 +443,7 @@ public class Parser extends TypeQLBaseVisitor {
 
     @Override
     public Modifiers visitModifiers(TypeQLParser.ModifiersContext ctx) {
-        Sortable.Sorting sorting = null;
+        Modifiers.Sorting sorting = null;
         Long offset = null, limit = null;
         if (ctx.sort() != null) sorting = visitSort(ctx.sort());
         if (ctx.offset() != null) offset = getLong(ctx.offset().LONG_());
@@ -454,9 +453,9 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public Sortable.Sorting visitSort(TypeQLParser.SortContext ctx) {
+    public Modifiers.Sorting visitSort(TypeQLParser.SortContext ctx) {
         List<Pair<TypeQLVariable, TypeQLArg.Order>> sorting = ctx.var_order().stream().map(this::visitVar_order).collect(toList());
-        return Sortable.Sorting.create(sorting);
+        return Modifiers.Sorting.create(sorting);
     }
 
     @Override

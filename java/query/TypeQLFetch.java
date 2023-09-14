@@ -28,7 +28,6 @@ import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.query.builder.ProjectionBuilder;
-import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,11 +58,11 @@ public class TypeQLFetch implements TypeQLQuery {
     final List<Projection> projections;
     final Modifiers modifiers;
 
-    TypeQLFetch(MatchClause match, List<Projection> projections) {
+    private TypeQLFetch(MatchClause match, List<Projection> projections) {
         this(match, projections, Modifiers.EMPTY);
     }
 
-    public TypeQLFetch(MatchClause match, List<Projection> projections, Modifiers modifiers) {
+    private TypeQLFetch(MatchClause match, List<Projection> projections, Modifiers modifiers) {
         this.match = match;
         this.projections = projections;
         this.modifiers = modifiers;
@@ -123,11 +122,12 @@ public class TypeQLFetch implements TypeQLQuery {
 
         @Override
         public TypeQLFetch modifiers(Modifiers modifier) {
+            if (modifier.sorting != null) TypeQLQuery.validateSorting(match, modifier.sorting);
             return new TypeQLFetch(match, projections, modifier);
         }
 
         @Override
-        public TypeQLFetch.Sorted sort(Sortable.Sorting sorting) {
+        public TypeQLFetch.Sorted sort(Modifiers.Sorting sorting) {
             return new TypeQLFetch.Sorted(this, sorting);
         }
 
@@ -144,8 +144,9 @@ public class TypeQLFetch implements TypeQLQuery {
 
     public static class Sorted extends TypeQLFetch implements TypeQLQuery.Sorted<TypeQLFetch.Offset, TypeQLFetch.Limited> {
 
-        public Sorted(TypeQLFetch delete, Sortable.Sorting sorting) {
+        public Sorted(TypeQLFetch delete, Modifiers.Sorting sorting) {
             super(delete.match, delete.projections, new Modifiers(sorting, delete.modifiers.offset, delete.modifiers.limit));
+            TypeQLQuery.validateSorting(match, sorting);
         }
 
         @Override
@@ -284,12 +285,12 @@ public class TypeQLFetch implements TypeQLQuery {
                 }
 
                 @Override
-                public Attribute project(Pair<Reference.Label, Label> attribute) {
+                public Attribute map(Pair<Reference.Label, Label> attribute) {
                     return new Attribute(this, list(attribute));
                 }
 
                 @Override
-                public Attribute project(Stream<Pair<Reference.Label, Label>> attributes) {
+                public Attribute map(Stream<Pair<Reference.Label, Label>> attributes) {
                     return new Attribute(this, attributes.collect(toList()));
                 }
 

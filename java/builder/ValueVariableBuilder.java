@@ -86,12 +86,12 @@ public class ValueVariableBuilder extends TypeQLVariable.Value implements
     }
 
     @Override
-    public Attribute project(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
+    public Attribute map(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
         return new Attribute(this, list(attribute));
     }
 
     @Override
-    public Attribute project(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
+    public Attribute map(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
         return new Attribute(this, attributes.collect(Collectors.toList()));
     }
 }

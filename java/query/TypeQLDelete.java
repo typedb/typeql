@@ -23,7 +23,6 @@ package com.vaticle.typeql.lang.query;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -70,11 +69,12 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
 
         @Override
         public TypeQLDelete modifiers(Modifiers modifier) {
+            if (modifier.sorting != null) TypeQLQuery.validateSorting(match, modifier.sorting);
             return new TypeQLDelete(match, statements, modifier);
         }
 
         @Override
-        public TypeQLDelete.Sorted sort(Sortable.Sorting sorting) {
+        public TypeQLDelete.Sorted sort(Modifiers.Sorting sorting) {
             return new TypeQLDelete.Sorted(this, sorting);
         }
 
@@ -91,8 +91,9 @@ public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {
 
     public static class Sorted extends TypeQLDelete implements TypeQLQuery.Sorted<TypeQLDelete.Offset, TypeQLDelete.Limited> {
 
-        public Sorted(TypeQLDelete delete, Sortable.Sorting sorting) {
+        public Sorted(TypeQLDelete delete, Modifiers.Sorting sorting) {
             super(delete.match, delete.statements, new Modifiers(sorting, delete.modifiers.offset, delete.modifiers.limit));
+            TypeQLQuery.validateSorting(match, sorting);
         }
 
         @Override

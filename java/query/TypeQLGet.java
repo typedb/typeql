@@ -27,7 +27,6 @@ import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.query.builder.Aggregatable;
-import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -169,11 +168,12 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
 
         @Override
         public TypeQLGet modifiers(Modifiers modifier) {
+            if (modifier.sorting != null) TypeQLQuery.validateSorting(match, modifier.sorting);
             return new TypeQLGet(match, filter, modifier);
         }
 
         @Override
-        public TypeQLGet.Sorted sort(Sortable.Sorting sorting) {
+        public TypeQLGet.Sorted sort(Modifiers.Sorting sorting) {
             return new TypeQLGet.Sorted(this, sorting);
         }
 
@@ -190,8 +190,9 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
 
     public static class Sorted extends TypeQLGet implements TypeQLQuery.Sorted<Offset, Limited> {
 
-        public Sorted(TypeQLGet get, Sortable.Sorting sorting) {
+        public Sorted(TypeQLGet get, Modifiers.Sorting sorting) {
             super(get.match, get.filter, new Modifiers(sorting, get.modifiers.offset, get.modifiers.limit));
+            TypeQLQuery.validateSorting(match, sorting);
         }
 
         @Override

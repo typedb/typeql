@@ -25,7 +25,6 @@ import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.statement.Statement;
 import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import java.util.List;
 import java.util.Objects;
@@ -133,11 +132,12 @@ public class TypeQLUpdate extends TypeQLWritable {
 
         @Override
         public TypeQLUpdate modifiers(Modifiers modifier) {
+            if (modifier.sorting != null) TypeQLQuery.validateSorting(match, modifier.sorting);
             return new TypeQLUpdate(match, deleteStatements(), insertStatements(), modifier);
         }
 
         @Override
-        public TypeQLUpdate.Sorted sort(Sortable.Sorting sorting) {
+        public TypeQLUpdate.Sorted sort(Modifiers.Sorting sorting) {
             return new TypeQLUpdate.Sorted(this, sorting);
         }
 
@@ -154,8 +154,9 @@ public class TypeQLUpdate extends TypeQLWritable {
 
     public static class Sorted extends TypeQLUpdate implements TypeQLQuery.Sorted<TypeQLUpdate.Offset, TypeQLUpdate.Limited> {
 
-        public Sorted(TypeQLUpdate delete, Sortable.Sorting sorting) {
+        public Sorted(TypeQLUpdate delete, Modifiers.Sorting sorting) {
             super(delete.match, delete.deleteStatements, delete.insertStatements, new Modifiers(sorting, delete.modifiers.offset, delete.modifiers.limit));
+            TypeQLQuery.validateSorting(match, sorting);
         }
 
         @Override

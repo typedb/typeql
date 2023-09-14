@@ -30,11 +30,12 @@ import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
 import com.vaticle.typeql.lang.pattern.statement.Statement;
 import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.query.builder.Sortable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +43,7 @@ import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.util.Objects.className;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
@@ -52,7 +54,9 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_VARIABLE_NOT_MATCHED;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_SORTED;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -157,6 +161,14 @@ public interface TypeQLQuery {
 
     String toString(boolean pretty);
 
+    static void validateSorting(MatchClause matchClause, Modifiers.Sorting sorting) {
+        for (TypeQLVariable variable : sorting.variables()) {
+            if (!matchClause.namedVariables().contains(variable)) {
+                throw TypeQLException.of(INVALID_SORTING_VARIABLE_NOT_MATCHED.message(variable));
+            }
+        }
+    }
+
     interface Unmodified<Q, S extends Sorted<O, L>, O extends Offset<L>, L extends Limited>
             extends TypeQLQuery {
 
@@ -187,10 +199,10 @@ public interface TypeQLQuery {
         }
 
         default S sort(List<Pair<TypeQLVariable, TypeQLArg.Order>> varOrders) {
-            return sort(Sortable.Sorting.create(varOrders));
+            return sort(Modifiers.Sorting.create(varOrders));
         }
 
-        S sort(Sortable.Sorting sorting);
+        S sort(Modifiers.Sorting sorting);
 
         O offset(long offset);
 
@@ -335,13 +347,13 @@ public interface TypeQLQuery {
 
         public static Modifiers EMPTY = new Modifiers(null, null, null);
 
-        final Sortable.Sorting sorting;
+        final Sorting sorting;
         final Long offset;
         final Long limit;
 
         private final int hash;
 
-        public Modifiers(@Nullable Sortable.Sorting sorting, @Nullable Long offset, @Nullable Long limit) {
+        public Modifiers(@Nullable Sorting sorting, @Nullable Long offset, @Nullable Long limit) {
             this.sorting = sorting;
             this.offset = offset;
             this.limit = limit;
@@ -356,7 +368,7 @@ public interface TypeQLQuery {
             return Optional.ofNullable(limit);
         }
 
-        public Optional<Sortable.Sorting> sort() {
+        public Optional<Sorting> sort() {
             return Optional.ofNullable(sorting);
         }
 
@@ -385,6 +397,60 @@ public interface TypeQLQuery {
         @Override
         public int hashCode() {
             return hash;
+        }
+
+        public static class Sorting {
+
+            private final int hash;
+            private final List<TypeQLVariable> variables;
+            private final Map<TypeQLVariable, TypeQLArg.Order> orders;
+
+            private Sorting(List<TypeQLVariable> variables, Map<TypeQLVariable, TypeQLArg.Order> orders) {
+                this.variables = variables;
+                this.orders = orders;
+                this.hash = Objects.hash(variables, orders);
+            }
+
+            public static Sorting create(List<Pair<TypeQLVariable, TypeQLArg.Order>> sorting) {
+                List<TypeQLVariable> vars = new ArrayList<>();
+                Map<TypeQLVariable, TypeQLArg.Order> orders = new HashMap<>();
+                sorting.forEach(pair -> {
+                    vars.add(pair.first());
+                    orders.put(pair.first(), pair.second());
+                });
+                return new Sorting(vars, orders);
+            }
+
+            public List<TypeQLVariable> variables() {
+                return variables;
+            }
+
+            public TypeQLArg.Order getOrder(TypeQLVariable var) {
+                if (!variables.contains(var)) throw TypeQLException.of(VARIABLE_NOT_SORTED.message(var));
+                TypeQLArg.Order order = orders.get(var);
+                return order == null ? TypeQLArg.Order.ASC : order;
+            }
+
+            @Override
+            public String toString() {
+                return variables.stream().map(v -> {
+                    if (orders.get(v) == null) return v.toString();
+                    else return v.toString() + SPACE + orders.get(v);
+                }).collect(COMMA_SPACE.joiner());
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Sorting that = (Sorting) o;
+                return this.variables.equals(that.variables) && this.orders.equals(that.orders);
+            }
+
+            @Override
+            public int hashCode() {
+                return hash;
+            }
         }
     }
 }
