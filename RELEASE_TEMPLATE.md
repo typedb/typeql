@@ -22,6 +22,14 @@
 </dependencies>
 ```
 
+## TypeQL Grammar and Language Library distributions for Rust
+
+Available through https://crates.io/crates/typedb-protocol.
+```
+cargo add typeql
+```
+
+
 ## TypeQL Grammar distribution for Python
 
 Available through https://pypi.org
