@@ -28,6 +28,10 @@ workspace(name = "vaticle_typeql")
 load("//dependencies/vaticle:repositories.bzl", "vaticle_dependencies")
 vaticle_dependencies()
 
+# Load //builder/python
+load("@vaticle_dependencies//builder/python:deps.bzl", python_deps = "deps")
+python_deps()
+
 # Load //builder/bazel for RBE
 load("@vaticle_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
@@ -44,35 +48,44 @@ kotlin_repositories()
 load("@io_bazel_rules_kotlin//kotlin:core.bzl", "kt_register_toolchains")
 kt_register_toolchains()
 
-# Load //builder/python
-load("@vaticle_dependencies//builder/python:deps.bzl", python_deps = "deps")
-python_deps()
 
 # Load //builder/antlr
 load("@vaticle_dependencies//builder/antlr:deps.bzl", antlr_deps = "deps", "antlr_version")
 antlr_deps()
 
+load("@rules_antlr//antlr:lang.bzl", "JAVA")
+load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
+rules_antlr_dependencies(antlr_version, JAVA)
+
 # Load //builder/rust
 load("@vaticle_dependencies//builder/rust:deps.bzl", rust_deps = "deps")
 rust_deps()
 
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains", "rust_analyzer_toolchain_tools_repository")
 rules_rust_dependencies()
-rust_register_toolchains(include_rustc_srcs = True, edition="2021")
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+rust_analyzer_dependencies()
+load("@rules_rust//rust:defs.bzl", "rust_common")
+rust_register_toolchains(
+    edition = "2021",
+    rust_analyzer_version = rust_common.default_version,
+)
+
+rust_analyzer_toolchain_tools_repository(
+    name = "rust_analyzer_toolchain_tools",
+    version = rust_common.default_version
+)
 
 load("@vaticle_dependencies//library/crates:crates.bzl", "fetch_crates")
 fetch_crates()
 load("@crates//:defs.bzl", "crate_repositories")
 crate_repositories()
 
-load("@rules_antlr//antlr:lang.bzl", "JAVA")
-load("@rules_antlr//antlr:repositories.bzl", "rules_antlr_dependencies")
-rules_antlr_dependencies(antlr_version, JAVA)
-
 # Load //tool/common
-load("@vaticle_dependencies//tool/common:deps.bzl", "vaticle_dependencies_ci_pip",
-vaticle_dependencies_tool_maven_artifacts = "maven_artifacts")
+load("@vaticle_dependencies//tool/common:deps.bzl", "vaticle_dependencies_ci_pip")
 vaticle_dependencies_ci_pip()
+load("@vaticle_dependencies_ci_pip//:requirements.bzl", "install_deps")
+install_deps()
 
 # Load //tool/checkstyle
 load("@vaticle_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
@@ -102,6 +115,8 @@ rules_pkg_dependencies()
 # Load //pip
 load("@vaticle_bazel_distribution//pip:deps.bzl", pip_deps = "deps")
 pip_deps()
+load("@vaticle_bazel_distribution_pip//:requirements.bzl", "install_deps")
+install_deps()
 
 # Load //github
 load("@vaticle_bazel_distribution//github:deps.bzl", github_deps = "deps")
@@ -118,6 +133,7 @@ load("//dependencies/vaticle:repositories.bzl", "vaticle_typedb_common", "vaticl
 vaticle_typedb_common()
 vaticle_typedb_behaviour()
 
+load("@vaticle_dependencies//tool/common:deps.bzl", vaticle_dependencies_tool_maven_artifacts = "maven_artifacts")
 load("@vaticle_typedb_common//dependencies/maven:artifacts.bzl", vaticle_typedb_common_artifacts = "artifacts")
 
 ############################

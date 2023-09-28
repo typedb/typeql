@@ -63,12 +63,12 @@ checkstyle_test(
     license_type = "apache-fulltext",
 )
 
-# CI targets that are not declared in any BUILD file, but are called externally
+# Force tools to be built during `build //...`
 filegroup(
-    name = "ci",
+    name = "tools",
     data = [
+        "@vaticle_dependencies//tool/ide:rust_sync",
         "@vaticle_dependencies//library/maven:update",
-        "@vaticle_dependencies//tool/cargo:sync",
         "@vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh",
         "@vaticle_dependencies//tool/checkstyle:test-coverage",
         "@vaticle_dependencies//tool/release/notes:create",
