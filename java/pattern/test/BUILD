@@ -31,13 +31,8 @@ java_test(
     deps = [
         # Internal Package Dependencies
         "//java:typeql-lang",
-        "//java/query:query",
-        "//java/pattern:pattern",
-
-        # Internal Repository Dependencies
-
-        # External dependencies
-        "@maven//:com_google_code_findbugs_jsr305",
+        "//java/query",
+        "//java/pattern",
     ],
 )
 

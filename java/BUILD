@@ -28,49 +28,44 @@ load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
 load("//:deployment.bzl", github_deployment = "deployment")
 
-
 java_library(
     name = "typeql-lang",
     srcs = ["TypeQL.java"],
+    tags = ["maven_coordinates=com.vaticle.typeql:typeql-lang:{pom_version}"],
     deps = [
         # Internal Package Dependencies
-        "//java/common:common",
-        "//java/parser:parser",
-        "//java/pattern:pattern",
-        "//java/query:query",
+        "//java/common",
+        "//java/parser",
+        "//java/pattern",
+        "//java/query",
 
         # Internal Repository Dependencies
         "@vaticle_typedb_common//:common",
         "@vaticle_typeql//grammar/java:typeql-grammar",
-
-        # External dependencies
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:org_slf4j_slf4j_api",
     ],
-    tags = ["maven_coordinates=com.vaticle.typeql:typeql-lang:{pom_version}"],
 )
 
 assemble_maven(
-  name = "assemble-maven",
-  target = ":typeql-lang",
-  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
+    name = "assemble-maven",
+    target = ":typeql-lang",
+    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json",
 )
 
 deploy_maven(
     name = "deploy-maven",
+    release = deployment["maven.release"],
+    snapshot = deployment["maven.snapshot"],
     target = ":assemble-maven",
-    snapshot = deployment['maven.snapshot'],
-    release = deployment['maven.release']
 )
 
 deploy_github(
     name = "deploy-github",
+    draft = False,
+    organisation = github_deployment["github.organisation"],
     release_description = "//:RELEASE_NOTES_LATEST.md",
+    repository = github_deployment["github.repository"],
     title = "TypeQL language library for Java",
     title_append_version = True,
-    organisation = github_deployment['github.organisation'],
-    repository = github_deployment['github.repository'],
-    draft = False
 )
 
 release_validate_deps(
@@ -79,7 +74,7 @@ release_validate_deps(
     tagged_deps = [
         "@vaticle_typedb_common",
     ],
-    tags = ["manual"]  # in order for bazel test //... to not fail
+    tags = ["manual"],  # in order for bazel test //... to not fail
 )
 
 checkstyle_test(
@@ -96,6 +91,7 @@ checkstyle_test(
     ],
     license_type = "apache-header",
 )
+
 checkstyle_test(
     name = "checkstyle-license",
     include = ["LICENSE"],
