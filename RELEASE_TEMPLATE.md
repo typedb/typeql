@@ -26,7 +26,7 @@
 
 Available through https://crates.io/crates/typedb-protocol.
 ```
-cargo add typeql
+cargo add typeql@{version}
 ```
 
 
