@@ -51,7 +51,7 @@ rust_library(
 )
 
 rust_test(
-    name = "typeql_lang_rust_test",
+    name = "typeql_rust_test",
     crate = ":typeql",
 )
 

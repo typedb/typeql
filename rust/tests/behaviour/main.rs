@@ -21,7 +21,7 @@
  */
 
 use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
-use typeql_lang::{parse_query, query::Query};
+use typeql::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
