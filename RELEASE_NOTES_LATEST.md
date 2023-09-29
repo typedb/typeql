@@ -1,6 +1,6 @@
 ## TypeQL Grammar and Language Library distributions for Rust
 
-Available through https://crates.io/crates/typedb-protocol.
+Available through https://crates.io/crates/typeql.
 ```
 cargo add typeql@2.24.5
 ```
