@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Request a feature here, or visit forum.vaticle.com for ideas and questions
+about: Request a feature here, or visit forum.typedb.com for ideas and questions
 labels: feature
 ---
 

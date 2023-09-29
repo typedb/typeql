@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug here, or visit forum.vaticle.com for troubleshooting discussions
+about: Report a bug here, or visit forum.typedb.com for troubleshooting discussions
 labels: bug
 ---
 

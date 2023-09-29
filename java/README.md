@@ -12,7 +12,7 @@ The native TypeQL query above can be constructed programmatically in Java using 
 TypeQL.match(cVar("x").isa("person").has("name", "alice").has("age", 32));
 ```
 
-You can learn more about TypeQL Language Library for Java from [docs.vaticle.com](https://docs.vaticle.com/docs/query/overview). You can find TypeDB and TypeQL repositories at [vaticle/typedb](https://github.com/vaticle/typedb) and [vaticle/typeql](https://github.com/vaticle/typeql).
+You can learn more about TypeQL Language Library for Java from [typedb.com/docs](https://typedb.com/docs/query/overview). You can find TypeDB and TypeQL repositories at [vaticle/typedb](https://github.com/vaticle/typedb) and [vaticle/typeql](https://github.com/vaticle/typeql).
 
 ## Importing TypeQL Language Library through Maven
 
@@ -33,7 +33,7 @@ You can learn more about TypeQL Language Library for Java from [docs.vaticle.com
 </dependencies>
 ```
 
-Replace `{version}` with the version number, in which you can find the latest on [TypeQL's Maven Repository](https://repo.vaticle.com/#browse/browse:maven:com%2Fvaticle%2Ftypeql%2Ftypeql-lang). Further documentation: http://docs.vaticle.com/docs/client-api/java#typeql
+Replace `{version}` with the version number, in which you can find the latest on [TypeQL's Maven Repository](https://repo.vaticle.com/#browse/browse:maven:com%2Fvaticle%2Ftypeql%2Ftypeql-lang). Further documentation: http://typedb.com/docs/client-api/java#typeql
 
 ## Building TypeQL from Source
 
