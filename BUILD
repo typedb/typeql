@@ -25,7 +25,7 @@ load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("//:deployment.bzl", "deployment")
 
 exports_files(
-    ["VERSION", "RELEASE_NOTES_LATEST.md", "requirements.txt", "README.md"],
+    ["VERSION", "RELEASE_NOTES_LATEST.md", "LICENSE", "requirements.txt", "README.md"],
     visibility = ["//visibility:public"]
 )
 

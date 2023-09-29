@@ -1,3 +1,10 @@
+## TypeQL Grammar and Language Library distributions for Rust
+
+Available through https://crates.io/crates/typedb-protocol.
+```
+cargo add typeql@2.24.5
+```
+
 ## TypeQL Grammar and Language Library distributions for Java
 
 ```xml
@@ -22,14 +29,6 @@
 </dependencies>
 ```
 
-## TypeQL Grammar and Language Library distributions for Rust
-
-Available through https://crates.io/crates/typedb-protocol.
-```
-cargo add typeql@2.24.5
-```
-
-
 ## TypeQL Grammar distribution for Python
 
 Available through https://pypi.org
@@ -45,6 +44,7 @@ pip install typeql-grammar==2.24.5
 ## Bugs Fixed
 
 - **Cargo package includes PEST grammar**
+- **Add License and README to Cargo package**
 
 
 ## Code Refactors

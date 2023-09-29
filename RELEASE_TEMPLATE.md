@@ -1,3 +1,11 @@
+
+## TypeQL Grammar and Language Library distributions for Rust
+
+Available through https://crates.io/crates/typedb-lang.
+```
+cargo add typeql@{version}
+```
+
 ## TypeQL Grammar and Language Library distributions for Java
 
 ```xml
@@ -21,14 +29,6 @@
     </dependency>
 </dependencies>
 ```
-
-## TypeQL Grammar and Language Library distributions for Rust
-
-Available through https://crates.io/crates/typedb-protocol.
-```
-cargo add typeql@{version}
-```
-
 
 ## TypeQL Grammar distribution for Python
 

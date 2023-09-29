@@ -28,12 +28,12 @@ load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_dep
 load("//:deployment.bzl", deployment_github = "deployment")
 
 rust_library(
-    name = "typeql_lang",
+    name = "typeql",
     srcs = glob([
         "*.rs",
         "**/*.rs",
     ]),
-    crate_root = "typeql_lang.rs",
+    crate_root = "typeql.rs",
     compile_data = [
         "parser/typeql.pest",
     ],
@@ -46,20 +46,22 @@ rust_library(
     proc_macro_deps = [
         "@crates//:pest_derive",
     ],
-    visibility = ["//visibility:public"]
+    visibility = ["//visibility:public"],
+    tags = ["crate-name=typeql"]
 )
 
 rust_test(
     name = "typeql_lang_rust_test",
-    crate = ":typeql_lang",
+    crate = ":typeql",
 )
 
 assemble_crate(
     name = "assemble_crate",
-    target = ":typeql_lang",
+    target = ":typeql",
     description = "TypeQL Language for Rust",
-    license = "Apache-2.0",
     readme_file = "//:README.md",
+    license = "Apache-2.0",
+    license_file = "//:LICENSE",
     homepage = "https://github.com/vaticle/typeql",
     repository = "https://github.com/vaticle/typeql",
     keywords = ["typeql", "typedb", "database", "strongly-typed"],
