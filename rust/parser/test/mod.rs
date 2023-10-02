@@ -36,10 +36,10 @@ use crate::{
     filter, gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
     parse_query, parse_variable,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, Conjunction, Disjunction, ExpressionBuilder, Label,
-        RelationVariableBuilder, ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Variable,
+        Annotation::Key, ConceptVariableBuilder, ExpressionBuilder, Label, RelationVariableBuilder,
+        ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Variable,
     },
-    query::{AggregateQueryBuilder, TypeQLDefine, TypeQLInsert, TypeQLMatch, TypeQLUndefine},
+    query::AggregateQueryBuilder,
     rel, rule, sort_vars, type_, typeql_insert, typeql_match, Query,
 };
 
@@ -436,9 +436,9 @@ $a == ?x isa age;"#;
 
 #[test]
 fn test_parsing_variable_name_clash_throws() {
-    let query = r#"match\n
+    let query = r"match\n
 $z isa person, has age $y;
-?y = $y;"#;
+?y = $y;";
 
     let parsed = parse_query(query);
     assert!(parsed.is_err());
@@ -1690,7 +1690,7 @@ digit sub attribute,
     regex "\d";"#;
 
     let parsed = parse_query(query).unwrap().into_define();
-    let expected = typeql_define!(type_("digit").sub("attribute").regex(r#"\d"#));
+    let expected = typeql_define!(type_("digit").sub("attribute").regex(r"\d"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1701,7 +1701,7 @@ fn undefine_attribute_type_regex() {
 digit regex "\d";"#;
 
     let parsed = parse_query(query).unwrap().into_undefine();
-    let expected = typeql_undefine!(type_("digit").regex(r#"\d"#));
+    let expected = typeql_undefine!(type_("digit").regex(r"\d"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
