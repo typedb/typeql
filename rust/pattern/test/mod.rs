@@ -24,7 +24,7 @@ use crate::{
     and,
     builder::cvar,
     not, or, parse_query,
-    pattern::{Conjunction, Disjunction, Normalisable, ThingVariableBuilder},
+    pattern::{Disjunction, Normalisable, ThingVariableBuilder},
 };
 
 #[test]
