@@ -7,6 +7,10 @@
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typeql-3dce8c.svg)](https://stackoverflow.com/questions/tagged/typeql)
 
+TypeQL is the query language of [TypeDB](https://github.com/vaticle/typedb).
+It features a near-natural, declarative, and highly composable syntax for defining,
+manipulating, querying, and reasoning over data in a TypeDB database.
+
 * [A higher level of expressivity](#a-higher-level-of-expressivity)
 * [A higher degree of safety](#a-higher-degree-of-safety)
 * [Evolved with logical inference](#evolved-with-logical-inference)
@@ -14,179 +18,176 @@
 * [Contributions](#contributions)
 * [Licensing](#licensing)
 
-# Meet TypeQL (and [TypeDB](https://github.com/vaticle/typedb))
+## Core design principles
 
-TypeDB is a strongly-typed database with a rich and logical type system. TypeDB empowers you to tackle complex problems, and TypeQL is its query language.
+### Conceptual and intuitive
 
-## A higher level of expressivity
+TypeQL’s design is based directly on the polymorphic conceptual data model of TypeDB databases,
+including syntax for modeling with `entity`, `relation`, and `attribute` types,
+while also closely mirroring the structure of natural language.
+Like natural language, TypeQL queries are comprised of sequences of statements, delineated with `;`.
+Many statements in TypeQL queries read just like sentences,
+and follow a “subject-verb-object” order, like `$some_employee has name "John Doe";`.
+Moreover, all collection statements are composable,
+and the composition can be given in any order —
+TypeDB’s inference engine will infer all necessary types and inform the user if type constraints cannot be satisfied.
 
-TypeQL allows you to model your domain based on logical and object-oriented principles. Composed of entity, relationship, and attribute types, as well as type hierarchies, roles, and rules, TypeQL allows you to think higher-level as opposed to join-tables, columns, documents, vertices, edges, and properties.
+### Fully variablizable language
 
-### Entity-relationship model
+Variables in TypeQL are pre-fixed with `$`.
+Just as any part in a sentence might be unknown to us, any part of a TypeQL statement can be variablized.
+For example, both `$some_employee has name $full_name;` and `$some_employee has $some_attribute "John Doe";`
+are valid in TypeQL syntax.
+The ability to variablize types is underpinned by a form of [parametric polymorphism](https://typedb.com/features#polymorphic-queries),
+which leads to particularly powerful queries and database operations that can be performed with TypeDB.
 
-TypeQL allows you to model your domain using the well-known Entity-Relationship model. It is composed of entity types, relation types, and attribute types, with the introduction of role types. TypeQL allows you to leverage the full expressivity of the ER model, and describe your schema through first normal form.
+### Extensible and built for consistency
+
+TypeQL’s statement-based syntax can be naturally interleaved with many other declarative constructs,
+including variable arithmetic or regular expressions.
+All these additional construct are integrated into database’s type system,
+which ensures consistency of any query sent to the database.
+For a more in-depth overview of the range of statements
+that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/features)!
+
+## Examples of TypeQL
+
+### Entity-Relation-Attribute
+
+TypeQL features the type system of the [Polymorphic Entity-Relation-Attribute](https://development.typedb.com/philosophy)
+(PERA) model:
+entities are independent concepts,
+relations depend on role interfaces played by either entities or relations,
+and attributes are properties with a value that can interface with (namely, be owned by) entities or relations.
+Entities, relations, and attributes are all considered first-class citizens and can be subtyped,
+allowing for expressive modeling without the need for normalization or reification.
 
 ```typeql
 define
 
-person sub entity,
-  owns name,
-  plays employment:employee;
-company sub entity,
-  owns name,
-  plays employment:employer;
-employment sub relation,
-  relates employee,
-  relates employer;
-name sub attribute,
-  value string;
+id sub attribute, value string;
+email sub id;
+path sub id;
+name sub id;
+
+user sub entity,
+    owns email @unique,
+    plays permission:subject,
+    plays request:requestee;
+file sub entity,
+    owns path,
+    plays permission:object;
+action sub entity,
+    owns name,
+    plays permission:action;
+
+permission sub relation,
+    relates subject,
+    relates object,
+    relates action,
+    plays request:target;
+request sub relation,
+    relates target,
+    relates requestee;
 ```
 
-### Type hierarchies
+### Polymorphic querying
 
-TypeQL allows you to easily model type inheritance into your domain model. Following logical and object-oriented principle, TypeQL allows data types to inherit the behaviours and properties of their supertypes. Complex data structures become reusable, and data interpretation becomes richer through polymorphism.
+Use subtyping to query a common supertype and automatically retrieve matching data.
+Variablize queries to return types, roles, and data.
+New types added to the schema are automatically included in the results of pre-existing queries against their supertype,
+so no refactoring is necessary.
 
 ```typeql
-define
+match $user isa user,
+    has full-name $name,
+    has email $email;
+# This returns all users of any type
 
-person sub entity,
-  owns first-name,
-  owns last-name;
+match $user isa employee,
+    has full-name $name,
+    has email $email,
+    has employee-id $id;
+# This returns only users who are employees
 
-student sub person;
-undergrad sub student;
-postgrad sub student;
-
-teacher sub person;
-supervisor sub teacher;
-professor sub teacher;
+match $user-type sub user;
+$user isa $user-type,
+    has full-name $name,
+    has email $email;
+# This returns all users and their type
 ```
 
+### Near Natural and fully declarative
 
-### N-ary relations
-
-In the real world, relations aren't just binary connections between two things. In rich systems, we often need to capture three or more things related with each other at once. Representing them as separate binary relationships would lose information. TypeQL can naturally represent arbitrary number of things as one relation.
+TypeQL's near-natural syntax and fully declarative properties make queries easily understandable,
+reducing the learning curve and easing maintenance.
+This allows you to define query patterns without considering execution strategy.
+TypeDB's query planner always optimizes queries, so you don't have to worry about the logical implementation.
 
 ```typeql
 match
- 
-$person isa person, has name "Leonardo";
-$character isa character, has name "Jack";
-$movie isa movie;
-(actor: $person, character: $character, movie: $movie) isa cast;
-get $movie;
- 
-answers>>
- 
-$movie isa movie, has name "Titanic";
-```
+$kevin isa user, has email "kevin@vaticle.com";
 
-
-### Nested relations
-
-Relations are concepts we use to describe the association between two or more things. Sometimes, those things can be relations themselves. TypeQL can represent these structures naturally, as it enables relations to be nested in another relation, allowing you to express the model of your system in the most natural form.
-
-```typeql
-match
- 
-$alice isa person, has name "Alice";
-$bob isa person, has name "Bob";
-$mar ($alice, $bob) isa marriage;
-$city isa city;
-($mar, $city) isa located;
- 
-answers>>
- 
-$city isa city, has name "London";
-```
-
-
-## A higher degree of safety
-
-Types provide a way to describe the logical structures of your data, allowing TypeDB to validate that your code inserts and queries data correctly. Query validation goes beyond static type checking, and includes logical validations of meaningless queries. With strict type-checking errors, you have a dataset that you can trust.
-
-### Logical data validation
-
-Inserted data gets validated beyond static type checking of attribute value types. Entities are validated to only have the correct attributes, and relations are validated to only relate things that are logically allowed. TypeDB performs richer validation of inserted entities and relations by evaluating the polymorphic types of the things involved.
-
-```typeql
 insert
-
-$charlie isa person, has name "Charlie";
-$dataCo isa company, has name "DataCo";
-(husband: $charlie, wife: $dataCo) isa marriage; # invalid relation
-
-commit>>
-
-ERROR: invalid data detected during type validation
+$chloe isa full-time-employee,
+    has full-name "Chloé Dupond",
+    has email "chloe@vaticle.com",
+    has employee-id 185,
+    has weekly-hours 35;
+$hire (employee: $chloe, ceo: $kevin) isa hiring,
+    has date 2023-09-27;
 ```
 
+### Composable patterns
 
-### Logical query validation
-
-Read queries executed on TypeDB go through a type resolution process. This process not only optimises the query's execution, but also acts as a static type checker to reject meaningless and unsatisfiable queries, as they are likely a user error.
+TypeDB's TypeQL query language uses pattern matching to find data.
+Patterns in TypeQL are fully composable.
+Every complex pattern can be broken down into a conjunction of atomic constraints,
+which can be concatenated in any order.
+Any pattern composed of valid constraints is guaranteed to be valid itself, no matter how complex.
 
 ```typeql
+match 
+$user isa user;
+
 match
+$user isa user;
+$user has email "john@vaticle.com";
 
-$alice isa person, has name "Alice";
-$bob isa person, has name "Bob";
-($alice, $bob) isa marriage;
-$dataCo isa company, has name "DataCo";
-($bob, $dataCo) isa marriage; # invalid relation
-
-answers>>
-
-ERROR: unsatisfiable query detected during type resolution
-```
-
-## Evolved with logical inference
-
-TypeDB encodes your data for logical interpretation by a reasoning engine. It enables type-inference and rule-inference that creates logical abstractions of data. This allows the discovery of facts and patterns that would otherwise be too hard to find; and complex queries become much simpler.
-
-### Rules
-
-TypeQL allows you to define rules in your schema. This extends the expressivity of your model as it enables the system to derive new conclusions when a certain logical form in your dataset is satisfied. Like functions in programming, rules can chain onto one another, creating abstractions of behaviour at the data level.
-
-```typeql
-define
-
-rule transitive-location:
-when {
-  (located: $x, locating: $y);
-  (located: $y, locating: $z);
-} then {
-  (located: $x, locating: $z);
-};
-```
-
-### Inference
-
-TypeDB's inference facility translates one query into all of its possible interpretations. This happens through two mechanisms: type-based and rule-based inference. Not only does this derive new conclusions and uncovers relationships that would otherwise be hidden, but it also enables the abstraction of complex patterns into simple queries.
-
-```typeql
 match
+$user isa user;
+$user has email "john@vaticle.com";
+(team: $team, member: $user) isa team-membership;
 
-$person isa person;
-$uk isa country, has name "UK";
-($person, $uk) isa location;
-get $person;
-
-answers>>
-
-$person isa teacher, has name "Alice";
-$person isa postgrad, has name "Bob";
+match
+$user isa user;
+$user has email "john@vaticle.com";
+(team: $team, member: $user) isa team-membership;
+$team has name "Engineering";
 ```
 
 ## TypeQL grammar and language libraries
 
-> Note: All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively.
+> Note: All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. 
+> If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively.
 > However, if you would like to construct TypeQL queries programmatically, you can do so with "Language Libraries" listed below.
 
 - [TypeQL Grammar](https://github.com/vaticle/typeql/blob/master/grammar/README.md)
 - [TypeQL Language Library for Java](https://github.com/vaticle/typeql/blob/master/java)
 - [TypeQL Language Library for Rust (under development)](https://github.com/vaticle/typeql/blob/master/rust)
 - [TypeQL Language Library for Python (under development)](https://github.com/typedb-osi/typeql-lang-python)
+
+## Further links
+
+If you want to begin your journey with TypeQL, you can explore the following resources:
+
+* [The features](https://typedb.com/features)
+
+* [The philosophy](https://typedb.com/philosophy)
+
+* [The quickstart](https://typedb.com/docs/typedb/2.x/quickstart-guide)
+
+* [The docs](https://typedb.com/docs/typeql/2.x/overview)
 
 ## Contributions
 
