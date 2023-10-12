@@ -5,6 +5,8 @@
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typeql-3dce8c.svg)](https://stackoverflow.com/questions/tagged/typeql)
 
+[![TypeDB Studio](./banner.png)](https://typedb.com/docs/typeql/2.x/overview)
+
 * [A higher level of expressivity](#a-higher-level-of-expressivity)
 * [A higher degree of safety](#a-higher-degree-of-safety)
 * [Evolved with logical inference](#evolved-with-logical-inference)
