@@ -11,10 +11,10 @@ TypeQL is the query language of [TypeDB](https://github.com/vaticle/typedb).
 It features a near-natural, declarative, and highly composable syntax for defining,
 manipulating, querying, and reasoning over data in a TypeDB database.
 
-* [A higher level of expressivity](#a-higher-level-of-expressivity)
-* [A higher degree of safety](#a-higher-degree-of-safety)
-* [Evolved with logical inference](#evolved-with-logical-inference)
-* [TypeQL libraries](#typeql-grammar-and-language-libraries)
+* [Core design principles](#core-design-principles)
+* [Query examples](#query-examples)
+* [TypeQL grammar](#typeql-grammar)
+* [Resources](#resources)
 * [Contributions](#contributions)
 * [Licensing](#licensing)
 
@@ -50,7 +50,7 @@ which ensures consistency of any query sent to the database.
 For a more in-depth overview of the range of statements
 that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/features)!
 
-## Examples of TypeQL
+## Query examples
 
 ### Entity-Relation-Attribute
 
@@ -166,7 +166,7 @@ $user has email "john@vaticle.com";
 $team has name "Engineering";
 ```
 
-## TypeQL grammar and language libraries
+## TypeQL grammar
 
 > Note: All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. 
 > If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively.
@@ -177,17 +177,22 @@ $team has name "Engineering";
 - [TypeQL Language Library for Rust (under development)](https://github.com/vaticle/typeql/blob/master/rust)
 - [TypeQL Language Library for Python (under development)](https://github.com/typedb-osi/typeql-lang-python)
 
-## Further links
+## Resources
 
-If you want to begin your journey with TypeQL, you can explore the following resources:
+### Developer resources
 
-* [The features](https://typedb.com/features)
+- Documentation: https://typedb.com/docs
+- Discussion Forum: https://forum.typedb.com/
+- Discord Chat Server: https://typedb.com/discord
+- Community Projects: https://github.com/typedb-osi
 
-* [The philosophy](https://typedb.com/philosophy)
+### Useful links
 
-* [The quickstart](https://typedb.com/docs/typedb/2.x/quickstart-guide)
+If you want to begin your journey with TypeDB, you can explore the following resources:
 
-* [The docs](https://typedb.com/docs/typeql/2.x/overview)
+* More on TypeDB's [features](https://typedb.com/features)
+* In-depth dive into TypeDB's [philosophy](https://typedb.com/philosophy)
+* Our [TypeDB quickstart](https://typedb.com/docs/typedb/2.x/quickstart-guide)
 
 ## Contributions
 
