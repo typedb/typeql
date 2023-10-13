@@ -7,62 +7,26 @@
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)
 [![Stack Overflow](https://img.shields.io/badge/stackoverflow-typeql-3dce8c.svg)](https://stackoverflow.com/questions/tagged/typeql)
 
+
+
+# Introducing TypeQL
+
 TypeQL is the query language of [TypeDB](https://github.com/vaticle/typedb).
-It features a near-natural, declarative, and highly composable syntax for defining,
-manipulating, querying, and reasoning over data in a TypeDB database.
 
-* [Core design principles](#core-design-principles)
-* [Query examples](#query-examples)
-* [TypeQL grammar](#typeql-grammar)
-* [Resources](#resources)
-* [Contributions](#contributions)
-* [Licensing](#licensing)
+- **Conceptual and intuitive**. TypeQL’s design is based directly on the [polymorphic conceptual data model]([https://typedb.com/philosophy](https://development.typedb.com/philosophy)) of TypeDB databases, providing syntax for working with entities, relation, and attributes, as well as inheritance and interfaces. TypeQL  is designed to closely mirrors natural language: its syntax is comprised of sequences of statements which often read just like sentences.
+- **A fully variablizable language**. Any part of a TypeQL statement can be variablized, which can be used to express [parametric polymorphic](https://typedb.com/features#polymorphic-queries) statements. This enables TypeQL to express powerful parametric database operations.
+- **Declarative and built for consistency.** TypeQL’s declarative statement-based syntax can be naturally interleaved with many other declarative constructs, including variable arithmetic or regular expressions. These additional constructs are integrated into TypeDB’s type system, which ensures consistency of any query sent to the database.
 
-## Core design principles
+For a quick overview of the range of statements that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/docs/).
 
-### Conceptual and intuitive
 
-TypeQL’s design is based directly on the polymorphic conceptual data model of TypeDB databases,
-including syntax for modeling with `entity`, `relation`, and `attribute` types,
-while also closely mirroring the structure of natural language.
-Like natural language, TypeQL queries are comprised of sequences of statements, delineated with `;`.
-Many statements in TypeQL queries read just like sentences,
-and follow a “subject-verb-object” order, like `$some_employee has name "John Doe";`.
-Moreover, all collection statements are composable,
-and the composition can be given in any order —
-TypeDB’s inference engine will infer all necessary types and inform the user if type constraints cannot be satisfied.
+## A polymorphic query language
 
-### Fully variablizable language
+### Define types, inheritance, and interfaces
 
-Variables in TypeQL are pre-fixed with `$`.
-Just as any part in a sentence might be unknown to us, any part of a TypeQL statement can be variablized.
-For example, both `$some_employee has name $full_name;` and `$some_employee has $some_attribute "John Doe";`
-are valid in TypeQL syntax.
-The ability to variablize types is underpinned by a form of [parametric polymorphism](https://typedb.com/features#polymorphic-queries),
-which leads to particularly powerful queries and database operations that can be performed with TypeDB.
+TypeQL features the type system of the [Polymorphic Entity-Relation-Attribute](https://typedb.com/philosophy) (PERA) model: entities are independent concepts, relations depend on role interfaces played by either entities or relations, and attributes are properties with a value that can interface with (namely, be owned by) entities or relations. Entities, relations, and attributes are all considered first-class citizens and can be subtyped, allowing for expressive modeling without the need for normalization or reification.
 
-### Extensible and built for consistency
-
-TypeQL’s statement-based syntax can be naturally interleaved with many other declarative constructs,
-including variable arithmetic or regular expressions.
-All these additional construct are integrated into database’s type system,
-which ensures consistency of any query sent to the database.
-For a more in-depth overview of the range of statements
-that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/features)!
-
-## Query examples
-
-### Entity-Relation-Attribute
-
-TypeQL features the type system of the [Polymorphic Entity-Relation-Attribute](https://development.typedb.com/philosophy)
-(PERA) model:
-entities are independent concepts,
-relations depend on role interfaces played by either entities or relations,
-and attributes are properties with a value that can interface with (namely, be owned by) entities or relations.
-Entities, relations, and attributes are all considered first-class citizens and can be subtyped,
-allowing for expressive modeling without the need for normalization or reification.
-
-```typeql
+```php
 define
 
 id sub attribute, value string;
@@ -91,14 +55,12 @@ request sub relation,
     relates requestee;
 ```
 
-### Polymorphic querying
 
-Use subtyping to query a common supertype and automatically retrieve matching data.
-Variablize queries to return types, roles, and data.
-New types added to the schema are automatically included in the results of pre-existing queries against their supertype,
-so no refactoring is necessary.
+### Write polymorphic database queries 
 
-```typeql
+Use subtyping to query a common supertype and automatically retrieve matching data. Variablize queries to return types, roles, and data. New types added to the schema are automatically included in the results of pre-existing queries against their supertype, so no refactoring is necessary.
+
+```
 match $user isa user,
     has full-name $name,
     has email $email;
@@ -117,14 +79,14 @@ $user isa $user-type,
 # This returns all users and their type
 ```
 
-### Near Natural and fully declarative
 
-TypeQL's near-natural syntax and fully declarative properties make queries easily understandable,
-reducing the learning curve and easing maintenance.
-This allows you to define query patterns without considering execution strategy.
-TypeDB's query planner always optimizes queries, so you don't have to worry about the logical implementation.
+## Build queries with ease
 
-```typeql
+### Gain clarity through natural and fully declarative syntax
+
+TypeQL's near-natural syntax and fully declarative properties make queries easily understandable, reducing the learning curve and easing maintenance. This allows you to define query patterns without considering execution strategy. TypeDB's query planner always optimizes queries, so you don't have to worry about the logical implementation.
+
+```php
 match
 $kevin isa user, has email "kevin@vaticle.com";
 
@@ -138,15 +100,11 @@ $hire (employee: $chloe, ceo: $kevin) isa hiring,
     has date 2023-09-27;
 ```
 
-### Composable patterns
+### Develop modularly with fully composable query patterns
 
-TypeDB's TypeQL query language uses pattern matching to find data.
-Patterns in TypeQL are fully composable.
-Every complex pattern can be broken down into a conjunction of atomic constraints,
-which can be concatenated in any order.
-Any pattern composed of valid constraints is guaranteed to be valid itself, no matter how complex.
+TypeDB's TypeQL query language uses pattern matching to find data. Patterns in TypeQL are fully composable. Every complex pattern can be broken down into a conjunction of atomic constraints, which can be concatenated in any order. Any pattern composed of valid constraints is guaranteed to be valid itself, no matter how complex.
 
-```typeql
+```php
 match 
 $user isa user;
 
@@ -166,6 +124,7 @@ $user has email "john@vaticle.com";
 $team has name "Engineering";
 ```
 
+
 ## TypeQL grammar
 
 > Note: All TypeDB Clients, as well as TypeDB Console, accept TypeQL syntax natively. 
@@ -176,6 +135,7 @@ $team has name "Engineering";
 - [TypeQL Language Library for Java](https://github.com/vaticle/typeql/blob/master/java)
 - [TypeQL Language Library for Rust (under development)](https://github.com/vaticle/typeql/blob/master/rust)
 - [TypeQL Language Library for Python (under development)](https://github.com/typedb-osi/typeql-lang-python)
+
 
 ## Resources
 
