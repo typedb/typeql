@@ -1,20 +1,30 @@
-[![TypeDB Studio](./banner.png)](https://typedb.com/docs/typeql/2.x/overview)
+[![TypeQL](./banner.png)](https://typedb.com/docs/typeql/2.x/overview)
 
-[![Factory](https://factory.vaticle.com/api/status/vaticle/typeql/badge.svg)](https://factory.vaticle.com/vaticle/typeql)
-[![GitHub release](https://img.shields.io/github/release/vaticle/typeql.svg)](https://github.com/vaticle/typeql/releases/latest)
-[![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff)](https://vaticle.com/discord)
-[![Discussion Forum](https://img.shields.io/discourse/https/forum.vaticle.com/topics.svg)](https://forum.vaticle.com)
-[![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)
-[![Stack Overflow](https://img.shields.io/badge/stackoverflow-typeql-3dce8c.svg)](https://stackoverflow.com/questions/tagged/typeql)
-
+<div align="center">
+  <a href="https://factory.vaticle.com/vaticle/typeql">
+    <img alt="Factory" src="https://factory.vaticle.com/api/status/vaticle/typeql/badge.svg" />
+  </a>
+  <a href="https://factory.vaticle.com/vaticle/typeql">
+    <img alt="GitHub release" src="https://img.shields.io/github/release/vaticle/typeql.svg">
+  </a>
+  <a href="https://vaticle.com/discord">
+    <img alt="Discord" src="https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff" />
+  </a>
+  <a href="https://forum.vaticle.com">
+    <img alt="Discussion Forum" src="https://img.shields.io/discourse/https/forum.vaticle.com/topics.svg" />
+  </a>
+  <a href="https://stackoverflow.com/questions/tagged/typeql">
+    <img alt="Stack Overflow" src="https://img.shields.io/badge/stackoverflow-typeql-3dce8c.svg">
+  </a>
+</div>
 
 
 # Introducing TypeQL
 
-TypeQL is the query language of [TypeDB](https://github.com/vaticle/typedb).
+TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**.
 
-- **Conceptual and intuitive**. TypeQL’s design is based directly on the [polymorphic conceptual data model]([https://typedb.com/philosophy](https://development.typedb.com/philosophy)) of TypeDB databases, providing syntax for working with entities, relation, and attributes, as well as inheritance and interfaces. TypeQL  is designed to closely mirrors natural language: its syntax is comprised of sequences of statements which often read just like sentences.
-- **A fully variablizable language**. Any part of a TypeQL statement can be variablized, which can be used to express [parametric polymorphic](https://typedb.com/features#polymorphic-queries) statements. This enables TypeQL to express powerful parametric database operations.
+- **Conceptual and intuitive**. TypeQL’s design is based directly on the [polymorphic conceptual data model]([https://typedb.com/philosophy](https://development.typedb.com/philosophy)) of TypeDB. Its syntactic structure closely mirrors that of natural language, comprising sequences of statements, which makes it easy and intuitive to work even with highly complex database applications.
+- **A fully variablizable language**. Any concept in TypeQL has a type, and so any concept in TypeQL can be variablized in a query – even types! This enables TypeQL to express powerful [parametric](https://typedb.com/features#polymorphic-queries) database operations.
 - **Declarative and built for consistency.** TypeQL’s declarative statement-based syntax can be naturally interleaved with many other declarative constructs, including variable arithmetic or regular expressions. These additional constructs are integrated into TypeDB’s type system, which ensures consistency of any query sent to the database.
 
 For a quick overview of the range of statements that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/docs/).
@@ -80,7 +90,7 @@ $user isa $user-type,
 ```
 
 
-## Build queries with ease
+## Building queries with ease
 
 ### Gain clarity through natural and fully declarative syntax
 
