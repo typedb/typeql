@@ -24,18 +24,18 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{variable::Reference, IsExplicit, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{variable::Reference, IsExplicit, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
-    pub type_: Box<TypeVariable>,
+    pub type_: Box<TypeStatement>,
     pub is_explicit: IsExplicit,
 }
 
 impl SubConstraint {
-    fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
+    fn new(type_: TypeStatement, is_explicit: IsExplicit) -> Self {
         Self { type_: Box::new(type_), is_explicit }
     }
 
@@ -61,8 +61,8 @@ impl From<UnboundConceptVariable> for SubConstraint {
         Self::from(type_.into_type())
     }
 }
-impl From<TypeVariable> for SubConstraint {
-    fn from(type_: TypeVariable) -> Self {
+impl From<TypeStatement> for SubConstraint {
+    fn from(type_: TypeStatement) -> Self {
         Self::new(type_, IsExplicit::No)
     }
 }
@@ -78,8 +78,8 @@ impl From<(UnboundConceptVariable, IsExplicit)> for SubConstraint {
         Self::from((type_.into_type(), is_explicit))
     }
 }
-impl From<(TypeVariable, IsExplicit)> for SubConstraint {
-    fn from((type_, is_explicit): (TypeVariable, IsExplicit)) -> Self {
+impl From<(TypeStatement, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (TypeStatement, IsExplicit)) -> Self {
         Self::new(type_, is_explicit)
     }
 }

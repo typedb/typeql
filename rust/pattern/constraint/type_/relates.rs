@@ -24,14 +24,14 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{variable::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelatesConstraint {
-    pub role_type: TypeVariable,
-    pub overridden_role_type: Option<TypeVariable>,
+    pub role_type: TypeStatement,
+    pub overridden_role_type: Option<TypeStatement>,
 }
 
 impl RelatesConstraint {
@@ -82,14 +82,14 @@ impl From<UnboundConceptVariable> for RelatesConstraint {
     }
 }
 
-impl From<TypeVariable> for RelatesConstraint {
-    fn from(role_type: TypeVariable) -> Self {
+impl From<TypeStatement> for RelatesConstraint {
+    fn from(role_type: TypeStatement) -> Self {
         RelatesConstraint { role_type, overridden_role_type: None }
     }
 }
 
-impl From<(TypeVariable, Option<TypeVariable>)> for RelatesConstraint {
-    fn from((role_type, overridden_role_type): (TypeVariable, Option<TypeVariable>)) -> Self {
+impl From<(TypeStatement, Option<TypeStatement>)> for RelatesConstraint {
+    fn from((role_type, overridden_role_type): (TypeStatement, Option<TypeStatement>)) -> Self {
         RelatesConstraint { role_type, overridden_role_type }
     }
 }

@@ -17,36 +17,21 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
-use crate::{common::error::TypeQLError, pattern::ThingStatement, Result};
+use crate::pattern::{Conjunction, Pattern};
 
-pub trait Writable {
-    fn vars(self) -> Vec<ThingStatement>;
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MatchClause {
+    conjunction: Conjunction,
 }
 
-impl Writable for ThingStatement {
-    fn vars(self) -> Vec<ThingStatement> {
-        vec![self]
+impl MatchClause {
+    pub fn new(conjunction: Conjunction) -> Self {
+        Self { conjunction }
     }
-}
 
-impl<const N: usize> Writable for [ThingStatement; N] {
-    fn vars(self) -> Vec<ThingStatement> {
-        self.to_vec()
+    pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
+        Self::new(Conjunction::new(patterns))
     }
-}
-
-impl Writable for Vec<ThingStatement> {
-    fn vars(self) -> Vec<ThingStatement> {
-        self
-    }
-}
-
-pub(crate) fn expect_non_empty(variables: &[ThingStatement]) -> Result<()> {
-    if variables.is_empty() {
-        Err(TypeQLError::MissingPatterns())?
-    }
-    Ok(())
 }

@@ -24,63 +24,63 @@ use crate::{
     common::token,
     pattern::{
         LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, SubConstraint,
-        TypeVariable, ValueTypeConstraint,
+        TypeStatement, ValueTypeConstraint,
     },
     Label,
 };
 
 pub trait TypeConstrainable {
-    fn constrain_abstract(self) -> TypeVariable;
-    fn constrain_label(self, label: LabelConstraint) -> TypeVariable;
-    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable;
-    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable;
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable;
-    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable;
-    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable;
-    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeVariable;
+    fn constrain_abstract(self) -> TypeStatement;
+    fn constrain_label(self, label: LabelConstraint) -> TypeStatement;
+    fn constrain_owns(self, owns: OwnsConstraint) -> TypeStatement;
+    fn constrain_plays(self, plays: PlaysConstraint) -> TypeStatement;
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeStatement;
+    fn constrain_relates(self, relates: RelatesConstraint) -> TypeStatement;
+    fn constrain_sub(self, sub: SubConstraint) -> TypeStatement;
+    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement;
 }
 
 pub trait TypeVariableBuilder: Sized {
-    fn abstract_(self) -> TypeVariable;
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeVariable;
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeVariable;
-    fn regex(self, regex: impl Into<RegexConstraint>) -> TypeVariable;
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeVariable;
-    fn sub(self, sub: impl Into<SubConstraint>) -> TypeVariable;
-    fn type_(self, type_name: impl Into<Label>) -> TypeVariable;
-    fn value(self, value_type: token::ValueType) -> TypeVariable;
+    fn abstract_(self) -> TypeStatement;
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeStatement;
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeStatement;
+    fn regex(self, regex: impl Into<RegexConstraint>) -> TypeStatement;
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeStatement;
+    fn sub(self, sub: impl Into<SubConstraint>) -> TypeStatement;
+    fn type_(self, type_name: impl Into<Label>) -> TypeStatement;
+    fn value(self, value_type: token::ValueType) -> TypeStatement;
 }
 
 impl<U: TypeConstrainable> TypeVariableBuilder for U {
-    fn abstract_(self) -> TypeVariable {
+    fn abstract_(self) -> TypeStatement {
         self.constrain_abstract()
     }
 
-    fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeVariable {
+    fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeStatement {
         self.constrain_owns(owns.into())
     }
 
-    fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeVariable {
+    fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeStatement {
         self.constrain_plays(plays.into())
     }
 
-    fn regex(self, regex: impl Into<RegexConstraint>) -> TypeVariable {
+    fn regex(self, regex: impl Into<RegexConstraint>) -> TypeStatement {
         self.constrain_regex(regex.into())
     }
 
-    fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeVariable {
+    fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeStatement {
         self.constrain_relates(relates.into())
     }
 
-    fn sub(self, sub: impl Into<SubConstraint>) -> TypeVariable {
+    fn sub(self, sub: impl Into<SubConstraint>) -> TypeStatement {
         self.constrain_sub(sub.into())
     }
 
-    fn type_(self, type_name: impl Into<Label>) -> TypeVariable {
+    fn type_(self, type_name: impl Into<Label>) -> TypeStatement {
         self.constrain_label(LabelConstraint { label: type_name.into() })
     }
 
-    fn value(self, value_type: token::ValueType) -> TypeVariable {
+    fn value(self, value_type: token::ValueType) -> TypeStatement {
         self.constrain_value_type(ValueTypeConstraint { value_type })
     }
 }

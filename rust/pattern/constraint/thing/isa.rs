@@ -24,18 +24,18 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{IsExplicit, Reference, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{IsExplicit, Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
-    pub type_: TypeVariable,
+    pub type_: TypeStatement,
     pub is_explicit: IsExplicit,
 }
 
 impl IsaConstraint {
-    fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
+    fn new(type_: TypeStatement, is_explicit: IsExplicit) -> Self {
         IsaConstraint { type_, is_explicit }
     }
 

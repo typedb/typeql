@@ -29,20 +29,22 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedReferences, ThingVariable},
-    query::{writable::expect_non_empty, TypeQLMatch, TypeQLUpdate, Writable},
+    pattern::{NamedReferences, ThingStatement},
+    query::{writable::expect_non_empty, TypeQLGet, TypeQLUpdate, Writable},
     write_joined,
 };
+use crate::query::modifier::Modifiers;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDelete {
-    pub match_query: TypeQLMatch,
-    pub variables: Vec<ThingVariable>,
+    pub clause_match: TypeQLMatch,
+    pub statements: Vec<ThingStatement>,
+    pub modifiers: Modifiers,
 }
 
 impl TypeQLDelete {
     pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
-        TypeQLUpdate { delete_query: self, insert_variables: vars.vars() }
+        TypeQLUpdate { query_delete: self, insert_statements: vars.vars() }
     }
 }
 
@@ -50,17 +52,17 @@ impl Validatable for TypeQLDelete {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut ([
-                expect_delete_in_scope_of_match(&self.match_query, &self.variables),
-                expect_non_empty(&self.variables),
-                self.match_query.validate(),
+                expect_delete_in_scope_of_match(&self.clause_match, &self.statements),
+                expect_non_empty(&self.statements),
+                self.clause_match.validate(),
             ]
             .into_iter())
-            .chain(self.variables.iter().map(Validatable::validate)),
+            .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }
 
-fn expect_delete_in_scope_of_match(match_query: &TypeQLMatch, variables: &[ThingVariable]) -> Result<()> {
+fn expect_delete_in_scope_of_match(match_query: &TypeQLGet, variables: &[ThingStatement]) -> Result<()> {
     let names_in_scope = match_query.named_references();
     collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(|r| -> Result<()> {
         if names_in_scope.contains(r) {
@@ -73,9 +75,9 @@ fn expect_delete_in_scope_of_match(match_query: &TypeQLMatch, variables: &[Thing
 
 impl fmt::Display for TypeQLDelete {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.match_query)?;
+        writeln!(f, "{}", self.clause_match)?;
         writeln!(f, "{}", token::Command::Delete)?;
-        write_joined!(f, ";\n", self.variables)?;
+        write_joined!(f, ";\n", self.statements)?;
         f.write_str(";")
     }
 }

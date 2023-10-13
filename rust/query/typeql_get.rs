@@ -27,31 +27,27 @@ use itertools::Itertools;
 use crate::{
     common::{
         error::{collect_err, Error, TypeQLError},
+        Result,
         token,
         validatable::Validatable,
-        Result,
     },
     pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundVariable},
-    query::{AggregateQueryBuilder, TypeQLDelete, TypeQLInsert, TypeQLMatchGroup, Writable},
+    query::{AggregateQueryBuilder, TypeQLDelete, TypeQLGetGroup, TypeQLInsert, Writable},
     write_joined,
 };
+use crate::query::MatchClause;
+use crate::query::modifier::{Modifiers, Sorting};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct TypeQLMatch {
-    pub conjunction: Conjunction,
+pub struct TypeQLGet {
+    pub match_: MatchClause,
+    pub filter: Vec<UnboundVariable>,
     pub modifiers: Modifiers,
 }
 
-impl AggregateQueryBuilder for TypeQLMatch {}
+impl AggregateQueryBuilder for TypeQLGet {}
 
-impl TypeQLMatch {
-    pub fn new(conjunction: Conjunction, modifiers: Modifiers) -> Self {
-        Self { conjunction, modifiers }
-    }
-
-    pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
-        Self::new(Conjunction::new(patterns), Modifiers::default())
-    }
+impl TypeQLGet {
 
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         Self::new(self.conjunction, self.modifiers.filter(vars))
@@ -66,27 +62,27 @@ impl TypeQLMatch {
     }
 
     pub fn limit(self, limit: usize) -> Self {
-        TypeQLMatch { modifiers: self.modifiers.limit(limit), ..self }
+        TypeQLGet { modifiers: self.modifiers.limit(limit), ..self }
     }
 
     pub fn offset(self, offset: usize) -> Self {
-        TypeQLMatch { modifiers: self.modifiers.offset(offset), ..self }
+        TypeQLGet { modifiers: self.modifiers.offset(offset), ..self }
     }
 
     pub fn insert(self, vars: impl Writable) -> TypeQLInsert {
-        TypeQLInsert { match_query: Some(self), variables: vars.vars() }
+        TypeQLInsert { get_query: Some(self), statements: vars.vars() }
     }
 
     pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
-        TypeQLDelete { match_query: self, variables: vars.vars() }
+        TypeQLDelete { clause_match: self, statements: vars.vars() }
     }
 
-    pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLMatchGroup {
-        TypeQLMatchGroup { match_query: self, group_var: var.into() }
+    pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLGetGroup {
+        TypeQLGetGroup { get_query: self, group_var: var.into() }
     }
 }
 
-impl Validatable for TypeQLMatch {
+impl Validatable for TypeQLGet {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut [
@@ -103,7 +99,7 @@ impl Validatable for TypeQLMatch {
     }
 }
 
-impl NamedReferences for TypeQLMatch {
+impl NamedReferences for TypeQLGet {
     fn named_references(&self) -> HashSet<Reference> {
         if let Some(filter) = &self.modifiers.filter {
             filter.vars.iter().map(|v| v.reference().clone()).collect()
@@ -187,7 +183,7 @@ fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result<()> {
     Ok(())
 }
 
-impl fmt::Display for TypeQLMatch {
+impl fmt::Display for TypeQLGet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", token::Command::Match)?;
 
@@ -204,43 +200,6 @@ impl fmt::Display for TypeQLMatch {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
-pub struct Modifiers {
-    pub filter: Option<Filter>,
-    pub sorting: Option<Sorting>,
-    pub limit: Option<Limit>,
-    pub offset: Option<Offset>,
-}
-
-impl Modifiers {
-    pub fn is_empty(&self) -> bool {
-        self.filter.is_none() && self.sorting.is_none() && self.limit.is_none() && self.offset.is_none()
-    }
-
-    pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
-        Self { filter: Some(Filter { vars }), ..self }
-    }
-
-    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
-        Self { sorting: Some(sorting.into()), ..self }
-    }
-
-    pub fn limit(self, limit: usize) -> Self {
-        Self { limit: Some(Limit { limit }), ..self }
-    }
-
-    pub fn offset(self, offset: usize) -> Self {
-        Self { offset: Some(Offset { offset }), ..self }
-    }
-}
-
-impl fmt::Display for Modifiers {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_joined!(f, "; ", self.filter, self.sorting, self.offset, self.limit)?;
-        f.write_str(";")
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Filter {
     pub vars: Vec<UnboundVariable>,
 }
@@ -249,105 +208,5 @@ impl fmt::Display for Filter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ", token::Filter::Get)?;
         write_joined!(f, ", ", self.vars)
-    }
-}
-
-pub mod sorting {
-    use std::fmt;
-
-    use crate::{common::token, pattern::UnboundVariable};
-
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    pub struct OrderedVariable {
-        pub var: UnboundVariable,
-        pub order: Option<token::Order>,
-    }
-
-    impl OrderedVariable {
-        pub fn new(var: UnboundVariable, order: Option<token::Order>) -> Self {
-            OrderedVariable { var, order }
-        }
-    }
-
-    impl<T: Into<UnboundVariable>> From<(T, token::Order)> for OrderedVariable {
-        fn from(ordered_var: (T, token::Order)) -> Self {
-            let (variable, order) = ordered_var;
-            Self::new(variable.into(), Some(order))
-        }
-    }
-
-    impl<T: Into<UnboundVariable>> From<T> for OrderedVariable {
-        fn from(variable: T) -> Self {
-            Self::new(variable.into(), None)
-        }
-    }
-
-    impl fmt::Display for OrderedVariable {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(f, "{}", self.var)?;
-            if let Some(order) = &self.order {
-                write!(f, " {order}")?;
-            }
-            Ok(())
-        }
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Sorting {
-    vars: Vec<sorting::OrderedVariable>,
-}
-
-impl Sorting {
-    pub fn new(vars: Vec<sorting::OrderedVariable>) -> Self {
-        Sorting { vars }
-    }
-
-    pub fn get_order(&self, var: UnboundVariable) -> Result<token::Order> {
-        self.vars
-            .iter()
-            .find_map(|v| (v.var == var).then_some(v.order.unwrap_or(token::Order::Asc)))
-            .ok_or_else(|| TypeQLError::VariableNotSorted(var).into())
-    }
-}
-
-impl<const N: usize, T: Into<sorting::OrderedVariable>> From<[T; N]> for Sorting {
-    fn from(ordered_vars: [T; N]) -> Self {
-        Self::new(ordered_vars.map(|ordered_var| ordered_var.into()).to_vec())
-    }
-}
-
-impl<'a, T: Into<sorting::OrderedVariable> + Clone> From<&'a [T]> for Sorting {
-    fn from(ordered_vars: &'a [T]) -> Self {
-        Self::new(ordered_vars.iter().map(|ordered_var| ordered_var.clone().into()).collect())
-    }
-}
-
-impl fmt::Display for Sorting {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Filter::Sort)?;
-        write_joined!(f, ", ", self.vars)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Default)]
-pub struct Limit {
-    pub limit: usize,
-}
-
-impl fmt::Display for Limit {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Filter::Limit, self.limit)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, Default)]
-pub struct Offset {
-    pub offset: usize,
-}
-
-impl fmt::Display for Offset {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Filter::Offset, self.offset)
     }
 }

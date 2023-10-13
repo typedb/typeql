@@ -29,13 +29,13 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Definable, RuleDeclaration, TypeVariable},
+    pattern::{Definable, RuleDeclaration, TypeStatement},
     write_joined,
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLUndefine {
-    variables: Vec<TypeVariable>,
+    variables: Vec<TypeStatement>,
     rules: Vec<RuleDeclaration>,
 }
 
@@ -50,7 +50,7 @@ impl TypeQLUndefine {
         })
     }
 
-    fn add_definition(mut self, variable: TypeVariable) -> Self {
+    fn add_definition(mut self, variable: TypeStatement) -> Self {
         self.variables.push(variable);
         self
     }
@@ -66,13 +66,13 @@ impl Validatable for TypeQLUndefine {
         collect_err(
             &mut iter::once(expect_non_empty(&self.variables, &self.rules))
                 .chain(self.variables.iter().map(Validatable::validate))
-                .chain(self.variables.iter().map(TypeVariable::validate_definable))
+                .chain(self.variables.iter().map(TypeStatement::validate_definable))
                 .chain(self.rules.iter().map(Validatable::validate)),
         )
     }
 }
 
-fn expect_non_empty(variables: &[TypeVariable], rules: &[RuleDeclaration]) -> Result<()> {
+fn expect_non_empty(variables: &[TypeStatement], rules: &[RuleDeclaration]) -> Result<()> {
     if variables.is_empty() && rules.is_empty() {
         Err(TypeQLError::MissingDefinables())?
     }

@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, NamedReferences, Pattern, ThingVariable},
+    pattern::{Conjunction, NamedReferences, Pattern, ThingStatement},
     Label,
 };
 
@@ -72,7 +72,7 @@ pub struct RuleWhenStub {
 }
 
 impl RuleWhenStub {
-    pub fn then(self, then: ThingVariable) -> RuleDefinition {
+    pub fn then(self, then: ThingStatement) -> RuleDefinition {
         RuleDefinition { label: self.label, when: self.when, then }
     }
 }
@@ -81,7 +81,7 @@ impl RuleWhenStub {
 pub struct RuleDefinition {
     pub label: Label,
     pub when: Conjunction,
-    pub then: ThingVariable,
+    pub then: ThingStatement,
 }
 
 impl Validatable for RuleDefinition {
@@ -125,7 +125,7 @@ fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bo
     })
 }
 
-fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
+fn expect_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result<()> {
     if infers_ownership(then) {
         let has = then.has.get(0).unwrap();
         if has.type_.is_some() && has.attribute.reference.is_name() {
@@ -148,15 +148,15 @@ fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()
     }
 }
 
-fn infers_ownership(then: &ThingVariable) -> bool {
+fn infers_ownership(then: &ThingStatement) -> bool {
     then.has.len() == 1 && (then.iid.is_none() && then.isa.is_none() && then.value.is_none() && then.relation.is_none())
 }
 
-fn infers_relation(then: &ThingVariable) -> bool {
+fn infers_relation(then: &ThingStatement) -> bool {
     then.relation.is_some() && then.isa.is_some() && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
 }
 
-fn expect_then_bounded_by_when(then: &ThingVariable, when: &Conjunction, rule_label: &Label) -> Result<()> {
+fn expect_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result<()> {
     let bounds = when.named_references();
     if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?

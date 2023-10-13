@@ -20,6 +20,10 @@
  *
  */
 
+// TODO - reenable
+// #![deny(elided_lifetimes_in_paths)]
+// #![deny(unused_must_use)]
+
 #[macro_use]
 mod builder;
 pub mod common;
@@ -35,9 +39,9 @@ pub use builder::{
 use common::Result;
 use parser::{
     visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
-    visit_eof_schema_rule, visit_eof_variable,
+    visit_eof_schema_rule, visit_eof_statement,
 };
-use pattern::{Definable, Label, Pattern, RuleDefinition, Variable};
+use pattern::{Definable, Label, Pattern, RuleDefinition, Statement};
 use query::Query;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
@@ -64,8 +68,8 @@ pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition> {
     visit_eof_schema_rule(typeql_rule.trim_end())
 }
 
-pub fn parse_variable(typeql_variable: &str) -> Result<Variable> {
-    visit_eof_variable(typeql_variable.trim_end())
+pub fn parse_variable(typeql_variable: &str) -> Result<Statement> {
+    visit_eof_statement(typeql_variable.trim_end())
 }
 
 pub fn parse_label(typeql_label: &str) -> Result<Label> {

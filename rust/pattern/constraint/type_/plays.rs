@@ -24,19 +24,19 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{variable::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PlaysConstraint {
-    pub role_type: TypeVariable,
-    pub relation_type: Option<TypeVariable>,
-    pub overridden_role_type: Option<TypeVariable>,
+    pub role_type: TypeStatement,
+    pub relation_type: Option<TypeStatement>,
+    pub overridden_role_type: Option<TypeStatement>,
 }
 
 impl PlaysConstraint {
-    pub(crate) fn new(role_type: TypeVariable, overridden_role_type: Option<TypeVariable>) -> Self {
+    pub(crate) fn new(role_type: TypeStatement, overridden_role_type: Option<TypeStatement>) -> Self {
         PlaysConstraint {
             relation_type: role_type
                 .label
@@ -115,8 +115,8 @@ impl From<UnboundConceptVariable> for PlaysConstraint {
     }
 }
 
-impl From<TypeVariable> for PlaysConstraint {
-    fn from(role_type: TypeVariable) -> Self {
+impl From<TypeStatement> for PlaysConstraint {
+    fn from(role_type: TypeStatement) -> Self {
         PlaysConstraint::new(role_type, None)
     }
 }

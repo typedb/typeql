@@ -37,7 +37,7 @@ use crate::{
     parse_query, parse_variable,
     pattern::{
         Annotation::Key, ConceptVariableBuilder, ExpressionBuilder, Label, RelationVariableBuilder,
-        ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Variable,
+        ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Statement,
     },
     query::AggregateQueryBuilder,
     rel, rule, sort_vars, type_, typeql_insert, typeql_match, Query,
@@ -1318,10 +1318,10 @@ fn test_parsing_patterns() {
 "#;
 
     let parsed = parse_patterns(patterns).unwrap().into_iter().map(|p| p.into_variable()).collect::<Vec<_>>();
-    let expected: Vec<Variable> = vec![
-        Variable::Thing(rel(("wife", "a")).rel(("husband", "b")).isa("marriage")),
-        Variable::Thing(cvar("a").has(("gender", "male"))),
-        Variable::Thing(cvar("b").has(("gender", "female"))),
+    let expected: Vec<Statement> = vec![
+        Statement::Thing(rel(("wife", "a")).rel(("husband", "b")).isa("marriage")),
+        Statement::Thing(cvar("a").has(("gender", "male"))),
+        Statement::Thing(cvar("b").has(("gender", "female"))),
     ];
 
     assert_eq!(expected, parsed);
@@ -1375,7 +1375,7 @@ fn test_parsing_variable_rel() {
     let variable = "(wife: $a, husband: $b) isa marriage";
 
     let parsed = parse_variable(variable).unwrap();
-    if let Variable::Thing(parsed_var) = parsed {
+    if let Statement::Thing(parsed_var) = parsed {
         let expected = rel(("wife", "a")).rel(("husband", "b")).isa("marriage");
         assert_valid_eq_repr!(expected, parsed_var, variable);
     } else {
@@ -1388,7 +1388,7 @@ fn test_parsing_variable_has() {
     let variable = "$x has is_interesting true";
 
     let parsed = parse_variable(variable).unwrap();
-    if let Variable::Thing(parsed_var) = parsed {
+    if let Statement::Thing(parsed_var) = parsed {
         let expected = cvar("x").has(("is_interesting", true));
         assert_valid_eq_repr!(expected, parsed_var, variable);
     } else {
@@ -1568,7 +1568,7 @@ $x regex "(fe)male";"#;
 
 #[test]
 fn test_typeql_parsing_query() {
-    assert!(matches!(parse_query("match\n$x isa movie;"), Ok(Query::Match(_))));
+    assert!(matches!(parse_query("match\n$x isa movie;"), Ok(Query::Get(_))));
 }
 
 #[test]

@@ -36,7 +36,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct TypeVariable {
+pub struct TypeStatement {
     pub reference: Reference,
     pub label: Option<LabelConstraint>,
     pub owns: Vec<OwnsConstraint>,
@@ -48,9 +48,9 @@ pub struct TypeVariable {
     pub abstract_: Option<AbstractConstraint>,
 }
 
-impl TypeVariable {
-    pub fn new(reference: Reference) -> TypeVariable {
-        TypeVariable {
+impl TypeStatement {
+    pub fn new(reference: Reference) -> TypeStatement {
+        TypeStatement {
             reference,
             abstract_: None,
             label: None,
@@ -91,7 +91,7 @@ impl TypeVariable {
     }
 }
 
-impl Validatable for TypeVariable {
+impl Validatable for TypeStatement {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut iter::once(self.reference.validate())
@@ -107,44 +107,44 @@ impl Validatable for TypeVariable {
     }
 }
 
-impl TypeConstrainable for TypeVariable {
-    fn constrain_abstract(self) -> TypeVariable {
-        TypeVariable { abstract_: Some(AbstractConstraint), ..self }
+impl TypeConstrainable for TypeStatement {
+    fn constrain_abstract(self) -> TypeStatement {
+        TypeStatement { abstract_: Some(AbstractConstraint), ..self }
     }
 
-    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
-        TypeVariable { label: Some(label), ..self }
+    fn constrain_label(self, label: LabelConstraint) -> TypeStatement {
+        TypeStatement { label: Some(label), ..self }
     }
 
-    fn constrain_owns(mut self, owns: OwnsConstraint) -> TypeVariable {
+    fn constrain_owns(mut self, owns: OwnsConstraint) -> TypeStatement {
         self.owns.push(owns);
         self
     }
 
-    fn constrain_plays(mut self, plays: PlaysConstraint) -> TypeVariable {
+    fn constrain_plays(mut self, plays: PlaysConstraint) -> TypeStatement {
         self.plays.push(plays);
         self
     }
 
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
-        TypeVariable { regex: Some(regex), ..self }
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeStatement {
+        TypeStatement { regex: Some(regex), ..self }
     }
 
-    fn constrain_relates(mut self, relates: RelatesConstraint) -> TypeVariable {
+    fn constrain_relates(mut self, relates: RelatesConstraint) -> TypeStatement {
         self.relates.push(relates);
         self
     }
 
-    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
-        TypeVariable { sub: Some(sub), ..self }
+    fn constrain_sub(self, sub: SubConstraint) -> TypeStatement {
+        TypeStatement { sub: Some(sub), ..self }
     }
 
-    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeVariable {
-        TypeVariable { value_type: Some(value_type), ..self }
+    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement {
+        TypeStatement { value_type: Some(value_type), ..self }
     }
 }
 
-impl fmt::Display for TypeVariable {
+impl fmt::Display for TypeStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.reference.is_visible() {
             write!(f, "{}", self.reference)?;

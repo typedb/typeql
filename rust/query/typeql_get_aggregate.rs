@@ -30,7 +30,7 @@ use crate::{
         Result,
     },
     pattern::{NamedReferences, Reference, UnboundVariable},
-    query::{TypeQLMatch, TypeQLMatchGroup},
+    query::{TypeQLGet, TypeQLGetGroup},
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -43,8 +43,8 @@ where
     pub var: Option<UnboundVariable>,
 }
 
-pub type TypeQLMatchAggregate = AggregateQuery<TypeQLMatch>;
-pub type TypeQLMatchGroupAggregate = AggregateQuery<TypeQLMatchGroup>;
+pub type TypeQLGetAggregate = AggregateQuery<TypeQLGet>;
+pub type TypeQLGetGroupAggregate = AggregateQuery<TypeQLGetGroup>;
 
 impl<T: AggregateQueryBuilder> AggregateQuery<T> {
     fn new_count(base: T) -> Self {
@@ -80,7 +80,7 @@ fn expect_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Refer
     Ok(())
 }
 
-impl fmt::Display for TypeQLMatchAggregate {
+impl fmt::Display for TypeQLGetAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}\n{}", self.query, self.method)?;
         if let Some(var) = &self.var {
@@ -90,7 +90,7 @@ impl fmt::Display for TypeQLMatchAggregate {
     }
 }
 
-impl fmt::Display for TypeQLMatchGroupAggregate {
+impl fmt::Display for TypeQLGetGroupAggregate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.query, self.method)?;
         if let Some(var) = &self.var {

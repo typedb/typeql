@@ -20,13 +20,10 @@
  *
  */
 
-#[cfg(test)]
-mod test;
-
 use chrono::{NaiveDate, NaiveDateTime};
 use pest::{
-    pratt_parser::{Assoc, Op, PrattParser},
     Parser,
+    pratt_parser::{Assoc, Op, PrattParser},
 };
 use pest_derive::Parser;
 
@@ -34,88 +31,87 @@ use crate::{
     common::{
         date_time,
         error::TypeQLError,
+        Result,
         string::{unescape_regex, unquote},
         token,
         validatable::Validatable,
-        Result,
     },
     pattern::{
         Annotation, AssignConstraint, ConceptVariable, ConceptVariableBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
         Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
-        RuleDeclaration, RuleDefinition, SubConstraint, ThingConstrainable, ThingVariable, ThingVariableBuilder,
-        TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
-        UnboundVariable, Value, ValueConstrainable, ValueVariable, Variable,
+        RuleDeclaration, RuleDefinition, Statement, SubConstraint, ThingConstrainable, ThingStatement,
+        ThingVariableBuilder, TypeConstrainable, TypeStatement, TypeVariableBuilder, UnboundConceptVariable,
+        UnboundValueVariable, UnboundVariable, Value, ValueConstrainable, ValueVariable,
     },
     query::{
-        sorting, AggregateQueryBuilder, Query, Sorting, TypeQLDefine, TypeQLDelete, TypeQLInsert, TypeQLMatch,
-        TypeQLMatchAggregate, TypeQLMatchGroup, TypeQLMatchGroupAggregate, TypeQLUndefine, TypeQLUpdate,
+        AggregateQueryBuilder, MatchClause, Query, TypeQLDefine, TypeQLDelete, TypeQLGet,
+        TypeQLGetAggregate, TypeQLGetGroup, TypeQLGetGroupAggregate, TypeQLInsert, TypeQLUndefine,
+        TypeQLUpdate,
     },
 };
+use crate::query::{Limit, Offset};
+use crate::query::modifier::{Modifiers, sorting, Sorting};
+
+#[cfg(test)]
+mod test;
 
 #[derive(Parser)]
 #[grammar = "parser/typeql.pest"]
-struct TypeQLParser;
+pub(crate) struct TypeQLParser;
 
-type SyntaxTree<'a> = pest::iterators::Pair<'a, Rule>;
-type Children<'a> = pest::iterators::Pairs<'a, Rule>;
+type Node<'a> = pest::iterators::Pair<'a, Rule>;
+type ChildNodes<'a> = pest::iterators::Pairs<'a, Rule>;
 
-trait TreeChildren {
-    type Items;
-    fn into_child(self) -> Self;
-    fn into_children(self) -> Self::Items;
+trait IntoChildNodes<'a> {
+    fn into_first_child(self) -> Self;
+    fn into_children(self) -> ChildNodes<'a>;
 }
 
-impl<'a> TreeChildren for SyntaxTree<'a> {
-    type Items = Children<'a>;
-
-    fn into_child(self) -> Self {
+impl<'a> IntoChildNodes<'a> for Node<'a> {
+    fn into_first_child(self) -> Self {
         self.into_children().consume_any()
     }
 
-    fn into_children(self) -> Self::Items {
+    fn into_children(self) -> ChildNodes<'a> {
         self.into_inner()
     }
 }
 
-trait RuleIterator {
-    type Item;
-
+trait RuleMatcher<'a> {
     fn skip_expected(&mut self, rule: Rule) -> &mut Self;
-    fn consume_expected(&mut self, rule: Rule) -> Self::Item;
+    fn consume_expected(&mut self, rule: Rule) -> Node<'a>;
     fn peek_rule(&mut self) -> Option<Rule>;
-    fn consume_if_matches(&mut self, rule: Rule) -> Option<Self::Item>;
-    fn consume_any(&mut self) -> Self::Item;
-    fn try_consume_any(&mut self) -> Option<Self::Item>;
+    fn consume_if_matches(&mut self, rule: Rule) -> Option<Node<'a>>;
+    fn consume_any(&mut self) -> Node<'a>;
+    fn try_consume_any(&mut self) -> Option<Node<'a>>;
 }
 
-impl<'a, T: Iterator<Item = SyntaxTree<'a>> + Clone> RuleIterator for T {
-    type Item = SyntaxTree<'a>;
-
+impl<'a, T: Iterator<Item=Node<'a>> + Clone> RuleMatcher<'a> for T {
     fn skip_expected(&mut self, rule: Rule) -> &mut Self {
         self.consume_expected(rule);
         self
     }
 
-    fn consume_expected(&mut self, _rule: Rule) -> Self::Item {
+    fn consume_expected(&mut self, _rule: Rule) -> Node<'a> {
         let next = self.consume_any();
         assert_eq!(next.as_rule(), _rule);
         next
     }
 
     fn peek_rule(&mut self) -> Option<Rule> {
-        self.clone().peekable().peek().map(|tree| tree.as_rule())
+        self.clone().peekable().peek().map(|node| node.as_rule())
     }
 
-    fn consume_if_matches(&mut self, rule: Rule) -> Option<Self::Item> {
+    fn consume_if_matches(&mut self, rule: Rule) -> Option<Node<'a>> {
         (Some(rule) == self.peek_rule()).then(|| self.consume_any())
     }
 
-    fn consume_any(&mut self) -> Self::Item {
+    fn consume_any(&mut self) -> Node<'a> {
         self.next().expect("attempting to consume from an empty iterator")
     }
 
-    fn try_consume_any(&mut self) -> Option<Self::Item> {
+    fn try_consume_any(&mut self) -> Option<Node<'a>> {
         self.next()
     }
 }
@@ -127,7 +123,7 @@ enum Type {
 }
 
 impl Type {
-    pub fn into_type_variable(self) -> TypeVariable {
+    pub fn into_type_statement(self) -> TypeStatement {
         match self {
             Self::Label(label) => UnboundConceptVariable::hidden().type_(label),
             Self::Variable(var) => var.into_type(),
@@ -135,15 +131,15 @@ impl Type {
     }
 }
 
-fn parse_single(rule: Rule, string: &str) -> Result<SyntaxTree> {
+fn parse_single(rule: Rule, string: &str) -> Result<Node> {
     Ok(TypeQLParser::parse(rule, string)?.consume_any())
 }
 
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
-    visit_query(parse_single(Rule::eof_query, query)?.into_child()).validated()
+    visit_query(parse_single(Rule::eof_query, query)?.into_first_child()).validated()
 }
 
-pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
+pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item=Result<Query>> + '_> {
     Ok(TypeQLParser::parse(Rule::eof_queries, queries)?
         .consume_expected(Rule::eof_queries)
         .into_children()
@@ -169,15 +165,15 @@ pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
         .collect()
 }
 
-pub(crate) fn visit_eof_variable(variable: &str) -> Result<Variable> {
-    visit_pattern_variable(
-        parse_single(Rule::eof_variable, variable)?.into_children().consume_expected(Rule::pattern_variable),
+pub(crate) fn visit_eof_statement(statement: &str) -> Result<Statement> {
+    visit_statement(
+        parse_single(Rule::eof_statement, statement)?.into_children().consume_expected(Rule::statement),
     )
-    .validated()
+        .validated()
 }
 
 pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
-    let parsed = parse_single(Rule::eof_label, label)?.into_child().as_str();
+    let parsed = parse_single(Rule::eof_label, label)?.into_first_child().as_str();
     if parsed != label {
         Err(TypeQLError::IllegalCharInLabel(label.to_string()))?;
     }
@@ -188,37 +184,38 @@ pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<RuleDefinition> {
     visit_schema_rule(parse_single(Rule::eof_schema_rule, rule)?).validated()
 }
 
-fn get_string(string: SyntaxTree) -> String {
+fn get_string_from_quoted(string: Node) -> String {
     unquote(string.as_str())
 }
 
-fn get_regex(string: SyntaxTree) -> String {
+fn get_regex(string: Node) -> String {
     unescape_regex(&unquote(string.as_str()))
 }
 
-fn get_long(long: SyntaxTree) -> i64 {
+fn get_long(long: Node) -> i64 {
     long.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(long.to_string())))
 }
 
-fn get_double(double: SyntaxTree) -> f64 {
+fn get_double(double: Node) -> f64 {
     double.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(double.to_string())))
 }
 
-fn get_boolean(boolean: SyntaxTree) -> bool {
+fn get_boolean(boolean: Node) -> bool {
     boolean.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(boolean.to_string())))
 }
 
-fn get_date(date: SyntaxTree) -> NaiveDate {
+fn get_date(date: Node) -> NaiveDate {
     NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
         .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(date.to_string())))
 }
 
-fn get_date_time(date_time: SyntaxTree) -> NaiveDateTime {
+fn get_date_time(date_time: Node) -> NaiveDateTime {
     date_time::parse(date_time.as_str())
         .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar(date_time.to_string())))
 }
 
-fn get_var(var: SyntaxTree) -> UnboundVariable {
+fn get_var(nodes: &mut ChildNodes) -> UnboundVariable {
+    let var = nodes.consume_expected(Rule::VAR_);
     let name = var.as_str();
 
     let (prefix, _name) = name.split_at(1);
@@ -229,7 +226,7 @@ fn get_var(var: SyntaxTree) -> UnboundVariable {
     }
 }
 
-fn get_var_concept(var: SyntaxTree) -> UnboundConceptVariable {
+fn get_var_concept(var: Node) -> UnboundConceptVariable {
     let name = var.as_str();
 
     assert!(name.len() > 1);
@@ -243,25 +240,25 @@ fn get_var_concept(var: SyntaxTree) -> UnboundConceptVariable {
     }
 }
 
-fn get_var_value(var: SyntaxTree) -> UnboundValueVariable {
+fn get_var_value(var: Node) -> UnboundValueVariable {
     let name = var.as_str();
     assert!(name.len() > 1);
     assert!(name.starts_with('?'));
     UnboundValueVariable::named(String::from(&name[1..]))
 }
 
-fn get_isa_constraint(isa: SyntaxTree, tree: SyntaxTree) -> IsaConstraint {
-    let is_explicit = matches!(isa.into_child().as_rule(), Rule::ISAX).into();
-    match visit_type(tree) {
+fn get_isa_constraint(isa: Node, node: Node) -> IsaConstraint {
+    let is_explicit = matches!(isa.into_first_child().as_rule(), Rule::ISAX).into();
+    match visit_type(node) {
         Type::Label(label) => IsaConstraint::from((label, is_explicit)),
         Type::Variable(var) => IsaConstraint::from((var, is_explicit)),
     }
 }
 
-fn get_role_player_constraint(tree: SyntaxTree) -> RolePlayerConstraint {
-    let mut tree = tree.into_children().rev();
-    let player = get_var_concept(tree.consume_expected(Rule::player));
-    if let Some(type_) = tree.consume_if_matches(Rule::type_) {
+fn get_role_player_constraint(node: Node) -> RolePlayerConstraint {
+    let mut node = node.into_children().rev();
+    let player = get_var_concept(node.consume_expected(Rule::player));
+    if let Some(type_) = node.consume_if_matches(Rule::type_) {
         match visit_type(type_) {
             Type::Label(label) => RolePlayerConstraint::from((label, player)),
             Type::Variable(var) => RolePlayerConstraint::from((var, player)),
@@ -271,214 +268,280 @@ fn get_role_player_constraint(tree: SyntaxTree) -> RolePlayerConstraint {
     }
 }
 
-fn get_role_players(tree: SyntaxTree) -> Vec<RolePlayerConstraint> {
-    tree.into_children().map(get_role_player_constraint).collect()
+fn get_role_players(node: Node) -> Vec<RolePlayerConstraint> {
+    node.into_children().map(get_role_player_constraint).collect()
 }
 
-fn visit_query(tree: SyntaxTree) -> Query {
-    let child = tree.into_child();
-    match child.as_rule() {
-        Rule::query_match => visit_query_match(child).into(),
-        Rule::query_insert => visit_query_insert(child).into(),
-        Rule::query_delete => visit_query_delete(child).into(),
-        Rule::query_update => visit_query_update(child).into(),
-        Rule::query_define => visit_query_define(child).into(),
-        Rule::query_undefine => visit_query_undefine(child).into(),
-        Rule::query_match_aggregate => visit_query_match_aggregate(child).into(),
-        Rule::query_match_group => visit_query_match_group(child).into(),
-        Rule::query_match_group_agg => visit_query_match_group_agg(child).into(),
-        _ => unreachable!("{:?}", TypeQLError::IllegalGrammar(child.to_string())),
+fn visit_query(node: Node) -> Query {
+    let mut children = node.into_children();
+    match children.peek_rule().unwrap() {
+        Rule::query_define => visit_query_define(&mut children).into(),
+        Rule::query_undefine => visit_query_undefine(&mut children).into(),
+        Rule::query_insert => visit_query_insert(&mut children).into(),
+        Rule::query_delete => visit_query_delete(&mut children).into(),
+        Rule::query_update => visit_query_update(&mut children).into(),
+        Rule::query_get => visit_query_get(&mut children).into(),
+        // Rule::query_fetch => visit_query_fetch(&mut children).into(),
+        Rule::query_get_aggregate => visit_query_get_aggregate(&mut children).into(),
+        Rule::query_get_group => visit_query_get_group(&mut children).into(),
+        Rule::query_get_group_agg => visit_query_get_group_agg(&mut children).into(),
+        _ => unreachable!("{:?}", TypeQLError::IllegalGrammar(node.to_string())),
     }
 }
 
-fn visit_query_define(tree: SyntaxTree) -> TypeQLDefine {
-    TypeQLDefine::new(visit_definables(
-        tree.into_children().skip_expected(Rule::DEFINE).consume_expected(Rule::definables),
-    ))
+fn visit_query_define(nodes: &mut ChildNodes) -> TypeQLDefine {
+    let node = nodes.consume_expected(Rule::query_define);
+    let mut children = node.into_children().skip_expected(Rule::DEFINE);
+    TypeQLDefine::new(visit_definables(&mut children))
 }
 
-fn visit_query_undefine(tree: SyntaxTree) -> TypeQLUndefine {
-    TypeQLUndefine::new(visit_definables(
-        tree.into_children().skip_expected(Rule::UNDEFINE).consume_expected(Rule::definables),
-    ))
+fn visit_query_undefine(nodes: &mut ChildNodes) -> TypeQLUndefine {
+    let node = nodes.consume_expected(Rule::query_undefine);
+    let mut children = node.into_children().skip_expected(Rule::UNDEFINE);
+    TypeQLUndefine::new(visit_definables(&mut children))
 }
 
-fn visit_query_insert(tree: SyntaxTree) -> TypeQLInsert {
-    let mut children = tree.into_children();
-    match children.consume_any().as_rule() {
-        Rule::MATCH => TypeQLMatch::from_patterns(visit_patterns(children.consume_expected(Rule::patterns))).insert(
-            visit_variable_things(children.skip_expected(Rule::INSERT).consume_expected(Rule::variable_things)),
-        ),
-        Rule::INSERT => TypeQLInsert::new(visit_variable_things(children.consume_expected(Rule::variable_things))),
+fn visit_query_insert(nodes: &mut ChildNodes) -> TypeQLInsert {
+    let node = nodes.consume_expected(Rule::query_insert);
+    let mut children = node.into_children();
+    match children.peek_rule().unwrap() {
+        Rule::clause_match => {
+            let clause_match = visit_clause_match(&mut children);
+            let clause_insert = visit_clause_insert(&mut children);
+            let modifiers = visit_modifiers(&mut children);
+            debug_assert!(children.try_consume_any().is_none());
+            TypeQLInsert { clause_match: Some(clause_match), statements: clause_insert, modifiers }
+        }
+        Rule::clause_insert => {
+            debug_assert!(children.try_consume_any().is_none());
+            TypeQLInsert::new(visit_clause_insert(&mut children))
+        }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
 
-fn visit_query_delete(tree: SyntaxTree) -> TypeQLDelete {
-    let mut children = tree.into_children();
-    TypeQLMatch::from_patterns(visit_patterns(children.skip_expected(Rule::MATCH).consume_expected(Rule::patterns)))
-        .delete(visit_variable_things(children.skip_expected(Rule::DELETE).consume_expected(Rule::variable_things)))
+fn visit_query_delete(nodes: &mut ChildNodes) -> TypeQLDelete {
+    let node = nodes.consume_expected(Rule::query_delete);
+    let mut children = node.into_children();
+    let clause_match = visit_clause_match(&mut children);
+    let clause_delete = visit_clause_delete(&mut children);
+    let modifiers = visit_modifiers(&mut children);
+    debug_assert!(children.try_consume_any().is_none());
+    TypeQLDelete { clause_match, statements: clause_delete, modifiers }
 }
 
-fn visit_query_update(tree: SyntaxTree) -> TypeQLUpdate {
-    let mut children = tree.into_children();
-    visit_query_delete(children.consume_expected(Rule::query_delete))
-        .insert(visit_variable_things(children.skip_expected(Rule::INSERT).consume_expected(Rule::variable_things)))
+fn visit_query_update(nodes: &mut ChildNodes) -> TypeQLUpdate {
+    let node = nodes.consume_expected(Rule::query_update);
+    let mut children = node.into_children();
+    let query_delete = visit_query_delete(&mut children);
+    let clause_insert = visit_clause_insert(&mut children);
+    let modifiers = visit_modifiers(&mut children);
+    debug_assert!(children.try_consume_any().is_none());
+    TypeQLUpdate { query_delete, insert_statements: clause_insert, modifiers }
 }
 
-fn visit_query_match(tree: SyntaxTree) -> TypeQLMatch {
-    let mut children = tree.into_children();
-    let mut match_query = TypeQLMatch::from_patterns(visit_patterns(
-        children.skip_expected(Rule::MATCH).consume_expected(Rule::patterns),
-    ));
-    if let Some(modifiers) = children.consume_if_matches(Rule::modifiers) {
-        for modifier in modifiers.into_children() {
-            match_query = match modifier.as_rule() {
-                Rule::filter => match_query.filter(visit_filter(modifier)),
-                Rule::sort => match_query.sort(visit_sort(modifier)),
-                Rule::offset => match_query.offset(get_long(
-                    modifier.into_children().skip_expected(Rule::OFFSET).consume_expected(Rule::LONG_),
-                ) as usize),
-                Rule::limit => match_query
-                    .limit(get_long(modifier.into_children().skip_expected(Rule::LIMIT).consume_expected(Rule::LONG_))
-                        as usize),
-                _ => unreachable!("{}", TypeQLError::IllegalGrammar(modifier.to_string())),
-            };
-        }
-    }
-    match_query
+fn visit_query_get(nodes: &mut ChildNodes) -> TypeQLGet {
+    let node = nodes.consume_expected(Rule::query_get);
+    let mut children = node.into_children();
+    let clause_match = visit_clause_match(&mut children);
+    let clause_get = visit_clause_get(&mut children);
+    let modifiers = visit_modifiers(&mut children);
+    debug_assert!(children.try_consume_any().is_none());
+    TypeQLGet { match_: clause_match, filter: clause_get, modifiers }
 }
 
-fn visit_query_match_aggregate(tree: SyntaxTree) -> TypeQLMatchAggregate {
-    let mut children = tree.into_children();
-    let match_query = visit_query_match(children.consume_expected(Rule::query_match));
-    let mut function = children.consume_expected(Rule::match_aggregate).into_children();
-    match visit_aggregate_method(function.consume_expected(Rule::aggregate_method)) {
-        token::Aggregate::Count => match_query.count(),
-        method => match_query.aggregate(method, get_var(function.consume_expected(Rule::VAR_))),
-    }
+fn visit_clause_insert(nodes: &mut ChildNodes) -> Vec<ThingStatement> {
+    let node = nodes.consume_expected(Rule::clause_insert);
+    let mut children = node.into_children().skip_expected(Rule::INSERT);
+    visit_statement_things(&mut children)
 }
 
-fn visit_query_match_group(tree: SyntaxTree) -> TypeQLMatchGroup {
-    let mut children = tree.into_children();
-    visit_query_match(children.consume_expected(Rule::query_match)).group(get_var(
-        children
-            .consume_expected(Rule::match_group)
-            .into_children()
-            .skip_expected(Rule::GROUP)
-            .consume_expected(Rule::VAR_),
+fn visit_clause_delete(nodes: &mut ChildNodes) -> Vec<ThingStatement> {
+    let node = nodes.consume_expected(Rule::clause_delete);
+    let mut children = node.into_children().skip_expected(Rule::DELETE);
+    visit_statement_things(&mut children)
+}
+
+fn visit_clause_match(nodes: &mut ChildNodes) -> MatchClause {
+    let node = nodes.consume_expected(Rule::clause_match);
+    MatchClause::from_patterns(visit_patterns(
+        node.into_children().skip_expected(Rule::MATCH).consume_expected(Rule::patterns)
     ))
 }
 
-fn visit_query_match_group_agg(tree: SyntaxTree) -> TypeQLMatchGroupAggregate {
-    let mut children = tree.into_children();
-    let group = visit_query_match(children.consume_expected(Rule::query_match)).group(get_var(
-        children
-            .consume_expected(Rule::match_group)
-            .into_children()
-            .skip_expected(Rule::GROUP)
-            .consume_expected(Rule::VAR_),
-    ));
-    let mut function = children.consume_expected(Rule::match_aggregate).into_children();
+fn visit_clause_get(nodes: &mut ChildNodes) -> Vec<UnboundVariable> {
+    let node = nodes.consume_expected(Rule::clause_get);
+    node.into_children().skip_expected(Rule::GET).map(get_var).collect()
+}
+
+fn visit_modifiers(nodes: &mut ChildNodes) -> Modifiers {
+    let node = nodes.consume_expected(Rule::modifiers);
+    let mut modifiers = Modifiers::default();
+    for modifier in node.into_children() {
+        match node.as_rule() {
+            Rule::sort => modifiers.sorting = Some(visit_sort(modifier)),
+            Rule::offset => modifiers.offset = Some(Offset {
+                offset: get_long(
+                    modifier.into_children().skip_expected(Rule::OFFSET).consume_expected(Rule::LONG_),
+                ) as usize
+            }),
+            Rule::limit => modifiers.limit = Some(Limit {
+                limit: get_long(modifier.into_children().skip_expected(Rule::LIMIT).consume_expected(Rule::LONG_)) as usize,
+            }),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar(modifier.to_string())),
+        };
+    }
+    modifiers
+}
+
+fn visit_query_get_aggregate(nodes: &mut ChildNodes) -> TypeQLGetAggregate {
+    let node = nodes.consume_expected(Rule::query_get_aggregate);
+    let mut children = node.into_children();
+    let match_query = visit_query_get(&mut children);
+    let mut function = children.consume_expected(Rule::clause_aggregate).into_children();
     match visit_aggregate_method(function.consume_expected(Rule::aggregate_method)) {
-        token::Aggregate::Count => group.count(),
-        method => group.aggregate(method, get_var(function.consume_expected(Rule::VAR_))),
+        token::Aggregate::Count => match_query.count(),
+        method => match_query.aggregate(method, get_var(&mut function)),
     }
 }
 
-fn visit_filter(tree: SyntaxTree) -> Vec<UnboundVariable> {
-    tree.into_children().skip_expected(Rule::GET).map(get_var).collect()
+fn visit_query_get_group(nodes: &mut ChildNodes) -> TypeQLGetGroup {
+    let node = nodes.consume_expected(Rule::query_get_group);
+    let mut children = node.into_children();
+    visit_query_get(&mut children).group(get_var(
+        &mut children
+            .consume_expected(Rule::clause_group)
+            .into_children()
+            .skip_expected(Rule::GROUP),
+    ))
 }
 
-fn visit_sort(tree: SyntaxTree) -> Sorting {
-    Sorting::new(tree.into_children().skip_expected(Rule::SORT).map(visit_var_order).collect())
+fn visit_query_get_group_agg(nodes: &mut ChildNodes) -> TypeQLGetGroupAggregate {
+    let node = nodes.consume_expected(Rule::query_get_group_agg);
+    let mut children = node.into_children();
+    let group = visit_query_get(&mut children).group(get_var(
+        &mut children
+            .consume_expected(Rule::clause_group)
+            .into_children()
+            .skip_expected(Rule::GROUP)
+        ,
+    ));
+    let mut function = children.consume_expected(Rule::clause_aggregate).into_children();
+    match visit_aggregate_method(function.consume_expected(Rule::aggregate_method)) {
+        token::Aggregate::Count => group.count(),
+        method => group.aggregate(method, get_var(&mut function)),
+    }
 }
 
-fn visit_var_order(tree: SyntaxTree) -> sorting::OrderedVariable {
-    let mut children = tree.into_children();
+fn visit_sort(node: Node) -> Sorting {
+    Sorting::new(node.into_children().skip_expected(Rule::SORT).map(visit_var_order).collect())
+}
+
+fn visit_var_order(node: Node) -> sorting::OrderedVariable {
+    let mut children = node.into_children();
     sorting::OrderedVariable {
-        var: get_var(children.consume_expected(Rule::VAR_)),
+        var: get_var(&mut children),
         order: children.consume_if_matches(Rule::ORDER_).map(|child| token::Order::from(child.as_str())),
     }
 }
 
-fn visit_aggregate_method(tree: SyntaxTree) -> token::Aggregate {
-    token::Aggregate::from(tree.as_str())
+fn visit_aggregate_method(node: Node) -> token::Aggregate {
+    token::Aggregate::from(node.as_str())
 }
 
-fn visit_definables(tree: SyntaxTree) -> Vec<Definable> {
-    tree.into_children().map(visit_definable).collect()
+fn visit_definables(nodes: &mut ChildNodes) -> Vec<Definable> {
+    let node = nodes.consume_expected(Rule::definables);
+    node.into_children().map(visit_definable).collect()
 }
 
-fn visit_definable(tree: SyntaxTree) -> Definable {
-    let child = tree.into_child();
+fn visit_definable(node: Node) -> Definable {
+    let child = node.into_first_child();
     match child.as_rule() {
-        Rule::variable_type => visit_variable_type(child).into(),
+        Rule::statement_type => visit_statement_type(child).into(),
         Rule::schema_rule => visit_schema_rule(child).into(),
         Rule::schema_rule_declaration => visit_schema_rule_declaration(child).into(),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
-fn visit_patterns(tree: SyntaxTree) -> Vec<Pattern> {
-    tree.into_children().map(visit_pattern).collect()
-}
-
-fn visit_pattern(tree: SyntaxTree) -> Pattern {
-    let child = tree.into_child();
-    match child.as_rule() {
-        Rule::pattern_variable => visit_pattern_variable(child).into(),
-        Rule::pattern_disjunction => visit_pattern_disjunction(child).into(),
-        Rule::pattern_conjunction => visit_pattern_conjunction(child).into(),
-        Rule::pattern_negation => visit_pattern_negation(child).into(),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
+fn visit_patterns(nodes: &mut ChildNodes) -> Vec<Pattern> {
+    let node = nodes.consume_expected(Rule::patterns);
+    let mut children = node.into_children();
+    let mut patterns = vec![];
+    // TODO: this is where a 'consume' based pattern becomes ugly
+    while children.peek().is_some() {
+        patterns.push(visit_pattern(&mut children));
     }
+    patterns
 }
 
-fn visit_pattern_conjunction(tree: SyntaxTree) -> Conjunction {
-    Conjunction::new(visit_patterns(tree.into_child()))
+fn visit_pattern(nodes: &mut ChildNodes) -> Pattern {
+    let node = nodes.consume_expected(Rule::pattern);
+    let mut children = node.into_children();
+    let query = match children.peek_rule().unwrap() {
+        Rule::statement => visit_statement(&mut children).into(),
+        Rule::pattern_disjunction => visit_pattern_disjunction(&mut children).into(),
+        Rule::pattern_conjunction => visit_pattern_conjunction(&mut children).into(),
+        Rule::pattern_negation => visit_pattern_negation(&mut children).into(),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(node.to_string())),
+    };
+    debug_assert!(children.try_consume_any().is_none());
+    query
 }
 
-fn visit_pattern_disjunction(tree: SyntaxTree) -> Disjunction {
-    Disjunction::new(
-        tree.into_children()
-            .filter(|child| matches!(child.as_rule(), Rule::patterns))
-            .map(visit_patterns)
-            .map(|mut nested| match nested.len() {
-                1 => nested.pop().unwrap(),
-                _ => Conjunction::new(nested).into(),
-            })
-            .collect::<Vec<Pattern>>(),
-    )
+fn visit_pattern_conjunction(nodes: &mut ChildNodes) -> Conjunction {
+    let node = nodes.consume_expected(Rule::pattern_conjunction);
+    let mut children = node.into_children();
+    let conjunction = Conjunction::new(visit_patterns(&mut children));
+    debug_assert!(children.try_consume_any().is_none());
+    conjunction
 }
 
-fn visit_pattern_negation(tree: SyntaxTree) -> Negation {
-    let mut patterns = visit_patterns(tree.into_children().skip_expected(Rule::NOT).consume_expected(Rule::patterns));
+fn visit_pattern_disjunction(nodes: &mut ChildNodes) -> Disjunction {
+    let node = nodes.consume_expected(Rule::pattern_disjunction);
+    let mut children = node.into_children();
+    let patterns = vec![];
+    while children.peek().is_some() {
+
+    }
+    let patterns = children
+        .filter(|child| matches!(child.as_rule(), Rule::patterns))
+        .map(visit_patterns)
+        .map(|mut nested| match nested.len() {
+            1 => nested.pop().unwrap(),
+            _ => Conjunction::new(nested).into(),
+        })
+        .collect::<Vec<Pattern>>();
+    Disjunction::new(patterns)
+}
+
+fn visit_pattern_negation(node: Node) -> Negation {
+    let mut patterns = visit_patterns(node.into_children().skip_expected(Rule::NOT).consume_expected(Rule::patterns));
     match patterns.len() {
         1 => Negation::new(patterns.pop().unwrap()),
         _ => Negation::new(Conjunction::new(patterns).into()),
     }
 }
 
-fn visit_pattern_variable(tree: SyntaxTree) -> Variable {
-    let child = tree.into_child();
+fn visit_statement(node: Node) -> Statement {
+    let child = node.into_first_child();
     match child.as_rule() {
-        Rule::variable_thing_any => visit_variable_thing_any(child).into(),
-        Rule::variable_type => visit_variable_type(child).into(),
-        Rule::variable_concept => visit_variable_concept(child).into(),
-        Rule::variable_value => visit_variable_value(child).into(),
+        Rule::statement_thing_any => visit_statement_thing_any(child).into(),
+        Rule::statement_type => visit_statement_type(child).into(),
+        Rule::statement_concept => visit_statement_concept(child).into(),
+        Rule::statement_value => visit_statement_value(child).into(),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
-fn visit_variable_concept(tree: SyntaxTree) -> ConceptVariable {
-    let mut children = tree.into_children();
+fn visit_statement_concept(node: Node) -> ConceptVariable {
+    let mut children = node.into_children();
     get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))
         .is(get_var_concept(children.skip_expected(Rule::IS).consume_expected(Rule::VAR_CONCEPT_)))
 }
 
-fn visit_variable_value(tree: SyntaxTree) -> ValueVariable {
-    let mut children = tree.into_children();
+fn visit_statement_value(node: Node) -> ValueVariable {
+    let mut children = node.into_children();
     let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
     match children.peek_rule() {
         Some(Rule::ASSIGN) => {
@@ -492,39 +555,40 @@ fn visit_variable_value(tree: SyntaxTree) -> ValueVariable {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
-fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
-    let mut children = tree.into_children();
-    let mut var_type = visit_type_any(children.consume_expected(Rule::type_any)).into_type_variable();
-    var_type = children.map(SyntaxTree::into_children).fold(var_type, |var_type, mut constraint| {
+
+fn visit_statement_type(node: Node) -> TypeStatement {
+    let mut children = node.into_children();
+    let mut var_type = visit_type_any(children.consume_expected(Rule::type_any)).into_type_statement();
+    var_type = children.map(Node::into_children).fold(var_type, |var_type, mut constraint| {
         let keyword = constraint.consume_any();
         match keyword.as_rule() {
             Rule::ABSTRACT => var_type.abstract_(),
             Rule::OWNS => {
-                let type_ = visit_type(constraint.consume_expected(Rule::type_)).into_type_variable();
+                let type_ = visit_type(constraint.consume_expected(Rule::type_)).into_type_statement();
                 let overridden = constraint
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_variable());
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_statement());
                 let annotations = visit_annotations_owns(constraint.consume_expected(Rule::annotations_owns));
                 var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
             }
             Rule::PLAYS => {
-                let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped)).into_type_variable();
+                let type_ = visit_type_scoped(constraint.consume_expected(Rule::type_scoped)).into_type_statement();
                 let overridden = constraint
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_variable());
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_statement());
                 var_type.constrain_plays(PlaysConstraint::new(type_, overridden))
             }
-            Rule::REGEX => var_type.regex(get_regex(constraint.consume_expected(Rule::STRING_))),
+            Rule::REGEX => var_type.regex(get_regex(constraint.consume_expected(Rule::QUOTED_STRING))),
             Rule::RELATES => {
-                let type_ = visit_type(constraint.consume_expected(Rule::type_)).into_type_variable();
+                let type_ = visit_type(constraint.consume_expected(Rule::type_)).into_type_statement();
                 let overridden = constraint
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_variable());
+                    .map(|_| visit_type(constraint.consume_expected(Rule::type_)).into_type_statement());
                 var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
             }
             Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
-                visit_type_any(constraint.consume_expected(Rule::type_any)).into_type_variable(),
-                matches!(keyword.into_child().as_rule(), Rule::SUBX).into(),
+                visit_type_any(constraint.consume_expected(Rule::type_any)).into_type_statement(),
+                matches!(keyword.into_first_child().as_rule(), Rule::SUBX).into(),
             ))),
             Rule::TYPE => var_type.type_(visit_label_any(constraint.consume_expected(Rule::label_any))),
             Rule::VALUE => {
@@ -537,8 +601,8 @@ fn visit_variable_type(tree: SyntaxTree) -> TypeVariable {
     var_type
 }
 
-fn visit_annotations_owns(tree: SyntaxTree) -> Vec<Annotation> {
-    tree.into_children()
+fn visit_annotations_owns(node: Node) -> Vec<Annotation> {
+    node.into_children()
         .map(|annotation| match annotation.as_rule() {
             Rule::ANNOTATION_KEY => Annotation::Key,
             Rule::ANNOTATION_UNIQUE => Annotation::Unique,
@@ -547,40 +611,41 @@ fn visit_annotations_owns(tree: SyntaxTree) -> Vec<Annotation> {
         .collect()
 }
 
-fn visit_variable_things(tree: SyntaxTree) -> Vec<ThingVariable> {
-    tree.into_children().map(visit_variable_thing_any).collect()
+fn visit_statement_things(nodes: &mut ChildNodes) -> Vec<ThingStatement> {
+    let node = nodes.consume_expected(Rule::statement_things);
+    node.into_children().map(visit_statement_thing_any).collect()
 }
 
-fn visit_variable_thing_any(tree: SyntaxTree) -> ThingVariable {
-    let child = tree.into_child();
+fn visit_statement_thing_any(node: Node) -> ThingStatement {
+    let child = node.into_first_child();
     match child.as_rule() {
-        Rule::variable_thing => visit_variable_thing(child),
-        Rule::variable_relation => visit_variable_relation(child),
-        Rule::variable_attribute => visit_variable_attribute(child),
+        Rule::statement_thing => visit_statement_thing(child),
+        Rule::statement_relation => visit_statement_relation(child),
+        Rule::statement_attribute => visit_statement_attribute(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     }
 }
 
-fn visit_variable_thing(tree: SyntaxTree) -> ThingVariable {
-    let mut children = tree.into_children();
-    let mut var_thing = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_)).into_thing();
+fn visit_statement_thing(node: Node) -> ThingStatement {
+    let mut children = node.into_children();
+    let mut stmt_thing = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_)).into_thing();
     if children.peek_rule() != Some(Rule::attributes) {
         let keyword = children.consume_any();
-        var_thing = match keyword.as_rule() {
-            Rule::IID => var_thing.iid(children.consume_expected(Rule::IID_).as_str()),
-            Rule::ISA_ => var_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_))),
+        stmt_thing = match keyword.as_rule() {
+            Rule::IID => stmt_thing.iid(children.consume_expected(Rule::IID_).as_str()),
+            Rule::ISA_ => stmt_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_))),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
         }
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
-        var_thing =
-            visit_attributes(attributes).into_iter().fold(var_thing, |var_thing, has| var_thing.constrain_has(has));
+        stmt_thing = visit_attributes(attributes).into_iter()
+            .fold(stmt_thing, |var_thing, has| var_thing.constrain_has(has));
     }
-    var_thing
+    stmt_thing
 }
 
-fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
-    let mut children = tree.into_children();
+fn visit_statement_relation(node: Node) -> ThingStatement {
+    let mut children = node.into_children();
     let mut relation = children
         .consume_if_matches(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
@@ -598,8 +663,8 @@ fn visit_variable_relation(tree: SyntaxTree) -> ThingVariable {
     relation
 }
 
-fn visit_variable_attribute(tree: SyntaxTree) -> ThingVariable {
-    let mut children = tree.into_children();
+fn visit_statement_attribute(node: Node) -> ThingStatement {
+    let mut children = node.into_children();
     let mut attribute = children
         .consume_if_matches(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
@@ -618,16 +683,16 @@ fn visit_variable_attribute(tree: SyntaxTree) -> ThingVariable {
     attribute
 }
 
-fn visit_relation(tree: SyntaxTree) -> RelationConstraint {
-    RelationConstraint::new(get_role_players(tree))
+fn visit_relation(node: Node) -> RelationConstraint {
+    RelationConstraint::new(get_role_players(node))
 }
 
-fn visit_attributes(tree: SyntaxTree) -> Vec<HasConstraint> {
-    tree.into_children().map(visit_attribute).collect()
+fn visit_attributes(node: Node) -> Vec<HasConstraint> {
+    node.into_children().map(visit_attribute).collect()
 }
 
-fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
-    let mut children = tree.into_children();
+fn visit_attribute(node: Node) -> HasConstraint {
+    let mut children = node.into_children();
 
     match children.skip_expected(Rule::HAS).peek_rule() {
         Some(Rule::label) => {
@@ -648,8 +713,8 @@ fn visit_attribute(tree: SyntaxTree) -> HasConstraint {
     }
 }
 
-fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
-    let mut children = tree.into_children();
+fn visit_predicate(node: Node) -> PredicateConstraint {
+    let mut children = node.into_children();
     match children.peek_rule() {
         Some(Rule::constant) => PredicateConstraint::new(
             token::Predicate::Eq,
@@ -658,10 +723,10 @@ fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
         Some(Rule::predicate_equality) => PredicateConstraint::new(
             token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
             {
-                let predicate_value = children.consume_expected(Rule::value).into_child();
+                let predicate_value = children.consume_expected(Rule::value).into_first_child();
                 match predicate_value.as_rule() {
                     Rule::constant => visit_constant(predicate_value).into(),
-                    Rule::VAR_ => Value::from(get_var(predicate_value.into_children().consume_any())),
+                    Rule::VAR_ => Value::from(get_var(&mut predicate_value.into_children())),
                     _ => unreachable!("{}", TypeQLError::IllegalGrammar(predicate_value.to_string())),
                 }
             },
@@ -672,19 +737,19 @@ fn visit_predicate(tree: SyntaxTree) -> PredicateConstraint {
                 predicate,
                 {
                     match predicate {
-                        token::Predicate::Like => get_regex(children.consume_expected(Rule::STRING_)),
-                        token::Predicate::Contains => get_string(children.consume_expected(Rule::STRING_)),
+                        token::Predicate::Like => get_regex(children.consume_expected(Rule::QUOTED_STRING)),
+                        token::Predicate::Contains => get_string_from_quoted(children.consume_expected(Rule::QUOTED_STRING)),
                         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
                     }
                 }
-                .into(),
+                    .into(),
             )
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
     }
 }
 
-fn visit_expression(tree: SyntaxTree) -> Expression {
+fn visit_expression(node: Node) -> Expression {
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
         .op(Op::infix(Rule::ADD, Assoc::Left) | Op::infix(Rule::SUBTRACT, Assoc::Left))
         .op(Op::infix(Rule::MULTIPLY, Assoc::Left)
@@ -712,18 +777,18 @@ fn visit_expression(tree: SyntaxTree) -> Expression {
             };
             Expression::Operation(Operation::new(op, left, right))
         })
-        .parse(tree.into_children())
+        .parse(node.into_children())
 }
 
-fn visit_function(tree: SyntaxTree) -> Function {
-    let mut children = tree.into_children();
+fn visit_function(node: Node) -> Function {
+    let mut children = node.into_children();
     let function_name = visit_function_name(children.consume_expected(Rule::expression_function_name));
     let args = children.map(|arg| Box::new(visit_expression(arg))).collect();
     Function { function_name, args }
 }
 
-fn visit_function_name(tree: SyntaxTree) -> token::Function {
-    let child = tree.into_child();
+fn visit_function_name(node: Node) -> token::Function {
+    let child = node.into_first_child();
     match child.as_rule() {
         Rule::ABS => token::Function::Abs,
         Rule::CEIL => token::Function::Ceil,
@@ -735,21 +800,21 @@ fn visit_function_name(tree: SyntaxTree) -> token::Function {
     }
 }
 
-fn visit_schema_rule(tree: SyntaxTree) -> RuleDefinition {
-    let mut children = tree.into_children();
+fn visit_schema_rule(node: Node) -> RuleDefinition {
+    let mut children = node.into_children();
     RuleDeclaration::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
         .when(Conjunction::new(visit_patterns(children.skip_expected(Rule::WHEN).consume_expected(Rule::patterns))))
-        .then(visit_variable_thing_any(children.skip_expected(Rule::THEN).consume_expected(Rule::variable_thing_any)))
+        .then(visit_statement_thing_any(children.skip_expected(Rule::THEN).consume_expected(Rule::statement_thing_any)))
 }
 
-fn visit_schema_rule_declaration(tree: SyntaxTree) -> RuleDeclaration {
+fn visit_schema_rule_declaration(node: Node) -> RuleDeclaration {
     RuleDeclaration::new(Label::from(
-        tree.into_children().skip_expected(Rule::RULE).consume_expected(Rule::label).as_str(),
+        node.into_children().skip_expected(Rule::RULE).consume_expected(Rule::label).as_str(),
     ))
 }
 
-fn visit_type_any(tree: SyntaxTree) -> Type {
-    let child = tree.into_child();
+fn visit_type_any(node: Node) -> Type {
+    let child = node.into_first_child();
     match child.as_rule() {
         Rule::VAR_CONCEPT_ => Type::Variable(get_var_concept(child)),
         Rule::type_ => visit_type(child),
@@ -758,8 +823,8 @@ fn visit_type_any(tree: SyntaxTree) -> Type {
     }
 }
 
-fn visit_type_scoped(tree: SyntaxTree) -> Type {
-    let child = tree.into_child();
+fn visit_type_scoped(node: Node) -> Type {
+    let child = node.into_first_child();
     match child.as_rule() {
         Rule::label_scoped => Type::Label(visit_label_scoped(child)),
         Rule::VAR_CONCEPT_ => Type::Variable(get_var_concept(child)),
@@ -767,8 +832,8 @@ fn visit_type_scoped(tree: SyntaxTree) -> Type {
     }
 }
 
-fn visit_type(tree: SyntaxTree) -> Type {
-    let child = tree.into_child();
+fn visit_type(node: Node) -> Type {
+    let child = node.into_first_child();
     match child.as_rule() {
         Rule::label => Type::Label(child.as_str().into()),
         Rule::VAR_CONCEPT_ => Type::Variable(get_var_concept(child)),
@@ -776,8 +841,8 @@ fn visit_type(tree: SyntaxTree) -> Type {
     }
 }
 
-fn visit_label_any(tree: SyntaxTree) -> Label {
-    let child = tree.into_child();
+fn visit_label_any(node: Node) -> Label {
+    let child = node.into_first_child();
     match child.as_rule() {
         Rule::label => Label::from(child.as_str()),
         Rule::label_scoped => visit_label_scoped(child),
@@ -785,16 +850,16 @@ fn visit_label_any(tree: SyntaxTree) -> Label {
     }
 }
 
-fn visit_label_scoped(tree: SyntaxTree) -> Label {
-    let parts: Vec<String> = tree.as_str().split(':').map(String::from).collect();
+fn visit_label_scoped(node: Node) -> Label {
+    let parts: Vec<String> = node.as_str().split(':').map(String::from).collect();
     assert_eq!(parts.len(), 2);
     Label::from((parts[0].clone(), parts[1].clone()))
 }
 
-fn visit_constant(tree: SyntaxTree) -> Constant {
-    let child = tree.into_child();
+fn visit_constant(node: Node) -> Constant {
+    let child = node.into_first_child();
     match child.as_rule() {
-        Rule::STRING_ => Constant::from(get_string(child)),
+        Rule::QUOTED_STRING => Constant::from(get_string_from_quoted(child)),
         Rule::signed_long => Constant::from(get_long(child)),
         Rule::signed_double => Constant::from(get_double(child)),
         Rule::BOOLEAN_ => Constant::from(get_boolean(child)),

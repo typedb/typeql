@@ -25,31 +25,31 @@ use std::{collections::HashSet, fmt};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{NamedReferences, Reference, UnboundVariable},
-    query::{AggregateQueryBuilder, TypeQLMatch},
+    query::{AggregateQueryBuilder, TypeQLGet},
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct TypeQLMatchGroup {
-    pub match_query: TypeQLMatch,
+pub struct TypeQLGetGroup {
+    pub get_query: TypeQLGet,
     pub group_var: UnboundVariable,
 }
 
-impl AggregateQueryBuilder for TypeQLMatchGroup {}
+impl AggregateQueryBuilder for TypeQLGetGroup {}
 
-impl Validatable for TypeQLMatchGroup {
+impl Validatable for TypeQLGetGroup {
     fn validate(&self) -> Result<()> {
-        collect_err(&mut [self.match_query.validate(), self.group_var.validate()].into_iter())
+        collect_err(&mut [self.get_query.validate(), self.group_var.validate()].into_iter())
     }
 }
 
-impl NamedReferences for TypeQLMatchGroup {
+impl NamedReferences for TypeQLGetGroup {
     fn named_references(&self) -> HashSet<Reference> {
-        self.match_query.named_references()
+        self.get_query.named_references()
     }
 }
 
-impl fmt::Display for TypeQLMatchGroup {
+impl fmt::Display for TypeQLGetGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{} {};", self.match_query, token::Command::Group, self.group_var)
+        write!(f, "{}\n{} {};", self.get_query, token::Command::Group, self.group_var)
     }
 }

@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{Reference, ThingStatement, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     write_joined, Label,
 };
 
@@ -89,13 +89,13 @@ impl fmt::Display for RelationConstraint {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RolePlayerConstraint {
-    pub role_type: Option<TypeVariable>,
-    pub player: ThingVariable,
+    pub role_type: Option<TypeStatement>,
+    pub player: ThingStatement,
     pub repetition: u64,
 }
 
 impl RolePlayerConstraint {
-    pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> Self {
+    pub fn new(role_type: Option<TypeStatement>, player: ThingStatement) -> Self {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 
@@ -168,8 +168,8 @@ impl From<(UnboundConceptVariable, UnboundConceptVariable)> for RolePlayerConstr
     }
 }
 
-impl From<(TypeVariable, UnboundConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (TypeVariable, UnboundConceptVariable)) -> Self {
+impl From<(TypeStatement, UnboundConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (TypeStatement, UnboundConceptVariable)) -> Self {
         Self::new(Some(role_type), player_var.into_thing())
     }
 }

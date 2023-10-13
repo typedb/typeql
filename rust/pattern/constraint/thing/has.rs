@@ -25,15 +25,15 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
-        PredicateConstraint, Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
+        PredicateConstraint, Reference, ThingConstrainable, ThingStatement, TypeStatement, TypeVariableBuilder,
         UnboundConceptVariable, Value,
     },
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {
-    pub type_: Option<TypeVariable>,
-    pub attribute: ThingVariable,
+    pub type_: Option<TypeStatement>,
+    pub attribute: ThingStatement,
 }
 
 impl HasConstraint {

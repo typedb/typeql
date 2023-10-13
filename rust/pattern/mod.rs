@@ -51,9 +51,9 @@ pub use schema::{RuleDeclaration, RuleDefinition};
 pub(crate) use variable::LeftOperand;
 pub use variable::{
     ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, ExpressionBuilder, Reference,
-    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingVariable, ThingVariableBuilder,
-    TypeConstrainable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
-    UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder, Variable, Visibility,
+    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingStatement, ThingVariableBuilder,
+    TypeConstrainable, TypeStatement, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
+    UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder, Statement, Visibility,
 };
 
 use crate::{
@@ -66,7 +66,7 @@ pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
-    Variable(Variable),
+    Variable(Statement),
 }
 
 impl Pattern {
@@ -95,14 +95,14 @@ enum_getter! { Pattern
     into_conjunction(Conjunction) => Conjunction,
     into_disjunction(Disjunction) => Disjunction,
     into_negation(Negation) => Negation,
-    into_variable(Variable) => Variable,
+    into_variable(Variable) => Statement,
 }
 
 enum_wrapper! { Pattern
     Conjunction => Conjunction,
     Disjunction => Disjunction,
     Negation => Negation,
-    Variable => Variable,
+    Statement => Variable,
 }
 
 impl Validatable for Pattern {
@@ -146,25 +146,25 @@ impl Normalisable for Pattern {
 
 impl From<ConceptVariable> for Pattern {
     fn from(variable: ConceptVariable) -> Self {
-        Variable::from(variable).into()
+        Statement::from(variable).into()
     }
 }
 
-impl From<ThingVariable> for Pattern {
-    fn from(variable: ThingVariable) -> Self {
-        Variable::from(variable).into()
+impl From<ThingStatement> for Pattern {
+    fn from(variable: ThingStatement) -> Self {
+        Statement::from(variable).into()
     }
 }
 
-impl From<TypeVariable> for Pattern {
-    fn from(variable: TypeVariable) -> Self {
-        Variable::from(variable).into()
+impl From<TypeStatement> for Pattern {
+    fn from(variable: TypeStatement) -> Self {
+        Statement::from(variable).into()
     }
 }
 
 impl From<ValueVariable> for Pattern {
     fn from(variable: ValueVariable) -> Self {
-        Variable::from(variable).into()
+        Statement::from(variable).into()
     }
 }
 
@@ -184,19 +184,19 @@ impl fmt::Display for Pattern {
 pub enum Definable {
     RuleDeclaration(RuleDeclaration),
     RuleDefinition(RuleDefinition),
-    TypeVariable(TypeVariable),
+    TypeVariable(TypeStatement),
 }
 
 enum_getter! { Definable
     into_rule_declaration(RuleDeclaration) => RuleDeclaration,
     into_rule(RuleDefinition) => RuleDefinition,
-    into_type_variable(TypeVariable) => TypeVariable,
+    into_type_variable(TypeVariable) => TypeStatement,
 }
 
 enum_wrapper! { Definable
     RuleDeclaration => RuleDeclaration,
     RuleDefinition => RuleDefinition,
-    TypeVariable => TypeVariable,
+    TypeStatement => TypeVariable,
 }
 
 impl Validatable for Definable {

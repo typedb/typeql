@@ -31,7 +31,7 @@ use pest::error::{Error as PestError, LineColLocation};
 use crate::{
     common::token,
     error_messages,
-    pattern::{Label, Pattern, Reference, ThingVariable, TypeVariable, UnboundVariable, Value},
+    pattern::{Label, Pattern, Reference, ThingStatement, TypeStatement, UnboundVariable, Value},
     write_joined,
 };
 
@@ -135,13 +135,13 @@ error_messages! { TypeQLError
         29: "Rule '{}' 'when' has not been provided with any patterns.",
     InvalidRuleWhenNestedNegation(Label) =
         30: "Rule '{}' 'when' contains a nested negation.",
-    InvalidRuleThen(Label, ThingVariable) =
+    InvalidRuleThen(Label, ThingStatement) =
         31: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
-    InvalidRuleThenHas(Label, ThingVariable, Reference, TypeVariable) =
+    InvalidRuleThenHas(Label, ThingStatement, Reference, TypeStatement) =
         32: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
     InvalidRuleThenVariables(Label) =
         33: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
-    InvalidRuleThenRoles(Label, ThingVariable) =
+    InvalidRuleThenRoles(Label, ThingStatement) =
         34: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
     RedundantNestedNegation() =
         35: "Invalid query containing redundant nested negations.",

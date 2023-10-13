@@ -40,8 +40,8 @@ pub use builder::{
 };
 pub use concept::ConceptVariable;
 pub use reference::{ConceptReference, Reference, ValueReference, Visibility};
-pub use thing::ThingVariable;
-pub use type_::TypeVariable;
+pub use thing::ThingStatement;
+pub use type_::TypeStatement;
 pub use unbound::UnboundVariable;
 pub use unbound_concept::UnboundConceptVariable;
 pub use unbound_value::UnboundValueVariable;
@@ -54,16 +54,16 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Variable {
+pub enum Statement {
     Concept(ConceptVariable),
-    Thing(ThingVariable),
-    Type(TypeVariable),
+    Thing(ThingStatement),
+    Type(TypeStatement),
     Value(ValueVariable),
 }
 
-impl Variable {
+impl Statement {
     pub fn reference(&self) -> &Reference {
-        use Variable::*;
+        use Statement::*;
         match self {
             Concept(concept) => &concept.reference,
             Thing(thing) => &thing.reference,
@@ -73,7 +73,7 @@ impl Variable {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        use Variable::*;
+        use Statement::*;
         match self {
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
@@ -83,7 +83,7 @@ impl Variable {
     }
 
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        use Variable::*;
+        use Statement::*;
         match self {
             Concept(concept) => concept.references(),
             Thing(thing) => thing.references(),
@@ -100,16 +100,16 @@ impl Variable {
     }
 }
 
-enum_wrapper! { Variable
+enum_wrapper! { Statement
     ConceptVariable => Concept,
-    ThingVariable => Thing,
-    TypeVariable => Type,
+    ThingStatement => Thing,
+    TypeStatement => Type,
     ValueVariable => Value,
 }
 
-impl Validatable for Variable {
+impl Validatable for Statement {
     fn validate(&self) -> Result<()> {
-        use Variable::*;
+        use Statement::*;
         match self {
             Concept(concept) => concept.validate(),
             Thing(thing) => thing.validate(),
@@ -119,7 +119,7 @@ impl Validatable for Variable {
     }
 }
 
-impl Normalisable for Variable {
+impl Normalisable for Statement {
     fn normalise(&mut self) -> Pattern {
         self.compute_normalised()
     }
@@ -129,9 +129,9 @@ impl Normalisable for Variable {
     }
 }
 
-impl fmt::Display for Variable {
+impl fmt::Display for Statement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Variable::*;
+        use Statement::*;
         match self {
             Concept(concept) => write!(f, "{concept}"),
             Thing(thing) => write!(f, "{thing}"),

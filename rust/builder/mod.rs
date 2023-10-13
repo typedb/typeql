@@ -24,7 +24,7 @@ use crate::{
     common::token,
     pattern::{
         Constant, Expression, Function, Negation, PredicateConstraint, RelationVariableBuilder, RolePlayerConstraint,
-        RuleDeclaration, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable,
+        RuleDeclaration, ThingStatement, TypeStatement, TypeVariableBuilder, UnboundConceptVariable,
         UnboundValueVariable, Value,
     },
     Pattern,
@@ -132,11 +132,11 @@ pub fn constant(constant: impl Into<Constant>) -> Constant {
     constant.into()
 }
 
-pub fn type_(name: impl Into<String>) -> TypeVariable {
+pub fn type_(name: impl Into<String>) -> TypeStatement {
     UnboundConceptVariable::hidden().type_(name.into())
 }
 
-pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingVariable {
+pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingStatement {
     UnboundConceptVariable::hidden().rel(value)
 }
 

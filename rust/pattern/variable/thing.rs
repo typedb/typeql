@@ -32,7 +32,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ThingVariable {
+pub struct ThingStatement {
     pub reference: Reference,
     pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
@@ -41,9 +41,9 @@ pub struct ThingVariable {
     pub relation: Option<RelationConstraint>,
 }
 
-impl ThingVariable {
-    pub fn new(reference: Reference) -> ThingVariable {
-        ThingVariable { reference, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
+impl ThingStatement {
+    pub fn new(reference: Reference) -> ThingStatement {
+        ThingStatement { reference, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -88,7 +88,7 @@ impl ThingVariable {
     }
 }
 
-impl Validatable for ThingVariable {
+impl Validatable for ThingStatement {
     fn validate(&self) -> Result<()> {
         collect_err(
             &mut iter::once(self.reference.validate())
@@ -101,31 +101,31 @@ impl Validatable for ThingVariable {
     }
 }
 
-impl ThingConstrainable for ThingVariable {
-    fn constrain_has(mut self, has: HasConstraint) -> ThingVariable {
+impl ThingConstrainable for ThingStatement {
+    fn constrain_has(mut self, has: HasConstraint) -> ThingStatement {
         self.has.push(has);
         self
     }
 
-    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
-        ThingVariable { iid: Some(iid), ..self }
+    fn constrain_iid(self, iid: IIDConstraint) -> ThingStatement {
+        ThingStatement { iid: Some(iid), ..self }
     }
 
-    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
-        ThingVariable { isa: Some(isa), ..self }
+    fn constrain_isa(self, isa: IsaConstraint) -> ThingStatement {
+        ThingStatement { isa: Some(isa), ..self }
     }
 
-    fn constrain_predicate(self, value: PredicateConstraint) -> ThingVariable {
-        ThingVariable { value: Some(value), ..self }
+    fn constrain_predicate(self, value: PredicateConstraint) -> ThingStatement {
+        ThingStatement { value: Some(value), ..self }
     }
 
-    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
-        ThingVariable { relation: Some(relation), ..self }
+    fn constrain_relation(self, relation: RelationConstraint) -> ThingStatement {
+        ThingStatement { relation: Some(relation), ..self }
     }
 }
 
-impl RelationConstrainable for ThingVariable {
-    fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> ThingVariable {
+impl RelationConstrainable for ThingStatement {
+    fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> ThingStatement {
         match &mut self.relation {
             None => self.relation = Some(RelationConstraint::from(constraint)),
             Some(relation) => relation.add(constraint),
@@ -134,7 +134,7 @@ impl RelationConstrainable for ThingVariable {
     }
 }
 
-impl fmt::Display for ThingVariable {
+impl fmt::Display for ThingStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.fmt_thing_syntax(f)?;
 

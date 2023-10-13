@@ -24,31 +24,33 @@ use std::fmt;
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::ThingVariable,
+    pattern::ThingStatement,
     query::{writable::expect_non_empty, TypeQLDelete},
     write_joined,
 };
+use crate::query::modifier::Modifiers;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {
-    pub delete_query: TypeQLDelete,
-    pub insert_variables: Vec<ThingVariable>,
+    pub query_delete: TypeQLDelete,
+    pub insert_statements: Vec<ThingStatement>,
+    pub modifiers: Modifiers,
 }
 
 impl Validatable for TypeQLUpdate {
     fn validate(&self) -> Result<()> {
         collect_err(
-            &mut ([expect_non_empty(&self.insert_variables), self.delete_query.validate()].into_iter())
-                .chain(self.insert_variables.iter().map(Validatable::validate)),
+            &mut ([expect_non_empty(&self.insert_statements), self.query_delete.validate()].into_iter())
+                .chain(self.insert_statements.iter().map(Validatable::validate)),
         )
     }
 }
 
 impl fmt::Display for TypeQLUpdate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.delete_query)?;
+        writeln!(f, "{}", self.query_delete)?;
         writeln!(f, "{}", token::Command::Insert)?;
-        write_joined!(f, ";\n", self.insert_variables)?;
+        write_joined!(f, ";\n", self.insert_statements)?;
         f.write_str(";")
     }
 }

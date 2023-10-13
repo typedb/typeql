@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{variable::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
@@ -46,15 +46,15 @@ impl fmt::Display for Annotation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct OwnsConstraint {
-    pub attribute_type: TypeVariable,
-    pub overridden_attribute_type: Option<TypeVariable>,
+    pub attribute_type: TypeStatement,
+    pub overridden_attribute_type: Option<TypeStatement>,
     pub annotations: Vec<Annotation>,
 }
 
 impl OwnsConstraint {
     pub(crate) fn new(
-        attribute_type: TypeVariable,
-        overridden_attribute_type: Option<TypeVariable>,
+        attribute_type: TypeStatement,
+        overridden_attribute_type: Option<TypeStatement>,
         annotations: Vec<Annotation>,
     ) -> Self {
         OwnsConstraint { attribute_type, overridden_attribute_type, annotations }
@@ -101,8 +101,8 @@ impl From<UnboundConceptVariable> for OwnsConstraint {
     }
 }
 
-impl From<TypeVariable> for OwnsConstraint {
-    fn from(attribute_type: TypeVariable) -> Self {
+impl From<TypeStatement> for OwnsConstraint {
+    fn from(attribute_type: TypeStatement) -> Self {
         OwnsConstraint::new(attribute_type, None, vec![])
     }
 }
@@ -134,8 +134,8 @@ impl From<(UnboundConceptVariable, UnboundConceptVariable)> for OwnsConstraint {
     }
 }
 
-impl From<(TypeVariable, TypeVariable)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (TypeVariable, TypeVariable)) -> Self {
+impl From<(TypeStatement, TypeStatement)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (TypeStatement, TypeStatement)) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), vec![])
     }
 }
@@ -164,8 +164,8 @@ impl From<(UnboundConceptVariable, Annotation)> for OwnsConstraint {
     }
 }
 
-impl From<(TypeVariable, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (TypeVariable, Annotation)) -> Self {
+impl From<(TypeStatement, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (TypeStatement, Annotation)) -> Self {
         OwnsConstraint::new(attribute_type, None, [annotation].into())
     }
 }
@@ -204,8 +204,8 @@ impl From<(UnboundConceptVariable, UnboundConceptVariable, Annotation)> for Owns
     }
 }
 
-impl From<(TypeVariable, TypeVariable, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotation): (TypeVariable, TypeVariable, Annotation)) -> Self {
+impl From<(TypeStatement, TypeStatement, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type, annotation): (TypeStatement, TypeStatement, Annotation)) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), [annotation].into())
     }
 }
@@ -234,8 +234,8 @@ impl<const N: usize> From<(UnboundConceptVariable, [Annotation; N])> for OwnsCon
     }
 }
 
-impl<const N: usize> From<(TypeVariable, [Annotation; N])> for OwnsConstraint {
-    fn from((attribute_type, annotations): (TypeVariable, [Annotation; N])) -> Self {
+impl<const N: usize> From<(TypeStatement, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (TypeStatement, [Annotation; N])) -> Self {
         OwnsConstraint::new(attribute_type, None, annotations.into())
     }
 }
@@ -274,9 +274,9 @@ impl<const N: usize> From<(UnboundConceptVariable, UnboundConceptVariable, [Anno
     }
 }
 
-impl<const N: usize> From<(TypeVariable, TypeVariable, [Annotation; N])> for OwnsConstraint {
+impl<const N: usize> From<(TypeStatement, TypeStatement, [Annotation; N])> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotations): (TypeVariable, TypeVariable, [Annotation; N]),
+        (attribute_type, overridden_attribute_type, annotations): (TypeStatement, TypeStatement, [Annotation; N]),
     ) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), annotations.into())
     }

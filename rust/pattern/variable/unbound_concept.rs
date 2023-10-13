@@ -28,7 +28,7 @@ use crate::{
         ConceptConstrainable, ConceptReference, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
         IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference,
         RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
-        SubConstraint, ThingConstrainable, ThingVariable, TypeConstrainable, TypeVariable, ValueTypeConstraint,
+        SubConstraint, ThingConstrainable, ThingStatement, TypeConstrainable, TypeStatement, ValueTypeConstraint,
         Visibility,
     },
 };
@@ -43,12 +43,12 @@ impl UnboundConceptVariable {
         ConceptVariable::new(self.reference)
     }
 
-    pub fn into_thing(self) -> ThingVariable {
-        ThingVariable::new(self.reference)
+    pub fn into_thing(self) -> ThingStatement {
+        ThingStatement::new(self.reference)
     }
 
-    pub fn into_type(self) -> TypeVariable {
-        TypeVariable::new(self.reference)
+    pub fn into_type(self) -> TypeStatement {
+        TypeStatement::new(self.reference)
     }
 
     pub fn named(name: String) -> UnboundConceptVariable {
@@ -81,63 +81,63 @@ impl ConceptConstrainable for UnboundConceptVariable {
 }
 
 impl ThingConstrainable for UnboundConceptVariable {
-    fn constrain_has(self, has: HasConstraint) -> ThingVariable {
+    fn constrain_has(self, has: HasConstraint) -> ThingStatement {
         self.into_thing().constrain_has(has)
     }
 
-    fn constrain_iid(self, iid: IIDConstraint) -> ThingVariable {
+    fn constrain_iid(self, iid: IIDConstraint) -> ThingStatement {
         self.into_thing().constrain_iid(iid)
     }
 
-    fn constrain_isa(self, isa: IsaConstraint) -> ThingVariable {
+    fn constrain_isa(self, isa: IsaConstraint) -> ThingStatement {
         self.into_thing().constrain_isa(isa)
     }
 
-    fn constrain_predicate(self, predicate: PredicateConstraint) -> ThingVariable {
+    fn constrain_predicate(self, predicate: PredicateConstraint) -> ThingStatement {
         self.into_thing().constrain_predicate(predicate)
     }
 
-    fn constrain_relation(self, relation: RelationConstraint) -> ThingVariable {
+    fn constrain_relation(self, relation: RelationConstraint) -> ThingStatement {
         self.into_thing().constrain_relation(relation)
     }
 }
 
 impl RelationConstrainable for UnboundConceptVariable {
-    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingVariable {
+    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingStatement {
         self.into_thing().constrain_role_player(constraint)
     }
 }
 
 impl TypeConstrainable for UnboundConceptVariable {
-    fn constrain_abstract(self) -> TypeVariable {
+    fn constrain_abstract(self) -> TypeStatement {
         self.into_type().constrain_abstract()
     }
 
-    fn constrain_label(self, label: LabelConstraint) -> TypeVariable {
+    fn constrain_label(self, label: LabelConstraint) -> TypeStatement {
         self.into_type().constrain_label(label)
     }
 
-    fn constrain_owns(self, owns: OwnsConstraint) -> TypeVariable {
+    fn constrain_owns(self, owns: OwnsConstraint) -> TypeStatement {
         self.into_type().constrain_owns(owns)
     }
 
-    fn constrain_plays(self, plays: PlaysConstraint) -> TypeVariable {
+    fn constrain_plays(self, plays: PlaysConstraint) -> TypeStatement {
         self.into_type().constrain_plays(plays)
     }
 
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeVariable {
+    fn constrain_regex(self, regex: RegexConstraint) -> TypeStatement {
         self.into_type().constrain_regex(regex)
     }
 
-    fn constrain_relates(self, relates: RelatesConstraint) -> TypeVariable {
+    fn constrain_relates(self, relates: RelatesConstraint) -> TypeStatement {
         self.into_type().constrain_relates(relates)
     }
 
-    fn constrain_sub(self, sub: SubConstraint) -> TypeVariable {
+    fn constrain_sub(self, sub: SubConstraint) -> TypeStatement {
         self.into_type().constrain_sub(sub)
     }
 
-    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeVariable {
+    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement {
         self.into_type().constrain_value_type(value_type)
     }
 }
