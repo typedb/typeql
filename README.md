@@ -23,9 +23,10 @@
 
 TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**.
 
-- **Conceptual and intuitive**. TypeQL’s design is based directly on the [polymorphic conceptual data model]([https://typedb.com/philosophy](https://development.typedb.com/philosophy)) of TypeDB. Its syntactic structure closely mirrors that of natural language, comprising sequences of statements, which makes it easy and intuitive to work even with highly complex database applications.
+- **Conceptual and intuitive**. TypeQL is based directly on the [conceptual data model](https://development.typedb.com/philosophy) of TypeDB. Its queries comprise sequences of statements that assemble into [patterns](https://development.typedb.com/features#modern-language). This mirrors natural language and makes it easy and intuitive to express even highly complex queries.
+- **Fully declarative and composable** TypeQL is fully declarative, allowing us to define query patterns without considering execution strategy. The user only composes sets of requirements, and TypeDB finds all matching data to process. 
 - **A fully variablizable language**. Any concept in TypeQL has a type, and so any concept in TypeQL can be variablized in a query – even types! This enables TypeQL to express powerful [parametric](https://typedb.com/features#polymorphic-queries) database operations.
-- **Declarative and built for consistency.** TypeQL’s declarative statement-based syntax can be naturally interleaved with many other declarative constructs, including variable arithmetic or regular expressions. These additional constructs are integrated into TypeDB’s type system, which ensures consistency of any query sent to the database.
+- **Built for consistency**. TypeQL patterns are underpinned by a powerful type system that ensure safety and consistency of database applications.
 
 For a quick overview of the range of statements that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/docs/).
 
