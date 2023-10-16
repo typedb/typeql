@@ -51,6 +51,7 @@ impl fmt::Display for TypeQLUpdate {
         writeln!(f, "{}", self.query_delete)?;
         writeln!(f, "{}", token::Command::Insert)?;
         write_joined!(f, ";\n", self.insert_statements)?;
-        f.write_str(";")
+        f.write_str(";")?;
+        write!(f, "\n{}", self.modifiers)
     }
 }

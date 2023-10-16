@@ -19,7 +19,11 @@
  * under the License.
  */
 
-use crate::pattern::{Conjunction, Pattern};
+use std::collections::HashSet;
+use std::fmt;
+use crate::common::token;
+use crate::common::validatable::Validatable;
+use crate::pattern::{Conjunction, NamedReferences, Pattern, Reference};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {
@@ -33,5 +37,29 @@ impl MatchClause {
 
     pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
         Self::new(Conjunction::new(patterns))
+    }
+}
+
+impl Validatable for MatchClause {
+    fn validate(&self) -> crate::common::Result<()> {
+        todo!()
+    }
+}
+
+impl NamedReferences for MatchClause {
+    fn named_references(&self) -> HashSet<Reference> {
+        self.conjunction.named_references()
+    }
+}
+
+impl fmt::Display for MatchClause {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", token::Command::Match)?;
+
+        for pattern in &self.conjunction.patterns {
+            write!(f, "\n{pattern};")?;
+        }
+
+        Ok(())
     }
 }

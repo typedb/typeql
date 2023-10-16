@@ -88,6 +88,7 @@ fn expect_bounded(names: &HashSet<Reference>, bounds: &HashSet<Reference>, conju
 
 impl NamedReferences for Conjunction {
     fn named_references(&self) -> HashSet<Reference> {
+        // TODO: do we want to cache this?
         self.references().filter(|r| r.is_name()).cloned().collect()
     }
 }

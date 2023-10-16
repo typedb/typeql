@@ -20,7 +20,7 @@
  */
 
 use std::fmt;
-use crate::common;
+use crate::{common, write_joined};
 use crate::common::error::TypeQLError;
 use crate::common::token;
 use crate::pattern::UnboundVariable;
@@ -38,23 +38,27 @@ impl Modifiers {
         self.sorting.is_none() && self.limit.is_none() && self.offset.is_none()
     }
 
-    // pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
-    //     Self { sorting: Some(sorting.into()), ..self }
-    // }
-    //
-    // pub fn limit(self, limit: usize) -> Self {
-    //     Self { limit: Some(Limit { limit }), ..self }
-    // }
-    //
-    // pub fn offset(self, offset: usize) -> Self {
-    //     Self { offset: Some(Offset { offset }), ..self }
-    // }
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
+        Self { sorting: Some(sorting.into()), ..self }
+    }
+
+    pub fn limit(self, limit: usize) -> Self {
+        Self { limit: Some(Limit { limit }), ..self }
+    }
+
+    pub fn offset(self, offset: usize) -> Self {
+        Self { offset: Some(Offset { offset }), ..self }
+    }
 }
 
 impl fmt::Display for Modifiers {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_joined!(f, "; ", self.filter, self.sorting, self.offset, self.limit)?;
-        f.write_str(";")
+        if self.is_empty() {
+            write_joined!(f, "; ", self.sorting, self.offset, self.limit)?;
+            f.write_str(";")
+        } else {
+            Ok(())
+        }
     }
 }
 

@@ -71,7 +71,7 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
         }
         this.modifiers = modifiers;
 
-        sortVarsAreInScope(); // TODO: this is redundant each time we update a modifiers
+        sortVarsAreInScope(); // TODO: this is redundant each time we update a modifier
         validateNamesUnique(match.patternsRecursive()); // TODO: this is redundant each time we update a modifier
         this.hash = Objects.hash(this.match, this.filter, this.modifiers);
     }

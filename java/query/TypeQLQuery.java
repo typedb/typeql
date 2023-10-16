@@ -240,7 +240,7 @@ public interface TypeQLQuery {
         public MatchClause(Conjunction<? extends Pattern> conjunction) {
             this.conjunction = conjunction;
 
-            eachPatternVariableHasNamedVariable(conjunction.patterns());
+            eachPatternStatementHasNamedVariable(conjunction.patterns());
             nestedPatternsAreBounded();
         }
 
@@ -249,12 +249,12 @@ public interface TypeQLQuery {
                     .forEach(pattern -> pattern.validateIsBoundedBy(namedVariables()));
         }
 
-        private void eachPatternVariableHasNamedVariable(List<? extends Pattern> patterns) {
+        private void eachPatternStatementHasNamedVariable(List<? extends Pattern> patterns) {
             patterns.forEach(pattern -> {
                 if (pattern.isStatement() && pattern.asStatement().variables().noneMatch(TypeQLVariable::isNamed)) {
                     throw TypeQLException.of(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.message(pattern));
                 } else if (!pattern.isStatement()) {
-                    eachPatternVariableHasNamedVariable(pattern.patterns());
+                    eachPatternStatementHasNamedVariable(pattern.patterns());
                 }
             });
         }

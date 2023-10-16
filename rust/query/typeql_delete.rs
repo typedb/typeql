@@ -33,18 +33,19 @@ use crate::{
     query::{writable::expect_non_empty, TypeQLGet, TypeQLUpdate, Writable},
     write_joined,
 };
+use crate::query::MatchClause;
 use crate::query::modifier::Modifiers;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDelete {
-    pub clause_match: TypeQLMatch,
+    pub clause_match: MatchClause,
     pub statements: Vec<ThingStatement>,
     pub modifiers: Modifiers,
 }
 
 impl TypeQLDelete {
     pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
-        TypeQLUpdate { query_delete: self, insert_statements: vars.vars() }
+        TypeQLUpdate { query_delete: self, insert_statements: vars.vars(), modifiers: Default::default() }
     }
 }
 
@@ -62,8 +63,8 @@ impl Validatable for TypeQLDelete {
     }
 }
 
-fn expect_delete_in_scope_of_match(match_query: &TypeQLGet, variables: &[ThingStatement]) -> Result<()> {
-    let names_in_scope = match_query.named_references();
+fn expect_delete_in_scope_of_match(clause_match: &MatchClause, variables: &[ThingStatement]) -> Result<()> {
+    let names_in_scope = clause_match.named_references();
     collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(|r| -> Result<()> {
         if names_in_scope.contains(r) {
             Ok(())
@@ -78,6 +79,7 @@ impl fmt::Display for TypeQLDelete {
         writeln!(f, "{}", self.clause_match)?;
         writeln!(f, "{}", token::Command::Delete)?;
         write_joined!(f, ";\n", self.statements)?;
+        write!(f, "\n{}", self.modifiers)?;
         f.write_str(";")
     }
 }

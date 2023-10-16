@@ -40,17 +40,16 @@ use crate::query::modifier::{Modifiers, Sorting};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGet {
-    pub match_: MatchClause,
-    pub filter: Vec<UnboundVariable>,
+    pub clause_match: MatchClause,
+    pub filter: Filter,
     pub modifiers: Modifiers,
 }
 
 impl AggregateQueryBuilder for TypeQLGet {}
 
 impl TypeQLGet {
-
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
-        Self::new(self.conjunction, self.modifiers.filter(vars))
+        TypeQLGet { filter: Filter { vars }, ..self }
     }
 
     pub fn get<const N: usize, T: Into<UnboundVariable>>(self, vars: [T; N]) -> Self {
@@ -58,7 +57,7 @@ impl TypeQLGet {
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
-        Self::new(self.conjunction, self.modifiers.sort(sorting))
+        TypeQLGet { modifiers: self.modifiers.sort(sorting), ..self }
     }
 
     pub fn limit(self, limit: usize) -> Self {
@@ -70,11 +69,11 @@ impl TypeQLGet {
     }
 
     pub fn insert(self, vars: impl Writable) -> TypeQLInsert {
-        TypeQLInsert { get_query: Some(self), statements: vars.vars() }
+        TypeQLInsert { clause_match: Some(self.clause_match), statements: vars.vars(), modifiers: self.modifiers }
     }
 
     pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
-        TypeQLDelete { clause_match: self, statements: vars.vars() }
+        TypeQLDelete { clause_match: self.clause_match, statements: vars.vars(), modifiers: self.modifiers }
     }
 
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLGetGroup {
@@ -93,8 +92,8 @@ impl Validatable for TypeQLGet {
                 expect_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
                 expect_variable_names_are_unique(&self.conjunction),
             ]
-            .into_iter()
-            .chain(self.conjunction.patterns.iter().map(|p| p.validate())),
+                .into_iter()
+                .chain(self.conjunction.patterns.iter().map(|p| p.validate())),
         )
     }
 }
@@ -122,7 +121,7 @@ fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<()> {
     collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
 }
 
-fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item = &'a Pattern>) -> Result<()> {
+fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item=&'a Pattern>) -> Result<()> {
     collect_err(&mut patterns.map(|p| {
         match p {
             Pattern::Variable(v) => v
@@ -185,16 +184,9 @@ fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result<()> {
 
 impl fmt::Display for TypeQLGet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", token::Command::Match)?;
-
-        for pattern in &self.conjunction.patterns {
-            write!(f, "\n{pattern};")?;
-        }
-
-        if !self.modifiers.is_empty() {
-            write!(f, "\n{}", self.modifiers)?;
-        }
-
+        write!(f, "{}", self.clause_match)?;
+        write!(f, "\n{}", self.filter)?;
+        write!(f, "\n{}", self.modifiers)?;
         Ok(())
     }
 }
