@@ -40,7 +40,7 @@ impl IsConstraint {
 }
 
 impl Validatable for IsConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         self.variable.validate()
     }
 }

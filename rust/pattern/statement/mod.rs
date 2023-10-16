@@ -92,7 +92,7 @@ impl Statement {
         }
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
         if !self.references_recursive().any(|r| r.is_name() && bounds.contains(r)) {
             Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
         }
@@ -108,13 +108,12 @@ enum_wrapper! { Statement
 }
 
 impl Validatable for Statement {
-    fn validate(&self) -> Result<()> {
-        use Statement::*;
+    fn validate(&self) -> Result {
         match self {
-            Concept(concept) => concept.validate(),
-            Thing(thing) => thing.validate(),
-            Type(type_) => type_.validate(),
-            Value(value) => value.validate(),
+            Statement::Concept(concept) => concept.validate(),
+            Statement::Thing(thing) => thing.validate(),
+            Statement::Type(type_) => type_.validate(),
+            Statement::Value(value) => value.validate(),
         }
     }
 }

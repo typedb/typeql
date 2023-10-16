@@ -62,9 +62,9 @@ impl TypeQLDefine {
 }
 
 impl Validatable for TypeQLDefine {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(expect_non_empty(&self.variables, &self.rules))
+            iter::once(expect_non_empty(&self.variables, &self.rules))
                 .chain(self.variables.iter().map(Validatable::validate))
                 .chain(self.variables.iter().map(TypeStatement::validate_definable))
                 .chain(self.rules.iter().map(Validatable::validate)),
@@ -72,7 +72,7 @@ impl Validatable for TypeQLDefine {
     }
 }
 
-fn expect_non_empty(variables: &[TypeStatement], rules: &[RuleDefinition]) -> Result<()> {
+fn expect_non_empty(variables: &[TypeStatement], rules: &[RuleDefinition]) -> Result {
     if variables.is_empty() && rules.is_empty() {
         Err(TypeQLError::MissingDefinables())?
     }

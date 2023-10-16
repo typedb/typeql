@@ -25,7 +25,7 @@ use std::{fmt, iter};
 use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
-        variable::ValueConstrainable, AssignConstraint, LeftOperand, PredicateConstraint, Reference, ValueReference,
+        statement::ValueConstrainable, AssignConstraint, LeftOperand, PredicateConstraint, Reference, ValueReference,
         ValueVariable,
     },
 };
@@ -60,7 +60,7 @@ impl ValueConstrainable for UnboundValueVariable {
 }
 
 impl Validatable for UnboundValueVariable {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         self.reference.validate()
     }
 }

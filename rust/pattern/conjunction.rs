@@ -69,17 +69,17 @@ impl Conjunction {
         self.references().any(|r| r.is_name())
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
         let names = self.named_references();
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
-            &mut iter::once(expect_bounded(&names, bounds, self))
+            iter::once(expect_bounded(&names, bounds, self))
                 .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_bounds))),
         )
     }
 }
 
-fn expect_bounded(names: &HashSet<Reference>, bounds: &HashSet<Reference>, conjunction: &Conjunction) -> Result<()> {
+fn expect_bounded(names: &HashSet<Reference>, bounds: &HashSet<Reference>, conjunction: &Conjunction) -> Result {
     if bounds.is_disjoint(names) {
         Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
@@ -94,7 +94,7 @@ impl NamedReferences for Conjunction {
 }
 
 impl Validatable for Conjunction {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }

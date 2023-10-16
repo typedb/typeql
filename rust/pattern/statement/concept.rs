@@ -26,7 +26,7 @@ use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
         constraint::IsConstraint,
-        variable::{builder::ConceptConstrainable, Reference},
+        statement::{builder::ConceptConstrainable, Reference},
     },
 };
 
@@ -47,9 +47,9 @@ impl ConceptVariable {
 }
 
 impl Validatable for ConceptVariable {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
+            iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
         )
     }
 }

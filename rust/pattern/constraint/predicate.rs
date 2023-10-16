@@ -60,15 +60,14 @@ impl PredicateConstraint {
 }
 
 impl Validatable for PredicateConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut [expect_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
-                .into_iter(),
+            [expect_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
         )
     }
 }
 
-fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result<()> {
+fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result {
     if predicate.is_substring() && !matches!(value, Value::Constant(Constant::String(_))) {
         Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
@@ -99,7 +98,7 @@ pub enum Value {
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
 impl Validatable for Value {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match &self {
             Self::Constant(constant) => constant.validate(),
             Self::ThingVariable(variable) => variable.validate(),

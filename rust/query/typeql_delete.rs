@@ -42,7 +42,6 @@ pub struct TypeQLDelete {
     pub statements: Vec<ThingStatement>,
     pub modifiers: Modifiers,
 }
-
 impl TypeQLDelete {
     pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
         TypeQLUpdate { query_delete: self, insert_statements: vars.vars(), modifiers: Default::default() }
@@ -50,22 +49,21 @@ impl TypeQLDelete {
 }
 
 impl Validatable for TypeQLDelete {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut ([
+            ([
                 expect_delete_in_scope_of_match(&self.clause_match, &self.statements),
                 expect_non_empty(&self.statements),
                 self.clause_match.validate(),
-            ]
-            .into_iter())
+            ].into_iter())
             .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }
 
-fn expect_delete_in_scope_of_match(clause_match: &MatchClause, variables: &[ThingStatement]) -> Result<()> {
+fn expect_delete_in_scope_of_match(clause_match: &MatchClause, variables: &[ThingStatement]) -> Result {
     let names_in_scope = clause_match.named_references();
-    collect_err(&mut variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(|r| -> Result<()> {
+    collect_err(variables.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(|r| -> Result {
         if names_in_scope.contains(r) {
             Ok(())
         } else {

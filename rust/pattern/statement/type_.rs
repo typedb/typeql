@@ -83,7 +83,7 @@ impl TypeStatement {
             || self.value_type.is_some()
     }
 
-    pub fn validate_definable(&self) -> Result<()> {
+    pub fn validate_definable(&self) -> Result {
         if self.label.is_none() {
             Err(TypeQLError::InvalidDefineQueryVariable())?;
         }
@@ -92,9 +92,9 @@ impl TypeStatement {
 }
 
 impl Validatable for TypeStatement {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(self.reference.validate())
+            iter::once(self.reference.validate())
                 .chain(self.label.iter().map(Validatable::validate))
                 .chain(self.owns.iter().map(Validatable::validate))
                 .chain(self.plays.iter().map(Validatable::validate))

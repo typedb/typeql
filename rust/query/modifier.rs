@@ -105,7 +105,7 @@ pub mod sorting {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sorting {
-    vars: Vec<sorting::OrderedVariable>,
+    pub(crate) vars: Vec<sorting::OrderedVariable>,
 }
 
 impl Sorting {

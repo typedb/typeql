@@ -25,7 +25,7 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
-        variable::{builder::ValueConstrainable, Reference},
+        statement::{builder::ValueConstrainable, Reference},
         AssignConstraint, PredicateConstraint,
     },
 };
@@ -56,9 +56,9 @@ impl ValueVariable {
 }
 
 impl Validatable for ValueVariable {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(self.reference.validate())
+            iter::once(self.reference.validate())
                 .chain(self.assign_constraint.iter().map(Validatable::validate))
                 .chain(self.predicate_constraint.iter().map(Validatable::validate)),
         )

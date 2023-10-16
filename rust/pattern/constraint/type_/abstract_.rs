@@ -28,7 +28,7 @@ use crate::common::{token, validatable::Validatable, Result};
 pub struct AbstractConstraint;
 
 impl Validatable for AbstractConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }

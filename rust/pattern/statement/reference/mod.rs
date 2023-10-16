@@ -68,7 +68,7 @@ impl Reference {
 }
 
 impl Validatable for Reference {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match self {
             Reference::Concept(concept) => concept.validate(),
             Reference::Value(value) => value.validate(),

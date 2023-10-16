@@ -45,7 +45,7 @@ impl IsaConstraint {
 }
 
 impl Validatable for IsaConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         self.type_.validate()
     }
 }

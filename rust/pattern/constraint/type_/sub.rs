@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{variable::Reference, IsExplicit, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{statement::Reference, IsExplicit, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
@@ -45,7 +45,7 @@ impl SubConstraint {
 }
 
 impl Validatable for SubConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         self.type_.validate()
     }
 }

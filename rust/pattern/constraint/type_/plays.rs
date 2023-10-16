@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{statement::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
@@ -57,9 +57,9 @@ impl PlaysConstraint {
 }
 
 impl Validatable for PlaysConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(self.role_type.validate())
+            iter::once(self.role_type.validate())
                 .chain(self.overridden_role_type.iter().map(Validatable::validate))
                 .chain(self.relation_type.iter().map(Validatable::validate)),
         )

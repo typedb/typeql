@@ -49,7 +49,7 @@ impl RuleDeclaration {
 }
 
 impl Validatable for RuleDeclaration {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }
@@ -85,22 +85,21 @@ pub struct RuleDefinition {
 }
 
 impl Validatable for RuleDefinition {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut [
+             [
                 expect_no_nested_negations(self.when.patterns.iter(), &self.label),
                 expect_valid_inference(&self.then, &self.label),
                 expect_then_bounded_by_when(&self.then, &self.when, &self.label),
                 self.when.validate(),
                 self.then.validate(),
             ]
-            .into_iter(),
         )
     }
 }
 
-fn expect_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, rule_label: &Label) -> Result<()> {
-    collect_err(&mut patterns.map(|p| -> Result<()> {
+fn expect_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, rule_label: &Label) -> Result {
+    collect_err(patterns.map(|p| -> Result {
         match p {
             Pattern::Conjunction(c) => expect_no_nested_negations(c.patterns.iter(), rule_label),
             Pattern::Variable(_) => Ok(()),
@@ -125,7 +124,7 @@ fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bo
     })
 }
 
-fn expect_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result<()> {
+fn expect_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result {
     if infers_ownership(then) {
         let has = then.has.get(0).unwrap();
         if has.type_.is_some() && has.attribute.reference.is_name() {
@@ -156,7 +155,7 @@ fn infers_relation(then: &ThingStatement) -> bool {
     then.relation.is_some() && then.isa.is_some() && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
 }
 
-fn expect_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result<()> {
+fn expect_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {
     let bounds = when.named_references();
     if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?

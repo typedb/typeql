@@ -37,8 +37,8 @@ pub struct TypeQLGetGroup {
 impl AggregateQueryBuilder for TypeQLGetGroup {}
 
 impl Validatable for TypeQLGetGroup {
-    fn validate(&self) -> Result<()> {
-        collect_err(&mut [self.get_query.validate(), self.group_var.validate()].into_iter())
+    fn validate(&self) -> Result {
+        collect_err([self.get_query.validate(), self.group_var.validate()])
     }
 }
 

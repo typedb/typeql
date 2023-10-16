@@ -69,7 +69,7 @@ impl UnboundConceptVariable {
 }
 
 impl Validatable for UnboundConceptVariable {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         self.reference.validate()
     }
 }

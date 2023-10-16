@@ -89,9 +89,9 @@ impl ThingStatement {
 }
 
 impl Validatable for ThingStatement {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(self.reference.validate())
+            iter::once(self.reference.validate())
                 .chain(self.iid.iter().map(Validatable::validate))
                 .chain(self.isa.iter().map(Validatable::validate))
                 .chain(self.has.iter().map(Validatable::validate))

@@ -29,9 +29,9 @@ mod label;
 mod named_references;
 mod negation;
 mod schema;
+mod statement;
 #[cfg(test)]
 mod test;
-mod variable;
 
 use std::{collections::HashSet, fmt};
 
@@ -48,8 +48,8 @@ pub use label::Label;
 pub use named_references::NamedReferences;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
-pub(crate) use variable::LeftOperand;
-pub use variable::{
+pub(crate) use statement::LeftOperand;
+pub use statement::{
     ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, ExpressionBuilder, Reference,
     RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingStatement, ThingVariableBuilder,
     TypeConstrainable, TypeStatement, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
@@ -80,7 +80,7 @@ impl Pattern {
         })
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
         use Pattern::*;
         match self {
             Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
@@ -106,7 +106,7 @@ enum_wrapper! { Pattern
 }
 
 impl Validatable for Pattern {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         use Pattern::*;
         match self {
             Conjunction(conjunction) => conjunction.validate(),
@@ -200,7 +200,7 @@ enum_wrapper! { Definable
 }
 
 impl Validatable for Definable {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         use Definable::*;
         match self {
             RuleDeclaration(rule) => rule.validate(),

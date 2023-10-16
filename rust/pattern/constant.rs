@@ -49,7 +49,7 @@ impl Eq for Constant {} // can't derive, because floating point types do not imp
 impl LeftOperand for Constant {}
 
 impl Validatable for Constant {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {

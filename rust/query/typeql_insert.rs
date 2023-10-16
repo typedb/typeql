@@ -50,9 +50,9 @@ impl TypeQLInsert {
 }
 
 impl Validatable for TypeQLInsert {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut [
+            [
                 expect_non_empty(&self.statements),
                 expect_insert_in_scope_of_match(&self.get_query, &self.statements),
             ]
@@ -63,7 +63,7 @@ impl Validatable for TypeQLInsert {
     }
 }
 
-fn expect_insert_in_scope_of_match(match_query: &Option<TypeQLGet>, variables: &[ThingStatement]) -> Result<()> {
+fn expect_insert_in_scope_of_match(match_query: &Option<TypeQLGet>, variables: &[ThingStatement]) -> Result {
     if let Some(match_query) = match_query {
         let names_in_scope = match_query.named_references();
         if variables.iter().any(|v| {

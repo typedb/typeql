@@ -56,7 +56,7 @@ impl ConceptReference {
 }
 
 impl Validatable for ConceptReference {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match self {
             Self::Anonymous(_) => Ok(()),
             Self::Name(n) => expect_valid_identifier(n),
@@ -64,7 +64,7 @@ impl Validatable for ConceptReference {
     }
 }
 
-fn expect_valid_identifier(name: &str) -> Result<()> {
+fn expect_valid_identifier(name: &str) -> Result {
     if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
         || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
     {

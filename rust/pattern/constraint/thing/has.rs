@@ -47,8 +47,8 @@ impl HasConstraint {
 }
 
 impl Validatable for HasConstraint {
-    fn validate(&self) -> Result<()> {
-        collect_err(&mut iter::once(self.attribute.validate()).chain(self.type_.iter().map(Validatable::validate)))
+    fn validate(&self) -> Result {
+        collect_err(iter::once(self.attribute.validate()).chain(self.type_.iter().map(Validatable::validate)))
     }
 }
 

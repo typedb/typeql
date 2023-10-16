@@ -58,7 +58,7 @@ impl RelationConstraint {
 }
 
 impl Validatable for RelationConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
             &mut iter::once(expect_role_players_present(&self.role_players))
                 .chain(self.role_players.iter().map(Validatable::validate)),
@@ -66,7 +66,7 @@ impl Validatable for RelationConstraint {
     }
 }
 
-fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result<()> {
+fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result {
     if role_players.is_empty() {
         Err(TypeQLError::MissingConstraintRelationPlayer())?
     }
@@ -109,8 +109,8 @@ impl RolePlayerConstraint {
 }
 
 impl Validatable for RolePlayerConstraint {
-    fn validate(&self) -> Result<()> {
-        collect_err(&mut (self.role_type.iter().map(Validatable::validate)).chain(iter::once(self.player.validate())))
+    fn validate(&self) -> Result {
+        collect_err((self.role_type.iter().map(Validatable::validate)).chain(iter::once(self.player.validate())))
     }
 }
 

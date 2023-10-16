@@ -50,7 +50,7 @@ impl UnboundVariable {
 }
 
 impl Validatable for UnboundVariable {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match self {
             UnboundVariable::Concept(concept_variable) => concept_variable.validate(),
             UnboundVariable::Value(value_variable) => value_variable.validate(),

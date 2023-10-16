@@ -45,14 +45,14 @@ impl ValueReference {
 }
 
 impl Validatable for ValueReference {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match self {
             Self::Name(n) => expect_valid_identifier(n),
         }
     }
 }
 
-fn expect_valid_identifier(name: &str) -> Result<()> {
+fn expect_valid_identifier(name: &str) -> Result {
     if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
         || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
     {

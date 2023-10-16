@@ -76,8 +76,8 @@ impl fmt::Display for Error {
     }
 }
 
-pub fn collect_err(i: &mut dyn Iterator<Item = Result<(), Error>>) -> Result<(), Error> {
-    let errors = i.filter_map(Result::err).flat_map(|e| e.errors).collect::<Vec<_>>();
+pub fn collect_err(i: impl IntoIterator<Item = Result<(), Error>>) -> Result<(), Error> {
+    let errors = i.into_iter().filter_map(Result::err).flat_map(|e| e.errors).collect::<Vec<_>>();
     if errors.is_empty() {
         Ok(())
     } else {

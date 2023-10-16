@@ -30,7 +30,7 @@ pub struct ValueTypeConstraint {
 }
 
 impl Validatable for ValueTypeConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }

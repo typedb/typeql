@@ -21,9 +21,11 @@
 
 use std::collections::HashSet;
 use std::fmt;
+use crate::common::error::collect_err;
 use crate::common::token;
 use crate::common::validatable::Validatable;
 use crate::pattern::{Conjunction, NamedReferences, Pattern, Reference};
+use crate::Result;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {
@@ -38,11 +40,21 @@ impl MatchClause {
     pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
         Self::new(Conjunction::new(patterns))
     }
+
+    fn nestedPatternsAreBounded(&self) -> Result {
+        todo!()
+    }
+
+    fn statementsHaveNamedVariable(&self) -> Result {
+        todo!()
+    }
 }
 
 impl Validatable for MatchClause {
-    fn validate(&self) -> crate::common::Result<()> {
-        todo!()
+    fn validate(&self) -> Result {
+        self.statementsHaveNamedVariable()?;
+        self.nestedPatternsAreBounded()?;
+        collect_err(self.conjunction.patterns.iter().map(|p| p.validate()))
     }
 }
 

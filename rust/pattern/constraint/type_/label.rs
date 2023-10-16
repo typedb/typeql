@@ -33,7 +33,7 @@ pub struct LabelConstraint {
 }
 
 impl Validatable for LabelConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }

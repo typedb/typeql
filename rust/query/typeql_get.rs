@@ -79,36 +79,48 @@ impl TypeQLGet {
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLGetGroup {
         TypeQLGetGroup { get_query: self, group_var: var.into() }
     }
+
+    fn filters_are_in_scope(&self) -> Result {
+        todo!()
+    }
+
+    fn sort_vars_are_in_scope(&self) -> Result {
+        todo!()
+    }
+
+    fn variable_names_are_unique(&self) -> Result {
+        todo!()
+    }
 }
 
 impl Validatable for TypeQLGet {
-    fn validate(&self) -> Result<()> {
-        collect_err(
-            &mut [
-                expect_has_bounding_conjunction(&self.conjunction),
-                expect_nested_patterns_are_bounded(&self.conjunction),
-                expect_each_variable_is_bounded_by_named(self.conjunction.patterns.iter()),
-                expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
-                expect_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
-                expect_variable_names_are_unique(&self.conjunction),
-            ]
-                .into_iter()
-                .chain(self.conjunction.patterns.iter().map(|p| p.validate())),
-        )
+    fn validate(&self) -> Result {
+        collect_err([
+            self.clause_match.validate(),
+            self.filters_are_in_scope(),
+            self.sort_vars_are_in_scope(),
+            self.variable_names_are_unique()
+        ])
+            // expect_has_bounding_conjunction(&self.conjunction),
+            // expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
+            // expect_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
+            // expect_variable_names_are_unique(&self.conjunction),
+            // ]
+        // )
     }
 }
 
 impl NamedReferences for TypeQLGet {
     fn named_references(&self) -> HashSet<Reference> {
-        if let Some(filter) = &self.modifiers.filter {
-            filter.vars.iter().map(|v| v.reference().clone()).collect()
+        if !self.filter.vars.is_empty() {
+            self.filter.vars.iter().map(|v| v.reference().clone()).collect()
         } else {
-            self.conjunction.named_references()
+            self.clause_match.named_references()
         }
     }
 }
 
-fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
+fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result {
     if conjunction.has_named_variables() {
         Ok(())
     } else {
@@ -116,13 +128,13 @@ fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result<()> {
     }
 }
 
-fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result<()> {
+fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result {
     let bounds = conjunction.named_references();
-    collect_err(&mut conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
+    collect_err(conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
 }
 
-fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item=&'a Pattern>) -> Result<()> {
-    collect_err(&mut patterns.map(|p| {
+fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item=&'a Pattern>) -> Result {
+    collect_err(patterns.map(|p| {
         match p {
             Pattern::Variable(v) => v
                 .references()
@@ -136,13 +148,13 @@ fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item=&'a
     }))
 }
 
-fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result<()> {
+fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result {
     let names_in_scope = conjunction.named_references();
     let mut seen = HashSet::new();
     if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
         Err(TypeQLError::EmptyMatchFilter())?;
     }
-    collect_err(&mut filter.iter().flat_map(|f| &f.vars).map(|v| v.reference()).map(|r| {
+    collect_err(filter.iter().flat_map(|f| &f.vars).map(|v| v.reference()).map(|r| {
         if !r.is_name() {
             Err(TypeQLError::VariableNotNamed().into())
         } else if !names_in_scope.contains(r) {
@@ -160,17 +172,17 @@ fn expect_sort_vars_are_in_scope(
     conjunction: &Conjunction,
     filter: &Option<Filter>,
     sorting: &Option<Sorting>,
-) -> Result<()> {
+) -> Result {
     let names_in_scope = filter
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.reference().clone()).collect())
         .unwrap_or_else(|| conjunction.named_references());
-    collect_err(&mut sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference().clone()).map(|r| {
+    collect_err(sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.reference().clone()).map(|r| {
         names_in_scope.contains(&r).then_some(()).ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
     }))
 }
 
-fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result<()> {
+fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result {
     let all_refs = conjunction.references_recursive();
     let (concept_refs, value_refs): (HashSet<&Reference>, HashSet<&Reference>) = all_refs.partition(|r| r.is_concept());
     let concept_names = concept_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();

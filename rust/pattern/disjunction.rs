@@ -48,13 +48,13 @@ impl Disjunction {
         Box::new(self.patterns.iter().flat_map(|p| p.references_recursive()))
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
-        collect_err(&mut self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)))
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
+        collect_err(self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)))
     }
 }
 
 impl Validatable for Disjunction {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }

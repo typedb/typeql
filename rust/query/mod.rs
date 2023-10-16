@@ -92,7 +92,7 @@ enum_wrapper! { Query
 }
 
 impl Validatable for Query {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         use Query::*;
         match self {
             Get(query) => query.validate(),

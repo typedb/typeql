@@ -39,7 +39,7 @@ impl AssignConstraint {
 }
 
 impl Validatable for AssignConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }

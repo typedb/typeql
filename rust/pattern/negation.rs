@@ -49,13 +49,13 @@ impl Negation {
         self.pattern.references_recursive()
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
         self.pattern.expect_is_bounded_by(bounds)
     }
 }
 
 impl Validatable for Negation {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match self.pattern.as_ref() {
             Pattern::Negation(_) => Err(TypeQLError::RedundantNestedNegation())?,
             _ => Ok(()),

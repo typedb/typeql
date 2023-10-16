@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{variable::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{statement::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
     Label,
 };
 
@@ -69,9 +69,9 @@ impl OwnsConstraint {
 }
 
 impl Validatable for OwnsConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(self.attribute_type.validate())
+            iter::once(self.attribute_type.validate())
                 .chain(self.overridden_attribute_type.iter().map(Validatable::validate)),
         )
     }
