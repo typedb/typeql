@@ -23,7 +23,12 @@
 use std::collections::HashSet;
 
 use crate::pattern::Reference;
+use crate::Result;
 
 pub trait NamedReferences {
     fn named_references(&self) -> HashSet<Reference>;
+}
+
+pub(crate) fn validate_names_unique(references: impl NamedReferences) -> Result {
+    todo!()
 }

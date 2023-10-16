@@ -20,18 +20,18 @@
  *
  */
 
-use crate::pattern::{ConceptVariable, IsConstraint};
+use crate::pattern::{ConceptStatement, IsConstraint};
 
 pub trait ConceptConstrainable {
-    fn constrain_is(self, is: IsConstraint) -> ConceptVariable;
+    fn constrain_is(self, is: IsConstraint) -> ConceptStatement;
 }
 
 pub trait ConceptVariableBuilder: Sized {
-    fn is(self, is: impl Into<IsConstraint>) -> ConceptVariable;
+    fn is(self, is: impl Into<IsConstraint>) -> ConceptStatement;
 }
 
 impl<U: ConceptConstrainable> ConceptVariableBuilder for U {
-    fn is(self, is: impl Into<IsConstraint>) -> ConceptVariable {
+    fn is(self, is: impl Into<IsConstraint>) -> ConceptStatement {
         self.constrain_is(is.into())
     }
 }

@@ -25,16 +25,16 @@ use std::fmt;
 use crate::{
     builder::cvar,
     common::{token, validatable::Validatable, Result},
-    pattern::{ConceptVariable, UnboundConceptVariable},
+    pattern::{ConceptStatement, UnboundConceptVariable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {
-    pub variable: Box<ConceptVariable>,
+    pub variable: Box<ConceptStatement>,
 }
 
 impl IsConstraint {
-    fn new(var: ConceptVariable) -> Self {
+    fn new(var: ConceptStatement) -> Self {
         Self { variable: Box::new(var) }
     }
 }

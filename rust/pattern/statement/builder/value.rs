@@ -20,23 +20,23 @@
  *
  */
 
-use crate::pattern::{AssignConstraint, PredicateConstraint, ValueVariable};
+use crate::pattern::{AssignConstraint, PredicateConstraint, ValueStatement};
 
 pub trait ValueConstrainable {
-    fn constrain_assign(self, assign: AssignConstraint) -> ValueVariable;
-    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueVariable;
+    fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement;
+    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueStatement;
 }
 
 pub trait ValueVariableBuilder: Sized {
-    fn assign(self, assign: impl Into<AssignConstraint>) -> ValueVariable;
-    fn predicate(self, predicate: impl Into<PredicateConstraint>) -> ValueVariable;
+    fn assign(self, assign: impl Into<AssignConstraint>) -> ValueStatement;
+    fn predicate(self, predicate: impl Into<PredicateConstraint>) -> ValueStatement;
 }
 
 impl<U: ValueConstrainable> ValueVariableBuilder for U {
-    fn assign(self, assign: impl Into<AssignConstraint>) -> ValueVariable {
+    fn assign(self, assign: impl Into<AssignConstraint>) -> ValueStatement {
         self.constrain_assign(assign.into())
     }
-    fn predicate(self, predicate: impl Into<PredicateConstraint>) -> ValueVariable {
+    fn predicate(self, predicate: impl Into<PredicateConstraint>) -> ValueStatement {
         self.constrain_predicate(predicate.into())
     }
 }

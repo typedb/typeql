@@ -102,7 +102,7 @@ fn expect_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, r
     collect_err(patterns.map(|p| -> Result {
         match p {
             Pattern::Conjunction(c) => expect_no_nested_negations(c.patterns.iter(), rule_label),
-            Pattern::Variable(_) => Ok(()),
+            Pattern::Statement(_) => Ok(()),
             Pattern::Disjunction(d) => expect_no_nested_negations(d.patterns.iter(), rule_label),
             Pattern::Negation(n) => {
                 if contains_negations(iter::once(n.pattern.as_ref())) {
@@ -118,7 +118,7 @@ fn expect_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, r
 fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bool {
     patterns.any(|p| match p {
         Pattern::Conjunction(c) => contains_negations(c.patterns.iter()),
-        Pattern::Variable(_) => false,
+        Pattern::Statement(_) => false,
         Pattern::Disjunction(d) => contains_negations(d.patterns.iter()),
         Pattern::Negation(_) => true,
     })

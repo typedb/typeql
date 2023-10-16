@@ -20,9 +20,9 @@
  */
 
 use std::collections::HashSet;
-use std::fmt;
-use crate::common::error::collect_err;
-use crate::common::token;
+use std::{fmt, iter};
+use crate::common::error::{collect_err, TypeQLError};
+use crate::common::{Error, token};
 use crate::common::validatable::Validatable;
 use crate::pattern::{Conjunction, NamedReferences, Pattern, Reference};
 use crate::Result;
@@ -41,20 +41,9 @@ impl MatchClause {
         Self::new(Conjunction::new(patterns))
     }
 
-    fn nestedPatternsAreBounded(&self) -> Result {
-        todo!()
-    }
-
-    fn statementsHaveNamedVariable(&self) -> Result {
-        todo!()
-    }
-}
-
-impl Validatable for MatchClause {
-    fn validate(&self) -> Result {
-        self.statementsHaveNamedVariable()?;
-        self.nestedPatternsAreBounded()?;
-        collect_err(self.conjunction.patterns.iter().map(|p| p.validate()))
+    fn validate_nested_patterns_are_bounded(&self) -> Result {
+        let bounds = self.conjunction.named_references();
+        collect_err(self.conjunction.patterns.iter().map(|p| p.validate_is_bounded_by(&bounds)))
     }
 }
 
@@ -62,6 +51,29 @@ impl NamedReferences for MatchClause {
     fn named_references(&self) -> HashSet<Reference> {
         self.conjunction.named_references()
     }
+}
+
+impl Validatable for MatchClause {
+    fn validate(&self) -> Result {
+        self.validate_nested_patterns_are_bounded()?;
+        validate_statements_have_named_variable(self.conjunction.patterns.iter())?;
+        collect_err(self.conjunction.patterns.iter().map(|p| p.validate()))
+    }
+}
+
+fn validate_statements_have_named_variable(patterns: impl Iterator<Item=&Pattern>) -> Result {
+    collect_err(patterns.map(|p| {
+        match p {
+            Pattern::Statement(v) => v
+                .references()
+                .any(|r| r.is_name())
+                .then_some(())
+                .ok_or_else(|| Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))),
+            Pattern::Conjunction(c) => validate_statements_have_named_variable(c.patterns.iter()),
+            Pattern::Disjunction(d) => validate_statements_have_named_variable(d.patterns.iter()),
+            Pattern::Negation(n) => validate_statements_have_named_variable(iter::once(n.pattern.as_ref())),
+        }
+    }))
 }
 
 impl fmt::Display for MatchClause {

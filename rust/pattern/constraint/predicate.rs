@@ -32,7 +32,7 @@ use crate::{
     },
     pattern::{
         Constant, Reference, ThingStatement, UnboundConceptVariable, UnboundValueVariable, UnboundVariable,
-        ValueVariable,
+        ValueStatement,
     },
 };
 
@@ -93,7 +93,7 @@ impl fmt::Display for PredicateConstraint {
 pub enum Value {
     Constant(Constant),
     ThingVariable(Box<ThingStatement>),
-    ValueVariable(Box<ValueVariable>),
+    ValueVariable(Box<ValueStatement>),
 }
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
@@ -140,8 +140,8 @@ impl From<ThingStatement> for Value {
     }
 }
 
-impl From<ValueVariable> for Value {
-    fn from(variable: ValueVariable) -> Self {
+impl From<ValueStatement> for Value {
+    fn from(variable: ValueStatement) -> Self {
         Value::ValueVariable(Box::new(variable))
     }
 }

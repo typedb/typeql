@@ -38,14 +38,14 @@ pub use builder::{
     ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder, ValueConstrainable,
     ValueVariableBuilder,
 };
-pub use concept::ConceptVariable;
+pub use concept::ConceptStatement;
 pub use reference::{ConceptReference, Reference, ValueReference, Visibility};
 pub use thing::ThingStatement;
 pub use type_::TypeStatement;
 pub use unbound::UnboundVariable;
 pub use unbound_concept::UnboundConceptVariable;
 pub use unbound_value::UnboundValueVariable;
-pub use value::ValueVariable;
+pub use value::ValueStatement;
 
 use crate::{
     common::{error::TypeQLError, validatable::Validatable, Result},
@@ -55,10 +55,10 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
-    Concept(ConceptVariable),
+    Concept(ConceptStatement),
     Thing(ThingStatement),
     Type(TypeStatement),
-    Value(ValueVariable),
+    Value(ValueStatement),
 }
 
 impl Statement {
@@ -101,10 +101,10 @@ impl Statement {
 }
 
 enum_wrapper! { Statement
-    ConceptVariable => Concept,
+    ConceptStatement => Concept,
     ThingStatement => Thing,
     TypeStatement => Type,
-    ValueVariable => Value,
+    ValueStatement => Value,
 }
 
 impl Validatable for Statement {

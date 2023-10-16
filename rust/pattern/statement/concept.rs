@@ -31,14 +31,14 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ConceptVariable {
+pub struct ConceptStatement {
     pub reference: Reference,
     pub is_constraint: Option<IsConstraint>,
 }
 
-impl ConceptVariable {
-    pub fn new(reference: Reference) -> ConceptVariable {
-        ConceptVariable { reference, is_constraint: None }
+impl ConceptStatement {
+    pub fn new(reference: Reference) -> ConceptStatement {
+        ConceptStatement { reference, is_constraint: None }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -46,7 +46,7 @@ impl ConceptVariable {
     }
 }
 
-impl Validatable for ConceptVariable {
+impl Validatable for ConceptStatement {
     fn validate(&self) -> Result {
         collect_err(
             iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
@@ -54,13 +54,13 @@ impl Validatable for ConceptVariable {
     }
 }
 
-impl ConceptConstrainable for ConceptVariable {
-    fn constrain_is(self, is: IsConstraint) -> ConceptVariable {
+impl ConceptConstrainable for ConceptStatement {
+    fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
         Self { is_constraint: Some(is), ..self }
     }
 }
 
-impl fmt::Display for ConceptVariable {
+impl fmt::Display for ConceptStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)?;
         if let Some(is) = &self.is_constraint {

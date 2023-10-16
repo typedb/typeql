@@ -77,18 +77,18 @@ impl TypeQLGet {
     }
 
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLGetGroup {
-        TypeQLGetGroup { get_query: self, group_var: var.into() }
+        TypeQLGetGroup { query: self, group_var: var.into() }
     }
 
-    fn filters_are_in_scope(&self) -> Result {
+    fn validate_filters_are_in_scope(&self) -> Result {
         todo!()
     }
 
-    fn sort_vars_are_in_scope(&self) -> Result {
+    fn validate_sort_vars_are_in_scope(&self) -> Result {
         todo!()
     }
 
-    fn variable_names_are_unique(&self) -> Result {
+    fn validate_names_are_unique(&self) -> Result {
         todo!()
     }
 }
@@ -97,9 +97,9 @@ impl Validatable for TypeQLGet {
     fn validate(&self) -> Result {
         collect_err([
             self.clause_match.validate(),
-            self.filters_are_in_scope(),
-            self.sort_vars_are_in_scope(),
-            self.variable_names_are_unique()
+            self.validate_filters_are_in_scope(),
+            self.validate_sort_vars_are_in_scope(),
+            self.validate_names_are_unique()
         ])
             // expect_has_bounding_conjunction(&self.conjunction),
             // expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
@@ -118,34 +118,6 @@ impl NamedReferences for TypeQLGet {
             self.clause_match.named_references()
         }
     }
-}
-
-fn expect_has_bounding_conjunction(conjunction: &Conjunction) -> Result {
-    if conjunction.has_named_variables() {
-        Ok(())
-    } else {
-        Err(TypeQLError::MatchHasNoBoundingNamedVariable())?
-    }
-}
-
-fn expect_nested_patterns_are_bounded(conjunction: &Conjunction) -> Result {
-    let bounds = conjunction.named_references();
-    collect_err(conjunction.patterns.iter().map(|p| p.expect_is_bounded_by(&bounds)))
-}
-
-fn expect_each_variable_is_bounded_by_named<'a>(patterns: impl Iterator<Item=&'a Pattern>) -> Result {
-    collect_err(patterns.map(|p| {
-        match p {
-            Pattern::Variable(v) => v
-                .references()
-                .any(|r| r.is_name())
-                .then_some(())
-                .ok_or_else(|| Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))),
-            Pattern::Conjunction(c) => expect_each_variable_is_bounded_by_named(c.patterns.iter()),
-            Pattern::Disjunction(d) => expect_each_variable_is_bounded_by_named(d.patterns.iter()),
-            Pattern::Negation(n) => expect_each_variable_is_bounded_by_named(iter::once(n.pattern.as_ref())),
-        }
-    }))
 }
 
 fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result {

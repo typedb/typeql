@@ -37,12 +37,12 @@ use crate::{
         validatable::Validatable,
     },
     pattern::{
-        Annotation, AssignConstraint, ConceptVariable, ConceptVariableBuilder, Conjunction, Constant, Definable,
+        Annotation, AssignConstraint, ConceptStatement, ConceptVariableBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
         Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
         RuleDeclaration, RuleDefinition, Statement, SubConstraint, ThingConstrainable, ThingStatement,
         ThingVariableBuilder, TypeConstrainable, TypeStatement, TypeVariableBuilder, UnboundConceptVariable,
-        UnboundValueVariable, UnboundVariable, Value, ValueConstrainable, ValueVariable,
+        UnboundValueVariable, UnboundVariable, Value, ValueConstrainable, ValueStatement,
     },
     query::{
         AggregateQueryBuilder, MatchClause, Query, TypeQLDefine, TypeQLDelete, TypeQLGet,
@@ -574,7 +574,7 @@ fn visit_statement(node: Node) -> Statement {
     statement
 }
 
-fn visit_statement_concept(node: Node) -> ConceptVariable {
+fn visit_statement_concept(node: Node) -> ConceptStatement {
     debug_assert_eq!(node.as_rule(), Rule::statement_concept);
     let mut children = node.into_children();
     let var = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))
@@ -583,7 +583,7 @@ fn visit_statement_concept(node: Node) -> ConceptVariable {
     var
 }
 
-fn visit_statement_value(node: Node) -> ValueVariable {
+fn visit_statement_value(node: Node) -> ValueStatement {
     debug_assert_eq!(node.as_rule(), Rule::statement_value);
     let mut children = node.into_children();
     let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));

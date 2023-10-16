@@ -30,7 +30,7 @@ use crate::{
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGetGroup {
-    pub get_query: TypeQLGet,
+    pub query: TypeQLGet,
     pub group_var: UnboundVariable,
 }
 
@@ -38,18 +38,18 @@ impl AggregateQueryBuilder for TypeQLGetGroup {}
 
 impl Validatable for TypeQLGetGroup {
     fn validate(&self) -> Result {
-        collect_err([self.get_query.validate(), self.group_var.validate()])
+        collect_err([self.query.validate(), self.group_var.validate()])
     }
 }
 
 impl NamedReferences for TypeQLGetGroup {
     fn named_references(&self) -> HashSet<Reference> {
-        self.get_query.named_references()
+        self.query.named_references()
     }
 }
 
 impl fmt::Display for TypeQLGetGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{} {};", self.get_query, token::Command::Group, self.group_var)
+        write!(f, "{}\n{} {};", self.query, token::Command::Group, self.group_var)
     }
 }

@@ -54,7 +54,7 @@ impl Conjunction {
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_))).flat_map(
             |p| match p {
-                Pattern::Variable(v) => v.references(),
+                Pattern::Statement(v) => v.references(),
                 Pattern::Conjunction(c) => c.references(),
                 _ => unreachable!(),
             },
@@ -74,7 +74,7 @@ impl Conjunction {
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
             iter::once(expect_bounded(&names, bounds, self))
-                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_bounds))),
+                .chain(self.patterns.iter().map(|p| p.validate_is_bounded_by(&combined_bounds))),
         )
     }
 }
@@ -118,7 +118,7 @@ impl Normalisable for Conjunction {
                 disjunctions.push(disjunction.compute_normalised().into_disjunction().patterns)
             }
             Pattern::Negation(negation) => conjunctables.push(negation.compute_normalised()),
-            Pattern::Variable(variable) => conjunctables.push(variable.compute_normalised()),
+            Pattern::Statement(variable) => conjunctables.push(variable.compute_normalised()),
         });
         disjunctions.push(vec![Conjunction::new(conjunctables).into()]);
 

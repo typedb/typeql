@@ -25,7 +25,7 @@ use std::{fmt, iter};
 use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
-        ConceptConstrainable, ConceptReference, ConceptVariable, HasConstraint, IIDConstraint, IsConstraint,
+        ConceptConstrainable, ConceptReference, ConceptStatement, HasConstraint, IIDConstraint, IsConstraint,
         IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference,
         RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
         SubConstraint, ThingConstrainable, ThingStatement, TypeConstrainable, TypeStatement, ValueTypeConstraint,
@@ -39,8 +39,8 @@ pub struct UnboundConceptVariable {
 }
 
 impl UnboundConceptVariable {
-    pub fn into_concept(self) -> ConceptVariable {
-        ConceptVariable::new(self.reference)
+    pub fn into_concept(self) -> ConceptStatement {
+        ConceptStatement::new(self.reference)
     }
 
     pub fn into_thing(self) -> ThingStatement {
@@ -75,7 +75,7 @@ impl Validatable for UnboundConceptVariable {
 }
 
 impl ConceptConstrainable for UnboundConceptVariable {
-    fn constrain_is(self, is: IsConstraint) -> ConceptVariable {
+    fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
         self.into_concept().constrain_is(is)
     }
 }

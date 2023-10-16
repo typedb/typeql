@@ -26,7 +26,7 @@ use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
         statement::ValueConstrainable, AssignConstraint, LeftOperand, PredicateConstraint, Reference, ValueReference,
-        ValueVariable,
+        ValueStatement,
     },
 };
 
@@ -36,8 +36,8 @@ pub struct UnboundValueVariable {
 }
 
 impl UnboundValueVariable {
-    pub fn into_value_variable(self) -> ValueVariable {
-        ValueVariable::new(self.reference)
+    pub fn into_value_variable(self) -> ValueStatement {
+        ValueStatement::new(self.reference)
     }
 
     pub fn named(name: String) -> UnboundValueVariable {
@@ -50,11 +50,11 @@ impl UnboundValueVariable {
 }
 
 impl ValueConstrainable for UnboundValueVariable {
-    fn constrain_assign(self, assign: AssignConstraint) -> ValueVariable {
+    fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
         self.into_value_variable().constrain_assign(assign)
     }
 
-    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueVariable {
+    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueStatement {
         self.into_value_variable().constrain_predicate(predicate)
     }
 }

@@ -30,7 +30,7 @@ use crate::{
         Result,
     },
     pattern::{NamedReferences, ThingStatement},
-    query::{writable::expect_non_empty, TypeQLGet},
+    query::{writable::validate_non_empty, TypeQLGet},
     write_joined,
 };
 use crate::query::MatchClause;
@@ -53,8 +53,8 @@ impl Validatable for TypeQLInsert {
     fn validate(&self) -> Result {
         collect_err(
             [
-                expect_non_empty(&self.statements),
-                expect_insert_in_scope_of_match(&self.get_query, &self.statements),
+                validate_non_empty(&self.statements),
+                validate_insert_in_scope_of_match(&self.get_query, &self.statements),
             ]
             .into_iter()
             .chain(self.get_query.iter().map(Validatable::validate))
@@ -63,7 +63,7 @@ impl Validatable for TypeQLInsert {
     }
 }
 
-fn expect_insert_in_scope_of_match(match_query: &Option<TypeQLGet>, variables: &[ThingStatement]) -> Result {
+fn validate_insert_in_scope_of_match(match_query: &Option<TypeQLGet>, variables: &[ThingStatement]) -> Result {
     if let Some(match_query) = match_query {
         let names_in_scope = match_query.named_references();
         if variables.iter().any(|v| {

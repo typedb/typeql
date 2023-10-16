@@ -31,15 +31,15 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ValueVariable {
+pub struct ValueStatement {
     pub reference: Reference,
     pub assign_constraint: Option<AssignConstraint>,
     pub predicate_constraint: Option<PredicateConstraint>,
 }
 
-impl ValueVariable {
-    pub fn new(reference: Reference) -> ValueVariable {
-        ValueVariable { reference, assign_constraint: None, predicate_constraint: None }
+impl ValueStatement {
+    pub fn new(reference: Reference) -> ValueStatement {
+        ValueStatement { reference, assign_constraint: None, predicate_constraint: None }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -55,7 +55,7 @@ impl ValueVariable {
     }
 }
 
-impl Validatable for ValueVariable {
+impl Validatable for ValueStatement {
     fn validate(&self) -> Result {
         collect_err(
             iter::once(self.reference.validate())
@@ -65,17 +65,17 @@ impl Validatable for ValueVariable {
     }
 }
 
-impl ValueConstrainable for ValueVariable {
-    fn constrain_assign(self, assign: AssignConstraint) -> ValueVariable {
+impl ValueConstrainable for ValueStatement {
+    fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
         Self { assign_constraint: Some(assign), ..self }
     }
 
-    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueVariable {
+    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueStatement {
         Self { predicate_constraint: Some(predicate), ..self }
     }
 }
 
-impl fmt::Display for ValueVariable {
+impl fmt::Display for ValueStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)?;
         if let Some(assign) = &self.assign_constraint {

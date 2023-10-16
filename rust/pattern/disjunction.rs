@@ -49,7 +49,7 @@ impl Disjunction {
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
-        collect_err(self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)))
+        collect_err(self.patterns.iter().map(|p| p.validate_is_bounded_by(bounds)))
     }
 }
 
@@ -81,7 +81,7 @@ impl Normalisable for Disjunction {
                     Pattern::Negation(negation) => {
                         vec![Conjunction::new(vec![negation.compute_normalised()]).into()].into_iter()
                     }
-                    Pattern::Variable(variable) => {
+                    Pattern::Statement(variable) => {
                         vec![Conjunction::new(vec![variable.clone().into()]).into()].into_iter()
                     }
                 })

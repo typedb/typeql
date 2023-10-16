@@ -25,7 +25,7 @@ use std::fmt;
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::ThingStatement,
-    query::{writable::expect_non_empty, TypeQLDelete},
+    query::{writable::validate_non_empty, TypeQLDelete},
     write_joined,
 };
 use crate::query::modifier::Modifiers;
@@ -40,7 +40,7 @@ pub struct TypeQLUpdate {
 impl Validatable for TypeQLUpdate {
     fn validate(&self) -> Result {
         collect_err(
-            ([expect_non_empty(&self.insert_statements), self.query_delete.validate()].into_iter())
+            ([validate_non_empty(&self.insert_statements), self.query_delete.validate()].into_iter())
                 .chain(self.insert_statements.iter().map(Validatable::validate)),
         )
     }

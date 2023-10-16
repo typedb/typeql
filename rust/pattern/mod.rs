@@ -50,10 +50,10 @@ pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub(crate) use statement::LeftOperand;
 pub use statement::{
-    ConceptConstrainable, ConceptReference, ConceptVariable, ConceptVariableBuilder, ExpressionBuilder, Reference,
+    ConceptConstrainable, ConceptReference, ConceptStatement, ConceptVariableBuilder, ExpressionBuilder, Reference,
     RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingStatement, ThingVariableBuilder,
     TypeConstrainable, TypeStatement, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
-    UnboundVariable, ValueConstrainable, ValueReference, ValueVariable, ValueVariableBuilder, Statement, Visibility,
+    UnboundVariable, ValueConstrainable, ValueReference, ValueStatement, ValueVariableBuilder, Statement, Visibility,
 };
 
 use crate::{
@@ -66,27 +66,25 @@ pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
-    Variable(Statement),
+    Statement(Statement),
 }
 
 impl Pattern {
     pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        use Pattern::*;
         Box::new(match self {
-            Conjunction(conjunction) => conjunction.references_recursive(),
-            Disjunction(disjunction) => disjunction.references_recursive(),
-            Negation(negation) => negation.references_recursive(),
-            Variable(variable) => variable.references_recursive(),
+            Pattern::Conjunction(conjunction) => conjunction.references_recursive(),
+            Pattern::Disjunction(disjunction) => disjunction.references_recursive(),
+            Pattern::Negation(negation) => negation.references_recursive(),
+            Pattern::Statement(statement) => statement.references_recursive(),
         })
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
-        use Pattern::*;
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
         match self {
-            Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
-            Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
-            Negation(negation) => negation.expect_is_bounded_by(bounds),
-            Variable(variable) => variable.expect_is_bounded_by(bounds),
+            Pattern::Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
+            Pattern::Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
+            Pattern::Negation(negation) => negation.expect_is_bounded_by(bounds),
+            Pattern::Statement(statement) => statement.expect_is_bounded_by(bounds),
         }
     }
 }
@@ -95,14 +93,14 @@ enum_getter! { Pattern
     into_conjunction(Conjunction) => Conjunction,
     into_disjunction(Disjunction) => Disjunction,
     into_negation(Negation) => Negation,
-    into_variable(Variable) => Statement,
+    into_statement(Statement) => Statement,
 }
 
 enum_wrapper! { Pattern
     Conjunction => Conjunction,
     Disjunction => Disjunction,
     Negation => Negation,
-    Statement => Variable,
+    Statement => Statement,
 }
 
 impl Validatable for Pattern {
@@ -112,7 +110,7 @@ impl Validatable for Pattern {
             Conjunction(conjunction) => conjunction.validate(),
             Disjunction(disjunction) => disjunction.validate(),
             Negation(negation) => negation.validate(),
-            Variable(variable) => variable.validate(),
+            Statement(statement) => statement.validate(),
         }
     }
 }
@@ -129,7 +127,7 @@ impl Normalisable for Pattern {
             Conjunction(conjunction) => conjunction.normalise(),
             Disjunction(disjunction) => disjunction.normalise(),
             Negation(negation) => negation.normalise(),
-            Variable(variable) => variable.normalise(),
+            Statement(statement) => statement.normalise(),
         }
     }
 
@@ -139,32 +137,32 @@ impl Normalisable for Pattern {
             Conjunction(conjunction) => conjunction.compute_normalised(),
             Disjunction(disjunction) => disjunction.compute_normalised(),
             Negation(negation) => negation.compute_normalised(),
-            Variable(variable) => variable.compute_normalised(),
+            Statement(statement) => statement.compute_normalised(),
         }
     }
 }
 
-impl From<ConceptVariable> for Pattern {
-    fn from(variable: ConceptVariable) -> Self {
-        Statement::from(variable).into()
+impl From<ConceptStatement> for Pattern {
+    fn from(statement: ConceptStatement) -> Self {
+        Statement::from(statement).into()
     }
 }
 
 impl From<ThingStatement> for Pattern {
-    fn from(variable: ThingStatement) -> Self {
-        Statement::from(variable).into()
+    fn from(statement: ThingStatement) -> Self {
+        Statement::from(statement).into()
     }
 }
 
 impl From<TypeStatement> for Pattern {
-    fn from(variable: TypeStatement) -> Self {
-        Statement::from(variable).into()
+    fn from(statement: TypeStatement) -> Self {
+        Statement::from(statement).into()
     }
 }
 
-impl From<ValueVariable> for Pattern {
-    fn from(variable: ValueVariable) -> Self {
-        Statement::from(variable).into()
+impl From<ValueStatement> for Pattern {
+    fn from(statement: ValueStatement) -> Self {
+        Statement::from(statement).into()
     }
 }
 
@@ -175,7 +173,7 @@ impl fmt::Display for Pattern {
             Conjunction(conjunction) => write!(f, "{conjunction}"),
             Disjunction(disjunction) => write!(f, "{disjunction}"),
             Negation(negation) => write!(f, "{negation}"),
-            Variable(variable) => write!(f, "{variable}"),
+            Statement(statement) => write!(f, "{statement}"),
         }
     }
 }
@@ -190,7 +188,7 @@ pub enum Definable {
 enum_getter! { Definable
     into_rule_declaration(RuleDeclaration) => RuleDeclaration,
     into_rule(RuleDefinition) => RuleDefinition,
-    into_type_variable(TypeVariable) => TypeStatement,
+    into_type_statement(TypeVariable) => TypeStatement,
 }
 
 enum_wrapper! { Definable
@@ -205,7 +203,7 @@ impl Validatable for Definable {
         match self {
             RuleDeclaration(rule) => rule.validate(),
             RuleDefinition(rule) => rule.validate(),
-            TypeVariable(variable) => variable.validate(),
+            TypeVariable(statement) => statement.validate(),
         }
     }
 }
@@ -216,7 +214,7 @@ impl fmt::Display for Definable {
         match self {
             RuleDeclaration(rule_declaration) => write!(f, "{rule_declaration}"),
             RuleDefinition(rule) => write!(f, "{rule}"),
-            TypeVariable(variable) => write!(f, "{variable}"),
+            TypeVariable(statement) => write!(f, "{statement}"),
         }
     }
 }

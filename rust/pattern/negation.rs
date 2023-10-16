@@ -50,7 +50,7 @@ impl Negation {
     }
 
     pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
-        self.pattern.expect_is_bounded_by(bounds)
+        self.pattern.validate_is_bounded_by(bounds)
     }
 }
 
@@ -76,7 +76,7 @@ impl Normalisable for Negation {
             Pattern::Conjunction(conjunction) => conjunction.compute_normalised(),
             Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
             Pattern::Negation(_) => panic!("{}", TypeQLError::RedundantNestedNegation()),
-            Pattern::Variable(variable) => {
+            Pattern::Statement(variable) => {
                 Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()]).into()
             }
         })
