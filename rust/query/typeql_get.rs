@@ -68,12 +68,12 @@ impl TypeQLGet {
         TypeQLGet { modifiers: self.modifiers.offset(offset), ..self }
     }
 
-    pub fn insert(self, vars: impl Writable) -> TypeQLInsert {
-        TypeQLInsert { clause_match: Some(self.clause_match), statements: vars.vars(), modifiers: self.modifiers }
+    pub fn insert(self, writable: impl Writable) -> TypeQLInsert {
+        TypeQLInsert { clause_match: Some(self.clause_match), statements: writable.statements(), modifiers: self.modifiers }
     }
 
-    pub fn delete(self, vars: impl Writable) -> TypeQLDelete {
-        TypeQLDelete { clause_match: self.clause_match, statements: vars.vars(), modifiers: self.modifiers }
+    pub fn delete(self, writable: impl Writable) -> TypeQLDelete {
+        TypeQLDelete { clause_match: self.clause_match, statements: writable.statements(), modifiers: self.modifiers }
     }
 
     pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLGetGroup {
@@ -101,10 +101,10 @@ impl Validatable for TypeQLGet {
             self.validate_sort_vars_are_in_scope(),
             self.validate_names_are_unique()
         ])
-            // expect_has_bounding_conjunction(&self.conjunction),
-            // expect_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
-            // expect_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
-            // expect_variable_names_are_unique(&self.conjunction),
+            // validate_has_bounding_conjunction(&self.conjunction),
+            // validate_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
+            // validate_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
+            // validate_variable_names_are_unique(&self.conjunction),
             // ]
         // )
     }
@@ -120,7 +120,7 @@ impl NamedReferences for TypeQLGet {
     }
 }
 
-fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result {
+fn validate_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result {
     let names_in_scope = conjunction.named_references();
     let mut seen = HashSet::new();
     if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
@@ -140,7 +140,7 @@ fn expect_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter
     }))
 }
 
-fn expect_sort_vars_are_in_scope(
+fn validate_sort_vars_are_in_scope(
     conjunction: &Conjunction,
     filter: &Option<Filter>,
     sorting: &Option<Sorting>,
@@ -154,7 +154,7 @@ fn expect_sort_vars_are_in_scope(
     }))
 }
 
-fn expect_variable_names_are_unique(conjunction: &Conjunction) -> Result {
+fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
     let all_refs = conjunction.references_recursive();
     let (concept_refs, value_refs): (HashSet<&Reference>, HashSet<&Reference>) = all_refs.partition(|r| r.is_concept());
     let concept_names = concept_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();

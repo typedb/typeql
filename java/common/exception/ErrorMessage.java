@@ -41,7 +41,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(8, "The match query does not have named variables to bound the nested disjunction/negation pattern(s).");
     public static final ErrorMessage MATCH_HAS_NO_NAMED_VARIABLE =
             new ErrorMessage(9, "The match query has no named variables to retrieve.");
-    public static final ErrorMessage MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE =
+    public static final ErrorMessage MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE =
             new ErrorMessage(10, "The pattern '%s' has no named variable.");
     public static final ErrorMessage MATCH_HAS_UNBOUNDED_NESTED_PATTERN =
             new ErrorMessage(11, "The match query contains a nested pattern is not bounded: '%s'.");

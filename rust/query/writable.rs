@@ -23,23 +23,23 @@
 use crate::{common::error::TypeQLError, pattern::ThingStatement, Result};
 
 pub trait Writable {
-    fn vars(self) -> Vec<ThingStatement>;
+    fn statements(self) -> Vec<ThingStatement>;
 }
 
 impl Writable for ThingStatement {
-    fn vars(self) -> Vec<ThingStatement> {
+    fn statements(self) -> Vec<ThingStatement> {
         vec![self]
     }
 }
 
 impl<const N: usize> Writable for [ThingStatement; N] {
-    fn vars(self) -> Vec<ThingStatement> {
+    fn statements(self) -> Vec<ThingStatement> {
         self.to_vec()
     }
 }
 
 impl Writable for Vec<ThingStatement> {
-    fn vars(self) -> Vec<ThingStatement> {
+    fn statements(self) -> Vec<ThingStatement> {
         self
     }
 }

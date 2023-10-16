@@ -25,9 +25,9 @@ use std::{collections::HashSet, fmt};
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
+        Result,
         token,
         validatable::Validatable,
-        Result,
     },
     pattern::{NamedReferences, Reference, UnboundVariable},
     query::{TypeQLGet, TypeQLGetGroup},
@@ -35,8 +35,8 @@ use crate::{
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>
-where
-    T: AggregateQueryBuilder,
+    where
+        T: AggregateQueryBuilder,
 {
     pub query: T,
     pub method: token::Aggregate,
@@ -47,30 +47,30 @@ pub type TypeQLGetAggregate = AggregateQuery<TypeQLGet>;
 pub type TypeQLGetGroupAggregate = AggregateQuery<TypeQLGetGroup>;
 
 impl<T: AggregateQueryBuilder> AggregateQuery<T> {
-    fn new_count(base: T) -> Self {
-        Self { query: base, method: token::Aggregate::Count, var: None }
+    fn new_count(query: T) -> Self {
+        Self { query, method: token::Aggregate::Count, var: None }
     }
 
-    fn new(base: T, method: token::Aggregate, var: UnboundVariable) -> Self {
-        Self { query: base, method, var: Some(var) }
+    fn new(query: T, method: token::Aggregate, var: UnboundVariable) -> Self {
+        Self { query, method, var: Some(var) }
+    }
+
+    fn validate_method_variable_compatible(&self) -> Result {
+        if self.method == token::Aggregate::Count && self.var.is_some() {
+            Err(TypeQLError::InvalidCountVariableArgument())?
+        }
+        Ok(())
     }
 }
 
 impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
     fn validate(&self) -> Result {
         collect_err(
-            [validate_method_variable_compatible(self.method, &self.var), self.query.validate()]
+            [self.validate_method_variable_compatible(), self.query.validate()]
                 .into_iter()
                 .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.named_references()))),
         )
     }
-}
-
-fn validate_method_variable_compatible(method: token::Aggregate, var: &Option<UnboundVariable>) -> Result {
-    if method == token::Aggregate::Count && var.is_some() {
-        Err(TypeQLError::InvalidCountVariableArgument())?
-    }
-    Ok(())
 }
 
 fn validate_variable_in_scope(var: &UnboundVariable, names_in_scope: HashSet<Reference>) -> Result {
@@ -101,7 +101,7 @@ impl fmt::Display for TypeQLGetGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + NamedReferences + Validatable
+Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + NamedReferences + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)

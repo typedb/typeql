@@ -39,7 +39,7 @@ $com isa company;
     $n2 "another-company";
 };"#;
 
-    let mut parsed = parse_query(query).unwrap().into_match();
+    let mut parsed = parse_query(query).unwrap().into_get();
     let normalised = parsed.conjunction.normalise().into_disjunction();
 
     assert_eq!(
@@ -65,7 +65,7 @@ not {
     };
 };"#;
 
-    let mut parsed = parse_query(query).unwrap().into_match();
+    let mut parsed = parse_query(query).unwrap().into_get();
     let normalised = parsed.conjunction.normalise().into_disjunction();
 
     assert_eq!(

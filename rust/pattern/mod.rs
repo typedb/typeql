@@ -105,12 +105,11 @@ enum_wrapper! { Pattern
 
 impl Validatable for Pattern {
     fn validate(&self) -> Result {
-        use Pattern::*;
         match self {
-            Conjunction(conjunction) => conjunction.validate(),
-            Disjunction(disjunction) => disjunction.validate(),
-            Negation(negation) => negation.validate(),
-            Statement(statement) => statement.validate(),
+            Pattern::Conjunction(conjunction) => conjunction.validate(),
+            Pattern::Disjunction(disjunction) => disjunction.validate(),
+            Pattern::Negation(negation) => negation.validate(),
+            Pattern::Statement(statement) => statement.validate(),
         }
     }
 }
@@ -122,22 +121,20 @@ pub trait Normalisable {
 
 impl Normalisable for Pattern {
     fn normalise(&mut self) -> Pattern {
-        use Pattern::*;
         match self {
-            Conjunction(conjunction) => conjunction.normalise(),
-            Disjunction(disjunction) => disjunction.normalise(),
-            Negation(negation) => negation.normalise(),
-            Statement(statement) => statement.normalise(),
+            Pattern::Conjunction(conjunction) => conjunction.normalise(),
+            Pattern::Disjunction(disjunction) => disjunction.normalise(),
+            Pattern::Negation(negation) => negation.normalise(),
+            Pattern::Statement(statement) => statement.normalise(),
         }
     }
 
     fn compute_normalised(&self) -> Pattern {
-        use Pattern::*;
         match self {
-            Conjunction(conjunction) => conjunction.compute_normalised(),
-            Disjunction(disjunction) => disjunction.compute_normalised(),
-            Negation(negation) => negation.compute_normalised(),
-            Statement(statement) => statement.compute_normalised(),
+            Pattern::Conjunction(conjunction) => conjunction.compute_normalised(),
+            Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
+            Pattern::Negation(negation) => negation.compute_normalised(),
+            Pattern::Statement(statement) => statement.compute_normalised(),
         }
     }
 }
@@ -182,39 +179,37 @@ impl fmt::Display for Pattern {
 pub enum Definable {
     RuleDeclaration(RuleDeclaration),
     RuleDefinition(RuleDefinition),
-    TypeVariable(TypeStatement),
+    TypeStatement(TypeStatement),
 }
 
 enum_getter! { Definable
     into_rule_declaration(RuleDeclaration) => RuleDeclaration,
     into_rule(RuleDefinition) => RuleDefinition,
-    into_type_statement(TypeVariable) => TypeStatement,
+    into_type_statement(TypeStatement) => TypeStatement,
 }
 
 enum_wrapper! { Definable
     RuleDeclaration => RuleDeclaration,
     RuleDefinition => RuleDefinition,
-    TypeStatement => TypeVariable,
+    TypeStatement => TypeStatement,
 }
 
 impl Validatable for Definable {
     fn validate(&self) -> Result {
-        use Definable::*;
         match self {
-            RuleDeclaration(rule) => rule.validate(),
-            RuleDefinition(rule) => rule.validate(),
-            TypeVariable(statement) => statement.validate(),
+            Definable::RuleDeclaration(rule) => rule.validate(),
+            Definable::RuleDefinition(rule) => rule.validate(),
+            Definable::TypeStatement(statement) => statement.validate(),
         }
     }
 }
 
 impl fmt::Display for Definable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Definable::*;
         match self {
-            RuleDeclaration(rule_declaration) => write!(f, "{rule_declaration}"),
-            RuleDefinition(rule) => write!(f, "{rule}"),
-            TypeVariable(statement) => write!(f, "{statement}"),
+            Definable::RuleDeclaration(rule_declaration) => write!(f, "{rule_declaration}"),
+            Definable::RuleDefinition(rule) => write!(f, "{rule}"),
+            Definable::TypeStatement(statement) => write!(f, "{statement}"),
         }
     }
 }

@@ -44,8 +44,8 @@ pub struct TypeQLInsert {
 }
 
 impl TypeQLInsert {
-    pub fn new(variables: Vec<ThingStatement>) -> Self {
-        TypeQLInsert { clause_match: None, statements: variables, modifiers: Modifiers::default() }
+    pub fn new(statements: Vec<ThingStatement>) -> Self {
+        TypeQLInsert { clause_match: None, statements, modifiers: Modifiers::default() }
     }
 }
 
@@ -54,27 +54,27 @@ impl Validatable for TypeQLInsert {
         collect_err(
             [
                 validate_non_empty(&self.statements),
-                validate_insert_in_scope_of_match(&self.get_query, &self.statements),
+                validate_insert_in_scope_of_get(&self.clause_match, &self.statements),
             ]
             .into_iter()
-            .chain(self.get_query.iter().map(Validatable::validate))
+            .chain(self.clause_match.validate())
             .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }
 
-fn validate_insert_in_scope_of_match(match_query: &Option<TypeQLGet>, variables: &[ThingStatement]) -> Result {
-    if let Some(match_query) = match_query {
-        let names_in_scope = match_query.named_references();
-        if variables.iter().any(|v| {
+fn validate_insert_in_scope_of_get(match_clause: &Option<MatchClause>, statements: &[ThingStatement]) -> Result {
+    if let Some(match_) = match_clause {
+        let names_in_scope = match_.named_references();
+        if statements.iter().any(|v| {
             v.reference.is_name() && names_in_scope.contains(&v.reference)
                 || v.references_recursive().any(|w| names_in_scope.contains(w))
         }) {
             Ok(())
         } else {
-            let variables_str = variables.iter().map(ThingStatement::to_string).collect::<Vec<String>>().join(", ");
+            let stmts_str = statements.iter().map(ThingStatement::to_string).collect::<Vec<String>>().join(", ");
             let bounds_str = names_in_scope.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
-            Err(TypeQLError::NoVariableInScopeInsert(variables_str, bounds_str))?
+            Err(TypeQLError::NoVariableInScopeInsert(stmts_str, bounds_str))?
         }
     } else {
         Ok(())

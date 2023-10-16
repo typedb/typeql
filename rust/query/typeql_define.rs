@@ -35,7 +35,7 @@ use crate::{
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLDefine {
-    variables: Vec<TypeStatement>,
+    statements: Vec<TypeStatement>,
     rules: Vec<RuleDefinition>,
 }
 
@@ -43,15 +43,15 @@ impl TypeQLDefine {
     pub fn new(definables: Vec<Definable>) -> Self {
         definables.into_iter().fold(TypeQLDefine::default(), |define, definable| match definable {
             Definable::RuleDefinition(rule) => define.add_rule(rule),
-            Definable::TypeVariable(var) => define.add_definition(var),
+            Definable::TypeStatement(var) => define.add_statement(var),
             Definable::RuleDeclaration(r) => {
                 panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns(r.label))
             }
         })
     }
 
-    fn add_definition(mut self, variable: TypeStatement) -> Self {
-        self.variables.push(variable);
+    fn add_statement(mut self, variable: TypeStatement) -> Self {
+        self.statements.push(variable);
         self
     }
 
@@ -59,30 +59,31 @@ impl TypeQLDefine {
         self.rules.push(rule);
         self
     }
+
+    fn validate_non_empty(&self) -> Result {
+        if self.statements.is_empty() && self.rules.is_empty() {
+            Err(TypeQLError::MissingDefinables())?
+        }
+        Ok(())
+    }
 }
 
 impl Validatable for TypeQLDefine {
     fn validate(&self) -> Result {
         collect_err(
-            iter::once(expect_non_empty(&self.variables, &self.rules))
-                .chain(self.variables.iter().map(Validatable::validate))
-                .chain(self.variables.iter().map(TypeStatement::validate_definable))
+            iter::once(self.validate_non_empty())
+                .chain(self.statements.iter().map(Validatable::validate))
+                .chain(self.statements.iter().map(TypeStatement::validate_definable))
                 .chain(self.rules.iter().map(Validatable::validate)),
         )
     }
 }
 
-fn expect_non_empty(variables: &[TypeStatement], rules: &[RuleDefinition]) -> Result {
-    if variables.is_empty() && rules.is_empty() {
-        Err(TypeQLError::MissingDefinables())?
-    }
-    Ok(())
-}
 
 impl fmt::Display for TypeQLDefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", token::Command::Define)?;
-        write_joined!(f, ";\n", self.variables, self.rules)?;
+        write_joined!(f, ";\n", self.statements, self.rules)?;
         f.write_str(";")
     }
 }

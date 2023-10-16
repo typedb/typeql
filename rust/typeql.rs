@@ -68,8 +68,8 @@ pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition> {
     visit_eof_schema_rule(typeql_rule.trim_end())
 }
 
-pub fn parse_variable(typeql_variable: &str) -> Result<Statement> {
-    visit_eof_statement(typeql_variable.trim_end())
+pub fn parse_statement(typeql_statement: &str) -> Result<Statement> {
+    visit_eof_statement(typeql_statement.trim_end())
 }
 
 pub fn parse_label(typeql_label: &str) -> Result<Label> {

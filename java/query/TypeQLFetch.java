@@ -48,6 +48,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STAT
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.util.Strings.indent;
 import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
+import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
 import static java.util.stream.Collectors.toList;
@@ -66,6 +67,7 @@ public class TypeQLFetch implements TypeQLQuery {
         this.match = match;
         this.projections = projections;
         this.modifiers = modifiers;
+        validateNamesUnique(match.patternsRecursive()); // TODO: validate against subqueries too, where each one checks against the parents
     }
 
     @Override

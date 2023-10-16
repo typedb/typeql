@@ -26,6 +26,7 @@ use crate::pattern::Reference;
 use crate::Result;
 
 pub trait NamedReferences {
+    // TODO maybe we want to implement this for statements
     fn named_references(&self) -> HashSet<Reference>;
 }
 

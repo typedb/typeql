@@ -56,86 +56,83 @@ use crate::{
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
-    Get(TypeQLGet),
+    Define(TypeQLDefine),
+    Undefine(TypeQLUndefine),
     Insert(TypeQLInsert),
     Delete(TypeQLDelete),
     Update(TypeQLUpdate),
-    Define(TypeQLDefine),
-    Undefine(TypeQLUndefine),
-    Aggregate(TypeQLGetAggregate),
-    Group(TypeQLGetGroup),
-    GroupAggregate(TypeQLGetGroupAggregate),
+    GetAggregate(TypeQLGetAggregate),
+    Get(TypeQLGet),
+    GetGroup(TypeQLGetGroup),
+    GetGroupAggregate(TypeQLGetGroupAggregate),
 }
 
 enum_getter! { Query
-    into_match(Get) => TypeQLGet,
+    into_define(Define) => TypeQLDefine,
+    into_undefine(Undefine) => TypeQLUndefine,
     into_insert(Insert) => TypeQLInsert,
     into_delete(Delete) => TypeQLDelete,
     into_update(Update) => TypeQLUpdate,
-    into_define(Define) => TypeQLDefine,
-    into_undefine(Undefine) => TypeQLUndefine,
-    into_aggregate(Aggregate) => TypeQLGetAggregate,
-    into_group(Group) => TypeQLGetGroup,
-    into_group_aggregate(GroupAggregate) => TypeQLGetGroupAggregate,
+    into_get(Get) => TypeQLGet,
+    into_get_aggregate(GetAggregate) => TypeQLGetAggregate,
+    into_get_group(GetGroup) => TypeQLGetGroup,
+    into_get_group_aggregate(GetGroupAggregate) => TypeQLGetGroupAggregate,
 }
 
 enum_wrapper! { Query
-    TypeQLGet => Get,
+    TypeQLDefine => Define,
+    TypeQLUndefine => Undefine,
     TypeQLInsert => Insert,
     TypeQLDelete => Delete,
     TypeQLUpdate => Update,
-    TypeQLDefine => Define,
-    TypeQLUndefine => Undefine,
-    TypeQLGetAggregate => Aggregate,
-    TypeQLGetGroup => Group,
-    TypeQLGetGroupAggregate => GroupAggregate,
+    TypeQLGet => Get,
+    TypeQLGetAggregate => GetAggregate,
+    TypeQLGetGroup => GetGroup,
+    TypeQLGetGroupAggregate => GetGroupAggregate,
 }
 
 impl Validatable for Query {
     fn validate(&self) -> Result {
-        use Query::*;
         match self {
-            Get(query) => query.validate(),
-            Insert(query) => query.validate(),
-            Delete(query) => query.validate(),
-            Update(query) => query.validate(),
-            Define(query) => query.validate(),
-            Undefine(query) => query.validate(),
-            Aggregate(query) => query.validate(),
-            Group(query) => query.validate(),
-            GroupAggregate(query) => query.validate(),
+            Query::Define(query) => query.validate(),
+            Query::Undefine(query) => query.validate(),
+            Query::Insert(query) => query.validate(),
+            Query::Delete(query) => query.validate(),
+            Query::Update(query) => query.validate(),
+            Query::Get(query) => query.validate(),
+            Query::GetAggregate(query) => query.validate(),
+            Query::GetGroup(query) => query.validate(),
+            Query::GetGroupAggregate(query) => query.validate(),
         }
     }
 
     fn validated(self) -> Result<Self> {
-        use Query::*;
         match self {
-            Get(query) => query.validated().map(TypeQLGet::into),
-            Insert(query) => query.validated().map(TypeQLInsert::into),
-            Delete(query) => query.validated().map(TypeQLDelete::into),
-            Update(query) => query.validated().map(TypeQLUpdate::into),
-            Define(query) => query.validated().map(TypeQLDefine::into),
-            Undefine(query) => query.validated().map(TypeQLUndefine::into),
-            Aggregate(query) => query.validated().map(TypeQLGetAggregate::into),
-            Group(query) => query.validated().map(TypeQLGetGroup::into),
-            GroupAggregate(query) => query.validated().map(TypeQLGetGroupAggregate::into),
+            Query::Define(query) => query.validated().map(TypeQLDefine::into),
+            Query::Undefine(query) => query.validated().map(TypeQLUndefine::into),
+            Query::Insert(query) => query.validated().map(TypeQLInsert::into),
+            Query::Delete(query) => query.validated().map(TypeQLDelete::into),
+            Query::Update(query) => query.validated().map(TypeQLUpdate::into),
+            Query::Get(query) => query.validated().map(TypeQLGet::into),
+            Query::GetAggregate(query) => query.validated().map(TypeQLGetAggregate::into),
+            Query::GetGroup(query) => query.validated().map(TypeQLGetGroup::into),
+            Query::GetGroupAggregate(query) => query.validated().map(TypeQLGetGroupAggregate::into),
         }
     }
 }
 
 impl fmt::Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Query::*;
         match self {
-            Get(query) => write!(f, "{query}"),
-            Insert(query) => write!(f, "{query}"),
-            Delete(query) => write!(f, "{query}"),
-            Update(query) => write!(f, "{query}"),
-            Define(query) => write!(f, "{query}"),
-            Undefine(query) => write!(f, "{query}"),
-            Aggregate(query) => write!(f, "{query}"),
-            Group(query) => write!(f, "{query}"),
-            GroupAggregate(query) => write!(f, "{query}"),
+            Query::Define(query) => write!(f, "{query}"),
+            Query::Undefine(query) => write!(f, "{query}"),
+            Query::Insert(query) => write!(f, "{query}"),
+            Query::Delete(query) => write!(f, "{query}"),
+            Query::Update(query) => write!(f, "{query}"),
+            Query::Get(query) => write!(f, "{query}"),
+            Query::GetAggregate(query) => write!(f, "{query}"),
+            Query::GetGroup(query) => write!(f, "{query}"),
+            Query::GetGroupAggregate(query) => write!(f, "{query}"),
         }
     }
 }

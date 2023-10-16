@@ -35,7 +35,7 @@ use crate::{
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLUndefine {
-    variables: Vec<TypeStatement>,
+    statements: Vec<TypeStatement>,
     rules: Vec<RuleDeclaration>,
 }
 
@@ -43,15 +43,15 @@ impl TypeQLUndefine {
     pub fn new(undefinables: Vec<Definable>) -> Self {
         undefinables.into_iter().fold(TypeQLUndefine::default(), |undefine, undefinable| match undefinable {
             Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
-            Definable::TypeVariable(var) => undefine.add_definition(var),
+            Definable::TypeStatement(var) => undefine.add_statement(var),
             Definable::RuleDefinition(r) => {
                 panic!("{}", TypeQLError::InvalidUndefineQueryRule(r.label))
             }
         })
     }
 
-    fn add_definition(mut self, variable: TypeStatement) -> Self {
-        self.variables.push(variable);
+    fn add_statement(mut self, statement: TypeStatement) -> Self {
+        self.statements.push(statement);
         self
     }
 
@@ -59,30 +59,31 @@ impl TypeQLUndefine {
         self.rules.push(rule);
         self
     }
+
+    fn validate_non_empty(&self) -> Result {
+        if self.statements.is_empty() && self.rules.is_empty() {
+            Err(TypeQLError::MissingDefinables())?
+        }
+        Ok(())
+    }
 }
 
 impl Validatable for TypeQLUndefine {
     fn validate(&self) -> Result {
         collect_err(
-            &mut iter::once(expect_non_empty(&self.variables, &self.rules))
-                .chain(self.variables.iter().map(Validatable::validate))
-                .chain(self.variables.iter().map(TypeStatement::validate_definable))
+            &mut iter::once(self.validate_non_empty())
+                .chain(self.statements.iter().map(Validatable::validate))
+                .chain(self.statements.iter().map(TypeStatement::validate_definable))
                 .chain(self.rules.iter().map(Validatable::validate)),
         )
     }
 }
 
-fn expect_non_empty(variables: &[TypeStatement], rules: &[RuleDeclaration]) -> Result {
-    if variables.is_empty() && rules.is_empty() {
-        Err(TypeQLError::MissingDefinables())?
-    }
-    Ok(())
-}
 
 impl fmt::Display for TypeQLUndefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", token::Command::Undefine)?;
-        write_joined!(f, ";\n", self.variables, self.rules)?;
+        write_joined!(f, ";\n", self.statements, self.rules)?;
         f.write_str(";")
     }
 }

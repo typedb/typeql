@@ -55,7 +55,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_VARIABLE_NOT_MATCHED;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_SORTED;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -252,7 +252,7 @@ public interface TypeQLQuery {
         private void eachPatternStatementHasNamedVariable(List<? extends Pattern> patterns) {
             patterns.forEach(pattern -> {
                 if (pattern.isStatement() && pattern.asStatement().variables().noneMatch(TypeQLVariable::isNamed)) {
-                    throw TypeQLException.of(MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE.message(pattern));
+                    throw TypeQLException.of(MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE.message(pattern));
                 } else if (!pattern.isStatement()) {
                     eachPatternStatementHasNamedVariable(pattern.patterns());
                 }

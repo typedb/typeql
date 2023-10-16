@@ -44,8 +44,8 @@ pub struct TypeQLDelete {
 }
 
 impl TypeQLDelete {
-    pub fn insert(self, vars: impl Writable) -> TypeQLUpdate {
-        TypeQLUpdate { query_delete: self, insert_statements: vars.vars(), modifiers: Default::default() }
+    pub fn insert(self, writable: impl Writable) -> TypeQLUpdate {
+        TypeQLUpdate { query_delete: self, insert_statements: writable.statements(), modifiers: Default::default() }
     }
 
     fn validate_delete_in_scope_of_match(&self) -> Result {
