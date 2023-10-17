@@ -20,23 +20,44 @@
  *
  */
 
-use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
+use cucumber::{gherkin::Step, given, then, when, StatsWriter, World, writer};
 use typeql::{parse_query, query::Query};
+use std::io;
+use cucumber::WriterExt;
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
 
-fn main() {
-    assert!(!futures::executor::block_on(
-        // Bazel specific path: when running the test in bazel, the external data from
-        // @vaticle_typedb_behaviour is stored in a directory that is a  sibling to
-        // the working directory.
-        TypeQLWorld::cucumber().fail_on_skipped().filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
+#[tokio::main]
+async fn main() {
+    let hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        eprintln!("hello");
+        hook(info)
+    }));
+    TypeQLWorld::cucumber().fail_on_skipped()
+        .max_concurrent_scenarios(1)
+        // .with_writer(
+        //     writer::Basic::raw(io::stdout(), writer::Coloring::Never, 0)
+        //         .summarized()
+        //         .assert_normalized(),
+        // )
+        .filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
-        }),
-    )
-    .execution_has_failed());
+        }).await;
+    // AnimalWorld::run("tests/features/book/quickstart").await;
 }
+// fn main() {
+//     assert!(!futures::executor::block_on(
+//         // Bazel specific path: when running the test in bazel, the external data from
+//         // @vaticle_typedb_behaviour is stored in a directory that is a  sibling to
+//         // the working directory.
+//         TypeQLWorld::cucumber().fail_on_skipped().filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
+//             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
+//         }),
+//     )
+//     .execution_has_failed());
+// }
 
 fn parse_query_in_step(step: &Step) -> Query {
     parse_query(step.docstring.as_ref().unwrap()).unwrap()

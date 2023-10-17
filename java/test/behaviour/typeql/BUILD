@@ -47,9 +47,9 @@ java_test(
         ":steps",
     ],
     data = [
-        "@vaticle_typedb_behaviour//typeql/explanation:features",
-        "@vaticle_typedb_behaviour//typeql/language:features",
-        "@vaticle_typedb_behaviour//typeql/reasoner:features",
+        "@vaticle_typedb_behaviour//query/explanation:features",
+        "@vaticle_typedb_behaviour//query/language:features",
+        "@vaticle_typedb_behaviour//query/reasoner:features",
     ],
     visibility = ["//visibility:public"],
     size = "small",

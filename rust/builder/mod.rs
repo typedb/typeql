@@ -27,13 +27,13 @@ use crate::{
         RuleDeclaration, ThingStatement, TypeStatement, TypeVariableBuilder, UnboundConceptVariable,
         UnboundValueVariable, Value,
     },
-    Pattern,
+    Pattern
 };
 
 #[macro_export]
-macro_rules! typeql_match {
+macro_rules! typeql_get {
     ($($pattern:expr),* $(,)?) => {{
-        $crate::query::TypeQLMatch::from_patterns(vec![$($pattern.into()),*])
+        $crate::query::TypeQLGet::new($crate::query::MatchClause::from_patterns(vec![$($pattern.into()),*]))
     }}
 }
 

@@ -48,6 +48,10 @@ pub struct TypeQLGet {
 impl AggregateQueryBuilder for TypeQLGet {}
 
 impl TypeQLGet {
+    pub fn new(clause_match: MatchClause) -> Self {
+        TypeQLGet { clause_match, filter: Filter::default(), modifiers: Modifiers::default() }
+    }
+
     pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
         TypeQLGet { filter: Filter { vars }, ..self }
     }

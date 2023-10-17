@@ -55,7 +55,7 @@ impl Validatable for TypeQLInsert {
             [
                 validate_non_empty(&self.statements),
                 validate_insert_in_scope_of_get(&self.clause_match, &self.statements),
-                self.clause_match.as_ref().map(|m| m.validate()).unwrap_or_else(|| Ok(()))
+                self.clause_match.as_ref().map(Validatable::validate).unwrap_or_else(|| Ok(()))
             ]
                 .into_iter()
                 .chain(self.statements.iter().map(Validatable::validate)),

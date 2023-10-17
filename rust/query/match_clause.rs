@@ -29,7 +29,7 @@ use crate::Result;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {
-    conjunction: Conjunction,
+    pub(crate) conjunction: Conjunction,
 }
 
 impl MatchClause {

@@ -26,14 +26,15 @@ rust_test(
     name = "typeql_behaviour_test",
     srcs = ["main.rs"],
     data = [
-        "@vaticle_typedb_behaviour//typeql/explanation:features",
-        "@vaticle_typedb_behaviour//typeql/language:features",
-        "@vaticle_typedb_behaviour//typeql/reasoner:features",
+        "@vaticle_typedb_behaviour//query/explanation:features",
+        "@vaticle_typedb_behaviour//query/language:features",
+        "@vaticle_typedb_behaviour//query/reasoner:features",
     ],
     deps = [
         "//rust:typeql",
         "@crates//:cucumber",
         "@crates//:futures",
+        "@crates//:tokio",
     ],
     use_libtest_harness = False,
 )
