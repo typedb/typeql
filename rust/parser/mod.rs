@@ -288,7 +288,7 @@ fn visit_query(node: Node) -> Query {
         Rule::query_get_aggregate => visit_query_get_aggregate(child).into(),
         Rule::query_get_group => visit_query_get_group(child).into(),
         Rule::query_get_group_agg => visit_query_get_group_agg(child).into(),
-        _ => unreachable!("{:?}", TypeQLError::IllegalGrammar(node.to_string())),
+        _ => unreachable!("{:?}", TypeQLError::IllegalGrammar(child.to_string())),
     };
     debug_assert!(children.try_consume_any().is_none());
     query
@@ -296,7 +296,8 @@ fn visit_query(node: Node) -> Query {
 
 fn visit_query_define(node: Node) -> TypeQLDefine {
     debug_assert_eq!(node.as_rule(), Rule::query_define);
-    let mut children = node.into_children().skip_expected(Rule::DEFINE);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::DEFINE);
     let query = TypeQLDefine::new(visit_definables(children.consume_expected(Rule::definables)));
     debug_assert!(children.try_consume_any().is_none());
     query
@@ -304,7 +305,8 @@ fn visit_query_define(node: Node) -> TypeQLDefine {
 
 fn visit_query_undefine(node: Node) -> TypeQLUndefine {
     debug_assert_eq!(node.as_rule(), Rule::query_undefine);
-    let mut children = node.into_children().skip_expected(Rule::UNDEFINE);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::UNDEFINE);
     let query = TypeQLUndefine::new(visit_definables(children.consume_expected(Rule::definables)));
     debug_assert!(children.try_consume_any().is_none());
     query
@@ -362,7 +364,8 @@ fn visit_query_get(node: Node) -> TypeQLGet {
 
 fn visit_clause_insert(node: Node) -> Vec<ThingStatement> {
     debug_assert_eq!(node.as_rule(), Rule::clause_insert);
-    let mut children = node.into_children().skip_expected(Rule::INSERT);
+    let mut children = node.into_children();
+        children.skip_expected(Rule::INSERT);
     let clause = visit_statement_things(children.consume_expected(Rule::statement_things));
     debug_assert!(children.try_consume_any().is_none());
     clause
@@ -370,7 +373,8 @@ fn visit_clause_insert(node: Node) -> Vec<ThingStatement> {
 
 fn visit_clause_delete(node: Node) -> Vec<ThingStatement> {
     debug_assert_eq!(node.as_rule(), Rule::clause_delete);
-    let mut children = node.into_children().skip_expected(Rule::DELETE);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::DELETE);
     let statements = visit_statement_things(children.consume_expected(Rule::statement_things));
     debug_assert!(children.try_consume_any().is_none());
     statements
@@ -378,7 +382,8 @@ fn visit_clause_delete(node: Node) -> Vec<ThingStatement> {
 
 fn visit_clause_match(node: Node) -> MatchClause {
     debug_assert_eq!(node.as_rule(), Rule::clause_match);
-    let mut children = node.into_children().skip_expected(Rule::MATCH);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::MATCH);
     let clause = MatchClause::from_patterns(visit_patterns(children.consume_expected(Rule::patterns)));
     debug_assert!(children.try_consume_any().is_none());
     clause
@@ -393,7 +398,7 @@ fn visit_modifiers(node: Node) -> Modifiers {
     debug_assert_eq!(node.as_rule(), Rule::modifiers);
     let mut modifiers = Modifiers::default();
     for modifier in node.into_children() {
-        match node.as_rule() {
+        match modifier.as_rule() {
             Rule::sort => modifiers.sorting = Some(visit_sort(modifier)),
             Rule::offset => modifiers.offset = Some(Offset {
                 offset: get_long(
@@ -465,9 +470,9 @@ fn visit_query_get_group_agg(node: Node) -> TypeQLGetGroupAggregate {
 
 fn visit_sort(node: Node) -> Sorting {
     debug_assert_eq!(node.as_rule(), Rule::sort);
-    let children = node.into_children().skip_expected(Rule::SORT);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::SORT);
     let sorting = Sorting::new(children.map(visit_var_order).collect());
-    debug_assert!(children.try_consume_any().is_none());
     sorting
 }
 
@@ -519,7 +524,7 @@ fn visit_pattern(node: Node) -> Pattern {
         Rule::pattern_disjunction => visit_pattern_disjunction(children.consume_expected(Rule::pattern_disjunction)).into(),
         Rule::pattern_conjunction => visit_pattern_conjunction(children.consume_expected(Rule::pattern_conjunction)).into(),
         Rule::pattern_negation => visit_pattern_negation(children.consume_expected(Rule::pattern_negation)).into(),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar(node.to_string())),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.consume_any().to_string())),
     };
     debug_assert!(children.try_consume_any().is_none());
     pattern
@@ -549,7 +554,8 @@ fn visit_pattern_disjunction(node: Node) -> Disjunction {
 
 fn visit_pattern_negation(node: Node) -> Negation {
     debug_assert_eq!(node.as_rule(), Rule::pattern_negation);
-    let children = node.into_children().skip_expected(Rule::NOT);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::NOT);
     let mut patterns = visit_patterns(children.consume_expected(Rule::patterns));
     let negation = match patterns.len() {
         1 => Negation::new(patterns.pop().unwrap()),
@@ -646,7 +652,6 @@ fn visit_statement_type(node: Node) -> TypeStatement {
         debug_assert!(constraint_nodes.try_consume_any().is_none());
         statement
     });
-    debug_assert!(children.try_consume_any().is_none());
     var_type
 }
 
@@ -883,7 +888,8 @@ fn visit_schema_rule(node: Node) -> RuleDefinition {
 
 fn visit_schema_rule_declaration(node: Node) -> RuleDeclaration {
     debug_assert_eq!(node.as_rule(), Rule::schema_rule_declaration);
-    let mut children = node.into_children().skip_expected(Rule::RULE);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::RULE);
     let rule = RuleDeclaration::new(Label::from(
         children.consume_expected(Rule::label).as_str(),
     ));

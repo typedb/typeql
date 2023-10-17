@@ -30,7 +30,7 @@ use crate::{
         Result,
     },
     pattern::{NamedReferences, ThingStatement},
-    query::{writable::validate_non_empty, TypeQLGet, TypeQLUpdate, Writable},
+    query::{writable::validate_non_empty, TypeQLUpdate, Writable},
     write_joined,
 };
 use crate::query::MatchClause;

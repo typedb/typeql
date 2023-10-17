@@ -61,7 +61,7 @@ impl Validatable for MatchClause {
     }
 }
 
-fn validate_statements_have_named_variable(patterns: impl Iterator<Item=&Pattern>) -> Result {
+fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item=&'a Pattern>) -> Result {
     collect_err(patterns.map(|p| {
         match p {
             Pattern::Statement(v) => v

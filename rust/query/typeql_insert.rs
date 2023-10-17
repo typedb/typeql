@@ -30,17 +30,17 @@ use crate::{
         Result,
     },
     pattern::{NamedReferences, ThingStatement},
-    query::{writable::validate_non_empty, TypeQLGet},
+    query::{writable::validate_non_empty},
     write_joined,
 };
-use crate::query::MatchClause;
+use crate::query::{MatchClause};
 use crate::query::modifier::Modifiers;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {
     pub clause_match: Option<MatchClause>,
     pub statements: Vec<ThingStatement>,
-    pub modifiers: Modifiers
+    pub modifiers: Modifiers,
 }
 
 impl TypeQLInsert {
@@ -55,10 +55,10 @@ impl Validatable for TypeQLInsert {
             [
                 validate_non_empty(&self.statements),
                 validate_insert_in_scope_of_get(&self.clause_match, &self.statements),
+                self.clause_match.as_ref().map(|m| m.validate()).unwrap_or_else(|| Ok(()))
             ]
-            .into_iter()
-            .chain(self.clause_match.validate())
-            .chain(self.statements.iter().map(Validatable::validate)),
+                .into_iter()
+                .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }

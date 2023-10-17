@@ -52,7 +52,7 @@ impl Conjunction {
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_))).flat_map(
+        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
             |p| match p {
                 Pattern::Statement(v) => v.references(),
                 Pattern::Conjunction(c) => c.references(),

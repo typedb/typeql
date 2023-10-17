@@ -20,18 +20,18 @@
  *
  */
 
-use std::{collections::HashSet, fmt, iter};
+use std::{collections::HashSet, fmt};
 
 use itertools::Itertools;
 
 use crate::{
     common::{
-        error::{collect_err, Error, TypeQLError},
+        error::{collect_err, TypeQLError},
         Result,
         token,
         validatable::Validatable,
     },
-    pattern::{Conjunction, NamedReferences, Pattern, Reference, UnboundVariable},
+    pattern::{Conjunction, NamedReferences, Reference, UnboundVariable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLGetGroup, TypeQLInsert, Writable},
     write_joined,
 };

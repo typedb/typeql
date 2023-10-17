@@ -24,7 +24,6 @@ use crate::{common, write_joined};
 use crate::common::error::TypeQLError;
 use crate::common::token;
 use crate::pattern::UnboundVariable;
-use crate::query::Filter;
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Modifiers {
