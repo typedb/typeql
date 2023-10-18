@@ -22,49 +22,30 @@
 
 use cucumber::{gherkin::Step, given, then, when, StatsWriter, World, writer};
 use typeql::{parse_query, query::Query};
-use std::io;
 use cucumber::WriterExt;
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
 
-#[tokio::main]
-async fn main() {
-    let hook = std::panic::take_hook();
-    std::panic::set_hook(Box::new(move |info| {
-        eprintln!("hello");
-        hook(info)
-    }));
-    TypeQLWorld::cucumber().fail_on_skipped()
-        .max_concurrent_scenarios(1)
-        // .with_writer(
-        //     writer::Basic::raw(io::stdout(), writer::Coloring::Never, 0)
-        //         .summarized()
-        //         .assert_normalized(),
-        // )
-        .filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
+fn main() {
+    assert!(!futures::executor::block_on(
+        // Bazel specific path: when running the test in bazel, the external data from
+        // @vaticle_typedb_behaviour is stored in a directory that is a  sibling to
+        // the working directory.
+        TypeQLWorld::cucumber().fail_on_skipped().filter_run("../vaticle_typedb_behaviour/", |_, _, sc| {
             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
-        }).await;
-    // AnimalWorld::run("tests/features/book/quickstart").await;
+        }),
+    )
+    .execution_has_failed());
 }
-// fn main() {
-//     assert!(!futures::executor::block_on(
-//         // Bazel specific path: when running the test in bazel, the external data from
-//         // @vaticle_typedb_behaviour is stored in a directory that is a  sibling to
-//         // the working directory.
-//         TypeQLWorld::cucumber().fail_on_skipped().filter_run("../vaticle_typedb_behaviour", |_, _, sc| {
-//             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
-//         }),
-//     )
-//     .execution_has_failed());
-// }
 
 fn parse_query_in_step(step: &Step) -> Query {
     parse_query(step.docstring.as_ref().unwrap()).unwrap()
 }
 
 fn reparse_query(parsed: &Query) -> Query {
-    parse_query(&parsed.to_string()).unwrap()
+    let query_string = &parsed.to_string();
+    parse_query(query_string).unwrap()
 }
 
 macro_rules! generic_step_impl {
@@ -113,13 +94,14 @@ generic_step_impl! {
         assert_eq!(parsed, reparse_query(&parsed));
     }
 
-    #[step("get answer of typeql match aggregate")]
-    #[step("get answers of typeql match group aggregate")]
-    #[step("get answers of typeql match group")]
-    #[step("get answers of typeql match")]
+    #[step("get answer of typeql get aggregate")]
+    #[step("get answers of typeql get group aggregate")]
+    #[step("get answers of typeql get group")]
+    #[step("get answers of typeql get")]
+    #[step("get answers of typeql fetch")]
     #[step("reasoning query")]
     #[step("verify answer set is equivalent for query")]
-    async fn typeql_match(_: &mut TypeQLWorld, step: &Step) {
+    async fn typeql_get(_: &mut TypeQLWorld, step: &Step) {
         let parsed = parse_query_in_step(step);
         assert_eq!(parsed, reparse_query(&parsed));
     }
@@ -140,7 +122,7 @@ generic_step_impl! {
     #[step("session opens transaction of type: write")]
     #[step("session transaction closes")]
     #[step("session transaction is open: false")]
-    #[step("templated typeql match; throws exception")]
+    #[step("templated typeql get; throws exception")]
     #[step("transaction commits")]
     #[step("transaction commits; throws exception")]
     #[step("transaction is initialised")]
@@ -164,11 +146,12 @@ generic_step_impl! {
     #[step("typeql define; throws exception")]
     #[step("typeql delete; throws exception")]
     #[step("typeql insert; throws exception")]
-    #[step("typeql match aggregate; throws exception")]
-    #[step("typeql match group; throws exception")]
-    #[step("typeql match; throws exception")]
+    #[step("typeql get aggregate; throws exception")]
+    #[step("typeql get group; throws exception")]
+    #[step("typeql get; throws exception")]
+    #[step("typeql fetch; throws exception")]
     #[step("typeql undefine; throws exception")]
     #[step("typeql update; throws exception")]
-    #[step(regex = r"^typeql match; throws exception containing .*$")]
+    #[step(regex = r"^typeql get; throws exception containing .*$")]
     async fn do_nothing_unknown_exception(_: &mut TypeQLWorld) {}
 }

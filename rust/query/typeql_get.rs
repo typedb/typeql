@@ -101,9 +101,9 @@ impl Validatable for TypeQLGet {
     fn validate(&self) -> Result {
         collect_err([
             self.clause_match.validate(),
-            self.validate_filters_are_in_scope(),
-            self.validate_sort_vars_are_in_scope(),
-            self.validate_names_are_unique()
+            // self.validate_filters_are_in_scope(),
+            // self.validate_sort_vars_are_in_scope(),
+            // self.validate_names_are_unique()
         ])
             // validate_has_bounding_conjunction(&self.conjunction),
             // validate_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
@@ -186,7 +186,8 @@ pub struct Filter {
 
 impl fmt::Display for Filter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Filter::Get)?;
-        write_joined!(f, ", ", self.vars)
+        write!(f, "{} ", token::Command::Get)?;
+        write_joined!(f, ", ", self.vars)?;
+        write!(f, ";")
     }
 }

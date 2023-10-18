@@ -79,7 +79,7 @@ impl fmt::Display for TypeQLDelete {
         writeln!(f, "{}", self.clause_match)?;
         writeln!(f, "{}", token::Command::Delete)?;
         write_joined!(f, ";\n", self.statements)?;
-        write!(f, "\n{}", self.modifiers)?;
-        f.write_str(";")
+        f.write_str(";")?;
+        write!(f, "\n{}", self.modifiers)
     }
 }

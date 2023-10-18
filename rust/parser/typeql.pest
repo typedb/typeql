@@ -40,7 +40,7 @@ query = { query_define          | query_undefine
 
 query_define = { clause_define }
 query_undefine = { clause_undefine }
-query_insert = { (clause_match)? ~ clause_insert ~ modifiers } // TODO formalise modifier only available with match
+query_insert = { clause_match ~ clause_insert ~ modifiers | clause_insert }
 query_delete = { clause_match ~ clause_delete ~ modifiers }
 query_update = { query_delete ~ clause_insert ~ modifiers }
 
@@ -157,6 +157,7 @@ player = { VAR_CONCEPT_ }                                                       
 attributes = { attribute ~ ( "," ~ attribute )* }
 attribute = { HAS ~ label ~ ( VAR_ | predicate )                                // ownership by labeled variable or value or just value
             | HAS ~ VAR_CONCEPT_
+            // TODO: fix to allow explicit value variables
             }
 
 // VALUE CONSTRUCT =============================================================

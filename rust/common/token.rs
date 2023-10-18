@@ -71,10 +71,11 @@ string_enum! { Command
     Delete = "delete",
     Match = "match",
     Group = "group",
+    Fetch = "fetch",
+    Get = "get",
 }
 
 string_enum! { Filter
-    Get = "get",
     Sort = "sort",
     Offset = "offset",
     Limit = "limit",

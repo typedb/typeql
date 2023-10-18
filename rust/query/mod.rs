@@ -24,9 +24,10 @@ mod match_clause;
 mod typeql_get_aggregate;
 mod typeql_define;
 mod typeql_delete;
-mod typeql_insert;
+mod typeql_fetch;
 mod typeql_get;
 mod typeql_get_group;
+mod typeql_insert;
 mod typeql_undefine;
 mod typeql_update;
 mod writable;
@@ -43,6 +44,7 @@ pub use typeql_get_aggregate::{AggregateQueryBuilder, TypeQLGetAggregate, TypeQL
 pub use typeql_define::TypeQLDefine;
 pub use typeql_delete::TypeQLDelete;
 pub use typeql_insert::TypeQLInsert;
+pub use typeql_fetch::TypeQLFetch;
 pub use typeql_get::{Filter, TypeQLGet};
 pub use typeql_get_group::TypeQLGetGroup;
 pub use typeql_undefine::TypeQLUndefine;
@@ -65,6 +67,7 @@ pub enum Query {
     Get(TypeQLGet),
     GetGroup(TypeQLGetGroup),
     GetGroupAggregate(TypeQLGetGroupAggregate),
+    Fetch(TypeQLFetch),
 }
 
 enum_getter! { Query
@@ -77,6 +80,7 @@ enum_getter! { Query
     into_get_aggregate(GetAggregate) => TypeQLGetAggregate,
     into_get_group(GetGroup) => TypeQLGetGroup,
     into_get_group_aggregate(GetGroupAggregate) => TypeQLGetGroupAggregate,
+    into_fetch(Fetch) => TypeQLFetch,
 }
 
 enum_wrapper! { Query
@@ -89,6 +93,7 @@ enum_wrapper! { Query
     TypeQLGetAggregate => GetAggregate,
     TypeQLGetGroup => GetGroup,
     TypeQLGetGroupAggregate => GetGroupAggregate,
+    TypeQLFetch => Fetch
 }
 
 impl Validatable for Query {
@@ -103,6 +108,7 @@ impl Validatable for Query {
             Query::GetAggregate(query) => query.validate(),
             Query::GetGroup(query) => query.validate(),
             Query::GetGroupAggregate(query) => query.validate(),
+            Query::Fetch(query) => query.validate(),
         }
     }
 
@@ -117,6 +123,7 @@ impl Validatable for Query {
             Query::GetAggregate(query) => query.validated().map(TypeQLGetAggregate::into),
             Query::GetGroup(query) => query.validated().map(TypeQLGetGroup::into),
             Query::GetGroupAggregate(query) => query.validated().map(TypeQLGetGroupAggregate::into),
+            Query::Fetch(query) => query.validated().map(TypeQLFetch::into),
         }
     }
 }
@@ -133,6 +140,7 @@ impl fmt::Display for Query {
             Query::GetAggregate(query) => write!(f, "{query}"),
             Query::GetGroup(query) => write!(f, "{query}"),
             Query::GetGroupAggregate(query) => write!(f, "{query}"),
+            Query::Fetch(query) => write!(f, "{query}"),
         }
     }
 }

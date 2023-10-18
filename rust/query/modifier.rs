@@ -52,7 +52,7 @@ impl Modifiers {
 
 impl fmt::Display for Modifiers {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_empty() {
+        if !self.is_empty() {
             write_joined!(f, "; ", self.sorting, self.offset, self.limit)?;
             f.write_str(";")
         } else {
