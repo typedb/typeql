@@ -89,8 +89,7 @@ impl<'a> IntoChildNodes<'a> for Node<'a> {
         let mut children = self.into_children();
         let child = children.consume_any();
         let next_child = children.try_consume_any();
-        if n
-        ext_child.is_some() {
+        if next_child.is_some() {
             Err(IllegalGrammar(child.to_string() + " is followed by more tokens: " + next_child.unwrap().as_str()).into())
         } else {
             Ok(child)
@@ -160,10 +159,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node> {
 }
 
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
-    let parsed = parse_single(Rule::eof_query, query)?.into_child();
-    dbg!(&parsed);
-    dbg_assert_line!(parsed.is_ok());
-    visit_query(parsed?).validated()
+    visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)).validated()
 }
 
 pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item=Result<Query>> + '_> {
@@ -296,9 +292,12 @@ fn get_isa_constraint(isa: Node, node: Node) -> IsaConstraint {
 }
 
 fn get_role_player_constraint(node: Node) -> RolePlayerConstraint {
-    let mut node = node.into_children().rev();
-    let player = get_var_concept(node.consume_expected(Rule::player));
-    if let Some(type_) = node.consume_if_matches(Rule::type_) {
+    dbg_assert_eq_line!(node.as_rule(), Rule::role_player);
+    let mut children_rev = node.into_children().rev();
+    let player = get_var_concept(
+        children_rev.consume_expected(Rule::player).into_children().consume_expected(Rule::VAR_CONCEPT_)
+    );
+    if let Some(type_) = children_rev.consume_if_matches(Rule::type_) {
         match visit_type(type_) {
             Type::Label(label) => RolePlayerConstraint::from((label, player)),
             Type::Variable(var) => RolePlayerConstraint::from((var, player)),
@@ -334,7 +333,6 @@ fn visit_query(node: Node) -> Query {
 
 fn visit_query_define(node: Node) -> TypeQLDefine {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_define);
-    println!("in visit_query_define");
     let mut children = node.into_children();
     let query = visit_clause_define(children.consume_expected(Rule::clause_define));
     debug_assert!(children.try_consume_any().is_none());
@@ -820,7 +818,7 @@ fn visit_attribute(node: Node) -> HasConstraint {
             match children.peek_rule() {
                 Some(Rule::VAR_) => HasConstraint::from((
                     label,
-                    get_var(children.consume_expected(Rule::VAR_).into_children().consume_any()),
+                    get_var(children.consume_expected(Rule::VAR_)),
                 )),
                 Some(Rule::predicate) => {
                     HasConstraint::new((label, visit_predicate(children.consume_expected(Rule::predicate))))
