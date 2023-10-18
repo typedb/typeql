@@ -27,12 +27,12 @@ pub trait ValueConstrainable {
     fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueStatement;
 }
 
-pub trait ValueVariableBuilder: Sized {
+pub trait ValueStatementBuilder: Sized {
     fn assign(self, assign: impl Into<AssignConstraint>) -> ValueStatement;
     fn predicate(self, predicate: impl Into<PredicateConstraint>) -> ValueStatement;
 }
 
-impl<U: ValueConstrainable> ValueVariableBuilder for U {
+impl<U: ValueConstrainable> ValueStatementBuilder for U {
     fn assign(self, assign: impl Into<AssignConstraint>) -> ValueStatement {
         self.constrain_assign(assign.into())
     }

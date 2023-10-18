@@ -24,7 +24,8 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{statement::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{statement::Reference, TypeStatement, TypeStatementBuilder},
+    variable::ConceptVariable,
     Label,
 };
 
@@ -64,20 +65,20 @@ impl From<String> for RelatesConstraint {
 impl From<(&str, &str)> for RelatesConstraint {
     fn from((role_type, overridden_role_type): (&str, &str)) -> Self {
         RelatesConstraint {
-            role_type: UnboundConceptVariable::hidden().type_(role_type),
-            overridden_role_type: Some(UnboundConceptVariable::hidden().type_(overridden_role_type)),
+            role_type: ConceptVariable::hidden().type_(role_type),
+            overridden_role_type: Some(ConceptVariable::hidden().type_(overridden_role_type)),
         }
     }
 }
 
 impl From<Label> for RelatesConstraint {
     fn from(type_: Label) -> Self {
-        RelatesConstraint { role_type: UnboundConceptVariable::hidden().type_(type_), overridden_role_type: None }
+        RelatesConstraint { role_type: ConceptVariable::hidden().type_(type_), overridden_role_type: None }
     }
 }
 
-impl From<UnboundConceptVariable> for RelatesConstraint {
-    fn from(role_type: UnboundConceptVariable) -> Self {
+impl From<ConceptVariable> for RelatesConstraint {
+    fn from(role_type: ConceptVariable) -> Self {
         RelatesConstraint::from(role_type.into_type())
     }
 }

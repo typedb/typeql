@@ -36,8 +36,8 @@ use crate::{
     filter, gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
     parse_query, parse_statement,
     pattern::{
-        Annotation::Key, ConceptVariableBuilder, ExpressionBuilder, Label, RelationVariableBuilder,
-        ThingVariableBuilder, TypeVariableBuilder, ValueVariableBuilder, Statement,
+        Annotation::Key, ConceptStatementBuilder, ExpressionBuilder, Label, RelationStatementBuilder,
+        ThingStatementBuilder, TypeStatementBuilder, ValueStatementBuilder, Statement,
     },
     query::AggregateQueryBuilder,
     rel, rule, sort_vars, type_, typeql_insert, typeql_get, Query,

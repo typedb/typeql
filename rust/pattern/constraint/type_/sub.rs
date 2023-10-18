@@ -24,7 +24,8 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{statement::Reference, IsExplicit, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{statement::Reference, IsExplicit, TypeStatement, TypeStatementBuilder},
+    variable::ConceptVariable,
     Label,
 };
 
@@ -52,12 +53,12 @@ impl Validatable for SubConstraint {
 
 impl<T: Into<Label>> From<T> for SubConstraint {
     fn from(scoped_type: T) -> Self {
-        Self::from(UnboundConceptVariable::hidden().type_(scoped_type))
+        Self::from(ConceptVariable::hidden().type_(scoped_type))
     }
 }
 
-impl From<UnboundConceptVariable> for SubConstraint {
-    fn from(type_: UnboundConceptVariable) -> Self {
+impl From<ConceptVariable> for SubConstraint {
+    fn from(type_: ConceptVariable) -> Self {
         Self::from(type_.into_type())
     }
 }
@@ -69,12 +70,12 @@ impl From<TypeStatement> for SubConstraint {
 
 impl<T: Into<Label>> From<(T, IsExplicit)> for SubConstraint {
     fn from((scoped_type, is_explicit): (T, IsExplicit)) -> Self {
-        Self::from((UnboundConceptVariable::hidden().type_(scoped_type), is_explicit))
+        Self::from((ConceptVariable::hidden().type_(scoped_type), is_explicit))
     }
 }
 
-impl From<(UnboundConceptVariable, IsExplicit)> for SubConstraint {
-    fn from((type_, is_explicit): (UnboundConceptVariable, IsExplicit)) -> Self {
+impl From<(ConceptVariable, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (ConceptVariable, IsExplicit)) -> Self {
         Self::from((type_.into_type(), is_explicit))
     }
 }

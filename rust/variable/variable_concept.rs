@@ -34,11 +34,23 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub struct UnboundConceptVariable {
+pub struct ConceptVariable {
     pub reference: Reference,
 }
 
-impl UnboundConceptVariable {
+impl ConceptVariable {
+    pub fn named(name: String) -> ConceptVariable {
+        ConceptVariable { reference: Reference::Concept(ConceptReference::Name(name)) }
+    }
+
+    pub fn anonymous() -> ConceptVariable {
+        ConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Visible)) }
+    }
+
+    pub fn hidden() -> ConceptVariable {
+        ConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Invisible)) }
+    }
+
     pub fn into_concept(self) -> ConceptStatement {
         ConceptStatement::new(self.reference)
     }
@@ -51,36 +63,24 @@ impl UnboundConceptVariable {
         TypeStatement::new(self.reference)
     }
 
-    pub fn named(name: String) -> UnboundConceptVariable {
-        UnboundConceptVariable { reference: Reference::Concept(ConceptReference::Name(name)) }
-    }
-
-    pub fn anonymous() -> UnboundConceptVariable {
-        UnboundConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Visible)) }
-    }
-
-    pub fn hidden() -> UnboundConceptVariable {
-        UnboundConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Invisible)) }
-    }
-
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         Box::new(iter::once(&self.reference))
     }
 }
 
-impl Validatable for UnboundConceptVariable {
+impl Validatable for ConceptVariable {
     fn validate(&self) -> Result {
         self.reference.validate()
     }
 }
 
-impl ConceptConstrainable for UnboundConceptVariable {
+impl ConceptConstrainable for ConceptVariable {
     fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
         self.into_concept().constrain_is(is)
     }
 }
 
-impl ThingConstrainable for UnboundConceptVariable {
+impl ThingConstrainable for ConceptVariable {
     fn constrain_has(self, has: HasConstraint) -> ThingStatement {
         self.into_thing().constrain_has(has)
     }
@@ -102,13 +102,13 @@ impl ThingConstrainable for UnboundConceptVariable {
     }
 }
 
-impl RelationConstrainable for UnboundConceptVariable {
+impl RelationConstrainable for ConceptVariable {
     fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingStatement {
         self.into_thing().constrain_role_player(constraint)
     }
 }
 
-impl TypeConstrainable for UnboundConceptVariable {
+impl TypeConstrainable for ConceptVariable {
     fn constrain_abstract(self) -> TypeStatement {
         self.into_type().constrain_abstract()
     }
@@ -142,27 +142,27 @@ impl TypeConstrainable for UnboundConceptVariable {
     }
 }
 
-impl From<()> for UnboundConceptVariable {
+impl From<()> for ConceptVariable {
     fn from(_: ()) -> Self {
-        UnboundConceptVariable::anonymous()
+        ConceptVariable::anonymous()
     }
 }
 
-impl From<&str> for UnboundConceptVariable {
+impl From<&str> for ConceptVariable {
     fn from(name: &str) -> Self {
-        UnboundConceptVariable::named(name.to_string())
+        ConceptVariable::named(name.to_string())
     }
 }
 
-impl From<String> for UnboundConceptVariable {
+impl From<String> for ConceptVariable {
     fn from(name: String) -> Self {
-        UnboundConceptVariable::named(name)
+        ConceptVariable::named(name)
     }
 }
 
-impl LeftOperand for UnboundConceptVariable {}
+impl LeftOperand for ConceptVariable {}
 
-impl fmt::Display for UnboundConceptVariable {
+impl fmt::Display for ConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)
     }

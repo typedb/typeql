@@ -25,26 +25,23 @@ mod concept;
 mod reference;
 mod thing;
 mod type_;
-mod unbound;
-mod unbound_concept;
-mod unbound_value;
 mod value;
 
 use std::{collections::HashSet, fmt};
 
 pub(crate) use builder::LeftOperand;
 pub use builder::{
-    ConceptConstrainable, ConceptVariableBuilder, ExpressionBuilder, RelationConstrainable, RelationVariableBuilder,
-    ThingConstrainable, ThingVariableBuilder, TypeConstrainable, TypeVariableBuilder, ValueConstrainable,
-    ValueVariableBuilder,
+    ConceptConstrainable, ConceptStatementBuilder, ExpressionBuilder, RelationConstrainable, RelationStatementBuilder,
+    ThingConstrainable, ThingStatementBuilder, TypeConstrainable, TypeStatementBuilder, ValueConstrainable,
+    ValueStatementBuilder,
 };
 pub use concept::ConceptStatement;
 pub use reference::{ConceptReference, Reference, ValueReference, Visibility};
 pub use thing::ThingStatement;
 pub use type_::TypeStatement;
-pub use unbound::UnboundVariable;
-pub use unbound_concept::UnboundConceptVariable;
-pub use unbound_value::UnboundValueVariable;
+pub use crate::variable::variable::Variable;
+pub use crate::variable::variable_concept::ConceptVariable;
+pub use crate::variable::variable_value::ValueVariable;
 pub use value::ValueStatement;
 
 use crate::{

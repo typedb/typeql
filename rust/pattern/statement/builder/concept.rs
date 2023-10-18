@@ -26,11 +26,11 @@ pub trait ConceptConstrainable {
     fn constrain_is(self, is: IsConstraint) -> ConceptStatement;
 }
 
-pub trait ConceptVariableBuilder: Sized {
+pub trait ConceptStatementBuilder: Sized {
     fn is(self, is: impl Into<IsConstraint>) -> ConceptStatement;
 }
 
-impl<U: ConceptConstrainable> ConceptVariableBuilder for U {
+impl<U: ConceptConstrainable> ConceptStatementBuilder for U {
     fn is(self, is: impl Into<IsConstraint>) -> ConceptStatement {
         self.constrain_is(is.into())
     }

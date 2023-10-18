@@ -24,7 +24,8 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{statement::Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{statement::Reference, TypeStatement, TypeStatementBuilder},
+    variable::ConceptVariable,
     Label,
 };
 
@@ -41,7 +42,7 @@ impl PlaysConstraint {
             relation_type: role_type
                 .label
                 .as_ref()
-                .map(|label| UnboundConceptVariable::hidden().type_(label.label.scope.as_ref().cloned().unwrap())),
+                .map(|label| ConceptVariable::hidden().type_(label.label.scope.as_ref().cloned().unwrap())),
             role_type,
             overridden_role_type,
         }
@@ -96,21 +97,21 @@ impl From<(String, String, String)> for PlaysConstraint {
 
 impl From<Label> for PlaysConstraint {
     fn from(role_type: Label) -> Self {
-        PlaysConstraint::new(UnboundConceptVariable::hidden().type_(role_type), None)
+        PlaysConstraint::new(ConceptVariable::hidden().type_(role_type), None)
     }
 }
 
 impl From<(Label, Label)> for PlaysConstraint {
     fn from((role_type, overridden_role_type): (Label, Label)) -> Self {
         PlaysConstraint::new(
-            UnboundConceptVariable::hidden().type_(role_type),
-            Some(UnboundConceptVariable::hidden().type_(overridden_role_type)),
+            ConceptVariable::hidden().type_(role_type),
+            Some(ConceptVariable::hidden().type_(overridden_role_type)),
         )
     }
 }
 
-impl From<UnboundConceptVariable> for PlaysConstraint {
-    fn from(role_type: UnboundConceptVariable) -> Self {
+impl From<ConceptVariable> for PlaysConstraint {
+    fn from(role_type: ConceptVariable) -> Self {
         PlaysConstraint::from(role_type.into_type())
     }
 }

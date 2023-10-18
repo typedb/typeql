@@ -37,13 +37,14 @@ use crate::{
         validatable::Validatable,
     },
     pattern::{
-        Annotation, AssignConstraint, ConceptStatement, ConceptVariableBuilder, Conjunction, Constant, Definable,
+        Annotation, AssignConstraint, ConceptStatement, ConceptStatementBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
         Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
         RuleDeclaration, RuleDefinition, Statement, SubConstraint, ThingConstrainable, ThingStatement,
-        ThingVariableBuilder, TypeConstrainable, TypeStatement, TypeVariableBuilder, UnboundConceptVariable,
-        UnboundValueVariable, UnboundVariable, Value, ValueConstrainable, ValueStatement,
+        ThingStatementBuilder, TypeConstrainable, TypeStatement, TypeStatementBuilder,
+        Value, ValueConstrainable, ValueStatement,
     },
+    variable::{Variable, ConceptVariable, ValueVariable},
     query::{
         AggregateQueryBuilder, MatchClause, Query, TypeQLDefine, TypeQLDelete, TypeQLGet,
         TypeQLGetAggregate, TypeQLGetGroup, TypeQLGetGroupAggregate, TypeQLInsert, TypeQLUndefine,
@@ -141,13 +142,13 @@ impl<'a, T: Iterator<Item=Node<'a>> + Clone> RuleMatcher<'a> for T {
 #[derive(Debug)]
 enum Type {
     Label(Label),
-    Variable(UnboundConceptVariable),
+    Variable(ConceptVariable),
 }
 
 impl Type {
     pub fn into_type_statement(self) -> TypeStatement {
         match self {
-            Self::Label(label) => UnboundConceptVariable::hidden().type_(label),
+            Self::Label(label) => ConceptVariable::hidden().type_(label),
             Self::Variable(var) => var.into_type(),
         }
     }
@@ -254,18 +255,18 @@ fn get_date_time(date_time: Node) -> NaiveDateTime {
         .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar(date_time.to_string())))
 }
 
-fn get_var(node: Node) -> UnboundVariable {
+fn get_var(node: Node) -> Variable {
     dbg_assert_eq_line!(node.as_rule(), Rule::VAR_);
     let name = node.as_str();
     let (prefix, _name) = name.split_at(1);
     match prefix {
-        "$" => UnboundVariable::Concept(get_var_concept(node.into_children().consume_expected(Rule::VAR_CONCEPT_))),
-        "?" => UnboundVariable::Value(get_var_value(node.into_children().consume_expected(Rule::VAR_VALUE_))),
+        "$" => Variable::Concept(get_var_concept(node.into_children().consume_expected(Rule::VAR_CONCEPT_))),
+        "?" => Variable::Value(get_var_value(node.into_children().consume_expected(Rule::VAR_VALUE_))),
         _ => unreachable!(),
     }
 }
 
-fn get_var_concept(node: Node) -> UnboundConceptVariable {
+fn get_var_concept(node: Node) -> ConceptVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::VAR_CONCEPT_);
     let name = node.as_str();
 
@@ -274,18 +275,18 @@ fn get_var_concept(node: Node) -> UnboundConceptVariable {
     let name = &name[1..];
 
     if name == "_" {
-        UnboundConceptVariable::anonymous()
+        ConceptVariable::anonymous()
     } else {
-        UnboundConceptVariable::named(String::from(name))
+        ConceptVariable::named(String::from(name))
     }
 }
 
-fn get_var_value(node: Node) -> UnboundValueVariable {
+fn get_var_value(node: Node) -> ValueVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::VAR_VALUE_);
     let name = node.as_str();
     assert!(name.len() > 1);
     assert!(name.starts_with('?'));
-    UnboundValueVariable::named(String::from(&name[1..]))
+    ValueVariable::named(String::from(&name[1..]))
 }
 
 fn get_isa_constraint(isa: Node, node: Node) -> IsaConstraint {
@@ -454,7 +455,7 @@ fn visit_clause_match(node: Node) -> MatchClause {
     clause
 }
 
-fn visit_clause_get(node: Node) -> Vec<UnboundVariable> {
+fn visit_clause_get(node: Node) -> Vec<Variable> {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_get);
     node.into_children().skip_expected(Rule::GET).map(get_var).collect()
 }
@@ -491,7 +492,7 @@ fn visit_query_get_aggregate(node: Node) -> TypeQLGetAggregate {
     }
 }
 
-fn visit_clause_aggregate(node: Node) -> (Aggregate, Option<UnboundVariable>) {
+fn visit_clause_aggregate(node: Node) -> (Aggregate, Option<Variable>) {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_aggregate);
     let mut children = node.into_children();
     let method = visit_aggregate_method(children.consume_expected(Rule::aggregate_method));
@@ -510,7 +511,7 @@ fn visit_query_get_group(node: Node) -> TypeQLGetGroup {
     query
 }
 
-fn visit_clause_group(node: Node) -> UnboundVariable {
+fn visit_clause_group(node: Node) -> Variable {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_group);
     let mut children = node.into_children();
     children.skip_expected(Rule::GROUP);
@@ -776,7 +777,7 @@ fn visit_statement_relation(node: Node) -> ThingStatement {
     let mut relation = children
         .consume_if_matches(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
-        .unwrap_or_else(UnboundConceptVariable::hidden)
+        .unwrap_or_else(ConceptVariable::hidden)
         .constrain_relation(visit_relation(children.consume_expected(Rule::relation)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
@@ -796,7 +797,7 @@ fn visit_statement_attribute(node: Node) -> ThingStatement {
     let mut attribute = children
         .consume_if_matches(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
-        .unwrap_or_else(UnboundConceptVariable::hidden)
+        .unwrap_or_else(ConceptVariable::hidden)
         .constrain_predicate(visit_predicate(children.consume_expected(Rule::predicate)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {

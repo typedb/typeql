@@ -31,7 +31,8 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::{Conjunction, NamedReferences, Reference, UnboundVariable},
+    pattern::{Conjunction, NamedReferences, Reference},
+    variable::Variable,
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLGetGroup, TypeQLInsert, Writable},
     write_joined,
 };
@@ -52,11 +53,11 @@ impl TypeQLGet {
         TypeQLGet { clause_match, filter: Filter::default(), modifiers: Modifiers::default() }
     }
 
-    pub fn filter(self, vars: Vec<UnboundVariable>) -> Self {
+    pub fn filter(self, vars: Vec<Variable>) -> Self {
         TypeQLGet { filter: Filter { vars }, ..self }
     }
 
-    pub fn get<const N: usize, T: Into<UnboundVariable>>(self, vars: [T; N]) -> Self {
+    pub fn get<const N: usize, T: Into<Variable>>(self, vars: [T; N]) -> Self {
         self.filter(vars.into_iter().map(|var| var.into()).collect::<Vec<_>>())
     }
 
@@ -80,7 +81,7 @@ impl TypeQLGet {
         TypeQLDelete { clause_match: self.clause_match, statements: writable.statements(), modifiers: self.modifiers }
     }
 
-    pub fn group(self, var: impl Into<UnboundVariable>) -> TypeQLGetGroup {
+    pub fn group(self, var: impl Into<Variable>) -> TypeQLGetGroup {
         TypeQLGetGroup { query: self, group_var: var.into() }
     }
 
@@ -181,7 +182,7 @@ impl fmt::Display for TypeQLGet {
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Filter {
-    pub vars: Vec<UnboundVariable>,
+    pub vars: Vec<Variable>,
 }
 
 impl fmt::Display for Filter {

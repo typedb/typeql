@@ -25,9 +25,10 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
-        PredicateConstraint, Reference, ThingConstrainable, ThingStatement, TypeStatement, TypeVariableBuilder,
-        UnboundConceptVariable, Value,
+        PredicateConstraint, Reference, ThingConstrainable, ThingStatement, TypeStatement, TypeStatementBuilder,
+        Value,
     },
+    variable::ConceptVariable,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -52,8 +53,8 @@ impl Validatable for HasConstraint {
     }
 }
 
-impl From<UnboundConceptVariable> for HasConstraint {
-    fn from(variable: UnboundConceptVariable) -> Self {
+impl From<ConceptVariable> for HasConstraint {
+    fn from(variable: ConceptVariable) -> Self {
         HasConstraint { type_: None, attribute: variable.into_thing() }
     }
 }
@@ -62,12 +63,12 @@ impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
     fn from((type_name, value): (S, T)) -> Self {
         match value.into() {
             Value::ThingVariable(variable) => HasConstraint {
-                type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
+                type_: Some(ConceptVariable::hidden().type_(type_name.into())),
                 attribute: *variable,
             },
             value => HasConstraint {
-                type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-                attribute: UnboundConceptVariable::hidden()
+                type_: Some(ConceptVariable::hidden().type_(type_name.into())),
+                attribute: ConceptVariable::hidden()
                     .constrain_predicate(PredicateConstraint::new(token::Predicate::Eq, value)),
             },
         }
@@ -77,8 +78,8 @@ impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
 impl<S: Into<String>> From<(S, PredicateConstraint)> for HasConstraint {
     fn from((type_name, predicate): (S, PredicateConstraint)) -> Self {
         HasConstraint {
-            type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
+            type_: Some(ConceptVariable::hidden().type_(type_name.into())),
+            attribute: ConceptVariable::hidden().constrain_predicate(predicate),
         }
     }
 }
@@ -86,8 +87,8 @@ impl<S: Into<String>> From<(S, PredicateConstraint)> for HasConstraint {
 impl HasConstraint {
     pub fn new((type_name, predicate): (String, PredicateConstraint)) -> Self {
         HasConstraint {
-            type_: Some(UnboundConceptVariable::hidden().type_(type_name)),
-            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
+            type_: Some(ConceptVariable::hidden().type_(type_name)),
+            attribute: ConceptVariable::hidden().constrain_predicate(predicate),
         }
     }
 }

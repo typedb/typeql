@@ -23,11 +23,11 @@
 use crate::{
     common::token,
     pattern::{
-        Constant, Expression, Function, Negation, PredicateConstraint, RelationVariableBuilder, RolePlayerConstraint,
-        RuleDeclaration, ThingStatement, TypeStatement, TypeVariableBuilder, UnboundConceptVariable,
-        UnboundValueVariable, Value,
+        Constant, Expression, Function, Negation, PredicateConstraint, RelationStatementBuilder, RolePlayerConstraint,
+        RuleDeclaration, ThingStatement, TypeStatement, TypeStatementBuilder, Value,
     },
-    Pattern
+    variable::{ConceptVariable, ValueVariable},
+    Pattern,
 };
 
 #[macro_export]
@@ -120,11 +120,11 @@ pub fn rule(name: &str) -> RuleDeclaration {
     RuleDeclaration::from(name)
 }
 
-pub fn cvar(var: impl Into<UnboundConceptVariable>) -> UnboundConceptVariable {
+pub fn cvar(var: impl Into<ConceptVariable>) -> ConceptVariable {
     var.into()
 }
 
-pub fn vvar(var: impl Into<UnboundValueVariable>) -> UnboundValueVariable {
+pub fn vvar(var: impl Into<ValueVariable>) -> ValueVariable {
     var.into()
 }
 
@@ -133,11 +133,11 @@ pub fn constant(constant: impl Into<Constant>) -> Constant {
 }
 
 pub fn type_(name: impl Into<String>) -> TypeStatement {
-    UnboundConceptVariable::hidden().type_(name.into())
+    ConceptVariable::hidden().type_(name.into())
 }
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingStatement {
-    UnboundConceptVariable::hidden().rel(value)
+    ConceptVariable::hidden().rel(value)
 }
 
 pub fn eq<T: Into<Value>>(value: T) -> PredicateConstraint {

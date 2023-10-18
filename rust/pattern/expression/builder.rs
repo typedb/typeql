@@ -20,10 +20,8 @@
  *
  */
 
-use crate::{
-    common::token,
-    pattern::expression::{Expression, Operation},
-};
+use crate::common::token;
+use crate::pattern::{Expression, Operation};
 
 pub(crate) trait LeftOperand: Into<Expression> {}
 

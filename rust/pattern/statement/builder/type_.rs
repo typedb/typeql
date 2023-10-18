@@ -40,7 +40,7 @@ pub trait TypeConstrainable {
     fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement;
 }
 
-pub trait TypeVariableBuilder: Sized {
+pub trait TypeStatementBuilder: Sized {
     fn abstract_(self) -> TypeStatement;
     fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeStatement;
     fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeStatement;
@@ -51,7 +51,7 @@ pub trait TypeVariableBuilder: Sized {
     fn value(self, value_type: token::ValueType) -> TypeStatement;
 }
 
-impl<U: TypeConstrainable> TypeVariableBuilder for U {
+impl<U: TypeConstrainable> TypeStatementBuilder for U {
     fn abstract_(self) -> TypeStatement {
         self.constrain_abstract()
     }

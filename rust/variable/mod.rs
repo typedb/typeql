@@ -17,17 +17,12 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
-mod concept;
-mod thing;
-mod type_;
-mod value;
+pub(crate) mod variable;
+pub(crate) mod variable_concept;
+pub(crate) mod variable_value;
 
-pub use concept::{ConceptConstrainable, ConceptStatementBuilder};
-pub use crate::pattern::expression::builder::ExpressionBuilder;
-pub(crate) use crate::pattern::expression::builder::LeftOperand;
-pub use thing::{RelationConstrainable, RelationStatementBuilder, ThingConstrainable, ThingStatementBuilder};
-pub use type_::{TypeConstrainable, TypeStatementBuilder};
-pub use value::{ValueConstrainable, ValueStatementBuilder};
+pub use variable::Variable;
+pub use variable_concept::ConceptVariable;
+pub use variable_value::ValueVariable;

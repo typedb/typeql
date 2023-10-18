@@ -36,7 +36,7 @@ pub trait ThingConstrainable {
     fn constrain_relation(self, relation: RelationConstraint) -> ThingStatement;
 }
 
-pub trait ThingVariableBuilder {
+pub trait ThingStatementBuilder {
     fn has(self, has: impl Into<HasConstraint>) -> ThingStatement;
     fn iid<T: Into<IIDConstraint>>(self, iid: T) -> ThingStatement;
     fn isa(self, isa: impl Into<IsaConstraint>) -> ThingStatement;
@@ -50,7 +50,7 @@ pub trait ThingVariableBuilder {
     fn like(self, string: impl Into<String>) -> ThingStatement;
 }
 
-impl<U: ThingConstrainable> ThingVariableBuilder for U {
+impl<U: ThingConstrainable> ThingStatementBuilder for U {
     fn has(self, has: impl Into<HasConstraint>) -> ThingStatement {
         self.constrain_has(has.into())
     }
@@ -100,11 +100,11 @@ pub trait RelationConstrainable {
     fn constrain_role_player(self, role_player: RolePlayerConstraint) -> ThingStatement;
 }
 
-pub trait RelationVariableBuilder {
+pub trait RelationStatementBuilder {
     fn rel(self, value: impl Into<RolePlayerConstraint>) -> ThingStatement;
 }
 
-impl<U: RelationConstrainable> RelationVariableBuilder for U {
+impl<U: RelationConstrainable> RelationStatementBuilder for U {
     fn rel(self, value: impl Into<RolePlayerConstraint>) -> ThingStatement {
         self.constrain_role_player(value.into())
     }

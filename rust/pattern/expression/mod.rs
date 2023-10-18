@@ -20,23 +20,26 @@
  *
  */
 
-mod function;
-mod operation;
-
 use std::{fmt, iter};
 
 use chrono::NaiveDateTime;
+
 pub use function::Function;
 pub use operation::Operation;
 
-use crate::pattern::{Constant, Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable};
+use crate::pattern::{Constant, Reference};
+use crate::variable::{ConceptVariable, ValueVariable, Variable};
+
+mod function;
+mod operation;
+pub mod builder;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
     Operation(Operation),
     Function(Function),
     Constant(Constant),
-    Variable(UnboundVariable),
+    Variable(Variable),
 }
 
 impl fmt::Display for Expression {
@@ -51,7 +54,7 @@ impl fmt::Display for Expression {
 }
 
 impl Expression {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item=&Reference> + '_> {
         match self {
             Expression::Operation(operation) => operation.references_recursive(),
             Expression::Function(function) => function.references_recursive(),
@@ -79,14 +82,14 @@ impl From<Constant> for Expression {
     }
 }
 
-impl From<UnboundValueVariable> for Expression {
-    fn from(variable: UnboundValueVariable) -> Self {
+impl From<ValueVariable> for Expression {
+    fn from(variable: ValueVariable) -> Self {
         Self::Variable(variable.into())
     }
 }
 
-impl From<UnboundConceptVariable> for Expression {
-    fn from(variable: UnboundConceptVariable) -> Self {
+impl From<ConceptVariable> for Expression {
+    fn from(variable: ConceptVariable) -> Self {
         Self::Variable(variable.into())
     }
 }

@@ -30,6 +30,7 @@ pub mod common;
 pub mod parser;
 pub mod pattern;
 pub mod query;
+pub mod variable;
 #[macro_use]
 mod util;
 

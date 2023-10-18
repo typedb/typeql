@@ -24,7 +24,8 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{IsExplicit, Reference, TypeStatement, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::{IsExplicit, Reference, TypeStatement, TypeStatementBuilder},
+    variable::ConceptVariable,
     Label,
 };
 
@@ -52,24 +53,24 @@ impl Validatable for IsaConstraint {
 
 impl<T: Into<Label>> From<T> for IsaConstraint {
     fn from(type_name: T) -> Self {
-        IsaConstraint::new(UnboundConceptVariable::hidden().type_(type_name), IsExplicit::No)
+        IsaConstraint::new(ConceptVariable::hidden().type_(type_name), IsExplicit::No)
     }
 }
 
 impl<T: Into<Label>> From<(T, IsExplicit)> for IsaConstraint {
     fn from((type_name, is_explicit): (T, IsExplicit)) -> Self {
-        IsaConstraint::new(UnboundConceptVariable::hidden().type_(type_name), is_explicit)
+        IsaConstraint::new(ConceptVariable::hidden().type_(type_name), is_explicit)
     }
 }
 
-impl From<UnboundConceptVariable> for IsaConstraint {
-    fn from(var: UnboundConceptVariable) -> Self {
+impl From<ConceptVariable> for IsaConstraint {
+    fn from(var: ConceptVariable) -> Self {
         IsaConstraint::new(var.into_type(), IsExplicit::No)
     }
 }
 
-impl From<(UnboundConceptVariable, IsExplicit)> for IsaConstraint {
-    fn from((var, is_explicit): (UnboundConceptVariable, IsExplicit)) -> Self {
+impl From<(ConceptVariable, IsExplicit)> for IsaConstraint {
+    fn from((var, is_explicit): (ConceptVariable, IsExplicit)) -> Self {
         IsaConstraint::new(var.into_type(), is_explicit)
     }
 }

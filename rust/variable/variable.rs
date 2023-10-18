@@ -24,57 +24,58 @@ use std::{fmt, fmt::Formatter};
 
 use crate::{
     common::{validatable::Validatable, Result},
-    pattern::{Reference, UnboundConceptVariable, UnboundValueVariable},
+    pattern::{Reference},
+    variable::{ConceptVariable, ValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub enum UnboundVariable {
-    Concept(UnboundConceptVariable),
-    Value(UnboundValueVariable),
+pub enum Variable {
+    Concept(ConceptVariable),
+    Value(ValueVariable),
 }
 
-impl UnboundVariable {
+impl Variable {
     pub fn reference(&self) -> &Reference {
         match self {
-            UnboundVariable::Concept(concept_variable) => &concept_variable.reference,
-            UnboundVariable::Value(value_variable) => &value_variable.reference,
+            Variable::Concept(concept_variable) => &concept_variable.reference,
+            Variable::Value(value_variable) => &value_variable.reference,
         }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
         match self {
-            UnboundVariable::Concept(concept_variable) => concept_variable.references(),
-            UnboundVariable::Value(value_variable) => value_variable.references(),
+            Variable::Concept(concept_variable) => concept_variable.references(),
+            Variable::Value(value_variable) => value_variable.references(),
         }
     }
 }
 
-impl Validatable for UnboundVariable {
+impl Validatable for Variable {
     fn validate(&self) -> Result {
         match self {
-            UnboundVariable::Concept(concept_variable) => concept_variable.validate(),
-            UnboundVariable::Value(value_variable) => value_variable.validate(),
+            Variable::Concept(concept_variable) => concept_variable.validate(),
+            Variable::Value(value_variable) => value_variable.validate(),
         }
     }
 }
 
-impl From<UnboundConceptVariable> for UnboundVariable {
-    fn from(concept: UnboundConceptVariable) -> Self {
-        UnboundVariable::Concept(concept)
+impl From<ConceptVariable> for Variable {
+    fn from(concept: ConceptVariable) -> Self {
+        Variable::Concept(concept)
     }
 }
 
-impl From<UnboundValueVariable> for UnboundVariable {
-    fn from(value: UnboundValueVariable) -> Self {
-        UnboundVariable::Value(value)
+impl From<ValueVariable> for Variable {
+    fn from(value: ValueVariable) -> Self {
+        Variable::Value(value)
     }
 }
 
-impl fmt::Display for UnboundVariable {
+impl fmt::Display for Variable {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            UnboundVariable::Concept(concept_variable) => write!(f, "{concept_variable}"),
-            UnboundVariable::Value(value_variable) => write!(f, "{value_variable}"),
+            Variable::Concept(concept_variable) => write!(f, "{concept_variable}"),
+            Variable::Value(value_variable) => write!(f, "{value_variable}"),
         }
     }
 }

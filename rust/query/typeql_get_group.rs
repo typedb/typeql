@@ -24,14 +24,15 @@ use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{NamedReferences, Reference, UnboundVariable},
+    pattern::{NamedReferences, Reference},
+    variable::Variable,
     query::{AggregateQueryBuilder, TypeQLGet},
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGetGroup {
     pub query: TypeQLGet,
-    pub group_var: UnboundVariable,
+    pub group_var: Variable,
 }
 
 impl AggregateQueryBuilder for TypeQLGetGroup {}

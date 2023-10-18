@@ -23,7 +23,7 @@ use std::fmt;
 use crate::{common, write_joined};
 use crate::common::error::TypeQLError;
 use crate::common::token;
-use crate::pattern::UnboundVariable;
+use crate::variable::Variable;
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Modifiers {
@@ -64,28 +64,28 @@ impl fmt::Display for Modifiers {
 pub mod sorting {
     use std::fmt;
 
-    use crate::{common::token, pattern::UnboundVariable};
+    use crate::{common::token, variable::Variable};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct OrderedVariable {
-        pub var: UnboundVariable,
+        pub var: Variable,
         pub order: Option<token::Order>,
     }
 
     impl OrderedVariable {
-        pub fn new(var: UnboundVariable, order: Option<token::Order>) -> Self {
+        pub fn new(var: Variable, order: Option<token::Order>) -> Self {
             OrderedVariable { var, order }
         }
     }
 
-    impl<T: Into<UnboundVariable>> From<(T, token::Order)> for OrderedVariable {
+    impl<T: Into<Variable>> From<(T, token::Order)> for OrderedVariable {
         fn from(ordered_var: (T, token::Order)) -> Self {
             let (variable, order) = ordered_var;
             Self::new(variable.into(), Some(order))
         }
     }
 
-    impl<T: Into<UnboundVariable>> From<T> for OrderedVariable {
+    impl<T: Into<Variable>> From<T> for OrderedVariable {
         fn from(variable: T) -> Self {
             Self::new(variable.into(), None)
         }
@@ -112,7 +112,7 @@ impl Sorting {
         Sorting { vars }
     }
 
-    pub fn get_order(&self, var: UnboundVariable) -> common::Result<token::Order> {
+    pub fn get_order(&self, var: Variable) -> common::Result<token::Order> {
         self.vars
             .iter()
             .find_map(|v| (v.var == var).then_some(v.order.unwrap_or(token::Order::Asc)))

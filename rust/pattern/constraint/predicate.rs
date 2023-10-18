@@ -30,10 +30,8 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{
-        Constant, Reference, ThingStatement, UnboundConceptVariable, UnboundValueVariable, UnboundVariable,
-        ValueStatement,
-    },
+    pattern::{Constant, Reference, ThingStatement, ValueStatement},
+    variable::{Variable, ConceptVariable, ValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -50,7 +48,7 @@ impl PredicateConstraint {
         }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn references(&self) -> Box<dyn Iterator<Item=&Reference> + '_> {
         match &self.value {
             Value::ThingVariable(v) => Box::new(iter::once(&v.reference)),
             Value::ValueVariable(v) => Box::new(iter::once(&v.reference)),
@@ -95,6 +93,7 @@ pub enum Value {
     ThingVariable(Box<ThingStatement>),
     ValueVariable(Box<ValueStatement>),
 }
+
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
 
 impl Validatable for Value {
@@ -113,23 +112,23 @@ impl<T: Into<Constant>> From<T> for Value {
     }
 }
 
-impl From<UnboundConceptVariable> for Value {
-    fn from(variable: UnboundConceptVariable) -> Self {
+impl From<ConceptVariable> for Value {
+    fn from(variable: ConceptVariable) -> Self {
         Value::ThingVariable(Box::new(variable.into_thing()))
     }
 }
 
-impl From<UnboundValueVariable> for Value {
-    fn from(variable: UnboundValueVariable) -> Self {
+impl From<ValueVariable> for Value {
+    fn from(variable: ValueVariable) -> Self {
         Value::ValueVariable(Box::new(variable.into_value_variable()))
     }
 }
 
-impl From<UnboundVariable> for Value {
-    fn from(variable: UnboundVariable) -> Self {
+impl From<Variable> for Value {
+    fn from(variable: Variable) -> Self {
         match variable {
-            UnboundVariable::Concept(concept) => Value::from(concept),
-            UnboundVariable::Value(value) => Value::from(value),
+            Variable::Concept(concept) => Value::from(concept),
+            Variable::Value(value) => Value::from(value),
         }
     }
 }

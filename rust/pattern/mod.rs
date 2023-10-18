@@ -29,7 +29,7 @@ mod label;
 mod named_references;
 mod negation;
 mod schema;
-mod statement;
+pub(crate) mod statement;
 #[cfg(test)]
 mod test;
 
@@ -50,10 +50,9 @@ pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub(crate) use statement::LeftOperand;
 pub use statement::{
-    ConceptConstrainable, ConceptReference, ConceptStatement, ConceptVariableBuilder, ExpressionBuilder, Reference,
-    RelationConstrainable, RelationVariableBuilder, ThingConstrainable, ThingStatement, ThingVariableBuilder,
-    TypeConstrainable, TypeStatement, TypeVariableBuilder, UnboundConceptVariable, UnboundValueVariable,
-    UnboundVariable, ValueConstrainable, ValueReference, ValueStatement, ValueVariableBuilder, Statement, Visibility,
+    ConceptConstrainable, ConceptReference, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder, Reference,
+    RelationConstrainable, RelationStatementBuilder, ThingConstrainable, ThingStatement, ThingStatementBuilder,
+    TypeConstrainable, TypeStatement, TypeStatementBuilder, ValueConstrainable, ValueReference, ValueStatement, ValueStatementBuilder, Statement, Visibility,
 };
 
 use crate::{
@@ -70,7 +69,7 @@ pub enum Pattern {
 }
 
 impl Pattern {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn references_recursive(&self) -> Box<dyn Iterator<Item=&Reference> + '_> {
         Box::new(match self {
             Pattern::Conjunction(conjunction) => conjunction.references_recursive(),
             Pattern::Disjunction(disjunction) => disjunction.references_recursive(),

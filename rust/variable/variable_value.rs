@@ -31,17 +31,17 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub struct UnboundValueVariable {
+pub struct ValueVariable {
     pub reference: Reference,
 }
 
-impl UnboundValueVariable {
+impl ValueVariable {
     pub fn into_value_variable(self) -> ValueStatement {
         ValueStatement::new(self.reference)
     }
 
-    pub fn named(name: String) -> UnboundValueVariable {
-        UnboundValueVariable { reference: Reference::Value(ValueReference::Name(name)) }
+    pub fn named(name: String) -> ValueVariable {
+        ValueVariable { reference: Reference::Value(ValueReference::Name(name)) }
     }
 
     pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
@@ -49,7 +49,7 @@ impl UnboundValueVariable {
     }
 }
 
-impl ValueConstrainable for UnboundValueVariable {
+impl ValueConstrainable for ValueVariable {
     fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
         self.into_value_variable().constrain_assign(assign)
     }
@@ -59,27 +59,27 @@ impl ValueConstrainable for UnboundValueVariable {
     }
 }
 
-impl Validatable for UnboundValueVariable {
+impl Validatable for ValueVariable {
     fn validate(&self) -> Result {
         self.reference.validate()
     }
 }
 
-impl From<&str> for UnboundValueVariable {
+impl From<&str> for ValueVariable {
     fn from(name: &str) -> Self {
-        UnboundValueVariable::named(name.to_string())
+        ValueVariable::named(name.to_string())
     }
 }
 
-impl From<String> for UnboundValueVariable {
+impl From<String> for ValueVariable {
     fn from(name: String) -> Self {
-        UnboundValueVariable::named(name)
+        ValueVariable::named(name)
     }
 }
 
-impl LeftOperand for UnboundValueVariable {}
+impl LeftOperand for ValueVariable {}
 
-impl fmt::Display for UnboundValueVariable {
+impl fmt::Display for ValueVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.reference)
     }

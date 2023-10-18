@@ -20,6 +20,7 @@
  */
 use std::collections::HashSet;
 use std::fmt;
+use std::ptr::write;
 use crate::common::error::collect_err;
 use crate::common::validatable::Validatable;
 use crate::common::{Result, token};
@@ -59,11 +60,11 @@ impl Validatable for TypeQLFetch {
 
 impl NamedReferences for TypeQLFetch {
     fn named_references(&self) -> HashSet<Reference> {
-        todo!()
+
         // if !self.filter.vars.is_empty() {
         //     self.filter.vars.iter().map(|v| v.reference().clone()).collect()
         // } else {
-        //     self.clause_match.named_references()
+            self.clause_match.named_references()
         // }
     }
 }
@@ -71,8 +72,9 @@ impl NamedReferences for TypeQLFetch {
 
 impl fmt::Display for TypeQLFetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", token::Command::Fetch)?;
+        writeln!(f, "{}", self.clause_match)
+        // writeln!(f, "{}", token::Command::Fetch)?;
         // write_joined!(f, ";\n", self.statements, self.rules)?;
-        f.write_str(";")
+        // f.write_str(";")
     }
 }

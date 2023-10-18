@@ -31,7 +31,8 @@ use pest::error::{Error as PestError, LineColLocation};
 use crate::{
     common::token,
     error_messages,
-    pattern::{Label, Pattern, Reference, ThingStatement, TypeStatement, UnboundVariable, Value},
+    pattern::{Label, Pattern, Reference, ThingStatement, TypeStatement, Value},
+    variable::{Variable},
     write_joined,
 };
 
@@ -145,7 +146,7 @@ error_messages! { TypeQLError
         34: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
     RedundantNestedNegation() =
         35: "Invalid query containing redundant nested negations.",
-    VariableNotSorted(UnboundVariable) =
+    VariableNotSorted(Variable) =
         36: "Variable '{}' does not exist in the sorting clause.",
     InvalidCountVariableArgument() =
         38: "Aggregate COUNT does not accept a Variable.",
