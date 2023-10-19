@@ -25,7 +25,7 @@ use std::{cmp::Ordering, fmt};
 use super::Expression;
 use crate::{
     common::token,
-    pattern::{LeftOperand, Reference},
+    pattern::{LeftOperand},
 };
 use crate::variable::Variable;
 
@@ -113,7 +113,7 @@ impl Operation {
         Arity::Binary
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         match self.arity() {
             Arity::Binary => Box::new(
                 self.left().unwrap().variables_recursive().chain(self.right().unwrap().variables_recursive()),

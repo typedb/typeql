@@ -24,7 +24,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{IsExplicit, Reference, TypeStatement, TypeStatementBuilder},
+    pattern::{IsExplicit, TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable,
     Label,
 };
@@ -41,7 +41,7 @@ impl IsaConstraint {
         IsaConstraint { type_, is_explicit }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(iter::once(&self.type_.variable))
     }
 }

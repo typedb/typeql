@@ -20,16 +20,6 @@
  *
  */
 
-use std::collections::HashSet;
+mod is;
 
-use crate::Result;
-use crate::variable::Variable;
-
-pub trait NamedVariables {
-    // TODO maybe we want to implement this for statements
-    fn named_variables(&self) -> HashSet<Variable>;
-}
-
-pub(crate) fn validate_names_unique(variables: impl NamedVariables) -> Result {
-    todo!()
-}
+pub use is::IsConstraint;

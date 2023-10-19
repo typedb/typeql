@@ -50,11 +50,11 @@ impl RelationConstraint {
         self.role_players.push(role_player);
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(self.role_players.iter().flat_map(|rp| rp.variables()))
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(self.role_players.iter().flat_map(|rp| rp.variables_recursive()))
     }
 }
@@ -101,11 +101,11 @@ impl RolePlayerConstraint {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new((self.role_type.iter().map(|r| &r.variable)).chain(iter::once(&self.player.variable)))
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new((self.role_type.iter().map(|r| &r.variable)).chain(self.player.variables_recursive()))
     }
 }

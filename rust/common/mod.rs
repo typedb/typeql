@@ -25,6 +25,7 @@ pub mod error;
 pub mod string;
 pub mod token;
 pub mod validatable;
+pub mod variabilizable;
 
 pub use error::Error;
 

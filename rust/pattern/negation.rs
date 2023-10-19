@@ -91,9 +91,9 @@ impl fmt::Display for Negation {
         if matches!(*self.pattern, Pattern::Conjunction(_)) {
             write!(f, "{} {}", token::LogicOperator::Not, pattern_string)
         } else if pattern_string.lines().count() > 1 {
-            write!(f, "{} {}\n{};\n{}", token::LogicOperator::Not, token::Char::CURLY_LEFT, indent(&pattern_string), token::Char::CURLY_RIGHT)
+            write!(f, "{} {}\n{};\n{}", token::LogicOperator::Not, token::Char::CurlyLeft, indent(&pattern_string), token::Char::CurlyRight)
         } else {
-            write!(f, "{} {} {}; {}", token::LogicOperator::Not, token::Char::CURLY_LEFT, pattern_string, token::Char::CURLY_RIGHT)
+            write!(f, "{} {} {}; {}", token::LogicOperator::Not, token::Char::CurlyLeft, pattern_string, token::Char::CurlyRight)
         }
     }
 }

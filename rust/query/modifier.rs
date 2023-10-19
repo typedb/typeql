@@ -20,10 +20,9 @@
  */
 
 use std::fmt;
-use crate::{common, write_joined};
-use crate::common::error::TypeQLError;
+
+use crate::write_joined;
 use crate::common::token;
-use crate::variable::Variable;
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Modifiers {
@@ -64,38 +63,66 @@ impl fmt::Display for Modifiers {
 pub mod sorting {
     use std::fmt;
 
-    use crate::{common::token, variable::Variable};
+    use crate::common::token;
+    use crate::variable::{ConceptVariable, ValueVariable};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
-    pub struct OrderedVariable {
-        pub var: Variable,
-        pub order: Option<token::Order>,
+    pub enum SortedVariable {
+        Concept(ConceptVariable, Option<token::Order>),
+        Value(ValueVariable, Option<token::Order>),
     }
 
-    impl OrderedVariable {
-        pub fn new(var: Variable, order: Option<token::Order>) -> Self {
-            OrderedVariable { var, order }
+    impl SortedVariable {
+        pub fn new_concept(var: ConceptVariable, order: Option<token::Order>) -> Self {
+            SortedVariable::Concept(var, order)
+        }
+
+        pub fn new_value(var: ValueVariable, order: Option<token::Order>) -> Self {
+            SortedVariable::Value(var, order)
         }
     }
 
-    impl<T: Into<Variable>> From<(T, token::Order)> for OrderedVariable {
-        fn from(ordered_var: (T, token::Order)) -> Self {
+    impl From<(ConceptVariable)> for SortedVariable {
+        fn from(variable: ConceptVariable) -> Self {
+            SortedVariable::Concept(variable, None)
+        }
+    }
+
+    impl From<(ConceptVariable, token::Order)> for SortedVariable {
+        fn from(ordered_var: (ConceptVariable, token::Order)) -> Self {
             let (variable, order) = ordered_var;
-            Self::new(variable.into(), Some(order))
+            SortedVariable::Concept(variable, Some(order))
         }
     }
 
-    impl<T: Into<Variable>> From<T> for OrderedVariable {
-        fn from(variable: T) -> Self {
-            Self::new(variable.into(), None)
+    impl From<(ValueVariable)> for SortedVariable {
+        fn from(variable: ValueVariable) -> Self {
+            SortedVariable::Value(variable, None)
         }
     }
 
-    impl fmt::Display for OrderedVariable {
+    impl From<(ValueVariable, token::Order)> for SortedVariable {
+        fn from(ordered_var: (ValueVariable, token::Order)) -> Self {
+            let (variable, order) = ordered_var;
+            SortedVariable::Value(variable, Some(order))
+        }
+    }
+
+    impl fmt::Display for SortedVariable {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(f, "{}", self.var)?;
-            if let Some(order) = &self.order {
-                write!(f, " {order}")?;
+            match self {
+                SortedVariable::Concept(var, order) => {
+                    write!(f, "{}", var)?;
+                    if let Some(order) = order {
+                        write!(f, " {order}")?;
+                    }
+                }
+                SortedVariable::Value(var, order) => {
+                    write!(f, "{}", var)?;
+                    if let Some(order) = order {
+                        write!(f, " {order}")?;
+                    }
+                }
             }
             Ok(())
         }
@@ -104,29 +131,22 @@ pub mod sorting {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Sorting {
-    pub(crate) vars: Vec<sorting::OrderedVariable>,
+    pub(crate) vars: Vec<sorting::SortedVariable>,
 }
 
 impl Sorting {
-    pub fn new(vars: Vec<sorting::OrderedVariable>) -> Self {
+    pub fn new(vars: Vec<sorting::SortedVariable>) -> Self {
         Sorting { vars }
-    }
-
-    pub fn get_order(&self, var: Variable) -> common::Result<token::Order> {
-        self.vars
-            .iter()
-            .find_map(|v| (v.var == var).then_some(v.order.unwrap_or(token::Order::Asc)))
-            .ok_or_else(|| TypeQLError::VariableNotSorted(var).into())
     }
 }
 
-impl<const N: usize, T: Into<sorting::OrderedVariable>> From<[T; N]> for Sorting {
+impl<const N: usize, T: Into<sorting::SortedVariable>> From<[T; N]> for Sorting {
     fn from(ordered_vars: [T; N]) -> Self {
         Self::new(ordered_vars.map(|ordered_var| ordered_var.into()).to_vec())
     }
 }
 
-impl<'a, T: Into<sorting::OrderedVariable> + Clone> From<&'a [T]> for Sorting {
+impl<'a, T: Into<sorting::SortedVariable> + Clone> From<&'a [T]> for Sorting {
     fn from(ordered_vars: &'a [T]) -> Self {
         Self::new(ordered_vars.iter().map(|ordered_var| ordered_var.clone().into()).collect())
     }

@@ -20,17 +20,17 @@
  *
  */
 
-use std::{fmt, iter};
+use std::fmt;
 
 use crate::{
     common::{validatable::Validatable, Result},
     pattern::{
-        statement::ValueConstrainable, AssignConstraint, LeftOperand, PredicateConstraint, Reference, ValueReference,
+        statement::ValueConstrainable, AssignConstraint, LeftOperand, PredicateConstraint,
         ValueStatement,
     },
 };
-use crate::common::error::TypeQLError;
 use crate::common::token;
+use crate::variable::Variable;
 use crate::variable::variable::validate_variable_name;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -60,6 +60,8 @@ impl ValueVariable {
         name
     }
 }
+
+impl Variable for ValueVariable {}
 
 impl ValueConstrainable for ValueVariable {
     fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
@@ -95,6 +97,6 @@ impl LeftOperand for ValueVariable {}
 
 impl fmt::Display for ValueVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}", token::Char::QUESTION, self.name())
+        write!(f, "{}{}", token::Char::Question, self.name())
     }
 }

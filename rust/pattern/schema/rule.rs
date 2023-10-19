@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, NamedVariables, Pattern, ThingStatement},
+    pattern::{Conjunction, Variabilizable, Pattern, ThingStatement},
     Label,
 };
 

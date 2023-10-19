@@ -20,19 +20,20 @@
  *
  */
 
-use std::{collections::HashSet, fmt};
+use std::fmt;
 
 use crate::{
-    common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{NamedVariables, Reference},
-    variable::Variable,
+    common::{error::collect_err, Result, token, validatable::Validatable},
+    pattern::Variabilizable,
     query::{AggregateQueryBuilder, TypeQLGet},
+    variable::Variable,
 };
+use crate::query::typeql_get::GetVar;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGetGroup {
     pub query: TypeQLGet,
-    pub group_var: Variable,
+    pub group_var: GetVar,
 }
 
 impl AggregateQueryBuilder for TypeQLGetGroup {}
@@ -43,8 +44,8 @@ impl Validatable for TypeQLGetGroup {
     }
 }
 
-impl NamedVariables for TypeQLGetGroup {
-    fn named_variables(&self) -> HashSet<Variable> {
+impl Variabilizable for TypeQLGetGroup {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
         self.query.named_variables()
     }
 }

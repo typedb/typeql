@@ -189,9 +189,9 @@ string_enum! { Function
 }
 
 string_enum! { Char
-    QUESTION = "?",
-    DOLLAR = "$",
-    UNDERSCORE = "_",
-    CURLY_LEFT = "{",
-    CURLY_RIGHT = "}",
+    Question = "?",
+    Dollar = "$",
+    Underscore = "_",
+    CurlyLeft = "{",
+    CurlyRight = "}",
 }

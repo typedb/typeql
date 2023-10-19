@@ -29,9 +29,10 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::{NamedVariables},
+    pattern::{Variabilizable},
     variable::Variable,
     query::{TypeQLGet, TypeQLGetGroup},
+    query::typeql_get::GetVar,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -41,7 +42,7 @@ pub struct AggregateQuery<T>
 {
     pub query: T,
     pub method: token::Aggregate,
-    pub var: Option<Variable>,
+    pub var: Option<GetVar>,
 }
 
 pub type TypeQLGetAggregate = AggregateQuery<TypeQLGet>;
@@ -52,8 +53,8 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
         Self { query, method: token::Aggregate::Count, var: None }
     }
 
-    fn new(query: T, method: token::Aggregate, var: Variable) -> Self {
-        Self { query, method, var: Some(var) }
+    fn new(query: T, method: token::Aggregate, var: impl Into<GetVar>) -> Self {
+        Self { query, method, var: Some(var.into()) }
     }
 
     fn validate_method_variable_compatible(&self) -> Result {
@@ -102,37 +103,38 @@ impl fmt::Display for TypeQLGetGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + NamedVariables + Validatable
+Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + Variabilizable + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)
     }
 
-    fn aggregate(self, method: token::Aggregate, var: Variable) -> AggregateQuery<Self> {
+    fn aggregate(self, method: token::Aggregate, var: impl Into<GetVar>) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new(self, method, var)
     }
 
-    fn max(self, var: impl Into<Variable>) -> AggregateQuery<Self> {
+    fn max(self, var: impl Into<GetVar>) -> AggregateQuery<Self> {
         self.aggregate(token::Aggregate::Max, var.into())
     }
 
-    fn min(self, var: impl Into<Variable>) -> AggregateQuery<Self> {
+    fn min(self, var: impl Into<GetVar>) -> AggregateQuery<Self> {
         self.aggregate(token::Aggregate::Min, var.into())
     }
 
-    fn mean(self, var: impl Into<Variable>) -> AggregateQuery<Self> {
+    fn mean(self, var: impl Into<GetVar>) -> AggregateQuery<Self> {
         self.aggregate(token::Aggregate::Mean, var.into())
     }
 
-    fn median(self, var: impl Into<Variable>) -> AggregateQuery<Self> {
+    fn median(self, var: impl Into<GetVar>) -> AggregateQuery<Self> {
         self.aggregate(token::Aggregate::Median, var.into())
     }
 
-    fn std(self, var: impl Into<Variable>) -> AggregateQuery<Self> {
+    fn std(self, var: impl Into<GetVar>) -> AggregateQuery<Self> {
         self.aggregate(token::Aggregate::Std, var.into())
     }
 
-    fn sum(self, var: impl Into<Variable>) -> AggregateQuery<Self> {
+    fn sum(self, var: impl Into<GetVar>) -> AggregateQuery<Self> {
         self.aggregate(token::Aggregate::Sum, var.into())
     }
 }
+

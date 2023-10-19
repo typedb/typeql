@@ -37,7 +37,7 @@ pub struct RelatesConstraint {
 }
 
 impl RelatesConstraint {
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(iter::once(&self.role_type.variable).chain(self.overridden_role_type.iter().map(|v| &v.variable)))
     }
 }

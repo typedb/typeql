@@ -30,7 +30,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Constant, Reference, ThingStatement, ValueStatement},
+    pattern::{Constant, ThingStatement, ValueStatement},
     variable::{Variable, ConceptVariable, ValueVariable},
 };
 
@@ -48,10 +48,10 @@ impl PredicateConstraint {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
         match &self.value {
-            Value::ThingVariable(v) => Box::new(iter::once(&v.variable)),
-            Value::ValueVariable(v) => Box::new(iter::once(&v.variable)),
+            Value::ThingVariable(v) => Box::new(iter::once(&v.variable.into())),
+            Value::ValueVariable(v) => Box::new(iter::once(&v.variable.into())),
             _ => Box::new(iter::empty()),
         }
     }
@@ -60,12 +60,12 @@ impl PredicateConstraint {
 impl Validatable for PredicateConstraint {
     fn validate(&self) -> Result {
         collect_err(
-            [expect_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
+            [validate_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
         )
     }
 }
 
-fn expect_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result {
+fn validate_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result {
     if predicate.is_substring() && !matches!(value, Value::Constant(Constant::String(_))) {
         Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
     }
@@ -121,27 +121,6 @@ impl From<ConceptVariable> for Value {
 impl From<ValueVariable> for Value {
     fn from(variable: ValueVariable) -> Self {
         Value::ValueVariable(Box::new(variable.into_value_variable()))
-    }
-}
-
-impl From<Variable> for Value {
-    fn from(variable: Variable) -> Self {
-        match variable {
-            Variable::Concept(concept) => Value::from(concept),
-            Variable::Value(value) => Value::from(value),
-        }
-    }
-}
-
-impl From<ThingStatement> for Value {
-    fn from(variable: ThingStatement) -> Self {
-        Value::ThingVariable(Box::new(variable))
-    }
-}
-
-impl From<ValueStatement> for Value {
-    fn from(variable: ValueStatement) -> Self {
-        Value::ValueVariable(Box::new(variable))
     }
 }
 

@@ -27,7 +27,7 @@ use chrono::NaiveDateTime;
 pub use function::Function;
 pub use operation::Operation;
 
-use crate::pattern::{Constant, Reference};
+use crate::pattern::Constant;
 use crate::variable::{ConceptVariable, ValueVariable, Variable};
 
 mod function;
@@ -39,7 +39,8 @@ pub enum Expression {
     Operation(Operation),
     Function(Function),
     Constant(Constant),
-    Variable(Variable),
+    ThingVariable(ConceptVariable),
+    ValueVariable(ValueVariable),
 }
 
 impl fmt::Display for Expression {
@@ -48,18 +49,20 @@ impl fmt::Display for Expression {
             Expression::Operation(operation) => write!(f, "{operation}"),
             Expression::Function(function) => write!(f, "{function}"),
             Expression::Constant(constant) => write!(f, "{constant}"),
-            Expression::Variable(variable) => write!(f, "{variable}"),
+            Expression::ThingVariable(variable) => write!(f, "{variable}"),
+            Expression::ValueVariable(variable) => write!(f, "{variable}"),
         }
     }
 }
 
 impl Expression {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
         match self {
             Expression::Operation(operation) => operation.variables_recursive(),
             Expression::Function(function) => function.variables_recursive(),
             Expression::Constant(_constant) => Box::new(iter::empty()),
-            Expression::Variable(variable) => variable.references(),
+            Expression::ThingVariable(variable) => variable,
+            Expression::ValueVariable(variable) => variable,
         }
     }
 }

@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Disjunction, NamedVariables, Normalisable, Pattern},
+    pattern::{Disjunction, Variabilizable, Normalisable, Pattern},
 };
 use crate::common::token;
 use crate::variable::Variable;
@@ -42,36 +42,20 @@ pub struct Conjunction {
     normalised: Option<Disjunction>,
 }
 
-impl PartialEq for Conjunction {
-    fn eq(&self, other: &Self) -> bool {
-        self.patterns == other.patterns
-    }
-}
-
 impl Conjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Conjunction { patterns, normalised: None }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
-        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
-            |p| match p {
-                Pattern::Statement(v) => v.variables(),
-                Pattern::Conjunction(c) => c.variables(),
-                _ => unreachable!(),
-            },
-        ))
-    }
-
     pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
+    //
+    // pub fn has_named_variables(&self) -> bool {
+    //     self.named_vars().any(|r| r.is_name())
+    // }
 
-    pub fn has_named_variables(&self) -> bool {
-        self.variables().any(|r| r.is_name())
-    }
-
-    pub fn validate_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<&dyn Variable>) -> Result {
         let names = self.named_variables();
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
@@ -81,17 +65,35 @@ impl Conjunction {
     }
 }
 
-fn validate_bounded(names: &HashSet<Variable>, bounds: &HashSet<Variable>, conjunction: &Conjunction) -> Result {
+fn validate_bounded(names: &HashSet<&dyn Variable>, bounds: &HashSet<&dyn Variable>, conjunction: &Conjunction) -> Result {
+
+    let f = HashSet::new();
+    f.insert(1);
+    f.insert(2);
+    f.insert(3);
+
+
     if bounds.is_disjoint(names) {
         Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
     Ok(())
 }
 
-impl NamedVariables for Conjunction {
-    fn named_variables(&self) -> HashSet<Variable> {
-        // TODO: do we want to cache this?
-        self.variables().filter(|r| r.is_name()).cloned().collect()
+impl PartialEq for Conjunction {
+    fn eq(&self, other: &Self) -> bool {
+        self.patterns == other.patterns
+    }
+}
+
+impl Variabilizable for Conjunction {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
+            |p| match p {
+                Pattern::Statement(v) => v.variables(),
+                Pattern::Conjunction(c) => c.named_vars(),
+                _ => unreachable!(),
+            },
+        ))
     }
 }
 
@@ -140,9 +142,9 @@ impl Normalisable for Conjunction {
 
 impl fmt::Display for Conjunction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(token::Char::CURLY_LEFT.as_str())?;
+        f.write_str(token::Char::CurlyLeft.as_str())?;
         f.write_str("\n")?;
         f.write_str(&self.patterns.iter().map(|p| indent(&p.to_string()) + ";\n").collect::<String>())?;
-        f.write_str(token::Char::CURLY_RIGHT.as_str())
+        f.write_str(token::Char::CurlyRight.as_str())
     }
 }

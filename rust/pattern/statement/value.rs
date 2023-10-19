@@ -43,11 +43,7 @@ impl ValueStatement {
         ValueStatement { variable, assign_constraint: None, predicate_constraint: None }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
-        Box::new(iter::once(&self.variable))
-    }
-
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(
             iter::once(&self.variable)
                 .chain(self.assign_constraint.iter().flat_map(|assign| assign.variables_recursive()))

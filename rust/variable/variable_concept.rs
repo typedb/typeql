@@ -30,8 +30,9 @@ use crate::{
         RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
         SubConstraint, ThingConstrainable, ThingStatement, TypeConstrainable, TypeStatement, ValueTypeConstraint,
     },
-    variable::variable::validate_variable_name,
+    variable::variable::{validate_variable_name},
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub(crate) enum Visibility {
@@ -46,7 +47,7 @@ pub enum ConceptVariable {
 }
 
 impl ConceptVariable {
-    const ANONYMOUS_NAME: &'static str = token::Char::UNDERSCORE.as_str();
+    const ANONYMOUS_NAME: &'static str = token::Char::Underscore.as_str();
 
     pub fn named(name: String) -> ConceptVariable {
         ConceptVariable::Name(name)
@@ -87,6 +88,8 @@ impl ConceptVariable {
         }
     }
 }
+
+impl Variable for ConceptVariable {}
 
 impl Validatable for ConceptVariable {
     fn validate(&self) -> Result {
@@ -190,6 +193,6 @@ impl LeftOperand for ConceptVariable {}
 
 impl fmt::Display for ConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}", token::Char::DOLLAR, self.name())
+        write!(f, "{}{}", token::Char::Dollar, self.name())
     }
 }

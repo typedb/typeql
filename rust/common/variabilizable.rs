@@ -20,39 +20,15 @@
  *
  */
 
-use std::fmt;
 
-use crate::{
-    common::{token, validatable::Validatable, Result},
-    pattern::{Expression},
-};
+use crate::Result;
 use crate::variable::Variable;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct AssignConstraint {
-    pub expression: Expression,
+pub trait Variabilizable {
+
+    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_>;
 }
 
-impl AssignConstraint {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
-        self.expression.variables()
-    }
-}
-
-impl Validatable for AssignConstraint {
-    fn validate(&self) -> Result {
-        Ok(())
-    }
-}
-
-impl<T: Into<Expression>> From<T> for AssignConstraint {
-    fn from(expr: T) -> Self {
-        Self { expression: expr.into() }
-    }
-}
-
-impl fmt::Display for AssignConstraint {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Constraint::Assign, self.expression)
-    }
+pub(crate) fn validate_names_unique(variables: impl Variabilizable) -> Result {
+    todo!()
 }

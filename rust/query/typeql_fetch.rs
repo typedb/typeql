@@ -18,17 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-use std::collections::HashSet;
 use std::fmt;
-use std::ptr::write;
+
+use crate::common::Result;
 use crate::common::error::collect_err;
 use crate::common::validatable::Validatable;
-use crate::common::{Result};
-use crate::pattern::{NamedVariables};
+use crate::pattern::Variabilizable;
 use crate::query::MatchClause;
 use crate::query::modifier::Modifiers;
 use crate::variable::Variable;
-use crate::write_joined;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLFetch {
@@ -59,13 +57,13 @@ impl Validatable for TypeQLFetch {
     }
 }
 
-impl NamedVariables for TypeQLFetch {
-    fn named_variables(&self) -> HashSet<Variable> {
+impl Variabilizable for TypeQLFetch {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
 
         // if !self.filter.vars.is_empty() {
         //     self.filter.vars.iter().map(|v| v.reference().clone()).collect()
         // } else {
-            self.clause_match.named_variables()
+        self.clause_match.named_variables()
         // }
     }
 }

@@ -41,7 +41,7 @@ impl SubConstraint {
         Self { type_: Box::new(type_), is_explicit }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(iter::once(&self.type_.variable))
     }
 }

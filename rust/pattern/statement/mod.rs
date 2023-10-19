@@ -20,34 +20,33 @@
  *
  */
 
-mod builder;
-mod concept;
-mod reference;
-mod thing;
-mod type_;
-mod value;
-
 use std::{collections::HashSet, fmt};
 
-pub(crate) use builder::LeftOperand;
 pub use builder::{
     ConceptConstrainable, ConceptStatementBuilder, ExpressionBuilder, RelationConstrainable, RelationStatementBuilder,
     ThingConstrainable, ThingStatementBuilder, TypeConstrainable, TypeStatementBuilder, ValueConstrainable,
     ValueStatementBuilder,
 };
+pub(crate) use builder::LeftOperand;
 pub use concept::ConceptStatement;
 pub use thing::ThingStatement;
 pub use type_::TypeStatement;
-pub use crate::variable::variable::Variable;
-pub use crate::variable::variable_concept::ConceptVariable;
-pub use crate::variable::variable_value::ValueVariable;
 pub use value::ValueStatement;
 
 use crate::{
-    common::{error::TypeQLError, validatable::Validatable, Result},
+    common::{error::TypeQLError, Result, validatable::Validatable},
     enum_wrapper,
     pattern::{Normalisable, Pattern},
 };
+pub use crate::variable::variable::Variable;
+pub use crate::variable::variable_concept::ConceptVariable;
+pub use crate::variable::variable_value::ValueVariable;
+
+mod builder;
+mod concept;
+mod thing;
+mod type_;
+mod value;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
@@ -58,7 +57,7 @@ pub enum Statement {
 }
 
 impl Statement {
-    pub fn variable(&self) -> &Variable {
+    pub fn owner(&self) -> &dyn Variable {
         match self {
             Statement::Concept(concept) => &concept.variable,
             Statement::Thing(thing) => &thing.variable,
@@ -67,27 +66,17 @@ impl Statement {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
         match self {
-            Statement::Concept(concept) => concept.references(),
+            Statement::Concept(concept) => concept.variables(),
             Statement::Thing(thing) => thing.variables(),
             Statement::Type(type_) => type_.variables(),
             Statement::Value(value) => value.variables(),
         }
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
-        use Statement::*;
-        match self {
-            Concept(concept) => concept.references(),
-            Thing(thing) => thing.variables(),
-            Type(type_) => type_.variables(),
-            Value(value) => value.variables_recursive(),
-        }
-    }
-
-    pub fn validate_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
-        if !self.variables_recursive().any(|r| r.is_name() && bounds.contains(r)) {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<&dyn Variable>) -> Result {
+        if !self.variables().any(|r| r.is_name() && bounds.contains(r)) {
             Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
         }
         Ok(())

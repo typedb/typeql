@@ -43,11 +43,11 @@ pub struct ThingStatement {
 }
 
 impl ThingStatement {
-    pub fn new(reference: ConceptVariable) -> ThingStatement {
-        ThingStatement { variable: reference, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
+    pub fn new(variable: ConceptVariable) -> ThingStatement {
+        ThingStatement { variable, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(
             iter::once(&self.variable)
                 .chain(self.isa.iter().flat_map(|c| c.variables()))
@@ -57,7 +57,7 @@ impl ThingStatement {
         )
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(
             iter::once(&self.variable)
                 .chain(self.isa.iter().flat_map(|c| c.variables()))
@@ -68,6 +68,8 @@ impl ThingStatement {
     }
 
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // TODO simplify once we remove statements from inside HAS
+
         if self.variable.is_visible() {
             write!(f, "{}", self.variable)?;
             if self.value.is_some() || self.relation.is_some() {

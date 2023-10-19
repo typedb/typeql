@@ -29,7 +29,7 @@ use crate::{
         Result,
     },
     pattern::{
-        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Reference, RegexConstraint,
+        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
         RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
     },
     write_joined,
@@ -64,7 +64,7 @@ impl TypeStatement {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(
             iter::once(&self.variable)
                 .chain(self.owns.iter().flat_map(|c| c.variables()))

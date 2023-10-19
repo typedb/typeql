@@ -26,7 +26,6 @@ mod constraint;
 mod disjunction;
 mod expression;
 mod label;
-mod named_references;
 mod negation;
 mod schema;
 pub(crate) mod statement;
@@ -38,25 +37,25 @@ use std::{collections::HashSet, fmt};
 pub use conjunction::Conjunction;
 pub use constant::Constant;
 pub use constraint::{
-    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit,
-    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, RegexConstraint,
+    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsaConstraint, IsConstraint,
+    IsExplicit, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, RegexConstraint,
     RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
 pub use expression::{Expression, Function, Operation};
 pub use label::Label;
-pub use named_references::NamedVariables;
+pub use crate::common::variabilizable::Variabilizable;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub(crate) use statement::LeftOperand;
 pub use statement::{
-    ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder, Reference,
-    RelationConstrainable, RelationStatementBuilder, ThingConstrainable, ThingStatement, ThingStatementBuilder,
-    TypeConstrainable, TypeStatement, TypeStatementBuilder, ValueConstrainable, ValueStatement, ValueStatementBuilder, Statement,
+    ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder,
+    RelationConstrainable, RelationStatementBuilder, Statement, ThingConstrainable, ThingStatement,
+    ThingStatementBuilder, TypeConstrainable, TypeStatement, TypeStatementBuilder, ValueConstrainable, ValueStatement, ValueStatementBuilder,
 };
 
 use crate::{
-    common::{validatable::Validatable, Result},
+    common::{Result, validatable::Validatable},
     enum_getter, enum_wrapper,
 };
 use crate::variable::Variable;
@@ -70,16 +69,16 @@ pub enum Pattern {
 }
 
 impl Pattern {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
         Box::new(match self {
             Pattern::Conjunction(conjunction) => conjunction.variables_recursive(),
             Pattern::Disjunction(disjunction) => disjunction.variables_recursive(),
             Pattern::Negation(negation) => negation.variables_recursive(),
-            Pattern::Statement(statement) => statement.variables_recursive(),
+            Pattern::Statement(statement) => statement.variables(),
         })
     }
 
-    pub fn validate_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<&dyn Variable>) -> Result {
         match self {
             Pattern::Conjunction(conjunction) => conjunction.validate_is_bounded_by(bounds),
             Pattern::Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
@@ -110,6 +109,17 @@ impl Validatable for Pattern {
             Pattern::Disjunction(disjunction) => disjunction.validate(),
             Pattern::Negation(negation) => negation.validate(),
             Pattern::Statement(statement) => statement.validate(),
+        }
+    }
+}
+
+impl Variabilizable for Pattern {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+        match self {
+            Pattern::Conjunction(conjunction) => conjunction.named_variables(),
+            Pattern::Disjunction(disjunction) => disjunction.named_variables(),
+            Pattern::Negation(negation) => negation.named_variables(),
+            Pattern::Statement(statement) => statement.named_variables(),
         }
     }
 }

@@ -29,20 +29,20 @@ use crate::{
         statement::{builder::ConceptConstrainable},
     },
 };
-use crate::variable::Variable;
+use crate::variable::{ConceptVariable, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConceptStatement {
-    pub variable: Variable,
+    pub variable: ConceptVariable,
     pub is_constraint: Option<IsConstraint>,
 }
 
 impl ConceptStatement {
-    pub fn new(reference: Variable) -> ConceptStatement {
-        ConceptStatement { variable: reference, is_constraint: None }
+    pub fn new(variable: ConceptVariable) -> ConceptStatement {
+        ConceptStatement { variable, is_constraint: None }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
         Box::new(iter::once(&self.variable).chain(self.is_constraint.iter().map(|is| &is.variable.variable)))
     }
 }
@@ -50,7 +50,8 @@ impl ConceptStatement {
 impl Validatable for ConceptStatement {
     fn validate(&self) -> Result {
         collect_err(
-            iter::once(self.variable.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
+            iter::once(self.variable.validate())
+                .chain(self.is_constraint.iter().map(Validatable::validate)),
         )
     }
 }

@@ -39,12 +39,12 @@ pub struct HasConstraint {
 }
 
 impl HasConstraint {
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.variable)).chain(iter::once(&self.attribute.variable)))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+        Box::new((self.type_.iter().map(|t| &t.variable.into())).chain(iter::once(&self.attribute.variable.into())))
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.variable)).chain(self.attribute.variables_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+        Box::new((self.type_.iter().map(|t| &t.variable.into())).chain(self.attribute.variables_recursive()))
     }
 }
 

@@ -31,13 +31,14 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::{Conjunction, NamedVariables},
-    variable::Variable,
+    pattern::{Conjunction, Variabilizable},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLGetGroup, TypeQLInsert, Writable},
+    variable::Variable,
     write_joined,
 };
 use crate::query::MatchClause;
 use crate::query::modifier::{Modifiers, Sorting};
+use crate::variable::{ConceptVariable, ValueVariable};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGet {
@@ -53,11 +54,11 @@ impl TypeQLGet {
         TypeQLGet { clause_match, filter: Filter::default(), modifiers: Modifiers::default() }
     }
 
-    pub fn filter(self, vars: Vec<Variable>) -> Self {
+    pub fn filter(self, vars: Vec<GetVar>) -> Self {
         TypeQLGet { filter: Filter { vars }, ..self }
     }
 
-    pub fn get<const N: usize, T: Into<Variable>>(self, vars: [T; N]) -> Self {
+    pub fn get<const N: usize, T: Into<GetVar>>(self, vars: [T; N]) -> Self {
         self.filter(vars.into_iter().map(|var| var.into()).collect::<Vec<_>>())
     }
 
@@ -81,7 +82,7 @@ impl TypeQLGet {
         TypeQLDelete { clause_match: self.clause_match, statements: writable.statements(), modifiers: self.modifiers }
     }
 
-    pub fn group(self, var: impl Into<Variable>) -> TypeQLGetGroup {
+    pub fn group(self, var: impl Into<GetVar>) -> TypeQLGetGroup {
         TypeQLGetGroup { query: self, group_var: var.into() }
     }
 
@@ -106,17 +107,17 @@ impl Validatable for TypeQLGet {
             // self.validate_sort_vars_are_in_scope(),
             // self.validate_names_are_unique()
         ])
-            // validate_has_bounding_conjunction(&self.conjunction),
-            // validate_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
-            // validate_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
-            // validate_variable_names_are_unique(&self.conjunction),
-            // ]
+        // validate_has_bounding_conjunction(&self.conjunction),
+        // validate_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
+        // validate_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
+        // validate_variable_names_are_unique(&self.conjunction),
+        // ]
         // )
     }
 }
 
-impl NamedVariables for TypeQLGet {
-    fn named_variables(&self) -> HashSet<Variable> {
+impl Variabilizable for TypeQLGet {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
         if !self.filter.vars.is_empty() {
             self.filter.vars.iter().map(|v| v.clone()).collect()
         } else {
@@ -154,14 +155,14 @@ fn validate_sort_vars_are_in_scope(
         .as_ref()
         .map(|f| f.vars.iter().map(|v| v.clone()).collect())
         .unwrap_or_else(|| conjunction.named_variables());
-    collect_err(sorting.iter().flat_map(|s| &s.vars).map(|v| v.var.clone()).map(|r| {
+    collect_err(sorting.iter().flat_map(|s| &s.vars).map(|v| v.clone()).map(|r| {
         names_in_scope.contains(&r).then_some(()).ok_or_else(|| TypeQLError::VariableOutOfScopeMatch(r).into())
     }))
 }
 
 fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
     let all_refs = conjunction.variables_recursive();
-    let (concept_refs, value_refs): (HashSet<&Variable>, HashSet<&Variable>) = all_refs.partition(|r| r.is_concept());
+    let (concept_refs, value_refs): (HashSet<&dyn Variable>, HashSet<&dyn Variable>) = all_refs.partition(|r| r.is_concept());
     let concept_names = concept_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
     let value_names = value_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
     let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
@@ -182,7 +183,7 @@ impl fmt::Display for TypeQLGet {
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Filter {
-    pub vars: Vec<Variable>,
+    pub vars: Vec<GetVar>,
 }
 
 impl fmt::Display for Filter {
@@ -190,5 +191,31 @@ impl fmt::Display for Filter {
         write!(f, "{} ", token::Clause::Get)?;
         write_joined!(f, ", ", self.vars)?;
         write!(f, ";")
+    }
+}
+
+pub(crate) enum GetVar {
+    Concept(ConceptVariable),
+    Value(ValueVariable),
+}
+
+impl fmt::Display for GetVar {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            GetVar::Concept(var) => write!(f, "{}", var),
+            GetVar::Value(var) => write!(f, "{}", var),
+        }
+    }
+}
+
+impl Into<GetVar> for ConceptVariable {
+    fn into(self) -> GetVar {
+        GetVar::Concept(self)
+    }
+}
+
+impl Into<GetVar> for ValueVariable {
+    fn into(self) -> GetVar {
+        GetVar::Value(self)
     }
 }

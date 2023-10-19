@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedVariables, ThingStatement},
+    pattern::{Variabilizable, ThingStatement},
     query::{writable::validate_non_empty},
     write_joined,
 };

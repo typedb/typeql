@@ -19,12 +19,11 @@
  * under the License.
  */
 
-use std::collections::HashSet;
 use std::{fmt, iter};
 use crate::common::error::{collect_err, TypeQLError};
 use crate::common::{Error, token};
 use crate::common::validatable::Validatable;
-use crate::pattern::{Conjunction, NamedVariables, Pattern};
+use crate::pattern::{Conjunction, Variabilizable, Pattern};
 use crate::Result;
 use crate::variable::Variable;
 
@@ -48,8 +47,8 @@ impl MatchClause {
     }
 }
 
-impl NamedVariables for MatchClause {
-    fn named_variables(&self) -> HashSet<Variable> {
+impl Variabilizable for MatchClause {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
         self.conjunction.named_variables()
     }
 }

@@ -29,6 +29,7 @@ use crate::{
     variable::ConceptVariable,
 };
 
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {
     pub variable: Box<ConceptStatement>,

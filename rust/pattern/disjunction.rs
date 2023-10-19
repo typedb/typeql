@@ -100,7 +100,7 @@ impl fmt::Display for Disjunction {
                 .iter()
                 .map(|pattern| match pattern {
                     Pattern::Conjunction(conjunction) => conjunction.to_string(),
-                    other => format!("{}\n{};\n{}", token::Char::CURLY_LEFT, indent(&other.to_string()), token::Char::CURLY_RIGHT),
+                    other => format!("{}\n{};\n{}", token::Char::CurlyLeft, indent(&other.to_string()), token::Char::CurlyRight),
                 })
                 .collect::<Vec<_>>()
                 .join(&format!(" {} ", token::LogicOperator::Or)),
