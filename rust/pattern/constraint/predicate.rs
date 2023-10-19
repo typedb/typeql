@@ -48,10 +48,10 @@ impl PredicateConstraint {
         }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item=&Reference> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
         match &self.value {
-            Value::ThingVariable(v) => Box::new(iter::once(&v.reference)),
-            Value::ValueVariable(v) => Box::new(iter::once(&v.reference)),
+            Value::ThingVariable(v) => Box::new(iter::once(&v.variable)),
+            Value::ValueVariable(v) => Box::new(iter::once(&v.variable)),
             _ => Box::new(iter::empty()),
         }
     }
@@ -150,8 +150,8 @@ impl fmt::Display for Value {
         use Value::*;
         match self {
             Constant(constant) => write!(f, "{constant}"),
-            ThingVariable(var) => write!(f, "{}", var.reference),
-            ValueVariable(var) => write!(f, "{}", var.reference),
+            ThingVariable(var) => write!(f, "{}", var.variable),
+            ValueVariable(var) => write!(f, "{}", var.variable),
         }
     }
 }

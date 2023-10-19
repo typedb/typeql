@@ -29,23 +29,35 @@ use crate::{
         ValueStatement,
     },
 };
+use crate::common::error::TypeQLError;
+use crate::common::token;
+use crate::variable::variable::validate_variable_name;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub struct ValueVariable {
-    pub reference: Reference,
+pub enum ValueVariable {
+    Name(String),
 }
 
 impl ValueVariable {
-    pub fn into_value_variable(self) -> ValueStatement {
-        ValueStatement::new(self.reference)
-    }
-
     pub fn named(name: String) -> ValueVariable {
-        ValueVariable { reference: Reference::Value(ValueReference::Name(name)) }
+        Self::Name(name)
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.reference))
+    pub fn into_value_variable(self) -> ValueStatement {
+        ValueStatement::new(self)
+    }
+
+    pub fn is_name(&self) -> bool {
+        true
+    }
+
+    pub fn is_visible(&self) -> bool {
+        true
+    }
+
+    pub fn name(&self) -> &str {
+        let Self::Name(name) = self;
+        name
     }
 }
 
@@ -61,7 +73,9 @@ impl ValueConstrainable for ValueVariable {
 
 impl Validatable for ValueVariable {
     fn validate(&self) -> Result {
-        self.reference.validate()
+        match self {
+            Self::Name(n) => validate_variable_name(n),
+        }
     }
 }
 
@@ -81,6 +95,6 @@ impl LeftOperand for ValueVariable {}
 
 impl fmt::Display for ValueVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reference)
+        write!(f, "{}{}", token::Char::QUESTION, self.name())
     }
 }

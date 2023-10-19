@@ -49,7 +49,7 @@ impl Validatable for TypeQLUpdate {
 impl fmt::Display for TypeQLUpdate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.query_delete)?;
-        writeln!(f, "{}", token::Command::Insert)?;
+        writeln!(f, "{}", token::Clause::Insert)?;
         write_joined!(f, ";\n", self.insert_statements)?;
         f.write_str(";")?;
         write!(f, "\n{}", self.modifiers)

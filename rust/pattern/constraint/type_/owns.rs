@@ -24,10 +24,11 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{statement::Reference, TypeStatement, TypeStatementBuilder},
+    pattern::{TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable,
     Label,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum Annotation {
@@ -61,10 +62,10 @@ impl OwnsConstraint {
         OwnsConstraint { attribute_type, overridden_attribute_type, annotations }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         Box::new(
-            iter::once(&self.attribute_type.reference)
-                .chain(self.overridden_attribute_type.iter().map(|v| &v.reference)),
+            iter::once(&self.attribute_type.variable)
+                .chain(self.overridden_attribute_type.iter().map(|v| &v.variable)),
         )
     }
 }

@@ -24,10 +24,11 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{statement::Reference, TypeStatement, TypeStatementBuilder},
+    pattern::{TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable,
     Label,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PlaysConstraint {
@@ -48,11 +49,11 @@ impl PlaysConstraint {
         }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         Box::new(
-            iter::once(&self.role_type.reference)
-                .chain(self.relation_type.iter().map(|v| &v.reference))
-                .chain(self.overridden_role_type.iter().map(|v| &v.reference)),
+            iter::once(&self.role_type.variable)
+                .chain(self.relation_type.iter().map(|v| &v.variable))
+                .chain(self.overridden_role_type.iter().map(|v| &v.variable)),
         )
     }
 }

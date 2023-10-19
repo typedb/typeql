@@ -24,7 +24,7 @@ use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{NamedReferences, Reference},
+    pattern::{NamedVariables, Reference},
     variable::Variable,
     query::{AggregateQueryBuilder, TypeQLGet},
 };
@@ -43,14 +43,14 @@ impl Validatable for TypeQLGetGroup {
     }
 }
 
-impl NamedReferences for TypeQLGetGroup {
-    fn named_references(&self) -> HashSet<Reference> {
-        self.query.named_references()
+impl NamedVariables for TypeQLGetGroup {
+    fn named_variables(&self) -> HashSet<Variable> {
+        self.query.named_variables()
     }
 }
 
 impl fmt::Display for TypeQLGetGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{} {};", self.query, token::Command::Group, self.group_var)
+        write!(f, "{}\n{} {};", self.query, token::Clause::Group, self.group_var)
     }
 }

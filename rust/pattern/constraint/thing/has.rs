@@ -25,11 +25,12 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
     pattern::{
-        PredicateConstraint, Reference, ThingConstrainable, ThingStatement, TypeStatement, TypeStatementBuilder,
+        PredicateConstraint, ThingConstrainable, ThingStatement, TypeStatement, TypeStatementBuilder,
         Value,
     },
     variable::ConceptVariable,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {
@@ -38,12 +39,12 @@ pub struct HasConstraint {
 }
 
 impl HasConstraint {
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.reference)).chain(iter::once(&self.attribute.reference)))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new((self.type_.iter().map(|t| &t.variable)).chain(iter::once(&self.attribute.variable)))
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.reference)).chain(self.attribute.references_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new((self.type_.iter().map(|t| &t.variable)).chain(self.attribute.variables_recursive()))
     }
 }
 
@@ -100,8 +101,8 @@ impl fmt::Display for HasConstraint {
             write!(f, " {}", &type_.label.as_ref().unwrap().label)?;
         }
 
-        if self.attribute.reference.is_name() {
-            write!(f, " {}", self.attribute.reference)
+        if self.attribute.variable.is_name() {
+            write!(f, " {}", self.attribute.variable)
         } else {
             write!(f, " {}", self.attribute.value.as_ref().unwrap())
         }

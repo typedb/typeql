@@ -25,9 +25,10 @@ use std::fmt;
 use super::Expression;
 use crate::{
     common::token,
-    pattern::{LeftOperand, Reference},
+    pattern::{LeftOperand},
     write_joined,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Function {
@@ -36,8 +37,8 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.args.iter().flat_map(|expr| expr.references_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(self.args.iter().flat_map(|expr| expr.variables_recursive()))
     }
 }
 

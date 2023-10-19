@@ -24,10 +24,11 @@ use std::{fmt, iter};
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{statement::Reference, IsExplicit, TypeStatement, TypeStatementBuilder},
+    pattern::{IsExplicit, TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable,
     Label,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
@@ -40,8 +41,8 @@ impl SubConstraint {
         Self { type_: Box::new(type_), is_explicit }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.type_.reference))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(iter::once(&self.type_.variable))
     }
 }
 

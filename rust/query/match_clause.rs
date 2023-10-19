@@ -24,8 +24,9 @@ use std::{fmt, iter};
 use crate::common::error::{collect_err, TypeQLError};
 use crate::common::{Error, token};
 use crate::common::validatable::Validatable;
-use crate::pattern::{Conjunction, NamedReferences, Pattern, Reference};
+use crate::pattern::{Conjunction, NamedVariables, Pattern};
 use crate::Result;
+use crate::variable::Variable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {
@@ -42,14 +43,14 @@ impl MatchClause {
     }
 
     fn validate_nested_patterns_are_bounded(&self) -> Result {
-        let bounds = self.conjunction.named_references();
+        let bounds = self.conjunction.named_variables();
         collect_err(self.conjunction.patterns.iter().map(|p| p.validate_is_bounded_by(&bounds)))
     }
 }
 
-impl NamedReferences for MatchClause {
-    fn named_references(&self) -> HashSet<Reference> {
-        self.conjunction.named_references()
+impl NamedVariables for MatchClause {
+    fn named_variables(&self) -> HashSet<Variable> {
+        self.conjunction.named_variables()
     }
 }
 
@@ -65,7 +66,7 @@ fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item=&'a 
     collect_err(patterns.map(|p| {
         match p {
             Pattern::Statement(v) => v
-                .references()
+                .variables()
                 .any(|r| r.is_name())
                 .then_some(())
                 .ok_or_else(|| Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))),
@@ -78,7 +79,7 @@ fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item=&'a 
 
 impl fmt::Display for MatchClause {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", token::Command::Match)?;
+        write!(f, "{}", token::Clause::Match)?;
 
         for pattern in &self.conjunction.patterns {
             write!(f, "\n{pattern};")?;

@@ -29,7 +29,7 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::{NamedReferences, Reference},
+    pattern::{NamedVariables},
     variable::Variable,
     query::{TypeQLGet, TypeQLGetGroup},
 };
@@ -69,12 +69,12 @@ impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
         collect_err(
             [self.validate_method_variable_compatible(), self.query.validate()]
                 .into_iter()
-                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.named_references()))),
+                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.named_variables()))),
         )
     }
 }
 
-fn validate_variable_in_scope(var: &Variable, names_in_scope: HashSet<Reference>) -> Result {
+fn validate_variable_in_scope(var: &Variable, names_in_scope: HashSet<Variable>) -> Result {
     if !names_in_scope.contains(var.reference()) {
         Err(TypeQLError::VariableOutOfScopeMatch(var.reference().clone()))?;
     }
@@ -102,7 +102,7 @@ impl fmt::Display for TypeQLGetGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + NamedReferences + Validatable
+Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + NamedVariables + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)

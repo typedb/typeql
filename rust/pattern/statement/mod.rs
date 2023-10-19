@@ -36,7 +36,6 @@ pub use builder::{
     ValueStatementBuilder,
 };
 pub use concept::ConceptStatement;
-pub use reference::{ConceptReference, Reference, ValueReference, Visibility};
 pub use thing::ThingStatement;
 pub use type_::TypeStatement;
 pub use crate::variable::variable::Variable;
@@ -59,38 +58,36 @@ pub enum Statement {
 }
 
 impl Statement {
-    pub fn reference(&self) -> &Reference {
-        use Statement::*;
+    pub fn variable(&self) -> &Variable {
         match self {
-            Concept(concept) => &concept.reference,
-            Thing(thing) => &thing.reference,
-            Type(type_) => &type_.reference,
-            Value(value) => &value.reference,
+            Statement::Concept(concept) => &concept.variable,
+            Statement::Thing(thing) => &thing.variable,
+            Statement::Type(type_) => &type_.variable,
+            Statement::Value(value) => &value.variable,
         }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
+        match self {
+            Statement::Concept(concept) => concept.references(),
+            Statement::Thing(thing) => thing.variables(),
+            Statement::Type(type_) => type_.variables(),
+            Statement::Value(value) => value.variables(),
+        }
+    }
+
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
         use Statement::*;
         match self {
             Concept(concept) => concept.references(),
-            Thing(thing) => thing.references(),
-            Type(type_) => type_.references(),
-            Value(value) => value.references(),
+            Thing(thing) => thing.variables(),
+            Type(type_) => type_.variables(),
+            Value(value) => value.variables_recursive(),
         }
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        use Statement::*;
-        match self {
-            Concept(concept) => concept.references(),
-            Thing(thing) => thing.references(),
-            Type(type_) => type_.references(),
-            Value(value) => value.references_recursive(),
-        }
-    }
-
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
-        if !self.references_recursive().any(|r| r.is_name() && bounds.contains(r)) {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
+        if !self.variables_recursive().any(|r| r.is_name() && bounds.contains(r)) {
             Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
         }
         Ok(())

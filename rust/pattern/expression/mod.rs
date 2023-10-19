@@ -54,10 +54,10 @@ impl fmt::Display for Expression {
 }
 
 impl Expression {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item=&Reference> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
         match self {
-            Expression::Operation(operation) => operation.references_recursive(),
-            Expression::Function(function) => function.references_recursive(),
+            Expression::Operation(operation) => operation.variables_recursive(),
+            Expression::Function(function) => function.variables_recursive(),
             Expression::Constant(_constant) => Box::new(iter::empty()),
             Expression::Variable(variable) => variable.references(),
         }

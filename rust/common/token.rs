@@ -29,11 +29,18 @@ macro_rules! string_enum {
             $($item),*
         }
 
+        impl $name {
+            pub fn as_str(&self) -> &'static str {
+               match self {
+                    $($name::$item => $value,)*
+                }
+            }
+        }
+
         impl From<&str> for $name {
             fn from(string: &str) -> Self {
-                use $name::*;
                 match string {
-                    $($value => $item,)*
+                    $($value => $name::$item,)*
                     _ => panic!("Unexpected input while parsing {}: '{}'", stringify!($name), string),
                 }
             }
@@ -47,10 +54,7 @@ macro_rules! string_enum {
 
         impl fmt::Display for $name {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                use $name::*;
-                f.write_str(match self {
-                    $($item => $value,)*
-                })
+                f.write_str(self.as_str())
             }
         }
     }
@@ -64,7 +68,7 @@ string_enum! { Type
     Role = "role",
 }
 
-string_enum! { Command
+string_enum! { Clause
     Define = "define",
     Undefine = "undefine",
     Insert = "insert",
@@ -75,7 +79,7 @@ string_enum! { Command
     Get = "get",
 }
 
-string_enum! { Filter
+string_enum! { Modifier
     Sort = "sort",
     Offset = "offset",
     Limit = "limit",
@@ -182,4 +186,12 @@ string_enum! { Function
     Max = "max",
     Min = "min",
     Round = "round",
+}
+
+string_enum! { Char
+    QUESTION = "?",
+    DOLLAR = "$",
+    UNDERSCORE = "_",
+    CURLY_LEFT = "{",
+    CURLY_RIGHT = "}",
 }

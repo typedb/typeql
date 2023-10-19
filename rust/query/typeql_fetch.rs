@@ -23,10 +23,11 @@ use std::fmt;
 use std::ptr::write;
 use crate::common::error::collect_err;
 use crate::common::validatable::Validatable;
-use crate::common::{Result, token};
-use crate::pattern::{NamedReferences, Reference};
+use crate::common::{Result};
+use crate::pattern::{NamedVariables};
 use crate::query::MatchClause;
 use crate::query::modifier::Modifiers;
+use crate::variable::Variable;
 use crate::write_joined;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -58,13 +59,13 @@ impl Validatable for TypeQLFetch {
     }
 }
 
-impl NamedReferences for TypeQLFetch {
-    fn named_references(&self) -> HashSet<Reference> {
+impl NamedVariables for TypeQLFetch {
+    fn named_variables(&self) -> HashSet<Variable> {
 
         // if !self.filter.vars.is_empty() {
         //     self.filter.vars.iter().map(|v| v.reference().clone()).collect()
         // } else {
-            self.clause_match.named_references()
+            self.clause_match.named_variables()
         // }
     }
 }

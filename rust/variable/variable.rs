@@ -27,6 +27,7 @@ use crate::{
     pattern::{Reference},
     variable::{ConceptVariable, ValueVariable},
 };
+use crate::common::error::TypeQLError;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Variable {
@@ -35,17 +36,46 @@ pub enum Variable {
 }
 
 impl Variable {
-    pub fn reference(&self) -> &Reference {
+    // pub fn reference(&self) -> &Reference {
+    //     match self {
+    //         Variable::Concept(concept_variable) => &concept_variable.reference,
+    //         Variable::Value(value_variable) => &value_variable.reference,
+    //     }
+    // }
+    //
+    // pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    //     match self {
+    //         Variable::Concept(concept_variable) => concept_variable.references(),
+    //         Variable::Value(value_variable) => value_variable.references(),
+    //     }
+    // }
+
+    pub fn is_name(&self) -> bool {
         match self {
-            Variable::Concept(concept_variable) => &concept_variable.reference,
-            Variable::Value(value_variable) => &value_variable.reference,
+            Self::Concept(concept) => concept.is_name(),
+            Self::Value(_value) => true,
         }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn is_visible(&self) -> bool {
         match self {
-            Variable::Concept(concept_variable) => concept_variable.references(),
-            Variable::Value(value_variable) => value_variable.references(),
+            Self::Concept(concept) => concept.is_visible(),
+            Self::Value(_value) => true,
+        }
+    }
+
+    pub fn is_concept(&self) -> bool {
+        matches!(self, Self::Concept(_))
+    }
+
+    pub fn is_value(&self) -> bool {
+        matches!(self, Self::Value(_))
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Concept(concept) => concept.name(),
+            Self::Value(value) => value.name(),
         }
     }
 }
@@ -57,6 +87,15 @@ impl Validatable for Variable {
             Variable::Value(value_variable) => value_variable.validate(),
         }
     }
+}
+
+pub(super) fn validate_variable_name(name: &str) -> Result {
+    if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
+        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    {
+        Err(TypeQLError::InvalidVariableName(name.to_string()))?
+    }
+    Ok(())
 }
 
 impl From<ConceptVariable> for Variable {

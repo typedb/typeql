@@ -34,10 +34,11 @@ use crate::{
     },
     write_joined,
 };
+use crate::variable::{ConceptVariable, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeStatement {
-    pub reference: Reference,
+    pub variable: ConceptVariable,
     pub label: Option<LabelConstraint>,
     pub owns: Vec<OwnsConstraint>,
     pub plays: Vec<PlaysConstraint>,
@@ -49,9 +50,9 @@ pub struct TypeStatement {
 }
 
 impl TypeStatement {
-    pub fn new(reference: Reference) -> TypeStatement {
+    pub fn new(variable: ConceptVariable) -> TypeStatement {
         TypeStatement {
-            reference,
+            variable,
             abstract_: None,
             label: None,
             owns: vec![],
@@ -63,13 +64,13 @@ impl TypeStatement {
         }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         Box::new(
-            iter::once(&self.reference)
-                .chain(self.owns.iter().flat_map(|c| c.references()))
-                .chain(self.plays.iter().flat_map(|c| c.references()))
-                .chain(self.relates.iter().flat_map(|c| c.references()))
-                .chain(self.sub.iter().flat_map(|c| c.references())),
+            iter::once(&self.variable)
+                .chain(self.owns.iter().flat_map(|c| c.variables()))
+                .chain(self.plays.iter().flat_map(|c| c.variables()))
+                .chain(self.relates.iter().flat_map(|c| c.variables()))
+                .chain(self.sub.iter().flat_map(|c| c.variables())),
         )
     }
 
@@ -94,7 +95,7 @@ impl TypeStatement {
 impl Validatable for TypeStatement {
     fn validate(&self) -> Result {
         collect_err(
-            iter::once(self.reference.validate())
+            iter::once(self.variable.validate())
                 .chain(self.label.iter().map(Validatable::validate))
                 .chain(self.owns.iter().map(Validatable::validate))
                 .chain(self.plays.iter().map(Validatable::validate))
@@ -146,8 +147,8 @@ impl TypeConstrainable for TypeStatement {
 
 impl fmt::Display for TypeStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.reference.is_visible() {
-            write!(f, "{}", self.reference)?;
+        if self.variable.is_visible() {
+            write!(f, "{}", self.variable)?;
             if let Some(type_) = &self.label {
                 write!(f, " {type_}")?;
             }
@@ -155,7 +156,7 @@ impl fmt::Display for TypeStatement {
             write!(f, "{}", self.label.as_ref().unwrap().label)?;
         }
         if self.is_type_constrained() {
-            if self.reference.is_visible() && self.label.is_some() {
+            if self.variable.is_visible() && self.label.is_some() {
                 f.write_str(",")?;
             }
             f.write_str(" ")?;

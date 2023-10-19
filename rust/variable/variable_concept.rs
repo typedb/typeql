@@ -20,59 +20,83 @@
  *
  */
 
-use std::{fmt, iter};
+use std::{fmt};
 
 use crate::{
-    common::{validatable::Validatable, Result},
+    common::{validatable::Validatable, Result, token},
     pattern::{
-        ConceptConstrainable, ConceptReference, ConceptStatement, HasConstraint, IIDConstraint, IsConstraint,
-        IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, PredicateConstraint, Reference,
+        ConceptConstrainable, ConceptStatement, HasConstraint, IIDConstraint, IsConstraint,
+        IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, PredicateConstraint,
         RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
         SubConstraint, ThingConstrainable, ThingStatement, TypeConstrainable, TypeStatement, ValueTypeConstraint,
-        Visibility,
     },
+    variable::variable::validate_variable_name,
 };
 
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
+pub(crate) enum Visibility {
+    Visible,
+    Invisible,
+}
+
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
-pub struct ConceptVariable {
-    pub reference: Reference,
+pub enum ConceptVariable {
+    Anonymous(Visibility),
+    Name(String),
 }
 
 impl ConceptVariable {
+    const ANONYMOUS_NAME: &'static str = token::Char::UNDERSCORE.as_str();
+
     pub fn named(name: String) -> ConceptVariable {
-        ConceptVariable { reference: Reference::Concept(ConceptReference::Name(name)) }
+        ConceptVariable::Name(name)
     }
 
     pub fn anonymous() -> ConceptVariable {
-        ConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Visible)) }
+        ConceptVariable::Anonymous(Visibility::Visible)
     }
 
     pub fn hidden() -> ConceptVariable {
-        ConceptVariable { reference: Reference::Concept(ConceptReference::Anonymous(Visibility::Invisible)) }
+        ConceptVariable::Anonymous(Visibility::Invisible)
     }
 
     pub fn into_concept(self) -> ConceptStatement {
-        ConceptStatement::new(self.reference)
+        ConceptStatement::new(self)
     }
 
     pub fn into_thing(self) -> ThingStatement {
-        ThingStatement::new(self.reference)
+        ThingStatement::new(self)
     }
 
     pub fn into_type(self) -> TypeStatement {
-        TypeStatement::new(self.reference)
+        TypeStatement::new(self)
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.reference))
+    pub fn is_visible(&self) -> bool {
+        !matches!(self, Self::Anonymous(Visibility::Invisible))
+    }
+
+    pub fn is_name(&self) -> bool {
+        matches!(self, Self::Name(_))
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Anonymous(_) => Self::ANONYMOUS_NAME,
+            Self::Name(name) => name,
+        }
     }
 }
 
 impl Validatable for ConceptVariable {
     fn validate(&self) -> Result {
-        self.reference.validate()
+        match self {
+            Self::Anonymous(_) => Ok(()),
+            Self::Name(n) => validate_variable_name(n),
+        }
     }
 }
+
 
 impl ConceptConstrainable for ConceptVariable {
     fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
@@ -148,6 +172,8 @@ impl From<()> for ConceptVariable {
     }
 }
 
+// TODO: these are ambiguous conversions (label vs named) - why do we need them?
+
 impl From<&str> for ConceptVariable {
     fn from(name: &str) -> Self {
         ConceptVariable::named(name.to_string())
@@ -164,6 +190,6 @@ impl LeftOperand for ConceptVariable {}
 
 impl fmt::Display for ConceptVariable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reference)
+        write!(f, "{}{}", token::Char::DOLLAR, self.name())
     }
 }

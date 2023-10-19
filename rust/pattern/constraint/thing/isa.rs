@@ -28,6 +28,7 @@ use crate::{
     variable::ConceptVariable,
     Label,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
@@ -40,8 +41,8 @@ impl IsaConstraint {
         IsaConstraint { type_, is_explicit }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.type_.reference))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(iter::once(&self.type_.variable))
     }
 }
 

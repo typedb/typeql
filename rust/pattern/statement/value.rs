@@ -25,32 +25,33 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
-        statement::{builder::ValueConstrainable, Reference},
+        statement::{builder::ValueConstrainable},
         AssignConstraint, PredicateConstraint,
     },
 };
+use crate::variable::{ValueVariable, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueStatement {
-    pub reference: Reference,
+    pub variable: ValueVariable,
     pub assign_constraint: Option<AssignConstraint>,
     pub predicate_constraint: Option<PredicateConstraint>,
 }
 
 impl ValueStatement {
-    pub fn new(reference: Reference) -> ValueStatement {
-        ValueStatement { reference, assign_constraint: None, predicate_constraint: None }
+    pub fn new(variable: ValueVariable) -> ValueStatement {
+        ValueStatement { variable, assign_constraint: None, predicate_constraint: None }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.reference))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(iter::once(&self.variable))
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         Box::new(
-            iter::once(&self.reference)
-                .chain(self.assign_constraint.iter().flat_map(|assign| assign.references_recursive()))
-                .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.references())),
+            iter::once(&self.variable)
+                .chain(self.assign_constraint.iter().flat_map(|assign| assign.variables_recursive()))
+                .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.variables())),
         )
     }
 }
@@ -58,7 +59,7 @@ impl ValueStatement {
 impl Validatable for ValueStatement {
     fn validate(&self) -> Result {
         collect_err(
-            iter::once(self.reference.validate())
+            iter::once(self.variable.validate())
                 .chain(self.assign_constraint.iter().map(Validatable::validate))
                 .chain(self.predicate_constraint.iter().map(Validatable::validate)),
         )
@@ -77,7 +78,7 @@ impl ValueConstrainable for ValueStatement {
 
 impl fmt::Display for ValueStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reference)?;
+        write!(f, "{}", self.variable)?;
         if let Some(assign) = &self.assign_constraint {
             write!(f, " {assign}")?;
         } else if let Some(predicate) = &self.predicate_constraint {

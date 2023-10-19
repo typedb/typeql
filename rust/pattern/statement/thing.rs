@@ -25,15 +25,16 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, Reference, RelationConstrainable,
+        HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable,
     },
     write_joined,
 };
+use crate::variable::{ConceptVariable, Variable};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingStatement {
-    pub reference: Reference,
+    pub variable: ConceptVariable,
     pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
@@ -42,33 +43,33 @@ pub struct ThingStatement {
 }
 
 impl ThingStatement {
-    pub fn new(reference: Reference) -> ThingStatement {
-        ThingStatement { reference, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
+    pub fn new(reference: ConceptVariable) -> ThingStatement {
+        ThingStatement { variable: reference, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         Box::new(
-            iter::once(&self.reference)
-                .chain(self.isa.iter().flat_map(|c| c.references()))
-                .chain(self.has.iter().flat_map(|c| c.references()))
-                .chain(self.relation.iter().flat_map(|c| c.references()))
-                .chain(self.value.iter().flat_map(|c| c.references())),
+            iter::once(&self.variable)
+                .chain(self.isa.iter().flat_map(|c| c.variables()))
+                .chain(self.has.iter().flat_map(|c| c.variables()))
+                .chain(self.relation.iter().flat_map(|c| c.variables()))
+                .chain(self.value.iter().flat_map(|c| c.variables())),
         )
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         Box::new(
-            iter::once(&self.reference)
-                .chain(self.isa.iter().flat_map(|c| c.references()))
-                .chain(self.has.iter().flat_map(|c| c.references_recursive()))
-                .chain(self.relation.iter().flat_map(|c| c.references_recursive()))
-                .chain(self.value.iter().flat_map(|c| c.references())),
+            iter::once(&self.variable)
+                .chain(self.isa.iter().flat_map(|c| c.variables()))
+                .chain(self.has.iter().flat_map(|c| c.variables_recursive()))
+                .chain(self.relation.iter().flat_map(|c| c.variables_recursive()))
+                .chain(self.value.iter().flat_map(|c| c.variables())),
         )
     }
 
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.reference.is_visible() {
-            write!(f, "{}", self.reference)?;
+        if self.variable.is_visible() {
+            write!(f, "{}", self.variable)?;
             if self.value.is_some() || self.relation.is_some() {
                 f.write_str(" ")?;
             }
@@ -91,7 +92,7 @@ impl ThingStatement {
 impl Validatable for ThingStatement {
     fn validate(&self) -> Result {
         collect_err(
-            iter::once(self.reference.validate())
+            iter::once(self.variable.validate())
                 .chain(self.iid.iter().map(Validatable::validate))
                 .chain(self.isa.iter().map(Validatable::validate))
                 .chain(self.has.iter().map(Validatable::validate))

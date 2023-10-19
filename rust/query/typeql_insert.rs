@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedReferences, ThingStatement},
+    pattern::{NamedVariables, ThingStatement},
     query::{writable::validate_non_empty},
     write_joined,
 };
@@ -65,10 +65,10 @@ impl Validatable for TypeQLInsert {
 
 fn validate_insert_in_scope_of_get(match_clause: &Option<MatchClause>, statements: &[ThingStatement]) -> Result {
     if let Some(match_) = match_clause {
-        let names_in_scope = match_.named_references();
+        let names_in_scope = match_.named_variables();
         if statements.iter().any(|v| {
-            v.reference.is_name() && names_in_scope.contains(&v.reference)
-                || v.references_recursive().any(|w| names_in_scope.contains(w))
+            v.variable.is_name() && names_in_scope.contains(&v.variable)
+                || v.variables_recursive().any(|w| names_in_scope.contains(w))
         }) {
             Ok(())
         } else {
@@ -87,7 +87,7 @@ impl fmt::Display for TypeQLInsert {
             writeln!(f, "{clause_match}")?;
         }
 
-        writeln!(f, "{}", token::Command::Insert)?;
+        writeln!(f, "{}", token::Clause::Insert)?;
         write_joined!(f, ";\n", self.statements)?;
         f.write_str(";")?;
         write!(f, "\n{}", self.modifiers)

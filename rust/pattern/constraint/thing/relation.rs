@@ -29,10 +29,11 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingStatement, TypeStatement, TypeStatementBuilder},
+    pattern::{ThingStatement, TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable,
     write_joined, Label,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
@@ -49,12 +50,12 @@ impl RelationConstraint {
         self.role_players.push(role_player);
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.role_players.iter().flat_map(|rp| rp.references()))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(self.role_players.iter().flat_map(|rp| rp.variables()))
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.role_players.iter().flat_map(|rp| rp.references_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(self.role_players.iter().flat_map(|rp| rp.variables_recursive()))
     }
 }
 
@@ -100,12 +101,12 @@ impl RolePlayerConstraint {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(iter::once(&self.player.reference)))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new((self.role_type.iter().map(|r| &r.variable)).chain(iter::once(&self.player.variable)))
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(self.player.references_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new((self.role_type.iter().map(|r| &r.variable)).chain(self.player.variables_recursive()))
     }
 }
 
@@ -178,8 +179,8 @@ impl From<(TypeStatement, ConceptVariable)> for RolePlayerConstraint {
 impl fmt::Display for RolePlayerConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(role_type) = &self.role_type {
-            if role_type.reference.is_visible() {
-                write!(f, "{}", role_type.reference)?;
+            if role_type.variable.is_visible() {
+                write!(f, "{}", role_type.variable)?;
             } else {
                 write!(f, "{}", role_type.label.as_ref().unwrap().label)?;
             }

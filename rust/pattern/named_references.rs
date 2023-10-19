@@ -22,14 +22,14 @@
 
 use std::collections::HashSet;
 
-use crate::pattern::Reference;
 use crate::Result;
+use crate::variable::Variable;
 
-pub trait NamedReferences {
+pub trait NamedVariables {
     // TODO maybe we want to implement this for statements
-    fn named_references(&self) -> HashSet<Reference>;
+    fn named_variables(&self) -> HashSet<Variable>;
 }
 
-pub(crate) fn validate_names_unique(references: impl NamedReferences) -> Result {
+pub(crate) fn validate_names_unique(variables: impl NamedVariables) -> Result {
     todo!()
 }

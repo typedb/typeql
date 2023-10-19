@@ -24,8 +24,9 @@ use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
-    pattern::{Conjunction, Normalisable, Pattern, Reference},
+    pattern::{Conjunction, Normalisable, Pattern},
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Disjunction {
@@ -44,11 +45,11 @@ impl Disjunction {
         Disjunction { patterns, normalised: None }
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.patterns.iter().flat_map(|p| p.references_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
         collect_err(self.patterns.iter().map(|p| p.validate_is_bounded_by(bounds)))
     }
 }
@@ -99,7 +100,7 @@ impl fmt::Display for Disjunction {
                 .iter()
                 .map(|pattern| match pattern {
                     Pattern::Conjunction(conjunction) => conjunction.to_string(),
-                    other => format!("{{\n{};\n}}", indent(&other.to_string())),
+                    other => format!("{}\n{};\n{}", token::Char::CURLY_LEFT, indent(&other.to_string()), token::Char::CURLY_RIGHT),
                 })
                 .collect::<Vec<_>>()
                 .join(&format!(" {} ", token::LogicOperator::Or)),

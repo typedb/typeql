@@ -82,7 +82,7 @@ impl Validatable for TypeQLUndefine {
 
 impl fmt::Display for TypeQLUndefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", token::Command::Undefine)?;
+        writeln!(f, "{}", token::Clause::Undefine)?;
         write_joined!(f, ";\n", self.statements, self.rules)?;
         f.write_str(";")
     }

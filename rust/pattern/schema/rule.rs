@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, NamedReferences, Pattern, ThingStatement},
+    pattern::{Conjunction, NamedVariables, Pattern, ThingStatement},
     Label,
 };
 
@@ -127,11 +127,11 @@ fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bo
 fn expect_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result {
     if infers_ownership(then) {
         let has = then.has.get(0).unwrap();
-        if has.type_.is_some() && has.attribute.reference.is_name() {
+        if has.type_.is_some() && has.attribute.variable.is_name() {
             Err(TypeQLError::InvalidRuleThenHas(
                 rule_label.clone(),
                 then.clone(),
-                has.attribute.reference.clone(),
+                has.attribute.variable.clone(),
                 has.type_.clone().unwrap(),
             ))?
         }
@@ -156,8 +156,8 @@ fn infers_relation(then: &ThingStatement) -> bool {
 }
 
 fn expect_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {
-    let bounds = when.named_references();
-    if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
+    let bounds = when.named_variables();
+    if !then.variables().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
     }
     Ok(())

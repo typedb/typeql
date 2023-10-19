@@ -31,7 +31,7 @@ use pest::error::{Error as PestError, LineColLocation};
 use crate::{
     common::token,
     error_messages,
-    pattern::{Label, Pattern, Reference, ThingStatement, TypeStatement, Value},
+    pattern::{Label, Pattern, ThingStatement, TypeStatement, Value},
     variable::{Variable},
     write_joined,
 };
@@ -110,11 +110,11 @@ error_messages! { TypeQLError
         13: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
     InvalidAttributeTypeRegex(String) =
         14: "Invalid regular expression '{}'.",
-    IllegalFilterVariableRepeating(Reference) =
+    IllegalFilterVariableRepeating(Variable) =
         15: "The variable '{}' occurred more than once in match query filter.",
-    VariableOutOfScopeMatch(Reference) =
+    VariableOutOfScopeMatch(Variable) =
         16: "The variable '{}' is out of scope of the match query.",
-    VariableOutOfScopeDelete(Reference) =
+    VariableOutOfScopeDelete(Variable) =
         17: "The deleted variable '{}' is out of scope of the match query.",
     NoVariableInScopeInsert(String, String) =
         18: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
@@ -138,7 +138,7 @@ error_messages! { TypeQLError
         30: "Rule '{}' 'when' contains a nested negation.",
     InvalidRuleThen(Label, ThingStatement) =
         31: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
-    InvalidRuleThenHas(Label, ThingStatement, Reference, TypeStatement) =
+    InvalidRuleThenHas(Label, ThingStatement, Variable, TypeStatement) =
         32: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
     InvalidRuleThenVariables(Label) =
         33: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",

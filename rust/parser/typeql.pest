@@ -111,13 +111,13 @@ statement_concept = { VAR_CONCEPT_ ~ IS ~ VAR_CONCEPT_ }
 
 // TYPE STATEMENTS =============================================================
 
-statement_type = { type_any ~ type_constraint ~ ( "," ~ type_constraint )* }
+statement_type = { type_ref ~ type_constraint ~ ( "," ~ type_constraint )* }
 type_constraint = { ABSTRACT
-                  | OWNS ~ type_ ~ ( AS ~ type_)? ~ annotations_owns
-                  | PLAYS ~ type_scoped ~ ( AS ~ type_)?
+                  | OWNS ~ type_ref ~ ( AS ~ type_ref)? ~ annotations_owns
+                  | PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref)?
                   | REGEX ~ QUOTED_STRING
-                  | RELATES ~ type_ ~ ( AS ~ type_)?
-                  | SUB_ ~ type_any
+                  | RELATES ~ type_ref ~ ( AS ~ type_ref)?
+                  | SUB_ ~ type_ref
                   | TYPE ~ label_any
                   | VALUE ~ value_type
                   }
@@ -135,21 +135,21 @@ statement_value = { VAR_VALUE_ ~ ASSIGN ~ expression
 statement_things = { ( statement_thing_any ~ ";" )+ }
 statement_thing_any = { statement_thing | statement_relation | statement_attribute }
 
-statement_thing = { VAR_CONCEPT_ ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+statement_thing = { VAR_CONCEPT_ ~ ISA_ ~ type_ref ~ ( "," ~ attributes )?
                   | VAR_CONCEPT_ ~ IID ~ IID_ ~ ( "," ~ attributes )?
                   | VAR_CONCEPT_ ~ attributes
                   }
 
-statement_relation = { VAR_CONCEPT_? ~ relation ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+statement_relation = { VAR_CONCEPT_? ~ relation ~ ISA_ ~ type_ref ~ ( "," ~ attributes )?
                      | VAR_CONCEPT_? ~ relation ~ attributes? }
 
-statement_attribute = { VAR_CONCEPT_? ~ predicate ~ ISA_ ~ type_ ~ ( "," ~ attributes )?
+statement_attribute = { VAR_CONCEPT_? ~ predicate ~ ISA_ ~ type_ref ~ ( "," ~ attributes )?
                       | VAR_CONCEPT_? ~ predicate ~ attributes? }
 
 // RELATION CONSTRUCT ==========================================================
 
 relation = { "(" ~ role_player ~ ( "," ~ role_player )* ~ ")" }                 // A list of role players in a Relations
-role_player = { type_ ~ ":" ~ player | player }                                 // The Role type and player variable or just the player variable
+role_player = { type_ref ~ ":" ~ player | player }                                 // The Role type and player variable or just the player variable
 player = { VAR_CONCEPT_ }                                                       // A player is just a variable
 
 // ATTRIBUTE CONSTRUCT =========================================================
@@ -194,9 +194,8 @@ schema_rule = { RULE ~ label ~ ":" ~ WHEN ~ "{" ~ patterns ~ "}" ~ THEN ~ "{" ~ 
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type_any = { type_scoped | type_ | VAR_CONCEPT_ }
-type_scoped = { label_scoped | VAR_CONCEPT_ }
-type_ = { label | VAR_CONCEPT_ } // A type_can be a label or variable
+type_ref = { label | VAR_CONCEPT_ }
+type_ref_scoped = { label_scoped | VAR_CONCEPT_ }
 
 label_any = { label_scoped | label }
 label_scoped = { LABEL_SCOPED_ }

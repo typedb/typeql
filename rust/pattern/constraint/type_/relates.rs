@@ -24,10 +24,11 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{statement::Reference, TypeStatement, TypeStatementBuilder},
+    pattern::{TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable,
     Label,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelatesConstraint {
@@ -36,8 +37,8 @@ pub struct RelatesConstraint {
 }
 
 impl RelatesConstraint {
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.role_type.reference).chain(self.overridden_role_type.iter().map(|v| &v.reference)))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(iter::once(&self.role_type.variable).chain(self.overridden_role_type.iter().map(|v| &v.variable)))
     }
 }
 

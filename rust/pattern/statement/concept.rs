@@ -26,30 +26,31 @@ use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::{
         constraint::IsConstraint,
-        statement::{builder::ConceptConstrainable, Reference},
+        statement::{builder::ConceptConstrainable},
     },
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConceptStatement {
-    pub reference: Reference,
+    pub variable: Variable,
     pub is_constraint: Option<IsConstraint>,
 }
 
 impl ConceptStatement {
-    pub fn new(reference: Reference) -> ConceptStatement {
-        ConceptStatement { reference, is_constraint: None }
+    pub fn new(reference: Variable) -> ConceptStatement {
+        ConceptStatement { variable: reference, is_constraint: None }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.reference).chain(self.is_constraint.iter().map(|is| &is.variable.reference)))
+    pub fn references(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        Box::new(iter::once(&self.variable).chain(self.is_constraint.iter().map(|is| &is.variable.variable)))
     }
 }
 
 impl Validatable for ConceptStatement {
     fn validate(&self) -> Result {
         collect_err(
-            iter::once(self.reference.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
+            iter::once(self.variable.validate()).chain(self.is_constraint.iter().map(Validatable::validate)),
         )
     }
 }
@@ -62,7 +63,7 @@ impl ConceptConstrainable for ConceptStatement {
 
 impl fmt::Display for ConceptStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reference)?;
+        write!(f, "{}", self.variable)?;
         if let Some(is) = &self.is_constraint {
             write!(f, " {is}")?;
         }

@@ -25,8 +25,9 @@ use std::collections::HashSet;
 
 use crate::{
     common::{error::TypeQLError, string::indent, token, validatable::Validatable, Result},
-    pattern::{Conjunction, Disjunction, Normalisable, Pattern, Reference},
+    pattern::{Conjunction, Disjunction, Normalisable, Pattern},
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Negation {
@@ -45,11 +46,11 @@ impl Negation {
         Self { pattern: Box::new(pattern), normalised: None }
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        self.pattern.references_recursive()
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+        self.pattern.variables_recursive()
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
         self.pattern.validate_is_bounded_by(bounds)
     }
 }
@@ -90,9 +91,9 @@ impl fmt::Display for Negation {
         if matches!(*self.pattern, Pattern::Conjunction(_)) {
             write!(f, "{} {}", token::LogicOperator::Not, pattern_string)
         } else if pattern_string.lines().count() > 1 {
-            write!(f, "{} {{\n{};\n}}", token::LogicOperator::Not, indent(&pattern_string))
+            write!(f, "{} {}\n{};\n{}", token::LogicOperator::Not, token::Char::CURLY_LEFT, indent(&pattern_string), token::Char::CURLY_RIGHT)
         } else {
-            write!(f, "{} {{ {}; }}", token::LogicOperator::Not, pattern_string)
+            write!(f, "{} {} {}; {}", token::LogicOperator::Not, token::Char::CURLY_LEFT, pattern_string, token::Char::CURLY_RIGHT)
         }
     }
 }

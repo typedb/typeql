@@ -45,20 +45,21 @@ pub use constraint::{
 pub use disjunction::Disjunction;
 pub use expression::{Expression, Function, Operation};
 pub use label::Label;
-pub use named_references::NamedReferences;
+pub use named_references::NamedVariables;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
 pub(crate) use statement::LeftOperand;
 pub use statement::{
-    ConceptConstrainable, ConceptReference, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder, Reference,
+    ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder, Reference,
     RelationConstrainable, RelationStatementBuilder, ThingConstrainable, ThingStatement, ThingStatementBuilder,
-    TypeConstrainable, TypeStatement, TypeStatementBuilder, ValueConstrainable, ValueReference, ValueStatement, ValueStatementBuilder, Statement, Visibility,
+    TypeConstrainable, TypeStatement, TypeStatementBuilder, ValueConstrainable, ValueStatement, ValueStatementBuilder, Statement,
 };
 
 use crate::{
     common::{validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
@@ -69,21 +70,21 @@ pub enum Pattern {
 }
 
 impl Pattern {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item=&Reference> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&Variable> + '_> {
         Box::new(match self {
-            Pattern::Conjunction(conjunction) => conjunction.references_recursive(),
-            Pattern::Disjunction(disjunction) => disjunction.references_recursive(),
-            Pattern::Negation(negation) => negation.references_recursive(),
-            Pattern::Statement(statement) => statement.references_recursive(),
+            Pattern::Conjunction(conjunction) => conjunction.variables_recursive(),
+            Pattern::Disjunction(disjunction) => disjunction.variables_recursive(),
+            Pattern::Negation(negation) => negation.variables_recursive(),
+            Pattern::Statement(statement) => statement.variables_recursive(),
         })
     }
 
-    pub fn validate_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
         match self {
-            Pattern::Conjunction(conjunction) => conjunction.expect_is_bounded_by(bounds),
+            Pattern::Conjunction(conjunction) => conjunction.validate_is_bounded_by(bounds),
             Pattern::Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
             Pattern::Negation(negation) => negation.expect_is_bounded_by(bounds),
-            Pattern::Statement(statement) => statement.expect_is_bounded_by(bounds),
+            Pattern::Statement(statement) => statement.validate_is_bounded_by(bounds),
         }
     }
 }

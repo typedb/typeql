@@ -27,6 +27,7 @@ use crate::{
     common::token,
     pattern::{LeftOperand, Reference},
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Operation {
@@ -112,10 +113,10 @@ impl Operation {
         Arity::Binary
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
         match self.arity() {
             Arity::Binary => Box::new(
-                self.left().unwrap().references_recursive().chain(self.right().unwrap().references_recursive()),
+                self.left().unwrap().variables_recursive().chain(self.right().unwrap().variables_recursive()),
             ),
         }
     }

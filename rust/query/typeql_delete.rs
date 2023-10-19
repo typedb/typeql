@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{NamedReferences, ThingStatement},
+    pattern::{NamedVariables, ThingStatement},
     query::{writable::validate_non_empty, TypeQLUpdate, Writable},
     write_joined,
 };
@@ -49,8 +49,8 @@ impl TypeQLDelete {
     }
 
     fn validate_delete_in_scope_of_match(&self) -> Result {
-        let names_in_scope = self.clause_match.named_references();
-        collect_err(self.statements.iter().flat_map(|v| v.references()).filter(|r| r.is_name()).map(|r| -> Result {
+        let names_in_scope = self.clause_match.named_variables();
+        collect_err(self.statements.iter().flat_map(|v| v.variables()).filter(|r| r.is_name()).map(|r| -> Result {
             if names_in_scope.contains(r) {
                 Ok(())
             } else {
@@ -77,7 +77,7 @@ impl Validatable for TypeQLDelete {
 impl fmt::Display for TypeQLDelete {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.clause_match)?;
-        writeln!(f, "{}", token::Command::Delete)?;
+        writeln!(f, "{}", token::Clause::Delete)?;
         write_joined!(f, ";\n", self.statements)?;
         f.write_str(";")?;
         write!(f, "\n{}", self.modifiers)

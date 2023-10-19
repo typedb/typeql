@@ -134,7 +134,7 @@ impl<'a, T: Into<sorting::OrderedVariable> + Clone> From<&'a [T]> for Sorting {
 
 impl fmt::Display for Sorting {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Filter::Sort)?;
+        write!(f, "{} ", token::Modifier::Sort)?;
         write_joined!(f, ", ", self.vars)
     }
 }
@@ -146,7 +146,7 @@ pub struct Limit {
 
 impl fmt::Display for Limit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Filter::Limit, self.limit)
+        write!(f, "{} {}", token::Modifier::Limit, self.limit)
     }
 }
 
@@ -157,6 +157,6 @@ pub struct Offset {
 
 impl fmt::Display for Offset {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Filter::Offset, self.offset)
+        write!(f, "{} {}", token::Modifier::Offset, self.offset)
     }
 }
