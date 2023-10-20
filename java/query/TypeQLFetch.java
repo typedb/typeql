@@ -42,7 +42,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.FETCH;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.FETCH;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Projection.AS;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;

@@ -33,27 +33,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DEFINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.UNDEFINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.DEFINE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.UNDEFINE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 
 abstract class TypeQLDefinable implements TypeQLQuery {
 
-    private final TypeQLToken.Command command;
+    private final TypeQLToken.Clause clause;
     private final List<Definable> definables;
     private final List<TypeStatement> statements = new ArrayList<>();
     private final List<Rule> rules = new ArrayList<>();
     private final int hash;
 
-    TypeQLDefinable(TypeQLToken.Command command, List<Definable> definables) {
-        assert command == DEFINE || command == UNDEFINE;
+    TypeQLDefinable(TypeQLToken.Clause clause, List<Definable> definables) {
+        assert clause == DEFINE || clause == UNDEFINE;
         if (definables == null || definables.isEmpty()) throw TypeQLException.of(MISSING_DEFINABLES.message());
         this.definables = new ArrayList<>(definables);
         for (Definable definable : definables) {
             if (definable.isRule()) {
                 Rule rule = definable.asRule();
-                if (command == UNDEFINE && (rule.when() != null || rule.then() != null)) {
+                if (clause == UNDEFINE && (rule.when() != null || rule.then() != null)) {
                     throw TypeQLException.of(ErrorMessage.INVALID_UNDEFINE_QUERY_RULE.message(rule.label()));
                 }
                 rules.add(rule);
@@ -64,8 +64,8 @@ abstract class TypeQLDefinable implements TypeQLQuery {
             if (!var.isLabelled()) throw TypeQLException.of(ErrorMessage.INVALID_DEFINE_QUERY_VARIABLE.message());
         });
 
-        this.command = command;
-        this.hash = Objects.hash(this.command, this.statements, this.rules);
+        this.clause = clause;
+        this.hash = Objects.hash(this.clause, this.statements, this.rules);
     }
 
     @Override
@@ -89,7 +89,7 @@ abstract class TypeQLDefinable implements TypeQLQuery {
     @Override
     public String toString(boolean pretty) {
         StringBuilder query = new StringBuilder();
-        appendClause(query, command, definables.stream().map(d -> d.toString(pretty)), pretty);
+        appendClause(query, clause, definables.stream().map(d -> d.toString(pretty)), pretty);
         return query.toString();
     }
 
@@ -98,7 +98,7 @@ abstract class TypeQLDefinable implements TypeQLQuery {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TypeQLDefinable that = (TypeQLDefinable) o;
-        return this.command.equals(that.command) && this.definables.equals(that.definables);
+        return this.clause.equals(that.clause) && this.definables.equals(that.definables);
     }
 
     @Override

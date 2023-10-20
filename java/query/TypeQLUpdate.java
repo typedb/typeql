@@ -31,8 +31,8 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.DELETE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.INSERT;
 import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static com.vaticle.typeql.lang.query.TypeQLDelete.validDeleteStatements;
 import static com.vaticle.typeql.lang.query.TypeQLInsert.validInsertStatements;

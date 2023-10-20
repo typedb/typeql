@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.DELETE;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.DELETE;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_DELETE;
 import static java.util.Objects.requireNonNull;
 

@@ -26,7 +26,7 @@ import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 
 import java.util.List;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.INSERT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.INSERT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
 import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static java.util.stream.Stream.concat;

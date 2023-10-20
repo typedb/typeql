@@ -49,10 +49,10 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Command.MATCH;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.LIMIT;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.OFFSET;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Filter.SORT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.MATCH;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Modifier.LIMIT;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Modifier.OFFSET;
+import static com.vaticle.typeql.lang.common.TypeQLToken.Modifier.SORT;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_VARIABLE_NOT_MATCHED;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE;
@@ -145,8 +145,8 @@ public interface TypeQLQuery {
         }
     }
 
-    static void appendClause(StringBuilder builder, TypeQLToken.Command command, Stream<String> elements, boolean pretty) {
-        builder.append(command).append(NEW_LINE);
+    static void appendClause(StringBuilder builder, TypeQLToken.Clause clause, Stream<String> elements, boolean pretty) {
+        builder.append(clause).append(NEW_LINE);
         if (pretty) builder.append(elements.collect(SEMICOLON_NEW_LINE.joiner()));
         else builder.append(elements.collect(SEMICOLON_SPACE.joiner()));
         builder.append(SEMICOLON);

@@ -29,6 +29,6 @@ import java.util.List;
 public class TypeQLDefine extends TypeQLDefinable {
 
     public TypeQLDefine(List<Definable> definables) {
-        super(TypeQLToken.Command.DEFINE, definables);
+        super(TypeQLToken.Clause.DEFINE, definables);
     }
 }
