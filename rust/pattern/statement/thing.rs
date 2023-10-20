@@ -48,9 +48,9 @@ impl ThingStatement {
         ThingStatement { variable, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(&self.variable)
+            iter::once(VariableRef::Concept(&self.variable))
                 .chain(self.isa.iter().flat_map(|c| c.variables()))
                 .chain(self.has.iter().flat_map(|c| c.variables()))
                 .chain(self.relation.iter().flat_map(|c| c.variables()))
@@ -58,9 +58,9 @@ impl ThingStatement {
         )
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(&self.variable)
+            iter::once(VariableRef::Concept(&self.variable))
                 .chain(self.isa.iter().flat_map(|c| c.variables()))
                 .chain(self.has.iter().flat_map(|c| c.variables_recursive()))
                 .chain(self.relation.iter().flat_map(|c| c.variables_recursive()))

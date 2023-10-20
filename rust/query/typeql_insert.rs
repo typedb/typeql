@@ -20,6 +20,7 @@
  *
  */
 
+use std::collections::HashSet;
 use std::fmt;
 
 use crate::{
@@ -35,6 +36,7 @@ use crate::{
 };
 use crate::query::{MatchClause};
 use crate::query::modifier::Modifiers;
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {
@@ -65,10 +67,10 @@ impl Validatable for TypeQLInsert {
 
 fn validate_insert_in_scope_of_get(match_clause: &Option<MatchClause>, statements: &[ThingStatement]) -> Result {
     if let Some(match_) = match_clause {
-        let names_in_scope = match_.named_variables();
+        let names_in_scope: HashSet<VariableRef> = match_.named_variables().collect();
         if statements.iter().any(|v| {
-            v.variable.is_name() && names_in_scope.contains(&v.variable)
-                || v.variables_recursive().any(|w| names_in_scope.contains(w))
+            v.variable.is_name() && names_in_scope.contains(&VariableRef::Concept(&v.variable))
+                || v.variables_recursive().any(|w| names_in_scope.contains(&w))
         }) {
             Ok(())
         } else {

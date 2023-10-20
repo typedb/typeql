@@ -25,6 +25,7 @@ use std::fmt::Formatter;
 use std::hash::Hash;
 use crate::common::Result;
 use crate::common::error::TypeQLError;
+use crate::common::validatable::Validatable;
 use crate::variable::{ConceptVariable, ValueVariable};
 
 
@@ -41,6 +42,13 @@ impl Variable {
             Self::Value(vv) => VariableRef::Value(vv)
         }
     }
+
+    pub fn is_name(&self) -> bool {
+        match self {
+            Variable::Concept(var) => var.is_name(),
+            Variable::Value(var) => var.is_name()
+        }
+    }
 }
 
 impl From<ConceptVariable> for Variable {
@@ -52,6 +60,15 @@ impl From<ConceptVariable> for Variable {
 impl From<ValueVariable> for Variable {
     fn from(value: ValueVariable) -> Self {
         Variable::Value(value)
+    }
+}
+
+impl Validatable for Variable {
+    fn validate(&self) -> Result {
+        match self {
+            Variable::Concept(concept_variable) => concept_variable.validate(),
+            Variable::Value(value_variable) => value_variable.validate(),
+        }
     }
 }
 
@@ -72,16 +89,37 @@ pub enum VariableRef<'a> {
 
 impl VariableRef<'_> {
 
+    pub fn is_name(&self) -> bool {
+        match self {
+            VariableRef::Concept( var) => (*var).is_name(),
+            VariableRef::Value( var) => (*var).is_name(),
+        }
+    }
 
+    pub fn is_concept(&self) -> bool {
+        matches!(self, VariableRef::Concept(_))
+    }
 
-    // pub fn to_owned(&self) -> Variable {
-    //     match self {
-    //         Self::Concept(&cv) => Variable::Concept(cv.clone()),
-    //         Self::Value(&vv) => Variable::Value(vv.clone()),
-    //     }
-    // }
+    pub fn is_value(&self) -> bool {
+        matches!(self, VariableRef::Value(_))
+    }
+
+    pub fn to_owned(&self) -> Variable {
+        match self {
+            Self::Concept(var) => Variable::Concept((*var).clone()),
+            Self::Value(var) => Variable::Value((*var).clone()),
+        }
+    }
 }
 
+impl fmt::Display for VariableRef<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            VariableRef::Concept(var) => write!(f, "{}", *var),
+            VariableRef::Value(var) => write!(f, "{}", *var),
+        }
+    }
+}
 
 pub(super) fn validate_variable_name(name: &str) -> Result {
     if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
@@ -144,14 +182,7 @@ pub(super) fn validate_variable_name(name: &str) -> Result {
 //     }
 // }
 //
-// impl Validatable for Variable {
-//     fn validate(&self) -> Result {
-//         match self {
-//             Variable::Concept(concept_variable) => concept_variable.validate(),
-//             Variable::Value(value_variable) => value_variable.validate(),
-//         }
-//     }
-// }
+
 //
 
 //

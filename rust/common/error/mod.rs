@@ -20,9 +20,6 @@
  *
  */
 
-#[macro_use]
-mod macros;
-
 use std::{error::Error as StdError, fmt};
 
 use chrono::NaiveDateTime;
@@ -32,10 +29,12 @@ use crate::{
     common::token,
     error_messages,
     pattern::{Label, Pattern, ThingStatement, TypeStatement, Value},
-    variable::{Variable},
+    variable::Variable,
     write_joined,
 };
-use crate::variable::{ConceptVariable, ValueVariable};
+
+#[macro_use]
+mod macros;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Error {
@@ -115,10 +114,8 @@ error_messages! { TypeQLError
         15: "The variable '{}' occurred more than once in get query filter.",
     GetVarNotBound(Variable) =
         16: "The get variable '{}' is not bound in the match clause.",
-    ConceptVariableOutOfScopeDelete(ConceptVariable) =
-        17: "The deleted variable '{}' is out of scope of the match query.",
-    ValueVariableOutOfScopeDelete(ValueVariable) =
-        18: "The deleted variable '{}' is out of scope of the match query.",
+    VariableOutOfScopeDelete(Variable) =
+        17: "The delete variable '{}' is out of scope of the match query.",
     NoVariableInScopeInsert(String, String) =
         19: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
     VariableNotNamed() =

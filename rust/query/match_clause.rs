@@ -43,7 +43,7 @@ impl MatchClause {
     }
 
     fn validate_nested_patterns_are_bounded(&self) -> Result {
-        let bounds = self.conjunction.named_variables();
+        let bounds = self.conjunction.named_variables().collect();
         collect_err(self.conjunction.patterns.iter().map(|p| p.validate_is_bounded_by(&bounds)))
     }
 }

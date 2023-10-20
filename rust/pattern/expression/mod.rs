@@ -28,7 +28,7 @@ pub use function::Function;
 pub use operation::Operation;
 
 use crate::pattern::Constant;
-use crate::variable::{ConceptVariable, ValueVariable};
+use crate::variable::{ConceptVariable, ValueVariable, Variable};
 use crate::variable::variable::VariableRef;
 
 mod function;
@@ -83,6 +83,16 @@ impl From<Function> for Expression {
 impl From<Constant> for Expression {
     fn from(constant: Constant) -> Self {
         Self::Constant(constant)
+    }
+}
+
+
+impl From<Variable> for Expression {
+    fn from(variable: Variable) -> Self {
+        match variable {
+            Variable::Concept(var) => Self::ThingVariable(var),
+            Variable::Value(var) => Self::ValueVariable(var),
+        }
     }
 }
 

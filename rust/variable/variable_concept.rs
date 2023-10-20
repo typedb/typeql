@@ -34,7 +34,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
-pub(crate) enum Visibility {
+pub enum Visibility {
     Visible,
     Invisible,
 }

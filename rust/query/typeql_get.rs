@@ -21,8 +21,8 @@
  */
 
 use std::{collections::HashSet, fmt};
-
 use itertools::Itertools;
+
 
 use crate::{
     common::{
@@ -119,7 +119,7 @@ impl Validatable for TypeQLGet {
 impl Variabilizable for TypeQLGet {
     fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         if !self.filter.vars.is_empty() {
-            self.filter.vars.iter().map(|v| v.clone()).collect()
+            Box::new(self.filter.vars.iter().map(|v| v.as_ref()))
         } else {
             self.clause_match.named_variables()
         }
@@ -127,7 +127,7 @@ impl Variabilizable for TypeQLGet {
 }
 
 fn validate_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result {
-    let names_in_scope = conjunction.named_variables();
+    let names_in_scope: HashSet<VariableRef> = conjunction.named_variables().collect();
     let mut seen = HashSet::new();
     if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
         Err(TypeQLError::EmptyMatchFilter())?;
@@ -135,10 +135,10 @@ fn validate_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filt
     collect_err(filter.iter().flat_map(|f| &f.vars).map(|v| v).map(|r| {
         if !r.is_name() {
             Err(TypeQLError::VariableNotNamed().into())
-        } else if !names_in_scope.contains(r) {
-            Err(TypeQLError::GetVarNotBound(r.clone()).into())
+        } else if !names_in_scope.contains(&r.as_ref()) {
+            Err(TypeQLError::GetVarNotBound(r.to_owned()).into())
         } else if seen.contains(&r) {
-            Err(TypeQLError::IllegalFilterVariableRepeating(r.clone()).into())
+            Err(TypeQLError::IllegalFilterVariableRepeating(r.to_owned()).into())
         } else {
             seen.insert(r);
             Ok(())
@@ -151,20 +151,20 @@ fn validate_sort_vars_are_in_scope(
     filter: &Option<Filter>,
     sorting: &Option<Sorting>,
 ) -> Result {
-    let names_in_scope = filter
+    let names_in_scope: HashSet<VariableRef> = filter
         .as_ref()
-        .map(|f| f.vars.iter().map(|v| v.clone()).collect())
-        .unwrap_or_else(|| conjunction.named_variables());
+        .map(|f| f.vars.iter().map(|v| v.as_ref()).collect())
+        .unwrap_or_else(|| conjunction.named_variables().collect());
     collect_err(sorting.iter().flat_map(|s| &s.vars).map(|v| v.clone()).map(|r| {
-        names_in_scope.contains(&r).then_some(()).ok_or_else(|| TypeQLError::GetVarNotBound(r).into())
+        names_in_scope.contains(&r.variable.as_ref()).then_some(()).ok_or_else(|| TypeQLError::GetVarNotBound(r.variable.clone()).into())
     }))
 }
 
 fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
-    let all_refs = conjunction.variables_recursive();
-    let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) = all_refs.partition(|r| r.is_concept());
-    let concept_names = concept_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
-    let value_names = value_refs.iter().map(|r| r.name()).collect::<HashSet<_>>();
+    let all_refs: HashSet<VariableRef> = conjunction.variables_recursive().collect();
+    let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) = all_refs.iter().partition(|r| r.is_concept());
+    let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
+    let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
     let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
     if !common_refs.is_empty() {
         return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());

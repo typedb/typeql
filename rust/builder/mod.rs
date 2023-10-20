@@ -108,7 +108,7 @@ macro_rules! filter {
 #[macro_export]
 macro_rules! sort_vars {
     ($($arg:expr),*) => {{
-        $crate::query::Sorting::new(vec![$(Into::<$crate::query::sorting::SortedVariable>::into($arg), )*])
+        $crate::query::Sorting::new(vec![$(Into::<$crate::query::sorting::SortVariable>::into($arg), )*])
     }}
 }
 

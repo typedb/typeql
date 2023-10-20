@@ -33,6 +33,7 @@ use crate::{
     pattern::{Constant, ThingStatement, ValueStatement},
     variable::{ConceptVariable, ValueVariable},
 };
+use crate::variable::Variable;
 use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -113,6 +114,15 @@ impl<T: Into<Constant>> From<T> for Value {
     }
 }
 
+impl From<Variable> for Value {
+    fn from(variable: Variable) -> Self {
+        match variable {
+            Variable::Concept(var) => Value::ThingVariable(Box::new(var.into_thing())),
+            Variable::Value(var) => Value::ValueVariable(Box::new(var.into_value())),
+        }
+    }
+}
+
 impl From<ConceptVariable> for Value {
     fn from(variable: ConceptVariable) -> Self {
         Value::ThingVariable(Box::new(variable.into_thing()))
@@ -121,7 +131,7 @@ impl From<ConceptVariable> for Value {
 
 impl From<ValueVariable> for Value {
     fn from(variable: ValueVariable) -> Self {
-        Value::ValueVariable(Box::new(variable.into_value_variable()))
+        Value::ValueVariable(Box::new(variable.into_value()))
     }
 }
 

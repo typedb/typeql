@@ -304,7 +304,7 @@ fn get_role_player_constraint(node: Node) -> RolePlayerConstraint {
     let player = get_var_concept(
         children_rev.consume_expected(Rule::player).into_children().consume_expected(Rule::VAR_CONCEPT_)
     );
-    if let Some(type_) = children_rev.consume_if_matches(Rule::type_) {
+    if let Some(type_) = children_rev.consume_if_matches(Rule::type_ref) {
         match visit_type(type_) {
             Type::Label(label) => RolePlayerConstraint::from((label, player)),
             Type::Variable(var) => RolePlayerConstraint::from((var, player)),
@@ -542,7 +542,7 @@ fn visit_sort(node: Node) -> Sorting {
     sorting
 }
 
-fn visit_var_order(node: Node) -> sorting::SortedVariable {
+fn visit_var_order(node: Node) -> sorting::SortVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::var_order);
     let mut children = node.into_children();
     let var = get_var(children.consume_expected(Rule::VAR_));
@@ -676,36 +676,36 @@ fn visit_statement_value(node: Node) -> ValueStatement {
 fn visit_statement_type(node: Node) -> TypeStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_type);
     let mut children = node.into_children();
-    let mut var_type = visit_type_any(children.consume_expected(Rule::type_any)).into_type_statement();
+    let mut var_type = visit_type_any(children.consume_expected(Rule::type_ref)).into_type_statement();
     var_type = children.map(Node::into_children).fold(var_type, |var_type, mut constraint_nodes| {
         let keyword = constraint_nodes.consume_any();
         let statement = match keyword.as_rule() {
             Rule::ABSTRACT => var_type.abstract_(),
             Rule::OWNS => {
-                let type_ = visit_type(constraint_nodes.consume_expected(Rule::type_)).into_type_statement();
+                let type_ = visit_type(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement();
                 let overridden = constraint_nodes
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint_nodes.consume_expected(Rule::type_)).into_type_statement());
+                    .map(|_| visit_type(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement());
                 let annotations = visit_annotations_owns(constraint_nodes.consume_expected(Rule::annotations_owns));
                 var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
             }
             Rule::PLAYS => {
-                let type_ = visit_type_scoped(constraint_nodes.consume_expected(Rule::type_scoped)).into_type_statement();
+                let type_ = visit_type_scoped(constraint_nodes.consume_expected(Rule::type_ref_scoped)).into_type_statement();
                 let overridden = constraint_nodes
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint_nodes.consume_expected(Rule::type_)).into_type_statement());
+                    .map(|_| visit_type(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement());
                 var_type.constrain_plays(PlaysConstraint::new(type_, overridden))
             }
             Rule::REGEX => var_type.regex(get_regex(constraint_nodes.consume_expected(Rule::QUOTED_STRING))),
             Rule::RELATES => {
-                let type_ = visit_type(constraint_nodes.consume_expected(Rule::type_)).into_type_statement();
+                let type_ = visit_type(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement();
                 let overridden = constraint_nodes
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type(constraint_nodes.consume_expected(Rule::type_)).into_type_statement());
+                    .map(|_| visit_type(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement());
                 var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
             }
             Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
-                visit_type_any(constraint_nodes.consume_expected(Rule::type_any)).into_type_statement(),
+                visit_type_any(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement(),
                 matches!(keyword.into_child().unwrap().as_rule(), Rule::SUBX).into(),
             ))),
             Rule::TYPE => var_type.type_(visit_label_any(constraint_nodes.consume_expected(Rule::label_any))),
@@ -758,7 +758,7 @@ fn visit_statement_thing(node: Node) -> ThingStatement {
         let keyword = children.consume_any();
         stmt_thing = match keyword.as_rule() {
             Rule::IID => stmt_thing.iid(children.consume_expected(Rule::IID_).as_str()),
-            Rule::ISA_ => stmt_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_))),
+            Rule::ISA_ => stmt_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_ref))),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar(children.to_string())),
         }
     }
@@ -780,7 +780,7 @@ fn visit_statement_relation(node: Node) -> ThingStatement {
         .constrain_relation(visit_relation(children.consume_expected(Rule::relation)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
-        let type_ = children.consume_expected(Rule::type_);
+        let type_ = children.consume_expected(Rule::type_ref);
         relation = relation.constrain_isa(get_isa_constraint(isa, type_));
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
@@ -800,7 +800,7 @@ fn visit_statement_attribute(node: Node) -> ThingStatement {
         .constrain_predicate(visit_predicate(children.consume_expected(Rule::predicate)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
-        let type_ = children.consume_expected(Rule::type_);
+        let type_ = children.consume_expected(Rule::type_ref);
         attribute = attribute.constrain_isa(get_isa_constraint(isa, type_));
     }
     if let Some(attributes) = children.consume_if_matches(Rule::attributes) {
@@ -897,7 +897,7 @@ fn visit_expression(node: Node) -> Expression {
 
     pratt_parser
         .map_primary(|primary| match primary.as_rule() {
-            Rule::VAR_ => Expression::Variable(get_var(primary)),
+            Rule::VAR_ => get_var(primary).into(),
             Rule::constant => Expression::Constant(visit_constant(primary)),
             Rule::expression_function => Expression::Function(visit_function(primary)),
             Rule::expression_parenthesis => visit_expression(primary.into_children().consume_any()),
@@ -965,13 +965,13 @@ fn visit_schema_rule_declaration(node: Node) -> RuleDeclaration {
 }
 
 fn visit_type_any(node: Node) -> Type {
-    dbg_assert_eq_line!(node.as_rule(), Rule::type_any);
+    dbg_assert_eq_line!(node.as_rule(), Rule::type_ref);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
         Rule::VAR_CONCEPT_ => Type::Variable(get_var_concept(child)),
-        Rule::type_ => visit_type(child),
-        Rule::type_scoped => visit_type_scoped(child),
+        Rule::type_ref => visit_type(child),
+        Rule::type_ref_scoped => visit_type_scoped(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar(child.to_string())),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
@@ -979,7 +979,7 @@ fn visit_type_any(node: Node) -> Type {
 }
 
 fn visit_type_scoped(node: Node) -> Type {
-    dbg_assert_eq_line!(node.as_rule(), Rule::type_scoped);
+    dbg_assert_eq_line!(node.as_rule(), Rule::type_ref_scoped);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
@@ -992,7 +992,7 @@ fn visit_type_scoped(node: Node) -> Type {
 }
 
 fn visit_type(node: Node) -> Type {
-    dbg_assert_eq_line!(node.as_rule(), Rule::type_);
+    dbg_assert_eq_line!(node.as_rule(), Rule::type_ref);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {

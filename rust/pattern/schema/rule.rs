@@ -21,6 +21,7 @@
  */
 
 use std::{fmt, iter};
+use std::collections::HashSet;
 
 use crate::{
     common::{
@@ -33,6 +34,7 @@ use crate::{
     Label,
 };
 use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RuleDeclaration {
@@ -157,8 +159,8 @@ fn infers_relation(then: &ThingStatement) -> bool {
 }
 
 fn expect_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {
-    let bounds = when.named_variables();
-    if !then.variables().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
+    let bounds: HashSet<VariableRef> = when.named_variables().collect();
+    if !then.variables().filter(|r| r.is_name()).all(|r| bounds.contains(&r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
     }
     Ok(())

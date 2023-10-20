@@ -42,7 +42,7 @@ impl ValueVariable {
         Self::Name(name)
     }
 
-    pub fn into_value_variable(self) -> ValueStatement {
+    pub fn into_value(self) -> ValueStatement {
         ValueStatement::new(self)
     }
 
@@ -62,11 +62,11 @@ impl ValueVariable {
 
 impl ValueConstrainable for ValueVariable {
     fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
-        self.into_value_variable().constrain_assign(assign)
+        self.into_value().constrain_assign(assign)
     }
 
     fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueStatement {
-        self.into_value_variable().constrain_predicate(predicate)
+        self.into_value().constrain_predicate(predicate)
     }
 }
 

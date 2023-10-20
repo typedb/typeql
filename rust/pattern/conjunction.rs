@@ -56,7 +56,7 @@ impl Conjunction {
     // }
 
     pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
-        let names = self.named_variables();
+        let names = self.named_variables().collect();
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
             iter::once(validate_bounded(&names, bounds, self))
@@ -66,13 +66,6 @@ impl Conjunction {
 }
 
 fn validate_bounded(names: &HashSet<VariableRef<'_>>, bounds: &HashSet<VariableRef<'_>>, conjunction: &Conjunction) -> Result {
-
-    let f = HashSet::new();
-    f.insert(1);
-    f.insert(2);
-    f.insert(3);
-
-
     if bounds.is_disjoint(names) {
         Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
@@ -90,7 +83,7 @@ impl Variabilizable for Conjunction {
         Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
             |p| match p {
                 Pattern::Statement(v) => v.variables(),
-                Pattern::Conjunction(c) => c.named_vars(),
+                Pattern::Conjunction(c) => c.named_variables(),
                 _ => unreachable!(),
             },
         ))

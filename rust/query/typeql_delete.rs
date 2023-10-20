@@ -20,21 +20,23 @@
  *
  */
 
+use std::collections::HashSet;
 use std::fmt;
 
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
+        Result,
         token,
         validatable::Validatable,
-        Result,
     },
-    pattern::{Variabilizable, ThingStatement},
-    query::{writable::validate_non_empty, TypeQLUpdate, Writable},
+    pattern::{ThingStatement, Variabilizable},
+    query::{TypeQLUpdate, Writable, writable::validate_non_empty},
     write_joined,
 };
 use crate::query::MatchClause;
 use crate::query::modifier::Modifiers;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDelete {
@@ -49,12 +51,12 @@ impl TypeQLDelete {
     }
 
     fn validate_delete_in_scope_of_match(&self) -> Result {
-        let names_in_scope = self.clause_match.named_variables();
+        let names_in_scope: HashSet<VariableRef> = self.clause_match.named_variables().collect();
         collect_err(self.statements.iter().flat_map(|v| v.variables()).filter(|r| r.is_name()).map(|r| -> Result {
-            if names_in_scope.contains(r) {
+            if names_in_scope.contains(&r) {
                 Ok(())
             } else {
-                Err(TypeQLError::VariableOutOfScopeDelete(r.clone()))?
+                Err(TypeQLError::VariableOutOfScopeDelete(r.to_owned()))?
             }
         }))
     }
@@ -68,7 +70,7 @@ impl Validatable for TypeQLDelete {
                 self.validate_delete_in_scope_of_match(),
                 validate_non_empty(&self.statements),
             ].into_iter())
-            .chain(self.statements.iter().map(Validatable::validate)),
+                .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }

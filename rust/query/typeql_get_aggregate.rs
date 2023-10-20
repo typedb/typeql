@@ -70,14 +70,14 @@ impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
         collect_err(
             [self.validate_method_variable_compatible(), self.query.validate()]
                 .into_iter()
-                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.named_variables()))),
+                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.named_variables().collect()))),
         )
     }
 }
 
-fn validate_variable_in_scope(var: VariableRef<'_>, names_in_scope: HashSet<VariableRef<'_>>) -> Result {
-    if !names_in_scope.contains(var.reference()) {
-        Err(TypeQLError::GetVarNotBound(var.reference().clone()))?;
+fn validate_variable_in_scope(var: &Variable, names_in_scope: HashSet<VariableRef<'_>>) -> Result {
+    if !names_in_scope.contains(&var.as_ref()) {
+        Err(TypeQLError::GetVarNotBound(var.clone()))?;
     }
     Ok(())
 }
