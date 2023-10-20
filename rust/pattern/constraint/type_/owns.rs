@@ -23,11 +23,11 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{TypeStatement, TypeStatementBuilder},
-    variable::ConceptVariable,
+    common::{error::collect_err, Result, token, validatable::Validatable},
     Label,
+    variable::ConceptVariable,
 };
+use crate::variable::TypeReference;
 use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
@@ -48,25 +48,24 @@ impl fmt::Display for Annotation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct OwnsConstraint {
-    pub attribute_type: TypeStatement,
-    pub overridden_attribute_type: Option<TypeStatement>,
+    pub attribute_type: TypeReference,
+    pub overridden_attribute_type: Option<TypeReference>,
     pub annotations: Vec<Annotation>,
 }
 
 impl OwnsConstraint {
     pub(crate) fn new(
-        attribute_type: TypeStatement,
-        overridden_attribute_type: Option<TypeStatement>,
+        attribute_type: TypeReference,
+        overridden_attribute_type: Option<TypeReference>,
         annotations: Vec<Annotation>,
     ) -> Self {
         OwnsConstraint { attribute_type, overridden_attribute_type, annotations }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new(
-            iter::once(VariableRef::Concept(&self.attribute_type.variable))
-                .chain(self.overridden_attribute_type.iter().map(|v| VariableRef::Concept(&v.variable))),
-        )
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+        Box::new(self.attribute_type.variables().chain(
+            self.overridden_attribute_type.iter().flat_map(|attr_type| attr_type.variables())
+        ))
     }
 }
 
@@ -93,18 +92,18 @@ impl From<String> for OwnsConstraint {
 
 impl From<Label> for OwnsConstraint {
     fn from(attribute_type: Label) -> Self {
-        OwnsConstraint::from(ConceptVariable::hidden().type_(attribute_type))
+        OwnsConstraint::from(TypeReference::Label(attribute_type))
     }
 }
 
 impl From<ConceptVariable> for OwnsConstraint {
     fn from(attribute_type: ConceptVariable) -> Self {
-        OwnsConstraint::from(attribute_type.into_type())
+        OwnsConstraint::from(TypeReference::Variable(attribute_type))
     }
 }
 
-impl From<TypeStatement> for OwnsConstraint {
-    fn from(attribute_type: TypeStatement) -> Self {
+impl From<TypeReference> for OwnsConstraint {
+    fn from(attribute_type: TypeReference) -> Self {
         OwnsConstraint::new(attribute_type, None, vec![])
     }
 }
@@ -123,21 +122,22 @@ impl From<(String, String)> for OwnsConstraint {
 
 impl From<(Label, Label)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (Label, Label)) -> Self {
-        OwnsConstraint::from((
-            ConceptVariable::hidden().type_(attribute_type),
-            ConceptVariable::hidden().type_(overridden_attribute_type),
-        ))
+        OwnsConstraint::from(
+            (TypeReference::Label(attribute_type), TypeReference::Label(overridden_attribute_type))
+        )
     }
 }
 
 impl From<(ConceptVariable, ConceptVariable)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (ConceptVariable, ConceptVariable)) -> Self {
-        OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type()))
+        OwnsConstraint::from(
+            (TypeReference::Variable(attribute_type), TypeReference::Variable(overridden_attribute_type))
+        )
     }
 }
 
-impl From<(TypeStatement, TypeStatement)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (TypeStatement, TypeStatement)) -> Self {
+impl From<(TypeReference, TypeReference)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (TypeReference, TypeReference)) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), vec![])
     }
 }
@@ -156,18 +156,18 @@ impl From<(String, Annotation)> for OwnsConstraint {
 
 impl From<(Label, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (Label, Annotation)) -> Self {
-        OwnsConstraint::from((ConceptVariable::hidden().type_(attribute_type), [annotation]))
+        OwnsConstraint::from((TypeReference::Label(attribute_type), [annotation]))
     }
 }
 
 impl From<(ConceptVariable, Annotation)> for OwnsConstraint {
     fn from((attribute_type, annotation): (ConceptVariable, Annotation)) -> Self {
-        OwnsConstraint::from((attribute_type.into_type(), [annotation]))
+        OwnsConstraint::from((TypeReference::Variable(attribute_type), [annotation]))
     }
 }
 
-impl From<(TypeStatement, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (TypeStatement, Annotation)) -> Self {
+impl From<(TypeReference, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (TypeReference, Annotation)) -> Self {
         OwnsConstraint::new(attribute_type, None, [annotation].into())
     }
 }
@@ -187,8 +187,8 @@ impl From<(String, String, Annotation)> for OwnsConstraint {
 impl From<(Label, Label, Annotation)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type, annotation): (Label, Label, Annotation)) -> Self {
         OwnsConstraint::from((
-            ConceptVariable::hidden().type_(attribute_type),
-            ConceptVariable::hidden().type_(overridden_attribute_type),
+            TypeReference::Label(attribute_type),
+            TypeReference::Label(overridden_attribute_type),
             [annotation],
         ))
     }
@@ -202,12 +202,15 @@ impl From<(ConceptVariable, ConceptVariable, Annotation)> for OwnsConstraint {
             Annotation,
         ),
     ) -> Self {
-        OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type(), [annotation]))
+        OwnsConstraint::from(
+            (TypeReference::Variable(attribute_type),
+             TypeReference::Variable(overridden_attribute_type),
+             [annotation]))
     }
 }
 
-impl From<(TypeStatement, TypeStatement, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotation): (TypeStatement, TypeStatement, Annotation)) -> Self {
+impl From<(TypeReference, TypeReference, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type, annotation): (TypeReference, TypeReference, Annotation)) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), [annotation].into())
     }
 }
@@ -226,18 +229,18 @@ impl<const N: usize> From<(String, [Annotation; N])> for OwnsConstraint {
 
 impl<const N: usize> From<(Label, [Annotation; N])> for OwnsConstraint {
     fn from((attribute_type, annotations): (Label, [Annotation; N])) -> Self {
-        OwnsConstraint::from((ConceptVariable::hidden().type_(attribute_type), annotations))
+        OwnsConstraint::from((TypeReference::Label(attribute_type), annotations))
     }
 }
 
 impl<const N: usize> From<(ConceptVariable, [Annotation; N])> for OwnsConstraint {
     fn from((attribute_type, annotations): (ConceptVariable, [Annotation; N])) -> Self {
-        OwnsConstraint::from((attribute_type.into_type(), annotations))
+        OwnsConstraint::from((TypeReference::Variable(attribute_type), annotations))
     }
 }
 
-impl<const N: usize> From<(TypeStatement, [Annotation; N])> for OwnsConstraint {
-    fn from((attribute_type, annotations): (TypeStatement, [Annotation; N])) -> Self {
+impl<const N: usize> From<(TypeReference, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (TypeReference, [Annotation; N])) -> Self {
         OwnsConstraint::new(attribute_type, None, annotations.into())
     }
 }
@@ -257,8 +260,8 @@ impl<const N: usize> From<(String, String, [Annotation; N])> for OwnsConstraint 
 impl<const N: usize> From<(Label, Label, [Annotation; N])> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type, annotations): (Label, Label, [Annotation; N])) -> Self {
         OwnsConstraint::from((
-            ConceptVariable::hidden().type_(attribute_type),
-            ConceptVariable::hidden().type_(overridden_attribute_type),
+            TypeReference::Label(attribute_type),
+            TypeReference::Label(overridden_attribute_type),
             annotations,
         ))
     }
@@ -272,13 +275,16 @@ impl<const N: usize> From<(ConceptVariable, ConceptVariable, [Annotation; N])> f
             [Annotation; N],
         ),
     ) -> Self {
-        OwnsConstraint::from((attribute_type.into_type(), overridden_attribute_type.into_type(), annotations))
+        OwnsConstraint::from((
+            TypeReference::Variable(attribute_type),
+            TypeReference::Variable(overridden_attribute_type),
+            annotations))
     }
 }
 
-impl<const N: usize> From<(TypeStatement, TypeStatement, [Annotation; N])> for OwnsConstraint {
+impl<const N: usize> From<(TypeReference, TypeReference, [Annotation; N])> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotations): (TypeStatement, TypeStatement, [Annotation; N]),
+        (attribute_type, overridden_attribute_type, annotations): (TypeReference, TypeReference, [Annotation; N]),
     ) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), annotations.into())
     }

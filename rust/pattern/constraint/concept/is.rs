@@ -32,13 +32,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {
-    pub variable: Box<ConceptStatement>,
-}
-
-impl IsConstraint {
-    fn new(var: ConceptStatement) -> Self {
-        Self { variable: Box::new(var) }
-    }
+    pub variable: ConceptVariable,
 }
 
 impl Validatable for IsConstraint {
@@ -49,19 +43,19 @@ impl Validatable for IsConstraint {
 
 impl From<&str> for IsConstraint {
     fn from(string: &str) -> Self {
-        Self::from(cvar(string))
+        Self::from(ConceptVariable::Name(string.to_string()))
     }
 }
 
 impl From<String> for IsConstraint {
     fn from(string: String) -> Self {
-        Self::from(cvar(string))
+        Self::from(ConceptVariable::Name(string))
     }
 }
 
 impl From<ConceptVariable> for IsConstraint {
-    fn from(var: ConceptVariable) -> Self {
-        Self::new(var.into_concept())
+    fn from(variable: ConceptVariable) -> Self {
+        Self { variable }
     }
 }
 

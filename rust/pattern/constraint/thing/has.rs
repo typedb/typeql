@@ -43,13 +43,13 @@ pub enum HasConstraint {
 impl HasConstraint {
     pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match self {
-            HasConstraint::HasConcept(label_opt, var) => {
+            HasConstraint::HasConcept(_, var) => {
                 Box::new(iter::once(VariableRef::Concept(var)))
             }
-            HasConstraint::HasValue(label, var) => {
+            HasConstraint::HasValue(_, var) => {
                 Box::new(iter::once(VariableRef::Value(var)))
             }
-            HasConstraint::HasPredicate(label, predicate) => {
+            HasConstraint::HasPredicate(_, predicate) => {
                 predicate.variables()
             }
         }

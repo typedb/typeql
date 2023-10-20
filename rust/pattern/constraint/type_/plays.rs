@@ -28,21 +28,20 @@ use crate::{
     variable::ConceptVariable,
     Label,
 };
+use crate::variable::TypeReference;
 use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PlaysConstraint {
-    pub role_type: TypeStatement,
-    pub relation_type: Option<TypeStatement>,
-    pub overridden_role_type: Option<TypeStatement>,
+    pub role_type: TypeReference,
+    pub relation_type: Option<TypeReference>,
+    pub overridden_role_type: Option<TypeReference>,
 }
 
 impl PlaysConstraint {
-    pub(crate) fn new(role_type: TypeStatement, overridden_role_type: Option<TypeStatement>) -> Self {
+    pub(crate) fn new(role_type: TypeReference, overridden_role_type: Option<TypeReference>) -> Self {
         PlaysConstraint {
-            relation_type: role_type
-                .label
-                .as_ref()
+            relation_type: role_type.
                 .map(|label| ConceptVariable::hidden().type_(label.label.scope.as_ref().cloned().unwrap())),
             role_type,
             overridden_role_type,

@@ -30,9 +30,9 @@ use crate::{
         validatable::Validatable,
     },
     Label,
-    pattern::{ThingStatement, TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable, write_joined,
 };
+use crate::variable::TypeReference;
 use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -50,10 +50,9 @@ impl RelationConstraint {
         self.role_players.push(role_player);
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(self.role_players.iter().flat_map(|rp| rp.variables()))
     }
-
 }
 
 impl Validatable for RelationConstraint {
@@ -88,19 +87,19 @@ impl fmt::Display for RelationConstraint {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RolePlayerConstraint {
-    pub role_type: Option<TypeStatement>,
-    pub player: ThingStatement,
+    pub role_type: Option<TypeReference>,
+    pub player: ConceptVariable,
     pub repetition: u64,
 }
 
 impl RolePlayerConstraint {
-    pub fn new(role_type: Option<TypeStatement>, player: ThingStatement) -> Self {
+    pub fn new(role_type: Option<TypeReference>, player: ConceptVariable) -> Self {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new((self.role_type.iter().map(|r| r.owner()))
-            .chain(iter::once(self.player.owner())))
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+        Box::new(self.role_type.iter().flat_map(|r| r.variables())
+            .chain(iter::once(VariableRef::Concept(&self.player))))
     }
 }
 
@@ -142,42 +141,38 @@ impl From<(Label, String)> for RolePlayerConstraint {
 
 impl From<ConceptVariable> for RolePlayerConstraint {
     fn from(player_var: ConceptVariable) -> Self {
-        Self::new(None, player_var.into_thing())
+        Self::new(None, player_var)
     }
 }
 
 impl From<(String, ConceptVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, ConceptVariable)) -> Self {
-        Self::from((ConceptVariable::hidden().type_(role_type), player_var))
+        Self::from((TypeReference::Label(role_type.into()), player_var))
     }
 }
 
 impl From<(Label, ConceptVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, ConceptVariable)) -> Self {
-        Self::from((ConceptVariable::hidden().type_(role_type), player_var))
+        Self::from((TypeReference::Label(role_type), player_var))
     }
 }
 
 impl From<(ConceptVariable, ConceptVariable)> for RolePlayerConstraint {
     fn from((role_type, player_var): (ConceptVariable, ConceptVariable)) -> Self {
-        Self::new(Some(role_type.into_type()), player_var.into_thing())
+        Self::new(Some(TypeReference::Variable(role_type)), player_var)
     }
 }
 
-impl From<(TypeStatement, ConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (TypeStatement, ConceptVariable)) -> Self {
-        Self::new(Some(role_type), player_var.into_thing())
+impl From<(TypeReference, ConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (TypeReference, ConceptVariable)) -> Self {
+        Self::new(Some(role_type), player_var)
     }
 }
 
 impl fmt::Display for RolePlayerConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(role_type) = &self.role_type {
-            if role_type.variable.is_visible() {
-                write!(f, "{}", role_type.variable)?;
-            } else {
-                write!(f, "{}", role_type.label.as_ref().unwrap().label)?;
-            }
+            write!(f, "{}", role_type)?;
             f.write_str(": ")?;
         }
         write!(f, "{}", self.player)
