@@ -25,14 +25,15 @@ use std::{fmt, iter};
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
+        Result,
         string::escape_regex,
         token,
         validatable::Validatable,
-        Result,
     },
     pattern::{Constant, ThingStatement, ValueStatement},
-    variable::{Variable, ConceptVariable, ValueVariable},
+    variable::{ConceptVariable, ValueVariable},
 };
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PredicateConstraint {
@@ -48,10 +49,10 @@ impl PredicateConstraint {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match &self.value {
-            Value::ThingVariable(v) => Box::new(iter::once(&v.variable.into())),
-            Value::ValueVariable(v) => Box::new(iter::once(&v.variable.into())),
+            Value::ThingVariable(v) => Box::new(iter::once(VariableRef::Concept(&v.variable))),
+            Value::ValueVariable(v) => Box::new(iter::once(VariableRef::Value(&v.variable))),
             _ => Box::new(iter::empty()),
         }
     }

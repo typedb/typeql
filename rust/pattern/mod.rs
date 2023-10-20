@@ -20,18 +20,6 @@
  *
  */
 
-mod conjunction;
-mod constant;
-mod constraint;
-mod disjunction;
-mod expression;
-mod label;
-mod negation;
-mod schema;
-pub(crate) mod statement;
-#[cfg(test)]
-mod test;
-
 use std::{collections::HashSet, fmt};
 
 pub use conjunction::Conjunction;
@@ -44,21 +32,33 @@ pub use constraint::{
 pub use disjunction::Disjunction;
 pub use expression::{Expression, Function, Operation};
 pub use label::Label;
-pub use crate::common::variabilizable::Variabilizable;
 pub use negation::Negation;
 pub use schema::{RuleDeclaration, RuleDefinition};
-pub(crate) use statement::LeftOperand;
 pub use statement::{
     ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder,
     RelationConstrainable, RelationStatementBuilder, Statement, ThingConstrainable, ThingStatement,
     ThingStatementBuilder, TypeConstrainable, TypeStatement, TypeStatementBuilder, ValueConstrainable, ValueStatement, ValueStatementBuilder,
 };
+pub(crate) use statement::LeftOperand;
 
 use crate::{
     common::{Result, validatable::Validatable},
     enum_getter, enum_wrapper,
 };
-use crate::variable::Variable;
+pub use crate::common::variabilizable::Variabilizable;
+use crate::variable::variable::VariableRef;
+
+mod conjunction;
+mod constant;
+mod constraint;
+mod disjunction;
+mod expression;
+mod label;
+mod negation;
+mod schema;
+pub(crate) mod statement;
+#[cfg(test)]
+mod test;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
@@ -69,7 +69,7 @@ pub enum Pattern {
 }
 
 impl Pattern {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(match self {
             Pattern::Conjunction(conjunction) => conjunction.variables_recursive(),
             Pattern::Disjunction(disjunction) => disjunction.variables_recursive(),
@@ -78,7 +78,7 @@ impl Pattern {
         })
     }
 
-    pub fn validate_is_bounded_by(&self, bounds: &HashSet<&dyn Variable>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         match self {
             Pattern::Conjunction(conjunction) => conjunction.validate_is_bounded_by(bounds),
             Pattern::Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
@@ -114,7 +114,7 @@ impl Validatable for Pattern {
 }
 
 impl Variabilizable for Pattern {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match self {
             Pattern::Conjunction(conjunction) => conjunction.named_variables(),
             Pattern::Disjunction(disjunction) => disjunction.named_variables(),

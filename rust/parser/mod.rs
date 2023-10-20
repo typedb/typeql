@@ -545,12 +545,11 @@ fn visit_sort(node: Node) -> Sorting {
 fn visit_var_order(node: Node) -> sorting::SortedVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::var_order);
     let mut children = node.into_children();
-    let var_order = sorting::SortedVariable {
-        var: get_var(children.consume_expected(Rule::VAR_)),
-        order: children.consume_if_matches(Rule::ORDER_).map(|child| token::Order::from(child.as_str())),
-    };
+    let var = get_var(children.consume_expected(Rule::VAR_));
+    let order = children.consume_if_matches(Rule::ORDER_).map(|child| token::Order::from(child.as_str()));
+    let sorted_variable = (var, order).into();
     dbg_assert_line!(children.try_consume_any().is_none());
-    var_order
+    sorted_variable
 }
 
 fn visit_aggregate_method(node: Node) -> token::Aggregate {

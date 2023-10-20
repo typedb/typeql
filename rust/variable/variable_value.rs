@@ -30,7 +30,6 @@ use crate::{
     },
 };
 use crate::common::token;
-use crate::variable::Variable;
 use crate::variable::variable::validate_variable_name;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -60,8 +59,6 @@ impl ValueVariable {
         name
     }
 }
-
-impl Variable for ValueVariable {}
 
 impl ValueConstrainable for ValueVariable {
     fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {

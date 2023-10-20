@@ -39,6 +39,7 @@ use crate::{
     pattern::{Normalisable, Pattern},
 };
 pub use crate::variable::variable::Variable;
+use crate::variable::variable::VariableRef;
 pub use crate::variable::variable_concept::ConceptVariable;
 pub use crate::variable::variable_value::ValueVariable;
 
@@ -57,16 +58,16 @@ pub enum Statement {
 }
 
 impl Statement {
-    pub fn owner(&self) -> &dyn Variable {
+    pub fn owner(&self) -> VariableRef<'_> {
         match self {
-            Statement::Concept(concept) => &concept.variable,
-            Statement::Thing(thing) => &thing.variable,
-            Statement::Type(type_) => &type_.variable,
-            Statement::Value(value) => &value.variable,
+            Statement::Concept(concept) => VariableRef::Concept(&concept.variable),
+            Statement::Thing(thing) => VariableRef::Concept(&thing.variable),
+            Statement::Type(type_) => VariableRef::Concept(&type_.variable),
+            Statement::Value(value) => VariableRef::Value(&value.variable),
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match self {
             Statement::Concept(concept) => concept.variables(),
             Statement::Thing(thing) => thing.variables(),
@@ -75,7 +76,7 @@ impl Statement {
         }
     }
 
-    pub fn validate_is_bounded_by(&self, bounds: &HashSet<&dyn Variable>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         if !self.variables().any(|r| r.is_name() && bounds.contains(r)) {
             Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
         }

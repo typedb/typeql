@@ -28,7 +28,7 @@ use crate::{
     variable::ConceptVariable,
     Label,
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PlaysConstraint {
@@ -49,11 +49,11 @@ impl PlaysConstraint {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(&self.role_type.variable)
-                .chain(self.relation_type.iter().map(|v| &v.variable))
-                .chain(self.overridden_role_type.iter().map(|v| &v.variable)),
+            iter::once(VariableRef::Concept(&self.role_type.variable))
+                .chain(self.relation_type.iter().map(|v| VariableRef::Concept(&v.variable)))
+                .chain(self.overridden_role_type.iter().map(|v| VariableRef::Concept(&v.variable))),
         )
     }
 }

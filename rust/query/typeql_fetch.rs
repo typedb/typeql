@@ -20,13 +20,13 @@
  */
 use std::fmt;
 
-use crate::common::Result;
 use crate::common::error::collect_err;
+use crate::common::Result;
 use crate::common::validatable::Validatable;
 use crate::pattern::Variabilizable;
 use crate::query::MatchClause;
 use crate::query::modifier::Modifiers;
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLFetch {
@@ -58,7 +58,7 @@ impl Validatable for TypeQLFetch {
 }
 
 impl Variabilizable for TypeQLFetch {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
 
         // if !self.filter.vars.is_empty() {
         //     self.filter.vars.iter().map(|v| v.reference().clone()).collect()

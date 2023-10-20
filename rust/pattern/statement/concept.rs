@@ -23,13 +23,14 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, validatable::Validatable, Result},
+    common::{error::collect_err, Result, validatable::Validatable},
     pattern::{
         constraint::IsConstraint,
-        statement::{builder::ConceptConstrainable},
+        statement::builder::ConceptConstrainable,
     },
 };
-use crate::variable::{ConceptVariable, Variable};
+use crate::variable::ConceptVariable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConceptStatement {
@@ -42,8 +43,9 @@ impl ConceptStatement {
         ConceptStatement { variable, is_constraint: None }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
-        Box::new(iter::once(&self.variable).chain(self.is_constraint.iter().map(|is| &is.variable.variable)))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(iter::once(VariableRef::Concept(&self.variable))
+            .chain(self.is_constraint.iter().map(|is| VariableRef::Concept(&is.variable.variable))))
     }
 }
 

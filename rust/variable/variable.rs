@@ -20,14 +20,77 @@
  *
  */
 
-use std::fmt::Display;
+use std::fmt;
+use std::fmt::Formatter;
+use std::hash::Hash;
 use crate::common::Result;
 use crate::common::error::TypeQLError;
+use crate::variable::{ConceptVariable, ValueVariable};
 
-pub trait Variable: Display {
 
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+pub enum Variable {
+    Concept(ConceptVariable),
+    Value(ValueVariable),
 }
 
+impl Variable {
+    pub fn as_ref(&self) -> VariableRef<'_> {
+        match self {
+            Self::Concept(cv) => VariableRef::Concept(cv),
+            Self::Value(vv) => VariableRef::Value(vv)
+        }
+    }
+}
+
+impl From<ConceptVariable> for Variable {
+    fn from(concept: ConceptVariable) -> Self {
+        Variable::Concept(concept)
+    }
+}
+
+impl From<ValueVariable> for Variable {
+    fn from(value: ValueVariable) -> Self {
+        Variable::Value(value)
+    }
+}
+
+impl fmt::Display for Variable {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Variable::Concept(concept_variable) => write!(f, "{concept_variable}"),
+            Variable::Value(value_variable) => write!(f, "{value_variable}"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
+pub enum VariableRef<'a> {
+    Concept(&'a ConceptVariable),
+    Value(&'a ValueVariable),
+}
+
+impl VariableRef<'_> {
+
+
+
+    // pub fn to_owned(&self) -> Variable {
+    //     match self {
+    //         Self::Concept(&cv) => Variable::Concept(cv.clone()),
+    //         Self::Value(&vv) => Variable::Value(vv.clone()),
+    //     }
+    // }
+}
+
+
+pub(super) fn validate_variable_name(name: &str) -> Result {
+    if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
+        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    {
+        Err(TypeQLError::InvalidVariableName(name.to_string()))?
+    }
+    Ok(())
+}
 
 
 // #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -90,32 +153,9 @@ pub trait Variable: Display {
 //     }
 // }
 //
-pub(super) fn validate_variable_name(name: &str) -> Result {
-    if !name.starts_with(|c: char| c.is_ascii_alphanumeric())
-        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
-    {
-        Err(TypeQLError::InvalidVariableName(name.to_string()))?
-    }
-    Ok(())
-}
+
 //
-// impl From<ConceptVariable> for Variable {
-//     fn from(concept: ConceptVariable) -> Self {
-//         Variable::Concept(concept)
-//     }
-// }
+
 //
-// impl From<ValueVariable> for Variable {
-//     fn from(value: ValueVariable) -> Self {
-//         Variable::Value(value)
-//     }
-// }
-//
-// impl fmt::Display for Variable {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-//         match self {
-//             Variable::Concept(concept_variable) => write!(f, "{concept_variable}"),
-//             Variable::Value(value_variable) => write!(f, "{value_variable}"),
-//         }
-//     }
+
 // }

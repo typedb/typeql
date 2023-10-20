@@ -22,12 +22,13 @@
 
 use std::{cmp::Ordering, fmt};
 
-use super::Expression;
 use crate::{
     common::token,
-    pattern::{LeftOperand},
+    pattern::LeftOperand,
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
+
+use super::Expression;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Operation {
@@ -113,7 +114,7 @@ impl Operation {
         Arity::Binary
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self.arity() {
             Arity::Binary => Box::new(
                 self.left().unwrap().variables_recursive().chain(self.right().unwrap().variables_recursive()),

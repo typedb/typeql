@@ -27,14 +27,14 @@ use itertools::Itertools;
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
+        Result,
         string::indent,
         validatable::Validatable,
-        Result,
     },
-    pattern::{Disjunction, Variabilizable, Normalisable, Pattern},
+    pattern::{Disjunction, Normalisable, Pattern, Variabilizable},
 };
 use crate::common::token;
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Conjunction {
@@ -47,7 +47,7 @@ impl Conjunction {
         Conjunction { patterns, normalised: None }
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
     //
@@ -55,7 +55,7 @@ impl Conjunction {
     //     self.named_vars().any(|r| r.is_name())
     // }
 
-    pub fn validate_is_bounded_by(&self, bounds: &HashSet<&dyn Variable>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         let names = self.named_variables();
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
@@ -65,7 +65,7 @@ impl Conjunction {
     }
 }
 
-fn validate_bounded(names: &HashSet<&dyn Variable>, bounds: &HashSet<&dyn Variable>, conjunction: &Conjunction) -> Result {
+fn validate_bounded(names: &HashSet<VariableRef<'_>>, bounds: &HashSet<VariableRef<'_>>, conjunction: &Conjunction) -> Result {
 
     let f = HashSet::new();
     f.insert(1);
@@ -86,7 +86,7 @@ impl PartialEq for Conjunction {
 }
 
 impl Variabilizable for Conjunction {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
             |p| match p {
                 Pattern::Statement(v) => v.variables(),

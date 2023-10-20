@@ -26,14 +26,14 @@ use crate::{
     common::{error::collect_err, Result, token, validatable::Validatable},
     pattern::Variabilizable,
     query::{AggregateQueryBuilder, TypeQLGet},
-    variable::Variable,
 };
-use crate::query::typeql_get::GetVar;
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGetGroup {
     pub query: TypeQLGet,
-    pub group_var: GetVar,
+    pub group_var: Variable,
 }
 
 impl AggregateQueryBuilder for TypeQLGetGroup {}
@@ -45,7 +45,7 @@ impl Validatable for TypeQLGetGroup {
 }
 
 impl Variabilizable for TypeQLGetGroup {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         self.query.named_variables()
     }
 }

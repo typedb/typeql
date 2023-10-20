@@ -20,12 +20,13 @@
  */
 
 use std::{fmt, iter};
-use crate::common::error::{collect_err, TypeQLError};
+
 use crate::common::{Error, token};
+use crate::common::error::{collect_err, TypeQLError};
 use crate::common::validatable::Validatable;
-use crate::pattern::{Conjunction, Variabilizable, Pattern};
+use crate::pattern::{Conjunction, Pattern, Variabilizable};
 use crate::Result;
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {
@@ -48,7 +49,7 @@ impl MatchClause {
 }
 
 impl Variabilizable for MatchClause {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         self.conjunction.named_variables()
     }
 }

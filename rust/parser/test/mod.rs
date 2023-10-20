@@ -33,15 +33,16 @@ use crate::{
         },
         validatable::Validatable,
     },
-    filter, gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
+    gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
     parse_query, parse_statement,
     pattern::{
         Annotation::Key, ConceptStatementBuilder, ExpressionBuilder, Label, RelationStatementBuilder,
-        ThingStatementBuilder, TypeStatementBuilder, ValueStatementBuilder, Statement,
+        Statement, ThingStatementBuilder, TypeStatementBuilder, ValueStatementBuilder,
     },
-    query::AggregateQueryBuilder,
-    rel, rule, sort_vars, type_, typeql_insert, typeql_get, Query,
+    Query,
+    query::AggregateQueryBuilder, rel, rule, sort_vars, type_, typeql_get, typeql_insert,
 };
+use crate::variable::Variable;
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
@@ -932,12 +933,13 @@ get $x, ?t;
 group $x; sum ?t;"#;
 
     let parsed = parse_query(query).unwrap().into_get_group_aggregate();
+    let filter: [Variable; 2] = [cvar("x").into(), vvar("t").into()];
     let expected = typeql_get!(
         cvar("i").rel("x").rel("s").isa("income-source"),
         cvar("i").has(("value", cvar("v"))).has(("tax-rate", cvar("r"))),
         vvar("t").assign(cvar("r").multiply(cvar("v"))),
     )
-    .get(filter!(cvar("x"), vvar("t")))
+    .get(filter)
     .group(cvar("x"))
     .sum(vvar("t"));
 

@@ -27,7 +27,7 @@ use crate::{
     common::{error::TypeQLError, string::indent, token, validatable::Validatable, Result},
     pattern::{Conjunction, Disjunction, Normalisable, Pattern},
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Negation {
@@ -46,11 +46,11 @@ impl Negation {
         Self { pattern: Box::new(pattern), normalised: None }
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         self.pattern.variables_recursive()
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         self.pattern.validate_is_bounded_by(bounds)
     }
 }

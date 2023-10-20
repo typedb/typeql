@@ -23,14 +23,15 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, validatable::Validatable, Result},
+    common::{error::collect_err, Result, validatable::Validatable},
     pattern::{
         HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable,
     },
     write_joined,
 };
-use crate::variable::{ConceptVariable, Variable};
+use crate::variable::ConceptVariable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingStatement {
@@ -47,7 +48,7 @@ impl ThingStatement {
         ThingStatement { variable, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
             iter::once(&self.variable)
                 .chain(self.isa.iter().flat_map(|c| c.variables()))
@@ -57,7 +58,7 @@ impl ThingStatement {
         )
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
             iter::once(&self.variable)
                 .chain(self.isa.iter().flat_map(|c| c.variables()))

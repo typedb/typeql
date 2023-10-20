@@ -28,7 +28,8 @@ pub use function::Function;
 pub use operation::Operation;
 
 use crate::pattern::Constant;
-use crate::variable::{ConceptVariable, ValueVariable, Variable};
+use crate::variable::{ConceptVariable, ValueVariable};
+use crate::variable::variable::VariableRef;
 
 mod function;
 mod operation;
@@ -56,13 +57,13 @@ impl fmt::Display for Expression {
 }
 
 impl Expression {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=&dyn Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match self {
             Expression::Operation(operation) => operation.variables_recursive(),
             Expression::Function(function) => function.variables_recursive(),
             Expression::Constant(_constant) => Box::new(iter::empty()),
-            Expression::ThingVariable(variable) => variable,
-            Expression::ValueVariable(variable) => variable,
+            Expression::ThingVariable(variable) => Box::new(iter::once(VariableRef::Concept(variable))),
+            Expression::ValueVariable(variable) => Box::new(iter::once(VariableRef::Value(variable))),
         }
     }
 }
@@ -85,15 +86,15 @@ impl From<Constant> for Expression {
     }
 }
 
-impl From<ValueVariable> for Expression {
-    fn from(variable: ValueVariable) -> Self {
-        Self::Variable(variable.into())
+impl From<ConceptVariable> for Expression {
+    fn from(variable: ConceptVariable) -> Self {
+        Self::ThingVariable(variable)
     }
 }
 
-impl From<ConceptVariable> for Expression {
-    fn from(variable: ConceptVariable) -> Self {
-        Self::Variable(variable.into())
+impl From<ValueVariable> for Expression {
+    fn from(variable: ValueVariable) -> Self {
+        Self::ValueVariable(variable)
     }
 }
 

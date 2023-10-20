@@ -111,10 +111,10 @@ error_messages! { TypeQLError
         13: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
     InvalidAttributeTypeRegex(String) =
         14: "Invalid regular expression '{}'.",
-    IllegalFilterVariableRepeating(GetVar) =
+    IllegalFilterVariableRepeating(Variable) =
         15: "The variable '{}' occurred more than once in get query filter.",
-    VariableOutOfScopeMatch(GetVar) =
-        16: "The variable '{}' is out of scope of the match query.",
+    GetVarNotBound(Variable) =
+        16: "The get variable '{}' is not bound in the match clause.",
     ConceptVariableOutOfScopeDelete(ConceptVariable) =
         17: "The deleted variable '{}' is out of scope of the match query.",
     ValueVariableOutOfScopeDelete(ValueVariable) =

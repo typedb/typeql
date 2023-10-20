@@ -22,13 +22,14 @@
 
 use std::fmt;
 
-use super::Expression;
 use crate::{
     common::token,
-    pattern::{LeftOperand},
+    pattern::LeftOperand,
     write_joined,
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
+
+use super::Expression;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Function {
@@ -37,7 +38,7 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(self.args.iter().flat_map(|expr| expr.variables_recursive()))
     }
 }

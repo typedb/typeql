@@ -23,10 +23,10 @@
 use std::fmt;
 
 use crate::{
-    common::{token, validatable::Validatable, Result},
-    pattern::{Expression},
+    common::{Result, token, validatable::Validatable},
+    pattern::Expression,
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AssignConstraint {
@@ -34,7 +34,7 @@ pub struct AssignConstraint {
 }
 
 impl AssignConstraint {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         self.expression.variables()
     }
 }

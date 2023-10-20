@@ -28,7 +28,7 @@ use crate::{
     variable::ConceptVariable,
     Label,
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum Annotation {
@@ -62,10 +62,10 @@ impl OwnsConstraint {
         OwnsConstraint { attribute_type, overridden_attribute_type, annotations }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(&self.attribute_type.variable)
-                .chain(self.overridden_attribute_type.iter().map(|v| &v.variable)),
+            iter::once(VariableRef::Concept(&self.attribute_type.variable))
+                .chain(self.overridden_attribute_type.iter().map(|v| VariableRef::Concept(&v.variable))),
         )
     }
 }

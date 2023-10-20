@@ -23,10 +23,10 @@
 use std::{collections::HashSet, fmt};
 
 use crate::{
-    common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
+    common::{error::collect_err, Result, string::indent, token, validatable::Validatable},
     pattern::{Conjunction, Normalisable, Pattern},
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Disjunction {
@@ -45,11 +45,11 @@ impl Disjunction {
         Disjunction { patterns, normalised: None }
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &Variable> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Variable>) -> Result {
+    pub fn expect_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         collect_err(self.patterns.iter().map(|p| p.validate_is_bounded_by(bounds)))
     }
 }

@@ -32,6 +32,7 @@ use crate::{
     pattern::{Conjunction, Variabilizable, Pattern, ThingStatement},
     Label,
 };
+use crate::variable::Variable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RuleDeclaration {
@@ -131,7 +132,7 @@ fn expect_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result {
             Err(TypeQLError::InvalidRuleThenHas(
                 rule_label.clone(),
                 then.clone(),
-                has.attribute.variable.clone(),
+                Variable::Concept(has.attribute.variable.clone()),
                 has.type_.clone().unwrap(),
             ))?
         }

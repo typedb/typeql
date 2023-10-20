@@ -64,7 +64,7 @@ pub mod sorting {
     use std::fmt;
 
     use crate::common::token;
-    use crate::variable::{ConceptVariable, ValueVariable};
+    use crate::variable::{ConceptVariable, ValueVariable, Variable};
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub enum SortedVariable {
@@ -82,7 +82,26 @@ pub mod sorting {
         }
     }
 
-    impl From<(ConceptVariable)> for SortedVariable {
+    impl From<Variable> for SortedVariable {
+        fn from(variable: Variable) -> Self {
+            match variable {
+                Variable::Concept(var) => SortedVariable::Concept(var, None),
+                Variable::Value(var) => SortedVariable::Value(var, None)
+            }
+        }
+    }
+
+    impl From<(Variable, token::Order)> for SortedVariable {
+        fn from(ordered_var: (Variable, token::Order)) -> Self {
+            let (v, order) = ordered_var;
+            match v {
+                Variable::Concept(var) => SortedVariable::Concept(var, Some(order)),
+                Variable::Value(var) => SortedVariable::Value(var, Some(order))
+            }
+        }
+    }
+
+    impl From<ConceptVariable> for SortedVariable {
         fn from(variable: ConceptVariable) -> Self {
             SortedVariable::Concept(variable, None)
         }
@@ -95,7 +114,7 @@ pub mod sorting {
         }
     }
 
-    impl From<(ValueVariable)> for SortedVariable {
+    impl From<ValueVariable> for SortedVariable {
         fn from(variable: ValueVariable) -> Self {
             SortedVariable::Value(variable, None)
         }

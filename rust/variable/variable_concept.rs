@@ -32,7 +32,6 @@ use crate::{
     },
     variable::variable::{validate_variable_name},
 };
-use crate::variable::Variable;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub(crate) enum Visibility {
@@ -88,8 +87,6 @@ impl ConceptVariable {
         }
     }
 }
-
-impl Variable for ConceptVariable {}
 
 impl Validatable for ConceptVariable {
     fn validate(&self) -> Result {

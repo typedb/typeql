@@ -30,7 +30,7 @@ use crate::{
     },
     variable::ConceptVariable,
 };
-use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct HasConstraint {
@@ -39,12 +39,14 @@ pub struct HasConstraint {
 }
 
 impl HasConstraint {
-    pub fn variables(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.variable.into())).chain(iter::once(&self.attribute.variable.into())))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(self.type_.iter().map(|t| VariableRef::Concept(&t.variable))
+            .chain(iter::once(VariableRef::Concept(&self.attribute.variable))))
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = &dyn Variable> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.variable.into())).chain(self.attribute.variables_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new((self.type_.iter().map(|t| VariableRef::Concept(&t.variable)))
+            .chain(self.attribute.variables_recursive()))
     }
 }
 
