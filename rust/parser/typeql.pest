@@ -111,13 +111,13 @@ statement_concept = { VAR_CONCEPT_ ~ IS ~ VAR_CONCEPT_ }
 
 // TYPE STATEMENTS =============================================================
 
-statement_type = { type_ref ~ type_constraint ~ ( "," ~ type_constraint )* }
+statement_type = { type_ref_any ~ type_constraint ~ ( "," ~ type_constraint )* }
 type_constraint = { ABSTRACT
                   | OWNS ~ type_ref ~ ( AS ~ type_ref)? ~ annotations_owns
                   | PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref)?
                   | REGEX ~ QUOTED_STRING
                   | RELATES ~ type_ref ~ ( AS ~ type_ref)?
-                  | SUB_ ~ type_ref
+                  | SUB_ ~ type_ref_any
                   | TYPE ~ label_any
                   | VALUE ~ value_type
                   }
@@ -194,8 +194,9 @@ schema_rule = { RULE ~ label ~ ":" ~ WHEN ~ "{" ~ patterns ~ "}" ~ THEN ~ "{" ~ 
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type_ref = { label | VAR_CONCEPT_ }
+type_ref_any = { type_ref_scoped | type_ref | VAR_CONCEPT_ }
 type_ref_scoped = { label_scoped | VAR_CONCEPT_ }
+type_ref = { label | VAR_CONCEPT_ }
 
 label_any = { label_scoped | label }
 label_scoped = { LABEL_SCOPED_ }
