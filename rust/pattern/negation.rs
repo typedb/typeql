@@ -50,7 +50,7 @@ impl Negation {
         self.pattern.variables_recursive()
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         self.pattern.validate_is_bounded_by(bounds)
     }
 }

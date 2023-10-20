@@ -26,7 +26,7 @@ use crate::{
     common::{error::collect_err, Result, validatable::Validatable},
     pattern::{
         AssignConstraint,
-        PredicateConstraint, statement::builder::ValueConstrainable,
+        Predicate, statement::builder::ValueConstrainable,
     },
 };
 use crate::variable::ValueVariable;
@@ -36,7 +36,7 @@ use crate::variable::variable::VariableRef;
 pub struct ValueStatement {
     pub variable: ValueVariable,
     pub assign_constraint: Option<AssignConstraint>,
-    pub predicate_constraint: Option<PredicateConstraint>,
+    pub predicate_constraint: Option<Predicate>,
 }
 
 impl ValueStatement {
@@ -44,10 +44,14 @@ impl ValueStatement {
         ValueStatement { variable, assign_constraint: None, predicate_constraint: None }
     }
 
+    pub fn owner(&self) -> VariableRef<'_> {
+        VariableRef::Value(&self.variable)
+    }
+
     pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(VariableRef::Value(&self.variable))
-                .chain(self.assign_constraint.iter().flat_map(|assign| assign.variables_recursive()))
+            iter::once(self.owner())
+                .chain(self.assign_constraint.iter().flat_map(|assign| assign.variables()))
                 .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.variables())),
         )
     }
@@ -68,7 +72,7 @@ impl ValueConstrainable for ValueStatement {
         Self { assign_constraint: Some(assign), ..self }
     }
 
-    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueStatement {
+    fn constrain_predicate(self, predicate: Predicate) -> ValueStatement {
         Self { predicate_constraint: Some(predicate), ..self }
     }
 }

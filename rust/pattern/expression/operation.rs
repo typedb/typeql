@@ -114,10 +114,10 @@ impl Operation {
         Arity::Binary
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self.arity() {
             Arity::Binary => Box::new(
-                self.left().unwrap().variables_recursive().chain(self.right().unwrap().variables_recursive()),
+                self.left().unwrap().variables().chain(self.right().unwrap().variables()),
             ),
         }
     }

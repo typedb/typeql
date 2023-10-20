@@ -26,7 +26,7 @@ pub use conjunction::Conjunction;
 pub use constant::Constant;
 pub use constraint::{
     AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsaConstraint, IsConstraint,
-    IsExplicit, LabelConstraint, OwnsConstraint, PlaysConstraint, PredicateConstraint, RegexConstraint,
+    IsExplicit, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, RegexConstraint,
     RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
@@ -81,8 +81,8 @@ impl Pattern {
     pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         match self {
             Pattern::Conjunction(conjunction) => conjunction.validate_is_bounded_by(bounds),
-            Pattern::Disjunction(disjunction) => disjunction.expect_is_bounded_by(bounds),
-            Pattern::Negation(negation) => negation.expect_is_bounded_by(bounds),
+            Pattern::Disjunction(disjunction) => disjunction.validate_is_bounded_by(bounds),
+            Pattern::Negation(negation) => negation.validate_is_bounded_by(bounds),
             Pattern::Statement(statement) => statement.validate_is_bounded_by(bounds),
         }
     }

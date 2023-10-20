@@ -39,23 +39,24 @@ use crate::{
     pattern::{
         Annotation, AssignConstraint, ConceptStatement, ConceptStatementBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
-        Pattern, PlaysConstraint, PredicateConstraint, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
+        Pattern, PlaysConstraint, Predicate, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
         RuleDeclaration, RuleDefinition, Statement, SubConstraint, ThingConstrainable, ThingStatement,
         ThingStatementBuilder, TypeConstrainable, TypeStatement, TypeStatementBuilder,
         Value, ValueConstrainable, ValueStatement,
     },
-    variable::{Variable, ConceptVariable, ValueVariable},
     query::{
-        AggregateQueryBuilder, MatchClause, Query, TypeQLDefine, TypeQLDelete, TypeQLGet,
-        TypeQLGetAggregate, TypeQLGetGroup, TypeQLGetGroupAggregate, TypeQLInsert, TypeQLUndefine,
-        TypeQLUpdate, TypeQLFetch
+        AggregateQueryBuilder, MatchClause, Query, TypeQLDefine, TypeQLDelete, TypeQLFetch,
+        TypeQLGet, TypeQLGetAggregate, TypeQLGetGroup, TypeQLGetGroupAggregate, TypeQLInsert,
+        TypeQLUndefine, TypeQLUpdate
     },
+    variable::{ConceptVariable, ValueVariable, Variable},
 };
 use crate::common::error::TypeQLError::IllegalGrammar;
 use crate::common::token::Aggregate;
 use crate::parser::Rule::clause_undefine;
 use crate::query::{Filter, Limit, Offset};
 use crate::query::modifier::{Modifiers, sorting, Sorting};
+use crate::variable::TypeReference;
 
 #[cfg(test)]
 mod test;
@@ -136,21 +137,6 @@ impl<'a, T: Iterator<Item=Node<'a>> + Clone> RuleMatcher<'a> for T {
 
     fn try_consume_any(&mut self) -> Option<Node<'a>> {
         self.next()
-    }
-}
-
-#[derive(Debug)]
-enum TypeRef {
-    Label(Label),
-    Variable(ConceptVariable),
-}
-
-impl TypeRef {
-    pub fn into_type_statement(self) -> TypeStatement {
-        match self {
-            Self::Label(label) => ConceptVariable::hidden().type_(label),
-            Self::Variable(var) => var.into_type(),
-        }
     }
 }
 
@@ -293,8 +279,8 @@ fn get_isa_constraint(isa: Node, node: Node) -> IsaConstraint {
     dbg_assert_eq_line!(isa.as_rule(), Rule::ISA_);
     let is_explicit = matches!(isa.into_child().unwrap().as_rule(), Rule::ISAX).into();
     match visit_type_ref(node) {
-        TypeRef::Label(label) => IsaConstraint::from((label, is_explicit)),
-        TypeRef::Variable(var) => IsaConstraint::from((var, is_explicit)),
+        TypeReference::Label(label) => IsaConstraint::from((label, is_explicit)),
+        TypeReference::Variable(var) => IsaConstraint::from((var, is_explicit)),
     }
 }
 
@@ -306,8 +292,8 @@ fn get_role_player_constraint(node: Node) -> RolePlayerConstraint {
     );
     if let Some(type_) = children_rev.consume_if_matches(Rule::type_ref) {
         match visit_type_ref(type_) {
-            TypeRef::Label(label) => RolePlayerConstraint::from((label, player)),
-            TypeRef::Variable(var) => RolePlayerConstraint::from((var, player)),
+            TypeReference::Label(label) => RolePlayerConstraint::from((label, player)),
+            TypeReference::Variable(var) => RolePlayerConstraint::from((var, player)),
         }
     } else {
         RolePlayerConstraint::from(player)
@@ -845,15 +831,15 @@ fn visit_attribute(node: Node) -> HasConstraint {
     constraint
 }
 
-fn visit_predicate(node: Node) -> PredicateConstraint {
+fn visit_predicate(node: Node) -> Predicate {
     dbg_assert_eq_line!(node.as_rule(), Rule::predicate);
     let mut children = node.into_children();
     let constraint = match children.peek_rule() {
-        Some(Rule::constant) => PredicateConstraint::new(
+        Some(Rule::constant) => Predicate::new(
             token::Predicate::Eq,
             visit_constant(children.consume_expected(Rule::constant)).into(),
         ),
-        Some(Rule::predicate_equality) => PredicateConstraint::new(
+        Some(Rule::predicate_equality) => Predicate::new(
             token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
             {
                 let res_predicate_value = children.consume_expected(Rule::value).into_child();
@@ -868,7 +854,7 @@ fn visit_predicate(node: Node) -> PredicateConstraint {
         ),
         Some(Rule::predicate_substring) => {
             let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
-            PredicateConstraint::new(
+            Predicate::new(
                 predicate,
                 {
                     match predicate {
@@ -964,12 +950,12 @@ fn visit_schema_rule_declaration(node: Node) -> RuleDeclaration {
     rule
 }
 
-fn visit_type_ref_any(node: Node) -> TypeRef {
+fn visit_type_ref_any(node: Node) -> TypeReference {
     dbg_assert_eq_line!(node.as_rule(), Rule::type_ref_any);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
-        Rule::VAR_CONCEPT_ => TypeRef::Variable(get_var_concept(child)),
+        Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
         Rule::type_ref => visit_type_ref(child),
         Rule::type_ref_scoped => visit_type_ref_scoped(child),
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
@@ -978,26 +964,26 @@ fn visit_type_ref_any(node: Node) -> TypeRef {
     type_
 }
 
-fn visit_type_ref_scoped(node: Node) -> TypeRef {
+fn visit_type_ref_scoped(node: Node) -> TypeReference {
     dbg_assert_eq_line!(node.as_rule(), Rule::type_ref_scoped);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
-        Rule::label_scoped => TypeRef::Label(visit_label_scoped(child)),
-        Rule::VAR_CONCEPT_ => TypeRef::Variable(get_var_concept(child)),
+        Rule::label_scoped => TypeReference::Label(visit_label_scoped(child)),
+        Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     type_
 }
 
-fn visit_type_ref(node: Node) -> TypeRef {
+fn visit_type_ref(node: Node) -> TypeReference {
     dbg_assert_eq_line!(node.as_rule(), Rule::type_ref);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
-        Rule::label => TypeRef::Label(child.as_str().into()),
-        Rule::VAR_CONCEPT_ => TypeRef::Variable(get_var_concept(child)),
+        Rule::label => TypeReference::Label(child.as_str().into()),
+        Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());

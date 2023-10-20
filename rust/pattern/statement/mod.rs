@@ -60,10 +60,10 @@ pub enum Statement {
 impl Statement {
     pub fn owner(&self) -> VariableRef<'_> {
         match self {
-            Statement::Concept(concept) => VariableRef::Concept(&concept.variable),
-            Statement::Thing(thing) => VariableRef::Concept(&thing.variable),
-            Statement::Type(type_) => VariableRef::Concept(&type_.variable),
-            Statement::Value(value) => VariableRef::Value(&value.variable),
+            Statement::Concept(concept) => concept.owner(),
+            Statement::Thing(thing) => thing.owner(),
+            Statement::Type(type_) => type_.owner(),
+            Statement::Value(value) => value.owner(),
         }
     }
 

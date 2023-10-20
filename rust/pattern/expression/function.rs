@@ -38,8 +38,8 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new(self.args.iter().flat_map(|expr| expr.variables_recursive()))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(self.args.iter().flat_map(|expr| expr.variables()))
     }
 }
 

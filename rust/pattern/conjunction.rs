@@ -50,10 +50,6 @@ impl Conjunction {
     pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
-    //
-    // pub fn has_named_variables(&self) -> bool {
-    //     self.named_vars().any(|r| r.is_name())
-    // }
 
     pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         let names = self.named_variables().collect();

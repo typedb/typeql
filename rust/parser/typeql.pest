@@ -157,7 +157,6 @@ player = { VAR_CONCEPT_ }                                                       
 attributes = { attribute ~ ( "," ~ attribute )* }
 attribute = { HAS ~ label ~ ( VAR_ | predicate )                                // ownership by labeled variable or value or just value
             | HAS ~ VAR_CONCEPT_
-            // TODO: fix to allow explicit value variables
             }
 
 // VALUE CONSTRUCT =============================================================

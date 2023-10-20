@@ -65,9 +65,13 @@ impl TypeStatement {
         }
     }
 
+    pub fn owner(&self) -> VariableRef<'_> {
+        VariableRef::Concept(&self.variable)
+    }
+
     pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(VariableRef::Concept(&self.variable))
+            iter::once(self.owner())
                 .chain(self.owns.iter().flat_map(|c| c.variables()))
                 .chain(self.plays.iter().flat_map(|c| c.variables()))
                 .chain(self.relates.iter().flat_map(|c| c.variables()))

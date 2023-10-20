@@ -20,23 +20,23 @@
  *
  */
 
-use crate::pattern::{AssignConstraint, PredicateConstraint, ValueStatement};
+use crate::pattern::{AssignConstraint, Predicate, ValueStatement};
 
 pub trait ValueConstrainable {
     fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement;
-    fn constrain_predicate(self, predicate: PredicateConstraint) -> ValueStatement;
+    fn constrain_predicate(self, predicate: Predicate) -> ValueStatement;
 }
 
 pub trait ValueStatementBuilder: Sized {
     fn assign(self, assign: impl Into<AssignConstraint>) -> ValueStatement;
-    fn predicate(self, predicate: impl Into<PredicateConstraint>) -> ValueStatement;
+    fn predicate(self, predicate: impl Into<Predicate>) -> ValueStatement;
 }
 
 impl<U: ValueConstrainable> ValueStatementBuilder for U {
     fn assign(self, assign: impl Into<AssignConstraint>) -> ValueStatement {
         self.constrain_assign(assign.into())
     }
-    fn predicate(self, predicate: impl Into<PredicateConstraint>) -> ValueStatement {
+    fn predicate(self, predicate: impl Into<Predicate>) -> ValueStatement {
         self.constrain_predicate(predicate.into())
     }
 }

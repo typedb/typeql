@@ -34,8 +34,8 @@ pub struct AssignConstraint {
 }
 
 impl AssignConstraint {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        self.expression.variables_recursive()
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        self.expression.variables()
     }
 }
 

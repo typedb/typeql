@@ -26,7 +26,7 @@ use crate::{
     common::{validatable::Validatable, Result, token},
     pattern::{
         ConceptConstrainable, ConceptStatement, HasConstraint, IIDConstraint, IsConstraint,
-        IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, PredicateConstraint,
+        IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, Predicate,
         RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
         SubConstraint, ThingConstrainable, ThingStatement, TypeConstrainable, TypeStatement, ValueTypeConstraint,
     },
@@ -117,7 +117,7 @@ impl ThingConstrainable for ConceptVariable {
         self.into_thing().constrain_isa(isa)
     }
 
-    fn constrain_predicate(self, predicate: PredicateConstraint) -> ThingStatement {
+    fn constrain_predicate(self, predicate: Predicate) -> ThingStatement {
         self.into_thing().constrain_predicate(predicate)
     }
 

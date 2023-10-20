@@ -49,7 +49,7 @@ impl Disjunction {
         Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         collect_err(self.patterns.iter().map(|p| p.validate_is_bounded_by(bounds)))
     }
 }

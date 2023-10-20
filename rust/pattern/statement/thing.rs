@@ -25,7 +25,7 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, Result, validatable::Validatable},
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, PredicateConstraint, RelationConstrainable,
+        HasConstraint, IIDConstraint, IsaConstraint, Predicate, RelationConstrainable,
         RelationConstraint, RolePlayerConstraint, ThingConstrainable,
     },
     write_joined,
@@ -39,7 +39,7 @@ pub struct ThingStatement {
     pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
-    pub value: Option<PredicateConstraint>,
+    pub value: Option<Predicate>,
     pub relation: Option<RelationConstraint>,
 }
 
@@ -48,25 +48,29 @@ impl ThingStatement {
         ThingStatement { variable, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
     }
 
+    pub fn owner(&self) -> VariableRef<'_> {
+        VariableRef::Concept(&self.variable)
+    }
+
     pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(VariableRef::Concept(&self.variable))
+            iter::once(self.owner())
                 .chain(self.isa.iter().flat_map(|c| c.variables()))
                 .chain(self.has.iter().flat_map(|c| c.variables()))
                 .chain(self.relation.iter().flat_map(|c| c.variables()))
                 .chain(self.value.iter().flat_map(|c| c.variables())),
         )
     }
-
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        Box::new(
-            iter::once(VariableRef::Concept(&self.variable))
-                .chain(self.isa.iter().flat_map(|c| c.variables()))
-                .chain(self.has.iter().flat_map(|c| c.variables_recursive()))
-                .chain(self.relation.iter().flat_map(|c| c.variables_recursive()))
-                .chain(self.value.iter().flat_map(|c| c.variables())),
-        )
-    }
+    //
+    // pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    //     Box::new(
+    //         iter::once(VariableRef::Concept(&self.variable))
+    //             .chain(self.isa.iter().flat_map(|c| c.variables()))
+    //             .chain(self.has.iter().flat_map(|c| c.variables_recursive()))
+    //             .chain(self.relation.iter().flat_map(|c| c.variables_recursive()))
+    //             .chain(self.value.iter().flat_map(|c| c.variables())),
+    //     )
+    // }
 
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // TODO simplify once we remove statements from inside HAS
@@ -119,7 +123,7 @@ impl ThingConstrainable for ThingStatement {
         ThingStatement { isa: Some(isa), ..self }
     }
 
-    fn constrain_predicate(self, value: PredicateConstraint) -> ThingStatement {
+    fn constrain_predicate(self, value: Predicate) -> ThingStatement {
         ThingStatement { value: Some(value), ..self }
     }
 

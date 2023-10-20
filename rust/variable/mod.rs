@@ -26,3 +26,19 @@ pub(crate) mod variable_value;
 pub use variable::Variable;
 pub use variable_concept::ConceptVariable;
 pub use variable_value::ValueVariable;
+use crate::pattern::{Label, TypeStatement, TypeStatementBuilder};
+
+#[derive(Debug)]
+pub enum TypeReference {
+    Label(Label),
+    Variable(ConceptVariable),
+}
+
+impl TypeReference {
+    pub fn into_type_statement(self) -> TypeStatement {
+        match self {
+            Self::Label(label) => ConceptVariable::hidden().type_(label),
+            Self::Variable(var) => var.into_type(),
+        }
+    }
+}

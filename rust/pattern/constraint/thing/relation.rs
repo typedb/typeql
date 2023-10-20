@@ -54,9 +54,6 @@ impl RelationConstraint {
         Box::new(self.role_players.iter().flat_map(|rp| rp.variables()))
     }
 
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new(self.role_players.iter().flat_map(|rp| rp.variables_recursive()))
-    }
 }
 
 impl Validatable for RelationConstraint {
@@ -102,13 +99,8 @@ impl RolePlayerConstraint {
     }
 
     pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new((self.role_type.iter().map(|r| VariableRef::Concept(&r.variable)))
-            .chain(iter::once(VariableRef::Concept(&self.player.variable))))
-    }
-
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new((self.role_type.iter().map(|r| VariableRef::Concept(&r.variable)))
-            .chain(self.player.variables_recursive()))
+        Box::new((self.role_type.iter().map(|r| r.owner()))
+            .chain(iter::once(self.player.owner())))
     }
 }
 

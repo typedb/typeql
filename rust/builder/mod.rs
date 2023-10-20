@@ -23,7 +23,7 @@
 use crate::{
     common::token,
     pattern::{
-        Constant, Expression, Function, Negation, PredicateConstraint, RelationStatementBuilder, RolePlayerConstraint,
+        Constant, Expression, Function, Negation, Predicate, RelationStatementBuilder, RolePlayerConstraint,
         RuleDeclaration, ThingStatement, TypeStatement, TypeStatementBuilder, Value,
     },
     variable::{ConceptVariable, ValueVariable},
@@ -140,36 +140,36 @@ pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingStatement {
     ConceptVariable::hidden().rel(value)
 }
 
-pub fn eq<T: Into<Value>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Eq, value.into())
+pub fn eq<T: Into<Value>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Eq, value.into())
 }
 
-pub fn neq<T: Into<Value>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Neq, value.into())
+pub fn neq<T: Into<Value>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Neq, value.into())
 }
 
-pub fn lt<T: Into<Value>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Lt, value.into())
+pub fn lt<T: Into<Value>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Lt, value.into())
 }
 
-pub fn lte<T: Into<Value>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Lte, value.into())
+pub fn lte<T: Into<Value>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Lte, value.into())
 }
 
-pub fn gt<T: Into<Value>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Gt, value.into())
+pub fn gt<T: Into<Value>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Gt, value.into())
 }
 
-pub fn gte<T: Into<Value>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Gte, value.into())
+pub fn gte<T: Into<Value>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Gte, value.into())
 }
 
-pub fn contains<T: Into<String>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Contains, Value::from(value.into()))
+pub fn contains<T: Into<String>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Contains, Value::from(value.into()))
 }
 
-pub fn like<T: Into<String>>(value: T) -> PredicateConstraint {
-    PredicateConstraint::new(token::Predicate::Like, Value::from(value.into()))
+pub fn like<T: Into<String>>(value: T) -> Predicate {
+    Predicate::new(token::Predicate::Like, Value::from(value.into()))
 }
 
 pub fn abs<T: Into<Expression>>(arg: T) -> Function {
