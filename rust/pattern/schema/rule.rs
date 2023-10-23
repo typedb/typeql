@@ -151,11 +151,11 @@ fn validate_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result
 }
 
 fn infers_ownership(then: &ThingStatement) -> bool {
-    then.has.len() == 1 && (then.iid.is_none() && then.isa.is_none() && then.value.is_none() && then.relation.is_none())
+    then.has.len() == 1 && (then.iid.is_none() && then.isa.is_none() && then.predicate.is_none() && then.relation.is_none())
 }
 
 fn infers_relation(then: &ThingStatement) -> bool {
-    then.relation.is_some() && then.isa.is_some() && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
+    then.relation.is_some() && then.isa.is_some() && (then.iid.is_none() && then.has.is_empty() && then.predicate.is_none())
 }
 
 fn validate_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {

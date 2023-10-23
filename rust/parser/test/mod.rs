@@ -36,7 +36,7 @@ use crate::{
     gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
     parse_query, parse_statement,
     pattern::{
-        Annotation::Key, ConceptStatementBuilder, ExpressionBuilder, Label, RelationStatementBuilder,
+        Annotation::Key, ConceptStatementBuilder, ExpressionBuilder, Label,
         Statement, ThingStatementBuilder, TypeStatementBuilder, ValueStatementBuilder,
     },
     Query,

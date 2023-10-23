@@ -30,8 +30,8 @@ pub trait ConceptStatementBuilder: Sized {
     fn is(self, is: impl Into<IsConstraint>) -> ConceptStatement;
 }
 
-impl<U: ConceptConstrainable> ConceptStatementBuilder for U {
+impl<U: Into<ConceptStatement>> ConceptStatementBuilder for U {
     fn is(self, is: impl Into<IsConstraint>) -> ConceptStatement {
-        self.constrain_is(is.into())
+        self.into().constrain_is(is.into())
     }
 }

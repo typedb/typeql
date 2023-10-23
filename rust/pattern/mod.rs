@@ -36,8 +36,8 @@ pub use negation::Negation;
 pub use schema::{RuleLabel, Rule};
 pub use statement::{
     ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder,
-    RelationConstrainable, RelationStatementBuilder, Statement, ThingConstrainable, ThingStatement,
-    ThingStatementBuilder, TypeConstrainable, TypeStatement, TypeStatementBuilder, ValueConstrainable, ValueStatement, ValueStatementBuilder,
+    Statement, ThingStatement,
+    ThingStatementBuilder,  TypeStatement, TypeStatementBuilder, ValueStatement, ValueStatementBuilder,
 };
 pub(crate) use statement::LeftOperand;
 

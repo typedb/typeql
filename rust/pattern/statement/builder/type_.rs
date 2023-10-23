@@ -22,23 +22,12 @@
 
 use crate::{
     common::token,
+    Label,
     pattern::{
         LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, SubConstraint,
         TypeStatement, ValueTypeConstraint,
     },
-    Label,
 };
-
-pub trait TypeConstrainable {
-    fn constrain_abstract(self) -> TypeStatement;
-    fn constrain_label(self, label: LabelConstraint) -> TypeStatement;
-    fn constrain_owns(self, owns: OwnsConstraint) -> TypeStatement;
-    fn constrain_plays(self, plays: PlaysConstraint) -> TypeStatement;
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeStatement;
-    fn constrain_relates(self, relates: RelatesConstraint) -> TypeStatement;
-    fn constrain_sub(self, sub: SubConstraint) -> TypeStatement;
-    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement;
-}
 
 pub trait TypeStatementBuilder: Sized {
     fn abstract_(self) -> TypeStatement;
@@ -51,36 +40,36 @@ pub trait TypeStatementBuilder: Sized {
     fn value(self, value_type: token::ValueType) -> TypeStatement;
 }
 
-impl<U: TypeConstrainable> TypeStatementBuilder for U {
+impl<U: Into<TypeStatement>> TypeStatementBuilder for U {
     fn abstract_(self) -> TypeStatement {
-        self.constrain_abstract()
+        self.into().constrain_abstract()
     }
 
     fn owns(self, owns: impl Into<OwnsConstraint>) -> TypeStatement {
-        self.constrain_owns(owns.into())
+        self.into().constrain_owns(owns.into())
     }
 
     fn plays(self, plays: impl Into<PlaysConstraint>) -> TypeStatement {
-        self.constrain_plays(plays.into())
+        self.into().constrain_plays(plays.into())
     }
 
     fn regex(self, regex: impl Into<RegexConstraint>) -> TypeStatement {
-        self.constrain_regex(regex.into())
+        self.into().constrain_regex(regex.into())
     }
 
     fn relates(self, relates: impl Into<RelatesConstraint>) -> TypeStatement {
-        self.constrain_relates(relates.into())
+        self.into().constrain_relates(relates.into())
     }
 
     fn sub(self, sub: impl Into<SubConstraint>) -> TypeStatement {
-        self.constrain_sub(sub.into())
+        self.into().constrain_sub(sub.into())
     }
 
     fn type_(self, type_name: impl Into<Label>) -> TypeStatement {
-        self.constrain_label(LabelConstraint { label: type_name.into() })
+        self.into().constrain_label(LabelConstraint { label: type_name.into() })
     }
 
     fn value(self, value_type: token::ValueType) -> TypeStatement {
-        self.constrain_value_type(ValueTypeConstraint { value_type })
+        self.into().constrain_value_type(ValueTypeConstraint { value_type })
     }
 }

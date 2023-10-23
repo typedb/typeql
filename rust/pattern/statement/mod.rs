@@ -23,8 +23,8 @@
 use std::{collections::HashSet, fmt};
 
 pub use builder::{
-    ConceptConstrainable, ConceptStatementBuilder, ExpressionBuilder, RelationConstrainable, RelationStatementBuilder,
-    ThingConstrainable, ThingStatementBuilder, TypeConstrainable, TypeStatementBuilder, ValueConstrainable,
+    ConceptConstrainable, ConceptStatementBuilder, ExpressionBuilder,
+     ThingStatementBuilder,  TypeStatementBuilder,
     ValueStatementBuilder,
 };
 pub(crate) use builder::LeftOperand;

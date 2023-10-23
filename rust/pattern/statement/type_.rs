@@ -30,7 +30,7 @@ use crate::{
     },
     pattern::{
         AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
-        RelatesConstraint, SubConstraint, TypeConstrainable, ValueTypeConstraint,
+        RelatesConstraint, SubConstraint, ValueTypeConstraint,
     },
     write_joined,
 };
@@ -69,7 +69,7 @@ impl TypeStatement {
         VariableRef::Concept(&self.variable)
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(
             iter::once(self.owner())
                 .chain(self.owns.iter().flat_map(|c| c.variables()))
@@ -77,6 +77,41 @@ impl TypeStatement {
                 .chain(self.relates.iter().flat_map(|c| c.variables()))
                 .chain(self.sub.iter().flat_map(|c| c.variables())),
         )
+    }
+
+    pub fn constrain_abstract(self) -> TypeStatement {
+        TypeStatement { abstract_: Some(AbstractConstraint), ..self }
+    }
+
+    pub fn constrain_label(self, label: LabelConstraint) -> TypeStatement {
+        TypeStatement { label: Some(label), ..self }
+    }
+
+    pub fn constrain_owns(mut self, owns: OwnsConstraint) -> TypeStatement {
+        self.owns.push(owns);
+        self
+    }
+
+    pub fn constrain_plays(mut self, plays: PlaysConstraint) -> TypeStatement {
+        self.plays.push(plays);
+        self
+    }
+
+    pub fn constrain_regex(self, regex: RegexConstraint) -> TypeStatement {
+        TypeStatement { regex: Some(regex), ..self }
+    }
+
+    pub fn constrain_relates(mut self, relates: RelatesConstraint) -> TypeStatement {
+        self.relates.push(relates);
+        self
+    }
+
+    pub fn constrain_sub(self, sub: SubConstraint) -> TypeStatement {
+        TypeStatement { sub: Some(sub), ..self }
+    }
+
+    pub fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement {
+        TypeStatement { value_type: Some(value_type), ..self }
     }
 
     fn is_type_constrained(&self) -> bool {
@@ -113,42 +148,12 @@ impl Validatable for TypeStatement {
     }
 }
 
-impl TypeConstrainable for TypeStatement {
-    fn constrain_abstract(self) -> TypeStatement {
-        TypeStatement { abstract_: Some(AbstractConstraint), ..self }
-    }
-
-    fn constrain_label(self, label: LabelConstraint) -> TypeStatement {
-        TypeStatement { label: Some(label), ..self }
-    }
-
-    fn constrain_owns(mut self, owns: OwnsConstraint) -> TypeStatement {
-        self.owns.push(owns);
-        self
-    }
-
-    fn constrain_plays(mut self, plays: PlaysConstraint) -> TypeStatement {
-        self.plays.push(plays);
-        self
-    }
-
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeStatement {
-        TypeStatement { regex: Some(regex), ..self }
-    }
-
-    fn constrain_relates(mut self, relates: RelatesConstraint) -> TypeStatement {
-        self.relates.push(relates);
-        self
-    }
-
-    fn constrain_sub(self, sub: SubConstraint) -> TypeStatement {
-        TypeStatement { sub: Some(sub), ..self }
-    }
-
-    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement {
-        TypeStatement { value_type: Some(value_type), ..self }
+impl From<ConceptVariable> for TypeStatement {
+    fn from(variable: ConceptVariable) -> Self {
+        TypeStatement::new(variable)
     }
 }
+
 
 impl fmt::Display for TypeStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

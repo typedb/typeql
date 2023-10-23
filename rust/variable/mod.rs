@@ -42,7 +42,7 @@ impl TypeReference {
     pub fn into_type_statement(self) -> TypeStatement {
         match self {
             Self::Label(label) => ConceptVariable::hidden().type_(label),
-            Self::Variable(var) => var.into_type(),
+            Self::Variable(var) => var.into(),
         }
     }
 

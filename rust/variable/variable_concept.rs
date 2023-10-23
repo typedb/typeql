@@ -20,17 +20,12 @@
  *
  */
 
-use std::{fmt};
+use std::fmt;
 
 use crate::{
-    common::{validatable::Validatable, Result, token},
-    pattern::{
-        ConceptConstrainable, ConceptStatement, HasConstraint, IIDConstraint, IsConstraint,
-        IsaConstraint, LabelConstraint, LeftOperand, OwnsConstraint, PlaysConstraint, Predicate,
-        RegexConstraint, RelatesConstraint, RelationConstrainable, RelationConstraint, RolePlayerConstraint,
-        SubConstraint, ThingConstrainable, ThingStatement, TypeConstrainable, TypeStatement, ValueTypeConstraint,
-    },
-    variable::variable::{validate_variable_name},
+    common::{Result, token, validatable::Validatable},
+    pattern::LeftOperand,
+    variable::variable::validate_variable_name,
 };
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
@@ -60,18 +55,6 @@ impl ConceptVariable {
         ConceptVariable::Anonymous(Visibility::Invisible)
     }
 
-    pub fn into_concept(self) -> ConceptStatement {
-        ConceptStatement::new(self)
-    }
-
-    pub fn into_thing(self) -> ThingStatement {
-        ThingStatement::new(self)
-    }
-
-    pub fn into_type(self) -> TypeStatement {
-        TypeStatement::new(self)
-    }
-
     pub fn is_visible(&self) -> bool {
         !matches!(self, Self::Anonymous(Visibility::Invisible))
     }
@@ -94,75 +77,6 @@ impl Validatable for ConceptVariable {
             Self::Anonymous(_) => Ok(()),
             Self::Name(n) => validate_variable_name(n),
         }
-    }
-}
-
-
-impl ConceptConstrainable for ConceptVariable {
-    fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
-        self.into_concept().constrain_is(is)
-    }
-}
-
-impl ThingConstrainable for ConceptVariable {
-    fn constrain_has(self, has: HasConstraint) -> ThingStatement {
-        self.into_thing().constrain_has(has)
-    }
-
-    fn constrain_iid(self, iid: IIDConstraint) -> ThingStatement {
-        self.into_thing().constrain_iid(iid)
-    }
-
-    fn constrain_isa(self, isa: IsaConstraint) -> ThingStatement {
-        self.into_thing().constrain_isa(isa)
-    }
-
-    fn constrain_predicate(self, predicate: Predicate) -> ThingStatement {
-        self.into_thing().constrain_predicate(predicate)
-    }
-
-    fn constrain_relation(self, relation: RelationConstraint) -> ThingStatement {
-        self.into_thing().constrain_relation(relation)
-    }
-}
-
-impl RelationConstrainable for ConceptVariable {
-    fn constrain_role_player(self, constraint: RolePlayerConstraint) -> ThingStatement {
-        self.into_thing().constrain_role_player(constraint)
-    }
-}
-
-impl TypeConstrainable for ConceptVariable {
-    fn constrain_abstract(self) -> TypeStatement {
-        self.into_type().constrain_abstract()
-    }
-
-    fn constrain_label(self, label: LabelConstraint) -> TypeStatement {
-        self.into_type().constrain_label(label)
-    }
-
-    fn constrain_owns(self, owns: OwnsConstraint) -> TypeStatement {
-        self.into_type().constrain_owns(owns)
-    }
-
-    fn constrain_plays(self, plays: PlaysConstraint) -> TypeStatement {
-        self.into_type().constrain_plays(plays)
-    }
-
-    fn constrain_regex(self, regex: RegexConstraint) -> TypeStatement {
-        self.into_type().constrain_regex(regex)
-    }
-
-    fn constrain_relates(self, relates: RelatesConstraint) -> TypeStatement {
-        self.into_type().constrain_relates(relates)
-    }
-
-    fn constrain_sub(self, sub: SubConstraint) -> TypeStatement {
-        self.into_type().constrain_sub(sub)
-    }
-
-    fn constrain_value_type(self, value_type: ValueTypeConstraint) -> TypeStatement {
-        self.into_type().constrain_value_type(value_type)
     }
 }
 

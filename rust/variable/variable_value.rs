@@ -23,9 +23,9 @@
 use std::fmt;
 
 use crate::{
-    common::{validatable::Validatable, Result},
+    common::{Result, validatable::Validatable},
     pattern::{
-        statement::ValueConstrainable, AssignConstraint, LeftOperand, Predicate,
+        LeftOperand,
         ValueStatement,
     },
 };
@@ -57,16 +57,6 @@ impl ValueVariable {
     pub fn name(&self) -> &str {
         let Self::Name(name) = self;
         name
-    }
-}
-
-impl ValueConstrainable for ValueVariable {
-    fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
-        self.into_value().constrain_assign(assign)
-    }
-
-    fn constrain_predicate(self, predicate: Predicate) -> ValueStatement {
-        self.into_value().constrain_predicate(predicate)
     }
 }
 

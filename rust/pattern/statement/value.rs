@@ -26,7 +26,7 @@ use crate::{
     common::{error::collect_err, Result, validatable::Validatable},
     pattern::{
         AssignConstraint,
-        Predicate, statement::builder::ValueConstrainable,
+        Predicate,
     },
 };
 use crate::variable::ValueVariable;
@@ -48,12 +48,20 @@ impl ValueStatement {
         VariableRef::Value(&self.variable)
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(
             iter::once(self.owner())
                 .chain(self.assign_constraint.iter().flat_map(|assign| assign.variables()))
                 .chain(self.predicate_constraint.iter().flat_map(|predicate| predicate.variables())),
         )
+    }
+
+    pub fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
+        Self { assign_constraint: Some(assign), ..self }
+    }
+
+    pub fn constrain_predicate(self, predicate: Predicate) -> ValueStatement {
+        Self { predicate_constraint: Some(predicate), ..self }
     }
 }
 
@@ -67,13 +75,9 @@ impl Validatable for ValueStatement {
     }
 }
 
-impl ValueConstrainable for ValueStatement {
-    fn constrain_assign(self, assign: AssignConstraint) -> ValueStatement {
-        Self { assign_constraint: Some(assign), ..self }
-    }
-
-    fn constrain_predicate(self, predicate: Predicate) -> ValueStatement {
-        Self { predicate_constraint: Some(predicate), ..self }
+impl From<ValueVariable> for ValueStatement {
+    fn from(variable: ValueVariable) -> Self {
+        ValueStatement::new(variable)
     }
 }
 

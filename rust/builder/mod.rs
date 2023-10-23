@@ -23,12 +23,13 @@
 use crate::{
     common::token,
     pattern::{
-        Constant, Expression, Function, Negation, Predicate, RelationStatementBuilder, RolePlayerConstraint,
+        Constant, Expression, Function, Negation, Predicate, RolePlayerConstraint,
         RuleLabel, ThingStatement, TypeStatement, TypeStatementBuilder, Value,
     },
     variable::{ConceptVariable, ValueVariable},
     Pattern,
 };
+use crate::pattern::ThingStatementBuilder;
 
 #[macro_export]
 macro_rules! typeql_get {

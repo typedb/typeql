@@ -26,7 +26,6 @@ use crate::{
     common::{error::collect_err, Result, validatable::Validatable},
     pattern::{
         constraint::IsConstraint,
-        statement::builder::ConceptConstrainable,
     },
 };
 use crate::variable::ConceptVariable;
@@ -47,9 +46,13 @@ impl ConceptStatement {
         VariableRef::Concept(&self.variable)
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(iter::once(self.owner())
             .chain(self.is_constraint.iter().map(|is| VariableRef::Concept(&is.variable))))
+    }
+
+    pub fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
+        Self { is_constraint: Some(is), ..self }
     }
 }
 
@@ -62,9 +65,9 @@ impl Validatable for ConceptStatement {
     }
 }
 
-impl ConceptConstrainable for ConceptStatement {
-    fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
-        Self { is_constraint: Some(is), ..self }
+impl From<ConceptVariable> for ConceptStatement {
+    fn from(variable: ConceptVariable) -> Self {
+        ConceptStatement::new(variable)
     }
 }
 

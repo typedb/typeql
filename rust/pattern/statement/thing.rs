@@ -25,8 +25,8 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, Result, validatable::Validatable},
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, Predicate, RelationConstrainable,
-        RelationConstraint, RolePlayerConstraint, ThingConstrainable,
+        HasConstraint, IIDConstraint, IsaConstraint, Predicate,
+        RelationConstraint, RolePlayerConstraint,
     },
     write_joined,
 };
@@ -39,13 +39,13 @@ pub struct ThingStatement {
     pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
-    pub value: Option<Predicate>,
+    pub predicate: Option<Predicate>,
     pub relation: Option<RelationConstraint>,
 }
 
 impl ThingStatement {
     pub fn new(variable: ConceptVariable) -> ThingStatement {
-        ThingStatement { variable, iid: None, isa: None, has: Vec::new(), value: None, relation: None }
+        ThingStatement { variable, iid: None, isa: None, has: Vec::new(), predicate: None, relation: None }
     }
 
     pub fn owner(&self) -> VariableRef<'_> {
@@ -58,31 +58,50 @@ impl ThingStatement {
                 .chain(self.isa.iter().flat_map(|c| c.variables()))
                 .chain(self.has.iter().flat_map(|c| c.variables()))
                 .chain(self.relation.iter().flat_map(|c| c.variables()))
-                .chain(self.value.iter().flat_map(|c| c.variables())),
+                .chain(self.predicate.iter().flat_map(|c| c.variables())),
         )
     }
-    //
-    // pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-    //     Box::new(
-    //         iter::once(VariableRef::Concept(&self.variable))
-    //             .chain(self.isa.iter().flat_map(|c| c.variables()))
-    //             .chain(self.has.iter().flat_map(|c| c.variables_recursive()))
-    //             .chain(self.relation.iter().flat_map(|c| c.variables_recursive()))
-    //             .chain(self.value.iter().flat_map(|c| c.variables())),
-    //     )
-    // }
+
+    pub fn constrain_has(mut self, has: HasConstraint) -> ThingStatement {
+        self.has.push(has);
+        self
+    }
+
+    pub fn constrain_iid(self, iid: IIDConstraint) -> ThingStatement {
+        ThingStatement { iid: Some(iid), ..self }
+    }
+
+    pub fn constrain_isa(self, isa: IsaConstraint) -> ThingStatement {
+        ThingStatement { isa: Some(isa), ..self }
+    }
+
+    pub fn constrain_predicate(self, predicate: Predicate) -> ThingStatement {
+        ThingStatement { predicate: Some(predicate), ..self }
+    }
+
+    pub fn constrain_relation(self, relation: RelationConstraint) -> ThingStatement {
+        ThingStatement { relation: Some(relation), ..self }
+    }
+
+    pub(crate) fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> ThingStatement {
+        match &mut self.relation {
+            None => self.relation = Some(RelationConstraint::from(constraint)),
+            Some(relation) => relation.add(constraint),
+        }
+        self
+    }
 
     fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // TODO simplify once we remove statements from inside HAS
 
         if self.variable.is_visible() {
             write!(f, "{}", self.variable)?;
-            if self.value.is_some() || self.relation.is_some() {
+            if self.predicate.is_some() || self.relation.is_some() {
                 f.write_str(" ")?;
             }
         }
 
-        if let Some(value) = &self.value {
+        if let Some(value) = &self.predicate {
             write!(f, "{value}")?;
         } else if let Some(relation) = &self.relation {
             write!(f, "{relation}")?;
@@ -104,41 +123,14 @@ impl Validatable for ThingStatement {
                 .chain(self.isa.iter().map(Validatable::validate))
                 .chain(self.has.iter().map(Validatable::validate))
                 .chain(self.relation.iter().map(Validatable::validate))
-                .chain(self.value.iter().map(Validatable::validate)),
+                .chain(self.predicate.iter().map(Validatable::validate)),
         )
     }
 }
 
-impl ThingConstrainable for ThingStatement {
-    fn constrain_has(mut self, has: HasConstraint) -> ThingStatement {
-        self.has.push(has);
-        self
-    }
-
-    fn constrain_iid(self, iid: IIDConstraint) -> ThingStatement {
-        ThingStatement { iid: Some(iid), ..self }
-    }
-
-    fn constrain_isa(self, isa: IsaConstraint) -> ThingStatement {
-        ThingStatement { isa: Some(isa), ..self }
-    }
-
-    fn constrain_predicate(self, value: Predicate) -> ThingStatement {
-        ThingStatement { value: Some(value), ..self }
-    }
-
-    fn constrain_relation(self, relation: RelationConstraint) -> ThingStatement {
-        ThingStatement { relation: Some(relation), ..self }
-    }
-}
-
-impl RelationConstrainable for ThingStatement {
-    fn constrain_role_player(mut self, constraint: RolePlayerConstraint) -> ThingStatement {
-        match &mut self.relation {
-            None => self.relation = Some(RelationConstraint::from(constraint)),
-            Some(relation) => relation.add(constraint),
-        }
-        self
+impl From<ConceptVariable> for ThingStatement {
+    fn from(variable: ConceptVariable) -> Self {
+        ThingStatement::new(variable)
     }
 }
 

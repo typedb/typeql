@@ -37,12 +37,12 @@ use crate::{
         validatable::Validatable,
     },
     pattern::{
-        Annotation, AssignConstraint, ConceptStatement, ConceptStatementBuilder, Conjunction, Constant, Definable,
+        Annotation, ConceptStatement, ConceptStatementBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
         Pattern, PlaysConstraint, Predicate, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
-        RuleLabel, Statement, SubConstraint, ThingConstrainable, ThingStatement,
-        ThingStatementBuilder, TypeConstrainable, TypeStatement, TypeStatementBuilder,
-        Value, ValueConstrainable, ValueStatement,
+        RuleLabel, Statement, SubConstraint, ThingStatement,
+        ThingStatementBuilder, TypeStatement, TypeStatementBuilder,
+        Value, ValueStatement,
     },
     query::{
         AggregateQueryBuilder, MatchClause, Query, TypeQLDefine, TypeQLDelete, TypeQLFetch,
@@ -54,6 +54,7 @@ use crate::{
 use crate::common::error::TypeQLError::IllegalGrammar;
 use crate::common::token::Aggregate;
 use crate::parser::Rule::clause_undefine;
+use crate::pattern::ValueStatementBuilder;
 use crate::query::{Filter, Limit, Offset};
 use crate::query::modifier::{Modifiers, sorting, Sorting};
 use crate::variable::TypeReference;
@@ -646,12 +647,10 @@ fn visit_statement_value(node: Node) -> ValueStatement {
     let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
     let var = match children.peek_rule() {
         Some(Rule::ASSIGN) => {
-            let expression = visit_expression(children.skip_expected(Rule::ASSIGN).consume_any());
-            var_value.constrain_assign(AssignConstraint::from(expression))
+            var_value.assign(visit_expression(children.skip_expected(Rule::ASSIGN).consume_any()))
         }
         Some(Rule::predicate) => {
-            let predicate = visit_predicate(children.consume_any());
-            var_value.constrain_predicate(predicate)
+            var_value.predicate(visit_predicate(children.consume_any()))
         }
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
     };
@@ -739,7 +738,8 @@ fn visit_statement_thing_any(node: Node) -> ThingStatement {
 fn visit_statement_thing(node: Node) -> ThingStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_thing);
     let mut children = node.into_children();
-    let mut stmt_thing = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_)).into_thing();
+    let self1 = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_));
+    let mut stmt_thing: ThingStatement = self1.into();
     if children.peek_rule() != Some(Rule::attributes) {
         let keyword = children.consume_any();
         stmt_thing = match keyword.as_rule() {
@@ -763,7 +763,7 @@ fn visit_statement_relation(node: Node) -> ThingStatement {
         .consume_if_matches(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
         .unwrap_or_else(ConceptVariable::hidden)
-        .constrain_relation(visit_relation(children.consume_expected(Rule::relation)));
+        .relation(visit_relation(children.consume_expected(Rule::relation)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
         let type_ = children.consume_expected(Rule::type_ref);
@@ -783,7 +783,7 @@ fn visit_statement_attribute(node: Node) -> ThingStatement {
         .consume_if_matches(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
         .unwrap_or_else(ConceptVariable::hidden)
-        .constrain_predicate(visit_predicate(children.consume_expected(Rule::predicate)));
+        .predicate(visit_predicate(children.consume_expected(Rule::predicate)));
 
     if let Some(isa) = children.consume_if_matches(Rule::ISA_) {
         let type_ = children.consume_expected(Rule::type_ref);
