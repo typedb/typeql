@@ -33,7 +33,7 @@ pub use disjunction::Disjunction;
 pub use expression::{Expression, Function, Operation};
 pub use label::Label;
 pub use negation::Negation;
-pub use schema::{RuleDeclaration, RuleDefinition};
+pub use schema::{RuleLabel, Rule};
 pub use statement::{
     ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder,
     RelationConstrainable, RelationStatementBuilder, Statement, ThingConstrainable, ThingStatement,
@@ -187,20 +187,20 @@ impl fmt::Display for Pattern {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Definable {
-    RuleDeclaration(RuleDeclaration),
-    RuleDefinition(RuleDefinition),
+    RuleDeclaration(RuleLabel),
+    RuleDefinition(Rule),
     TypeStatement(TypeStatement),
 }
 
 enum_getter! { Definable
-    into_rule_declaration(RuleDeclaration) => RuleDeclaration,
-    into_rule(RuleDefinition) => RuleDefinition,
+    into_rule_declaration(RuleDeclaration) => RuleLabel,
+    into_rule(RuleDefinition) => Rule,
     into_type_statement(TypeStatement) => TypeStatement,
 }
 
 enum_wrapper! { Definable
-    RuleDeclaration => RuleDeclaration,
-    RuleDefinition => RuleDefinition,
+    RuleLabel => RuleDeclaration,
+    Rule => RuleDefinition,
     TypeStatement => TypeStatement,
 }
 

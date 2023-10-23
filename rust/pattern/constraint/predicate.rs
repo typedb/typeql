@@ -30,7 +30,7 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::{Constant, ThingStatement, ValueStatement},
+    pattern::Constant,
     variable::{ConceptVariable, ValueVariable},
 };
 use crate::variable::Variable;
@@ -52,8 +52,8 @@ impl Predicate {
 
     pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match &self.value {
-            Value::ThingVariable(v) => Box::new(iter::once(VariableRef::Concept(&v.variable))),
-            Value::ValueVariable(v) => Box::new(iter::once(VariableRef::Value(&v.variable))),
+            Value::ThingVariable(var) => Box::new(iter::once(VariableRef::Concept(var))),
+            Value::ValueVariable(var) => Box::new(iter::once(VariableRef::Value(var))),
             _ => Box::new(iter::empty()),
         }
     }
@@ -92,8 +92,8 @@ impl fmt::Display for Predicate {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Constant(Constant),
-    ThingVariable(Box<ThingStatement>),
-    ValueVariable(Box<ValueStatement>),
+    ThingVariable(ConceptVariable),
+    ValueVariable(ValueVariable),
 }
 
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
@@ -117,21 +117,21 @@ impl<T: Into<Constant>> From<T> for Value {
 impl From<Variable> for Value {
     fn from(variable: Variable) -> Self {
         match variable {
-            Variable::Concept(var) => Value::ThingVariable(Box::new(var.into_thing())),
-            Variable::Value(var) => Value::ValueVariable(Box::new(var.into_value())),
+            Variable::Concept(var) => Value::ThingVariable(var),
+            Variable::Value(var) => Value::ValueVariable(var),
         }
     }
 }
 
 impl From<ConceptVariable> for Value {
     fn from(variable: ConceptVariable) -> Self {
-        Value::ThingVariable(Box::new(variable.into_thing()))
+        Value::ThingVariable(variable)
     }
 }
 
 impl From<ValueVariable> for Value {
     fn from(variable: ValueVariable) -> Self {
-        Value::ValueVariable(Box::new(variable.into_value()))
+        Value::ValueVariable(variable)
     }
 }
 
@@ -140,8 +140,8 @@ impl fmt::Display for Value {
         use Value::*;
         match self {
             Constant(constant) => write!(f, "{constant}"),
-            ThingVariable(var) => write!(f, "{}", var.variable),
-            ValueVariable(var) => write!(f, "{}", var.variable),
+            ThingVariable(var) => write!(f, "{}", var),
+            ValueVariable(var) => write!(f, "{}", var),
         }
     }
 }

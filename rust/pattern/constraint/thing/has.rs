@@ -110,10 +110,10 @@ impl fmt::Display for HasConstraint {
                 }
             }
             HasConstraint::HasValue(label, var) => {
-                write!(f, " {}", label)
+                write!(f, " {} {}", label, var)
             }
             HasConstraint::HasPredicate(label, predicate) => {
-                write!(f, " {}", label)
+                write!(f, " {} {}", label, predicate)
             }
         }
     }

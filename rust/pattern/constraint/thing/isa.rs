@@ -20,12 +20,12 @@
  *
  */
 
-use std::{fmt, iter};
+use std::fmt;
 
 use crate::{
     common::{Result, token, validatable::Validatable},
     Label,
-    pattern::{IsExplicit, TypeStatementBuilder},
+    pattern::IsExplicit,
     variable::ConceptVariable,
 };
 use crate::variable::TypeReference;

@@ -24,7 +24,7 @@ use crate::{
     common::token,
     pattern::{
         Constant, Expression, Function, Negation, Predicate, RelationStatementBuilder, RolePlayerConstraint,
-        RuleDeclaration, ThingStatement, TypeStatement, TypeStatementBuilder, Value,
+        RuleLabel, ThingStatement, TypeStatement, TypeStatementBuilder, Value,
     },
     variable::{ConceptVariable, ValueVariable},
     Pattern,
@@ -116,8 +116,8 @@ pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
     Negation::new(pattern.into())
 }
 
-pub fn rule(name: &str) -> RuleDeclaration {
-    RuleDeclaration::from(name)
+pub fn rule(name: &str) -> RuleLabel {
+    RuleLabel::from(name)
 }
 
 pub fn cvar(var: impl Into<ConceptVariable>) -> ConceptVariable {

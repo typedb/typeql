@@ -23,12 +23,9 @@
 use std::fmt;
 
 use crate::{
-    builder::cvar,
-    common::{token, validatable::Validatable, Result},
-    pattern::{ConceptStatement},
+    common::{Result, token, validatable::Validatable},
     variable::ConceptVariable,
 };
-
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {

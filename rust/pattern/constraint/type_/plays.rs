@@ -23,10 +23,9 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{TypeStatement, TypeStatementBuilder},
-    variable::ConceptVariable,
+    common::{error::collect_err, Result, token, validatable::Validatable},
     Label,
+    variable::ConceptVariable,
 };
 use crate::variable::TypeReference;
 use crate::variable::variable::VariableRef;
@@ -34,25 +33,18 @@ use crate::variable::variable::VariableRef;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PlaysConstraint {
     pub role_type: TypeReference,
-    pub relation_type: Option<TypeReference>,
     pub overridden_role_type: Option<TypeReference>,
 }
 
 impl PlaysConstraint {
     pub(crate) fn new(role_type: TypeReference, overridden_role_type: Option<TypeReference>) -> Self {
-        PlaysConstraint {
-            relation_type: role_type.
-                .map(|label| ConceptVariable::hidden().type_(label.label.scope.as_ref().cloned().unwrap())),
-            role_type,
-            overridden_role_type,
-        }
+        PlaysConstraint { role_type, overridden_role_type }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(
-            iter::once(VariableRef::Concept(&self.role_type.variable))
-                .chain(self.relation_type.iter().map(|v| VariableRef::Concept(&v.variable)))
-                .chain(self.overridden_role_type.iter().map(|v| VariableRef::Concept(&v.variable))),
+            self.role_type.variables()
+                .chain(self.overridden_role_type.iter().flat_map(|t| t.variables()))
         )
     }
 }
@@ -61,64 +53,68 @@ impl Validatable for PlaysConstraint {
     fn validate(&self) -> Result {
         collect_err(
             iter::once(self.role_type.validate())
-                .chain(self.overridden_role_type.iter().map(Validatable::validate))
-                .chain(self.relation_type.iter().map(Validatable::validate)),
+                .chain(self.overridden_role_type.iter().map(Validatable::validate)),
         )
-    }
-}
-
-impl From<(&str, &str)> for PlaysConstraint {
-    fn from((relation_type, role_type): (&str, &str)) -> Self {
-        PlaysConstraint::from((String::from(relation_type), String::from(role_type)))
-    }
-}
-
-impl From<(&str, &str, &str)> for PlaysConstraint {
-    fn from((relation_type, role_type, overridden_role_type): (&str, &str, &str)) -> Self {
-        PlaysConstraint::from((
-            String::from(relation_type),
-            String::from(role_type),
-            String::from(overridden_role_type),
-        ))
-    }
-}
-
-impl From<(String, String)> for PlaysConstraint {
-    fn from((relation_type, role_type): (String, String)) -> Self {
-        PlaysConstraint::from(Label::from((relation_type, role_type)))
-    }
-}
-
-impl From<(String, String, String)> for PlaysConstraint {
-    fn from((relation_type, role_type, overridden_role_type): (String, String, String)) -> Self {
-        PlaysConstraint::from((Label::from((relation_type, role_type)), Label::from(overridden_role_type)))
     }
 }
 
 impl From<Label> for PlaysConstraint {
     fn from(role_type: Label) -> Self {
-        PlaysConstraint::new(ConceptVariable::hidden().type_(role_type), None)
-    }
-}
-
-impl From<(Label, Label)> for PlaysConstraint {
-    fn from((role_type, overridden_role_type): (Label, Label)) -> Self {
-        PlaysConstraint::new(
-            ConceptVariable::hidden().type_(role_type),
-            Some(ConceptVariable::hidden().type_(overridden_role_type)),
-        )
+        PlaysConstraint::from(TypeReference::Label(role_type))
     }
 }
 
 impl From<ConceptVariable> for PlaysConstraint {
     fn from(role_type: ConceptVariable) -> Self {
-        PlaysConstraint::from(role_type.into_type())
+        PlaysConstraint::from(TypeReference::Variable(role_type))
     }
 }
 
-impl From<TypeStatement> for PlaysConstraint {
-    fn from(role_type: TypeStatement) -> Self {
+impl From<TypeReference> for PlaysConstraint {
+    fn from(role_type: TypeReference) -> Self {
         PlaysConstraint::new(role_type, None)
+    }
+}
+
+impl From<(&str, &str)> for PlaysConstraint {
+    fn from((relation_type, role_name): (&str, &str)) -> Self {
+        PlaysConstraint::from((relation_type.to_owned(), role_name.to_owned()))
+    }
+}
+
+impl From<(String, String)> for PlaysConstraint {
+    fn from((relation_type, role_name): (String, String)) -> Self {
+        PlaysConstraint::from(Label::from((relation_type, role_name)))
+    }
+}
+
+impl From<(Label, Label)> for PlaysConstraint {
+    fn from((relation_type, role_name): (Label, Label)) -> Self {
+        PlaysConstraint::from((TypeReference::Label(relation_type), TypeReference::Label(role_name)))
+    }
+}
+
+impl From<(ConceptVariable, ConceptVariable)> for PlaysConstraint {
+    fn from((role_type, overridden_role_type): (ConceptVariable, ConceptVariable)) -> Self {
+        PlaysConstraint::from((TypeReference::Variable(role_type), TypeReference::Variable(overridden_role_type)))
+    }
+}
+
+impl From<(&str, &str, &str)> for PlaysConstraint {
+    fn from((relation_type, role_type, overridden_role_name): (&str, &str, &str)) -> Self {
+        PlaysConstraint::from((relation_type.to_owned(), role_type.to_owned(), overridden_role_name.to_owned()))
+    }
+}
+
+impl From<(String, String, String)> for PlaysConstraint {
+    fn from((relation_type, role_name, overridden_role_name): (String, String, String)) -> Self {
+        PlaysConstraint::from((Label::from((relation_type, role_name)), Label::from(overridden_role_name)))
+    }
+}
+
+impl From<(TypeReference, TypeReference)> for PlaysConstraint {
+    fn from((role_type, overridden_role_type): (TypeReference, TypeReference)) -> Self {
+        PlaysConstraint::new(role_type, Some(overridden_role_type))
     }
 }
 

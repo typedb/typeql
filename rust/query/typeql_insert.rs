@@ -70,7 +70,7 @@ fn validate_insert_in_scope_of_get(match_clause: &Option<MatchClause>, statement
         let names_in_scope: HashSet<VariableRef> = match_.named_variables().collect();
         if statements.iter().any(|v| {
             v.variable.is_name() && names_in_scope.contains(&VariableRef::Concept(&v.variable))
-                || v.variables_recursive().any(|w| names_in_scope.contains(&w))
+                || v.variables().any(|w| names_in_scope.contains(&w))
         }) {
             Ok(())
         } else {

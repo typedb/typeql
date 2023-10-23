@@ -49,7 +49,7 @@ impl ConceptStatement {
 
     pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(iter::once(self.owner())
-            .chain(self.is_constraint.iter().map(|is| VariableRef::Concept(&is.variable.variable))))
+            .chain(self.is_constraint.iter().map(|is| VariableRef::Concept(&is.variable))))
     }
 }
 

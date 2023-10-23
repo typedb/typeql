@@ -42,7 +42,7 @@ use parser::{
     visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
     visit_eof_schema_rule, visit_eof_statement,
 };
-use pattern::{Definable, Label, Pattern, RuleDefinition, Statement};
+use pattern::{Definable, Label, Pattern, Rule, Statement};
 use query::Query;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
@@ -65,7 +65,7 @@ pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>> {
     visit_eof_definables(typeql_definables.trim_end())
 }
 
-pub fn parse_rule(typeql_rule: &str) -> Result<RuleDefinition> {
+pub fn parse_rule(typeql_rule: &str) -> Result<Rule> {
     visit_eof_schema_rule(typeql_rule.trim_end())
 }
 

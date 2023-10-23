@@ -29,14 +29,14 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Definable, RuleDeclaration, TypeStatement},
+    pattern::{Definable, RuleLabel, TypeStatement},
     write_joined,
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TypeQLUndefine {
     statements: Vec<TypeStatement>,
-    rules: Vec<RuleDeclaration>,
+    rules: Vec<RuleLabel>,
 }
 
 impl TypeQLUndefine {
@@ -55,7 +55,7 @@ impl TypeQLUndefine {
         self
     }
 
-    fn add_rule(mut self, rule: RuleDeclaration) -> Self {
+    fn add_rule(mut self, rule: RuleLabel) -> Self {
         self.rules.push(rule);
         self
     }

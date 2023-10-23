@@ -40,7 +40,7 @@ use crate::{
         Annotation, AssignConstraint, ConceptStatement, ConceptStatementBuilder, Conjunction, Constant, Definable,
         Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
         Pattern, PlaysConstraint, Predicate, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
-        RuleDeclaration, RuleDefinition, Statement, SubConstraint, ThingConstrainable, ThingStatement,
+        RuleLabel, Statement, SubConstraint, ThingConstrainable, ThingStatement,
         ThingStatementBuilder, TypeConstrainable, TypeStatement, TypeStatementBuilder,
         Value, ValueConstrainable, ValueStatement,
     },
@@ -192,7 +192,7 @@ pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
     Ok(node.into())
 }
 
-pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<RuleDefinition> {
+pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<crate::pattern::Rule> {
     visit_schema_rule(parse_single(Rule::eof_schema_rule, rule)?).validated()
 }
 
@@ -668,30 +668,30 @@ fn visit_statement_type(node: Node) -> TypeStatement {
         let statement = match keyword.as_rule() {
             Rule::ABSTRACT => var_type.abstract_(),
             Rule::OWNS => {
-                let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement();
+                let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
                 let overridden = constraint_nodes
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement());
+                    .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
                 let annotations = visit_annotations_owns(constraint_nodes.consume_expected(Rule::annotations_owns));
                 var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
             }
             Rule::PLAYS => {
-                let type_ = visit_type_ref_scoped(constraint_nodes.consume_expected(Rule::type_ref_scoped)).into_type_statement();
+                let type_ = visit_type_ref_scoped(constraint_nodes.consume_expected(Rule::type_ref_scoped));
                 let overridden = constraint_nodes
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement());
+                    .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
                 var_type.constrain_plays(PlaysConstraint::new(type_, overridden))
             }
             Rule::REGEX => var_type.regex(get_regex(constraint_nodes.consume_expected(Rule::QUOTED_STRING))),
             Rule::RELATES => {
-                let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement();
+                let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
                 let overridden = constraint_nodes
                     .consume_if_matches(Rule::AS)
-                    .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)).into_type_statement());
+                    .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
                 var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
             }
             Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
-                visit_type_ref_any(constraint_nodes.consume_expected(Rule::type_ref_any)).into_type_statement(),
+                visit_type_ref_any(constraint_nodes.consume_expected(Rule::type_ref_any)),
                 matches!(keyword.into_child().unwrap().as_rule(), Rule::SUBX).into(),
             ))),
             Rule::TYPE => var_type.type_(visit_label_any(constraint_nodes.consume_expected(Rule::label_any))),
@@ -929,21 +929,21 @@ fn visit_function_name(node: Node) -> token::Function {
     function_token
 }
 
-fn visit_schema_rule(node: Node) -> RuleDefinition {
+fn visit_schema_rule(node: Node) -> crate::pattern::Rule {
     dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule);
     let mut children = node.into_children();
-    let rule = RuleDeclaration::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
+    let rule = RuleLabel::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
         .when(Conjunction::new(visit_patterns(children.skip_expected(Rule::WHEN).consume_expected(Rule::patterns))))
         .then(visit_statement_thing_any(children.skip_expected(Rule::THEN).consume_expected(Rule::statement_thing_any)));
     dbg_assert_line!(children.try_consume_any().is_none());
     rule
 }
 
-fn visit_schema_rule_declaration(node: Node) -> RuleDeclaration {
+fn visit_schema_rule_declaration(node: Node) -> RuleLabel {
     dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule_declaration);
     let mut children = node.into_children();
     children.skip_expected(Rule::RULE);
-    let rule = RuleDeclaration::new(Label::from(
+    let rule = RuleLabel::new(Label::from(
         children.consume_expected(Rule::label).as_str(),
     ));
     dbg_assert_line!(children.try_consume_any().is_none());

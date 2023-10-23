@@ -28,10 +28,11 @@ use pest::error::{Error as PestError, LineColLocation};
 use crate::{
     common::token,
     error_messages,
-    pattern::{Label, Pattern, ThingStatement, TypeStatement, Value},
+    pattern::{Label, Pattern, ThingStatement, Value},
     variable::Variable,
     write_joined,
 };
+use crate::variable::ConceptVariable;
 
 #[macro_use]
 mod macros;
@@ -138,7 +139,7 @@ error_messages! { TypeQLError
         31: "Rule '{}' 'when' contains a nested negation.",
     InvalidRuleThen(Label, ThingStatement) =
         32: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
-    InvalidRuleThenHas(Label, ThingStatement, Variable, TypeStatement) =
+    InvalidRuleThenHas(Label, ThingStatement, ConceptVariable, Label) =
         33: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
     InvalidRuleThenVariables(Label) =
         34: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",

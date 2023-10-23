@@ -25,21 +25,21 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, Result, token, validatable::Validatable},
     Label,
-    pattern::{TypeStatement, TypeStatementBuilder},
     variable::ConceptVariable,
 };
+use crate::variable::TypeReference;
 use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelatesConstraint {
-    pub role_type: TypeStatement,
-    pub overridden_role_type: Option<TypeStatement>,
+    pub role_type: TypeReference,
+    pub overridden_role_type: Option<TypeReference>,
 }
 
 impl RelatesConstraint {
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new(iter::once(VariableRef::Concept(&self.role_type.variable))
-            .chain(self.overridden_role_type.iter().map(|v| VariableRef::Concept(&v.variable))))
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+        Box::new(self.role_type.variables()
+            .chain(self.overridden_role_type.iter().flat_map(|v| v.variables())))
     }
 }
 
@@ -53,46 +53,67 @@ impl Validatable for RelatesConstraint {
 }
 
 impl From<&str> for RelatesConstraint {
-    fn from(type_name: &str) -> Self {
-        RelatesConstraint::from(String::from(type_name))
+    fn from(role_name: &str) -> Self {
+        RelatesConstraint::from(role_name.to_owned())
     }
 }
 
 impl From<String> for RelatesConstraint {
-    fn from(type_name: String) -> Self {
-        RelatesConstraint::from(Label::from(type_name))
-    }
-}
-
-impl From<(&str, &str)> for RelatesConstraint {
-    fn from((role_type, overridden_role_type): (&str, &str)) -> Self {
-        RelatesConstraint {
-            role_type: ConceptVariable::hidden().type_(role_type),
-            overridden_role_type: Some(ConceptVariable::hidden().type_(overridden_role_type)),
-        }
+    fn from(role_name: String) -> Self {
+        RelatesConstraint::from(Label::from(role_name))
     }
 }
 
 impl From<Label> for RelatesConstraint {
-    fn from(type_: Label) -> Self {
-        RelatesConstraint { role_type: ConceptVariable::hidden().type_(type_), overridden_role_type: None }
+    fn from(role_name: Label) -> Self {
+        RelatesConstraint::from(TypeReference::Label(role_name))
     }
 }
 
 impl From<ConceptVariable> for RelatesConstraint {
     fn from(role_type: ConceptVariable) -> Self {
-        RelatesConstraint::from(role_type.into_type())
+        RelatesConstraint::from(TypeReference::Variable(role_type))
     }
 }
 
-impl From<TypeStatement> for RelatesConstraint {
-    fn from(role_type: TypeStatement) -> Self {
+impl From<TypeReference> for RelatesConstraint {
+    fn from(role_type: TypeReference) -> Self {
         RelatesConstraint { role_type, overridden_role_type: None }
     }
 }
 
-impl From<(TypeStatement, Option<TypeStatement>)> for RelatesConstraint {
-    fn from((role_type, overridden_role_type): (TypeStatement, Option<TypeStatement>)) -> Self {
+impl From<(&str, &str)> for RelatesConstraint {
+    fn from((role_name, overridden_role_name): (&str, &str)) -> Self {
+        RelatesConstraint::from((role_name.to_owned(), overridden_role_name.to_owned()))
+    }
+}
+
+impl From<(String, String)> for RelatesConstraint {
+    fn from((role_name, overridden_role_name): (String, String)) -> Self {
+        RelatesConstraint::from((Label::from(role_name), Label::from(overridden_role_name)))
+    }
+}
+
+impl From<(Label, Label)> for RelatesConstraint {
+    fn from((role_name, overridden_role_name): (Label, Label)) -> Self {
+        RelatesConstraint::from((TypeReference::Label(role_name), TypeReference::Label(overridden_role_name)))
+    }
+}
+
+impl From<(ConceptVariable, ConceptVariable)> for RelatesConstraint {
+    fn from((role_type, overridden_role_name): (ConceptVariable, ConceptVariable)) -> Self {
+        RelatesConstraint::from((TypeReference::Variable(role_type), TypeReference::Variable(overridden_role_name)))
+    }
+}
+
+impl From<(TypeReference, TypeReference)> for RelatesConstraint {
+    fn from((role_type, overridden_role_name): (TypeReference, TypeReference)) -> Self {
+        RelatesConstraint { role_type, overridden_role_type: Some(overridden_role_name) }
+    }
+}
+
+impl From<(TypeReference, Option<TypeReference>)> for RelatesConstraint {
+    fn from((role_type, overridden_role_type): (TypeReference, Option<TypeReference>)) -> Self {
         RelatesConstraint { role_type, overridden_role_type }
     }
 }

@@ -22,4 +22,4 @@
 
 mod rule;
 
-pub use rule::{RuleDeclaration, RuleDefinition};
+pub use rule::{RuleLabel, Rule};

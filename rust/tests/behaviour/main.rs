@@ -20,9 +20,9 @@
  *
  */
 
-use cucumber::{gherkin::Step, given, then, when, StatsWriter, World, writer};
+use cucumber::{gherkin::Step, given, StatsWriter, then, when, World};
+
 use typeql::{parse_query, query::Query};
-use cucumber::WriterExt;
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
