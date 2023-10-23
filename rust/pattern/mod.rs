@@ -45,7 +45,7 @@ use crate::{
     common::{Result, validatable::Validatable},
     enum_getter, enum_wrapper,
 };
-pub use crate::common::variabilizable::Variabilizable;
+pub use crate::common::variabilizable::VariablesRetrieved;
 use crate::variable::variable::VariableRef;
 
 mod conjunction;
@@ -113,10 +113,10 @@ impl Validatable for Pattern {
     }
 }
 
-impl Variabilizable for Pattern {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+impl VariablesRetrieved for Pattern {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match self {
-            Pattern::Conjunction(conjunction) => conjunction.named_variables(),
+            Pattern::Conjunction(conjunction) => conjunction.retrieved_variables(),
             Pattern::Disjunction(disjunction) => disjunction.variables_recursive(),
             Pattern::Negation(negation) => negation.variables_recursive(),
             Pattern::Statement(statement) => statement.variables()

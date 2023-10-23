@@ -19,9 +19,12 @@
  * under the License.
  */
 
+use std::collections::HashSet;
 use std::fmt;
+use crate::common::error::{collect_err, TypeQLError};
 
-use crate::common::token;
+use crate::common::{Result, token};
+use crate::variable::variable::VariableRef;
 use crate::write_joined;
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
@@ -151,6 +154,14 @@ pub struct Sorting {
 impl Sorting {
     pub fn new(vars: Vec<sorting::SortVariable>) -> Self {
         Sorting { vars }
+    }
+
+    pub(crate) fn validate(&self, available_variables: &HashSet<VariableRef>) -> Result {
+        collect_err(self.vars.iter().map(|r| {
+            available_variables.contains(&r.variable.as_ref())
+                .then_some(())
+                .ok_or_else(|| TypeQLError::SortVarNotAvailable(r.variable.clone()).into())
+        }))
     }
 }
 

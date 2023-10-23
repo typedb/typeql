@@ -28,8 +28,4 @@ pub trait Validatable: Sized {
     fn validated(self) -> Result<Self> {
         self.validate().map(|_| self)
     }
-
-    fn is_valid(&self) -> bool {
-        self.validate().is_ok()
-    }
 }

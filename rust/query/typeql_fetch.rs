@@ -23,7 +23,7 @@ use std::fmt;
 use crate::common::error::collect_err;
 use crate::common::Result;
 use crate::common::validatable::Validatable;
-use crate::pattern::Variabilizable;
+use crate::pattern::VariablesRetrieved;
 use crate::query::MatchClause;
 use crate::query::modifier::Modifiers;
 use crate::variable::variable::VariableRef;
@@ -57,13 +57,13 @@ impl Validatable for TypeQLFetch {
     }
 }
 
-impl Variabilizable for TypeQLFetch {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+impl VariablesRetrieved for TypeQLFetch {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
 
         // if !self.filter.vars.is_empty() {
         //     self.filter.vars.iter().map(|v| v.reference().clone()).collect()
         // } else {
-        self.clause_match.named_variables()
+        self.clause_match.retrieved_variables()
         // }
     }
 }

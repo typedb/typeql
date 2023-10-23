@@ -91,25 +91,6 @@ impl ThingStatement {
         self
     }
 
-    fn fmt_thing_syntax(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO simplify once we remove statements from inside HAS
-
-        if self.variable.is_visible() {
-            write!(f, "{}", self.variable)?;
-            if self.predicate.is_some() || self.relation.is_some() {
-                f.write_str(" ")?;
-            }
-        }
-
-        if let Some(value) = &self.predicate {
-            write!(f, "{value}")?;
-        } else if let Some(relation) = &self.relation {
-            write!(f, "{relation}")?;
-        }
-
-        Ok(())
-    }
-
     fn is_thing_constrained(&self) -> bool {
         self.isa.is_some() || self.iid.is_some() || !self.has.is_empty()
     }
@@ -136,7 +117,19 @@ impl From<ConceptVariable> for ThingStatement {
 
 impl fmt::Display for ThingStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.fmt_thing_syntax(f)?;
+        if self.variable.is_visible() {
+            write!(f, "{}", self.variable)?;
+            if self.predicate.is_some() || self.relation.is_some() {
+                f.write_str(" ")?;
+            }
+        }
+
+        if let Some(value) = &self.predicate {
+            write!(f, "{value}")?;
+        } else if let Some(relation) = &self.relation {
+            write!(f, "{relation}")?;
+        }
+        ();
 
         if self.is_thing_constrained() {
             f.write_str(" ")?;

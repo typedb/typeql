@@ -101,58 +101,58 @@ error_messages! { TypeQLError
         7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
     VariableNameConflict(String) =
         8: "The variable names '{}' cannot be used for both concept variables and value variables.",
-    MatchPatternVariableHasNoNamedVariable(Pattern) =
-        9: "The pattern '{}' has no named variable.",
+    MatchStatementHasNoNamedVariable(Pattern) =
+        9: "The statement '{}' has no named variable.",
     MatchHasUnboundedNestedPattern(Pattern) =
         10: "The match query contains a nested pattern is not bounded: '{}'.",
-    EmptyMatchFilter() =
-        12: "The match query cannot be filtered with an empty list of variables.",
     InvalidIIDString(String) =
-        13: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
+        11: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
     InvalidAttributeTypeRegex(String) =
-        14: "Invalid regular expression '{}'.",
-    IllegalFilterVariableRepeating(Variable) =
-        15: "The variable '{}' occurred more than once in get query filter.",
+        12: "Invalid regular expression '{}'.",
+    GetVarRepeating(Variable) =
+        13: "The variable '{}' occurred more than once in get query filter.",
     GetVarNotBound(Variable) =
-        16: "The get variable '{}' is not bound in the match clause.",
+        14: "The get variable '{}' is not bound in the match clause.",
+    SortVarNotAvailable(Variable) =
+        15: "The sort variable '{}' is not available from the preceding match clause.",
     VariableOutOfScopeDelete(Variable) =
-        17: "The delete variable '{}' is out of scope of the match query.",
+        16: "The delete variable '{}' is out of scope of the match query.",
     NoVariableInScopeInsert(String, String) =
-        19: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
+        17: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
     VariableNotNamed() =
-        20: "Anonymous variable encountered in a match query filter.",
+        18: "Anonymous variable encountered in a match query filter.",
     InvalidVariableName(String) =
-        21: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
+        19: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
     MissingConstraintRelationPlayer() =
-        23: "A relation variable has not been provided with role players.",
+        20: "A relation variable has not been provided with role players.",
     InvalidConstraintPredicate(token::Predicate, Value) =
-        26: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
+        21: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
     InvalidConstraintDatetimePrecision(NaiveDateTime) =
-        27: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
+        22: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
     InvalidDefineQueryVariable() =
-        28: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
+        23: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
     InvalidUndefineQueryRule(Label) =
-        29: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
+        24: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
     InvalidRuleWhenMissingPatterns(Label) =
-        30: "Rule '{}' 'when' has not been provided with any patterns.",
+        25: "Rule '{}' 'when' has not been provided with any patterns.",
     InvalidRuleWhenNestedNegation(Label) =
-        31: "Rule '{}' 'when' contains a nested negation.",
+        26: "Rule '{}' 'when' contains a nested negation.",
     InvalidRuleThen(Label, ThingStatement) =
-        32: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
+        27: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
     InvalidRuleThenHas(Label, ThingStatement, ConceptVariable, Label) =
-        33: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
+        28: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
     InvalidRuleThenVariables(Label) =
-        34: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
+        29: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
     InvalidRuleThenRoles(Label, ThingStatement) =
-        35: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
+        30: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
     RedundantNestedNegation() =
-        36: "Invalid query containing redundant nested negations.",
+        31: "Invalid query containing redundant nested negations.",
     VariableNotSorted(Variable) =
-        37: "Variable '{}' does not exist in the sorting clause.",
+        32: "Variable '{}' does not exist in the sorting clause.",
     InvalidCountVariableArgument() =
-        39: "Aggregate COUNT does not accept a Variable.",
+        33: "Aggregate COUNT does not accept a Variable.",
     IllegalGrammar(String) =
-        40: "Illegal grammar: '{}'",
+        34: "Illegal grammar: '{}'",
     IllegalCharInLabel(String) =
-        41: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
+        35: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
 }

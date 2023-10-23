@@ -29,7 +29,7 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::Variabilizable,
+    pattern::VariablesRetrieved,
     query::{TypeQLGet, TypeQLGetGroup},
 };
 use crate::variable::Variable;
@@ -68,9 +68,12 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
 impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
     fn validate(&self) -> Result {
         collect_err(
-            [self.validate_method_variable_compatible(), self.query.validate()]
+            [
+                self.validate_method_variable_compatible(),
+                self.query.validate()
+            ]
                 .into_iter()
-                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.named_variables().collect()))),
+                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.retrieved_variables().collect()))),
         )
     }
 }
@@ -103,7 +106,7 @@ impl fmt::Display for TypeQLGetGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + Variabilizable + Validatable
+Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + VariablesRetrieved + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)

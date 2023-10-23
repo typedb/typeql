@@ -31,7 +31,7 @@ use crate::{
         string::indent,
         validatable::Validatable,
     },
-    pattern::{Disjunction, Normalisable, Pattern, Variabilizable},
+    pattern::{Disjunction, Normalisable, Pattern, VariablesRetrieved},
 };
 use crate::common::token;
 use crate::variable::variable::VariableRef;
@@ -52,7 +52,7 @@ impl Conjunction {
     }
 
     pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
-        let names = self.named_variables().collect();
+        let names = self.retrieved_variables().collect();
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
             iter::once(validate_bounded(&names, bounds, self))
@@ -74,12 +74,12 @@ impl PartialEq for Conjunction {
     }
 }
 
-impl Variabilizable for Conjunction {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+impl VariablesRetrieved for Conjunction {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
             |p| match p {
                 Pattern::Statement(v) => v.variables(),
-                Pattern::Conjunction(c) => c.named_variables(),
+                Pattern::Conjunction(c) => c.retrieved_variables(),
                 _ => unreachable!(),
             },
         ))

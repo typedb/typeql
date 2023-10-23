@@ -24,7 +24,7 @@ use std::fmt;
 
 use crate::{
     common::{error::collect_err, Result, token, validatable::Validatable},
-    pattern::Variabilizable,
+    pattern::VariablesRetrieved,
     query::{AggregateQueryBuilder, TypeQLGet},
 };
 use crate::variable::Variable;
@@ -44,9 +44,9 @@ impl Validatable for TypeQLGetGroup {
     }
 }
 
-impl Variabilizable for TypeQLGetGroup {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        self.query.named_variables()
+impl VariablesRetrieved for TypeQLGetGroup {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+        self.query.retrieved_variables()
     }
 }
 

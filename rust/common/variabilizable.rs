@@ -21,14 +21,13 @@
  */
 
 
-use crate::Result;
 use crate::variable::variable::VariableRef;
 
-pub trait Variabilizable {
+pub trait VariablesRetrieved {
 
-    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_>;
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_>;
 }
 
-pub(crate) fn validate_names_unique(variables: impl Variabilizable) -> Result {
-    todo!()
-}
+// pub(crate) fn validate_names_unique(variabilizable: impl Variabilizable) -> Result {
+//
+// }

@@ -31,7 +31,7 @@ use crate::{
         validatable::Validatable,
     },
     Label,
-    pattern::{Conjunction, Pattern, ThingStatement, Variabilizable},
+    pattern::{Conjunction, Pattern, ThingStatement, VariablesRetrieved},
 };
 use crate::pattern::HasConstraint;
 use crate::variable::variable::VariableRef;
@@ -159,7 +159,7 @@ fn infers_relation(then: &ThingStatement) -> bool {
 }
 
 fn validate_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {
-    let bounds: HashSet<VariableRef> = when.named_variables().collect();
+    let bounds: HashSet<VariableRef> = when.retrieved_variables().collect();
     if !then.variables().filter(|r| r.is_name()).all(|r| bounds.contains(&r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
     }

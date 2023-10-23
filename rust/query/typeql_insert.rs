@@ -30,7 +30,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Variabilizable, ThingStatement},
+    pattern::{VariablesRetrieved, ThingStatement},
     query::{writable::validate_non_empty},
     write_joined,
 };
@@ -67,7 +67,7 @@ impl Validatable for TypeQLInsert {
 
 fn validate_insert_in_scope_of_get(match_clause: &Option<MatchClause>, statements: &[ThingStatement]) -> Result {
     if let Some(match_) = match_clause {
-        let names_in_scope: HashSet<VariableRef> = match_.named_variables().collect();
+        let names_in_scope: HashSet<VariableRef> = match_.retrieved_variables().collect();
         if statements.iter().any(|v| {
             v.variable.is_name() && names_in_scope.contains(&VariableRef::Concept(&v.variable))
                 || v.variables().any(|w| names_in_scope.contains(&w))

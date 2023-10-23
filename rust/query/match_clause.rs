@@ -24,13 +24,13 @@ use std::{fmt, iter};
 use crate::common::{Error, token};
 use crate::common::error::{collect_err, TypeQLError};
 use crate::common::validatable::Validatable;
-use crate::pattern::{Conjunction, Pattern, Variabilizable};
+use crate::pattern::{Conjunction, Pattern, VariablesRetrieved};
 use crate::Result;
 use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {
-    pub(crate) conjunction: Conjunction,
+    pub conjunction: Conjunction,
 }
 
 impl MatchClause {
@@ -43,14 +43,14 @@ impl MatchClause {
     }
 
     fn validate_nested_patterns_are_bounded(&self) -> Result {
-        let bounds = self.conjunction.named_variables().collect();
+        let bounds = self.conjunction.retrieved_variables().collect();
         collect_err(self.conjunction.patterns.iter().map(|p| p.validate_is_bounded_by(&bounds)))
     }
 }
 
-impl Variabilizable for MatchClause {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        self.conjunction.named_variables()
+impl VariablesRetrieved for MatchClause {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+        self.conjunction.retrieved_variables()
     }
 }
 
@@ -69,7 +69,7 @@ fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item=&'a 
                 .variables()
                 .any(|r| r.is_name())
                 .then_some(())
-                .ok_or_else(|| Error::from(TypeQLError::MatchPatternVariableHasNoNamedVariable(p.clone()))),
+                .ok_or_else(|| Error::from(TypeQLError::MatchStatementHasNoNamedVariable(p.clone()))),
             Pattern::Conjunction(c) => validate_statements_have_named_variable(c.patterns.iter()),
             Pattern::Disjunction(d) => validate_statements_have_named_variable(d.patterns.iter()),
             Pattern::Negation(n) => validate_statements_have_named_variable(iter::once(n.pattern.as_ref())),

@@ -31,7 +31,7 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::{Conjunction, Variabilizable},
+    pattern::{Conjunction, VariablesRetrieved},
     query::{AggregateQueryBuilder, TypeQLDelete, TypeQLGetGroup, TypeQLInsert, Writable},
     write_joined,
 };
@@ -85,78 +85,45 @@ impl TypeQLGet {
     pub fn group(self, var: impl Into<Variable>) -> TypeQLGetGroup {
         TypeQLGetGroup { query: self, group_var: var.into() }
     }
-
-    fn validate_filters_are_in_scope(&self) -> Result {
-        todo!()
-    }
-
-    fn validate_sort_vars_are_in_scope(&self) -> Result {
-        todo!()
-    }
-
-    fn validate_names_are_unique(&self) -> Result {
-        todo!()
-    }
 }
 
 impl Validatable for TypeQLGet {
     fn validate(&self) -> Result {
+        let match_variables = self.clause_match.retrieved_variables().collect();
+        let filter_vars = HashSet::from_iter((&self.filter.vars).iter().map(Variable::as_ref));
+        let retrieved_variables = if self.filter.vars.is_empty() { &match_variables } else { &filter_vars };
         collect_err([
             self.clause_match.validate(),
-            // self.validate_filters_are_in_scope(),
-            // self.validate_sort_vars_are_in_scope(),
-            // self.validate_names_are_unique()
+            validate_filters_are_in_scope(&match_variables, &self.filter),
+            self.modifiers.sorting.as_ref().map(|s| s.validate(&retrieved_variables)).unwrap_or(Ok(())),
+            validate_variable_names_are_unique(&self.clause_match.conjunction)
         ])
-        // validate_has_bounding_conjunction(&self.conjunction),
-        // validate_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
-        // validate_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
-        // validate_variable_names_are_unique(&self.conjunction),
-        // ]
-        // )
     }
 }
 
-impl Variabilizable for TypeQLGet {
-    fn named_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+impl VariablesRetrieved for TypeQLGet {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         if !self.filter.vars.is_empty() {
             Box::new(self.filter.vars.iter().map(|v| v.as_ref()))
         } else {
-            self.clause_match.named_variables()
+            self.clause_match.retrieved_variables()
         }
     }
 }
 
-fn validate_filters_are_in_scope(conjunction: &Conjunction, filter: &Option<Filter>) -> Result {
-    let names_in_scope: HashSet<VariableRef> = conjunction.named_variables().collect();
+fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef>, filter: &Filter) -> Result {
     let mut seen = HashSet::new();
-    if filter.as_ref().map_or(false, |f| f.vars.is_empty()) {
-        Err(TypeQLError::EmptyMatchFilter())?;
-    }
-    collect_err(filter.iter().flat_map(|f| &f.vars).map(|v| v).map(|r| {
+    collect_err(filter.vars.iter().map(|r| {
         if !r.is_name() {
             Err(TypeQLError::VariableNotNamed().into())
-        } else if !names_in_scope.contains(&r.as_ref()) {
+        } else if !match_variables.contains(&r.as_ref()) {
             Err(TypeQLError::GetVarNotBound(r.to_owned()).into())
         } else if seen.contains(&r) {
-            Err(TypeQLError::IllegalFilterVariableRepeating(r.to_owned()).into())
+            Err(TypeQLError::GetVarRepeating(r.to_owned()).into())
         } else {
             seen.insert(r);
             Ok(())
         }
-    }))
-}
-
-fn validate_sort_vars_are_in_scope(
-    conjunction: &Conjunction,
-    filter: &Option<Filter>,
-    sorting: &Option<Sorting>,
-) -> Result {
-    let names_in_scope: HashSet<VariableRef> = filter
-        .as_ref()
-        .map(|f| f.vars.iter().map(|v| v.as_ref()).collect())
-        .unwrap_or_else(|| conjunction.named_variables().collect());
-    collect_err(sorting.iter().flat_map(|s| &s.vars).map(|v| v.clone()).map(|r| {
-        names_in_scope.contains(&r.variable.as_ref()).then_some(()).ok_or_else(|| TypeQLError::GetVarNotBound(r.variable.clone()).into())
     }))
 }
 

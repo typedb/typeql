@@ -30,7 +30,7 @@ use crate::{
         token,
         validatable::Validatable,
     },
-    pattern::{ThingStatement, Variabilizable},
+    pattern::{ThingStatement, VariablesRetrieved},
     query::{TypeQLUpdate, Writable, writable::validate_non_empty},
     write_joined,
 };
@@ -51,7 +51,7 @@ impl TypeQLDelete {
     }
 
     fn validate_delete_in_scope_of_match(&self) -> Result {
-        let names_in_scope: HashSet<VariableRef> = self.clause_match.named_variables().collect();
+        let names_in_scope: HashSet<VariableRef> = self.clause_match.retrieved_variables().collect();
         collect_err(self.statements.iter().flat_map(|v| v.variables()).filter(|r| r.is_name()).map(|r| -> Result {
             if names_in_scope.contains(&r) {
                 Ok(())
