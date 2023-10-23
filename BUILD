@@ -53,6 +53,7 @@ checkstyle_test(
     exclude = [
         ".bazel-remote-cache.rc",
         ".bazel-cache-credential.json",
+        ".banner.png",
     ],
     license_type = "apache-header",
 )
