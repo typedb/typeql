@@ -56,31 +56,32 @@ impl<T: AggregateQueryBuilder> AggregateQuery<T> {
     fn new(query: T, method: token::Aggregate, var: impl Into<Variable>) -> Self {
         Self { query, method, var: Some(var.into()) }
     }
-
-    fn validate_method_variable_compatible(&self) -> Result {
-        if self.method == token::Aggregate::Count && self.var.is_some() {
-            Err(TypeQLError::InvalidCountVariableArgument())?
-        }
-        Ok(())
-    }
 }
 
 impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
     fn validate(&self) -> Result {
+        let retrieved_variables = self.query.retrieved_variables().collect();
         collect_err(
             [
-                self.validate_method_variable_compatible(),
-                self.query.validate()
+                self.query.validate(),
+                validate_method_variable_compatible(&self.method, &self.var),
             ]
                 .into_iter()
-                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, self.query.retrieved_variables().collect()))),
+                .chain(self.var.iter().map(|v| validate_variable_in_scope(v, &retrieved_variables))),
         )
     }
 }
 
-fn validate_variable_in_scope(var: &Variable, names_in_scope: HashSet<VariableRef<'_>>) -> Result {
-    if !names_in_scope.contains(&var.as_ref()) {
-        Err(TypeQLError::GetVarNotBound(var.clone()))?;
+fn validate_method_variable_compatible(method: &token::Aggregate, var: &Option<Variable>) -> Result {
+    if *method == token::Aggregate::Count && var.is_some() {
+        Err(TypeQLError::InvalidCountVariableArgument())?
+    }
+    Ok(())
+}
+
+fn validate_variable_in_scope(var: &Variable, scope_variables: &HashSet<VariableRef<'_>>) -> Result {
+    if !scope_variables.contains(&var.as_ref()) {
+        Err(TypeQLError::AggregateVarNotBound(var.clone()))?;
     }
     Ok(())
 }

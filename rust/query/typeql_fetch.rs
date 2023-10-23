@@ -21,7 +21,7 @@
 use std::fmt;
 
 use crate::common::error::collect_err;
-use crate::common::Result;
+use crate::common::{Result, token};
 use crate::common::validatable::Validatable;
 use crate::pattern::VariablesRetrieved;
 use crate::query::MatchClause;
@@ -31,6 +31,7 @@ use crate::variable::variable::VariableRef;
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLFetch {
     pub clause_match: MatchClause,
+    pub projections: Vec<Projection>,
     pub modifiers: Modifiers,
 }
 
@@ -42,37 +43,26 @@ impl TypeQLFetch {
 
 impl Validatable for TypeQLFetch {
     fn validate(&self) -> Result {
+        let match_variables = self.clause_match.retrieved_variables().collect();
         collect_err([
             self.clause_match.validate(),
-            // self.validate_filters_are_in_scope(),
-            // self.validate_sort_vars_are_in_scope(),
-            // self.validate_names_are_unique()
+            self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
+            self.validate_names_are_unique()
         ])
-        // validate_has_bounding_conjunction(&self.conjunction),
-        // validate_filters_are_in_scope(&self.conjunction, &self.modifiers.filter),
-        // validate_sort_vars_are_in_scope(&self.conjunction, &self.modifiers.filter, &self.modifiers.sorting),
-        // validate_variable_names_are_unique(&self.conjunction),
-        // ]
-        // )
     }
 }
 
 impl VariablesRetrieved for TypeQLFetch {
     fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-
-        // if !self.filter.vars.is_empty() {
-        //     self.filter.vars.iter().map(|v| v.reference().clone()).collect()
-        // } else {
+        // TODO get projection variable keys
         self.clause_match.retrieved_variables()
-        // }
     }
 }
 
-
 impl fmt::Display for TypeQLFetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.clause_match)
-        // writeln!(f, "{}", token::Command::Fetch)?;
+        writeln!(f, "{}", self.clause_match)?;
+        writeln!(f, "{}", token::Clause::Fetch)
         // write_joined!(f, ";\n", self.statements, self.rules)?;
         // f.write_str(";")
     }

@@ -113,46 +113,50 @@ error_messages! { TypeQLError
         13: "The variable '{}' occurred more than once in get query filter.",
     GetVarNotBound(Variable) =
         14: "The get variable '{}' is not bound in the match clause.",
-    SortVarNotAvailable(Variable) =
-        15: "The sort variable '{}' is not available from the preceding match clause.",
-    VariableOutOfScopeDelete(Variable) =
-        16: "The delete variable '{}' is out of scope of the match query.",
+    AggregateVarNotBound(Variable) =
+        15: "The get-aggregate variable '{}' is not bound in the match clause.",
+    GroupVarNotBound(Variable) =
+        16: "The get-group variable '{}' is not bound in the match clause.",
+    SortVarNotBound(Variable) =
+        17: "The sort variable '{}' is not bound in the match clause.",
+    DeleteVarNotBound(Variable) =
+        18: "The delete variable '{}' is not bound in the match clause.",
     NoVariableInScopeInsert(String, String) =
-        17: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
+        19: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
     VariableNotNamed() =
-        18: "Anonymous variable encountered in a match query filter.",
+        20: "Anonymous variable encountered in a match query filter.",
     InvalidVariableName(String) =
-        19: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
+        21: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
     MissingConstraintRelationPlayer() =
-        20: "A relation variable has not been provided with role players.",
+        22: "A relation variable has not been provided with role players.",
     InvalidConstraintPredicate(token::Predicate, Value) =
-        21: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
+        23: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
     InvalidConstraintDatetimePrecision(NaiveDateTime) =
-        22: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
+        24: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
     InvalidDefineQueryVariable() =
-        23: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
+        25: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
     InvalidUndefineQueryRule(Label) =
-        24: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
+        26: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
     InvalidRuleWhenMissingPatterns(Label) =
-        25: "Rule '{}' 'when' has not been provided with any patterns.",
+        27: "Rule '{}' 'when' has not been provided with any patterns.",
     InvalidRuleWhenNestedNegation(Label) =
-        26: "Rule '{}' 'when' contains a nested negation.",
+        28: "Rule '{}' 'when' contains a nested negation.",
     InvalidRuleThen(Label, ThingStatement) =
-        27: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
+        29: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
     InvalidRuleThenHas(Label, ThingStatement, ConceptVariable, Label) =
-        28: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
+        30: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
     InvalidRuleThenVariables(Label) =
-        29: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
+        31: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
     InvalidRuleThenRoles(Label, ThingStatement) =
-        30: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
+        32: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
     RedundantNestedNegation() =
-        31: "Invalid query containing redundant nested negations.",
+        33: "Invalid query containing redundant nested negations.",
     VariableNotSorted(Variable) =
-        32: "Variable '{}' does not exist in the sorting clause.",
+        34: "Variable '{}' does not exist in the sorting clause.",
     InvalidCountVariableArgument() =
-        33: "Aggregate COUNT does not accept a Variable.",
+        35: "Aggregate COUNT does not accept a Variable.",
     IllegalGrammar(String) =
-        34: "Illegal grammar: '{}'",
+        36: "Illegal grammar: '{}'",
     IllegalCharInLabel(String) =
-        35: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
+        37: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
 }

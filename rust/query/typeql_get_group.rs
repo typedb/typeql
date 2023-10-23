@@ -20,13 +20,15 @@
  *
  */
 
-use std::fmt;
+use std::collections::HashSet;
+use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, Result, token, validatable::Validatable},
     pattern::VariablesRetrieved,
     query::{AggregateQueryBuilder, TypeQLGet},
 };
+use crate::common::error::TypeQLError;
 use crate::variable::Variable;
 use crate::variable::variable::VariableRef;
 
@@ -40,7 +42,12 @@ impl AggregateQueryBuilder for TypeQLGetGroup {}
 
 impl Validatable for TypeQLGetGroup {
     fn validate(&self) -> Result {
-        collect_err([self.query.validate(), self.group_var.validate()])
+        let retrieved_variables = self.query.retrieved_variables().collect();
+        collect_err(
+            [self.query.validate(), self.group_var.validate()]
+                .into_iter()
+                .chain(iter::once(&self.group_var).map(|v| validate_variable_in_scope(v, &retrieved_variables)))
+        )
     }
 }
 
@@ -48,6 +55,13 @@ impl VariablesRetrieved for TypeQLGetGroup {
     fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         self.query.retrieved_variables()
     }
+}
+
+fn validate_variable_in_scope(var: &Variable, scope_variables: &HashSet<VariableRef<'_>>) -> Result {
+    if !scope_variables.contains(&var.as_ref()) {
+        Err(TypeQLError::GroupVarNotBound(var.clone()))?;
+    }
+    Ok(())
 }
 
 impl fmt::Display for TypeQLGetGroup {

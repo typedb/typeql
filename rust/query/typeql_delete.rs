@@ -49,32 +49,32 @@ impl TypeQLDelete {
     pub fn insert(self, writable: impl Writable) -> TypeQLUpdate {
         TypeQLUpdate { query_delete: self, insert_statements: writable.statements(), modifiers: Default::default() }
     }
-
-    fn validate_delete_in_scope_of_match(&self) -> Result {
-        let names_in_scope: HashSet<VariableRef> = self.clause_match.retrieved_variables().collect();
-        collect_err(self.statements.iter().flat_map(|v| v.variables()).filter(|r| r.is_name()).map(|r| -> Result {
-            if names_in_scope.contains(&r) {
-                Ok(())
-            } else {
-                Err(TypeQLError::VariableOutOfScopeDelete(r.to_owned()))?
-            }
-        }))
-    }
 }
 
 impl Validatable for TypeQLDelete {
     fn validate(&self) -> Result {
+        let match_variables = self.clause_match.retrieved_variables().collect();
         collect_err(
             ([
                 self.clause_match.validate(),
-                self.validate_delete_in_scope_of_match(),
+                validate_delete_in_scope(&match_variables, &self.statements),
                 validate_non_empty(&self.statements),
+                self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
             ].into_iter())
                 .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }
 
+fn validate_delete_in_scope(scope_variables: &HashSet<VariableRef>, statements: &Vec<ThingStatement>) -> Result {
+    collect_err(statements.iter().flat_map(|v| v.variables()).filter(|r| r.is_name()).map(|r| -> Result {
+        if scope_variables.contains(&r) {
+            Ok(())
+        } else {
+            Err(TypeQLError::DeleteVarNotBound(r.to_owned()))?
+        }
+    }))
+}
 
 impl fmt::Display for TypeQLDelete {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

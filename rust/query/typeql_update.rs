@@ -28,6 +28,7 @@ use crate::{
     query::{writable::validate_non_empty, TypeQLDelete},
     write_joined,
 };
+use crate::pattern::VariablesRetrieved;
 use crate::query::modifier::Modifiers;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -39,8 +40,13 @@ pub struct TypeQLUpdate {
 
 impl Validatable for TypeQLUpdate {
     fn validate(&self) -> Result {
+        let match_variables = self.query_delete.clause_match.retrieved_variables();
         collect_err(
-            [validate_non_empty(&self.insert_statements), self.query_delete.validate()].into_iter()
+            [
+                validate_non_empty(&self.insert_statements),
+                self.query_delete.validate(),
+                self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
+            ].into_iter()
                 .chain(self.insert_statements.iter().map(Validatable::validate)),
         )
     }

@@ -160,7 +160,7 @@ impl Sorting {
         collect_err(self.vars.iter().map(|r| {
             available_variables.contains(&r.variable.as_ref())
                 .then_some(())
-                .ok_or_else(|| TypeQLError::SortVarNotAvailable(r.variable.clone()).into())
+                .ok_or_else(|| TypeQLError::SortVarNotBound(r.variable.clone()).into())
         }))
     }
 }
