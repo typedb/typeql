@@ -19,8 +19,6 @@
  * under the License.
  */
 use std::fmt;
-use std::path::Display;
-use itertools::Itertools;
 
 use crate::common::{Result, token};
 use crate::common::error::collect_err;
@@ -42,7 +40,7 @@ pub struct TypeQLFetch {
 impl TypeQLFetch {
     fn validate_names_are_unique(&self) -> Result {
         // TODO: either do restrict no-reuse across sub-trees or fully allow re-use
-        todo!()
+        Ok(())
     }
 }
 
@@ -65,38 +63,48 @@ impl Validatable for TypeQLFetch {
 
 impl VariablesRetrieved for TypeQLFetch {
     fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        // TODO get projection variable keys
-        self.clause_match.retrieved_variables()
+        Box::new(self.clause_match.retrieved_variables()
+            .chain(self.projections.iter().flat_map(Projection::key_variable)))
     }
 }
 
 #[derive(Debug, Eq, PartialEq)]
-enum Projection {
-    Variable(ProjectionKey),
-    Attribute(ProjectionKey, Vec<ProjectionAttribute>),
-    Subquery(ProjectionLabel, ProjectionSubquery),
+pub enum Projection {
+    Variable(ProjectionKeyVar),
+    Attribute(ProjectionKeyVar, Vec<ProjectionAttribute>),
+    Subquery(ProjectionKeyLabel, ProjectionSubquery),
+}
+
+impl Projection {
+    pub fn key_variable(&self) -> Option<VariableRef<'_>> {
+        match self {
+            Projection::Variable(key) => Some(key.variable.as_ref()),
+            Projection::Attribute(key, _) => Some(key.variable.as_ref()),
+            Projection::Subquery(_, _) => None,
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
-struct ProjectionKey {
-    variable: Variable,
-    label: Option<ProjectionLabel>
+pub struct ProjectionKeyVar {
+    pub(crate) variable: Variable,
+    pub(crate) label: Option<ProjectionKeyLabel>
 }
 
 #[derive(Debug, Eq, PartialEq)]
-enum ProjectionLabel {
+pub enum ProjectionKeyLabel {
     Quoted(String),
     Unquoted(String),
 }
 
 #[derive(Debug, Eq, PartialEq)]
-struct ProjectionAttribute {
-    attribute: Label,
-    label: Option<ProjectionLabel>,
+pub struct ProjectionAttribute {
+    pub(crate) attribute: Label,
+    pub(crate) label: Option<ProjectionKeyLabel>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
-enum ProjectionSubquery {
+pub enum ProjectionSubquery {
     GetAggregate(TypeQLGetAggregate),
     Fetch(Box<TypeQLFetch>)
 }
@@ -105,7 +113,7 @@ impl fmt::Display for TypeQLFetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.clause_match)?;
         writeln!(f, "{}", token::Clause::Fetch)?;
-        write_joined!(f, ";\n", self.projections)?;
+        write_joined!(f, "\n", self.projections)?;
         writeln!(f, "{}", self.modifiers)
     }
 }
@@ -118,8 +126,8 @@ impl fmt::Display for Projection {
             }
             Projection::Attribute(key, attrs) => {
                 write!(f, "{}: ", key)?;
-                // TODO fix
-                writeln!(f, " {};", attrs.iter().map(Display::fmt)).join(", ")
+                write_joined!(f, ", ", attrs)?;
+                write!(f, ";")
             }
             Projection::Subquery(label, subquery) => {
                 writeln!(f, "{}: {{\n {} }};", label, subquery)
@@ -128,22 +136,22 @@ impl fmt::Display for Projection {
     }
 }
 
-impl fmt::Display for ProjectionKey {
+impl fmt::Display for ProjectionKeyVar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.variable)?;
         if let Some(label) = &self.label {
-            write!(f, " {}", label)
+            write!(f, " {} {}", token::Projection::As, label)
         } else {
             Ok(())
         }
     }
 }
 
-impl fmt::Display for ProjectionLabel {
+impl fmt::Display for ProjectionKeyLabel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ProjectionLabel::Quoted(s) => write!(f, "\"{}\"", s),
-            ProjectionLabel::Unquoted(s) => write!(f, "{}", s),
+            ProjectionKeyLabel::Quoted(s) => write!(f, "\"{}\"", s),
+            ProjectionKeyLabel::Unquoted(s) => write!(f, "{}", s),
         }
     }
 }
@@ -152,7 +160,7 @@ impl fmt::Display for ProjectionAttribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.attribute)?;
         if let Some(label) = &self.label {
-            write!(f, " {}", label)
+            write!(f, " {} {}", token::Projection::As, label)
         } else {
             Ok(())
         }

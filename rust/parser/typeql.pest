@@ -49,7 +49,7 @@ query_get_group = { query_get ~ clause_group }
 query_get_aggregate = { query_get ~ clause_aggregate }
 query_get = { clause_match ~ clause_get? ~ modifiers }
 
-query_fetch = { clause_match ~ FETCH ~ projections ~ modifiers }
+query_fetch = { clause_match ~ clause_fetch ~ modifiers }
 
 clause_define = { DEFINE ~ definables }
 clause_undefine = { UNDEFINE ~ definables }
@@ -81,7 +81,6 @@ projection_attributes = { projection_attribute ~ ( "," ~ projection_attribute )*
 projection_attribute = { label ~ projection_key_as_label? }
 
 projection_subquery = { query_fetch | query_get_aggregate }
-// projection_subquery = { query_fetch }
 
 projection_key_var = { VAR_ ~ projection_key_as_label? }
 projection_key_as_label = { AS ~ projection_key_label }

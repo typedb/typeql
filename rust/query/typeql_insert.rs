@@ -34,8 +34,7 @@ use crate::{
     query::writable::validate_non_empty,
     write_joined,
 };
-use crate::pattern::Pattern::Statement;
-use crate::query::{MatchClause, Writable};
+use crate::query::MatchClause;
 use crate::query::modifier::Modifiers;
 use crate::variable::variable::VariableRef;
 

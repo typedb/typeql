@@ -40,7 +40,7 @@ pub struct TypeQLUpdate {
 
 impl Validatable for TypeQLUpdate {
     fn validate(&self) -> Result {
-        let match_variables = self.query_delete.clause_match.retrieved_variables();
+        let match_variables = self.query_delete.clause_match.retrieved_variables().collect();
         collect_err(
             [
                 validate_non_empty(&self.insert_statements),

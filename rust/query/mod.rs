@@ -20,6 +20,29 @@
  *
  */
 
+use std::fmt;
+
+pub use match_clause::MatchClause;
+pub use modifier::Limit;
+pub use modifier::Offset;
+pub use modifier::Sorting;
+pub use modifier::sorting;
+pub use typeql_define::TypeQLDefine;
+pub use typeql_delete::TypeQLDelete;
+pub use typeql_fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar, ProjectionSubquery, TypeQLFetch};
+pub use typeql_get::{Filter, TypeQLGet};
+pub use typeql_get_aggregate::{AggregateQueryBuilder, TypeQLGetAggregate, TypeQLGetGroupAggregate};
+pub use typeql_get_group::TypeQLGetGroup;
+pub use typeql_insert::TypeQLInsert;
+pub use typeql_undefine::TypeQLUndefine;
+pub use typeql_update::TypeQLUpdate;
+pub use writable::Writable;
+
+use crate::{
+    common::{Result, validatable::Validatable},
+    enum_getter, enum_wrapper,
+};
+
 mod match_clause;
 mod typeql_get_aggregate;
 mod typeql_define;
@@ -32,29 +55,6 @@ mod typeql_undefine;
 mod typeql_update;
 mod writable;
 pub(crate) mod modifier;
-
-use std::fmt;
-
-pub use match_clause::MatchClause;
-pub use modifier::Limit;
-pub use modifier::Offset;
-pub use modifier::Sorting;
-pub use modifier::sorting;
-pub use typeql_get_aggregate::{AggregateQueryBuilder, TypeQLGetAggregate, TypeQLGetGroupAggregate};
-pub use typeql_define::TypeQLDefine;
-pub use typeql_delete::TypeQLDelete;
-pub use typeql_insert::TypeQLInsert;
-pub use typeql_fetch::TypeQLFetch;
-pub use typeql_get::{Filter, TypeQLGet};
-pub use typeql_get_group::TypeQLGetGroup;
-pub use typeql_undefine::TypeQLUndefine;
-pub use typeql_update::TypeQLUpdate;
-pub use writable::Writable;
-
-use crate::{
-    common::{Result, validatable::Validatable},
-    enum_getter, enum_wrapper,
-};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {

@@ -46,8 +46,8 @@ use crate::variable::Variable;
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
-        assert!($parsed.is_valid());
-        assert!($expected.is_valid());
+        assert!($parsed.validate().is_ok());
+        assert!($expected.validate().is_ok());
         assert_eq!($expected, $parsed);
         assert_eq!($expected.to_string(), $query);
         assert_eq!($parsed.to_string(), $query);

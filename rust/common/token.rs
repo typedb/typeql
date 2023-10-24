@@ -188,6 +188,10 @@ string_enum! { Function
     Round = "round",
 }
 
+string_enum! { Projection
+    As = "as",
+}
+
 string_enum! { Char
     Question = "?",
     Dollar = "$",
