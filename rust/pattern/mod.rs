@@ -45,7 +45,7 @@ use crate::{
     common::{Result, validatable::Validatable},
     enum_getter, enum_wrapper,
 };
-pub use crate::common::variabilizable::VariablesRetrieved;
+pub use crate::common::variables_retrieved::VariablesRetrieved;
 use crate::variable::variable::VariableRef;
 
 mod conjunction;

@@ -143,8 +143,11 @@ impl fmt::Display for TypeQLGet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.clause_match)?;
         write!(f, "\n{}", self.filter)?;
-        write!(f, "\n{}", self.modifiers)?;
-        Ok(())
+        if !self.modifiers.is_empty() {
+            write!(f, "\n{}", self.modifiers)
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -155,8 +158,11 @@ pub struct Filter {
 
 impl fmt::Display for Filter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Clause::Get)?;
-        write_joined!(f, ", ", self.vars)?;
+        write!(f, "{}", token::Clause::Get)?;
+        if !self.vars.is_empty() {
+            write!(f, " ")?;
+            write_joined!(f, ", ", self.vars)?;
+        }
         write!(f, ";")
     }
 }

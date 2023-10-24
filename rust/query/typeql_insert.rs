@@ -89,6 +89,10 @@ impl fmt::Display for TypeQLInsert {
         writeln!(f, "{}", token::Clause::Insert)?;
         write_joined!(f, ";\n", self.statements)?;
         f.write_str(";")?;
-        write!(f, "\n{}", self.modifiers)
+        if !self.modifiers.is_empty() {
+            write!(f, "\n{}", self.modifiers)
+        } else {
+            Ok(())
+        }
     }
 }

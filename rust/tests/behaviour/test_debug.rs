@@ -23,17 +23,13 @@
 mod steps;
 
 use cucumber::{StatsWriter, World};
-use typeql::{parse_query, query::Query};
 
 use steps::*;
 
-
 fn main() {
     assert!(!futures::executor::block_on(
-        // Bazel specific path: when running the test in bazel, the external data from
-        // @vaticle_typedb_behaviour is stored in a directory that is a  sibling to
-        // the working directory.
-        TypeQLWorld::cucumber().fail_on_skipped().filter_run("./", |_, _, sc| {
+        // cargo-specific path to feature file, to enable debugging
+        TypeQLWorld::cucumber().fail_on_skipped().filter_run("./tests/behaviour/", |_, _, sc| {
             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
         }),
     )

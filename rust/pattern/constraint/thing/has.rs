@@ -27,8 +27,6 @@ use crate::{
     pattern::Predicate,
     variable::ConceptVariable,
 };
-use crate::common::token::Predicate::Eq;
-use crate::pattern::constraint::predicate;
 use crate::pattern::Label;
 use crate::variable::ValueVariable;
 use crate::variable::variable::VariableRef;
@@ -80,9 +78,15 @@ impl From<ConceptVariable> for HasConstraint {
     }
 }
 
-impl<S: Into<Label>, T: Into<predicate::Value>> From<(S, T)> for HasConstraint {
-    fn from((label, value): (S, T)) -> Self {
-        HasConstraint::HasPredicate(label.into(), Predicate::new(Eq, value.into()))
+impl From<(Label, ConceptVariable)> for HasConstraint {
+    fn from((label, variable): (Label, ConceptVariable)) -> Self {
+        HasConstraint::HasConcept(Some(label), variable)
+    }
+}
+
+impl From<(Option<Label>, ConceptVariable)> for HasConstraint {
+    fn from((label, variable): (Option<Label>, ConceptVariable)) -> Self {
+        HasConstraint::HasConcept(label, variable)
     }
 }
 

@@ -910,10 +910,10 @@ fn visit_attribute(node: Node) -> HasConstraint {
     let mut children = node.into_children();
     let constraint = match children.skip_expected(Rule::HAS).peek_rule() {
         Some(Rule::label) => {
-            let label = children.consume_expected(Rule::label).as_str().to_owned();
+            let label: Label = children.consume_expected(Rule::label).as_str().to_owned().into();
             match children.peek_rule() {
                 Some(Rule::VAR_) => HasConstraint::from((
-                    label,
+                    Some(label)
                     get_var(children.consume_expected(Rule::VAR_)),
                 )),
                 Some(Rule::predicate) => {

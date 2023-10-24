@@ -114,7 +114,11 @@ impl fmt::Display for TypeQLFetch {
         writeln!(f, "{}", self.clause_match)?;
         writeln!(f, "{}", token::Clause::Fetch)?;
         write_joined!(f, "\n", self.projections)?;
-        writeln!(f, "{}", self.modifiers)
+        if !self.modifiers.is_empty() {
+            write!(f, "\n{}", self.modifiers)
+        } else {
+            Ok(())
+        }
     }
 }
 

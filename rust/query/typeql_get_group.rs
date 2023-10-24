@@ -66,6 +66,6 @@ fn validate_variable_in_scope(var: &Variable, scope_variables: &HashSet<Variable
 
 impl fmt::Display for TypeQLGetGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{} {};", self.query, token::Clause::Group, self.group_var)
+        write!(f, "{}{} {};", self.query, token::Clause::Group, self.group_var)
     }
 }

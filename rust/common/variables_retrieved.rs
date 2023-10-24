@@ -24,10 +24,5 @@
 use crate::variable::variable::VariableRef;
 
 pub trait VariablesRetrieved {
-
     fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_>;
 }
-
-// pub(crate) fn validate_names_unique(variabilizable: impl Variabilizable) -> Result {
-//
-// }
