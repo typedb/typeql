@@ -17,27 +17,14 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 
 use cucumber::{gherkin::Step, given, StatsWriter, then, when, World};
-
 use typeql::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
 
-fn main() {
-    assert!(!futures::executor::block_on(
-        // Bazel specific path: when running the test in bazel, the external data from
-        // @vaticle_typedb_behaviour is stored in a directory that is a  sibling to
-        // the working directory.
-        TypeQLWorld::cucumber().fail_on_skipped().filter_run("../vaticle_typedb_behaviour/", |_, _, sc| {
-            !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
-        }),
-    )
-    .execution_has_failed());
-}
 
 fn parse_query_in_step(step: &Step) -> Query {
     parse_query(step.docstring.as_ref().unwrap()).unwrap()
