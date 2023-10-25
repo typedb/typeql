@@ -34,7 +34,7 @@ use crate::{
     query::{TypeQLUpdate, Writable, writable::validate_non_empty},
     write_joined,
 };
-use crate::query::MatchClause;
+use crate::query::{MatchClause, Sorting};
 use crate::query::modifier::Modifiers;
 use crate::variable::variable::VariableRef;
 
@@ -48,6 +48,18 @@ pub struct TypeQLDelete {
 impl TypeQLDelete {
     pub fn insert(self, writable: impl Writable) -> TypeQLUpdate {
         TypeQLUpdate { query_delete: self, insert_statements: writable.statements(), modifiers: Default::default() }
+    }
+
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
+        TypeQLDelete { modifiers: self.modifiers.sort(sorting), ..self }
+    }
+
+    pub fn limit(self, limit: usize) -> Self {
+        TypeQLDelete { modifiers: self.modifiers.limit(limit), ..self }
+    }
+
+    pub fn offset(self, offset: usize) -> Self {
+        TypeQLDelete { modifiers: self.modifiers.offset(offset), ..self }
     }
 }
 

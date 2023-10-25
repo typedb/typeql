@@ -32,9 +32,9 @@ use crate::{
 use crate::pattern::ThingStatementBuilder;
 
 #[macro_export]
-macro_rules! typeql_get {
+macro_rules! match_ {
     ($($pattern:expr),* $(,)?) => {{
-        $crate::query::TypeQLGet::new($crate::query::MatchClause::from_patterns(vec![$($pattern.into()),*]))
+        $crate::query::MatchClause::from_patterns(vec![$($pattern.into()),*])
     }}
 }
 

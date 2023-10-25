@@ -19,6 +19,7 @@
  * under the License.
  */
 use std::fmt;
+use regex::Regex;
 
 use crate::common::{Result, token};
 use crate::common::error::collect_err;
@@ -26,7 +27,7 @@ use crate::common::validatable::Validatable;
 use crate::pattern::{Label, VariablesRetrieved};
 use crate::query::{MatchClause, TypeQLGetAggregate};
 use crate::query::modifier::Modifiers;
-use crate::variable::Variable;
+use crate::variable::{Variable, variable};
 use crate::variable::variable::VariableRef;
 use crate::write_joined;
 
@@ -88,13 +89,27 @@ impl Projection {
 #[derive(Debug, Eq, PartialEq)]
 pub struct ProjectionKeyVar {
     pub(crate) variable: Variable,
-    pub(crate) label: Option<ProjectionKeyLabel>
+    pub(crate) label: Option<ProjectionKeyLabel>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum ProjectionKeyLabel {
     Quoted(String),
     Unquoted(String),
+}
+
+impl ProjectionKeyLabel {
+    fn map_subquery_get_aggregate(self, subquery: TypeQLGetAggregate) -> Projection {
+        Projection::Subquery(self.into(), ProjectionSubquery::GetAggregate(subquery))
+    }
+
+    fn map_subquery_fetch(self, subquery: TypeQLFetch) -> Projection {
+        Projection::Subquery(self.into(), ProjectionSubquery::Fetch(Box::new(subquery)))
+    }
+
+    fn must_quote(s: &str) -> bool {
+        !variable::is_valid_variable_name(s)
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -106,7 +121,56 @@ pub struct ProjectionAttribute {
 #[derive(Debug, Eq, PartialEq)]
 pub enum ProjectionSubquery {
     GetAggregate(TypeQLGetAggregate),
-    Fetch(Box<TypeQLFetch>)
+    Fetch(Box<TypeQLFetch>),
+}
+
+pub trait ProjectionBuilder {
+    fn map_attribute(self, attribute: impl Into<ProjectionAttribute>) -> Projection;
+    fn map_attributes(self, attribute: Vec<ProjectionAttribute>) -> Projection;
+}
+
+impl<T: Into<Variable>> ProjectionBuilder for T {
+    fn map_attribute(self, attribute: impl Into<ProjectionAttribute>) -> Projection {
+        Projection::Attribute(self.into().into(), vec!(attribute.into()))
+    }
+
+    fn map_attributes(self, attributes: Vec<ProjectionAttribute>) -> Projection {
+        Projection::Attribute(self.into().into(), attributes)
+    }
+}
+
+impl<T: Into<ProjectionKeyVar>> From<T> for Projection {
+    fn from(key_var: T) -> Self {
+        Projection::Variable(key_var.into())
+    }
+}
+
+impl<T: Into<Variable>> From<T> for ProjectionKeyVar {
+    fn from(var: T) -> Self {
+        ProjectionKeyVar { variable: var.into(), label: None }
+    }
+}
+
+impl<T: Into<Variable>, U: Into<ProjectionKeyLabel>> From<(T, U)> for ProjectionKeyVar {
+    fn from((var, label): (T, U)) -> Self {
+        ProjectionKeyVar { variable: var.into(), label: Some(label.into()) }
+    }
+}
+
+impl From<&str> for ProjectionKeyLabel {
+    fn from(value: &str) -> Self {
+        Self::from(value.to_owned())
+    }
+}
+
+impl From<String> for ProjectionKeyLabel {
+    fn from(label: String) -> Self {
+        if Self::must_quote(label.as_ref()) {
+            ProjectionKeyLabel::Quoted(label)
+        } else {
+            ProjectionKeyLabel::Unquoted(label)
+        }
+    }
 }
 
 impl fmt::Display for TypeQLFetch {

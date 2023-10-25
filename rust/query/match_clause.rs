@@ -25,7 +25,10 @@ use crate::common::{Error, token};
 use crate::common::error::{collect_err, TypeQLError};
 use crate::common::validatable::Validatable;
 use crate::pattern::{Conjunction, Pattern, VariablesRetrieved};
+use crate::query::{Projection, typeql_get, TypeQLDelete, TypeQLFetch, TypeQLGet, TypeQLInsert, Writable};
+use crate::query::modifier::Modifiers;
 use crate::Result;
+use crate::variable::Variable;
 use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -40,6 +43,34 @@ impl MatchClause {
 
     pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
         Self::new(Conjunction::new(patterns))
+    }
+
+    pub fn get(self) -> TypeQLGet {
+        TypeQLGet { clause_match: self, filter: typeql_get::Filter { vars: Vec::default() }, modifiers: Modifiers::default() }
+    }
+
+    pub fn get_vars(self, vars: Vec<Variable>) -> TypeQLGet {
+        TypeQLGet { clause_match: self, filter: typeql_get::Filter { vars }, modifiers: Modifiers::default() }
+    }
+
+    pub fn get_fixed<const N: usize, T: Into<Variable>>(self, vars: [T; N]) -> TypeQLGet {
+        self.get_vars(vars.into_iter().map(|var| var.into()).collect::<Vec<_>>())
+    }
+
+    pub fn fetch(self, projections: Vec<Projection>) -> TypeQLFetch {
+        TypeQLFetch { clause_match: self, projections, modifiers: Modifiers::default() }
+    }
+
+    pub fn fetch_fixed<const N: usize>(self, projections: [Projection; N]) -> TypeQLFetch {
+        self.fetch(projections.into_iter().collect::<Vec<_>>())
+    }
+
+    pub fn insert(self, writable: impl Writable) -> TypeQLInsert {
+        TypeQLInsert { clause_match: Some(self), statements: writable.statements(), modifiers: Modifiers::default() }
+    }
+
+    pub fn delete(self, writable: impl Writable) -> TypeQLDelete {
+        TypeQLDelete { clause_match: self, statements: writable.statements(), modifiers: Modifiers::default() }
     }
 
     fn validate_nested_patterns_are_bounded(&self) -> Result {

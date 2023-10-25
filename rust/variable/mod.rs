@@ -19,18 +19,22 @@
  * under the License.
  */
 
+use std::{fmt, iter};
+use std::fmt::Formatter;
+
+
+pub use variable::Variable;
+pub use variable_concept::ConceptVariable;
+pub use variable_value::ValueVariable;
+
+use crate::common::validatable::Validatable;
+use crate::pattern::{Label, TypeStatement, TypeStatementBuilder};
+use crate::variable::variable::VariableRef;
+
 pub(crate) mod variable;
 pub(crate) mod variable_concept;
 pub(crate) mod variable_value;
 
-use std::{fmt, iter};
-use std::fmt::Formatter;
-pub use variable::Variable;
-pub use variable_concept::ConceptVariable;
-pub use variable_value::ValueVariable;
-use crate::common::validatable::Validatable;
-use crate::pattern::{Label, TypeStatement, TypeStatementBuilder};
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeReference {

@@ -34,7 +34,7 @@ use crate::{
     query::writable::validate_non_empty,
     write_joined,
 };
-use crate::query::MatchClause;
+use crate::query::{MatchClause, Sorting};
 use crate::query::modifier::Modifiers;
 use crate::variable::variable::VariableRef;
 
@@ -49,6 +49,26 @@ impl TypeQLInsert {
     pub fn new(statements: Vec<ThingStatement>) -> Self {
         TypeQLInsert { clause_match: None, statements, modifiers: Modifiers::default() }
     }
+
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
+        TypeQLInsert { modifiers: self.modifiers.sort(sorting), ..self }
+    }
+
+    pub fn limit(self, limit: usize) -> Self {
+        TypeQLInsert { modifiers: self.modifiers.limit(limit), ..self }
+    }
+
+    pub fn offset(self, offset: usize) -> Self {
+        TypeQLInsert { modifiers: self.modifiers.offset(offset), ..self }
+    }
+
+    fn validate_modifiers_have_match_clause(&self) -> Result {
+        if !self.modifiers.is_empty() && self.clause_match.is_none() {
+            Err(TypeQLError::InsertModifiersRequireMatch(self.to_string()))?
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl Validatable for TypeQLInsert {
@@ -56,6 +76,7 @@ impl Validatable for TypeQLInsert {
         collect_err(
             [
                 validate_non_empty(&self.statements),
+                self.validate_modifiers_have_match_clause(),
                 self.clause_match.as_ref().map(|m| {
                     m.validate()?;
                     let match_variables = m.retrieved_variables().collect();
@@ -76,7 +97,7 @@ fn validate_insert_in_scope_of_match(match_variables: &HashSet<VariableRef>, sta
     } else {
         let stmts_str = statements.iter().map(ThingStatement::to_string).collect::<Vec<String>>().join(", ");
         let bounds_str = match_variables.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
-        Err(TypeQLError::NoVariableInScopeInsert(stmts_str, bounds_str))?
+        Err(TypeQLError::InsertClauseNotBound(stmts_str, bounds_str))?
     }
 }
 

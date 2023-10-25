@@ -21,8 +21,8 @@
  */
 
 use std::{collections::HashSet, fmt};
-use itertools::Itertools;
 
+use itertools::Itertools;
 
 use crate::{
     common::{
@@ -32,7 +32,7 @@ use crate::{
         validatable::Validatable,
     },
     pattern::{Conjunction, VariablesRetrieved},
-    query::{AggregateQueryBuilder, TypeQLDelete, TypeQLGetGroup, TypeQLInsert, Writable},
+    query::{AggregateQueryBuilder, TypeQLGetGroup},
     write_joined,
 };
 use crate::query::MatchClause;
@@ -54,14 +54,6 @@ impl TypeQLGet {
         TypeQLGet { clause_match, filter: Filter::default(), modifiers: Modifiers::default() }
     }
 
-    pub fn filter(self, vars: Vec<Variable>) -> Self {
-        TypeQLGet { filter: Filter { vars }, ..self }
-    }
-
-    pub fn get<const N: usize, T: Into<Variable>>(self, vars: [T; N]) -> Self {
-        self.filter(vars.into_iter().map(|var| var.into()).collect::<Vec<_>>())
-    }
-
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
         TypeQLGet { modifiers: self.modifiers.sort(sorting), ..self }
     }
@@ -72,14 +64,6 @@ impl TypeQLGet {
 
     pub fn offset(self, offset: usize) -> Self {
         TypeQLGet { modifiers: self.modifiers.offset(offset), ..self }
-    }
-
-    pub fn insert(self, writable: impl Writable) -> TypeQLInsert {
-        TypeQLInsert { clause_match: Some(self.clause_match), statements: writable.statements(), modifiers: self.modifiers }
-    }
-
-    pub fn delete(self, writable: impl Writable) -> TypeQLDelete {
-        TypeQLDelete { clause_match: self.clause_match, statements: writable.statements(), modifiers: self.modifiers }
     }
 
     pub fn group(self, var: impl Into<Variable>) -> TypeQLGetGroup {

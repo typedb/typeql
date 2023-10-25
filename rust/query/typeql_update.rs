@@ -23,19 +23,34 @@
 use std::fmt;
 
 use crate::{
-    common::{error::collect_err, token, validatable::Validatable, Result},
+    common::{error::collect_err, Result, token, validatable::Validatable},
     pattern::ThingStatement,
-    query::{writable::validate_non_empty, TypeQLDelete},
+    query::{TypeQLDelete, writable::validate_non_empty},
     write_joined,
 };
 use crate::pattern::VariablesRetrieved;
 use crate::query::modifier::Modifiers;
+use crate::query::Sorting;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {
     pub query_delete: TypeQLDelete,
     pub insert_statements: Vec<ThingStatement>,
     pub modifiers: Modifiers,
+}
+
+impl TypeQLUpdate {
+    pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
+        TypeQLUpdate { modifiers: self.modifiers.sort(sorting), ..self }
+    }
+
+    pub fn limit(self, limit: usize) -> Self {
+        TypeQLUpdate { modifiers: self.modifiers.limit(limit), ..self }
+    }
+
+    pub fn offset(self, offset: usize) -> Self {
+        TypeQLUpdate { modifiers: self.modifiers.offset(offset), ..self }
+    }
 }
 
 impl Validatable for TypeQLUpdate {
