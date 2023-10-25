@@ -89,7 +89,7 @@ projection_key_label = { QUOTED_STRING | label }
 // SCHEMA QUERY ================================================================
 
 definables = { ( definable ~ ";" )+ }
-definable = { statement_type | schema_rule | schema_rule_declaration }
+definable = { statement_type | schema_rule | schema_rule_label }
 
 // QUERY PATTERNS ==============================================================
 
@@ -187,7 +187,7 @@ expression_arguments = _{ expression ~ ( "," ~ expression )* }
 
 // SCHEMA CONSTRUCT ============================================================
 
-schema_rule_declaration = { RULE ~ label }
+schema_rule_label = { RULE ~ label }
 schema_rule = { RULE ~ label ~ ":" ~ WHEN ~ "{" ~ patterns ~ "}" ~ THEN ~ "{" ~ statement_thing_any ~ ";" ~ "}" }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================

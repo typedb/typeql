@@ -184,13 +184,12 @@ pub(crate) fn visit_eof_statement(statement: &str) -> Result<Statement> {
 }
 
 pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
-    let parsed = parse_single(Rule::eof_label, label)?.into_child();
-    dbg_assert_line!(parsed.is_ok());
-    let node = parsed?.as_str();
-    if node != label {
+    let parsed = parse_single(Rule::eof_label, label)?.into_children().consume_expected(Rule::label);
+    let string = parsed.as_str();
+    if string != label {
         Err(TypeQLError::IllegalCharInLabel(label.to_string()))?;
     }
-    Ok(node.into())
+    Ok(string.into())
 }
 
 pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<crate::pattern::Rule> {
@@ -654,7 +653,7 @@ fn visit_definable(node: Node) -> Definable {
     let definable = match child.as_rule() {
         Rule::statement_type => visit_statement_type(child).into(),
         Rule::schema_rule => visit_schema_rule(child).into(),
-        Rule::schema_rule_declaration => visit_schema_rule_declaration(child).into(),
+        Rule::schema_rule_label => visit_schema_rule_label(child).into(),
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
@@ -912,12 +911,15 @@ fn visit_attribute(node: Node) -> HasConstraint {
         Some(Rule::label) => {
             let label: Label = children.consume_expected(Rule::label).as_str().to_owned().into();
             match children.peek_rule() {
-                Some(Rule::VAR_) => HasConstraint::from((
-                    Some(label)
-                    get_var(children.consume_expected(Rule::VAR_)),
-                )),
+                Some(Rule::VAR_) => {
+                    let var = get_var(children.consume_expected(Rule::VAR_));
+                    match var {
+                        Variable::Concept(cvar) => HasConstraint::HasConcept(Some(label), cvar),
+                        Variable::Value(vvar) => HasConstraint::HasValue(label, vvar),
+                    }
+                },
                 Some(Rule::predicate) => {
-                    HasConstraint::new((label, visit_predicate(children.consume_expected(Rule::predicate))))
+                    HasConstraint::from((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }
                 _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
             }
@@ -1027,23 +1029,23 @@ fn visit_function_name(node: Node) -> token::Function {
     function_token
 }
 
+fn visit_schema_rule_label(node: Node) -> RuleLabel {
+    dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule_label);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::RULE);
+    let rule = RuleLabel::new(Label::from(
+        children.consume_expected(Rule::label).as_str(),
+    ));
+    dbg_assert_line!(children.try_consume_any().is_none());
+    rule
+}
+
 fn visit_schema_rule(node: Node) -> crate::pattern::Rule {
     dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule);
     let mut children = node.into_children();
     let rule = RuleLabel::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
         .when(Conjunction::new(visit_patterns(children.skip_expected(Rule::WHEN).consume_expected(Rule::patterns))))
         .then(visit_statement_thing_any(children.skip_expected(Rule::THEN).consume_expected(Rule::statement_thing_any)));
-    dbg_assert_line!(children.try_consume_any().is_none());
-    rule
-}
-
-fn visit_schema_rule_declaration(node: Node) -> RuleLabel {
-    dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule_declaration);
-    let mut children = node.into_children();
-    children.skip_expected(Rule::RULE);
-    let rule = RuleLabel::new(Label::from(
-        children.consume_expected(Rule::label).as_str(),
-    ));
     dbg_assert_line!(children.try_consume_any().is_none());
     rule
 }

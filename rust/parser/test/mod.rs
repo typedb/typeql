@@ -24,7 +24,7 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use crate::{
     and,
-    builder::{abs, ceil, constant, cvar, floor, round, vvar},
+    builder::{abs, ceil, constant, cvar, eq, floor, round, vvar},
     common::{
         token::{
             self,
@@ -101,7 +101,7 @@ get $char, $prod;"#;
         cvar("brando").eq("Marl B").isa("name"),
         rel(("actor", "brando")).rel("char").rel(("production-with-cast", "prod")),
     )
-    .get([cvar("char"), cvar("prod")]);
+        .get([cvar("char"), cvar("prod")]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -427,7 +427,7 @@ fn when_parsing_date_error_when_handling_overly_precise_nanos() {
             NaiveTime::from_hms_nano_opt(13, 14, 15, 123450000).unwrap(),
         ),
     )))
-    .validated();
+        .validated();
     assert!(validated.is_err());
     assert!(validated.unwrap_err().to_string().contains("more precise than 1 millisecond"));
 }
@@ -686,8 +686,8 @@ get;"#;
 fn test_schema_query() {
     let query = r#"match
 $x plays starring:actor;
-sort $x asc;
-get;"#;
+get;
+sort $x asc;"#;
 
     let parsed = parse_query(query).unwrap().into_get();
     let expected = typeql_get!(cvar("x").plays(("starring", "actor"))).sort([(cvar("x"), Asc)]);
@@ -723,7 +723,7 @@ sort ?l desc;"#;
         cvar("x").isa("movie").has(("rating", cvar("r"))),
         vvar("l").assign(constant(100).subtract(cvar("r")))
     )
-    .sort([(vvar("l"), Desc)]);
+        .sort([(vvar("l"), Desc)]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -743,7 +743,7 @@ sort ?rate desc, $t;"#;
         cvar("x").isa("movie").has(("title", cvar("t"))).has(("rating", cvar("r"))),
         vvar("rate").assign(cvar("r").multiply(100)),
     )
-    .sort(sort_vars!((vvar("rate"), Desc), cvar("t")));
+        .sort(sort_vars!((vvar("rate"), Desc), cvar("t")));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -991,9 +991,9 @@ group $x; sum ?t;"#;
         cvar("i").has(("value", cvar("v"))).has(("tax-rate", cvar("r"))),
         vvar("t").assign(cvar("r").multiply(cvar("v"))),
     )
-    .get(filter)
-    .group(cvar("x"))
-    .sum(vvar("t"));
+        .get(filter)
+        .group(cvar("x"))
+        .sum(vvar("t"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1003,8 +1003,8 @@ fn when_comparing_count_query_using_typeql_and_rust_typeql_they_are_equivalent()
     let query = r#"match
 $x isa movie,
     has title "Godfather";
-count;
-get;"#;
+get;
+count;"#;
 
     let parsed = parse_query(query).unwrap().into_get_aggregate();
     let expected = typeql_get!(cvar("x").isa("movie").has(("title", "Godfather"))).count();
@@ -1467,7 +1467,7 @@ fn test_parsing_label() {
 }
 
 #[test]
-fn test_rule_attach_attribute_by_value() {
+fn test_rule_attach_attribute_by_value_predicate() {
     let query = r#"define
 rule attach-val: when {
     $x has age $a;
@@ -1479,13 +1479,13 @@ rule attach-val: when {
     let parsed = parse_query(query).unwrap().into_define();
     let expected = typeql_define!(rule("attach-val")
         .when(and!(cvar("x").has(("age", cvar("a"))), vvar("d").assign(cvar("a").multiply(365)),))
-        .then(cvar("x").has(("days", vvar("d")))));
+        .then(cvar("x").has(("days", eq(vvar("d"))))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
 #[test]
-fn test_rule_attach_attribute_by_value_implicit_equals() {
+fn test_rule_attach_attribute_by_value() {
     let query = r#"define
 rule attach-val: when {
     $x has age $a;
@@ -1499,7 +1499,7 @@ rule attach-val: when {
     $x has age $a;
     ?d = $a * 365;
 } then {
-    $x has days == ?d;
+    $x has days ?d;
 };"#;
 
     let parsed = parse_query(query).unwrap().into_define();
@@ -1613,7 +1613,8 @@ fn test_syntax_error_pointer() {
 fn test_has_variable() {
     let query = r#"match
 $_ has title "Godfather",
-    has tmdb-vote-count $x;"#;
+    has tmdb-vote-count $x;
+get;"#;
 
     let parsed = parse_query(query).unwrap().into_get();
     let expected = typeql_get!(cvar(()).has(("title", "Godfather")).has(("tmdb-vote-count", cvar("x"))));
@@ -1623,7 +1624,8 @@ $_ has title "Godfather",
 #[test]
 fn test_regex_attribute_type() {
     let query = r#"match
-$x regex "(fe)male";"#;
+$x regex "(fe)male";
+get;"#;
 
     let parsed = parse_query(query).unwrap().into_get();
     let expected = typeql_get!(cvar("x").regex("(fe)male"));
@@ -1632,7 +1634,7 @@ $x regex "(fe)male";"#;
 
 #[test]
 fn test_typeql_parsing_query() {
-    assert!(matches!(parse_query("match\n$x isa movie;"), Ok(Query::Get(_))));
+    assert!(matches!(parse_query("match\n$x isa movie; get;"), Ok(Query::Get(_))));
 }
 
 #[test]
@@ -1696,8 +1698,7 @@ fn test_parsing_list() {
 #[test]
 fn test_parsing_many_match_insert_without_stack_overflow() {
     let num_queries = 10_000;
-    let query = "match\n$x isa person; insert $x has name 'bob';
-get;\n";
+    let query = "match\n$x isa person; insert $x has name 'bob';";
     let queries = query.repeat(num_queries);
 
     let mut parsed = Vec::with_capacity(num_queries);

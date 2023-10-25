@@ -27,7 +27,7 @@ use crate::{
     pattern::Predicate,
     variable::ConceptVariable,
 };
-use crate::pattern::Label;
+use crate::pattern::{Constant, Label};
 use crate::variable::ValueVariable;
 use crate::variable::variable::VariableRef;
 
@@ -78,9 +78,15 @@ impl From<ConceptVariable> for HasConstraint {
     }
 }
 
-impl From<(Label, ConceptVariable)> for HasConstraint {
-    fn from((label, variable): (Label, ConceptVariable)) -> Self {
-        HasConstraint::HasConcept(Some(label), variable)
+impl<T: Into<Label>> From<(T, ConceptVariable)> for HasConstraint {
+    fn from((label, variable): (T, ConceptVariable)) -> Self {
+        HasConstraint::HasConcept(Some(label.into()), variable)
+    }
+}
+
+impl<T: Into<Label>> From<(T, ValueVariable)> for HasConstraint {
+    fn from((label, variable): (T, ValueVariable)) -> Self {
+        HasConstraint::HasValue(label.into(), variable)
     }
 }
 
@@ -90,14 +96,17 @@ impl From<(Option<Label>, ConceptVariable)> for HasConstraint {
     }
 }
 
-impl<S: Into<Label>> From<(S, Predicate)> for HasConstraint {
-    fn from((label, predicate): (S, Predicate)) -> Self {
-        HasConstraint::HasPredicate(label.into(), predicate)
+impl<S: Into<Label>, T: Into<Constant>> From<(S, T)> for HasConstraint {
+    fn from((label, constant): (S, T)) -> Self {
+        HasConstraint::HasPredicate(
+            label.into(),
+            Predicate::new(token::Predicate::Eq, constant.into().into())
+        )
     }
 }
 
-impl HasConstraint {
-    pub fn new((label, predicate): (impl Into<Label>, Predicate)) -> Self {
+impl<S: Into<Label>> From<(S, Predicate)> for HasConstraint {
+    fn from((label, predicate): (S, Predicate)) -> Self {
         HasConstraint::HasPredicate(label.into(), predicate)
     }
 }
