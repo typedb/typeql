@@ -19,7 +19,7 @@
  * under the License.
  */
 
-use cucumber::{gherkin::Step, given, StatsWriter, then, when, World};
+use cucumber::{gherkin::Step, given, then, when, World};
 use typeql::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]
