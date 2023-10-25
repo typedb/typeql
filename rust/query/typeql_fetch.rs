@@ -92,6 +92,12 @@ pub struct ProjectionKeyVar {
     pub(crate) label: Option<ProjectionKeyLabel>,
 }
 
+impl ProjectionKeyVar {
+    pub fn label(self, label: impl Into<ProjectionKeyLabel>) -> Self {
+        ProjectionKeyVar { label: Some(label.into()), ..self }
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum ProjectionKeyLabel {
     Quoted(String),
@@ -108,6 +114,7 @@ impl ProjectionKeyLabel {
     }
 
     fn must_quote(s: &str) -> bool {
+        // TODO: we should actually check against valid label regex, instead of valid variable regex - Java has to be updated too
         !variable::is_valid_variable_name(s)
     }
 }
@@ -117,6 +124,13 @@ pub struct ProjectionAttribute {
     pub(crate) attribute: Label,
     pub(crate) label: Option<ProjectionKeyLabel>,
 }
+
+impl ProjectionAttribute {
+    pub fn label(self, label: impl Into<ProjectionKeyLabel>) -> Self {
+        ProjectionAttribute { label: Some(label.into()), ..self }
+    }
+}
+
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum ProjectionSubquery {
@@ -129,15 +143,16 @@ pub trait ProjectionBuilder {
     fn map_attributes(self, attribute: Vec<ProjectionAttribute>) -> Projection;
 }
 
-impl<T: Into<Variable>> ProjectionBuilder for T {
+impl<T: Into<ProjectionKeyVar>> ProjectionBuilder for T {
     fn map_attribute(self, attribute: impl Into<ProjectionAttribute>) -> Projection {
-        Projection::Attribute(self.into().into(), vec!(attribute.into()))
+        Projection::Attribute(self.into(), vec!(attribute.into()))
     }
 
     fn map_attributes(self, attributes: Vec<ProjectionAttribute>) -> Projection {
-        Projection::Attribute(self.into().into(), attributes)
+        Projection::Attribute(self.into(), attributes)
     }
 }
+
 
 impl<T: Into<ProjectionKeyVar>> From<T> for Projection {
     fn from(key_var: T) -> Self {
@@ -170,6 +185,12 @@ impl From<String> for ProjectionKeyLabel {
         } else {
             ProjectionKeyLabel::Unquoted(label)
         }
+    }
+}
+
+impl<T: Into<Label>> From<T> for ProjectionAttribute {
+    fn from(attribute: T) -> Self {
+        ProjectionAttribute { attribute: attribute.into(), label: None }
     }
 }
 

@@ -29,7 +29,7 @@ pub use modifier::Sorting;
 pub use modifier::sorting;
 pub use typeql_define::TypeQLDefine;
 pub use typeql_delete::TypeQLDelete;
-pub use typeql_fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar, ProjectionSubquery, TypeQLFetch};
+pub use typeql_fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar, ProjectionSubquery, ProjectionBuilder, TypeQLFetch};
 pub use typeql_get::{Filter, TypeQLGet};
 pub use typeql_get_aggregate::{AggregateQueryBuilder, TypeQLGetAggregate, TypeQLGetGroupAggregate};
 pub use typeql_get_group::TypeQLGetGroup;

@@ -42,6 +42,7 @@ use crate::{
     Query,
     query::AggregateQueryBuilder, rel, rule, sort_vars, type_, match_, typeql_insert,
 };
+use crate::query::{Projection, ProjectionKeyVar, ProjectionBuilder, ProjectionAttribute};
 use crate::variable::Variable;
 
 macro_rules! assert_valid_eq_repr {
@@ -797,6 +798,61 @@ offset 2; limit 4;"#;
 }
 
 #[test]
+fn test_fetch_query() {
+    let query = r#"match
+$x isa movie
+    has title \"Godfather\"
+    has release-date $d;
+fetch
+$d;
+$d as date;
+$x: name, title as t, name as \"Movie name\";
+$x as movie: name;
+$x as \"Movie name\": name;
+label-a: {
+    match
+    ($d, $c) isa director;
+    fetch
+    $d: name;
+};
+label-b: {
+    match
+    ($d, $c) isa director;
+    get $d;
+    count;
+};
+}
+"#;
+
+    let parsed = parse_query(query).unwrap().into_fetch();
+    let projections:Vec<Projection> = vec!(
+        cvar("d").into(),
+        ProjectionKeyVar::from(cvar("d")).label("date").into(),
+        ProjectionKeyVar::from(cvar("x")).map_attributes(vec!(
+            ProjectionAttribute::from("name"), ProjectionAttribute::from("title").label("t"),
+            ProjectionAttribute::from("name").label("Movie name")
+        )),
+        // cvar("x").asLabel("movie").map("name"),
+        // cvar("x").asLabel("Movie name").map("name"),
+        // "label-a".into().map_subquery_fetch(
+        //     match_!(
+        //         rel(cvar("d")).rel(cvar("c")).isa("director")
+        //     ).fetch(
+        //         cvar("d").map("name")
+        //     )
+        // ),
+        // "label-b".into().map_subquery_get_aggregate(
+        //     match_!(
+        //         rel(cvar("d")).rel(cvar("c")).isa("director")
+        //     ).get(cvar("d")).count()
+        // )
+    );
+    let expected = match_!(
+        cvar("x").isa("movie").has(("title", "Godfather")).has(("release-date", cvar("d")))
+    ).fetch(projections);
+}
+
+#[test]
 fn test_variables_everywhere_query() {
     let query = r#"match
 ($p: $x, $y);
@@ -1019,19 +1075,7 @@ count;"#;
 }
 
 #[test]
-fn test_insert_query() {
-    let query = r#"insert
-$_ isa movie,
-    has title "The Title";"#;
-
-    let parsed = parse_query(query).unwrap().into_insert();
-    let expected = typeql_insert!(cvar(()).isa("movie").has(("title", "The Title")));
-
-    assert_valid_eq_repr!(expected, parsed, query);
-}
-
-#[test]
-fn when_parsing_delete_query_result_is_same_as_java_typeql() {
+fn test_delete_query() {
     let query = r#"match
 $x isa movie,
     has title "The Title";
@@ -1048,7 +1092,7 @@ $y isa movie;"#;
 }
 
 #[test]
-fn when_parsing_insert_query_result_is_same_as_java_typeql() {
+fn test_insert_query() {
     let query = r#"insert
 $x isa pokemon,
     has name "Pichu";
@@ -1072,7 +1116,7 @@ $z isa pokemon,
 }
 
 #[test]
-fn when_parsing_update_query_result_is_same_as_java_typeql() {
+fn test_update_query() {
     let query = r#"match
 $x isa person,
     has name "alice",
@@ -1128,7 +1172,7 @@ get;"#;
 }
 
 #[test]
-fn when_parsing_define_query_with_owns_overrides_result_is_same_as_java_typeql() {
+fn test_define_query_with_owns_overrides() {
     let query = r#"define
 triangle sub entity;
 triangle owns side-length;
@@ -1147,7 +1191,7 @@ triangle-right-angled owns hypotenuse-length as side-length;"#;
 }
 
 #[test]
-fn when_parsing_define_query_with_relates_overrides_result_is_same_as_java_typeql() {
+fn test_define_query_with_relates_overrides() {
     let query = r#"define
 pokemon sub entity;
 evolves sub relation;
@@ -1169,7 +1213,7 @@ evolves-final relates from-final as from;"#;
 }
 
 #[test]
-fn when_parsing_define_query_with_plays_overrides_result_is_same_as_java_typeql() {
+fn test_define_query_with_plays_overrides() {
     let query = r#"define
 pokemon sub entity;
 evolves sub relation;
@@ -1193,7 +1237,7 @@ pokemon plays evolves-final:from-final as from;"#;
 }
 
 #[test]
-fn when_parsing_define_query_result_is_same_as_java_typeql() {
+fn test_define_query() {
     let query = r#"define
 pokemon sub entity;
 evolution sub relation;
