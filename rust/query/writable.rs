@@ -44,8 +44,8 @@ impl Writable for Vec<ThingStatement> {
     }
 }
 
-pub(crate) fn validate_non_empty(variables: &[ThingStatement]) -> Result {
-    if variables.is_empty() {
+pub(crate) fn validate_non_empty(statements: &[ThingStatement]) -> Result {
+    if statements.is_empty() {
         Err(TypeQLError::MissingPatterns())?
     }
     Ok(())

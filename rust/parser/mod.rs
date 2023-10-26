@@ -633,11 +633,11 @@ fn visit_sort(node: Node) -> Sorting {
     dbg_assert_eq_line!(node.as_rule(), Rule::sort);
     let mut children = node.into_children();
     children.skip_expected(Rule::SORT);
-    let sorting = Sorting::new(children.map(visit_var_order).collect());
+    let sorting = Sorting::new(children.map(visit_sort_var).collect());
     sorting
 }
 
-fn visit_var_order(node: Node) -> sorting::SortVariable {
+fn visit_sort_var(node: Node) -> sorting::SortVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::var_order);
     let mut children = node.into_children();
     let var = get_var(children.consume_expected(Rule::VAR_));
@@ -769,8 +769,8 @@ fn visit_statement_value(node: Node) -> ValueStatement {
 fn visit_statement_type(node: Node) -> TypeStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_type);
     let mut children = node.into_children();
-    let mut var_type = visit_type_ref_any(children.consume_expected(Rule::type_ref_any)).into_type_statement();
-    var_type = children.map(Node::into_children).fold(var_type, |var_type, mut constraint_nodes| {
+    let mut type_statement = visit_type_ref_any(children.consume_expected(Rule::type_ref_any)).into_type_statement();
+    type_statement = children.map(Node::into_children).fold(type_statement, |var_type, mut constraint_nodes| {
         let keyword = constraint_nodes.consume_any();
         let statement = match keyword.as_rule() {
             Rule::ABSTRACT => var_type.abstract_(),
@@ -810,7 +810,7 @@ fn visit_statement_type(node: Node) -> TypeStatement {
         dbg_assert_line!(constraint_nodes.try_consume_any().is_none());
         statement
     });
-    var_type
+    type_statement
 }
 
 fn visit_annotations_owns(node: Node) -> Vec<Annotation> {

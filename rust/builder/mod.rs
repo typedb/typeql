@@ -42,8 +42,8 @@ macro_rules! typeql_match {
 
 #[macro_export]
 macro_rules! typeql_insert {
-    ($($thing_variable:expr),* $(,)?) => {{
-        $crate::query::TypeQLInsert::new(vec![$($thing_variable),*])
+    ($($thing_statement:expr),* $(,)?) => {{
+        $crate::query::TypeQLInsert::new(vec![$($thing_statement),*])
     }}
 }
 

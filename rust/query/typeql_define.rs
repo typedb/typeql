@@ -50,8 +50,8 @@ impl TypeQLDefine {
         })
     }
 
-    fn add_statement(mut self, variable: TypeStatement) -> Self {
-        self.statements.push(variable);
+    fn add_statement(mut self, statement: TypeStatement) -> Self {
+        self.statements.push(statement);
         self
     }
 
