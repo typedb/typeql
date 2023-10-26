@@ -90,7 +90,7 @@ checkstyle_test(
     include = glob([
         "*",
         "**/*",
-    ]),
+    ], exclude = ["target/**"]),
     exclude = ["LICENSE", "README.md"],
     license_type = "apache-header",
 )

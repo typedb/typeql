@@ -37,7 +37,8 @@ $com isa company;
 } or {
     $com has name $n2;
     $n2 "another-company";
-};"#;
+};
+get;"#;
 
     let mut parsed = parse_query(query).unwrap().into_get();
     let normalised = parsed.match_clause.conjunction.normalise().into_disjunction();
@@ -63,7 +64,8 @@ not {
     } or {
         $n1 "another-company";
     };
-};"#;
+};
+get;"#;
 
     let mut parsed = parse_query(query).unwrap().into_get();
     let normalised = parsed.match_clause.conjunction.normalise().into_disjunction();

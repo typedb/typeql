@@ -56,7 +56,8 @@ public class NormalisationTest {
                 "} or {\n" +
                 "    $com has name $n2;\n" +
                 "    $n2 \"another-company\";\n" +
-                "};";
+                "};\n" +
+                "get;";
         TypeQLGet getQuery = TypeQL.parseQuery(query).asGet();
         Disjunction<Conjunction<Conjunctable>> normalised = getQuery.match().conjunction().normalise();
 
@@ -83,7 +84,8 @@ public class NormalisationTest {
                 "    } or {\n" +
                 "        $n1 \"other-company\";\n" +
                 "    };\n" +
-                "}; ";
+                "};\n" +
+                "get; ";
         TypeQLGet getQuery = TypeQL.parseQuery(query).asGet();
         Disjunction<Conjunction<Conjunctable>> normalised = getQuery.match().conjunction().normalise();
 
@@ -97,7 +99,8 @@ public class NormalisationTest {
                 "        $com has name $n1;\n" +
                 "        $n1 \"other-company\";\n" +
                 "    };\n" +
-                "};";
+                "};\n" +
+                "get;";
         TypeQLQuery expectedQuery = TypeQL.parseQuery(expected);
         Disjunction<? extends Pattern> inner = expectedQuery.asGet().match().conjunction().patterns().get(1).asNegation().pattern().asDisjunction();
         assertEquals(expected, expectedQuery.toString());
