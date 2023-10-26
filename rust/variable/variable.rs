@@ -123,13 +123,13 @@ impl fmt::Display for VariableRef<'_> {
 
 pub(crate) fn validate_variable_name(name: &str) -> Result {
     // TODO this should be a static regex
-    if is_valid_variable_name(name) {
+    if !is_valid_variable_name(name) {
         Err(TypeQLError::InvalidVariableName(name.to_string()))?
     }
     Ok(())
 }
 
 pub(crate) fn is_valid_variable_name(name: &str) -> bool {
-    !name.starts_with(|c: char| c.is_ascii_alphanumeric())
-        || !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+    name.starts_with(|c: char| c.is_ascii_alphanumeric())
+        && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
 }

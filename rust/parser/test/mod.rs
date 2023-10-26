@@ -21,6 +21,7 @@
  */
 
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use std::{fmt};
 
 use crate::{
     and,
@@ -33,16 +34,17 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
-    parse_query, parse_statement,
+    gte, lt, lte, match_, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns,
+    parse_queries, parse_query,
+    parse_statement,
     pattern::{
         Annotation::Key, ConceptStatementBuilder, ExpressionBuilder, Label,
         Statement, ThingStatementBuilder, TypeStatementBuilder, ValueStatementBuilder,
     },
-    Query,
-    query::AggregateQueryBuilder, rel, rule, sort_vars, type_, match_, typeql_insert,
+    Query, query::AggregateQueryBuilder, rel, rule, sort_vars, type_, typeql_insert,
 };
-use crate::query::{Projection, ProjectionKeyVar, ProjectionBuilder, ProjectionAttribute};
+use crate::builder::label;
+use crate::query::{Projection, ProjectionBuilder, ProjectionKeyVarBuilder};
 use crate::variable::Variable;
 
 macro_rules! assert_valid_eq_repr {
@@ -800,15 +802,15 @@ offset 2; limit 4;"#;
 #[test]
 fn test_fetch_query() {
     let query = r#"match
-$x isa movie
-    has title \"Godfather\"
+$x isa movie,
+    has title "Godfather",
     has release-date $d;
 fetch
 $d;
 $d as date;
-$x: name, title as t, name as \"Movie name\";
+$x: name, title as t, name as "Movie name";
 $x as movie: name;
-$x as \"Movie name\": name;
+$x as "Movie name": name;
 label-a: {
     match
     ($d, $c) isa director;
@@ -820,36 +822,44 @@ label-b: {
     ($d, $c) isa director;
     get $d;
     count;
-};
-}
-"#;
+};"#;
+    let result = parse_query(query);
+    let parsed = match result {
+        Ok(query) => query.into_fetch(),
+        Err(error) => {
+            println!("{}", error);
+            panic!();
+        }
+    };
 
-    let parsed = parse_query(query).unwrap().into_fetch();
-    let projections:Vec<Projection> = vec!(
+    let projections: Vec<Projection> = vec![
         cvar("d").into(),
-        ProjectionKeyVar::from(cvar("d")).label("date").into(),
-        ProjectionKeyVar::from(cvar("x")).map_attributes(vec!(
-            ProjectionAttribute::from("name"), ProjectionAttribute::from("title").label("t"),
-            ProjectionAttribute::from("name").label("Movie name")
-        )),
-        // cvar("x").asLabel("movie").map("name"),
-        // cvar("x").asLabel("Movie name").map("name"),
-        // "label-a".into().map_subquery_fetch(
-        //     match_!(
-        //         rel(cvar("d")).rel(cvar("c")).isa("director")
-        //     ).fetch(
-        //         cvar("d").map("name")
-        //     )
-        // ),
-        // "label-b".into().map_subquery_get_aggregate(
-        //     match_!(
-        //         rel(cvar("d")).rel(cvar("c")).isa("director")
-        //     ).get(cvar("d")).count()
-        // )
-    );
+        cvar("d").label("date").into(),
+        cvar("x").map_attributes(vec![
+            "name".into(),
+            ("title", "t").into(),
+            ("name", "Movie name").into(),
+        ]),
+        cvar("x").label("movie").map_attribute("name"),
+        cvar("x").label("Movie name").map_attribute("name"),
+        label("label-a").map_subquery_fetch(
+            match_!(
+                    rel(cvar("d")).rel(cvar("c")).isa("director")
+                ).fetch(vec![
+                cvar("d").map_attribute("name")
+            ])
+        ),
+        label("label-b").map_subquery_get_aggregate(
+            match_!(
+                rel(cvar("d")).rel(cvar("c")).isa("director")
+            ).get_fixed([cvar("d")]).count()
+        )
+    ];
     let expected = match_!(
         cvar("x").isa("movie").has(("title", "Godfather")).has(("release-date", cvar("d")))
     ).fetch(projections);
+
+    assert_valid_eq_repr!(expected, parsed, query);
 }
 
 #[test]

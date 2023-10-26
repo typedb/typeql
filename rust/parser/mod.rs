@@ -21,6 +21,7 @@
  */
 
 use chrono::{NaiveDate, NaiveDateTime};
+use itertools::Itertools;
 use pest::{
     Parser,
     pratt_parser::{Assoc, Op, PrattParser},
@@ -51,6 +52,7 @@ use crate::{
     },
     variable::{ConceptVariable, ValueVariable, Variable},
 };
+use crate::common::error::syntax_error;
 use crate::common::error::TypeQLError::IllegalGrammar;
 use crate::common::token::Aggregate;
 use crate::parser::Rule::clause_undefine;
@@ -59,7 +61,6 @@ use crate::query::{Filter, Limit, Offset, Projection, ProjectionAttribute, Proje
 use crate::query::modifier::{Modifiers, sorting, Sorting};
 use crate::variable::TypeReference;
 
-#[cfg(test)]
 mod test;
 
 #[derive(Parser)]
@@ -141,8 +142,18 @@ impl<'a, T: Iterator<Item=Node<'a>> + Clone> RuleMatcher<'a> for T {
     }
 }
 
+fn parse(rule: Rule, string: &str) -> Result<ChildNodes> {
+    let result = TypeQLParser::parse(rule, string);
+    match result {
+        Ok(nodes) => Ok(nodes),
+        Err(error) => {
+            Err(syntax_error(string, error).into())
+        }
+    }
+}
+
 fn parse_single(rule: Rule, string: &str) -> Result<Node> {
-    Ok(TypeQLParser::parse(rule, string)?.consume_any())
+    Ok(parse(rule, string)?.consume_any())
 }
 
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
@@ -151,7 +162,7 @@ pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
 }
 
 pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item=Result<Query>> + '_> {
-    Ok(TypeQLParser::parse(Rule::eof_queries, queries)?
+    Ok(parse(Rule::eof_queries, queries)?
         .consume_expected(Rule::eof_queries)
         .into_children()
         .filter(|child| matches!(child.as_rule(), Rule::query))
@@ -394,10 +405,10 @@ fn visit_projection_key_label(node: Node) -> ProjectionKeyLabel {
     match child.as_rule() {
         Rule::QUOTED_STRING => {
             ProjectionKeyLabel::Quoted(get_string_from_quoted(child))
-        },
+        }
         Rule::label => {
             ProjectionKeyLabel::Unquoted(child.as_str().to_owned())
-        },
+        }
         _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
     }
 }
@@ -413,7 +424,7 @@ fn visit_projection_attribute(node: Node) -> ProjectionAttribute {
     let attribute_label = Label::from(children.consume_expected(Rule::label).as_str());
     let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
     dbg_assert_line!(children.try_consume_any().is_none());
-    ProjectionAttribute{ attribute: attribute_label, label}
+    ProjectionAttribute { attribute: attribute_label, label }
 }
 
 fn visit_projection_subquery(node: Node) -> ProjectionSubquery {
@@ -917,7 +928,7 @@ fn visit_attribute(node: Node) -> HasConstraint {
                         Variable::Concept(cvar) => HasConstraint::HasConcept(Some(label), cvar),
                         Variable::Value(vvar) => HasConstraint::HasValue(label, vvar),
                     }
-                },
+                }
                 Some(Rule::predicate) => {
                     HasConstraint::from((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }

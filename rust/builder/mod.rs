@@ -24,12 +24,14 @@ use crate::{
     common::token,
     pattern::{
         Constant, Expression, Function, Negation, Predicate, RolePlayerConstraint,
-        RuleLabel, ThingStatement, TypeStatement, TypeStatementBuilder, Value,
+        RuleLabel, ThingStatement, TypeStatement, Value,
     },
-    variable::{ConceptVariable, ValueVariable},
     Pattern,
+    variable::{ConceptVariable, ValueVariable},
 };
-use crate::pattern::ThingStatementBuilder;
+use crate::pattern::{Label, ThingStatementBuilder};
+use crate::query::ProjectionKeyLabel;
+use crate::variable::TypeReference;
 
 #[macro_export]
 macro_rules! match_ {
@@ -134,7 +136,11 @@ pub fn constant(constant: impl Into<Constant>) -> Constant {
 }
 
 pub fn type_(name: impl Into<String>) -> TypeStatement {
-    ConceptVariable::hidden().type_(name.into())
+    TypeReference::Label(Label::from(name.into())).into_type_statement()
+}
+
+pub fn label(name: impl Into<ProjectionKeyLabel>) -> ProjectionKeyLabel {
+    name.into()
 }
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingStatement {

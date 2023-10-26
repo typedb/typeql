@@ -21,8 +21,10 @@
  */
 
 use std::{error::Error as StdError, fmt};
+use std::cmp::min;
 
 use chrono::NaiveDateTime;
+use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
 use crate::{
@@ -36,6 +38,10 @@ use crate::variable::ConceptVariable;
 
 #[macro_use]
 mod macros;
+
+const SYNTAX_ERROR_INDENT: usize = 4;
+const SYNTAX_ERROR_INDICATOR: &str = "--> ";
+
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Error {
@@ -57,19 +63,27 @@ impl From<Vec<TypeQLError>> for Error {
     }
 }
 
-impl<T: pest::RuleType> From<PestError<T>> for Error {
-    fn from(error: PestError<T>) -> Self {
-        let (line, col) = match error.line_col {
-            LineColLocation::Pos((line, col)) => (line, col),
-            LineColLocation::Span((line, col), _) => (line, col),
-        };
-        Self::from(TypeQLError::SyntaxErrorDetailed(
-            line,
-            error.line().to_owned(),
-            " ".repeat(col - 1) + "^",
-            error.variant.message().to_string(),
-        ))
-    }
+pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) -> TypeQLError {
+    let (error_line_nr, _) = match error.line_col {
+        LineColLocation::Pos((line, col)) => (line, col),
+        LineColLocation::Span((line, col), _) => (line, col),
+    };
+    // error_line_nr is 1-indexed, we operate on 0-offset
+    let error_line = error_line_nr - 1;
+    let formatted_error = query.lines().enumerate()
+        .map(
+            |(i, line)| {
+                if i == error_line {
+                    format!("{SYNTAX_ERROR_INDICATOR}{line}")
+                } else {
+                    format!("{}{line}", " ".repeat(SYNTAX_ERROR_INDENT))
+                }
+            }
+        ).join("\n");
+    TypeQLError::SyntaxErrorDetailed(
+        error_line_nr,
+        formatted_error,
+    )
 }
 
 impl fmt::Display for Error {
@@ -78,7 +92,7 @@ impl fmt::Display for Error {
     }
 }
 
-pub fn collect_err(i: impl IntoIterator<Item = Result<(), Error>>) -> Result<(), Error> {
+pub fn collect_err(i: impl IntoIterator<Item=Result<(), Error>>) -> Result<(), Error> {
     let errors = i.into_iter().filter_map(Result::err).flat_map(|e| e.errors).collect::<Vec<_>>();
     if errors.is_empty() {
         Ok(())
@@ -89,8 +103,8 @@ pub fn collect_err(i: impl IntoIterator<Item = Result<(), Error>>) -> Result<(),
 
 error_messages! { TypeQLError
     code: "TQL", type: "TypeQL Error",
-    SyntaxErrorDetailed(usize, String, String, String) =
-        3: "There is a syntax error at line {}:\n{}\n{}\n{}",
+    SyntaxErrorDetailed(usize, String) =
+        3: "There is a syntax error near line {}:\n{}",
     InvalidCasting(&'static str, &'static str, &'static str, &'static str) =
         4: "Enum '{}::{}' does not match '{}', and cannot be unwrapped into '{}'.",
     MissingPatterns() =
