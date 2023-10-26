@@ -34,7 +34,7 @@ use crate::query::ProjectionKeyLabel;
 use crate::variable::TypeReference;
 
 #[macro_export]
-macro_rules! match_ {
+macro_rules! typeql_match {
     ($($pattern:expr),* $(,)?) => {{
         $crate::query::MatchClause::from_patterns(vec![$($pattern.into()),*])
     }}
