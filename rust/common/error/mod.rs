@@ -21,7 +21,6 @@
  */
 
 use std::{error::Error as StdError, fmt};
-use std::cmp::min;
 
 use chrono::NaiveDateTime;
 use itertools::Itertools;

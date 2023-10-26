@@ -19,15 +19,12 @@
  * under the License.
  */
 
-mod type_reference;
-
+pub use type_reference::TypeReference;
 pub use variable::Variable;
 pub use variable_concept::ConceptVariable;
 pub use variable_value::ValueVariable;
-pub use type_reference::TypeReference;
 
-use crate::common::validatable::Validatable;
-use crate::pattern::TypeStatementBuilder;
+mod type_reference;
 
 pub(crate) mod variable;
 pub(crate) mod variable_concept;

@@ -30,6 +30,7 @@ import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
+import com.vaticle.typeql.lang.query.TypeQLUpdate;
 import io.cucumber.java.en.Given;
 
 import java.util.List;
@@ -44,14 +45,14 @@ public class TypeQLSteps {
     @Given("typeql define without commit")
     @Given("for each session, typeql define")
     public void typeql_define(String query) {
-        TypeQLDefine parsed = TypeQL.parseQuery(query);
+        TypeQLDefine parsed = TypeQL.parseQuery(query).asDefine();
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
     }
 
     @Given("typeql undefine")
     @Given("typeql undefine without commit")
     public void typeql_undefine(String query) {
-        TypeQLUndefine parsed = TypeQL.parseQuery(query);
+        TypeQLUndefine parsed = TypeQL.parseQuery(query).asUndefine();
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
     }
 
@@ -61,17 +62,25 @@ public class TypeQLSteps {
     @Given("typeql insert without commit")
     @Given("for each session, typeql insert")
     public void typeql_insert(String query) {
-        TypeQLInsert parsed = TypeQL.parseQuery(query);
+        TypeQLInsert parsed = TypeQL.parseQuery(query).asInsert();
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
         parsed.match().ifPresent(match -> match.conjunction().normalise());
     }
 
     @Given("typeql delete")
     public void typeql_delete(String query) {
-        TypeQLDelete parsed = TypeQL.parseQuery(query);
+        TypeQLDelete parsed = TypeQL.parseQuery(query).asDelete();
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
         parsed.match().get().conjunction().normalise();
     }
+
+    @Given("typeql update")
+    public void typeql_update(String query) {
+        TypeQLUpdate parsed = TypeQL.parseQuery(query).asUpdate();
+        assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
+        parsed.match().get().conjunction().normalise();
+    }
+
 
     @Given("for typeql query")
     @Given("reasoning query")
@@ -90,11 +99,9 @@ public class TypeQLSteps {
 
     @Given("get answers of typeql fetch")
     public void typeql_fetch(String query) {
-        TypeQLQuery parsed = TypeQL.parseQuery(query);
+        TypeQLFetch parsed = TypeQL.parseQuery(query).asFetch();
         assertEquals(parsed, TypeQL.parseQuery(parsed.toString()));
-        if (parsed instanceof TypeQLFetch) {
-            parsed.asFetch().match().conjunction().normalise();
-        }
+        parsed.match().conjunction().normalise();
     }
 
     @Given("typeql get; throws exception")
@@ -106,10 +113,13 @@ public class TypeQLSteps {
     @Given("typeql delete; throws exception")
     @Given("typeql define; throws exception")
     @Given("typeql undefine; throws exception")
-    public void do_nothing_with_throws(String query) { }
+    @Given("typeql update; throws exception")
+    public void do_nothing_with_throws(String query) {
+    }
 
     @Given("typeql get; throws exception containing {string}")
-    public void do_nothing_with_throws_exception_containing(String exception, String query) { }
+    public void do_nothing_with_throws_exception_containing(String exception, String query) {
+    }
 
     @Given("typedb starts")
     @Given("connection opens with default authentication")
@@ -123,11 +133,13 @@ public class TypeQLSteps {
     @Given("verify answers are sound")
     @Given("connection close all sessions")
     @Given("connection delete all databases")
+    @Given("session transaction closes")
     @Given("for each session, transaction closes")
     @Given("transaction commits; throws exception")
     @Given("connection does not have any database")
     @Given("for each session, transaction commits")
-    public void do_nothing() { }
+    public void do_nothing() {
+    }
 
     @Given("set time-zone is: {}")
     @Given("rules contain: {}")
@@ -147,21 +159,25 @@ public class TypeQLSteps {
     @Given("for each session, open transactions of type: {}")
     @Given("for each session, open transactions with reasoning of type: {}")
     @Given("verify answers are consistent across {} executions")
-    public void do_nothing_with_arg(String ignored) { }
+    public void do_nothing_with_arg(String ignored) {
+    }
 
     @Given("connection open data sessions for databases:")
     @Given("connection open schema sessions for databases:")
-    public void do_nothing_with_list(List<String> ignored) { }
+    public void do_nothing_with_list(List<String> ignored) {
+    }
 
     @Given("answer groups are")
     @Given("group aggregate values are")
     @Given("order of answer concepts is")
     @Given("uniquely identify answer concepts")
-    public void do_nothing_with_list_of_map(List<Map<String, String>> ignored) { }
+    public void do_nothing_with_list_of_map(List<Map<String, String>> ignored) {
+    }
 
     @Given("rules are")
     @Given("group identifiers are")
     @Given("concept identifiers are")
     @Given("answers contain explanation tree")
-    public void do_nothing_with_map_of_map(Map<String, Map<String, String>> ignored) { }
+    public void do_nothing_with_map_of_map(Map<String, Map<String, String>> ignored) {
+    }
 }

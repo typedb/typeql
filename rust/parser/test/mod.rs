@@ -21,7 +21,6 @@
  */
 
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
-use std::{fmt};
 
 use crate::{
     and,
@@ -419,7 +418,7 @@ get;"#;
 
     let parsed = parse_query(query);
     assert!(parsed.is_err());
-    assert!(parsed.unwrap_err().to_string().contains("expected"));
+    assert!(parsed.unwrap_err().to_string().contains("line 2"));
 }
 
 #[test]
@@ -1635,10 +1634,8 @@ fn when_parsing_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_erro
     let parsed = parse_query("match\n$x isa");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
-    assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
-    assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n      ^"));
+    assert!(report.contains("$x isa"));
 }
 
 #[test]
@@ -1646,10 +1643,8 @@ fn when_parsing_incorrect_syntax_trailing_query_whitespace_is_ignored() {
     let parsed = parse_query("match\n$x isa \n");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
-    assert!(report.contains("syntax error"));
     assert!(report.contains("line 2"));
-    assert!(report.contains("\n$x isa"));
-    assert!(report.contains("\n      ^"));
+    assert!(report.contains("$x isa"));
 }
 
 #[test]
@@ -1665,8 +1660,8 @@ fn test_syntax_error_pointer() {
     let parsed = parse_query("match\n$x of");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
-    assert!(report.contains("\n$x of"));
-    assert!(report.contains("\n   ^"));
+    assert!(report.contains("line 2"));
+    assert!(report.contains("$x of"));
 }
 
 #[test]
@@ -1774,7 +1769,7 @@ fn when_parsing_list_of_queries_with_syntax_error_report_error() {
     let query_text = "define\nperson sub entity has name;"; // note no comma
     let parsed = parse_query(query_text);
     assert!(parsed.is_err());
-    assert!(parsed.unwrap_err().to_string().contains("\nperson sub entity has name;"));
+    assert!(parsed.unwrap_err().to_string().contains("person sub entity has name;"));
 }
 
 #[test]

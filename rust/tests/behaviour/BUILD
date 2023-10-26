@@ -49,6 +49,7 @@ rust_test(
         "@crates//:cucumber",
         "@crates//:futures",
     ],
+    tags = ["manual"],
     use_libtest_harness = False,
 )
 

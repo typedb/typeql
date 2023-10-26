@@ -21,7 +21,6 @@
  */
 
 use chrono::{NaiveDate, NaiveDateTime};
-use itertools::Itertools;
 use pest::{
     Parser,
     pratt_parser::{Assoc, Op, PrattParser},
