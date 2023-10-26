@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
@@ -132,13 +133,14 @@ public class TypeQLGet implements TypeQLQuery, Aggregatable<TypeQLGet.Aggregate>
     @Override
     public String toString(boolean pretty) {
         StringBuilder query = new StringBuilder(match.toString(pretty));
+        if (pretty) query.append(NEW_LINE);
+        query.append(GET);
         if (!filter.isEmpty()) {
-            if (pretty) query.append(NEW_LINE);
-            query.append(GET);
-            String vars = filter.stream().map(TypeQLVariable::toString).collect(COMMA_SPACE.joiner());
-            query.append(SPACE).append(vars);
-            query.append(SEMICOLON);
+            query.append(filter.stream().map(TypeQLVariable::toString)
+                    .collect(Collectors.joining(COMMA_SPACE.toString(), SPACE.toString(), ""))
+            );
         }
+        query.append(SEMICOLON);
         appendModifiers(query, modifiers, pretty);
         return query.toString();
     }

@@ -45,7 +45,7 @@ query_insert          :   clause_match  clause_insert  modifiers
 query_update          :   clause_match  clause_delete  clause_insert  modifiers    ;
 query_delete          :   clause_match  clause_delete  modifiers                   ;
 
-query_get             :   clause_match  ( clause_get )?  modifiers                 ;
+query_get             :   clause_match  clause_get  modifiers                      ;
 query_get_aggregate   :   query_get  clause_aggregate                              ;
 query_get_group       :   query_get  clause_group                                  ;
 query_get_group_agg   :   query_get_group clause_aggregate                         ;

@@ -350,9 +350,7 @@ public class Parser extends TypeQLBaseVisitor {
     @Override
     public TypeQLGet visitQuery_get(TypeQLParser.Query_getContext ctx) {
         MatchClause match = visitClause_match(ctx.clause_match());
-        List<TypeQLVariable> filter;
-        if (ctx.clause_get() != null) filter = visitClause_get(ctx.clause_get());
-        else filter = emptyList();
+        List<TypeQLVariable> filter = visitClause_get(ctx.clause_get());
         Modifiers modifiers = visitModifiers(ctx.modifiers());
         return new TypeQLGet(match, filter, modifiers);
     }
