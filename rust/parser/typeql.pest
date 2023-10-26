@@ -47,7 +47,7 @@ query_update = { query_delete ~ clause_insert ~ modifiers }
 query_get_group_agg = { query_get ~ clause_group ~ clause_aggregate }
 query_get_group = { query_get ~ clause_group }
 query_get_aggregate = { query_get ~ clause_aggregate }
-query_get = { clause_match ~ clause_get? ~ modifiers }
+query_get = { clause_match ~ clause_get ~ modifiers }
 
 query_fetch = { clause_match ~ clause_fetch ~ modifiers }
 

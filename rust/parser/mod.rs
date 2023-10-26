@@ -515,8 +515,7 @@ fn visit_query_get(node: Node) -> TypeQLGet {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_get);
     let mut children = node.into_children();
     let clause_match = visit_clause_match(children.consume_expected(Rule::clause_match));
-    let clause_get = children.try_consume_expected(Rule::clause_get)
-        .map(visit_clause_get).unwrap_or_default();
+    let clause_get = visit_clause_get(children.consume_expected(Rule::clause_get));
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
     dbg_assert_line!(children.try_consume_any().is_none());
     TypeQLGet { match_clause: clause_match, filter: Filter { vars: clause_get }, modifiers }
