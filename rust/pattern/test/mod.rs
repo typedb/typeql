@@ -40,7 +40,7 @@ $com isa company;
 };"#;
 
     let mut parsed = parse_query(query).unwrap().into_get();
-    let normalised = parsed.clause_match.conjunction.normalise().into_disjunction();
+    let normalised = parsed.match_clause.conjunction.normalise().into_disjunction();
 
     assert_eq!(
         normalised,
@@ -66,7 +66,7 @@ not {
 };"#;
 
     let mut parsed = parse_query(query).unwrap().into_get();
-    let normalised = parsed.clause_match.conjunction.normalise().into_disjunction();
+    let normalised = parsed.match_clause.conjunction.normalise().into_disjunction();
 
     assert_eq!(
         normalised,

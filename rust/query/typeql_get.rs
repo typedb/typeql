@@ -42,7 +42,7 @@ use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGet {
-    pub clause_match: MatchClause,
+    pub match_clause: MatchClause,
     pub filter: Filter,
     pub modifiers: Modifiers,
 }
@@ -50,8 +50,8 @@ pub struct TypeQLGet {
 impl AggregateQueryBuilder for TypeQLGet {}
 
 impl TypeQLGet {
-    pub fn new(clause_match: MatchClause) -> Self {
-        TypeQLGet { clause_match, filter: Filter::default(), modifiers: Modifiers::default() }
+    pub fn new(match_clause: MatchClause) -> Self {
+        TypeQLGet { match_clause, filter: Filter::default(), modifiers: Modifiers::default() }
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
@@ -73,14 +73,14 @@ impl TypeQLGet {
 
 impl Validatable for TypeQLGet {
     fn validate(&self) -> Result {
-        let match_variables = self.clause_match.retrieved_variables().collect();
+        let match_variables = self.match_clause.retrieved_variables().collect();
         let filter_vars = HashSet::from_iter((&self.filter.vars).iter().map(Variable::as_ref));
         let retrieved_variables = if self.filter.vars.is_empty() { &match_variables } else { &filter_vars };
         collect_err([
-            self.clause_match.validate(),
+            self.match_clause.validate(),
             validate_filters_are_in_scope(&match_variables, &self.filter),
             self.modifiers.sorting.as_ref().map(|s| s.validate(&retrieved_variables)).unwrap_or(Ok(())),
-            validate_variable_names_are_unique(&self.clause_match.conjunction)
+            validate_variable_names_are_unique(&self.match_clause.conjunction)
         ])
     }
 }
@@ -90,7 +90,7 @@ impl VariablesRetrieved for TypeQLGet {
         if !self.filter.vars.is_empty() {
             Box::new(self.filter.vars.iter().map(|v| v.as_ref()))
         } else {
-            self.clause_match.retrieved_variables()
+            self.match_clause.retrieved_variables()
         }
     }
 }
@@ -125,7 +125,7 @@ fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
 
 impl fmt::Display for TypeQLGet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.clause_match)?;
+        write!(f, "{}", self.match_clause)?;
         write!(f, "\n{}", self.filter)?;
         if !self.modifiers.is_empty() {
             write!(f, "\n{}", self.modifiers)

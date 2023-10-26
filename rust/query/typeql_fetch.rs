@@ -33,7 +33,7 @@ use crate::write_joined;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLFetch {
-    pub clause_match: MatchClause,
+    pub match_clause: MatchClause,
     pub projections: Vec<Projection>,
     pub modifiers: Modifiers,
 }
@@ -46,16 +46,16 @@ impl TypeQLFetch {
 }
 
 impl TypeQLFetch {
-    pub(crate) fn new(clause_match: MatchClause, projections: Vec<Projection>) -> Self {
-        TypeQLFetch { clause_match, projections, modifiers: Modifiers::default() }
+    pub(crate) fn new(match_clause: MatchClause, projections: Vec<Projection>) -> Self {
+        TypeQLFetch { match_clause, projections, modifiers: Modifiers::default() }
     }
 }
 
 impl Validatable for TypeQLFetch {
     fn validate(&self) -> Result {
-        let match_variables = self.clause_match.retrieved_variables().collect();
+        let match_variables = self.match_clause.retrieved_variables().collect();
         collect_err([
-            self.clause_match.validate(),
+            self.match_clause.validate(),
             self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
             self.validate_names_are_unique()
         ])
@@ -64,7 +64,7 @@ impl Validatable for TypeQLFetch {
 
 impl VariablesRetrieved for TypeQLFetch {
     fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        Box::new(self.clause_match.retrieved_variables()
+        Box::new(self.match_clause.retrieved_variables()
             .chain(self.projections.iter().flat_map(Projection::key_variable)))
     }
 }
@@ -224,7 +224,7 @@ impl<T: Into<ProjectionKeyVar>> ProjectionBuilder for T {
 }
 impl fmt::Display for TypeQLFetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.clause_match)?;
+        writeln!(f, "{}", self.match_clause)?;
         writeln!(f, "{}", token::Clause::Fetch)?;
         write_joined!(f, "\n", self.projections)?;
         if !self.modifiers.is_empty() {

@@ -40,7 +40,7 @@ use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDelete {
-    pub clause_match: MatchClause,
+    pub match_clause: MatchClause,
     pub statements: Vec<ThingStatement>,
     pub modifiers: Modifiers,
 }
@@ -65,10 +65,10 @@ impl TypeQLDelete {
 
 impl Validatable for TypeQLDelete {
     fn validate(&self) -> Result {
-        let match_variables = self.clause_match.retrieved_variables().collect();
+        let match_variables = self.match_clause.retrieved_variables().collect();
         collect_err(
             ([
-                self.clause_match.validate(),
+                self.match_clause.validate(),
                 validate_delete_in_scope(&match_variables, &self.statements),
                 validate_non_empty(&self.statements),
                 self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
@@ -90,7 +90,7 @@ fn validate_delete_in_scope(scope_variables: &HashSet<VariableRef>, statements: 
 
 impl fmt::Display for TypeQLDelete {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.clause_match)?;
+        writeln!(f, "{}", self.match_clause)?;
         writeln!(f, "{}", token::Clause::Delete)?;
         write_joined!(f, ";\n", self.statements)?;
         f.write_str(";")?;

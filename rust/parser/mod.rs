@@ -343,7 +343,7 @@ fn visit_query_fetch(node: Node) -> TypeQLFetch {
     let projections = visit_clause_fetch(children.consume_expected(Rule::clause_fetch));
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
     dbg_assert_line!(children.try_consume_any().is_none());
-    TypeQLFetch { clause_match, projections, modifiers }
+    TypeQLFetch { match_clause: clause_match, projections, modifiers }
 }
 
 fn visit_clause_fetch(node: Node) -> Vec<Projection> {
@@ -481,7 +481,7 @@ fn visit_query_insert(node: Node) -> TypeQLInsert {
             let clause_match = visit_clause_match(child);
             let clause_insert = visit_clause_insert(children.consume_expected(Rule::clause_insert));
             let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
-            TypeQLInsert { clause_match: Some(clause_match), statements: clause_insert, modifiers }
+            TypeQLInsert { match_clause: Some(clause_match), statements: clause_insert, modifiers }
         }
         Rule::clause_insert => {
             TypeQLInsert::new(visit_clause_insert(child))
@@ -499,7 +499,7 @@ fn visit_query_delete(node: Node) -> TypeQLDelete {
     let clause_delete = visit_clause_delete(children.consume_expected(Rule::clause_delete));
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
     dbg_assert_line!(children.try_consume_any().is_none());
-    TypeQLDelete { clause_match, statements: clause_delete, modifiers }
+    TypeQLDelete { match_clause: clause_match, statements: clause_delete, modifiers }
 }
 
 fn visit_query_update(node: Node) -> TypeQLUpdate {
@@ -520,7 +520,7 @@ fn visit_query_get(node: Node) -> TypeQLGet {
         .map(visit_clause_get).unwrap_or_default();
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
     dbg_assert_line!(children.try_consume_any().is_none());
-    TypeQLGet { clause_match, filter: Filter { vars: clause_get }, modifiers }
+    TypeQLGet { match_clause: clause_match, filter: Filter { vars: clause_get }, modifiers }
 }
 
 fn visit_clause_insert(node: Node) -> Vec<ThingStatement> {

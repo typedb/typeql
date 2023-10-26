@@ -40,14 +40,14 @@ use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {
-    pub clause_match: Option<MatchClause>,
+    pub match_clause: Option<MatchClause>,
     pub statements: Vec<ThingStatement>,
     pub modifiers: Modifiers,
 }
 
 impl TypeQLInsert {
     pub fn new(statements: Vec<ThingStatement>) -> Self {
-        TypeQLInsert { clause_match: None, statements, modifiers: Modifiers::default() }
+        TypeQLInsert { match_clause: None, statements, modifiers: Modifiers::default() }
     }
 
     pub fn sort(self, sorting: impl Into<Sorting>) -> Self {
@@ -63,7 +63,7 @@ impl TypeQLInsert {
     }
 
     fn validate_modifiers_have_match_clause(&self) -> Result {
-        if !self.modifiers.is_empty() && self.clause_match.is_none() {
+        if !self.modifiers.is_empty() && self.match_clause.is_none() {
             Err(TypeQLError::InsertModifiersRequireMatch(self.to_string()))?
         } else {
             Ok(())
@@ -77,7 +77,7 @@ impl Validatable for TypeQLInsert {
             [
                 validate_non_empty(&self.statements),
                 self.validate_modifiers_have_match_clause(),
-                self.clause_match.as_ref().map(|m| {
+                self.match_clause.as_ref().map(|m| {
                     m.validate()?;
                     let match_variables = m.retrieved_variables().collect();
                     validate_insert_in_scope_of_match(&match_variables, &self.statements)
@@ -103,8 +103,8 @@ fn validate_insert_in_scope_of_match(match_variables: &HashSet<VariableRef>, sta
 
 impl fmt::Display for TypeQLInsert {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(clause_match) = &self.clause_match {
-            writeln!(f, "{clause_match}")?;
+        if let Some(match_clause) = &self.match_clause {
+            writeln!(f, "{match_clause}")?;
         }
 
         writeln!(f, "{}", token::Clause::Insert)?;

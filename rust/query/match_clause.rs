@@ -46,11 +46,11 @@ impl MatchClause {
     }
 
     pub fn get(self) -> TypeQLGet {
-        TypeQLGet { clause_match: self, filter: typeql_get::Filter { vars: Vec::default() }, modifiers: Modifiers::default() }
+        TypeQLGet { match_clause: self, filter: typeql_get::Filter { vars: Vec::default() }, modifiers: Modifiers::default() }
     }
 
     pub fn get_vars(self, vars: Vec<Variable>) -> TypeQLGet {
-        TypeQLGet { clause_match: self, filter: typeql_get::Filter { vars }, modifiers: Modifiers::default() }
+        TypeQLGet { match_clause: self, filter: typeql_get::Filter { vars }, modifiers: Modifiers::default() }
     }
 
     pub fn get_fixed<const N: usize, T: Into<Variable>>(self, vars: [T; N]) -> TypeQLGet {
@@ -58,7 +58,7 @@ impl MatchClause {
     }
 
     pub fn fetch(self, projections: Vec<Projection>) -> TypeQLFetch {
-        TypeQLFetch { clause_match: self, projections, modifiers: Modifiers::default() }
+        TypeQLFetch { match_clause: self, projections, modifiers: Modifiers::default() }
     }
 
     pub fn fetch_fixed<const N: usize>(self, projections: [Projection; N]) -> TypeQLFetch {
@@ -66,11 +66,11 @@ impl MatchClause {
     }
 
     pub fn insert(self, writable: impl Writable) -> TypeQLInsert {
-        TypeQLInsert { clause_match: Some(self), statements: writable.statements(), modifiers: Modifiers::default() }
+        TypeQLInsert { match_clause: Some(self), statements: writable.statements(), modifiers: Modifiers::default() }
     }
 
     pub fn delete(self, writable: impl Writable) -> TypeQLDelete {
-        TypeQLDelete { clause_match: self, statements: writable.statements(), modifiers: Modifiers::default() }
+        TypeQLDelete { match_clause: self, statements: writable.statements(), modifiers: Modifiers::default() }
     }
 
     fn validate_nested_patterns_are_bounded(&self) -> Result {

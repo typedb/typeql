@@ -32,12 +32,8 @@ def vaticle_typedb_common():
     )
 
 def vaticle_typedb_behaviour():
-#    git_repository(
-#        name = "vaticle_typedb_behaviour",
-#        remote = "https://github.com/flyingsilverfin/typedb-behaviour",
-#        commit = "dd26bf30fdc367587b941908a085f9c1f2a1028c", # sync-marker: do not remove this comment, this is used for sync-dependencies by @vaticle_typedb_behaviour
-#    )
-    native.local_repository(
+    git_repository(
         name = "vaticle_typedb_behaviour",
-        path = "../typedb-behaviour",
+        remote = "https://github.com/flyingsilverfin/typedb-behaviour",
+        commit = "5c23b6c3be2addddb74a5c3700cde54ace771900", # sync-marker: do not remove this comment, this is used for sync-dependencies by @vaticle_typedb_behaviour
     )
