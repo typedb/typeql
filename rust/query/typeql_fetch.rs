@@ -18,10 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-use std::fmt;
+use std::collections::HashSet;
+use std::{fmt, iter};
+use itertools::Itertools;
 
 use crate::common::{Result, token};
-use crate::common::error::collect_err;
+use crate::common::error::{collect_err, TypeQLError};
 use crate::common::string::indent;
 use crate::common::validatable::Validatable;
 use crate::pattern::{Label, VariablesRetrieved};
@@ -40,7 +42,18 @@ pub struct TypeQLFetch {
 
 impl TypeQLFetch {
     fn validate_names_are_unique(&self) -> Result {
-        // TODO: either do restrict no-reuse across sub-trees or fully allow re-use
+        let all_refs = self.match_clause.retrieved_variables().chain(
+            self.projections.iter().flat_map(|p|
+                p.key_variable().into_iter().chain(p.value_variables())
+            ),
+        );
+        let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) = all_refs.partition(|r| r.is_concept());
+        let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
+        let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
+        let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
+        if !common_refs.is_empty() {
+            return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());
+        }
         Ok(())
     }
 }
@@ -82,6 +95,14 @@ impl Projection {
             Projection::Variable(key) => Some(key.variable.as_ref()),
             Projection::Attribute(key, _) => Some(key.variable.as_ref()),
             Projection::Subquery(_, _) => None,
+        }
+    }
+
+    pub fn value_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+        match self {
+            Projection::Variable(key) => Box::new(iter::empty()),
+            Projection::Attribute(key, _) => Box::new(iter::empty()),
+            Projection::Subquery(_, subquery) => subquery.variables(),
         }
     }
 }
@@ -206,6 +227,16 @@ impl From<(String, String)> for ProjectionAttribute {
 pub enum ProjectionSubquery {
     GetAggregate(TypeQLGetAggregate),
     Fetch(Box<TypeQLFetch>),
+}
+
+impl ProjectionSubquery {
+
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>>> {
+        match self {
+            ProjectionSubquery::GetAggregate(query) => query.query.retrieved_variables(),
+            ProjectionSubquery::Fetch(query) => query.retrieved_variables(),
+        }
+    }
 }
 
 pub trait ProjectionBuilder {

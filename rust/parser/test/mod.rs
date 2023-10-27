@@ -845,7 +845,7 @@ label-b: {
             typeql_match!(
                     rel(cvar("d")).rel(cvar("c")).isa("director")
                 ).fetch(vec![
-                cvar("d").map_attribute("name")
+                cvar("d").map_attributes(vec!["name".into(), "age".into()])
             ])
         ),
         label("label-b").map_subquery_get_aggregate(

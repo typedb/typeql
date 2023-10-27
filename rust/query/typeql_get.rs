@@ -112,8 +112,8 @@ fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef>, filter:
 }
 
 fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
-    let all_refs: HashSet<VariableRef> = conjunction.variables_recursive().collect();
-    let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) = all_refs.iter().partition(|r| r.is_concept());
+    let all_refs = conjunction.variables_recursive();
+    let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) = all_refs.partition(|r| r.is_concept());
     let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
     let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
     let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
