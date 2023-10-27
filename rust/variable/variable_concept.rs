@@ -86,8 +86,6 @@ impl From<()> for ConceptVariable {
     }
 }
 
-// TODO: these are ambiguous conversions (label vs named) - why do we need them?
-
 impl From<&str> for ConceptVariable {
     fn from(name: &str) -> Self {
         ConceptVariable::named(name.to_string())

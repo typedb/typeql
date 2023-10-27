@@ -156,7 +156,7 @@ impl Sorting {
         Sorting { vars }
     }
 
-    pub(crate) fn validate(&self, available_variables: &HashSet<VariableRef>) -> Result {
+    pub(crate) fn validate(&self, available_variables: &HashSet<VariableRef<'_>>) -> Result {
         collect_err(self.vars.iter().map(|r| {
             available_variables.contains(&r.variable.as_ref())
                 .then_some(())

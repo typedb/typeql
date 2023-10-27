@@ -33,14 +33,14 @@ use crate::{
         },
         validatable::Validatable,
     },
-    gte, lt, lte, typeql_match, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns,
-    parse_queries, parse_query,
-    parse_statement,
+    gte, lt, lte, min, not, or, parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries,
+    parse_query, parse_statement,
     pattern::{
         Annotation::Key, ConceptStatementBuilder, ExpressionBuilder, Label,
         Statement, ThingStatementBuilder, TypeStatementBuilder, ValueStatementBuilder,
     },
-    Query, query::AggregateQueryBuilder, rel, rule, sort_vars, type_, typeql_insert,
+    Query,
+    query::AggregateQueryBuilder, rel, rule, sort_vars, type_, typeql_insert, typeql_match,
 };
 use crate::builder::label;
 use crate::query::{Projection, ProjectionBuilder, ProjectionKeyVarBuilder};
@@ -814,7 +814,7 @@ label-a: {
     match
     ($d, $c) isa director;
     fetch
-    $d: name;
+    $d: name, age;
 };
 label-b: {
     match

@@ -89,7 +89,7 @@ impl Validatable for TypeQLInsert {
     }
 }
 
-fn validate_insert_in_scope_of_match(match_variables: &HashSet<VariableRef>, statements: &[ThingStatement]) -> Result {
+fn validate_insert_in_scope_of_match(match_variables: &HashSet<VariableRef<'_>>, statements: &[ThingStatement]) -> Result {
     if statements.iter().flat_map(|s| s.variables()).any(|v| {
         match_variables.contains(&v)
     }) {

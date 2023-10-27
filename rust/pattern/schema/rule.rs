@@ -159,7 +159,7 @@ fn infers_relation(then: &ThingStatement) -> bool {
 }
 
 fn validate_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {
-    let bounds: HashSet<VariableRef> = when.retrieved_variables().collect();
+    let bounds: HashSet<VariableRef<'_>> = when.retrieved_variables().collect();
     if !then.variables().filter(|r| r.is_name()).all(|r| bounds.contains(&r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
     }

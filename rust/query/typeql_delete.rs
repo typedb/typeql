@@ -78,7 +78,7 @@ impl Validatable for TypeQLDelete {
     }
 }
 
-fn validate_delete_in_scope(scope_variables: &HashSet<VariableRef>, statements: &Vec<ThingStatement>) -> Result {
+fn validate_delete_in_scope(scope_variables: &HashSet<VariableRef<'_>>, statements: &[ThingStatement]) -> Result {
     collect_err(statements.iter().flat_map(|v| v.variables()).filter(|r| r.is_name()).map(|r| -> Result {
         if scope_variables.contains(&r) {
             Ok(())

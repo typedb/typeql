@@ -20,9 +20,8 @@
  *
  */
 
-// TODO - reenable
-// #![deny(elided_lifetimes_in_paths)]
-// #![deny(unused_must_use)]
+#![deny(elided_lifetimes_in_paths)]
+#![deny(unused_must_use)]
 
 #[macro_use]
 mod builder;

@@ -100,8 +100,8 @@ impl Projection {
 
     pub fn value_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match self {
-            Projection::Variable(key) => Box::new(iter::empty()),
-            Projection::Attribute(key, _) => Box::new(iter::empty()),
+            Projection::Variable(_) => Box::new(iter::empty()),
+            Projection::Attribute(_, _) => Box::new(iter::empty()),
             Projection::Subquery(_, subquery) => subquery.variables(),
         }
     }
@@ -231,7 +231,7 @@ pub enum ProjectionSubquery {
 
 impl ProjectionSubquery {
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>>> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match self {
             ProjectionSubquery::GetAggregate(query) => query.query.retrieved_variables(),
             ProjectionSubquery::Fetch(query) => query.retrieved_variables(),

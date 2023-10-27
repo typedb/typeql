@@ -141,7 +141,7 @@ impl<'a, T: Iterator<Item=Node<'a>> + Clone> RuleMatcher<'a> for T {
     }
 }
 
-fn parse(rule: Rule, string: &str) -> Result<ChildNodes> {
+fn parse(rule: Rule, string: &str) -> Result<ChildNodes<'_>> {
     let result = TypeQLParser::parse(rule, string);
     match result {
         Ok(nodes) => Ok(nodes),
@@ -151,7 +151,7 @@ fn parse(rule: Rule, string: &str) -> Result<ChildNodes> {
     }
 }
 
-fn parse_single(rule: Rule, string: &str) -> Result<Node> {
+fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
     Ok(parse(rule, string)?.consume_any())
 }
 
@@ -206,17 +206,17 @@ pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<crate::pattern::Rule> 
     visit_schema_rule(parse_single(Rule::eof_schema_rule, rule)?).validated()
 }
 
-fn get_string_from_quoted(string: Node) -> String {
+fn get_string_from_quoted(string: Node<'_>) -> String {
     dbg_assert_eq_line!(string.as_rule(), Rule::QUOTED_STRING);
     unquote(string.as_str())
 }
 
-fn get_regex(string: Node) -> String {
+fn get_regex(string: Node<'_>) -> String {
     dbg_assert_eq_line!(string.as_rule(), Rule::QUOTED_STRING);
     unescape_regex(&unquote(string.as_str()))
 }
 
-fn get_long(long: Node) -> i64 {
+fn get_long(long: Node<'_>) -> i64 {
     dbg_assert_eq_line!(long.as_rule(), Rule::LONG_);
     long_from_string(long.as_str())
 }
@@ -225,7 +225,7 @@ fn long_from_string(string: &str) -> i64 {
     string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(string.to_string())))
 }
 
-fn get_double(double: Node) -> f64 {
+fn get_double(double: Node<'_>) -> f64 {
     dbg_assert_eq_line!(double.as_rule(), Rule::DOUBLE_);
     double_from_string(double.as_str())
 }
@@ -234,24 +234,24 @@ fn double_from_string(string: &str) -> f64 {
     string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(string.to_string())))
 }
 
-fn get_boolean(boolean: Node) -> bool {
+fn get_boolean(boolean: Node<'_>) -> bool {
     dbg_assert_eq_line!(boolean.as_rule(), Rule::BOOLEAN_);
     boolean.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(boolean.to_string())))
 }
 
-fn get_date(date: Node) -> NaiveDate {
+fn get_date(date: Node<'_>) -> NaiveDate {
     dbg_assert_eq_line!(date.as_rule(), Rule::DATE_);
     NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
         .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(date.to_string())))
 }
 
-fn get_date_time(date_time: Node) -> NaiveDateTime {
+fn get_date_time(date_time: Node<'_>) -> NaiveDateTime {
     dbg_assert_eq_line!(date_time.as_rule(), Rule::DATETIME_);
     date_time::parse(date_time.as_str())
         .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar(date_time.to_string())))
 }
 
-fn get_var(node: Node) -> Variable {
+fn get_var(node: Node<'_>) -> Variable {
     dbg_assert_eq_line!(node.as_rule(), Rule::VAR_);
     let name = node.as_str();
     let (prefix, _name) = name.split_at(1);
@@ -262,7 +262,7 @@ fn get_var(node: Node) -> Variable {
     }
 }
 
-fn get_var_concept(node: Node) -> ConceptVariable {
+fn get_var_concept(node: Node<'_>) -> ConceptVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::VAR_CONCEPT_);
     let name = node.as_str();
 
@@ -277,7 +277,7 @@ fn get_var_concept(node: Node) -> ConceptVariable {
     }
 }
 
-fn get_var_value(node: Node) -> ValueVariable {
+fn get_var_value(node: Node<'_>) -> ValueVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::VAR_VALUE_);
     let name = node.as_str();
     assert!(name.len() > 1);
@@ -285,7 +285,7 @@ fn get_var_value(node: Node) -> ValueVariable {
     ValueVariable::named(String::from(&name[1..]))
 }
 
-fn get_isa_constraint(isa: Node, node: Node) -> IsaConstraint {
+fn get_isa_constraint(isa: Node<'_>, node: Node<'_>) -> IsaConstraint {
     dbg_assert_eq_line!(isa.as_rule(), Rule::ISA_);
     let is_explicit = matches!(isa.into_child().unwrap().as_rule(), Rule::ISAX).into();
     match visit_type_ref(node) {
@@ -294,7 +294,7 @@ fn get_isa_constraint(isa: Node, node: Node) -> IsaConstraint {
     }
 }
 
-fn get_role_player_constraint(node: Node) -> RolePlayerConstraint {
+fn get_role_player_constraint(node: Node<'_>) -> RolePlayerConstraint {
     dbg_assert_eq_line!(node.as_rule(), Rule::role_player);
     let mut children_rev = node.into_children().rev();
     let player = get_var_concept(
@@ -310,11 +310,11 @@ fn get_role_player_constraint(node: Node) -> RolePlayerConstraint {
     }
 }
 
-fn get_role_players(node: Node) -> Vec<RolePlayerConstraint> {
+fn get_role_players(node: Node<'_>) -> Vec<RolePlayerConstraint> {
     node.into_children().map(get_role_player_constraint).collect()
 }
 
-fn visit_query(node: Node) -> Query {
+fn visit_query(node: Node<'_>) -> Query {
     dbg_assert_eq_line!(node.as_rule(), Rule::query);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -335,7 +335,7 @@ fn visit_query(node: Node) -> Query {
     query
 }
 
-fn visit_query_fetch(node: Node) -> TypeQLFetch {
+fn visit_query_fetch(node: Node<'_>) -> TypeQLFetch {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_fetch);
     let mut children = node.into_children();
     let clause_match = visit_clause_match(children.consume_expected(Rule::clause_match));
@@ -345,7 +345,7 @@ fn visit_query_fetch(node: Node) -> TypeQLFetch {
     TypeQLFetch { match_clause: clause_match, projections, modifiers }
 }
 
-fn visit_clause_fetch(node: Node) -> Vec<Projection> {
+fn visit_clause_fetch(node: Node<'_>) -> Vec<Projection> {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_fetch);
     let mut children = node.into_children();
     children.skip_expected(Rule::FETCH);
@@ -354,7 +354,7 @@ fn visit_clause_fetch(node: Node) -> Vec<Projection> {
     projections.map(visit_projection).collect()
 }
 
-fn visit_projection(node: Node) -> Projection {
+fn visit_projection(node: Node<'_>) -> Projection {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -378,7 +378,7 @@ fn visit_projection(node: Node) -> Projection {
     }
 }
 
-fn visit_projection_key_var(node: Node) -> ProjectionKeyVar {
+fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection_key_var);
     let mut children = node.into_children();
     let var = get_var(children.consume_expected(Rule::VAR_));
@@ -388,7 +388,7 @@ fn visit_projection_key_var(node: Node) -> ProjectionKeyVar {
     ProjectionKeyVar { variable: var, label }
 }
 
-fn visit_projection_as_label(node: Node) -> ProjectionKeyLabel {
+fn visit_projection_as_label(node: Node<'_>) -> ProjectionKeyLabel {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection_key_as_label);
     let mut children = node.into_children();
     children.skip_expected(Rule::AS);
@@ -397,7 +397,7 @@ fn visit_projection_as_label(node: Node) -> ProjectionKeyLabel {
     label
 }
 
-fn visit_projection_key_label(node: Node) -> ProjectionKeyLabel {
+fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection_key_label);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -412,12 +412,12 @@ fn visit_projection_key_label(node: Node) -> ProjectionKeyLabel {
     }
 }
 
-fn visit_projection_attributes(node: Node) -> Vec<ProjectionAttribute> {
+fn visit_projection_attributes(node: Node<'_>) -> Vec<ProjectionAttribute> {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection_attributes);
     node.into_children().map(visit_projection_attribute).collect()
 }
 
-fn visit_projection_attribute(node: Node) -> ProjectionAttribute {
+fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection_attribute);
     let mut children = node.into_children();
     let attribute_label = Label::from(children.consume_expected(Rule::label).as_str());
@@ -426,7 +426,7 @@ fn visit_projection_attribute(node: Node) -> ProjectionAttribute {
     ProjectionAttribute { attribute: attribute_label, label }
 }
 
-fn visit_projection_subquery(node: Node) -> ProjectionSubquery {
+fn visit_projection_subquery(node: Node<'_>) -> ProjectionSubquery {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection_subquery);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -437,7 +437,7 @@ fn visit_projection_subquery(node: Node) -> ProjectionSubquery {
     }
 }
 
-fn visit_query_define(node: Node) -> TypeQLDefine {
+fn visit_query_define(node: Node<'_>) -> TypeQLDefine {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_define);
     let mut children = node.into_children();
     let query = visit_clause_define(children.consume_expected(Rule::clause_define));
@@ -445,7 +445,7 @@ fn visit_query_define(node: Node) -> TypeQLDefine {
     query
 }
 
-fn visit_clause_define(node: Node) -> TypeQLDefine {
+fn visit_clause_define(node: Node<'_>) -> TypeQLDefine {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_define);
     let mut children = node.into_children();
     children.skip_expected(Rule::DEFINE);
@@ -454,7 +454,7 @@ fn visit_clause_define(node: Node) -> TypeQLDefine {
     query
 }
 
-fn visit_query_undefine(node: Node) -> TypeQLUndefine {
+fn visit_query_undefine(node: Node<'_>) -> TypeQLUndefine {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_undefine);
     let mut children = node.into_children();
     let query = visit_clause_undefine(children.consume_expected(clause_undefine));
@@ -462,7 +462,7 @@ fn visit_query_undefine(node: Node) -> TypeQLUndefine {
     query
 }
 
-fn visit_clause_undefine(node: Node) -> TypeQLUndefine {
+fn visit_clause_undefine(node: Node<'_>) -> TypeQLUndefine {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_undefine);
     let mut children = node.into_children();
     children.skip_expected(Rule::UNDEFINE);
@@ -471,7 +471,7 @@ fn visit_clause_undefine(node: Node) -> TypeQLUndefine {
     query
 }
 
-fn visit_query_insert(node: Node) -> TypeQLInsert {
+fn visit_query_insert(node: Node<'_>) -> TypeQLInsert {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_insert);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -491,7 +491,7 @@ fn visit_query_insert(node: Node) -> TypeQLInsert {
     query
 }
 
-fn visit_query_delete(node: Node) -> TypeQLDelete {
+fn visit_query_delete(node: Node<'_>) -> TypeQLDelete {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_delete);
     let mut children = node.into_children();
     let clause_match = visit_clause_match(children.consume_expected(Rule::clause_match));
@@ -501,7 +501,7 @@ fn visit_query_delete(node: Node) -> TypeQLDelete {
     TypeQLDelete { match_clause: clause_match, statements: clause_delete, modifiers }
 }
 
-fn visit_query_update(node: Node) -> TypeQLUpdate {
+fn visit_query_update(node: Node<'_>) -> TypeQLUpdate {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_update);
     let mut children = node.into_children();
     let query_delete = visit_query_delete(children.consume_expected(Rule::query_delete));
@@ -511,7 +511,7 @@ fn visit_query_update(node: Node) -> TypeQLUpdate {
     TypeQLUpdate { query_delete, insert_statements: clause_insert, modifiers }
 }
 
-fn visit_query_get(node: Node) -> TypeQLGet {
+fn visit_query_get(node: Node<'_>) -> TypeQLGet {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_get);
     let mut children = node.into_children();
     let clause_match = visit_clause_match(children.consume_expected(Rule::clause_match));
@@ -521,7 +521,7 @@ fn visit_query_get(node: Node) -> TypeQLGet {
     TypeQLGet { match_clause: clause_match, filter: Filter { vars: clause_get }, modifiers }
 }
 
-fn visit_clause_insert(node: Node) -> Vec<ThingStatement> {
+fn visit_clause_insert(node: Node<'_>) -> Vec<ThingStatement> {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_insert);
     let mut children = node.into_children();
     children.skip_expected(Rule::INSERT);
@@ -530,7 +530,7 @@ fn visit_clause_insert(node: Node) -> Vec<ThingStatement> {
     clause
 }
 
-fn visit_clause_delete(node: Node) -> Vec<ThingStatement> {
+fn visit_clause_delete(node: Node<'_>) -> Vec<ThingStatement> {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_delete);
     let mut children = node.into_children();
     children.skip_expected(Rule::DELETE);
@@ -539,7 +539,7 @@ fn visit_clause_delete(node: Node) -> Vec<ThingStatement> {
     statements
 }
 
-fn visit_clause_match(node: Node) -> MatchClause {
+fn visit_clause_match(node: Node<'_>) -> MatchClause {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_match);
     let mut children = node.into_children();
     children.skip_expected(Rule::MATCH);
@@ -548,12 +548,12 @@ fn visit_clause_match(node: Node) -> MatchClause {
     clause
 }
 
-fn visit_clause_get(node: Node) -> Vec<Variable> {
+fn visit_clause_get(node: Node<'_>) -> Vec<Variable> {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_get);
     node.into_children().skip_expected(Rule::GET).map(get_var).collect()
 }
 
-fn visit_modifiers(node: Node) -> Modifiers {
+fn visit_modifiers(node: Node<'_>) -> Modifiers {
     dbg_assert_eq_line!(node.as_rule(), Rule::modifiers);
     let mut modifiers = Modifiers::default();
     for modifier in node.into_children() {
@@ -573,7 +573,7 @@ fn visit_modifiers(node: Node) -> Modifiers {
     modifiers
 }
 
-fn visit_query_get_aggregate(node: Node) -> TypeQLGetAggregate {
+fn visit_query_get_aggregate(node: Node<'_>) -> TypeQLGetAggregate {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_get_aggregate);
     let mut children = node.into_children();
     let query_get = visit_query_get(children.consume_expected(Rule::query_get));
@@ -585,7 +585,7 @@ fn visit_query_get_aggregate(node: Node) -> TypeQLGetAggregate {
     }
 }
 
-fn visit_clause_aggregate(node: Node) -> (Aggregate, Option<Variable>) {
+fn visit_clause_aggregate(node: Node<'_>) -> (Aggregate, Option<Variable>) {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_aggregate);
     let mut children = node.into_children();
     let method = visit_aggregate_method(children.consume_expected(Rule::aggregate_method));
@@ -594,7 +594,7 @@ fn visit_clause_aggregate(node: Node) -> (Aggregate, Option<Variable>) {
     (method, var)
 }
 
-fn visit_query_get_group(node: Node) -> TypeQLGetGroup {
+fn visit_query_get_group(node: Node<'_>) -> TypeQLGetGroup {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_get_group);
     let mut children = node.into_children();
     let query = visit_query_get(children.consume_expected(Rule::query_get)).group(
@@ -604,7 +604,7 @@ fn visit_query_get_group(node: Node) -> TypeQLGetGroup {
     query
 }
 
-fn visit_clause_group(node: Node) -> Variable {
+fn visit_clause_group(node: Node<'_>) -> Variable {
     dbg_assert_eq_line!(node.as_rule(), Rule::clause_group);
     let mut children = node.into_children();
     children.skip_expected(Rule::GROUP);
@@ -613,7 +613,7 @@ fn visit_clause_group(node: Node) -> Variable {
     var
 }
 
-fn visit_query_get_group_agg(node: Node) -> TypeQLGetGroupAggregate {
+fn visit_query_get_group_agg(node: Node<'_>) -> TypeQLGetGroupAggregate {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_get_group_agg);
     let mut children = node.into_children();
     let query = visit_query_get(children.consume_expected(Rule::query_get)).group(
@@ -627,7 +627,7 @@ fn visit_query_get_group_agg(node: Node) -> TypeQLGetGroupAggregate {
     }
 }
 
-fn visit_sort(node: Node) -> Sorting {
+fn visit_sort(node: Node<'_>) -> Sorting {
     dbg_assert_eq_line!(node.as_rule(), Rule::sort);
     let mut children = node.into_children();
     children.skip_expected(Rule::SORT);
@@ -635,7 +635,7 @@ fn visit_sort(node: Node) -> Sorting {
     sorting
 }
 
-fn visit_sort_var(node: Node) -> sorting::SortVariable {
+fn visit_sort_var(node: Node<'_>) -> sorting::SortVariable {
     dbg_assert_eq_line!(node.as_rule(), Rule::var_order);
     let mut children = node.into_children();
     let var = get_var(children.consume_expected(Rule::VAR_));
@@ -645,17 +645,17 @@ fn visit_sort_var(node: Node) -> sorting::SortVariable {
     sorted_variable
 }
 
-fn visit_aggregate_method(node: Node) -> token::Aggregate {
+fn visit_aggregate_method(node: Node<'_>) -> token::Aggregate {
     dbg_assert_eq_line!(node.as_rule(), Rule::aggregate_method);
     token::Aggregate::from(node.as_str())
 }
 
-fn visit_definables(node: Node) -> Vec<Definable> {
+fn visit_definables(node: Node<'_>) -> Vec<Definable> {
     dbg_assert_eq_line!(node.as_rule(), Rule::definables);
     node.into_children().map(visit_definable).collect()
 }
 
-fn visit_definable(node: Node) -> Definable {
+fn visit_definable(node: Node<'_>) -> Definable {
     dbg_assert_eq_line!(node.as_rule(), Rule::definable);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -669,12 +669,12 @@ fn visit_definable(node: Node) -> Definable {
     definable
 }
 
-fn visit_patterns(node: Node) -> Vec<Pattern> {
+fn visit_patterns(node: Node<'_>) -> Vec<Pattern> {
     dbg_assert_eq_line!(node.as_rule(), Rule::patterns);
     node.into_children().map(visit_pattern).collect()
 }
 
-fn visit_pattern(node: Node) -> Pattern {
+fn visit_pattern(node: Node<'_>) -> Pattern {
     dbg_assert_eq_line!(node.as_rule(), Rule::pattern);
     let mut children = node.into_children();
     let pattern = match children.peek_rule().unwrap() {
@@ -688,7 +688,7 @@ fn visit_pattern(node: Node) -> Pattern {
     pattern
 }
 
-fn visit_pattern_conjunction(node: Node) -> Conjunction {
+fn visit_pattern_conjunction(node: Node<'_>) -> Conjunction {
     dbg_assert_eq_line!(node.as_rule(), Rule::pattern_conjunction);
     let mut children = node.into_children();
     let conjunction = Conjunction::new(visit_patterns(children.consume_expected(Rule::patterns)));
@@ -696,7 +696,7 @@ fn visit_pattern_conjunction(node: Node) -> Conjunction {
     conjunction
 }
 
-fn visit_pattern_disjunction(node: Node) -> Disjunction {
+fn visit_pattern_disjunction(node: Node<'_>) -> Disjunction {
     dbg_assert_eq_line!(node.as_rule(), Rule::pattern_disjunction);
     Disjunction::new(
         node.into_children()
@@ -710,7 +710,7 @@ fn visit_pattern_disjunction(node: Node) -> Disjunction {
     )
 }
 
-fn visit_pattern_negation(node: Node) -> Negation {
+fn visit_pattern_negation(node: Node<'_>) -> Negation {
     dbg_assert_eq_line!(node.as_rule(), Rule::pattern_negation);
     let mut children = node.into_children();
     children.skip_expected(Rule::NOT);
@@ -723,7 +723,7 @@ fn visit_pattern_negation(node: Node) -> Negation {
     negation
 }
 
-fn visit_statement(node: Node) -> Statement {
+fn visit_statement(node: Node<'_>) -> Statement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -738,7 +738,7 @@ fn visit_statement(node: Node) -> Statement {
     statement
 }
 
-fn visit_statement_concept(node: Node) -> ConceptStatement {
+fn visit_statement_concept(node: Node<'_>) -> ConceptStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_concept);
     let mut children = node.into_children();
     let var = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))
@@ -747,7 +747,7 @@ fn visit_statement_concept(node: Node) -> ConceptStatement {
     var
 }
 
-fn visit_statement_value(node: Node) -> ValueStatement {
+fn visit_statement_value(node: Node<'_>) -> ValueStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_value);
     let mut children = node.into_children();
     let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
@@ -764,7 +764,7 @@ fn visit_statement_value(node: Node) -> ValueStatement {
     var
 }
 
-fn visit_statement_type(node: Node) -> TypeStatement {
+fn visit_statement_type(node: Node<'_>) -> TypeStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_type);
     let mut children = node.into_children();
     let mut type_statement = visit_type_ref_any(children.consume_expected(Rule::type_ref_any)).into_type_statement();
@@ -811,7 +811,7 @@ fn visit_statement_type(node: Node) -> TypeStatement {
     type_statement
 }
 
-fn visit_annotations_owns(node: Node) -> Vec<Annotation> {
+fn visit_annotations_owns(node: Node<'_>) -> Vec<Annotation> {
     dbg_assert_eq_line!(node.as_rule(), Rule::annotations_owns);
     node.into_children()
         .map(|annotation| match annotation.as_rule() {
@@ -822,12 +822,12 @@ fn visit_annotations_owns(node: Node) -> Vec<Annotation> {
         .collect()
 }
 
-fn visit_statement_things(node: Node) -> Vec<ThingStatement> {
+fn visit_statement_things(node: Node<'_>) -> Vec<ThingStatement> {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_things);
     node.into_children().map(visit_statement_thing_any).collect()
 }
 
-fn visit_statement_thing_any(node: Node) -> ThingStatement {
+fn visit_statement_thing_any(node: Node<'_>) -> ThingStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_thing_any);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -841,7 +841,7 @@ fn visit_statement_thing_any(node: Node) -> ThingStatement {
     statement
 }
 
-fn visit_statement_thing(node: Node) -> ThingStatement {
+fn visit_statement_thing(node: Node<'_>) -> ThingStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_thing);
     let mut children = node.into_children();
     let self1 = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_));
@@ -862,7 +862,7 @@ fn visit_statement_thing(node: Node) -> ThingStatement {
     stmt_thing
 }
 
-fn visit_statement_relation(node: Node) -> ThingStatement {
+fn visit_statement_relation(node: Node<'_>) -> ThingStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_relation);
     let mut children = node.into_children();
     let mut relation = children
@@ -882,7 +882,7 @@ fn visit_statement_relation(node: Node) -> ThingStatement {
     relation
 }
 
-fn visit_statement_attribute(node: Node) -> ThingStatement {
+fn visit_statement_attribute(node: Node<'_>) -> ThingStatement {
     dbg_assert_eq_line!(node.as_rule(), Rule::statement_attribute);
     let mut children = node.into_children();
     let mut attribute = children
@@ -903,17 +903,17 @@ fn visit_statement_attribute(node: Node) -> ThingStatement {
     attribute
 }
 
-fn visit_relation(node: Node) -> RelationConstraint {
+fn visit_relation(node: Node<'_>) -> RelationConstraint {
     dbg_assert_eq_line!(node.as_rule(), Rule::relation);
     RelationConstraint::new(get_role_players(node))
 }
 
-fn visit_attributes(node: Node) -> Vec<HasConstraint> {
+fn visit_attributes(node: Node<'_>) -> Vec<HasConstraint> {
     dbg_assert_eq_line!(node.as_rule(), Rule::attributes);
     node.into_children().map(visit_attribute).collect()
 }
 
-fn visit_attribute(node: Node) -> HasConstraint {
+fn visit_attribute(node: Node<'_>) -> HasConstraint {
     dbg_assert_eq_line!(node.as_rule(), Rule::attribute);
     let mut children = node.into_children();
     let constraint = match children.skip_expected(Rule::HAS).peek_rule() {
@@ -940,7 +940,7 @@ fn visit_attribute(node: Node) -> HasConstraint {
     constraint
 }
 
-fn visit_predicate(node: Node) -> Predicate {
+fn visit_predicate(node: Node<'_>) -> Predicate {
     dbg_assert_eq_line!(node.as_rule(), Rule::predicate);
     let mut children = node.into_children();
     let constraint = match children.peek_rule() {
@@ -981,7 +981,7 @@ fn visit_predicate(node: Node) -> Predicate {
     constraint
 }
 
-fn visit_expression(node: Node) -> Expression {
+fn visit_expression(node: Node<'_>) -> Expression {
     dbg_assert_eq_line!(node.as_rule(), Rule::expression);
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
         .op(Op::infix(Rule::ADD, Assoc::Left) | Op::infix(Rule::SUBTRACT, Assoc::Left))
@@ -1013,7 +1013,7 @@ fn visit_expression(node: Node) -> Expression {
         .parse(node.into_children())
 }
 
-fn visit_function(node: Node) -> Function {
+fn visit_function(node: Node<'_>) -> Function {
     dbg_assert_eq_line!(node.as_rule(), Rule::expression_function);
     let mut children = node.into_children();
     let function_name = visit_function_name(children.consume_expected(Rule::expression_function_name));
@@ -1021,7 +1021,7 @@ fn visit_function(node: Node) -> Function {
     Function { function_name, args }
 }
 
-fn visit_function_name(node: Node) -> token::Function {
+fn visit_function_name(node: Node<'_>) -> token::Function {
     dbg_assert_eq_line!(node.as_rule(), Rule::expression_function_name);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -1038,7 +1038,7 @@ fn visit_function_name(node: Node) -> token::Function {
     function_token
 }
 
-fn visit_schema_rule_label(node: Node) -> RuleLabel {
+fn visit_schema_rule_label(node: Node<'_>) -> RuleLabel {
     dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule_label);
     let mut children = node.into_children();
     children.skip_expected(Rule::RULE);
@@ -1049,7 +1049,7 @@ fn visit_schema_rule_label(node: Node) -> RuleLabel {
     rule
 }
 
-fn visit_schema_rule(node: Node) -> crate::pattern::Rule {
+fn visit_schema_rule(node: Node<'_>) -> crate::pattern::Rule {
     dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule);
     let mut children = node.into_children();
     let rule = RuleLabel::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
@@ -1059,7 +1059,7 @@ fn visit_schema_rule(node: Node) -> crate::pattern::Rule {
     rule
 }
 
-fn visit_type_ref_any(node: Node) -> TypeReference {
+fn visit_type_ref_any(node: Node<'_>) -> TypeReference {
     dbg_assert_eq_line!(node.as_rule(), Rule::type_ref_any);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -1073,7 +1073,7 @@ fn visit_type_ref_any(node: Node) -> TypeReference {
     type_
 }
 
-fn visit_type_ref_scoped(node: Node) -> TypeReference {
+fn visit_type_ref_scoped(node: Node<'_>) -> TypeReference {
     dbg_assert_eq_line!(node.as_rule(), Rule::type_ref_scoped);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -1086,7 +1086,7 @@ fn visit_type_ref_scoped(node: Node) -> TypeReference {
     type_
 }
 
-fn visit_type_ref(node: Node) -> TypeReference {
+fn visit_type_ref(node: Node<'_>) -> TypeReference {
     dbg_assert_eq_line!(node.as_rule(), Rule::type_ref);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -1099,7 +1099,7 @@ fn visit_type_ref(node: Node) -> TypeReference {
     type_
 }
 
-fn visit_label_any(node: Node) -> Label {
+fn visit_label_any(node: Node<'_>) -> Label {
     dbg_assert_eq_line!(node.as_rule(), Rule::label_any);
     let mut children = node.into_children();
     let child = children.consume_any();
@@ -1112,14 +1112,14 @@ fn visit_label_any(node: Node) -> Label {
     label
 }
 
-fn visit_label_scoped(node: Node) -> Label {
+fn visit_label_scoped(node: Node<'_>) -> Label {
     dbg_assert_eq_line!(node.as_rule(), Rule::label_scoped);
     let parts: Vec<String> = node.as_str().split(':').map(String::from).collect();
     assert_eq!(parts.len(), 2);
     Label::from((parts[0].clone(), parts[1].clone()))
 }
 
-fn visit_constant(node: Node) -> Constant {
+fn visit_constant(node: Node<'_>) -> Constant {
     dbg_assert_eq_line!(node.as_rule(), Rule::constant);
     let mut children = node.into_children();
     let child = children.consume_any();

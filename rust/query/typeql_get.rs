@@ -95,7 +95,7 @@ impl VariablesRetrieved for TypeQLGet {
     }
 }
 
-fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef>, filter: &Filter) -> Result {
+fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef<'_>>, filter: &Filter) -> Result {
     let mut seen = HashSet::new();
     collect_err(filter.vars.iter().map(|r| {
         if !r.is_name() {
