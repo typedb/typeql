@@ -32,7 +32,7 @@ rust_library(
     srcs = glob([
         "*.rs",
         "**/*.rs",
-    ]),
+    ], exclude=["target/**"]),
     crate_root = "typeql.rs",
     compile_data = [
         "parser/typeql.pest",
