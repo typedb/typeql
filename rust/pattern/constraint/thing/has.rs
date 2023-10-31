@@ -24,85 +24,90 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    pattern::{
-        PredicateConstraint, Reference, ThingConstrainable, ThingVariable, TypeVariable, TypeVariableBuilder,
-        UnboundConceptVariable, Value,
-    },
+    pattern::{Constant, Label, Predicate},
+    variable::{variable::VariableRef, ConceptVariable, ValueVariable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct HasConstraint {
-    pub type_: Option<TypeVariable>,
-    pub attribute: ThingVariable,
+pub enum HasConstraint {
+    HasConcept(Option<Label>, ConceptVariable),
+    HasValue(Label, ValueVariable),
+    HasPredicate(Label, Predicate),
 }
 
 impl HasConstraint {
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.reference)).chain(iter::once(&self.attribute.reference)))
-    }
-
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.type_.iter().map(|t| &t.reference)).chain(self.attribute.references_recursive()))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        match self {
+            HasConstraint::HasConcept(_, var) => Box::new(iter::once(VariableRef::Concept(var))),
+            HasConstraint::HasValue(_, var) => Box::new(iter::once(VariableRef::Value(var))),
+            HasConstraint::HasPredicate(_, predicate) => predicate.variables(),
+        }
     }
 }
 
 impl Validatable for HasConstraint {
-    fn validate(&self) -> Result<()> {
-        collect_err(&mut iter::once(self.attribute.validate()).chain(self.type_.iter().map(Validatable::validate)))
+    fn validate(&self) -> Result {
+        collect_err(match self {
+            HasConstraint::HasConcept(_, var) => iter::once(var.validate()),
+            HasConstraint::HasValue(_, var) => iter::once(var.validate()),
+            HasConstraint::HasPredicate(_, predicate) => iter::once(predicate.validate()),
+        })
     }
 }
 
-impl From<UnboundConceptVariable> for HasConstraint {
-    fn from(variable: UnboundConceptVariable) -> Self {
-        HasConstraint { type_: None, attribute: variable.into_thing() }
+impl From<ConceptVariable> for HasConstraint {
+    fn from(variable: ConceptVariable) -> Self {
+        HasConstraint::HasConcept(None, variable)
     }
 }
 
-impl<S: Into<String>, T: Into<Value>> From<(S, T)> for HasConstraint {
-    fn from((type_name, value): (S, T)) -> Self {
-        match value.into() {
-            Value::ThingVariable(variable) => HasConstraint {
-                type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-                attribute: *variable,
-            },
-            value => HasConstraint {
-                type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-                attribute: UnboundConceptVariable::hidden()
-                    .constrain_predicate(PredicateConstraint::new(token::Predicate::Eq, value)),
-            },
-        }
+impl<T: Into<Label>> From<(T, ConceptVariable)> for HasConstraint {
+    fn from((label, variable): (T, ConceptVariable)) -> Self {
+        HasConstraint::HasConcept(Some(label.into()), variable)
     }
 }
 
-impl<S: Into<String>> From<(S, PredicateConstraint)> for HasConstraint {
-    fn from((type_name, predicate): (S, PredicateConstraint)) -> Self {
-        HasConstraint {
-            type_: Some(UnboundConceptVariable::hidden().type_(type_name.into())),
-            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
-        }
+impl<T: Into<Label>> From<(T, ValueVariable)> for HasConstraint {
+    fn from((label, variable): (T, ValueVariable)) -> Self {
+        HasConstraint::HasValue(label.into(), variable)
     }
 }
 
-impl HasConstraint {
-    pub fn new((type_name, predicate): (String, PredicateConstraint)) -> Self {
-        HasConstraint {
-            type_: Some(UnboundConceptVariable::hidden().type_(type_name)),
-            attribute: UnboundConceptVariable::hidden().constrain_predicate(predicate),
-        }
+impl From<(Option<Label>, ConceptVariable)> for HasConstraint {
+    fn from((label, variable): (Option<Label>, ConceptVariable)) -> Self {
+        HasConstraint::HasConcept(label, variable)
+    }
+}
+
+impl<S: Into<Label>, T: Into<Constant>> From<(S, T)> for HasConstraint {
+    fn from((label, constant): (S, T)) -> Self {
+        HasConstraint::HasPredicate(label.into(), Predicate::new(token::Predicate::Eq, constant.into().into()))
+    }
+}
+
+impl<S: Into<Label>> From<(S, Predicate)> for HasConstraint {
+    fn from((label, predicate): (S, Predicate)) -> Self {
+        HasConstraint::HasPredicate(label.into(), predicate)
     }
 }
 
 impl fmt::Display for HasConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", token::Constraint::Has)?;
-        if let Some(type_) = &self.type_ {
-            write!(f, " {}", &type_.label.as_ref().unwrap().label)?;
-        }
-
-        if self.attribute.reference.is_name() {
-            write!(f, " {}", self.attribute.reference)
-        } else {
-            write!(f, " {}", self.attribute.value.as_ref().unwrap())
+        match self {
+            HasConstraint::HasConcept(label, var) => {
+                if let Some(l) = label {
+                    write!(f, " {} {}", l, var)
+                } else {
+                    write!(f, " {}", var)
+                }
+            }
+            HasConstraint::HasValue(label, var) => {
+                write!(f, " {} {}", label, var)
+            }
+            HasConstraint::HasPredicate(label, predicate) => {
+                write!(f, " {} {}", label, predicate)
+            }
         }
     }
 }

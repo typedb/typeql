@@ -19,7 +19,7 @@
 # under the License.
 #
 
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test", "rustfmt_test")
 load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@vaticle_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
@@ -32,7 +32,7 @@ rust_library(
     srcs = glob([
         "*.rs",
         "**/*.rs",
-    ]),
+    ], exclude=["target/**"]),
     crate_root = "typeql.rs",
     compile_data = [
         "parser/typeql.pest",
@@ -85,12 +85,23 @@ deploy_github(
     draft = False
 )
 
+rustfmt_test(
+    name = "rustfmt_test",
+    targets = [":typeql"],
+    size = "small",
+)
+
+filegroup(
+    name = "rustfmt_config",
+    srcs = ["rustfmt.toml"],
+)
+
 checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
         "**/*",
-    ]),
+    ], exclude = ["target/**"]),
     exclude = ["LICENSE", "README.md"],
     license_type = "apache-header",
 )

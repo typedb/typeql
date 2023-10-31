@@ -41,68 +41,68 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(8, "The match query does not have named variables to bound the nested disjunction/negation pattern(s).");
     public static final ErrorMessage MATCH_HAS_NO_NAMED_VARIABLE =
             new ErrorMessage(9, "The match query has no named variables to retrieve.");
-    public static final ErrorMessage MATCH_PATTERN_VARIABLE_HAS_NO_NAMED_VARIABLE =
+    public static final ErrorMessage MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE =
             new ErrorMessage(10, "The pattern '%s' has no named variable.");
     public static final ErrorMessage MATCH_HAS_UNBOUNDED_NESTED_PATTERN =
             new ErrorMessage(11, "The match query contains a nested pattern is not bounded: '%s'.");
-    public static final ErrorMessage MISSING_MATCH_FILTER =
-            new ErrorMessage(12, "The match query cannot be constructed with NULL filter variable collection.");
-    public static final ErrorMessage EMPTY_MATCH_FILTER =
-            new ErrorMessage(13, "The match query cannot be filtered with an empty list of variables.");
+    public static final ErrorMessage MISSING_GET_FILTER =
+            new ErrorMessage(12, "The get query cannot be constructed with NULL filter variable collection.");
     public static final ErrorMessage INVALID_IID_STRING =
-            new ErrorMessage(14, "Invalid IID: '%s'. IIDs must follow the regular expression: '%s'.");
+            new ErrorMessage(13, "Invalid IID: '%s'. IIDs must follow the regular expression: '%s'.");
     public static final ErrorMessage INVALID_ATTRIBUTE_TYPE_REGEX =
-            new ErrorMessage(15, "Invalid regular expression '%s'.");
+            new ErrorMessage(14, "Invalid regular expression '%s'.");
     public static final ErrorMessage ILLEGAL_FILTER_VARIABLE_REPEATING =
-            new ErrorMessage(16, "The variable '%s' occurred more than once in match query filter.");
-    public static final ErrorMessage VARIABLE_OUT_OF_SCOPE_MATCH =
-            new ErrorMessage(17, "The variable '%s' is out of scope of the match query.");
+            new ErrorMessage(15, "The variable '%s' occurred more than once in the filter.");
+    public static final ErrorMessage VARIABLE_OUT_OF_SCOPE =
+            new ErrorMessage(16, "The variable '%s' is out of scope of the query.");
     public static final ErrorMessage VARIABLE_OUT_OF_SCOPE_DELETE =
-            new ErrorMessage(18, "The deleted variable '%s' is out of scope of the match query.");
+            new ErrorMessage(17, "The deleted variable '%s' is out of scope of the match query.");
     public static final ErrorMessage NO_VARIABLE_IN_SCOPE_INSERT =
-            new ErrorMessage(19, "None of the variables in 'insert' ('%s') is within scope of 'match' ('%s')");
+            new ErrorMessage(18, "None of the variables in 'insert' ('%s') is within scope of 'match' ('%s')");
     public static final ErrorMessage FILTER_VARIABLE_ANONYMOUS =
-            new ErrorMessage(20, "Anonymous variable encountered in a match query filter.");
+            new ErrorMessage(19, "Anonymous variable encountered in the query filter.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
-            new ErrorMessage(21, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
+            new ErrorMessage(20, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
     public static final ErrorMessage ILLEGAL_CONSTRAINT_REPETITION =
-            new ErrorMessage(22, "The variable '%s' contains illegally repeating constraints: '%s' and '%s'.");
+            new ErrorMessage(21, "The variable '%s' contains illegally repeating constraints: '%s' and '%s'.");
     public static final ErrorMessage MISSING_CONSTRAINT_RELATION_PLAYER =
-            new ErrorMessage(23, "A relation variable has not been provided with role players.");
+            new ErrorMessage(22, "A relation variable has not been provided with role players.");
     public static final ErrorMessage MISSING_CONSTRAINT_VALUE =
-            new ErrorMessage(24, "A value constraint has not been provided with a variable or literal value.");
+            new ErrorMessage(23, "A value constraint has not been provided with a variable or literal value.");
     public static final ErrorMessage MISSING_CONSTRAINT_PREDICATE =
-            new ErrorMessage(25, "A value constraint has not been provided with a predicate.");
+            new ErrorMessage(24, "A value constraint has not been provided with a predicate.");
     public static final ErrorMessage INVALID_CONSTRAINT_DATETIME_PRECISION =
-            new ErrorMessage(27, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
+            new ErrorMessage(26, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
-            new ErrorMessage(28, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
+            new ErrorMessage(27, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
     public static final ErrorMessage INVALID_UNDEFINE_QUERY_RULE =
-            new ErrorMessage(29, "Invalid undefine query: the rule body of '%s' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.");
+            new ErrorMessage(28, "Invalid undefine query: the rule body of '%s' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.");
     public static final ErrorMessage INVALID_RULE_WHEN_MISSING_PATTERNS =
-            new ErrorMessage(30, "Rule '%s' 'when' has not been provided with any patterns.");
+            new ErrorMessage(29, "Rule '%s' 'when' has not been provided with any patterns.");
     public static final ErrorMessage INVALID_RULE_WHEN_NESTED_NEGATION =
-            new ErrorMessage(31, "Rule '%s' 'when' contains a nested negation.");
+            new ErrorMessage(30, "Rule '%s' 'when' contains a nested negation.");
     public static final ErrorMessage INVALID_RULE_THEN =
-            new ErrorMessage(32, "Rule '%s' 'then' '%s': must be exactly one attribute ownership, or exactly one relation.");
+            new ErrorMessage(31, "Rule '%s' 'then' '%s': must be exactly one attribute ownership, or exactly one relation.");
     public static final ErrorMessage INVALID_RULE_THEN_HAS =
-            new ErrorMessage(33, "Rule '%s' 'then' '%s' tries to assign type '%s' to variable '%s', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.");
+            new ErrorMessage(32, "Rule '%s' 'then' '%s' tries to assign type '%s' to variable '%s', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.");
     public static final ErrorMessage INVALID_RULE_THEN_VARIABLES =
-            new ErrorMessage(34, "Rule '%s' 'then' variables must be present in the 'when', outside of nested patterns.");
+            new ErrorMessage(33, "Rule '%s' 'then' variables must be present in the 'when', outside of nested patterns.");
     public static final ErrorMessage INVALID_RULE_THEN_ROLES =
-            new ErrorMessage(35, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
+            new ErrorMessage(34, "Rule '%s' 'then' '%s' must specify all role types explicitly or by using a variable.");
     public static final ErrorMessage INVALID_RULE_THEN_RELATION_VARIABLE =
-            new ErrorMessage(36, "Rule '%s': relation variable name '%s' in 'then' must not be present.");
+            new ErrorMessage(35, "Rule '%s': relation variable name '%s' in 'then' must not be present.");
     public static final ErrorMessage REDUNDANT_NESTED_NEGATION =
-            new ErrorMessage(37, "Invalid query containing redundant nested negations.");
+            new ErrorMessage(36, "Invalid query containing redundant nested negations.");
     public static final ErrorMessage VARIABLE_NOT_SORTED =
-            new ErrorMessage(38, "Variable '%s' does not exist in the sorting clause.");
+            new ErrorMessage(37, "Variable '%s' does not exist in the sorting clause.");
+    public static final ErrorMessage INVALID_SORTING_VARIABLE_NOT_MATCHED =
+            new ErrorMessage(38, "Sort variable '%s' is not present in the match clause.");
     public static final ErrorMessage INVALID_SORTING_ORDER =
             new ErrorMessage(39, "Invalid sorting order '%s'. Valid options: '%s' or '%s'.");
     public static final ErrorMessage INVALID_COUNT_VARIABLE_ARGUMENT =
             new ErrorMessage(40, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
-            new ErrorMessage(41, "Illegal grammar!");
+            new ErrorMessage(41, "Illegal grammar: '%s'");
     public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
             new ErrorMessage(42, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
     public static final ErrorMessage INVALID_ANNOTATION =

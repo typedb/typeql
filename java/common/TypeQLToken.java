@@ -59,29 +59,31 @@ public class TypeQLToken {
         }
     }
 
-    public enum Command {
+    public enum Clause {
         DEFINE("define"),
         UNDEFINE("undefine"),
         INSERT("insert"),
         DELETE("delete"),
         MATCH("match"),
+        GET("get"),
         AGGREGATE("aggregate"),
-        GROUP("group");
+        GROUP("group"),
+        FETCH("fetch");
 
-        private final String command;
+        private final String clause;
 
-        Command(String command) {
-            this.command = command;
+        Clause(String clause) {
+            this.clause = clause;
         }
 
         @Override
         public String toString() {
-            return this.command;
+            return this.clause;
         }
 
-        public static Command of(String value) {
-            for (Command c : Command.values()) {
-                if (c.command.equals(value)) {
+        public static Clause of(String value) {
+            for (Clause c : Clause.values()) {
+                if (c.clause.equals(value)) {
                     return c;
                 }
             }
@@ -89,26 +91,25 @@ public class TypeQLToken {
         }
     }
 
-    public enum Filter {
-        GET("get"),
+    public enum Modifier {
         SORT("sort"),
         OFFSET("offset"),
         LIMIT("limit");
 
-        private final String filter;
+        private final String modifier;
 
-        Filter(String filter) {
-            this.filter = filter;
+        Modifier(String modifier) {
+            this.modifier = modifier;
         }
 
         @Override
         public String toString() {
-            return this.filter;
+            return this.modifier;
         }
 
-        public static Filter of(String value) {
-            for (Filter c : Filter.values()) {
-                if (c.filter.equals(value)) {
+        public static Modifier of(String value) {
+            for (Modifier c : Modifier.values()) {
+                if (c.modifier.equals(value)) {
                     return c;
                 }
             }
@@ -371,6 +372,30 @@ public class TypeQLToken {
             for (Annotation annotation: Annotation.values()) {
                 if (annotation.name.equals(value)) {
                     return annotation;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum Projection {
+        AS("as");
+
+        private final String name;
+
+        Projection(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+
+        public static Projection of(String value) {
+            for (Projection projection: Projection.values()) {
+                if (projection.name.equals(value)) {
+                    return projection;
                 }
             }
             return null;

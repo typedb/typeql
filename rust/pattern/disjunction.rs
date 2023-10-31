@@ -24,7 +24,8 @@ use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
-    pattern::{Conjunction, Normalisable, Pattern, Reference},
+    pattern::{Conjunction, Normalisable, Pattern},
+    variable::variable::VariableRef,
 };
 
 #[derive(Debug, Clone, Eq)]
@@ -44,17 +45,17 @@ impl Disjunction {
         Disjunction { patterns, normalised: None }
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.patterns.iter().flat_map(|p| p.references_recursive()))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
 
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
-        collect_err(&mut self.patterns.iter().map(|p| p.expect_is_bounded_by(bounds)))
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
+        collect_err(self.patterns.iter().map(|p| p.validate_is_bounded_by(bounds)))
     }
 }
 
 impl Validatable for Disjunction {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }
@@ -81,7 +82,7 @@ impl Normalisable for Disjunction {
                     Pattern::Negation(negation) => {
                         vec![Conjunction::new(vec![negation.compute_normalised()]).into()].into_iter()
                     }
-                    Pattern::Variable(variable) => {
+                    Pattern::Statement(variable) => {
                         vec![Conjunction::new(vec![variable.clone().into()]).into()].into_iter()
                     }
                 })
@@ -99,7 +100,12 @@ impl fmt::Display for Disjunction {
                 .iter()
                 .map(|pattern| match pattern {
                     Pattern::Conjunction(conjunction) => conjunction.to_string(),
-                    other => format!("{{\n{};\n}}", indent(&other.to_string())),
+                    other => format!(
+                        "{}\n{};\n{}",
+                        token::Char::CurlyLeft,
+                        indent(&other.to_string()),
+                        token::Char::CurlyRight
+                    ),
                 })
                 .collect::<Vec<_>>()
                 .join(&format!(" {} ", token::LogicOperator::Or)),

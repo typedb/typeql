@@ -24,9 +24,9 @@ package com.vaticle.typeql.lang.query.test;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLQuery.MatchClause;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -43,11 +43,11 @@ public class TypeQLDeleteTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private final TypeQLMatch.Unfiltered match1 = TypeQL.match(cVar("x").isa("movie"));
-    private final TypeQLMatch.Unfiltered match2 = TypeQL.match(cVar("y").isa("movie"));
+    private final MatchClause match1 = TypeQL.match(cVar("x").isa("movie"));
+    private final MatchClause match2 = TypeQL.match(cVar("y").isa("movie"));
 
-    private final List<ThingVariable<?>> delete1 = list(cVar("x").isa("movie"));
-    private final List<ThingVariable<?>> delete2 = list(cVar("y").isa("movie"));
+    private final List<ThingStatement<?>> delete1 = list(cVar("x").isa("movie"));
+    private final List<ThingStatement<?>> delete2 = list(cVar("y").isa("movie"));
 
     @Test
     public void deleteQueriesWithTheSameMatchAndVarsAreEqual() {

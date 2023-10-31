@@ -20,67 +20,66 @@
  *
  */
 
-use std::{fmt, iter};
+use std::fmt;
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{variable::Reference, IsExplicit, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::IsExplicit,
+    variable::{variable::VariableRef, ConceptVariable, TypeReference},
     Label,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
-    pub type_: Box<TypeVariable>,
+    pub type_: TypeReference,
     pub is_explicit: IsExplicit,
 }
 
 impl SubConstraint {
-    fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
-        Self { type_: Box::new(type_), is_explicit }
-    }
-
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.type_.reference))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        self.type_.variables()
     }
 }
 
 impl Validatable for SubConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         self.type_.validate()
     }
 }
 
 impl<T: Into<Label>> From<T> for SubConstraint {
-    fn from(scoped_type: T) -> Self {
-        Self::from(UnboundConceptVariable::hidden().type_(scoped_type))
+    fn from(type_: T) -> Self {
+        Self::from(TypeReference::Label(type_.into()))
     }
 }
 
-impl From<UnboundConceptVariable> for SubConstraint {
-    fn from(type_: UnboundConceptVariable) -> Self {
-        Self::from(type_.into_type())
+impl From<ConceptVariable> for SubConstraint {
+    fn from(type_: ConceptVariable) -> Self {
+        Self::from(TypeReference::Variable(type_))
     }
 }
-impl From<TypeVariable> for SubConstraint {
-    fn from(type_: TypeVariable) -> Self {
-        Self::new(type_, IsExplicit::No)
+
+impl From<TypeReference> for SubConstraint {
+    fn from(type_: TypeReference) -> Self {
+        SubConstraint { type_: type_, is_explicit: IsExplicit::No }
     }
 }
 
 impl<T: Into<Label>> From<(T, IsExplicit)> for SubConstraint {
-    fn from((scoped_type, is_explicit): (T, IsExplicit)) -> Self {
-        Self::from((UnboundConceptVariable::hidden().type_(scoped_type), is_explicit))
+    fn from((type_, is_explicit): (T, IsExplicit)) -> Self {
+        Self::from((TypeReference::Label(type_.into()), is_explicit))
     }
 }
 
-impl From<(UnboundConceptVariable, IsExplicit)> for SubConstraint {
-    fn from((type_, is_explicit): (UnboundConceptVariable, IsExplicit)) -> Self {
-        Self::from((type_.into_type(), is_explicit))
+impl From<(ConceptVariable, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (ConceptVariable, IsExplicit)) -> Self {
+        Self::from((TypeReference::Variable(type_), is_explicit))
     }
 }
-impl From<(TypeVariable, IsExplicit)> for SubConstraint {
-    fn from((type_, is_explicit): (TypeVariable, IsExplicit)) -> Self {
-        Self::new(type_, is_explicit)
+
+impl From<(TypeReference, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (TypeReference, IsExplicit)) -> Self {
+        Self { type_, is_explicit }
     }
 }
 

@@ -25,7 +25,7 @@ eof_queries           :   query+           EOF ;
 eof_pattern           :   pattern          EOF ;
 eof_patterns          :   patterns         EOF ;
 eof_definables        :   definables       EOF ;
-eof_variable          :   pattern_variable EOF ;
+eof_statement         :   statement        EOF ;
 eof_label             :   label            EOF ;
 eof_schema_rule       :   schema_rule      EOF ;
 
@@ -33,62 +33,72 @@ eof_schema_rule       :   schema_rule      EOF ;
 
 query                 :   query_define           |   query_undefine
                       |   query_insert           |   query_update
-                      |   query_delete           |   query_match
-                      |   query_match_aggregate  |   query_match_group
-                      |   query_match_group_agg                                 ;
+                      |   query_delete           |   query_get
+                      |   query_get_aggregate    |   query_get_group
+                      |   query_get_group_agg    |   query_fetch          ;
 
-query_define          :   DEFINE      definables  ;
-query_undefine        :   UNDEFINE    definables  ;
+query_define          :   clause_define   ;
+query_undefine        :   clause_undefine ;
 
-query_insert          :   MATCH       patterns      INSERT  variable_things
-                      |                             INSERT  variable_things     ;
-query_update          :   query_delete              INSERT  variable_things     ;
-query_delete          :   MATCH       patterns      DELETE  variable_things     ;
+query_insert          :   clause_match  clause_insert  modifiers
+                      |   clause_insert  modifiers                                 ;
+query_update          :   clause_match  clause_delete  clause_insert  modifiers    ;
+query_delete          :   clause_match  clause_delete  modifiers                   ;
 
-query_match           :   MATCH       patterns            ( modifiers )         ;
+query_get             :   clause_match  clause_get  modifiers                      ;
+query_get_aggregate   :   query_get  clause_aggregate                              ;
+query_get_group       :   query_get  clause_group                                  ;
+query_get_group_agg   :   query_get_group clause_aggregate                         ;
 
-// MATCH QUERY ANSWER GROUP AND AGGREGATE FUNCTIONS ============================
+query_fetch           :   clause_match  clause_fetch  modifiers                    ;
 
-query_match_aggregate :   query_match   match_aggregate   ;
-query_match_group     :   query_match   match_group       ;
-query_match_group_agg :   query_match   match_group       match_aggregate  ;
-
-// MATCH QUERY MODIFIERS =======================================================
-
-modifiers             :   ( filter ';' )? ( sort ';' )? ( offset ';' )? ( limit ';' )?                  ;
-
-filter                :   GET        (VAR_CONCEPT_ | VAR_VALUE_)   ( ',' (VAR_CONCEPT_ | VAR_VALUE_) )* ;
-sort                  :   SORT        var_order     ( ',' var_order    )*                               ;
-var_order             :   (VAR_CONCEPT_  | VAR_VALUE_)  ORDER_?                                         ;
-offset                :   OFFSET      LONG_                                                             ;
-limit                 :   LIMIT       LONG_                                                             ;
-
-// GET AGGREGATE QUERY =========================================================
-//
-// An aggregate function is composed of 2 things:
-// The aggregate method name, followed by the variable to apply the function to
-
-match_aggregate       :   aggregate_method  (VAR_CONCEPT_  | VAR_VALUE_)?   ';' ;   // method and, optionally, a variable
-aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                // calculate statistical values
+clause_define         :   DEFINE      definables          ;
+clause_undefine       :   UNDEFINE    definables          ;
+clause_match          :   MATCH       patterns            ;
+clause_insert         :   INSERT      statement_things    ;
+clause_delete         :   DELETE      statement_things    ;
+clause_get            :   GET       ( VAR_CONCEPT_ | VAR_VALUE_ )?   ( ',' ( VAR_CONCEPT_ | VAR_VALUE_ ) )*  ';' ;
+clause_group          :   GROUP     ( VAR_CONCEPT_ | VAR_VALUE_ ) ';'            ;
+clause_fetch          :   FETCH       projections         ;
+clause_aggregate      :   aggregate_method  ( VAR_CONCEPT_  | VAR_VALUE_ )?  ';' ;   // method and, optionally, a variable
+aggregate_method      :   COUNT   |   MAX     |   MEAN    |   MEDIAN                 // calculate statistical values
                       |   MIN     |   STD     |   SUM     ;
 
-// GET GROUP QUERY =============================================================
-//
-// An group function is composed of 2 things:
-// The 'GROUP' method name, followed by the variable to group the results by
+// QUERY MODIFIERS =======================================================
 
-match_group           :   GROUP   (VAR_CONCEPT_  | VAR_VALUE_)  ';'             ;
+modifiers             : ( sort ';' )? ( offset ';' )? ( limit ';' )?                     ;
+
+sort                  :   SORT        var_order     ( ',' var_order    )*                ;
+var_order             : ( VAR_CONCEPT_  | VAR_VALUE_ )  ORDER_?                          ;
+offset                :   OFFSET      LONG_                                              ;
+limit                 :   LIMIT       LONG_                                              ;
+
+// FETCH QUERY =================================================================
+
+projections           : ( projection ';' )+      ;
+projection            :   projection_key_var
+                      |   projection_key_var ':' projection_attributes
+                      |   projection_key_label ':' '{' projection_subquery  '}'  ;
+
+projection_attributes    :   projection_attribute  ( ',' projection_attribute )*  ;
+projection_attribute     :   label  ( projection_key_as_label )?         ;
+
+projection_subquery      : ( query_fetch | query_get_aggregate )  ;
+
+projection_key_var       : ( VAR_CONCEPT_ | VAR_VALUE_ ) ( projection_key_as_label )? ;
+projection_key_as_label  :   AS  projection_key_label ;
+projection_key_label     :   QUOTED_STRING | label  ;
 
 // SCHEMA QUERY ================================================================
 
 definables            : ( definable ';' )+    ;
-definable             :   variable_type
+definable             :   statement_type
                       |   schema_rule         ;
 
 // QUERY PATTERNS ==============================================================
 
 patterns              : ( pattern ';' )+      ;
-pattern               :   pattern_variable
+pattern               :   statement
                       |   pattern_conjunction
                       |   pattern_disjunction
                       |   pattern_negation
@@ -97,54 +107,54 @@ pattern_conjunction   :   '{' patterns '}'                            ;
 pattern_disjunction   :   '{' patterns '}'  ( OR '{' patterns '}' )+  ;
 pattern_negation      :   NOT '{' patterns '}'                        ;
 
-// VARIABLE PATTERNS ===========================================================
+// STATEMENT PATTERNS ===========================================================
 
-pattern_variable      :   variable_concept
-                      |   variable_type
-                      |   variable_thing_any
-                      |   variable_value
+statement             :   statement_concept
+                      |   statement_type
+                      |   statement_thing_any
+                      |   statement_value
                       ;
 
-// CONCEPT VARAIBLES ===========================================================
+// CONCEPT STATEMENTS ===========================================================
 
-variable_concept      :   VAR_CONCEPT_  IS  VAR_CONCEPT_  ;
+statement_concept     :   VAR_CONCEPT_  IS  VAR_CONCEPT_  ;
 
-// TYPE VARIABLES ==============================================================
+// TYPE STATEMENTS ==============================================================
 
-variable_type         :   type_any    type_constraint ( ',' type_constraint )*  ;
+statement_type        :   type_any    type_constraint ( ',' type_constraint )*  ;
 type_constraint       :   ABSTRACT
                       |   SUB_        type_any
                       |   OWNS        type         ( AS type )?     annotations_owns
                       |   RELATES     type         ( AS type )?
                       |   PLAYS       type_scoped  ( AS type )?
                       |   VALUE       value_type
-                      |   REGEX       STRING_
+                      |   REGEX       QUOTED_STRING
                       |   TYPE        label_any
                       ;
 
 annotations_owns      :   ( ANNOTATION_KEY )?   ( ANNOTATION_UNIQUE )?          ;
 
-// VALUE VARIABLES =============================================================
+// VALUE STATEMENTS =============================================================
 
-variable_value        :   VAR_VALUE_ ASSIGN expression
+statement_value       :   VAR_VALUE_ ASSIGN expression
                       |   VAR_VALUE_ predicate
                       ;
 
-// THING VARIABLES =============================================================
+// THING STATEMENTS =============================================================
 
-variable_things       : ( variable_thing_any ';' )+ ;
-variable_thing_any    :   variable_thing
-                      |   variable_relation
-                      |   variable_attribute
+statement_things      : ( statement_thing_any ';' )+ ;
+statement_thing_any   :   statement_thing
+                      |   statement_relation
+                      |   statement_attribute
                       ;
-variable_thing        :   VAR_CONCEPT_            ISA_ type   ( ',' attributes )?
+statement_thing       :   VAR_CONCEPT_            ISA_ type   ( ',' attributes )?
                       |   VAR_CONCEPT_            IID  IID_   ( ',' attributes )?
                       |   VAR_CONCEPT_            attributes
                       ;
-variable_relation     :   VAR_CONCEPT_? relation  ISA_ type   ( ',' attributes )?
+statement_relation    :   VAR_CONCEPT_? relation  ISA_ type   ( ',' attributes )?
                       |   VAR_CONCEPT_? relation  attributes?
                       ;
-variable_attribute    :   VAR_CONCEPT_? predicate ISA_ type   ( ',' attributes )?
+statement_attribute   :   VAR_CONCEPT_? predicate ISA_ type   ( ',' attributes )?
                       |   VAR_CONCEPT_? predicate attributes?
                       ;
 
@@ -165,7 +175,7 @@ attribute             :   HAS label ( VAR_CONCEPT_ | VAR_VALUE_ | predicate )   
 
 predicate             :   value
                       |   predicate_equality   predicate_value
-                      |   predicate_substring  STRING_
+                      |   predicate_substring  QUOTED_STRING
                       ;
 predicate_equality    :   EQ | NEQ | GT | GTE | LT | LTE
                       |   ASSIGN ;                                              // Backwards compatibility till 3.0
@@ -191,7 +201,7 @@ expression_arguments        :   expression   (',' expression)*                  
 // SCHEMA CONSTRUCT ============================================================
 
 schema_rule           :   RULE label
-                      |   RULE label ':' WHEN '{' patterns '}' THEN '{' variable_thing_any ';' '}' ;
+                      |   RULE label ':' WHEN '{' patterns '}' THEN '{' statement_thing_any ';' '}' ;
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
@@ -203,6 +213,7 @@ label_any             :   label_scoped  | label         ;
 label_scoped          :   LABEL_SCOPED_ ;
 label                 :   LABEL_        | type_native   | unreserved    ;
 
+
 // LITERAL INPUT VALUES ========================================================
 
 type_native           :   THING           |   ENTITY          |   ATTRIBUTE
@@ -210,7 +221,7 @@ type_native           :   THING           |   ENTITY          |   ATTRIBUTE
 
 value_type            :   LONG            |   DOUBLE          |   STRING
                       |   BOOLEAN         |   DATETIME        ;
-value                 :   STRING_         |   BOOLEAN_
+value                 :   QUOTED_STRING   |   BOOLEAN_
                       |   DATE_           |   DATETIME_
                       |   signed_long     |   signed_double   ;
 
@@ -234,7 +245,7 @@ unreserved            : VALUE | EXPR_FUNC_NAME
 MATCH           : 'match'       ;   GET             : 'get'         ;
 DEFINE          : 'define'      ;   UNDEFINE        : 'undefine'    ;
 INSERT          : 'insert'      ;   DELETE          : 'delete'      ;
-COMPUTE         : 'compute'     ;
+FETCH           : 'fetch'       ;   COMPUTE         : 'compute'     ;
 
 // NATIVE TYPE KEYWORDS
 
@@ -248,7 +259,7 @@ OFFSET          : 'offset'      ;   LIMIT           : 'limit'       ;
 SORT            : 'sort'        ;   ORDER_          : ASC | DESC    ;
 ASC             : 'asc'         ;   DESC            : 'desc'        ;
 
-// TYPE VARIABLE CONSTRAINT KEYWORDS
+// TYPE STATEMENT CONSTRAINT KEYWORDS
 
 TYPE            : 'type'        ;
 ABSTRACT        : 'abstract'    ;   SUB_            : SUB | SUBX    ;
@@ -263,7 +274,7 @@ WHEN            : 'when'        ;   THEN            : 'then'        ;
 ANNOTATION_KEY            : '@key';
 ANNOTATION_UNIQUE         : '@unique';
 
-// THING VARIABLE CONSTRAINT KEYWORDS
+// THING STATEMENT CONSTRAINT KEYWORDS
 
 IID             : 'iid'         ;   ISA_            : ISA | ISAX    ;
 ISA             : 'isa'         ;   ISAX            : 'isa!'        ;
@@ -309,7 +320,7 @@ DATETIME        : 'datetime'    ;
 BOOLEAN_        : TRUE | FALSE  ; // order of lexer declaration matters
 TRUE            : 'true'        ;
 FALSE           : 'false'       ;
-STRING_         : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
+QUOTED_STRING   : '"'  (~["\\] | ESCAPE_SEQ_ )* '"'
                 | '\'' (~['\\] | ESCAPE_SEQ_ )* '\''    ;
 LONG_           : [0-9]+                                ;
 DOUBLE_         : [0-9]+ '.' [0-9]+                     ;

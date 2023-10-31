@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
         strict = true,
         plugin = "pretty",
         glue = "com.vaticle.typeql.lang.test.behaviour",
-        features = "external/vaticle_typedb_behaviour/typeql",
+        features = "external/vaticle_typedb_behaviour/query",
         tags = "not @ignore and not @ignore-typeql"
 )
 public class TypeQLTest {

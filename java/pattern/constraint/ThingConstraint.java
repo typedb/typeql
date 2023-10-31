@@ -24,11 +24,9 @@ package com.vaticle.typeql.lang.pattern.constraint;
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.collection.Pair;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.pair;
-import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
@@ -59,13 +56,14 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Type.RELATION;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_IID_STRING;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_RELATION_PLAYER;
-import static com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable.hidden;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 
-public abstract class ThingConstraint extends Constraint<BoundVariable> {
+public abstract class ThingConstraint extends Constraint {
 
     @Override
-    public Set<BoundVariable> variables() {
-        return set();
+    public Set<? extends TypeQLVariable> variables() {
+        return emptySet();
     }
 
     @Override
@@ -168,34 +166,32 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Isa extends ThingConstraint {
 
-        private final TypeVariable type;
+        private final TypeQLVariable.Concept type;
         private final boolean isExplicit;
         private final boolean isDerived;
         private final int hash;
 
         public Isa(String type, boolean isExplicit) {
-            this(hidden().type(type), isExplicit, false);
+            this(TypeQLVariable.Concept.labelVar(type), isExplicit, false);
         }
 
-        public Isa(UnboundConceptVariable typeVar, boolean isExplicit) {
-            this(typeVar.toType(), isExplicit, false);
+        public Isa(TypeQLVariable.Concept typeVar, boolean isExplicit) {
+            this(typeVar, isExplicit, false);
         }
 
-        public Isa(Either<String, UnboundConceptVariable> typeArg, boolean isExplicit) {
-            this(typeArg.apply(label -> hidden().type(label), UnboundConceptVariable::toType), isExplicit, false);
+        public Isa(Either<String, ? extends TypeQLVariable.Concept> typeArg, boolean isExplicit) {
+            this(typeArg.apply(TypeQLVariable.Concept::labelVar, var -> var), isExplicit, false);
         }
 
-        private Isa(TypeVariable type, boolean isExplicit, boolean isDerived) {
-            if (type == null) {
-                throw new NullPointerException("Null type");
-            }
+        public Isa(TypeQLVariable.Concept type, boolean isExplicit, boolean isDerived) {
+            if (type == null) throw new NullPointerException("Type provided to 'isa' is null");
             this.type = type;
             this.isExplicit = isExplicit;
             this.isDerived = isDerived;
             this.hash = Objects.hash(Isa.class, this.type, this.isExplicit, this.isDerived);
         }
 
-        public TypeVariable type() {
+        public TypeQLVariable.Concept type() {
             return type;
         }
 
@@ -203,11 +199,13 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             return isExplicit;
         }
 
-        public boolean isDerived() { return isDerived; }
+        public boolean isDerived() {
+            return isDerived;
+        }
 
         @Override
-        public Set<BoundVariable> variables() {
-            return set(type);
+        public Set<TypeQLVariable.Concept> variables() {
+            return singleton(type);
         }
 
         @Override
@@ -243,7 +241,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Relation extends ThingConstraint {
 
-        private final Map<Pair<TypeVariable, ThingVariable<?>>, AtomicInteger> repetitions;
+        private final Map<Pair<TypeQLVariable.Concept, TypeQLVariable.Concept>, AtomicInteger> repetitions;
         private final List<RolePlayer> players;
         private String scope;
 
@@ -269,7 +267,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         private int incrementRepetition(RolePlayer player) {
             return repetitions.computeIfAbsent(pair(player.roleType, player.player),
-                                               k -> new AtomicInteger(0)).incrementAndGet();
+                    k -> new AtomicInteger(0)).incrementAndGet();
         }
 
         public void setScope(String relationLabel) {
@@ -288,8 +286,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
         }
 
         @Override
-        public Set<BoundVariable> variables() {
-            Set<BoundVariable> variables = new HashSet<>();
+        public Set<TypeQLVariable.Concept> variables() {
+            Set<TypeQLVariable.Concept> variables = new HashSet<>();
             players().forEach(player -> {
                 variables.add(player.player());
                 if (player.roleType().isPresent()) variables.add(player.roleType().get());
@@ -327,37 +325,33 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         public static class RolePlayer {
 
-            private TypeVariable roleType;
-            private final ThingVariable<?> player;
+            private TypeQLVariable.Concept roleType;
+            private final TypeQLVariable.Concept player;
             private int repetition;
 
-            public RolePlayer(String roleType, UnboundConceptVariable playerVar) {
-                this(roleType == null ? null : hidden().type(roleType), playerVar.toThing());
+            public RolePlayer(@Nullable String roleType, TypeQLVariable.Concept playerVar) {
+                this(roleType == null ? (TypeQLVariable.Concept) null : TypeQLVariable.Concept.labelVar(roleType), playerVar);
             }
 
-            public RolePlayer(UnboundConceptVariable roleTypeVar, UnboundConceptVariable playerVar) {
-                this(roleTypeVar == null ? null : roleTypeVar.toType(), playerVar.toThing());
+            public RolePlayer(TypeQLVariable.Concept playerVar) {
+                this((TypeQLVariable.Concept) null, playerVar);
             }
 
-            public RolePlayer(UnboundConceptVariable playerVar) {
-                this(null, playerVar.toThing());
+            public RolePlayer(@Nullable Either<String, ? extends TypeQLVariable.Concept> roleTypeArg, TypeQLVariable.Concept playerVar) {
+                this(roleTypeArg == null ? (TypeQLVariable.Concept) null : roleTypeArg.apply(TypeQLVariable.Concept::labelVar, var -> var), playerVar);
             }
 
-            public RolePlayer(Either<String, UnboundConceptVariable> roleTypeArg, UnboundConceptVariable playerVar) {
-                this(roleTypeArg == null ? null : roleTypeArg.apply(label -> hidden().type(label), UnboundConceptVariable::toType), playerVar.toThing());
-            }
-
-            private RolePlayer(@Nullable TypeVariable roleType, ThingVariable<?> player) {
-                if (player == null) throw new NullPointerException("Null player");
+            public RolePlayer(@Nullable TypeQLVariable.Concept roleType, TypeQLVariable.Concept player) {
+                if (player == null) throw new NullPointerException("Player provided to role is null");
                 this.roleType = roleType;
                 this.player = player;
             }
 
-            public Optional<TypeVariable> roleType() {
+            public Optional<TypeQLVariable.Concept> roleType() {
                 return Optional.ofNullable(roleType);
             }
 
-            public ThingVariable<?> player() {
+            public TypeQLVariable.Concept player() {
                 return player;
             }
 
@@ -366,8 +360,8 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
             }
 
             private void setScope(String relationLabel) {
-                if (roleType != null && roleType.label().isPresent()) {
-                    this.roleType = hidden().type(relationLabel, roleType.label().get().label());
+                if (roleType != null && roleType.isLabelled()) {
+                    this.roleType = TypeQLVariable.Concept.labelVar(roleType.reference().asLabel().label(), relationLabel);
                 }
             }
 
@@ -382,7 +376,7 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
                 } else {
                     StringBuilder syntax = new StringBuilder();
                     if (roleType.isVisible()) syntax.append(roleType.reference().toString());
-                    else syntax.append(roleType.label().get().label());
+                    else syntax.append(roleType.reference().asLabel().label());
                     syntax.append(COLON).append(SPACE).append(player);
                     return syntax.toString();
                 }
@@ -407,39 +401,54 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
     public static class Has extends ThingConstraint {
 
-        private final TypeVariable type;
-        private final ThingVariable<?> attribute;
+        private final String type;
+        private final Either<TypeQLVariable, ThingStatement.Attribute> attribute;
         private final int hash;
 
         public Has(String type, Predicate predicate) {
-            this(hidden().type(type), hidden().constrain(predicate));
+            this(type, Either.second(
+                    ThingStatement.Attribute.of(TypeQLVariable.Concept.hiddenVar(), predicate)
+                            .constrain(new Isa(TypeQLVariable.Concept.labelVar(type), false, true))
+            ));
         }
 
-        public Has(String type, UnboundConceptVariable var) {
-            this(hidden().type(type), var.toThing());
+        public Has(String type, TypeQLVariable.Concept var) {
+            this(type, Either.second(ThingStatement.Attribute.of(var)
+                    .constrain(new Isa(TypeQLVariable.Concept.labelVar(type), false, true))
+            ));
         }
 
-        public Has(UnboundConceptVariable var) {
-            this(null, var.toThing());
+        public Has(String type, TypeQLVariable.Value var) {
+            this(type, Either.first(var));
         }
 
-        private Has(@Nullable TypeVariable type, ThingVariable<?> attribute) {
+        public Has(TypeQLVariable.Concept var) {
+            this(null, Either.first(var));
+        }
+
+        private Has(@Nullable String type, Either<TypeQLVariable, ThingStatement.Attribute> attribute) {
             if (attribute == null) throw new NullPointerException("Null attribute");
+            this.attribute = attribute;
             this.type = type;
-            if (type == null) this.attribute = attribute;
-            else this.attribute = attribute.constrain(new Isa(type, false, true));
             this.hash = Objects.hash(Has.class, this.type, this.attribute);
         }
 
-        public ThingVariable<?> attribute() { return attribute; }
+        public Either<TypeQLVariable, ThingStatement.Attribute> attribute() {
+            return attribute;
+        }
 
-        public Optional<TypeVariable> type() { return Optional.ofNullable(type); }
+        public Optional<String> type() {
+            return Optional.ofNullable(type);
+        }
 
         @Override
-        public Set<BoundVariable> variables() {
-            Set<BoundVariable> variables = new HashSet<>();
-            variables.add(attribute);
-            attribute.predicate().ifPresent(pred -> variables.addAll(pred.variables()));
+        public Set<TypeQLVariable> variables() {
+            Set<TypeQLVariable> variables = new HashSet<>();
+            if (attribute.isFirst()) {
+                variables.add(attribute.first());
+            } else {
+                attribute.second().variables().forEach(variables::add);
+            }
             return variables;
         }
 
@@ -455,9 +464,15 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
 
         @Override
         public String toString() {
-            return String.valueOf(HAS) + SPACE +
-                    (type != null ? type.label().get().label() + SPACE : "") +
-                    (attribute.isNamedConcept() ? attribute.reference() : attribute.predicate().get());
+            if (attribute.isFirst()) {
+                return HAS.toString() + SPACE +
+                        (type != null ? type + SPACE : "") +
+                        attribute.first();
+            } else {
+                return HAS.toString() + SPACE +
+                        (type != null ? type + SPACE : "") +
+                        (attribute.second().headVariable().isNamed() ? attribute.second().headVariable() : attribute.second().predicate().get());
+            }
         }
 
         @Override
@@ -477,20 +492,17 @@ public abstract class ThingConstraint extends Constraint<BoundVariable> {
     public static class Predicate extends ThingConstraint {
 
         private final com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate;
-        private final Set<BoundVariable> variables;
+        private final Set<TypeQLVariable> variables;
         private final int hash;
 
         public Predicate(com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate) {
             this.predicate = predicate;
-            this.variables = predicate.variables().stream().map(v -> {
-                if (v.isValueVariable()) return v.asValueVariable().toBound();
-                else return v.asConceptVariable().toThing();
-            }).collect(Collectors.toSet());
+            this.variables = predicate.variables().stream().map(TypeQLVariable::cloneVar).collect(Collectors.toSet());
             this.hash = Objects.hash(Predicate.class, predicate);
         }
 
         @Override
-        public Set<BoundVariable> variables() {
+        public Set<TypeQLVariable> variables() {
             return variables;
         }
 

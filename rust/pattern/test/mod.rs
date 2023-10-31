@@ -24,7 +24,7 @@ use crate::{
     and,
     builder::cvar,
     not, or, parse_query,
-    pattern::{Disjunction, Normalisable, ThingVariableBuilder},
+    pattern::{Disjunction, Normalisable, ThingStatementBuilder},
 };
 
 #[test]
@@ -37,10 +37,11 @@ $com isa company;
 } or {
     $com has name $n2;
     $n2 "another-company";
-};"#;
+};
+get;"#;
 
-    let mut parsed = parse_query(query).unwrap().into_match();
-    let normalised = parsed.conjunction.normalise().into_disjunction();
+    let mut parsed = parse_query(query).unwrap().into_get();
+    let normalised = parsed.match_clause.conjunction.normalise().into_disjunction();
 
     assert_eq!(
         normalised,
@@ -63,10 +64,11 @@ not {
     } or {
         $n1 "another-company";
     };
-};"#;
+};
+get;"#;
 
-    let mut parsed = parse_query(query).unwrap().into_match();
-    let normalised = parsed.conjunction.normalise().into_disjunction();
+    let mut parsed = parse_query(query).unwrap().into_get();
+    let normalised = parsed.match_clause.conjunction.normalise().into_disjunction();
 
     assert_eq!(
         normalised,

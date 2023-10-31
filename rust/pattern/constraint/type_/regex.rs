@@ -32,7 +32,7 @@ pub struct RegexConstraint {
 }
 
 impl Validatable for RegexConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         if Regex::new(&self.regex).is_err() {
             Err(TypeQLError::InvalidAttributeTypeRegex(self.regex.clone()))?;
         }

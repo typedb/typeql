@@ -49,7 +49,7 @@ impl Eq for Constant {} // can't derive, because floating point types do not imp
 impl LeftOperand for Constant {}
 
 impl Validatable for Constant {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         match &self {
             Self::DateTime(date_time) => {
                 if date_time.nanosecond() % 1000000 > 0 {
@@ -100,13 +100,12 @@ impl From<NaiveDateTime> for Constant {
 
 impl fmt::Display for Constant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Constant::*;
         match self {
-            Long(long) => write!(f, "{long}"),
-            Double(double) => write!(f, "{}", format_double(*double)),
-            Boolean(boolean) => write!(f, "{boolean}"),
-            String(string) => write!(f, "{}", quote(string)),
-            DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
+            Constant::Long(long) => write!(f, "{long}"),
+            Constant::Double(double) => write!(f, "{}", format_double(*double)),
+            Constant::Boolean(boolean) => write!(f, "{boolean}"),
+            Constant::String(string) => write!(f, "{}", quote(string)),
+            Constant::DateTime(date_time) => write!(f, "{}", date_time::format(date_time)),
         }
     }
 }

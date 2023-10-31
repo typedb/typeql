@@ -25,7 +25,8 @@ pub mod error;
 pub mod string;
 pub mod token;
 pub mod validatable;
+pub mod variables_retrieved;
 
 pub use error::Error;
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T = ()> = std::result::Result<T, Error>;

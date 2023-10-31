@@ -40,7 +40,7 @@ impl IIDConstraint {
 }
 
 impl Validatable for IIDConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         if !is_valid_iid(&self.iid) {
             Err(TypeQLError::InvalidIIDString(self.iid.clone()))?
         }

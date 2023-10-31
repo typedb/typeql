@@ -20,32 +20,32 @@
  *
  */
 
-use crate::{common::error::TypeQLError, pattern::ThingVariable, Result};
+use crate::{common::error::TypeQLError, pattern::ThingStatement, Result};
 
 pub trait Writable {
-    fn vars(self) -> Vec<ThingVariable>;
+    fn statements(self) -> Vec<ThingStatement>;
 }
 
-impl Writable for ThingVariable {
-    fn vars(self) -> Vec<ThingVariable> {
+impl Writable for ThingStatement {
+    fn statements(self) -> Vec<ThingStatement> {
         vec![self]
     }
 }
 
-impl<const N: usize> Writable for [ThingVariable; N] {
-    fn vars(self) -> Vec<ThingVariable> {
+impl<const N: usize> Writable for [ThingStatement; N] {
+    fn statements(self) -> Vec<ThingStatement> {
         self.to_vec()
     }
 }
 
-impl Writable for Vec<ThingVariable> {
-    fn vars(self) -> Vec<ThingVariable> {
+impl Writable for Vec<ThingStatement> {
+    fn statements(self) -> Vec<ThingStatement> {
         self
     }
 }
 
-pub(crate) fn expect_non_empty(variables: &[ThingVariable]) -> Result<()> {
-    if variables.is_empty() {
+pub(crate) fn validate_non_empty(statements: &[ThingStatement]) -> Result {
+    if statements.is_empty() {
         Err(TypeQLError::MissingPatterns())?
     }
     Ok(())

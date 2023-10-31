@@ -25,13 +25,14 @@ import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.TypeQL.Expression;
 import com.vaticle.typeql.lang.common.TypeQLArg;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.cVar;
+import static com.vaticle.typeql.lang.TypeQL.label;
 import static com.vaticle.typeql.lang.TypeQL.lte;
 import static com.vaticle.typeql.lang.TypeQL.match;
 import static com.vaticle.typeql.lang.TypeQL.or;
@@ -46,12 +47,12 @@ public class TypeQLQueryTest {
 
     @Test
     public void testSimpleGetQueryToString() {
-        assertSameStringRepresentation(match(cVar("x").isa("movie").has("title", "Godfather")));
+        assertSameStringRepresentation(match(cVar("x").isa("movie").has("title", "Godfather")).get());
     }
 
     @Test
     public void testComplexQueryToString() {
-        TypeQLMatch query = match(
+        TypeQLGet query = match(
                 cVar("x").isa("movie"),
                 cVar().rel(cVar("x")).rel(cVar("y")),
                 or(
@@ -69,37 +70,37 @@ public class TypeQLQueryTest {
 
     @Test
     public void testQueryWithResourcesToString() {
-        assertSameStringRepresentation(match(cVar("x").has("tmdb-vote-count", lte(400))));
+        assertSameStringRepresentation(match(cVar("x").has("tmdb-vote-count", lte(400))).get());
     }
 
     @Test
     public void testQueryWithSubToString() {
-        assertSameStringRepresentation(match(cVar("x").sub(cVar("y"))));
+        assertSameStringRepresentation(match(cVar("x").sub(cVar("y"))).get());
     }
 
     @Test
     public void testQueryWithPlaysToString() {
-        assertSameStringRepresentation(match(cVar("x").plays(cVar("y"))));
+        assertSameStringRepresentation(match(cVar("x").plays(cVar("y"))).get());
     }
 
     @Test
     public void testQueryWithRelatesToString() {
-        assertSameStringRepresentation(match(cVar("x").relates(cVar("y"))));
+        assertSameStringRepresentation(match(cVar("x").relates(cVar("y"))).get());
     }
 
     @Test
     public void testQueryWithValueTypeToString() {
-        assertSameStringRepresentation(match(cVar("x").value(TypeQLArg.ValueType.LONG)));
+        assertSameStringRepresentation(match(cVar("x").value(TypeQLArg.ValueType.LONG)).get());
     }
 
     @Test
     public void testQueryIsAbstractToString() {
-        assertSameStringRepresentation(match(cVar("x").isAbstract()));
+        assertSameStringRepresentation(match(cVar("x").isAbstract()).get());
     }
 
     @Test
     public void testQueryWithRuleThenToString() {
-        TypeQLDefine query = TypeQL.define(rule("a-rule").when(and(TypeQL.parsePatterns("$x isa movie;"))).then(TypeQL.parseVariable("$x has name 'Ghostbusters'").asThing()));
+        TypeQLDefine query = TypeQL.define(rule("a-rule").when(and(TypeQL.parsePatterns("$x isa movie;"))).then(TypeQL.parseStatement("$x has name 'Ghostbusters'").asThing()));
         assertValidToString(query);
     }
 
@@ -172,7 +173,42 @@ public class TypeQLQueryTest {
         assertEquals(query, TypeQL.parseQuery(query).toString());
     }
 
-    private void assertSameStringRepresentation(TypeQLMatch query) {
+    @Test
+    public void testFetch() {
+        String query = "match\n" +
+                "$x isa person,\n" +
+                "    has id $id;\n" +
+                "fetch\n" +
+                "$id;\n" +
+                "$x: name, age, email;\n" +
+                "children: {\n" +
+                "    match\n" +
+                "    ($c, $x) isa parenthood;\n" +
+                "    fetch\n" +
+                "    $c: name;\n" +
+                "};";
+        assertEquivalent(TypeQL.parseQuery(query), query);
+    }
+
+    @Test
+    public void testFetchBuilder() {
+        match(
+                cVar("x").isa("person").has("id", cVar("id"))
+        ).fetch(
+                cVar("id"),
+                cVar("x").map("name").map("age").map("email"),
+                label("children").map(
+                        match(
+                                rel(cVar("c")).rel(cVar("x")).isa("parenthood)")
+                        ).fetch(
+                                cVar("c").map("name")
+                        )
+                )
+        );
+        // TODO make test
+    }
+
+    private void assertSameStringRepresentation(TypeQLGet query) {
         assertEquals(query.toString(), TypeQL.parseQuery(query.toString()).toString());
     }
 

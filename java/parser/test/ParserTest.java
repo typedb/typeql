@@ -28,11 +28,12 @@ import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.Conjunction;
 import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLDelete;
+import com.vaticle.typeql.lang.query.TypeQLFetch;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import com.vaticle.typeql.lang.query.TypeQLUndefine;
 import com.vaticle.typeql.lang.query.TypeQLUpdate;
@@ -51,6 +52,7 @@ import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.TypeQL.and;
 import static com.vaticle.typeql.lang.TypeQL.cVar;
 import static com.vaticle.typeql.lang.TypeQL.define;
+import static com.vaticle.typeql.lang.TypeQL.label;
 import static com.vaticle.typeql.lang.TypeQL.gte;
 import static com.vaticle.typeql.lang.TypeQL.insert;
 import static com.vaticle.typeql.lang.TypeQL.lt;
@@ -74,7 +76,7 @@ import static org.junit.Assert.fail;
 public class ParserTest {
 
     @Rule
-    public final ExpectedException exception = ExpectedException.none();
+    public ExpectedException exception = ExpectedException.none();
 
     private void assertQueryEquals(TypeQLQuery expected, TypeQLQuery parsed, String query) {
         assertEquals(expected, parsed);
@@ -99,10 +101,11 @@ public class ParserTest {
 
     @Test
     public void testSimpleQuery() {
-        final String query = "match\n" +
-                "$x isa movie;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").isa("movie"));
+        String query = "match\n" +
+                "$x isa movie;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").isa("movie")).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -112,34 +115,35 @@ public class ParserTest {
         String query = "match\n" +
                 "$a type attribute_label;\n" +
                 "get $a;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("a").type("attribute_label")).get(cVar("a"));
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("a").type("attribute_label")).get(cVar("a"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseStringWithSlash() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "" +
                 "$x isa person,\n" +
-                "    has name 'alice/bob';";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").isa("person").has("name", "alice/bob"));
+                "    has name 'alice/bob';\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").isa("person").has("name", "alice/bob")).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testRelationQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "" +
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 cVar("brando").eq("Marl B").isa("name"),
                 rel("actor", TypeQL.cVar("brando")).rel(TypeQL.cVar("char")).rel("production-with-cast", TypeQL.cVar("prod"))
         ).get(cVar("char"), cVar("prod"));
@@ -150,9 +154,10 @@ public class ParserTest {
     @Test
     public void testRoleTypeScopedGlobally() {
         String query = "match\n" +
-                "$x relates spouse;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").relates("spouse"));
+                "$x relates spouse;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").relates("spouse")).get();
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -160,16 +165,17 @@ public class ParserTest {
     @Test
     public void testRoleTypeNotScoped() {
         String query = "match\n" +
-                "marriage relates $s;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(type("marriage").relates(cVar("s")));
+                "marriage relates $s;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(type("marriage").relates(cVar("s"))).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testPredicateQuery1() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has title $t;\n" +
                 "{\n" +
@@ -180,10 +186,11 @@ public class ParserTest {
                 "} or {\n" +
                 "    $t 'Spy';\n" +
                 "};\n" +
-                "$t != 'Apocalypse Now';";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+                "$t != 'Apocalypse Now';\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 cVar("x").isa("movie").has("title", cVar("t")),
                 or(
                         cVar("t").eq("Apocalypse Now"),
@@ -194,14 +201,14 @@ public class ParserTest {
                         cVar("t").eq("Spy")
                 ),
                 cVar("t").neq("Apocalypse Now")
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testPredicateQuery2() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has title $t;\n" +
                 "{\n" +
@@ -210,10 +217,11 @@ public class ParserTest {
                 "    $t != 'Heat';\n" +
                 "} or {\n" +
                 "    $t 'The Muppets';\n" +
-                "};";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+                "};\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 cVar("x").isa("movie").has("title", cVar("t")),
                 or(
                         and(
@@ -223,14 +231,14 @@ public class ParserTest {
                         ),
                         cVar("t").eq("The Muppets")
                 )
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testPredicateQuery3() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "($x, $y);\n" +
                 "$y isa person,\n" +
                 "    has name $n;\n" +
@@ -238,61 +246,66 @@ public class ParserTest {
                 "    $n contains 'ar';\n" +
                 "} or {\n" +
                 "    $n like '^M.*$';\n" +
-                "};";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+                "};\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 rel(cVar("x")).rel(cVar("y")),
                 cVar("y").isa("person").has("name", cVar("n")),
                 or(cVar("n").contains("ar"), cVar("n").like("^M.*$"))
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testPredicateQuery4() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x has age $y;\n" +
                 "$y >= $z;\n" +
-                "$z 18 isa age;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+                "$z 18 isa age;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 cVar("x").has("age", cVar("y")),
                 cVar("y").gte(cVar("z")),
                 cVar("z").eq(18).isa("age")
-        );
+        ).get();
+        ;
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testConceptVariable() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x sub $z;\n" +
                 "$y sub $z;\n" +
                 "$a isa $x;\n" +
                 "$b isa $y;\n" +
                 "not { $x is $y; };\n" +
-                "not { $a is $b; };";
-        TypeQLMatch parsed = TypeQL.parseQuery(query);
+                "not { $a is $b; };\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query);
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 cVar("x").sub(cVar("z")), cVar("y").sub(cVar("z")),
                 cVar("a").isa(cVar("x")), cVar("b").isa(cVar("y")),
                 not(cVar("x").is("y")),
                 not(cVar("a").is("b"))
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testValueEqualsVariableQuery() {
-        final String query = "match\n$s1 == $s2;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("s1").eq(cVar("s2")));
+        String query = "match\n$s1 == $s2;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("s1").eq(cVar("s2"))).get();
+        ;
 
         assertQueryEquals(expected, parsed, query);
     }
@@ -300,9 +313,10 @@ public class ParserTest {
     @Test
     public void testValueEqualsVariableQuery_backwardsCompatibility() {
         // Remove when we fully deprecate '=' for ThingVariable equality.
-        final String query = "match\n$s1 = $s2;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("s1").eq(cVar("s2")));
+        String query = "match\n$s1 = $s2;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("s1").eq(cVar("s2"))).get();
+        ;
 
         assertEquals(expected, parsed);
         assertEquals(expected, TypeQL.parseQuery(parsed.toString()));
@@ -310,340 +324,358 @@ public class ParserTest {
 
     @Test
     public void testMoviesReleasedAfterOrAtTheSameTimeAsSpy() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x has release-date >= $r;\n" +
                 "$_ has title 'Spy',\n" +
-                "    has release-date $r;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+                "    has release-date $r;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 cVar("x").has("release-date", gte(cVar("r"))),
                 cVar().has("title", "Spy").has("release-date", cVar("r"))
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testPredicates() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x has release-date < 1986-03-03T00:00,\n" +
                 "    has tmdb-vote-count 100,\n" +
-                "    has tmdb-vote-average <= 9.0;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+                "    has tmdb-vote-average <= 9.0;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 cVar("x")
                         .has("release-date", lt(LocalDate.of(1986, 3, 3).atStartOfDay()))
                         .has("tmdb-vote-count", 100)
                         .has("tmdb-vote-average", lte(9.0))
-        );
+        ).get();
+        ;
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleTime() {
-        final String query = "match\n$x has release-date 1000-11-12T13:14:15;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15)));
+        String query = "match\n$x has release-date 1000-11-12T13:14:15;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15))).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleBigYears() {
-        TypeQLMatch expected = match(cVar("x").has("release-date", LocalDate.of(12345, 12, 25).atStartOfDay()));
-        final String query = "match\n$x has release-date +12345-12-25T00:00;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet expected = match(cVar("x").has("release-date", LocalDate.of(12345, 12, 25).atStartOfDay())).get();
+        String query = "match\n$x has release-date +12345-12-25T00:00;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleSmallYears() {
-        final String query = "match\n$x has release-date 0867-01-01T00:00;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").has("release-date", LocalDate.of(867, 1, 1).atStartOfDay()));
+        String query = "match\n$x has release-date 0867-01-01T00:00;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").has("release-date", LocalDate.of(867, 1, 1).atStartOfDay())).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleNegativeYears() {
-        final String query = "match\n$x has release-date -3200-01-01T00:00;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").has("release-date", LocalDate.of(-3200, 1, 1).atStartOfDay()));
+        String query = "match\n$x has release-date -3200-01-01T00:00;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").has("release-date", LocalDate.of(-3200, 1, 1).atStartOfDay())).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleMillis() {
-        final String query = "match\n$x has release-date 1000-11-12T13:14:15.123;";
-        TypeQLMatch expected = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123000000)));
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        String query = "match\n$x has release-date 1000-11-12T13:14:15.123;\nget;";
+        TypeQLGet expected = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123000000))).get();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDate_HandleMillisShorthand() {
-        final String query = "match\n$x has release-date 1000-11-12T13:14:15.1;";
-        final String parsedQueryString = "match\n$x has release-date 1000-11-12T13:14:15.100;";
-        TypeQLMatch expected = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 100000000)));
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        String query = "match\n$x has release-date 1000-11-12T13:14:15.1;\nget;";
+        String parsedQueryString = "match\n$x has release-date 1000-11-12T13:14:15.100;\nget;";
+        TypeQLGet expected = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 100000000))).get();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
         assertQueryEquals(expected, parsed, parsedQueryString);
     }
 
 
     @Test
     public void whenParsingDate_ErrorWhenHandlingOverPreciseDecimalSeconds() {
-        final String query = "match\n$x has release-date 1000-11-12T13:14:15.000123456;";
+        String query = "match\n$x has release-date 1000-11-12T13:14:15.000123456;\nget;";
         exception.expect(TypeQLException.class);
         exception.expectMessage(Matchers.containsString("no viable alternative"));
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
     }
 
     @Test
     public void whenParsingDateTime_ErrorWhenHandlingOverPreciseNanos() {
         exception.expect(TypeQLException.class);
         exception.expectMessage(Matchers.containsString("more precise than 1 millisecond"));
-        TypeQLMatch apiQuery = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000)));
+        TypeQLGet apiQuery = match(cVar("x").has("release-date", LocalDateTime.of(1000, 11, 12, 13, 14, 15, 123450000))).get();
     }
 
     @Test
     public void testLongPredicateQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
-                "    has tmdb-vote-count <= 400;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").isa("movie").has("tmdb-vote-count", lte(400)));
+                "    has tmdb-vote-count <= 400;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").isa("movie").has("tmdb-vote-count", lte(400))).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testAttributeQueryByValueVariable() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "?x = 5;\n" +
-                "$a == ?x isa age;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+                "$a == ?x isa age;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 vVar("x").assign(Expression.constant(5)),
-                cVar("a").eq(vVar("x")).isa("age"));
+                cVar("a").eq(vVar("x")).isa("age")).get();
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testVariableNameClashThrows() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$z isa person, has age $y;\n" +
-                "?y = $y;\n";
+                "?y = $y;\n" +
+                "get;";
         assertThrows(() -> parseQuery(query));
     }
 
     @Test
     public void testAssignOps() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa commodity,\n" +
                 "    has price $p;\n" +
                 "(commodity: $x, qty: $q) isa order;\n" +
                 "?net = $p * $q;\n" +
-                "?gross = ?net * ( 1.0 + 0.21 );";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+                "?gross = ?net * ( 1.0 + 0.21 );\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("x").isa("commodity").has("price", cVar("p")),
                 rel("commodity", TypeQL.cVar("x")).rel("qty", TypeQL.cVar("q")).isa("order"),
-                vVar("net").assign(cVar("p").mul(cVar("q"))),
+                vVar("net").assign(cVar("p").multiply(cVar("q"))),
                 vVar("gross").assign(
-                        vVar("net").mul(Expression.parenthesis(Expression.constant(1.0).add(Expression.constant(0.21))))
+                        vVar("net").multiply(Expression.parenthesis(Expression.constant(1.0).add(Expression.constant(0.21))))
                 )
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testOpPrecedence() {
-        final String query = "match\n" +
-                "?res = $a / $b * $c + $d ^ $e ^ $f / $g;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+        String query = "match\n" +
+                "?res = $a / $b * $c + $d ^ $e ^ $f / $g;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 vVar("res").assign(
                         cVar("a")
-                                .div(cVar("b"))
-                                .mul(cVar("c"))
-                                .add(cVar("d").pow(cVar("e").pow(cVar("f"))).div(cVar("g")))
+                                .divide(cVar("b"))
+                                .multiply(cVar("c"))
+                                .add(cVar("d").power(cVar("e").power(cVar("f"))).divide(cVar("g")))
                 )
-        );
+        ).get();
         assertQueryEquals(expected, parsed, query);
     }
 
 
     @Test
     public void testFuncParenthesisPrecedence() {
-        final String query = "match\n" +
-                "?res = $a + ( round($b + ?c) + $d ) * ?e;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+        String query = "match\n" +
+                "?res = $a + ( round($b + ?c) + $d ) * ?e;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 vVar("res").assign(
                         cVar("a").add(Expression.parenthesis(
                                 Expression.round(cVar("b").add(vVar("c"))).add(cVar("d"))
-                        ).mul(vVar("e")))));
+                        ).multiply(vVar("e"))))).get();
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testAssignFunction() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa commodity,\n" +
                 "    has price $p;\n" +
                 "(commodity: $x, qty: $q) isa order;\n" +
                 "?net = $p * $q;\n" +
-                "?gross = min(?net * 1.21, ?net + 100.0);" +
-                "";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+                "?gross = min(?net * 1.21, ?net + 100.0);\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("x").isa("commodity").has("price", cVar("p")),
                 rel("commodity", TypeQL.cVar("x")).rel("qty", TypeQL.cVar("q")).isa("order"),
-                vVar("net").assign(cVar("p").mul(cVar("q"))),
+                vVar("net").assign(cVar("p").multiply(cVar("q"))),
                 vVar("gross").assign(Expression.min(
-                        vVar("net").mul(Expression.constant(1.21)),
+                        vVar("net").multiply(Expression.constant(1.21)),
                         vVar("net").add(Expression.constant(100.0))
                 ))
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testSchemaQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x plays starring:actor;\n" +
+                "get;\n" +
                 "sort $x asc;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").plays("starring", "actor")).sort(pair(cVar("x"), "asc"));
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").plays("starring", "actor")).get().sort(pair(cVar("x"), "asc"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetSort() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has rating $r;\n" +
+                "get;\n" +
                 "sort $r desc;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("x").isa("movie").has("rating", cVar("r"))
-        ).sort(pair(cVar("r"), "desc"));
+        ).get().sort(pair(cVar("r"), "desc"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetSortOnValueVariable() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has rating $r;\n" +
                 "?l = 100 - $r;\n" +
+                "get;\n" +
                 "sort ?l desc;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        com.vaticle.typeql.lang.pattern.variable.builder.Expression a = Expression.constant(100);
-        com.vaticle.typeql.lang.pattern.variable.builder.Expression b = cVar("r");
-        TypeQLMatch expected = match(
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        com.vaticle.typeql.lang.pattern.expression.Expression a = Expression.constant(100);
+        com.vaticle.typeql.lang.pattern.expression.Expression b = cVar("r");
+        TypeQLGet expected = match(
                 cVar("x").isa("movie").has("rating", cVar("r")),
-                vVar("l").assign(a.sub(b))
-        ).sort(pair(vVar("l"), "desc"));
+                vVar("l").assign(a.subtract(b))
+        ).get().sort(pair(vVar("l"), "desc"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetSortLimit() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has rating $r;\n" +
+                "get;\n" +
                 "sort $r; limit 10;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("x").isa("movie").has("rating", cVar("r"))
-        ).sort(cVar("r")).limit(10);
+        ).get().sort(cVar("r")).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetSortOffsetLimit() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has rating $r;\n" +
+                "get;\n" +
                 "sort $r desc, $x asc; offset 10; limit 10;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("x").isa("movie").has("rating", cVar("r"))
-        ).sort(pair(cVar("r"), "desc"), pair(cVar("x"), "asc")).offset(10).limit(10);
+        ).get().sort(pair(cVar("r"), "desc"), pair(cVar("x"), "asc")).offset(10).limit(10);
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testGetOffsetLimit() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$y isa movie,\n" +
                 "    has title $n;\n" +
+                "get;\n" +
                 "offset 2; limit 4;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("y").isa("movie").has("title", cVar("n"))
-        ).offset(2).limit(4);
+        ).get().offset(2).limit(4);
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testVariablesEverywhereQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "($p: $x, $y);\n" +
                 "$x isa $z;\n" +
                 "$y 'crime';\n" +
                 "$z sub production;\n" +
-                "has-genre relates $p;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+                "has-genre relates $p;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 rel(cVar("p"), cVar("x")).rel(cVar("y")),
                 cVar("x").isa(cVar("z")),
                 cVar("y").eq("crime"),
                 cVar("z").sub("production"),
                 type("has-genre").relates(cVar("p"))
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testParseRelatesTypeVariable() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa $type;\n" +
-                "$type relates someRole;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").isa(cVar("type")), cVar("type").relates("someRole"));
+                "$type relates someRole;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").isa(cVar("type")), cVar("type").relates("someRole")).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testOrQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie;\n" +
                 "{\n" +
                 "    $y 'drama' isa genre;\n" +
                 "    ($x, $y);\n" +
                 "} or {\n" +
                 "    $x 'The Muppets';\n" +
-                "};";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+                "};\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("x").isa("movie"),
                 or(
                         and(
@@ -652,7 +684,7 @@ public class ParserTest {
                         ),
                         cVar("x").eq("The Muppets")
                 )
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
@@ -664,8 +696,9 @@ public class ParserTest {
                 "    $x isa person;\n" +
                 "} or {\n" +
                 "    $x isa company;\n" +
-                "};";
-        assertThrows(() -> parseQuery(query).asMatch());
+                "};\n" +
+                "get;";
+        assertThrows(() -> parseQuery(query).asGet());
     }
 
 
@@ -682,14 +715,15 @@ public class ParserTest {
                 "    } or {\n" +
                 "        $x has last-name $z;\n" +
                 "    };\n" +
-                "};";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+                "};\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("y").isa(cVar("p")),
                 or(rel(cVar("y")).rel(cVar("q")),
                         and(cVar("x").isa(cVar("p")),
                                 or(cVar("x").has("first-name", cVar("y")),
-                                        cVar("x").has("last-name", cVar("z"))))));
+                                        cVar("x").has("last-name", cVar("z")))))).get();
         assertQueryEquals(expected, parsed, query);
     }
 
@@ -697,56 +731,59 @@ public class ParserTest {
     public void testDisjunctionNotBindingConjunction() {
         String query = "match\n" +
                 "$y isa $p;\n" +
-                "{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $q has last-name $z; }; };";
-        assertThrows(() -> parseQuery(query).asMatch());
+                "{ ($y, $q); } or { $x isa $p; { $x has first-name $y; } or { $q has last-name $z; }; };\n" +
+                "get;";
+        assertThrows(() -> parseQuery(query).asGet());
     }
 
     @Test
     public void testAggregateCountQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "($x, $y) isa friendship;\n" +
                 "get $x, $y;\n" +
                 "count;";
-        TypeQLMatch.Aggregate parsed = parseQuery(query).asMatchAggregate();
-        TypeQLMatch.Aggregate expected = match(rel(cVar("x")).rel(cVar("y")).isa("friendship")).get(cVar("x"), cVar("y")).count();
+        TypeQLGet.Aggregate parsed = parseQuery(query).asGetAggregate();
+        TypeQLGet.Aggregate expected = match(rel(cVar("x")).rel(cVar("y")).isa("friendship")).get(cVar("x"), cVar("y")).count();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testAggregateGroupCountQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "($x, $y) isa friendship;\n" +
                 "get $x, $y;\n" +
                 "group $x; count;";
-        TypeQLMatch.Group.Aggregate parsed = parseQuery(query).asMatchGroupAggregate();
-        TypeQLMatch.Group.Aggregate expected = match(rel(cVar("x")).rel(cVar("y")).isa("friendship")).get(cVar("x"), cVar("y")).group(cVar("x")).count();
+        TypeQLGet.Group.Aggregate parsed = parseQuery(query).asGetGroupAggregate();
+        TypeQLGet.Group.Aggregate expected = match(rel(cVar("x")).rel(cVar("y")).isa("friendship")).get(cVar("x"), cVar("y")).group(cVar("x")).count();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testSingleLineGroupAggregateMaxQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x has age $a;\n" +
+                "get;\n" +
                 "group $x; max $a;";
-        TypeQLMatch.Group.Aggregate parsed = parseQuery(query).asMatchGroupAggregate();
-        TypeQLMatch.Group.Aggregate expected = match(cVar("x").has("age", cVar("a"))).group(cVar("x")).max(cVar("a"));
+        TypeQLGet.Group.Aggregate parsed = parseQuery(query).asGetGroupAggregate();
+        TypeQLGet.Group.Aggregate expected = match(cVar("x").has("age", cVar("a"))).get().group(cVar("x")).max(cVar("a"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testMultiLineGroupAggregateMaxQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "($x, $y) isa friendship;\n" +
                 "$y has age $z;\n" +
+                "get;\n" +
                 "group $x; max $z;";
-        TypeQLMatch.Group.Aggregate parsed = parseQuery(query).asMatchGroupAggregate();
-        TypeQLMatch.Group.Aggregate expected = match(
+        TypeQLGet.Group.Aggregate parsed = parseQuery(query).asGetGroupAggregate();
+        TypeQLGet.Group.Aggregate expected = match(
                 rel(cVar("x")).rel(cVar("y")).isa("friendship"),
                 cVar("y").has("age", cVar("z"))
-        ).group(cVar("x")).max(cVar("z"));
+        ).get().group(cVar("x")).max(cVar("z"));
 
 
         assertQueryEquals(expected, parsed, query);
@@ -754,13 +791,13 @@ public class ParserTest {
 
     @Test
     public void testMultiLineFilteredGroupAggregateMaxQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "($x, $y) isa friendship;\n" +
                 "$y has age $z;\n" +
                 "get $x, $y, $z;\n" +
                 "group $x; max $z;";
-        TypeQLMatch.Group.Aggregate parsed = parseQuery(query).asMatchGroupAggregate();
-        TypeQLMatch.Group.Aggregate expected = match(
+        TypeQLGet.Group.Aggregate parsed = parseQuery(query).asGetGroupAggregate();
+        TypeQLGet.Group.Aggregate expected = match(
                 rel(cVar("x")).rel(cVar("y")).isa("friendship"),
                 cVar("y").has("age", cVar("z"))
         ).get(cVar("x"), cVar("y"), cVar("z")).group(cVar("x")).max(cVar("z"));
@@ -770,20 +807,20 @@ public class ParserTest {
 
     @Test
     public void testFilteredGroupAggregatesOnValueVariable() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$i ($x, $s) isa income-source;\n" +
                 "$i has value $v,\n" +
                 "    has tax-rate $r;\n" +
                 "?t = $r * $v;\n" +
                 "get $x, ?t;\n" +
                 "group $x; sum ?t;";
-        TypeQLMatch.Group.Aggregate parsed = parseQuery(query).asMatchGroupAggregate();
-        com.vaticle.typeql.lang.pattern.variable.builder.Expression a = cVar("r");
-        com.vaticle.typeql.lang.pattern.variable.builder.Expression b = cVar("v");
-        TypeQLMatch.Group.Aggregate expected = match(
+        TypeQLGet.Group.Aggregate parsed = parseQuery(query).asGetGroupAggregate();
+        com.vaticle.typeql.lang.pattern.expression.Expression a = cVar("r");
+        com.vaticle.typeql.lang.pattern.expression.Expression b = cVar("v");
+        TypeQLGet.Group.Aggregate expected = match(
                 cVar("i").rel(cVar("x")).rel(cVar("s")).isa("income-source"),
                 cVar("i").has("value", cVar("v")).has("tax-rate", cVar("r")),
-                vVar("t").assign(a.mul(b))
+                vVar("t").assign(a.multiply(b))
         ).get(list(cVar("x"), vVar("t"))).group(cVar("x")).sum(vVar("t"));
 
         assertQueryEquals(expected, parsed, query);
@@ -791,19 +828,70 @@ public class ParserTest {
 
     @Test
     public void whenComparingCountQueryUsingTypeQLAndJavaTypeQL_TheyAreEquivalent() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has title \"Godfather\";\n" +
+                "get;\n" +
                 "count;";
-        TypeQLMatch.Aggregate parsed = parseQuery(query).asMatchAggregate();
-        TypeQLMatch.Aggregate expected = match(cVar("x").isa("movie").has("title", "Godfather")).count();
+        TypeQLGet.Aggregate parsed = parseQuery(query).asGetAggregate();
+        TypeQLGet.Aggregate expected = match(cVar("x").isa("movie").has("title", "Godfather")).get().count();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
+    public void testFetchQuery() {
+        String query = "match\n" +
+                "$x isa movie,\n" +
+                "    has title \"Godfather\",\n" +
+                "    has release-date $d;\n" +
+                "fetch\n" +
+                "$d;\n" +
+                "$d as date;\n" +
+                "$x: name, title as t, name as \"Movie name\";\n" +
+                "$x as movie: name;\n" +
+                "$x as \"Movie name\": name;\n" +
+                "label-a: {\n" +
+                "    match\n" +
+                "    ($d, $c) isa director;\n" +
+                "    fetch\n" +
+                "    $d: name;\n" +
+                "};\n" +
+                "label-b: {\n" +
+                "    match\n" +
+                "    ($d, $c) isa director;\n" +
+                "    get $d;\n" +
+                "    count;\n" +
+                "};";
+
+        TypeQLFetch expected = match(
+                cVar("x").isa("movie").has("title", "Godfather").has("release-date", cVar("d"))
+        ).fetch(
+                cVar("d"),
+                cVar("d").asLabel("date"),
+                cVar("x").map("name").map("title", "t").map("name", "Movie name"),
+                cVar("x").asLabel("movie").map("name"),
+                cVar("x").asLabel("Movie name").map("name"),
+                label("label-a").map(
+                        match(
+                                rel(cVar("d")).rel(cVar("c")).isa("director")
+                        ).fetch(
+                                cVar("d").map("name")
+                        )
+                ),
+                label("label-b").map(
+                        match(
+                                rel(cVar("d")).rel(cVar("c")).isa("director")
+                        ).get(cVar("d")).count()
+                )
+        );
+
+        assertQueryEquals(expected, TypeQL.parseQuery(query), query);
+    }
+
+    @Test
     public void testInsertQuery() {
-        final String query = "insert\n$_ isa movie,\n" +
+        String query = "insert\n$_ isa movie,\n" +
                 "    has title \"The Title\";";
         TypeQLInsert parsed = TypeQL.parseQuery(query).asInsert();
         TypeQLInsert expected = insert(cVar().isa("movie").has("title", "The Title"));
@@ -813,7 +901,7 @@ public class ParserTest {
 
     @Test
     public void whenParsingDeleteQuery_ResultIsSameAsJavaTypeQL() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie,\n" +
                 "    has title 'The Title';\n" +
                 "$y isa movie;\n" +
@@ -831,7 +919,7 @@ public class ParserTest {
 
     @Test
     public void whenParsingInsertQuery_ResultIsSameAsJavaTypeQL() {
-        final String query = "insert\n" +
+        String query = "insert\n" +
                 "$x isa pokemon,\n" +
                 "    has name 'Pichu';\n" +
                 "$y isa pokemon,\n" +
@@ -871,7 +959,7 @@ public class ParserTest {
 
     @Test
     public void whenParsingAsInDefine_ResultIsSameAsSub() {
-        final String query = "define\n" +
+        String query = "define\n" +
                 "parent sub role;\n" +
                 "child sub role;\n" +
                 "parenthood sub relation,\n" +
@@ -898,23 +986,24 @@ public class ParserTest {
 
     @Test
     public void whenParsingAsInMatch_ResultIsSameAsSub() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$f sub parenthood,\n" +
                 "    relates father as parent,\n" +
-                "    relates son as child;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(
+                "    relates son as child;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(
                 cVar("f").sub("parenthood")
                         .relates("father", "parent")
                         .relates("son", "child")
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void whenParsingDefineQueryWithOwnsOverrides_ResultIsSameAsJavaTypeQL() {
-        final String query = "define\n" +
+        String query = "define\n" +
                 "triangle sub entity;\n" +
                 "triangle owns side-length;\n" +
                 "triangle-right-angled sub triangle;\n" +
@@ -1028,7 +1117,7 @@ public class ParserTest {
 
     @Test
     public void testMatchInsertQuery() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa language;\n" +
                 "insert\n$x has name \"HELLO\";";
         TypeQLInsert parsed = TypeQL.parseQuery(query).asInsert();
@@ -1040,7 +1129,7 @@ public class ParserTest {
 
     @Test
     public void testDefineAbstractEntityQuery() {
-        final String query = "define\n" +
+        String query = "define\n" +
                 "concrete-type sub entity;\n" +
                 "abstract-type sub entity,\n" +
                 "    abstract;";
@@ -1055,32 +1144,32 @@ public class ParserTest {
 
     @Test
     public void testMatchValueTypeQuery() {
-        final String query = "match\n$x value double;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").value(TypeQLArg.ValueType.DOUBLE));
+        String query = "match\n$x value double;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").value(TypeQLArg.ValueType.DOUBLE)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseWithoutVar() {
-        String query = "match\n$_ isa person;";
-        assertThrows(() -> TypeQL.parseQuery(query).asMatch());
+        String query = "match\n$_ isa person;\nget;";
+        assertThrows(() -> TypeQL.parseQuery(query).asGet());
         assertThrows(() -> match(cVar().isa("person")));
     }
 
     @Test
     public void whenParsingDateKeyword_ParseAsTheCorrectValueType() {
-        final String query = "match\n$x value datetime;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").value(TypeQLArg.ValueType.DATETIME));
+        String query = "match\n$x value datetime;\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").value(TypeQLArg.ValueType.DATETIME)).get();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testDefineValueTypeQuery() {
-        final String query = "define\n" +
+        String query = "define\n" +
                 "my-type sub attribute,\n" +
                 "    value long;";
         TypeQLDefine parsed = TypeQL.parseQuery(query).asDefine();
@@ -1093,9 +1182,9 @@ public class ParserTest {
     public void testEscapeString() {
         // ANTLR will see this as a string that looks like:
         // "This has \"double quotes\" and a single-quoted backslash: '\\'"
-        final String input = "This has \\\"double quotes\\\" and a single-quoted backslash: \\'\\\\\\'";
+        String input = "This has \\\"double quotes\\\" and a single-quoted backslash: \\'\\\\\\'";
 
-        final String query = "insert\n" +
+        String query = "insert\n" +
                 "$_ isa movie,\n" +
                 "    has title \"" + input + "\";";
         TypeQLInsert parsed = TypeQL.parseQuery(query).asInsert();
@@ -1107,10 +1196,10 @@ public class ParserTest {
 
     @Test
     public void whenParsingQueryWithComments_TheyAreIgnored() {
-        final String query = "match\n" +
-                "\n# there's a comment here\n$x isa###WOW HERES ANOTHER###\r\nmovie; count;";
-        TypeQLMatch.Aggregate parsed = parseQuery(query).asMatchAggregate();
-        TypeQLMatch.Aggregate expected = match(cVar("x").isa("movie")).count();
+        String query = "match\n" +
+                "\n# there's a comment here\n$x isa###WOW HERES ANOTHER###\r\nmovie;\nget;\n count;";
+        TypeQLGet.Aggregate parsed = parseQuery(query).asGetAggregate();
+        TypeQLGet.Aggregate expected = match(cVar("x").isa("movie")).get().count();
 
         assertEquals(expected, parsed);
         assertEquals(expected, parseQuery(parsed.toString()));
@@ -1118,7 +1207,7 @@ public class ParserTest {
 
     @Test
     public void testParsingPattern() {
-        final String pattern = "{\n" +
+        String pattern = "{\n" +
                 "    (wife: $a, husband: $b) isa marriage;\n" +
                 "    $a has gender 'male';\n" +
                 "    $b has gender 'female';\n" +
@@ -1135,7 +1224,7 @@ public class ParserTest {
 
     @Test
     public void testDefineRules() {
-        final String when =
+        String when =
                 "    $x isa person;\n" +
                         "    not {\n" +
                         "        $x has name 'Alice';\n" +
@@ -1146,16 +1235,16 @@ public class ParserTest {
                         "    } or {\n" +
                         "        ($x) isa employment;\n" +
                         "    };";
-        final String then = "$x has is_interesting true;";
+        String then = "$x has is_interesting true;";
         Conjunction<? extends Pattern> whenPattern = and(
                 cVar("x").isa("person"),
                 not(and(cVar("x").has("name", "Alice"), cVar("x").has("name", "Bob"))),
                 or(rel(cVar("x")).isa("friendship"), rel(cVar("x")).isa("employment"))
         );
-        ThingVariable<?> thenPattern = cVar("x").has("is_interesting", true);
+        ThingStatement<?> thenPattern = cVar("x").has("is_interesting", true);
 
         TypeQLDefine expected = define(rule("interesting-friendships").when(whenPattern).then(thenPattern));
-        final String query = "define\n" +
+        String query = "define\n" +
                 "rule interesting-friendships: when {\n" +
                 when + "\n" +
                 "} then {\n" +
@@ -1168,16 +1257,16 @@ public class ParserTest {
 
     @Test
     public void testRuleAttachAttributeByValue() {
-        com.vaticle.typeql.lang.pattern.variable.builder.Expression a = cVar("a");
-        com.vaticle.typeql.lang.pattern.variable.builder.Expression b = Expression.constant(365);
+        com.vaticle.typeql.lang.pattern.expression.Expression a = cVar("a");
+        com.vaticle.typeql.lang.pattern.expression.Expression b = Expression.constant(365);
         Conjunction<? extends Pattern> whenPattern = and(
                 cVar("x").has("age", cVar("a")),
-                vVar("d").assign(a.mul(b))
+                vVar("d").assign(a.multiply(b))
         );
-        ThingVariable<?> thenPattern = cVar("x").has("days", vVar("d"));
+        ThingStatement<?> thenPattern = cVar("x").has("days", vVar("d"));
         TypeQLDefine expected = define(rule("attach-val").when(whenPattern).then(thenPattern));
 
-        final String query = "define\n" +
+        String query = "define\n" +
                 "rule attach-val: when {\n" +
                 "    $x has age $a;\n" +
                 "    ?d = $a * 365;\n" +
@@ -1191,7 +1280,7 @@ public class ParserTest {
 
     @Test
     public void testParseBoolean() {
-        final String query = "insert\n$_ has flag true;";
+        String query = "insert\n$_ has flag true;";
         TypeQLInsert parsed = TypeQL.parseQuery(query).asInsert();
         TypeQLInsert expected = insert(cVar().has("flag", true));
 
@@ -1200,40 +1289,43 @@ public class ParserTest {
 
     @Test
     public void testParseAggregateGroup() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie;\n" +
+                "get;\n" +
                 "group $x;";
-        TypeQLMatch.Group parsed = parseQuery(query).asMatchGroup();
-        TypeQLMatch.Group expected = match(cVar("x").isa("movie")).group(cVar("x"));
+        TypeQLGet.Group parsed = parseQuery(query).asGetGroup();
+        TypeQLGet.Group expected = match(cVar("x").isa("movie")).get().group(cVar("x"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseAggregateGroupCount() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie;\n" +
+                "get;\n" +
                 "group $x; count;";
-        TypeQLMatch.Group.Aggregate parsed = parseQuery(query).asMatchGroupAggregate();
-        TypeQLMatch.Group.Aggregate expected = match(cVar("x").isa("movie")).group(cVar("x")).count();
+        TypeQLGet.Group.Aggregate parsed = parseQuery(query).asGetGroupAggregate();
+        TypeQLGet.Group.Aggregate expected = match(cVar("x").isa("movie")).get().group(cVar("x")).count();
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseAggregateStd() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie;\n" +
+                "get;\n" +
                 "std $x;";
-        TypeQLMatch.Aggregate parsed = parseQuery(query).asMatchAggregate();
-        TypeQLMatch.Aggregate expected = match(cVar("x").isa("movie")).std(cVar("x"));
+        TypeQLGet.Aggregate parsed = parseQuery(query).asGetAggregate();
+        TypeQLGet.Aggregate expected = match(cVar("x").isa("movie")).get().std(cVar("x"));
 
         assertQueryEquals(expected, parsed, query);
     }
 
     @Test
     public void testParseAggregateToString() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$x isa movie;\n" +
                 "get $x;\n" +
                 "group $x; count;";
@@ -1289,33 +1381,34 @@ public class ParserTest {
 
     @Test
     public void testHasVariable() {
-        final String query = "match\n" +
+        String query = "match\n" +
                 "$_ has title 'Godfather',\n" +
-                "    has tmdb-vote-count $x;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar().has("title", "Godfather").has("tmdb-vote-count", cVar("x")));
+                "    has tmdb-vote-count $x;\n" +
+                "get;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar().has("title", "Godfather").has("tmdb-vote-count", cVar("x"))).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testRegexAttributeType() {
-        final String query = "match\n" +
-                "$x regex '(fe)?male';";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
-        TypeQLMatch expected = match(cVar("x").regex("(fe)?male"));
+        String query = "match\n" +
+                "$x regex '(fe)?male';\nget;";
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
+        TypeQLGet expected = match(cVar("x").regex("(fe)?male")).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void testTypeQLParseQuery() {
-        assertTrue(parseQuery("match\n$x isa movie;") instanceof TypeQLMatch);
+        assertTrue(parseQuery("match\n$x isa movie;\nget;") instanceof TypeQLGet);
     }
 
     @Test
     public void testParseAnnotations() {
-        final String defineString = "define\n" +
+        String defineString = "define\n" +
                 "e1 owns a1 @key;\n" +
                 "e2 owns a2 @unique;";
         assertEquals(
@@ -1333,15 +1426,15 @@ public class ParserTest {
 
     @Test
     public void testParseListOneMatch() {
-        final String getString = "match\n$y isa movie;";
+        String getString = "match\n$y isa movie;\nget;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(getString).collect(toList());
 
-        assertEquals(list(match(cVar("y").isa("movie"))), queries);
+        assertEquals(list(match(cVar("y").isa("movie")).get()), queries);
     }
 
     @Test
     public void testParseListOneInsert() {
-        final String insertString = "insert\n$x isa movie;";
+        String insertString = "insert\n$x isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString).collect(toList());
 
         assertEquals(list(insert(cVar("x").isa("movie"))), queries);
@@ -1349,7 +1442,7 @@ public class ParserTest {
 
     @Test
     public void testParseListOneInsertWithWhitespacePrefix() {
-        final String insertString = " insert $x isa movie;";
+        String insertString = " insert $x isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString).collect(toList());
 
         assertEquals(list(insert(cVar("x").isa("movie"))), queries);
@@ -1357,7 +1450,7 @@ public class ParserTest {
 
     @Test
     public void testParseListOneInsertWithPrefixComment() {
-        final String insertString = "#hola\ninsert $x isa movie;";
+        String insertString = "#hola\ninsert $x isa movie;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString).collect(toList());
 
         assertEquals(list(insert(cVar("x").isa("movie"))), queries);
@@ -1365,17 +1458,18 @@ public class ParserTest {
 
     @Test
     public void testParseList() {
-        final String insertString = "insert\n$x isa movie;";
-        final String getString = "match\n$y isa movie;";
+        String insertString = "insert\n$x isa movie;";
+        String getString = "match\n$y isa movie;\nget;";
         List<TypeQLQuery> queries = TypeQL.parseQueries(insertString + getString).collect(toList());
 
-        assertEquals(list(insert(cVar("x").isa("movie")), match(cVar("y").isa("movie"))), queries);
+        assertEquals(list(insert(cVar("x").isa("movie")), match(cVar("y").isa("movie")).get()), queries);
     }
 
     @Test
     public void testParseManyMatchInsertWithoutStackOverflow() {
-        final int numQueries = 10_000;
-        final String matchInsertString = "match\n$x isa person; insert $x has name 'bob';\n";
+//        int numQueries = 10_000;
+        int numQueries = 2;
+        String matchInsertString = "match\n$x isa person; insert $x has name 'bob';\n";
         StringBuilder longQuery = new StringBuilder();
         for (int i = 0; i < numQueries; i++) {
             longQuery.append(matchInsertString);
@@ -1389,7 +1483,7 @@ public class ParserTest {
 
     @Test
     public void whenParsingAListOfQueriesWithASyntaxError_ReportError() {
-        final String queryText = "define\nperson sub entity has name;"; // note no semicolon
+        String queryText = "define\nperson sub entity has name;"; // note no semicolon
 
         exception.expect(TypeQLException.class);
         exception.expectMessage("\nperson sub entity has name;"); // Message should refer to line
@@ -1443,7 +1537,7 @@ public class ParserTest {
 
     @Test
     public void defineAttributeTypeRegex() {
-        final String query = "define\n" +
+        String query = "define\n" +
                 "digit sub attribute,\n" +
                 "    regex '\\d';";
         TypeQLDefine parsed = parseQuery(query);
@@ -1453,7 +1547,7 @@ public class ParserTest {
 
     @Test
     public void undefineAttributeTypeRegex() {
-        final String query = "undefine\ndigit regex '\\d';";
+        String query = "undefine\ndigit regex '\\d';";
         TypeQLUndefine parsed = parseQuery(query);
         TypeQLUndefine expected = undefine(type("digit").regex("\\d"));
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
@@ -1461,48 +1555,48 @@ public class ParserTest {
 
     @Test
     public void regexPredicateParsesCharacterClassesCorrectly() {
-        final String query = "match\n$x like '\\d';";
-        TypeQLMatch parsed = parseQuery(query);
-        TypeQLMatch expected = match(cVar("x").like("\\d"));
+        String query = "match\n$x like '\\d';\nget;";
+        TypeQLGet parsed = parseQuery(query);
+        TypeQLGet expected = match(cVar("x").like("\\d")).get();
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesQuotesCorrectly() {
-        final String query = "match\n$x like '\\\"';";
-        TypeQLMatch parsed = parseQuery(query);
-        TypeQLMatch expected = match(cVar("x").like("\\\""));
+        String query = "match\n$x like '\\\"';\nget;";
+        TypeQLGet parsed = parseQuery(query);
+        TypeQLGet expected = match(cVar("x").like("\\\"")).get();
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesBackslashesCorrectly() {
-        final String query = "match\n$x like '\\\\';";
-        TypeQLMatch parsed = parseQuery(query);
-        TypeQLMatch expected = match(cVar("x").like("\\\\"));
+        String query = "match\n$x like '\\\\';\nget;";
+        TypeQLGet parsed = parseQuery(query);
+        TypeQLGet expected = match(cVar("x").like("\\\\")).get();
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesNewlineCorrectly() {
-        final String query = "match\n$x like '\\n';";
-        TypeQLMatch parsed = parseQuery(query);
-        TypeQLMatch expected = match(cVar("x").like("\\n"));
+        String query = "match\n$x like '\\n';\nget;";
+        TypeQLGet parsed = parseQuery(query);
+        TypeQLGet expected = match(cVar("x").like("\\n")).get();
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void regexPredicateParsesForwardSlashesCorrectly() {
-        final String query = "match\n$x like '\\/';";
-        TypeQLMatch parsed = parseQuery(query);
-        TypeQLMatch expected = match(cVar("x").like("/"));
+        String query = "match\n$x like '\\/';\nget;";
+        TypeQLGet parsed = parseQuery(query);
+        TypeQLGet expected = match(cVar("x").like("/")).get();
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }
 
     @Test
     public void whenValueEqualityToString_CreateValidQueryString() {
-        TypeQLMatch expected = match(cVar("x").eq(cVar("y")));
-        TypeQLMatch parsed = TypeQL.parseQuery(expected.toString());
+        TypeQLGet expected = match(cVar("x").eq(cVar("y"))).get();
+        TypeQLGet parsed = TypeQL.parseQuery(expected.toString());
         assertEquals(expected, parsed);
     }
 

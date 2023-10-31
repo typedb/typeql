@@ -20,57 +20,58 @@
  *
  */
 
-use std::{fmt, iter};
+use std::fmt;
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    pattern::{IsExplicit, Reference, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    pattern::IsExplicit,
+    variable::{variable::VariableRef, ConceptVariable, TypeReference},
     Label,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
-    pub type_: TypeVariable,
+    pub type_reference: TypeReference,
     pub is_explicit: IsExplicit,
 }
 
 impl IsaConstraint {
-    fn new(type_: TypeVariable, is_explicit: IsExplicit) -> Self {
-        IsaConstraint { type_, is_explicit }
+    fn new(type_reference: TypeReference, is_explicit: IsExplicit) -> Self {
+        IsaConstraint { type_reference, is_explicit }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(iter::once(&self.type_.reference))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        self.type_reference.variables()
     }
 }
 
 impl Validatable for IsaConstraint {
-    fn validate(&self) -> Result<()> {
-        self.type_.validate()
+    fn validate(&self) -> Result {
+        self.type_reference.validate()
     }
 }
 
 impl<T: Into<Label>> From<T> for IsaConstraint {
-    fn from(type_name: T) -> Self {
-        IsaConstraint::new(UnboundConceptVariable::hidden().type_(type_name), IsExplicit::No)
+    fn from(label: T) -> Self {
+        IsaConstraint::new(TypeReference::Label(label.into()), IsExplicit::No)
     }
 }
 
 impl<T: Into<Label>> From<(T, IsExplicit)> for IsaConstraint {
-    fn from((type_name, is_explicit): (T, IsExplicit)) -> Self {
-        IsaConstraint::new(UnboundConceptVariable::hidden().type_(type_name), is_explicit)
+    fn from((label, is_explicit): (T, IsExplicit)) -> Self {
+        IsaConstraint::new(TypeReference::Label(label.into()), is_explicit)
     }
 }
 
-impl From<UnboundConceptVariable> for IsaConstraint {
-    fn from(var: UnboundConceptVariable) -> Self {
-        IsaConstraint::new(var.into_type(), IsExplicit::No)
+impl From<ConceptVariable> for IsaConstraint {
+    fn from(var: ConceptVariable) -> Self {
+        IsaConstraint::new(TypeReference::Variable(var), IsExplicit::No)
     }
 }
 
-impl From<(UnboundConceptVariable, IsExplicit)> for IsaConstraint {
-    fn from((var, is_explicit): (UnboundConceptVariable, IsExplicit)) -> Self {
-        IsaConstraint::new(var.into_type(), is_explicit)
+impl From<(ConceptVariable, IsExplicit)> for IsaConstraint {
+    fn from((var, is_explicit): (ConceptVariable, IsExplicit)) -> Self {
+        IsaConstraint::new(TypeReference::Variable(var), is_explicit)
     }
 }
 
@@ -83,7 +84,7 @@ impl fmt::Display for IsaConstraint {
                 IsExplicit::Yes => token::Constraint::IsaX,
                 IsExplicit::No => token::Constraint::Isa,
             },
-            self.type_
+            self.type_reference
         )
     }
 }

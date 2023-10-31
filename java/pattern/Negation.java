@@ -22,9 +22,9 @@
 package com.vaticle.typeql.lang.pattern;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.ErrorMessage;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,7 +64,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
     }
 
     @Override
-    public void validateIsBoundedBy(Set<UnboundVariable> bounds) {
+    public void validateIsBoundedBy(Set<TypeQLVariable> bounds) {
         if (pattern.isNegation()) {
             throw TypeQLException.of(ErrorMessage.ILLEGAL_STATE);
         } else {
@@ -77,8 +77,8 @@ public class Negation<T extends Pattern> implements Conjunctable {
         if (normalised == null) {
             if (pattern.isNegation()) {
                 throw TypeQLException.of(ErrorMessage.ILLEGAL_STATE);
-            } else if (pattern.isVariable()) {
-                normalised = new Negation<>(new Disjunction<>(list(new Conjunction<>(list(pattern.asVariable())))));
+            } else if (pattern.isStatement()) {
+                normalised = new Negation<>(new Disjunction<>(list(new Conjunction<>(list(pattern.asStatement())))));
             } else {
                 if (pattern.isConjunction()) normalised = new Negation<>(pattern.asConjunction().normalise());
                 else normalised = new Negation<>(pattern.asDisjunction().normalise());
@@ -126,7 +126,7 @@ public class Negation<T extends Pattern> implements Conjunctable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Negation<?> negation = (Negation<?>) o;
-        return Objects.equals(pattern, negation.pattern);
+        return pattern.equals(negation.pattern);
     }
 
     @Override

@@ -28,10 +28,12 @@ use crate::{
     common::{
         error::{collect_err, TypeQLError},
         string::indent,
+        token,
         validatable::Validatable,
         Result,
     },
-    pattern::{Disjunction, NamedReferences, Normalisable, Pattern, Reference},
+    pattern::{Disjunction, Normalisable, Pattern, VariablesRetrieved},
+    variable::variable::VariableRef,
 };
 
 #[derive(Debug, Clone, Eq)]
@@ -40,60 +42,58 @@ pub struct Conjunction {
     normalised: Option<Disjunction>,
 }
 
-impl PartialEq for Conjunction {
-    fn eq(&self, other: &Self) -> bool {
-        self.patterns == other.patterns
-    }
-}
-
 impl Conjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
         Conjunction { patterns, normalised: None }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Variable(_) | Pattern::Conjunction(_))).flat_map(
-            |p| match p {
-                Pattern::Variable(v) => v.references(),
-                Pattern::Conjunction(c) => c.references(),
-                _ => unreachable!(),
-            },
-        ))
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(self.patterns.iter().flat_map(|p| p.variables_recursive()))
     }
 
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.patterns.iter().flat_map(|p| p.references_recursive()))
-    }
-
-    pub fn has_named_variables(&self) -> bool {
-        self.references().any(|r| r.is_name())
-    }
-
-    pub fn expect_is_bounded_by(&self, bounds: &HashSet<Reference>) -> Result<()> {
-        let names = self.named_references();
+    pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
+        let names = self.retrieved_variables().collect();
         let combined_bounds = bounds.union(&names).cloned().collect();
         collect_err(
-            &mut iter::once(expect_bounded(&names, bounds, self))
-                .chain(self.patterns.iter().map(|p| p.expect_is_bounded_by(&combined_bounds))),
+            iter::once(validate_bounded(&names, bounds, self))
+                .chain(self.patterns.iter().map(|p| p.validate_is_bounded_by(&combined_bounds))),
         )
     }
 }
 
-fn expect_bounded(names: &HashSet<Reference>, bounds: &HashSet<Reference>, conjunction: &Conjunction) -> Result<()> {
+fn validate_bounded(
+    names: &HashSet<VariableRef<'_>>,
+    bounds: &HashSet<VariableRef<'_>>,
+    conjunction: &Conjunction,
+) -> Result {
     if bounds.is_disjoint(names) {
         Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
     Ok(())
 }
 
-impl NamedReferences for Conjunction {
-    fn named_references(&self) -> HashSet<Reference> {
-        self.references().filter(|r| r.is_name()).cloned().collect()
+impl PartialEq for Conjunction {
+    fn eq(&self, other: &Self) -> bool {
+        self.patterns == other.patterns
+    }
+}
+
+impl VariablesRetrieved for Conjunction {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(
+            self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
+                |p| match p {
+                    Pattern::Statement(v) => v.variables(),
+                    Pattern::Conjunction(c) => c.retrieved_variables(),
+                    _ => unreachable!(),
+                },
+            ),
+        )
     }
 }
 
 impl Validatable for Conjunction {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }
@@ -117,7 +117,7 @@ impl Normalisable for Conjunction {
                 disjunctions.push(disjunction.compute_normalised().into_disjunction().patterns)
             }
             Pattern::Negation(negation) => conjunctables.push(negation.compute_normalised()),
-            Pattern::Variable(variable) => conjunctables.push(variable.compute_normalised()),
+            Pattern::Statement(variable) => conjunctables.push(variable.compute_normalised()),
         });
         disjunctions.push(vec![Conjunction::new(conjunctables).into()]);
 
@@ -137,8 +137,9 @@ impl Normalisable for Conjunction {
 
 impl fmt::Display for Conjunction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("{\n")?;
+        f.write_str(token::Char::CurlyLeft.as_str())?;
+        f.write_str("\n")?;
         f.write_str(&self.patterns.iter().map(|p| indent(&p.to_string()) + ";\n").collect::<String>())?;
-        f.write_str("}")
+        f.write_str(token::Char::CurlyRight.as_str())
     }
 }

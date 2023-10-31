@@ -21,10 +21,9 @@
 
 package com.vaticle.typeql.lang.pattern;
 
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.Reference;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
 
 import java.util.HashSet;
 import java.util.List;
@@ -41,20 +40,30 @@ public interface Pattern {
 
     List<? extends Pattern> patterns();
 
-    void validateIsBoundedBy(Set<UnboundVariable> bounds);
+    void validateIsBoundedBy(Set<TypeQLVariable> bounds);
 
-    default boolean isVariable() { return false; }
+    default boolean isStatement() {
+        return false;
+    }
 
-    default boolean isConjunction() { return false; }
+    default boolean isConjunction() {
+        return false;
+    }
 
-    default boolean isDisjunction() { return false; }
+    default boolean isDisjunction() {
+        return false;
+    }
 
-    default boolean isNegation() { return false; }
+    default boolean isNegation() {
+        return false;
+    }
 
-    default boolean isConjunctable() { return false; }
+    default boolean isConjunctable() {
+        return false;
+    }
 
-    default BoundVariable asVariable() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(BoundVariable.class)));
+    default Statement asStatement() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Statement.class)));
     }
 
     default Conjunction<? extends Pattern> asConjunction() {
@@ -77,13 +86,12 @@ public interface Pattern {
         Set<String> conceptNames = new HashSet<>();
         Set<String> valueNames = new HashSet<>();
         patterns.flatMap(p -> {
-            if (p.isVariable()) return Stream.of(p);
-            else if (p.isConjunction()) return p.asConjunction().variables();
+            if (p.isStatement()) return Stream.of(p);
+            else if (p.isConjunction()) return p.asConjunction().statements();
             else return Stream.empty();
-        }).filter(Pattern::isVariable).forEach(p -> {
-            Reference reference = p.asVariable().reference();
-            if (reference.isNameValue()) valueNames.add(reference.name());
-            else if (reference.isNameConcept()) conceptNames.add(reference.name());
+        }).filter(Pattern::isStatement).flatMap(p -> p.asStatement().variables()).forEach(v -> {
+            if (v.isNamedValue()) valueNames.add(v.name());
+            else if (v.isNamedConcept()) conceptNames.add(v.name());
         });
         conceptNames.retainAll(valueNames);
         if (!conceptNames.isEmpty()) {

@@ -22,7 +22,7 @@
 package com.vaticle.typeql.lang.test.deployment.src.test.java;
 
 import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 import com.vaticle.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
@@ -45,9 +45,9 @@ public class MavenApplicationTest {
                 "$brando 'Marl B' isa name;\n" +
                 "(actor: $brando, $char, production-with-cast: $prod);\n" +
                 "get $char, $prod;";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 TypeQL.cVar("brando").eq("Marl B").isa("name"),
                 rel("actor", TypeQL.cVar("brando")).rel(TypeQL.cVar("char")).rel("production-with-cast", TypeQL.cVar("prod"))
         ).get(TypeQL.cVar("char"), TypeQL.cVar("prod"));
@@ -69,9 +69,9 @@ public class MavenApplicationTest {
                 "    $t 'Spy';\n" +
                 "};\n" +
                 "$t != 'Apocalypse Now';";
-        TypeQLMatch parsed = TypeQL.parseQuery(query).asMatch();
+        TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
-        TypeQLMatch expected = match(
+        TypeQLGet expected = match(
                 TypeQL.cVar("x").isa("movie").has("title", TypeQL.cVar("t")),
                 or(
                         TypeQL.cVar("t").eq("Apocalypse Now"),
@@ -82,7 +82,7 @@ public class MavenApplicationTest {
                         TypeQL.cVar("t").eq("Spy")
                 ),
                 TypeQL.cVar("t").neq("Apocalypse Now")
-        );
+        ).get();
 
         assertQueryEquals(expected, parsed, query.replace("'", "\""));
     }

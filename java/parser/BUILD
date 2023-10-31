@@ -34,6 +34,7 @@ java_library(
     deps = [
         # Internal Package Dependencies
         "//java/common:common",
+        "//java/builder:builder",
         "//java/pattern:pattern",
         "//java/query:query",
 

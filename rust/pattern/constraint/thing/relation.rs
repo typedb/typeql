@@ -29,7 +29,7 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Reference, ThingVariable, TypeVariable, TypeVariableBuilder, UnboundConceptVariable},
+    variable::{variable::VariableRef, ConceptVariable, TypeReference},
     write_joined, Label,
 };
 
@@ -48,17 +48,13 @@ impl RelationConstraint {
         self.role_players.push(role_player);
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.role_players.iter().flat_map(|rp| rp.references()))
-    }
-
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new(self.role_players.iter().flat_map(|rp| rp.references_recursive()))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(self.role_players.iter().flat_map(|rp| rp.variables()))
     }
 }
 
 impl Validatable for RelationConstraint {
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         collect_err(
             &mut iter::once(expect_role_players_present(&self.role_players))
                 .chain(self.role_players.iter().map(Validatable::validate)),
@@ -66,7 +62,7 @@ impl Validatable for RelationConstraint {
     }
 }
 
-fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result<()> {
+fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result {
     if role_players.is_empty() {
         Err(TypeQLError::MissingConstraintRelationPlayer())?
     }
@@ -89,28 +85,26 @@ impl fmt::Display for RelationConstraint {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RolePlayerConstraint {
-    pub role_type: Option<TypeVariable>,
-    pub player: ThingVariable,
+    pub role_type: Option<TypeReference>,
+    pub player: ConceptVariable,
     pub repetition: u64,
 }
 
 impl RolePlayerConstraint {
-    pub fn new(role_type: Option<TypeVariable>, player: ThingVariable) -> Self {
+    pub fn new(role_type: Option<TypeReference>, player: ConceptVariable) -> Self {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 
-    pub fn references(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(iter::once(&self.player.reference)))
-    }
-
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
-        Box::new((self.role_type.iter().map(|r| &r.reference)).chain(self.player.references_recursive()))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(
+            self.role_type.iter().flat_map(|r| r.variables()).chain(iter::once(VariableRef::Concept(&self.player))),
+        )
     }
 }
 
 impl Validatable for RolePlayerConstraint {
-    fn validate(&self) -> Result<()> {
-        collect_err(&mut (self.role_type.iter().map(Validatable::validate)).chain(iter::once(self.player.validate())))
+    fn validate(&self) -> Result {
+        collect_err((self.role_type.iter().map(Validatable::validate)).chain(iter::once(self.player.validate())))
     }
 }
 
@@ -122,7 +116,7 @@ impl From<&str> for RolePlayerConstraint {
 
 impl From<String> for RolePlayerConstraint {
     fn from(player_var: String) -> Self {
-        Self::from(UnboundConceptVariable::named(player_var))
+        Self::from(ConceptVariable::named(player_var))
     }
 }
 
@@ -134,54 +128,50 @@ impl From<(&str, &str)> for RolePlayerConstraint {
 
 impl From<(String, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, String)) -> Self {
-        Self::from((role_type, UnboundConceptVariable::named(player_var)))
+        Self::from((role_type, ConceptVariable::named(player_var)))
     }
 }
 
 impl From<(Label, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, String)) -> Self {
-        Self::from((role_type, UnboundConceptVariable::named(player_var)))
+        Self::from((role_type, ConceptVariable::named(player_var)))
     }
 }
 
-impl From<UnboundConceptVariable> for RolePlayerConstraint {
-    fn from(player_var: UnboundConceptVariable) -> Self {
-        Self::new(None, player_var.into_thing())
+impl From<ConceptVariable> for RolePlayerConstraint {
+    fn from(player_var: ConceptVariable) -> Self {
+        Self::new(None, player_var)
     }
 }
 
-impl From<(String, UnboundConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (String, UnboundConceptVariable)) -> Self {
-        Self::from((UnboundConceptVariable::hidden().type_(role_type), player_var))
+impl From<(String, ConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (String, ConceptVariable)) -> Self {
+        Self::from((TypeReference::Label(role_type.into()), player_var))
     }
 }
 
-impl From<(Label, UnboundConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (Label, UnboundConceptVariable)) -> Self {
-        Self::from((UnboundConceptVariable::hidden().type_(role_type), player_var))
+impl From<(Label, ConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (Label, ConceptVariable)) -> Self {
+        Self::from((TypeReference::Label(role_type), player_var))
     }
 }
 
-impl From<(UnboundConceptVariable, UnboundConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (UnboundConceptVariable, UnboundConceptVariable)) -> Self {
-        Self::new(Some(role_type.into_type()), player_var.into_thing())
+impl From<(ConceptVariable, ConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (ConceptVariable, ConceptVariable)) -> Self {
+        Self::new(Some(TypeReference::Variable(role_type)), player_var)
     }
 }
 
-impl From<(TypeVariable, UnboundConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (TypeVariable, UnboundConceptVariable)) -> Self {
-        Self::new(Some(role_type), player_var.into_thing())
+impl From<(TypeReference, ConceptVariable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (TypeReference, ConceptVariable)) -> Self {
+        Self::new(Some(role_type), player_var)
     }
 }
 
 impl fmt::Display for RolePlayerConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(role_type) = &self.role_type {
-            if role_type.reference.is_visible() {
-                write!(f, "{}", role_type.reference)?;
-            } else {
-                write!(f, "{}", role_type.label.as_ref().unwrap().label)?;
-            }
+            write!(f, "{}", role_type)?;
             f.write_str(": ")?;
         }
         write!(f, "{}", self.player)

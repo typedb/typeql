@@ -23,18 +23,33 @@ load("@rules_rust//rust:defs.bzl", "rust_test")
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 rust_test(
-    name = "typeql_behaviour_test",
-    srcs = ["main.rs"],
+    name = "test_behaviour",
+    srcs = ["test_behaviour.rs", "steps.rs"],
     data = [
-        "@vaticle_typedb_behaviour//typeql/explanation:features",
-        "@vaticle_typedb_behaviour//typeql/language:features",
-        "@vaticle_typedb_behaviour//typeql/reasoner:features",
+        "@vaticle_typedb_behaviour//query/explanation:features",
+        "@vaticle_typedb_behaviour//query/language:features",
+        "@vaticle_typedb_behaviour//query/reasoner:features",
     ],
     deps = [
         "//rust:typeql",
         "@crates//:cucumber",
         "@crates//:futures",
     ],
+    use_libtest_harness = False,
+)
+
+rust_test(
+    name = "test_debug",
+    srcs = ["test_debug.rs", "steps.rs"],
+    data = [
+        ":debug.feature"
+    ],
+    deps = [
+        "//rust:typeql",
+        "@crates//:cucumber",
+        "@crates//:futures",
+    ],
+    tags = ["manual"],
     use_libtest_harness = False,
 )
 

@@ -48,7 +48,6 @@ kotlin_repositories()
 load("@io_bazel_rules_kotlin//kotlin:core.bzl", "kt_register_toolchains")
 kt_register_toolchains()
 
-
 # Load //builder/antlr
 load("@vaticle_dependencies//builder/antlr:deps.bzl", antlr_deps = "deps", "antlr_version")
 antlr_deps()
@@ -68,12 +67,12 @@ rust_analyzer_dependencies()
 load("@rules_rust//rust:defs.bzl", "rust_common")
 rust_register_toolchains(
     edition = "2021",
-    rust_analyzer_version = rust_common.default_version,
+    versions = ["1.70.0"],
 )
 
 rust_analyzer_toolchain_tools_repository(
     name = "rust_analyzer_toolchain_tools",
-    version = rust_common.default_version
+    version = "1.70.0",
 )
 
 load("@vaticle_dependencies//library/crates:crates.bzl", "fetch_crates")

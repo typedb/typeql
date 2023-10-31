@@ -20,23 +20,28 @@
  *
  */
 
-mod function;
-mod operation;
-
 use std::{fmt, iter};
 
 use chrono::NaiveDateTime;
 pub use function::Function;
 pub use operation::Operation;
 
-use crate::pattern::{Constant, Reference, UnboundConceptVariable, UnboundValueVariable, UnboundVariable};
+use crate::{
+    pattern::Constant,
+    variable::{variable::VariableRef, ConceptVariable, ValueVariable, Variable},
+};
+
+pub mod builder;
+mod function;
+mod operation;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
     Operation(Operation),
     Function(Function),
     Constant(Constant),
-    Variable(UnboundVariable),
+    ThingVariable(ConceptVariable),
+    ValueVariable(ValueVariable),
 }
 
 impl fmt::Display for Expression {
@@ -45,18 +50,20 @@ impl fmt::Display for Expression {
             Expression::Operation(operation) => write!(f, "{operation}"),
             Expression::Function(function) => write!(f, "{function}"),
             Expression::Constant(constant) => write!(f, "{constant}"),
-            Expression::Variable(variable) => write!(f, "{variable}"),
+            Expression::ThingVariable(variable) => write!(f, "{variable}"),
+            Expression::ValueVariable(variable) => write!(f, "{variable}"),
         }
     }
 }
 
 impl Expression {
-    pub fn references_recursive(&self) -> Box<dyn Iterator<Item = &Reference> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
-            Expression::Operation(operation) => operation.references_recursive(),
-            Expression::Function(function) => function.references_recursive(),
+            Expression::Operation(operation) => operation.variables(),
+            Expression::Function(function) => function.variables(),
             Expression::Constant(_constant) => Box::new(iter::empty()),
-            Expression::Variable(variable) => variable.references(),
+            Expression::ThingVariable(variable) => Box::new(iter::once(VariableRef::Concept(variable))),
+            Expression::ValueVariable(variable) => Box::new(iter::once(VariableRef::Value(variable))),
         }
     }
 }
@@ -79,15 +86,24 @@ impl From<Constant> for Expression {
     }
 }
 
-impl From<UnboundValueVariable> for Expression {
-    fn from(variable: UnboundValueVariable) -> Self {
-        Self::Variable(variable.into())
+impl From<Variable> for Expression {
+    fn from(variable: Variable) -> Self {
+        match variable {
+            Variable::Concept(var) => Self::ThingVariable(var),
+            Variable::Value(var) => Self::ValueVariable(var),
+        }
     }
 }
 
-impl From<UnboundConceptVariable> for Expression {
-    fn from(variable: UnboundConceptVariable) -> Self {
-        Self::Variable(variable.into())
+impl From<ConceptVariable> for Expression {
+    fn from(variable: ConceptVariable) -> Self {
+        Self::ThingVariable(variable)
+    }
+}
+
+impl From<ValueVariable> for Expression {
+    fn from(variable: ValueVariable) -> Self {
+        Self::ValueVariable(variable)
     }
 }
 

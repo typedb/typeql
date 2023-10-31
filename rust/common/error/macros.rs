@@ -77,7 +77,7 @@ macro_rules! error_messages {
         }
 
         impl std::fmt::Display for $name {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(
                     f,
                     concat!("[", $code_pfx, "{}{}] ", $message_pfx, ": {}"),
@@ -89,7 +89,7 @@ macro_rules! error_messages {
         }
 
         impl std::fmt::Debug for $name {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let mut debug_struct = f.debug_struct(self.name());
                 debug_struct.field("message", &format!("{}", self));
                 $(error_messages!(@payload

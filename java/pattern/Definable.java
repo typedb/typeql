@@ -24,7 +24,7 @@ package com.vaticle.typeql.lang.pattern;
 
 import com.vaticle.typeql.lang.common.exception.TypeQLException;
 import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.variable.TypeVariable;
+import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
@@ -35,7 +35,7 @@ public interface Definable {
         return false;
     }
 
-    default boolean isTypeVariable() {
+    default boolean isTypeStatement() {
         return false;
     }
 
@@ -43,8 +43,8 @@ public interface Definable {
         throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(Rule.class)));
     }
 
-    default TypeVariable asTypeVariable() {
-        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeVariable.class)));
+    default TypeStatement asTypeStatement() {
+        throw TypeQLException.of(INVALID_CASTING.message(className(this.getClass()), className(TypeStatement.class)));
     }
 
     String toString(boolean pretty);

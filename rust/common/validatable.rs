@@ -23,13 +23,9 @@
 use crate::common::Result;
 
 pub trait Validatable: Sized {
-    fn validate(&self) -> Result<()>;
+    fn validate(&self) -> Result;
 
     fn validated(self) -> Result<Self> {
         self.validate().map(|_| self)
-    }
-
-    fn is_valid(&self) -> bool {
-        self.validate().is_ok()
     }
 }

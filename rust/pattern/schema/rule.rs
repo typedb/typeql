@@ -20,7 +20,7 @@
  *
  */
 
-use std::{fmt, iter};
+use std::{collections::HashSet, fmt, iter};
 
 use crate::{
     common::{
@@ -29,82 +29,80 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    pattern::{Conjunction, NamedReferences, Pattern, ThingVariable},
+    pattern::{Conjunction, HasConstraint, Pattern, ThingStatement, VariablesRetrieved},
+    variable::variable::VariableRef,
     Label,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct RuleDeclaration {
+pub struct RuleLabel {
     pub label: Label,
 }
 
-impl RuleDeclaration {
+impl RuleLabel {
     pub fn new(label: Label) -> Self {
-        RuleDeclaration { label }
+        RuleLabel { label }
     }
 
-    pub fn when(self, when: Conjunction) -> RuleWhenStub {
-        RuleWhenStub { label: self.label, when }
+    pub fn when(self, when: Conjunction) -> RuleLabelWhen {
+        RuleLabelWhen { label: self.label, when }
     }
 }
 
-impl Validatable for RuleDeclaration {
-    fn validate(&self) -> Result<()> {
+impl Validatable for RuleLabel {
+    fn validate(&self) -> Result {
         Ok(())
     }
 }
 
-impl From<&str> for RuleDeclaration {
-    fn from(label: &str) -> Self {
-        RuleDeclaration::new(Label::from(label))
+impl<T: Into<Label>> From<T> for RuleLabel {
+    fn from(label: T) -> Self {
+        RuleLabel::new(label.into())
     }
 }
 
-impl fmt::Display for RuleDeclaration {
+impl fmt::Display for RuleLabel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", token::Schema::Rule, self.label)
     }
 }
 
-pub struct RuleWhenStub {
+pub struct RuleLabelWhen {
     pub label: Label,
     pub when: Conjunction,
 }
 
-impl RuleWhenStub {
-    pub fn then(self, then: ThingVariable) -> RuleDefinition {
-        RuleDefinition { label: self.label, when: self.when, then }
+impl RuleLabelWhen {
+    pub fn then(self, then: ThingStatement) -> Rule {
+        Rule { label: self.label, when: self.when, then }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct RuleDefinition {
+pub struct Rule {
     pub label: Label,
     pub when: Conjunction,
-    pub then: ThingVariable,
+    pub then: ThingStatement,
 }
 
-impl Validatable for RuleDefinition {
-    fn validate(&self) -> Result<()> {
-        collect_err(
-            &mut [
-                expect_no_nested_negations(self.when.patterns.iter(), &self.label),
-                expect_valid_inference(&self.then, &self.label),
-                expect_then_bounded_by_when(&self.then, &self.when, &self.label),
-                self.when.validate(),
-                self.then.validate(),
-            ]
-            .into_iter(),
-        )
+impl Validatable for Rule {
+    fn validate(&self) -> Result {
+        collect_err([
+            validate_no_nested_negations(self.when.patterns.iter(), &self.label),
+            validate_valid_inference(&self.then, &self.label),
+            validate_then_bounded_by_when(&self.then, &self.when, &self.label),
+            self.when.validate(),
+            self.then.validate(),
+        ])
     }
 }
 
-fn expect_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, rule_label: &Label) -> Result<()> {
-    collect_err(&mut patterns.map(|p| -> Result<()> {
+fn validate_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, rule_label: &Label) -> Result {
+    collect_err(patterns.map(|p| -> Result {
         match p {
-            Pattern::Conjunction(c) => expect_no_nested_negations(c.patterns.iter(), rule_label),
-            Pattern::Variable(_) => Ok(()),
-            Pattern::Disjunction(d) => expect_no_nested_negations(d.patterns.iter(), rule_label),
+            Pattern::Conjunction(c) => validate_no_nested_negations(c.patterns.iter(), rule_label),
+            Pattern::Statement(_) => Ok(()),
+            Pattern::Disjunction(d) => validate_no_nested_negations(d.patterns.iter(), rule_label),
             Pattern::Negation(n) => {
                 if contains_negations(iter::once(n.pattern.as_ref())) {
                     Err(TypeQLError::InvalidRuleWhenNestedNegation(rule_label.clone()))?
@@ -119,21 +117,21 @@ fn expect_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, r
 fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bool {
     patterns.any(|p| match p {
         Pattern::Conjunction(c) => contains_negations(c.patterns.iter()),
-        Pattern::Variable(_) => false,
+        Pattern::Statement(_) => false,
         Pattern::Disjunction(d) => contains_negations(d.patterns.iter()),
         Pattern::Negation(_) => true,
     })
 }
 
-fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()> {
+fn validate_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result {
     if infers_ownership(then) {
         let has = then.has.get(0).unwrap();
-        if has.type_.is_some() && has.attribute.reference.is_name() {
+        if let HasConstraint::HasConcept(Some(type_label), attr_var) = has {
             Err(TypeQLError::InvalidRuleThenHas(
                 rule_label.clone(),
                 then.clone(),
-                has.attribute.reference.clone(),
-                has.type_.clone().unwrap(),
+                attr_var.clone(),
+                type_label.clone(),
             ))?
         }
         Ok(())
@@ -148,23 +146,26 @@ fn expect_valid_inference(then: &ThingVariable, rule_label: &Label) -> Result<()
     }
 }
 
-fn infers_ownership(then: &ThingVariable) -> bool {
-    then.has.len() == 1 && (then.iid.is_none() && then.isa.is_none() && then.value.is_none() && then.relation.is_none())
+fn infers_ownership(then: &ThingStatement) -> bool {
+    then.has.len() == 1
+        && (then.iid.is_none() && then.isa.is_none() && then.predicate.is_none() && then.relation.is_none())
 }
 
-fn infers_relation(then: &ThingVariable) -> bool {
-    then.relation.is_some() && then.isa.is_some() && (then.iid.is_none() && then.has.is_empty() && then.value.is_none())
+fn infers_relation(then: &ThingStatement) -> bool {
+    then.relation.is_some()
+        && then.isa.is_some()
+        && (then.iid.is_none() && then.has.is_empty() && then.predicate.is_none())
 }
 
-fn expect_then_bounded_by_when(then: &ThingVariable, when: &Conjunction, rule_label: &Label) -> Result<()> {
-    let bounds = when.named_references();
-    if !then.references().filter(|r| r.is_name()).all(|r| bounds.contains(r)) {
+fn validate_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {
+    let bounds: HashSet<VariableRef<'_>> = when.retrieved_variables().collect();
+    if !then.variables().filter(|r| r.is_name()).all(|r| bounds.contains(&r)) {
         Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
     }
     Ok(())
 }
 
-impl fmt::Display for RuleDefinition {
+impl fmt::Display for Rule {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,

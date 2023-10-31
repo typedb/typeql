@@ -29,6 +29,6 @@ import java.util.List;
 public class TypeQLUndefine extends TypeQLDefinable {
 
     public TypeQLUndefine(List<Definable> definables) {
-        super(TypeQLToken.Command.UNDEFINE, definables);
+        super(TypeQLToken.Clause.UNDEFINE, definables);
     }
 }
