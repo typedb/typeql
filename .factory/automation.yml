@@ -86,6 +86,7 @@ build:
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //java/builder:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/pattern:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/query:deploy-maven -- snapshot
@@ -151,6 +152,7 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar/java:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //java/builder:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java/common:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java/pattern:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java/query:deploy-maven -- release
