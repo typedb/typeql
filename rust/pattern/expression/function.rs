@@ -22,14 +22,8 @@
 
 use std::fmt;
 
-use crate::{
-    common::token,
-    pattern::LeftOperand,
-    write_joined,
-};
-use crate::variable::variable::VariableRef;
-
 use super::Expression;
+use crate::{common::token, pattern::LeftOperand, variable::variable::VariableRef, write_joined};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Function {

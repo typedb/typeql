@@ -29,4 +29,3 @@ mod type_reference;
 pub(crate) mod variable;
 pub(crate) mod variable_concept;
 pub(crate) mod variable_value;
-

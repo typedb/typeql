@@ -25,20 +25,19 @@ use std::{collections::HashSet, fmt};
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::VariablesRetrieved,
     query::{TypeQLGet, TypeQLGetGroup},
+    variable::{variable::VariableRef, Variable},
 };
-use crate::variable::Variable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AggregateQuery<T>
-    where
-        T: AggregateQueryBuilder,
+where
+    T: AggregateQueryBuilder,
 {
     pub query: T,
     pub method: token::Aggregate,
@@ -62,10 +61,7 @@ impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
     fn validate(&self) -> Result {
         let retrieved_variables = self.query.retrieved_variables().collect();
         collect_err(
-            [
-                self.query.validate(),
-                validate_method_variable_compatible(&self.method, &self.var),
-            ]
+            [self.query.validate(), validate_method_variable_compatible(&self.method, &self.var)]
                 .into_iter()
                 .chain(self.var.iter().map(|v| validate_variable_in_scope(v, &retrieved_variables))),
         )
@@ -107,7 +103,7 @@ impl fmt::Display for TypeQLGetGroupAggregate {
 }
 
 pub trait AggregateQueryBuilder:
-Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + VariablesRetrieved + Validatable
+    Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + VariablesRetrieved + Validatable
 {
     fn count(self) -> AggregateQuery<Self> {
         AggregateQuery::<Self>::new_count(self)
@@ -141,4 +137,3 @@ Sized + Clone + fmt::Display + fmt::Debug + Eq + PartialEq + VariablesRetrieved 
         self.aggregate(token::Aggregate::Sum, var.into())
     }
 }
-

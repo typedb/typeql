@@ -20,23 +20,20 @@
  *
  */
 
-use std::collections::HashSet;
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::{ThingStatement, VariablesRetrieved},
-    query::{TypeQLUpdate, Writable, writable::validate_non_empty},
+    query::{modifier::Modifiers, writable::validate_non_empty, MatchClause, Sorting, TypeQLUpdate, Writable},
+    variable::variable::VariableRef,
     write_joined,
 };
-use crate::query::{MatchClause, Sorting};
-use crate::query::modifier::Modifiers;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDelete {
@@ -72,8 +69,9 @@ impl Validatable for TypeQLDelete {
                 validate_delete_in_scope(&match_variables, &self.statements),
                 validate_non_empty(&self.statements),
                 self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
-            ].into_iter())
-                .chain(self.statements.iter().map(Validatable::validate)),
+            ]
+            .into_iter())
+            .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }

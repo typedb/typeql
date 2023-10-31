@@ -23,13 +23,10 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, Result, token, validatable::Validatable},
-    pattern::Predicate,
-    variable::ConceptVariable,
+    common::{error::collect_err, token, validatable::Validatable, Result},
+    pattern::{Constant, Label, Predicate},
+    variable::{variable::VariableRef, ConceptVariable, ValueVariable},
 };
-use crate::pattern::{Constant, Label};
-use crate::variable::ValueVariable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum HasConstraint {
@@ -39,36 +36,22 @@ pub enum HasConstraint {
 }
 
 impl HasConstraint {
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
-            HasConstraint::HasConcept(_, var) => {
-                Box::new(iter::once(VariableRef::Concept(var)))
-            }
-            HasConstraint::HasValue(_, var) => {
-                Box::new(iter::once(VariableRef::Value(var)))
-            }
-            HasConstraint::HasPredicate(_, predicate) => {
-                predicate.variables()
-            }
+            HasConstraint::HasConcept(_, var) => Box::new(iter::once(VariableRef::Concept(var))),
+            HasConstraint::HasValue(_, var) => Box::new(iter::once(VariableRef::Value(var))),
+            HasConstraint::HasPredicate(_, predicate) => predicate.variables(),
         }
     }
 }
 
 impl Validatable for HasConstraint {
     fn validate(&self) -> Result {
-        collect_err(
-            match self {
-                HasConstraint::HasConcept(_, var) => {
-                    iter::once(var.validate())
-                }
-                HasConstraint::HasValue(_, var) => {
-                    iter::once(var.validate())
-                }
-                HasConstraint::HasPredicate(_, predicate) => {
-                    iter::once(predicate.validate())
-                }
-            }
-        )
+        collect_err(match self {
+            HasConstraint::HasConcept(_, var) => iter::once(var.validate()),
+            HasConstraint::HasValue(_, var) => iter::once(var.validate()),
+            HasConstraint::HasPredicate(_, predicate) => iter::once(predicate.validate()),
+        })
     }
 }
 
@@ -98,10 +81,7 @@ impl From<(Option<Label>, ConceptVariable)> for HasConstraint {
 
 impl<S: Into<Label>, T: Into<Constant>> From<(S, T)> for HasConstraint {
     fn from((label, constant): (S, T)) -> Self {
-        HasConstraint::HasPredicate(
-            label.into(),
-            Predicate::new(token::Predicate::Eq, constant.into().into())
-        )
+        HasConstraint::HasPredicate(label.into(), Predicate::new(token::Predicate::Eq, constant.into().into()))
     }
 }
 

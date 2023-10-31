@@ -30,17 +30,15 @@ use crate::{
     common::token,
     error_messages,
     pattern::{Label, Pattern, ThingStatement, Value},
-    variable::Variable,
+    variable::{ConceptVariable, Variable},
     write_joined,
 };
-use crate::variable::ConceptVariable;
 
 #[macro_use]
 mod macros;
 
 const SYNTAX_ERROR_INDENT: usize = 4;
 const SYNTAX_ERROR_INDICATOR: &str = "--> ";
-
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Error {
@@ -69,20 +67,18 @@ pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) 
     };
     // error_line_nr is 1-indexed, we operate on 0-offset
     let error_line = error_line_nr - 1;
-    let formatted_error = query.lines().enumerate()
-        .map(
-            |(i, line)| {
-                if i == error_line {
-                    format!("{SYNTAX_ERROR_INDICATOR}{line}")
-                } else {
-                    format!("{}{line}", " ".repeat(SYNTAX_ERROR_INDENT))
-                }
+    let formatted_error = query
+        .lines()
+        .enumerate()
+        .map(|(i, line)| {
+            if i == error_line {
+                format!("{SYNTAX_ERROR_INDICATOR}{line}")
+            } else {
+                format!("{}{line}", " ".repeat(SYNTAX_ERROR_INDENT))
             }
-        ).join("\n");
-    TypeQLError::SyntaxErrorDetailed(
-        error_line_nr,
-        formatted_error,
-    )
+        })
+        .join("\n");
+    TypeQLError::SyntaxErrorDetailed(error_line_nr, formatted_error)
 }
 
 impl fmt::Display for Error {
@@ -91,7 +87,7 @@ impl fmt::Display for Error {
     }
 }
 
-pub fn collect_err(i: impl IntoIterator<Item=Result<(), Error>>) -> Result<(), Error> {
+pub fn collect_err(i: impl IntoIterator<Item = Result<(), Error>>) -> Result<(), Error> {
     let errors = i.into_iter().filter_map(Result::err).flat_map(|e| e.errors).collect::<Vec<_>>();
     if errors.is_empty() {
         Ok(())

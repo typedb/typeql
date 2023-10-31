@@ -20,14 +20,12 @@
  *
  */
 
-use std::fmt;
-use std::fmt::Formatter;
-use std::hash::Hash;
-use crate::common::Result;
-use crate::common::error::TypeQLError;
-use crate::common::validatable::Validatable;
-use crate::variable::{ConceptVariable, ValueVariable};
+use std::{fmt, fmt::Formatter, hash::Hash};
 
+use crate::{
+    common::{error::TypeQLError, validatable::Validatable, Result},
+    variable::{ConceptVariable, ValueVariable},
+};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Variable {
@@ -39,14 +37,14 @@ impl Variable {
     pub fn as_ref(&self) -> VariableRef<'_> {
         match self {
             Self::Concept(cv) => VariableRef::Concept(cv),
-            Self::Value(vv) => VariableRef::Value(vv)
+            Self::Value(vv) => VariableRef::Value(vv),
         }
     }
 
     pub fn is_name(&self) -> bool {
         match self {
             Variable::Concept(var) => var.is_name(),
-            Variable::Value(var) => var.is_name()
+            Variable::Value(var) => var.is_name(),
         }
     }
 }
@@ -88,11 +86,10 @@ pub enum VariableRef<'a> {
 }
 
 impl VariableRef<'_> {
-
     pub fn is_name(&self) -> bool {
         match self {
-            VariableRef::Concept( var) => (*var).is_name(),
-            VariableRef::Value( var) => (*var).is_name(),
+            VariableRef::Concept(var) => (*var).is_name(),
+            VariableRef::Value(var) => (*var).is_name(),
         }
     }
 

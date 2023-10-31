@@ -19,13 +19,13 @@
  * under the License.
  */
 
+use std::{fmt, fmt::Formatter, iter};
 
-use std::{fmt, iter};
-use std::fmt::Formatter;
-use crate::common::validatable::Validatable;
-use crate::pattern::{Label, TypeStatement, TypeStatementBuilder};
-use crate::variable::ConceptVariable;
-use crate::variable::variable::VariableRef;
+use crate::{
+    common::validatable::Validatable,
+    pattern::{Label, TypeStatement, TypeStatementBuilder},
+    variable::{variable::VariableRef, ConceptVariable},
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeReference {
@@ -41,7 +41,7 @@ impl TypeReference {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
             TypeReference::Label(_) => Box::new(iter::empty()),
             TypeReference::Variable(var) => Box::new(iter::once(VariableRef::Concept(var))),

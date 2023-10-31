@@ -22,7 +22,6 @@
 mod steps;
 
 use cucumber::{StatsWriter, World};
-
 use steps::*;
 
 fn main() {

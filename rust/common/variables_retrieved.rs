@@ -20,9 +20,8 @@
  *
  */
 
-
 use crate::variable::variable::VariableRef;
 
 pub trait VariablesRetrieved {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_>;
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_>;
 }

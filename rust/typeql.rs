@@ -34,7 +34,8 @@ pub mod variable;
 mod util;
 
 pub use builder::{
-    abs, ceil, constant, contains, cvar, eq, floor, gt, gte, like, lt, lte, neq, not, rel, round, rule, type_, vvar,
+    abs, ceil, constant, contains, cvar, eq, floor, gt, gte, label, like, lt, lte, neq, not, rel, round, rule, type_,
+    vvar,
 };
 use common::Result;
 use parser::{

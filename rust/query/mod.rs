@@ -23,13 +23,13 @@
 use std::fmt;
 
 pub use match_clause::MatchClause;
-pub use modifier::Limit;
-pub use modifier::Offset;
-pub use modifier::Sorting;
-pub use modifier::sorting;
+pub use modifier::{sorting, Limit, Offset, Sorting};
 pub use typeql_define::TypeQLDefine;
 pub use typeql_delete::TypeQLDelete;
-pub use typeql_fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar, ProjectionKeyVarBuilder, ProjectionSubquery, ProjectionBuilder, TypeQLFetch};
+pub use typeql_fetch::{
+    Projection, ProjectionAttribute, ProjectionBuilder, ProjectionKeyLabel, ProjectionKeyVar, ProjectionKeyVarBuilder,
+    ProjectionSubquery, TypeQLFetch,
+};
 pub use typeql_get::{Filter, TypeQLGet};
 pub use typeql_get_aggregate::{AggregateQueryBuilder, TypeQLGetAggregate, TypeQLGetGroupAggregate};
 pub use typeql_get_group::TypeQLGetGroup;
@@ -39,22 +39,22 @@ pub use typeql_update::TypeQLUpdate;
 pub use writable::Writable;
 
 use crate::{
-    common::{Result, validatable::Validatable},
+    common::{validatable::Validatable, Result},
     enum_getter, enum_wrapper,
 };
 
 mod match_clause;
-mod typeql_get_aggregate;
+pub(crate) mod modifier;
 mod typeql_define;
 mod typeql_delete;
 mod typeql_fetch;
 mod typeql_get;
+mod typeql_get_aggregate;
 mod typeql_get_group;
 mod typeql_insert;
 mod typeql_undefine;
 mod typeql_update;
 mod writable;
-pub(crate) mod modifier;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {

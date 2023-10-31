@@ -18,20 +18,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-use std::collections::HashSet;
-use std::{fmt, iter};
+use std::{collections::HashSet, fmt, iter};
+
 use itertools::Itertools;
 
-use crate::common::{Result, token};
-use crate::common::error::{collect_err, TypeQLError};
-use crate::common::string::indent;
-use crate::common::validatable::Validatable;
-use crate::pattern::{Label, VariablesRetrieved};
-use crate::query::{MatchClause, TypeQLGetAggregate};
-use crate::query::modifier::Modifiers;
-use crate::variable::{Variable, variable};
-use crate::variable::variable::VariableRef;
-use crate::write_joined;
+use crate::{
+    common::{
+        error::{collect_err, TypeQLError},
+        string::indent,
+        token,
+        validatable::Validatable,
+        Result,
+    },
+    pattern::{Label, VariablesRetrieved},
+    query::{modifier::Modifiers, MatchClause, TypeQLGetAggregate},
+    variable::{variable, variable::VariableRef, Variable},
+    write_joined,
+};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLFetch {
@@ -42,12 +45,12 @@ pub struct TypeQLFetch {
 
 impl TypeQLFetch {
     fn validate_names_are_unique(&self) -> Result {
-        let all_refs = self.match_clause.retrieved_variables().chain(
-            self.projections.iter().flat_map(|p|
-                p.key_variable().into_iter().chain(p.value_variables())
-            ),
-        );
-        let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) = all_refs.partition(|r| r.is_concept());
+        let all_refs = self
+            .match_clause
+            .retrieved_variables()
+            .chain(self.projections.iter().flat_map(|p| p.key_variable().into_iter().chain(p.value_variables())));
+        let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) =
+            all_refs.partition(|r| r.is_concept());
         let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
         let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
         let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
@@ -58,27 +61,22 @@ impl TypeQLFetch {
     }
 }
 
-impl TypeQLFetch {
-    pub(crate) fn new(match_clause: MatchClause, projections: Vec<Projection>) -> Self {
-        TypeQLFetch { match_clause, projections, modifiers: Modifiers::default() }
-    }
-}
-
 impl Validatable for TypeQLFetch {
     fn validate(&self) -> Result {
         let match_variables = self.match_clause.retrieved_variables().collect();
         collect_err([
             self.match_clause.validate(),
             self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
-            self.validate_names_are_unique()
+            self.validate_names_are_unique(),
         ])
     }
 }
 
 impl VariablesRetrieved for TypeQLFetch {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        Box::new(self.match_clause.retrieved_variables()
-            .chain(self.projections.iter().flat_map(Projection::key_variable)))
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(
+            self.match_clause.retrieved_variables().chain(self.projections.iter().flat_map(Projection::key_variable)),
+        )
     }
 }
 
@@ -98,7 +96,7 @@ impl Projection {
         }
     }
 
-    pub fn value_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn value_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
             Projection::Variable(_) => Box::new(iter::empty()),
             Projection::Attribute(_, _) => Box::new(iter::empty()),
@@ -126,7 +124,6 @@ impl<T: Into<ProjectionKeyVar>> From<T> for Projection {
 }
 
 pub trait ProjectionKeyVarBuilder {
-
     fn label(self, label: impl Into<ProjectionKeyLabel>) -> ProjectionKeyVar;
 }
 
@@ -230,8 +227,7 @@ pub enum ProjectionSubquery {
 }
 
 impl ProjectionSubquery {
-
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
             ProjectionSubquery::GetAggregate(query) => query.query.retrieved_variables(),
             ProjectionSubquery::Fetch(query) => query.retrieved_variables(),
@@ -246,7 +242,7 @@ pub trait ProjectionBuilder {
 
 impl<T: Into<ProjectionKeyVar>> ProjectionBuilder for T {
     fn map_attribute(self, attribute: impl Into<ProjectionAttribute>) -> Projection {
-        Projection::Attribute(self.into(), vec!(attribute.into()))
+        Projection::Attribute(self.into(), vec![attribute.into()])
     }
 
     fn map_attributes(self, attributes: Vec<ProjectionAttribute>) -> Projection {

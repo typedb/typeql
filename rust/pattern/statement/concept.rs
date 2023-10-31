@@ -23,13 +23,10 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, Result, validatable::Validatable},
-    pattern::{
-        constraint::IsConstraint,
-    },
+    common::{error::collect_err, validatable::Validatable, Result},
+    pattern::constraint::IsConstraint,
+    variable::{variable::VariableRef, ConceptVariable},
 };
-use crate::variable::ConceptVariable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConceptStatement {
@@ -46,9 +43,8 @@ impl ConceptStatement {
         VariableRef::Concept(&self.variable)
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        Box::new(iter::once(self.owner())
-            .chain(self.is_constraint.iter().map(|is| VariableRef::Concept(&is.variable))))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(iter::once(self.owner()).chain(self.is_constraint.iter().map(|is| VariableRef::Concept(&is.variable))))
     }
 
     pub fn constrain_is(self, is: IsConstraint) -> ConceptStatement {
@@ -58,10 +54,7 @@ impl ConceptStatement {
 
 impl Validatable for ConceptStatement {
     fn validate(&self) -> Result {
-        collect_err(
-            iter::once(self.variable.validate())
-                .chain(self.is_constraint.iter().map(Validatable::validate)),
-        )
+        collect_err(iter::once(self.variable.validate()).chain(self.is_constraint.iter().map(Validatable::validate)))
     }
 }
 

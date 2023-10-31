@@ -23,13 +23,11 @@
 use std::fmt;
 
 use crate::{
-    common::{Result, token, validatable::Validatable},
-    Label,
+    common::{token, validatable::Validatable, Result},
     pattern::IsExplicit,
-    variable::ConceptVariable,
+    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    Label,
 };
-use crate::variable::TypeReference;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
@@ -42,7 +40,7 @@ impl IsaConstraint {
         IsaConstraint { type_reference, is_explicit }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         self.type_reference.variables()
     }
 }
@@ -79,7 +77,9 @@ impl From<(ConceptVariable, IsExplicit)> for IsaConstraint {
 
 impl fmt::Display for IsaConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}",
+        write!(
+            f,
+            "{} {}",
             match self.is_explicit {
                 IsExplicit::Yes => token::Constraint::IsaX,
                 IsExplicit::No => token::Constraint::Isa,

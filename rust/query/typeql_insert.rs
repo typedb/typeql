@@ -20,23 +20,20 @@
  *
  */
 
-use std::collections::HashSet;
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::{ThingStatement, VariablesRetrieved},
-    query::writable::validate_non_empty,
+    query::{modifier::Modifiers, writable::validate_non_empty, MatchClause, Sorting},
+    variable::variable::VariableRef,
     write_joined,
 };
-use crate::query::{MatchClause, Sorting};
-use crate::query::modifier::Modifiers;
-use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {
@@ -77,22 +74,26 @@ impl Validatable for TypeQLInsert {
             [
                 validate_non_empty(&self.statements),
                 self.validate_modifiers_have_match_clause(),
-                self.match_clause.as_ref().map(|m| {
-                    m.validate()?;
-                    let match_variables = m.retrieved_variables().collect();
-                    validate_insert_in_scope_of_match(&match_variables, &self.statements)
-                }).unwrap_or_else(|| Ok(())),
+                self.match_clause
+                    .as_ref()
+                    .map(|m| {
+                        m.validate()?;
+                        let match_variables = m.retrieved_variables().collect();
+                        validate_insert_in_scope_of_match(&match_variables, &self.statements)
+                    })
+                    .unwrap_or_else(|| Ok(())),
             ]
-                .into_iter()
-                .chain(self.statements.iter().map(Validatable::validate)),
+            .into_iter()
+            .chain(self.statements.iter().map(Validatable::validate)),
         )
     }
 }
 
-fn validate_insert_in_scope_of_match(match_variables: &HashSet<VariableRef<'_>>, statements: &[ThingStatement]) -> Result {
-    if statements.iter().flat_map(|s| s.variables()).any(|v| {
-        match_variables.contains(&v)
-    }) {
+fn validate_insert_in_scope_of_match(
+    match_variables: &HashSet<VariableRef<'_>>,
+    statements: &[ThingStatement],
+) -> Result {
+    if statements.iter().flat_map(|s| s.variables()).any(|v| match_variables.contains(&v)) {
         Ok(())
     } else {
         let stmts_str = statements.iter().map(ThingStatement::to_string).collect::<Vec<String>>().join(", ");

@@ -22,44 +22,39 @@
 
 use chrono::{NaiveDate, NaiveDateTime};
 use pest::{
-    Parser,
     pratt_parser::{Assoc, Op, PrattParser},
+    Parser,
 };
 use pest_derive::Parser;
 
 use crate::{
     common::{
         date_time,
-        error::TypeQLError,
-        Result,
+        error::{syntax_error, TypeQLError, TypeQLError::IllegalGrammar},
         string::{unescape_regex, unquote},
         token,
+        token::Aggregate,
         validatable::Validatable,
+        Result,
     },
+    parser::Rule::clause_undefine,
     pattern::{
-        Annotation, ConceptStatement, ConceptStatementBuilder, Conjunction, Constant, Definable,
-        Disjunction, Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint,
-        Pattern, PlaysConstraint, Predicate, RelatesConstraint, RelationConstraint, RolePlayerConstraint,
-        RuleLabel, Statement, SubConstraint, ThingStatement,
-        ThingStatementBuilder, TypeStatement, TypeStatementBuilder,
-        Value, ValueStatement,
+        Annotation, ConceptStatement, ConceptStatementBuilder, Conjunction, Constant, Definable, Disjunction,
+        Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint, Pattern,
+        PlaysConstraint, Predicate, RelatesConstraint, RelationConstraint, RolePlayerConstraint, RuleLabel, Statement,
+        SubConstraint, ThingStatement, ThingStatementBuilder, TypeStatement, TypeStatementBuilder, Value,
+        ValueStatement, ValueStatementBuilder,
     },
     query::{
-        AggregateQueryBuilder, MatchClause, Query, TypeQLDefine, TypeQLDelete, TypeQLFetch,
-        TypeQLGet, TypeQLGetAggregate, TypeQLGetGroup, TypeQLGetGroupAggregate, TypeQLInsert,
-        TypeQLUndefine, TypeQLUpdate,
+        modifier::{sorting, Modifiers, Sorting},
+        AggregateQueryBuilder, Filter, Limit, MatchClause, Offset, Projection, ProjectionAttribute, ProjectionKeyLabel,
+        ProjectionKeyVar, ProjectionSubquery, Query, TypeQLDefine, TypeQLDelete, TypeQLFetch, TypeQLGet,
+        TypeQLGetAggregate, TypeQLGetGroup, TypeQLGetGroupAggregate, TypeQLInsert, TypeQLUndefine, TypeQLUpdate,
     },
-    variable::{ConceptVariable, ValueVariable, Variable},
+    variable::{ConceptVariable, TypeReference, ValueVariable, Variable},
 };
-use crate::common::error::syntax_error;
-use crate::common::error::TypeQLError::IllegalGrammar;
-use crate::common::token::Aggregate;
-use crate::parser::Rule::clause_undefine;
-use crate::pattern::ValueStatementBuilder;
-use crate::query::{Filter, Limit, Offset, Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar, ProjectionSubquery};
-use crate::query::modifier::{Modifiers, sorting, Sorting};
-use crate::variable::TypeReference;
 
+#[cfg(test)]
 mod test;
 
 #[derive(Parser)]
@@ -92,7 +87,8 @@ impl<'a> IntoChildNodes<'a> for Node<'a> {
         let child = children.consume_any();
         let next_child = children.try_consume_any();
         if next_child.is_some() {
-            Err(IllegalGrammar(child.to_string() + " is followed by more tokens: " + next_child.unwrap().as_str()).into())
+            Err(IllegalGrammar(child.to_string() + " is followed by more tokens: " + next_child.unwrap().as_str())
+                .into())
         } else {
             Ok(child)
         }
@@ -112,7 +108,7 @@ trait RuleMatcher<'a> {
     fn try_consume_any(&mut self) -> Option<Node<'a>>;
 }
 
-impl<'a, T: Iterator<Item=Node<'a>> + Clone> RuleMatcher<'a> for T {
+impl<'a, T: Iterator<Item = Node<'a>> + Clone> RuleMatcher<'a> for T {
     fn skip_expected(&mut self, rule: Rule) -> &mut Self {
         self.consume_expected(rule);
         self
@@ -145,9 +141,7 @@ fn parse(rule: Rule, string: &str) -> Result<ChildNodes<'_>> {
     let result = TypeQLParser::parse(rule, string);
     match result {
         Ok(nodes) => Ok(nodes),
-        Err(error) => {
-            Err(syntax_error(string, error).into())
-        }
+        Err(error) => Err(syntax_error(string, error).into()),
     }
 }
 
@@ -156,11 +150,10 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 }
 
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
-    visit_query(parse_single(Rule::eof_query, query)?
-        .into_children().consume_expected(Rule::query)).validated()
+    visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)).validated()
 }
 
-pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item=Result<Query>> + '_> {
+pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
     Ok(parse(Rule::eof_queries, queries)?
         .consume_expected(Rule::eof_queries)
         .into_children()
@@ -187,9 +180,7 @@ pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
 }
 
 pub(crate) fn visit_eof_statement(statement: &str) -> Result<Statement> {
-    visit_statement(
-        parse_single(Rule::eof_statement, statement)?.into_children().consume_expected(Rule::statement),
-    )
+    visit_statement(parse_single(Rule::eof_statement, statement)?.into_children().consume_expected(Rule::statement))
         .validated()
 }
 
@@ -223,11 +214,6 @@ fn get_long(long: Node<'_>) -> i64 {
 
 fn long_from_string(string: &str) -> i64 {
     string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(string.to_string())))
-}
-
-fn get_double(double: Node<'_>) -> f64 {
-    dbg_assert_eq_line!(double.as_rule(), Rule::DOUBLE_);
-    double_from_string(double.as_str())
 }
 
 fn double_from_string(string: &str) -> f64 {
@@ -298,7 +284,7 @@ fn get_role_player_constraint(node: Node<'_>) -> RolePlayerConstraint {
     dbg_assert_eq_line!(node.as_rule(), Rule::role_player);
     let mut children_rev = node.into_children().rev();
     let player = get_var_concept(
-        children_rev.consume_expected(Rule::player).into_children().consume_expected(Rule::VAR_CONCEPT_)
+        children_rev.consume_expected(Rule::player).into_children().consume_expected(Rule::VAR_CONCEPT_),
     );
     if let Some(type_) = children_rev.try_consume_expected(Rule::type_ref) {
         match visit_type_ref(type_) {
@@ -382,8 +368,7 @@ fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
     dbg_assert_eq_line!(node.as_rule(), Rule::projection_key_var);
     let mut children = node.into_children();
     let var = get_var(children.consume_expected(Rule::VAR_));
-    let label = children.try_consume_expected(Rule::projection_key_as_label)
-        .map(visit_projection_as_label);
+    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
     dbg_assert_line!(children.try_consume_any().is_none());
     ProjectionKeyVar { variable: var, label }
 }
@@ -402,12 +387,8 @@ fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
     let mut children = node.into_children();
     let child = children.consume_any();
     match child.as_rule() {
-        Rule::QUOTED_STRING => {
-            ProjectionKeyLabel::Quoted(get_string_from_quoted(child))
-        }
-        Rule::label => {
-            ProjectionKeyLabel::Unquoted(child.as_str().to_owned())
-        }
+        Rule::QUOTED_STRING => ProjectionKeyLabel::Quoted(get_string_from_quoted(child)),
+        Rule::label => ProjectionKeyLabel::Unquoted(child.as_str().to_owned()),
         _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
     }
 }
@@ -482,9 +463,7 @@ fn visit_query_insert(node: Node<'_>) -> TypeQLInsert {
             let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
             TypeQLInsert { match_clause: Some(clause_match), statements: clause_insert, modifiers }
         }
-        Rule::clause_insert => {
-            TypeQLInsert::new(visit_clause_insert(child))
-        }
+        Rule::clause_insert => TypeQLInsert::new(visit_clause_insert(child)),
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
@@ -559,14 +538,18 @@ fn visit_modifiers(node: Node<'_>) -> Modifiers {
     for modifier in node.into_children() {
         match modifier.as_rule() {
             Rule::sort => modifiers.sorting = Some(visit_sort(modifier)),
-            Rule::offset => modifiers.offset = Some(Offset {
-                offset: get_long(
-                    modifier.into_children().skip_expected(Rule::OFFSET).consume_expected(Rule::LONG_),
-                ) as usize
-            }),
-            Rule::limit => modifiers.limit = Some(Limit {
-                limit: get_long(modifier.into_children().skip_expected(Rule::LIMIT).consume_expected(Rule::LONG_)) as usize,
-            }),
+            Rule::offset => {
+                modifiers.offset = Some(Offset {
+                    offset: get_long(modifier.into_children().skip_expected(Rule::OFFSET).consume_expected(Rule::LONG_))
+                        as usize,
+                })
+            }
+            Rule::limit => {
+                modifiers.limit = Some(Limit {
+                    limit: get_long(modifier.into_children().skip_expected(Rule::LIMIT).consume_expected(Rule::LONG_))
+                        as usize,
+                })
+            }
             _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(modifier.to_string()), line!()),
         };
     }
@@ -597,9 +580,8 @@ fn visit_clause_aggregate(node: Node<'_>) -> (Aggregate, Option<Variable>) {
 fn visit_query_get_group(node: Node<'_>) -> TypeQLGetGroup {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_get_group);
     let mut children = node.into_children();
-    let query = visit_query_get(children.consume_expected(Rule::query_get)).group(
-        visit_clause_group(children.consume_expected(Rule::clause_group))
-    );
+    let query = visit_query_get(children.consume_expected(Rule::query_get))
+        .group(visit_clause_group(children.consume_expected(Rule::clause_group)));
     dbg_assert_line!(children.try_consume_any().is_none());
     query
 }
@@ -616,9 +598,8 @@ fn visit_clause_group(node: Node<'_>) -> Variable {
 fn visit_query_get_group_agg(node: Node<'_>) -> TypeQLGetGroupAggregate {
     dbg_assert_eq_line!(node.as_rule(), Rule::query_get_group_agg);
     let mut children = node.into_children();
-    let query = visit_query_get(children.consume_expected(Rule::query_get)).group(
-        visit_clause_group(children.consume_expected(Rule::clause_group))
-    );
+    let query = visit_query_get(children.consume_expected(Rule::query_get))
+        .group(visit_clause_group(children.consume_expected(Rule::clause_group)));
     let (method, var) = visit_clause_aggregate(children.consume_expected(Rule::clause_aggregate));
     dbg_assert_line!(children.try_consume_any().is_none());
     match method {
@@ -679,8 +660,12 @@ fn visit_pattern(node: Node<'_>) -> Pattern {
     let mut children = node.into_children();
     let pattern = match children.peek_rule().unwrap() {
         Rule::statement => visit_statement(children.consume_expected(Rule::statement)).into(),
-        Rule::pattern_disjunction => visit_pattern_disjunction(children.consume_expected(Rule::pattern_disjunction)).into(),
-        Rule::pattern_conjunction => visit_pattern_conjunction(children.consume_expected(Rule::pattern_conjunction)).into(),
+        Rule::pattern_disjunction => {
+            visit_pattern_disjunction(children.consume_expected(Rule::pattern_disjunction)).into()
+        }
+        Rule::pattern_conjunction => {
+            visit_pattern_conjunction(children.consume_expected(Rule::pattern_conjunction)).into()
+        }
         Rule::pattern_negation => visit_pattern_negation(children.consume_expected(Rule::pattern_negation)).into(),
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.consume_any().to_string()), line!()),
     };
@@ -752,12 +737,8 @@ fn visit_statement_value(node: Node<'_>) -> ValueStatement {
     let mut children = node.into_children();
     let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
     let var = match children.peek_rule() {
-        Some(Rule::ASSIGN) => {
-            var_value.assign(visit_expression(children.skip_expected(Rule::ASSIGN).consume_any()))
-        }
-        Some(Rule::predicate) => {
-            var_value.predicate(visit_predicate(children.consume_any()))
-        }
+        Some(Rule::ASSIGN) => var_value.assign(visit_expression(children.skip_expected(Rule::ASSIGN).consume_any())),
+        Some(Rule::predicate) => var_value.predicate(visit_predicate(children.consume_any())),
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
@@ -850,13 +831,15 @@ fn visit_statement_thing(node: Node<'_>) -> ThingStatement {
         let keyword = children.consume_any();
         stmt_thing = match keyword.as_rule() {
             Rule::IID => stmt_thing.iid(children.consume_expected(Rule::IID_).as_str()),
-            Rule::ISA_ => stmt_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_ref))),
+            Rule::ISA_ => {
+                stmt_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_ref)))
+            }
             _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
         }
     }
     if let Some(attributes) = children.try_consume_expected(Rule::attributes) {
-        stmt_thing = visit_attributes(attributes).into_iter()
-            .fold(stmt_thing, |var_thing, has| var_thing.constrain_has(has));
+        stmt_thing =
+            visit_attributes(attributes).into_iter().fold(stmt_thing, |var_thing, has| var_thing.constrain_has(has));
     }
     dbg_assert_line!(children.try_consume_any().is_none());
     stmt_thing
@@ -944,23 +927,23 @@ fn visit_predicate(node: Node<'_>) -> Predicate {
     dbg_assert_eq_line!(node.as_rule(), Rule::predicate);
     let mut children = node.into_children();
     let constraint = match children.peek_rule() {
-        Some(Rule::constant) => Predicate::new(
-            token::Predicate::Eq,
-            visit_constant(children.consume_expected(Rule::constant)).into(),
-        ),
-        Some(Rule::predicate_equality) => Predicate::new(
-            token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()),
-            {
+        Some(Rule::constant) => {
+            Predicate::new(token::Predicate::Eq, visit_constant(children.consume_expected(Rule::constant)).into())
+        }
+        Some(Rule::predicate_equality) => {
+            Predicate::new(token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()), {
                 let res_predicate_value = children.consume_expected(Rule::value).into_child();
                 dbg_assert_line!(res_predicate_value.is_ok());
                 let predicate_value = res_predicate_value.unwrap();
                 match predicate_value.as_rule() {
                     Rule::constant => visit_constant(predicate_value).into(),
                     Rule::VAR_ => Value::from(get_var(predicate_value)),
-                    _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(predicate_value.to_string()), line!()),
+                    _ => {
+                        unreachable!("{} at line {}", TypeQLError::IllegalGrammar(predicate_value.to_string()), line!())
+                    }
                 }
-            },
-        ),
+            })
+        }
         Some(Rule::predicate_substring) => {
             let predicate = token::Predicate::from(children.consume_expected(Rule::predicate_substring).as_str());
             Predicate::new(
@@ -968,11 +951,13 @@ fn visit_predicate(node: Node<'_>) -> Predicate {
                 {
                     match predicate {
                         token::Predicate::Like => get_regex(children.consume_expected(Rule::QUOTED_STRING)),
-                        token::Predicate::Contains => get_string_from_quoted(children.consume_expected(Rule::QUOTED_STRING)),
+                        token::Predicate::Contains => {
+                            get_string_from_quoted(children.consume_expected(Rule::QUOTED_STRING))
+                        }
                         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
                     }
                 }
-                    .into(),
+                .into(),
             )
         }
         _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
@@ -1042,9 +1027,7 @@ fn visit_schema_rule_label(node: Node<'_>) -> RuleLabel {
     dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule_label);
     let mut children = node.into_children();
     children.skip_expected(Rule::RULE);
-    let rule = RuleLabel::new(Label::from(
-        children.consume_expected(Rule::label).as_str(),
-    ));
+    let rule = RuleLabel::new(Label::from(children.consume_expected(Rule::label).as_str()));
     dbg_assert_line!(children.try_consume_any().is_none());
     rule
 }
@@ -1054,7 +1037,9 @@ fn visit_schema_rule(node: Node<'_>) -> crate::pattern::Rule {
     let mut children = node.into_children();
     let rule = RuleLabel::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
         .when(Conjunction::new(visit_patterns(children.skip_expected(Rule::WHEN).consume_expected(Rule::patterns))))
-        .then(visit_statement_thing_any(children.skip_expected(Rule::THEN).consume_expected(Rule::statement_thing_any)));
+        .then(visit_statement_thing_any(
+            children.skip_expected(Rule::THEN).consume_expected(Rule::statement_thing_any),
+        ));
     dbg_assert_line!(children.try_consume_any().is_none());
     rule
 }

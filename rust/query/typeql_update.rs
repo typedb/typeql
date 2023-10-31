@@ -23,14 +23,11 @@
 use std::fmt;
 
 use crate::{
-    common::{error::collect_err, Result, token, validatable::Validatable},
-    pattern::ThingStatement,
-    query::{TypeQLDelete, writable::validate_non_empty},
+    common::{error::collect_err, token, validatable::Validatable, Result},
+    pattern::{ThingStatement, VariablesRetrieved},
+    query::{modifier::Modifiers, writable::validate_non_empty, Sorting, TypeQLDelete},
     write_joined,
 };
-use crate::pattern::VariablesRetrieved;
-use crate::query::modifier::Modifiers;
-use crate::query::Sorting;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLUpdate {
@@ -61,8 +58,9 @@ impl Validatable for TypeQLUpdate {
                 validate_non_empty(&self.insert_statements),
                 self.query_delete.validate(),
                 self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
-            ].into_iter()
-                .chain(self.insert_statements.iter().map(Validatable::validate)),
+            ]
+            .into_iter()
+            .chain(self.insert_statements.iter().map(Validatable::validate)),
         )
     }
 }

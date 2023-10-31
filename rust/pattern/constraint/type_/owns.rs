@@ -23,12 +23,10 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, Result, token, validatable::Validatable},
+    common::{error::collect_err, token, validatable::Validatable, Result},
+    variable::{variable::VariableRef, ConceptVariable, TypeReference},
     Label,
-    variable::ConceptVariable,
 };
-use crate::variable::TypeReference;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum Annotation {
@@ -62,10 +60,12 @@ impl OwnsConstraint {
         OwnsConstraint { attribute_type, overridden_attribute_type, annotations }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        Box::new(self.attribute_type.variables().chain(
-            self.overridden_attribute_type.iter().flat_map(|attr_type| attr_type.variables())
-        ))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(
+            self.attribute_type
+                .variables()
+                .chain(self.overridden_attribute_type.iter().flat_map(|attr_type| attr_type.variables())),
+        )
     }
 }
 
@@ -122,17 +122,16 @@ impl From<(String, String)> for OwnsConstraint {
 
 impl From<(Label, Label)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (Label, Label)) -> Self {
-        OwnsConstraint::from(
-            (TypeReference::Label(attribute_type), TypeReference::Label(overridden_attribute_type))
-        )
+        OwnsConstraint::from((TypeReference::Label(attribute_type), TypeReference::Label(overridden_attribute_type)))
     }
 }
 
 impl From<(ConceptVariable, ConceptVariable)> for OwnsConstraint {
     fn from((attribute_type, overridden_attribute_type): (ConceptVariable, ConceptVariable)) -> Self {
-        OwnsConstraint::from(
-            (TypeReference::Variable(attribute_type), TypeReference::Variable(overridden_attribute_type))
-        )
+        OwnsConstraint::from((
+            TypeReference::Variable(attribute_type),
+            TypeReference::Variable(overridden_attribute_type),
+        ))
     }
 }
 
@@ -196,21 +195,20 @@ impl From<(Label, Label, Annotation)> for OwnsConstraint {
 
 impl From<(ConceptVariable, ConceptVariable, Annotation)> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotation): (
-            ConceptVariable,
-            ConceptVariable,
-            Annotation,
-        ),
+        (attribute_type, overridden_attribute_type, annotation): (ConceptVariable, ConceptVariable, Annotation),
     ) -> Self {
-        OwnsConstraint::from(
-            (TypeReference::Variable(attribute_type),
-             TypeReference::Variable(overridden_attribute_type),
-             [annotation]))
+        OwnsConstraint::from((
+            TypeReference::Variable(attribute_type),
+            TypeReference::Variable(overridden_attribute_type),
+            [annotation],
+        ))
     }
 }
 
 impl From<(TypeReference, TypeReference, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotation): (TypeReference, TypeReference, Annotation)) -> Self {
+    fn from(
+        (attribute_type, overridden_attribute_type, annotation): (TypeReference, TypeReference, Annotation),
+    ) -> Self {
         OwnsConstraint::new(attribute_type, Some(overridden_attribute_type), [annotation].into())
     }
 }
@@ -269,16 +267,13 @@ impl<const N: usize> From<(Label, Label, [Annotation; N])> for OwnsConstraint {
 
 impl<const N: usize> From<(ConceptVariable, ConceptVariable, [Annotation; N])> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotations): (
-            ConceptVariable,
-            ConceptVariable,
-            [Annotation; N],
-        ),
+        (attribute_type, overridden_attribute_type, annotations): (ConceptVariable, ConceptVariable, [Annotation; N]),
     ) -> Self {
         OwnsConstraint::from((
             TypeReference::Variable(attribute_type),
             TypeReference::Variable(overridden_attribute_type),
-            annotations))
+            annotations,
+        ))
     }
 }
 

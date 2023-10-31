@@ -26,8 +26,9 @@ mod type_;
 mod value;
 
 pub use concept::{ConceptConstrainable, ConceptStatementBuilder};
+pub use thing::ThingStatementBuilder;
+pub use type_::TypeStatementBuilder;
+pub use value::ValueStatementBuilder;
+
 pub use crate::pattern::expression::builder::ExpressionBuilder;
 pub(crate) use crate::pattern::expression::builder::LeftOperand;
-pub use thing::{ThingStatementBuilder};
-pub use type_::{TypeStatementBuilder};
-pub use value::{ValueStatementBuilder};

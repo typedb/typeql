@@ -20,21 +20,19 @@
  *
  */
 
-use std::{fmt, iter};
-use std::collections::HashSet;
+use std::{collections::HashSet, fmt, iter};
 
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         token,
         validatable::Validatable,
+        Result,
     },
+    pattern::{Conjunction, HasConstraint, Pattern, ThingStatement, VariablesRetrieved},
+    variable::variable::VariableRef,
     Label,
-    pattern::{Conjunction, Pattern, ThingStatement, VariablesRetrieved},
 };
-use crate::pattern::HasConstraint;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RuleLabel {
@@ -89,19 +87,17 @@ pub struct Rule {
 
 impl Validatable for Rule {
     fn validate(&self) -> Result {
-        collect_err(
-            [
-                validate_no_nested_negations(self.when.patterns.iter(), &self.label),
-                validate_valid_inference(&self.then, &self.label),
-                validate_then_bounded_by_when(&self.then, &self.when, &self.label),
-                self.when.validate(),
-                self.then.validate(),
-            ]
-        )
+        collect_err([
+            validate_no_nested_negations(self.when.patterns.iter(), &self.label),
+            validate_valid_inference(&self.then, &self.label),
+            validate_then_bounded_by_when(&self.then, &self.when, &self.label),
+            self.when.validate(),
+            self.then.validate(),
+        ])
     }
 }
 
-fn validate_no_nested_negations<'a>(patterns: impl Iterator<Item=&'a Pattern>, rule_label: &Label) -> Result {
+fn validate_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>, rule_label: &Label) -> Result {
     collect_err(patterns.map(|p| -> Result {
         match p {
             Pattern::Conjunction(c) => validate_no_nested_negations(c.patterns.iter(), rule_label),
@@ -118,7 +114,7 @@ fn validate_no_nested_negations<'a>(patterns: impl Iterator<Item=&'a Pattern>, r
     }))
 }
 
-fn contains_negations<'a>(mut patterns: impl Iterator<Item=&'a Pattern>) -> bool {
+fn contains_negations<'a>(mut patterns: impl Iterator<Item = &'a Pattern>) -> bool {
     patterns.any(|p| match p {
         Pattern::Conjunction(c) => contains_negations(c.patterns.iter()),
         Pattern::Statement(_) => false,
@@ -151,11 +147,14 @@ fn validate_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result
 }
 
 fn infers_ownership(then: &ThingStatement) -> bool {
-    then.has.len() == 1 && (then.iid.is_none() && then.isa.is_none() && then.predicate.is_none() && then.relation.is_none())
+    then.has.len() == 1
+        && (then.iid.is_none() && then.isa.is_none() && then.predicate.is_none() && then.relation.is_none())
 }
 
 fn infers_relation(then: &ThingStatement) -> bool {
-    then.relation.is_some() && then.isa.is_some() && (then.iid.is_none() && then.has.is_empty() && then.predicate.is_none())
+    then.relation.is_some()
+        && then.isa.is_some()
+        && (then.iid.is_none() && then.has.is_empty() && then.predicate.is_none())
 }
 
 fn validate_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {

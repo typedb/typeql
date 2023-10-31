@@ -23,11 +23,10 @@
 use crate::{
     common::token,
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, Predicate, RolePlayerConstraint,
+        HasConstraint, IIDConstraint, IsaConstraint, Predicate, RelationConstraint, RolePlayerConstraint,
         ThingStatement, Value,
     },
 };
-use crate::pattern::RelationConstraint;
 
 pub trait ThingStatementBuilder {
     fn has(self, has: impl Into<HasConstraint>) -> ThingStatement;

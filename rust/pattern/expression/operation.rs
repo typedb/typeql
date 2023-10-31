@@ -22,13 +22,8 @@
 
 use std::{cmp::Ordering, fmt};
 
-use crate::{
-    common::token,
-    pattern::LeftOperand,
-};
-use crate::variable::variable::VariableRef;
-
 use super::Expression;
+use crate::{common::token, pattern::LeftOperand, variable::variable::VariableRef};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Operation {
@@ -116,9 +111,7 @@ impl Operation {
 
     pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self.arity() {
-            Arity::Binary => Box::new(
-                self.left().unwrap().variables().chain(self.right().unwrap().variables()),
-            ),
+            Arity::Binary => Box::new(self.left().unwrap().variables().chain(self.right().unwrap().variables())),
         }
     }
 }

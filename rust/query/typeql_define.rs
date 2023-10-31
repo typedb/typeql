@@ -79,7 +79,6 @@ impl Validatable for TypeQLDefine {
     }
 }
 
-
 impl fmt::Display for TypeQLDefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", token::Clause::Define)?;

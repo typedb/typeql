@@ -23,7 +23,6 @@
 mod steps;
 
 use cucumber::{StatsWriter, World};
-
 use steps::*;
 
 fn main() {
@@ -33,5 +32,5 @@ fn main() {
             !sc.tags.iter().any(|t| t == "ignore" || t == "ignore-typeql")
         }),
     )
-        .execution_has_failed());
+    .execution_has_failed());
 }

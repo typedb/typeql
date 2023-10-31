@@ -23,10 +23,10 @@
 use std::fmt;
 
 use crate::{
-    common::{Result, token, validatable::Validatable},
+    common::{token, validatable::Validatable, Result},
     pattern::Expression,
+    variable::variable::VariableRef,
 };
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AssignConstraint {

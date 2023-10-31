@@ -25,15 +25,13 @@ use std::{fmt, iter};
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         token,
         validatable::Validatable,
+        Result,
     },
-    Label,
-    variable::ConceptVariable, write_joined,
+    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    write_joined, Label,
 };
-use crate::variable::TypeReference;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
@@ -50,7 +48,7 @@ impl RelationConstraint {
         self.role_players.push(role_player);
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(self.role_players.iter().flat_map(|rp| rp.variables()))
     }
 }
@@ -97,9 +95,10 @@ impl RolePlayerConstraint {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        Box::new(self.role_type.iter().flat_map(|r| r.variables())
-            .chain(iter::once(VariableRef::Concept(&self.player))))
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(
+            self.role_type.iter().flat_map(|r| r.variables()).chain(iter::once(VariableRef::Concept(&self.player))),
+        )
     }
 }
 

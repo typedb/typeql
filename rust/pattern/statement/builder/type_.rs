@@ -22,11 +22,11 @@
 
 use crate::{
     common::token,
-    Label,
     pattern::{
         LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint, SubConstraint,
         TypeStatement, ValueTypeConstraint,
     },
+    Label,
 };
 
 pub trait TypeStatementBuilder: Sized {

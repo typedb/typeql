@@ -23,14 +23,10 @@
 use std::fmt;
 
 use crate::{
-    common::{Result, validatable::Validatable},
-    pattern::{
-        LeftOperand,
-        ValueStatement,
-    },
+    common::{token, validatable::Validatable, Result},
+    pattern::{LeftOperand, ValueStatement},
+    variable::variable::validate_variable_name,
 };
-use crate::common::token;
-use crate::variable::variable::validate_variable_name;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum ValueVariable {

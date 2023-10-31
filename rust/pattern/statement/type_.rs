@@ -25,17 +25,16 @@ use std::{fmt, iter};
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         validatable::Validatable,
+        Result,
     },
     pattern::{
-        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,
-        RelatesConstraint, SubConstraint, ValueTypeConstraint,
+        AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint,
+        SubConstraint, ValueTypeConstraint,
     },
+    variable::{variable::VariableRef, ConceptVariable},
     write_joined,
 };
-use crate::variable::ConceptVariable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeStatement {
@@ -69,7 +68,7 @@ impl TypeStatement {
         VariableRef::Concept(&self.variable)
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
             iter::once(self.owner())
                 .chain(self.owns.iter().flat_map(|c| c.variables()))
@@ -153,7 +152,6 @@ impl From<ConceptVariable> for TypeStatement {
         TypeStatement::new(variable)
     }
 }
-
 
 impl fmt::Display for TypeStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

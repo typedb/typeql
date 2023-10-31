@@ -27,18 +27,18 @@ use itertools::Itertools;
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::{Conjunction, VariablesRetrieved},
-    query::{AggregateQueryBuilder, TypeQLGetGroup},
+    query::{
+        modifier::{Modifiers, Sorting},
+        AggregateQueryBuilder, MatchClause, TypeQLGetGroup,
+    },
+    variable::{variable::VariableRef, Variable},
     write_joined,
 };
-use crate::query::MatchClause;
-use crate::query::modifier::{Modifiers, Sorting};
-use crate::variable::Variable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGet {
@@ -80,13 +80,13 @@ impl Validatable for TypeQLGet {
             self.match_clause.validate(),
             validate_filters_are_in_scope(&match_variables, &self.filter),
             self.modifiers.sorting.as_ref().map(|s| s.validate(&retrieved_variables)).unwrap_or(Ok(())),
-            validate_variable_names_are_unique(&self.match_clause.conjunction)
+            validate_variable_names_are_unique(&self.match_clause.conjunction),
         ])
     }
 }
 
 impl VariablesRetrieved for TypeQLGet {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         if !self.filter.vars.is_empty() {
             Box::new(self.filter.vars.iter().map(|v| v.as_ref()))
         } else {
@@ -113,7 +113,8 @@ fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef<'_>>, fil
 
 fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
     let all_refs = conjunction.variables_recursive();
-    let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) = all_refs.partition(|r| r.is_concept());
+    let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) =
+        all_refs.partition(|r| r.is_concept());
     let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
     let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
     let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();

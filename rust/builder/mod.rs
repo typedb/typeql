@@ -23,15 +23,13 @@
 use crate::{
     common::token,
     pattern::{
-        Constant, Expression, Function, Negation, Predicate, RolePlayerConstraint,
-        RuleLabel, ThingStatement, TypeStatement, Value,
+        Constant, Expression, Function, Label, Negation, Predicate, RolePlayerConstraint, RuleLabel, ThingStatement,
+        ThingStatementBuilder, TypeStatement, Value,
     },
+    query::ProjectionKeyLabel,
+    variable::{ConceptVariable, TypeReference, ValueVariable},
     Pattern,
-    variable::{ConceptVariable, ValueVariable},
 };
-use crate::pattern::{Label, ThingStatementBuilder};
-use crate::query::ProjectionKeyLabel;
-use crate::variable::TypeReference;
 
 #[macro_export]
 macro_rules! typeql_match {

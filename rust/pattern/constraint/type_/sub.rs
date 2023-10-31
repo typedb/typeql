@@ -23,13 +23,11 @@
 use std::fmt;
 
 use crate::{
-    common::{Result, token, validatable::Validatable},
-    Label,
+    common::{token, validatable::Validatable, Result},
     pattern::IsExplicit,
-    variable::ConceptVariable,
+    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    Label,
 };
-use crate::variable::TypeReference;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SubConstraint {
@@ -38,7 +36,7 @@ pub struct SubConstraint {
 }
 
 impl SubConstraint {
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         self.type_.variables()
     }
 }

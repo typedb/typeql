@@ -20,17 +20,19 @@
  *
  */
 
-use std::collections::HashSet;
-use std::{fmt, iter};
+use std::{collections::HashSet, fmt, iter};
 
 use crate::{
-    common::{error::collect_err, Result, token, validatable::Validatable},
+    common::{
+        error::{collect_err, TypeQLError},
+        token,
+        validatable::Validatable,
+        Result,
+    },
     pattern::VariablesRetrieved,
     query::{AggregateQueryBuilder, TypeQLGet},
+    variable::{variable::VariableRef, Variable},
 };
-use crate::common::error::TypeQLError;
-use crate::variable::Variable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGetGroup {
@@ -46,13 +48,13 @@ impl Validatable for TypeQLGetGroup {
         collect_err(
             [self.query.validate(), self.group_var.validate()]
                 .into_iter()
-                .chain(iter::once(&self.group_var).map(|v| validate_variable_in_scope(v, &retrieved_variables)))
+                .chain(iter::once(&self.group_var).map(|v| validate_variable_in_scope(v, &retrieved_variables))),
         )
     }
 }
 
 impl VariablesRetrieved for TypeQLGetGroup {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         self.query.retrieved_variables()
     }
 }

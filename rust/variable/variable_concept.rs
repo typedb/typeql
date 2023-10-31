@@ -23,7 +23,7 @@
 use std::fmt;
 
 use crate::{
-    common::{Result, token, validatable::Validatable},
+    common::{token, validatable::Validatable, Result},
     pattern::LeftOperand,
     variable::variable::validate_variable_name,
 };

@@ -25,28 +25,27 @@ use std::{collections::HashSet, fmt};
 pub use conjunction::Conjunction;
 pub use constant::Constant;
 pub use constraint::{
-    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsaConstraint, IsConstraint,
-    IsExplicit, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, RegexConstraint,
-    RelatesConstraint, RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
+    AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, RegexConstraint, RelatesConstraint,
+    RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
 pub use expression::{Expression, Function, Operation};
 pub use label::Label;
 pub use negation::Negation;
-pub use schema::{RuleLabel, Rule};
-pub use statement::{
-    ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder,
-    Statement, ThingStatement,
-    ThingStatementBuilder,  TypeStatement, TypeStatementBuilder, ValueStatement, ValueStatementBuilder,
-};
+pub use schema::{Rule, RuleLabel};
 pub(crate) use statement::LeftOperand;
-
-use crate::{
-    common::{Result, validatable::Validatable},
-    enum_getter, enum_wrapper,
+pub use statement::{
+    ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder, Statement, ThingStatement,
+    ThingStatementBuilder, TypeStatement, TypeStatementBuilder, ValueStatement, ValueStatementBuilder,
 };
+
 pub use crate::common::variables_retrieved::VariablesRetrieved;
-use crate::variable::variable::VariableRef;
+use crate::{
+    common::{validatable::Validatable, Result},
+    enum_getter, enum_wrapper,
+    variable::variable::VariableRef,
+};
 
 mod conjunction;
 mod constant;
@@ -69,7 +68,7 @@ pub enum Pattern {
 }
 
 impl Pattern {
-    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(match self {
             Pattern::Conjunction(conjunction) => conjunction.variables_recursive(),
             Pattern::Disjunction(disjunction) => disjunction.variables_recursive(),
@@ -114,12 +113,12 @@ impl Validatable for Pattern {
 }
 
 impl VariablesRetrieved for Pattern {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
             Pattern::Conjunction(conjunction) => conjunction.retrieved_variables(),
             Pattern::Disjunction(disjunction) => disjunction.variables_recursive(),
             Pattern::Negation(negation) => negation.variables_recursive(),
-            Pattern::Statement(statement) => statement.variables()
+            Pattern::Statement(statement) => statement.variables(),
         }
     }
 }

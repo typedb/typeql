@@ -25,7 +25,6 @@ use typeql::{parse_query, query::Query};
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
 
-
 fn parse_query_in_step(step: &Step) -> Query {
     parse_query(step.docstring.as_ref().unwrap()).unwrap()
 }

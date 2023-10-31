@@ -27,14 +27,14 @@ use itertools::Itertools;
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         string::indent,
+        token,
         validatable::Validatable,
+        Result,
     },
     pattern::{Disjunction, Normalisable, Pattern, VariablesRetrieved},
+    variable::variable::VariableRef,
 };
-use crate::common::token;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Conjunction {
@@ -61,7 +61,11 @@ impl Conjunction {
     }
 }
 
-fn validate_bounded(names: &HashSet<VariableRef<'_>>, bounds: &HashSet<VariableRef<'_>>, conjunction: &Conjunction) -> Result {
+fn validate_bounded(
+    names: &HashSet<VariableRef<'_>>,
+    bounds: &HashSet<VariableRef<'_>>,
+    conjunction: &Conjunction,
+) -> Result {
     if bounds.is_disjoint(names) {
         Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
     }
@@ -75,14 +79,16 @@ impl PartialEq for Conjunction {
 }
 
 impl VariablesRetrieved for Conjunction {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
-        Box::new(self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
-            |p| match p {
-                Pattern::Statement(v) => v.variables(),
-                Pattern::Conjunction(c) => c.retrieved_variables(),
-                _ => unreachable!(),
-            },
-        ))
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+        Box::new(
+            self.patterns.iter().filter(|p| matches!(p, Pattern::Statement(_) | Pattern::Conjunction(_))).flat_map(
+                |p| match p {
+                    Pattern::Statement(v) => v.variables(),
+                    Pattern::Conjunction(c) => c.retrieved_variables(),
+                    _ => unreachable!(),
+                },
+            ),
+        )
     }
 }
 

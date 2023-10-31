@@ -23,10 +23,10 @@
 use std::{collections::HashSet, fmt};
 
 use crate::{
-    common::{error::collect_err, Result, string::indent, token, validatable::Validatable},
+    common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
     pattern::{Conjunction, Normalisable, Pattern},
+    variable::variable::VariableRef,
 };
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Disjunction {
@@ -100,7 +100,12 @@ impl fmt::Display for Disjunction {
                 .iter()
                 .map(|pattern| match pattern {
                     Pattern::Conjunction(conjunction) => conjunction.to_string(),
-                    other => format!("{}\n{};\n{}", token::Char::CurlyLeft, indent(&other.to_string()), token::Char::CurlyRight),
+                    other => format!(
+                        "{}\n{};\n{}",
+                        token::Char::CurlyLeft,
+                        indent(&other.to_string()),
+                        token::Char::CurlyRight
+                    ),
                 })
                 .collect::<Vec<_>>()
                 .join(&format!(" {} ", token::LogicOperator::Or)),

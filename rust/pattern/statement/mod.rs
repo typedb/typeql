@@ -22,26 +22,23 @@
 
 use std::{collections::HashSet, fmt};
 
+pub(crate) use builder::LeftOperand;
 pub use builder::{
-    ConceptConstrainable, ConceptStatementBuilder, ExpressionBuilder,
-     ThingStatementBuilder,  TypeStatementBuilder,
+    ConceptConstrainable, ConceptStatementBuilder, ExpressionBuilder, ThingStatementBuilder, TypeStatementBuilder,
     ValueStatementBuilder,
 };
-pub(crate) use builder::LeftOperand;
 pub use concept::ConceptStatement;
 pub use thing::ThingStatement;
 pub use type_::TypeStatement;
 pub use value::ValueStatement;
 
+pub use crate::variable::{variable::Variable, variable_concept::ConceptVariable, variable_value::ValueVariable};
 use crate::{
-    common::{error::TypeQLError, Result, validatable::Validatable},
+    common::{error::TypeQLError, validatable::Validatable, Result},
     enum_wrapper,
     pattern::{Normalisable, Pattern},
+    variable::variable::VariableRef,
 };
-pub use crate::variable::variable::Variable;
-use crate::variable::variable::VariableRef;
-pub use crate::variable::variable_concept::ConceptVariable;
-pub use crate::variable::variable_value::ValueVariable;
 
 mod builder;
 mod concept;
@@ -67,7 +64,7 @@ impl Statement {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
             Statement::Concept(concept) => concept.variables(),
             Statement::Thing(thing) => thing.variables(),

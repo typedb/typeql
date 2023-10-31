@@ -23,14 +23,10 @@
 use std::{fmt, iter};
 
 use crate::{
-    common::{error::collect_err, Result, validatable::Validatable},
-    pattern::{
-        AssignConstraint,
-        Predicate,
-    },
+    common::{error::collect_err, validatable::Validatable, Result},
+    pattern::{AssignConstraint, Predicate},
+    variable::{variable::VariableRef, ValueVariable},
 };
-use crate::variable::ValueVariable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueStatement {
@@ -48,7 +44,7 @@ impl ValueStatement {
         VariableRef::Value(&self.variable)
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         Box::new(
             iter::once(self.owner())
                 .chain(self.assign_constraint.iter().flat_map(|assign| assign.variables()))

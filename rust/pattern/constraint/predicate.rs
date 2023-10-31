@@ -25,16 +25,14 @@ use std::{fmt, iter};
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
         string::escape_regex,
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::Constant,
-    variable::{ConceptVariable, ValueVariable},
+    variable::{variable::VariableRef, ConceptVariable, ValueVariable, Variable},
 };
-use crate::variable::Variable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Predicate {
@@ -50,7 +48,7 @@ impl Predicate {
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match &self.value {
             Value::ThingVariable(var) => Box::new(iter::once(VariableRef::Concept(var))),
             Value::ValueVariable(var) => Box::new(iter::once(VariableRef::Value(var))),
@@ -61,9 +59,10 @@ impl Predicate {
 
 impl Validatable for Predicate {
     fn validate(&self) -> Result {
-        collect_err(
-            [validate_string_value_with_substring_predicate(self.predicate, &self.value), self.value.validate()]
-        )
+        collect_err([
+            validate_string_value_with_substring_predicate(self.predicate, &self.value),
+            self.value.validate(),
+        ])
     }
 }
 

@@ -23,17 +23,17 @@
 use std::{fmt, iter};
 
 use chrono::NaiveDateTime;
-
 pub use function::Function;
 pub use operation::Operation;
 
-use crate::pattern::Constant;
-use crate::variable::{ConceptVariable, ValueVariable, Variable};
-use crate::variable::variable::VariableRef;
+use crate::{
+    pattern::Constant,
+    variable::{variable::VariableRef, ConceptVariable, ValueVariable, Variable},
+};
 
+pub mod builder;
 mod function;
 mod operation;
-pub mod builder;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
@@ -57,7 +57,7 @@ impl fmt::Display for Expression {
 }
 
 impl Expression {
-    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
             Expression::Operation(operation) => operation.variables(),
             Expression::Function(function) => function.variables(),
@@ -85,7 +85,6 @@ impl From<Constant> for Expression {
         Self::Constant(constant)
     }
 }
-
 
 impl From<Variable> for Expression {
     fn from(variable: Variable) -> Self {

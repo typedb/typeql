@@ -21,15 +21,20 @@
 
 use std::{fmt, iter};
 
-use crate::common::{Error, token};
-use crate::common::error::{collect_err, TypeQLError};
-use crate::common::validatable::Validatable;
-use crate::pattern::{Conjunction, Pattern, VariablesRetrieved};
-use crate::query::{Projection, typeql_get, TypeQLDelete, TypeQLFetch, TypeQLGet, TypeQLInsert, Writable};
-use crate::query::modifier::Modifiers;
-use crate::Result;
-use crate::variable::Variable;
-use crate::variable::variable::VariableRef;
+use crate::{
+    common::{
+        error::{collect_err, TypeQLError},
+        token,
+        validatable::Validatable,
+        Error,
+    },
+    pattern::{Conjunction, Pattern, VariablesRetrieved},
+    query::{
+        modifier::Modifiers, typeql_get, Projection, TypeQLDelete, TypeQLFetch, TypeQLGet, TypeQLInsert, Writable,
+    },
+    variable::{variable::VariableRef, Variable},
+    Result,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {
@@ -46,7 +51,11 @@ impl MatchClause {
     }
 
     pub fn get(self) -> TypeQLGet {
-        TypeQLGet { match_clause: self, filter: typeql_get::Filter { vars: Vec::default() }, modifiers: Modifiers::default() }
+        TypeQLGet {
+            match_clause: self,
+            filter: typeql_get::Filter { vars: Vec::default() },
+            modifiers: Modifiers::default(),
+        }
     }
 
     pub fn get_vars(self, vars: Vec<Variable>) -> TypeQLGet {
@@ -80,7 +89,7 @@ impl MatchClause {
 }
 
 impl VariablesRetrieved for MatchClause {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
+    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         self.conjunction.retrieved_variables()
     }
 }
@@ -93,7 +102,7 @@ impl Validatable for MatchClause {
     }
 }
 
-fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item=&'a Pattern>) -> Result {
+fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item = &'a Pattern>) -> Result {
     collect_err(patterns.map(|p| {
         match p {
             Pattern::Statement(v) => v

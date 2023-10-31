@@ -26,8 +26,8 @@ use std::collections::HashSet;
 use crate::{
     common::{error::TypeQLError, string::indent, token, validatable::Validatable, Result},
     pattern::{Conjunction, Disjunction, Normalisable, Pattern},
+    variable::variable::VariableRef,
 };
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Negation {
@@ -91,9 +91,23 @@ impl fmt::Display for Negation {
         if matches!(*self.pattern, Pattern::Conjunction(_)) {
             write!(f, "{} {}", token::LogicOperator::Not, pattern_string)
         } else if pattern_string.lines().count() > 1 {
-            write!(f, "{} {}\n{};\n{}", token::LogicOperator::Not, token::Char::CurlyLeft, indent(&pattern_string), token::Char::CurlyRight)
+            write!(
+                f,
+                "{} {}\n{};\n{}",
+                token::LogicOperator::Not,
+                token::Char::CurlyLeft,
+                indent(&pattern_string),
+                token::Char::CurlyRight
+            )
         } else {
-            write!(f, "{} {} {}; {}", token::LogicOperator::Not, token::Char::CurlyLeft, pattern_string, token::Char::CurlyRight)
+            write!(
+                f,
+                "{} {} {}; {}",
+                token::LogicOperator::Not,
+                token::Char::CurlyLeft,
+                pattern_string,
+                token::Char::CurlyRight
+            )
         }
     }
 }

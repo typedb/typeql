@@ -19,7 +19,7 @@
 # under the License.
 #
 
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test", "rustfmt_test")
 load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@vaticle_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
@@ -83,6 +83,17 @@ deploy_github(
     organisation = deployment_github['github.organisation'],
     repository = deployment_github['github.repository'],
     draft = False
+)
+
+rustfmt_test(
+    name = "rustfmt_test",
+    targets = [":typeql"],
+    size = "small",
+)
+
+filegroup(
+    name = "rustfmt_config",
+    srcs = ["rustfmt.toml"],
 )
 
 checkstyle_test(
