@@ -100,9 +100,21 @@ checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
-        "**/*",
-    ], exclude = ["target/**"]),
-    exclude = ["LICENSE", "README.md"],
+        "builder/**",
+        "common/**",
+        "parser/**",
+        "pattern/**",
+        "query/**",
+        "tests/**",
+        "util/**",
+        "variable/**",
+      ], exclude = [
+        "target/**",
+        "README.md",
+        "LICENSE",
+        "**/Cargo.toml",
+        "**/Cargo.lock",
+    ]),
     license_type = "apache-header",
 )
 

@@ -92,7 +92,8 @@ generic_step_impl! {
         assert_eq!(parsed, reparse_query(&parsed));
     }
 
-    #[step("aggregate answer is not a number")]
+    #[step("aggregate answer is empty")]
+    #[step("group aggregate answer value is empty")]
     #[step("answer groups are")]
     #[step("answers contain explanation tree")]
     #[step("fetch answers are")]
