@@ -68,7 +68,8 @@ public class MavenApplicationTest {
                 "} or {\n" +
                 "    $t 'Spy';\n" +
                 "};\n" +
-                "$t != 'Apocalypse Now';";
+                "$t != 'Apocalypse Now';" +
+                "get;";
         TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
 
         TypeQLGet expected = match(
