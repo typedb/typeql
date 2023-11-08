@@ -24,11 +24,11 @@
 macro_rules! error_messages {
     {
         $name:ident code: $code_pfx:literal, type: $message_pfx:literal,
-        $($error_name:ident( $($inner:ty),* $(,)? ) = $code:literal: $body:literal),+ $(,)?
+        $($error_name:ident $(( $($inner:ty),* $(,)? ))? = $code:literal: $body:literal),+ $(,)?
     } => {
         #[derive(Clone, Eq, PartialEq)]
         pub enum $name {$(
-            $error_name($($inner),*),
+            $error_name $( ( $($inner),* ) )?,
         )*}
 
         impl $name {
@@ -36,7 +36,7 @@ macro_rules! error_messages {
 
             pub const fn code(&self) -> usize {
                 match self {$(
-                    Self::$error_name(..) => $code,
+                    Self::$error_name $( (error_messages!(@rest $($inner),*)) )? => $code,
                 )*}
             }
 
@@ -45,7 +45,7 @@ macro_rules! error_messages {
             }
 
             pub fn message(&self) -> String {
-                $(error_messages!(@format self, $error_name, $body $(, $inner)*);)*
+                $(error_messages!(@format self, $error_name, $body $($(, $inner)*)?);)*
                 unreachable!()
             }
 
@@ -71,7 +71,7 @@ macro_rules! error_messages {
 
             const fn name(&self) -> &'static str {
                 match self {$(
-                    Self::$error_name(..) => concat!(stringify!($name), "::", stringify!($error_name)),
+                    Self::$error_name $( (error_messages!(@rest $($inner),*)) )? => concat!(stringify!($name), "::", stringify!($error_name)),
                 )*}
             }
         }
@@ -96,7 +96,7 @@ macro_rules! error_messages {
                     self,
                     $error_name,
                     debug_struct
-                    $(, $inner)*
+                    $($(, $inner)*)?
                 );)*
                 debug_struct.finish()
             }
@@ -109,8 +109,10 @@ macro_rules! error_messages {
         }
     };
 
+    (@rest $($inner:ty),*) => { .. };
+
     (@format $self:ident, $error_name:ident, $body:literal) => {
-        if let Self::$error_name() = &$self {
+        if &Self::$error_name == $self {
             return format!($body)
         }
     };
@@ -136,7 +138,7 @@ macro_rules! error_messages {
     };
 
     (@payload $self:ident, $error_name:ident, $debug_struct:expr) => {
-        if let Self::$error_name() = &$self {
+        if let Self::$error_name = &$self {
             $debug_struct.field("payload", &());
         }
     };
@@ -171,28 +173,28 @@ macro_rules! error_messages {
 mod tests {
     error_messages! { TestError
         code: "TST", type: "Test Error",
-        BasicError() =
+        BasicError =
             1: "This is a basic error.",
         ErrorWithAttributes(i32, String) =
             2: "This is an error with i32 {} and string '{}'.",
-        MultiLine() =
+        MultiLine =
             3: "This is an error,\nthat spans,\nmultiple lines."
     }
 
     #[test]
     pub fn debug_includes_display() {
         let errors = [
-            TestError::BasicError(),
+            TestError::BasicError,
             TestError::ErrorWithAttributes(1, "error message".to_string()),
-            TestError::MultiLine(),
+            TestError::MultiLine,
         ];
 
         for error in errors {
             let display = format!("{error}");
             let compact_debug = format!("{error:?}");
             let expanded_debug = format!("{error:#?}");
-            assert!(compact_debug.contains(&display.replace('\n', &"\\n")));
-            assert!(expanded_debug.contains(&display.replace('\n', &"\\n")));
+            assert!(compact_debug.contains(&display.replace('\n', "\\n")));
+            assert!(expanded_debug.contains(&display.replace('\n', "\\n")));
         }
     }
 }

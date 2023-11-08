@@ -64,7 +64,7 @@ impl Validatable for RelationConstraint {
 
 fn expect_role_players_present(role_players: &[RolePlayerConstraint]) -> Result {
     if role_players.is_empty() {
-        Err(TypeQLError::MissingConstraintRelationPlayer())?
+        Err(TypeQLError::MissingConstraintRelationPlayer)?
     }
     Ok(())
 }

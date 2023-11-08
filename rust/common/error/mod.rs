@@ -102,11 +102,11 @@ error_messages! { TypeQLError
         3: "There is a syntax error near line {}:\n{}",
     InvalidCasting(&'static str, &'static str, &'static str, &'static str) =
         4: "Enum '{}::{}' does not match '{}', and cannot be unwrapped into '{}'.",
-    MissingPatterns() =
+    MissingPatterns =
         5: "The query has not been provided with any patterns.",
-    MissingDefinables() =
+    MissingDefinables =
         6: "The query has not been provided with any definables.",
-    MatchHasNoBoundingNamedVariable() =
+    MatchHasNoBoundingNamedVariable =
         7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
     VariableNameConflict(String) =
         8: "The variable name '{}' cannot be used for both concept variables and value variables.",
@@ -134,17 +134,17 @@ error_messages! { TypeQLError
         19: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
     InsertModifiersRequireMatch(String) =
         20: "The insert query '{}' contains query modifiers that require a 'match' clause be specified",
-    VariableNotNamed() =
+    VariableNotNamed =
         21: "Anonymous variable encountered in a match query filter.",
     InvalidVariableName(String) =
         22: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
-    MissingConstraintRelationPlayer() =
+    MissingConstraintRelationPlayer =
         23: "A relation variable has not been provided with role players.",
     InvalidConstraintPredicate(token::Predicate, Value) =
         24: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
     InvalidConstraintDatetimePrecision(NaiveDateTime) =
         25: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
-    InvalidDefineQueryVariable() =
+    InvalidDefineQueryVariable =
         26: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
     InvalidUndefineQueryRule(Label) =
         27: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
@@ -160,11 +160,11 @@ error_messages! { TypeQLError
         32: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
     InvalidRuleThenRoles(Label, ThingStatement) =
         33: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
-    RedundantNestedNegation() =
+    RedundantNestedNegation =
         34: "Invalid query containing redundant nested negations.",
     VariableNotSorted(Variable) =
         35: "Variable '{}' does not exist in the sorting clause.",
-    InvalidCountVariableArgument() =
+    InvalidCountVariableArgument =
         36: "Aggregate COUNT does not accept a Variable.",
     IllegalGrammar(String) =
         37: "Illegal grammar: '{}'",

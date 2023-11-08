@@ -62,7 +62,7 @@ impl TypeQLDefine {
 
     fn validate_non_empty(&self) -> Result {
         if self.statements.is_empty() && self.rules.is_empty() {
-            Err(TypeQLError::MissingDefinables())?
+            Err(TypeQLError::MissingDefinables)?
         }
         Ok(())
     }

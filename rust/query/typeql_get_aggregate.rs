@@ -70,7 +70,7 @@ impl<T: AggregateQueryBuilder> Validatable for AggregateQuery<T> {
 
 fn validate_method_variable_compatible(method: &token::Aggregate, var: &Option<Variable>) -> Result {
     if *method == token::Aggregate::Count && var.is_some() {
-        Err(TypeQLError::InvalidCountVariableArgument())?
+        Err(TypeQLError::InvalidCountVariableArgument)?
     }
     Ok(())
 }

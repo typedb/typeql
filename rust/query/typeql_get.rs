@@ -99,7 +99,7 @@ fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef<'_>>, fil
     let mut seen = HashSet::new();
     collect_err(filter.vars.iter().map(|r| {
         if !r.is_name() {
-            Err(TypeQLError::VariableNotNamed().into())
+            Err(TypeQLError::VariableNotNamed.into())
         } else if !match_variables.contains(&r.as_ref()) {
             Err(TypeQLError::GetVarNotBound(r.to_owned()).into())
         } else if seen.contains(&r) {
