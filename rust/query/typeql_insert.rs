@@ -97,7 +97,7 @@ fn validate_insert_in_scope_of_match(
         Ok(())
     } else {
         let stmts_str = statements.iter().map(ThingStatement::to_string).collect::<Vec<String>>().join(", ");
-        let bounds_str = match_variables.into_iter().map(|r| r.to_string()).collect::<Vec<String>>().join(", ");
+        let bounds_str = match_variables.iter().map(VariableRef::to_string).collect::<Vec<String>>().join(", ");
         Err(TypeQLError::InsertClauseNotBound(stmts_str, bounds_str))?
     }
 }

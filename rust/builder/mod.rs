@@ -83,7 +83,7 @@ macro_rules! max {
         let args = [$($arg, )*];
         $crate::pattern::Expression::Function($crate::pattern::Function {
             function_name: $crate::common::token::Function::Max,
-            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+            args: args.into_iter().map(Into::into).collect(),
         })
     }}
 }
@@ -94,7 +94,7 @@ macro_rules! min {
         let args = [$($arg, )*];
         $crate::pattern::Expression::Function($crate::pattern::Function {
             function_name: token::Function::Min,
-            args: args.into_iter().map(|arg| Box::new(arg.into())).collect(),
+            args: args.into_iter().map(Into::into).collect(),
         })
     }}
 }
@@ -178,17 +178,17 @@ pub fn like<T: Into<String>>(value: T) -> Predicate {
 }
 
 pub fn abs<T: Into<Expression>>(arg: T) -> Function {
-    Function { function_name: token::Function::Abs, args: vec![Box::from(arg.into())] }
+    Function { function_name: token::Function::Abs, args: vec![arg.into()] }
 }
 
 pub fn ceil<T: Into<Expression>>(arg: T) -> Function {
-    Function { function_name: token::Function::Ceil, args: vec![Box::from(arg.into())] }
+    Function { function_name: token::Function::Ceil, args: vec![arg.into()] }
 }
 
 pub fn floor<T: Into<Expression>>(arg: T) -> Function {
-    Function { function_name: token::Function::Floor, args: vec![Box::from(arg.into())] }
+    Function { function_name: token::Function::Floor, args: vec![arg.into()] }
 }
 
 pub fn round<T: Into<Expression>>(arg: T) -> Function {
-    Function { function_name: token::Function::Round, args: vec![Box::from(arg.into())] }
+    Function { function_name: token::Function::Round, args: vec![arg.into()] }
 }

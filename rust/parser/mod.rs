@@ -85,12 +85,9 @@ impl<'a> IntoChildNodes<'a> for Node<'a> {
     fn into_child(self) -> Result<Node<'a>> {
         let mut children = self.into_children();
         let child = children.consume_any();
-        let next_child = children.try_consume_any();
-        if next_child.is_some() {
-            Err(IllegalGrammar(child.to_string() + " is followed by more tokens: " + next_child.unwrap().as_str())
-                .into())
-        } else {
-            Ok(child)
+        match children.try_consume_any() {
+            None => Ok(child),
+            Some(next) => Err(IllegalGrammar(format!("{child} is followed by more tokens: {next}")).into()),
         }
     }
 
@@ -612,8 +609,7 @@ fn visit_sort(node: Node<'_>) -> Sorting {
     dbg_assert_eq_line!(node.as_rule(), Rule::sort);
     let mut children = node.into_children();
     children.skip_expected(Rule::SORT);
-    let sorting = Sorting::new(children.map(visit_sort_var).collect());
-    sorting
+    Sorting::new(children.map(visit_sort_var).collect())
 }
 
 fn visit_sort_var(node: Node<'_>) -> sorting::SortVariable {
@@ -1001,9 +997,10 @@ fn visit_expression(node: Node<'_>) -> Expression {
 fn visit_function(node: Node<'_>) -> Function {
     dbg_assert_eq_line!(node.as_rule(), Rule::expression_function);
     let mut children = node.into_children();
-    let function_name = visit_function_name(children.consume_expected(Rule::expression_function_name));
-    let args = children.map(|arg| Box::new(visit_expression(arg))).collect();
-    Function { function_name, args }
+    Function {
+        function_name: visit_function_name(children.consume_expected(Rule::expression_function_name)),
+        args: children.map(visit_expression).collect(),
+    }
 }
 
 fn visit_function_name(node: Node<'_>) -> token::Function {

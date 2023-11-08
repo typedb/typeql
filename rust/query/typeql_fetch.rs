@@ -51,8 +51,8 @@ impl TypeQLFetch {
             .chain(self.projections.iter().flat_map(|p| p.key_variable().into_iter().chain(p.value_variables())));
         let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) =
             all_refs.partition(|r| r.is_concept());
-        let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
-        let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
+        let concept_names = concept_refs.iter().collect::<HashSet<_>>();
+        let value_names = value_refs.iter().collect::<HashSet<_>>();
         let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
         if !common_refs.is_empty() {
             return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());
@@ -154,17 +154,16 @@ pub enum ProjectionKeyLabel {
 
 impl ProjectionKeyLabel {
     pub fn map_subquery_get_aggregate(self, subquery: TypeQLGetAggregate) -> Projection {
-        Projection::Subquery(self.into(), ProjectionSubquery::GetAggregate(subquery))
+        Projection::Subquery(self, ProjectionSubquery::GetAggregate(subquery))
     }
 
     pub fn map_subquery_fetch(self, subquery: TypeQLFetch) -> Projection {
-        Projection::Subquery(self.into(), ProjectionSubquery::Fetch(Box::new(subquery)))
+        Projection::Subquery(self, ProjectionSubquery::Fetch(Box::new(subquery)))
     }
 
     fn must_quote(s: &str) -> bool {
         // TODO: we should actually check against valid label regex, instead of valid variable regex - Java has to be updated too
-        let x = !variable::is_valid_variable_name(s);
-        x
+        !variable::is_valid_variable_name(s)
     }
 }
 

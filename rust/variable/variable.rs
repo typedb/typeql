@@ -101,7 +101,7 @@ impl VariableRef<'_> {
         matches!(self, VariableRef::Value(_))
     }
 
-    pub fn to_owned(&self) -> Variable {
+    pub fn to_owned(self) -> Variable {
         match self {
             Self::Concept(var) => Variable::Concept((*var).clone()),
             Self::Value(var) => Variable::Value((*var).clone()),

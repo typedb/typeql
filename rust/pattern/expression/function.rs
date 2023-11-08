@@ -28,7 +28,7 @@ use crate::{common::token, pattern::LeftOperand, variable::variable::VariableRef
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Function {
     pub(crate) function_name: token::Function,
-    pub(crate) args: Vec<Box<Expression>>,
+    pub(crate) args: Vec<Expression>,
 }
 
 impl Function {
