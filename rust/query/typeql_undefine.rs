@@ -44,8 +44,8 @@ impl TypeQLUndefine {
         undefinables.into_iter().fold(TypeQLUndefine::default(), |undefine, undefinable| match undefinable {
             Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
             Definable::TypeStatement(var) => undefine.add_statement(var),
-            Definable::RuleDefinition(r) => {
-                panic!("{}", TypeQLError::InvalidUndefineQueryRule(r.label))
+            Definable::RuleDefinition(rule) => {
+                panic!("{}", TypeQLError::InvalidUndefineQueryRule { rule_label: rule.label })
             }
         })
     }

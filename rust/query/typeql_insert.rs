@@ -61,7 +61,7 @@ impl TypeQLInsert {
 
     fn validate_modifiers_have_match_clause(&self) -> Result {
         if !self.modifiers.is_empty() && self.match_clause.is_none() {
-            Err(TypeQLError::InsertModifiersRequireMatch(self.to_string()))?
+            Err(TypeQLError::InsertModifiersRequireMatch { insert: self.to_string() })?
         } else {
             Ok(())
         }
@@ -98,7 +98,7 @@ fn validate_insert_in_scope_of_match(
     } else {
         let stmts_str = statements.iter().map(ThingStatement::to_string).collect::<Vec<String>>().join(", ");
         let bounds_str = match_variables.iter().map(VariableRef::to_string).collect::<Vec<String>>().join(", ");
-        Err(TypeQLError::InsertClauseNotBound(stmts_str, bounds_str))?
+        Err(TypeQLError::InsertClauseNotBound { insert_statements: stmts_str, bounds: bounds_str })?
     }
 }
 

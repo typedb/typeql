@@ -101,9 +101,9 @@ fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef<'_>>, fil
         if !r.is_name() {
             Err(TypeQLError::VariableNotNamed.into())
         } else if !match_variables.contains(&r.as_ref()) {
-            Err(TypeQLError::GetVarNotBound(r.to_owned()).into())
+            Err(TypeQLError::GetVarNotBound { variable: r.to_owned() }.into())
         } else if seen.contains(&r) {
-            Err(TypeQLError::GetVarRepeating(r.to_owned()).into())
+            Err(TypeQLError::GetVarRepeating { variable: r.to_owned() }.into())
         } else {
             seen.insert(r);
             Ok(())
@@ -116,7 +116,9 @@ fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
     let (concept_refs, value_refs) = all_refs.partition::<HashSet<_>, _>(VariableRef::is_concept);
     let common_refs = concept_refs.intersection(&value_refs).collect::<HashSet<_>>();
     if !common_refs.is_empty() {
-        return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());
+        return Err(
+            TypeQLError::VariableNameConflict { names: common_refs.iter().map(|r| r.to_string()).join(", ") }.into()
+        );
     }
     Ok(())
 }

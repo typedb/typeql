@@ -87,7 +87,7 @@ impl<'a> IntoChildNodes<'a> for Node<'a> {
         let child = children.consume_any();
         match children.try_consume_any() {
             None => Ok(child),
-            Some(next) => Err(IllegalGrammar(format!("{child} is followed by more tokens: {next}")).into()),
+            Some(next) => Err(IllegalGrammar { input: format!("{child} is followed by more tokens: {next}") }.into()),
         }
     }
 
@@ -185,7 +185,7 @@ pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
     let parsed = parse_single(Rule::eof_label, label)?.into_children().consume_expected(Rule::label);
     let string = parsed.as_str();
     if string != label {
-        Err(TypeQLError::IllegalCharInLabel(label.to_string()))?;
+        Err(TypeQLError::IllegalCharInLabel { input: label.to_string() })?;
     }
     Ok(string.into())
 }
@@ -210,28 +210,31 @@ fn get_long(long: Node<'_>) -> i64 {
 }
 
 fn long_from_string(string: &str) -> i64 {
-    string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(string.to_string())))
+    string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: string.to_owned() }))
 }
 
 fn double_from_string(string: &str) -> f64 {
-    string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(string.to_string())))
+    string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: string.to_owned() }))
 }
 
 fn get_boolean(boolean: Node<'_>) -> bool {
     dbg_assert_eq_line!(boolean.as_rule(), Rule::BOOLEAN_);
-    boolean.as_str().parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(boolean.to_string())))
+    boolean
+        .as_str()
+        .parse()
+        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: boolean.to_string() }))
 }
 
 fn get_date(date: Node<'_>) -> NaiveDate {
     dbg_assert_eq_line!(date.as_rule(), Rule::DATE_);
     NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
-        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar(date.to_string())))
+        .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: date.to_string() }))
 }
 
 fn get_date_time(date_time: Node<'_>) -> NaiveDateTime {
     dbg_assert_eq_line!(date_time.as_rule(), Rule::DATETIME_);
     date_time::parse(date_time.as_str())
-        .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar(date_time.to_string())))
+        .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar { input: date_time.to_string() }))
 }
 
 fn get_var(node: Node<'_>) -> Variable {
@@ -312,7 +315,7 @@ fn visit_query(node: Node<'_>) -> Query {
         Rule::query_get_aggregate => visit_query_get_aggregate(child).into(),
         Rule::query_get_group => visit_query_get_group(child).into(),
         Rule::query_get_group_agg => visit_query_get_group_agg(child).into(),
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     query
@@ -357,7 +360,7 @@ fn visit_projection(node: Node<'_>) -> Projection {
             let subquery = visit_projection_subquery(children.consume_expected(Rule::projection_subquery));
             Projection::Subquery(key_label, subquery)
         }
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     }
 }
 
@@ -386,7 +389,7 @@ fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
     match child.as_rule() {
         Rule::QUOTED_STRING => ProjectionKeyLabel::Quoted(get_string_from_quoted(child)),
         Rule::label => ProjectionKeyLabel::Unquoted(child.as_str().to_owned()),
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     }
 }
 
@@ -411,7 +414,7 @@ fn visit_projection_subquery(node: Node<'_>) -> ProjectionSubquery {
     match child.as_rule() {
         Rule::query_fetch => ProjectionSubquery::Fetch(Box::new(visit_query_fetch(child))),
         Rule::query_get_aggregate => ProjectionSubquery::GetAggregate(visit_query_get_aggregate(child)),
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     }
 }
 
@@ -461,7 +464,7 @@ fn visit_query_insert(node: Node<'_>) -> TypeQLInsert {
             TypeQLInsert { match_clause: Some(clause_match), statements: clause_insert, modifiers }
         }
         Rule::clause_insert => TypeQLInsert::new(visit_clause_insert(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     query
@@ -547,7 +550,7 @@ fn visit_modifiers(node: Node<'_>) -> Modifiers {
                         as usize,
                 })
             }
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(modifier.to_string()), line!()),
+            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: modifier.to_string() }, line!()),
         };
     }
     modifiers
@@ -640,7 +643,7 @@ fn visit_definable(node: Node<'_>) -> Definable {
         Rule::statement_type => visit_statement_type(child).into(),
         Rule::schema_rule => visit_schema_rule(child).into(),
         Rule::schema_rule_label => visit_schema_rule_label(child).into(),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     definable
@@ -663,7 +666,11 @@ fn visit_pattern(node: Node<'_>) -> Pattern {
             visit_pattern_conjunction(children.consume_expected(Rule::pattern_conjunction)).into()
         }
         Rule::pattern_negation => visit_pattern_negation(children.consume_expected(Rule::pattern_negation)).into(),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.consume_any().to_string()), line!()),
+        _ => unreachable!(
+            "{} at line {}",
+            TypeQLError::IllegalGrammar { input: children.consume_any().to_string() },
+            line!()
+        ),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     pattern
@@ -713,7 +720,7 @@ fn visit_statement(node: Node<'_>) -> Statement {
         Rule::statement_type => visit_statement_type(child).into(),
         Rule::statement_concept => visit_statement_concept(child).into(),
         Rule::statement_value => visit_statement_value(child).into(),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     statement
@@ -735,7 +742,7 @@ fn visit_statement_value(node: Node<'_>) -> ValueStatement {
     let var = match children.peek_rule() {
         Some(Rule::ASSIGN) => var_value.assign(visit_expression(children.skip_expected(Rule::ASSIGN).consume_any())),
         Some(Rule::predicate) => var_value.predicate(visit_predicate(children.consume_any())),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     var
@@ -780,7 +787,11 @@ fn visit_statement_type(node: Node<'_>) -> TypeStatement {
             Rule::VALUE => {
                 var_type.value(token::ValueType::from(constraint_nodes.consume_expected(Rule::value_type).as_str()))
             }
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(constraint_nodes.to_string()), line!()),
+            _ => unreachable!(
+                "{} at line {}",
+                TypeQLError::IllegalGrammar { input: constraint_nodes.to_string() },
+                line!()
+            ),
         };
         dbg_assert_line!(constraint_nodes.try_consume_any().is_none());
         statement
@@ -794,7 +805,7 @@ fn visit_annotations_owns(node: Node<'_>) -> Vec<Annotation> {
         .map(|annotation| match annotation.as_rule() {
             Rule::ANNOTATION_KEY => Annotation::Key,
             Rule::ANNOTATION_UNIQUE => Annotation::Unique,
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(annotation.to_string()), line!()),
+            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: annotation.to_string() }, line!()),
         })
         .collect()
 }
@@ -812,7 +823,7 @@ fn visit_statement_thing_any(node: Node<'_>) -> ThingStatement {
         Rule::statement_thing => visit_statement_thing(child),
         Rule::statement_relation => visit_statement_relation(child),
         Rule::statement_attribute => visit_statement_attribute(child),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     statement
@@ -830,7 +841,7 @@ fn visit_statement_thing(node: Node<'_>) -> ThingStatement {
             Rule::ISA_ => {
                 stmt_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_ref)))
             }
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
+            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
         }
     }
     if let Some(attributes) = children.try_consume_expected(Rule::attributes) {
@@ -909,11 +920,13 @@ fn visit_attribute(node: Node<'_>) -> HasConstraint {
                 Some(Rule::predicate) => {
                     HasConstraint::from((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }
-                _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
+                _ => {
+                    unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!())
+                }
             }
         }
         Some(Rule::VAR_CONCEPT_) => HasConstraint::from(get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     constraint
@@ -935,7 +948,11 @@ fn visit_predicate(node: Node<'_>) -> Predicate {
                     Rule::constant => visit_constant(predicate_value).into(),
                     Rule::VAR_ => Value::from(get_var(predicate_value)),
                     _ => {
-                        unreachable!("{} at line {}", TypeQLError::IllegalGrammar(predicate_value.to_string()), line!())
+                        unreachable!(
+                            "{} at line {}",
+                            TypeQLError::IllegalGrammar { input: predicate_value.to_string() },
+                            line!()
+                        )
                     }
                 }
             })
@@ -950,13 +967,17 @@ fn visit_predicate(node: Node<'_>) -> Predicate {
                         token::Predicate::Contains => {
                             get_string_from_quoted(children.consume_expected(Rule::QUOTED_STRING))
                         }
-                        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
+                        _ => unreachable!(
+                            "{} at line {}",
+                            TypeQLError::IllegalGrammar { input: children.to_string() },
+                            line!()
+                        ),
                     }
                 }
                 .into(),
             )
         }
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(children.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     constraint
@@ -977,7 +998,7 @@ fn visit_expression(node: Node<'_>) -> Expression {
             Rule::constant => Expression::Constant(visit_constant(primary)),
             Rule::expression_function => Expression::Function(visit_function(primary)),
             Rule::expression_parenthesis => visit_expression(primary.into_children().consume_any()),
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(primary.to_string()), line!()),
+            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: primary.to_string() }, line!()),
         })
         .map_infix(|left, op, right| {
             let op = match op.as_rule() {
@@ -987,7 +1008,7 @@ fn visit_expression(node: Node<'_>) -> Expression {
                 Rule::DIVIDE => token::ArithmeticOperator::Divide,
                 Rule::MODULO => token::ArithmeticOperator::Modulo,
                 Rule::POWER => token::ArithmeticOperator::Power,
-                _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(op.to_string()), line!()),
+                _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: op.to_string() }, line!()),
             };
             Expression::Operation(Operation::new(op, left, right))
         })
@@ -1014,7 +1035,7 @@ fn visit_function_name(node: Node<'_>) -> token::Function {
         Rule::MAX => token::Function::Max,
         Rule::MIN => token::Function::Min,
         Rule::ROUND => token::Function::Round,
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     function_token
@@ -1049,7 +1070,7 @@ fn visit_type_ref_any(node: Node<'_>) -> TypeReference {
         Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
         Rule::type_ref => visit_type_ref(child),
         Rule::type_ref_scoped => visit_type_ref_scoped(child),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     type_
@@ -1062,7 +1083,7 @@ fn visit_type_ref_scoped(node: Node<'_>) -> TypeReference {
     let type_ = match child.as_rule() {
         Rule::label_scoped => TypeReference::Label(visit_label_scoped(child)),
         Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     type_
@@ -1075,7 +1096,7 @@ fn visit_type_ref(node: Node<'_>) -> TypeReference {
     let type_ = match child.as_rule() {
         Rule::label => TypeReference::Label(child.as_str().into()),
         Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     type_
@@ -1088,7 +1109,7 @@ fn visit_label_any(node: Node<'_>) -> Label {
     let label = match child.as_rule() {
         Rule::label => Label::from(child.as_str()),
         Rule::label_scoped => visit_label_scoped(child),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     label
@@ -1112,7 +1133,7 @@ fn visit_constant(node: Node<'_>) -> Constant {
         Rule::BOOLEAN_ => Constant::from(get_boolean(child)),
         Rule::DATE_ => Constant::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
         Rule::DATETIME_ => Constant::from(get_date_time(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar(child.to_string()), line!()),
+        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
     };
     dbg_assert_line!(children.try_consume_any().is_none());
     constant

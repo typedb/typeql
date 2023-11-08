@@ -77,7 +77,7 @@ fn validate_method_variable_compatible(method: &token::Aggregate, var: &Option<V
 
 fn validate_variable_in_scope(var: &Variable, scope_variables: &HashSet<VariableRef<'_>>) -> Result {
     if !scope_variables.contains(&var.as_ref()) {
-        Err(TypeQLError::AggregateVarNotBound(var.clone()))?;
+        Err(TypeQLError::AggregateVarNotBound { variable: var.clone() })?;
     }
     Ok(())
 }

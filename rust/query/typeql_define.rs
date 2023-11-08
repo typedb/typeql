@@ -45,7 +45,7 @@ impl TypeQLDefine {
             Definable::RuleDefinition(rule) => define.add_rule(rule),
             Definable::TypeStatement(var) => define.add_statement(var),
             Definable::RuleDeclaration(r) => {
-                panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns(r.label))
+                panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns { rule_label: r.label })
             }
         })
     }

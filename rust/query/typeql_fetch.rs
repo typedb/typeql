@@ -55,7 +55,10 @@ impl TypeQLFetch {
         let value_names = value_refs.iter().collect::<HashSet<_>>();
         let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
         if !common_refs.is_empty() {
-            return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());
+            return Err(TypeQLError::VariableNameConflict {
+                names: common_refs.iter().map(|r| r.to_string()).join(", "),
+            }
+            .into());
         }
         Ok(())
     }

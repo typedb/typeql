@@ -166,7 +166,7 @@ impl Sorting {
             available_variables
                 .contains(&r.variable.as_ref())
                 .then_some(())
-                .ok_or_else(|| TypeQLError::SortVarNotBound(r.variable.clone()).into())
+                .ok_or_else(|| TypeQLError::SortVarNotBound { variable: r.variable.clone() }.into())
         }))
     }
 }

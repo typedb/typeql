@@ -81,7 +81,7 @@ fn validate_delete_in_scope(scope_variables: &HashSet<VariableRef<'_>>, statemen
         if scope_variables.contains(&r) {
             Ok(())
         } else {
-            Err(TypeQLError::DeleteVarNotBound(r.to_owned()))?
+            Err(TypeQLError::DeleteVarNotBound { variable: r.to_owned() })?
         }
     }))
 }

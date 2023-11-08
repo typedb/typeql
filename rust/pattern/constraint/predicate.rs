@@ -68,7 +68,7 @@ impl Validatable for Predicate {
 
 fn validate_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result {
     if predicate.is_substring() && !matches!(value, Value::Constant(Constant::String(_))) {
-        Err(TypeQLError::InvalidConstraintPredicate(predicate, value.clone()))?
+        Err(TypeQLError::InvalidConstraintPredicate { predicate, value: value.clone() })?
     }
     Ok(())
 }

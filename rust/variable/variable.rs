@@ -121,7 +121,7 @@ impl fmt::Display for VariableRef<'_> {
 pub(crate) fn validate_variable_name(name: &str) -> Result {
     // TODO this should be a static regex
     if !is_valid_variable_name(name) {
-        Err(TypeQLError::InvalidVariableName(name.to_string()))?
+        Err(TypeQLError::InvalidVariableName { name: name.to_owned() })?
     }
     Ok(())
 }

@@ -75,7 +75,7 @@ impl Statement {
 
     pub fn validate_is_bounded_by(&self, bounds: &HashSet<VariableRef<'_>>) -> Result {
         if !self.variables().any(|r| r.is_name() && bounds.contains(&r)) {
-            Err(TypeQLError::MatchHasUnboundedNestedPattern(self.clone().into()))?
+            Err(TypeQLError::MatchHasUnboundedNestedPattern { pattern: self.clone().into() })?
         }
         Ok(())
     }
