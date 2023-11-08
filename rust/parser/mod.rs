@@ -64,18 +64,6 @@ pub(crate) struct TypeQLParser;
 type Node<'a> = pest::iterators::Pair<'a, Rule>;
 type ChildNodes<'a> = pest::iterators::Pairs<'a, Rule>;
 
-macro_rules! dbg_assert_eq_line {
-    ($($arg:tt)*) => {
-        debug_assert_eq!($($arg)*, "\n{}", line!())
-    };
-}
-
-macro_rules! dbg_assert_line {
-    ($($arg:tt)*) => {
-        debug_assert!($($arg)*, "\n{}", line!())
-    };
-}
-
 trait IntoChildNodes<'a> {
     fn into_child(self) -> Result<Node<'a>>;
     fn into_children(self) -> ChildNodes<'a>;
@@ -195,17 +183,17 @@ pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<crate::pattern::Rule> 
 }
 
 fn get_string_from_quoted(string: Node<'_>) -> String {
-    dbg_assert_eq_line!(string.as_rule(), Rule::QUOTED_STRING);
+    debug_assert_eq!(string.as_rule(), Rule::QUOTED_STRING);
     unquote(string.as_str())
 }
 
 fn get_regex(string: Node<'_>) -> String {
-    dbg_assert_eq_line!(string.as_rule(), Rule::QUOTED_STRING);
+    debug_assert_eq!(string.as_rule(), Rule::QUOTED_STRING);
     unescape_regex(&unquote(string.as_str()))
 }
 
 fn get_long(long: Node<'_>) -> i64 {
-    dbg_assert_eq_line!(long.as_rule(), Rule::LONG_);
+    debug_assert_eq!(long.as_rule(), Rule::LONG_);
     long_from_string(long.as_str())
 }
 
@@ -218,7 +206,7 @@ fn double_from_string(string: &str) -> f64 {
 }
 
 fn get_boolean(boolean: Node<'_>) -> bool {
-    dbg_assert_eq_line!(boolean.as_rule(), Rule::BOOLEAN_);
+    debug_assert_eq!(boolean.as_rule(), Rule::BOOLEAN_);
     boolean
         .as_str()
         .parse()
@@ -226,30 +214,30 @@ fn get_boolean(boolean: Node<'_>) -> bool {
 }
 
 fn get_date(date: Node<'_>) -> NaiveDate {
-    dbg_assert_eq_line!(date.as_rule(), Rule::DATE_);
+    debug_assert_eq!(date.as_rule(), Rule::DATE_);
     NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
         .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: date.to_string() }))
 }
 
 fn get_date_time(date_time: Node<'_>) -> NaiveDateTime {
-    dbg_assert_eq_line!(date_time.as_rule(), Rule::DATETIME_);
+    debug_assert_eq!(date_time.as_rule(), Rule::DATETIME_);
     date_time::parse(date_time.as_str())
         .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar { input: date_time.to_string() }))
 }
 
 fn get_var(node: Node<'_>) -> Variable {
-    dbg_assert_eq_line!(node.as_rule(), Rule::VAR_);
+    debug_assert_eq!(node.as_rule(), Rule::VAR_);
     let name = node.as_str();
     let (prefix, _name) = name.split_at(1);
     match prefix {
         "$" => Variable::Concept(get_var_concept(node.into_children().consume_expected(Rule::VAR_CONCEPT_))),
         "?" => Variable::Value(get_var_value(node.into_children().consume_expected(Rule::VAR_VALUE_))),
-        _ => unreachable!("{}", line!()),
+        _ => unreachable!("Unexpected variable prefix in {node}"),
     }
 }
 
 fn get_var_concept(node: Node<'_>) -> ConceptVariable {
-    dbg_assert_eq_line!(node.as_rule(), Rule::VAR_CONCEPT_);
+    debug_assert_eq!(node.as_rule(), Rule::VAR_CONCEPT_);
     let name = node.as_str();
 
     assert!(name.len() > 1);
@@ -264,7 +252,7 @@ fn get_var_concept(node: Node<'_>) -> ConceptVariable {
 }
 
 fn get_var_value(node: Node<'_>) -> ValueVariable {
-    dbg_assert_eq_line!(node.as_rule(), Rule::VAR_VALUE_);
+    debug_assert_eq!(node.as_rule(), Rule::VAR_VALUE_);
     let name = node.as_str();
     assert!(name.len() > 1);
     assert!(name.starts_with('?'));
@@ -272,7 +260,7 @@ fn get_var_value(node: Node<'_>) -> ValueVariable {
 }
 
 fn get_isa_constraint(isa: Node<'_>, node: Node<'_>) -> IsaConstraint {
-    dbg_assert_eq_line!(isa.as_rule(), Rule::ISA_);
+    debug_assert_eq!(isa.as_rule(), Rule::ISA_);
     let is_explicit = matches!(isa.into_child().unwrap().as_rule(), Rule::ISAX).into();
     match visit_type_ref(node) {
         TypeReference::Label(label) => IsaConstraint::from((label, is_explicit)),
@@ -281,7 +269,7 @@ fn get_isa_constraint(isa: Node<'_>, node: Node<'_>) -> IsaConstraint {
 }
 
 fn get_role_player_constraint(node: Node<'_>) -> RolePlayerConstraint {
-    dbg_assert_eq_line!(node.as_rule(), Rule::role_player);
+    debug_assert_eq!(node.as_rule(), Rule::role_player);
     let mut children_rev = node.into_children().rev();
     let player = get_var_concept(
         children_rev.consume_expected(Rule::player).into_children().consume_expected(Rule::VAR_CONCEPT_),
@@ -301,7 +289,7 @@ fn get_role_players(node: Node<'_>) -> Vec<RolePlayerConstraint> {
 }
 
 fn visit_query(node: Node<'_>) -> Query {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query);
+    debug_assert_eq!(node.as_rule(), Rule::query);
     let mut children = node.into_children();
     let child = children.consume_any();
     let query = match child.as_rule() {
@@ -315,33 +303,33 @@ fn visit_query(node: Node<'_>) -> Query {
         Rule::query_get_aggregate => visit_query_get_aggregate(child).into(),
         Rule::query_get_group => visit_query_get_group(child).into(),
         Rule::query_get_group_agg => visit_query_get_group_agg(child).into(),
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     query
 }
 
 fn visit_query_fetch(node: Node<'_>) -> TypeQLFetch {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_fetch);
+    debug_assert_eq!(node.as_rule(), Rule::query_fetch);
     let mut children = node.into_children();
     let clause_match = visit_clause_match(children.consume_expected(Rule::clause_match));
     let projections = visit_clause_fetch(children.consume_expected(Rule::clause_fetch));
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     TypeQLFetch { match_clause: clause_match, projections, modifiers }
 }
 
 fn visit_clause_fetch(node: Node<'_>) -> Vec<Projection> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_fetch);
+    debug_assert_eq!(node.as_rule(), Rule::clause_fetch);
     let mut children = node.into_children();
     children.skip_expected(Rule::FETCH);
     let projections = children.consume_expected(Rule::projections).into_children();
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     projections.map(visit_projection).collect()
 }
 
 fn visit_projection(node: Node<'_>) -> Projection {
-    dbg_assert_eq_line!(node.as_rule(), Rule::projection);
+    debug_assert_eq!(node.as_rule(), Rule::projection);
     let mut children = node.into_children();
     let child = children.consume_any();
     match child.as_rule() {
@@ -360,100 +348,100 @@ fn visit_projection(node: Node<'_>) -> Projection {
             let subquery = visit_projection_subquery(children.consume_expected(Rule::projection_subquery));
             Projection::Subquery(key_label, subquery)
         }
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
 fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
-    dbg_assert_eq_line!(node.as_rule(), Rule::projection_key_var);
+    debug_assert_eq!(node.as_rule(), Rule::projection_key_var);
     let mut children = node.into_children();
     let var = get_var(children.consume_expected(Rule::VAR_));
     let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     ProjectionKeyVar { variable: var, label }
 }
 
 fn visit_projection_as_label(node: Node<'_>) -> ProjectionKeyLabel {
-    dbg_assert_eq_line!(node.as_rule(), Rule::projection_key_as_label);
+    debug_assert_eq!(node.as_rule(), Rule::projection_key_as_label);
     let mut children = node.into_children();
     children.skip_expected(Rule::AS);
     let label = visit_projection_key_label(children.consume_expected(Rule::projection_key_label));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     label
 }
 
 fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
-    dbg_assert_eq_line!(node.as_rule(), Rule::projection_key_label);
+    debug_assert_eq!(node.as_rule(), Rule::projection_key_label);
     let mut children = node.into_children();
     let child = children.consume_any();
     match child.as_rule() {
         Rule::QUOTED_STRING => ProjectionKeyLabel::Quoted(get_string_from_quoted(child)),
         Rule::label => ProjectionKeyLabel::Unquoted(child.as_str().to_owned()),
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
 fn visit_projection_attributes(node: Node<'_>) -> Vec<ProjectionAttribute> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::projection_attributes);
+    debug_assert_eq!(node.as_rule(), Rule::projection_attributes);
     node.into_children().map(visit_projection_attribute).collect()
 }
 
 fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
-    dbg_assert_eq_line!(node.as_rule(), Rule::projection_attribute);
+    debug_assert_eq!(node.as_rule(), Rule::projection_attribute);
     let mut children = node.into_children();
     let attribute_label = Label::from(children.consume_expected(Rule::label).as_str());
     let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     ProjectionAttribute { attribute: attribute_label, label }
 }
 
 fn visit_projection_subquery(node: Node<'_>) -> ProjectionSubquery {
-    dbg_assert_eq_line!(node.as_rule(), Rule::projection_subquery);
+    debug_assert_eq!(node.as_rule(), Rule::projection_subquery);
     let mut children = node.into_children();
     let child = children.consume_any();
     match child.as_rule() {
         Rule::query_fetch => ProjectionSubquery::Fetch(Box::new(visit_query_fetch(child))),
         Rule::query_get_aggregate => ProjectionSubquery::GetAggregate(visit_query_get_aggregate(child)),
-        _ => unreachable!("{:?} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
 fn visit_query_define(node: Node<'_>) -> TypeQLDefine {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_define);
+    debug_assert_eq!(node.as_rule(), Rule::query_define);
     let mut children = node.into_children();
     let query = visit_clause_define(children.consume_expected(Rule::clause_define));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     query
 }
 
 fn visit_clause_define(node: Node<'_>) -> TypeQLDefine {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_define);
+    debug_assert_eq!(node.as_rule(), Rule::clause_define);
     let mut children = node.into_children();
     children.skip_expected(Rule::DEFINE);
     let query = TypeQLDefine::new(visit_definables(children.consume_expected(Rule::definables)));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     query
 }
 
 fn visit_query_undefine(node: Node<'_>) -> TypeQLUndefine {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_undefine);
+    debug_assert_eq!(node.as_rule(), Rule::query_undefine);
     let mut children = node.into_children();
     let query = visit_clause_undefine(children.consume_expected(clause_undefine));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     query
 }
 
 fn visit_clause_undefine(node: Node<'_>) -> TypeQLUndefine {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_undefine);
+    debug_assert_eq!(node.as_rule(), Rule::clause_undefine);
     let mut children = node.into_children();
     children.skip_expected(Rule::UNDEFINE);
     let query = TypeQLUndefine::new(visit_definables(children.consume_expected(Rule::definables)));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     query
 }
 
 fn visit_query_insert(node: Node<'_>) -> TypeQLInsert {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_insert);
+    debug_assert_eq!(node.as_rule(), Rule::query_insert);
     let mut children = node.into_children();
     let child = children.consume_any();
     let query = match child.as_rule() {
@@ -464,76 +452,76 @@ fn visit_query_insert(node: Node<'_>) -> TypeQLInsert {
             TypeQLInsert { match_clause: Some(clause_match), statements: clause_insert, modifiers }
         }
         Rule::clause_insert => TypeQLInsert::new(visit_clause_insert(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     query
 }
 
 fn visit_query_delete(node: Node<'_>) -> TypeQLDelete {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_delete);
+    debug_assert_eq!(node.as_rule(), Rule::query_delete);
     let mut children = node.into_children();
     let clause_match = visit_clause_match(children.consume_expected(Rule::clause_match));
     let clause_delete = visit_clause_delete(children.consume_expected(Rule::clause_delete));
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     TypeQLDelete { match_clause: clause_match, statements: clause_delete, modifiers }
 }
 
 fn visit_query_update(node: Node<'_>) -> TypeQLUpdate {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_update);
+    debug_assert_eq!(node.as_rule(), Rule::query_update);
     let mut children = node.into_children();
     let query_delete = visit_query_delete(children.consume_expected(Rule::query_delete));
     let clause_insert = visit_clause_insert(children.consume_expected(Rule::clause_insert));
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     TypeQLUpdate { query_delete, insert_statements: clause_insert, modifiers }
 }
 
 fn visit_query_get(node: Node<'_>) -> TypeQLGet {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_get);
+    debug_assert_eq!(node.as_rule(), Rule::query_get);
     let mut children = node.into_children();
     let clause_match = visit_clause_match(children.consume_expected(Rule::clause_match));
     let clause_get = visit_clause_get(children.consume_expected(Rule::clause_get));
     let modifiers = visit_modifiers(children.consume_expected(Rule::modifiers));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     TypeQLGet { match_clause: clause_match, filter: Filter { vars: clause_get }, modifiers }
 }
 
 fn visit_clause_insert(node: Node<'_>) -> Vec<ThingStatement> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_insert);
+    debug_assert_eq!(node.as_rule(), Rule::clause_insert);
     let mut children = node.into_children();
     children.skip_expected(Rule::INSERT);
     let clause = visit_statement_things(children.consume_expected(Rule::statement_things));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     clause
 }
 
 fn visit_clause_delete(node: Node<'_>) -> Vec<ThingStatement> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_delete);
+    debug_assert_eq!(node.as_rule(), Rule::clause_delete);
     let mut children = node.into_children();
     children.skip_expected(Rule::DELETE);
     let statements = visit_statement_things(children.consume_expected(Rule::statement_things));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     statements
 }
 
 fn visit_clause_match(node: Node<'_>) -> MatchClause {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_match);
+    debug_assert_eq!(node.as_rule(), Rule::clause_match);
     let mut children = node.into_children();
     children.skip_expected(Rule::MATCH);
     let clause = MatchClause::from_patterns(visit_patterns(children.consume_expected(Rule::patterns)));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     clause
 }
 
 fn visit_clause_get(node: Node<'_>) -> Vec<Variable> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_get);
+    debug_assert_eq!(node.as_rule(), Rule::clause_get);
     node.into_children().skip_expected(Rule::GET).map(get_var).collect()
 }
 
 fn visit_modifiers(node: Node<'_>) -> Modifiers {
-    dbg_assert_eq_line!(node.as_rule(), Rule::modifiers);
+    debug_assert_eq!(node.as_rule(), Rule::modifiers);
     let mut modifiers = Modifiers::default();
     for modifier in node.into_children() {
         match modifier.as_rule() {
@@ -550,18 +538,18 @@ fn visit_modifiers(node: Node<'_>) -> Modifiers {
                         as usize,
                 })
             }
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: modifier.to_string() }, line!()),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: modifier.to_string() }),
         };
     }
     modifiers
 }
 
 fn visit_query_get_aggregate(node: Node<'_>) -> TypeQLGetAggregate {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_get_aggregate);
+    debug_assert_eq!(node.as_rule(), Rule::query_get_aggregate);
     let mut children = node.into_children();
     let query_get = visit_query_get(children.consume_expected(Rule::query_get));
     let (method, var) = visit_clause_aggregate(children.consume_expected(Rule::clause_aggregate));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     match method {
         Aggregate::Count => query_get.count(),
         method => query_get.aggregate(method, var.unwrap()),
@@ -569,39 +557,39 @@ fn visit_query_get_aggregate(node: Node<'_>) -> TypeQLGetAggregate {
 }
 
 fn visit_clause_aggregate(node: Node<'_>) -> (Aggregate, Option<Variable>) {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_aggregate);
+    debug_assert_eq!(node.as_rule(), Rule::clause_aggregate);
     let mut children = node.into_children();
     let method = visit_aggregate_method(children.consume_expected(Rule::aggregate_method));
     let var = children.try_consume_expected(Rule::VAR_).map(get_var);
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     (method, var)
 }
 
 fn visit_query_get_group(node: Node<'_>) -> TypeQLGetGroup {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_get_group);
+    debug_assert_eq!(node.as_rule(), Rule::query_get_group);
     let mut children = node.into_children();
     let query = visit_query_get(children.consume_expected(Rule::query_get))
         .group(visit_clause_group(children.consume_expected(Rule::clause_group)));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     query
 }
 
 fn visit_clause_group(node: Node<'_>) -> Variable {
-    dbg_assert_eq_line!(node.as_rule(), Rule::clause_group);
+    debug_assert_eq!(node.as_rule(), Rule::clause_group);
     let mut children = node.into_children();
     children.skip_expected(Rule::GROUP);
     let var = get_var(children.consume_expected(Rule::VAR_));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     var
 }
 
 fn visit_query_get_group_agg(node: Node<'_>) -> TypeQLGetGroupAggregate {
-    dbg_assert_eq_line!(node.as_rule(), Rule::query_get_group_agg);
+    debug_assert_eq!(node.as_rule(), Rule::query_get_group_agg);
     let mut children = node.into_children();
     let query = visit_query_get(children.consume_expected(Rule::query_get))
         .group(visit_clause_group(children.consume_expected(Rule::clause_group)));
     let (method, var) = visit_clause_aggregate(children.consume_expected(Rule::clause_aggregate));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     match method {
         Aggregate::Count => query.count(),
         method => query.aggregate(method, var.unwrap()),
@@ -609,53 +597,53 @@ fn visit_query_get_group_agg(node: Node<'_>) -> TypeQLGetGroupAggregate {
 }
 
 fn visit_sort(node: Node<'_>) -> Sorting {
-    dbg_assert_eq_line!(node.as_rule(), Rule::sort);
+    debug_assert_eq!(node.as_rule(), Rule::sort);
     let mut children = node.into_children();
     children.skip_expected(Rule::SORT);
     Sorting::new(children.map(visit_sort_var).collect())
 }
 
 fn visit_sort_var(node: Node<'_>) -> sorting::SortVariable {
-    dbg_assert_eq_line!(node.as_rule(), Rule::var_order);
+    debug_assert_eq!(node.as_rule(), Rule::var_order);
     let mut children = node.into_children();
     let var = get_var(children.consume_expected(Rule::VAR_));
     let order = children.try_consume_expected(Rule::ORDER_).map(|child| token::Order::from(child.as_str()));
     let sorted_variable = (var, order).into();
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     sorted_variable
 }
 
 fn visit_aggregate_method(node: Node<'_>) -> token::Aggregate {
-    dbg_assert_eq_line!(node.as_rule(), Rule::aggregate_method);
+    debug_assert_eq!(node.as_rule(), Rule::aggregate_method);
     token::Aggregate::from(node.as_str())
 }
 
 fn visit_definables(node: Node<'_>) -> Vec<Definable> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::definables);
+    debug_assert_eq!(node.as_rule(), Rule::definables);
     node.into_children().map(visit_definable).collect()
 }
 
 fn visit_definable(node: Node<'_>) -> Definable {
-    dbg_assert_eq_line!(node.as_rule(), Rule::definable);
+    debug_assert_eq!(node.as_rule(), Rule::definable);
     let mut children = node.into_children();
     let child = children.consume_any();
     let definable = match child.as_rule() {
         Rule::statement_type => visit_statement_type(child).into(),
         Rule::schema_rule => visit_schema_rule(child).into(),
         Rule::schema_rule_label => visit_schema_rule_label(child).into(),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     definable
 }
 
 fn visit_patterns(node: Node<'_>) -> Vec<Pattern> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::patterns);
+    debug_assert_eq!(node.as_rule(), Rule::patterns);
     node.into_children().map(visit_pattern).collect()
 }
 
 fn visit_pattern(node: Node<'_>) -> Pattern {
-    dbg_assert_eq_line!(node.as_rule(), Rule::pattern);
+    debug_assert_eq!(node.as_rule(), Rule::pattern);
     let mut children = node.into_children();
     let pattern = match children.peek_rule().unwrap() {
         Rule::statement => visit_statement(children.consume_expected(Rule::statement)).into(),
@@ -666,26 +654,22 @@ fn visit_pattern(node: Node<'_>) -> Pattern {
             visit_pattern_conjunction(children.consume_expected(Rule::pattern_conjunction)).into()
         }
         Rule::pattern_negation => visit_pattern_negation(children.consume_expected(Rule::pattern_negation)).into(),
-        _ => unreachable!(
-            "{} at line {}",
-            TypeQLError::IllegalGrammar { input: children.consume_any().to_string() },
-            line!()
-        ),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.consume_any().to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     pattern
 }
 
 fn visit_pattern_conjunction(node: Node<'_>) -> Conjunction {
-    dbg_assert_eq_line!(node.as_rule(), Rule::pattern_conjunction);
+    debug_assert_eq!(node.as_rule(), Rule::pattern_conjunction);
     let mut children = node.into_children();
     let conjunction = Conjunction::new(visit_patterns(children.consume_expected(Rule::patterns)));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     conjunction
 }
 
 fn visit_pattern_disjunction(node: Node<'_>) -> Disjunction {
-    dbg_assert_eq_line!(node.as_rule(), Rule::pattern_disjunction);
+    debug_assert_eq!(node.as_rule(), Rule::pattern_disjunction);
     Disjunction::new(
         node.into_children()
             .filter(|child| matches!(child.as_rule(), Rule::patterns))
@@ -699,7 +683,7 @@ fn visit_pattern_disjunction(node: Node<'_>) -> Disjunction {
 }
 
 fn visit_pattern_negation(node: Node<'_>) -> Negation {
-    dbg_assert_eq_line!(node.as_rule(), Rule::pattern_negation);
+    debug_assert_eq!(node.as_rule(), Rule::pattern_negation);
     let mut children = node.into_children();
     children.skip_expected(Rule::NOT);
     let mut patterns = visit_patterns(children.consume_expected(Rule::patterns));
@@ -707,12 +691,12 @@ fn visit_pattern_negation(node: Node<'_>) -> Negation {
         1 => Negation::new(patterns.pop().unwrap()),
         _ => Negation::new(Conjunction::new(patterns).into()),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     negation
 }
 
 fn visit_statement(node: Node<'_>) -> Statement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement);
+    debug_assert_eq!(node.as_rule(), Rule::statement);
     let mut children = node.into_children();
     let child = children.consume_any();
     let statement = match child.as_rule() {
@@ -720,36 +704,36 @@ fn visit_statement(node: Node<'_>) -> Statement {
         Rule::statement_type => visit_statement_type(child).into(),
         Rule::statement_concept => visit_statement_concept(child).into(),
         Rule::statement_value => visit_statement_value(child).into(),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     statement
 }
 
 fn visit_statement_concept(node: Node<'_>) -> ConceptStatement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_concept);
+    debug_assert_eq!(node.as_rule(), Rule::statement_concept);
     let mut children = node.into_children();
     let var = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))
         .is(get_var_concept(children.skip_expected(Rule::IS).consume_expected(Rule::VAR_CONCEPT_)));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     var
 }
 
 fn visit_statement_value(node: Node<'_>) -> ValueStatement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_value);
+    debug_assert_eq!(node.as_rule(), Rule::statement_value);
     let mut children = node.into_children();
     let var_value = get_var_value(children.consume_expected(Rule::VAR_VALUE_));
     let var = match children.peek_rule() {
         Some(Rule::ASSIGN) => var_value.assign(visit_expression(children.skip_expected(Rule::ASSIGN).consume_any())),
         Some(Rule::predicate) => var_value.predicate(visit_predicate(children.consume_any())),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     var
 }
 
 fn visit_statement_type(node: Node<'_>) -> TypeStatement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_type);
+    debug_assert_eq!(node.as_rule(), Rule::statement_type);
     let mut children = node.into_children();
     let mut type_statement = visit_type_ref_any(children.consume_expected(Rule::type_ref_any)).into_type_statement();
     type_statement = children.map(Node::into_children).fold(type_statement, |var_type, mut constraint_nodes| {
@@ -787,50 +771,46 @@ fn visit_statement_type(node: Node<'_>) -> TypeStatement {
             Rule::VALUE => {
                 var_type.value(token::ValueType::from(constraint_nodes.consume_expected(Rule::value_type).as_str()))
             }
-            _ => unreachable!(
-                "{} at line {}",
-                TypeQLError::IllegalGrammar { input: constraint_nodes.to_string() },
-                line!()
-            ),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: constraint_nodes.to_string() }),
         };
-        dbg_assert_line!(constraint_nodes.try_consume_any().is_none());
+        debug_assert!(constraint_nodes.try_consume_any().is_none());
         statement
     });
     type_statement
 }
 
 fn visit_annotations_owns(node: Node<'_>) -> Vec<Annotation> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::annotations_owns);
+    debug_assert_eq!(node.as_rule(), Rule::annotations_owns);
     node.into_children()
         .map(|annotation| match annotation.as_rule() {
             Rule::ANNOTATION_KEY => Annotation::Key,
             Rule::ANNOTATION_UNIQUE => Annotation::Unique,
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: annotation.to_string() }, line!()),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: annotation.to_string() }),
         })
         .collect()
 }
 
 fn visit_statement_things(node: Node<'_>) -> Vec<ThingStatement> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_things);
+    debug_assert_eq!(node.as_rule(), Rule::statement_things);
     node.into_children().map(visit_statement_thing_any).collect()
 }
 
 fn visit_statement_thing_any(node: Node<'_>) -> ThingStatement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_thing_any);
+    debug_assert_eq!(node.as_rule(), Rule::statement_thing_any);
     let mut children = node.into_children();
     let child = children.consume_any();
     let statement = match child.as_rule() {
         Rule::statement_thing => visit_statement_thing(child),
         Rule::statement_relation => visit_statement_relation(child),
         Rule::statement_attribute => visit_statement_attribute(child),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     statement
 }
 
 fn visit_statement_thing(node: Node<'_>) -> ThingStatement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_thing);
+    debug_assert_eq!(node.as_rule(), Rule::statement_thing);
     let mut children = node.into_children();
     let self1 = get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_));
     let mut stmt_thing: ThingStatement = self1.into();
@@ -841,19 +821,19 @@ fn visit_statement_thing(node: Node<'_>) -> ThingStatement {
             Rule::ISA_ => {
                 stmt_thing.constrain_isa(get_isa_constraint(keyword, children.consume_expected(Rule::type_ref)))
             }
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
         }
     }
     if let Some(attributes) = children.try_consume_expected(Rule::attributes) {
         stmt_thing =
             visit_attributes(attributes).into_iter().fold(stmt_thing, |var_thing, has| var_thing.constrain_has(has));
     }
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     stmt_thing
 }
 
 fn visit_statement_relation(node: Node<'_>) -> ThingStatement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_relation);
+    debug_assert_eq!(node.as_rule(), Rule::statement_relation);
     let mut children = node.into_children();
     let mut relation = children
         .try_consume_expected(Rule::VAR_CONCEPT_)
@@ -868,12 +848,12 @@ fn visit_statement_relation(node: Node<'_>) -> ThingStatement {
     if let Some(attributes) = children.try_consume_expected(Rule::attributes) {
         relation = visit_attributes(attributes).into_iter().fold(relation, |relation, has| relation.constrain_has(has));
     }
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     relation
 }
 
 fn visit_statement_attribute(node: Node<'_>) -> ThingStatement {
-    dbg_assert_eq_line!(node.as_rule(), Rule::statement_attribute);
+    debug_assert_eq!(node.as_rule(), Rule::statement_attribute);
     let mut children = node.into_children();
     let mut attribute = children
         .try_consume_expected(Rule::VAR_CONCEPT_)
@@ -889,22 +869,22 @@ fn visit_statement_attribute(node: Node<'_>) -> ThingStatement {
         attribute =
             visit_attributes(attributes).into_iter().fold(attribute, |attribute, has| attribute.constrain_has(has));
     }
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     attribute
 }
 
 fn visit_relation(node: Node<'_>) -> RelationConstraint {
-    dbg_assert_eq_line!(node.as_rule(), Rule::relation);
+    debug_assert_eq!(node.as_rule(), Rule::relation);
     RelationConstraint::new(get_role_players(node))
 }
 
 fn visit_attributes(node: Node<'_>) -> Vec<HasConstraint> {
-    dbg_assert_eq_line!(node.as_rule(), Rule::attributes);
+    debug_assert_eq!(node.as_rule(), Rule::attributes);
     node.into_children().map(visit_attribute).collect()
 }
 
 fn visit_attribute(node: Node<'_>) -> HasConstraint {
-    dbg_assert_eq_line!(node.as_rule(), Rule::attribute);
+    debug_assert_eq!(node.as_rule(), Rule::attribute);
     let mut children = node.into_children();
     let constraint = match children.skip_expected(Rule::HAS).peek_rule() {
         Some(Rule::label) => {
@@ -920,20 +900,18 @@ fn visit_attribute(node: Node<'_>) -> HasConstraint {
                 Some(Rule::predicate) => {
                     HasConstraint::from((label, visit_predicate(children.consume_expected(Rule::predicate))))
                 }
-                _ => {
-                    unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!())
-                }
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
             }
         }
         Some(Rule::VAR_CONCEPT_) => HasConstraint::from(get_var_concept(children.consume_expected(Rule::VAR_CONCEPT_))),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     constraint
 }
 
 fn visit_predicate(node: Node<'_>) -> Predicate {
-    dbg_assert_eq_line!(node.as_rule(), Rule::predicate);
+    debug_assert_eq!(node.as_rule(), Rule::predicate);
     let mut children = node.into_children();
     let constraint = match children.peek_rule() {
         Some(Rule::constant) => {
@@ -942,18 +920,12 @@ fn visit_predicate(node: Node<'_>) -> Predicate {
         Some(Rule::predicate_equality) => {
             Predicate::new(token::Predicate::from(children.consume_expected(Rule::predicate_equality).as_str()), {
                 let res_predicate_value = children.consume_expected(Rule::value).into_child();
-                dbg_assert_line!(res_predicate_value.is_ok());
+                debug_assert!(res_predicate_value.is_ok());
                 let predicate_value = res_predicate_value.unwrap();
                 match predicate_value.as_rule() {
                     Rule::constant => visit_constant(predicate_value).into(),
                     Rule::VAR_ => Value::from(get_var(predicate_value)),
-                    _ => {
-                        unreachable!(
-                            "{} at line {}",
-                            TypeQLError::IllegalGrammar { input: predicate_value.to_string() },
-                            line!()
-                        )
-                    }
+                    _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: predicate_value.to_string() }),
                 }
             })
         }
@@ -967,24 +939,20 @@ fn visit_predicate(node: Node<'_>) -> Predicate {
                         token::Predicate::Contains => {
                             get_string_from_quoted(children.consume_expected(Rule::QUOTED_STRING))
                         }
-                        _ => unreachable!(
-                            "{} at line {}",
-                            TypeQLError::IllegalGrammar { input: children.to_string() },
-                            line!()
-                        ),
+                        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
                     }
                 }
                 .into(),
             )
         }
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: children.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     constraint
 }
 
 fn visit_expression(node: Node<'_>) -> Expression {
-    dbg_assert_eq_line!(node.as_rule(), Rule::expression);
+    debug_assert_eq!(node.as_rule(), Rule::expression);
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
         .op(Op::infix(Rule::ADD, Assoc::Left) | Op::infix(Rule::SUBTRACT, Assoc::Left))
         .op(Op::infix(Rule::MULTIPLY, Assoc::Left)
@@ -998,7 +966,7 @@ fn visit_expression(node: Node<'_>) -> Expression {
             Rule::constant => Expression::Constant(visit_constant(primary)),
             Rule::expression_function => Expression::Function(visit_function(primary)),
             Rule::expression_parenthesis => visit_expression(primary.into_children().consume_any()),
-            _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: primary.to_string() }, line!()),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: primary.to_string() }),
         })
         .map_infix(|left, op, right| {
             let op = match op.as_rule() {
@@ -1008,7 +976,7 @@ fn visit_expression(node: Node<'_>) -> Expression {
                 Rule::DIVIDE => token::ArithmeticOperator::Divide,
                 Rule::MODULO => token::ArithmeticOperator::Modulo,
                 Rule::POWER => token::ArithmeticOperator::Power,
-                _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: op.to_string() }, line!()),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: op.to_string() }),
             };
             Expression::Operation(Operation::new(op, left, right))
         })
@@ -1016,7 +984,7 @@ fn visit_expression(node: Node<'_>) -> Expression {
 }
 
 fn visit_function(node: Node<'_>) -> Function {
-    dbg_assert_eq_line!(node.as_rule(), Rule::expression_function);
+    debug_assert_eq!(node.as_rule(), Rule::expression_function);
     let mut children = node.into_children();
     Function {
         function_name: visit_function_name(children.consume_expected(Rule::expression_function_name)),
@@ -1025,7 +993,7 @@ fn visit_function(node: Node<'_>) -> Function {
 }
 
 fn visit_function_name(node: Node<'_>) -> token::Function {
-    dbg_assert_eq_line!(node.as_rule(), Rule::expression_function_name);
+    debug_assert_eq!(node.as_rule(), Rule::expression_function_name);
     let mut children = node.into_children();
     let child = children.consume_any();
     let function_token = match child.as_rule() {
@@ -1035,95 +1003,95 @@ fn visit_function_name(node: Node<'_>) -> token::Function {
         Rule::MAX => token::Function::Max,
         Rule::MIN => token::Function::Min,
         Rule::ROUND => token::Function::Round,
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     function_token
 }
 
 fn visit_schema_rule_label(node: Node<'_>) -> RuleLabel {
-    dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule_label);
+    debug_assert_eq!(node.as_rule(), Rule::schema_rule_label);
     let mut children = node.into_children();
     children.skip_expected(Rule::RULE);
     let rule = RuleLabel::new(Label::from(children.consume_expected(Rule::label).as_str()));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     rule
 }
 
 fn visit_schema_rule(node: Node<'_>) -> crate::pattern::Rule {
-    dbg_assert_eq_line!(node.as_rule(), Rule::schema_rule);
+    debug_assert_eq!(node.as_rule(), Rule::schema_rule);
     let mut children = node.into_children();
     let rule = RuleLabel::new(Label::from(children.skip_expected(Rule::RULE).consume_expected(Rule::label).as_str()))
         .when(Conjunction::new(visit_patterns(children.skip_expected(Rule::WHEN).consume_expected(Rule::patterns))))
         .then(visit_statement_thing_any(
             children.skip_expected(Rule::THEN).consume_expected(Rule::statement_thing_any),
         ));
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     rule
 }
 
 fn visit_type_ref_any(node: Node<'_>) -> TypeReference {
-    dbg_assert_eq_line!(node.as_rule(), Rule::type_ref_any);
+    debug_assert_eq!(node.as_rule(), Rule::type_ref_any);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
         Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
         Rule::type_ref => visit_type_ref(child),
         Rule::type_ref_scoped => visit_type_ref_scoped(child),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     type_
 }
 
 fn visit_type_ref_scoped(node: Node<'_>) -> TypeReference {
-    dbg_assert_eq_line!(node.as_rule(), Rule::type_ref_scoped);
+    debug_assert_eq!(node.as_rule(), Rule::type_ref_scoped);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
         Rule::label_scoped => TypeReference::Label(visit_label_scoped(child)),
         Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     type_
 }
 
 fn visit_type_ref(node: Node<'_>) -> TypeReference {
-    dbg_assert_eq_line!(node.as_rule(), Rule::type_ref);
+    debug_assert_eq!(node.as_rule(), Rule::type_ref);
     let mut children = node.into_children();
     let child = children.consume_any();
     let type_ = match child.as_rule() {
         Rule::label => TypeReference::Label(child.as_str().into()),
         Rule::VAR_CONCEPT_ => TypeReference::Variable(get_var_concept(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     type_
 }
 
 fn visit_label_any(node: Node<'_>) -> Label {
-    dbg_assert_eq_line!(node.as_rule(), Rule::label_any);
+    debug_assert_eq!(node.as_rule(), Rule::label_any);
     let mut children = node.into_children();
     let child = children.consume_any();
     let label = match child.as_rule() {
         Rule::label => Label::from(child.as_str()),
         Rule::label_scoped => visit_label_scoped(child),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     label
 }
 
 fn visit_label_scoped(node: Node<'_>) -> Label {
-    dbg_assert_eq_line!(node.as_rule(), Rule::label_scoped);
+    debug_assert_eq!(node.as_rule(), Rule::label_scoped);
     let parts: Vec<String> = node.as_str().split(':').map(String::from).collect();
     assert_eq!(parts.len(), 2);
     Label::from((parts[0].clone(), parts[1].clone()))
 }
 
 fn visit_constant(node: Node<'_>) -> Constant {
-    dbg_assert_eq_line!(node.as_rule(), Rule::constant);
+    debug_assert_eq!(node.as_rule(), Rule::constant);
     let mut children = node.into_children();
     let child = children.consume_any();
     let constant = match child.as_rule() {
@@ -1133,8 +1101,8 @@ fn visit_constant(node: Node<'_>) -> Constant {
         Rule::BOOLEAN_ => Constant::from(get_boolean(child)),
         Rule::DATE_ => Constant::from(get_date(child).and_hms_opt(0, 0, 0).unwrap()),
         Rule::DATETIME_ => Constant::from(get_date_time(child)),
-        _ => unreachable!("{} at line {}", TypeQLError::IllegalGrammar { input: child.to_string() }, line!()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    dbg_assert_line!(children.try_consume_any().is_none());
+    debug_assert!(children.try_consume_any().is_none());
     constant
 }
