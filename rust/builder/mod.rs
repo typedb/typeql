@@ -68,13 +68,14 @@ macro_rules! and {
 
 #[macro_export]
 macro_rules! or {
-    ($($pattern:expr),* $(,)?) => {{
-        let mut patterns = vec![$($pattern.into()),*];
-        match patterns.len() {
-            1 => patterns.pop().unwrap(),
-            _ => $crate::pattern::Disjunction::new(patterns).into(),
-        }
-    }}
+    ($pattern:expr $(,)?) => { 
+        // $pattern.into()
+        compile_error!("Useless disjunction of one pattern");
+    };
+
+    ($($pattern:expr),+ $(,)?) => {
+        $crate::pattern::Disjunction::new(vec![$($pattern.into()),*])
+    };
 }
 
 #[macro_export]
