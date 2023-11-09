@@ -36,7 +36,7 @@ pub enum TypeReference {
 impl TypeReference {
     pub fn into_type_statement(self) -> TypeStatement {
         match self {
-            Self::Label(label) => ConceptVariable::hidden().type_(label),
+            Self::Label(label) => ConceptVariable::Hidden.type_(label),
             Self::Variable(var) => var.into(),
         }
     }

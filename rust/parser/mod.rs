@@ -245,9 +245,9 @@ fn get_var_concept(node: Node<'_>) -> ConceptVariable {
     let name = &name[1..];
 
     if name == "_" {
-        ConceptVariable::anonymous()
+        ConceptVariable::Anonymous
     } else {
-        ConceptVariable::named(String::from(name))
+        ConceptVariable::Named(String::from(name))
     }
 }
 
@@ -256,7 +256,7 @@ fn get_var_value(node: Node<'_>) -> ValueVariable {
     let name = node.as_str();
     assert!(name.len() > 1);
     assert!(name.starts_with('?'));
-    ValueVariable::named(String::from(&name[1..]))
+    ValueVariable::Named(String::from(&name[1..]))
 }
 
 fn get_isa_constraint(isa: Node<'_>, node: Node<'_>) -> IsaConstraint {
@@ -355,10 +355,10 @@ fn visit_projection(node: Node<'_>) -> Projection {
 fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
     debug_assert_eq!(node.as_rule(), Rule::projection_key_var);
     let mut children = node.into_children();
-    let var = get_var(children.consume_expected(Rule::VAR_));
+    let variable = get_var(children.consume_expected(Rule::VAR_));
     let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
     debug_assert!(children.try_consume_any().is_none());
-    ProjectionKeyVar { variable: var, label }
+    ProjectionKeyVar { variable, label }
 }
 
 fn visit_projection_as_label(node: Node<'_>) -> ProjectionKeyLabel {
@@ -375,8 +375,8 @@ fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
     let mut children = node.into_children();
     let child = children.consume_any();
     match child.as_rule() {
-        Rule::QUOTED_STRING => ProjectionKeyLabel::Quoted(get_string_from_quoted(child)),
-        Rule::label => ProjectionKeyLabel::Unquoted(child.as_str().to_owned()),
+        Rule::QUOTED_STRING => ProjectionKeyLabel { label: get_string_from_quoted(child) },
+        Rule::label => ProjectionKeyLabel { label: child.as_str().to_owned() },
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -510,7 +510,7 @@ fn visit_clause_match(node: Node<'_>) -> MatchClause {
     debug_assert_eq!(node.as_rule(), Rule::clause_match);
     let mut children = node.into_children();
     children.skip_expected(Rule::MATCH);
-    let clause = MatchClause::from_patterns(visit_patterns(children.consume_expected(Rule::patterns)));
+    let clause = MatchClause::new(Conjunction::new(visit_patterns(children.consume_expected(Rule::patterns))));
     debug_assert!(children.try_consume_any().is_none());
     clause
 }
@@ -838,7 +838,7 @@ fn visit_statement_relation(node: Node<'_>) -> ThingStatement {
     let mut relation = children
         .try_consume_expected(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
-        .unwrap_or_else(ConceptVariable::hidden)
+        .unwrap_or(ConceptVariable::Hidden)
         .relation(visit_relation(children.consume_expected(Rule::relation)));
 
     if let Some(isa) = children.try_consume_expected(Rule::ISA_) {
@@ -858,7 +858,7 @@ fn visit_statement_attribute(node: Node<'_>) -> ThingStatement {
     let mut attribute = children
         .try_consume_expected(Rule::VAR_CONCEPT_)
         .map(get_var_concept)
-        .unwrap_or_else(ConceptVariable::hidden)
+        .unwrap_or(ConceptVariable::Hidden)
         .predicate(visit_predicate(children.consume_expected(Rule::predicate)));
 
     if let Some(isa) = children.try_consume_expected(Rule::ISA_) {

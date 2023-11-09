@@ -116,7 +116,7 @@ impl From<&str> for RolePlayerConstraint {
 
 impl From<String> for RolePlayerConstraint {
     fn from(player_var: String) -> Self {
-        Self::from(ConceptVariable::named(player_var))
+        Self::from(ConceptVariable::Named(player_var))
     }
 }
 
@@ -128,13 +128,13 @@ impl From<(&str, &str)> for RolePlayerConstraint {
 
 impl From<(String, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, String)) -> Self {
-        Self::from((role_type, ConceptVariable::named(player_var)))
+        Self::from((role_type, ConceptVariable::Named(player_var)))
     }
 }
 
 impl From<(Label, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, String)) -> Self {
-        Self::from((role_type, ConceptVariable::named(player_var)))
+        Self::from((role_type, ConceptVariable::Named(player_var)))
     }
 }
 

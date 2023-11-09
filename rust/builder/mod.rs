@@ -141,7 +141,7 @@ pub fn label(name: impl Into<ProjectionKeyLabel>) -> ProjectionKeyLabel {
 }
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingStatement {
-    ConceptVariable::hidden().rel(value)
+    ConceptVariable::Hidden.rel(value)
 }
 
 pub fn eq<T: Into<Value>>(value: T) -> Predicate {
