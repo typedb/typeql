@@ -108,21 +108,12 @@ impl From<TypeReference> for OwnsConstraint {
     }
 }
 
-impl From<(&str, &str)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (&str, &str)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), Label::from(overridden_attribute_type)))
-    }
-}
-
-impl From<(String, String)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (String, String)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), Label::from(overridden_attribute_type)))
-    }
-}
-
-impl From<(Label, Label)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (Label, Label)) -> Self {
-        OwnsConstraint::from((TypeReference::Label(attribute_type), TypeReference::Label(overridden_attribute_type)))
+impl<T: Into<Label>, U: Into<Label>> From<(T, U)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (T, U)) -> Self {
+        OwnsConstraint::from((
+            TypeReference::Label(attribute_type.into()),
+            TypeReference::Label(overridden_attribute_type.into()),
+        ))
     }
 }
 
@@ -141,21 +132,13 @@ impl From<(TypeReference, TypeReference)> for OwnsConstraint {
     }
 }
 
-impl From<(&str, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (&str, Annotation)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), [annotation]))
-    }
-}
-
-impl From<(String, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (String, Annotation)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), [annotation]))
-    }
-}
-
-impl From<(Label, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (Label, Annotation)) -> Self {
-        OwnsConstraint::from((TypeReference::Label(attribute_type), [annotation]))
+impl<T: Into<Label>> From<(T, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (T, Annotation)) -> Self {
+        Self {
+            attribute_type: TypeReference::Label(attribute_type.into()),
+            annotations: vec![annotation],
+            overridden_attribute_type: None,
+        }
     }
 }
 
@@ -171,23 +154,11 @@ impl From<(TypeReference, Annotation)> for OwnsConstraint {
     }
 }
 
-impl From<(&str, &str, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotation): (&str, &str, Annotation)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), Label::from(overridden_attribute_type), [annotation]))
-    }
-}
-
-impl From<(String, String, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotation): (String, String, Annotation)) -> Self {
-        OwnsConstraint::from((Label::from(attribute_type), Label::from(overridden_attribute_type), [annotation]))
-    }
-}
-
-impl From<(Label, Label, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type, annotation): (Label, Label, Annotation)) -> Self {
+impl<T: Into<Label>, U: Into<Label>> From<(T, U, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type, annotation): (T, U, Annotation)) -> Self {
         OwnsConstraint::from((
-            TypeReference::Label(attribute_type),
-            TypeReference::Label(overridden_attribute_type),
+            TypeReference::Label(attribute_type.into()),
+            TypeReference::Label(overridden_attribute_type.into()),
             [annotation],
         ))
     }

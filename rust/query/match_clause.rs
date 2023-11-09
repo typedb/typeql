@@ -46,10 +46,6 @@ impl MatchClause {
         Self { conjunction }
     }
 
-    pub fn from_patterns(patterns: Vec<Pattern>) -> Self {
-        Self::new(Conjunction::new(patterns))
-    }
-
     pub fn get(self) -> TypeQLGet {
         TypeQLGet {
             match_clause: self,
@@ -68,10 +64,6 @@ impl MatchClause {
 
     pub fn fetch(self, projections: Vec<Projection>) -> TypeQLFetch {
         TypeQLFetch { match_clause: self, projections, modifiers: Modifiers::default() }
-    }
-
-    pub fn fetch_fixed<const N: usize>(self, projections: [Projection; N]) -> TypeQLFetch {
-        self.fetch(projections.into_iter().collect::<Vec<_>>())
     }
 
     pub fn insert(self, writable: impl Writable) -> TypeQLInsert {
@@ -103,13 +95,13 @@ impl Validatable for MatchClause {
 }
 
 fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item = &'a Pattern>) -> Result {
-    collect_err(patterns.map(|p| {
-        match p {
-            Pattern::Statement(v) => v
+    collect_err(patterns.map(|pattern| {
+        match pattern {
+            Pattern::Statement(statement) => statement
                 .variables()
-                .any(|r| r.is_name())
+                .any(|variable| variable.is_name())
                 .then_some(())
-                .ok_or_else(|| Error::from(TypeQLError::MatchStatementHasNoNamedVariable { pattern: p.clone() })),
+                .ok_or_else(|| Error::from(TypeQLError::MatchStatementHasNoNamedVariable { pattern: pattern.clone() })),
             Pattern::Conjunction(c) => validate_statements_have_named_variable(c.patterns.iter()),
             Pattern::Disjunction(d) => validate_statements_have_named_variable(d.patterns.iter()),
             Pattern::Negation(n) => validate_statements_have_named_variable(iter::once(n.pattern.as_ref())),

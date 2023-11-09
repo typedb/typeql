@@ -33,37 +33,37 @@ use crate::{
 
 #[macro_export]
 macro_rules! typeql_match {
-    ($($pattern:expr),* $(,)?) => {{
-        $crate::query::MatchClause::from_patterns(vec![$($pattern.into()),*])
-    }}
+    ($($pattern:expr),* $(,)?) => {
+        $crate::query::MatchClause::new($crate::pattern::Conjunction::new(vec![$($pattern.into()),*]))
+    }
 }
 
 #[macro_export]
 macro_rules! typeql_insert {
-    ($($thing_statement:expr),* $(,)?) => {{
+    ($($thing_statement:expr),* $(,)?) => {
         $crate::query::TypeQLInsert::new(vec![$($thing_statement),*])
-    }}
+    }
 }
 
 #[macro_export]
 macro_rules! typeql_define {
-    ($($pattern:expr),* $(,)?) => {{
+    ($($pattern:expr),* $(,)?) => {
         $crate::query::TypeQLDefine::new(vec![$($pattern.into()),*])
-    }}
+    }
 }
 
 #[macro_export]
 macro_rules! typeql_undefine {
-    ($($pattern:expr),* $(,)?) => {{
+    ($($pattern:expr),* $(,)?) => {
         $crate::query::TypeQLUndefine::new(vec![$($pattern.into()),*])
-    }}
+    }
 }
 
 #[macro_export]
 macro_rules! and {
-    ($($pattern:expr),* $(,)?) => {{
+    ($($pattern:expr),* $(,)?) => {
         $crate::pattern::Conjunction::new(vec![$($pattern.into()),*])
-    }}
+    }
 }
 
 #[macro_export]
@@ -80,10 +80,9 @@ macro_rules! or {
 #[macro_export]
 macro_rules! max {
     ($($arg:expr),* $(,)?) => {{
-        let args = [$($arg, )*];
         $crate::pattern::Expression::Function($crate::pattern::Function {
             function_name: $crate::common::token::Function::Max,
-            args: args.into_iter().map(Into::into).collect(),
+            args: vec![$($arg.into()),*],
         })
     }}
 }
@@ -91,10 +90,9 @@ macro_rules! max {
 #[macro_export]
 macro_rules! min {
     ($($arg:expr),* $(,)?) => {{
-        let args = [$($arg, )*];
         $crate::pattern::Expression::Function($crate::pattern::Function {
             function_name: token::Function::Min,
-            args: args.into_iter().map(Into::into).collect(),
+            args: vec![$($arg.into()),*],
         })
     }}
 }
@@ -102,14 +100,14 @@ macro_rules! min {
 #[macro_export]
 macro_rules! filter {
     ($($arg:expr),* $(,)?) => {{
-        [$(Into::<$crate::pattern::UnboundVariable>::into($arg)),*]
+        [$($crate::pattern::UnboundVariable::from($arg)),*]
     }}
 }
 
 #[macro_export]
 macro_rules! sort_vars {
     ($($arg:expr),*) => {{
-        $crate::query::Sorting::new(vec![$(Into::<$crate::query::sorting::SortVariable>::into($arg), )*])
+        $crate::query::Sorting::new(vec![$($crate::query::sorting::SortVariable::from($arg), )*])
     }}
 }
 

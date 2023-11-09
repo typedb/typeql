@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 use std::{collections::HashSet, fmt, iter};
 
 use itertools::Itertools;
@@ -69,7 +70,7 @@ impl Validatable for TypeQLFetch {
         let match_variables = self.match_clause.retrieved_variables().collect();
         collect_err([
             self.match_clause.validate(),
-            self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
+            self.modifiers.sorting.as_ref().map_or(Ok(()), |s| s.validate(&match_variables)),
             self.validate_names_are_unique(),
         ])
     }
@@ -93,16 +94,14 @@ pub enum Projection {
 impl Projection {
     pub fn key_variable(&self) -> Option<VariableRef<'_>> {
         match self {
-            Projection::Variable(key) => Some(key.variable.as_ref()),
-            Projection::Attribute(key, _) => Some(key.variable.as_ref()),
+            Projection::Variable(key) | Projection::Attribute(key, _) => Some(key.variable.as_ref()),
             Projection::Subquery(_, _) => None,
         }
     }
 
     pub fn value_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
-            Projection::Variable(_) => Box::new(iter::empty()),
-            Projection::Attribute(_, _) => Box::new(iter::empty()),
+            Projection::Variable(_) | Projection::Attribute(_, _) => Box::new(iter::empty()),
             Projection::Subquery(_, subquery) => subquery.variables(),
         }
     }
@@ -150,9 +149,8 @@ impl<T: Into<Variable>> From<T> for ProjectionKeyVar {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum ProjectionKeyLabel {
-    Quoted(String),
-    Unquoted(String),
+pub struct ProjectionKeyLabel {
+    pub label: String,
 }
 
 impl ProjectionKeyLabel {
@@ -178,11 +176,7 @@ impl From<&str> for ProjectionKeyLabel {
 
 impl From<String> for ProjectionKeyLabel {
     fn from(label: String) -> Self {
-        if Self::must_quote(label.as_ref()) {
-            ProjectionKeyLabel::Quoted(label)
-        } else {
-            ProjectionKeyLabel::Unquoted(label)
-        }
+        Self { label }
     }
 }
 
@@ -210,15 +204,9 @@ impl From<String> for ProjectionAttribute {
     }
 }
 
-impl From<(&str, &str)> for ProjectionAttribute {
-    fn from((attribute, label): (&str, &str)) -> Self {
-        Self::from((attribute.to_owned(), label.to_owned()))
-    }
-}
-
-impl From<(String, String)> for ProjectionAttribute {
-    fn from((attribute, label): (String, String)) -> Self {
-        ProjectionAttribute { attribute: Label::from(attribute), label: Some(label.into()) }
+impl<T: Into<Label>, U: Into<ProjectionKeyLabel>> From<(T, U)> for ProjectionAttribute {
+    fn from((attribute, label): (T, U)) -> Self {
+        Self { attribute: attribute.into(), label: Some(label.into()) }
     }
 }
 
@@ -251,6 +239,7 @@ impl<T: Into<ProjectionKeyVar>> ProjectionBuilder for T {
         Projection::Attribute(self.into(), attributes)
     }
 }
+
 impl fmt::Display for TypeQLFetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.match_clause)?;
@@ -295,9 +284,11 @@ impl fmt::Display for ProjectionKeyVar {
 
 impl fmt::Display for ProjectionKeyLabel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ProjectionKeyLabel::Quoted(s) => write!(f, "\"{}\"", s),
-            ProjectionKeyLabel::Unquoted(s) => write!(f, "{}", s),
+        let label = &self.label;
+        if Self::must_quote(label) {
+            write!(f, "\"{}\"", label)
+        } else {
+            write!(f, "{}", label)
         }
     }
 }
