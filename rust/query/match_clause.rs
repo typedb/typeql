@@ -59,11 +59,15 @@ impl MatchClause {
     }
 
     pub fn get_fixed<const N: usize, T: Into<Variable>>(self, vars: [T; N]) -> TypeQLGet {
-        self.get_vars(vars.into_iter().map(|var| var.into()).collect::<Vec<_>>())
+        self.get_vars(vars.into_iter().map(|var| var.into()).collect())
     }
 
     pub fn fetch(self, projections: Vec<Projection>) -> TypeQLFetch {
         TypeQLFetch { match_clause: self, projections, modifiers: Modifiers::default() }
+    }
+
+    pub fn fetch_fixed<const N: usize>(self, projections: [Projection; N]) -> TypeQLFetch {
+        self.fetch(projections.into())
     }
 
     pub fn insert(self, writable: impl Writable) -> TypeQLInsert {
