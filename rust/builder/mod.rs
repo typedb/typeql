@@ -69,7 +69,6 @@ macro_rules! and {
 #[macro_export]
 macro_rules! or {
     ($pattern:expr $(,)?) => { 
-        // $pattern.into()
         compile_error!("Useless disjunction of one pattern");
     };
 
