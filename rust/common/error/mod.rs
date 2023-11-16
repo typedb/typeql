@@ -109,7 +109,7 @@ error_messages! { TypeQLError
     MatchHasNoBoundingNamedVariable =
         7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
     VariableNameConflict { names: String } =
-        8: "The variable names '{names}' cannot be used for both concept variables and value variables.",
+        8: "The variable names {names} cannot be used for both concept variables and value variables.",
     MatchStatementHasNoNamedVariable { pattern: Pattern } =
         9: "The statement '{pattern}' has no named variable.",
     MatchHasUnboundedNestedPattern { pattern: Pattern } =

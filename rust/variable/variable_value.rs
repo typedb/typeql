@@ -38,7 +38,7 @@ impl ValueVariable {
         ValueStatement::new(self)
     }
 
-    pub fn is_name(&self) -> bool {
+    pub fn is_named(&self) -> bool {
         true
     }
 

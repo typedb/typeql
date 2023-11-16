@@ -41,10 +41,10 @@ impl Variable {
         }
     }
 
-    pub fn is_name(&self) -> bool {
+    pub fn is_named(&self) -> bool {
         match self {
-            Variable::Concept(var) => var.is_name(),
-            Variable::Value(var) => var.is_name(),
+            Variable::Concept(var) => var.is_named(),
+            Variable::Value(var) => var.is_named(),
         }
     }
 }
@@ -88,8 +88,8 @@ pub enum VariableRef<'a> {
 impl VariableRef<'_> {
     pub fn is_name(&self) -> bool {
         match self {
-            VariableRef::Concept(var) => (*var).is_name(),
-            VariableRef::Value(var) => (*var).is_name(),
+            VariableRef::Concept(var) => (*var).is_named(),
+            VariableRef::Value(var) => (*var).is_named(),
         }
     }
 

@@ -42,7 +42,7 @@ impl ConceptVariable {
         self != &Self::Hidden
     }
 
-    pub fn is_name(&self) -> bool {
+    pub fn is_named(&self) -> bool {
         matches!(self, Self::Named(_))
     }
 
