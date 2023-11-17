@@ -101,11 +101,11 @@ impl Validatable for MatchClause {
 fn validate_statements_have_named_variable<'a>(patterns: impl Iterator<Item = &'a Pattern>) -> Result {
     collect_err(patterns.map(|pattern| {
         match pattern {
-            Pattern::Statement(statement) => statement
-                .variables()
-                .any(|variable| variable.is_name())
-                .then_some(())
-                .ok_or_else(|| Error::from(TypeQLError::MatchStatementHasNoNamedVariable { pattern: pattern.clone() })),
+            Pattern::Statement(statement) => {
+                statement.variables().any(|variable| variable.is_name()).then_some(()).ok_or_else(|| {
+                    Error::from(TypeQLError::MatchStatementHasNoNamedVariable { pattern: pattern.clone() })
+                })
+            }
             Pattern::Conjunction(c) => validate_statements_have_named_variable(c.patterns.iter()),
             Pattern::Disjunction(d) => validate_statements_have_named_variable(d.patterns.iter()),
             Pattern::Negation(n) => validate_statements_have_named_variable(iter::once(n.pattern.as_ref())),
