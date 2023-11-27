@@ -49,7 +49,6 @@ get;"#;
             and!(cvar("com").has(("name", cvar("n1"))), cvar("n1").eq("the-company"), cvar("com").isa("company"),),
             and!(cvar("com").has(("name", cvar("n2"))), cvar("n2").eq("another-company"), cvar("com").isa("company"),)
         )
-        .into_disjunction()
     );
 }
 

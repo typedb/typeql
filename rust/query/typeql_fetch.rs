@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 use std::{collections::HashSet, fmt, iter};
 
 use itertools::Itertools;
@@ -51,11 +52,14 @@ impl TypeQLFetch {
             .chain(self.projections.iter().flat_map(|p| p.key_variable().into_iter().chain(p.value_variables())));
         let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) =
             all_refs.partition(|r| r.is_concept());
-        let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
-        let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
+        let concept_names = concept_refs.iter().collect::<HashSet<_>>();
+        let value_names = value_refs.iter().collect::<HashSet<_>>();
         let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
         if !common_refs.is_empty() {
-            return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());
+            return Err(TypeQLError::VariableNameConflict {
+                names: common_refs.iter().map(|r| r.to_string()).join(", "),
+            }
+            .into());
         }
         Ok(())
     }
@@ -66,7 +70,7 @@ impl Validatable for TypeQLFetch {
         let match_variables = self.match_clause.retrieved_variables().collect();
         collect_err([
             self.match_clause.validate(),
-            self.modifiers.sorting.as_ref().map(|s| s.validate(&match_variables)).unwrap_or(Ok(())),
+            self.modifiers.sorting.as_ref().map_or(Ok(()), |s| s.validate(&match_variables)),
             self.validate_names_are_unique(),
         ])
     }
@@ -90,16 +94,14 @@ pub enum Projection {
 impl Projection {
     pub fn key_variable(&self) -> Option<VariableRef<'_>> {
         match self {
-            Projection::Variable(key) => Some(key.variable.as_ref()),
-            Projection::Attribute(key, _) => Some(key.variable.as_ref()),
+            Projection::Variable(key) | Projection::Attribute(key, _) => Some(key.variable.as_ref()),
             Projection::Subquery(_, _) => None,
         }
     }
 
     pub fn value_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         match self {
-            Projection::Variable(_) => Box::new(iter::empty()),
-            Projection::Attribute(_, _) => Box::new(iter::empty()),
+            Projection::Variable(_) | Projection::Attribute(_, _) => Box::new(iter::empty()),
             Projection::Subquery(_, subquery) => subquery.variables(),
         }
     }
@@ -147,24 +149,22 @@ impl<T: Into<Variable>> From<T> for ProjectionKeyVar {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum ProjectionKeyLabel {
-    Quoted(String),
-    Unquoted(String),
+pub struct ProjectionKeyLabel {
+    pub label: String,
 }
 
 impl ProjectionKeyLabel {
     pub fn map_subquery_get_aggregate(self, subquery: TypeQLGetAggregate) -> Projection {
-        Projection::Subquery(self.into(), ProjectionSubquery::GetAggregate(subquery))
+        Projection::Subquery(self, ProjectionSubquery::GetAggregate(subquery))
     }
 
     pub fn map_subquery_fetch(self, subquery: TypeQLFetch) -> Projection {
-        Projection::Subquery(self.into(), ProjectionSubquery::Fetch(Box::new(subquery)))
+        Projection::Subquery(self, ProjectionSubquery::Fetch(Box::new(subquery)))
     }
 
     fn must_quote(s: &str) -> bool {
         // TODO: we should actually check against valid label regex, instead of valid variable regex - Java has to be updated too
-        let x = !variable::is_valid_variable_name(s);
-        x
+        !variable::is_valid_variable_name(s)
     }
 }
 
@@ -176,11 +176,7 @@ impl From<&str> for ProjectionKeyLabel {
 
 impl From<String> for ProjectionKeyLabel {
     fn from(label: String) -> Self {
-        if Self::must_quote(label.as_ref()) {
-            ProjectionKeyLabel::Quoted(label)
-        } else {
-            ProjectionKeyLabel::Unquoted(label)
-        }
+        Self { label }
     }
 }
 
@@ -208,15 +204,9 @@ impl From<String> for ProjectionAttribute {
     }
 }
 
-impl From<(&str, &str)> for ProjectionAttribute {
-    fn from((attribute, label): (&str, &str)) -> Self {
-        Self::from((attribute.to_owned(), label.to_owned()))
-    }
-}
-
-impl From<(String, String)> for ProjectionAttribute {
-    fn from((attribute, label): (String, String)) -> Self {
-        ProjectionAttribute { attribute: Label::from(attribute), label: Some(label.into()) }
+impl<T: Into<Label>, U: Into<ProjectionKeyLabel>> From<(T, U)> for ProjectionAttribute {
+    fn from((attribute, label): (T, U)) -> Self {
+        Self { attribute: attribute.into(), label: Some(label.into()) }
     }
 }
 
@@ -249,6 +239,7 @@ impl<T: Into<ProjectionKeyVar>> ProjectionBuilder for T {
         Projection::Attribute(self.into(), attributes)
     }
 }
+
 impl fmt::Display for TypeQLFetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.match_clause)?;
@@ -293,9 +284,11 @@ impl fmt::Display for ProjectionKeyVar {
 
 impl fmt::Display for ProjectionKeyLabel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ProjectionKeyLabel::Quoted(s) => write!(f, "\"{}\"", s),
-            ProjectionKeyLabel::Unquoted(s) => write!(f, "{}", s),
+        let label = &self.label;
+        if Self::must_quote(label) {
+            write!(f, "\"{}\"", label)
+        } else {
+            write!(f, "{}", label)
         }
     }
 }

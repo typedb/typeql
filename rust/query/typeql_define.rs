@@ -45,7 +45,7 @@ impl TypeQLDefine {
             Definable::RuleDefinition(rule) => define.add_rule(rule),
             Definable::TypeStatement(var) => define.add_statement(var),
             Definable::RuleDeclaration(r) => {
-                panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns(r.label))
+                panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns { rule_label: r.label })
             }
         })
     }
@@ -62,7 +62,7 @@ impl TypeQLDefine {
 
     fn validate_non_empty(&self) -> Result {
         if self.statements.is_empty() && self.rules.is_empty() {
-            Err(TypeQLError::MissingDefinables())?
+            Err(TypeQLError::MissingDefinables)?
         }
         Ok(())
     }

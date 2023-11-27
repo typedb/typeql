@@ -94,15 +94,13 @@ impl From<(ConceptVariable, ConceptVariable)> for PlaysConstraint {
     }
 }
 
-impl From<(&str, &str, &str)> for PlaysConstraint {
-    fn from((relation_type, role_type, overridden_role_name): (&str, &str, &str)) -> Self {
-        PlaysConstraint::from((relation_type.to_owned(), role_type.to_owned(), overridden_role_name.to_owned()))
-    }
-}
-
-impl From<(String, String, String)> for PlaysConstraint {
-    fn from((relation_type, role_name, overridden_role_name): (String, String, String)) -> Self {
-        PlaysConstraint::from((Label::from((relation_type, role_name)), Label::from(overridden_role_name)))
+impl<T, U, V> From<(T, U, V)> for PlaysConstraint
+where
+    (T, U): Into<Label>,
+    V: Into<Label>,
+{
+    fn from((relation_type, role_type, overridden_role_name): (T, U, V)) -> Self {
+        PlaysConstraint::from(((relation_type, role_type).into(), overridden_role_name.into()))
     }
 }
 

@@ -41,10 +41,10 @@ impl Variable {
         }
     }
 
-    pub fn is_name(&self) -> bool {
+    pub fn is_named(&self) -> bool {
         match self {
-            Variable::Concept(var) => var.is_name(),
-            Variable::Value(var) => var.is_name(),
+            Variable::Concept(var) => var.is_named(),
+            Variable::Value(var) => var.is_named(),
         }
     }
 }
@@ -88,8 +88,8 @@ pub enum VariableRef<'a> {
 impl VariableRef<'_> {
     pub fn is_name(&self) -> bool {
         match self {
-            VariableRef::Concept(var) => (*var).is_name(),
-            VariableRef::Value(var) => (*var).is_name(),
+            VariableRef::Concept(var) => (*var).is_named(),
+            VariableRef::Value(var) => (*var).is_named(),
         }
     }
 
@@ -101,7 +101,7 @@ impl VariableRef<'_> {
         matches!(self, VariableRef::Value(_))
     }
 
-    pub fn to_owned(&self) -> Variable {
+    pub fn to_owned(self) -> Variable {
         match self {
             Self::Concept(var) => Variable::Concept((*var).clone()),
             Self::Value(var) => Variable::Value((*var).clone()),
@@ -121,7 +121,7 @@ impl fmt::Display for VariableRef<'_> {
 pub(crate) fn validate_variable_name(name: &str) -> Result {
     // TODO this should be a static regex
     if !is_valid_variable_name(name) {
-        Err(TypeQLError::InvalidVariableName(name.to_string()))?
+        Err(TypeQLError::InvalidVariableName { name: name.to_owned() })?
     }
     Ok(())
 }

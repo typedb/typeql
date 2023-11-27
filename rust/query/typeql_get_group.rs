@@ -61,7 +61,7 @@ impl VariablesRetrieved for TypeQLGetGroup {
 
 fn validate_variable_in_scope(var: &Variable, scope_variables: &HashSet<VariableRef<'_>>) -> Result {
     if !scope_variables.contains(&var.as_ref()) {
-        Err(TypeQLError::GroupVarNotBound(var.clone()))?;
+        Err(TypeQLError::GroupVarNotBound { variable: var.clone() })?;
     }
     Ok(())
 }

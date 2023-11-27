@@ -67,7 +67,7 @@ fn validate_bounded(
     conjunction: &Conjunction,
 ) -> Result {
     if bounds.is_disjoint(names) {
-        Err(TypeQLError::MatchHasUnboundedNestedPattern(conjunction.clone().into()))?;
+        Err(TypeQLError::MatchHasUnboundedNestedPattern { pattern: conjunction.clone().into() })?;
     }
     Ok(())
 }

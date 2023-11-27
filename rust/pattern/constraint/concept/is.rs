@@ -40,13 +40,13 @@ impl Validatable for IsConstraint {
 
 impl From<&str> for IsConstraint {
     fn from(string: &str) -> Self {
-        Self::from(ConceptVariable::Name(string.to_string()))
+        Self::from(ConceptVariable::Named(string.to_string()))
     }
 }
 
 impl From<String> for IsConstraint {
     fn from(string: String) -> Self {
-        Self::from(ConceptVariable::Name(string))
+        Self::from(ConceptVariable::Named(string))
     }
 }
 

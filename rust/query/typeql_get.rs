@@ -74,12 +74,12 @@ impl TypeQLGet {
 impl Validatable for TypeQLGet {
     fn validate(&self) -> Result {
         let match_variables = self.match_clause.retrieved_variables().collect();
-        let filter_vars = HashSet::from_iter((&self.filter.vars).iter().map(Variable::as_ref));
+        let filter_vars = HashSet::from_iter(self.filter.vars.iter().map(Variable::as_ref));
         let retrieved_variables = if self.filter.vars.is_empty() { &match_variables } else { &filter_vars };
         collect_err([
             self.match_clause.validate(),
             validate_filters_are_in_scope(&match_variables, &self.filter),
-            self.modifiers.sorting.as_ref().map(|s| s.validate(&retrieved_variables)).unwrap_or(Ok(())),
+            self.modifiers.sorting.as_ref().map(|s| s.validate(retrieved_variables)).unwrap_or(Ok(())),
             validate_variable_names_are_unique(&self.match_clause.conjunction),
         ])
     }
@@ -88,7 +88,7 @@ impl Validatable for TypeQLGet {
 impl VariablesRetrieved for TypeQLGet {
     fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
         if !self.filter.vars.is_empty() {
-            Box::new(self.filter.vars.iter().map(|v| v.as_ref()))
+            Box::new(self.filter.vars.iter().map(Variable::as_ref))
         } else {
             self.match_clause.retrieved_variables()
         }
@@ -97,15 +97,15 @@ impl VariablesRetrieved for TypeQLGet {
 
 fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef<'_>>, filter: &Filter) -> Result {
     let mut seen = HashSet::new();
-    collect_err(filter.vars.iter().map(|r| {
-        if !r.is_name() {
-            Err(TypeQLError::VariableNotNamed().into())
-        } else if !match_variables.contains(&r.as_ref()) {
-            Err(TypeQLError::GetVarNotBound(r.to_owned()).into())
-        } else if seen.contains(&r) {
-            Err(TypeQLError::GetVarRepeating(r.to_owned()).into())
+    collect_err(filter.vars.iter().map(|variable| {
+        if !variable.is_named() {
+            Err(TypeQLError::VariableNotNamed.into())
+        } else if !match_variables.contains(&variable.as_ref()) {
+            Err(TypeQLError::GetVarNotBound { variable: variable.clone() }.into())
+        } else if seen.contains(&variable) {
+            Err(TypeQLError::GetVarRepeating { variable: variable.clone() }.into())
         } else {
-            seen.insert(r);
+            seen.insert(variable);
             Ok(())
         }
     }))
@@ -113,13 +113,13 @@ fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef<'_>>, fil
 
 fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
     let all_refs = conjunction.variables_recursive();
-    let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) =
-        all_refs.partition(|r| r.is_concept());
-    let concept_names = concept_refs.iter().map(|r| r).collect::<HashSet<_>>();
-    let value_names = value_refs.iter().map(|r| r).collect::<HashSet<_>>();
-    let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
+    let (concept_refs, value_refs) = all_refs.partition::<HashSet<_>, _>(VariableRef::is_concept);
+    let common_refs = concept_refs.intersection(&value_refs).collect::<HashSet<_>>();
     if !common_refs.is_empty() {
-        return Err(TypeQLError::VariableNameConflict(common_refs.iter().map(|r| r.to_string()).join(", ")).into());
+        return Err(TypeQLError::VariableNameConflict {
+            names: common_refs.into_iter().map(VariableRef::to_string).join(", "),
+        }
+        .into());
     }
     Ok(())
 }

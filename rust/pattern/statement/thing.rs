@@ -125,7 +125,6 @@ impl fmt::Display for ThingStatement {
         } else if let Some(relation) = &self.relation {
             write!(f, "{relation}")?;
         }
-        ();
 
         if self.is_thing_constrained() {
             f.write_str(" ")?;

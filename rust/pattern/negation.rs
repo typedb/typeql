@@ -58,7 +58,7 @@ impl Negation {
 impl Validatable for Negation {
     fn validate(&self) -> Result {
         match self.pattern.as_ref() {
-            Pattern::Negation(_) => Err(TypeQLError::RedundantNestedNegation())?,
+            Pattern::Negation(_) => Err(TypeQLError::RedundantNestedNegation)?,
             _ => Ok(()),
         }
     }
@@ -76,7 +76,7 @@ impl Normalisable for Negation {
         Negation::new(match self.pattern.as_ref() {
             Pattern::Conjunction(conjunction) => conjunction.compute_normalised(),
             Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
-            Pattern::Negation(_) => panic!("{}", TypeQLError::RedundantNestedNegation()),
+            Pattern::Negation(_) => panic!("{}", TypeQLError::RedundantNestedNegation),
             Pattern::Statement(variable) => {
                 Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()]).into()
             }

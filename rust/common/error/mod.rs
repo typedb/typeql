@@ -78,7 +78,7 @@ pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) 
             }
         })
         .join("\n");
-    TypeQLError::SyntaxErrorDetailed(error_line_nr, formatted_error)
+    TypeQLError::SyntaxErrorDetailed { error_line_nr, formatted_error }
 }
 
 impl fmt::Display for Error {
@@ -98,76 +98,76 @@ pub fn collect_err(i: impl IntoIterator<Item = Result<(), Error>>) -> Result<(),
 
 error_messages! { TypeQLError
     code: "TQL", type: "TypeQL Error",
-    SyntaxErrorDetailed(usize, String) =
-        3: "There is a syntax error near line {}:\n{}",
-    InvalidCasting(&'static str, &'static str, &'static str, &'static str) =
-        4: "Enum '{}::{}' does not match '{}', and cannot be unwrapped into '{}'.",
-    MissingPatterns() =
+    SyntaxErrorDetailed { error_line_nr: usize, formatted_error: String } =
+        3: "There is a syntax error near line {error_line_nr}:\n{formatted_error}",
+    InvalidCasting { enum_name: &'static str, variant: &'static str, expected_variant: &'static str, typename: &'static str } =
+        4: "Enum '{enum_name}::{variant}' does not match '{expected_variant}', and cannot be unwrapped into '{typename}'.",
+    MissingPatterns =
         5: "The query has not been provided with any patterns.",
-    MissingDefinables() =
+    MissingDefinables =
         6: "The query has not been provided with any definables.",
-    MatchHasNoBoundingNamedVariable() =
+    MatchHasNoBoundingNamedVariable =
         7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
-    VariableNameConflict(String) =
-        8: "The variable name '{}' cannot be used for both concept variables and value variables.",
-    MatchStatementHasNoNamedVariable(Pattern) =
-        9: "The statement '{}' has no named variable.",
-    MatchHasUnboundedNestedPattern(Pattern) =
-        10: "The match query contains a nested pattern is not bounded: '{}'.",
-    InvalidIIDString(String) =
-        11: "Invalid IID: '{}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
-    InvalidAttributeTypeRegex(String) =
-        12: "Invalid regular expression '{}'.",
-    GetVarRepeating(Variable) =
-        13: "The variable '{}' occurred more than once in get query filter.",
-    GetVarNotBound(Variable) =
-        14: "The get variable '{}' is not bound in the match clause.",
-    AggregateVarNotBound(Variable) =
-        15: "The get-aggregate variable '{}' is not bound in the match clause.",
-    GroupVarNotBound(Variable) =
-        16: "The get-group variable '{}' is not bound in the match clause.",
-    SortVarNotBound(Variable) =
-        17: "The sort variable '{}' is not bound in the match clause.",
-    DeleteVarNotBound(Variable) =
-        18: "The delete variable '{}' is not bound in the match clause.",
-    InsertClauseNotBound(String, String) =
-        19: "None of the variables in 'insert' ('{}') is within scope of 'match' ('{}')",
-    InsertModifiersRequireMatch(String) =
-        20: "The insert query '{}' contains query modifiers that require a 'match' clause be specified",
-    VariableNotNamed() =
+    VariableNameConflict { names: String } =
+        8: "The variable names {names} cannot be used for both concept variables and value variables.",
+    MatchStatementHasNoNamedVariable { pattern: Pattern } =
+        9: "The statement '{pattern}' has no named variable.",
+    MatchHasUnboundedNestedPattern { pattern: Pattern } =
+        10: "The match query contains a nested pattern is not bounded: '{pattern}'.",
+    InvalidIIDString { iid: String } =
+        11: "Invalid IID: '{iid}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
+    InvalidAttributeTypeRegex { regex: String } =
+        12: "Invalid regular expression '{regex}'.",
+    GetVarRepeating { variable: Variable } =
+        13: "The variable '{variable}' occurred more than once in get query filter.",
+    GetVarNotBound { variable: Variable } =
+        14: "The get variable '{variable}' is not bound in the match clause.",
+    AggregateVarNotBound { variable: Variable } =
+        15: "The get-aggregate variable '{variable}' is not bound in the match clause.",
+    GroupVarNotBound { variable: Variable } =
+        16: "The get-group variable '{variable}' is not bound in the match clause.",
+    SortVarNotBound { variable: Variable } =
+        17: "The sort variable '{variable}' is not bound in the match clause.",
+    DeleteVarNotBound { variable: Variable } =
+        18: "The delete variable '{variable}' is not bound in the match clause.",
+    InsertClauseNotBound { insert_statements: String, bounds: String } =
+        19: "None of the variables in 'insert' ('{insert_statements}') is within scope of 'match' ('{bounds}')",
+    InsertModifiersRequireMatch { insert: String } =
+        20: "The insert query '{insert}' contains query modifiers that require a 'match' clause be specified",
+    VariableNotNamed =
         21: "Anonymous variable encountered in a match query filter.",
-    InvalidVariableName(String) =
-        22: "The variable name '{}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
-    MissingConstraintRelationPlayer() =
+    InvalidVariableName { name: String } =
+        22: "The variable name '{name}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
+    MissingConstraintRelationPlayer =
         23: "A relation variable has not been provided with role players.",
-    InvalidConstraintPredicate(token::Predicate, Value) =
-        24: "The '{}' constraint may only accept a string value as its operand, got '{}' instead.",
-    InvalidConstraintDatetimePrecision(NaiveDateTime) =
-        25: "Attempted to assign DateTime value of '{}' which is more precise than 1 millisecond.",
-    InvalidDefineQueryVariable() =
+    InvalidConstraintPredicate { predicate: token::Predicate, value: Value } =
+        24: "The '{predicate}' constraint may only accept a string value as its operand, got '{value}' instead.",
+    InvalidConstraintDatetimePrecision { date_time: NaiveDateTime } =
+        25: "Attempted to assign DateTime value of '{date_time}' which is more precise than 1 millisecond.",
+    InvalidDefineQueryVariable =
         26: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
-    InvalidUndefineQueryRule(Label) =
-        27: "Invalid undefine query: the rule body of '{}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
-    InvalidRuleWhenMissingPatterns(Label) =
-        28: "Rule '{}' 'when' has not been provided with any patterns.",
-    InvalidRuleWhenNestedNegation(Label) =
-        29: "Rule '{}' 'when' contains a nested negation.",
-    InvalidRuleThen(Label, ThingStatement) =
-        30: "Rule '{}' 'then' '{}': must be exactly one attribute ownership, or exactly one relation.",
-    InvalidRuleThenHas(Label, ThingStatement, ConceptVariable, Label) =
-        31: "Rule '{}' 'then' '{}' tries to assign type '{}' to variable '{}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
-    InvalidRuleThenVariables(Label) =
-        32: "Rule '{}' 'then' variables must be present in the 'when', outside of nested patterns.",
-    InvalidRuleThenRoles(Label, ThingStatement) =
-        33: "Rule '{}' 'then' '{}' must specify all role types explicitly or by using a variable.",
-    RedundantNestedNegation() =
+    InvalidUndefineQueryRule { rule_label: Label } =
+        27: "Invalid undefine query: the rule body of '{rule_label}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
+    InvalidRuleWhenMissingPatterns { rule_label: Label } =
+        28: "Rule '{rule_label}' 'when' has not been provided with any patterns.",
+    InvalidRuleWhenNestedNegation { rule_label: Label } =
+        29: "Rule '{rule_label}' 'when' contains a nested negation.",
+    InvalidRuleThen { rule_label: Label, then: ThingStatement } =
+        30: "Rule '{rule_label}' 'then' '{then}': must be exactly one attribute ownership, or exactly one relation.",
+    InvalidRuleThenHas { rule_label: Label, then: ThingStatement, variable: ConceptVariable, type_label: Label } =
+        31: "Rule '{rule_label}' 'then' '{then}' tries to assign type '{type_label}' to variable '{variable}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
+    InvalidRuleThenVariables { rule_label: Label } =
+        32: "Rule '{rule_label}' 'then' variables must be present in the 'when', outside of nested patterns.",
+    InvalidRuleThenRoles { rule_label: Label, then: ThingStatement } =
+        33: "Rule '{rule_label}' 'then' '{then}' must specify all role types explicitly or by using a variable.",
+    RedundantNestedNegation =
         34: "Invalid query containing redundant nested negations.",
-    VariableNotSorted(Variable) =
-        35: "Variable '{}' does not exist in the sorting clause.",
-    InvalidCountVariableArgument() =
+    VariableNotSorted { variable: Variable } =
+        35: "Variable '{variable}' does not exist in the sorting clause.",
+    InvalidCountVariableArgument =
         36: "Aggregate COUNT does not accept a Variable.",
-    IllegalGrammar(String) =
-        37: "Illegal grammar: '{}'",
-    IllegalCharInLabel(String) =
-        38: "'{}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
+    IllegalGrammar { input: String } =
+        37: "Illegal grammar: '{input}'",
+    IllegalCharInLabel { input: String } =
+        38: "'{input}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
 }

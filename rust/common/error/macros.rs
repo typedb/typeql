@@ -24,11 +24,11 @@
 macro_rules! error_messages {
     {
         $name:ident code: $code_pfx:literal, type: $message_pfx:literal,
-        $($error_name:ident( $($inner:ty),* $(,)? ) = $code:literal: $body:literal),+ $(,)?
+        $($error_name:ident $({ $($field:ident : $inner:ty),+ $(,)? })? = $code:literal: $body:literal),+ $(,)?
     } => {
         #[derive(Clone, Eq, PartialEq)]
         pub enum $name {$(
-            $error_name($($inner),*),
+            $error_name$( { $($field: $inner),+ })?,
         )*}
 
         impl $name {
@@ -36,7 +36,7 @@ macro_rules! error_messages {
 
             pub const fn code(&self) -> usize {
                 match self {$(
-                    Self::$error_name(..) => $code,
+                    Self::$error_name $({ $($field: _),+ })? => $code,
                 )*}
             }
 
@@ -45,8 +45,9 @@ macro_rules! error_messages {
             }
 
             pub fn message(&self) -> String {
-                $(error_messages!(@format self, $error_name, $body $(, $inner)*);)*
-                unreachable!()
+                match self {$(
+                    Self::$error_name $({$($field),+})? => format!($body $($(, $field = $field)+)?),
+                )*}
             }
 
             const fn max_code() -> usize {
@@ -71,7 +72,7 @@ macro_rules! error_messages {
 
             const fn name(&self) -> &'static str {
                 match self {$(
-                    Self::$error_name(..) => concat!(stringify!($name), "::", stringify!($error_name)),
+                    Self::$error_name $({ $($field: _),+ })? => concat!(stringify!($name), "::", stringify!($error_name)),
                 )*}
             }
         }
@@ -92,12 +93,13 @@ macro_rules! error_messages {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let mut debug_struct = f.debug_struct(self.name());
                 debug_struct.field("message", &format!("{}", self));
-                $(error_messages!(@payload
-                    self,
-                    $error_name,
-                    debug_struct
-                    $(, $inner)*
-                );)*
+                $(
+                    $(
+                        if let Self::$error_name { $($field),+ } = &self {
+                            $(debug_struct.field(stringify!($field), &$field);)+
+                        }
+                    )?
+                )*
                 debug_struct.finish()
             }
         }
@@ -108,62 +110,6 @@ macro_rules! error_messages {
             }
         }
     };
-
-    (@format $self:ident, $error_name:ident, $body:literal) => {
-        if let Self::$error_name() = &$self {
-            return format!($body)
-        }
-    };
-    (@format $self:ident, $error_name:ident, $body:literal, $t1:ty) => {
-        if let Self::$error_name(_0) = &$self {
-            return format!($body, _0)
-        }
-    };
-    (@format $self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty) => {
-        if let Self::$error_name(_0, _1) = &$self {
-            return format!($body, _0, _1)
-        }
-    };
-    (@format $self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty, $t3:ty) => {
-        if let Self::$error_name(_0, _1, _2) = &$self {
-            return format!($body, _0, _1, _2)
-        }
-    };
-    (@format $self:ident, $error_name:ident, $body:literal, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
-        if let Self::$error_name(_0, _1, _2, _3) = &$self {
-            return format!($body, _0, _1, _2, _3)
-        }
-    };
-
-    (@payload $self:ident, $error_name:ident, $debug_struct:expr) => {
-        if let Self::$error_name() = &$self {
-            $debug_struct.field("payload", &());
-        }
-    };
-
-    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty) => {
-        if let Self::$error_name(_0) = &$self {
-            $debug_struct.field("payload", &(_0));
-        }
-    };
-
-    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty, $t2:ty) => {
-        if let Self::$error_name(_0, _1) = &$self {
-            $debug_struct.field("payload", &(_0, _1));
-        }
-    };
-
-    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty, $t2:ty, $t3:ty) => {
-        if let Self::$error_name(_0, _1, _2) = &$self {
-            $debug_struct.field("payload", &(_0, _1, _2));
-        }
-    };
-
-    (@payload $self:ident, $error_name:ident, $debug_struct:expr, $t1:ty, $t2:ty, $t3:ty, $t4:ty) => {
-        if let Self::$error_name(_0, _1, _2, _3) = &$self {
-            $debug_struct.field("payload", &(_0, _1, _2, _3));
-        }
-    };
 }
 
 #[allow(dead_code)]
@@ -171,28 +117,28 @@ macro_rules! error_messages {
 mod tests {
     error_messages! { TestError
         code: "TST", type: "Test Error",
-        BasicError() =
+        BasicError =
             1: "This is a basic error.",
-        ErrorWithAttributes(i32, String) =
-            2: "This is an error with i32 {} and string '{}'.",
-        MultiLine() =
+        ErrorWithAttributes { int: i32, string: String } =
+            2: "This is an error with i32 {int} and string '{string}'.",
+        MultiLine =
             3: "This is an error,\nthat spans,\nmultiple lines."
     }
 
     #[test]
     pub fn debug_includes_display() {
         let errors = [
-            TestError::BasicError(),
-            TestError::ErrorWithAttributes(1, "error message".to_string()),
-            TestError::MultiLine(),
+            TestError::BasicError,
+            TestError::ErrorWithAttributes { int: 1, string: "error message".to_string() },
+            TestError::MultiLine,
         ];
 
         for error in errors {
             let display = format!("{error}");
             let compact_debug = format!("{error:?}");
             let expanded_debug = format!("{error:#?}");
-            assert!(compact_debug.contains(&display.replace('\n', &"\\n")));
-            assert!(expanded_debug.contains(&display.replace('\n', &"\\n")));
+            assert!(compact_debug.contains(&display.replace('\n', "\\n")));
+            assert!(expanded_debug.contains(&display.replace('\n', "\\n")));
         }
     }
 }

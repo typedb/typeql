@@ -125,7 +125,7 @@ impl TypeStatement {
 
     pub fn validate_definable(&self) -> Result {
         if self.label.is_none() {
-            Err(TypeQLError::InvalidDefineQueryVariable())?;
+            Err(TypeQLError::InvalidDefineQueryVariable)?;
         }
         Ok(())
     }

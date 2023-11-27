@@ -61,7 +61,7 @@ impl From<ConceptVariable> for SubConstraint {
 
 impl From<TypeReference> for SubConstraint {
     fn from(type_: TypeReference) -> Self {
-        SubConstraint { type_: type_, is_explicit: IsExplicit::No }
+        SubConstraint { type_, is_explicit: IsExplicit::No }
     }
 }
 

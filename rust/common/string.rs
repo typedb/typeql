@@ -33,11 +33,11 @@ pub(crate) fn indent(multiline_string: &str) -> String {
 }
 
 pub(crate) fn escape_regex(regex: &str) -> String {
-    regex.replace('/', r#"\/"#)
+    regex.replace('/', r"\/")
 }
 
 pub(crate) fn unescape_regex(regex: &str) -> String {
-    regex.replace(r#"\/"#, "/")
+    regex.replace(r"\/", "/")
 }
 
 pub(crate) fn format_double(double: f64) -> String {

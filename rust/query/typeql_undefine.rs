@@ -44,8 +44,8 @@ impl TypeQLUndefine {
         undefinables.into_iter().fold(TypeQLUndefine::default(), |undefine, undefinable| match undefinable {
             Definable::RuleDeclaration(rule) => undefine.add_rule(rule),
             Definable::TypeStatement(var) => undefine.add_statement(var),
-            Definable::RuleDefinition(r) => {
-                panic!("{}", TypeQLError::InvalidUndefineQueryRule(r.label))
+            Definable::RuleDefinition(rule) => {
+                panic!("{}", TypeQLError::InvalidUndefineQueryRule { rule_label: rule.label })
             }
         })
     }
@@ -62,7 +62,7 @@ impl TypeQLUndefine {
 
     fn validate_non_empty(&self) -> Result {
         if self.statements.is_empty() && self.rules.is_empty() {
-            Err(TypeQLError::MissingDefinables())?
+            Err(TypeQLError::MissingDefinables)?
         }
         Ok(())
     }

@@ -30,19 +30,15 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum ValueVariable {
-    Name(String),
+    Named(String),
 }
 
 impl ValueVariable {
-    pub fn named(name: String) -> ValueVariable {
-        Self::Name(name)
-    }
-
     pub fn into_value(self) -> ValueStatement {
         ValueStatement::new(self)
     }
 
-    pub fn is_name(&self) -> bool {
+    pub fn is_named(&self) -> bool {
         true
     }
 
@@ -51,7 +47,7 @@ impl ValueVariable {
     }
 
     pub fn name(&self) -> &str {
-        let Self::Name(name) = self;
+        let Self::Named(name) = self;
         name
     }
 }
@@ -59,20 +55,20 @@ impl ValueVariable {
 impl Validatable for ValueVariable {
     fn validate(&self) -> Result {
         match self {
-            Self::Name(n) => validate_variable_name(n),
+            Self::Named(n) => validate_variable_name(n),
         }
     }
 }
 
 impl From<&str> for ValueVariable {
     fn from(name: &str) -> Self {
-        ValueVariable::named(name.to_string())
+        ValueVariable::Named(name.to_owned())
     }
 }
 
 impl From<String> for ValueVariable {
     fn from(name: String) -> Self {
-        ValueVariable::named(name)
+        ValueVariable::Named(name)
     }
 }
 

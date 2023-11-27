@@ -28,45 +28,28 @@ use crate::{
     variable::variable::validate_variable_name,
 };
 
-#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
-pub enum Visibility {
-    Visible,
-    Invisible,
-}
-
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum ConceptVariable {
-    Anonymous(Visibility),
-    Name(String),
+    Anonymous,
+    Hidden,
+    Named(String),
 }
 
 impl ConceptVariable {
     const ANONYMOUS_NAME: &'static str = token::Char::Underscore.as_str();
 
-    pub fn named(name: String) -> ConceptVariable {
-        ConceptVariable::Name(name)
-    }
-
-    pub fn anonymous() -> ConceptVariable {
-        ConceptVariable::Anonymous(Visibility::Visible)
-    }
-
-    pub fn hidden() -> ConceptVariable {
-        ConceptVariable::Anonymous(Visibility::Invisible)
-    }
-
     pub fn is_visible(&self) -> bool {
-        !matches!(self, Self::Anonymous(Visibility::Invisible))
+        self != &Self::Hidden
     }
 
-    pub fn is_name(&self) -> bool {
-        matches!(self, Self::Name(_))
+    pub fn is_named(&self) -> bool {
+        matches!(self, Self::Named(_))
     }
 
     pub fn name(&self) -> &str {
         match self {
-            Self::Anonymous(_) => Self::ANONYMOUS_NAME,
-            Self::Name(name) => name,
+            Self::Anonymous | Self::Hidden => Self::ANONYMOUS_NAME,
+            Self::Named(name) => name,
         }
     }
 }
@@ -74,27 +57,27 @@ impl ConceptVariable {
 impl Validatable for ConceptVariable {
     fn validate(&self) -> Result {
         match self {
-            Self::Anonymous(_) => Ok(()),
-            Self::Name(n) => validate_variable_name(n),
+            Self::Anonymous | Self::Hidden => Ok(()),
+            Self::Named(n) => validate_variable_name(n),
         }
     }
 }
 
 impl From<()> for ConceptVariable {
     fn from(_: ()) -> Self {
-        ConceptVariable::anonymous()
+        ConceptVariable::Anonymous
     }
 }
 
 impl From<&str> for ConceptVariable {
     fn from(name: &str) -> Self {
-        ConceptVariable::named(name.to_string())
+        ConceptVariable::Named(name.to_string())
     }
 }
 
 impl From<String> for ConceptVariable {
     fn from(name: String) -> Self {
-        ConceptVariable::named(name)
+        ConceptVariable::Named(name)
     }
 }
 

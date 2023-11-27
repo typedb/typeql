@@ -105,7 +105,7 @@ fn validate_no_nested_negations<'a>(patterns: impl Iterator<Item = &'a Pattern>,
             Pattern::Disjunction(d) => validate_no_nested_negations(d.patterns.iter(), rule_label),
             Pattern::Negation(n) => {
                 if contains_negations(iter::once(n.pattern.as_ref())) {
-                    Err(TypeQLError::InvalidRuleWhenNestedNegation(rule_label.clone()))?
+                    Err(TypeQLError::InvalidRuleWhenNestedNegation { rule_label: rule_label.clone() })?
                 } else {
                     Ok(())
                 }
@@ -127,22 +127,22 @@ fn validate_valid_inference(then: &ThingStatement, rule_label: &Label) -> Result
     if infers_ownership(then) {
         let has = then.has.get(0).unwrap();
         if let HasConstraint::HasConcept(Some(type_label), attr_var) = has {
-            Err(TypeQLError::InvalidRuleThenHas(
-                rule_label.clone(),
-                then.clone(),
-                attr_var.clone(),
-                type_label.clone(),
-            ))?
+            Err(TypeQLError::InvalidRuleThenHas {
+                rule_label: rule_label.clone(),
+                then: then.clone(),
+                variable: attr_var.clone(),
+                type_label: type_label.clone(),
+            })?
         }
         Ok(())
     } else if infers_relation(then) {
         let relation = then.relation.as_ref().unwrap();
         if !relation.role_players.iter().all(|rp| rp.role_type.is_some()) {
-            Err(TypeQLError::InvalidRuleThenRoles(rule_label.clone(), then.clone()))?
+            Err(TypeQLError::InvalidRuleThenRoles { rule_label: rule_label.clone(), then: then.clone() })?
         }
         Ok(())
     } else {
-        Err(TypeQLError::InvalidRuleThen(rule_label.clone(), then.clone()))?
+        Err(TypeQLError::InvalidRuleThen { rule_label: rule_label.clone(), then: then.clone() })?
     }
 }
 
@@ -160,7 +160,7 @@ fn infers_relation(then: &ThingStatement) -> bool {
 fn validate_then_bounded_by_when(then: &ThingStatement, when: &Conjunction, rule_label: &Label) -> Result {
     let bounds: HashSet<VariableRef<'_>> = when.retrieved_variables().collect();
     if !then.variables().filter(|r| r.is_name()).all(|r| bounds.contains(&r)) {
-        Err(TypeQLError::InvalidRuleThenVariables(rule_label.clone()))?
+        Err(TypeQLError::InvalidRuleThenVariables { rule_label: rule_label.clone() })?
     }
     Ok(())
 }
