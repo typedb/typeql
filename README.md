@@ -18,7 +18,7 @@ TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**.
 
 For a quick overview of the range of statements that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/docs/).
 
-> **IMPORTANT NOTE:** TypeDB & TypeQL is in the process of being ported over and rewritten in Rust. There will changes that won't be backwards compatible, as we refine the the language further to extend its expressivity, as well as changes to the byte storage data structure to further boost performanc significantly. We're aiming to complete this by February/March 2024, released as TypeDB 3.0, along with preliminary benchmarks of TypeDB.
+> **IMPORTANT NOTE:** TypeDB & TypeQL is in the process of being ported over and rewritten in [Rust](https://www.rust-lang.org). There will changes that won't be backwards compatible, as we refine the the language further to extend its expressivity, as well as changes to the byte storage data structure to further boost performanc significantly. We're aiming to complete this by February/March 2024, released as TypeDB 3.0, along with preliminary benchmarks of TypeDB.
 
 ## A polymorphic query language
 
