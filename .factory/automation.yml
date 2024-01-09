@@ -72,7 +72,7 @@ build:
       image: vaticle-ubuntu-22.04
       dependencies: [build, build-dependency, test-rust]
       command: |
-        export DEPLOY_CRATE_TOKEN=$REPO_VATICLE_CRATES_TOKEN
+        export DEPLOY_CRATE_TOKEN=$REPO_TYPEDB_CRATES_TOKEN
         bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //rust:deploy_crate -- snapshot
     deploy-maven-snapshot:
@@ -82,8 +82,8 @@ build:
       image: vaticle-ubuntu-22.04
       dependencies: [build, build-dependency, test-java]
       command: |
-        export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
-        export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
+        export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
+        export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
         bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/builder:deploy-maven -- snapshot
@@ -99,8 +99,8 @@ build:
       image: vaticle-ubuntu-20.04
       dependencies: [ build, build-dependency ]
       command: |
-        export DEPLOY_PIP_USERNAME=$REPO_VATICLE_USERNAME
-        export DEPLOY_PIP_PASSWORD=$REPO_VATICLE_PASSWORD
+        export DEPLOY_PIP_USERNAME=$REPO_TYPEDB_USERNAME
+        export DEPLOY_PIP_PASSWORD=$REPO_TYPEDB_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //grammar/python:deploy-pip -- snapshot
     test-deployment-maven:
       filter:
@@ -149,8 +149,8 @@ release:
       image: vaticle-ubuntu-22.04
       dependencies: [deploy-github]
       command: |
-        export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
-        export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
+        export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
+        export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
         bazel run --define version=$(cat VERSION) //grammar/java:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java/builder:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java/common:deploy-maven -- release
