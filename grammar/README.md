@@ -13,8 +13,8 @@ If you would like to develop language TypeQL plugins or extension in Java, and r
 
 <repositories>
     <repository>
-        <id>repo.vaticle.com</id>
-        <url>https://repo.vaticle.com/repository/maven/</url>
+        <id>repo.typedb.com</id>
+        <url>https://repo.typedb.com/public/public-release/maven/</url>
     </repository>
 </repositories>
 
@@ -27,7 +27,7 @@ If you would like to develop language TypeQL plugins or extension in Java, and r
 </dependencies>
 ```
 
-Replace `{version}` with the version number, in which you can find the latest of TypeQL Grammar on our [Maven Repository](https://repo.vaticle.com/#browse/browse:maven:com%2Fvaticle%2Ftypeql%2Ftypeql-grammar).
+Replace `{version}` with the version number, in which you can find the latest of TypeQL Grammar on our [Maven Repository](https://cloudsmith.io/~typedb/repos/public-release/packages/?q=name%3A%27%5Etypeql-grammar%24%27).
 
 ---
 

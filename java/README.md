@@ -19,8 +19,8 @@ You can learn more about TypeQL Language Library for Java from [typedb.com/docs]
 ```xml
 <repositories>
     <repository>
-        <id>repo.vaticle.com</id>
-        <url>https://repo.vaticle.com/repository/maven/</url>
+        <id>repo.typedb.com</id>
+        <url>https://repo.typedb.com/public/public-release/maven/</url>
     </repository>
 </repositories>
 
@@ -33,7 +33,7 @@ You can learn more about TypeQL Language Library for Java from [typedb.com/docs]
 </dependencies>
 ```
 
-Replace `{version}` with the version number, in which you can find the latest on [TypeQL's Maven Repository](https://repo.vaticle.com/#browse/browse:maven:com%2Fvaticle%2Ftypeql%2Ftypeql-lang). Further documentation: http://typedb.com/docs/client-api/java#typeql
+Replace `{version}` with the version number, in which you can find the latest on [TypeQL's Maven Repository](https://cloudsmith.io/~typedb/repos/public-release/packages/?q=name%3A%27%5Etypeql-lang%24%27). Further documentation: http://typedb.com/docs/client-api/java#typeql
 
 ## Building TypeQL from Source
 

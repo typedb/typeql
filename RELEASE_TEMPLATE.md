@@ -11,8 +11,8 @@ cargo add typeql@{version}
 ```xml
 <repositories>
     <repository>
-        <id>repo.vaticle.com</id>
-        <url>https://repo.vaticle.com/repository/maven/</url>
+        <id>repo.typedb.com</id>
+        <url>https://repo.typedb.com/public/public-release/maven/</url>
     </repository>
 </repositories>
 
