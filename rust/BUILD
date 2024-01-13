@@ -71,8 +71,8 @@ assemble_crate(
 deploy_crate(
     name = "deploy_crate",
     target = ":assemble_crate",
-    snapshot = deployment["crate.snapshot"],
-    release = deployment["crate.release"],
+    snapshot = deployment["crate"]["snapshot"],
+    release = deployment["crate"]["release"],
 )
 
 deploy_github(

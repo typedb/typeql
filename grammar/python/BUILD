@@ -87,8 +87,8 @@ assemble_pip(
 deploy_pip(
     name = "deploy-pip",
     target = ":assemble-pip",
-    snapshot = deployment["pypi.snapshot"],
-    release = deployment["pypi.release"],
+    snapshot = deployment["pypi"]["snapshot"],
+    release = deployment["pypi"]["release"],
 )
 
 checkstyle_test(
