@@ -142,5 +142,6 @@ generic_step_impl! {
     #[step("typeql undefine; throws exception")]
     #[step("typeql update; throws exception")]
     #[step(regex = r"^typeql get; throws exception containing .*$")]
+    #[step(regex = r"^typeql delete; throws exception containing .*$")]
     async fn do_nothing_unknown_exception(_: &mut TypeQLWorld) {}
 }
