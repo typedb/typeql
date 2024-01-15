@@ -199,7 +199,7 @@ public class TypeQLQueryTest {
                 cVar("x").map("name").map("age").map("email"),
                 label("children").map(
                         match(
-                                rel(cVar("c")).rel(cVar("x")).isa("parenthood)")
+                                rel(cVar("c")).rel(cVar("x")).isa("parenthood")
                         ).fetch(
                                 cVar("c").map("name")
                         )
