@@ -243,7 +243,7 @@ public abstract class Reference {
             super(Type.LABEL, false);
             if (!IDENTIFIER_REGEX.matcher(label).matches()) {
                 throw TypeQLException.of(INVALID_TYPE_LABEL.message(label));
-            } else if (scope != null && IDENTIFIER_REGEX.matcher(scope).matches()) {
+            } else if (scope != null && !IDENTIFIER_REGEX.matcher(scope).matches()) {
                 throw TypeQLException.of(INVALID_TYPE_LABEL.message(scope));
             }
             this.label = label;

@@ -23,7 +23,7 @@
 use std::{fmt, fmt::Formatter, hash::Hash};
 
 use crate::{
-    common::{error::TypeQLError, validatable::Validatable, Result, identifier::is_valid_identifier},
+    common::{error::TypeQLError, identifier::is_valid_identifier, validatable::Validatable, Result},
     variable::{ConceptVariable, ValueVariable},
 };
 

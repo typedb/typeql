@@ -26,17 +26,17 @@ use itertools::Itertools;
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        Result,
+        identifier::is_valid_identifier,
         string::indent,
         token,
         validatable::Validatable,
+        Result,
     },
     pattern::{Label, VariablesRetrieved},
-    query::{MatchClause, modifier::Modifiers, TypeQLGetAggregate},
-    variable::{Variable, variable::VariableRef},
+    query::{modifier::Modifiers, MatchClause, TypeQLGetAggregate},
+    variable::{variable::VariableRef, Variable},
     write_joined,
 };
-use crate::common::identifier::is_valid_identifier;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLFetch {

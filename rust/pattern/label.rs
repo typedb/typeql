@@ -22,11 +22,7 @@
 
 use std::fmt;
 
-use crate::common::error::TypeQLError;
-use crate::common::identifier::is_valid_identifier;
-use crate::common::Result;
-use crate::common::token;
-use crate::common::validatable::Validatable;
+use crate::common::{error::TypeQLError, identifier::is_valid_identifier, token, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {

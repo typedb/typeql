@@ -38,17 +38,18 @@ pub fn is_valid_identifier(identifier: &str) -> bool {
             \\u3001-\\uD7FF\
             \\uF900-\\uFDCF\
             \\uFDF0-\\uFFFD";
-        let identifier_tail = format!("{}\
+        let identifier_tail = format!(
+            "{}\
             0-9\
             _\
             \\-\
             \\u00B7\
             \\u0300-\\u036F\
-            \\u203F-\\u2040", identifier_start);
+            \\u203F-\\u2040",
+            identifier_start
+        );
         let identifier_pattern = format!("^[{}][{}]*$", identifier_start, identifier_tail);
         RegexBuilder::new(&identifier_pattern).build().unwrap()
     });
-    let match_ = regex.is_match(identifier);
-    dbg!(match_);
-    match_
+    regex.is_match(identifier)
 }
