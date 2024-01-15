@@ -26,6 +26,7 @@ pub mod string;
 pub mod token;
 pub mod validatable;
 pub mod variables_retrieved;
+pub(crate) mod identifier;
 
 pub use error::Error;
 

@@ -332,11 +332,11 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 
 VAR_CONCEPT_            : VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_   ;
 VAR_CONCEPT_ANONYMOUS_  : '$_' ;
-VAR_CONCEPT_NAMED_      : '$'  [a-zA-Z0-9][a-zA-Z0-9_-]* ;
-VAR_VALUE_              : '?'  [a-zA-Z0-9][a-zA-Z0-9_-]* ;
-IID_                    : '0x' [0-9a-f]+                 ;
-LABEL_                  : TYPE_CHAR_H_ TYPE_CHAR_T_*     ;
-LABEL_SCOPED_           : LABEL_ ':' LABEL_              ;
+VAR_CONCEPT_NAMED_      : '$'  TYPE_CHAR_H_ TYPE_CHAR_T_* ;
+VAR_VALUE_              : '?'  TYPE_CHAR_H_ TYPE_CHAR_T_* ;
+IID_                    : '0x' [0-9a-f]+                  ;
+LABEL_                  : TYPE_CHAR_H_ TYPE_CHAR_T_*      ;
+LABEL_SCOPED_           : LABEL_ ':' LABEL_               ;
 
 // FRAGMENTS OF KEYWORDS =======================================================
 

@@ -330,7 +330,7 @@ public class TypeQLFetch implements TypeQLQuery {
             }
 
             public static Label of(String label) {
-                if (Reference.Name.REGEX.matcher(label).matches()) {
+                if (Reference.IDENTIFIER_REGEX.matcher(label).matches()) {
                     return unquoted(label);
                 } else {
                     return quoted(label);

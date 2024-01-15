@@ -137,7 +137,7 @@ error_messages! { TypeQLError
     VariableNotNamed =
         21: "Anonymous variable encountered in a match query filter.",
     InvalidVariableName { name: String } =
-        22: "The variable name '{name}' is invalid; variables must match the following regular expression: '^[a-zA-Z0-9][a-zA-Z0-9_-]+$'.",
+        22: "The variable name '{name}' is invalid. Variables must be valid utf-8 identifiers without a leading underscore.",
     MissingConstraintRelationPlayer =
         23: "A relation variable has not been provided with role players.",
     InvalidConstraintPredicate { predicate: token::Predicate, value: Value } =
@@ -168,6 +168,6 @@ error_messages! { TypeQLError
         36: "Aggregate COUNT does not accept a Variable.",
     IllegalGrammar { input: String } =
         37: "Illegal grammar: '{input}'",
-    IllegalCharInLabel { input: String } =
-        38: "'{input}' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.",
+    InvalidTypeLabel { label: String } =
+        38: "The type label '{label}' is invalid. Type labels must be valid utf-8 identifiers without a leading underscore.",
 }

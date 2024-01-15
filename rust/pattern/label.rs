@@ -22,7 +22,11 @@
 
 use std::fmt;
 
+use crate::common::error::TypeQLError;
+use crate::common::identifier::is_valid_identifier;
+use crate::common::Result;
 use crate::common::token;
+use crate::common::validatable::Validatable;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {
@@ -57,6 +61,24 @@ impl From<(&str, &str)> for Label {
 impl From<(String, String)> for Label {
     fn from((scope, name): (String, String)) -> Self {
         Label { scope: Some(scope), name }
+    }
+}
+
+impl Validatable for Label {
+    fn validate(&self) -> Result {
+        validate_label(&self.name)?;
+        if let Some(scope_name) = &self.scope {
+            validate_label(scope_name)?
+        }
+        Ok(())
+    }
+}
+
+fn validate_label(label: &str) -> Result {
+    if !is_valid_identifier(label) {
+        Err(TypeQLError::InvalidTypeLabel { label: label.to_owned() })?
+    } else {
+        Ok(())
     }
 }
 

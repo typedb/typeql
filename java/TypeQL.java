@@ -58,7 +58,7 @@ import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LTE;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CHAR_IN_LABEL;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_TYPE_LABEL;
 
 public class TypeQL {
 
@@ -97,10 +97,10 @@ public class TypeQL {
         try {
             parsedLabel = parser.parseLabelEOF(label);
         } catch (TypeQLException e) {
-            throw TypeQLException.of(ILLEGAL_CHAR_IN_LABEL.message(label));
+            throw TypeQLException.of(INVALID_TYPE_LABEL.message(label));
         }
         if (!parsedLabel.equals(label))
-            throw TypeQLException.of(ILLEGAL_CHAR_IN_LABEL.message(label)); // e.g: 'abc#123'
+            throw TypeQLException.of(INVALID_TYPE_LABEL.message(label)); // e.g: 'abc#123'
         return parsedLabel;
     }
 

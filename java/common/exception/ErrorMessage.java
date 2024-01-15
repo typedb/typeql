@@ -62,7 +62,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage FILTER_VARIABLE_ANONYMOUS =
             new ErrorMessage(19, "Anonymous variable encountered in the query filter.");
     public static final ErrorMessage INVALID_VARIABLE_NAME =
-            new ErrorMessage(20, "The variable name '%s' is invalid; variables must match the following regular expression: '%s'.");
+            new ErrorMessage(20, "Invalid variable name '%s'. Variables must be valid unicode identifiers.");
     public static final ErrorMessage ILLEGAL_CONSTRAINT_REPETITION =
             new ErrorMessage(21, "The variable '%s' contains illegally repeating constraints: '%s' and '%s'.");
     public static final ErrorMessage MISSING_CONSTRAINT_RELATION_PLAYER =
@@ -103,8 +103,8 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
             new ErrorMessage(40, "Aggregate COUNT does not accept a Variable.");
     public static final ErrorMessage ILLEGAL_GRAMMAR =
             new ErrorMessage(41, "Illegal grammar: '%s'");
-    public static final ErrorMessage ILLEGAL_CHAR_IN_LABEL =
-            new ErrorMessage(42, "'%s' is not a valid Type label. Type labels must start with a letter, and may contain only letters, numbers, '-' and '_'.");
+    public static final ErrorMessage INVALID_TYPE_LABEL =
+            new ErrorMessage(42, "The type label '%s' is invalid. Type labels must be valid unicode identifiers.");
     public static final ErrorMessage INVALID_ANNOTATION =
             new ErrorMessage(43, "Invalid annotation '%s' on '%s' constraint");
 
