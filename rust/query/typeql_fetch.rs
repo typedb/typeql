@@ -26,6 +26,7 @@ use itertools::Itertools;
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
+        identifier::is_valid_identifier,
         string::indent,
         token,
         validatable::Validatable,
@@ -33,7 +34,7 @@ use crate::{
     },
     pattern::{Label, VariablesRetrieved},
     query::{modifier::Modifiers, MatchClause, TypeQLGetAggregate},
-    variable::{variable, variable::VariableRef, Variable},
+    variable::{variable::VariableRef, Variable},
     write_joined,
 };
 
@@ -163,8 +164,7 @@ impl ProjectionKeyLabel {
     }
 
     fn must_quote(s: &str) -> bool {
-        // TODO: we should actually check against valid label regex, instead of valid variable regex - Java has to be updated too
-        !variable::is_valid_variable_name(s)
+        !is_valid_identifier(s)
     }
 }
 

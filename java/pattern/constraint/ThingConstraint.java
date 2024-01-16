@@ -468,10 +468,14 @@ public abstract class ThingConstraint extends Constraint {
                 return HAS.toString() + SPACE +
                         (type != null ? type + SPACE : "") +
                         attribute.first();
+            } else if (attribute.second().predicate().isPresent()) {
+                return HAS.toString() + SPACE +
+                        (type != null ? type + SPACE : "") +
+                         attribute.second().predicate().get();
             } else {
                 return HAS.toString() + SPACE +
                         (type != null ? type + SPACE : "") +
-                        (attribute.second().headVariable().isNamed() ? attribute.second().headVariable() : attribute.second().predicate().get());
+                        attribute.second().headVariable();
             }
         }
 

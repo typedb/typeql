@@ -52,7 +52,7 @@ impl TypeReference {
 impl Validatable for TypeReference {
     fn validate(&self) -> crate::common::Result {
         match self {
-            TypeReference::Label(_) => Ok(()),
+            TypeReference::Label(label) => label.validate(),
             TypeReference::Variable(var) => var.validate(),
         }
     }

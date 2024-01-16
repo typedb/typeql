@@ -1946,3 +1946,31 @@ fn when_building_invalid_iid_throw() {
     let expected = typeql_match!(cvar("x").iid(iid)).get().validated();
     assert!(expected.is_err());
 }
+
+#[test]
+fn test_utf8_variable() {
+    let var = "人";
+    let expected = typeql_match!(cvar(var).isa("person")).get().validated();
+    assert!(expected.is_ok());
+}
+
+#[test]
+fn when_using_invalid_variable_throw() {
+    let var = "_人";
+    let expected = typeql_match!(cvar(var).isa("person")).get().validated();
+    assert!(expected.is_err());
+}
+
+#[test]
+fn test_utf8_label() {
+    let label = "人";
+    let expected = typeql_match!(cvar("x").isa(label)).get().validated();
+    assert!(expected.is_ok());
+}
+
+#[test]
+fn test_utf8_value() {
+    let value = "人";
+    let expected = typeql_match!(cvar("x").isa("person").has(("name", value))).get().validated();
+    assert!(expected.is_ok());
+}

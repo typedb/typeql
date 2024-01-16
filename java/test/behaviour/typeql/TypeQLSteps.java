@@ -118,6 +118,7 @@ public class TypeQLSteps {
     }
 
     @Given("typeql get; throws exception containing {string}")
+    @Given("typeql delete; throws exception containing {string}")
     public void do_nothing_with_throws_exception_containing(String exception, String query) {
     }
 

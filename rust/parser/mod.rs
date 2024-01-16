@@ -173,7 +173,7 @@ pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
     let parsed = parse_single(Rule::eof_label, label)?.into_children().consume_expected(Rule::label);
     let string = parsed.as_str();
     if string != label {
-        Err(TypeQLError::IllegalCharInLabel { input: label.to_string() })?;
+        Err(TypeQLError::InvalidTypeLabel { label: label.to_string() })?;
     }
     Ok(string.into())
 }

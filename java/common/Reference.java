@@ -31,9 +31,34 @@ import java.util.regex.Pattern;
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_TYPE_LABEL;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
 public abstract class Reference {
+
+    private static final String IDENTIFIER_START = "A-Za-z" +
+            "\\u00C0-\\u00D6" +
+            "\\u00D8-\\u00F6" +
+            "\\u00F8-\\u02FF" +
+            "\\u0370-\\u037D" +
+            "\\u037F-\\u1FFF" +
+            "\\u200C-\\u200D" +
+            "\\u2070-\\u218F" +
+            "\\u2C00-\\u2FEF" +
+            "\\u3001-\\uD7FF" +
+            "\\uF900-\\uFDCF" +
+            "\\uFDF0-\\uFFFD";
+    private static final String IDENTIFIER_TAIL = IDENTIFIER_START +
+            "0-9" +
+            "_" +
+            "\\-" +
+            "\\u00B7" +
+            "\\u0300-\\u036F" +
+            "\\u203F-\\u2040";
+
+    public static final Pattern IDENTIFIER_REGEX = Pattern.compile(
+            "^[" + IDENTIFIER_START + "][" + IDENTIFIER_TAIL + "]*$"
+    );
 
     final Type type;
     final boolean isVisible;
@@ -125,14 +150,14 @@ public abstract class Reference {
 
     public static abstract class Name extends Reference {
 
-        public static final Pattern REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9_-]*");
         final String name;
         private final int hash;
 
         Name(Type type, String name, boolean isVisible) {
             super(type, isVisible);
-            if (!REGEX.matcher(name).matches())
-                throw TypeQLException.of(INVALID_VARIABLE_NAME.message(name, REGEX.pattern()));
+            if (!IDENTIFIER_REGEX.matcher(name).matches()) {
+                throw TypeQLException.of(INVALID_VARIABLE_NAME.message(name));
+            }
             this.name = name;
             this.hash = Objects.hash(this.type, this.isVisible, this.name);
         }
@@ -216,6 +241,11 @@ public abstract class Reference {
 
         Label(String label, @Nullable String scope) {
             super(Type.LABEL, false);
+            if (!IDENTIFIER_REGEX.matcher(label).matches()) {
+                throw TypeQLException.of(INVALID_TYPE_LABEL.message(label));
+            } else if (scope != null && !IDENTIFIER_REGEX.matcher(scope).matches()) {
+                throw TypeQLException.of(INVALID_TYPE_LABEL.message(scope));
+            }
             this.label = label;
             this.scope = scope;
             this.hash = Objects.hash(this.type, this.isVisible, this.label, this.scope);

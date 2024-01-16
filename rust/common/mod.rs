@@ -22,6 +22,7 @@
 
 pub mod date_time;
 pub mod error;
+pub(crate) mod identifier;
 pub mod string;
 pub mod token;
 pub mod validatable;
