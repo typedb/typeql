@@ -68,7 +68,7 @@ build:
     deploy-crate-snapshot:
       filter:
         owner: vaticle
-        branch: master
+        branch: [master, development]
       image: vaticle-ubuntu-22.04
       dependencies: [build, build-dependency, test-rust]
       command: |
@@ -78,7 +78,7 @@ build:
     deploy-maven-snapshot:
       filter:
         owner: vaticle
-        branch: master
+        branch: [master, development]
       image: vaticle-ubuntu-22.04
       dependencies: [build, build-dependency, test-java]
       command: |
@@ -95,7 +95,7 @@ build:
     deploy-pip-snapshot:
       filter:
         owner: vaticle
-        branch: master
+        branch: [master, development]
       image: vaticle-ubuntu-20.04
       dependencies: [ build, build-dependency ]
       command: |
@@ -105,7 +105,7 @@ build:
     test-deployment-maven:
       filter:
         owner: vaticle
-        branch: master
+        branch: [master, development]
       image: vaticle-ubuntu-22.04
       dependencies: [deploy-maven-snapshot]
       command: |
