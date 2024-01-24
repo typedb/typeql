@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+#
+# Copyright (C) 2022 Vaticle
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+# TypeDB global variables
+JAVA_BIN=java
+if [[ ! -z "$JAVA_HOME" ]]; then
+    JAVA_BIN="$JAVA_HOME/bin/java"
+fi
+[[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
+TYPEDB_HOME=$(cd "$(dirname "${path}")" && pwd -P)
+
+# ================================================
+# common helper functions
+# ================================================
+exit_if_java_not_found() {
+    which "${JAVA_BIN}" > /dev/null
+    exit_code=$?
+
+    if [[ $exit_code -ne 0 ]]; then
+        echo "Java is not installed on this machine. TypeDB needs Java 11+ in order to run."
+        exit 1
+    fi
+}
+
+# =============================================
+# main routine
+# =============================================
+
+exit_if_java_not_found
+
+if [ -z "$1" ]; then
+    echo "Missing argument. Possible commands are:"
+    echo "  Server:          typedb server [--help]"
+    echo "  Enterprise:      typedb enterprise [--help]"
+    echo "  Console:         typedb console [--help]"
+    exit 1
+elif [ "$1" = "console" ]; then
+    if [ -d "${TYPEDB_HOME}/console" ]; then
+        SERVICE_LIB_CP="console/lib/*"
+        CLASSPATH="${TYPEDB_HOME}/${SERVICE_LIB_CP}:${TYPEDB_HOME}/console/conf/"
+    # exec replaces current shell process with java so no commands after this one will ever get executed
+        exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" com.vaticle.typedb.console.TypeDBConsole "${@:2}"
+    else
+        echo "TypeDB Console is not found. Make sure to install or download TypeDB Console or TypeDB (all)."
+        exit 1
+    fi
+elif [[ "$1" = "server" ]] || [[ "$1" = "enterprise" ]]; then
+
+    TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
+    TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
+    TYPEDB_ENTERPRISE_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-enterprise-server-*.jar)
+
+    CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/*"
+
+    if [[ "$1" = "server" ]]; then
+        TYPEDB_ALL_NAME="TypeDB (All)"
+        TYPEDB_SERVER_NAME="TypeDB (Server)"
+        TYPEDB_SERVER_CLASS=com.vaticle.typedb.core.server.TypeDBServer
+
+        if [[ -f "$TYPEDB_ENTERPRISE_SERVER_JAR" ]]; then
+            echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
+            exit 1
+        fi
+    else
+        TYPEDB_ALL_NAME="TypeDB Enterprise (All)"
+        TYPEDB_SERVER_NAME="TypeDB Enterprise (Server)"
+        TYPEDB_SERVER_CLASS=com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer
+
+        if [[ ! -f "$TYPEDB_ENTERPRISE_SERVER_JAR" ]]; then
+            echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
+            exit 1
+        fi
+    fi
+
+    IDX=0
+    while [[ "${@:IDX}" ]]; do
+        case ${@:IDX:1} in
+            --debug) DEBUG=yes;
+            break;
+        esac
+        IDX=$((IDX+1))
+    done
+
+    # exec replaces current shell process with java so no commands after these ones will ever get executed
+    if [ $DEBUG ]; then
+        exec $JAVA_BIN ${JAVAOPTS} -ea -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" \
+            ${TYPEDB_SERVER_CLASS} "${@:2}"
+    else
+        exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" \
+            ${TYPEDB_SERVER_CLASS} "${@:2}"
+    fi
+else
+    echo "Invalid argument: $1. Possible commands are: "
+    echo "  Server:          typedb server [--help]"
+    echo "  Enterprise:      typedb enterprise [--help]"
+    echo "  Console:         typedb console [--help]"
+    exit 1
+fi
+
