@@ -31,7 +31,6 @@ java_library(
         "concurrent/*.java",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
-        "conf/enterprise/*.java",
         "exception/*.java",
         "util/*.java",
         "yaml/*.java",
@@ -51,14 +50,14 @@ deploy_github(
     repository = deployment_github['github.repository'],
     title = "TypeDB Common",
     title_append_version = True,
-    release_description = "//:RELEASE_TEMPLATE.md",
+    release_description = "//:RELEASE_NOTES_LATEST.md",
     draft = False,
 )
 
 assemble_maven(
     name = "assemble-maven",
     target = ":common",
-    workspace_refs = "@vaticle_typedb_common_workspace_refs//:refs.json",
+    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json",
     version_overrides = version(artifacts_org = artifacts, artifacts_repo={}),
     project_name = "TypeDB Common",
     project_description = "TypeDB Common classes and tools",
@@ -69,15 +68,17 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
-    snapshot = deployment['maven.snapshot'],
-    release = deployment['maven.release']
+    snapshot = deployment['maven']['snapshot']['upload'],
+    release = deployment['maven']['release']['upload']
 )
 
 checkstyle_test(
     name = "checkstyle",
     include = glob([
         ".bazelrc",
+        ".gitattributes",
         ".gitignore",
+        ".gitattributes",
         ".factory/automation.yml",
         "BUILD",
         "WORKSPACE",
@@ -85,7 +86,6 @@ checkstyle_test(
         "concurrent/*",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
-        "conf/*/*.java",
         "deployment.bzl",
         "exception/*",
         "util/*",
@@ -109,5 +109,6 @@ filegroup(
         "@vaticle_dependencies//tool/release/notes:create",
         "@vaticle_dependencies//tool/sonarcloud:code-analysis",
         "@vaticle_dependencies//tool/unuseddeps:unused-deps",
+        "@vaticle_dependencies//tool/sync:dependencies",
     ]
 )
