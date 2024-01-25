@@ -20,13 +20,11 @@
 #
 
 exports_files(["VERSION"], visibility = ["//visibility:public"])
-load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@vaticle_dependencies//distribution/maven:version.bzl", "version")
 load("@vaticle_dependencies//library/maven:artifacts.bzl", "artifacts")
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
-load("//:deployment.bzl", deployment_github = "deployment")
 
 java_library(
     name = "common",
@@ -46,16 +44,6 @@ java_library(
     tags = [
         "maven_coordinates=com.vaticle.typedb:typedb-common:{pom_version}",
     ],
-)
-
-deploy_github(
-    name = "deploy-github",
-    organisation = deployment_github['github.organisation'],
-    repository = deployment_github['github.repository'],
-    title = "TypeDB Common",
-    title_append_version = True,
-    release_description = "//:RELEASE_NOTES_LATEST.md",
-    draft = False,
 )
 
 assemble_maven(
@@ -84,23 +72,9 @@ checkstyle_test(
         "concurrent/*",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
-        "deployment.bzl",
         "exception/*",
         "util/*",
         "yaml/*.java"
     ]),
     license_type = "apache-header",
-)
-
-# CI targets that are not declared in any BUILD file, but are called externally
-filegroup(
-    name = "ci",
-    data = [
-        "@vaticle_dependencies//library/maven:update",
-        "@vaticle_dependencies//tool/checkstyle:test-coverage",
-        "@vaticle_dependencies//tool/release/notes:create",
-        "@vaticle_dependencies//tool/sonarcloud:code-analysis",
-        "@vaticle_dependencies//tool/unuseddeps:unused-deps",
-        "@vaticle_dependencies//tool/sync:dependencies",
-    ]
 )
