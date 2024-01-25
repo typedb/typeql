@@ -43,7 +43,7 @@ java_test(
         "//java/common:common",
         "//java/pattern:pattern",
         "//java/query:query",
-        "@vaticle_typedb_common//:common",
+        "//common/java:common",
     ],
     size = "small",
 )

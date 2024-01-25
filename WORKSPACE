@@ -134,12 +134,10 @@ install_uploader_deps()
 # Load @vaticle dependencies #
 ################################
 
-load("//dependencies/vaticle:repositories.bzl", "vaticle_typedb_common", "vaticle_typedb_behaviour")
-vaticle_typedb_common()
+load("//dependencies/vaticle:repositories.bzl", "vaticle_typedb_behaviour")
 vaticle_typedb_behaviour()
 
 load("@vaticle_dependencies//tool/common:deps.bzl", vaticle_dependencies_tool_maven_artifacts = "maven_artifacts")
-load("@vaticle_typedb_common//dependencies/maven:artifacts.bzl", vaticle_typedb_common_artifacts = "artifacts")
 
 ############################
 # Load @maven dependencies #
@@ -150,7 +148,6 @@ load("@vaticle_dependencies//library/maven:rules.bzl", "maven")
 maven(
     vaticle_bazel_distribution_maven_artifacts +
     vaticle_dependencies_tool_maven_artifacts +
-    vaticle_typedb_common_artifacts +
     vaticle_typeql_artifacts
 )
 

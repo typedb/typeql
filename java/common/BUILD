@@ -34,7 +34,7 @@ java_library(
     ]),
     deps = [
         # Internal Repository Dependencies
-        "@vaticle_typedb_common//:common",
+        "//common/java:common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",
