@@ -37,7 +37,7 @@ java_library(
         "//java/pattern:pattern",
 
         # Internal Repository Dependencies
-        "@vaticle_typedb_common//:common",
+        "//common/java:common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",

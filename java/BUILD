@@ -41,7 +41,7 @@ java_library(
         "//java/query:query",
 
         # Internal Repository Dependencies
-        "@vaticle_typedb_common//:common",
+        "//common/java:common",
         "@vaticle_typeql//grammar/java:typeql-grammar",
     ],
 )
@@ -67,15 +67,6 @@ deploy_github(
     repository = github_deployment["github.repository"],
     title = "TypeQL language library for Java",
     title_append_version = True,
-)
-
-release_validate_deps(
-    name = "release-validate-deps",
-    refs = "@vaticle_typeql_workspace_refs//:refs.json",
-    tagged_deps = [
-        "@vaticle_typedb_common",
-    ],
-    tags = ["manual"],  # in order for bazel test //... to not fail
 )
 
 checkstyle_test(

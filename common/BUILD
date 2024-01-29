@@ -21,23 +21,10 @@
 
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
-java_test(
-    name = "parser-test",
-    test_class = "com.vaticle.typeql.lang.parser.test.ParserTest",
-    srcs = ["ParserTest.java"],
-    deps = [
-        "//java:typeql-lang",
-        "//java/common:common",
-        "//java/pattern:pattern",
-        "//java/query:query",
-        "//common/java:common",
-        "@maven//:org_hamcrest_hamcrest_library",
-    ],
-    size = "small",
-)
-
 checkstyle_test(
     name = "checkstyle",
-    include = glob(["*"]),
+    include = ["BUILD"],
     license_type = "apache-header",
 )
+
+

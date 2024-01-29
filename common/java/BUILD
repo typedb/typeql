@@ -19,33 +19,42 @@
 # under the License.
 #
 
-package(default_visibility = ["//visibility:public"])
-
+exports_files(["VERSION"], visibility = ["//visibility:public"])
 load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@vaticle_dependencies//distribution/maven:version.bzl", "version")
+load("@vaticle_dependencies//library/maven:artifacts.bzl", "artifacts")
 load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
 
 java_library(
-    name = "builder",
+    name = "common",
     srcs = glob([
-        "*.java",
-        "*/*.java"
+        "collection/*.java",
+        "concurrent/*.java",
+        "concurrent/actor/*.java",
+        "concurrent/actor/eventloop/*.java",
+        "exception/*.java",
+        "util/*.java",
+        "yaml/*.java",
     ]),
     deps = [
-        "//java/common",
-        "//java/pattern",
-        "//java/query",
-
-        # Internal Repository Dependencies
-        "//common/java:common",
+        "@maven//:org_yaml_snakeyaml",
     ],
-    tags = ["maven_coordinates=com.vaticle.typeql:typeql-builder:{pom_version}"],
+    visibility = ["//visibility:public"],
+    tags = [
+        "maven_coordinates=com.vaticle.typedb:typedb-common:{pom_version}",
+    ],
 )
 
 assemble_maven(
-  name = "assemble-maven",
-  target = ":builder",
-  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
+    name = "assemble-maven",
+    target = ":common",
+    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json",
+    version_overrides = version(artifacts_org = artifacts, artifacts_repo={}),
+    project_name = "TypeDB Common",
+    project_description = "TypeDB Common classes and tools",
+    project_url = "https://github.com/vaticle/typeql",
+    scm_url = "https://github.com/vaticle/typeql",
 )
 
 deploy_maven(
@@ -58,7 +67,14 @@ deploy_maven(
 checkstyle_test(
     name = "checkstyle",
     include = glob([
-        "**/*",
+        "BUILD",
+        "collection/*",
+        "concurrent/*",
+        "concurrent/actor/*.java",
+        "concurrent/actor/eventloop/*.java",
+        "exception/*",
+        "util/*",
+        "yaml/*.java"
     ]),
     license_type = "apache-header",
 )
