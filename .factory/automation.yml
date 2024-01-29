@@ -109,7 +109,7 @@ build:
       image: vaticle-ubuntu-22.04
       dependencies: [deploy-maven-snapshot]
       command: |
-        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/$FACTORY_COMMIT/g" java/test/deployment/pom.xml
+        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/0.0.0-$FACTORY_COMMIT/g" java/test/deployment/pom.xml
         cd java/test/deployment/ && mvn test
     sync-dependencies:
       image: vaticle-ubuntu-22.04
