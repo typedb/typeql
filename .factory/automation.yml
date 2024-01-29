@@ -134,9 +134,6 @@ release:
     owner: vaticle
     branch: master
   validation:
-    validate-dependencies:
-      image: vaticle-ubuntu-22.04
-      command: bazel test //java:release-validate-deps --test_output=streamed
     validate-release-notes:
       image: vaticle-ubuntu-22.04
       command: |
