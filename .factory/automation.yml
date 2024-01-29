@@ -75,6 +75,9 @@ build:
         bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //rust:deploy_crate -- snapshot
     deploy-maven-snapshot:
+      filter:
+        owner: vaticle
+        branch: [master, development]
       image: vaticle-ubuntu-22.04
       dependencies: [build, build-dependency, test-java]
       command: |
@@ -100,6 +103,9 @@ build:
         export DEPLOY_PIP_PASSWORD=$REPO_TYPEDB_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //grammar/python:deploy-pip -- snapshot
     test-deployment-maven:
+      filter:
+        owner: vaticle
+        branch: [master, development]
       image: vaticle-ubuntu-22.04
       dependencies: [deploy-maven-snapshot]
       command: |
