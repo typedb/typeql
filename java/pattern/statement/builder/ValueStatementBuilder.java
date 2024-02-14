@@ -21,8 +21,8 @@
 
 package com.vaticle.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.pattern.expression.Expression;
 import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
+import com.vaticle.typeql.lang.pattern.expression.Expression;
 import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
 
 public interface ValueStatementBuilder extends PredicateBuilder<ValueStatement> {

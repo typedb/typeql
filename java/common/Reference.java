@@ -36,7 +36,7 @@ import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_VARI
 
 public abstract class Reference {
 
-    private static final String IDENTIFIER_START = "A-Za-z" +
+    private static final String IDENTIFIER_CHAR = "A-Za-z" +
             "\\u00C0-\\u00D6" +
             "\\u00D8-\\u00F6" +
             "\\u00F8-\\u02FF" +
@@ -48,16 +48,18 @@ public abstract class Reference {
             "\\u3001-\\uD7FF" +
             "\\uF900-\\uFDCF" +
             "\\uFDF0-\\uFFFD";
-    private static final String IDENTIFIER_TAIL = IDENTIFIER_START +
-            "0-9" +
-            "_" +
+    private static final String IDENTIFIER_DIGIT = "0-9";
+    private static final String IDENTIFIER_CONNECTOR = "_" +
             "\\-" +
             "\\u00B7" +
             "\\u0300-\\u036F" +
             "\\u203F-\\u2040";
 
-    public static final Pattern IDENTIFIER_REGEX = Pattern.compile(
-            "^[" + IDENTIFIER_START + "][" + IDENTIFIER_TAIL + "]*$"
+    public static final Pattern IDENTIFIER_VAR = Pattern.compile(
+            "^[" + IDENTIFIER_CHAR + IDENTIFIER_DIGIT + "][" + IDENTIFIER_CHAR + IDENTIFIER_DIGIT + IDENTIFIER_CONNECTOR + "]*$"
+    );
+    public static final Pattern IDENTIFIER_LABEL = Pattern.compile(
+            "^[" + IDENTIFIER_CHAR  + "][" + IDENTIFIER_CHAR + IDENTIFIER_DIGIT + IDENTIFIER_CONNECTOR + "]*$"
     );
 
     final Type type;
@@ -155,7 +157,7 @@ public abstract class Reference {
 
         Name(Type type, String name, boolean isVisible) {
             super(type, isVisible);
-            if (!IDENTIFIER_REGEX.matcher(name).matches()) {
+            if (!IDENTIFIER_VAR.matcher(name).matches()) {
                 throw TypeQLException.of(INVALID_VARIABLE_NAME.message(name));
             }
             this.name = name;
@@ -241,9 +243,9 @@ public abstract class Reference {
 
         Label(String label, @Nullable String scope) {
             super(Type.LABEL, false);
-            if (!IDENTIFIER_REGEX.matcher(label).matches()) {
+            if (!IDENTIFIER_LABEL.matcher(label).matches()) {
                 throw TypeQLException.of(INVALID_TYPE_LABEL.message(label));
-            } else if (scope != null && !IDENTIFIER_REGEX.matcher(scope).matches()) {
+            } else if (scope != null && !IDENTIFIER_LABEL.matcher(scope).matches()) {
                 throw TypeQLException.of(INVALID_TYPE_LABEL.message(scope));
             }
             this.label = label;
