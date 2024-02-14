@@ -23,7 +23,7 @@
 use std::{fmt, fmt::Formatter, hash::Hash};
 
 use crate::{
-    common::{error::TypeQLError, identifier::is_valid_identifier, validatable::Validatable, Result},
+    common::{error::TypeQLError, identifier::is_valid_var_identifier, validatable::Validatable, Result},
     variable::{ConceptVariable, ValueVariable},
 };
 
@@ -119,7 +119,7 @@ impl fmt::Display for VariableRef<'_> {
 }
 
 pub(crate) fn validate_variable_name(name: &str) -> Result {
-    if !is_valid_identifier(name) {
+    if !is_valid_var_identifier(name) {
         Err(TypeQLError::InvalidVariableName { name: name.to_owned() })?
     }
     Ok(())

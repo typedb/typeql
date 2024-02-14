@@ -22,7 +22,7 @@
 
 use std::fmt;
 
-use crate::common::{error::TypeQLError, identifier::is_valid_identifier, token, validatable::Validatable, Result};
+use crate::common::{error::TypeQLError, identifier::is_valid_label_identifier, token, validatable::Validatable, Result};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {
@@ -71,7 +71,7 @@ impl Validatable for Label {
 }
 
 fn validate_label(label: &str) -> Result {
-    if !is_valid_identifier(label) {
+    if !is_valid_label_identifier(label) {
         Err(TypeQLError::InvalidTypeLabel { label: label.to_owned() })?
     } else {
         Ok(())
