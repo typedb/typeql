@@ -332,10 +332,10 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 
 VAR_CONCEPT_            : VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_   ;
 VAR_CONCEPT_ANONYMOUS_  : '$_' ;
-VAR_CONCEPT_NAMED_      : '$'  IDENTIFIER_VAR_H IDENTIFIER_VAR_T* ;
-VAR_VALUE_              : '?'  IDENTIFIER_VAR_H IDENTIFIER_VAR_T* ;
+VAR_CONCEPT_NAMED_      : '$'  IDENTIFIER_VAR_H_ IDENTIFIER_VAR_T_* ;
+VAR_VALUE_              : '?'  IDENTIFIER_VAR_H_ IDENTIFIER_VAR_T_* ;
 IID_                    : '0x' [0-9a-f]+                  ;
-LABEL_                  : IDENTIFIER_LABEL_H IDENTIFIER_LABEL_T*      ;
+LABEL_                  : IDENTIFIER_LABEL_H_ IDENTIFIER_LABEL_T_*      ;
 LABEL_SCOPED_           : LABEL_ ':' LABEL_               ;
 
 // FRAGMENTS OF KEYWORDS =======================================================
@@ -360,14 +360,15 @@ fragment IDENTIFIER_CHAR_      :'A'..'Z' | 'a'..'z'
                                | '\uF900'..'\uFDCF'
                                | '\uFDF0'..'\uFFFD'
                                ;
-fragment IDENTIFIER_VAR_H      : IDENTIFIER_DIGIT_
+fragment IDENTIFIER_VAR_H_     : IDENTIFIER_DIGIT_
                                | IDENTIFIER_CHAR_
                                ;
-fragment IDENTIFIER_VAR_T      : IDENTIFIER_VAR_H
+fragment IDENTIFIER_VAR_T_     : IDENTIFIER_DIGIT_
+                               | IDENTIFIER_CHAR_
                                | IDENTIFIER_CONNECTOR_
                                ;
-fragment IDENTIFIER_LABEL_H    : IDENTIFIER_CHAR_ ;
-fragment IDENTIFIER_LABEL_T    : IDENTIFIER_LABEL_H
+fragment IDENTIFIER_LABEL_H_   : IDENTIFIER_CHAR_ ;
+fragment IDENTIFIER_LABEL_T_   : IDENTIFIER_CHAR_
                                | IDENTIFIER_DIGIT_
                                | IDENTIFIER_CONNECTOR_
                                ;

@@ -55,9 +55,9 @@ pub fn is_valid_label_identifier(identifier: &str) -> bool {
 pub fn is_valid_var_identifier(identifier: &str) -> bool {
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| {
-        let identifier_start = format!("{}{}", IDENTIFIER_CHAR, IDENTIFIER_DIGIT);
+        let identifier_head = format!("{}{}", IDENTIFIER_CHAR, IDENTIFIER_DIGIT);
         let identifier_tail = format!("{}{}{}", IDENTIFIER_CHAR, IDENTIFIER_DIGIT, IDENTIFIER_CONNECTOR);
-        let identifier_pattern = format!("^[{}][{}]*$", identifier_start, identifier_tail);
+        let identifier_pattern = format!("^[{}][{}]*$", identifier_head, identifier_tail);
         RegexBuilder::new(&identifier_pattern).build().unwrap()
     });
     regex.is_match(identifier)
