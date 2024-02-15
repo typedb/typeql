@@ -22,9 +22,9 @@
 package com.vaticle.typeql.lang.pattern.statement.builder;
 
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.statement.Statement;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
 
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;

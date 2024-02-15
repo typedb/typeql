@@ -21,7 +21,6 @@
 
 package com.vaticle.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.common.Reference;
 import com.vaticle.typeql.lang.common.TypeQLVariable;
 import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
 import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;

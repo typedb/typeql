@@ -332,35 +332,47 @@ DATETIME_       : DATE_FRAGMENT_ 'T' TIME_              ;
 
 VAR_CONCEPT_            : VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_   ;
 VAR_CONCEPT_ANONYMOUS_  : '$_' ;
-VAR_CONCEPT_NAMED_      : '$'  TYPE_CHAR_H_ TYPE_CHAR_T_* ;
-VAR_VALUE_              : '?'  TYPE_CHAR_H_ TYPE_CHAR_T_* ;
+VAR_CONCEPT_NAMED_      : '$'  IDENTIFIER_VAR_H_ IDENTIFIER_VAR_T_* ;
+VAR_VALUE_              : '?'  IDENTIFIER_VAR_H_ IDENTIFIER_VAR_T_* ;
 IID_                    : '0x' [0-9a-f]+                  ;
-LABEL_                  : TYPE_CHAR_H_ TYPE_CHAR_T_*      ;
+LABEL_                  : IDENTIFIER_LABEL_H_ IDENTIFIER_LABEL_T_*      ;
 LABEL_SCOPED_           : LABEL_ ':' LABEL_               ;
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
-fragment TYPE_CHAR_H_     : 'A'..'Z' | 'a'..'z'
-                          | '\u00C0'..'\u00D6'
-                          | '\u00D8'..'\u00F6'
-                          | '\u00F8'..'\u02FF'
-                          | '\u0370'..'\u037D'
-                          | '\u037F'..'\u1FFF'
-                          | '\u200C'..'\u200D'
-                          | '\u2070'..'\u218F'
-                          | '\u2C00'..'\u2FEF'
-                          | '\u3001'..'\uD7FF'
-                          | '\uF900'..'\uFDCF'
-                          | '\uFDF0'..'\uFFFD'
-                          ;
-fragment TYPE_CHAR_T_     : TYPE_CHAR_H_
-                          | '0'..'9'
-                          | '_'
-                          | '-'
-                          | '\u00B7'
-                          | '\u0300'..'\u036F'
-                          | '\u203F'..'\u2040'
-                          ;
+fragment IDENTIFIER_DIGIT_     : '0'..'9' ;
+fragment IDENTIFIER_CONNECTOR_ : '_'
+                               | '-'
+                               | '\u00B7'
+                               | '\u0300'..'\u036F'
+                               | '\u203F'..'\u2040'
+                               ;
+fragment IDENTIFIER_CHAR_      :'A'..'Z' | 'a'..'z'
+                               | '\u00C0'..'\u00D6'
+                               | '\u00D8'..'\u00F6'
+                               | '\u00F8'..'\u02FF'
+                               | '\u0370'..'\u037D'
+                               | '\u037F'..'\u1FFF'
+                               | '\u200C'..'\u200D'
+                               | '\u2070'..'\u218F'
+                               | '\u2C00'..'\u2FEF'
+                               | '\u3001'..'\uD7FF'
+                               | '\uF900'..'\uFDCF'
+                               | '\uFDF0'..'\uFFFD'
+                               ;
+fragment IDENTIFIER_VAR_H_     : IDENTIFIER_DIGIT_
+                               | IDENTIFIER_CHAR_
+                               ;
+fragment IDENTIFIER_VAR_T_     : IDENTIFIER_DIGIT_
+                               | IDENTIFIER_CHAR_
+                               | IDENTIFIER_CONNECTOR_
+                               ;
+fragment IDENTIFIER_LABEL_H_   : IDENTIFIER_CHAR_ ;
+fragment IDENTIFIER_LABEL_T_   : IDENTIFIER_CHAR_
+                               | IDENTIFIER_DIGIT_
+                               | IDENTIFIER_CONNECTOR_
+                               ;
+
 fragment DATE_FRAGMENT_   : YEAR_ '-' MONTH_ '-' DAY_ ;
 fragment MONTH_           : [0-1][0-9] ;
 fragment DAY_             : [0-3][0-9] ;

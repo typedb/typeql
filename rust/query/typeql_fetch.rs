@@ -26,7 +26,7 @@ use itertools::Itertools;
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
-        identifier::is_valid_identifier,
+        identifier::is_valid_label_identifier,
         string::indent,
         token,
         validatable::Validatable,
@@ -164,7 +164,7 @@ impl ProjectionKeyLabel {
     }
 
     fn must_quote(s: &str) -> bool {
-        !is_valid_identifier(s)
+        !is_valid_label_identifier(s)
     }
 }
 

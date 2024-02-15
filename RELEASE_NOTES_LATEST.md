@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@2.26.6-rc0
+cargo add typeql@2.26.6
 ```
 
 ## TypeQL Grammar and Language Library distributions for Java
@@ -20,12 +20,12 @@ cargo add typeql@2.26.6-rc0
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-grammar</artifactId>
-        <version>2.26.6-rc0</version>
+        <version>2.26.6</version>
     </dependency>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-lang</artifactId>
-        <version>2.26.6-rc0</version>
+        <version>2.26.6</version>
     </dependency>
 </dependencies>
 ```
@@ -35,7 +35,7 @@ cargo add typeql@2.26.6-rc0
 Available through https://pypi.org
 
 ```
-pip install typeql-grammar==2.26.6-rc0
+pip install typeql-grammar==2.26.6
 ```
 
 
@@ -62,6 +62,21 @@ pip install typeql-grammar==2.26.6-rc0
   
 
 ## Code Refactors
+- **Allow variables to have a leading digit**
+
+  We modify the behaviour of #310 which unified variables and labels to have the same valid identifier syntax, which eliminated the capability of variables to have a leading number. For example, the variable `$0` was banned.
+
+  This PR reverts this specific behaviour, and enables usage of variables with leading digits:
+  ```
+  match
+  $1_a isa entity;
+  get;
+  ```
+  is made valid again.
+
+  Testing specified in https://github.com/vaticle/typedb-behaviour/pull/281
+
+
 
 - **Merge typedb-common repository into typeql**
 
