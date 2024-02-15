@@ -354,37 +354,41 @@ DATETIME_ = @{ DATE_FRAGMENT_ ~ "T" ~ TIME_ ~ WB }
 VAR_ = ${ VAR_CONCEPT_ | VAR_VALUE_ }
 VAR_CONCEPT_ = @{ VAR_CONCEPT_ANONYMOUS_ | VAR_CONCEPT_NAMED_ }
 VAR_CONCEPT_ANONYMOUS_ = @{ "$_" ~ WB }
-VAR_CONCEPT_NAMED_ = @{ "$" ~ IDENTIFIER }
-VAR_VALUE_ = @{ "?" ~ IDENTIFIER }
+VAR_CONCEPT_NAMED_ = @{ "$" ~ IDENTIFIER_VAR_H_ ~ IDENTIFIER_VAR_T_*  ~ WB }
+VAR_VALUE_ = @{ "?" ~ (IDENTIFIER_VAR_H_ ~ IDENTIFIER_VAR_T_* ~ WB) }
 IID_ = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
-LABEL_ = @{ IDENTIFIER }
-LABEL_SCOPED_ = @{ IDENTIFIER ~ ":" ~ IDENTIFIER }
-IDENTIFIER = @{ TYPE_CHAR_H_ ~ TYPE_CHAR_T_* ~ WB }
+LABEL_ = @{ (IDENTIFIER_LABEL_H_ ~ IDENTIFIER_LABEL_T_* ~ WB) }
+LABEL_SCOPED_ = @{ (IDENTIFIER_LABEL_H_ ~ IDENTIFIER_LABEL_T_*) ~ ":" ~ (IDENTIFIER_LABEL_H_ ~ IDENTIFIER_LABEL_T_*)  ~ WB }
 
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
-TYPE_CHAR_H_ = @{ ASCII_ALPHA
-               | '\u{00C0}'..'\u{00D6}'
-               | '\u{00D8}'..'\u{00F6}'
-               | '\u{00F8}'..'\u{02FF}'
-               | '\u{0370}'..'\u{037D}'
-               | '\u{037F}'..'\u{1FFF}'
-               | '\u{200C}'..'\u{200D}'
-               | '\u{2070}'..'\u{218F}'
-               | '\u{2C00}'..'\u{2FEF}'
-               | '\u{3001}'..'\u{D7FF}'
-               | '\u{F900}'..'\u{FDCF}'
-               | '\u{FDF0}'..'\u{FFFD}'
-               }
-TYPE_CHAR_T_ = @{ TYPE_CHAR_H_
-               | ASCII_DIGIT
-               | "_"
-               | "-"
-               | "\u{00B7}"
-               | '\u{0300}'..'\u{036F}'
-               | '\u{203F}'..'\u{2040}'
-               }
+IDENTIFIER_CHAR_ = @{ ASCII_ALPHA
+                   | '\u{00C0}'..'\u{00D6}'
+                   | '\u{00D8}'..'\u{00F6}'
+                   | '\u{00F8}'..'\u{02FF}'
+                   | '\u{0370}'..'\u{037D}'
+                   | '\u{037F}'..'\u{1FFF}'
+                   | '\u{200C}'..'\u{200D}'
+                   | '\u{2070}'..'\u{218F}'
+                   | '\u{2C00}'..'\u{2FEF}'
+                   | '\u{3001}'..'\u{D7FF}'
+                   | '\u{F900}'..'\u{FDCF}'
+                   | '\u{FDF0}'..'\u{FFFD}'
+                   }
+IDENTIFIER_CONNECTOR_ = @{ "_"
+                        | "-"
+                        | "\u{00B7}"
+                        | '\u{0300}'..'\u{036F}'
+                        | '\u{203F}'..'\u{2040}'
+                        }
+
+IDENTIFIER_LABEL_H_ = @{ IDENTIFIER_CHAR_ }
+IDENTIFIER_LABEL_T_ = @{ IDENTIFIER_LABEL_H_ | ASCII_DIGIT | IDENTIFIER_CONNECTOR_ }
+
+IDENTIFIER_VAR_H_ = @{ IDENTIFIER_CHAR_ | ASCII_DIGIT }
+IDENTIFIER_VAR_T_ = @{ IDENTIFIER_VAR_H_ | IDENTIFIER_CONNECTOR_ }
+
 DATE_FRAGMENT_ = @{ YEAR_ ~ "-" ~ MONTH_ ~ "-" ~ DAY_ }
 MONTH_ = @{ ('0'..'1') ~ ASCII_DIGIT }
 DAY_ = @{ ('0'..'3') ~ ASCII_DIGIT }
