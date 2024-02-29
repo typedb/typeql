@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.vaticle.typedb.common.collection.Collections.concatToList;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.util.Objects.className;
 import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
@@ -51,7 +52,6 @@ import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
 import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
 import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
-import static java.util.stream.Collectors.toList;
 
 public class TypeQLFetch implements TypeQLQuery {
 
@@ -287,13 +287,13 @@ public class TypeQLFetch implements TypeQLQuery {
                 }
 
                 @Override
-                public Attribute map(Pair<Reference.Label, Label> attribute) {
+                public Attribute fetch(Pair<Reference.Label, Label> attribute) {
                     return new Attribute(this, list(attribute));
                 }
 
                 @Override
-                public Attribute map(Stream<Pair<Reference.Label, Label>> attributes) {
-                    return new Attribute(this, attributes.collect(toList()));
+                public Attribute fetch(List<Pair<Reference.Label, Label>> attributes) {
+                    return new Attribute(this, attributes);
                 }
 
                 @Override
@@ -384,7 +384,7 @@ public class TypeQLFetch implements TypeQLQuery {
             }
 
             @Override
-            public Projection.Subquery map(Either<TypeQLFetch, TypeQLGet.Aggregate> subquery) {
+            public Projection.Subquery fetch(Either<TypeQLFetch, TypeQLGet.Aggregate> subquery) {
                 return new Projection.Subquery(this, subquery);
             }
         }
@@ -452,13 +452,13 @@ public class TypeQLFetch implements TypeQLQuery {
             }
 
             @Override
-            public Attribute map(Pair<Reference.Label, Key.Label> attribute) {
+            public Attribute fetch(Pair<Reference.Label, Key.Label> attribute) {
                 return new Attribute(key(), list(attributes, attribute));
             }
 
             @Override
-            public Attribute map(Stream<Pair<Reference.Label, Key.Label>> attributes) {
-                return new Attribute(key(), Stream.concat(this.attributes.stream(), attributes).collect(toList()));
+            public Attribute fetch(List<Pair<Reference.Label, Key.Label>> attributes) {
+                return new Attribute(key(), concatToList(this.attributes, attributes));
             }
 
             public List<Pair<Reference.Label, Key.Label>> attributes() {

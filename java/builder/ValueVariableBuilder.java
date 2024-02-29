@@ -31,9 +31,8 @@ import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
 import com.vaticle.typeql.lang.pattern.statement.builder.ValueStatementBuilder;
 import com.vaticle.typeql.lang.query.TypeQLFetch;
 
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 
@@ -86,12 +85,12 @@ public class ValueVariableBuilder extends TypeQLVariable.Value implements
     }
 
     @Override
-    public Attribute map(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
+    public Attribute fetch(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute) {
         return new Attribute(this, list(attribute));
     }
 
     @Override
-    public Attribute map(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
-        return new Attribute(this, attributes.collect(Collectors.toList()));
+    public Attribute fetch(List<Pair<Reference.Label, Label>> attributes) {
+        return new Attribute(this, attributes);
     }
 }

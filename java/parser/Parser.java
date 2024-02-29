@@ -89,7 +89,6 @@ import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
 import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
 import static com.vaticle.typeql.lang.common.util.Strings.unescapeRegex;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.antlr.v4.runtime.atn.PredictionMode.LL_EXACT_AMBIG_DETECTION;
 import static org.antlr.v4.runtime.atn.PredictionMode.SLL;
@@ -921,7 +920,7 @@ public class Parser extends TypeQLBaseVisitor {
             if (ctx.projection_attributes() == null) {
                 return key;
             } else {
-                return key.map(visitProjection_attributes(ctx.projection_attributes()).stream());
+                return key.fetch(visitProjection_attributes(ctx.projection_attributes()));
             }
         } else if (ctx.projection_key_label() != null && ctx.projection_subquery() != null) {
             return new TypeQLFetch.Projection.Subquery(
