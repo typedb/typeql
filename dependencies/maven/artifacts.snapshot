@@ -34,7 +34,7 @@
 @maven//:org_checkerframework_checker_qual_3_5_0
 @maven//:org_hamcrest_hamcrest_core_1_3
 @maven//:org_hamcrest_hamcrest_library_1_3
-@maven//:org_jetbrains_compose_compiler_compiler_1_3_2
+@maven//:org_jetbrains_compose_compiler_compiler_1_5_7
 @maven//:org_jsoup_jsoup_1_16_1
 @maven//:org_slf4j_slf4j_api_2_0_0
 @maven//:org_yaml_snakeyaml_1_25

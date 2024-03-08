@@ -259,11 +259,11 @@ impl<const N: usize> From<(TypeReference, TypeReference, [Annotation; N])> for O
 impl fmt::Display for OwnsConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", token::Constraint::Owns, self.attribute_type)?;
-        for annotation in &self.annotations {
-            write!(f, " {annotation}")?;
-        }
         if let Some(overridden) = &self.overridden_attribute_type {
             write!(f, " {} {}", token::Constraint::As, overridden)?;
+        }
+        for annotation in &self.annotations {
+            write!(f, " {annotation}")?;
         }
         Ok(())
     }
