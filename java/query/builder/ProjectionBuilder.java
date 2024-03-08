@@ -28,18 +28,25 @@ import com.vaticle.typeql.lang.query.TypeQLFetch;
 import com.vaticle.typeql.lang.query.TypeQLGet;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface ProjectionBuilder {
 
     interface Attribute {
 
-        default TypeQLFetch.Projection.Attribute fetch(String attribute) {
-            return fetch(Reference.label(attribute));
+        default TypeQLFetch.Projection.Attribute fetch(String attribute, String... attributes) {
+            return fetch(Stream.concat(Stream.of(attribute), Stream.of(attributes))
+                    .map(attr -> new Pair<>(Reference.label(attribute), (TypeQLFetch.Key.Label) null))
+                    .collect(Collectors.toList())
+            );
         }
 
-        default TypeQLFetch.Projection.Attribute fetch(Reference.Label label) {
-            return fetch(new Pair<>(label, null));
+        default TypeQLFetch.Projection.Attribute fetch(Reference.Label label, Reference.Label... labels) {
+            return fetch(Stream.concat(Stream.of(label), Stream.of(labels))
+                    .map(l -> new Pair<>(l, (TypeQLFetch.Key.Label) null))
+                    .collect(Collectors.toList())
+            );
         }
 
         default TypeQLFetch.Projection.Attribute fetch(String attribute, String label) {
