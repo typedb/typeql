@@ -35,18 +35,16 @@ public interface ProjectionBuilder {
 
     interface Attribute {
 
-        default TypeQLFetch.Projection.Attribute fetch(String attribute, String... attributes) {
-            return fetch(Stream.concat(Stream.of(attribute), Stream.of(attributes))
-                    .map(attr -> new Pair<>(Reference.label(attribute), (TypeQLFetch.Key.Label) null))
-                    .collect(Collectors.toList())
-            );
+        default TypeQLFetch.Projection.Attribute fetch(String... attributes) {
+            return fetch(Stream.of(attributes)
+                    .map(attr -> new Pair<>(Reference.label(attr), (TypeQLFetch.Key.Label) null))
+                    .collect(Collectors.toList()));
         }
 
-        default TypeQLFetch.Projection.Attribute fetch(Reference.Label label, Reference.Label... labels) {
-            return fetch(Stream.concat(Stream.of(label), Stream.of(labels))
-                    .map(l -> new Pair<>(l, (TypeQLFetch.Key.Label) null))
-                    .collect(Collectors.toList())
-            );
+        default TypeQLFetch.Projection.Attribute fetch(Reference.Label... labels) {
+            return fetch(Stream.of(labels)
+                    .map(label -> new Pair<>(label, (TypeQLFetch.Key.Label) null))
+                    .collect(Collectors.toList()));
         }
 
         default TypeQLFetch.Projection.Attribute fetch(String attribute, String label) {
