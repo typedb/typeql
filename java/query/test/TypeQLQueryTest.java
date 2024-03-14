@@ -196,12 +196,12 @@ public class TypeQLQueryTest {
                 cVar("x").isa("person").has("id", cVar("id"))
         ).fetch(
                 cVar("id"),
-                cVar("x").map("name").map("age").map("email"),
-                label("children").map(
+                cVar("x").fetch("name").fetch("age").fetch("email"),
+                label("children").fetch(
                         match(
                                 rel(cVar("c")).rel(cVar("x")).isa("parenthood")
                         ).fetch(
-                                cVar("c").map("name")
+                                cVar("c").fetch("name")
                         )
                 )
         );

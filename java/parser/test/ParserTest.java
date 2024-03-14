@@ -869,17 +869,17 @@ public class ParserTest {
         ).fetch(
                 cVar("d"),
                 cVar("d").asLabel("date"),
-                cVar("x").map("name").map("title", "t").map("name", "Movie name"),
-                cVar("x").asLabel("movie").map("name"),
-                cVar("x").asLabel("Movie name").map("name"),
-                label("label-a").map(
+                cVar("x").fetch("name").fetch("title", "t").fetch("name", "Movie name"),
+                cVar("x").asLabel("movie").fetch("name"),
+                cVar("x").asLabel("Movie name").fetch("name"),
+                label("label-a").fetch(
                         match(
                                 rel(cVar("d")).rel(cVar("c")).isa("director")
                         ).fetch(
-                                cVar("d").map("name")
+                                cVar("d").fetch("name")
                         )
                 ),
-                label("label-b").map(
+                label("label-b").fetch(
                         match(
                                 rel(cVar("d")).rel(cVar("c")).isa("director")
                         ).get(cVar("d")).count()

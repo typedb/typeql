@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@2.26.6
+cargo add typeql@2.27.0-rc0
 ```
 
 ## TypeQL Grammar and Language Library distributions for Java
@@ -20,12 +20,12 @@ cargo add typeql@2.26.6
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-grammar</artifactId>
-        <version>2.26.6</version>
+        <version>2.27.0-rc0</version>
     </dependency>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-lang</artifactId>
-        <version>2.26.6</version>
+        <version>2.27.0-rc0</version>
     </dependency>
 </dependencies>
 ```
@@ -35,68 +35,47 @@ cargo add typeql@2.26.6
 Available through https://pypi.org
 
 ```
-pip install typeql-grammar==2.26.6
+pip install typeql-grammar==2.27.0-rc0
 ```
 
 
 ## New Features
-- **Implement non-ascii variables in Java and Rust**
-  We update to TypeQL with Unicode support in both value and concept variables. This makes the following valid TypeQL:
-  ```
-  match $人 isa person, has name "Liu"; get  $人;
-  ```
-  ```
-  match $אדם isa person, has name "Solomon"; get $אדם;
-  ```
-  
-  We now require all Labels and Variables are valid unicode identifiers not starting with `_`.
-  
-  This change is fully backwards compatible. We also validate that Type Labels and Variables created using the TypeQL language builders in both Rust and Java are conforming to our Unicode specification.
-  
-  
+
 
 ## Bugs Fixed
-- **Fix snapshot version in test-deployment-maven**
-  
-  We update the generated snapshot version in test-deployment-maven CI job to correspond to the updated snapshot version format.
-  
+
 
 ## Code Refactors
-- **Allow variables to have a leading digit**
-
-  We modify the behaviour of #310 which unified variables and labels to have the same valid identifier syntax, which eliminated the capability of variables to have a leading number. For example, the variable `$0` was banned.
-
-  This PR reverts this specific behaviour, and enables usage of variables with leading digits:
+- **Refactor TypeQL Java projection builder**
+  
+  We note a previous change in [2eef07d388391e073cc1631f5af2bbf15e844cc4](https://github.com/vaticle/typeql/commit/2eef07d388391e073cc1631f5af2bbf15e844cc4) and extend it here to refactor the TypeQL Fetch projection query builder:
+  
+  Usage rename, before:
   ```
-  match
-  $1_a isa entity;
-  get;
+  cVar("x").map("name")
+  label("subquery").map(TypeQL.match(...).fetch(...))
   ```
-  is made valid again.
-
-  Testing specified in https://github.com/vaticle/typedb-behaviour/pull/281
-
-
-
-- **Merge typedb-common repository into typeql**
-
-  As part of the effort to reduce the number of vaticle organization repositories, we merge typedb-common into the typeql repo as a subpackage.
-
+  
+  Usage now: 
+  ```
+  cVar("x").fetch("name")
+  label("subquery").fetch(TypeQL.match(...).fetch(...))
+  ```
+  
+  
+  Fetching multiple attributes without relabeling, before:
+  ```
+  cVar("x").fetch(list(pair("name", null), pair("age", null), pair("dob", null)))
+  ```
+  Usage now:
+  ```
+  cVar("x").fetch("name", "age", "dob")
+  ```
 
 ## Other Improvements
-- **Sync dependencies in CI**
-  
-  We add a sync-dependencies job to be run in CI after successful snapshot and release deployments. The job sends a request to vaticle-bot to update all downstream dependencies.
-  
-  Note: this PR does _not_ update the `dependencies` repo dependency. It will be updated automatically by the bot during its first pass.
-  
-- **Set up CI filters for master-development workflow**
+- **Add helper method to create Sorting modifier with just one argument**
 
-- **Migrate artifact hosting to cloudsmith**
-  Updates artifact deployment & consumption rules to use cloudsmith instead of the self-hosted sonatype repository.
-  
-  
-  
-  
-    
+- **ProjectionBuilder for fetch queries**
+
+- **Renamed projection builder 'map()' to 'fetch()' and dissolved Stream overload**
 

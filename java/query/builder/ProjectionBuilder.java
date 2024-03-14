@@ -28,48 +28,48 @@ import com.vaticle.typeql.lang.query.TypeQLFetch;
 import com.vaticle.typeql.lang.query.TypeQLGet;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface ProjectionBuilder {
 
     interface Attribute {
 
-        default TypeQLFetch.Projection.Attribute map(String attribute) {
-            return map(Reference.label(attribute));
+        default TypeQLFetch.Projection.Attribute fetch(String... attributes) {
+            return fetch(Stream.of(attributes)
+                    .map(attr -> new Pair<>(Reference.label(attr), (TypeQLFetch.Key.Label) null))
+                    .collect(Collectors.toList()));
         }
 
-        default TypeQLFetch.Projection.Attribute map(Reference.Label label) {
-            return map(new Pair<>(label, null));
+        default TypeQLFetch.Projection.Attribute fetch(Reference.Label... labels) {
+            return fetch(Stream.of(labels)
+                    .map(label -> new Pair<>(label, (TypeQLFetch.Key.Label) null))
+                    .collect(Collectors.toList()));
         }
 
-        default TypeQLFetch.Projection.Attribute map(String attribute, String label) {
-            return map(Reference.label(attribute), TypeQLFetch.Key.Label.of(label));
+        default TypeQLFetch.Projection.Attribute fetch(String attribute, String label) {
+            return fetch(Reference.label(attribute), TypeQLFetch.Key.Label.of(label));
         }
 
-        default TypeQLFetch.Projection.Attribute map(Reference.Label attribute, TypeQLFetch.Key.Label label) {
-            return map(new Pair<>(attribute, label));
+        default TypeQLFetch.Projection.Attribute fetch(Reference.Label attribute, TypeQLFetch.Key.Label label) {
+            return fetch(new Pair<>(attribute, label));
         }
 
-        default TypeQLFetch.Projection.Attribute map(List<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes) {
-            return map(attributes.stream());
-        }
+        TypeQLFetch.Projection.Attribute fetch(List<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes);
 
-        TypeQLFetch.Projection.Attribute map(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute);
-
-        TypeQLFetch.Projection.Attribute map(Stream<Pair<Reference.Label, TypeQLFetch.Key.Label>> attributes);
-
+        TypeQLFetch.Projection.Attribute fetch(Pair<Reference.Label, TypeQLFetch.Key.Label> attribute);
     }
 
     interface Subquery {
 
-        default TypeQLFetch.Projection.Subquery map(TypeQLFetch fetch) {
-            return map(Either.first(fetch));
+        default TypeQLFetch.Projection.Subquery fetch(TypeQLFetch fetch) {
+            return fetch(Either.first(fetch));
         }
 
-        default TypeQLFetch.Projection.Subquery map(TypeQLGet.Aggregate aggregate) {
-            return map(Either.second(aggregate));
+        default TypeQLFetch.Projection.Subquery fetch(TypeQLGet.Aggregate aggregate) {
+            return fetch(Either.second(aggregate));
         }
 
-        TypeQLFetch.Projection.Subquery map(Either<TypeQLFetch, TypeQLGet.Aggregate> subquery);
+        TypeQLFetch.Projection.Subquery fetch(Either<TypeQLFetch, TypeQLGet.Aggregate> subquery);
     }
 }

@@ -411,6 +411,10 @@ public interface TypeQLQuery {
                 this.hash = Objects.hash(variables, orders);
             }
 
+            public static Sorting create(Pair<TypeQLVariable, TypeQLArg.Order> sorting) {
+                return create(list(sorting));
+            }
+
             public static Sorting create(List<Pair<TypeQLVariable, TypeQLArg.Order>> sorting) {
                 List<TypeQLVariable> vars = new ArrayList<>();
                 Map<TypeQLVariable, TypeQLArg.Order> orders = new HashMap<>();
