@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@2.27.0-rc0
+cargo add typeql@2.27.0
 ```
 
 ## TypeQL Grammar and Language Library distributions for Java
@@ -20,12 +20,12 @@ cargo add typeql@2.27.0-rc0
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-grammar</artifactId>
-        <version>2.27.0-rc0</version>
+        <version>2.27.0</version>
     </dependency>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-lang</artifactId>
-        <version>2.27.0-rc0</version>
+        <version>2.27.0</version>
     </dependency>
 </dependencies>
 ```
@@ -35,7 +35,7 @@ cargo add typeql@2.27.0-rc0
 Available through https://pypi.org
 
 ```
-pip install typeql-grammar==2.27.0-rc0
+pip install typeql-grammar==2.27.0
 ```
 
 
