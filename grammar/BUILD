@@ -25,5 +25,5 @@ checkstyle_test(
     name = "checkstyle",
     include = glob(["*"]),
     exclude = ["README.md"],
-    license_type = "agpl-header",
+    license_type = "mpl-header",
 )

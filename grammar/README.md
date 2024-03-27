@@ -45,14 +45,5 @@ Replace `{version}` with the version number, in which you can find the latest on
 
 ## Licensing
 
-The TypeQL Grammar libraries are distributed under the terms GNU Affero General Public License v3.0 ("AGPL 3.0") as published by the Free Software Foundation, but with the following special exception:
-
-Any TypeQL language library that is based on material or materials in the Vaticle TypeQL repository, and that is used to communicate or interact (in each case) with a database created or managed or accessed (in each case) using a version of the TypeQL software that is made available by or on behalf of Vaticle Limited (UK Company Number 08766237) or any successor entity (but excluding any forked version of that software), may be distributed under one of the following licences:
-
-- The Apache License version 2: https://www.apache.org/licenses/LICENSE-2.0.txt
-- The MIT License: https://opensource.org/licenses/MIT
-- The BSD License (2-Clause): https://opensource.org/licenses/BSD-2-Clause
-
-As used above "successor entity" means any entity then owning copyrights in the TypeDB software that were previously owned by Vaticle Ltd.
-
-Copyright (C) 2022 Vaticle
+The TypeQL grammar and language libraries are licensed under the Mozilla Public License version 2.0: 
+https://www.mozilla.org/en-US/MPL/2.0/
