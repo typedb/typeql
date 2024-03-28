@@ -186,11 +186,7 @@ confidence.
 
 ## Licensing
 
-The TypeQL language libraries, such as TypeQL Rust and Java, are distributed under Apache License, Version 2.0, January 2004.
+TypeQL grammar and language libraries are provided under the Mozilla Public License 2.0 (MPL 2.0),
+and therefore freely usable without restriction when unmodified.
+
 The full license can be founder at: [LICENSE](https://github.com/vaticle/typeql/blob/master/LICENSE).
-
-However, the TypeQL Grammar libraries, located under the `/grammar` package in this repository, 
-are distributed under the terms GNU Affero General Public License v3.0 ("AGPL 3.0"), but with a special exception. 
-Please refer to [TypeQL Grammar Licensing](https://github.com/vaticle/typeql/blob/master/grammar/README.md#licensing) for further details.
-
-Copyright (C) 2023 Vaticle.
