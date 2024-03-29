@@ -92,6 +92,7 @@ public class TypeQLSteps {
     @Given("typeql get group; throws exception")
     @Given("typeql get aggregate; throws exception")
     @Given("typeql fetch; throws exception")
+    @Given("get answers of templated typeql get")
     @Given("templated typeql get; throws exception")
     @Given("typeql insert; throws exception")
     @Given("typeql delete; throws exception")

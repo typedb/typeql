@@ -96,6 +96,7 @@ generic_step_impl! {
     #[step("session transaction closes")]
     #[step("session transaction is open: false")]
     #[step("for each session, transaction closes")]
+    #[step("get answers of templated typeql get")]
     #[step("templated typeql get; throws exception")]
     #[step("transaction commits")]
     #[step("transaction commits; throws exception")]
