@@ -19,7 +19,7 @@ TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**.
 
 For a quick overview of the range of statements that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/docs/).
 
-> **IMPORTANT NOTE:** TypeDB & TypeQL is in the process of being ported over and rewritten in [Rust](https://www.rust-lang.org). There will changes that won't be backwards compatible, as we refine the the language further to extend its expressivity, as well as changes to the byte storage data structure to further boost performanc significantly. We're aiming to complete this by February/March 2024, released as TypeDB 3.0, along with preliminary benchmarks of TypeDB.
+> **IMPORTANT NOTE:** > > TypeDB & TypeQL are in the process of being rewritten in [Rust](https://www.rust-lang.org). There will be significant refinement to the language, and minor breaks in backwards compatibility. Learn about the changes on our [roadmap issue on GitHub](https://github.com/vaticle/typedb/issues/6764). The biggest change to TypeDB 3.0 will be our storage data structure and architecture that significantly boosts performance. We’re aiming to release 3.0 in the summer this year, along with preliminary benchmarks of TypeDB.
 
 ## A polymorphic query language
 
@@ -186,11 +186,7 @@ confidence.
 
 ## Licensing
 
-The TypeQL language libraries, such as TypeQL Rust and Java, are distributed under Apache License, Version 2.0, January 2004.
+TypeQL grammar and language libraries are provided under the Mozilla Public License 2.0 (MPL 2.0),
+and therefore freely usable without restriction when unmodified.
+
 The full license can be founder at: [LICENSE](https://github.com/vaticle/typeql/blob/master/LICENSE).
-
-However, the TypeQL Grammar libraries, located under the `/grammar` package in this repository, 
-are distributed under the terms GNU Affero General Public License v3.0 ("AGPL 3.0"), but with a special exception. 
-Please refer to [TypeQL Grammar Licensing](https://github.com/vaticle/typeql/blob/master/grammar/README.md#licensing) for further details.
-
-Copyright (C) 2023 Vaticle.
