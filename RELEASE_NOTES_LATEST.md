@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@2.28.0
+cargo add typeql@2.28.1
 ```
 
 ## TypeQL Grammar and Language Library distributions for Java
@@ -20,12 +20,12 @@ cargo add typeql@2.28.0
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-grammar</artifactId>
-        <version>2.28.0</version>
+        <version>2.28.1</version>
     </dependency>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-lang</artifactId>
-        <version>2.28.0</version>
+        <version>2.28.1</version>
     </dependency>
 </dependencies>
 ```
@@ -35,34 +35,9 @@ cargo add typeql@2.28.0
 Available through https://pypi.org
 
 ```
-pip install typeql-grammar==2.28.0
+pip install typeql-grammar==2.28.1
 ```
 
-
-## New Features
-
-
-## Bugs Fixed
-
-
-## Code Refactors
-
-
 ## Other Improvements
-- **Update maven artifacts snapshot**
-  Update maven artifacts snapshot
-  
-
-- **Update README.md**
-
-- **Update typedb-behaviour and implement missing steps**
-
-- **Finish updating license tests, dependencies, last missed headers**
-
-- **Replace licenses with MPL version 2.0**
-
-- **Update banner.png for the README file**
-  
-  Update the banner image in the README file.
-  
-
+- **Bump snake-yaml maven dependency to 2.2**
+  Bump snake-yaml maven dependency to 2.2
