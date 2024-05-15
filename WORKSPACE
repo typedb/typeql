@@ -15,6 +15,8 @@ vaticle_dependencies()
 # Load //builder/python
 load("@vaticle_dependencies//builder/python:deps.bzl", python_deps = "deps")
 python_deps()
+load("@rules_python//python:repositories.bzl", "py_repositories")
+py_repositories()
 
 # Load //builder/bazel for RBE
 load("@vaticle_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")

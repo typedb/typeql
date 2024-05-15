@@ -1,9 +1,9 @@
 @maven//:com_eclipsesource_minimal_json_minimal_json_0_9_5
 @maven//:com_electronwill_night_config_core_3_6_5
 @maven//:com_electronwill_night_config_toml_3_6_5
-@maven//:com_fasterxml_jackson_core_jackson_annotations_2_10_1
-@maven//:com_fasterxml_jackson_core_jackson_core_2_10_1
-@maven//:com_fasterxml_jackson_core_jackson_databind_2_10_1
+@maven//:com_fasterxml_jackson_core_jackson_annotations_2_16_0
+@maven//:com_fasterxml_jackson_core_jackson_core_2_16_0
+@maven//:com_fasterxml_jackson_core_jackson_databind_2_16_0
 @maven//:com_google_code_findbugs_jsr305_3_0_2
 @maven//:com_google_errorprone_error_prone_annotations_2_3_4
 @maven//:com_google_guava_failureaccess_1_0_1
@@ -11,6 +11,7 @@
 @maven//:com_google_guava_listenablefuture_9999_0_empty_to_avoid_conflict_with_guava
 @maven//:com_google_http_client_google_http_client_1_34_2
 @maven//:com_google_j2objc_j2objc_annotations_1_3
+@maven//:com_vdurmont_semver4j_3_1_0
 @maven//:commons_codec_commons_codec_1_13
 @maven//:commons_io_commons_io_2_3
 @maven//:commons_logging_commons_logging_1_2
@@ -42,5 +43,5 @@
 @maven//:org_jsoup_jsoup_1_16_1
 @maven//:org_kohsuke_github_api_1_101
 @maven//:org_slf4j_slf4j_api_2_0_0
-@maven//:org_yaml_snakeyaml_1_25
+@maven//:org_yaml_snakeyaml_2_2
 @maven//:org_zeroturnaround_zt_exec_1_10
