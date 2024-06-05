@@ -6,29 +6,26 @@
 
 use std::{collections::HashSet, fmt, iter};
 
-use itertools::Itertools;
-
 use crate::{
     common::{
         error::{collect_err, TypeQLError},
+        Result,
         string::indent,
         token,
         validatable::Validatable,
-        Result,
     },
-    pattern::{Disjunction, Normalisable, Pattern, VariablesRetrieved},
-    variable::variable::VariableRef,
+    pattern::{Disjunction, Pattern, VariablesRetrieved},
 };
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq)]
 pub struct Conjunction {
     pub patterns: Vec<Pattern>,
-    normalised: Option<Disjunction>,
 }
 
 impl Conjunction {
     pub fn new(patterns: Vec<Pattern>) -> Self {
-        Conjunction { patterns, normalised: None }
+        Conjunction { patterns }
     }
 
     pub fn variables_recursive(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
@@ -79,43 +76,6 @@ impl VariablesRetrieved for Conjunction {
 impl Validatable for Conjunction {
     fn validate(&self) -> Result {
         Ok(())
-    }
-}
-
-impl Normalisable for Conjunction {
-    fn normalise(&mut self) -> Pattern {
-        if self.normalised.is_none() {
-            self.normalised = Some(self.compute_normalised().into_disjunction());
-        }
-        self.normalised.as_ref().unwrap().clone().into()
-    }
-
-    fn compute_normalised(&self) -> Pattern {
-        let mut conjunctables = Vec::new();
-        let mut disjunctions = Vec::new();
-        self.patterns.iter().for_each(|pattern| match pattern {
-            Pattern::Conjunction(conjunction) => {
-                disjunctions.push(conjunction.compute_normalised().into_disjunction().patterns)
-            }
-            Pattern::Disjunction(disjunction) => {
-                disjunctions.push(disjunction.compute_normalised().into_disjunction().patterns)
-            }
-            Pattern::Negation(negation) => conjunctables.push(negation.compute_normalised()),
-            Pattern::Statement(variable) => conjunctables.push(variable.compute_normalised()),
-        });
-        disjunctions.push(vec![Conjunction::new(conjunctables).into()]);
-
-        Disjunction::new(
-            disjunctions
-                .into_iter()
-                .multi_cartesian_product()
-                .map(|v| {
-                    Conjunction::new(v.into_iter().flat_map(|c| c.into_conjunction().patterns.into_iter()).collect())
-                        .into()
-                })
-                .collect(),
-        )
-        .into()
     }
 }
 

@@ -7,8 +7,8 @@
 use std::{collections::HashSet, fmt};
 
 use crate::{
-    common::{error::collect_err, string::indent, token, validatable::Validatable, Result},
-    pattern::{Conjunction, Normalisable, Pattern},
+    common::{error::collect_err, Result, string::indent, token, validatable::Validatable},
+    pattern::Pattern,
     variable::variable::VariableRef,
 };
 
@@ -41,38 +41,6 @@ impl Disjunction {
 impl Validatable for Disjunction {
     fn validate(&self) -> Result {
         Ok(())
-    }
-}
-
-impl Normalisable for Disjunction {
-    fn normalise(&mut self) -> Pattern {
-        if self.normalised.is_none() {
-            self.normalised = Some(Box::new(self.compute_normalised().into_disjunction()));
-        }
-        self.normalised.as_ref().unwrap().as_ref().clone().into()
-    }
-
-    fn compute_normalised(&self) -> Pattern {
-        Disjunction::new(
-            self.patterns
-                .iter()
-                .flat_map(|pattern| match pattern {
-                    Pattern::Conjunction(conjunction) => {
-                        conjunction.compute_normalised().into_disjunction().patterns.into_iter()
-                    }
-                    Pattern::Disjunction(disjunction) => {
-                        disjunction.compute_normalised().into_disjunction().patterns.into_iter()
-                    }
-                    Pattern::Negation(negation) => {
-                        vec![Conjunction::new(vec![negation.compute_normalised()]).into()].into_iter()
-                    }
-                    Pattern::Statement(variable) => {
-                        vec![Conjunction::new(vec![variable.clone().into()]).into()].into_iter()
-                    }
-                })
-                .collect(),
-        )
-        .into()
     }
 }
 

@@ -6,29 +6,29 @@
 
 use std::{collections::HashSet, fmt};
 
-pub(crate) use builder::LeftOperand;
 pub use builder::{
-    ConceptConstrainable, ConceptStatementBuilder, ExpressionBuilder, ThingStatementBuilder, TypeStatementBuilder,
+    IsStatementBuilder, ExpressionBuilder, ThingStatementBuilder, TypeStatementBuilder,
     ValueStatementBuilder,
 };
+pub(crate) use builder::LeftOperand;
 pub use concept::ConceptStatement;
 pub use thing::ThingStatement;
 pub use type_::TypeStatement;
 pub use value::ValueStatement;
 
-pub use crate::variable::{variable::Variable, variable_concept::ConceptVariable, variable_value::ValueVariable};
+
 use crate::{
     common::{error::TypeQLError, validatable::Validatable, Result},
     enum_wrapper,
-    pattern::{Normalisable, Pattern},
-    variable::variable::VariableRef,
 };
+use crate::variable::variable::VariableRef;
 
 mod builder;
 mod concept;
 mod thing;
 mod type_;
 mod value;
+mod statement;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
@@ -80,16 +80,6 @@ impl Validatable for Statement {
             Statement::Type(type_) => type_.validate(),
             Statement::Value(value) => value.validate(),
         }
-    }
-}
-
-impl Normalisable for Statement {
-    fn normalise(&mut self) -> Pattern {
-        self.compute_normalised()
-    }
-
-    fn compute_normalised(&self) -> Pattern {
-        self.clone().into()
     }
 }
 

@@ -75,7 +75,7 @@ string_enum! { LogicOperator
     Not = "not",
 }
 
-string_enum! { Predicate
+string_enum! { Comparator
     // equality
     Eq = "==",
     EqLegacy = "=",   // TODO: Deprecate '=' as equality in 3.0
@@ -89,14 +89,14 @@ string_enum! { Predicate
     Like = "like",
 }
 
-impl Predicate {
+impl Comparator {
     pub fn is_equality(&self) -> bool {
-        use Predicate::*;
+        use Comparator::*;
         matches!(self, Eq | EqLegacy | Neq | Gt | Gte | Lt | Lte) // TODO: Deprecate '=' as equality in 3.0
     }
 
     pub fn is_substring(&self) -> bool {
-        use Predicate::*;
+        use Comparator::*;
         matches!(self, Contains | Like)
     }
 }
@@ -177,7 +177,7 @@ string_enum! { Projection
 }
 
 string_enum! { Char
-    Question = "?",
+    // Question = "?",
     Dollar = "$",
     Underscore = "_",
     CurlyLeft = "{",

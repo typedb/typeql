@@ -4,91 +4,97 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{fmt, fmt::Formatter, hash::Hash};
+use std::fmt;
+use std::fmt::Formatter;
 
 use crate::{
-    common::{error::TypeQLError, identifier::is_valid_var_identifier, validatable::Validatable, Result},
-    variable::{ConceptVariable, ValueVariable},
+    common::{Result, token, validatable::Validatable},
+    pattern::LeftOperand,
 };
+use crate::common::error::TypeQLError;
+use crate::common::identifier::is_valid_var_identifier;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Variable {
-    Concept(ConceptVariable),
-    Value(ValueVariable),
+    Anonymous,
+    Hidden,
+    Named(String),
 }
 
 impl Variable {
-    pub fn as_ref(&self) -> VariableRef<'_> {
-        match self {
-            Self::Concept(cv) => VariableRef::Concept(cv),
-            Self::Value(vv) => VariableRef::Value(vv),
-        }
+    const ANONYMOUS_NAME: &'static str = token::Char::Underscore.as_str();
+
+    pub fn is_visible(&self) -> bool {
+        self != &Self::Hidden
     }
 
     pub fn is_named(&self) -> bool {
+        matches!(self, Self::Named(_))
+    }
+
+    pub fn name(&self) -> &str {
         match self {
-            Variable::Concept(var) => var.is_named(),
-            Variable::Value(var) => var.is_named(),
+            Self::Anonymous | Self::Hidden => Self::ANONYMOUS_NAME,
+            Self::Named(name) => name,
         }
     }
-}
 
-impl From<ConceptVariable> for Variable {
-    fn from(concept: ConceptVariable) -> Self {
-        Variable::Concept(concept)
-    }
-}
-
-impl From<ValueVariable> for Variable {
-    fn from(value: ValueVariable) -> Self {
-        Variable::Value(value)
+    pub fn as_ref(&self) -> VariableRef<'_> {
+        VariableRef::Concept(self)
     }
 }
 
 impl Validatable for Variable {
     fn validate(&self) -> Result {
         match self {
-            Variable::Concept(concept_variable) => concept_variable.validate(),
-            Variable::Value(value_variable) => value_variable.validate(),
+            Self::Anonymous | Self::Hidden => Ok(()),
+            Self::Named(n) => validate_variable_name(n),
         }
     }
 }
 
-impl fmt::Display for Variable {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            Variable::Concept(concept_variable) => write!(f, "{concept_variable}"),
-            Variable::Value(value_variable) => write!(f, "{value_variable}"),
-        }
+impl From<()> for Variable {
+    fn from(_: ()) -> Self {
+        Variable::Anonymous
     }
 }
+
+impl From<&str> for Variable {
+    fn from(name: &str) -> Self {
+        Variable::Named(name.to_string())
+    }
+}
+
+impl From<String> for Variable {
+    fn from(name: String) -> Self {
+        Variable::Named(name)
+    }
+}
+
+impl LeftOperand for Variable {}
+
+impl fmt::Display for Variable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", token::Char::Dollar, self.name())
+    }
+}
+
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum VariableRef<'a> {
-    Concept(&'a ConceptVariable),
-    Value(&'a ValueVariable),
+    Concept(&'a Variable),
 }
 
 impl VariableRef<'_> {
     pub fn is_name(&self) -> bool {
         match self {
             VariableRef::Concept(var) => (*var).is_named(),
-            VariableRef::Value(var) => (*var).is_named(),
         }
-    }
-
-    pub fn is_concept(&self) -> bool {
-        matches!(self, VariableRef::Concept(_))
-    }
-
-    pub fn is_value(&self) -> bool {
-        matches!(self, VariableRef::Value(_))
     }
 
     pub fn to_owned(self) -> Variable {
         match self {
-            Self::Concept(var) => Variable::Concept((*var).clone()),
-            Self::Value(var) => Variable::Value((*var).clone()),
+            Self::Concept(var) => var.clone(),
         }
     }
 }
@@ -97,7 +103,6 @@ impl fmt::Display for VariableRef<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             VariableRef::Concept(var) => write!(f, "{}", *var),
-            VariableRef::Value(var) => write!(f, "{}", *var),
         }
     }
 }

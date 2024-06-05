@@ -12,8 +12,9 @@ pub use operation::Operation;
 
 use crate::{
     pattern::Constant,
-    variable::{variable::VariableRef, ConceptVariable, ValueVariable, Variable},
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 pub mod builder;
 mod function;
@@ -24,8 +25,7 @@ pub enum Expression {
     Operation(Operation),
     Function(Function),
     Constant(Constant),
-    ThingVariable(ConceptVariable),
-    ValueVariable(ValueVariable),
+    ThingVariable(Variable),
 }
 
 impl fmt::Display for Expression {
@@ -35,7 +35,6 @@ impl fmt::Display for Expression {
             Expression::Function(function) => write!(f, "{function}"),
             Expression::Constant(constant) => write!(f, "{constant}"),
             Expression::ThingVariable(variable) => write!(f, "{variable}"),
-            Expression::ValueVariable(variable) => write!(f, "{variable}"),
         }
     }
 }
@@ -47,7 +46,6 @@ impl Expression {
             Expression::Function(function) => function.variables(),
             Expression::Constant(_constant) => Box::new(iter::empty()),
             Expression::ThingVariable(variable) => Box::new(iter::once(VariableRef::Concept(variable))),
-            Expression::ValueVariable(variable) => Box::new(iter::once(VariableRef::Value(variable))),
         }
     }
 }
@@ -72,22 +70,7 @@ impl From<Constant> for Expression {
 
 impl From<Variable> for Expression {
     fn from(variable: Variable) -> Self {
-        match variable {
-            Variable::Concept(var) => Self::ThingVariable(var),
-            Variable::Value(var) => Self::ValueVariable(var),
-        }
-    }
-}
-
-impl From<ConceptVariable> for Expression {
-    fn from(variable: ConceptVariable) -> Self {
         Self::ThingVariable(variable)
-    }
-}
-
-impl From<ValueVariable> for Expression {
-    fn from(variable: ValueVariable) -> Self {
-        Self::ValueVariable(variable)
     }
 }
 

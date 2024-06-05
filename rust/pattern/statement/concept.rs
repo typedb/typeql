@@ -9,17 +9,18 @@ use std::{fmt, iter};
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
     pattern::constraint::IsConstraint,
-    variable::{variable::VariableRef, ConceptVariable},
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ConceptStatement {
-    pub variable: ConceptVariable,
+    pub variable: Variable,
     pub is_constraint: Option<IsConstraint>,
 }
 
 impl ConceptStatement {
-    pub fn new(variable: ConceptVariable) -> ConceptStatement {
+    pub fn new(variable: Variable) -> ConceptStatement {
         ConceptStatement { variable, is_constraint: None }
     }
 
@@ -42,8 +43,8 @@ impl Validatable for ConceptStatement {
     }
 }
 
-impl From<ConceptVariable> for ConceptStatement {
-    fn from(variable: ConceptVariable) -> Self {
+impl From<Variable> for ConceptStatement {
+    fn from(variable: Variable) -> Self {
         ConceptStatement::new(variable)
     }
 }

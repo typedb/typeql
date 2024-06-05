@@ -9,19 +9,20 @@ use std::{fmt, fmt::Formatter, iter};
 use crate::{
     common::validatable::Validatable,
     pattern::{Label, TypeStatement, TypeStatementBuilder},
-    variable::{variable::VariableRef, ConceptVariable},
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeReference {
     Label(Label),
-    Variable(ConceptVariable),
+    Variable(Variable),
 }
 
 impl TypeReference {
     pub fn into_type_statement(self) -> TypeStatement {
         match self {
-            Self::Label(label) => ConceptVariable::Hidden.type_(label),
+            Self::Label(label) => Variable::Hidden.type_(label),
             Self::Variable(var) => var.into(),
         }
     }

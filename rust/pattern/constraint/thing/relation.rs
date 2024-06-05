@@ -13,9 +13,10 @@ use crate::{
         validatable::Validatable,
         Result,
     },
-    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    variable::{Variable, TypeReference},
     write_joined, Label,
 };
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RelationConstraint {
@@ -70,12 +71,12 @@ impl fmt::Display for RelationConstraint {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct RolePlayerConstraint {
     pub role_type: Option<TypeReference>,
-    pub player: ConceptVariable,
+    pub player: Variable,
     pub repetition: u64,
 }
 
 impl RolePlayerConstraint {
-    pub fn new(role_type: Option<TypeReference>, player: ConceptVariable) -> Self {
+    pub fn new(role_type: Option<TypeReference>, player: Variable) -> Self {
         RolePlayerConstraint { role_type, player, repetition: 0 }
     }
 
@@ -100,7 +101,7 @@ impl From<&str> for RolePlayerConstraint {
 
 impl From<String> for RolePlayerConstraint {
     fn from(player_var: String) -> Self {
-        Self::from(ConceptVariable::Named(player_var))
+        Self::from(Variable::Named(player_var))
     }
 }
 
@@ -112,42 +113,42 @@ impl From<(&str, &str)> for RolePlayerConstraint {
 
 impl From<(String, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (String, String)) -> Self {
-        Self::from((role_type, ConceptVariable::Named(player_var)))
+        Self::from((role_type, Variable::Named(player_var)))
     }
 }
 
 impl From<(Label, String)> for RolePlayerConstraint {
     fn from((role_type, player_var): (Label, String)) -> Self {
-        Self::from((role_type, ConceptVariable::Named(player_var)))
+        Self::from((role_type, Variable::Named(player_var)))
     }
 }
 
-impl From<ConceptVariable> for RolePlayerConstraint {
-    fn from(player_var: ConceptVariable) -> Self {
+impl From<Variable> for RolePlayerConstraint {
+    fn from(player_var: Variable) -> Self {
         Self::new(None, player_var)
     }
 }
 
-impl From<(String, ConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (String, ConceptVariable)) -> Self {
+impl From<(String, Variable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (String, Variable)) -> Self {
         Self::from((TypeReference::Label(role_type.into()), player_var))
     }
 }
 
-impl From<(Label, ConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (Label, ConceptVariable)) -> Self {
+impl From<(Label, Variable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (Label, Variable)) -> Self {
         Self::from((TypeReference::Label(role_type), player_var))
     }
 }
 
-impl From<(ConceptVariable, ConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (ConceptVariable, ConceptVariable)) -> Self {
+impl From<(Variable, Variable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (Variable, Variable)) -> Self {
         Self::new(Some(TypeReference::Variable(role_type)), player_var)
     }
 }
 
-impl From<(TypeReference, ConceptVariable)> for RolePlayerConstraint {
-    fn from((role_type, player_var): (TypeReference, ConceptVariable)) -> Self {
+impl From<(TypeReference, Variable)> for RolePlayerConstraint {
+    fn from((role_type, player_var): (TypeReference, Variable)) -> Self {
         Self::new(Some(role_type), player_var)
     }
 }

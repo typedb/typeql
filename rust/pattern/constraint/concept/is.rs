@@ -8,12 +8,12 @@ use std::fmt;
 
 use crate::{
     common::{token, validatable::Validatable, Result},
-    variable::ConceptVariable,
+    variable::Variable,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsConstraint {
-    pub variable: ConceptVariable,
+    pub variable: Variable,
 }
 
 impl Validatable for IsConstraint {
@@ -24,18 +24,18 @@ impl Validatable for IsConstraint {
 
 impl From<&str> for IsConstraint {
     fn from(string: &str) -> Self {
-        Self::from(ConceptVariable::Named(string.to_string()))
+        Self::from(Variable::Named(string.to_string()))
     }
 }
 
 impl From<String> for IsConstraint {
     fn from(string: String) -> Self {
-        Self::from(ConceptVariable::Named(string))
+        Self::from(Variable::Named(string))
     }
 }
 
-impl From<ConceptVariable> for IsConstraint {
-    fn from(variable: ConceptVariable) -> Self {
+impl From<Variable> for IsConstraint {
+    fn from(variable: Variable) -> Self {
         Self { variable }
     }
 }

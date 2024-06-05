@@ -20,9 +20,10 @@ use crate::{
         modifier::{Modifiers, Sorting},
         AggregateQueryBuilder, MatchClause, TypeQLGetGroup,
     },
-    variable::{variable::VariableRef, Variable},
     write_joined,
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGet {
@@ -64,7 +65,6 @@ impl Validatable for TypeQLGet {
             self.match_clause.validate(),
             validate_filters_are_in_scope(&match_variables, &self.filter),
             self.modifiers.sorting.as_ref().map(|s| s.validate(retrieved_variables)).unwrap_or(Ok(())),
-            validate_variable_names_are_unique(&self.match_clause.conjunction),
         ])
     }
 }
@@ -93,19 +93,6 @@ fn validate_filters_are_in_scope(match_variables: &HashSet<VariableRef<'_>>, fil
             Ok(())
         }
     }))
-}
-
-fn validate_variable_names_are_unique(conjunction: &Conjunction) -> Result {
-    let all_refs = conjunction.variables_recursive();
-    let (concept_refs, value_refs) = all_refs.partition::<HashSet<_>, _>(VariableRef::is_concept);
-    let common_refs = concept_refs.intersection(&value_refs).collect::<HashSet<_>>();
-    if !common_refs.is_empty() {
-        return Err(TypeQLError::VariableNameConflict {
-            names: common_refs.into_iter().map(VariableRef::to_string).join(", "),
-        }
-        .into());
-    }
-    Ok(())
 }
 
 impl fmt::Display for TypeQLGet {

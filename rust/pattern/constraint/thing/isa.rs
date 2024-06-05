@@ -9,9 +9,10 @@ use std::fmt;
 use crate::{
     common::{token, validatable::Validatable, Result},
     pattern::IsExplicit,
-    variable::{variable::VariableRef, ConceptVariable, TypeReference},
-    Label,
 };
+use crate::pattern::Label;
+use crate::variable::{Variable, TypeReference};
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IsaConstraint {
@@ -47,14 +48,14 @@ impl<T: Into<Label>> From<(T, IsExplicit)> for IsaConstraint {
     }
 }
 
-impl From<ConceptVariable> for IsaConstraint {
-    fn from(var: ConceptVariable) -> Self {
+impl From<Variable> for IsaConstraint {
+    fn from(var: Variable) -> Self {
         IsaConstraint::new(TypeReference::Variable(var), IsExplicit::No)
     }
 }
 
-impl From<(ConceptVariable, IsExplicit)> for IsaConstraint {
-    fn from((var, is_explicit): (ConceptVariable, IsExplicit)) -> Self {
+impl From<(Variable, IsExplicit)> for IsaConstraint {
+    fn from((var, is_explicit): (Variable, IsExplicit)) -> Self {
         IsaConstraint::new(TypeReference::Variable(var), is_explicit)
     }
 }

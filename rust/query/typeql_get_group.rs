@@ -15,8 +15,9 @@ use crate::{
     },
     pattern::VariablesRetrieved,
     query::{AggregateQueryBuilder, TypeQLGet},
-    variable::{variable::VariableRef, Variable},
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLGetGroup {

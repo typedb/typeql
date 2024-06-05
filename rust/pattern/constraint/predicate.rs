@@ -15,59 +15,58 @@ use crate::{
         Result,
     },
     pattern::Constant,
-    variable::{variable::VariableRef, ConceptVariable, ValueVariable, Variable},
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Predicate {
-    pub predicate: token::Predicate,
+pub struct Comparison {
+    pub comparator: token::Comparator,
     pub value: Value,
 }
 
-impl Predicate {
-    pub fn new(predicate: token::Predicate, value: Value) -> Self {
+impl Comparison {
+    pub fn new(predicate: token::Comparator, value: Value) -> Self {
         match predicate {
-            token::Predicate::EqLegacy => Predicate { predicate: token::Predicate::Eq, value }, // TODO: Deprecate '=' as equality in 3.0
-            predicate => Predicate { predicate, value },
+            token::Comparator::EqLegacy => Comparison { comparator: token::Comparator::Eq, value }, // TODO: Deprecate '=' as equality in 3.0
+            predicate => Comparison { comparator: predicate, value },
         }
     }
 
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
+    pub fn variables(&self) -> Box<dyn Iterator<Item=VariableRef<'_>> + '_> {
         match &self.value {
             Value::ThingVariable(var) => Box::new(iter::once(VariableRef::Concept(var))),
-            Value::ValueVariable(var) => Box::new(iter::once(VariableRef::Value(var))),
             _ => Box::new(iter::empty()),
         }
     }
 }
 
-impl Validatable for Predicate {
+impl Validatable for Comparison {
     fn validate(&self) -> Result {
         collect_err([
-            validate_string_value_with_substring_predicate(self.predicate, &self.value),
+            validate_string_value_with_substring_predicate(self.comparator, &self.value),
             self.value.validate(),
         ])
     }
 }
 
-fn validate_string_value_with_substring_predicate(predicate: token::Predicate, value: &Value) -> Result {
+fn validate_string_value_with_substring_predicate(predicate: token::Comparator, value: &Value) -> Result {
     if predicate.is_substring() && !matches!(value, Value::Constant(Constant::String(_))) {
         Err(TypeQLError::InvalidConstraintPredicate { predicate, value: value.clone() })?
     }
     Ok(())
 }
 
-impl fmt::Display for Predicate {
+impl fmt::Display for Comparison {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.predicate == token::Predicate::Like {
+        if self.comparator == token::Comparator::Like {
             assert!(matches!(self.value, Value::Constant(Constant::String(_))));
-            write!(f, "{} {}", self.predicate, escape_regex(&self.value.to_string()))
-        } else if self.predicate == token::Predicate::Eq
-            && !(matches!(self.value, Value::ThingVariable(_)) || matches!(self.value, Value::ValueVariable(_)))
+            write!(f, "{} {}", self.comparator, escape_regex(&self.value.to_string()))
+        } else if self.comparator == token::Comparator::Eq && !matches!(self.value, Value::ThingVariable(_))
         {
             write!(f, "{}", self.value)
         } else {
-            write!(f, "{} {}", self.predicate, self.value)
+            write!(f, "{} {}", self.comparator, self.value)
         }
     }
 }
@@ -75,8 +74,7 @@ impl fmt::Display for Predicate {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Constant(Constant),
-    ThingVariable(ConceptVariable),
-    ValueVariable(ValueVariable),
+    ThingVariable(Variable),
 }
 
 impl Eq for Value {} // can't derive, because floating point types do not implement Eq
@@ -86,7 +84,6 @@ impl Validatable for Value {
         match &self {
             Self::Constant(constant) => constant.validate(),
             Self::ThingVariable(variable) => variable.validate(),
-            Self::ValueVariable(variable) => variable.validate(),
         }
     }
 }
@@ -99,22 +96,7 @@ impl<T: Into<Constant>> From<T> for Value {
 
 impl From<Variable> for Value {
     fn from(variable: Variable) -> Self {
-        match variable {
-            Variable::Concept(var) => Value::ThingVariable(var),
-            Variable::Value(var) => Value::ValueVariable(var),
-        }
-    }
-}
-
-impl From<ConceptVariable> for Value {
-    fn from(variable: ConceptVariable) -> Self {
         Value::ThingVariable(variable)
-    }
-}
-
-impl From<ValueVariable> for Value {
-    fn from(variable: ValueVariable) -> Self {
-        Value::ValueVariable(variable)
     }
 }
 
@@ -124,7 +106,6 @@ impl fmt::Display for Value {
         match self {
             Constant(constant) => write!(f, "{constant}"),
             ThingVariable(var) => write!(f, "{}", var),
-            ValueVariable(var) => write!(f, "{}", var),
         }
     }
 }

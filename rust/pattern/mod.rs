@@ -10,7 +10,7 @@ pub use conjunction::Conjunction;
 pub use constant::Constant;
 pub use constraint::{
     AbstractConstraint, Annotation, AssignConstraint, HasConstraint, IIDConstraint, IsConstraint, IsExplicit,
-    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Predicate, RegexConstraint, RelatesConstraint,
+    IsaConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, Comparison, RegexConstraint, RelatesConstraint,
     RelationConstraint, RolePlayerConstraint, SubConstraint, Value, ValueTypeConstraint,
 };
 pub use disjunction::Disjunction;
@@ -20,7 +20,7 @@ pub use negation::Negation;
 pub use schema::{Rule, RuleLabel};
 pub(crate) use statement::LeftOperand;
 pub use statement::{
-    ConceptConstrainable, ConceptStatement, ConceptStatementBuilder, ExpressionBuilder, Statement, ThingStatement,
+    IsStatementBuilder, ConceptStatement, ExpressionBuilder, Statement, ThingStatement,
     ThingStatementBuilder, TypeStatement, TypeStatementBuilder, ValueStatement, ValueStatementBuilder,
 };
 
@@ -28,8 +28,8 @@ pub use crate::common::variables_retrieved::VariablesRetrieved;
 use crate::{
     common::{validatable::Validatable, Result},
     enum_getter, enum_wrapper,
-    variable::variable::VariableRef,
 };
+use crate::variable::variable::VariableRef;
 
 mod conjunction;
 mod constant;
@@ -40,8 +40,6 @@ mod label;
 mod negation;
 mod schema;
 pub(crate) mod statement;
-#[cfg(test)]
-mod test;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
@@ -103,31 +101,6 @@ impl VariablesRetrieved for Pattern {
             Pattern::Disjunction(disjunction) => disjunction.variables_recursive(),
             Pattern::Negation(negation) => negation.variables_recursive(),
             Pattern::Statement(statement) => statement.variables(),
-        }
-    }
-}
-
-pub trait Normalisable {
-    fn normalise(&mut self) -> Pattern;
-    fn compute_normalised(&self) -> Pattern;
-}
-
-impl Normalisable for Pattern {
-    fn normalise(&mut self) -> Pattern {
-        match self {
-            Pattern::Conjunction(conjunction) => conjunction.normalise(),
-            Pattern::Disjunction(disjunction) => disjunction.normalise(),
-            Pattern::Negation(negation) => negation.normalise(),
-            Pattern::Statement(statement) => statement.normalise(),
-        }
-    }
-
-    fn compute_normalised(&self) -> Pattern {
-        match self {
-            Pattern::Conjunction(conjunction) => conjunction.compute_normalised(),
-            Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
-            Pattern::Negation(negation) => negation.compute_normalised(),
-            Pattern::Statement(statement) => statement.compute_normalised(),
         }
     }
 }

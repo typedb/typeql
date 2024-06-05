@@ -8,9 +8,10 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    variable::{Variable, TypeReference},
     Label,
 };
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PlaysConstraint {
@@ -42,8 +43,8 @@ impl From<Label> for PlaysConstraint {
     }
 }
 
-impl From<ConceptVariable> for PlaysConstraint {
-    fn from(role_type: ConceptVariable) -> Self {
+impl From<Variable> for PlaysConstraint {
+    fn from(role_type: Variable) -> Self {
         PlaysConstraint::from(TypeReference::Variable(role_type))
     }
 }
@@ -72,8 +73,8 @@ impl From<(Label, Label)> for PlaysConstraint {
     }
 }
 
-impl From<(ConceptVariable, ConceptVariable)> for PlaysConstraint {
-    fn from((role_type, overridden_role_type): (ConceptVariable, ConceptVariable)) -> Self {
+impl From<(Variable, Variable)> for PlaysConstraint {
+    fn from((role_type, overridden_role_type): (Variable, Variable)) -> Self {
         PlaysConstraint::from((TypeReference::Variable(role_type), TypeReference::Variable(overridden_role_type)))
     }
 }

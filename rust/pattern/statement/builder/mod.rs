@@ -8,8 +8,9 @@ mod concept;
 mod thing;
 mod type_;
 mod value;
+mod comparison;
 
-pub use concept::{ConceptConstrainable, ConceptStatementBuilder};
+pub use concept::{IsStatementBuilder};
 pub use thing::ThingStatementBuilder;
 pub use type_::TypeStatementBuilder;
 pub use value::ValueStatementBuilder;

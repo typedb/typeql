@@ -8,9 +8,10 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    variable::{Variable, TypeReference},
     Label,
 };
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum Annotation {
@@ -80,8 +81,8 @@ impl From<Label> for OwnsConstraint {
     }
 }
 
-impl From<ConceptVariable> for OwnsConstraint {
-    fn from(attribute_type: ConceptVariable) -> Self {
+impl From<Variable> for OwnsConstraint {
+    fn from(attribute_type: Variable) -> Self {
         OwnsConstraint::from(TypeReference::Variable(attribute_type))
     }
 }
@@ -101,8 +102,8 @@ impl<T: Into<Label>, U: Into<Label>> From<(T, U)> for OwnsConstraint {
     }
 }
 
-impl From<(ConceptVariable, ConceptVariable)> for OwnsConstraint {
-    fn from((attribute_type, overridden_attribute_type): (ConceptVariable, ConceptVariable)) -> Self {
+impl From<(Variable, Variable)> for OwnsConstraint {
+    fn from((attribute_type, overridden_attribute_type): (Variable, Variable)) -> Self {
         OwnsConstraint::from((
             TypeReference::Variable(attribute_type),
             TypeReference::Variable(overridden_attribute_type),
@@ -126,8 +127,8 @@ impl<T: Into<Label>> From<(T, Annotation)> for OwnsConstraint {
     }
 }
 
-impl From<(ConceptVariable, Annotation)> for OwnsConstraint {
-    fn from((attribute_type, annotation): (ConceptVariable, Annotation)) -> Self {
+impl From<(Variable, Annotation)> for OwnsConstraint {
+    fn from((attribute_type, annotation): (Variable, Annotation)) -> Self {
         OwnsConstraint::from((TypeReference::Variable(attribute_type), [annotation]))
     }
 }
@@ -148,9 +149,9 @@ impl<T: Into<Label>, U: Into<Label>> From<(T, U, Annotation)> for OwnsConstraint
     }
 }
 
-impl From<(ConceptVariable, ConceptVariable, Annotation)> for OwnsConstraint {
+impl From<(Variable, Variable, Annotation)> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotation): (ConceptVariable, ConceptVariable, Annotation),
+        (attribute_type, overridden_attribute_type, annotation): (Variable, Variable, Annotation),
     ) -> Self {
         OwnsConstraint::from((
             TypeReference::Variable(attribute_type),
@@ -186,8 +187,8 @@ impl<const N: usize> From<(Label, [Annotation; N])> for OwnsConstraint {
     }
 }
 
-impl<const N: usize> From<(ConceptVariable, [Annotation; N])> for OwnsConstraint {
-    fn from((attribute_type, annotations): (ConceptVariable, [Annotation; N])) -> Self {
+impl<const N: usize> From<(Variable, [Annotation; N])> for OwnsConstraint {
+    fn from((attribute_type, annotations): (Variable, [Annotation; N])) -> Self {
         OwnsConstraint::from((TypeReference::Variable(attribute_type), annotations))
     }
 }
@@ -220,9 +221,9 @@ impl<const N: usize> From<(Label, Label, [Annotation; N])> for OwnsConstraint {
     }
 }
 
-impl<const N: usize> From<(ConceptVariable, ConceptVariable, [Annotation; N])> for OwnsConstraint {
+impl<const N: usize> From<(Variable, Variable, [Annotation; N])> for OwnsConstraint {
     fn from(
-        (attribute_type, overridden_attribute_type, annotations): (ConceptVariable, ConceptVariable, [Annotation; N]),
+        (attribute_type, overridden_attribute_type, annotations): (Variable, Variable, [Annotation; N]),
     ) -> Self {
         OwnsConstraint::from((
             TypeReference::Variable(attribute_type),

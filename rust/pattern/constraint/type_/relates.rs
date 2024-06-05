@@ -8,7 +8,7 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, token, validatable::Validatable, Result},
-    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    variable::{variable::VariableRef, Variable, TypeReference},
     Label,
 };
 
@@ -50,8 +50,8 @@ impl From<Label> for RelatesConstraint {
     }
 }
 
-impl From<ConceptVariable> for RelatesConstraint {
-    fn from(role_type: ConceptVariable) -> Self {
+impl From<Variable> for RelatesConstraint {
+    fn from(role_type: Variable) -> Self {
         RelatesConstraint::from(TypeReference::Variable(role_type))
     }
 }
@@ -80,8 +80,8 @@ impl From<(Label, Label)> for RelatesConstraint {
     }
 }
 
-impl From<(ConceptVariable, ConceptVariable)> for RelatesConstraint {
-    fn from((role_type, overridden_role_name): (ConceptVariable, ConceptVariable)) -> Self {
+impl From<(Variable, Variable)> for RelatesConstraint {
+    fn from((role_type, overridden_role_name): (Variable, Variable)) -> Self {
         RelatesConstraint::from((TypeReference::Variable(role_type), TypeReference::Variable(overridden_role_name)))
     }
 }

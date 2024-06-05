@@ -11,7 +11,7 @@ mod type_;
 mod value;
 
 pub use concept::IsConstraint;
-pub use predicate::{Predicate, Value};
+pub use predicate::{Comparison, Value};
 pub use thing::{HasConstraint, IIDConstraint, IsaConstraint, RelationConstraint, RolePlayerConstraint};
 pub use type_::{
     AbstractConstraint, Annotation, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint,

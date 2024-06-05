@@ -9,7 +9,7 @@ use std::fmt;
 use crate::{
     common::{token, validatable::Validatable, Result},
     pattern::IsExplicit,
-    variable::{variable::VariableRef, ConceptVariable, TypeReference},
+    variable::{variable::VariableRef, Variable, TypeReference},
     Label,
 };
 
@@ -37,8 +37,8 @@ impl<T: Into<Label>> From<T> for SubConstraint {
     }
 }
 
-impl From<ConceptVariable> for SubConstraint {
-    fn from(type_: ConceptVariable) -> Self {
+impl From<Variable> for SubConstraint {
+    fn from(type_: Variable) -> Self {
         Self::from(TypeReference::Variable(type_))
     }
 }
@@ -55,8 +55,8 @@ impl<T: Into<Label>> From<(T, IsExplicit)> for SubConstraint {
     }
 }
 
-impl From<(ConceptVariable, IsExplicit)> for SubConstraint {
-    fn from((type_, is_explicit): (ConceptVariable, IsExplicit)) -> Self {
+impl From<(Variable, IsExplicit)> for SubConstraint {
+    fn from((type_, is_explicit): (Variable, IsExplicit)) -> Self {
         Self::from((TypeReference::Variable(type_), is_explicit))
     }
 }

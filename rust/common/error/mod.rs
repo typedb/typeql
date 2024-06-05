@@ -14,9 +14,9 @@ use crate::{
     common::token,
     error_messages,
     pattern::{Label, Pattern, ThingStatement, Value},
-    variable::{ConceptVariable, Variable},
     write_joined,
 };
+use crate::variable::Variable;
 
 #[macro_use]
 mod macros;
@@ -124,7 +124,7 @@ error_messages! { TypeQLError
         22: "The variable name '{name}' is invalid. Variables must be valid utf-8 identifiers without a leading underscore.",
     MissingConstraintRelationPlayer =
         23: "A relation variable has not been provided with role players.",
-    InvalidConstraintPredicate { predicate: token::Predicate, value: Value } =
+    InvalidConstraintPredicate { predicate: token::Comparator, value: Value } =
         24: "The '{predicate}' constraint may only accept a string value as its operand, got '{value}' instead.",
     InvalidConstraintDatetimePrecision { date_time: NaiveDateTime } =
         25: "Attempted to assign DateTime value of '{date_time}' which is more precise than 1 millisecond.",
@@ -138,7 +138,7 @@ error_messages! { TypeQLError
         29: "Rule '{rule_label}' 'when' contains a nested negation.",
     InvalidRuleThen { rule_label: Label, then: ThingStatement } =
         30: "Rule '{rule_label}' 'then' '{then}': must be exactly one attribute ownership, or exactly one relation.",
-    InvalidRuleThenHas { rule_label: Label, then: ThingStatement, variable: ConceptVariable, type_label: Label } =
+    InvalidRuleThenHas { rule_label: Label, then: ThingStatement, variable: Variable, type_label: Label } =
         31: "Rule '{rule_label}' 'then' '{then}' tries to assign type '{type_label}' to variable '{variable}', but this variable already had a type assigned by the rule 'when'. Try omitting this type assignment.",
     InvalidRuleThenVariables { rule_label: Label } =
         32: "Rule '{rule_label}' 'then' variables must be present in the 'when', outside of nested patterns.",

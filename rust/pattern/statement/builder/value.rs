@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::pattern::{AssignConstraint, Predicate, ValueStatement};
+use crate::pattern::{AssignConstraint, Comparison, ValueStatement};
 
 pub trait ValueStatementBuilder: Sized {
     fn assign(self, assign: impl Into<AssignConstraint>) -> ValueStatement;
-    fn predicate(self, predicate: impl Into<Predicate>) -> ValueStatement;
+    fn predicate(self, predicate: impl Into<Comparison>) -> ValueStatement;
 }
 
 impl<U: Into<ValueStatement>> ValueStatementBuilder for U {
@@ -16,7 +16,7 @@ impl<U: Into<ValueStatement>> ValueStatementBuilder for U {
         self.into().constrain_assign(assign.into())
     }
 
-    fn predicate(self, predicate: impl Into<Predicate>) -> ValueStatement {
+    fn predicate(self, predicate: impl Into<Comparison>) -> ValueStatement {
         self.into().constrain_predicate(predicate.into())
     }
 }

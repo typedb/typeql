@@ -15,9 +15,9 @@ use crate::{
     },
     pattern::{ThingStatement, VariablesRetrieved},
     query::{modifier::Modifiers, writable::validate_non_empty, MatchClause, Sorting},
-    variable::variable::VariableRef,
     write_joined,
 };
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TypeQLInsert {

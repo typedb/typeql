@@ -8,24 +8,25 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
-    pattern::{AssignConstraint, Predicate},
-    variable::{variable::VariableRef, ValueVariable},
+    pattern::{AssignConstraint, Comparison},
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueStatement {
-    pub variable: ValueVariable,
+    pub variable: Variable,
     pub assign_constraint: Option<AssignConstraint>,
-    pub predicate_constraint: Option<Predicate>,
+    pub predicate_constraint: Option<Comparison>,
 }
 
 impl ValueStatement {
-    pub fn new(variable: ValueVariable) -> ValueStatement {
+    pub fn new(variable: Variable) -> ValueStatement {
         ValueStatement { variable, assign_constraint: None, predicate_constraint: None }
     }
 
     pub fn owner(&self) -> VariableRef<'_> {
-        VariableRef::Value(&self.variable)
+        VariableRef::Concept(&self.variable)
     }
 
     pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
@@ -40,7 +41,7 @@ impl ValueStatement {
         Self { assign_constraint: Some(assign), ..self }
     }
 
-    pub fn constrain_predicate(self, predicate: Predicate) -> ValueStatement {
+    pub fn constrain_predicate(self, predicate: Comparison) -> ValueStatement {
         Self { predicate_constraint: Some(predicate), ..self }
     }
 }
@@ -55,8 +56,8 @@ impl Validatable for ValueStatement {
     }
 }
 
-impl From<ValueVariable> for ValueStatement {
-    fn from(variable: ValueVariable) -> Self {
+impl From<Variable> for ValueStatement {
+    fn from(variable: Variable) -> Self {
         ValueStatement::new(variable)
     }
 }
@@ -67,7 +68,7 @@ impl fmt::Display for ValueStatement {
         if let Some(assign) = &self.assign_constraint {
             write!(f, " {assign}")?;
         } else if let Some(predicate) = &self.predicate_constraint {
-            write!(f, " {} {}", predicate.predicate, predicate.value)?;
+            write!(f, " {} {}", predicate.comparator, predicate.value)?;
         }
         Ok(())
     }

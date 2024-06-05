@@ -7,18 +7,18 @@
 use crate::{
     common::token,
     pattern::{
-        HasConstraint, IIDConstraint, IsaConstraint, Predicate, RelationConstraint, RolePlayerConstraint,
+        HasConstraint, IIDConstraint, IsaConstraint, Comparison, RelationConstraint, RolePlayerConstraint,
         ThingStatement, Value,
     },
 };
 
 pub trait ThingStatementBuilder {
     fn has(self, has: impl Into<HasConstraint>) -> ThingStatement;
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> ThingStatement;
+    fn links(self, value: impl Into<RolePlayerConstraint>) -> ThingStatement;
     fn relation(self, relation: impl Into<RelationConstraint>) -> ThingStatement;
     fn iid<T: Into<IIDConstraint>>(self, iid: T) -> ThingStatement;
     fn isa(self, isa: impl Into<IsaConstraint>) -> ThingStatement;
-    fn predicate(self, predicate: impl Into<Predicate>) -> ThingStatement;
+    fn compare(self, predicate: impl Into<Comparison>) -> ThingStatement;
     fn eq(self, value: impl Into<Value>) -> ThingStatement;
     fn neq(self, value: impl Into<Value>) -> ThingStatement;
     fn gt(self, value: impl Into<Value>) -> ThingStatement;
@@ -34,7 +34,7 @@ impl<U: Into<ThingStatement>> ThingStatementBuilder for U {
         self.into().constrain_has(has.into())
     }
 
-    fn rel(self, value: impl Into<RolePlayerConstraint>) -> ThingStatement {
+    fn links(self, value: impl Into<RolePlayerConstraint>) -> ThingStatement {
         self.into().constrain_role_player(value.into())
     }
 
@@ -50,39 +50,39 @@ impl<U: Into<ThingStatement>> ThingStatementBuilder for U {
         self.into().constrain_isa(isa.into())
     }
 
-    fn predicate(self, predicate: impl Into<Predicate>) -> ThingStatement {
-        self.into().constrain_predicate(predicate.into())
+    fn compare(self, comparison: impl Into<Comparison>) -> ThingStatement {
+        self.into().constrain_comparison(comparison.into())
     }
 
     fn eq(self, value: impl Into<Value>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Eq, value.into()))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Eq, value.into()))
     }
 
     fn neq(self, value: impl Into<Value>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Neq, value.into()))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Neq, value.into()))
     }
 
     fn gt(self, value: impl Into<Value>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Gt, value.into()))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Gt, value.into()))
     }
 
     fn gte(self, value: impl Into<Value>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Gte, value.into()))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Gte, value.into()))
     }
 
     fn lt(self, value: impl Into<Value>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Lt, value.into()))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Lt, value.into()))
     }
 
     fn lte(self, value: impl Into<Value>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Lte, value.into()))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Lte, value.into()))
     }
 
     fn contains(self, string: impl Into<String>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Contains, Value::from(string.into())))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Contains, Value::from(string.into())))
     }
 
     fn like(self, string: impl Into<String>) -> ThingStatement {
-        self.into().constrain_predicate(Predicate::new(token::Predicate::Like, Value::from(string.into())))
+        self.into().constrain_comparison(Comparison::new(token::Comparator::Like, Value::from(string.into())))
     }
 }

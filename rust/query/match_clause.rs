@@ -17,9 +17,10 @@ use crate::{
     query::{
         modifier::Modifiers, typeql_get, Projection, TypeQLDelete, TypeQLFetch, TypeQLGet, TypeQLInsert, Writable,
     },
-    variable::{variable::VariableRef, Variable},
     Result,
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MatchClause {

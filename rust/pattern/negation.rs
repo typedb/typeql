@@ -8,8 +8,8 @@ use core::fmt;
 use std::collections::HashSet;
 
 use crate::{
-    common::{error::TypeQLError, string::indent, token, validatable::Validatable, Result},
-    pattern::{Conjunction, Disjunction, Normalisable, Pattern},
+    common::{error::TypeQLError, Result, string::indent, token, validatable::Validatable},
+    pattern::{Pattern},
     variable::variable::VariableRef,
 };
 
@@ -45,27 +45,6 @@ impl Validatable for Negation {
             Pattern::Negation(_) => Err(TypeQLError::RedundantNestedNegation)?,
             _ => Ok(()),
         }
-    }
-}
-
-impl Normalisable for Negation {
-    fn normalise(&mut self) -> Pattern {
-        if self.normalised.is_none() {
-            self.normalised = Some(Box::new(self.compute_normalised().into_negation()));
-        }
-        self.normalised.as_ref().unwrap().as_ref().clone().into()
-    }
-
-    fn compute_normalised(&self) -> Pattern {
-        Negation::new(match self.pattern.as_ref() {
-            Pattern::Conjunction(conjunction) => conjunction.compute_normalised(),
-            Pattern::Disjunction(disjunction) => disjunction.compute_normalised(),
-            Pattern::Negation(_) => panic!("{}", TypeQLError::RedundantNestedNegation),
-            Pattern::Statement(variable) => {
-                Disjunction::new(vec![Conjunction::new(vec![variable.clone().into()]).into()]).into()
-            }
-        })
-        .into()
     }
 }
 

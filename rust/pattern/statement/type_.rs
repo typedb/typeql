@@ -16,13 +16,14 @@ use crate::{
         AbstractConstraint, LabelConstraint, OwnsConstraint, PlaysConstraint, RegexConstraint, RelatesConstraint,
         SubConstraint, ValueTypeConstraint,
     },
-    variable::{variable::VariableRef, ConceptVariable},
     write_joined,
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct TypeStatement {
-    pub variable: ConceptVariable,
+    pub variable: Variable,
     pub label: Option<LabelConstraint>,
     pub owns: Vec<OwnsConstraint>,
     pub plays: Vec<PlaysConstraint>,
@@ -34,7 +35,7 @@ pub struct TypeStatement {
 }
 
 impl TypeStatement {
-    pub fn new(variable: ConceptVariable) -> TypeStatement {
+    pub fn new(variable: Variable) -> TypeStatement {
         TypeStatement {
             variable,
             abstract_: None,
@@ -131,8 +132,8 @@ impl Validatable for TypeStatement {
     }
 }
 
-impl From<ConceptVariable> for TypeStatement {
-    fn from(variable: ConceptVariable) -> Self {
+impl From<Variable> for TypeStatement {
+    fn from(variable: Variable) -> Self {
         TypeStatement::new(variable)
     }
 }

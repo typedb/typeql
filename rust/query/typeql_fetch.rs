@@ -19,9 +19,10 @@ use crate::{
     },
     pattern::{Label, VariablesRetrieved},
     query::{modifier::Modifiers, MatchClause, TypeQLGetAggregate},
-    variable::{variable::VariableRef, Variable},
     write_joined,
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLFetch {
@@ -30,34 +31,12 @@ pub struct TypeQLFetch {
     pub modifiers: Modifiers,
 }
 
-impl TypeQLFetch {
-    fn validate_names_are_unique(&self) -> Result {
-        let all_refs = self
-            .match_clause
-            .retrieved_variables()
-            .chain(self.projections.iter().flat_map(|p| p.key_variable().into_iter().chain(p.value_variables())));
-        let (concept_refs, value_refs): (HashSet<VariableRef<'_>>, HashSet<VariableRef<'_>>) =
-            all_refs.partition(|r| r.is_concept());
-        let concept_names = concept_refs.iter().collect::<HashSet<_>>();
-        let value_names = value_refs.iter().collect::<HashSet<_>>();
-        let common_refs = concept_names.intersection(&value_names).collect::<HashSet<_>>();
-        if !common_refs.is_empty() {
-            return Err(TypeQLError::VariableNameConflict {
-                names: common_refs.iter().map(|r| r.to_string()).join(", "),
-            }
-            .into());
-        }
-        Ok(())
-    }
-}
-
 impl Validatable for TypeQLFetch {
     fn validate(&self) -> Result {
         let match_variables = self.match_clause.retrieved_variables().collect();
         collect_err([
             self.match_clause.validate(),
             self.modifiers.sorting.as_ref().map_or(Ok(()), |s| s.validate(&match_variables)),
-            self.validate_names_are_unique(),
         ])
     }
 }

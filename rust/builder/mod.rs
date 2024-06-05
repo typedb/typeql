@@ -7,12 +7,12 @@
 use crate::{
     common::token,
     pattern::{
-        Constant, Expression, Function, Label, Negation, Predicate, RolePlayerConstraint, RuleLabel, ThingStatement,
+        Constant, Expression, Function, Label, Negation, Comparison, RolePlayerConstraint, RuleLabel, ThingStatement,
         ThingStatementBuilder, TypeStatement, Value,
     },
     query::ProjectionKeyLabel,
-    variable::{ConceptVariable, TypeReference, ValueVariable},
-    Pattern,
+    variable::{Variable, TypeReference},
+    // Pattern,
 };
 
 #[macro_export]
@@ -95,19 +95,15 @@ macro_rules! sort_vars {
     }}
 }
 
-pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
-    Negation::new(pattern.into())
-}
+// pub fn not<T: Into<Pattern>>(pattern: T) -> Negation {
+//     Negation::new(pattern.into())
+// }
 
 pub fn rule(name: &str) -> RuleLabel {
     RuleLabel::from(name)
 }
 
-pub fn cvar(var: impl Into<ConceptVariable>) -> ConceptVariable {
-    var.into()
-}
-
-pub fn vvar(var: impl Into<ValueVariable>) -> ValueVariable {
+pub fn cvar(var: impl Into<Variable>) -> Variable {
     var.into()
 }
 
@@ -124,39 +120,39 @@ pub fn label(name: impl Into<ProjectionKeyLabel>) -> ProjectionKeyLabel {
 }
 
 pub fn rel<T: Into<RolePlayerConstraint>>(value: T) -> ThingStatement {
-    ConceptVariable::Hidden.rel(value)
+    Variable::Hidden.links(value)
 }
 
-pub fn eq<T: Into<Value>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Eq, value.into())
+pub fn eq<T: Into<Value>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Eq, value.into())
 }
 
-pub fn neq<T: Into<Value>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Neq, value.into())
+pub fn neq<T: Into<Value>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Neq, value.into())
 }
 
-pub fn lt<T: Into<Value>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Lt, value.into())
+pub fn lt<T: Into<Value>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Lt, value.into())
 }
 
-pub fn lte<T: Into<Value>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Lte, value.into())
+pub fn lte<T: Into<Value>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Lte, value.into())
 }
 
-pub fn gt<T: Into<Value>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Gt, value.into())
+pub fn gt<T: Into<Value>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Gt, value.into())
 }
 
-pub fn gte<T: Into<Value>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Gte, value.into())
+pub fn gte<T: Into<Value>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Gte, value.into())
 }
 
-pub fn contains<T: Into<String>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Contains, Value::from(value.into()))
+pub fn contains<T: Into<String>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Contains, Value::from(value.into()))
 }
 
-pub fn like<T: Into<String>>(value: T) -> Predicate {
-    Predicate::new(token::Predicate::Like, Value::from(value.into()))
+pub fn like<T: Into<String>>(value: T) -> Comparison {
+    Comparison::new(token::Comparator::Like, Value::from(value.into()))
 }
 
 pub fn abs<T: Into<Expression>>(arg: T) -> Function {

@@ -11,9 +11,9 @@ use crate::{
         error::{collect_err, TypeQLError},
         token, Result,
     },
-    variable::variable::VariableRef,
     write_joined,
 };
+use crate::variable::variable::VariableRef;
 
 #[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct Modifiers {
@@ -56,8 +56,8 @@ pub mod sorting {
 
     use crate::{
         common::token,
-        variable::{ConceptVariable, ValueVariable, Variable},
     };
+    use crate::variable::Variable;
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct SortVariable {
@@ -82,46 +82,6 @@ pub mod sorting {
         fn from(ordered_var: (Variable, Option<token::Order>)) -> Self {
             let (variable, order) = ordered_var;
             SortVariable { variable, order }
-        }
-    }
-
-    impl From<ConceptVariable> for SortVariable {
-        fn from(variable: ConceptVariable) -> Self {
-            SortVariable { variable: variable.into(), order: None }
-        }
-    }
-
-    impl From<(ConceptVariable, token::Order)> for SortVariable {
-        fn from(ordered_var: (ConceptVariable, token::Order)) -> Self {
-            let (variable, order) = ordered_var;
-            SortVariable { variable: variable.into(), order: Some(order) }
-        }
-    }
-
-    impl From<(ConceptVariable, Option<token::Order>)> for SortVariable {
-        fn from(ordered_var: (ConceptVariable, Option<token::Order>)) -> Self {
-            let (variable, order) = ordered_var;
-            SortVariable { variable: variable.into(), order }
-        }
-    }
-
-    impl From<ValueVariable> for SortVariable {
-        fn from(variable: ValueVariable) -> Self {
-            SortVariable { variable: variable.into(), order: None }
-        }
-    }
-
-    impl From<(ValueVariable, token::Order)> for SortVariable {
-        fn from(ordered_var: (ValueVariable, token::Order)) -> Self {
-            let (variable, order) = ordered_var;
-            SortVariable { variable: variable.into(), order: Some(order) }
-        }
-    }
-
-    impl From<(ValueVariable, Option<token::Order>)> for SortVariable {
-        fn from(ordered_var: (ValueVariable, Option<token::Order>)) -> Self {
-            let (variable, order) = ordered_var;
-            SortVariable { variable: variable.into(), order }
         }
     }
 

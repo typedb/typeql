@@ -8,23 +8,24 @@ use std::{fmt, iter};
 
 use crate::{
     common::{error::collect_err, validatable::Validatable, Result},
-    pattern::{HasConstraint, IIDConstraint, IsaConstraint, Predicate, RelationConstraint, RolePlayerConstraint},
-    variable::{variable::VariableRef, ConceptVariable},
+    pattern::{HasConstraint, IIDConstraint, IsaConstraint, Comparison, RelationConstraint, RolePlayerConstraint},
     write_joined,
 };
+use crate::variable::Variable;
+use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ThingStatement {
-    pub variable: ConceptVariable,
+    pub variable: Variable,
     pub iid: Option<IIDConstraint>,
     pub isa: Option<IsaConstraint>,
     pub has: Vec<HasConstraint>,
-    pub predicate: Option<Predicate>,
+    pub predicate: Option<Comparison>,
     pub relation: Option<RelationConstraint>,
 }
 
 impl ThingStatement {
-    pub fn new(variable: ConceptVariable) -> ThingStatement {
+    pub fn new(variable: Variable) -> ThingStatement {
         ThingStatement { variable, iid: None, isa: None, has: Vec::new(), predicate: None, relation: None }
     }
 
@@ -55,7 +56,7 @@ impl ThingStatement {
         ThingStatement { isa: Some(isa), ..self }
     }
 
-    pub fn constrain_predicate(self, predicate: Predicate) -> ThingStatement {
+    pub fn constrain_comparison(self, predicate: Comparison) -> ThingStatement {
         ThingStatement { predicate: Some(predicate), ..self }
     }
 
@@ -89,8 +90,8 @@ impl Validatable for ThingStatement {
     }
 }
 
-impl From<ConceptVariable> for ThingStatement {
-    fn from(variable: ConceptVariable) -> Self {
+impl From<Variable> for ThingStatement {
+    fn from(variable: Variable) -> Self {
         ThingStatement::new(variable)
     }
 }
