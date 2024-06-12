@@ -4,69 +4,43 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{fmt, iter};
+use std::fmt::{self, Write};
 
 use crate::{
-    common::{
-        error::{collect_err, TypeQLError},
-        token,
-        validatable::Validatable,
-        Result,
-    },
-    pattern::{Definable, Rule, TypeStatement},
+    common::{token, Span, Spanned},
+    pattern::Definable,
     write_joined,
 };
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDefine {
-    statements: Vec<TypeStatement>,
-    rules: Vec<Rule>,
+    definables: Vec<Definable>,
+    span: Option<Span>,
 }
 
 impl TypeQLDefine {
-    pub fn new(definables: Vec<Definable>) -> Self {
-        definables.into_iter().fold(TypeQLDefine::default(), |define, definable| match definable {
-            Definable::RuleDefinition(rule) => define.add_rule(rule),
-            Definable::TypeStatement(var) => define.add_statement(var),
-            Definable::RuleDeclaration(r) => {
-                panic!("{}", TypeQLError::InvalidRuleWhenMissingPatterns { rule_label: r.label })
-            }
-        })
-    }
-
-    fn add_statement(mut self, statement: TypeStatement) -> Self {
-        self.statements.push(statement);
-        self
-    }
-
-    fn add_rule(mut self, rule: Rule) -> Self {
-        self.rules.push(rule);
-        self
-    }
-
-    fn validate_non_empty(&self) -> Result {
-        if self.statements.is_empty() && self.rules.is_empty() {
-            Err(TypeQLError::MissingDefinables)?
-        }
-        Ok(())
+    pub fn new(definables: Vec<Definable>, span: Option<Span>) -> Self {
+        Self { definables, span }
     }
 }
 
-impl Validatable for TypeQLDefine {
-    fn validate(&self) -> Result {
-        collect_err(
-            iter::once(self.validate_non_empty())
-                .chain(self.statements.iter().map(Validatable::validate))
-                .chain(self.statements.iter().map(TypeStatement::validate_definable))
-                .chain(self.rules.iter().map(Validatable::validate)),
-        )
+impl Spanned for TypeQLDefine {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
 impl fmt::Display for TypeQLDefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", token::Clause::Define)?;
-        write_joined!(f, ";\n", self.statements, self.rules)?;
+        token::Clause::Define.fmt(f)?;
+        if f.alternate() {
+            f.write_char('\n')?;
+            f.write_str("    ")?;
+        } else {
+            f.write_char(' ')?;
+        }
+        let delimiter = if f.alternate() { ";\n" } else { "; " };
+        write_joined!(f, delimiter, self.definables)?;
         f.write_str(";")
     }
 }

@@ -13,15 +13,15 @@ eof_statement = { SOI ~ statement ~ EOI }
 eof_label = { SOI ~ label ~ EOI }
 eof_definition_function = { SOI ~ definition_function ~ EOI }
 
-// TYPEQL QUERY LANGUAGE ========================================================
+// TYPEQL QUERY LANGUAGE =======================================================
 
 query = { query_schema | query_data }
 
 query_schema = { query_define | query_undefine }
-query_define = {  DEFINE ~ definables }
+query_define = { DEFINE ~ definables }
 query_undefine = { UNDEFINE ~ definables }
 
-query_data  = { query_stage+ }
+query_data = { query_stage+ }
 query_stage = { stage_match
               | stage_insert
               | stage_delete
@@ -67,7 +67,7 @@ offset = { OFFSET ~ LONG_VALUE }
 
 // FETCH QUERY =================================================================
 
-projections = { (projection ~ SEMICOLON)+ }
+projections = { ( projection ~ SEMICOLON )+ }
 projection = { projection_key_var ~ COLON ~ projection_attributes
              | projection_key_var
              | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE }
@@ -84,8 +84,8 @@ projection_key_label = { QUOTED_STRING | label }
 
 // SCHEMA QUERY ================================================================
 
-definables = { ( definable )+ }
-definable = { ( statement_type ~ SEMICOLON ) | definition_function | definition_struct }
+definables = { definable+ }
+definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
 
 // QUERY PATTERNS ==============================================================
 
@@ -101,9 +101,9 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 statement = { statement_single | statement_multi }
 
-// SINGLE STATEMENTS ==========================================================
+// SINGLE STATEMENTS ===========================================================
 
-statement_single = { statement_is | statement_comparison | statement_assignment  | statement_in }
+statement_single = { statement_is | statement_comparison | statement_assignment | statement_in }
 
 statement_is = { VAR ~ IS ~ VAR }
 statement_comparison = { expression_value ~ comparison }
@@ -111,7 +111,7 @@ statement_assignment = { assignment_left ~ ASSIGN ~ expression_value_or_list }
 assignment_left = { VAR ~ ( COMMA ~ VAR )* | struct_destructor }
 statement_in = { VAR ~ ( COMMA ~ VAR )* ~ IN ~ expression_function }
 
-// MULTI STATEMENT  ============================================================
+// MULTI STATEMENT =============================================================
 
 statement_multi = { statement_type | statement_thing }
 
@@ -127,22 +127,22 @@ type_constraint = { SUB_ ~ type_ref_any ~ annotations_sub
                   }
 
 owns_constraint = { OWNS ~ type_ref_list ~ annotations_owns
-                  | OWNS ~ type_ref ~ ( AS ~ type_ref)? ~ annotations_owns
+                  | OWNS ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_owns
                   }
 relates_constraint = { RELATES ~ type_ref_list ~ annotations_relates
-                     | RELATES ~ type_ref ~ ( AS ~ type_ref)? ~ annotations_relates
+                     | RELATES ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_relates
                      }
 plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
 
-annotations_sub = { ( ANNOTATION_ABSTRACT )? ~ ( ANNOTATION_CASCADE )? ~ ( ANNOTATION_INDEPENDENT )? }
-annotations_owns = { (annotation_card)? ~ ( ANNOTATION_DISTINCT )? ~ ( ANNOTATION_KEY )? ~ ( ANNOTATION_UNIQUE )? }
-annotations_relates = { (annotation_card)? ~ ( ANNOTATION_DISTINCT )? ~ ( ANNOTATION_CASCADE )? } // ( ANNOTATION_ABSTRACT )?
-annotations_value = { ( annotation_regex )? ~ ( annotation_values )? }
+annotations_sub = { ( ANNOTATION_ABSTRACT | ANNOTATION_CASCADE | ANNOTATION_INDEPENDENT )* }
+annotations_owns = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_KEY | ANNOTATION_UNIQUE )* }
+annotations_relates = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_CASCADE )* } // ( ANNOTATION_ABSTRACT )?
+annotations_value = { ( annotation_regex | annotation_values )* }
 
-annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ ANNOTATION_CARD_LOWER ~ COMMA ~ ANNOTATION_CARD_UPPER ~ PAREN_CLOSE}
+annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ ANNOTATION_CARD_LOWER ~ COMMA ~ ANNOTATION_CARD_UPPER ~ PAREN_CLOSE }
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ QUOTED_STRING ~ PAREN_CLOSE }
 annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ label ~ PAREN_CLOSE }
-annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_primitive ~ (COMMA ~ value_primitive)* ~ PAREN_CLOSE }
+annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_primitive ~ ( COMMA ~ value_primitive )* ~ PAREN_CLOSE }
 
 // THING STATEMENTS ============================================================
 
@@ -165,9 +165,9 @@ thing_constraint = { ISA_ ~ type_ref
 has_constraint = { HAS ~ ( VAR | label ~ ( expression_value | comparison ) )
                  | HAS ~ type_ref_list ~ ( expression_list | comparison )
                  }
-relation_constraint = { LINKS ~  relation }
+relation_constraint = { LINKS ~ relation }
 
-relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE }              // A list of role players in a Relations
+relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE } // A list of role players in a Relations
 role_player = { type_ref_list ~ COLON ~ VAR
               | type_ref ~ COLON ~ VAR
               | VAR
@@ -176,7 +176,7 @@ role_player = { type_ref_list ~ COLON ~ VAR
 // COMPARISON CONSTRUCTS =======================================================
 
 comparison = { comparator ~ expression_value }
-comparator = { EQ | NEQ | GTE | GT | LTE | LT |  CONTAINS | LIKE }
+comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 
 // EXPRESSION CONSTRUCTS =======================================================
 
@@ -189,10 +189,10 @@ expression_operator = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
 
 expression_list_index = { VAR ~ list_index }
-list_index = { SQ_BRACKET_OPEN_ ~  expression_value ~ SQ_BRACKET_CLOSE_ }
+list_index = { SQ_BRACKET_OPEN_ ~ expression_value ~ SQ_BRACKET_CLOSE_ }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
-expression_function_name = { EXPR_FUNC_NAME | MAX | MIN  | label }
+expression_function_name = { EXPR_FUNC_NAME | MAX | MIN | label }
 expression_arguments = { expression_value ~ ( COMMA ~ expression_value )* }
 
 expression_list = { VAR | expression_list_new | expression_list_subrange }
@@ -200,8 +200,26 @@ expression_list_new = { SQ_BRACKET_OPEN_ ~ expression_value ~ ( COMMA ~ expressi
 expression_list_subrange = { VAR ~ list_range }
 list_range = { SQ_BRACKET_OPEN_ ~ expression_value ~ COLON ~ expression_value }
 
-expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value  ~ CURLY_CLOSE }
+expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
 struct_value = { expression_value | expression_struct }
+
+// TYPE DEFINITION =============================================================
+
+definition_type = { label ~ type_constraint_declaration ~ ( COMMA ~ type_constraint_declaration )* }
+type_constraint_declaration = { SUB_ ~ label ~ annotations_sub
+                              | VALUE ~ value_type_primitive ~ annotations_value
+                              | owns_declaration
+                              | relates_declaration
+                              | plays_declaration
+                              }
+
+owns_declaration = { OWNS ~ label ~ annotations_owns
+                   | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
+                   }
+relates_declaration = { RELATES ~ label ~ annotations_relates
+                      | RELATES ~ label ~ ( AS ~ label )? ~ annotations_relates
+                      }
+plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }
 
 // FUNCTION DEFINITION =========================================================
 
@@ -223,11 +241,11 @@ return_statement = { RETURN ~ ( return_statement_stream | return_statement_singl
 return_statement_stream = { CURLY_OPEN ~ VAR ~ ( COMMA ~ VAR )* ~ CURLY_CLOSE }
 return_statement_single = { ( VAR | reduce ) ~ ( COMMA ~ ( VAR | reduce ) )* }
 
-// STRUCT CONSTRUCTS ==========================================================
+// STRUCT CONSTRUCTS ===========================================================
 
 definition_struct = { STRUCT ~ label ~ COLON ~ definition_struct_fields ~ SEMICOLON }
 definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* }
-definition_struct_field = { struct_key ~ VALUE  ~ ( value_type_primitive | label ) }
+definition_struct_field = { struct_key ~ VALUE ~ ( value_type_primitive | label ) }
 
 struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value }
 struct_destructor_value = { VAR | struct_destructor }
@@ -266,7 +284,7 @@ sign = { ADD | SUBTRACT }
 
 unreserved = { VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS }
 
-// TYPEQL SYNTAX KEYWORDS =======================================================
+// TYPEQL SYNTAX KEYWORDS ======================================================
 
 // QUERY COMMAND KEYWORDS
 
@@ -317,10 +335,10 @@ RELATES = @{ "relates" ~ WB }
 // unparametrized
 ANNOTATION_ABSTRACT = @{ "@abstract" ~ WB }
 ANNOTATION_CASCADE = @{ "@cascade" ~ WB }
-ANNOTATION_DISTINCT = @{ "@distinct" ~ WB}
+ANNOTATION_DISTINCT = @{ "@distinct" ~ WB }
 ANNOTATION_KEY = @{ "@key" ~ WB }
 ANNOTATION_INDEPENDENT = @{ "@independent" ~ WB }
-ANNOTATION_UNIQUE = @{ "@unique" ~ WB}
+ANNOTATION_UNIQUE = @{ "@unique" ~ WB }
 
 // parametrized
 ANNOTATION_CARD = @{ "@card" }
@@ -404,8 +422,8 @@ STRUCT = @{ "struct" ~ WB }
 BOOLEAN_ = ${ TRUE | FALSE } // order of lexer declaration matters
 TRUE = @{ "true" ~ WB }
 FALSE = @{ "false" ~ WB }
-QUOTED_STRING = @{ "\"" ~ (!"\"" ~ !"\\" ~ ANY | ESCAPE_SEQ )* ~ "\""
-                 | "'"  ~ (!"'"  ~ !"\\" ~ ANY | ESCAPE_SEQ )* ~ "'"  }
+QUOTED_STRING = @{ "\"" ~ ( !"\"" ~ !"\\" ~ ANY | ESCAPE_SEQ )* ~ "\""
+                 | "'" ~ ( !"'" ~ !"\\" ~ ANY | ESCAPE_SEQ )* ~ "'" }
 LONG_VALUE = @{ ASCII_DIGIT+ ~ WB }
 DOUBLE_VALUE = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ WB }
 DATE_VALUE = ${ DATE_FRAGMENT ~ WB }
@@ -414,13 +432,13 @@ DATETIME_VALUE = ${ DATE_FRAGMENT ~ "T" ~ TIME ~ WB }
 // TYPEQL INPUT PATTERNS
 VAR = ${ VAR_ANONYMOUS | VAR_NAMED }
 VAR_ANONYMOUS = @{ "$_" ~ WB }
-VAR_NAMED = @{ "$" ~ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T*  ~ WB }
+VAR_NAMED = @{ "$" ~ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
 LIST_VAR = @{ VAR ~ SQ_BRACKET_OPEN_ ~ SQ_BRACKET_CLOSE_ }
 IID_VALUE = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
-LABEL = @{ (IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ) }
-LABEL_SCOPED = @{ (IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T*) ~ ":" ~ (IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T*)  ~ WB }
+LABEL = @{ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB }
+LABEL_SCOPED = ${ LABEL ~ ":" ~ LABEL ~ WB }
 
-// PUNCTUATION ================================================================
+// PUNCTUATION =================================================================
 
 PAREN_OPEN = _{ "(" }
 PAREN_CLOSE = _{ ")" }
@@ -465,15 +483,15 @@ IDENTIFIER_VAR_T = @{ IDENTIFIER_VAR_H | IDENTIFIER_CONNECTOR }
 DATE_FRAGMENT = ${ YEAR ~ "-" ~ MONTH ~ "-" ~ DAY }
 MONTH = @{ ('0'..'1') ~ ASCII_DIGIT }
 DAY = @{ ('0'..'3') ~ ASCII_DIGIT }
-YEAR = @{ ASCII_DIGIT{4} | ("+" | "-") ~ ASCII_DIGIT+ }
-TIME = ${ HOUR ~ COLON ~ MINUTE ~ (COLON ~ SECOND ~ ("." ~ SECOND_FRACTION)? )? }
-HOUR = @{ ('0'..'2') ~ ASCII_DIGIT }
-MINUTE = @{ ('0'..'6') ~ ASCII_DIGIT }
-SECOND = @{ ('0'..'6') ~ ASCII_DIGIT }
+YEAR = @{ ASCII_DIGIT{4} | ( "+" | "-" ) ~ ASCII_DIGIT+ }
+TIME = ${ HOUR ~ COLON ~ MINUTE ~ ( COLON ~ SECOND ~ ( "." ~ SECOND_FRACTION )? )? }
+HOUR = @{ ( '0'..'2' ) ~ ASCII_DIGIT }
+MINUTE = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
+SECOND = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
 SECOND_FRACTION = @{ ASCII_DIGIT{1,3} } // between 1 and 3 digits
 ESCAPE_SEQ = @{ "\\" ~ ANY }
 
-WB = _{ &(PUNCTUATION | WHITESPACE | COMMENT | EOI) } // Word boundary
+WB = _{ &( PUNCTUATION | WHITESPACE | COMMENT | EOI ) } // Word boundary
 
-COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ (NEWLINE | EOI) }
+COMMENT = _{ "#" ~ ( !NEWLINE ~ ANY )* ~ ( NEWLINE | EOI ) }
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }

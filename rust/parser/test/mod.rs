@@ -3,27 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-use pest::Parser;
 
-use crate::{
-    and,
-    builder::{abs, ceil, constant, cvar, eq, floor, label, round},
-    common::{
-        token::{
-            self,
-            Order::{Asc, Desc},
-            ValueType,
-        },
-        validatable::Validatable,
-    },
-    pattern::{
-        ThingStatementBuilder,
-        TypeStatementBuilder,
-    },
-    rel, type_,
-    typeql_match,
-};
-use crate::parser::{Rule, TypeQLParser};
+use crate::parse_query;
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
@@ -37,23 +18,14 @@ macro_rules! assert_valid_eq_repr {
 
 #[test]
 fn tmp() {
-    let query_struct = r#"
+    let query_string = r"
     define
-    struct coordinate:
-      x value double,
-      y value doube,
-      time value datetime;
-
-    struct nested-struct:
-      nested value coordinate,
-      comment value string;
-
-    insert
-    $x {
-
-    "#;
-    let result = TypeQLParser::parse(Rule::eof_query, query_struct);
-    dbg!("{}", &result);
+       name sub attribute, value string;
+    ";
+    let result = parse_query(query_string);
+    eprintln!("{result:?}");
+    eprintln!("{:#}", result.unwrap());
+    panic!();
 
     // let query_fn = r#"
     // define

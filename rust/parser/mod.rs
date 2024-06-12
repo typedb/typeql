@@ -4,39 +4,18 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use chrono::{NaiveDate, NaiveDateTime};
-use pest::{
-    pratt_parser::{Assoc, Op, PrattParser},
-    Parser,
-};
+use pest::Parser;
 use pest_derive::Parser;
 
 use crate::{
     common::{
-        date_time,
-        error::{syntax_error, TypeQLError, TypeQLError::IllegalGrammar},
-        string::{unescape_regex, unquote},
-        token,
-        token::Aggregate,
-        validatable::Validatable,
-        Result,
+        error::{syntax_error, TypeQLError},
+        LineColumn, Span, Spanned,
     },
-    // parser::Rule::clause_undefine,
-    pattern::{
-        Annotation, ConceptStatement, Conjunction, Constant, Definable, Disjunction,
-        Expression, Function, HasConstraint, IsaConstraint, Label, Negation, Operation, OwnsConstraint, Pattern,
-        PlaysConstraint, Comparison, RelatesConstraint, RelationConstraint, RolePlayerConstraint, RuleLabel, Statement,
-        SubConstraint, ThingStatement, ThingStatementBuilder, TypeStatement, TypeStatementBuilder, Value,
-        ValueStatement, ValueStatementBuilder,
-    },
-    query::{
-        modifier::{sorting, Modifiers, Sorting},
-        AggregateQueryBuilder, Filter, Limit, MatchClause, Offset, Projection, ProjectionAttribute, ProjectionKeyLabel,
-        ProjectionKeyVar, ProjectionSubquery, Query, TypeQLDefine, TypeQLDelete, TypeQLFetch, TypeQLGet,
-        TypeQLGetAggregate, TypeQLGetGroup, TypeQLGetGroupAggregate, TypeQLInsert, TypeQLUndefine, TypeQLUpdate,
-    },
+    pattern::{Definable, Label, TypeDeclaration},
+    query::{Query, SchemaQuery, TypeQLDefine},
+    Result,
 };
-use crate::variable::{Variable, TypeReference};
 
 #[cfg(test)]
 mod test;
@@ -47,6 +26,17 @@ pub(crate) struct TypeQLParser;
 
 type Node<'a> = pest::iterators::Pair<'a, Rule>;
 type ChildNodes<'a> = pest::iterators::Pairs<'a, Rule>;
+
+impl Spanned for Node<'_> {
+    fn span(&self) -> Option<Span> {
+        let (begin_line, begin_col) = self.as_span().start_pos().line_col();
+        let (end_line, end_col) = self.as_span().end_pos().line_col();
+        Some(Span {
+            begin: LineColumn { line: begin_line, column: begin_col },
+            end: LineColumn { line: end_line, column: end_col },
+        })
+    }
+}
 
 trait IntoChildNodes<'a> {
     fn into_child(self) -> Result<Node<'a>>;
@@ -59,7 +49,9 @@ impl<'a> IntoChildNodes<'a> for Node<'a> {
         let child = children.consume_any();
         match children.try_consume_any() {
             None => Ok(child),
-            Some(next) => Err(IllegalGrammar { input: format!("{child} is followed by more tokens: {next}") }.into()),
+            Some(next) => {
+                Err(TypeQLError::IllegalGrammar { input: format!("{child} is followed by more tokens: {next}") }.into())
+            }
         }
     }
 
@@ -118,10 +110,10 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
     Ok(parse(rule, string)?.consume_any())
 }
 
-// pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
-//     visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)).validated()
-// }
-//
+pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
+    Ok(visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)))
+}
+
 // pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
 //     Ok(parse(Rule::eof_queries, queries)?
 //         .consume_expected(Rule::eof_queries)
@@ -133,26 +125,26 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 // pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
 //     visit_pattern(parse_single(Rule::eof_pattern, pattern)?.into_children().consume_expected(Rule::pattern)).validated()
 // }
-//
+
 // pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
 //     visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::patterns))
 //         .into_iter()
 //         .map(Validatable::validated)
 //         .collect()
 // }
-//
+
 // pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
 //     visit_definables(parse_single(Rule::eof_definables, definables)?.into_children().consume_expected(Rule::definables))
 //         .into_iter()
 //         .map(Validatable::validated)
 //         .collect()
 // }
-//
+
 // pub(crate) fn visit_eof_statement(statement: &str) -> Result<Statement> {
 //     visit_statement(parse_single(Rule::eof_statement, statement)?.into_children().consume_expected(Rule::statement))
 //         .validated()
 // }
-//
+
 // pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
 //     let parsed = parse_single(Rule::eof_label, label)?.into_children().consume_expected(Rule::label);
 //     let string = parsed.as_str();
@@ -161,34 +153,34 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     }
 //     Ok(string.into())
 // }
-//
+
 // pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<crate::pattern::Rule> {
 //     visit_schema_rule(parse_single(Rule::eof_schema_rule, rule)?).validated()
 // }
-//
+
 // fn get_string_from_quoted(string: Node<'_>) -> String {
 //     debug_assert_eq!(string.as_rule(), Rule::QUOTED_STRING);
 //     unquote(string.as_str())
 // }
-//
+
 // fn get_regex(string: Node<'_>) -> String {
 //     debug_assert_eq!(string.as_rule(), Rule::QUOTED_STRING);
 //     unescape_regex(&unquote(string.as_str()))
 // }
-//
+
 // fn get_long(long: Node<'_>) -> i64 {
 //     debug_assert_eq!(long.as_rule(), Rule::LONG_);
 //     long_from_string(long.as_str())
 // }
-//
+
 // fn long_from_string(string: &str) -> i64 {
 //     string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: string.to_owned() }))
 // }
-//
+
 // fn double_from_string(string: &str) -> f64 {
 //     string.parse().unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: string.to_owned() }))
 // }
-//
+
 // fn get_boolean(boolean: Node<'_>) -> bool {
 //     debug_assert_eq!(boolean.as_rule(), Rule::BOOLEAN_);
 //     boolean
@@ -196,19 +188,19 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         .parse()
 //         .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: boolean.to_string() }))
 // }
-//
+
 // fn get_date(date: Node<'_>) -> NaiveDate {
 //     debug_assert_eq!(date.as_rule(), Rule::DATE_);
 //     NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
 //         .unwrap_or_else(|_| panic!("{}", TypeQLError::IllegalGrammar { input: date.to_string() }))
 // }
-//
+
 // fn get_date_time(date_time: Node<'_>) -> NaiveDateTime {
 //     debug_assert_eq!(date_time.as_rule(), Rule::DATETIME_);
 //     date_time::parse(date_time.as_str())
 //         .unwrap_or_else(|| panic!("{}", TypeQLError::IllegalGrammar { input: date_time.to_string() }))
 // }
-//
+
 // fn get_var(node: Node<'_>) -> Variable {
 //     debug_assert_eq!(node.as_rule(), Rule::VAR_);
 //     let name = node.as_str();
@@ -219,22 +211,22 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         _ => unreachable!("Unexpected variable prefix in {node}"),
 //     }
 // }
-//
+
 // fn get_var_concept(node: Node<'_>) -> Variable {
 //     debug_assert_eq!(node.as_rule(), Rule::VAR_CONCEPT_);
 //     let name = node.as_str();
-//
+
 //     assert!(name.len() > 1);
 //     assert!(name.starts_with('$'));
 //     let name = &name[1..];
-//
+
 //     if name == "_" {
 //         Variable::Anonymous
 //     } else {
 //         Variable::Named(String::from(name))
 //     }
 // }
-//
+
 // // fn get_var_value(node: Node<'_>) -> ValueVariable {
 // //     debug_assert_eq!(node.as_rule(), Rule::VAR_VALUE_);
 // //     let name = node.as_str();
@@ -242,7 +234,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 // //     assert!(name.starts_with('?'));
 // //     ValueVariable::Named(String::from(&name[1..]))
 // // }
-//
+
 // fn get_isa_constraint(isa: Node<'_>, node: Node<'_>) -> IsaConstraint {
 //     debug_assert_eq!(isa.as_rule(), Rule::ISA_);
 //     let is_explicit = matches!(isa.into_child().unwrap().as_rule(), Rule::ISAX).into();
@@ -251,7 +243,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         TypeReference::Variable(var) => IsaConstraint::from((var, is_explicit)),
 //     }
 // }
-//
+
 // fn get_role_player_constraint(node: Node<'_>) -> RolePlayerConstraint {
 //     debug_assert_eq!(node.as_rule(), Rule::role_player);
 //     let mut children_rev = node.into_children().rev();
@@ -267,32 +259,116 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         RolePlayerConstraint::from(player)
 //     }
 // }
-//
+
 // fn get_role_players(node: Node<'_>) -> Vec<RolePlayerConstraint> {
 //     node.into_children().map(get_role_player_constraint).collect()
 // }
-//
-// fn visit_query(node: Node<'_>) -> Query {
-//     debug_assert_eq!(node.as_rule(), Rule::query);
-//     let mut children = node.into_children();
-//     let child = children.consume_any();
-//     let query = match child.as_rule() {
-//         Rule::query_define => visit_query_define(child).into(),
-//         Rule::query_undefine => visit_query_undefine(child).into(),
-//         Rule::query_insert => visit_query_insert(child).into(),
-//         Rule::query_delete => visit_query_delete(child).into(),
-//         Rule::query_update => visit_query_update(child).into(),
-//         Rule::query_get => visit_query_get(child).into(),
-//         Rule::query_fetch => visit_query_fetch(child).into(),
-//         Rule::query_get_aggregate => visit_query_get_aggregate(child).into(),
-//         Rule::query_get_group => visit_query_get_group(child).into(),
-//         Rule::query_get_group_agg => visit_query_get_group_agg(child).into(),
-//         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-//     };
-//     debug_assert!(children.try_consume_any().is_none());
-//     query
-// }
-//
+
+fn visit_query(node: Node<'_>) -> Query {
+    debug_assert_eq!(node.as_rule(), Rule::query);
+    let span = node.span();
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    let query = match child.as_rule() {
+        Rule::query_schema => Query::Schema(visit_query_schema(child)),
+        Rule::query_data => todo!(),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    debug_assert!(children.try_consume_any().is_none());
+    query
+}
+
+fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
+    debug_assert_eq!(node.as_rule(), Rule::query_schema);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    let query = match child.as_rule() {
+        Rule::query_define => SchemaQuery::Define(visit_query_define(child)),
+        Rule::query_undefine => todo!(),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    debug_assert!(children.try_consume_any().is_none());
+    query
+}
+
+fn visit_query_define(node: Node<'_>) -> TypeQLDefine {
+    debug_assert_eq!(node.as_rule(), Rule::query_define);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::DEFINE);
+    let query = TypeQLDefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
+    debug_assert!(children.try_consume_any().is_none());
+    query
+}
+
+fn visit_definables(node: Node<'_>) -> Vec<Definable> {
+    debug_assert_eq!(node.as_rule(), Rule::definables);
+    node.into_children().map(visit_definable).collect()
+}
+
+fn visit_definable(node: Node<'_>) -> Definable {
+    debug_assert_eq!(node.as_rule(), Rule::definable);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    let definable = match child.as_rule() {
+        Rule::definition_type => Definable::TypeDeclaration(visit_definition_type(child)),
+        Rule::definition_function => todo!(),
+        Rule::definition_struct => todo!(),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    debug_assert!(children.try_consume_any().is_none());
+    definable
+}
+
+fn visit_definition_type(node: Node<'_>) -> TypeDeclaration {
+    debug_assert_eq!(node.as_rule(), Rule::definition_type);
+    let mut children = node.into_children();
+    let label = visit_label(children.consume_expected(Rule::label));
+    children.map(Node::into_children).fold(TypeDeclaration::new(label), |type_declaration, mut _constraint_nodes| {
+        // let keyword = constraint_nodes.consume_any();
+        // let statement = match keyword.as_rule() {
+        // Rule::OWNS => {
+        // let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
+        // let overridden = constraint_nodes
+        // .try_consume_expected(Rule::AS)
+        // .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
+        // let annotations = visit_annotations_owns(constraint_nodes.consume_expected(Rule::annotations_owns));
+        // var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
+        // }
+        // Rule::PLAYS => {
+        // let type_ = visit_type_ref_scoped(constraint_nodes.consume_expected(Rule::type_ref_scoped));
+        // let overridden = constraint_nodes
+        // .try_consume_expected(Rule::AS)
+        // .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
+        // var_type.constrain_plays(PlaysConstraint::new(type_, overridden))
+        // }
+        // Rule::REGEX => var_type.regex(get_regex(constraint_nodes.consume_expected(Rule::QUOTED_STRING))),
+        // Rule::RELATES => {
+        // let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
+        // let overridden = constraint_nodes
+        // .try_consume_expected(Rule::AS)
+        // .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
+        // var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
+        // }
+        // Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
+        // visit_type_ref_any(constraint_nodes.consume_expected(Rule::type_ref_any)),
+        // matches!(keyword.into_child().unwrap().as_rule(), Rule::SUBX).into(),
+        // ))),
+        // Rule::TYPE => var_type.type_(visit_label_any(constraint_nodes.consume_expected(Rule::label_any))),
+        // Rule::VALUE => {
+        // var_type.value(token::ValueType::from(constraint_nodes.consume_expected(Rule::value_type).as_str()))
+        // }
+        // _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: constraint_nodes.to_string() }),
+        // };
+        // debug_assert!(constraint_nodes.try_consume_any().is_none());
+        type_declaration
+    })
+}
+
+fn visit_label(label: Node<'_>) -> Label {
+    Label::unscoped(label.as_str(), label.span())
+}
+
 // fn visit_query_fetch(node: Node<'_>) -> TypeQLFetch {
 //     debug_assert_eq!(node.as_rule(), Rule::query_fetch);
 //     let mut children = node.into_children();
@@ -302,7 +378,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     TypeQLFetch { match_clause: clause_match, projections, modifiers }
 // }
-//
+
 // fn visit_clause_fetch(node: Node<'_>) -> Vec<Projection> {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_fetch);
 //     let mut children = node.into_children();
@@ -311,7 +387,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     projections.map(visit_projection).collect()
 // }
-//
+
 // fn visit_projection(node: Node<'_>) -> Projection {
 //     debug_assert_eq!(node.as_rule(), Rule::projection);
 //     let mut children = node.into_children();
@@ -335,7 +411,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
 //     }
 // }
-//
+
 // fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
 //     debug_assert_eq!(node.as_rule(), Rule::projection_key_var);
 //     let mut children = node.into_children();
@@ -344,7 +420,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     ProjectionKeyVar { variable, label }
 // }
-//
+
 // fn visit_projection_as_label(node: Node<'_>) -> ProjectionKeyLabel {
 //     debug_assert_eq!(node.as_rule(), Rule::projection_key_as_label);
 //     let mut children = node.into_children();
@@ -353,7 +429,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     label
 // }
-//
+
 // fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
 //     debug_assert_eq!(node.as_rule(), Rule::projection_key_label);
 //     let mut children = node.into_children();
@@ -364,12 +440,12 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
 //     }
 // }
-//
+
 // fn visit_projection_attributes(node: Node<'_>) -> Vec<ProjectionAttribute> {
 //     debug_assert_eq!(node.as_rule(), Rule::projection_attributes);
 //     node.into_children().map(visit_projection_attribute).collect()
 // }
-//
+
 // fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
 //     debug_assert_eq!(node.as_rule(), Rule::projection_attribute);
 //     let mut children = node.into_children();
@@ -378,7 +454,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     ProjectionAttribute { attribute: attribute_label, label }
 // }
-//
+
 // fn visit_projection_subquery(node: Node<'_>) -> ProjectionSubquery {
 //     debug_assert_eq!(node.as_rule(), Rule::projection_subquery);
 //     let mut children = node.into_children();
@@ -389,24 +465,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
 //     }
 // }
-//
-// fn visit_query_define(node: Node<'_>) -> TypeQLDefine {
-//     debug_assert_eq!(node.as_rule(), Rule::query_define);
-//     let mut children = node.into_children();
-//     let query = visit_clause_define(children.consume_expected(Rule::clause_define));
-//     debug_assert!(children.try_consume_any().is_none());
-//     query
-// }
-//
-// fn visit_clause_define(node: Node<'_>) -> TypeQLDefine {
-//     debug_assert_eq!(node.as_rule(), Rule::clause_define);
-//     let mut children = node.into_children();
-//     children.skip_expected(Rule::DEFINE);
-//     let query = TypeQLDefine::new(visit_definables(children.consume_expected(Rule::definables)));
-//     debug_assert!(children.try_consume_any().is_none());
-//     query
-// }
-//
+
 // fn visit_query_undefine(node: Node<'_>) -> TypeQLUndefine {
 //     debug_assert_eq!(node.as_rule(), Rule::query_undefine);
 //     let mut children = node.into_children();
@@ -414,7 +473,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     query
 // }
-//
+
 // fn visit_clause_undefine(node: Node<'_>) -> TypeQLUndefine {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_undefine);
 //     let mut children = node.into_children();
@@ -423,7 +482,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     query
 // }
-//
+
 // fn visit_query_insert(node: Node<'_>) -> TypeQLInsert {
 //     debug_assert_eq!(node.as_rule(), Rule::query_insert);
 //     let mut children = node.into_children();
@@ -441,7 +500,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     query
 // }
-//
+
 // fn visit_query_delete(node: Node<'_>) -> TypeQLDelete {
 //     debug_assert_eq!(node.as_rule(), Rule::query_delete);
 //     let mut children = node.into_children();
@@ -451,7 +510,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     TypeQLDelete { match_clause: clause_match, statements: clause_delete, modifiers }
 // }
-//
+
 // fn visit_query_update(node: Node<'_>) -> TypeQLUpdate {
 //     debug_assert_eq!(node.as_rule(), Rule::query_update);
 //     let mut children = node.into_children();
@@ -461,7 +520,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     TypeQLUpdate { query_delete, insert_statements: clause_insert, modifiers }
 // }
-//
+
 // fn visit_query_get(node: Node<'_>) -> TypeQLGet {
 //     debug_assert_eq!(node.as_rule(), Rule::query_get);
 //     let mut children = node.into_children();
@@ -471,7 +530,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     TypeQLGet { match_clause: clause_match, filter: Filter { vars: clause_get }, modifiers }
 // }
-//
+
 // fn visit_clause_insert(node: Node<'_>) -> Vec<ThingStatement> {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_insert);
 //     let mut children = node.into_children();
@@ -480,7 +539,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     clause
 // }
-//
+
 // fn visit_clause_delete(node: Node<'_>) -> Vec<ThingStatement> {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_delete);
 //     let mut children = node.into_children();
@@ -489,7 +548,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     statements
 // }
-//
+
 // fn visit_clause_match(node: Node<'_>) -> MatchClause {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_match);
 //     let mut children = node.into_children();
@@ -498,12 +557,12 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     clause
 // }
-//
+
 // fn visit_clause_get(node: Node<'_>) -> Vec<Variable> {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_get);
 //     node.into_children().skip_expected(Rule::GET).map(get_var).collect()
 // }
-//
+
 // fn visit_modifiers(node: Node<'_>) -> Modifiers {
 //     debug_assert_eq!(node.as_rule(), Rule::modifiers);
 //     let mut modifiers = Modifiers::default();
@@ -527,7 +586,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     }
 //     modifiers
 // }
-//
+
 // fn visit_query_get_aggregate(node: Node<'_>) -> TypeQLGetAggregate {
 //     debug_assert_eq!(node.as_rule(), Rule::query_get_aggregate);
 //     let mut children = node.into_children();
@@ -539,7 +598,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         method => query_get.aggregate(method, var.unwrap()),
 //     }
 // }
-//
+
 // fn visit_clause_aggregate(node: Node<'_>) -> (Aggregate, Option<Variable>) {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_aggregate);
 //     let mut children = node.into_children();
@@ -548,7 +607,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     (method, var)
 // }
-//
+
 // fn visit_query_get_group(node: Node<'_>) -> TypeQLGetGroup {
 //     debug_assert_eq!(node.as_rule(), Rule::query_get_group);
 //     let mut children = node.into_children();
@@ -557,7 +616,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     query
 // }
-//
+
 // fn visit_clause_group(node: Node<'_>) -> Variable {
 //     debug_assert_eq!(node.as_rule(), Rule::clause_group);
 //     let mut children = node.into_children();
@@ -566,7 +625,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     var
 // }
-//
+
 // fn visit_query_get_group_agg(node: Node<'_>) -> TypeQLGetGroupAggregate {
 //     debug_assert_eq!(node.as_rule(), Rule::query_get_group_agg);
 //     let mut children = node.into_children();
@@ -579,14 +638,14 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         method => query.aggregate(method, var.unwrap()),
 //     }
 // }
-//
+
 // fn visit_sort(node: Node<'_>) -> Sorting {
 //     debug_assert_eq!(node.as_rule(), Rule::sort);
 //     let mut children = node.into_children();
 //     children.skip_expected(Rule::SORT);
 //     Sorting::new(children.map(visit_sort_var).collect())
 // }
-//
+
 // fn visit_sort_var(node: Node<'_>) -> sorting::SortVariable {
 //     debug_assert_eq!(node.as_rule(), Rule::var_order);
 //     let mut children = node.into_children();
@@ -596,36 +655,17 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     sorted_variable
 // }
-//
+
 // fn visit_aggregate_method(node: Node<'_>) -> token::Aggregate {
 //     debug_assert_eq!(node.as_rule(), Rule::aggregate_method);
 //     token::Aggregate::from(node.as_str())
 // }
-//
-// fn visit_definables(node: Node<'_>) -> Vec<Definable> {
-//     debug_assert_eq!(node.as_rule(), Rule::definables);
-//     node.into_children().map(visit_definable).collect()
-// }
-//
-// fn visit_definable(node: Node<'_>) -> Definable {
-//     debug_assert_eq!(node.as_rule(), Rule::definable);
-//     let mut children = node.into_children();
-//     let child = children.consume_any();
-//     let definable = match child.as_rule() {
-//         Rule::statement_type => visit_statement_type(child).into(),
-//         Rule::schema_rule => visit_schema_rule(child).into(),
-//         Rule::schema_rule_label => visit_schema_rule_label(child).into(),
-//         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-//     };
-//     debug_assert!(children.try_consume_any().is_none());
-//     definable
-// }
-//
+
 // fn visit_patterns(node: Node<'_>) -> Vec<Pattern> {
 //     debug_assert_eq!(node.as_rule(), Rule::patterns);
 //     node.into_children().map(visit_pattern).collect()
 // }
-//
+
 // fn visit_pattern(node: Node<'_>) -> Pattern {
 //     debug_assert_eq!(node.as_rule(), Rule::pattern);
 //     let mut children = node.into_children();
@@ -643,7 +683,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     pattern
 // }
-//
+
 // fn visit_pattern_conjunction(node: Node<'_>) -> Conjunction {
 //     debug_assert_eq!(node.as_rule(), Rule::pattern_conjunction);
 //     let mut children = node.into_children();
@@ -651,7 +691,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     conjunction
 // }
-//
+
 // fn visit_pattern_disjunction(node: Node<'_>) -> Disjunction {
 //     debug_assert_eq!(node.as_rule(), Rule::pattern_disjunction);
 //     Disjunction::new(
@@ -665,7 +705,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //             .collect::<Vec<Pattern>>(),
 //     )
 // }
-//
+
 // fn visit_pattern_negation(node: Node<'_>) -> Negation {
 //     debug_assert_eq!(node.as_rule(), Rule::pattern_negation);
 //     let mut children = node.into_children();
@@ -678,7 +718,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     negation
 // }
-//
+
 // fn visit_statement(node: Node<'_>) -> Statement {
 //     debug_assert_eq!(node.as_rule(), Rule::statement);
 //     let mut children = node.into_children();
@@ -693,7 +733,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     statement
 // }
-//
+
 // fn visit_statement_concept(node: Node<'_>) -> ConceptStatement {
 //     debug_assert_eq!(node.as_rule(), Rule::statement_concept);
 //     let mut children = node.into_children();
@@ -702,7 +742,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     var
 // }
-//
+
 // fn visit_statement_value(node: Node<'_>) -> ValueStatement {
 //     debug_assert_eq!(node.as_rule(), Rule::statement_value);
 //     let mut children = node.into_children();
@@ -715,54 +755,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     var
 // }
-//
-// fn visit_statement_type(node: Node<'_>) -> TypeStatement {
-//     debug_assert_eq!(node.as_rule(), Rule::statement_type);
-//     let mut children = node.into_children();
-//     let mut type_statement = visit_type_ref_any(children.consume_expected(Rule::type_ref_any)).into_type_statement();
-//     type_statement = children.map(Node::into_children).fold(type_statement, |var_type, mut constraint_nodes| {
-//         let keyword = constraint_nodes.consume_any();
-//         let statement = match keyword.as_rule() {
-//             Rule::ABSTRACT => var_type.abstract_(),
-//             Rule::OWNS => {
-//                 let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
-//                 let overridden = constraint_nodes
-//                     .try_consume_expected(Rule::AS)
-//                     .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
-//                 let annotations = visit_annotations_owns(constraint_nodes.consume_expected(Rule::annotations_owns));
-//                 var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
-//             }
-//             Rule::PLAYS => {
-//                 let type_ = visit_type_ref_scoped(constraint_nodes.consume_expected(Rule::type_ref_scoped));
-//                 let overridden = constraint_nodes
-//                     .try_consume_expected(Rule::AS)
-//                     .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
-//                 var_type.constrain_plays(PlaysConstraint::new(type_, overridden))
-//             }
-//             Rule::REGEX => var_type.regex(get_regex(constraint_nodes.consume_expected(Rule::QUOTED_STRING))),
-//             Rule::RELATES => {
-//                 let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
-//                 let overridden = constraint_nodes
-//                     .try_consume_expected(Rule::AS)
-//                     .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
-//                 var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
-//             }
-//             Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
-//                 visit_type_ref_any(constraint_nodes.consume_expected(Rule::type_ref_any)),
-//                 matches!(keyword.into_child().unwrap().as_rule(), Rule::SUBX).into(),
-//             ))),
-//             Rule::TYPE => var_type.type_(visit_label_any(constraint_nodes.consume_expected(Rule::label_any))),
-//             Rule::VALUE => {
-//                 var_type.value(token::ValueType::from(constraint_nodes.consume_expected(Rule::value_type).as_str()))
-//             }
-//             _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: constraint_nodes.to_string() }),
-//         };
-//         debug_assert!(constraint_nodes.try_consume_any().is_none());
-//         statement
-//     });
-//     type_statement
-// }
-//
+
 // fn visit_annotations_owns(node: Node<'_>) -> Vec<Annotation> {
 //     debug_assert_eq!(node.as_rule(), Rule::annotations_owns);
 //     node.into_children()
@@ -773,12 +766,12 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         })
 //         .collect()
 // }
-//
+
 // fn visit_statement_things(node: Node<'_>) -> Vec<ThingStatement> {
 //     debug_assert_eq!(node.as_rule(), Rule::statement_things);
 //     node.into_children().map(visit_statement_thing_any).collect()
 // }
-//
+
 // fn visit_statement_thing_any(node: Node<'_>) -> ThingStatement {
 //     debug_assert_eq!(node.as_rule(), Rule::statement_thing_any);
 //     let mut children = node.into_children();
@@ -792,7 +785,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     statement
 // }
-//
+
 // fn visit_statement_thing(node: Node<'_>) -> ThingStatement {
 //     debug_assert_eq!(node.as_rule(), Rule::statement_thing);
 //     let mut children = node.into_children();
@@ -815,7 +808,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     stmt_thing
 // }
-//
+
 // fn visit_statement_relation(node: Node<'_>) -> ThingStatement {
 //     debug_assert_eq!(node.as_rule(), Rule::statement_relation);
 //     let mut children = node.into_children();
@@ -824,7 +817,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         .map(get_var_concept)
 //         .unwrap_or(Variable::Hidden)
 //         .relation(visit_relation(children.consume_expected(Rule::relation)));
-//
+
 //     if let Some(isa) = children.try_consume_expected(Rule::ISA_) {
 //         let type_ = children.consume_expected(Rule::type_ref);
 //         relation = relation.constrain_isa(get_isa_constraint(isa, type_));
@@ -835,7 +828,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     relation
 // }
-//
+
 // fn visit_statement_attribute(node: Node<'_>) -> ThingStatement {
 //     debug_assert_eq!(node.as_rule(), Rule::statement_attribute);
 //     let mut children = node.into_children();
@@ -844,7 +837,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         .map(get_var_concept)
 //         .unwrap_or(Variable::Hidden)
 //         .compare(visit_predicate(children.consume_expected(Rule::predicate)));
-//
+
 //     if let Some(isa) = children.try_consume_expected(Rule::ISA_) {
 //         let type_ = children.consume_expected(Rule::type_ref);
 //         attribute = attribute.constrain_isa(get_isa_constraint(isa, type_));
@@ -856,17 +849,17 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     attribute
 // }
-//
+
 // fn visit_relation(node: Node<'_>) -> RelationConstraint {
 //     debug_assert_eq!(node.as_rule(), Rule::relation);
 //     RelationConstraint::new(get_role_players(node))
 // }
-//
+
 // fn visit_attributes(node: Node<'_>) -> Vec<HasConstraint> {
 //     debug_assert_eq!(node.as_rule(), Rule::attributes);
 //     node.into_children().map(visit_attribute).collect()
 // }
-//
+
 // fn visit_attribute(node: Node<'_>) -> HasConstraint {
 //     debug_assert_eq!(node.as_rule(), Rule::attribute);
 //     let mut children = node.into_children();
@@ -893,7 +886,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     constraint
 // }
-//
+
 // fn visit_predicate(node: Node<'_>) -> Comparison {
 //     debug_assert_eq!(node.as_rule(), Rule::predicate);
 //     let mut children = node.into_children();
@@ -934,7 +927,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     constraint
 // }
-//
+
 // fn visit_expression(node: Node<'_>) -> Expression {
 //     debug_assert_eq!(node.as_rule(), Rule::expression);
 //     let pratt_parser: PrattParser<Rule> = PrattParser::new()
@@ -943,7 +936,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //             | Op::infix(Rule::DIVIDE, Assoc::Left)
 //             | Op::infix(Rule::MODULO, Assoc::Left))
 //         .op(Op::infix(Rule::POWER, Assoc::Right));
-//
+
 //     pratt_parser
 //         .map_primary(|primary| match primary.as_rule() {
 //             Rule::VAR_ => get_var(primary).into(),
@@ -966,7 +959,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         })
 //         .parse(node.into_children())
 // }
-//
+
 // fn visit_function(node: Node<'_>) -> Function {
 //     debug_assert_eq!(node.as_rule(), Rule::expression_function);
 //     let mut children = node.into_children();
@@ -975,7 +968,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //         args: children.map(visit_expression).collect(),
 //     }
 // }
-//
+
 // fn visit_function_name(node: Node<'_>) -> token::Function {
 //     debug_assert_eq!(node.as_rule(), Rule::expression_function_name);
 //     let mut children = node.into_children();
@@ -992,7 +985,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     function_token
 // }
-//
+
 // fn visit_schema_rule_label(node: Node<'_>) -> RuleLabel {
 //     debug_assert_eq!(node.as_rule(), Rule::schema_rule_label);
 //     let mut children = node.into_children();
@@ -1001,7 +994,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     rule
 // }
-//
+
 // fn visit_schema_rule(node: Node<'_>) -> crate::pattern::Rule {
 //     debug_assert_eq!(node.as_rule(), Rule::schema_rule);
 //     let mut children = node.into_children();
@@ -1013,7 +1006,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     rule
 // }
-//
+
 // fn visit_type_ref_any(node: Node<'_>) -> TypeReference {
 //     debug_assert_eq!(node.as_rule(), Rule::type_ref_any);
 //     let mut children = node.into_children();
@@ -1027,7 +1020,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     type_
 // }
-//
+
 // fn visit_type_ref_scoped(node: Node<'_>) -> TypeReference {
 //     debug_assert_eq!(node.as_rule(), Rule::type_ref_scoped);
 //     let mut children = node.into_children();
@@ -1040,7 +1033,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     type_
 // }
-//
+
 // fn visit_type_ref(node: Node<'_>) -> TypeReference {
 //     debug_assert_eq!(node.as_rule(), Rule::type_ref);
 //     let mut children = node.into_children();
@@ -1053,7 +1046,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     type_
 // }
-//
+
 // fn visit_label_any(node: Node<'_>) -> Label {
 //     debug_assert_eq!(node.as_rule(), Rule::label_any);
 //     let mut children = node.into_children();
@@ -1066,14 +1059,14 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 //     debug_assert!(children.try_consume_any().is_none());
 //     label
 // }
-//
+
 // fn visit_label_scoped(node: Node<'_>) -> Label {
 //     debug_assert_eq!(node.as_rule(), Rule::label_scoped);
 //     let parts: Vec<String> = node.as_str().split(':').map(String::from).collect();
 //     assert_eq!(parts.len(), 2);
 //     Label::from((parts[0].clone(), parts[1].clone()))
 // }
-//
+
 // fn visit_constant(node: Node<'_>) -> Constant {
 //     debug_assert_eq!(node.as_rule(), Rule::constant);
 //     let mut children = node.into_children();

@@ -15,8 +15,7 @@ macro_rules! enum_getter {
                     )*
                 }
             }
-        }
-        $(impl $enum_name {
+            $(
             pub fn $fn_name(self) -> $typename {
                 match self {
                     Self::$enum_variant(x) => x,
@@ -27,8 +26,8 @@ macro_rules! enum_getter {
                         typename: stringify!($typename)
                     }),
                 }
-            }
-        })*
+            })*
+        }
     };
 }
 
@@ -48,16 +47,17 @@ macro_rules! write_joined {
     ($f:ident, $joiner:expr, $($iterable:expr),* $(,)?) => {{
         let mut result: std::fmt::Result = Ok(());
         let mut _is_first = true;
+        let joiner = $joiner;
         $(
         let mut iter = $iterable.iter();
         if result.is_ok() && _is_first {
             if let Some(head) = iter.next() {
                 _is_first = false;
-                result = write!($f, "{}", head);
+                result = head.fmt($f);
             }
         }
         if result.is_ok() {
-            result = iter.map(|x| write!($f, "{}{}", $joiner, x)).collect();
+            result = iter.try_for_each(|x| joiner.fmt($f).and_then(|()| x.fmt($f)));
         }
         )*
         result

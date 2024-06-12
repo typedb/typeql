@@ -6,53 +6,24 @@
 
 use std::fmt;
 
-use crate::common::{
-    error::TypeQLError, identifier::is_valid_label_identifier, token, validatable::Validatable, Result,
-};
+use crate::common::{error::TypeQLError, identifier::is_valid_label_identifier, Result, Span, Spanned};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Label {
     pub scope: Option<String>,
     pub name: String,
+    span: Option<Span>,
 }
 
-impl From<token::Type> for Label {
-    fn from(name: token::Type) -> Self {
-        Label::from(name.to_string())
+impl Label {
+    pub(crate) fn unscoped(name: impl AsRef<str>, span: Option<Span>) -> Self {
+        Self { scope: None, name: name.as_ref().to_owned(), span }
     }
 }
 
-impl From<&str> for Label {
-    fn from(name: &str) -> Self {
-        Label::from(String::from(name))
-    }
-}
-
-impl From<String> for Label {
-    fn from(name: String) -> Self {
-        Label { scope: None, name }
-    }
-}
-
-impl From<(&str, &str)> for Label {
-    fn from((scope, name): (&str, &str)) -> Self {
-        Label::from((scope.to_string(), name.to_string()))
-    }
-}
-
-impl From<(String, String)> for Label {
-    fn from((scope, name): (String, String)) -> Self {
-        Label { scope: Some(scope), name }
-    }
-}
-
-impl Validatable for Label {
-    fn validate(&self) -> Result {
-        validate_label(&self.name)?;
-        if let Some(scope_name) = &self.scope {
-            validate_label(scope_name)?
-        }
-        Ok(())
+impl Spanned for Label {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

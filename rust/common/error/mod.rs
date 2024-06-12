@@ -6,17 +6,10 @@
 
 use std::{error::Error as StdError, fmt};
 
-use chrono::NaiveDateTime;
 use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
-use crate::{
-    common::token,
-    error_messages,
-    pattern::{Label, Pattern, ThingStatement, Value},
-    write_joined,
-};
-use crate::variable::Variable;
+use crate::{error_messages, write_joined};
 
 #[macro_use]
 mod macros;
@@ -86,6 +79,7 @@ error_messages! { TypeQLError
         3: "There is a syntax error near line {error_line_nr}:\n{formatted_error}",
     InvalidCasting { enum_name: &'static str, variant: &'static str, expected_variant: &'static str, typename: &'static str } =
         4: "Enum '{enum_name}::{variant}' does not match '{expected_variant}', and cannot be unwrapped into '{typename}'.",
+/*
     MissingPatterns =
         5: "The query has not been provided with any patterns.",
     MissingDefinables =
@@ -150,6 +144,7 @@ error_messages! { TypeQLError
         35: "Variable '{variable}' does not exist in the sorting clause.",
     InvalidCountVariableArgument =
         36: "Aggregate COUNT does not accept a Variable.",
+*/
     IllegalGrammar { input: String } =
         37: "Illegal grammar: '{input}'",
     InvalidTypeLabel { label: String } =
