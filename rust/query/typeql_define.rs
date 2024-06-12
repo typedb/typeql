@@ -39,7 +39,7 @@ impl fmt::Display for TypeQLDefine {
         } else {
             f.write_char(' ')?;
         }
-        let delimiter = if f.alternate() { ";\n" } else { "; " };
+        let delimiter = if f.alternate() { ";\n    " } else { "; " };
         write_joined!(f, delimiter, self.definables)?;
         f.write_str(";")
     }

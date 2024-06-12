@@ -206,13 +206,15 @@ struct_value = { expression_value | expression_struct }
 // TYPE DEFINITION =============================================================
 
 definition_type = { label ~ type_constraint_declaration ~ ( COMMA ~ type_constraint_declaration )* }
-type_constraint_declaration = { SUB_ ~ label ~ annotations_sub
-                              | VALUE ~ value_type_primitive ~ annotations_value
+type_constraint_declaration = { sub_declaration
+                              | value_type_declaration
                               | owns_declaration
                               | relates_declaration
                               | plays_declaration
                               }
 
+sub_declaration = { SUB ~ label ~ annotations_sub }
+value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
 owns_declaration = { OWNS ~ label ~ annotations_owns
                    | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
                    }

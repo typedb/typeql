@@ -18,10 +18,11 @@ macro_rules! assert_valid_eq_repr {
 
 #[test]
 fn tmp() {
-    let query_string = r"
+    let query_string = r#"
     define
-       name sub attribute, value string;
-    ";
+       name sub attribute, value string @regex("^(foo|bar)$") @values("foo", "bar");
+       person sub entity;
+    "#;
     let result = parse_query(query_string);
     eprintln!("{result:?}");
     eprintln!("{:#}", result.unwrap());

@@ -12,7 +12,10 @@ use crate::{
         error::{syntax_error, TypeQLError},
         LineColumn, Span, Spanned,
     },
-    pattern::{Definable, Label, TypeDeclaration},
+    pattern::{
+        statement::type_::{AnnotationSub, AnnotationValueType, SubDeclaration, ValueTypeDeclaration},
+        Definable, Label, TypeDeclaration,
+    },
     query::{Query, SchemaQuery, TypeQLDefine},
     Result,
 };
@@ -322,47 +325,81 @@ fn visit_definable(node: Node<'_>) -> Definable {
 
 fn visit_definition_type(node: Node<'_>) -> TypeDeclaration {
     debug_assert_eq!(node.as_rule(), Rule::definition_type);
+    let span = node.span();
     let mut children = node.into_children();
     let label = visit_label(children.consume_expected(Rule::label));
-    children.map(Node::into_children).fold(TypeDeclaration::new(label), |type_declaration, mut _constraint_nodes| {
-        // let keyword = constraint_nodes.consume_any();
-        // let statement = match keyword.as_rule() {
-        // Rule::OWNS => {
-        // let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
-        // let overridden = constraint_nodes
-        // .try_consume_expected(Rule::AS)
-        // .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
-        // let annotations = visit_annotations_owns(constraint_nodes.consume_expected(Rule::annotations_owns));
-        // var_type.constrain_owns(OwnsConstraint::new(type_, overridden, annotations))
-        // }
-        // Rule::PLAYS => {
-        // let type_ = visit_type_ref_scoped(constraint_nodes.consume_expected(Rule::type_ref_scoped));
-        // let overridden = constraint_nodes
-        // .try_consume_expected(Rule::AS)
-        // .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
-        // var_type.constrain_plays(PlaysConstraint::new(type_, overridden))
-        // }
-        // Rule::REGEX => var_type.regex(get_regex(constraint_nodes.consume_expected(Rule::QUOTED_STRING))),
-        // Rule::RELATES => {
-        // let type_ = visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref));
-        // let overridden = constraint_nodes
-        // .try_consume_expected(Rule::AS)
-        // .map(|_| visit_type_ref(constraint_nodes.consume_expected(Rule::type_ref)));
-        // var_type.constrain_relates(RelatesConstraint::from((type_, overridden)))
-        // }
-        // Rule::SUB_ => var_type.constrain_sub(SubConstraint::from((
-        // visit_type_ref_any(constraint_nodes.consume_expected(Rule::type_ref_any)),
-        // matches!(keyword.into_child().unwrap().as_rule(), Rule::SUBX).into(),
-        // ))),
-        // Rule::TYPE => var_type.type_(visit_label_any(constraint_nodes.consume_expected(Rule::label_any))),
-        // Rule::VALUE => {
-        // var_type.value(token::ValueType::from(constraint_nodes.consume_expected(Rule::value_type).as_str()))
-        // }
-        // _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: constraint_nodes.to_string() }),
-        // };
-        // debug_assert!(constraint_nodes.try_consume_any().is_none());
-        type_declaration
+    children.fold(TypeDeclaration::new(label, span), |type_declaration, constraint| {
+        let constraint = constraint.into_child().unwrap();
+        match constraint.as_rule() {
+            Rule::sub_declaration => type_declaration.sub_decl(visit_sub_declaration(constraint)),
+            Rule::value_type_declaration => type_declaration.value_type(visit_value_type_declaration(constraint)),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: constraint.to_string() }),
+        }
     })
+}
+
+fn visit_value_type_declaration(node: Node<'_>) -> ValueTypeDeclaration {
+    debug_assert_eq!(node.as_rule(), Rule::value_type_declaration);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::VALUE);
+    let value_type_node = children.consume_any();
+    let (value_type, annotations_value_type) = match value_type_node.as_rule() {
+        Rule::label => (visit_label(value_type_node).to_string(), Vec::new()),
+        Rule::value_type_primitive => (
+            value_type_node.as_str().to_owned(),
+            visit_annotations_value(children.consume_expected(Rule::annotations_value)),
+        ),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
+    };
+    debug_assert!(children.try_consume_any().is_none());
+    ValueTypeDeclaration::new(value_type, annotations_value_type, span)
+}
+
+fn visit_annotations_value(node: Node<'_>) -> Vec<AnnotationValueType> {
+    node.into_children()
+        .map(|anno| match anno.as_rule() {
+            Rule::annotation_regex => visit_annotation_regex(anno),
+            Rule::annotation_values => visit_annotation_values(anno),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: anno.to_string() }),
+        })
+        .collect()
+}
+
+fn visit_annotation_values(node: Node<'_>) -> AnnotationValueType {
+    let span = node.span();
+    let values = node.into_children().skip_expected(Rule::ANNOTATION_VALUES).map(|v| v.as_str().to_owned()).collect();
+    AnnotationValueType::Values(values, span)
+}
+
+fn visit_annotation_regex(node: Node<'_>) -> AnnotationValueType {
+    let span = node.span();
+    let mut children = node.into_children();
+    children.consume_expected(Rule::ANNOTATION_REGEX);
+    let regex = children.consume_expected(Rule::QUOTED_STRING).as_str().to_owned();
+    AnnotationValueType::Regex(regex, span)
+}
+
+fn visit_sub_declaration(node: Node<'_>) -> SubDeclaration {
+    debug_assert_eq!(node.as_rule(), Rule::sub_declaration);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::SUB);
+    let supertype_label = visit_label(children.consume_expected(Rule::label));
+    let annotations_sub = visit_annotations_sub(children.consume_expected(Rule::annotations_sub));
+    debug_assert!(children.try_consume_any().is_none());
+    SubDeclaration::new(supertype_label, annotations_sub, span)
+}
+
+fn visit_annotations_sub(node: Node<'_>) -> Vec<AnnotationSub> {
+    node.into_children()
+        .map(|anno| match anno.as_rule() {
+            Rule::ANNOTATION_ABSTRACT => AnnotationSub::Abstract(anno.span()),
+            Rule::ANNOTATION_CASCADE => AnnotationSub::Cascade(anno.span()),
+            Rule::ANNOTATION_INDEPENDENT => AnnotationSub::Independent(anno.span()),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: anno.to_string() }),
+        })
+        .collect()
 }
 
 fn visit_label(label: Node<'_>) -> Label {

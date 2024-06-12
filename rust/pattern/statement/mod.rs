@@ -6,4 +6,4 @@
 
 pub use self::type_::TypeDeclaration;
 
-mod type_;
+pub mod type_;

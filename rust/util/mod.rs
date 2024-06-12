@@ -53,11 +53,11 @@ macro_rules! write_joined {
         if result.is_ok() && _is_first {
             if let Some(head) = iter.next() {
                 _is_first = false;
-                result = head.fmt($f);
+                result = std::fmt::Display::fmt(head, $f);
             }
         }
         if result.is_ok() {
-            result = iter.try_for_each(|x| joiner.fmt($f).and_then(|()| x.fmt($f)));
+            result = iter.try_for_each(|x| std::fmt::Display::fmt(&joiner, $f).and_then(|()| std::fmt::Display::fmt(x, $f)));
         }
         )*
         result
