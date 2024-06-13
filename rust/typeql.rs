@@ -7,6 +7,7 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unused_must_use)]
 
+pub mod builder;
 pub mod common;
 pub mod parser;
 pub mod pattern;

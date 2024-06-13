@@ -218,7 +218,7 @@ value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | 
 owns_declaration = { OWNS ~ list_label ~ annotations_owns
                    | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
                    }
-relates_declaration = { RELATES ~ label ~ annotations_relates
+relates_declaration = { RELATES ~ list_label ~ annotations_relates
                       | RELATES ~ label ~ ( AS ~ label )? ~ annotations_relates
                       }
 plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }

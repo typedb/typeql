@@ -19,8 +19,12 @@ pub struct TypeQLDefine {
 }
 
 impl TypeQLDefine {
-    pub fn new(definables: Vec<Definable>, span: Option<Span>) -> Self {
+    pub(crate) fn new(definables: Vec<Definable>, span: Option<Span>) -> Self {
         Self { definables, span }
+    }
+
+    pub fn build(definables: Vec<Definable>) -> Self {
+        Self::new(definables, None)
     }
 }
 
@@ -35,11 +39,10 @@ impl fmt::Display for TypeQLDefine {
         token::Clause::Define.fmt(f)?;
         if f.alternate() {
             f.write_char('\n')?;
-            f.write_str("    ")?;
         } else {
             f.write_char(' ')?;
         }
-        let delimiter = if f.alternate() { ";\n    " } else { "; " };
+        let delimiter = if f.alternate() { ";\n" } else { "; " };
         write_joined!(f, delimiter, self.definables)?;
         f.write_str(";")
     }

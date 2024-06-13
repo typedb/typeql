@@ -16,8 +16,12 @@ pub struct Label {
 }
 
 impl Label {
-    pub(crate) fn unscoped(name: impl AsRef<str>, span: Option<Span>) -> Self {
-        Self { scope: None, name: name.as_ref().to_owned(), span }
+    pub(crate) fn new_unscoped(name: impl Into<String>, span: Option<Span>) -> Self {
+        Self { scope: None, name: name.into(), span }
+    }
+
+    pub fn build(name: impl Into<String>) -> Self {
+        Self::new_unscoped(name, None)
     }
 }
 

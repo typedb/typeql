@@ -14,8 +14,7 @@ use crate::{
     },
     pattern::{
         statement::type_::declaration::{
-            AnnotationOwns, AnnotationSub, AnnotationValueType, Owned, OwnsDeclaration, SubDeclaration,
-            ValueTypeDeclaration,
+            AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType, Owned, OwnsDeclaration, Played, PlaysDeclaration, Related, RelatesDeclaration, SubDeclaration, ValueTypeDeclaration
         },
         Definable, Label, TypeDeclaration,
     },
@@ -230,9 +229,56 @@ fn visit_definition_type(node: Node<'_>) -> TypeDeclaration {
             Rule::sub_declaration => type_declaration.set_sub(visit_sub_declaration(constraint)),
             Rule::value_type_declaration => type_declaration.set_value_type(visit_value_type_declaration(constraint)),
             Rule::owns_declaration => type_declaration.add_owns(visit_owns_declaration(constraint)),
+            Rule::relates_declaration => type_declaration.add_relates(visit_relates_declaration(constraint)),
+            Rule::plays_declaration => type_declaration.add_plays(visit_plays_declaration(constraint)),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: constraint.to_string() }),
         }
     })
+}
+
+fn visit_plays_declaration(node: Node<'_>) -> PlaysDeclaration {
+    debug_assert_eq!(node.as_rule(), Rule::plays_declaration);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::PLAYS);
+
+    let played_label = children.consume_any();
+    let label = visit_label(played_label);
+    let played = match children.try_consume_expected(Rule::AS) {
+        None => Played::new(label, None),
+        Some(_) => Played::new(label, Some(visit_label(children.consume_expected(Rule::label)))),
+    };
+
+    debug_assert!(children.try_consume_any().is_none());
+    PlaysDeclaration::new(played, span)
+}
+
+fn visit_relates_declaration(node: Node<'_>) -> RelatesDeclaration {
+    debug_assert_eq!(node.as_rule(), Rule::relates_declaration);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::RELATES);
+
+    let related_label = children.consume_any();
+    let related = match related_label.as_rule() {
+        Rule::list_label => Related::List(visit_list_label(related_label)),
+        Rule::label => {
+            let label = visit_label(related_label);
+            match children.try_consume_expected(Rule::AS) {
+                None => Related::Attribute(label, None),
+                Some(_) => Related::Attribute(label, Some(visit_label(children.consume_expected(Rule::label)))),
+            }
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
+    };
+
+    let annotations_relates = visit_annotations_relates(children.consume_expected(Rule::annotations_relates));
+    debug_assert!(children.try_consume_any().is_none());
+    RelatesDeclaration::new(related, annotations_relates, span)
+}
+
+fn visit_annotations_relates(node: Node<'_>) -> Vec<AnnotationRelates> {
+    vec![] // FIXME
 }
 
 fn visit_owns_declaration(node: Node<'_>) -> OwnsDeclaration {
@@ -264,7 +310,7 @@ fn visit_list_label(node: Node<'_>) -> Label {
     let mut children = node.into_children();
     let label = children.consume_expected(Rule::LABEL);
     debug_assert!(children.try_consume_any().is_none());
-    Label::unscoped(label.as_str(), label.span())
+    Label::new_unscoped(label.as_str(), label.span())
 }
 
 fn visit_annotations_owns(node: Node<'_>) -> Vec<AnnotationOwns> {
@@ -355,5 +401,5 @@ fn visit_annotations_sub(node: Node<'_>) -> Vec<AnnotationSub> {
 }
 
 fn visit_label(label: Node<'_>) -> Label {
-    Label::unscoped(label.as_str(), label.span())
+    Label::new_unscoped(label.as_str(), label.span())
 }

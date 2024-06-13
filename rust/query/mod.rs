@@ -7,13 +7,17 @@
 use std::fmt;
 
 pub use self::typeql_define::TypeQLDefine;
-use crate::common::{Span, Spanned};
+use crate::{common::{Span, Spanned}, enum_getter};
 
 mod typeql_define;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SchemaQuery {
     Define(TypeQLDefine),
+}
+
+enum_getter! { SchemaQuery
+    into_define(Define) => TypeQLDefine,
 }
 
 impl Spanned for SchemaQuery {
@@ -35,6 +39,10 @@ impl fmt::Display for SchemaQuery {
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Schema(SchemaQuery),
+}
+
+enum_getter! { Query
+    into_schema(Schema) => SchemaQuery,
 }
 
 impl fmt::Display for Query {
