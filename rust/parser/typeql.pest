@@ -189,16 +189,16 @@ expression_operator = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
 
 expression_list_index = { VAR ~ list_index }
-list_index = { SQ_BRACKET_OPEN_ ~ expression_value ~ SQ_BRACKET_CLOSE_ }
+list_index = { SQ_BRACKET_OPEN ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
 expression_function_name = { EXPR_FUNC_NAME | MAX | MIN | label }
 expression_arguments = { expression_value ~ ( COMMA ~ expression_value )* }
 
 expression_list = { VAR | expression_list_new | expression_list_subrange }
-expression_list_new = { SQ_BRACKET_OPEN_ ~ expression_value ~ ( COMMA ~ expression_value )* ~ SQ_BRACKET_CLOSE_ }
+expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ SQ_BRACKET_CLOSE }
 expression_list_subrange = { VAR ~ list_range }
-list_range = { SQ_BRACKET_OPEN_ ~ expression_value ~ COLON ~ expression_value }
+list_range = { SQ_BRACKET_OPEN ~ expression_value ~ COLON ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
 struct_value = { expression_value | expression_struct }
@@ -215,7 +215,7 @@ type_constraint_declaration = { sub_declaration
 
 sub_declaration = { SUB ~ label ~ annotations_sub }
 value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
-owns_declaration = { OWNS ~ label ~ annotations_owns
+owns_declaration = { OWNS ~ list_label ~ annotations_owns
                    | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
                    }
 relates_declaration = { RELATES ~ label ~ annotations_relates
@@ -264,14 +264,14 @@ type_ref_list = { list_label | LIST_VAR }
 label_any = { label_scoped | label }
 label_scoped = { LABEL_SCOPED }
 label = { LABEL | type_native | unreserved }
-list_label = { LABEL ~ SQ_BRACKET_OPEN_ ~ SQ_BRACKET_CLOSE_ }
+list_label = { LABEL ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 // LITERAL INPUT VALUES ========================================================
 
 type_native = { ENTITY | ATTRIBUTE | RELATION | ROLE }
 
 value_type_primitive = { LONG | DOUBLE | STRING | BOOLEAN | DATETIME }
-list_value_type_primitive = { value_type_primitive ~ SQ_BRACKET_OPEN_ ~ SQ_BRACKET_CLOSE_ }
+list_value_type_primitive = { value_type_primitive ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 value_primitive = { QUOTED_STRING | DATETIME_VALUE | DATE_VALUE | BOOLEAN_
                   | signed_double | signed_long
@@ -435,7 +435,7 @@ DATETIME_VALUE = ${ DATE_FRAGMENT ~ "T" ~ TIME ~ WB }
 VAR = ${ VAR_ANONYMOUS | VAR_NAMED }
 VAR_ANONYMOUS = @{ "$_" ~ WB }
 VAR_NAMED = @{ "$" ~ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
-LIST_VAR = @{ VAR ~ SQ_BRACKET_OPEN_ ~ SQ_BRACKET_CLOSE_ }
+LIST_VAR = @{ VAR ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 IID_VALUE = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
 LABEL = @{ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB }
 LABEL_SCOPED = ${ LABEL ~ ":" ~ LABEL ~ WB }
@@ -444,8 +444,8 @@ LABEL_SCOPED = ${ LABEL ~ ":" ~ LABEL ~ WB }
 
 PAREN_OPEN = _{ "(" }
 PAREN_CLOSE = _{ ")" }
-SQ_BRACKET_OPEN_ = _{ "[" }
-SQ_BRACKET_CLOSE_ = _{ "]" }
+SQ_BRACKET_OPEN = _{ "[" }
+SQ_BRACKET_CLOSE = _{ "]" }
 CURLY_OPEN = _{ "{" }
 CURLY_CLOSE = _{ "}" }
 COMMA = _{ "," }

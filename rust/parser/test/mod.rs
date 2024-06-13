@@ -22,9 +22,10 @@ fn tmp() {
     define
        name sub attribute, value string @regex("^(foo|bar)$") @values("foo", "bar");
        person sub entity;
+       person owns name[] @card(0, *);
     "#;
     let result = parse_query(query_string);
-    eprintln!("{result:?}");
+    eprintln!("{result:#?}");
     eprintln!("{:#}", result.unwrap());
     panic!();
 

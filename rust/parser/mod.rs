@@ -13,7 +13,11 @@ use crate::{
         LineColumn, Span, Spanned,
     },
     pattern::{
-        statement::type_::{AnnotationSub, AnnotationValueType, SubDeclaration, ValueTypeDeclaration},
+        label,
+        statement::type_::declaration::{
+            AnnotationOwns, AnnotationSub, AnnotationValueType, Owned, OwnsDeclaration, SubDeclaration,
+            ValueTypeDeclaration,
+        },
         Definable, Label, TypeDeclaration,
     },
     query::{Query, SchemaQuery, TypeQLDefine},
@@ -331,11 +335,67 @@ fn visit_definition_type(node: Node<'_>) -> TypeDeclaration {
     children.fold(TypeDeclaration::new(label, span), |type_declaration, constraint| {
         let constraint = constraint.into_child().unwrap();
         match constraint.as_rule() {
-            Rule::sub_declaration => type_declaration.sub_decl(visit_sub_declaration(constraint)),
-            Rule::value_type_declaration => type_declaration.value_type(visit_value_type_declaration(constraint)),
+            Rule::sub_declaration => type_declaration.set_sub(visit_sub_declaration(constraint)),
+            Rule::value_type_declaration => type_declaration.set_value_type(visit_value_type_declaration(constraint)),
+            Rule::owns_declaration => type_declaration.add_owns(visit_owns_declaration(constraint)),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: constraint.to_string() }),
         }
     })
+}
+
+fn visit_owns_declaration(node: Node<'_>) -> OwnsDeclaration {
+    debug_assert_eq!(node.as_rule(), Rule::owns_declaration);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::OWNS);
+
+    let owned_label = children.consume_any();
+    let owned = match owned_label.as_rule() {
+        Rule::list_label => Owned::List(visit_list_label(owned_label)),
+        Rule::label => {
+            let label = visit_label(owned_label);
+            match children.try_consume_expected(Rule::AS) {
+                None => Owned::Attribute(label, None),
+                Some(_) => Owned::Attribute(label, Some(visit_label(children.consume_expected(Rule::label)))),
+            }
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
+    };
+
+    let annotations_owns = visit_annotations_owns(children.consume_expected(Rule::annotations_owns));
+    debug_assert!(children.try_consume_any().is_none());
+    OwnsDeclaration::new(owned, annotations_owns, span)
+}
+
+fn visit_list_label(node: Node<'_>) -> Label {
+    debug_assert_eq!(node.as_rule(), Rule::list_label);
+    let mut children = node.into_children();
+    let label = children.consume_expected(Rule::LABEL);
+    debug_assert!(children.try_consume_any().is_none());
+    Label::unscoped(label.as_str(), label.span())
+}
+
+fn visit_annotations_owns(node: Node<'_>) -> Vec<AnnotationOwns> {
+    debug_assert_eq!(node.as_rule(), Rule::annotations_owns);
+    let children = node.into_children();
+    children
+        .map(|anno| {
+            let span = anno.span();
+            match anno.as_rule() {
+                Rule::annotation_card => {
+                    let mut children = anno.into_children();
+                    children.skip_expected(Rule::ANNOTATION_CARD);
+                    let lower = children.consume_expected(Rule::ANNOTATION_CARD_LOWER).as_str().parse().unwrap();
+                    let upper = children.consume_expected(Rule::ANNOTATION_CARD_UPPER).as_str().parse().ok();
+                    AnnotationOwns::Cardinality(lower, upper, span)
+                }
+                Rule::ANNOTATION_DISTINCT => AnnotationOwns::Distinct(span),
+                Rule::ANNOTATION_KEY => AnnotationOwns::Key(span),
+                Rule::ANNOTATION_UNIQUE => AnnotationOwns::Unique(span),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: anno.to_string() }),
+            }
+        })
+        .collect()
 }
 
 fn visit_value_type_declaration(node: Node<'_>) -> ValueTypeDeclaration {
