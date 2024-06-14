@@ -85,7 +85,10 @@ projection_key_label = { QUOTED_STRING | label }
 // SCHEMA QUERY ================================================================
 
 definables = { definable+ }
-definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
+definable = { ( definition_type ~ SEMICOLON ) 
+            // | definition_function
+            // | definition_struct
+            }
 
 // QUERY PATTERNS ==============================================================
 
