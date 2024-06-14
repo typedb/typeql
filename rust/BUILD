@@ -35,8 +35,12 @@ rust_library(
 )
 
 rust_test(
-    name = "typeql_rust_test",
+    name = "typeql_unit_tests",
     crate = ":typeql",
+    deps = [
+        "@crates//:syn",
+        "@crates//:proc-macro2",
+    ],
 )
 
 assemble_crate(

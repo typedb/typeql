@@ -46,7 +46,7 @@ build:
       image: vaticle-ubuntu-22.04
       command: |
         bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
-        bazel test //rust:typeql_rust_test --test_output=errors
+        bazel test //rust:typeql_unit_tests --test_output=errors
         bazel test //rust/tests/behaviour:test_behaviour --test_output=errors
     deploy-crate-snapshot:
       filter:
