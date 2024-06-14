@@ -12,4 +12,3 @@ macro_rules! typeql_define {
         $crate::query::TypeQLDefine::build(vec![$($def.into()),*])
     }
 }
-

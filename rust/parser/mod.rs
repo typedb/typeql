@@ -13,10 +13,11 @@ use crate::{
         LineColumn, Span, Spanned,
     },
     pattern::{
-        statement::type_::declaration::{
-            AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType, Owned, OwnsDeclaration, Played, PlaysDeclaration, Related, RelatesDeclaration, SubDeclaration, ValueTypeDeclaration
+        definition::type_::declaration::{
+            AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType, Owned, Owns, Played, Plays, Related,
+            Relates, Sub, ValueType,
         },
-        Definable, Label, TypeDeclaration,
+        Definable, Label, Type,
     },
     query::{Query, SchemaQuery, TypeQLDefine, TypeQLUndefine},
     Result,
@@ -228,12 +229,12 @@ fn visit_definable(node: Node<'_>) -> Definable {
     definable
 }
 
-fn visit_definition_type(node: Node<'_>) -> TypeDeclaration {
+fn visit_definition_type(node: Node<'_>) -> Type {
     debug_assert_eq!(node.as_rule(), Rule::definition_type);
     let span = node.span();
     let mut children = node.into_children();
     let label = visit_label(children.consume_expected(Rule::label));
-    children.fold(TypeDeclaration::new(label, span), |type_declaration, constraint| {
+    children.fold(Type::new(label, span), |type_declaration, constraint| {
         let constraint = constraint.into_child().unwrap();
         match constraint.as_rule() {
             Rule::sub_declaration => type_declaration.set_sub(visit_sub_declaration(constraint)),
@@ -246,7 +247,7 @@ fn visit_definition_type(node: Node<'_>) -> TypeDeclaration {
     })
 }
 
-fn visit_plays_declaration(node: Node<'_>) -> PlaysDeclaration {
+fn visit_plays_declaration(node: Node<'_>) -> Plays {
     debug_assert_eq!(node.as_rule(), Rule::plays_declaration);
     let span = node.span();
     let mut children = node.into_children();
@@ -260,10 +261,10 @@ fn visit_plays_declaration(node: Node<'_>) -> PlaysDeclaration {
     };
 
     debug_assert!(children.try_consume_any().is_none());
-    PlaysDeclaration::new(played, span)
+    Plays::new(played, span)
 }
 
-fn visit_relates_declaration(node: Node<'_>) -> RelatesDeclaration {
+fn visit_relates_declaration(node: Node<'_>) -> Relates {
     debug_assert_eq!(node.as_rule(), Rule::relates_declaration);
     let span = node.span();
     let mut children = node.into_children();
@@ -284,14 +285,14 @@ fn visit_relates_declaration(node: Node<'_>) -> RelatesDeclaration {
 
     let annotations_relates = visit_annotations_relates(children.consume_expected(Rule::annotations_relates));
     debug_assert!(children.try_consume_any().is_none());
-    RelatesDeclaration::new(related, annotations_relates, span)
+    Relates::new(related, annotations_relates, span)
 }
 
 fn visit_annotations_relates(node: Node<'_>) -> Vec<AnnotationRelates> {
     vec![] // FIXME
 }
 
-fn visit_owns_declaration(node: Node<'_>) -> OwnsDeclaration {
+fn visit_owns_declaration(node: Node<'_>) -> Owns {
     debug_assert_eq!(node.as_rule(), Rule::owns_declaration);
     let span = node.span();
     let mut children = node.into_children();
@@ -312,7 +313,7 @@ fn visit_owns_declaration(node: Node<'_>) -> OwnsDeclaration {
 
     let annotations_owns = visit_annotations_owns(children.consume_expected(Rule::annotations_owns));
     debug_assert!(children.try_consume_any().is_none());
-    OwnsDeclaration::new(owned, annotations_owns, span)
+    Owns::new(owned, annotations_owns, span)
 }
 
 fn visit_list_label(node: Node<'_>) -> Label {
@@ -346,7 +347,7 @@ fn visit_annotations_owns(node: Node<'_>) -> Vec<AnnotationOwns> {
         .collect()
 }
 
-fn visit_value_type_declaration(node: Node<'_>) -> ValueTypeDeclaration {
+fn visit_value_type_declaration(node: Node<'_>) -> ValueType {
     debug_assert_eq!(node.as_rule(), Rule::value_type_declaration);
     let span = node.span();
     let mut children = node.into_children();
@@ -361,7 +362,7 @@ fn visit_value_type_declaration(node: Node<'_>) -> ValueTypeDeclaration {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
     };
     debug_assert!(children.try_consume_any().is_none());
-    ValueTypeDeclaration::new(value_type, annotations_value_type, span)
+    ValueType::new(value_type, annotations_value_type, span)
 }
 
 fn visit_annotations_value(node: Node<'_>) -> Vec<AnnotationValueType> {
@@ -388,7 +389,7 @@ fn visit_annotation_regex(node: Node<'_>) -> AnnotationValueType {
     AnnotationValueType::Regex(regex, span)
 }
 
-fn visit_sub_declaration(node: Node<'_>) -> SubDeclaration {
+fn visit_sub_declaration(node: Node<'_>) -> Sub {
     debug_assert_eq!(node.as_rule(), Rule::sub_declaration);
     let span = node.span();
     let mut children = node.into_children();
@@ -396,7 +397,7 @@ fn visit_sub_declaration(node: Node<'_>) -> SubDeclaration {
     let supertype_label = visit_label(children.consume_expected(Rule::label));
     let annotations_sub = visit_annotations_sub(children.consume_expected(Rule::annotations_sub));
     debug_assert!(children.try_consume_any().is_none());
-    SubDeclaration::new(supertype_label, annotations_sub, span)
+    Sub::new(supertype_label, annotations_sub, span)
 }
 
 fn visit_annotations_sub(node: Node<'_>) -> Vec<AnnotationSub> {

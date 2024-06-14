@@ -38,7 +38,7 @@ fn tmp() {
     //   match
     //    $x isa person, has name $name;
     //   return {$x};
-    
+
     // fun test_stream_many($x: person) -> {name, age, dob}:
     //   match
     //     $x isa person, has name $name, has age $age, has dob $dob;
@@ -47,24 +47,24 @@ fn tmp() {
     //   offset 10;
     //   limit 10;
     //   return { $name, $age, $dob };
-    
+
     // fun test_single_1($x: person) -> long:
     //   match
     //     $x isa person;
     //   return count($x);
-    
+
     // fun test_single_many($x: person) -> long, long:
     //   match
     //     $x isa person, has age $a;
     //   return count($x), sum($a);
-    
+
     // fun test_stream_optional($x: person) -> { name, age?, dob }:
     //   match
     //     $x isa person, has name $name;
     //     try { $x has age $age; };
     //     $y in get_all_dob($x);
     //   return { $x, $age, $y };
-    
+
     // fun test_single_optional($x: person) -> name?, long, double?:
     //   match
     //     $x isa person, has age $age;
@@ -73,32 +73,32 @@ fn tmp() {
     //  "#;
     // let result = TypeQLParser::parse(Rule::eof_query, query_fn);
     // dbg!("{}", &result);
-    
+
     // let query_list_card = r#"
     // match
     // $x is $y;
-    
+
     // $x > $y;
     // $x like "abc";
     // $x like $y;
     // $x == $y;
-    
+
     // $x = $y;
     // $x = 10 + 11;
-    
+
     // person sub attribute @abstract,
     //   value long @values(1,2,3);
-    
+
     // $person sub attribute @abstract;
     // $person sub $parent, value string @regex("abc");
-    
+
     // $person type person;
-    
+
     // $x sub entity,
     //     owns age as abstract_age @card(0,*) @key @unique,
     //     owns name[] @card(0, *) @distinct,
     //     owns $attr[];
-    
+
     // $x sub relation,
     //     relates friend @card(10, 100) @cascade,
     //     relates best-friend[] @distinct,
@@ -1264,11 +1264,11 @@ triangle-right-angled owns hypotenuse-length as side-length;"#;
 
     let parsed = parse_query(query).unwrap().into_schema().into_define();
     let expected = typeql_define!(
-//         type_("triangle").sub("entity"),
-//         type_("triangle").owns("side-length"),
-//         type_("triangle-right-angled").sub("triangle"),
-//         type_("triangle-right-angled").owns(("hypotenuse-length", "side-length"))
-    );
+    //         type_("triangle").sub("entity"),
+    //         type_("triangle").owns("side-length"),
+    //         type_("triangle-right-angled").sub("triangle"),
+    //         type_("triangle-right-angled").owns(("hypotenuse-length", "side-length"))
+        );
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -1285,12 +1285,12 @@ evolves-final relates from-final as from;"#;
 
     let parsed = parse_query(query).unwrap().into_schema().into_define();
     let expected = typeql_define!(
-//         type_("pokemon").sub("entity"),
-//         type_("evolves").sub("relation"),
-//         type_("evolves").relates("from").relates("to"),
-//         type_("evolves-final").sub("evolves"),
-//         type_("evolves-final").relates(("from-final", "from"))
-    );
+    //         type_("pokemon").sub("entity"),
+    //         type_("evolves").sub("relation"),
+    //         type_("evolves").relates("from").relates("to"),
+    //         type_("evolves-final").sub("evolves"),
+    //         type_("evolves-final").relates(("from-final", "from"))
+        );
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
