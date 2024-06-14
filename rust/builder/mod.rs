@@ -12,3 +12,10 @@ macro_rules! typeql_define {
         $crate::query::TypeQLDefine::build(vec![$($def.into()),*])
     }
 }
+
+#[macro_export]
+macro_rules! typeql_undefine {
+    ($($def:expr),* $(,)?) => {
+        $crate::query::TypeQLUndefine::build(vec![$($def.into()),*])
+    }
+}

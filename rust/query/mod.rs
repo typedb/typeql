@@ -6,13 +6,14 @@
 
 use std::fmt;
 
-pub use self::typeql_define::{TypeQLDefine, TypeQLUndefine};
+pub use self::{typeql_define::TypeQLDefine, typeql_undefine::TypeQLUndefine};
 use crate::{
     common::{Span, Spanned},
     enum_getter,
 };
 
 mod typeql_define;
+mod typeql_undefine;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SchemaQuery {
