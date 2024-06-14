@@ -18,7 +18,7 @@ use crate::{
         },
         Definable, Label, TypeDeclaration,
     },
-    query::{Query, SchemaQuery, TypeQLDefine},
+    query::{Query, SchemaQuery, TypeQLDefine, TypeQLUndefine},
     Result,
 };
 
@@ -182,7 +182,7 @@ fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
     let child = children.consume_any();
     let query = match child.as_rule() {
         Rule::query_define => SchemaQuery::Define(visit_query_define(child)),
-        Rule::query_undefine => todo!(),
+        Rule::query_undefine => SchemaQuery::Undefine(visit_query_undefine(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert!(children.try_consume_any().is_none());
@@ -195,6 +195,16 @@ fn visit_query_define(node: Node<'_>) -> TypeQLDefine {
     let mut children = node.into_children();
     children.skip_expected(Rule::DEFINE);
     let query = TypeQLDefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
+    debug_assert!(children.try_consume_any().is_none());
+    query
+}
+
+fn visit_query_undefine(node: Node<'_>) -> TypeQLUndefine {
+    debug_assert_eq!(node.as_rule(), Rule::query_undefine);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::UNDEFINE);
+    let query = TypeQLUndefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
     debug_assert!(children.try_consume_any().is_none());
     query
 }

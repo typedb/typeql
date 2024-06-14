@@ -215,7 +215,7 @@ fn test() {
     let rules: HashMap<_, _> = tree.rules.into_iter().map(|(name, expansion)| (name, expansion.flatten())).collect();
 
     for _ in 0..100 {
-        let typeql_query = generate(&rules, &rules["query_define"]);
+        let typeql_query = generate(&rules, &rules["query_schema"]);
         eprintln!("{typeql_query}");
         parse_query(&typeql_query).unwrap();
     }

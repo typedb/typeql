@@ -12,6 +12,8 @@ use crate::{
     write_joined,
 };
 
+pub type TypeQLUndefine = TypeQLDefine;
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct TypeQLDefine {
     definables: Vec<Definable>,
