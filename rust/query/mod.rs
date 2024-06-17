@@ -6,12 +6,14 @@
 
 use std::fmt;
 
-pub use self::{typeql_define::TypeQLDefine, typeql_undefine::TypeQLUndefine};
+pub use self::{data::DataQuery, typeql_define::TypeQLDefine, typeql_undefine::TypeQLUndefine};
 use crate::{
     common::{Span, Spanned},
     enum_getter,
+    pattern::Pattern,
 };
 
+pub mod data;
 mod typeql_define;
 mod typeql_undefine;
 
@@ -41,28 +43,6 @@ impl fmt::Display for SchemaQuery {
             Self::Define(define_query) => fmt::Display::fmt(define_query, f),
             Self::Undefine(undefine_query) => fmt::Display::fmt(undefine_query, f),
         }
-    }
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub struct DataQuery {
-}
-
-impl DataQuery {
-    pub fn new() -> Self {
-        Self {  }
-    }
-}
-
-impl Spanned for DataQuery {
-    fn span(&self) -> Option<Span> {
-        todo!()
-    }
-}
-
-impl fmt::Display for DataQuery {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
     }
 }
 

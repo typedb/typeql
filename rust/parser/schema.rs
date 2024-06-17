@@ -7,13 +7,14 @@
 use super::{visit_label, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, Spanned},
-    pattern::{
-        definition::type_::declaration::{
+    definition::type_::{
+        declaration::{
             AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType, Owned, Owns, Played, Plays, Related,
             Relates, Sub, ValueType,
         },
-        Definable, Label, Type,
+        Type,
     },
+    pattern::{Definable, Label},
     query::{SchemaQuery, TypeQLDefine, TypeQLUndefine},
 };
 
@@ -75,7 +76,7 @@ fn visit_definition_type(node: Node<'_>) -> Type {
     let mut children = node.into_children();
     let label = visit_label(children.consume_expected(Rule::label));
     children.fold(Type::new(label, span), |type_declaration, constraint| {
-        let constraint = constraint.into_child().unwrap();
+        let constraint = constraint.into_child();
         match constraint.as_rule() {
             Rule::sub_declaration => type_declaration.set_sub(visit_sub_declaration(constraint)),
             Rule::value_type_declaration => type_declaration.set_value_type(visit_value_type_declaration(constraint)),

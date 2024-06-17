@@ -19,6 +19,7 @@ use crate::{
 
 mod data;
 mod schema;
+mod statement;
 
 #[cfg(test)]
 mod test;
@@ -42,18 +43,18 @@ impl Spanned for Node<'_> {
 }
 
 trait IntoChildNodes<'a> {
-    fn into_child(self) -> Result<Node<'a>>;
+    fn into_child(self) -> Node<'a>;
     fn into_children(self) -> ChildNodes<'a>;
 }
 
 impl<'a> IntoChildNodes<'a> for Node<'a> {
-    fn into_child(self) -> Result<Node<'a>> {
+    fn into_child(self) -> Node<'a> {
         let mut children = self.into_children();
         let child = children.consume_any();
         match children.try_consume_any() {
-            None => Ok(child),
+            None => child,
             Some(next) => {
-                Err(TypeQLError::IllegalGrammar { input: format!("{child} is followed by more tokens: {next}") }.into())
+                unreachable!("{child} is followed by more tokens: {next}")
             }
         }
     }
