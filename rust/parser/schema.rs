@@ -128,8 +128,26 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
     Relates::new(related, annotations_relates, span)
 }
 
-fn visit_annotations_relates(_node: Node<'_>) -> Vec<AnnotationRelates> {
-    todo!()
+fn visit_annotations_relates(node: Node<'_>) -> Vec<AnnotationRelates> {
+    debug_assert_eq!(node.as_rule(), Rule::annotations_relates);
+    let children = node.into_children();
+    children
+        .map(|anno| {
+            let span = anno.span();
+            match anno.as_rule() {
+                Rule::annotation_card => {
+                    let mut children = anno.into_children();
+                    children.skip_expected(Rule::ANNOTATION_CARD);
+                    let lower = children.consume_expected(Rule::ANNOTATION_CARD_LOWER).as_str().parse().unwrap();
+                    let upper = children.consume_expected(Rule::ANNOTATION_CARD_UPPER).as_str().parse().ok();
+                    AnnotationRelates::Cardinality(lower, upper, span)
+                }
+                Rule::ANNOTATION_DISTINCT => AnnotationRelates::Distinct(span),
+                Rule::ANNOTATION_CASCADE => AnnotationRelates::Cascade(span),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: anno.to_string() }),
+            }
+        })
+        .collect()
 }
 
 fn visit_owns_declaration(node: Node<'_>) -> Owns {
