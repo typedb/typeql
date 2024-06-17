@@ -240,7 +240,7 @@ function_return_stream = { CURLY_OPEN ~ function_return_value ~ ( "," ~ function
 function_return_single = { function_return_value ~ ( "," ~ function_return_value )* }
 function_return_value = { function_return_value_optional | function_return_value_base }
 function_return_value_optional = { function_return_value_base ~ QUESTION }
-function_return_value_base = { label | list_label | value_type_primitive | list_value_type_primitive }
+function_return_value_base = { list_value_type_primitive | value_type_primitive | list_label | label }
 
 return_statement = { RETURN ~ ( return_statement_stream | return_statement_single ) ~ SEMICOLON }
 return_statement_stream = { CURLY_OPEN ~ VAR ~ ( COMMA ~ VAR )* ~ CURLY_CLOSE }

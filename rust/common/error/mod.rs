@@ -38,7 +38,7 @@ impl From<Vec<TypeQLError>> for Error {
 }
 
 pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) -> TypeQLError {
-    let (error_line_nr, _) = match error.line_col {
+    let (error_line_nr, error_col) = match error.line_col {
         LineColLocation::Pos((line, col)) => (line, col),
         LineColLocation::Span((line, col), _) => (line, col),
     };
@@ -55,7 +55,7 @@ pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) 
             }
         })
         .join("\n");
-    TypeQLError::SyntaxErrorDetailed { error_line_nr, formatted_error }
+    TypeQLError::SyntaxErrorDetailed { error_line_nr, error_col, formatted_error }
 }
 
 impl fmt::Display for Error {
@@ -75,8 +75,8 @@ pub fn collect_err(i: impl IntoIterator<Item = Result<(), Error>>) -> Result<(),
 
 error_messages! { TypeQLError
     code: "TQL", type: "TypeQL Error",
-    SyntaxErrorDetailed { error_line_nr: usize, formatted_error: String } =
-        3: "There is a syntax error near line {error_line_nr}:\n{formatted_error}",
+    SyntaxErrorDetailed { error_line_nr: usize, error_col: usize, formatted_error: String } =
+        3: "There is a syntax error at {error_line_nr}:{error_col}:\n{formatted_error}",
     InvalidCasting { enum_name: &'static str, variant: &'static str, expected_variant: &'static str, typename: &'static str } =
         4: "Enum '{enum_name}::{variant}' does not match '{expected_variant}', and cannot be unwrapped into '{typename}'.",
 /*

@@ -216,8 +216,7 @@ fn test() {
 
     for _ in 0..100 {
         let typeql_query = generate(&rules, &rules["query_schema"]);
-        eprintln!("{typeql_query}");
-        parse_query(&typeql_query).unwrap();
+        parse_query(&typeql_query).expect(&typeql_query);
     }
 
     // for root in tree.roots {
