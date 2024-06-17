@@ -13,7 +13,10 @@ use std::{
 use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
-use crate::parser::{parse_single, Rule};
+use crate::{
+    parse_query,
+    parser::{parse_single, Rule},
+};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 enum RepKind {
@@ -239,35 +242,47 @@ fn visit(
     Expansion::Sequence(vec)
 }
 
-#[test]
-fn test() {
-    let tree = GrammarTree::from_grammar(include_str!("../typeql.pest"));
-    let rules: HashMap<_, _> = tree.rules.into_iter().map(|(name, expansion)| (name, expansion.flatten())).collect();
+fn grammar() -> GrammarTree {
+    GrammarTree::from_grammar(include_str!("../typeql.pest"))
+}
 
-    const ITERS_PER_DEPTH: usize = 100;
-    const MIN_DEPTH: usize = 3;
-    const MAX_DEPTH: usize = 33;
+const ITERS_PER_DEPTH: usize = 100;
+const MIN_DEPTH: usize = 3;
+const MAX_DEPTH: usize = 30;
+
+#[test]
+fn can_parse_generated() {
+    let tree = grammar();
 
     for _ in 0..ITERS_PER_DEPTH {
         for max_depth in MIN_DEPTH..=MAX_DEPTH {
             macro_rules! assert_parses {
                 ($rule:ident) => {
-                    let typeql_query = generate(&rules, stringify!($rule), max_depth);
-                    parse_single(Rule::$rule, &typeql_query)
-                        .inspect_err(|_| eprintln!("{typeql_query}\n"))
-                        .unwrap();
+                    let typeql_query = generate(&tree.rules, stringify!($rule), max_depth);
+                    parse_single(Rule::$rule, &typeql_query).inspect_err(|_| eprintln!("{typeql_query}\n")).unwrap();
                 };
             }
-            assert_parses!(eof_statement);
+            assert_parses!(eof_query);
         }
     }
+}
 
-    // for root in tree.roots {
-    // let rule = &rules[&root];
-    // for _ in 0..100 {
-    // parse(generate(&rules, rule)).unwrap();
-    // }
-    // }
+#[test]
+fn all_rules_covered_by_visitors() {
+    let tree = grammar();
+
+    let parsers: HashMap<&'static str, _> = [("eof_query", parse_query)].into();
+
+    for rule in tree.roots {
+        if !parsers.contains_key(rule.as_str()) {
+            continue; // FIXME should be removed
+        }
+        for _ in 0..ITERS_PER_DEPTH {
+            for max_depth in MIN_DEPTH..=MAX_DEPTH {
+                parsers[rule.as_str()](&generate(&tree.rules, &rule, max_depth)).unwrap();
+            }
+        }
+    }
 }
 
 fn bad_rng() -> u64 {

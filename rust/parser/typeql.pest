@@ -102,7 +102,7 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_single | statement_multi }
+statement = { statement_multi | statement_single | statement_anon_relation }
 
 // SINGLE STATEMENTS ===========================================================
 
@@ -116,7 +116,7 @@ statement_in = { VAR ~ ( COMMA ~ VAR )* ~ IN ~ expression_function }
 
 // MULTI STATEMENT =============================================================
 
-statement_multi = { statement_type | statement_thing }
+statement_multi = { statement_type | statement_thing_var }
 
 // TYPE STATEMENTS =============================================================
 
@@ -150,23 +150,24 @@ annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_primitive ~ ( COMMA
 // THING STATEMENTS ============================================================
 
 statement_things = { ( statement_thing ~ SEMICOLON )+ }
-statement_thing = { thing_start ~ ( COMMA ~ thing_constraint )* }
+statement_thing = { statement_thing_var | statement_anon_relation }
+statement_thing_var = { thing_start_var ~ ( COMMA ~ thing_constraint )* }
+statement_anon_relation = { relation ~ ( COMMA ~ thing_constraint )* }
 
-thing_start = { relation
-              | VAR ~ thing_constraint
-              | VAR ~ value_primitive ~ ISA_ ~ type_ref
-              | VAR ~ expression_struct ~ ISA_ ~ type_ref
-              | VAR ~ comparison ~ ISA_ ~ type_ref
-              }
+thing_start_var = { VAR ~ thing_constraint
+                  | VAR ~ value_primitive ~ ISA_ ~ type_ref
+                  | VAR ~ expression_struct ~ ISA_ ~ type_ref
+                  | VAR ~ comparison ~ (ISA_ ~ type_ref)?
+                  }
 
 thing_constraint = { ISA_ ~ type_ref
                    | IID ~ IID_VALUE
-                   | relates_constraint
+                   | relation_constraint
                    | has_constraint
                    }
 
-has_constraint = { HAS ~ ( VAR | label ~ ( expression_value | comparison ) )
-                 | HAS ~ type_ref_list ~ ( expression_list | comparison )
+has_constraint = { HAS ~ type_ref_list ~ ( expression_list | comparison )
+                 | HAS ~ ( VAR | label ~ ( expression_value | comparison ) )
                  }
 relation_constraint = { LINKS ~ relation }
 
@@ -183,10 +184,10 @@ comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 
 // EXPRESSION CONSTRUCTS =======================================================
 
-expression_value_or_list = { expression_value | expression_list }
+expression_value_or_list = { expression_list | expression_value }
 
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
-expression_base = _{ VAR | value_primitive | expression_function | expression_parenthesis | expression_list_index }
+expression_base = _{ expression_list_index | expression_parenthesis | expression_function | value_primitive | VAR }
 
 expression_operator = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
@@ -198,7 +199,7 @@ expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_argum
 expression_function_name = { EXPR_FUNC_NAME | MAX | MIN | label }
 expression_arguments = { expression_value ~ ( COMMA ~ expression_value )* }
 
-expression_list = { VAR | expression_list_new | expression_list_subrange }
+expression_list = { expression_list_subrange | expression_list_new }
 expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ SQ_BRACKET_CLOSE }
 expression_list_subrange = { VAR ~ list_range }
 list_range = { SQ_BRACKET_OPEN ~ expression_value ~ COLON ~ expression_value ~ SQ_BRACKET_CLOSE }

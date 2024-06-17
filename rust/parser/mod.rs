@@ -120,13 +120,13 @@ pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
     Ok(visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)))
 }
 
-// pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
-//     Ok(parse(Rule::eof_queries, queries)?
-//         .consume_expected(Rule::eof_queries)
-//         .into_children()
-//         .filter(|child| matches!(child.as_rule(), Rule::query))
-//         .map(|query| visit_query(query).validated()))
-// }
+pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Query> + '_> {
+    Ok(parse(Rule::eof_queries, queries)?
+        .consume_expected(Rule::eof_queries)
+        .into_children()
+        .filter(|child| matches!(child.as_rule(), Rule::query))
+        .map(visit_query))
+}
 
 // pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
 //     visit_pattern(parse_single(Rule::eof_pattern, pattern)?.into_children().consume_expected(Rule::pattern)).validated()
