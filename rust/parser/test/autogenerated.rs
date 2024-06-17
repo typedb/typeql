@@ -7,21 +7,22 @@
 use std::{
     collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
+    sync::{Mutex, OnceLock},
 };
 
 use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
-use crate::parse_query;
+use crate::parser::{parse_single, Rule};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 enum RepKind {
     Maybe,
     Star,
     Plus,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 enum Expansion {
     Sequence(Vec<Expansion>),
     Alternatives(Vec<Expansion>),
@@ -29,6 +30,8 @@ enum Expansion {
     Rule(String),
     Literal(String),
 }
+
+static EXPANSION_IS_RECURSIVE_CACHE: OnceLock<Mutex<HashMap<Expansion, bool>>> = OnceLock::new();
 
 impl Expansion {
     fn flatten(self) -> Self {
@@ -46,6 +49,34 @@ impl Expansion {
             Self::Repetition(repeated, kind, tilde) => Self::Repetition(Box::new(repeated.flatten()), kind, tilde),
             Self::Rule(_) | Self::Literal(_) => self,
         }
+    }
+
+    fn is_recursive(&self, rules: &HashMap<String, Expansion>) -> bool {
+        self.is_recursive_impl(Default::default(), rules)
+    }
+
+    fn is_recursive_impl(&self, seen: HashSet<&Expansion>, rules: &HashMap<String, Expansion>) -> bool {
+        if let Some(&cached) = EXPANSION_IS_RECURSIVE_CACHE.get_or_init(Mutex::default).lock().unwrap().get(self) {
+            return cached;
+        }
+
+        if seen.contains(self) {
+            EXPANSION_IS_RECURSIVE_CACHE.get().unwrap().lock().unwrap().insert(self.clone(), true);
+            return true;
+        }
+
+        let seen = &seen | &[self].into();
+        let res = match self {
+            Expansion::Sequence(seq) | Expansion::Alternatives(seq) => seq
+                .iter()
+                .filter(|exp| !matches!(exp, Expansion::Literal(_)))
+                .any(|exp| exp.is_recursive_impl(seen.clone(), rules)),
+            Expansion::Repetition(expansion, _, _) => expansion.is_recursive_impl(seen, rules),
+            Expansion::Rule(rule_name) => rules[rule_name].is_recursive_impl(seen, rules),
+            Expansion::Literal(_) => false,
+        };
+        EXPANSION_IS_RECURSIVE_CACHE.get().unwrap().lock().unwrap().insert(self.clone(), res);
+        res
     }
 }
 
@@ -203,7 +234,6 @@ fn visit(
                 }
                 _ => unreachable!("unexpected punctuation"),
             },
-            _ => unreachable!("unexpected token tree"),
         }
     }
     Expansion::Sequence(vec)
@@ -214,9 +244,22 @@ fn test() {
     let tree = GrammarTree::from_grammar(include_str!("../typeql.pest"));
     let rules: HashMap<_, _> = tree.rules.into_iter().map(|(name, expansion)| (name, expansion.flatten())).collect();
 
-    for _ in 0..100 {
-        let typeql_query = generate(&rules, &rules["query_schema"]);
-        parse_query(&typeql_query).expect(&typeql_query);
+    const ITERS_PER_DEPTH: usize = 100;
+    const MIN_DEPTH: usize = 3;
+    const MAX_DEPTH: usize = 33;
+
+    for _ in 0..ITERS_PER_DEPTH {
+        for max_depth in MIN_DEPTH..=MAX_DEPTH {
+            macro_rules! assert_parses {
+                ($rule:ident) => {
+                    let typeql_query = generate(&rules, stringify!($rule), max_depth);
+                    parse_single(Rule::$rule, &typeql_query)
+                        .inspect_err(|_| eprintln!("{typeql_query}\n"))
+                        .unwrap();
+                };
+            }
+            assert_parses!(eof_statement);
+        }
     }
 
     // for root in tree.roots {
@@ -233,53 +276,51 @@ fn bad_rng() -> u64 {
     hasher.finish()
 }
 
-const MAX_DEPTH: usize = 31;
 const MAX_REP: u64 = 5;
 
-fn generate(rules: &HashMap<String, Expansion>, rule: &Expansion) -> String {
+fn generate(rules: &HashMap<String, Expansion>, rule_name: &str, max_depth: usize) -> String {
     let space = Expansion::Literal(" ".into());
     let mut buf = String::new();
-    let mut stack = vec![rule];
-    while !stack.is_empty() {
-        let rule = stack.remove(0);
+    let mut stack = vec![&rules[rule_name]];
+    while let Some(rule) = stack.pop() {
         match rule {
-            Expansion::Sequence(seq) => stack = [&seq.iter().collect_vec()[..], &stack[..]].concat(),
+            Expansion::Sequence(seq) => stack.extend(seq.iter().rev()),
             Expansion::Alternatives(alts) => {
-                let index = if stack.len() >= MAX_DEPTH {
-                    0 // first alt should never be recursive, so this is probably a safe heuristic
+                let finite_alts = alts.iter().filter(|exp| !exp.is_recursive(rules)).collect_vec();
+                let alt = if stack.len() >= max_depth {
+                    if finite_alts.is_empty() {
+                        &alts[0] // first branch should be more likely to terminate earlier
+                    } else {
+                        finite_alts[bad_rng() as usize % finite_alts.len()]
+                    }
                 } else {
-                    bad_rng() as usize % alts.len()
+                    &alts[bad_rng() as usize % alts.len()]
                 };
-                stack.insert(0, &alts[index])
+                stack.push(alt)
             }
-            Expansion::Repetition(rule, RepKind::Maybe, _) => {
-                if stack.len() < MAX_DEPTH && bad_rng() % 2 == 1 {
-                    stack.insert(0, rule)
+            Expansion::Repetition(rule, rep_kind, is_atomic) => {
+                let num = if stack.len() >= max_depth && rule.is_recursive(rules) {
+                    match rep_kind {
+                        RepKind::Maybe | RepKind::Star => 0,
+                        RepKind::Plus => 1,
+                    }
+                } else {
+                    match rep_kind {
+                        RepKind::Maybe => bad_rng() % 2,
+                        RepKind::Star => bad_rng() % MAX_REP,
+                        RepKind::Plus => bad_rng() % (MAX_REP - 1) + 1,
+                    }
+                };
+                if num > 0 {
+                    let reps = (0..num).map(|_| &**rule);
+                    if *is_atomic {
+                        stack.extend(reps)
+                    } else {
+                        stack.extend(reps.intersperse(&space))
+                    }
                 }
             }
-            Expansion::Repetition(rule, RepKind::Plus, false) => {
-                stack = (0..(bad_rng() % (MAX_REP - 1) + 1))
-                    .map(|_| &**rule)
-                    .intersperse(&space)
-                    .chain(stack.into_iter())
-                    .collect()
-            }
-            Expansion::Repetition(rule, RepKind::Star, false) => {
-                let num = bad_rng() % MAX_REP;
-                if num > 0 && stack.len() < MAX_DEPTH {
-                    stack = (0..num).map(|_| &**rule).intersperse(&space).chain(stack.into_iter()).collect()
-                }
-            }
-            Expansion::Repetition(rule, RepKind::Plus, true) => {
-                stack = (0..(bad_rng() % (MAX_REP - 1) + 1)).map(|_| &**rule).chain(stack.into_iter()).collect()
-            }
-            Expansion::Repetition(rule, RepKind::Star, true) => {
-                let num = bad_rng() % MAX_REP;
-                if num > 0 && stack.len() < MAX_DEPTH {
-                    stack = (0..num).map(|_| &**rule).chain(stack.into_iter()).collect()
-                }
-            }
-            Expansion::Rule(rule) => stack.insert(0, &rules[rule]),
+            Expansion::Rule(rule) => stack.push(&rules[rule]),
             Expansion::Literal(literal) => buf.push_str(literal),
         }
     }
