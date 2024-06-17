@@ -13,10 +13,11 @@ use crate::{
         LineColumn, Span, Spanned,
     },
     pattern::Label,
-    query::{DataQuery, Query},
+    query::Query,
     Result,
 };
 
+mod data;
 mod schema;
 
 #[cfg(test)]
@@ -166,19 +167,11 @@ fn visit_query(node: Node<'_>) -> Query {
     let child = children.consume_any();
     let query = match child.as_rule() {
         Rule::query_schema => Query::Schema(schema::visit_query_schema(child)),
-        Rule::query_data => Query::Data(visit_query_data(child)),
+        Rule::query_data => Query::Data(data::visit_query_data(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert!(children.try_consume_any().is_none());
     query
-}
-
-fn visit_query_data(node: Node<'_>) -> DataQuery {
-    debug_assert_eq!(node.as_rule(), Rule::query_data);
-    node.into_children().fold(DataQuery::new(), |_query, stage| {
-        debug_assert_eq!(stage.as_rule(), Rule::query_stage);
-        todo!()
-    })
 }
 
 fn visit_label(label: Node<'_>) -> Label {
