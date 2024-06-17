@@ -331,7 +331,7 @@ fn generate(rules: &HashMap<String, Expansion>, rule_name: &str, max_depth: usiz
                     if *is_atomic {
                         stack.extend(reps)
                     } else {
-                        stack.extend(reps.intersperse(&space))
+                        stack.extend(Itertools::intersperse(reps, &space))
                     }
                 }
             }
