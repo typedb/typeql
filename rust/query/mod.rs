@@ -45,18 +45,43 @@ impl fmt::Display for SchemaQuery {
 }
 
 #[derive(Debug, Eq, PartialEq)]
+pub struct DataQuery {
+}
+
+impl DataQuery {
+    pub fn new() -> Self {
+        Self {  }
+    }
+}
+
+impl Spanned for DataQuery {
+    fn span(&self) -> Option<Span> {
+        todo!()
+    }
+}
+
+impl fmt::Display for DataQuery {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Schema(SchemaQuery),
+    Data(DataQuery),
 }
 
 enum_getter! { Query
     into_schema(Schema) => SchemaQuery,
+    into_data(Data) => DataQuery,
 }
 
 impl fmt::Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Schema(schema_query) => fmt::Display::fmt(schema_query, f),
+            Self::Data(data_query) => fmt::Display::fmt(data_query, f),
         }
     }
 }
