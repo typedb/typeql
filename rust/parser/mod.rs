@@ -12,7 +12,7 @@ use crate::{
         error::{syntax_error, TypeQLError},
         LineColumn, Span, Spanned,
     },
-    pattern::Label,
+    pattern::{statement::Variable, Label},
     query::Query,
     Result,
 };
@@ -177,4 +177,21 @@ fn visit_query(node: Node<'_>) -> Query {
 
 fn visit_label(label: Node<'_>) -> Label {
     Label::new_unscoped(label.as_str(), label.span())
+}
+
+fn visit_var(node: Node<'_>) -> Variable {
+    debug_assert_eq!(node.as_rule(), Rule::VAR);
+    let name = node.as_str();
+
+    assert!(name.len() > 1);
+    assert!(name.starts_with('$'));
+    let name = &name[1..];
+
+    let span = node.span();
+
+    if name == "_" {
+        Variable::Anonymous(span)
+    } else {
+        Variable::Named(span, String::from(name))
+    }
 }

@@ -6,10 +6,11 @@
 
 use std::fmt;
 
-pub use self::label::Label;
+pub use self::{label::Label, statement::Statement};
 use crate::{common::Span, definition::Type, enum_getter, enum_wrapper};
 
 pub mod label;
+pub mod statement;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Definable {
@@ -79,9 +80,6 @@ impl Disjunction {
         Self { span, branches }
     }
 }
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Statement;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Pattern {
