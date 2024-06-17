@@ -16,16 +16,16 @@ pub mod query;
 mod util;
 
 pub use common::Result;
-use parser::visit_eof_query;
+use parser::{visit_eof_queries, visit_eof_query};
 use query::Query;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())
 }
 
-// pub fn parse_queries(typeql_queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
-//     visit_eof_queries(typeql_queries.trim_end())
-// }
+pub fn parse_queries(typeql_queries: &str) -> Result<impl Iterator<Item = Query> + '_> {
+    visit_eof_queries(typeql_queries.trim_end())
+}
 
 // pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern> {
 //     visit_eof_pattern(typeql_pattern.trim_end())
