@@ -9,7 +9,7 @@ use pest::pratt_parser::{Assoc, Op, PrattParser};
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
-    expression::{Expression, FunctionCall, Identifier, Operation, Paren, Value},
+    expression::{Expression, FunctionCall, Identifier, ListIndex, Operation, Paren, Value},
     parser::visit_var,
 };
 
@@ -31,7 +31,7 @@ fn visit_expression_arguments(node: Node<'_>) -> Vec<Expression> {
     node.into_children().map(visit_expression).collect()
 }
 
-fn visit_expression(node: Node<'_>) -> Expression {
+pub(super) fn visit_expression(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression);
     let child = node.into_child();
     match child.as_rule() {
@@ -41,7 +41,7 @@ fn visit_expression(node: Node<'_>) -> Expression {
     }
 }
 
-fn visit_expression_value(node: Node<'_>) -> Expression {
+pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression_value);
 
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
@@ -74,8 +74,23 @@ fn visit_expression_base(node: Node<'_>) -> Expression {
         Rule::value_primitive => Expression::Value(visit_value_primitive(node)),
         Rule::expression_function => Expression::Function(visit_expression_function(node)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(node))),
+        Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(node))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
     }
+}
+
+fn visit_expression_list_index(node: Node<'_>) -> ListIndex {
+    debug_assert_eq!(node.as_rule(), Rule::expression_list_index);
+    let span = node.span();
+    let mut children = node.into_children();
+    let variable = visit_var(children.consume_expected(Rule::VAR));
+    let index = visit_list_index(children.consume_expected(Rule::list_index));
+    ListIndex::new(span, variable, index)
+}
+
+fn visit_list_index(node: Node<'_>) -> Expression {
+    debug_assert_eq!(node.as_rule(), Rule::list_index);
+    visit_expression_value(node.into_child())
 }
 
 fn visit_value_primitive(node: Node<'_>) -> Value {

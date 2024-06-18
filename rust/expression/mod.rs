@@ -91,8 +91,28 @@ impl Spanned for Value {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ListIndex {
+    span: Option<Span>,
+    variable: Variable,
+    index: Expression,
+}
+
+impl ListIndex {
+    pub fn new(span: Option<Span>, variable: Variable, index: Expression) -> Self {
+        Self { span, variable, index }
+    }
+}
+
+impl Spanned for ListIndex {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
     Variable(Variable),
+    ListIndex(Box<ListIndex>),
     Value(Value),
     Function(FunctionCall),
     Operation(Box<Operation>),
@@ -103,6 +123,7 @@ impl Spanned for Expression {
     fn span(&self) -> Option<Span> {
         match self {
             Expression::Variable(inner) => inner.span(),
+            Expression::ListIndex(inner) => inner.span(),
             Expression::Value(inner) => inner.span(),
             Expression::Function(inner) => inner.span(),
             Expression::Operation(inner) => inner.span(),

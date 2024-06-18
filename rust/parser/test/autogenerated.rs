@@ -170,8 +170,12 @@ fn visit(
             TokenTree::Ident(ident) => {
                 if ident == "SOI" {
                     tree.roots.insert(rule_name.to_owned());
-                } else if ident != "EOI" && ident != "WB" {
-                    vec.push(Expansion::Rule(ident.to_string()))
+                } else if ident == "EOI" || ident == "WB" {
+                    if !is_atomic {
+                        vec.pop(); // preceded by `~`
+                    }
+                } else {
+                    vec.push(Expansion::Rule(ident.to_string()));
                 }
             }
             TokenTree::Group(group) => {

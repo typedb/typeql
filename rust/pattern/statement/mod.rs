@@ -5,8 +5,8 @@
  */
 
 use crate::{
-    common::{Span, Spanned},
-    expression::FunctionCall,
+    common::{token::Comparator, Span, Spanned},
+    expression::{Expression, FunctionCall},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -56,10 +56,31 @@ impl InStream {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Comparison;
+pub struct Comparison {
+    span: Option<Span>,
+    lhs: Expression,
+    comparator: Comparator,
+    rhs: Expression,
+}
+
+impl Comparison {
+    pub fn new(span: Option<Span>, lhs: Expression, (comparator, rhs): (Comparator, Expression)) -> Self {
+        Self { span, lhs, comparator, rhs }
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Assignment;
+pub struct Assignment {
+    span: Option<Span>,
+    lhs: Vec<Variable>, // TODO or destructured struct
+    rhs: Expression,
+}
+
+impl Assignment {
+    pub fn new(span: Option<Span>, lhs: Vec<Variable>, rhs: Expression) -> Self {
+        Self { span, lhs, rhs }
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Single {
