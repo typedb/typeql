@@ -18,6 +18,7 @@ use crate::{
 };
 
 mod data;
+mod expression;
 mod schema;
 mod statement;
 

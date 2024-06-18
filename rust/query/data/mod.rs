@@ -6,12 +6,8 @@
 
 use std::fmt;
 
-use crate::{
-    common::{Span, Spanned},
-    pattern::Pattern,
-};
-
 use self::stage::Stage;
+use crate::common::{Span, Spanned};
 
 pub mod stage;
 

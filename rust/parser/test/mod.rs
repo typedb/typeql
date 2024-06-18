@@ -12,7 +12,7 @@ use crate::parse_query;
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
         let parsed = $parsed;
-        let expected = $expected;
+        let _expected = $expected;
         let query = $query;
         // assert_eq!(expected, parsed);
         // assert_eq!(format!("{:#}", expected), query);

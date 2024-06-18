@@ -1,0 +1,106 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+use pest::pratt_parser::{Assoc, Op, PrattParser};
+
+use super::{IntoChildNodes, Node, Rule, RuleMatcher};
+use crate::{
+    common::{error::TypeQLError, token, Spanned},
+    expression::{Expression, FunctionCall, Identifier, Operation, Paren, Value},
+    parser::visit_var,
+};
+
+pub(super) fn visit_expression_function(node: Node<'_>) -> FunctionCall {
+    debug_assert_eq!(node.as_rule(), Rule::expression_function);
+    let span = node.span();
+    let mut children = node.into_children();
+    let sigil = visit_expression_function_name(children.consume_expected(Rule::expression_function_name));
+    let args = if let Some(args) = children.try_consume_expected(Rule::expression_arguments) {
+        visit_expression_arguments(args)
+    } else {
+        Vec::new()
+    };
+    FunctionCall::new(span, sigil, args)
+}
+
+fn visit_expression_arguments(node: Node<'_>) -> Vec<Expression> {
+    debug_assert_eq!(node.as_rule(), Rule::expression_arguments);
+    node.into_children().map(visit_expression).collect()
+}
+
+fn visit_expression(node: Node<'_>) -> Expression {
+    debug_assert_eq!(node.as_rule(), Rule::expression);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::expression_value => visit_expression_value(child),
+        Rule::expression_list => visit_expression_list(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_expression_value(node: Node<'_>) -> Expression {
+    debug_assert_eq!(node.as_rule(), Rule::expression_value);
+
+    let pratt_parser: PrattParser<Rule> = PrattParser::new()
+        .op(Op::infix(Rule::ADD, Assoc::Left) | Op::infix(Rule::SUBTRACT, Assoc::Left))
+        .op(Op::infix(Rule::MULTIPLY, Assoc::Left)
+            | Op::infix(Rule::DIVIDE, Assoc::Left)
+            | Op::infix(Rule::MODULO, Assoc::Left))
+        .op(Op::infix(Rule::POWER, Assoc::Right));
+
+    pratt_parser
+        .map_primary(visit_expression_base)
+        .map_infix(|left, op, right| {
+            let op = match op.as_rule() {
+                Rule::ADD => token::ArithmeticOperator::Add,
+                Rule::SUBTRACT => token::ArithmeticOperator::Subtract,
+                Rule::MULTIPLY => token::ArithmeticOperator::Multiply,
+                Rule::DIVIDE => token::ArithmeticOperator::Divide,
+                Rule::MODULO => token::ArithmeticOperator::Modulo,
+                Rule::POWER => token::ArithmeticOperator::Power,
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: op.to_string() }),
+            };
+            Expression::Operation(Box::new(Operation::new(op, left, right)))
+        })
+        .parse(node.into_children())
+}
+
+fn visit_expression_base(node: Node<'_>) -> Expression {
+    match node.as_rule() {
+        Rule::VAR => Expression::Variable(visit_var(node)),
+        Rule::value_primitive => Expression::Value(visit_value_primitive(node)),
+        Rule::expression_function => Expression::Function(visit_expression_function(node)),
+        Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(node))),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
+    }
+}
+
+fn visit_value_primitive(node: Node<'_>) -> Value {
+    debug_assert_eq!(node.as_rule(), Rule::value_primitive);
+    Value::new(node.span(), node.as_str().to_owned()) // TODO parse value properly
+}
+
+fn visit_expression_parenthesis(node: Node<'_>) -> Paren {
+    debug_assert_eq!(node.as_rule(), Rule::expression_parenthesis);
+    Paren::new(node.span(), visit_expression_value(node.into_child()))
+}
+
+fn visit_expression_list(node: Node<'_>) -> Expression {
+    debug_assert_eq!(node.as_rule(), Rule::expression_list);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::expression_list_new => todo!(),
+        Rule::expression_list_subrange => todo!(),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_expression_function_name(node: Node<'_>) -> Identifier {
+    debug_assert_eq!(node.as_rule(), Rule::expression_function_name);
+    let child = node.into_child();
+    debug_assert!(matches!(child.as_rule(), Rule::label | Rule::BUILTIN_FUNC_NAME), "{:?}", child.as_rule());
+    Identifier(child.as_str().to_owned())
+}

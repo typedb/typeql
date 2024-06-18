@@ -4,10 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::{
-    common::{Span, Spanned},
-    pattern::Pattern,
-};
+use crate::{common::Span, pattern::Pattern};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Match {
@@ -20,4 +17,3 @@ impl Match {
         Self { span, patterns }
     }
 }
-

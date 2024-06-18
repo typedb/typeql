@@ -7,12 +7,11 @@
 use super::{IntoChildNodes, Node, Rule};
 use crate::{
     common::{error::TypeQLError, Spanned},
-    parser::{visit_var, RuleMatcher},
+    parser::{expression::visit_expression_function, visit_var, RuleMatcher},
     pattern::{
-        statement::{Is, Single, Variable},
-        Conjunction, Disjunction, Negation, Pattern, Statement, Try,
+        statement::{InStream, Is, Single},
+        Statement,
     },
-    query::DataQuery,
 };
 
 pub(super) fn visit_statement(node: Node<'_>) -> Statement {
@@ -31,6 +30,7 @@ fn visit_statement_single(node: Node<'_>) -> Single {
     let child = node.into_child();
     match child.as_rule() {
         Rule::statement_is => Single::Is(visit_statement_is(child)),
+        Rule::statement_in => Single::InStream(visit_statement_in(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -43,6 +43,19 @@ fn visit_statement_is(node: Node<'_>) -> Is {
     children.skip_expected(Rule::IS);
     let rhs = visit_var(children.consume_expected(Rule::VAR));
     Is::new(span, lhs, rhs)
+}
+
+fn visit_statement_in(node: Node<'_>) -> InStream {
+    debug_assert_eq!(node.as_rule(), Rule::statement_in);
+    let span = node.span();
+    let mut children = node.into_children();
+    let mut lhs = vec![visit_var(children.consume_expected(Rule::VAR))];
+    while let Some(var) = children.try_consume_expected(Rule::VAR) {
+        lhs.push(visit_var(var));
+    }
+    children.skip_expected(Rule::IN);
+    let rhs = visit_expression_function(children.consume_expected(Rule::expression_function));
+    InStream::new(span, lhs, rhs)
 }
 
 pub(super) fn visit_statement_things(_node: Node<'_>) {

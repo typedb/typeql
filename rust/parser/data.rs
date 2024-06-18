@@ -7,8 +7,8 @@
 use super::{statement::visit_statement, IntoChildNodes, Node, Rule};
 use crate::{
     common::{error::TypeQLError, Spanned},
-    parser::{statement::visit_statement_things, RuleMatcher},
-    pattern::{Conjunction, Disjunction, Negation, Pattern, Statement, Try},
+    parser::RuleMatcher,
+    pattern::{Conjunction, Disjunction, Negation, Pattern, Try},
     query::{
         data::stage::{Insert, Match, Stage},
         DataQuery,

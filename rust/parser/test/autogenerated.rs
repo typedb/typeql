@@ -14,7 +14,7 @@ use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
 use crate::{
-    parse_query,
+    parse_queries, parse_query,
     parser::{parse_single, Rule},
 };
 

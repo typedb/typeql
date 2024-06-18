@@ -4,7 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::common::Span;
+use crate::{
+    common::{Span, Spanned},
+    expression::FunctionCall,
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
@@ -16,6 +19,14 @@ pub enum Statement {
 pub enum Variable {
     Anonymous(Option<Span>),
     Named(Option<Span>, String),
+}
+
+impl Spanned for Variable {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Variable::Anonymous(span) | Variable::Named(span, _) => *span,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -32,6 +43,28 @@ impl Is {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct InStream {
+    span: Option<Span>,
+    lhs: Vec<Variable>,
+    rhs: FunctionCall,
+}
+
+impl InStream {
+    pub(crate) fn new(span: Option<Span>, lhs: Vec<Variable>, rhs: FunctionCall) -> Self {
+        Self { span, lhs, rhs }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Comparison;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Assignment;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Single {
     Is(Is),
+    InStream(InStream),
+    Comparison(Comparison),
+    Assignment(Assignment),
 }

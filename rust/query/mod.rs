@@ -10,7 +10,6 @@ pub use self::{data::DataQuery, typeql_define::TypeQLDefine, typeql_undefine::Ty
 use crate::{
     common::{Span, Spanned},
     enum_getter,
-    pattern::Pattern,
 };
 
 pub mod data;

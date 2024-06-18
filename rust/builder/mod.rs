@@ -4,8 +4,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::pattern::Label;
-
 #[macro_export]
 macro_rules! typeql_define {
     ($($def:expr),* $(,)?) => {

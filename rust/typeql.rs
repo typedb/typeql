@@ -10,6 +10,7 @@
 pub mod builder;
 pub mod common;
 pub mod definition;
+pub mod expression;
 pub mod parser;
 pub mod pattern;
 pub mod query;
