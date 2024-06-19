@@ -9,7 +9,7 @@ use pest::pratt_parser::{Assoc, Op, PrattParser};
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
-    expression::{Expression, FunctionCall, Identifier, ListIndex, Operation, Paren, Value},
+    expression::{Expression, FunctionCall, Identifier, List, ListIndex, ListIndexRange, Operation, Paren, Value},
     parser::visit_var,
 };
 
@@ -107,10 +107,36 @@ fn visit_expression_list(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression_list);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::expression_list_new => todo!(),
-        Rule::expression_list_subrange => todo!(),
+        Rule::expression_list_new => visit_expression_list_new(child),
+        Rule::expression_list_subrange => visit_expression_list_subrange(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
+}
+
+fn visit_expression_list_subrange(node: Node<'_>) -> Expression {
+    debug_assert_eq!(node.as_rule(), Rule::expression_list_subrange);
+    let span = node.span();
+    let mut children = node.into_children();
+    let var = visit_var(children.consume_expected(Rule::VAR));
+    let (from, to) = visit_list_range(children.consume_expected(Rule::list_range));
+    debug_assert!(children.try_consume_any().is_none());
+    Expression::ListIndexRange(Box::new(ListIndexRange::new(span, var, from, to)))
+}
+
+fn visit_list_range(node: Node<'_>) -> (Expression, Expression) {
+    debug_assert_eq!(node.as_rule(), Rule::list_range);
+    let mut children = node.into_children();
+    let from = visit_expression_value(children.consume_expected(Rule::expression_value));
+    let to = visit_expression_value(children.consume_expected(Rule::expression_value));
+    debug_assert!(children.try_consume_any().is_none());
+    (from, to)
+}
+
+fn visit_expression_list_new(node: Node<'_>) -> Expression {
+    debug_assert_eq!(node.as_rule(), Rule::expression_list_new);
+    let span = node.span();
+    let items = node.into_children().map(visit_expression_value).collect();
+    Expression::List(List::new(span, items))
 }
 
 fn visit_expression_function_name(node: Node<'_>) -> Identifier {

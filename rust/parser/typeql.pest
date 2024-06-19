@@ -110,7 +110,7 @@ statement_single = { statement_is | statement_comparison | statement_assignment 
 
 statement_is = { VAR ~ IS ~ VAR }
 statement_comparison = { expression_value ~ comparison }
-statement_assignment = { assignment_left ~ ASSIGN ~ expression_value_or_list }
+statement_assignment = { assignment_left ~ ASSIGN ~ expression }
 assignment_left = { VAR ~ ( COMMA ~ VAR )* | struct_destructor }
 statement_in = { VAR ~ ( COMMA ~ VAR )* ~ IN ~ expression_function }
 
@@ -184,7 +184,7 @@ comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 
 // EXPRESSION CONSTRUCTS =======================================================
 
-expression_value_or_list = { expression_list | expression_value }
+expression = { expression_list | expression_value }
 
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
 expression_base = _{ expression_list_index | expression_parenthesis | expression_function | value_primitive | VAR }
@@ -196,8 +196,8 @@ expression_list_index = { VAR ~ list_index }
 list_index = { SQ_BRACKET_OPEN ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
-expression_function_name = { EXPR_FUNC_NAME | MAX | MIN | label }
-expression_arguments = { expression_value ~ ( COMMA ~ expression_value )* }
+expression_function_name = { BUILTIN_FUNC_NAME | label }
+expression_arguments = { expression ~ ( COMMA ~ expression )* }
 
 expression_list = { expression_list_subrange | expression_list_new }
 expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ SQ_BRACKET_CLOSE }
@@ -397,11 +397,11 @@ POWER = @{ "^" }
 MODULO = @{ "%" }
 
 // Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
-EXPR_FUNC_NAME = _{ ABS | CEIL | FLOOR | ROUND | LENGTH }
-ABS = @{ "abs" }
-CEIL = @{ "ceil" }
-FLOOR = @{ "floor" }
-ROUND = @{ "round" }
+BUILTIN_FUNC_NAME = ${ ABS | CEIL | FLOOR | ROUND | LENGTH | MAX | MIN }
+ABS = @{ "abs" ~ WB }
+CEIL = @{ "ceil" ~ WB }
+FLOOR = @{ "floor" ~ WB }
+ROUND = @{ "round" ~ WB }
 LENGTH = @{ "length" ~ WB }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)

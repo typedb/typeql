@@ -110,6 +110,44 @@ impl Spanned for ListIndex {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct List {
+    span: Option<Span>,
+    items: Vec<Expression>,
+}
+
+impl List {
+    pub fn new(span: Option<Span>, items: Vec<Expression>) -> Self {
+        Self { span, items }
+    }
+}
+
+impl Spanned for List {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ListIndexRange {
+    span: Option<Span>,
+    var: Variable,
+    from: Expression,
+    to: Expression,
+}
+
+impl ListIndexRange {
+    pub fn new(span: Option<Span>, var: Variable, from: Expression, to: Expression) -> Self {
+        Self { span, var, from, to }
+    }
+}
+
+impl Spanned for ListIndexRange {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Expression {
     Variable(Variable),
     ListIndex(Box<ListIndex>),
@@ -117,17 +155,21 @@ pub enum Expression {
     Function(FunctionCall),
     Operation(Box<Operation>),
     Paren(Box<Paren>),
+    List(List),
+    ListIndexRange(Box<ListIndexRange>),
 }
 
 impl Spanned for Expression {
     fn span(&self) -> Option<Span> {
         match self {
-            Expression::Variable(inner) => inner.span(),
-            Expression::ListIndex(inner) => inner.span(),
-            Expression::Value(inner) => inner.span(),
-            Expression::Function(inner) => inner.span(),
-            Expression::Operation(inner) => inner.span(),
-            Expression::Paren(inner) => inner.span(),
+            Self::Variable(inner) => inner.span(),
+            Self::ListIndex(inner) => inner.span(),
+            Self::Value(inner) => inner.span(),
+            Self::Function(inner) => inner.span(),
+            Self::Operation(inner) => inner.span(),
+            Self::Paren(inner) => inner.span(),
+            Self::List(inner) => inner.span(),
+            Self::ListIndexRange(inner) => inner.span(),
         }
     }
 }
