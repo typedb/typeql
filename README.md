@@ -10,14 +10,14 @@
 
 # Introducing TypeQL
 
-TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**.
+TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**. It is based on a novel, elegant, and declarative querying paradigm described in [recent research](https://typedb.com/papers/typeql-theory). TypeQL is designed to be intuitive and mirror natural language, making it straightforward to compose complex queries using high-level abstractions.
 
-- **Conceptual and intuitive**. TypeQL is based directly on the [conceptual data model](https://development.typedb.com/philosophy) of TypeDB. Its queries comprise sequences of statements that assemble into [patterns](https://development.typedb.com/features#modern-language). This mirrors natural language and makes it easy and intuitive to express even highly complex queries.
-- **Fully declarative and composable** TypeQL is fully declarative, allowing us to define query patterns without considering execution strategy. The user only composes sets of requirements, and TypeDB finds all matching data to process. 
-- **A fully variablizable language**. Any concept in TypeQL has a type, and so any concept in TypeQL can be variablized in a query – even types! This enables TypeQL to express powerful [parametric](https://typedb.com/features#polymorphic-queries) database operations.
-- **Built for consistency**. TypeQL patterns are underpinned by a powerful type system that ensure safety and consistency of database applications.
+- Get started by [installing TypeDB](https://typedb.com/docs/home/install/overview).
+- Explore the basics of TypeDB in our easy [Crash Course](https://typedb.com/docs/home/crash-course).
+- Discover more of TypeDB’s unique [features](https://typedb.com/features).
+- Master TypeDB with our end-to-end [Learning Course](https://typedb.com/docs/learn/overview).
+- Learn more at TypeDB's [Learning Center](https://typedb.com/learn).
 
-For a quick overview of the range of statements that are available in TypeQL check out our [TypeQL in 20 queries guide](https://typedb.com/docs/).
 
 > **IMPORTANT NOTE:** > > TypeDB & TypeQL are in the process of being rewritten in [Rust](https://www.rust-lang.org). There will be significant refinement to the language, and minor breaks in backwards compatibility. Learn about the changes on our [roadmap issue on GitHub](https://github.com/vaticle/typedb/issues/6764). The biggest change to TypeDB 3.0 will be our storage data structure and architecture that significantly boosts performance. We’re aiming to release 3.0 in the summer this year, along with preliminary benchmarks of TypeDB.
 
