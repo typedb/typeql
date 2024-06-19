@@ -85,7 +85,7 @@ projection_key_label = { QUOTED_STRING | label }
 // SCHEMA QUERY ================================================================
 
 definables = { definable+ }
-definable = { ( definition_type ~ SEMICOLON ) 
+definable = { ( definition_type ~ SEMICOLON )
             // | definition_function
             // | definition_struct
             }
@@ -102,7 +102,7 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_multi | statement_single | statement_anon_relation }
+statement = { statement_type | statement_thing_var | statement_single | statement_anon_relation }
 
 // SINGLE STATEMENTS ===========================================================
 
@@ -113,10 +113,6 @@ statement_comparison = { expression_value ~ comparison }
 statement_assignment = { assignment_left ~ ASSIGN ~ expression }
 assignment_left = { VAR ~ ( COMMA ~ VAR )* | struct_destructor }
 statement_in = { VAR ~ ( COMMA ~ VAR )* ~ IN ~ expression_function }
-
-// MULTI STATEMENT =============================================================
-
-statement_multi = { statement_type | statement_thing_var }
 
 // TYPE STATEMENTS =============================================================
 
@@ -151,25 +147,26 @@ annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_primitive ~ ( COMMA
 
 statement_things = { ( statement_thing ~ SEMICOLON )+ }
 statement_thing = { statement_thing_var | statement_anon_relation }
-statement_thing_var = { thing_start_var ~ ( COMMA ~ thing_constraint )* }
 statement_anon_relation = { relation ~ ( COMMA ~ thing_constraint )* }
 
-thing_start_var = { VAR ~ thing_constraint
-                  | VAR ~ value_primitive ~ ISA_ ~ type_ref
-                  | VAR ~ expression_struct ~ ISA_ ~ type_ref
-                  | VAR ~ comparison ~ (ISA_ ~ type_ref)?
-                  }
+statement_thing_var = { VAR ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
+                      | VAR ~ ( value_primitive | expression_struct ) ~ ISA_ ~ type_ref
+                      | VAR ~ comparison ~ (ISA_ ~ type_ref)?
+                      }
 
-thing_constraint = { ISA_ ~ type_ref
-                   | IID ~ IID_VALUE
-                   | relation_constraint
+thing_constraint = { isa_constraint
+                   | iid_constraint
                    | has_constraint
+                   | links_constraint
                    }
 
-has_constraint = { HAS ~ type_ref_list ~ ( expression_list | comparison )
-                 | HAS ~ ( VAR | label ~ ( expression_value | comparison ) )
+isa_constraint = { ISA_ ~ type_ref }
+iid_constraint = { IID ~ IID_VALUE }
+has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | VAR )
+                 | HAS ~ type_ref ~ ( comparison | expression_value )
+                 | HAS ~ VAR
                  }
-relation_constraint = { LINKS ~ relation }
+links_constraint = { LINKS ~ relation }
 
 relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE } // A list of role players in a Relations
 role_player = { type_ref_list ~ COLON ~ VAR

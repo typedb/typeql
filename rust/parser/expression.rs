@@ -103,7 +103,7 @@ fn visit_expression_parenthesis(node: Node<'_>) -> Paren {
     Paren::new(node.span(), visit_expression_value(node.into_child()))
 }
 
-fn visit_expression_list(node: Node<'_>) -> Expression {
+pub(super) fn visit_expression_list(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression_list);
     let child = node.into_child();
     match child.as_rule() {

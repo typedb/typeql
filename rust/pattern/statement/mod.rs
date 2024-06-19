@@ -4,15 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use super::Label;
 use crate::{
     common::{token::Comparator, Span, Spanned},
     expression::{Expression, FunctionCall},
 };
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Statement {
-    Single(Single),
-}
 
 // FIXME move
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -56,16 +52,28 @@ impl InStream {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Comparison {
+pub struct ComparisonStatement {
     span: Option<Span>,
     lhs: Expression,
+    comparison: Comparison,
+}
+
+impl ComparisonStatement {
+    pub fn new(span: Option<Span>, lhs: Expression, comparison: Comparison) -> Self {
+        Self { span, lhs, comparison }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Comparison {
+    span: Option<Span>,
     comparator: Comparator,
     rhs: Expression,
 }
 
 impl Comparison {
-    pub fn new(span: Option<Span>, lhs: Expression, (comparator, rhs): (Comparator, Expression)) -> Self {
-        Self { span, lhs, comparator, rhs }
+    pub fn new(span: Option<Span>, comparator: Comparator, rhs: Expression) -> Self {
+        Self { span, comparator, rhs }
     }
 }
 
@@ -83,9 +91,134 @@ impl Assignment {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Single {
+pub enum Type {
+    Label(Label),
+    Variable(Variable),
+    ListLabel(Label),
+    ListVariable(Variable),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum RolePlayer {
+    Typed(Type, Variable),
+    Untyped(Variable),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Relation {
+    span: Option<Span>,
+    role_players: Vec<RolePlayer>,
+}
+
+impl Relation {
+    pub fn new(span: Option<Span>, role_players: Vec<RolePlayer>) -> Self {
+        Self { span, role_players }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct RelationStatement {
+    span: Option<Span>,
+    head: Relation,
+    constraints: Vec<ThingConstraint>,
+}
+
+impl RelationStatement {
+    pub fn new(span: Option<Span>, head: Relation, constraints: Vec<ThingConstraint>) -> Self {
+        Self { span, head, constraints }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ObjectStatement {
+    span: Option<Span>,
+    head: Variable,
+    constraints: Vec<ThingConstraint>,
+}
+
+impl ObjectStatement {
+    pub fn new(span: Option<Span>, head: Variable, constraints: Vec<ThingConstraint>) -> Self {
+        Self { span, head, constraints }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum ThingConstraint {
+    Isa(Isa),
+    Iid(Iid),
+    Has(Has),
+    Links(Links),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum IsaKind {
+    Exact,
+    Subtype,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Isa {
+    span: Option<Span>,
+    kind: IsaKind,
+    type_: Type,
+}
+
+impl Isa {
+    pub fn new(span: Option<Span>, kind: IsaKind, type_: Type) -> Self {
+        Self { span, kind, type_ }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Iid {
+    span: Option<Span>,
+    iid: String,
+}
+
+impl Iid {
+    pub fn new(span: Option<Span>, iid: String) -> Self {
+        Self { span, iid }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum HasValue {
+    Variable(Variable),
+    Expression(Expression),
+    Comparison(Comparison),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Has {
+    span: Option<Span>,
+    type_: Option<Type>,
+    value: HasValue,
+}
+
+impl Has {
+    pub fn new(span: Option<Span>, type_: Option<Type>, value: HasValue) -> Self {
+        Self { span, type_, value }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Links {
+    span: Option<Span>,
+    relation: Relation,
+}
+
+impl Links {
+    pub fn new(span: Option<Span>, relation: Relation) -> Self {
+        Self { span, relation }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Statement {
     Is(Is),
     InStream(InStream),
-    Comparison(Comparison),
+    Comparison(ComparisonStatement),
     Assignment(Assignment),
+    Relation(RelationStatement),
+    Object(ObjectStatement),
 }
