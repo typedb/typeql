@@ -147,6 +147,6 @@ fn visit_expression_list_new(node: Node<'_>) -> Expression {
 fn visit_expression_function_name(node: Node<'_>) -> Identifier {
     debug_assert_eq!(node.as_rule(), Rule::expression_function_name);
     let child = node.into_child();
-    debug_assert!(matches!(child.as_rule(), Rule::label | Rule::BUILTIN_FUNC_NAME), "{:?}", child.as_rule());
+    debug_assert!(matches!(child.as_rule(), Rule::LABEL | Rule::BUILTIN_FUNC_NAME), "{:?}", child.as_rule());
     Identifier(child.as_str().to_owned())
 }

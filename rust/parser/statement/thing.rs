@@ -10,6 +10,7 @@ use crate::{
     expression::Expression,
     parser::{
         expression::{visit_expression_list, visit_expression_struct, visit_expression_value, visit_value_primitive},
+        statement::visit_type_ref,
         visit_label, visit_var, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     pattern::statement::{
@@ -181,16 +182,6 @@ fn visit_role_player(node: Node<'_>) -> RolePlayer {
     };
     debug_assert!(children.try_consume_any().is_none());
     role_player
-}
-
-fn visit_type_ref(node: Node<'_>) -> Type {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::VAR => Type::Variable(visit_var(child)),
-        Rule::label => Type::Label(visit_label(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
 }
 
 fn visit_type_ref_list(node: Node<'_>) -> Type {

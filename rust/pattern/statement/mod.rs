@@ -4,11 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use self::type_::{Owns, Plays, Relates, Sub, ValueType};
 use super::Label;
 use crate::{
     common::{token::Comparator, Span, Spanned},
     expression::{Expression, FunctionCall, Value},
 };
+
+pub mod type_;
 
 // FIXME move
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -127,6 +130,29 @@ impl RelationStatement {
     pub fn new(span: Option<Span>, head: Relation, constraints: Vec<ThingConstraint>) -> Self {
         Self { span, head, constraints }
     }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct TypeStatement {
+    span: Option<Span>,
+    type_: Type,
+    constraints: Vec<TypeConstraint>,
+}
+
+impl TypeStatement {
+    pub fn new(span: Option<Span>, type_: Type, constraints: Vec<TypeConstraint>) -> Self {
+        Self { span, type_, constraints }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum TypeConstraint {
+    Sub(Sub),
+    Label(Label),
+    ValueType(ValueType),
+    Owns(Owns),
+    Relates(Relates),
+    Plays(Plays),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -250,4 +276,5 @@ pub enum Statement {
     Relation(RelationStatement),
     AttributeValue(AttributeValueStatement),
     AttributeComparison(AttributeComparisonStatement),
+    Type(TypeStatement),
 }

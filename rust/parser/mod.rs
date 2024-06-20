@@ -176,23 +176,54 @@ fn visit_query(node: Node<'_>) -> Query {
     query
 }
 
+fn visit_label_any(node: Node<'_>) -> Label {
+    debug_assert_eq!(node.as_rule(), Rule::label_any);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::LABEL => visit_label(child),
+        Rule::LABEL_SCOPED => visit_label_scoped(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
 fn visit_label(label: Node<'_>) -> Label {
+    debug_assert_eq!(label.as_rule(), Rule::LABEL);
     Label::new_unscoped(label.as_str(), label.span())
+}
+
+fn visit_label_scoped(label: Node<'_>) -> Label {
+    debug_assert_eq!(label.as_rule(), Rule::LABEL_SCOPED);
+    let span = label.span();
+    let mut children = label.into_children();
+    let scope = children.consume_expected(Rule::LABEL);
+    let name = children.consume_expected(Rule::LABEL);
+    Label::new_scoped(scope.as_str(), name.as_str(), span)
+}
+
+fn visit_list_label(node: Node<'_>) -> Label {
+    debug_assert_eq!(node.as_rule(), Rule::list_label);
+    visit_label(node.into_child())
 }
 
 fn visit_var(node: Node<'_>) -> Variable {
     debug_assert_eq!(node.as_rule(), Rule::VAR);
-    let name = node.as_str();
+    let span = node.span();
 
+    let name = node.as_str();
     assert!(name.len() > 1);
     assert!(name.starts_with('$'));
     let name = &name[1..];
-
-    let span = node.span();
-
-    if name == "_" {
-        Variable::Anonymous(span)
-    } else {
-        Variable::Named(span, String::from(name))
+    match name {
+        "_" => Variable::Anonymous(span),
+        name => Variable::Named(span, String::from(name)),
     }
+}
+
+fn visit_list_var(node: Node<'_>) -> Variable {
+    debug_assert_eq!(node.as_rule(), Rule::LIST_VAR);
+    visit_var(node.into_child())
+}
+
+fn visit_value_type_primitive(node: Node<'_>) -> String {
+    node.as_str().to_owned() // FIXME
 }

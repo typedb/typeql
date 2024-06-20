@@ -16,6 +16,9 @@ pub struct Label {
 }
 
 impl Label {
+    pub(crate) fn new_scoped(scope: impl Into<String>, name: impl Into<String>, span: Option<Span>) -> Self {
+        Self { scope: Some(scope.into()), name: name.into(), span }
+    }
     pub(crate) fn new_unscoped(name: impl Into<String>, span: Option<Span>) -> Self {
         Self { scope: None, name: name.into(), span }
     }

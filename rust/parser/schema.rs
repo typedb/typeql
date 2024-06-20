@@ -14,6 +14,7 @@ use crate::{
         },
         Type,
     },
+    parser::{visit_label_scoped, visit_value_type_primitive},
     pattern::{Definable, Label},
     query::{SchemaQuery, TypeQLDefine, TypeQLUndefine},
 };
@@ -58,23 +59,20 @@ fn visit_definables(node: Node<'_>) -> Vec<Definable> {
 
 fn visit_definable(node: Node<'_>) -> Definable {
     debug_assert_eq!(node.as_rule(), Rule::definable);
-    let mut children = node.into_children();
-    let child = children.consume_any();
-    let definable = match child.as_rule() {
+    let child = node.into_child();
+    match child.as_rule() {
         Rule::definition_type => Definable::TypeDeclaration(visit_definition_type(child)),
         Rule::definition_function => todo!(),
         Rule::definition_struct => todo!(),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    };
-    debug_assert!(children.try_consume_any().is_none());
-    definable
+    }
 }
 
 fn visit_definition_type(node: Node<'_>) -> Type {
     debug_assert_eq!(node.as_rule(), Rule::definition_type);
     let span = node.span();
     let mut children = node.into_children();
-    let label = visit_label(children.consume_expected(Rule::label));
+    let label = visit_label(children.consume_expected(Rule::LABEL));
     children.fold(Type::new(label, span), |type_declaration, constraint| {
         let constraint = constraint.into_child();
         match constraint.as_rule() {
@@ -94,11 +92,10 @@ fn visit_plays_declaration(node: Node<'_>) -> Plays {
     let mut children = node.into_children();
     children.skip_expected(Rule::PLAYS);
 
-    let played_label = children.consume_any();
-    let label = visit_label(played_label);
+    let label = visit_label_scoped(children.consume_expected(Rule::LABEL_SCOPED));
     let played = match children.try_consume_expected(Rule::AS) {
         None => Played::new(label, None),
-        Some(_) => Played::new(label, Some(visit_label(children.consume_expected(Rule::label)))),
+        Some(_) => Played::new(label, Some(visit_label(children.consume_expected(Rule::LABEL)))),
     };
 
     debug_assert!(children.try_consume_any().is_none());
@@ -114,11 +111,11 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
     let related_label = children.consume_any();
     let related = match related_label.as_rule() {
         Rule::list_label => Related::List(visit_list_label(related_label)),
-        Rule::label => {
+        Rule::LABEL => {
             let label = visit_label(related_label);
             match children.try_consume_expected(Rule::AS) {
-                None => Related::Attribute(label, None),
-                Some(_) => Related::Attribute(label, Some(visit_label(children.consume_expected(Rule::label)))),
+                None => Related::Role(label, None),
+                Some(_) => Related::Role(label, Some(visit_label(children.consume_expected(Rule::LABEL)))),
             }
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
@@ -129,7 +126,7 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
     Relates::new(related, annotations_relates, span)
 }
 
-fn visit_annotations_relates(node: Node<'_>) -> Vec<AnnotationRelates> {
+pub(super) fn visit_annotations_relates(node: Node<'_>) -> Vec<AnnotationRelates> {
     debug_assert_eq!(node.as_rule(), Rule::annotations_relates);
     let children = node.into_children();
     children
@@ -160,11 +157,11 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
     let owned_label = children.consume_any();
     let owned = match owned_label.as_rule() {
         Rule::list_label => Owned::List(visit_list_label(owned_label)),
-        Rule::label => {
+        Rule::LABEL => {
             let label = visit_label(owned_label);
             match children.try_consume_expected(Rule::AS) {
                 None => Owned::Attribute(label, None),
-                Some(_) => Owned::Attribute(label, Some(visit_label(children.consume_expected(Rule::label)))),
+                Some(_) => Owned::Attribute(label, Some(visit_label(children.consume_expected(Rule::LABEL)))),
             }
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
@@ -183,7 +180,7 @@ fn visit_list_label(node: Node<'_>) -> Label {
     Label::new_unscoped(label.as_str(), label.span())
 }
 
-fn visit_annotations_owns(node: Node<'_>) -> Vec<AnnotationOwns> {
+pub(super) fn visit_annotations_owns(node: Node<'_>) -> Vec<AnnotationOwns> {
     debug_assert_eq!(node.as_rule(), Rule::annotations_owns);
     let children = node.into_children();
     children
@@ -213,9 +210,9 @@ fn visit_value_type_declaration(node: Node<'_>) -> ValueType {
     children.skip_expected(Rule::VALUE);
     let value_type_node = children.consume_any();
     let (value_type, annotations_value_type) = match value_type_node.as_rule() {
-        Rule::label => (visit_label(value_type_node).to_string(), Vec::new()),
+        Rule::LABEL => (visit_label(value_type_node).to_string(), Vec::new()),
         Rule::value_type_primitive => (
-            value_type_node.as_str().to_owned(),
+            visit_value_type_primitive(value_type_node),
             visit_annotations_value(children.consume_expected(Rule::annotations_value)),
         ),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
@@ -224,7 +221,7 @@ fn visit_value_type_declaration(node: Node<'_>) -> ValueType {
     ValueType::new(value_type, annotations_value_type, span)
 }
 
-fn visit_annotations_value(node: Node<'_>) -> Vec<AnnotationValueType> {
+pub(super) fn visit_annotations_value(node: Node<'_>) -> Vec<AnnotationValueType> {
     node.into_children()
         .map(|anno| match anno.as_rule() {
             Rule::annotation_regex => visit_annotation_regex(anno),
@@ -234,13 +231,13 @@ fn visit_annotations_value(node: Node<'_>) -> Vec<AnnotationValueType> {
         .collect()
 }
 
-fn visit_annotation_values(node: Node<'_>) -> AnnotationValueType {
+pub(super) fn visit_annotation_values(node: Node<'_>) -> AnnotationValueType {
     let span = node.span();
     let values = node.into_children().skip_expected(Rule::ANNOTATION_VALUES).map(|v| v.as_str().to_owned()).collect();
     AnnotationValueType::Values(values, span)
 }
 
-fn visit_annotation_regex(node: Node<'_>) -> AnnotationValueType {
+pub(super) fn visit_annotation_regex(node: Node<'_>) -> AnnotationValueType {
     let span = node.span();
     let mut children = node.into_children();
     children.consume_expected(Rule::ANNOTATION_REGEX);
@@ -253,13 +250,13 @@ fn visit_sub_declaration(node: Node<'_>) -> Sub {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::SUB);
-    let supertype_label = visit_label(children.consume_expected(Rule::label));
+    let supertype_label = visit_label(children.consume_expected(Rule::LABEL));
     let annotations_sub = visit_annotations_sub(children.consume_expected(Rule::annotations_sub));
     debug_assert!(children.try_consume_any().is_none());
     Sub::new(supertype_label, annotations_sub, span)
 }
 
-fn visit_annotations_sub(node: Node<'_>) -> Vec<AnnotationSub> {
+pub(super) fn visit_annotations_sub(node: Node<'_>) -> Vec<AnnotationSub> {
     node.into_children()
         .map(|anno| match anno.as_rule() {
             Rule::ANNOTATION_ABSTRACT => AnnotationSub::Abstract(anno.span()),

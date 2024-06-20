@@ -10,7 +10,7 @@ eof_pattern = { SOI ~ pattern ~ EOI }
 eof_patterns = { SOI ~ patterns ~ EOI }
 eof_definables = { SOI ~ definables ~ EOI }
 eof_statement = { SOI ~ statement ~ EOI }
-eof_label = { SOI ~ label ~ EOI }
+eof_label = { SOI ~ LABEL ~ EOI }
 eof_definition_function = { SOI ~ definition_function ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
@@ -73,14 +73,14 @@ projection = { projection_key_var ~ COLON ~ projection_attributes
              | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE }
 
 projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
-projection_attribute = { label ~ projection_key_as_label? }
+projection_attribute = { LABEL ~ projection_key_as_label? }
 
 // TODO: we have to validate this is a fetch or reduce ended pipeline
 projection_subquery = { query_data }
 
 projection_key_var = { VAR ~ projection_key_as_label? }
 projection_key_as_label = { AS ~ projection_key_label }
-projection_key_label = { QUOTED_STRING | label }
+projection_key_label = { QUOTED_STRING | LABEL }
 
 // SCHEMA QUERY ================================================================
 
@@ -117,14 +117,17 @@ statement_in = { VAR ~ ( COMMA ~ VAR )* ~ IN ~ expression_function }
 // TYPE STATEMENTS =============================================================
 
 statement_type = { type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* }
-type_constraint = { SUB_ ~ type_ref_any ~ annotations_sub
-                  | VALUE ~ value_type_primitive ~ annotations_value
-                  | TYPE ~ label_any
+type_constraint = { sub_constraint
+                  | value_type_constraint
+                  | label_constraint
                   | owns_constraint
                   | relates_constraint
                   | plays_constraint
                   }
 
+sub_constraint = { SUB_ ~ type_ref_any ~ annotations_sub }
+value_type_constraint = { VALUE ~ value_type_primitive ~ annotations_value }
+label_constraint = { TYPE ~ label_any }
 owns_constraint = { OWNS ~ type_ref_list ~ annotations_owns
                   | OWNS ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_owns
                   }
@@ -140,7 +143,7 @@ annotations_value = { ( annotation_regex | annotation_values )* }
 
 annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ ANNOTATION_CARD_LOWER ~ COMMA ~ ANNOTATION_CARD_UPPER ~ PAREN_CLOSE }
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ QUOTED_STRING ~ PAREN_CLOSE }
-annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ label ~ PAREN_CLOSE }
+annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ LABEL ~ PAREN_CLOSE }
 annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_primitive ~ ( COMMA ~ value_primitive )* ~ PAREN_CLOSE }
 
 // THING STATEMENTS ============================================================
@@ -193,7 +196,7 @@ expression_list_index = { VAR ~ list_index }
 list_index = { SQ_BRACKET_OPEN ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
-expression_function_name = { BUILTIN_FUNC_NAME | label }
+expression_function_name = { BUILTIN_FUNC_NAME | LABEL }
 expression_arguments = { expression ~ ( COMMA ~ expression )* }
 
 expression_list = { expression_list_subrange | expression_list_new }
@@ -206,7 +209,7 @@ struct_value = { expression_value | expression_struct }
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { label ~ type_constraint_declaration ~ ( COMMA ~ type_constraint_declaration )* }
+definition_type = { LABEL ~ type_constraint_declaration ~ ( COMMA ~ type_constraint_declaration )* }
 type_constraint_declaration = { sub_declaration
                               | value_type_declaration
                               | owns_declaration
@@ -214,31 +217,31 @@ type_constraint_declaration = { sub_declaration
                               | plays_declaration
                               }
 
-sub_declaration = { SUB ~ label ~ annotations_sub }
-value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
+sub_declaration = { SUB ~ LABEL ~ annotations_sub }
+value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | LABEL ) }
 owns_declaration = { OWNS ~ list_label ~ annotations_owns
-                   | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
+                   | OWNS ~ LABEL ~ ( AS ~ LABEL )? ~ annotations_owns
                    }
 relates_declaration = { RELATES ~ list_label ~ annotations_relates
-                      | RELATES ~ label ~ ( AS ~ label )? ~ annotations_relates
+                      | RELATES ~ LABEL ~ ( AS ~ LABEL )? ~ annotations_relates
                       }
-plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }
+plays_declaration = { PLAYS ~ LABEL_SCOPED ~ ( AS ~ LABEL )? }
 
 // FUNCTION DEFINITION =========================================================
 
 definition_function = { FUN ~ function_signature ~ COLON ~ stage_match ~ stage_modifier* ~ return_statement }
 
-function_signature = { label ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_return }
+function_signature = { LABEL ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_return }
 
 function_arguments = { ( function_argument ~ ( COMMA ~ function_argument ) * )? }
-function_argument = { VAR ~ COLON ~ label }
+function_argument = { VAR ~ COLON ~ LABEL }
 
 function_return = { function_return_stream | function_return_single }
 function_return_stream = { CURLY_OPEN ~ function_return_value ~ ( "," ~ function_return_value )* ~ CURLY_CLOSE }
 function_return_single = { function_return_value ~ ( "," ~ function_return_value )* }
 function_return_value = { function_return_value_optional | function_return_value_base }
 function_return_value_optional = { function_return_value_base ~ QUESTION }
-function_return_value_base = { list_value_type_primitive | value_type_primitive | list_label | label }
+function_return_value_base = { list_value_type_primitive | value_type_primitive | list_label | LABEL }
 
 return_statement = { RETURN ~ ( return_statement_stream | return_statement_single ) ~ SEMICOLON }
 return_statement_stream = { CURLY_OPEN ~ VAR ~ ( COMMA ~ VAR )* ~ CURLY_CLOSE }
@@ -246,25 +249,23 @@ return_statement_single = { ( VAR | reduce ) ~ ( COMMA ~ ( VAR | reduce ) )* }
 
 // STRUCT CONSTRUCTS ===========================================================
 
-definition_struct = { STRUCT ~ label ~ COLON ~ definition_struct_fields ~ SEMICOLON }
+definition_struct = { STRUCT ~ LABEL ~ COLON ~ definition_struct_fields ~ SEMICOLON }
 definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* }
-definition_struct_field = { struct_key ~ VALUE ~ ( value_type_primitive | label ) }
+definition_struct_field = { struct_key ~ VALUE ~ ( value_type_primitive | LABEL ) }
 
 struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value }
 struct_destructor_value = { VAR | struct_destructor }
 
-struct_key = { label }
+struct_key = { LABEL }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type_ref_any = { type_ref_scoped | type_ref | VAR }
-type_ref_scoped = { label_scoped | VAR }
-type_ref = { label | VAR }
+type_ref_any = { type_ref_scoped | type_ref }
+type_ref_scoped = { LABEL_SCOPED | VAR }
+type_ref = { LABEL | VAR }
 type_ref_list = { list_label | LIST_VAR }
 
-label_any = { label_scoped | label }
-label_scoped = { LABEL_SCOPED }
-label = { LABEL | type_native | unreserved }
+label_any = { LABEL_SCOPED | LABEL }
 list_label = { LABEL ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 // LITERAL INPUT VALUES ========================================================
@@ -285,6 +286,7 @@ sign = { ADD | SUBTRACT }
 // UNRESERVED KEYWORDS =========================================================
 // Most of TypeQL syntax should not be reserved from being used as identifiers
 
+// TODO: this doesn't mean anything in a PEG but we probably need a reserved list instead
 unreserved = { VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================

@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 use std::fmt::{self, Write};
 
 use crate::{common::Span, pattern::Label, write_joined};
@@ -189,15 +195,15 @@ impl fmt::Display for AnnotationRelates {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Related {
     List(Label),
-    Attribute(Label, Option<Label>),
+    Role(Label, Option<Label>),
 }
 
 impl fmt::Display for Related {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::List(label) => write!(f, "{label}[]"),
-            Self::Attribute(label, None) => write!(f, "{label}"),
-            Self::Attribute(label, Some(overridden)) => write!(f, "{label} as {overridden}"),
+            Self::Role(label, None) => write!(f, "{label}"),
+            Self::Role(label, Some(overridden)) => write!(f, "{label} as {overridden}"),
         }
     }
 }
@@ -251,7 +257,7 @@ impl fmt::Display for Played {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
-    pub played: Played,
+    played: Played,
     span: Option<Span>,
 }
 
