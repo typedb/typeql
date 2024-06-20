@@ -45,12 +45,12 @@ fn visit_stage_match(node: Node<'_>) -> Match {
     Match::new(span, visit_patterns(patterns))
 }
 
-fn visit_patterns(node: Node<'_>) -> Vec<Pattern> {
+pub(super) fn visit_patterns(node: Node<'_>) -> Vec<Pattern> {
     debug_assert_eq!(node.as_rule(), Rule::patterns);
     node.into_children().map(visit_pattern).collect()
 }
 
-fn visit_pattern(node: Node<'_>) -> Pattern {
+pub(super) fn visit_pattern(node: Node<'_>) -> Pattern {
     debug_assert_eq!(node.as_rule(), Rule::pattern);
     let child = node.into_child();
     match child.as_rule() {

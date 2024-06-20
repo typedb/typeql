@@ -52,12 +52,12 @@ fn visit_query_undefine(node: Node<'_>) -> TypeQLUndefine {
     query
 }
 
-fn visit_definables(node: Node<'_>) -> Vec<Definable> {
+pub(super) fn visit_definables(node: Node<'_>) -> Vec<Definable> {
     debug_assert_eq!(node.as_rule(), Rule::definables);
     node.into_children().map(visit_definable).collect()
 }
 
-fn visit_definable(node: Node<'_>) -> Definable {
+pub(super) fn visit_definable(node: Node<'_>) -> Definable {
     debug_assert_eq!(node.as_rule(), Rule::definable);
     let child = node.into_child();
     match child.as_rule() {

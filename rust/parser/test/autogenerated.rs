@@ -14,7 +14,7 @@ use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
 use crate::{
-    parse_queries, parse_query,
+    parse_definables, parse_label, parse_pattern, parse_patterns, parse_queries, parse_query, parse_statement,
     parser::{parse_single, Rule},
 };
 
@@ -170,6 +170,7 @@ fn visit(
             TokenTree::Ident(ident) => {
                 if ident == "SOI" {
                     tree.roots.insert(rule_name.to_owned());
+                    children.next(); // skip '~' following SOI
                 } else if ident == "EOI" || ident == "WB" {
                     if !is_atomic {
                         vec.pop(); // preceded by `~`
@@ -275,7 +276,16 @@ fn can_parse_generated() {
 fn all_rules_covered_by_visitors() {
     let tree = grammar();
 
-    let parsers: HashMap<&'static str, _> = [("eof_query", parse_query)].into();
+    let parsers: HashMap<&'static str, fn(&str)> = [
+        ("eof_query", (|s| parse_query(s).map(|_| ()).unwrap()) as fn(&str)),
+        ("eof_queries", (|s| parse_queries(s).map(|_| ()).unwrap()) as fn(&str)),
+        ("eof_pattern", (|s| parse_pattern(s).map(|_| ()).unwrap()) as fn(&str)),
+        ("eof_patterns", (|s| parse_patterns(s).map(|_| ()).unwrap()) as fn(&str)),
+        ("eof_definables", (|s| parse_definables(s).map(|_| ()).unwrap()) as fn(&str)),
+        ("eof_statement", (|s| parse_statement(s).map(|_| ()).unwrap()) as fn(&str)),
+        ("eof_label", (|s| parse_label(s).map(|_| ()).unwrap()) as fn(&str)),
+    ]
+    .into();
 
     for rule in tree.roots {
         if !parsers.contains_key(rule.as_str()) {
@@ -283,7 +293,7 @@ fn all_rules_covered_by_visitors() {
         }
         for _ in 0..ITERS_PER_DEPTH {
             for max_depth in MIN_DEPTH..=MAX_DEPTH {
-                parsers[rule.as_str()](&generate(&tree.rules, &rule, max_depth)).unwrap();
+                parsers[rule.as_str()](&generate(&tree.rules, &rule, max_depth));
             }
         }
     }

@@ -7,12 +7,17 @@
 use pest::Parser;
 use pest_derive::Parser;
 
+use self::{
+    data::{visit_pattern, visit_patterns},
+    schema::visit_definables,
+    statement::visit_statement,
+};
 use crate::{
     common::{
         error::{syntax_error, TypeQLError},
         LineColumn, Span, Spanned,
     },
-    pattern::{statement::Variable, Label},
+    pattern::{statement::Variable, Definable, Label, Pattern, Statement},
     query::Query,
     Result,
 };
@@ -127,41 +132,32 @@ pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Qu
         .map(visit_query))
 }
 
-// pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
-//     visit_pattern(parse_single(Rule::eof_pattern, pattern)?.into_children().consume_expected(Rule::pattern)).validated()
-// }
+pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
+    Ok(visit_pattern(parse_single(Rule::eof_pattern, pattern)?.into_children().consume_expected(Rule::pattern)))
+}
 
-// pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
-//     visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::patterns))
-//         .into_iter()
-//         .map(Validatable::validated)
-//         .collect()
-// }
+pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
+    Ok(visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::patterns)))
+}
 
-// pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
-//     visit_definables(parse_single(Rule::eof_definables, definables)?.into_children().consume_expected(Rule::definables))
-//         .into_iter()
-//         .map(Validatable::validated)
-//         .collect()
-// }
+pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
+    Ok(visit_definables(
+        parse_single(Rule::eof_definables, definables)?.into_children().consume_expected(Rule::definables),
+    ))
+}
 
-// pub(crate) fn visit_eof_statement(statement: &str) -> Result<Statement> {
-//     visit_statement(parse_single(Rule::eof_statement, statement)?.into_children().consume_expected(Rule::statement))
-//         .validated()
-// }
+pub(crate) fn visit_eof_statement(statement: &str) -> Result<Statement> {
+    Ok(visit_statement(parse_single(Rule::eof_statement, statement)?.into_children().consume_expected(Rule::statement)))
+}
 
-// pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
-//     let parsed = parse_single(Rule::eof_label, label)?.into_children().consume_expected(Rule::label);
-//     let string = parsed.as_str();
-//     if string != label {
-//         Err(TypeQLError::InvalidTypeLabel { label: label.to_string() })?;
-//     }
-//     Ok(string.into())
-// }
-
-// pub(crate) fn visit_eof_schema_rule(rule: &str) -> Result<crate::pattern::Rule> {
-//     visit_schema_rule(parse_single(Rule::eof_schema_rule, rule)?).validated()
-// }
+pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
+    let parsed = parse_single(Rule::eof_label, label)?.into_children().consume_expected(Rule::label);
+    let string = parsed.as_str();
+    if string != label {
+        Err(TypeQLError::InvalidTypeLabel { label: label.to_string() })?;
+    }
+    Ok(visit_label(parsed))
+}
 
 fn visit_query(node: Node<'_>) -> Query {
     debug_assert_eq!(node.as_rule(), Rule::query);
