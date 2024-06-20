@@ -70,7 +70,7 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
 
 fn visit_expression_base(node: Node<'_>) -> Expression {
     match node.as_rule() {
-        Rule::VAR => Expression::Variable(visit_var(node)),
+        Rule::var => Expression::Variable(visit_var(node)),
         Rule::value_primitive => Expression::Value(visit_value_primitive(node)),
         Rule::expression_function => Expression::Function(visit_expression_function(node)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(node))),
@@ -83,7 +83,7 @@ fn visit_expression_list_index(node: Node<'_>) -> ListIndex {
     debug_assert_eq!(node.as_rule(), Rule::expression_list_index);
     let span = node.span();
     let mut children = node.into_children();
-    let variable = visit_var(children.consume_expected(Rule::VAR));
+    let variable = visit_var(children.consume_expected(Rule::var));
     let index = visit_list_index(children.consume_expected(Rule::list_index));
     ListIndex::new(span, variable, index)
 }
@@ -122,7 +122,7 @@ fn visit_expression_list_subrange(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression_list_subrange);
     let span = node.span();
     let mut children = node.into_children();
-    let var = visit_var(children.consume_expected(Rule::VAR));
+    let var = visit_var(children.consume_expected(Rule::var));
     let (from, to) = visit_list_range(children.consume_expected(Rule::list_range));
     debug_assert!(children.try_consume_any().is_none());
     Expression::ListIndexRange(Box::new(ListIndexRange::new(span, var, from, to)))
@@ -147,6 +147,6 @@ fn visit_expression_list_new(node: Node<'_>) -> Expression {
 fn visit_expression_function_name(node: Node<'_>) -> Identifier {
     debug_assert_eq!(node.as_rule(), Rule::expression_function_name);
     let child = node.into_child();
-    debug_assert!(matches!(child.as_rule(), Rule::LABEL | Rule::BUILTIN_FUNC_NAME), "{:?}", child.as_rule());
+    debug_assert!(matches!(child.as_rule(), Rule::label | Rule::builtin_func_name), "{:?}", child.as_rule());
     Identifier(child.as_str().to_owned())
 }

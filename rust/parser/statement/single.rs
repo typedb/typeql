@@ -56,9 +56,9 @@ pub fn visit_statement_is(node: Node<'_>) -> Is {
     debug_assert_eq!(node.as_rule(), Rule::statement_is);
     let span = node.span();
     let mut children = node.into_children();
-    let lhs = visit_var(children.consume_expected(Rule::VAR));
+    let lhs = visit_var(children.consume_expected(Rule::var));
     children.skip_expected(Rule::IS);
-    let rhs = visit_var(children.consume_expected(Rule::VAR));
+    let rhs = visit_var(children.consume_expected(Rule::var));
     Is::new(span, lhs, rhs)
 }
 
@@ -66,8 +66,8 @@ pub fn visit_statement_in(node: Node<'_>) -> InStream {
     debug_assert_eq!(node.as_rule(), Rule::statement_in);
     let span = node.span();
     let mut children = node.into_children();
-    let mut lhs = vec![visit_var(children.consume_expected(Rule::VAR))];
-    while let Some(var) = children.try_consume_expected(Rule::VAR) {
+    let mut lhs = vec![visit_var(children.consume_expected(Rule::var))];
+    while let Some(var) = children.try_consume_expected(Rule::var) {
         lhs.push(visit_var(var));
     }
     children.skip_expected(Rule::IN);

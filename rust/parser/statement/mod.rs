@@ -66,8 +66,8 @@ fn visit_type_ref(node: Node<'_>) -> Type {
     debug_assert_eq!(node.as_rule(), Rule::type_ref);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::VAR => Type::Variable(visit_var(child)),
-        Rule::LABEL => Type::Label(visit_label(child)),
+        Rule::var => Type::Variable(visit_var(child)),
+        Rule::label => Type::Label(visit_label(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -76,8 +76,8 @@ fn visit_type_ref_scoped(node: Node<'_>) -> Type {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_scoped);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::VAR => Type::Variable(visit_var(child)),
-        Rule::LABEL_SCOPED => Type::Label(visit_label_scoped(child)),
+        Rule::var => Type::Variable(visit_var(child)),
+        Rule::label_scoped => Type::Label(visit_label_scoped(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -86,7 +86,7 @@ fn visit_type_ref_list(node: Node<'_>) -> Type {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::LIST_VAR => Type::Variable(visit_list_var(child)),
+        Rule::list_var => Type::Variable(visit_list_var(child)),
         Rule::list_label => Type::Label(visit_list_label(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }

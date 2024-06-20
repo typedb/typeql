@@ -180,23 +180,23 @@ fn visit_label_any(node: Node<'_>) -> Label {
     debug_assert_eq!(node.as_rule(), Rule::label_any);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::LABEL => visit_label(child),
-        Rule::LABEL_SCOPED => visit_label_scoped(child),
+        Rule::label => visit_label(child),
+        Rule::label_scoped => visit_label_scoped(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
 fn visit_label(label: Node<'_>) -> Label {
-    debug_assert_eq!(label.as_rule(), Rule::LABEL);
+    debug_assert_eq!(label.as_rule(), Rule::label);
     Label::new_unscoped(label.as_str(), label.span())
 }
 
 fn visit_label_scoped(label: Node<'_>) -> Label {
-    debug_assert_eq!(label.as_rule(), Rule::LABEL_SCOPED);
+    debug_assert_eq!(label.as_rule(), Rule::label_scoped);
     let span = label.span();
     let mut children = label.into_children();
-    let scope = children.consume_expected(Rule::LABEL);
-    let name = children.consume_expected(Rule::LABEL);
+    let scope = children.consume_expected(Rule::label);
+    let name = children.consume_expected(Rule::label);
     Label::new_scoped(scope.as_str(), name.as_str(), span)
 }
 
@@ -206,7 +206,7 @@ fn visit_list_label(node: Node<'_>) -> Label {
 }
 
 fn visit_var(node: Node<'_>) -> Variable {
-    debug_assert_eq!(node.as_rule(), Rule::VAR);
+    debug_assert_eq!(node.as_rule(), Rule::var);
     let span = node.span();
 
     let name = node.as_str();
@@ -220,7 +220,7 @@ fn visit_var(node: Node<'_>) -> Variable {
 }
 
 fn visit_list_var(node: Node<'_>) -> Variable {
-    debug_assert_eq!(node.as_rule(), Rule::LIST_VAR);
+    debug_assert_eq!(node.as_rule(), Rule::list_var);
     visit_var(node.into_child())
 }
 

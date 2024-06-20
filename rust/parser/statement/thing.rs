@@ -38,7 +38,7 @@ pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement_thing_var);
     let span = node.span();
     let mut children = node.into_children();
-    let var = visit_var(children.consume_expected(Rule::VAR));
+    let var = visit_var(children.consume_expected(Rule::var));
     let child = children.consume_any();
     match child.as_rule() {
         Rule::thing_constraint => {
@@ -108,7 +108,7 @@ fn visit_iid_constraint(node: Node<'_>) -> Iid {
     debug_assert_eq!(node.as_rule(), Rule::iid_constraint);
     let span = node.span();
     let mut children = node.into_children();
-    let iid = children.skip_expected(Rule::IID).consume_expected(Rule::IID_VALUE).as_str().to_owned();
+    let iid = children.skip_expected(Rule::IID).consume_expected(Rule::iid_value).as_str().to_owned();
     debug_assert!(children.try_consume_any().is_none());
     Iid::new(span, iid)
 }
@@ -120,7 +120,7 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
     children.skip_expected(Rule::HAS);
     let child = children.consume_any();
     let has = match child.as_rule() {
-        Rule::VAR => Has::new(span, None, HasValue::Variable(visit_var(child))),
+        Rule::var => Has::new(span, None, HasValue::Variable(visit_var(child))),
         Rule::type_ref => {
             let type_ = Some(visit_type_ref(child));
             let value_node = children.consume_any();
@@ -138,7 +138,7 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
             let type_ = Some(visit_type_ref_list(child));
             let value_node = children.consume_any();
             let value = match value_node.as_rule() {
-                Rule::VAR => HasValue::Variable(visit_var(value_node)),
+                Rule::var => HasValue::Variable(visit_var(value_node)),
                 Rule::comparison => HasValue::Comparison(visit_comparison(value_node)),
                 Rule::expression_list => HasValue::Expression(visit_expression_list(value_node)),
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_node.to_string() }),
@@ -173,10 +173,10 @@ fn visit_role_player(node: Node<'_>) -> RolePlayer {
     let mut children = node.into_children();
     let child = children.consume_any();
     let role_player = match child.as_rule() {
-        Rule::VAR => RolePlayer::Untyped(visit_var(child)),
-        Rule::type_ref => RolePlayer::Typed(visit_type_ref(child), visit_var(children.consume_expected(Rule::VAR))),
+        Rule::var => RolePlayer::Untyped(visit_var(child)),
+        Rule::type_ref => RolePlayer::Typed(visit_type_ref(child), visit_var(children.consume_expected(Rule::var))),
         Rule::type_ref_list => {
-            RolePlayer::Typed(visit_type_ref_list(child), visit_var(children.consume_expected(Rule::VAR)))
+            RolePlayer::Typed(visit_type_ref_list(child), visit_var(children.consume_expected(Rule::var)))
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
@@ -188,7 +188,7 @@ fn visit_type_ref_list(node: Node<'_>) -> Type {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::LIST_VAR => Type::ListVariable(visit_var(child.into_child())),
+        Rule::list_var => Type::ListVariable(visit_var(child.into_child())),
         Rule::list_label => Type::ListLabel(visit_label(child.into_child())),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
