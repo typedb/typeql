@@ -7,10 +7,10 @@
 use super::{statement::visit_statement, IntoChildNodes, Node, Rule};
 use crate::{
     common::{error::TypeQLError, Spanned},
-    parser::RuleMatcher,
+    parser::{statement::thing::visit_statement_things, RuleMatcher},
     pattern::{Conjunction, Disjunction, Negation, Pattern, Try},
     query::{
-        data::stage::{Insert, Match, Stage},
+        data::stage::{Delete, Insert, Match, Stage},
         DataQuery,
     },
 };
@@ -28,7 +28,7 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
     match child.as_rule() {
         Rule::stage_match => Stage::Match(visit_stage_match(child)),
         Rule::stage_insert => Stage::Insert(visit_stage_insert(child)),
-        Rule::stage_delete => visit_stage_delete(child),
+        Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
         Rule::stage_put => visit_stage_put(child),
         Rule::stage_fetch => visit_stage_fetch(child),
         Rule::stage_reduce => visit_stage_reduce(child),
@@ -105,12 +105,15 @@ fn visit_stage_insert(node: Node<'_>) -> Insert {
     let span = node.span();
     let mut children = node.into_children();
     let statement_things = children.skip_expected(Rule::INSERT).consume_expected(Rule::statement_things);
-    // StageInsert::new(span, visit_statement_things(statements))
-    todo!()
+    Insert::new(span, visit_statement_things(statement_things))
 }
 
-fn visit_stage_delete(node: Node<'_>) -> Stage {
-    todo!()
+fn visit_stage_delete(node: Node<'_>) -> Delete {
+    debug_assert_eq!(node.as_rule(), Rule::stage_delete);
+    let span = node.span();
+    let mut children = node.into_children();
+    let statement_things = children.skip_expected(Rule::DELETE).consume_expected(Rule::statement_things);
+    Delete::new(span, visit_statement_things(statement_things))
 }
 
 fn visit_stage_put(node: Node<'_>) -> Stage {

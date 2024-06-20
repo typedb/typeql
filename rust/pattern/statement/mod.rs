@@ -7,7 +7,7 @@
 use super::Label;
 use crate::{
     common::{token::Comparator, Span, Spanned},
-    expression::{Expression, FunctionCall},
+    expression::{Expression, FunctionCall, Value},
 };
 
 // FIXME move
@@ -130,13 +130,13 @@ impl RelationStatement {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ObjectStatement {
+pub struct ThingStatement {
     span: Option<Span>,
     head: Variable,
     constraints: Vec<ThingConstraint>,
 }
 
-impl ObjectStatement {
+impl ThingStatement {
     pub fn new(span: Option<Span>, head: Variable, constraints: Vec<ThingConstraint>) -> Self {
         Self { span, head, constraints }
     }
@@ -214,11 +214,40 @@ impl Links {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct AttributeValueStatement {
+    span: Option<Span>,
+    type_: Option<Type>,
+    value: Value,
+    isa: Isa,
+}
+
+impl AttributeValueStatement {
+    pub fn new(span: Option<Span>, type_: Option<Type>, value: Value, isa: Isa) -> Self {
+        Self { span, type_, value, isa }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct AttributeComparisonStatement {
+    span: Option<Span>,
+    comparison: Comparison,
+    isa: Isa,
+}
+
+impl AttributeComparisonStatement {
+    pub fn new(span: Option<Span>, comparison: Comparison, isa: Isa) -> Self {
+        Self { span, comparison, isa }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
     Is(Is),
     InStream(InStream),
     Comparison(ComparisonStatement),
     Assignment(Assignment),
+    Thing(ThingStatement),
     Relation(RelationStatement),
-    Object(ObjectStatement),
+    AttributeValue(AttributeValueStatement),
+    AttributeComparison(AttributeComparisonStatement),
 }

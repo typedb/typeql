@@ -4,13 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+mod delete;
 mod insert;
 mod match_;
 
-pub use self::{insert::Insert, match_::Match};
+pub use self::{delete::Delete, insert::Insert, match_::Match};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Stage {
     Match(Match),
     Insert(Insert),
+    Delete(Delete),
 }

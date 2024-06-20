@@ -150,8 +150,8 @@ statement_thing = { statement_thing_var | statement_anon_relation }
 statement_anon_relation = { relation ~ ( COMMA ~ thing_constraint )* }
 
 statement_thing_var = { VAR ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
-                      | VAR ~ ( value_primitive | expression_struct ) ~ ISA_ ~ type_ref
-                      | VAR ~ comparison ~ (ISA_ ~ type_ref)?
+                      | VAR ~ ( value_primitive | expression_struct ) ~ isa_constraint
+                      | VAR ~ comparison ~ isa_constraint
                       }
 
 thing_constraint = { isa_constraint

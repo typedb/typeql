@@ -7,13 +7,14 @@
 use crate::{common::Span, pattern::Statement};
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Insert {
+pub struct Delete {
     span: Option<Span>,
     statements: Vec<Statement>,
 }
 
-impl Insert {
+impl Delete {
     pub(crate) fn new(span: Option<Span>, statements: Vec<Statement>) -> Self {
         Self { span, statements }
     }
 }
+

@@ -93,8 +93,13 @@ fn visit_list_index(node: Node<'_>) -> Expression {
     visit_expression_value(node.into_child())
 }
 
-fn visit_value_primitive(node: Node<'_>) -> Value {
+pub(super) fn visit_value_primitive(node: Node<'_>) -> Value {
     debug_assert_eq!(node.as_rule(), Rule::value_primitive);
+    Value::new(node.span(), node.as_str().to_owned()) // TODO parse value properly
+}
+
+pub(super) fn visit_expression_struct(node: Node<'_>) -> Value {
+    debug_assert_eq!(node.as_rule(), Rule::expression_struct);
     Value::new(node.span(), node.as_str().to_owned()) // TODO parse value properly
 }
 
