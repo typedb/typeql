@@ -97,7 +97,7 @@ error_messages! { TypeQLError
     MatchStatementHasNoNamedVariable { pattern: Pattern } =
         9: "The statement '{pattern}' has no named variable.",
     MatchHasUnboundedNestedPattern { pattern: Pattern } =
-        10: "The match query contains a nested pattern is not bounded: '{pattern}'.",
+        10: "The match query contains an unbounded nested pattern: '{pattern}'.",
     InvalidIIDString { iid: String } =
         11: "Invalid IID: '{iid}'. IIDs must follow the regular expression: '0x[0-9a-f]+'.",
     InvalidAttributeTypeRegex { regex: String } =
@@ -129,7 +129,7 @@ error_messages! { TypeQLError
     InvalidConstraintDatetimePrecision { date_time: NaiveDateTime } =
         25: "Attempted to assign DateTime value of '{date_time}' which is more precise than 1 millisecond.",
     InvalidDefineQueryVariable =
-        26: "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.",
+        26: "Invalid define/undefine query. User defined variables are not accepted in a define/undefine query.",
     InvalidUndefineQueryRule { rule_label: Label } =
         27: "Invalid undefine query: the rule body of '{rule_label}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
     InvalidRuleWhenMissingPatterns { rule_label: Label } =
