@@ -19,7 +19,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage MISSING_PATTERNS =
             new ErrorMessage(5, "The query has not been provided with any patterns.");
     public static final ErrorMessage VARIABLE_NAME_CONFLICT =
-            new ErrorMessage(6, "The variable(s) named '%s' cannot be used for both concept variables and a value variables.");
+            new ErrorMessage(6, "The variable(s) named '%s' cannot be used for both a concept variable and a value variable.");
     public static final ErrorMessage MISSING_DEFINABLES =
             new ErrorMessage(7, "The query has not been provided with any definables.");
     public static final ErrorMessage MATCH_HAS_NO_BOUNDING_NAMED_VARIABLE =
@@ -29,7 +29,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE =
             new ErrorMessage(10, "The pattern '%s' has no named variable.");
     public static final ErrorMessage MATCH_HAS_UNBOUNDED_NESTED_PATTERN =
-            new ErrorMessage(11, "The match query contains a nested pattern is not bounded: '%s'.");
+            new ErrorMessage(11, "The match query contains an unbounded nested pattern: '%s'.");
     public static final ErrorMessage MISSING_GET_FILTER =
             new ErrorMessage(12, "The get query cannot be constructed with NULL filter variable collection.");
     public static final ErrorMessage INVALID_IID_STRING =
@@ -59,7 +59,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage INVALID_CONSTRAINT_DATETIME_PRECISION =
             new ErrorMessage(26, "Attempted to assign DateTime value of '%s' which is more precise than 1 millisecond.");
     public static final ErrorMessage INVALID_DEFINE_QUERY_VARIABLE =
-            new ErrorMessage(27, "Invalid define/undefine query. User defined variables are not accepted in define/undefine query.");
+            new ErrorMessage(27, "Invalid define/undefine query. User-defined variables are not accepted in a define/undefine query.");
     public static final ErrorMessage INVALID_UNDEFINE_QUERY_RULE =
             new ErrorMessage(28, "Invalid undefine query: the rule body of '%s' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.");
     public static final ErrorMessage INVALID_RULE_WHEN_MISSING_PATTERNS =
@@ -89,7 +89,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage ILLEGAL_GRAMMAR =
             new ErrorMessage(41, "Illegal grammar: '%s'");
     public static final ErrorMessage INVALID_TYPE_LABEL =
-            new ErrorMessage(42, "The type label '%s' is invalid. Type labels must be valid unicode identifiers.");
+            new ErrorMessage(42, "The type label '%s' is invalid. Type labels must be valid Unicode identifiers.");
     public static final ErrorMessage INVALID_ANNOTATION =
             new ErrorMessage(43, "Invalid annotation '%s' on '%s' constraint");
 
