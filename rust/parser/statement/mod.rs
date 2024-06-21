@@ -48,7 +48,7 @@ fn visit_comparison(node: Node<'_>) -> Comparison {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: comparator_node.to_string() }),
     };
     let rhs = visit_expression_value(children.consume_expected(Rule::expression_value));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Comparison::new(span, comparator, rhs)
 }
 

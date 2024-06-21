@@ -28,7 +28,7 @@ pub(super) fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
         Rule::query_undefine => SchemaQuery::Undefine(visit_query_undefine(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     query
 }
 
@@ -38,7 +38,7 @@ fn visit_query_define(node: Node<'_>) -> TypeQLDefine {
     let mut children = node.into_children();
     children.skip_expected(Rule::DEFINE);
     let query = TypeQLDefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     query
 }
 
@@ -48,7 +48,7 @@ fn visit_query_undefine(node: Node<'_>) -> TypeQLUndefine {
     let mut children = node.into_children();
     children.skip_expected(Rule::UNDEFINE);
     let query = TypeQLUndefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     query
 }
 
@@ -98,7 +98,7 @@ fn visit_plays_declaration(node: Node<'_>) -> Plays {
         Some(_) => Played::new(label, Some(visit_label(children.consume_expected(Rule::label)))),
     };
 
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Plays::new(played, span)
 }
 
@@ -122,7 +122,7 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
     };
 
     let annotations_relates = visit_annotations_relates(children.consume_expected(Rule::annotations_relates));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Relates::new(related, annotations_relates, span)
 }
 
@@ -168,7 +168,7 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
     };
 
     let annotations_owns = visit_annotations_owns(children.consume_expected(Rule::annotations_owns));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Owns::new(owned, annotations_owns, span)
 }
 
@@ -176,7 +176,7 @@ fn visit_list_label(node: Node<'_>) -> Label {
     debug_assert_eq!(node.as_rule(), Rule::list_label);
     let mut children = node.into_children();
     let label = children.consume_expected(Rule::label);
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Label::new_unscoped(label.as_str(), label.span())
 }
 
@@ -217,7 +217,7 @@ fn visit_value_type_declaration(node: Node<'_>) -> ValueType {
         ),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
     };
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     ValueType::new(value_type, annotations_value_type, span)
 }
 
@@ -252,7 +252,7 @@ fn visit_sub_declaration(node: Node<'_>) -> Sub {
     children.skip_expected(Rule::SUB);
     let supertype_label = visit_label(children.consume_expected(Rule::label));
     let annotations_sub = visit_annotations_sub(children.consume_expected(Rule::annotations_sub));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Sub::new(supertype_label, annotations_sub, span)
 }
 

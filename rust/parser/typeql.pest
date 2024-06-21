@@ -45,25 +45,27 @@ stage_fetch = { FETCH ~ projections }
 stage_reduce = { reduce ~ SEMICOLON }
 reduce = { reduce_limited
          | reduce_all ~ ( COMMA ~ reduce_all )* }
+reduce_limited = { CHECK | reduce_first }
+reduce_first = { FIRST ~ PAREN_OPEN ~ var ~ ( COMMA ~ var )* ~ PAREN_CLOSE }
 reduce_all = { COUNT ~ PAREN_OPEN ~ var? ~ ( COMMA ~ var )* ~ PAREN_CLOSE
              | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+             | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
              | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
              | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
              | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
              | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
              }
-reduce_limited = { CHECK | reduce_first }
-reduce_first = { FIRST ~ var ~ ( COMMA ~ var )* }
 
 // QUERY MODIFIERS =============================================================
 
-stage_modifier = { stage_filter ~ SEMICOLON | stage_sort ~ SEMICOLON | offset ~ SEMICOLON | stage_limit ~ SEMICOLON }
+stage_modifier = { stage_filter ~ SEMICOLON | stage_sort ~ SEMICOLON | stage_offset ~ SEMICOLON | stage_limit ~ SEMICOLON }
+
 stage_filter = { FILTER ~ var ~ ( COMMA ~ var )* }
-stage_limit = { LIMIT ~ long_value }
 stage_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* }
+stage_offset = { OFFSET ~ long_value }
+stage_limit = { LIMIT ~ long_value }
+
 var_order = { var ~ ORDER? }
-offset = { OFFSET ~ long_value }
 
 // FETCH QUERY =================================================================
 
@@ -298,8 +300,9 @@ FETCH = @{ "fetch" ~ WB }
 DEFINE = @{ "define" ~ WB }
 UNDEFINE = @{ "undefine" ~ WB }
 INSERT = @{ "insert" ~ WB }
+PUT = @{ "put" ~ WB }
 DELETE = @{ "delete" ~ WB }
-CHECK = @{ "check" }
+CHECK = @{ "check" ~ WB }
 FIRST = @{ "first" ~ WB }
 
 // NATIVE TYPE KEYWORDS
@@ -315,7 +318,7 @@ FILTER = @{ "filter" ~ WB }
 LIMIT = @{ "limit" ~ WB }
 OFFSET = @{ "offset" ~ WB }
 SORT = @{ "sort" ~ WB }
-ORDER = @{ ASC | DESC }
+ORDER = ${ ASC | DESC }
 ASC = @{ "asc" ~ WB }
 DESC = @{ "desc" ~ WB }
 

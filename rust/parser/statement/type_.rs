@@ -70,7 +70,7 @@ fn visit_value_type_constraint(node: Node<'_>) -> ValueType {
     children.skip_expected(Rule::VALUE);
     let value_type = visit_value_type_primitive(children.consume_expected(Rule::value_type_primitive));
     let annotations = visit_annotations_value(children.consume_expected(Rule::annotations_value));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     ValueType::new(value_type, annotations, span)
 }
 
@@ -80,7 +80,7 @@ fn visit_label_constraint(node: Node<'_>) -> Label {
     let mut children = node.into_children();
     children.skip_expected(Rule::TYPE);
     let label = visit_label_any(children.consume_expected(Rule::label_any));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     label
 }
 
@@ -104,7 +104,7 @@ fn visit_owns_constraint(node: Node<'_>) -> Owns {
     };
 
     let annotations_owns = visit_annotations_owns(children.consume_expected(Rule::annotations_owns));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Owns::new(owned, annotations_owns, span)
 }
 
@@ -128,7 +128,7 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
     };
 
     let annotations_relates = visit_annotations_relates(children.consume_expected(Rule::annotations_relates));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Relates::new(related, annotations_relates, span)
 }
 
@@ -144,7 +144,7 @@ fn visit_plays_constraint(node: Node<'_>) -> Plays {
         Some(_) => Played::new(role_type, Some(visit_type_ref(children.consume_expected(Rule::type_ref)))),
     };
 
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Plays::new(played, span)
 }
 

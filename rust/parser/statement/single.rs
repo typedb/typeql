@@ -33,7 +33,7 @@ pub fn visit_statement_assignment(node: Node<'_>) -> Assignment {
     let lhs = visit_assignment_left(children.consume_expected(Rule::assignment_left));
     children.skip_expected(Rule::ASSIGN);
     let rhs = visit_expression(children.consume_expected(Rule::expression));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Assignment::new(span, lhs, rhs)
 }
 
@@ -48,7 +48,7 @@ pub fn visit_statement_comparison(node: Node<'_>) -> ComparisonStatement {
     let mut children = node.into_children();
     let lhs = visit_expression_value(children.consume_expected(Rule::expression_value));
     let comparison = visit_comparison(children.consume_expected(Rule::comparison));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     ComparisonStatement::new(span, lhs, comparison)
 }
 

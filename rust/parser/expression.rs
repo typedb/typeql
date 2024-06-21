@@ -124,7 +124,7 @@ fn visit_expression_list_subrange(node: Node<'_>) -> Expression {
     let mut children = node.into_children();
     let var = visit_var(children.consume_expected(Rule::var));
     let (from, to) = visit_list_range(children.consume_expected(Rule::list_range));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Expression::ListIndexRange(Box::new(ListIndexRange::new(span, var, from, to)))
 }
 
@@ -133,7 +133,7 @@ fn visit_list_range(node: Node<'_>) -> (Expression, Expression) {
     let mut children = node.into_children();
     let from = visit_expression_value(children.consume_expected(Rule::expression_value));
     let to = visit_expression_value(children.consume_expected(Rule::expression_value));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     (from, to)
 }
 

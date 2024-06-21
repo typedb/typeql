@@ -168,7 +168,7 @@ fn visit_query(node: Node<'_>) -> Query {
         Rule::query_data => Query::Data(data::visit_query_data(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     query
 }
 
@@ -222,4 +222,9 @@ fn visit_list_var(node: Node<'_>) -> Variable {
 
 fn visit_value_type_primitive(node: Node<'_>) -> String {
     node.as_str().to_owned() // FIXME
+}
+
+fn visit_long_value(node: Node<'_>) -> u64 {
+    debug_assert_eq!(node.as_rule(), Rule::long_value);
+    node.as_str().parse().unwrap() // TODO what should happen if the number is too large?
 }

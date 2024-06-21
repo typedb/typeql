@@ -7,9 +7,11 @@
 mod delete;
 mod insert;
 mod match_;
+pub mod modifier;
+pub mod reduce;
 mod put;
 
-pub use self::{delete::Delete, insert::Insert, match_::Match, put::Put};
+pub use self::{reduce::Reduce, delete::Delete, insert::Insert, match_::Match, modifier::Modifier, put::Put};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Stage {
@@ -17,4 +19,6 @@ pub enum Stage {
     Insert(Insert),
     Put(Put),
     Delete(Delete),
+    Reduce(Reduce),
+    Modifier(Modifier),
 }

@@ -90,7 +90,7 @@ fn visit_isa_constraint(node: Node<'_>) -> Isa {
     let mut children = node.into_children();
     let kind = visit_isa_token(children.consume_expected(Rule::ISA_));
     let type_ = visit_type_ref(children.consume_expected(Rule::type_ref));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Isa::new(span, kind, type_)
 }
 
@@ -109,7 +109,7 @@ fn visit_iid_constraint(node: Node<'_>) -> Iid {
     let span = node.span();
     let mut children = node.into_children();
     let iid = children.skip_expected(Rule::IID).consume_expected(Rule::iid_value).as_str().to_owned();
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Iid::new(span, iid)
 }
 
@@ -147,7 +147,7 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     has
 }
 
@@ -156,7 +156,7 @@ fn visit_links_constraint(node: Node<'_>) -> Links {
     let span = node.span();
     let mut children = node.into_children();
     let relation = visit_relation(children.skip_expected(Rule::LINKS).consume_expected(Rule::relation));
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     Links::new(span, relation)
 }
 
@@ -180,7 +180,7 @@ fn visit_role_player(node: Node<'_>) -> RolePlayer {
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    debug_assert!(children.try_consume_any().is_none());
+    debug_assert_eq!(children.try_consume_any(), None);
     role_player
 }
 
