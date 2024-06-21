@@ -93,7 +93,7 @@ error_messages! { TypeQLError
     MatchHasNoBoundingNamedVariable =
         7: "The match query does not have named variables to bound the nested disjunction/negation pattern(s).",
     VariableNameConflict { names: String } =
-        8: "The variable names {names} cannot be used for both concept variables and value variables.",
+        8: "The variable(s) named {names} cannot be used for both a concept variable and a value variable.",
     MatchStatementHasNoNamedVariable { pattern: Pattern } =
         9: "The statement '{pattern}' has no named variable.",
     MatchHasUnboundedNestedPattern { pattern: Pattern } =
@@ -129,7 +129,7 @@ error_messages! { TypeQLError
     InvalidConstraintDatetimePrecision { date_time: NaiveDateTime } =
         25: "Attempted to assign DateTime value of '{date_time}' which is more precise than 1 millisecond.",
     InvalidDefineQueryVariable =
-        26: "Invalid define/undefine query. User defined variables are not accepted in a define/undefine query.",
+        26: "Invalid define/undefine query. User-defined variables are not accepted in a define/undefine query.",
     InvalidUndefineQueryRule { rule_label: Label } =
         27: "Invalid undefine query: the rule body of '{rule_label}' ('when' or 'then') cannot be undefined. The rule must be undefined entirely by referring to its label.",
     InvalidRuleWhenMissingPatterns { rule_label: Label } =
@@ -153,5 +153,5 @@ error_messages! { TypeQLError
     IllegalGrammar { input: String } =
         37: "Illegal grammar: '{input}'",
     InvalidTypeLabel { label: String } =
-        38: "The type label '{label}' is invalid. Type labels must be valid utf-8 identifiers without a leading underscore.",
+        38: "The type label '{label}' is invalid. Type labels must be valid Unicode identifiers with restrictions on the leading character.",
 }
