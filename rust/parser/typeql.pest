@@ -488,16 +488,16 @@ IDENTIFIER_LABEL_T = @{ IDENTIFIER_LABEL_H | ASCII_DIGIT | IDENTIFIER_CONNECTOR 
 IDENTIFIER_VAR_H = @{ IDENTIFIER_CHAR | ASCII_DIGIT }
 IDENTIFIER_VAR_T = @{ IDENTIFIER_VAR_H | IDENTIFIER_CONNECTOR }
 
-DATE_FRAGMENT = ${ YEAR ~ "-" ~ MONTH ~ "-" ~ DAY }
-MONTH = @{ ('0'..'1') ~ ASCII_DIGIT }
-DAY = @{ ('0'..'3') ~ ASCII_DIGIT }
-YEAR = @{ ASCII_DIGIT{4} | ( "+" | "-" ) ~ ASCII_DIGIT+ }
-TIME = ${ HOUR ~ COLON ~ MINUTE ~ ( COLON ~ SECOND ~ ( "." ~ SECOND_FRACTION )? )? }
-HOUR = @{ ( '0'..'2' ) ~ ASCII_DIGIT }
-MINUTE = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
-SECOND = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
-SECOND_FRACTION = @{ ASCII_DIGIT{1,3} } // between 1 and 3 digits
-ESCAPE_SEQ = @{ "\\" ~ ANY }
+date_fragment = ${ year ~ "-" ~ month ~ "-" ~ day }
+month = @{ "0" ~ ( '1'..'9' ) | "10" | "11" | "12" }
+day = @{ ( '0'..'3' ) ~ ASCII_DIGIT }
+year = @{ ASCII_DIGIT{4} | ( "+" | "-" ) ~ ASCII_DIGIT+ }
+time = ${ hour ~ COLON ~ minute ~ ( COLON ~ second ~ ( "." ~ second_fraction )? )? }
+hour = @{ ( '0'..'2' ) ~ ASCII_DIGIT }
+minute = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
+second = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
+second_fraction = @{ ASCII_DIGIT{1,9} } // between 1 and 9 digits
+escape_seq = @{ "\\" ~ ANY }
 
 WB = _{ &( PUNCTUATION | WHITESPACE | COMMENT | EOI ) } // Word boundary
 
