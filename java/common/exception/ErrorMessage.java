@@ -89,7 +89,7 @@ public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessa
     public static final ErrorMessage ILLEGAL_GRAMMAR =
             new ErrorMessage(41, "Illegal grammar: '%s'");
     public static final ErrorMessage INVALID_TYPE_LABEL =
-            new ErrorMessage(42, "The type label '%s' is invalid. Type labels must be valid Unicode identifiers.");
+            new ErrorMessage(42, "The type label '%s' is invalid. Type labels must be valid Unicode identifiers with restrictions on the leading character.");
     public static final ErrorMessage INVALID_ANNOTATION =
             new ErrorMessage(43, "Invalid annotation '%s' on '%s' constraint");
 
