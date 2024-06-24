@@ -62,8 +62,8 @@ assemble_pip(
         "Topic :: Database :: Front-Ends"
     ],
     url = "https://github.com/vaticle/typeql",
-    author = "Vaticle",
-    author_email = "community@vaticle.com",
+    author = "TypeDB Community",
+    author_email = "community@typedb.com",
     license = "AGPLv3",
     requirements_file = "//:requirements.txt",
     keywords = ["typeql", "typedb", "database", "strongly-typed"],
