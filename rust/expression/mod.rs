@@ -5,23 +5,41 @@
  */
 
 use crate::{
-    common::{token::ArithmeticOperator, Span, Spanned},
-    pattern::statement::Variable,
+    common::{
+        token::{self, ArithmeticOperator},
+        Span, Spanned,
+    },
+    identifier::{Identifier, Variable},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Identifier(pub String); // TODO
+pub struct BuiltinFunctionName {
+    span: Option<Span>,
+    token: token::Function,
+}
+
+impl BuiltinFunctionName {
+    pub fn new(span: Option<Span>, token: token::Function) -> Self {
+        Self { span, token }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum FunctionName {
+    Builtin(BuiltinFunctionName),
+    Identifier(Identifier),
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FunctionCall {
     span: Option<Span>,
-    sigil: Identifier,
+    name: FunctionName,
     args: Vec<Expression>,
 }
 
 impl FunctionCall {
-    pub fn new(span: Option<Span>, sigil: Identifier, args: Vec<Expression>) -> Self {
-        Self { span, sigil, args }
+    pub fn new(span: Option<Span>, name: FunctionName, args: Vec<Expression>) -> Self {
+        Self { span, name, args }
     }
 }
 

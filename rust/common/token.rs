@@ -8,7 +8,7 @@ use std::fmt;
 
 macro_rules! string_enum {
     {$name:ident $($item:ident = $value:tt),* $(,)?} => {
-        #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+        #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
         pub enum $name {
             $($item),*
         }
@@ -45,7 +45,6 @@ macro_rules! string_enum {
 }
 
 string_enum! { Type
-    Thing = "thing",
     Entity = "entity",
     Relation = "relation",
     Attribute = "attribute",
@@ -143,8 +142,12 @@ string_enum! { Aggregate
 
 string_enum! { ValueType
     Boolean = "boolean",
+    Date = "date",
     DateTime = "datetime",
+    DateTimeTZ = "datetime-tz",
+    Decimal = "decimal",
     Double = "double",
+    Duration = "duration",
     Long = "long",
     String = "string",
 }
@@ -170,6 +173,7 @@ string_enum! { Function
     Max = "max",
     Min = "min",
     Round = "round",
+    Length = "length",
 }
 
 string_enum! { Projection

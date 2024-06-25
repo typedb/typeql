@@ -7,23 +7,39 @@
 use std::fmt;
 
 use self::stage::Stage;
-use crate::common::{Span, Spanned};
+use crate::{
+    common::{Span, Spanned},
+    definition,
+};
 
 pub mod stage;
 
 #[derive(Debug, Eq, PartialEq)]
+pub struct Preamble {
+    span: Option<Span>,
+    function: definition::Function,
+}
+
+impl Preamble {
+    pub fn new(span: Option<Span>, function: definition::Function) -> Self {
+        Self { span, function }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub struct DataQuery {
     span: Option<Span>,
+    preambles: Vec<Preamble>,
     stages: Vec<Stage>,
 }
 
 impl DataQuery {
-    pub(crate) fn new(span: Option<Span>) -> Self {
-        Self { span, stages: Vec::new() }
+    pub fn new(span: Option<Span>, preambles: Vec<Preamble>, stages: Vec<Stage>) -> Self {
+        Self { span, preambles, stages }
     }
 
     pub fn build() -> Self {
-        Self::new(None)
+        Self::new(None, Vec::new(), Vec::new())
     }
 
     pub fn then(mut self, stage: Stage) -> Self {

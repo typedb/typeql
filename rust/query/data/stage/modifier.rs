@@ -6,7 +6,7 @@
 
 use crate::{
     common::{token::Order, Span},
-    pattern::statement::Variable,
+    identifier::Variable,
 };
 
 #[derive(Debug, Eq, PartialEq)]

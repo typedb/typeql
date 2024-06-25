@@ -6,29 +6,25 @@
 
 use std::fmt;
 
-pub use self::{label::Label, statement::Statement};
-use crate::{common::Span, definition::Type, enum_getter, enum_wrapper};
+pub use self::statement::Statement;
+use crate::{
+    common::Span,
+    definition::{Function, Type},
+};
 
-pub mod label;
 pub mod statement;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Definable {
     TypeDeclaration(Type),
-}
-
-enum_getter! { Definable
-    into_type_statement(TypeDeclaration) => Type,
-}
-
-enum_wrapper! { Definable
-    Type => TypeDeclaration,
+    Function(Function),
 }
 
 impl fmt::Display for Definable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::TypeDeclaration(declaration) => fmt::Display::fmt(declaration, f),
+            Self::Function(declaration) => fmt::Display::fmt(declaration, f),
         }
     }
 }

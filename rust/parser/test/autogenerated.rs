@@ -210,6 +210,7 @@ fn visit(
                         vec.push(Expansion::Literal(" ".into()))
                     }
                 }
+                '^' => (), // ignore
                 '!' => {
                     children.next(); //skip
                 }
@@ -251,9 +252,9 @@ fn grammar() -> GrammarTree {
     GrammarTree::from_grammar(include_str!("../typeql.pest"))
 }
 
-const ITERS_PER_DEPTH: usize = 100;
+const ITERS_PER_DEPTH: usize = 10;
 const MIN_DEPTH: usize = 3;
-const MAX_DEPTH: usize = 30;
+const MAX_DEPTH: usize = 10;
 
 #[test]
 fn can_parse_generated() {

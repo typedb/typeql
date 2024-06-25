@@ -4,7 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use self::{single::visit_statement_single, thing::*};
+use self::{
+    single::visit_statement_single,
+    thing::{visit_statement_anon_relation, visit_statement_thing_var},
+};
 use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token::Comparator, Spanned},
@@ -77,7 +80,7 @@ fn visit_type_ref_scoped(node: Node<'_>) -> Type {
     let child = node.into_child();
     match child.as_rule() {
         Rule::var => Type::Variable(visit_var(child)),
-        Rule::label_scoped => Type::Label(visit_label_scoped(child)),
+        Rule::label_scoped => Type::ScopedLabel(visit_label_scoped(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

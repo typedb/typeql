@@ -8,10 +8,17 @@ use std::fmt::{self, Write};
 
 use super::Type;
 use crate::{
+    annotation::{AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType},
     common::Span,
-    definition::type_::declaration::{AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType},
+    identifier::{Label, ScopedLabel},
     write_joined,
 };
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum LabelConstraint {
+    Name(Label),
+    Scoped(ScopedLabel),
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum SubKind {
@@ -35,13 +42,13 @@ impl Sub {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
-    pub value_type: String, // TODO enum with optional user type?
+    pub value_type: Type,
     pub annotations: Vec<AnnotationValueType>,
     pub span: Option<Span>,
 }
 
 impl ValueType {
-    pub fn new(value_type: String, annotations: Vec<AnnotationValueType>, span: Option<Span>) -> Self {
+    pub fn new(value_type: Type, annotations: Vec<AnnotationValueType>, span: Option<Span>) -> Self {
         Self { value_type, annotations, span }
     }
 }

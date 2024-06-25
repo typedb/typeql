@@ -9,7 +9,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     expression::Expression,
     parser::{
-        expression::{visit_expression_list, visit_expression_struct, visit_expression_value, visit_value_primitive},
+        expression::{visit_expression_list, visit_expression_struct, visit_expression_value, visit_value_literal},
         statement::visit_type_ref,
         visit_label, visit_var, IntoChildNodes, Node, Rule, RuleMatcher,
     },
@@ -44,8 +44,8 @@ pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
         Rule::thing_constraint => {
             Statement::Thing(ThingStatement::new(span, var, children.map(visit_thing_constraint).collect()))
         }
-        Rule::value_primitive => {
-            let value = visit_value_primitive(child);
+        Rule::value_literal => {
+            let value = visit_value_literal(child);
             let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
             Statement::AttributeValue(AttributeValueStatement::new(span, Some(Type::Variable(var)), value, isa))
         }

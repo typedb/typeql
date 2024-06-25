@@ -4,13 +4,20 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+#![deny(rust_2018_idioms)]
+#![deny(rust_2021_compatibility)]
+#![deny(rust_2024_compatibility)]
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unused_must_use)]
+#![allow(unused)]
+#![warn(unused_imports)]
 
+pub mod annotation;
 pub mod builder;
 pub mod common;
 pub mod definition;
 pub mod expression;
+pub mod identifier;
 pub mod parser;
 pub mod pattern;
 pub mod query;
@@ -18,11 +25,12 @@ pub mod query;
 mod util;
 
 pub use common::Result;
+use identifier::Label;
 use parser::{
     visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
     visit_eof_statement,
 };
-use pattern::{Definable, Label, Pattern, Statement};
+use pattern::{Definable, Pattern, Statement};
 use query::Query;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {

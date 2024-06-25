@@ -7,16 +7,15 @@
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        schema::{visit_annotations_owns, visit_annotations_relates, visit_annotations_sub, visit_annotations_value},
-        statement::{visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_type_ref_scoped},
-        visit_label_any, visit_value_type_primitive, IntoChildNodes, Node, Rule, RuleMatcher,
-    },
-    pattern::{
-        statement::{
-            type_::{Owned, Owns, Played, Plays, Related, Relates, Sub, SubKind, ValueType},
-            Statement, TypeConstraint, TypeStatement,
+        annotation::{
+            visit_annotations_owns, visit_annotations_relates, visit_annotations_sub, visit_annotations_value,
         },
-        Label,
+        statement::{visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_type_ref_scoped},
+        visit_label, visit_label_scoped, visit_value_type_primitive, IntoChildNodes, Node, Rule, RuleMatcher,
+    },
+    pattern::statement::{
+        type_::{LabelConstraint, Owned, Owns, Played, Plays, Related, Relates, Sub, SubKind, ValueType},
+        Statement, TypeConstraint, TypeStatement,
     },
 };
 
@@ -68,18 +67,30 @@ fn visit_value_type_constraint(node: Node<'_>) -> ValueType {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::VALUE);
-    let value_type = visit_value_type_primitive(children.consume_expected(Rule::value_type_primitive));
-    let annotations = visit_annotations_value(children.consume_expected(Rule::annotations_value));
+    let value_type_node = children.consume_any();
+    let (value_type, annotations) = match value_type_node.as_rule() {
+        Rule::label => (crate::pattern::statement::Type::Label(visit_label(value_type_node)), Vec::new()),
+        Rule::value_type_primitive => (
+            crate::pattern::statement::Type::BuiltinValue(visit_value_type_primitive(value_type_node)),
+            visit_annotations_value(children.consume_expected(Rule::annotations_value)),
+        ),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
+    };
     debug_assert_eq!(children.try_consume_any(), None);
     ValueType::new(value_type, annotations, span)
 }
 
-fn visit_label_constraint(node: Node<'_>) -> Label {
+fn visit_label_constraint(node: Node<'_>) -> LabelConstraint {
     debug_assert_eq!(node.as_rule(), Rule::label_constraint);
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::TYPE);
-    let label = visit_label_any(children.consume_expected(Rule::label_any));
+    let label = children.consume_any();
+    let label = match label.as_rule() {
+        Rule::label => LabelConstraint::Name(visit_label(label)),
+        Rule::label_scoped => LabelConstraint::Scoped(visit_label_scoped(label)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: label.to_string() }),
+    };
     debug_assert_eq!(children.try_consume_any(), None);
     label
 }
@@ -147,4 +158,3 @@ fn visit_plays_constraint(node: Node<'_>) -> Plays {
     debug_assert_eq!(children.try_consume_any(), None);
     Plays::new(played, span)
 }
-

@@ -15,13 +15,15 @@ use self::{
 use crate::{
     common::{
         error::{syntax_error, TypeQLError},
-        LineColumn, Span, Spanned,
+        token, LineColumn, Span, Spanned,
     },
-    pattern::{statement::Variable, Definable, Label, Pattern, Statement},
+    identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
+    pattern::{statement::BuiltinValueType, Definable, Pattern, Statement},
     query::Query,
     Result,
 };
 
+mod annotation;
 mod data;
 mod expression;
 mod schema;
@@ -172,28 +174,53 @@ fn visit_query(node: Node<'_>) -> Query {
     query
 }
 
-fn visit_label_any(node: Node<'_>) -> Label {
-    debug_assert_eq!(node.as_rule(), Rule::label_any);
+fn visit_label(node: Node<'_>) -> Label {
+    debug_assert_eq!(node.as_rule(), Rule::label);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::label => visit_label(child),
-        Rule::label_scoped => visit_label_scoped(child),
+        Rule::identifier => Label::Identifier(visit_identifier(child)),
+        Rule::kind => Label::Reserved(visit_kind(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-fn visit_label(label: Node<'_>) -> Label {
-    debug_assert_eq!(label.as_rule(), Rule::label);
-    Label::new_unscoped(label.as_str(), label.span())
+fn visit_role_label(node: Node<'_>) -> Label {
+    debug_assert_eq!(node.as_rule(), Rule::role_label);
+    let span = node.span();
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::identifier => Label::Identifier(visit_identifier(child)),
+        Rule::ROLE => Label::Reserved(ReservedLabel::new(span, token::Type::Role)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
 }
 
-fn visit_label_scoped(label: Node<'_>) -> Label {
+fn visit_kind(node: Node<'_>) -> ReservedLabel {
+    debug_assert_eq!(node.as_rule(), Rule::kind);
+    let span = node.span();
+    let child = node.into_child();
+    let token = match child.as_rule() {
+        Rule::ENTITY => token::Type::Entity,
+        Rule::RELATION => token::Type::Relation,
+        Rule::ATTRIBUTE => token::Type::Attribute,
+        Rule::ROLE => token::Type::Role,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    ReservedLabel::new(span, token)
+}
+
+fn visit_label_scoped(label: Node<'_>) -> ScopedLabel {
     debug_assert_eq!(label.as_rule(), Rule::label_scoped);
     let span = label.span();
     let mut children = label.into_children();
-    let scope = children.consume_expected(Rule::label);
-    let name = children.consume_expected(Rule::label);
-    Label::new_scoped(scope.as_str(), name.as_str(), span)
+    let scope = visit_label(children.consume_expected(Rule::label));
+    let name = visit_role_label(children.consume_expected(Rule::role_label));
+    ScopedLabel::new(span, scope, name)
+}
+
+fn visit_identifier(node: Node<'_>) -> Identifier {
+    debug_assert_eq!(node.as_rule(), Rule::identifier);
+    Identifier::new(node.span(), node.as_str().to_owned())
 }
 
 fn visit_list_label(node: Node<'_>) -> Label {
@@ -204,15 +231,23 @@ fn visit_list_label(node: Node<'_>) -> Label {
 fn visit_var(node: Node<'_>) -> Variable {
     debug_assert_eq!(node.as_rule(), Rule::var);
     let span = node.span();
-
-    let name = node.as_str();
-    assert!(name.len() > 1);
-    assert!(name.starts_with('$'));
-    let name = &name[1..];
-    match name {
-        "_" => Variable::Anonymous(span),
-        name => Variable::Named(span, String::from(name)),
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::VAR_ANONYMOUS => Variable::Anonymous(span),
+        Rule::var_named => visit_var_named(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
+}
+
+fn visit_var_named(node: Node<'_>) -> Variable {
+    debug_assert_eq!(node.as_rule(), Rule::var_named);
+    let span = node.span();
+    Variable::Named(span, visit_identifier(node.into_child()))
+}
+
+fn visit_vars(node: Node<'_>) -> Vec<Variable> {
+    debug_assert_eq!(node.as_rule(), Rule::vars);
+    node.into_children().map(visit_var).collect()
 }
 
 fn visit_list_var(node: Node<'_>) -> Variable {
@@ -220,11 +255,31 @@ fn visit_list_var(node: Node<'_>) -> Variable {
     visit_var(node.into_child())
 }
 
-fn visit_value_type_primitive(node: Node<'_>) -> String {
-    node.as_str().to_owned() // FIXME
+fn visit_list_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
+    debug_assert_eq!(node.as_rule(), Rule::list_value_type_primitive);
+    visit_value_type_primitive(node.into_child())
 }
 
-fn visit_long_value(node: Node<'_>) -> u64 {
-    debug_assert_eq!(node.as_rule(), Rule::long_value);
+fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
+    debug_assert_eq!(node.as_rule(), Rule::value_type_primitive);
+    let span = node.span();
+    let child = node.into_child();
+    let token = match child.as_rule() {
+        Rule::BOOLEAN => token::ValueType::Boolean,
+        Rule::DATE => token::ValueType::Date,
+        Rule::DATETIME => token::ValueType::DateTime,
+        Rule::DATETIME_TZ => token::ValueType::DateTimeTZ,
+        Rule::DECIMAL => token::ValueType::Decimal,
+        Rule::DOUBLE => token::ValueType::Double,
+        Rule::DURATION => token::ValueType::Duration,
+        Rule::LONG => token::ValueType::Long,
+        Rule::STRING => token::ValueType::String,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    BuiltinValueType::new(span, token)
+}
+
+fn visit_integer_literal(node: Node<'_>) -> u64 {
+    debug_assert_eq!(node.as_rule(), Rule::integer_literal);
     node.as_str().parse().unwrap() // TODO what should happen if the number is too large?
 }

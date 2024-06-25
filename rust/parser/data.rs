@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use itertools::Itertools;
+
 use super::{statement::visit_statement, IntoChildNodes, Node, Rule};
 use crate::{
     common::{
@@ -11,13 +13,19 @@ use crate::{
         token::{Aggregate, Order},
         Spanned,
     },
-    parser::{statement::thing::visit_statement_things, visit_long_value, visit_var, RuleMatcher},
+    parser::{
+        schema::function::visit_definition_function, statement::thing::visit_statement_things, visit_integer_literal,
+        visit_var, visit_vars, RuleMatcher,
+    },
     pattern::{Conjunction, Disjunction, Negation, Pattern, Try},
     query::{
-        data::stage::{
-            modifier::{Filter, Limit, Offset, OrderedVariable, Sort},
-            reduce::{Check, Count, First, ReduceAll, Stat},
-            Delete, Insert, Match, Modifier, Put, Reduce, Stage,
+        data::{
+            stage::{
+                modifier::{Filter, Limit, Offset, OrderedVariable, Sort},
+                reduce::{Check, Count, First, ReduceAll, Stat},
+                Delete, Insert, Match, Modifier, Put, Reduce, Stage,
+            },
+            Preamble,
         },
         DataQuery,
     },
@@ -26,7 +34,27 @@ use crate::{
 pub(super) fn visit_query_data(node: Node<'_>) -> DataQuery {
     debug_assert_eq!(node.as_rule(), Rule::query_data);
     let span = node.span();
-    node.into_children().fold(DataQuery::new(span), |query, stage| query.then(visit_query_stage(stage)))
+    let mut children = node.into_children();
+
+    let preambles =
+        children.take_while_ref(|child| child.as_rule() == Rule::preamble).map(visit_preamble).collect_vec();
+    let mut stages =
+        children.take_while_ref(|child| child.as_rule() == Rule::query_stage).map(visit_query_stage).collect_vec();
+    stages.extend(children.try_consume_expected(Rule::query_stage_final).map(visit_query_stage_final));
+
+    debug_assert_eq!(children.try_consume_any(), None);
+
+    DataQuery::new(span, preambles, stages)
+}
+
+fn visit_preamble(node: Node<'_>) -> Preamble {
+    debug_assert_eq!(node.as_rule(), Rule::preamble);
+    let span = node.span();
+    let mut children = node.into_children();
+    let patterns =
+        visit_definition_function(children.skip_expected(Rule::WITH).consume_expected(Rule::definition_function));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Preamble::new(span, patterns)
 }
 
 fn visit_query_stage(node: Node<'_>) -> Stage {
@@ -36,21 +64,31 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
     match child.as_rule() {
         Rule::stage_match => Stage::Match(visit_stage_match(child)),
         Rule::stage_insert => Stage::Insert(visit_stage_insert(child)),
-        Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
         Rule::stage_put => Stage::Put(visit_stage_put(child)),
-        Rule::stage_fetch => visit_stage_fetch(child),
-        Rule::stage_reduce => Stage::Reduce(visit_stage_reduce(child)),
         Rule::stage_modifier => Stage::Modifier(visit_stage_modifier(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-fn visit_stage_match(node: Node<'_>) -> Match {
+fn visit_query_stage_final(node: Node<'_>) -> Stage {
+    debug_assert_eq!(node.as_rule(), Rule::query_stage_final);
+    let span = node.span();
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
+        Rule::stage_fetch => visit_stage_fetch(child),
+        Rule::stage_reduce => Stage::Reduce(visit_stage_reduce(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+pub(super) fn visit_stage_match(node: Node<'_>) -> Match {
     debug_assert_eq!(node.as_rule(), Rule::stage_match);
     let span = node.span();
     let mut children = node.into_children();
-    let patterns = children.skip_expected(Rule::MATCH).consume_expected(Rule::patterns);
-    Match::new(span, visit_patterns(patterns))
+    let patterns = visit_patterns(children.skip_expected(Rule::MATCH).consume_expected(Rule::patterns));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Match::new(span, patterns)
 }
 
 pub(super) fn visit_patterns(node: Node<'_>) -> Vec<Pattern> {
@@ -144,7 +182,7 @@ fn visit_stage_reduce(node: Node<'_>) -> Reduce {
     visit_reduce(node.into_child())
 }
 
-fn visit_reduce(node: Node<'_>) -> Reduce {
+pub(super) fn visit_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::reduce);
     let mut children = node.into_children();
     match children.peek_rule() {
@@ -172,7 +210,7 @@ fn visit_reduce_first(node: Node<'_>) -> First {
     debug_assert_eq!(node.as_rule(), Rule::reduce_first);
     let span = node.span();
     let mut children = node.into_children();
-    let variables = children.skip_expected(Rule::FIRST).map(visit_var).collect();
+    let variables = visit_vars(children.skip_expected(Rule::FIRST).consume_expected(Rule::vars));
     First::new(span, variables)
 }
 
@@ -182,7 +220,10 @@ fn visit_reduce_all(node: Node<'_>) -> ReduceAll {
     let mut children = node.into_children();
     let keyword = children.consume_any();
     match keyword.as_rule() {
-        Rule::COUNT => ReduceAll::Count(Count::new(span, children.map(visit_var).collect())),
+        Rule::COUNT => ReduceAll::Count(Count::new(
+            span,
+            children.try_consume_expected(Rule::vars).map(visit_vars).unwrap_or_default(),
+        )),
         Rule::MAX => ReduceAll::Stat(Stat::new(span, Aggregate::Max, visit_var(children.consume_expected(Rule::var)))),
         Rule::MIN => ReduceAll::Stat(Stat::new(span, Aggregate::Min, visit_var(children.consume_expected(Rule::var)))),
         Rule::MEAN => {
@@ -197,7 +238,7 @@ fn visit_reduce_all(node: Node<'_>) -> ReduceAll {
     }
 }
 
-fn visit_stage_modifier(node: Node<'_>) -> Modifier {
+pub(super) fn visit_stage_modifier(node: Node<'_>) -> Modifier {
     debug_assert_eq!(node.as_rule(), Rule::stage_modifier);
     let child = node.into_child();
     match child.as_rule() {
@@ -212,7 +253,9 @@ fn visit_stage_modifier(node: Node<'_>) -> Modifier {
 fn visit_stage_filter(node: Node<'_>) -> Filter {
     debug_assert_eq!(node.as_rule(), Rule::stage_filter);
     let span = node.span();
-    let variables = node.into_children().skip_expected(Rule::FILTER).map(visit_var).collect();
+    let mut children = node.into_children();
+    let variables = visit_vars(children.skip_expected(Rule::FILTER).consume_expected(Rule::vars));
+    debug_assert_eq!(children.try_consume_any(), None);
     Filter::new(span, variables)
 }
 
@@ -247,7 +290,7 @@ fn visit_stage_offset(node: Node<'_>) -> Offset {
     debug_assert_eq!(node.as_rule(), Rule::stage_offset);
     let span = node.span();
     let mut children = node.into_children();
-    let offset = visit_long_value(children.skip_expected(Rule::OFFSET).consume_expected(Rule::long_value));
+    let offset = visit_integer_literal(children.skip_expected(Rule::OFFSET).consume_expected(Rule::integer_literal));
     debug_assert_eq!(children.try_consume_any(), None);
     Offset::new(span, offset)
 }
@@ -256,7 +299,7 @@ fn visit_stage_limit(node: Node<'_>) -> Limit {
     debug_assert_eq!(node.as_rule(), Rule::stage_limit);
     let span = node.span();
     let mut children = node.into_children();
-    let limit = visit_long_value(children.skip_expected(Rule::LIMIT).consume_expected(Rule::long_value));
+    let limit = visit_integer_literal(children.skip_expected(Rule::LIMIT).consume_expected(Rule::integer_literal));
     debug_assert_eq!(children.try_consume_any(), None);
     Limit::new(span, limit)
 }

@@ -4,6 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-pub use self::type_::Type;
+pub use self::{function::Function, type_::Type};
 
 pub mod type_;
+pub mod function;

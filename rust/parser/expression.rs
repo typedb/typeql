@@ -9,21 +9,22 @@ use pest::pratt_parser::{Assoc, Op, PrattParser};
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
-    expression::{Expression, FunctionCall, Identifier, List, ListIndex, ListIndexRange, Operation, Paren, Value},
-    parser::visit_var,
+    expression::{
+        BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
+        Value,
+    },
+    parser::{visit_identifier, visit_var},
 };
 
 pub(super) fn visit_expression_function(node: Node<'_>) -> FunctionCall {
     debug_assert_eq!(node.as_rule(), Rule::expression_function);
     let span = node.span();
     let mut children = node.into_children();
-    let sigil = visit_expression_function_name(children.consume_expected(Rule::expression_function_name));
-    let args = if let Some(args) = children.try_consume_expected(Rule::expression_arguments) {
-        visit_expression_arguments(args)
-    } else {
-        Vec::new()
-    };
-    FunctionCall::new(span, sigil, args)
+    let name = visit_expression_function_name(children.consume_expected(Rule::expression_function_name));
+    let args =
+        children.try_consume_expected(Rule::expression_arguments).map(visit_expression_arguments).unwrap_or_default();
+    debug_assert_eq!(children.try_consume_any(), None);
+    FunctionCall::new(span, name, args)
 }
 
 fn visit_expression_arguments(node: Node<'_>) -> Vec<Expression> {
@@ -71,7 +72,7 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
 fn visit_expression_base(node: Node<'_>) -> Expression {
     match node.as_rule() {
         Rule::var => Expression::Variable(visit_var(node)),
-        Rule::value_primitive => Expression::Value(visit_value_primitive(node)),
+        Rule::value_literal => Expression::Value(visit_value_literal(node)),
         Rule::expression_function => Expression::Function(visit_expression_function(node)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(node))),
         Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(node))),
@@ -93,8 +94,8 @@ fn visit_list_index(node: Node<'_>) -> Expression {
     visit_expression_value(node.into_child())
 }
 
-pub(super) fn visit_value_primitive(node: Node<'_>) -> Value {
-    debug_assert_eq!(node.as_rule(), Rule::value_primitive);
+pub(super) fn visit_value_literal(node: Node<'_>) -> Value {
+    debug_assert_eq!(node.as_rule(), Rule::value_literal);
     Value::new(node.span(), node.as_str().to_owned()) // TODO parse value properly
 }
 
@@ -144,9 +145,29 @@ fn visit_expression_list_new(node: Node<'_>) -> Expression {
     Expression::List(List::new(span, items))
 }
 
-fn visit_expression_function_name(node: Node<'_>) -> Identifier {
+fn visit_expression_function_name(node: Node<'_>) -> FunctionName {
     debug_assert_eq!(node.as_rule(), Rule::expression_function_name);
     let child = node.into_child();
-    debug_assert!(matches!(child.as_rule(), Rule::label | Rule::builtin_func_name), "{:?}", child.as_rule());
-    Identifier(child.as_str().to_owned())
+    match child.as_rule() {
+        Rule::identifier => FunctionName::Identifier(visit_identifier(child)),
+        Rule::builtin_func_name => FunctionName::Builtin(visit_builtin_func_name(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_builtin_func_name(node: Node<'_>) -> BuiltinFunctionName {
+    debug_assert_eq!(node.as_rule(), Rule::builtin_func_name);
+    let span = node.span();
+    let child = node.into_child();
+    let token = match child.as_rule() {
+        Rule::ABS => token::Function::Abs,
+        Rule::CEIL => token::Function::Ceil,
+        Rule::FLOOR => token::Function::Floor,
+        Rule::LENGTH => token::Function::Length,
+        Rule::MAX => token::Function::Max,
+        Rule::MIN => token::Function::Min,
+        Rule::ROUND => token::Function::Round,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    BuiltinFunctionName::new(span, token)
 }

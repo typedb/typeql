@@ -4,29 +4,19 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use self::type_::{Owns, Plays, Relates, Sub, ValueType};
-use super::Label;
+use std::{collections::HashMap, fmt};
+
+use self::type_::{LabelConstraint, Owns, Plays, Relates, Sub, ValueType};
 use crate::{
-    common::{token::Comparator, Span, Spanned},
+    common::{
+        token::{self, Comparator},
+        Span,
+    },
     expression::{Expression, FunctionCall, Value},
+    identifier::{Label, ScopedLabel, Variable},
 };
 
 pub mod type_;
-
-// FIXME move
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Variable {
-    Anonymous(Option<Span>),
-    Named(Option<Span>, String),
-}
-
-impl Spanned for Variable {
-    fn span(&self) -> Option<Span> {
-        match self {
-            Variable::Anonymous(span) | Variable::Named(span, _) => *span,
-        }
-    }
-}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Is {
@@ -81,24 +71,81 @@ impl Comparison {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub enum DeconstructField {
+    Variable(Variable),
+    Deconstruct(StructDeconstruct),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct StructDeconstruct {
+    span: Option<Span>,
+    field_map: HashMap<Label, DeconstructField>,
+}
+
+impl StructDeconstruct {
+    pub fn new(span: Option<Span>, field_map: HashMap<Label, DeconstructField>) -> Self {
+        Self { span, field_map }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum AssignmentPattern {
+    Variables(Vec<Variable>),
+    Deconstruct(StructDeconstruct),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Assignment {
     span: Option<Span>,
-    lhs: Vec<Variable>, // TODO or destructured struct
+    lhs: AssignmentPattern,
     rhs: Expression,
 }
 
 impl Assignment {
-    pub fn new(span: Option<Span>, lhs: Vec<Variable>, rhs: Expression) -> Self {
+    pub fn new(span: Option<Span>, lhs: AssignmentPattern, rhs: Expression) -> Self {
         Self { span, lhs, rhs }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct BuiltinValueType {
+    span: Option<Span>,
+    name: token::ValueType,
+}
+
+impl BuiltinValueType {
+    pub fn new(span: Option<Span>, name: token::ValueType) -> Self {
+        Self { span, name }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Type {
+    Optional(Box<Type>),
+
     Label(Label),
+    ScopedLabel(ScopedLabel),
     Variable(Variable),
+    BuiltinValue(BuiltinValueType),
+
     ListLabel(Label),
     ListVariable(Variable),
+    ListBuiltinValue(BuiltinValueType),
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Optional(inner) => write!(f, "{inner}?"),
+            Self::Label(inner) => fmt::Display::fmt(inner, f),
+            Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
+            Self::Variable(inner) => todo!(),
+            Self::BuiltinValue(inner) => todo!(),
+            Self::ListLabel(inner) => todo!(),
+            Self::ListVariable(inner) => todo!(),
+            Self::ListBuiltinValue(inner) => todo!(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -148,7 +195,7 @@ impl TypeStatement {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeConstraint {
     Sub(Sub),
-    Label(Label),
+    Label(LabelConstraint),
     ValueType(ValueType),
     Owns(Owns),
     Relates(Relates),

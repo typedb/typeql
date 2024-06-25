@@ -4,7 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::{common::{token::Aggregate, Span}, pattern::statement::Variable};
+use crate::{
+    common::{token::Aggregate, Span},
+    identifier::Variable,
+};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Check {

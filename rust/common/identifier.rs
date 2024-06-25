@@ -27,7 +27,7 @@ const IDENTIFIER_CONNECTOR: &str = "_\
             \\u203F-\\u2040";
 const IDENTIFIER_DIGIT: &str = "0-9";
 
-pub fn is_valid_label_identifier(identifier: &str) -> bool {
+pub fn is_valid_identifier(identifier: &str) -> bool {
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| {
         let identifier_tail = format!("{}{}{}", IDENTIFIER_CHAR, IDENTIFIER_CONNECTOR, IDENTIFIER_DIGIT);
