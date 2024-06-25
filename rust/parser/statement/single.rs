@@ -7,14 +7,17 @@
 use itertools::Itertools;
 
 use crate::{
-    common::{error::TypeQLError, Spanned}, identifier::Label, parser::{
+    common::{error::TypeQLError, Spanned},
+    identifier::Label,
+    parser::{
         expression::{visit_expression, visit_expression_function, visit_expression_value},
         statement::visit_comparison,
         visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
-    }, pattern::statement::{
-            Assignment, AssignmentPattern, ComparisonStatement, DeconstructField, InStream, Is, Statement,
-            StructDeconstruct,
-        }
+    },
+    pattern::statement::{
+        comparison::ComparisonStatement, Assignment, AssignmentPattern, DeconstructField, InStream, Is, Statement,
+        StructDeconstruct,
+    },
 };
 
 pub(super) fn visit_statement_single(node: Node<'_>) -> Statement {

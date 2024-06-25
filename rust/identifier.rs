@@ -32,11 +32,29 @@ impl Spanned for Identifier {
     }
 }
 
+impl From<&str> for Identifier {
+    fn from(value: &str) -> Self {
+        Self::new(None, value.to_owned())
+    }
+}
+
+impl From<String> for Identifier {
+    fn from(value: String) -> Self {
+        Self::new(None, value)
+    }
+}
+
 // FIXME move
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
     Anonymous(Option<Span>),
     Named(Option<Span>, Identifier),
+}
+
+impl fmt::Display for Variable {
+    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
 }
 
 impl Spanned for Variable {

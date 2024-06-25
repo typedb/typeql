@@ -44,8 +44,8 @@ impl Spanned for Node<'_> {
         let (begin_line, begin_col) = self.as_span().start_pos().line_col();
         let (end_line, end_col) = self.as_span().end_pos().line_col();
         Some(Span {
-            begin: LineColumn { line: begin_line, column: begin_col },
-            end: LineColumn { line: end_line, column: end_col },
+            begin: LineColumn { line: begin_line as u32, column: begin_col as u32 },
+            end: LineColumn { line: end_line as u32, column: end_col as u32 },
         })
     }
 }

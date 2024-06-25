@@ -4,16 +4,29 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use crate::identifier::{Identifier, Variable};
+
 #[macro_export]
-macro_rules! typeql_define {
+macro_rules! define {
     ($($def:expr),* $(,)?) => {
-        $crate::query::TypeQLDefine::build(vec![$($def.into()),*])
+        $crate::query::Define::build(vec![$($def.into()),*])
     }
 }
 
 #[macro_export]
-macro_rules! typeql_undefine {
+macro_rules! undefine {
     ($($def:expr),* $(,)?) => {
-        $crate::query::TypeQLUndefine::build(vec![$($def.into()),*])
+        $crate::query::Undefine::build(vec![$($def.into()),*])
     }
+}
+
+#[macro_export]
+macro_rules! match_ {
+    ($($pattern:expr),* $(,)?) => {
+        $crate::query::data::stage::Match::build(vec![$($pattern.into()),*])
+    }
+}
+
+pub fn var(name: impl Into<Identifier>) -> Variable {
+    Variable::Named(None, name.into())
 }

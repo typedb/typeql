@@ -4,48 +4,25 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{collections::HashSet, fmt, iter};
-
-use itertools::Itertools;
+use std::fmt;
 
 use crate::{
-    common::{
-        error::{collect_err, TypeQLError},
-        identifier::is_valid_label_identifier,
-        string::indent,
-        token,
-        validatable::Validatable,
-        Result,
-    },
-    pattern::{Label, VariablesRetrieved},
-    query::{modifier::Modifiers, MatchClause, TypeQLGetAggregate},
+    common::{string::indent, token, Span},
+    identifier::Variable,
+    pattern::statement::Type,
+    query::DataQuery,
     write_joined,
 };
-use crate::variable::Variable;
-use crate::variable::variable::VariableRef;
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct TypeQLFetch {
-    pub match_clause: MatchClause,
-    pub projections: Vec<Projection>,
-    pub modifiers: Modifiers,
+pub struct Fetch {
+    span: Option<Span>,
+    projections: Vec<Projection>,
 }
 
-impl Validatable for TypeQLFetch {
-    fn validate(&self) -> Result {
-        let match_variables = self.match_clause.retrieved_variables().collect();
-        collect_err([
-            self.match_clause.validate(),
-            self.modifiers.sorting.as_ref().map_or(Ok(()), |s| s.validate(&match_variables)),
-        ])
-    }
-}
-
-impl VariablesRetrieved for TypeQLFetch {
-    fn retrieved_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        Box::new(
-            self.match_clause.retrieved_variables().chain(self.projections.iter().flat_map(Projection::key_variable)),
-        )
+impl Fetch {
+    pub fn new(span: Option<Span>, projections: Vec<Projection>) -> Self {
+        Self { span, projections }
     }
 }
 
@@ -53,32 +30,20 @@ impl VariablesRetrieved for TypeQLFetch {
 pub enum Projection {
     Variable(ProjectionKeyVar),
     Attribute(ProjectionKeyVar, Vec<ProjectionAttribute>),
-    Subquery(ProjectionKeyLabel, ProjectionSubquery),
-}
-
-impl Projection {
-    pub fn key_variable(&self) -> Option<VariableRef<'_>> {
-        match self {
-            Projection::Variable(key) | Projection::Attribute(key, _) => Some(key.variable.as_ref()),
-            Projection::Subquery(_, _) => None,
-        }
-    }
-
-    pub fn value_variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        match self {
-            Projection::Variable(_) | Projection::Attribute(_, _) => Box::new(iter::empty()),
-            Projection::Subquery(_, subquery) => subquery.variables(),
-        }
-    }
+    Subquery(ProjectionKeyLabel, DataQuery),
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct ProjectionKeyVar {
-    pub(crate) variable: Variable,
-    pub(crate) label: Option<ProjectionKeyLabel>,
+    variable: Variable,
+    label: Option<ProjectionKeyLabel>,
 }
 
 impl ProjectionKeyVar {
+    pub fn new(variable: Variable, label: Option<ProjectionKeyLabel>) -> Self {
+        Self { variable, label }
+    }
+
     pub fn label(self, label: impl Into<ProjectionKeyLabel>) -> Self {
         ProjectionKeyVar { label: Some(label.into()), ..self }
     }
@@ -118,20 +83,6 @@ pub struct ProjectionKeyLabel {
     pub label: String,
 }
 
-impl ProjectionKeyLabel {
-    pub fn map_subquery_get_aggregate(self, subquery: TypeQLGetAggregate) -> Projection {
-        Projection::Subquery(self, ProjectionSubquery::GetAggregate(subquery))
-    }
-
-    pub fn map_subquery_fetch(self, subquery: TypeQLFetch) -> Projection {
-        Projection::Subquery(self, ProjectionSubquery::Fetch(Box::new(subquery)))
-    }
-
-    fn must_quote(s: &str) -> bool {
-        !is_valid_label_identifier(s)
-    }
-}
-
 impl From<&str> for ProjectionKeyLabel {
     fn from(value: &str) -> Self {
         Self::from(value.to_owned())
@@ -146,46 +97,17 @@ impl From<String> for ProjectionKeyLabel {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct ProjectionAttribute {
-    pub(crate) attribute: Label,
-    pub(crate) label: Option<ProjectionKeyLabel>,
+    attribute: Type,
+    label: Option<ProjectionKeyLabel>,
 }
 
 impl ProjectionAttribute {
+    pub fn new(attribute: Type, label: Option<ProjectionKeyLabel>) -> Self {
+        Self { attribute, label }
+    }
+
     pub fn label(self, label: impl Into<ProjectionKeyLabel>) -> Self {
         ProjectionAttribute { label: Some(label.into()), ..self }
-    }
-}
-
-impl From<&str> for ProjectionAttribute {
-    fn from(attribute: &str) -> Self {
-        Self::from(attribute.to_owned())
-    }
-}
-
-impl From<String> for ProjectionAttribute {
-    fn from(attribute: String) -> Self {
-        ProjectionAttribute { attribute: Label::from(attribute), label: None }
-    }
-}
-
-impl<T: Into<Label>, U: Into<ProjectionKeyLabel>> From<(T, U)> for ProjectionAttribute {
-    fn from((attribute, label): (T, U)) -> Self {
-        Self { attribute: attribute.into(), label: Some(label.into()) }
-    }
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum ProjectionSubquery {
-    GetAggregate(TypeQLGetAggregate),
-    Fetch(Box<TypeQLFetch>),
-}
-
-impl ProjectionSubquery {
-    pub fn variables(&self) -> Box<dyn Iterator<Item = VariableRef<'_>> + '_> {
-        match self {
-            ProjectionSubquery::GetAggregate(query) => query.query.retrieved_variables(),
-            ProjectionSubquery::Fetch(query) => query.retrieved_variables(),
-        }
     }
 }
 
@@ -204,16 +126,11 @@ impl<T: Into<ProjectionKeyVar>> ProjectionBuilder for T {
     }
 }
 
-impl fmt::Display for TypeQLFetch {
+impl fmt::Display for Fetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", self.match_clause)?;
         writeln!(f, "{}", token::Clause::Fetch)?;
         write_joined!(f, "\n", self.projections)?;
-        if !self.modifiers.is_empty() {
-            write!(f, "\n{}", self.modifiers)
-        } else {
-            Ok(())
-        }
+        Ok(())
     }
 }
 
@@ -246,10 +163,14 @@ impl fmt::Display for ProjectionKeyVar {
     }
 }
 
+fn must_quote(_: &str) -> bool {
+    true
+}
+
 impl fmt::Display for ProjectionKeyLabel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let label = &self.label;
-        if Self::must_quote(label) {
+        if must_quote(label) {
             write!(f, "\"{}\"", label)
         } else {
             write!(f, "{}", label)
@@ -264,19 +185,6 @@ impl fmt::Display for ProjectionAttribute {
             write!(f, " {} {}", token::Projection::As, label)
         } else {
             Ok(())
-        }
-    }
-}
-
-impl fmt::Display for ProjectionSubquery {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ProjectionSubquery::GetAggregate(query) => {
-                write!(f, "{}", query)
-            }
-            ProjectionSubquery::Fetch(query) => {
-                write!(f, "{}", query)
-            }
         }
     }
 }

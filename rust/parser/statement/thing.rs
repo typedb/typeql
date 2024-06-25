@@ -14,8 +14,12 @@ use crate::{
         visit_label, visit_var, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     pattern::statement::{
-        AttributeComparisonStatement, AttributeValueStatement, Has, HasValue, Iid, Isa, IsaKind, Links, Relation,
-        RelationStatement, RolePlayer, Statement, ThingConstraint, ThingStatement, Type,
+        thing::{
+            isa::{Isa, IsaKind},
+            AttributeComparisonStatement, AttributeValueStatement, Has, HasValue, Iid, Links, Relation,
+            RelationStatement, RolePlayer, ThingConstraint, ThingStatement,
+        },
+        Statement, Type,
     },
 };
 

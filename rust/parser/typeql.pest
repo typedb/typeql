@@ -29,7 +29,7 @@ query_stage = { stage_match
               | stage_modifier
               }
 query_stage_final = { stage_delete
-                    // | stage_fetch
+                    | stage_fetch
                     | stage_reduce
                     }
 
@@ -67,12 +67,23 @@ stage_limit = { LIMIT ~ integer_literal }
 
 var_order = { var ~ ORDER? }
 
+// QUERY PATTERNS ==============================================================
+
+patterns = { ( pattern ~ SEMICOLON )+ }
+pattern = { statement | pattern_disjunction | pattern_conjunction | pattern_negation | pattern_try }
+
+pattern_conjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
+pattern_disjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE ~ ( OR ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE )+ }
+pattern_negation = { NOT ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
+pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
+
 // FETCH QUERY =================================================================
 
 projections = { ( projection ~ SEMICOLON )+ }
 projection = { projection_key_var ~ COLON ~ projection_attributes
              | projection_key_var
-             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE }
+             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE
+             }
 
 projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
 projection_attribute = { label ~ projection_key_as_label? }
@@ -91,16 +102,6 @@ definable = { ( definition_type ~ SEMICOLON )
             | definition_function
             // | definition_struct
             }
-
-// QUERY PATTERNS ==============================================================
-
-patterns = { ( pattern ~ SEMICOLON )+ }
-pattern = { statement | pattern_disjunction | pattern_conjunction | pattern_negation | pattern_try }
-
-pattern_conjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
-pattern_disjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE ~ ( OR ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE )+ }
-pattern_negation = { NOT ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
-pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 

@@ -15,7 +15,7 @@ use crate::{
         statement::type_::visit_statement_type, visit_label, visit_label_scoped, visit_list_label, visit_list_var,
         visit_var,
     },
-    pattern::statement::{Comparison, Statement, Type},
+    pattern::statement::{comparison::Comparison, Statement, Type},
 };
 
 mod single;

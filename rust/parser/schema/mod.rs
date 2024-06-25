@@ -12,7 +12,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     parser::schema::{function::visit_definition_function, type_::visit_definition_type},
     pattern::Definable,
-    query::{SchemaQuery, TypeQLDefine, TypeQLUndefine},
+    query::{SchemaQuery, Define, Undefine},
 };
 
 pub(super) fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
@@ -28,22 +28,22 @@ pub(super) fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
     query
 }
 
-fn visit_query_define(node: Node<'_>) -> TypeQLDefine {
+fn visit_query_define(node: Node<'_>) -> Define {
     debug_assert_eq!(node.as_rule(), Rule::query_define);
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::DEFINE);
-    let query = TypeQLDefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
+    let query = Define::new(visit_definables(children.consume_expected(Rule::definables)), span);
     debug_assert_eq!(children.try_consume_any(), None);
     query
 }
 
-fn visit_query_undefine(node: Node<'_>) -> TypeQLUndefine {
+fn visit_query_undefine(node: Node<'_>) -> Undefine {
     debug_assert_eq!(node.as_rule(), Rule::query_undefine);
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::UNDEFINE);
-    let query = TypeQLUndefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
+    let query = Undefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
     debug_assert_eq!(children.try_consume_any(), None);
     query
 }

@@ -13,12 +13,12 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct TypeQLUndefine {
+pub struct Define {
     definables: Vec<Definable>,
     span: Option<Span>,
 }
 
-impl TypeQLUndefine {
+impl Define {
     pub(crate) fn new(definables: Vec<Definable>, span: Option<Span>) -> Self {
         Self { definables, span }
     }
@@ -28,15 +28,15 @@ impl TypeQLUndefine {
     }
 }
 
-impl Spanned for TypeQLUndefine {
+impl Spanned for Define {
     fn span(&self) -> Option<Span> {
         self.span
     }
 }
 
-impl fmt::Display for TypeQLUndefine {
+impl fmt::Display for Define {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        token::Clause::Undefine.fmt(f)?;
+        token::Clause::Define.fmt(f)?;
         if f.alternate() {
             f.write_char('\n')?;
         } else {

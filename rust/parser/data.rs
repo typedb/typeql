@@ -15,15 +15,16 @@ use crate::{
     },
     parser::{
         schema::function::visit_definition_function, statement::thing::visit_statement_things, visit_integer_literal,
-        visit_var, visit_vars, RuleMatcher,
+        visit_label, visit_var, visit_vars, RuleMatcher,
     },
-    pattern::{Conjunction, Disjunction, Negation, Pattern, Try},
+    pattern::{statement::Type, Conjunction, Disjunction, Negation, Pattern, Try},
     query::{
         data::{
             stage::{
+                fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar},
                 modifier::{Filter, Limit, Offset, OrderedVariable, Sort},
                 reduce::{Check, Count, First, ReduceAll, Stat},
-                Delete, Insert, Match, Modifier, Put, Reduce, Stage,
+                Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage,
             },
             Preamble,
         },
@@ -76,7 +77,7 @@ fn visit_query_stage_final(node: Node<'_>) -> Stage {
     let child = node.into_child();
     match child.as_rule() {
         Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
-        Rule::stage_fetch => visit_stage_fetch(child),
+        Rule::stage_fetch => Stage::Fetch(visit_stage_fetch(child)),
         Rule::stage_reduce => Stage::Reduce(visit_stage_reduce(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
@@ -168,15 +169,97 @@ fn visit_stage_put(node: Node<'_>) -> Put {
     debug_assert_eq!(node.as_rule(), Rule::stage_put);
     let span = node.span();
     let mut children = node.into_children();
-    let statement_things = children.skip_expected(Rule::PUT).consume_expected(Rule::statement_things);
+    let statement_things =
+        visit_statement_things(children.skip_expected(Rule::PUT).consume_expected(Rule::statement_things));
     debug_assert_eq!(children.try_consume_any(), None);
-    Put::new(span, visit_statement_things(statement_things))
+    Put::new(span, statement_things)
 }
 
-fn visit_stage_fetch(node: Node<'_>) -> Stage {
-    todo!()
+fn visit_stage_fetch(node: Node<'_>) -> Fetch {
+    debug_assert_eq!(node.as_rule(), Rule::stage_fetch);
+    let span = node.span();
+    let mut children = node.into_children();
+    let projections = visit_projections(children.skip_expected(Rule::FETCH).consume_expected(Rule::projections));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Fetch::new(span, projections)
 }
 
+fn visit_projections(node: Node<'_>) -> Vec<Projection> {
+    debug_assert_eq!(node.as_rule(), Rule::projections);
+    node.into_children().map(visit_projection).collect()
+}
+
+fn visit_projection(node: Node<'_>) -> Projection {
+    debug_assert_eq!(node.as_rule(), Rule::projection);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    match child.as_rule() {
+        Rule::projection_key_var => {
+            let key_var = visit_projection_key_var(child);
+            let node = children.try_consume_any();
+            if let Some(n) = node {
+                let attrs = visit_projection_attributes(n);
+                Projection::Attribute(key_var, attrs)
+            } else {
+                Projection::Variable(key_var)
+            }
+        }
+        Rule::projection_key_label => {
+            let key_label = visit_projection_key_label(child);
+            let subquery = visit_projection_subquery(children.consume_expected(Rule::projection_subquery));
+            Projection::Subquery(key_label, subquery)
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
+    debug_assert_eq!(node.as_rule(), Rule::projection_key_label);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    match child.as_rule() {
+        Rule::quoted_string_literal => ProjectionKeyLabel { label: child.as_str().to_owned() },
+        Rule::label => ProjectionKeyLabel { label: child.as_str().to_owned() },
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_projection_subquery(node: Node<'_>) -> DataQuery {
+    debug_assert_eq!(node.as_rule(), Rule::projection_subquery);
+    visit_query_data(node.into_child())
+}
+
+fn visit_projection_attributes(node: Node<'_>) -> Vec<ProjectionAttribute> {
+    debug_assert_eq!(node.as_rule(), Rule::projection_attributes);
+    node.into_children().map(visit_projection_attribute).collect()
+}
+
+fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
+    debug_assert_eq!(node.as_rule(), Rule::projection_attribute);
+    let mut children = node.into_children();
+    let attribute_label = Type::Label(visit_label(children.consume_expected(Rule::label)));
+    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
+    debug_assert!(children.try_consume_any().is_none());
+    ProjectionAttribute::new(attribute_label, label)
+}
+
+fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
+    debug_assert_eq!(node.as_rule(), Rule::projection_key_var);
+    let mut children = node.into_children();
+    let variable = visit_var(children.consume_expected(Rule::var));
+    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
+    debug_assert!(children.try_consume_any().is_none());
+    ProjectionKeyVar::new(variable, label)
+}
+
+fn visit_projection_as_label(node: Node<'_>) -> ProjectionKeyLabel {
+    debug_assert_eq!(node.as_rule(), Rule::projection_key_as_label);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::AS);
+    let label = visit_projection_key_label(children.consume_expected(Rule::projection_key_label));
+    debug_assert!(children.try_consume_any().is_none());
+    label
+}
 fn visit_stage_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::stage_reduce);
     visit_reduce(node.into_child())

@@ -5,19 +5,23 @@
  */
 
 mod delete;
+pub mod fetch;
 mod insert;
 mod match_;
 pub mod modifier;
-pub mod reduce;
 mod put;
+pub mod reduce;
 
-pub use self::{reduce::Reduce, delete::Delete, insert::Insert, match_::Match, modifier::Modifier, put::Put};
+pub use self::{
+    delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Modifier, put::Put, reduce::Reduce,
+};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Stage {
     Match(Match),
     Insert(Insert),
     Put(Put),
+    Fetch(Fetch),
     Delete(Delete),
     Reduce(Reduce),
     Modifier(Modifier),

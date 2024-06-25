@@ -6,25 +6,25 @@
 
 use std::fmt;
 
-pub use self::{data::DataQuery, typeql_define::TypeQLDefine, typeql_undefine::TypeQLUndefine};
+pub use self::{data::DataQuery, define::Define, undefine::Undefine};
 use crate::{
     common::{Span, Spanned},
     enum_getter,
 };
 
 pub mod data;
-mod typeql_define;
-mod typeql_undefine;
+mod define;
+mod undefine;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SchemaQuery {
-    Define(TypeQLDefine),
-    Undefine(TypeQLUndefine),
+    Define(Define),
+    Undefine(Undefine),
 }
 
 enum_getter! { SchemaQuery
-    into_define(Define) => TypeQLDefine,
-    into_undefine(Undefine) => TypeQLUndefine,
+    into_define(Define) => Define,
+    into_undefine(Undefine) => Undefine,
 }
 
 impl Spanned for SchemaQuery {
