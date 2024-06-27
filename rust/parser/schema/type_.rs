@@ -8,7 +8,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     definition::type_::{
         declaration::{Owned, Owns, Played, Plays, Related, Relates, Sub, ValueType},
-        Type, TypeTrait,
+        Type, TypeCapability,
     },
     parser::{
         annotation::{
@@ -28,16 +28,16 @@ pub(super) fn visit_definition_type(node: Node<'_>) -> Type {
     Type::new(span, ident, traits)
 }
 
-fn visit_type_constraint_declaration(node: Node<'_>) -> TypeTrait {
-    debug_assert_eq!(node.as_rule(), Rule::type_constraint_declaration);
+fn visit_type_constraint_declaration(node: Node<'_>) -> TypeCapability {
+    debug_assert_eq!(node.as_rule(), Rule::type_capability_declaration);
 
     let child = node.into_child();
     match child.as_rule() {
-        Rule::sub_declaration => TypeTrait::Sub(visit_sub_declaration(child)),
-        Rule::value_type_declaration => TypeTrait::ValueType(visit_value_type_declaration(child)),
-        Rule::owns_declaration => TypeTrait::Owns(visit_owns_declaration(child)),
-        Rule::relates_declaration => TypeTrait::Relates(visit_relates_declaration(child)),
-        Rule::plays_declaration => TypeTrait::Plays(visit_plays_declaration(child)),
+        Rule::sub_declaration => TypeCapability::Sub(visit_sub_declaration(child)),
+        Rule::value_type_declaration => TypeCapability::ValueType(visit_value_type_declaration(child)),
+        Rule::owns_declaration => TypeCapability::Owns(visit_owns_declaration(child)),
+        Rule::relates_declaration => TypeCapability::Relates(visit_relates_declaration(child)),
+        Rule::plays_declaration => TypeCapability::Plays(visit_plays_declaration(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -79,7 +79,7 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
 
     let annotations_owns = visit_annotations_owns(children.consume_expected(Rule::annotations_owns));
     debug_assert_eq!(children.try_consume_any(), None);
-    Owns::new(owned, annotations_owns, span)
+    Owns::new(span, owned, annotations_owns)
 }
 
 fn visit_relates_declaration(node: Node<'_>) -> Relates {

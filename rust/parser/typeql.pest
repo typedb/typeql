@@ -5,21 +5,21 @@
  */
 
 eof_query = { SOI ~ query ~ EOI }
+eof_label = { SOI ~ label ~ EOI }
+eof_definition_function = { SOI ~ definition_function ~ EOI }
+eof_definition_struct = { SOI ~ definition_struct ~ EOI }
+
+// TODO: do we need these?
 eof_queries = { SOI ~ query+ ~ EOI }
 eof_pattern = { SOI ~ pattern ~ EOI }
 eof_patterns = { SOI ~ patterns ~ EOI }
 eof_definables = { SOI ~ definables ~ EOI }
+// undefinables etc
 eof_statement = { SOI ~ statement ~ EOI }
-eof_label = { SOI ~ label ~ EOI }
-eof_definition_function = { SOI ~ definition_function ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
 query = { query_schema | query_data }
-
-query_schema = { query_define | query_undefine }
-query_define = { DEFINE ~ definables }
-query_undefine = { UNDEFINE ~ definables }
 
 query_data = { preamble* ~ query_stage+ ~ query_stage_final? }
 preamble = { WITH ~ definition_function }
@@ -95,14 +95,6 @@ projection_key_var = { var ~ projection_key_as_label? }
 projection_key_as_label = { AS ~ projection_key_label }
 projection_key_label = { quoted_string_literal | label }
 
-// SCHEMA QUERY ================================================================
-
-definables = { definable+ }
-definable = { ( definition_type ~ SEMICOLON )
-            | definition_function
-            // | definition_struct
-            }
-
 // STATEMENTS ==================================================================
 
 statement = { statement_type | statement_thing_var | statement_single | statement_anon_relation }
@@ -130,7 +122,7 @@ type_constraint = { sub_constraint
 
 sub_constraint = { SUB_ ~ type_ref_any ~ annotations_sub }
 value_type_constraint = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
-label_constraint = { TYPE ~ ( label_scoped | label ) }
+label_constraint = { LABEL ~ ( label_scoped | label ) }
 owns_constraint = { OWNS ~ type_ref_list ~ annotations_owns
                   | OWNS ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_owns
                   }
@@ -138,16 +130,6 @@ relates_constraint = { RELATES ~ type_ref_list ~ annotations_relates
                      | RELATES ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_relates
                      }
 plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
-
-annotations_sub = { ( ANNOTATION_ABSTRACT | ANNOTATION_CASCADE | ANNOTATION_INDEPENDENT )* }
-annotations_owns = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_KEY | ANNOTATION_UNIQUE )* }
-annotations_relates = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_CASCADE )* } // ( ANNOTATION_ABSTRACT )?
-annotations_value = { ( annotation_regex | annotation_values )* }
-
-annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ annotation_card_lower ~ COMMA ~ annotation_card_upper ~ PAREN_CLOSE }
-annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
-annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ label ~ PAREN_CLOSE }
-annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ PAREN_CLOSE }
 
 // THING STATEMENTS ============================================================
 
@@ -192,7 +174,7 @@ expression = { expression_list | expression_value }
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
 expression_base = _{ expression_list_index | expression_parenthesis | expression_function | value_literal | var }
 
-expression_operator = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
+expression_operator = _{ CARET | ASTERISK | SOLIDUS | PERCENT | PLUS | MINUS }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
 
 expression_list_index = { var ~ list_index }
@@ -210,25 +192,39 @@ list_range = { SQ_BRACKET_OPEN ~ expression_value ~ COLON ~ expression_value ~ S
 expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
 struct_value = { expression_value | expression_struct }
 
+// SCHEMA QUERY ================================================================
+
+query_schema = { query_define | query_undefine /* | query_redefine */ }
+
+// DEFINE QUERY ================================================================
+
+query_define = { DEFINE ~ definables }
+
+definables = { definable+ }
+definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
+
 // TYPE DEFINITION =============================================================
 
-definition_type = { identifier ~ type_constraint_declaration ~ ( COMMA ~ type_constraint_declaration )* }
-type_constraint_declaration = { sub_declaration
-                              | value_type_declaration
-                              | owns_declaration
-                              | relates_declaration
-                              | plays_declaration
+definition_type = { identifier ~ type_capability_declaration ~ ( COMMA ~ type_capability_declaration )* }
+type_capability_declaration = { sub_declaration | value_type_declaration | alias_declaration
+                              | owns_declaration | plays_declaration | relates_declaration
                               }
 
 sub_declaration = { SUB ~ label ~ annotations_sub }
+
 value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
+
+alias_declaration = { ALIAS ~ label }
+
 owns_declaration = { OWNS ~ list_label ~ annotations_owns
                    | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
                    }
+
+plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }
+
 relates_declaration = { RELATES ~ list_label ~ annotations_relates
                       | RELATES ~ label ~ ( AS ~ label )? ~ annotations_relates
                       }
-plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }
 
 // FUNCTION DEFINITION =========================================================
 
@@ -240,8 +236,8 @@ function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* )? }
 function_argument = { var ~ COLON ~ label_arg }
 
 function_return = { function_return_stream | function_return_single }
-function_return_stream = { CURLY_OPEN ~ function_return_value ~ ( "," ~ function_return_value )* ~ CURLY_CLOSE }
-function_return_single = { function_return_value ~ ( "," ~ function_return_value )* }
+function_return_stream = { CURLY_OPEN ~ function_return_value ~ ( COMMA ~ function_return_value )* ~ CURLY_CLOSE }
+function_return_single = { function_return_value ~ ( COMMA ~ function_return_value )* }
 function_return_value = { function_return_value_optional | function_return_value_base }
 function_return_value_optional = { function_return_value_base ~ QUESTION }
 function_return_value_base = { list_value_type_primitive | value_type_primitive | list_label | label }
@@ -250,18 +246,57 @@ return_statement = { RETURN ~ ( return_statement_stream | return_statement_singl
 return_statement_stream = { CURLY_OPEN ~ vars ~ CURLY_CLOSE }
 return_statement_single = { ( var | reduce ) ~ ( COMMA ~ ( var | reduce ) )* }
 
-// STRUCT CONSTRUCTS ===========================================================
+// STRUCT DEFINITION ===========================================================
 
-definition_struct = { STRUCT ~ label ~ COLON ~ definition_struct_fields ~ SEMICOLON }
+definition_struct = { STRUCT ~ identifier ~ COLON ~ definition_struct_fields ~ SEMICOLON }
 definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* }
-definition_struct_field = { struct_key ~ VALUE ~ ( value_type_primitive | label ) }
+definition_struct_field = { identifier ~ VALUE ~ ( value_type_primitive | label ) }
 
-struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value }
+struct_destructor = { CURLY_OPEN ~ identifier ~ COLON ~ struct_destructor_value }
 struct_destructor_value = { var | struct_destructor }
 
-struct_key = { label }
+// UNDEFINE QUERY ==============================================================
 
-// TYPE, label AND IDENTIFIER CONSTRUCTS =======================================
+query_undefine = { UNDEFINE ~ undefinables }
+
+undefinables = { undefinable+ }
+undefinable = { ( undefine_from ~ SEMICOLON ) | undefine_function | undefine_struct | label }
+
+undefine_from = { annotation_kind ~ FROM ~ undefine_annotation_recipient
+                | AS ~ label ~ FROM ~ undefine_override_recipient
+                | type_capability_declaration ~ FROM ~ label
+                }
+undefine_annotation_recipient = { label ~ VALUE ~ label
+                                | label ~ OWNS ~ label
+                                | label ~ RELATES ~ label
+                                | label ~ PLAYS ~ label_scoped
+                                | label
+                                }
+
+undefine_override_recipient = { label ~ SUB ~ label
+                              | label ~ VALUE ~ label
+                              | label ~ OWNS ~ label
+                              | label ~ RELATES ~ label
+                              | label ~ PLAYS ~ label_scoped
+                              | label
+                              }
+
+undefine_function = { FUN ~ identifier }
+undefine_struct = { STRUCT ~ identifier }
+
+// REDEFINE QUERY ==============================================================
+
+query_redefine = { UNDEFINE ~ redefinables }
+
+redefinables = { redefinable+ }
+redefinable = { ( definition_type ~ SEMICOLON )  }  // TODO (reuse definable parts)
+
+// TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
+
+label = ${ kind | identifier }
+label_scoped = ${ label ~ COLON ~ label ~ WB }
+
+identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB }
 
 type_ref_any = { type_ref_scoped | type_ref }
 type_ref_scoped = { label_scoped | var }
@@ -270,6 +305,21 @@ type_ref_list = { list_label | list_var }
 
 label_arg = { list_label | label }
 list_label = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+
+struct_key = { identifier }
+
+iid_value = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
+
+// VARIABLES ===================================================================
+
+vars = { var ~ ( COMMA ~ var )* }
+
+var = ${ VAR_ANONYMOUS | var_named }
+VAR_ANONYMOUS = @{ "$_" ~ WB }
+var_named = ${ "$" ~ identifier_var }
+identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
+
+list_var = ${ var ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 // LITERAL INPUT VALUES ========================================================
 
@@ -287,28 +337,38 @@ value_literal = { quoted_string_literal | datetime_literal | date_literal | bool
 
 signed_decimal = { sign? ~ decimal_literal }
 signed_integer = { sign? ~ integer_literal }
-sign = { ADD | SUBTRACT }
+sign = { PLUS | MINUS }
 
-// UNRESERVED KEYWORDS =========================================================
-// Most of TypeQL syntax should not be reserved from being used as identifiers
+// ANNOTATIONS =================================================================
+
+annotations_sub = { ( ANNOTATION_ABSTRACT | ANNOTATION_CASCADE | ANNOTATION_INDEPENDENT )* }
+annotations_owns = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_KEY | ANNOTATION_UNIQUE )* }
+annotations_relates = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_CASCADE )* } // ( ANNOTATION_ABSTRACT )?
+annotations_value = { ( annotation_regex | annotation_values )* }
+
+annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ annotation_card_lower ~ COMMA ~ annotation_card_upper ~ PAREN_CLOSE }
+annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
+annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ label ~ PAREN_CLOSE }
+annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ PAREN_CLOSE }
+
+// TYPEQL SYNTAX KEYWORDS ======================================================
 
 reserved = { WITH | MATCH | FETCH | DEFINE | UNDEFINE | INSERT | PUT | DELETE
            | CHECK | FIRST
            | ENTITY | RELATION | ATTRIBUTE | ROLE
            | ASC | DESC
            | STRUCT | FUN | RETURN
-           | TYPE
-           | SUB | OWNS | AS | PLAYS | RELATES
+           | ALIAS | SUB | OWNS | AS | PLAYS | RELATES
            | IID | ISA | LINKS | HAS
            | IS | OR | NOT | TRY | IN
-           | ABS | CEIL | FLOOR | ROUND | LENGTH
-           | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
            | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
            | TRUE | FALSE
            }
-unreserved = { VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS }
 
-// TYPEQL SYNTAX KEYWORDS ======================================================
+unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
+             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
+             | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
+             }
 
 // QUERY COMMAND KEYWORDS
 
@@ -324,19 +384,20 @@ DELETE = @{ "delete" ~ WB }
 CHECK = @{ "check" ~ WB }
 FIRST = @{ "first" ~ WB }
 
-// NATIVE TYPE KEYWORDS
+// THING KIND KEYWORDS
 
 ENTITY = @{ "entity" ~ WB }
 ATTRIBUTE = @{ "attribute" ~ WB }
 RELATION = @{ "relation" ~ WB }
 ROLE = @{ "role" ~ WB }
 
-// DELETE AND GET QUERY MODIFIER KEYWORDS
+// QUERY MODIFIER KEYWORDS
 
 FILTER = @{ "filter" ~ WB }
 LIMIT = @{ "limit" ~ WB }
 OFFSET = @{ "offset" ~ WB }
 SORT = @{ "sort" ~ WB }
+
 ORDER = ${ ASC | DESC }
 ASC = @{ "asc" ~ WB }
 DESC = @{ "desc" ~ WB }
@@ -348,16 +409,31 @@ RETURN = @{ "return" ~ WB }
 
 // TYPE VARIABLE CONSTRAINT KEYWORDS
 
-TYPE = @{ "type" ~ WB }
+ALIAS = @{ "alias" ~ WB }
+AS = @{ "as" ~ WB }
+FROM = @{ "from" ~ WB }
+LABEL = @{ "label" ~ WB }
+OWNS = @{ "owns" ~ WB }
+PLAYS = @{ "plays" ~ WB }
+RELATES = @{ "relates" ~ WB }
 SUB_ = ${ SUBX | SUB }
 SUB = @{ "sub" ~ WB }
 SUBX = @{ "sub!" ~ WB }
-OWNS = @{ "owns" ~ WB }
-AS = @{ "as" ~ WB }
-PLAYS = @{ "plays" ~ WB }
-RELATES = @{ "relates" ~ WB }
 
 // TYPE ANNOTATIONS
+
+annotation_kind = ${ ANNOTATION_ABSTRACT
+                   | ANNOTATION_CARD
+                   | ANNOTATION_CASCADE
+                   | ANNOTATION_DISTINCT
+                   | ANNOTATION_INDEPENDENT
+                   | ANNOTATION_KEY
+                   | ANNOTATION_RANGE
+                   | ANNOTATION_REGEX
+                   | ANNOTATION_SUBKEY
+                   | ANNOTATION_UNIQUE
+                   | ANNOTATION_VALUES
+                   }
 
 // unparametrized
 ANNOTATION_ABSTRACT = @{ "@abstract" ~ WB }
@@ -374,8 +450,8 @@ ANNOTATION_REGEX = @{ "@regex" ~ WB }
 ANNOTATION_SUBKEY = @{ "@subkey" ~ WB }
 ANNOTATION_VALUES = @{ "@values" ~ WB }
 
-annotation_card_lower = @{ ASCII_DIGIT+ }
-annotation_card_upper = @{ ASCII_DIGIT+ | "*" }
+annotation_card_lower = @{ integer_literal }
+annotation_card_upper = @{ integer_literal | ASTERISK }
 
 // THING VARIABLE CONSTRAINT KEYWORDS
 
@@ -410,12 +486,12 @@ CONTAINS = @{ "contains" ~ WB }
 ASSIGN = @{ "=" }
 IN = @{ "in" ~ WB }
 
-ADD = @{ "+" }
-SUBTRACT = @{ "-" }
-DIVIDE = @{ "/" }
-MULTIPLY = @{ "*" }
-POWER = @{ "^" }
-MODULO = @{ "%" }
+PLUS = @{ "+" }     // unary plus, addition
+MINUS = @{ "-" }    // unary negation, subtraction
+SOLIDUS = @{ "/" }  // division
+ASTERISK = @{ "*" } // multiplication, unbounded cardinality
+CARET = @{ "^" }    // exponentiation
+PERCENT = @{ "%" }  // modulo
 
 // Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
 builtin_func_name = ${ ABS | CEIL | FLOOR | ROUND | LENGTH | MAX | MIN }
@@ -462,42 +538,12 @@ numeric_literal = @{ integer_literal | decimal_literal }
 
 date_literal = ${ date_fragment ~ WB }
 datetime_literal = ${ date_fragment ~ "T" ~ time ~ WB }
-datetime_literal_tz = ${ date_fragment ~ "T" ~ time ~ ( " " ~ iana_timezone | iso8601_timezone_offset ) ~ WB }
+datetime_tz_literal = ${ date_fragment ~ "T" ~ time ~ ( " " ~ iana_timezone | iso8601_timezone_offset ) ~ WB }
 
-duration_literal = ${ "P" ~ duration_date ~ ( "T" ~ duration_time )? ~ WB}
-
-duration_date = ${ duration_weeks
-                 | duration_years ~ duration_months? ~ duration_days?
-                 | duration_months ~ duration_days?
-                 | duration_days
-                 }
-duration_years = ${ integer_literal ~ "Y" }
-duration_months = ${ integer_literal ~ "M" }
-duration_weeks = ${ integer_literal ~ "W" }
-duration_days = ${ integer_literal ~ "D" }
-
-duration_time = ${ duration_hours ~ duration_minutes? ~ duration_seconds?
-                 | duration_minutes ~ duration_seconds?
-                 | duration_seconds
-                 }
-duration_hours = ${ integer_literal ~ "H" }
-duration_minutes = ${ integer_literal ~ "M" }
-duration_seconds = ${ numeric_literal ~ "S" }
+duration_literal = ${ "P" ~ ( duration_weeks | duration_date ~ ( "T" ~ duration_time )? ) ~ WB}
 
 quoted_string_literal = @{ "\"" ~ ( !"\"" ~ !"\\" ~ ANY | escape_seq )* ~ "\""
                          | "'" ~ ( !"'" ~ !"\\" ~ ANY | escape_seq )* ~ "'" }
-
-// TYPEQL INPUT PATTERNS
-var = ${ VAR_ANONYMOUS | var_named }
-vars = { var ~ ( COMMA ~ var )* }
-VAR_ANONYMOUS = @{ "$_" ~ WB }
-var_named = ${ "$" ~ identifier }
-list_var = ${ var ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
-iid_value = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
-label = ${ kind | identifier }
-role_label = ${ ROLE | identifier }
-label_scoped = ${ label ~ ":" ~ role_label ~ WB }
-identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB }
 
 // PUNCTUATION =================================================================
 
@@ -547,13 +593,31 @@ day = @{ ( '0'..'3' ) ~ ASCII_DIGIT }
 year = @{ ASCII_DIGIT{4} | ( "+" | "-" ) ~ ASCII_DIGIT+ }
 time = ${ hour ~ COLON ~ minute ~ ( COLON ~ second ~ ( "." ~ second_fraction )? )? }
 hour = @{ ( '0'..'2' ) ~ ASCII_DIGIT }
-minute = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
+minute = @{ ( '0'..'5' ) ~ ASCII_DIGIT }
 second = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
 second_fraction = @{ ASCII_DIGIT{1,9} } // between 1 and 9 digits
 
-iso8601_timezone_offset = @{ "Z" | sign ~ hour ~ ( COLON? ~ minute )? }
+iso8601_timezone_offset = @{ "Z" | sign ~ hour ~ ( COLON? ~ minute )? } // "Z", "±HH", "±HHMM", "±HH:MM"
+
 iana_timezone = @{ iana_timezone_single ~ ( "/" ~ iana_timezone_single ){0,2} ~ WB }
 iana_timezone_single = @{ 'A'..'Z' ~ ( ASCII_ALPHANUMERIC | "_" | "-" | "+" )+ }
+
+duration_date = ${ duration_years ~ duration_months? ~ duration_days?
+                 | duration_months ~ duration_days?
+                 | duration_days
+                 }
+duration_years = ${ integer_literal ~ "Y" }
+duration_months = ${ integer_literal ~ "M" }
+duration_weeks = ${ integer_literal ~ "W" }
+duration_days = ${ integer_literal ~ "D" }
+
+duration_time = ${ duration_hours ~ duration_minutes? ~ duration_seconds?
+                 | duration_minutes ~ duration_seconds?
+                 | duration_seconds
+                 }
+duration_hours = ${ integer_literal ~ "H" }
+duration_minutes = ${ integer_literal ~ "M" }
+duration_seconds = ${ numeric_literal ~ "S" }
 
 escape_seq = @{ "\\" ~ ANY }
 

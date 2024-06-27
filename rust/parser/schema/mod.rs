@@ -5,14 +5,17 @@
  */
 
 pub(super) mod function;
+mod struct_;
 mod type_;
 
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, Spanned},
-    parser::schema::{function::visit_definition_function, type_::visit_definition_type},
-    pattern::Definable,
-    query::{SchemaQuery, Define, Undefine},
+    definition::Definable,
+    parser::schema::{
+        function::visit_definition_function, struct_::visit_definition_struct, type_::visit_definition_type,
+    },
+    query::schema::{Define, SchemaQuery, Undefine},
 };
 
 pub(super) fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
@@ -59,7 +62,7 @@ pub(super) fn visit_definable(node: Node<'_>) -> Definable {
     match child.as_rule() {
         Rule::definition_type => Definable::TypeDeclaration(visit_definition_type(child)),
         Rule::definition_function => Definable::Function(visit_definition_function(child)),
-        Rule::definition_struct => todo!(),
+        Rule::definition_struct => Definable::Struct(visit_definition_struct(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

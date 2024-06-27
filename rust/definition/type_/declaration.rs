@@ -6,23 +6,43 @@
 
 use std::fmt::{self, Write};
 
+use super::TypeCapability;
 use crate::{
-    annotation::{AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType},
+    annotation::Annotation,
     common::Span,
-    identifier::{Label, ScopedLabel},
+    identifier::{Identifier, Label, ScopedLabel},
     write_joined,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sub {
-    pub supertype_label: Label,
-    pub annotations: Vec<AnnotationSub>,
     span: Option<Span>,
+    supertype_label: Label,
+    annotations: Vec<Annotation>,
 }
 
 impl Sub {
-    pub fn new(supertype_label: Label, annotations: Vec<AnnotationSub>, span: Option<Span>) -> Self {
+    pub fn new(supertype_label: Label, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
         Self { supertype_label, annotations, span }
+    }
+
+    pub fn build(supertype_label: impl Into<Identifier>) -> Self {
+        Self::new(Label::Identifier(supertype_label.into()), Vec::new(), None)
+    }
+}
+
+impl super::Type {
+    #[allow(clippy::should_implement_trait)]
+    pub fn sub(mut self, supertype: impl Into<Identifier>) -> Self {
+        self.traits.push(TypeCapability::Sub(Sub::build(supertype)));
+        self
+    }
+}
+
+impl Label {
+    #[allow(clippy::should_implement_trait)]
+    pub fn sub(self, supertype: impl Into<Identifier>) -> super::Type {
+        super::Type::from(self).sub(supertype)
     }
 }
 
@@ -41,16 +61,12 @@ impl fmt::Display for Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     pub value_type: crate::pattern::statement::Type,
-    pub annotations: Vec<AnnotationValueType>,
+    pub annotations: Vec<Annotation>,
     pub span: Option<Span>,
 }
 
 impl ValueType {
-    pub fn new(
-        value_type: crate::pattern::statement::Type,
-        annotations: Vec<AnnotationValueType>,
-        span: Option<Span>,
-    ) -> Self {
+    pub fn new(value_type: crate::pattern::statement::Type, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
         Self { value_type, annotations, span }
     }
 }
@@ -85,14 +101,27 @@ impl fmt::Display for Owned {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
-    pub owned: Owned,
-    pub annotations: Vec<AnnotationOwns>,
     span: Option<Span>,
+    owned: Owned,
+    annotations: Vec<Annotation>,
 }
 
 impl Owns {
-    pub fn new(owned: Owned, annotations: Vec<AnnotationOwns>, span: Option<Span>) -> Self {
-        Self { owned, annotations, span }
+    pub fn new(span: Option<Span>, owned: Owned, annotations: Vec<Annotation>) -> Self {
+        Self { span, owned, annotations }
+    }
+}
+
+impl super::Type {
+    pub fn owns(mut self, attribute_type: impl Into<Identifier>) -> Self {
+        self.traits.push(TypeCapability::Sub(Sub::build(attribute_type)));
+        self
+    }
+}
+
+impl Label {
+    pub fn owns(self, attribute_type: impl Into<Identifier>) -> super::Type {
+        super::Type::from(self).owns(attribute_type)
     }
 }
 
@@ -127,12 +156,12 @@ impl fmt::Display for Related {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     pub related: Related,
-    pub annotations: Vec<AnnotationRelates>,
+    pub annotations: Vec<Annotation>,
     span: Option<Span>,
 }
 
 impl Relates {
-    pub fn new(related: Related, annotations: Vec<AnnotationRelates>, span: Option<Span>) -> Self {
+    pub fn new(related: Related, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
         Self { related, annotations, span }
     }
 }

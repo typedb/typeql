@@ -46,22 +46,22 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression_value);
 
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
-        .op(Op::infix(Rule::ADD, Assoc::Left) | Op::infix(Rule::SUBTRACT, Assoc::Left))
-        .op(Op::infix(Rule::MULTIPLY, Assoc::Left)
-            | Op::infix(Rule::DIVIDE, Assoc::Left)
-            | Op::infix(Rule::MODULO, Assoc::Left))
-        .op(Op::infix(Rule::POWER, Assoc::Right));
+        .op(Op::infix(Rule::PLUS, Assoc::Left) | Op::infix(Rule::MINUS, Assoc::Left))
+        .op(Op::infix(Rule::ASTERISK, Assoc::Left)
+            | Op::infix(Rule::SOLIDUS, Assoc::Left)
+            | Op::infix(Rule::PERCENT, Assoc::Left))
+        .op(Op::infix(Rule::CARET, Assoc::Right));
 
     pratt_parser
         .map_primary(visit_expression_base)
         .map_infix(|left, op, right| {
             let op = match op.as_rule() {
-                Rule::ADD => token::ArithmeticOperator::Add,
-                Rule::SUBTRACT => token::ArithmeticOperator::Subtract,
-                Rule::MULTIPLY => token::ArithmeticOperator::Multiply,
-                Rule::DIVIDE => token::ArithmeticOperator::Divide,
-                Rule::MODULO => token::ArithmeticOperator::Modulo,
-                Rule::POWER => token::ArithmeticOperator::Power,
+                Rule::PLUS => token::ArithmeticOperator::Add,
+                Rule::MINUS => token::ArithmeticOperator::Subtract,
+                Rule::ASTERISK => token::ArithmeticOperator::Multiply,
+                Rule::SOLIDUS => token::ArithmeticOperator::Divide,
+                Rule::PERCENT => token::ArithmeticOperator::Modulo,
+                Rule::CARET => token::ArithmeticOperator::Power,
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: op.to_string() }),
             };
             Expression::Operation(Box::new(Operation::new(op, left, right)))

@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::identifier::{Identifier, Variable};
+use crate::identifier::{Identifier, Label, Variable};
 
 #[macro_export]
 macro_rules! define {
@@ -29,4 +29,8 @@ macro_rules! match_ {
 
 pub fn var(name: impl Into<Identifier>) -> Variable {
     Variable::Named(None, name.into())
+}
+
+pub fn type_(name: impl Into<Identifier>) -> Label {
+    Label::Identifier(name.into())
 }

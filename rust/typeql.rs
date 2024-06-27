@@ -25,12 +25,13 @@ pub mod query;
 mod util;
 
 pub use common::Result;
+use definition::Definable;
 use identifier::Label;
 use parser::{
     visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
     visit_eof_statement,
 };
-use pattern::{Definable, Pattern, Statement};
+use pattern::{Pattern, Statement};
 use query::Query;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {

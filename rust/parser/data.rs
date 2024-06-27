@@ -37,8 +37,7 @@ pub(super) fn visit_query_data(node: Node<'_>) -> DataQuery {
     let span = node.span();
     let mut children = node.into_children();
 
-    let preambles =
-        children.take_while_ref(|child| child.as_rule() == Rule::preamble).map(visit_preamble).collect_vec();
+    let preambles = children.take_while_ref(|child| child.as_rule() == Rule::preamble).map(visit_preamble).collect();
     let mut stages =
         children.take_while_ref(|child| child.as_rule() == Rule::query_stage).map(visit_query_stage).collect_vec();
     stages.extend(children.try_consume_expected(Rule::query_stage_final).map(visit_query_stage_final));

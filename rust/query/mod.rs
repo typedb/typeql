@@ -6,54 +6,16 @@
 
 use std::fmt;
 
-pub use self::{data::DataQuery, define::Define, undefine::Undefine};
-use crate::{
-    common::{Span, Spanned},
-    enum_getter,
-};
+pub use self::{data::DataQuery, schema::SchemaQuery};
 
 pub mod data;
-mod define;
-mod undefine;
+pub mod schema;
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum SchemaQuery {
-    Define(Define),
-    Undefine(Undefine),
-}
-
-enum_getter! { SchemaQuery
-    into_define(Define) => Define,
-    into_undefine(Undefine) => Undefine,
-}
-
-impl Spanned for SchemaQuery {
-    fn span(&self) -> Option<Span> {
-        match self {
-            SchemaQuery::Define(define) => define.span(),
-            SchemaQuery::Undefine(undefine) => undefine.span(),
-        }
-    }
-}
-
-impl fmt::Display for SchemaQuery {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Define(define_query) => fmt::Display::fmt(define_query, f),
-            Self::Undefine(undefine_query) => fmt::Display::fmt(undefine_query, f),
-        }
-    }
-}
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Schema(SchemaQuery),
     Data(DataQuery),
-}
-
-enum_getter! { Query
-    into_schema(Schema) => SchemaQuery,
-    into_data(Data) => DataQuery,
 }
 
 impl fmt::Display for Query {

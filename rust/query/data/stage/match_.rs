@@ -7,7 +7,11 @@
 use std::fmt;
 
 use super::Stage;
-use crate::{common::Span, pattern::Pattern, query::Query};
+use crate::{
+    common::{token, Span},
+    pattern::Pattern,
+    query::{DataQuery, Query},
+};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Match {
@@ -32,12 +36,18 @@ impl Match {
 
 impl From<Match> for Query {
     fn from(value: Match) -> Self {
-        Self::Data(crate::query::DataQuery::new(None, Vec::new(), vec![Stage::Match(value)]))
+        Self::Data(DataQuery::new(None, Vec::new(), vec![Stage::Match(value)]))
     }
 }
 
 impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        write!(f, "{}", token::Clause::Match)?;
+
+        for pattern in &self.patterns {
+            write!(f, "\n{pattern};")?;
+        }
+
+        Ok(())
     }
 }

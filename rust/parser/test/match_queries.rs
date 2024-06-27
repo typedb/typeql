@@ -4,8 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+
 use super::assert_valid_eq_repr;
-use crate::parse_query;
+use crate::{builder::var, match_, parse_query};
 
 #[test]
 fn test_simple_query() {
@@ -13,7 +15,7 @@ fn test_simple_query() {
 $x isa movie;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); // typeql_match!(cvar("x").isa("movie")).get();
+    let expected = match_!(var("x").isa("movie"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -23,7 +25,7 @@ fn test_named_type_variable() {
 $a type attribute_label;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); // typeql_match!(cvar("a").type_("attribute_label")).get_fixed([cvar("a")]);
+    let expected = match_!(var("a").type_("attribute_label")).get_fixed([var("a")]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -34,7 +36,7 @@ $x isa person,
     has name "alice/bob";"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); //typeql_match!(cvar("x").isa("person").has(("name", "alice/bob"))).get();
+    let expected = (); //typeql_match!(var("x").isa("person").has(("name", "alice/bob")));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -47,11 +49,11 @@ $brando "Marl B" isa name;
 filter $char, $prod;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(
-                           cvar("brando").eq("Marl B").isa("name"),
-                           rel(("actor", "brando")).links("char").links(("production-with-cast", "prod")),
-                       )
-                       .get_fixed([cvar("char"), cvar("prod")]); */
+    let expected = match_!(
+        var("brando").equals("Marl B").isa("name"),
+        rel(("actor", "brando")).links("char").links(("production-with-cast", "prod")),
+    )
+    .get_fixed([var("char"), var("prod")]);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -62,7 +64,7 @@ fn test_role_type_scoped_globally() {
 $m relates spouse;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); // typeql_match!(cvar("m").relates("spouse")).get();
+    let expected = match_!(var("m").relates("spouse"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -72,7 +74,7 @@ fn test_role_type_not_scoped() {
 marriage relates $s;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); // typeql_match!(type_("marriage").relates(cvar("s"))).get();
+    let expected = match_!(type_("marriage").relates(var("s")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -94,15 +96,15 @@ $t != "Apocalypse Now";"#;
     let parsed = parse_query(query).unwrap();
     let expected = ();
     // typeql_match!(
-    // cvar("x").isa("movie").has(("title", cvar("t"))),
+    // var("x").isa("movie").has(("title", var("t"))),
     // or!(
-    // cvar("t").eq("Apocalypse Now"),
-    // and!(cvar("t").lt("Juno"), cvar("t").gt("Godfather")),
-    // cvar("t").eq("Spy"),
+    // var("t").equals("Apocalypse Now"),
+    // and!(var("t").lt("Juno"), var("t").gt("Godfather")),
+    // var("t").equals("Spy"),
     // ),
-    // cvar("t").neq("Apocalypse Now"),
+    // var("t").neq("Apocalypse Now"),
     // )
-    // .get();
+    // ;
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -121,14 +123,10 @@ $x isa movie,
 };"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(
-                           cvar("x").isa("movie").has(("title", cvar("t"))),
-                           or!(
-                               and!(cvar("t").lte("Juno"), cvar("t").gte("Godfather"), cvar("t").neq("Heat")),
-                               cvar("t").eq("The Muppets"),
-                           ),
-                       )
-                       .get(); */
+    let expected = match_!(
+        var("x").isa("movie").has(("title", var("t"))),
+        or!(and!(var("t").lte("Juno"), var("t").gte("Godfather"), var("t").neq("Heat")), var("t").equals("The Muppets"),),
+    );
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -145,12 +143,11 @@ $y isa person,
 };"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(
-                           rel("x").links("y"),
-                           cvar("y").isa("person").has(("name", cvar("n"))),
-                           or!(cvar("n").contains("ar"), cvar("n").like("^M.*$")),
-                       )
-                       .get(); */
+    let expected = match_!(
+        rel("x").links("y"),
+        var("y").isa("person").has(("name", var("n"))),
+        or!(var("n").contains("ar"), var("n").like("^M.*$")),
+    );
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -164,7 +161,7 @@ $z 18 isa age;"#;
 
     let parsed = parse_query(query).unwrap();
     let expected = ();
-    // typeql_match!(cvar("x").has(("age", cvar("y"))), cvar("y").gte(cvar("z")), cvar("z").eq(18).isa("age"),).get();
+    // typeql_match!(var("x").has(("age", var("y"))), var("y").gte(var("z")), var("z").equals(18).isa("age"),);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -180,15 +177,14 @@ not { $x is $y; };
 not { $a is $b; };"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(
-                           cvar("x").sub(cvar("z")),
-                           cvar("y").sub(cvar("z")),
-                           cvar("a").isa(cvar("x")),
-                           cvar("b").isa(cvar("y")),
-                           not(cvar("x").is(cvar("y"))),
-                           not(cvar("a").is(cvar("b"))),
-                       )
-                       .get(); */
+    let expected = match_!(
+        var("x").sub(var("z")),
+        var("y").sub(var("z")),
+        var("a").isa(var("x")),
+        var("b").isa(var("y")),
+        not(var("x").is(var("y"))),
+        not(var("a").is(var("b"))),
+    );
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -199,7 +195,7 @@ fn test_value_equals_variable_query() {
 $s1 == $s2;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); // typeql_match!(cvar("s1").eq(cvar("s2"))).get();
+    let expected = match_!(var("s1").equals(var("s2")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -211,7 +207,7 @@ $s1 == $s2;"#;
 // get;"#;
 //
 //     let parsed = parse_query(query).unwrap();
-//     let expected = typeql_match!(cvar("s1").eq(cvar("s2"))).get();
+//     let expected = typeql_match!(var("s1").equals(var("s2")));
 //
 //     assert_eq!(expected, parsed);
 //     assert_eq!(expected, parse_query(parsed.to_string().as_str()).unwrap());
@@ -225,12 +221,11 @@ $_ has title "Spy",
     has release-date $r;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(
-                           cvar("x").has(("release-date", gte(cvar("r")))),
-                           cvar(()).has(("title", "Spy")).has(("release-date", cvar("r"))),
-                           )
-                           .get();
-                       */
+    let expected = match_!(
+        var("x").has(("release-date", gte(var("r")))),
+        var(()).has(("title", "Spy")).has(("release-date", var("r"))),
+    );
+
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -242,17 +237,16 @@ $x has release-date < 1986-03-03T00:00,
     has tmdb-vote-average <= 9.0;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(cvar("x")
-                           .has((
-                               "release-date",
-                               lt(NaiveDateTime::new(
-                                   NaiveDate::from_ymd_opt(1986, 3, 3).unwrap(),
-                                   NaiveTime::from_hms_opt(0, 0, 0).unwrap()
-                               ))
-                           ))
-                           .has(("tmdb-vote-count", 100))
-                           .has(("tmdb-vote-average", lte(9.0))))
-                       .get(); */
+    let expected = match_!(var("x")
+        .has((
+            "release-date",
+            lt(NaiveDateTime::new(
+                NaiveDate::from_ymd_opt(1986, 3, 3).unwrap(),
+                NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
+            )),
+        ))
+        .has(("tmdb-vote-count", 100))
+        .has(("tmdb-vote-average", lte(9.0))),);
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -263,14 +257,13 @@ fn when_parsing_date_handle_time() {
 $x has release-date 1000-11-12T13:14:15;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(cvar("x").has((
-                           "release-date",
-                           NaiveDateTime::new(
-                               NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
-                               NaiveTime::from_hms_opt(13, 14, 15).unwrap()
-                           ),
-                       )))
-                       .get();*/
+    let expected = match_!(var("x").has((
+        "release-date",
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
+            NaiveTime::from_hms_opt(13, 14, 15).unwrap(),
+        ),
+    )));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -281,11 +274,11 @@ fn when_parsing_date_handle_big_years() {
 $x has release-date +12345-12-25T00:00;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(cvar("x").has((
-                           "release-date",
-                           NaiveDateTime::new(NaiveDate::from_ymd_opt(12345, 12, 25).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-                       )))
-                       .get(); */
+    let var_name = match_!(var("x").has((
+        "release-date",
+        NaiveDateTime::new(NaiveDate::from_ymd_opt(12345, 12, 25).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
+    )));
+    let expected = var_name;
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -296,11 +289,10 @@ fn when_parsing_date_handle_small_years() {
 $x has release-date 0867-01-01T00:00;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(cvar("x").has((
-                           "release-date",
-                           NaiveDateTime::new(NaiveDate::from_ymd_opt(867, 1, 1).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-                       )))
-                       .get(); */
+    let expected = match_!(var("x").has((
+        "release-date",
+        NaiveDateTime::new(NaiveDate::from_ymd_opt(867, 1, 1).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
+    )));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -311,11 +303,10 @@ fn when_parsing_date_handle_negative_years() {
 $x has release-date -3200-01-01T00:00;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(cvar("x").has((
-                           "release-date",
-                           NaiveDateTime::new(NaiveDate::from_ymd_opt(-3200, 1, 1).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-                       )))
-                       .get(); */
+    let expected = match_!(var("x").has((
+        "release-date",
+        NaiveDateTime::new(NaiveDate::from_ymd_opt(-3200, 1, 1).unwrap(), NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
+    )));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -326,14 +317,13 @@ fn when_parsing_date_handle_millis() {
 $x has release-date 1000-11-12T13:14:15.123;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(cvar("x").has((
-                           "release-date",
-                           NaiveDateTime::new(
-                               NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
-                               NaiveTime::from_hms_milli_opt(13, 14, 15, 123).unwrap(),
-                           ),
-                       )))
-                       .get(); */
+    let expected = match_!(var("x").has((
+        "release-date",
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
+            NaiveTime::from_hms_milli_opt(13, 14, 15, 123).unwrap(),
+        ),
+    )));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -344,14 +334,13 @@ fn when_parsing_date_handle_millis_shorthand() {
 $x has release-date 1000-11-12T13:14:15.1;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(cvar("x").has((
-                           "release-date",
-                           NaiveDateTime::new(
-                               NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
-                               NaiveTime::from_hms_milli_opt(13, 14, 15, 100).unwrap(),
-                           ),
-                       )))
-                       .get(); */
+    let expected = match_!(var("x").has((
+        "release-date",
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(1000, 11, 12).unwrap(),
+            NaiveTime::from_hms_milli_opt(13, 14, 15, 100).unwrap(),
+        ),
+    )));
 
     let parsed_query = r#"match
 $x has release-date 1000-11-12T13:14:15.100;"#;
@@ -375,7 +364,7 @@ $x isa movie,
     has tmdb-vote-count <= 400;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); // typeql_match!(cvar("x").isa("movie").has(("tmdb-vote-count", lte(400)))).get();
+    let expected = match_!(var("x").isa("movie").has(("tmdb-vote-count", lte(400))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -387,7 +376,7 @@ $x = 5;
 $a == $x isa age;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); // typeql_match!(vvar("x").assign(5), cvar("a").eq(vvar("x")).isa("age"),).get();
+    let expected = match_!(var("x").assign(5), var("a").equals(var("x")).isa("age"));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
@@ -398,13 +387,9 @@ fn test_parsing_precedence_operators() {
 $res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(vvar("res").assign(
-                           cvar("a")
-                               .divide(cvar("b"))
-                               .multiply(cvar("c"))
-                               .add(cvar("d").power(cvar("e").power(cvar("f"))).divide(cvar("g")))
-                       ))
-                       .get(); */
+    let expected = match_!(var("res").assign(
+        var("a").divide(var("b")).multiply(var("c")).add(var("d").power(var("e").power(var("f"))).divide(var("g"))),
+    ));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
@@ -414,10 +399,8 @@ fn test_parsing_precedence_function_and_parentheses() {
 $res = $a + (round($b + $c) + $d) * $e;"#;
 
     let parsed = parse_query(query).unwrap();
-    let expected = (); /* typeql_match!(
-                           vvar("res").assign(cvar("a").add(round(cvar("b").add(vvar("c"))).add(cvar("d")).multiply(vvar("e"))))
-                       )
-                       .get(); */
+    let expected =
+        match_!(var("res").assign(var("a").add(round(var("b").add(var("c"))).add(var("d")).multiply(var("e")))));
 
     assert_valid_eq_repr!(expected, parsed, query);
 }

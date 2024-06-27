@@ -6,97 +6,200 @@
 
 use std::fmt::{self, Write};
 
-use crate::{common::Span, write_joined};
+use crate::{
+    common::{token, Span},
+    write_joined,
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum AnnotationSub {
-    Abstract(Option<Span>),    // FIXME
-    Cascade(Option<Span>),     // FIXME
-    Independent(Option<Span>), // FIXME
+pub struct Abstract {
+    span: Option<Span>,
 }
 
-impl fmt::Display for AnnotationSub {
+impl Abstract {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl fmt::Display for Abstract {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Abstract(_) => f.write_str("@abstract"),
-            Self::Cascade(_) => f.write_str("@cascade"),
-            Self::Independent(_) => f.write_str("@independent"),
+        write!(f, "@{}", token::Annotation::Abstract)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Cardinality {
+    span: Option<Span>,
+    min: usize,
+    max: Option<usize>,
+}
+
+impl Cardinality {
+    pub fn new(span: Option<Span>, min: usize, max: Option<usize>) -> Self {
+        Self { span, min, max }
+    }
+}
+
+impl fmt::Display for Cardinality {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.max {
+            Some(max) => write!(f, "@{}({}, {})", token::Annotation::Cardinality, self.min, max),
+            None => write!(f, "@{}({}, *)", token::Annotation::Cardinality, self.min),
         }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum AnnotationValueType {
-    Regex(String, Option<Span>),       // FIXME
-    Values(Vec<String>, Option<Span>), // FIXME
+pub struct Cascade {
+    span: Option<Span>,
 }
 
-impl fmt::Display for AnnotationValueType {
+impl Cascade {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl fmt::Display for Cascade {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Regex(regex, _) => write!(f, "@regex({regex})"),
-            Self::Values(values, _) => {
-                f.write_str("@values(")?;
-                write_joined!(f, ", ", values)?;
-                f.write_char(')')?;
-                Ok(())
-            }
-        }
+        write!(f, "@{}", token::Annotation::Cascade)
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum AnnotationOwns {
-    Cardinality(usize, Option<usize>, Option<Span>), // FIXME
-    Distinct(Option<Span>),                          // FIXME
-    Key(Option<Span>),                               // FIXME
-    Unique(Option<Span>),                            // FIXME
+pub struct Distinct {
+    span: Option<Span>,
 }
 
-impl fmt::Display for AnnotationOwns {
+impl Distinct {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl fmt::Display for Distinct {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Cardinality(min, max, _) => {
-                f.write_str("@card(")?;
-                fmt::Display::fmt(min, f)?;
-                f.write_str(", ")?;
-                match max {
-                    Some(max) => fmt::Display::fmt(max, f)?,
-                    None => f.write_char('*')?,
-                }
-                f.write_char(')')?;
-                Ok(())
-            }
-            Self::Distinct(_) => f.write_str("@distinct"),
-            Self::Key(_) => f.write_str("@key"),
-            Self::Unique(_) => f.write_str("@unique"),
-        }
+        write!(f, "@{}", token::Annotation::Distinct)
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum AnnotationRelates {
-    Cardinality(usize, Option<usize>, Option<Span>), // FIXME
-    Distinct(Option<Span>),                          // FIXME
-    Cascade(Option<Span>),                           // FIXME
+pub struct Independent {
+    span: Option<Span>,
 }
 
-impl fmt::Display for AnnotationRelates {
+impl Independent {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl fmt::Display for Independent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Cardinality(min, max, _) => {
-                f.write_str("@card(")?;
-                fmt::Display::fmt(min, f)?;
-                f.write_str(", ")?;
-                match max {
-                    Some(max) => fmt::Display::fmt(max, f)?,
-                    None => f.write_char('*')?,
-                }
-                f.write_char(')')?;
-                Ok(())
-            }
-            Self::Distinct(_) => f.write_str("@distinct"),
-            Self::Cascade(_) => f.write_str("@cascade"),
-        }
+        write!(f, "@{}", token::Annotation::Independent)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Key {
+    span: Option<Span>,
+}
+
+impl Key {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl fmt::Display for Key {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}", token::Annotation::Key)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Regex {
+    span: Option<Span>,
+    regex: String,
+}
+
+impl Regex {
+    pub fn new(span: Option<Span>, regex: String) -> Self {
+        Self { span, regex }
+    }
+}
+
+impl fmt::Display for Regex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}({})", token::Annotation::Regex, self.regex)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Unique {
+    span: Option<Span>,
+}
+
+impl Unique {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl fmt::Display for Unique {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}", token::Annotation::Unique)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Values {
+    span: Option<Span>,
+    values: Vec<String>, // FIXME
+}
+
+impl Values {
+    pub fn new(span: Option<Span>, values: Vec<String>) -> Self {
+        Self { span, values }
+    }
+}
+
+impl fmt::Display for Values {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}(", token::Annotation::Values)?;
+        write_joined!(f, ", ", &self.values)?;
+        f.write_char(')')?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Annotation {
+    Abstract(Abstract),
+    Cardinality(Cardinality),
+    Cascade(Cascade),
+    Distinct(Distinct),
+    Independent(Independent),
+    Key(Key),
+    Regex(Regex),
+    Unique(Unique),
+    Values(Values),
+}
+
+impl fmt::Display for Annotation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let inner: &dyn fmt::Display = match self {
+            Self::Abstract(inner) => inner,
+            Self::Cardinality(inner) => inner,
+            Self::Cascade(inner) => inner,
+            Self::Distinct(inner) => inner,
+            Self::Independent(inner) => inner,
+            Self::Key(inner) => inner,
+            Self::Regex(inner) => inner,
+            Self::Unique(inner) => inner,
+            Self::Values(inner) => inner,
+        };
+        inner.fmt(f)
     }
 }

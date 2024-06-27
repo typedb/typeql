@@ -10,7 +10,7 @@ use crate::{
     common::Span,
     identifier::{Identifier, Variable},
     pattern::statement::Type,
-    query::data::stage::{Match, Reduce},
+    query::data::stage::{Match, Modifier, Reduce},
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -75,12 +75,19 @@ pub struct Function {
     span: Option<Span>,
     signature: Signature,
     body: Match,
+    modifiers: Vec<Modifier>,
     return_stmt: ReturnStatement,
 }
 
 impl Function {
-    pub fn new(span: Option<Span>, signature: Signature, body: Match, return_stmt: ReturnStatement) -> Self {
-        Self { span, signature, body, return_stmt }
+    pub fn new(
+        span: Option<Span>,
+        signature: Signature,
+        body: Match,
+        modifiers: Vec<Modifier>,
+        return_stmt: ReturnStatement,
+    ) -> Self {
+        Self { span, signature, body, modifiers, return_stmt }
     }
 }
 

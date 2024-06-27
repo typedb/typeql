@@ -17,7 +17,7 @@ pub mod declaration;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 // TODO name?
-pub enum TypeTrait {
+pub enum TypeCapability {
     Sub(Sub),
     Owns(Owns),
     Plays(Plays),
@@ -25,7 +25,7 @@ pub enum TypeTrait {
     ValueType(ValueType),
 }
 
-impl fmt::Display for TypeTrait {
+impl fmt::Display for TypeCapability {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Sub(inner) => fmt::Display::fmt(inner, f),
@@ -41,12 +41,16 @@ impl fmt::Display for TypeTrait {
 pub struct Type {
     span: Option<Span>,
     label: Identifier,
-    traits: Vec<TypeTrait>,
+    traits: Vec<TypeCapability>,
 }
 
 impl Type {
-    pub fn new(span: Option<Span>, label: Identifier, traits: Vec<TypeTrait>) -> Self {
+    pub(crate) fn new(span: Option<Span>, label: Identifier, traits: Vec<TypeCapability>) -> Self {
         Self { span, label, traits }
+    }
+
+    pub fn build(label: Identifier) -> Self {
+        Self::new(None, label, Vec::new())
     }
 }
 

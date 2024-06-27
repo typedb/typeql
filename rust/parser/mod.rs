@@ -17,8 +17,9 @@ use crate::{
         error::{syntax_error, TypeQLError},
         token, LineColumn, Span, Spanned,
     },
+    definition::Definable,
     identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
-    pattern::{statement::BuiltinValueType, Definable, Pattern, Statement},
+    pattern::{statement::BuiltinValueType, Pattern, Statement},
     query::Query,
     Result,
 };
@@ -184,17 +185,6 @@ fn visit_label(node: Node<'_>) -> Label {
     }
 }
 
-fn visit_role_label(node: Node<'_>) -> Label {
-    debug_assert_eq!(node.as_rule(), Rule::role_label);
-    let span = node.span();
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::identifier => Label::Identifier(visit_identifier(child)),
-        Rule::ROLE => Label::Reserved(ReservedLabel::new(span, token::Type::Role)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
-}
-
 fn visit_kind(node: Node<'_>) -> ReservedLabel {
     debug_assert_eq!(node.as_rule(), Rule::kind);
     let span = node.span();
@@ -214,7 +204,8 @@ fn visit_label_scoped(label: Node<'_>) -> ScopedLabel {
     let span = label.span();
     let mut children = label.into_children();
     let scope = visit_label(children.consume_expected(Rule::label));
-    let name = visit_role_label(children.consume_expected(Rule::role_label));
+    let name = visit_label(children.consume_expected(Rule::label));
+    debug_assert_eq!(children.try_consume_any(), None);
     ScopedLabel::new(span, scope, name)
 }
 
@@ -242,7 +233,12 @@ fn visit_var(node: Node<'_>) -> Variable {
 fn visit_var_named(node: Node<'_>) -> Variable {
     debug_assert_eq!(node.as_rule(), Rule::var_named);
     let span = node.span();
-    Variable::Named(span, visit_identifier(node.into_child()))
+    Variable::Named(span, visit_identifier_var(node.into_child()))
+}
+
+fn visit_identifier_var(node: Node<'_>) -> Identifier {
+    debug_assert_eq!(node.as_rule(), Rule::identifier_var);
+    Identifier::new(node.span(), node.as_str().to_owned())
 }
 
 fn visit_vars(node: Node<'_>) -> Vec<Variable> {

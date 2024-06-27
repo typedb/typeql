@@ -7,27 +7,9 @@
 use std::fmt;
 
 pub use self::statement::Statement;
-use crate::{
-    common::Span,
-    definition::{Function, Type},
-};
+use crate::common::Span;
 
 pub mod statement;
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum Definable {
-    TypeDeclaration(Type),
-    Function(Function),
-}
-
-impl fmt::Display for Definable {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::TypeDeclaration(declaration) => fmt::Display::fmt(declaration, f),
-            Self::Function(declaration) => fmt::Display::fmt(declaration, f),
-        }
-    }
-}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -84,4 +66,10 @@ pub enum Pattern {
     Negation(Negation),
     Try(Try),
     Statement(Statement),
+}
+
+impl fmt::Display for Pattern {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
 }

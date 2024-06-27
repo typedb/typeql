@@ -6,24 +6,23 @@
 
 use std::fmt::{self, Write};
 
-use crate::{
-    common::{token, Span, Spanned},
-    pattern::Definable,
-    write_joined,
-};
+use crate::common::{token, Span, Spanned};
+
+#[derive(Debug, Eq, PartialEq)]
+enum Undefinable {}
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Undefine {
-    definables: Vec<Definable>,
+    undefinables: Vec<Undefinable>,
     span: Option<Span>,
 }
 
 impl Undefine {
-    pub(crate) fn new(definables: Vec<Definable>, span: Option<Span>) -> Self {
-        Self { definables, span }
+    pub(crate) fn new(undefinables: Vec<Undefinable>, span: Option<Span>) -> Self {
+        Self { undefinables, span }
     }
 
-    pub fn build(definables: Vec<Definable>) -> Self {
+    pub fn build(definables: Vec<Undefinable>) -> Self {
         Self::new(definables, None)
     }
 }
@@ -43,7 +42,7 @@ impl fmt::Display for Undefine {
             f.write_char(' ')?;
         }
         let delimiter = if f.alternate() { ";\n" } else { "; " };
-        write_joined!(f, delimiter, self.definables)?;
+        // write_joined!(f, delimiter, self.undefinables)?;
         f.write_str(";")
     }
 }

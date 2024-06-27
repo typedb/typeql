@@ -117,7 +117,6 @@ string_enum! { Constraint
     IsaX = "isa!",
     Owns = "owns",
     Plays = "plays",
-    Regex = "regex",
     Relates = "relates",
     Sub = "sub",
     SubX = "sub!",
@@ -126,8 +125,15 @@ string_enum! { Constraint
 }
 
 string_enum! { Annotation
+    Abstract = "abstract",
+    Cardinality = "card",
+    Cascade = "cascade",
+    Distinct = "distinct",
+    Independent = "independent",
     Key = "key",
+    Regex = "regex",
     Unique = "unique",
+    Values = "values",
 }
 
 string_enum! { Aggregate

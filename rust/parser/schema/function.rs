@@ -31,11 +31,11 @@ pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
     let signature = visit_function_signature(children.consume_expected(Rule::function_signature));
     let body = visit_stage_match(children.consume_expected(Rule::stage_match));
     let modifiers =
-        children.take_while_ref(|node| node.as_rule() == Rule::stage_modifier).map(visit_stage_modifier).collect_vec();
+        children.take_while_ref(|node| node.as_rule() == Rule::stage_modifier).map(visit_stage_modifier).collect();
     let return_stmt = visit_return_statement(children.consume_expected(Rule::return_statement));
 
     debug_assert_eq!(children.try_consume_any(), None);
-    Function::new(span, signature, body, return_stmt)
+    Function::new(span, signature, body, modifiers, return_stmt)
 }
 
 fn visit_return_statement(node: Node<'_>) -> ReturnStatement {

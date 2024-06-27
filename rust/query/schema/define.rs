@@ -8,7 +8,7 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span, Spanned},
-    pattern::Definable,
+    definition::Definable,
     write_joined,
 };
 

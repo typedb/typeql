@@ -6,11 +6,11 @@
 
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
+    annotation::{Abstract, Annotation, Cardinality, Cascade, Distinct, Independent, Key, Regex, Unique, Values},
     common::{error::TypeQLError, Spanned},
-    annotation::{AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType},
 };
 
-pub(super) fn visit_annotations_relates(node: Node<'_>) -> Vec<AnnotationRelates> {
+pub(super) fn visit_annotations_relates(node: Node<'_>) -> Vec<Annotation> {
     debug_assert_eq!(node.as_rule(), Rule::annotations_relates);
     let children = node.into_children();
     children
@@ -22,17 +22,17 @@ pub(super) fn visit_annotations_relates(node: Node<'_>) -> Vec<AnnotationRelates
                     children.skip_expected(Rule::ANNOTATION_CARD);
                     let lower = children.consume_expected(Rule::annotation_card_lower).as_str().parse().unwrap();
                     let upper = children.consume_expected(Rule::annotation_card_upper).as_str().parse().ok();
-                    AnnotationRelates::Cardinality(lower, upper, span)
+                    Annotation::Cardinality(Cardinality::new(span, lower, upper))
                 }
-                Rule::ANNOTATION_DISTINCT => AnnotationRelates::Distinct(span),
-                Rule::ANNOTATION_CASCADE => AnnotationRelates::Cascade(span),
+                Rule::ANNOTATION_CASCADE => Annotation::Cascade(Cascade::new(span)),
+                Rule::ANNOTATION_DISTINCT => Annotation::Distinct(Distinct::new(span)),
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: anno.to_string() }),
             }
         })
         .collect()
 }
 
-pub(super) fn visit_annotations_owns(node: Node<'_>) -> Vec<AnnotationOwns> {
+pub(super) fn visit_annotations_owns(node: Node<'_>) -> Vec<Annotation> {
     debug_assert_eq!(node.as_rule(), Rule::annotations_owns);
     let children = node.into_children();
     children
@@ -44,18 +44,18 @@ pub(super) fn visit_annotations_owns(node: Node<'_>) -> Vec<AnnotationOwns> {
                     children.skip_expected(Rule::ANNOTATION_CARD);
                     let lower = children.consume_expected(Rule::annotation_card_lower).as_str().parse().unwrap();
                     let upper = children.consume_expected(Rule::annotation_card_upper).as_str().parse().ok();
-                    AnnotationOwns::Cardinality(lower, upper, span)
+                    Annotation::Cardinality(Cardinality::new(span, lower, upper))
                 }
-                Rule::ANNOTATION_DISTINCT => AnnotationOwns::Distinct(span),
-                Rule::ANNOTATION_KEY => AnnotationOwns::Key(span),
-                Rule::ANNOTATION_UNIQUE => AnnotationOwns::Unique(span),
+                Rule::ANNOTATION_DISTINCT => Annotation::Distinct(Distinct::new(span)),
+                Rule::ANNOTATION_KEY => Annotation::Key(Key::new(span)),
+                Rule::ANNOTATION_UNIQUE => Annotation::Unique(Unique::new(span)),
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: anno.to_string() }),
             }
         })
         .collect()
 }
 
-pub(super) fn visit_annotations_value(node: Node<'_>) -> Vec<AnnotationValueType> {
+pub(super) fn visit_annotations_value(node: Node<'_>) -> Vec<Annotation> {
     node.into_children()
         .map(|anno| match anno.as_rule() {
             Rule::annotation_regex => visit_annotation_regex(anno),
@@ -65,26 +65,26 @@ pub(super) fn visit_annotations_value(node: Node<'_>) -> Vec<AnnotationValueType
         .collect()
 }
 
-pub(super) fn visit_annotation_values(node: Node<'_>) -> AnnotationValueType {
+pub(super) fn visit_annotation_values(node: Node<'_>) -> Annotation {
     let span = node.span();
     let values = node.into_children().skip_expected(Rule::ANNOTATION_VALUES).map(|v| v.as_str().to_owned()).collect();
-    AnnotationValueType::Values(values, span)
+    Annotation::Values(Values::new(span, values))
 }
 
-pub(super) fn visit_annotation_regex(node: Node<'_>) -> AnnotationValueType {
+pub(super) fn visit_annotation_regex(node: Node<'_>) -> Annotation {
     let span = node.span();
     let mut children = node.into_children();
     children.consume_expected(Rule::ANNOTATION_REGEX);
-    let regex = children.consume_expected(Rule::quoted_string_literal).as_str().to_owned();
-    AnnotationValueType::Regex(regex, span)
+    let regex = children.consume_expected(Rule::quoted_string_literal).as_str().to_owned(); // FIXME
+    Annotation::Regex(Regex::new(span, regex))
 }
 
-pub(super) fn visit_annotations_sub(node: Node<'_>) -> Vec<AnnotationSub> {
+pub(super) fn visit_annotations_sub(node: Node<'_>) -> Vec<Annotation> {
     node.into_children()
         .map(|anno| match anno.as_rule() {
-            Rule::ANNOTATION_ABSTRACT => AnnotationSub::Abstract(anno.span()),
-            Rule::ANNOTATION_CASCADE => AnnotationSub::Cascade(anno.span()),
-            Rule::ANNOTATION_INDEPENDENT => AnnotationSub::Independent(anno.span()),
+            Rule::ANNOTATION_ABSTRACT => Annotation::Abstract(Abstract::new(anno.span())),
+            Rule::ANNOTATION_CASCADE => Annotation::Cascade(Cascade::new(anno.span())),
+            Rule::ANNOTATION_INDEPENDENT => Annotation::Independent(Independent::new(anno.span())),
             _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: anno.to_string() }),
         })
         .collect()

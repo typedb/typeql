@@ -8,7 +8,7 @@ use std::fmt::{self, Write};
 
 use super::Type;
 use crate::{
-    annotation::{AnnotationOwns, AnnotationRelates, AnnotationSub, AnnotationValueType},
+    annotation::Annotation,
     common::Span,
     identifier::{Label, ScopedLabel},
     write_joined,
@@ -30,12 +30,12 @@ pub enum SubKind {
 pub struct Sub {
     kind: SubKind,
     supertype: Type,
-    annotations: Vec<AnnotationSub>,
+    annotations: Vec<Annotation>,
     span: Option<Span>,
 }
 
 impl Sub {
-    pub fn new(kind: SubKind, supertype: Type, annotations: Vec<AnnotationSub>, span: Option<Span>) -> Self {
+    pub fn new(kind: SubKind, supertype: Type, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
         Self { kind, supertype, annotations, span }
     }
 }
@@ -43,12 +43,12 @@ impl Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     pub value_type: Type,
-    pub annotations: Vec<AnnotationValueType>,
+    pub annotations: Vec<Annotation>,
     pub span: Option<Span>,
 }
 
 impl ValueType {
-    pub fn new(value_type: Type, annotations: Vec<AnnotationValueType>, span: Option<Span>) -> Self {
+    pub fn new(value_type: Type, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
         Self { value_type, annotations, span }
     }
 }
@@ -74,12 +74,12 @@ pub enum Owned {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
     pub owned: Owned,
-    pub annotations: Vec<AnnotationOwns>,
+    pub annotations: Vec<Annotation>,
     span: Option<Span>,
 }
 
 impl Owns {
-    pub fn new(owned: Owned, annotations: Vec<AnnotationOwns>, span: Option<Span>) -> Self {
+    pub fn new(owned: Owned, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
         Self { owned, annotations, span }
     }
 }
@@ -93,12 +93,12 @@ pub enum Related {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     pub related: Related,
-    pub annotations: Vec<AnnotationRelates>,
+    pub annotations: Vec<Annotation>,
     span: Option<Span>,
 }
 
 impl Relates {
-    pub fn new(related: Related, annotations: Vec<AnnotationRelates>, span: Option<Span>) -> Self {
+    pub fn new(related: Related, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
         Self { related, annotations, span }
     }
 }

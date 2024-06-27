@@ -84,7 +84,7 @@ fn visit_label_constraint(node: Node<'_>) -> LabelConstraint {
     debug_assert_eq!(node.as_rule(), Rule::label_constraint);
     let span = node.span();
     let mut children = node.into_children();
-    children.skip_expected(Rule::TYPE);
+    children.skip_expected(Rule::LABEL);
     let label = children.consume_any();
     let label = match label.as_rule() {
         Rule::label => LabelConstraint::Name(visit_label(label)),

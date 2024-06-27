@@ -6,7 +6,10 @@
 
 use std::fmt;
 
-use crate::common::{token, Span, Spanned};
+use crate::{
+    common::{token, Span, Spanned},
+    definition,
+};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Identifier {
@@ -95,6 +98,16 @@ pub enum Label {
     Reserved(ReservedLabel),
 }
 
+impl From<Label> for definition::Type {
+    fn from(label: Label) -> Self {
+        let ident = match label {
+            Label::Identifier(ident) => ident,
+            Label::Reserved(kind) => Identifier::new(None, kind.to_string()),
+        };
+        Self::build(ident)
+    }
+}
+
 impl Spanned for Label {
     fn span(&self) -> Option<Span> {
         match self {
@@ -131,4 +144,3 @@ impl fmt::Display for ScopedLabel {
         todo!()
     }
 }
-
