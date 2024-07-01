@@ -11,11 +11,11 @@ mod type_;
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, Spanned},
-    definition::Definable,
     parser::schema::{
         function::visit_definition_function, struct_::visit_definition_struct, type_::visit_definition_type,
     },
     query::schema::{Define, SchemaQuery, Undefine},
+    schema::definable::Definable,
 };
 
 pub(super) fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
@@ -36,7 +36,7 @@ fn visit_query_define(node: Node<'_>) -> Define {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::DEFINE);
-    let query = Define::new(visit_definables(children.consume_expected(Rule::definables)), span);
+    let query = Define::new(span, visit_definables(children.consume_expected(Rule::definables)));
     debug_assert_eq!(children.try_consume_any(), None);
     query
 }
@@ -46,9 +46,7 @@ fn visit_query_undefine(node: Node<'_>) -> Undefine {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::UNDEFINE);
-    let query = Undefine::new(visit_definables(children.consume_expected(Rule::definables)), span);
-    debug_assert_eq!(children.try_consume_any(), None);
-    query
+    todo!()
 }
 
 pub(super) fn visit_definables(node: Node<'_>) -> Vec<Definable> {

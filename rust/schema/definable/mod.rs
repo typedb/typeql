@@ -7,6 +7,7 @@
 use std::fmt;
 
 pub use self::{function::Function, struct_::Struct, type_::Type};
+use crate::pretty::Pretty;
 
 pub mod function;
 pub mod struct_;
@@ -19,6 +20,22 @@ pub enum Definable {
     Struct(Struct),
 }
 
+impl From<Type> for Definable {
+    fn from(type_: Type) -> Self {
+        Self::TypeDeclaration(type_)
+    }
+}
+
+impl Pretty for Definable {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::TypeDeclaration(declaration) => Pretty::fmt(declaration, indent_level, f),
+            Self::Function(declaration) => Pretty::fmt(declaration, indent_level, f),
+            Self::Struct(declaration) => Pretty::fmt(declaration, indent_level, f),
+        }
+    }
+}
+
 impl fmt::Display for Definable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -26,11 +43,5 @@ impl fmt::Display for Definable {
             Self::Function(declaration) => fmt::Display::fmt(declaration, f),
             Self::Struct(declaration) => fmt::Display::fmt(declaration, f),
         }
-    }
-}
-
-impl From<Type> for Definable {
-    fn from(type_: Type) -> Self {
-        Self::TypeDeclaration(type_)
     }
 }

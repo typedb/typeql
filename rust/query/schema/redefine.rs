@@ -8,41 +8,42 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span, Spanned},
-    schema::undefinable::Undefinable,
+    schema::definable::Definable,
+    util::write_joined,
 };
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Undefine {
+pub struct Redefine {
     span: Option<Span>,
-    undefinables: Vec<Undefinable>,
+    definables: Vec<Definable>,
 }
 
-impl Undefine {
-    pub(crate) fn new(span: Option<Span>, undefinables: Vec<Undefinable>) -> Self {
-        Self { span, undefinables }
+impl Redefine {
+    pub(crate) fn new(span: Option<Span>, definables: Vec<Definable>) -> Self {
+        Self { span, definables }
     }
 
-    pub fn build(definables: Vec<Undefinable>) -> Self {
+    pub fn build(definables: Vec<Definable>) -> Self {
         Self::new(None, definables)
     }
 }
 
-impl Spanned for Undefine {
+impl Spanned for Redefine {
     fn span(&self) -> Option<Span> {
         self.span
     }
 }
 
-impl fmt::Display for Undefine {
+impl fmt::Display for Redefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        token::Clause::Undefine.fmt(f)?;
+        write!(f, "{}", token::Clause::Redefine)?;
         if f.alternate() {
             f.write_char('\n')?;
         } else {
             f.write_char(' ')?;
         }
         let delimiter = if f.alternate() { ";\n" } else { "; " };
-        // write_joined!(f, delimiter, self.undefinables)?;
+        write_joined!(f, delimiter, self.definables)?;
         f.write_str(";")
     }
 }

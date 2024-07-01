@@ -19,16 +19,11 @@ use crate::{
             AttributeComparisonStatement, AttributeValueStatement, Has, HasValue, Iid, Links, Relation,
             RelationStatement, RolePlayer, ThingConstraint, ThingStatement,
         },
-        Statement, Type,
+        Statement, Type, TypeAny,
     },
 };
 
-pub(in crate::parser) fn visit_statement_things(node: Node<'_>) -> Vec<Statement> {
-    debug_assert_eq!(node.as_rule(), Rule::statement_things);
-    node.into_children().map(visit_statement_thing).collect()
-}
-
-fn visit_statement_thing(node: Node<'_>) -> Statement {
+pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement_thing);
     let child = node.into_child();
     match child.as_rule() {
@@ -126,7 +121,7 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
     let has = match child.as_rule() {
         Rule::var => Has::new(span, None, HasValue::Variable(visit_var(child))),
         Rule::type_ref => {
-            let type_ = Some(visit_type_ref(child));
+            let type_ = Some(TypeAny::Type(visit_type_ref(child)));
             let value_node = children.consume_any();
             let value = match value_node.as_rule() {
                 Rule::comparison => HasValue::Comparison(visit_comparison(value_node)),
@@ -178,7 +173,9 @@ fn visit_role_player(node: Node<'_>) -> RolePlayer {
     let child = children.consume_any();
     let role_player = match child.as_rule() {
         Rule::var => RolePlayer::Untyped(visit_var(child)),
-        Rule::type_ref => RolePlayer::Typed(visit_type_ref(child), visit_var(children.consume_expected(Rule::var))),
+        Rule::type_ref => {
+            RolePlayer::Typed(TypeAny::Type(visit_type_ref(child)), visit_var(children.consume_expected(Rule::var)))
+        }
         Rule::type_ref_list => {
             RolePlayer::Typed(visit_type_ref_list(child), visit_var(children.consume_expected(Rule::var)))
         }
@@ -188,12 +185,12 @@ fn visit_role_player(node: Node<'_>) -> RolePlayer {
     role_player
 }
 
-fn visit_type_ref_list(node: Node<'_>) -> Type {
+fn visit_type_ref_list(node: Node<'_>) -> TypeAny {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::list_var => Type::ListVariable(visit_var(child.into_child())),
-        Rule::list_label => Type::ListLabel(visit_label(child.into_child())),
+        Rule::var_list => TypeAny::List(Type::Variable(visit_var(child.into_child()))),
+        Rule::label_list => TypeAny::List(Type::Label(visit_label(child.into_child()))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

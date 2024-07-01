@@ -8,7 +8,7 @@ use std::fmt;
 
 use crate::{
     common::{token, Span, Spanned},
-    definition,
+    schema,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -98,13 +98,9 @@ pub enum Label {
     Reserved(ReservedLabel),
 }
 
-impl From<Label> for definition::Type {
+impl From<Label> for schema::definable::Type {
     fn from(label: Label) -> Self {
-        let ident = match label {
-            Label::Identifier(ident) => ident,
-            Label::Reserved(kind) => Identifier::new(None, kind.to_string()),
-        };
-        Self::build(ident)
+        Self::build(label)
     }
 }
 

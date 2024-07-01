@@ -17,4 +17,3 @@ impl Put {
         Self { span, statements }
     }
 }
-

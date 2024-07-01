@@ -99,30 +99,28 @@ impl BuiltinValueType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+// TODO name?
+pub enum TypeAny {
+    Type(Type),     // person, friendship:friend, or $t
+    Optional(Type), // person?, friendship:friend?, or $t?
+    List(Type),     // person[], friendship:friend[], or $t[]
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Type {
-    Optional(Box<Type>),
-
-    Label(Label),
-    ScopedLabel(ScopedLabel),
-    Variable(Variable),
-    BuiltinValue(BuiltinValueType),
-
-    ListLabel(Label),
-    ListVariable(Variable),
-    ListBuiltinValue(BuiltinValueType),
+    Label(Label),                   // person
+    ScopedLabel(ScopedLabel),       // friendship:friend
+    Variable(Variable),             // $t
+    BuiltinValue(BuiltinValueType), // string
 }
 
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Optional(inner) => write!(f, "{inner}?"),
             Self::Label(inner) => fmt::Display::fmt(inner, f),
             Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
             Self::Variable(inner) => todo!(),
             Self::BuiltinValue(inner) => todo!(),
-            Self::ListLabel(inner) => todo!(),
-            Self::ListVariable(inner) => todo!(),
-            Self::ListBuiltinValue(inner) => todo!(),
         }
     }
 }

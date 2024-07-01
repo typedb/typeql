@@ -11,7 +11,6 @@ pub use self::{data::DataQuery, schema::SchemaQuery};
 pub mod data;
 pub mod schema;
 
-
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Schema(SchemaQuery),

@@ -17,4 +17,3 @@ impl Delete {
         Self { span, statements }
     }
 }
-

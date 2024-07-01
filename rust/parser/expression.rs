@@ -47,10 +47,10 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
 
     let pratt_parser: PrattParser<Rule> = PrattParser::new()
         .op(Op::infix(Rule::PLUS, Assoc::Left) | Op::infix(Rule::MINUS, Assoc::Left))
-        .op(Op::infix(Rule::ASTERISK, Assoc::Left)
-            | Op::infix(Rule::SOLIDUS, Assoc::Left)
-            | Op::infix(Rule::PERCENT, Assoc::Left))
-        .op(Op::infix(Rule::CARET, Assoc::Right));
+        .op(Op::infix(Rule::TIMES, Assoc::Left)
+            | Op::infix(Rule::DIVIDE, Assoc::Left)
+            | Op::infix(Rule::MODULO, Assoc::Left))
+        .op(Op::infix(Rule::POWER, Assoc::Right));
 
     pratt_parser
         .map_primary(visit_expression_base)
@@ -58,10 +58,10 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
             let op = match op.as_rule() {
                 Rule::PLUS => token::ArithmeticOperator::Add,
                 Rule::MINUS => token::ArithmeticOperator::Subtract,
-                Rule::ASTERISK => token::ArithmeticOperator::Multiply,
-                Rule::SOLIDUS => token::ArithmeticOperator::Divide,
-                Rule::PERCENT => token::ArithmeticOperator::Modulo,
-                Rule::CARET => token::ArithmeticOperator::Power,
+                Rule::TIMES => token::ArithmeticOperator::Multiply,
+                Rule::DIVIDE => token::ArithmeticOperator::Divide,
+                Rule::MODULO => token::ArithmeticOperator::Modulo,
+                Rule::POWER => token::ArithmeticOperator::Power,
                 _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: op.to_string() }),
             };
             Expression::Operation(Box::new(Operation::new(op, left, right)))
@@ -70,13 +70,15 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
 }
 
 fn visit_expression_base(node: Node<'_>) -> Expression {
-    match node.as_rule() {
-        Rule::var => Expression::Variable(visit_var(node)),
-        Rule::value_literal => Expression::Value(visit_value_literal(node)),
-        Rule::expression_function => Expression::Function(visit_expression_function(node)),
-        Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(node))),
-        Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(node))),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
+    debug_assert_eq!(node.as_rule(), Rule::expression_base);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::var => Expression::Variable(visit_var(child)),
+        Rule::value_literal => Expression::Value(visit_value_literal(child)),
+        Rule::expression_function => Expression::Function(visit_expression_function(child)),
+        Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(child))),
+        Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(child))),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 

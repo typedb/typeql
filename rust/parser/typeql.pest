@@ -19,42 +19,25 @@ eof_statement = { SOI ~ statement ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
-query = { query_schema | query_data }
+query = { query_schema } //| query_data }
+
+// DATA QUERIES ================================================================
 
 query_data = { preamble* ~ query_stage+ ~ query_stage_final? }
-preamble = { WITH ~ definition_function }
-query_stage = { stage_match
-              | stage_insert
-              | stage_put
-              | stage_modifier
-              }
-query_stage_final = { stage_delete
-                    | stage_fetch
-                    | stage_reduce
-                    }
 
-// query_get_group_agg = { query_get ~ clause_group ~ stage_reduce }
-// query_get_group = { query_get ~ clause_group }
-// clause_group = { GROUP ~ var ~ SEMICOLON } // TODO: eliminate?
+preamble = { WITH ~ definition_function }
+query_stage = { stage_match | stage_insert | stage_put | stage_update | stage_delete | stage_modifier }
+query_stage_final = { stage_fetch | stage_reduce }
+
+// stage_group = { GROUP ~ var ~ SEMICOLON } // TODO: eliminate?
 
 stage_match = { MATCH ~ patterns }
-stage_insert = { INSERT ~ statement_things }
-stage_delete = { DELETE ~ statement_things }
-stage_put = { PUT ~ statement_things }
-stage_fetch = { FETCH ~ projections }
-stage_reduce = { reduce ~ SEMICOLON }
-reduce = { reduce_limited
-         | reduce_all ~ ( COMMA ~ reduce_all )* }
-reduce_limited = { CHECK | reduce_first }
-reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
-reduce_all = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
-             | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             }
+
+stage_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
+stage_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
+stage_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
+
+stage_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
 
 // QUERY MODIFIERS =============================================================
 
@@ -67,6 +50,25 @@ stage_limit = { LIMIT ~ integer_literal }
 
 var_order = { var ~ ORDER? }
 
+// REDUCE ======================================================================
+
+stage_reduce = { reduce ~ SEMICOLON }
+reduce = { reduce_limited
+         | reduce_all ~ ( COMMA ~ reduce_all )*
+         }
+
+reduce_limited = { CHECK | reduce_first }
+reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
+
+reduce_all = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
+             | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+             | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+             | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+             | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+             | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+             | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+             }
+
 // QUERY PATTERNS ==============================================================
 
 patterns = { ( pattern ~ SEMICOLON )+ }
@@ -77,27 +79,58 @@ pattern_disjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE ~ ( OR ~ CURLY_OPEN 
 pattern_negation = { NOT ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
-// FETCH QUERY =================================================================
-
-projections = { ( projection ~ SEMICOLON )+ }
-projection = { projection_key_var ~ COLON ~ projection_attributes
-             | projection_key_var
-             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE
-             }
-
-projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
-projection_attribute = { label ~ projection_key_as_label? }
-
-// TODO: we have to validate this is a fetch or reduce ended pipeline
-projection_subquery = { query_data }
-
-projection_key_var = { var ~ projection_key_as_label? }
-projection_key_as_label = { AS ~ projection_key_label }
-projection_key_label = { quoted_string_literal | label }
-
 // STATEMENTS ==================================================================
 
 statement = { statement_type | statement_thing_var | statement_single | statement_anon_relation }
+
+// TYPE STATEMENTS =============================================================
+
+statement_type = { type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* }
+type_constraint = { sub_constraint | value_type_constraint | label_constraint
+                  | owns_constraint | relates_constraint | plays_constraint
+                  }
+
+sub_constraint = { SUB_ ~ type_ref_any ~ annotations? }
+value_type_constraint = { VALUE ~ value_type ~ annotations? }
+label_constraint = { LABEL ~ ( label_scoped | label ) }
+owns_constraint = { OWNS ~ type_ref_list ~ annotations?
+                  | OWNS ~ type_ref ~ ( AS ~ type_ref )? ~ annotations?
+                  }
+relates_constraint = { RELATES ~ type_ref_list ~ annotations?
+                     | RELATES ~ type_ref ~ ( AS ~ type_ref )? ~ annotations?
+                     }
+plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
+
+// THING STATEMENTS ============================================================
+
+statement_thing = { statement_thing_var | statement_anon_relation }
+statement_anon_relation = { relation ~ ( COMMA ~ thing_constraint )* }
+
+statement_thing_var = { var ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
+                      | var ~ ( value_literal | expression_struct ) ~ isa_constraint
+                      | var ~ comparison ~ isa_constraint
+                      }
+
+thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
+
+isa_constraint = { ISA_ ~ type_ref }
+iid_constraint = { IID ~ iid_value }
+has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
+                 | HAS ~ type_ref ~ ( comparison | expression_value | var )
+                 | HAS ~ var
+                 }
+links_constraint = { LINKS ~ relation }
+
+relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE } // A list of role players in a Relations
+role_player = { type_ref_list ~ COLON ~ var
+              | type_ref ~ COLON ~ var
+              | var
+              }
+
+statement_deletable = { HAS? ~ var ~ OF ~ var
+                      | LINKS? ~ relation ~ OF ~ var
+                      | var
+                      }
 
 // SINGLE STATEMENTS ===========================================================
 
@@ -109,61 +142,6 @@ statement_assignment = { assignment_left ~ ASSIGN ~ expression }
 assignment_left = { vars | struct_destructor }
 statement_in = { vars ~ IN ~ expression_function }
 
-// TYPE STATEMENTS =============================================================
-
-statement_type = { type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* }
-type_constraint = { sub_constraint
-                  | value_type_constraint
-                  | label_constraint
-                  | owns_constraint
-                  | relates_constraint
-                  | plays_constraint
-                  }
-
-sub_constraint = { SUB_ ~ type_ref_any ~ annotations_sub }
-value_type_constraint = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
-label_constraint = { LABEL ~ ( label_scoped | label ) }
-owns_constraint = { OWNS ~ type_ref_list ~ annotations_owns
-                  | OWNS ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_owns
-                  }
-relates_constraint = { RELATES ~ type_ref_list ~ annotations_relates
-                     | RELATES ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_relates
-                     }
-plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
-
-// THING STATEMENTS ============================================================
-
-statement_things = { ( statement_thing ~ SEMICOLON )+ }
-statement_thing = { statement_thing_var | statement_anon_relation }
-statement_anon_relation = { relation ~ ( COMMA ~ thing_constraint )* }
-
-statement_thing_var = { var ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
-                      | var ~ ( value_literal | expression_struct ) ~ isa_constraint
-                      | var ~ comparison ~ isa_constraint
-                      }
-
-thing_constraint = { isa_constraint
-                   | iid_constraint
-                   | has_constraint
-                   | links_constraint
-                   }
-
-isa_constraint = { ISA_ ~ type_ref }
-iid_constraint = { IID ~ iid_value }
-has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
-                 | HAS ~ type_ref ~ ( comparison | expression_value )
-                 | HAS ~ var
-                 }
-links_constraint = { LINKS ~ relation }
-
-relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE } // A list of role players in a Relations
-role_player = { type_ref_list ~ COLON ~ var
-              | type_ref ~ COLON ~ var
-              | var
-              }
-
-// COMPARISON CONSTRUCTS =======================================================
-
 comparison = { comparator ~ expression_value }
 comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 
@@ -174,7 +152,7 @@ expression = { expression_list | expression_value }
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
 expression_base = _{ expression_list_index | expression_parenthesis | expression_function | value_literal | var }
 
-expression_operator = _{ CARET | ASTERISK | SOLIDUS | PERCENT | PLUS | MINUS }
+expression_operator = _{ POWER | TIMES | DIVIDE | MODULO | PLUS | MINUS }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
 
 expression_list_index = { var ~ list_index }
@@ -192,55 +170,69 @@ list_range = { SQ_BRACKET_OPEN ~ expression_value ~ COLON ~ expression_value ~ S
 expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
 struct_value = { expression_value | expression_struct }
 
+// FETCH QUERY =================================================================
+
+stage_fetch = { FETCH ~ projections }
+
+projections = { ( projection ~ SEMICOLON )+ }
+projection = { projection_key_var ~ COLON ~ projection_attributes
+             | projection_key_var
+             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE
+             }
+
+projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
+projection_attribute = { label ~ projection_key_as_label? }
+
+// TODO: we have to validate this is a fetch or reduce ended pipeline
+projection_subquery = { query_data }
+
+projection_key_var = { var ~ projection_key_as_label? }
+projection_key_as_label = { AS ~ projection_key_label }
+projection_key_label = { quoted_string_literal | label }
+
 // SCHEMA QUERY ================================================================
 
-query_schema = { query_define | query_undefine /* | query_redefine */ }
+query_schema = { query_define } // | query_undefine | query_redefine }
 
 // DEFINE QUERY ================================================================
 
 query_define = { DEFINE ~ definables }
 
 definables = { definable+ }
-definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
+definable = { ( definition_type ~ SEMICOLON ) }//| definition_function | definition_struct }
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { identifier ~ type_capability_declaration ~ ( COMMA ~ type_capability_declaration )* }
-type_capability_declaration = { sub_declaration | value_type_declaration | alias_declaration
-                              | owns_declaration | plays_declaration | relates_declaration
-                              }
+definition_type = { kind? ~ identifier ~ type_capability ~ ( COMMA ~ type_capability )* }
+type_capability = { type_capability_base ~ annotations? }
+type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
+                       | owns_declaration | plays_declaration | relates_declaration
+                       }
 
-sub_declaration = { SUB ~ label ~ annotations_sub }
-
-value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
-
-alias_declaration = { ALIAS ~ label }
-
-owns_declaration = { OWNS ~ list_label ~ annotations_owns
-                   | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
+sub_declaration = { SUB ~ label }
+alias_declaration = { ALIAS ~ label } 
+value_type_declaration = { VALUE ~ value_type }
+owns_declaration = { OWNS ~ label_list
+                   | OWNS ~ label ~ ( AS ~ label )?
                    }
-
 plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }
-
-relates_declaration = { RELATES ~ list_label ~ annotations_relates
-                      | RELATES ~ label ~ ( AS ~ label )? ~ annotations_relates
+relates_declaration = { RELATES ~ label_list
+                      | RELATES ~ label ~ ( AS ~ label )?
                       }
 
 // FUNCTION DEFINITION =========================================================
 
 definition_function = { FUN ~ function_signature ~ COLON ~ stage_match ~ stage_modifier* ~ return_statement }
 
-function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_return }
+function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
 function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* )? }
 function_argument = { var ~ COLON ~ label_arg }
 
-function_return = { function_return_stream | function_return_single }
-function_return_stream = { CURLY_OPEN ~ function_return_value ~ ( COMMA ~ function_return_value )* ~ CURLY_CLOSE }
-function_return_single = { function_return_value ~ ( COMMA ~ function_return_value )* }
-function_return_value = { function_return_value_optional | function_return_value_base }
-function_return_value_optional = { function_return_value_base ~ QUESTION }
-function_return_value_base = { list_value_type_primitive | value_type_primitive | list_label | label }
+function_output = { function_output_stream | function_output_single }
+function_output_stream = { CURLY_OPEN ~ function_output_type ~ ( COMMA ~ function_output_type )* ~ CURLY_CLOSE }
+function_output_single = { function_output_type ~ ( COMMA ~ function_output_type )* }
+function_output_type = { value_type_optional | value_type_list | value_type }
 
 return_statement = { RETURN ~ ( return_statement_stream | return_statement_single ) ~ SEMICOLON }
 return_statement_stream = { CURLY_OPEN ~ vars ~ CURLY_CLOSE }
@@ -250,61 +242,49 @@ return_statement_single = { ( var | reduce ) ~ ( COMMA ~ ( var | reduce ) )* }
 
 definition_struct = { STRUCT ~ identifier ~ COLON ~ definition_struct_fields ~ SEMICOLON }
 definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* }
-definition_struct_field = { identifier ~ VALUE ~ ( value_type_primitive | label ) }
+definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type }
+
+struct_field_value_type = { value_type_optional | value_type }
 
 struct_destructor = { CURLY_OPEN ~ identifier ~ COLON ~ struct_destructor_value }
 struct_destructor_value = { var | struct_destructor }
+
+// REDEFINE QUERY ==============================================================
+
+query_redefine = { UNDEFINE ~ ( redefinable ~ SEMICOLON )+ }
+redefinable = { identifier ~ type_capability }
 
 // UNDEFINE QUERY ==============================================================
 
 query_undefine = { UNDEFINE ~ undefinables }
 
-undefinables = { undefinable+ }
-undefinable = { ( undefine_from ~ SEMICOLON ) | undefine_function | undefine_struct | label }
+undefinables = { ( undefinable ~ SEMICOLON )+ }
+undefinable = { undefine_from | undefine_function | undefine_struct | label }
 
 undefine_from = { annotation_kind ~ FROM ~ undefine_annotation_recipient
                 | AS ~ label ~ FROM ~ undefine_override_recipient
-                | type_capability_declaration ~ FROM ~ label
+                | type_capability_base ~ FROM ~ label
                 }
-undefine_annotation_recipient = { label ~ VALUE ~ label
-                                | label ~ OWNS ~ label
-                                | label ~ RELATES ~ label
-                                | label ~ PLAYS ~ label_scoped
-                                | label
-                                }
-
-undefine_override_recipient = { label ~ SUB ~ label
-                              | label ~ VALUE ~ label
-                              | label ~ OWNS ~ label
-                              | label ~ RELATES ~ label
-                              | label ~ PLAYS ~ label_scoped
-                              | label
-                              }
+undefine_annotation_recipient = { label ~ type_capability_base? }
+undefine_override_recipient = { label ~ ( OWNS ~ label | RELATES ~ label | PLAYS ~ label_scoped ) }
 
 undefine_function = { FUN ~ identifier }
 undefine_struct = { STRUCT ~ identifier }
 
-// REDEFINE QUERY ==============================================================
-
-query_redefine = { UNDEFINE ~ redefinables }
-
-redefinables = { redefinable+ }
-redefinable = { ( definition_type ~ SEMICOLON )  }  // TODO (reuse definable parts)
-
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-label = ${ kind | identifier }
-label_scoped = ${ label ~ COLON ~ label ~ WB }
+label = ${ kind | ROLE | identifier } // type label
+label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
-identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB }
+identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
 
 type_ref_any = { type_ref_scoped | type_ref }
 type_ref_scoped = { label_scoped | var }
 type_ref = { label | var }
-type_ref_list = { list_label | list_var }
+type_ref_list = { label_list | var_list }
 
-label_arg = { list_label | label }
-list_label = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+label_arg = { label_list | label }
+label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 struct_key = { identifier }
 
@@ -319,20 +299,20 @@ VAR_ANONYMOUS = @{ "$_" ~ WB }
 var_named = ${ "$" ~ identifier_var }
 identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
 
-list_var = ${ var ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+var_list = ${ var ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
-// LITERAL INPUT VALUES ========================================================
+// ========================================================
 
-kind = { ENTITY | ATTRIBUTE | RELATION | ROLE }
+value_type = { value_type_primitive | identifier }
+value_type_optional = { value_type ~ QUESTION }
+value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 value_type_primitive = { BOOLEAN | LONG | DOUBLE | DECIMAL
                        | DATETIME_TZ | DATETIME | DATE | DURATION
                        | STRING
                        }
-list_value_type_primitive = { value_type_primitive ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
-
-value_literal = { quoted_string_literal | datetime_literal | date_literal | boolean_literal
-                | signed_decimal | signed_integer
+value_literal = { quoted_string_literal | datetime_tz_literal | datetime_literal | date_literal
+                | boolean_literal | signed_decimal | signed_integer
                 }
 
 signed_decimal = { sign? ~ decimal_literal }
@@ -341,19 +321,34 @@ sign = { PLUS | MINUS }
 
 // ANNOTATIONS =================================================================
 
-annotations_sub = { ( ANNOTATION_ABSTRACT | ANNOTATION_CASCADE | ANNOTATION_INDEPENDENT )* }
-annotations_owns = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_KEY | ANNOTATION_UNIQUE )* }
-annotations_relates = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_CASCADE )* } // ( ANNOTATION_ABSTRACT )?
-annotations_value = { ( annotation_regex | annotation_values )* }
+annotations = { annotation+ }
+annotation = { ANNOTATION_ABSTRACT
+             | ANNOTATION_CASCADE
+             | ANNOTATION_DISTINCT
+             | ANNOTATION_INDEPENDENT
+             | ANNOTATION_KEY
+             | ANNOTATION_UNIQUE
+             | annotation_card
+             | annotation_range
+             | annotation_regex
+             | annotation_values
+             }
 
-annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ annotation_card_lower ~ COMMA ~ annotation_card_upper ~ PAREN_CLOSE }
+annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ ".." ~ integer_literal? ~ PAREN_CLOSE }
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
 annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ label ~ PAREN_CLOSE }
+annotation_range = { ANNOTATION_RANGE ~ PAREN_OPEN ~ range ~ PAREN_CLOSE }
 annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ PAREN_CLOSE }
+
+range = { range_full | range_from | range_to }
+range_from = { range_bound ~ ".." }
+range_to = { ".." ~ range_bound }
+range_full = { range_bound ~ ".." ~ range_bound }
+range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
 
-reserved = { WITH | MATCH | FETCH | DEFINE | UNDEFINE | INSERT | PUT | DELETE
+reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | INSERT | PUT | DELETE
            | CHECK | FIRST
            | ENTITY | RELATION | ATTRIBUTE | ROLE
            | ASC | DESC
@@ -361,6 +356,7 @@ reserved = { WITH | MATCH | FETCH | DEFINE | UNDEFINE | INSERT | PUT | DELETE
            | ALIAS | SUB | OWNS | AS | PLAYS | RELATES
            | IID | ISA | LINKS | HAS
            | IS | OR | NOT | TRY | IN
+           | OF | FROM
            | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
            | TRUE | FALSE
            }
@@ -379,6 +375,7 @@ DEFINE = @{ "define" ~ WB }
 UNDEFINE = @{ "undefine" ~ WB }
 INSERT = @{ "insert" ~ WB }
 PUT = @{ "put" ~ WB }
+UPDATE = @{ "update" ~ WB }
 DELETE = @{ "delete" ~ WB }
 
 CHECK = @{ "check" ~ WB }
@@ -386,6 +383,7 @@ FIRST = @{ "first" ~ WB }
 
 // THING KIND KEYWORDS
 
+kind = { ENTITY | ATTRIBUTE | RELATION }
 ENTITY = @{ "entity" ~ WB }
 ATTRIBUTE = @{ "attribute" ~ WB }
 RELATION = @{ "relation" ~ WB }
@@ -413,6 +411,7 @@ ALIAS = @{ "alias" ~ WB }
 AS = @{ "as" ~ WB }
 FROM = @{ "from" ~ WB }
 LABEL = @{ "label" ~ WB }
+OF = @{ "of" ~ WB }
 OWNS = @{ "owns" ~ WB }
 PLAYS = @{ "plays" ~ WB }
 RELATES = @{ "relates" ~ WB }
@@ -450,9 +449,6 @@ ANNOTATION_REGEX = @{ "@regex" ~ WB }
 ANNOTATION_SUBKEY = @{ "@subkey" ~ WB }
 ANNOTATION_VALUES = @{ "@values" ~ WB }
 
-annotation_card_lower = @{ integer_literal }
-annotation_card_upper = @{ integer_literal | ASTERISK }
-
 // THING VARIABLE CONSTRAINT KEYWORDS
 
 IID = @{ "iid" ~ WB }
@@ -486,12 +482,12 @@ CONTAINS = @{ "contains" ~ WB }
 ASSIGN = @{ "=" }
 IN = @{ "in" ~ WB }
 
-PLUS = @{ "+" }     // unary plus, addition
-MINUS = @{ "-" }    // unary negation, subtraction
-SOLIDUS = @{ "/" }  // division
-ASTERISK = @{ "*" } // multiplication, unbounded cardinality
-CARET = @{ "^" }    // exponentiation
-PERCENT = @{ "%" }  // modulo
+PLUS = @{ "+" }
+MINUS = @{ "-" }
+TIMES = @{ "*" }
+DIVIDE = @{ "/" }
+POWER = @{ "^" }
+MODULO = @{ "%" }
 
 // Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
 builtin_func_name = ${ ABS | CEIL | FLOOR | ROUND | LENGTH | MAX | MIN }
@@ -532,9 +528,9 @@ boolean_literal = ${ TRUE | FALSE } // order of lexer declaration matters
 TRUE = @{ "true" ~ WB }
 FALSE = @{ "false" ~ WB }
 
-integer_literal = @{ ASCII_DIGIT+ ~ WB }
-decimal_literal = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ ( ^"e" ~ sign? ~ integer_literal )? ~ WB }
-numeric_literal = @{ integer_literal | decimal_literal }
+integer_literal = @{ ASCII_DIGIT+ }
+decimal_literal = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ ( ^"e" ~ sign? ~ integer_literal )? }
+numeric_literal = @{ decimal_literal | integer_literal }
 
 date_literal = ${ date_fragment ~ WB }
 datetime_literal = ${ date_fragment ~ "T" ~ time ~ WB }

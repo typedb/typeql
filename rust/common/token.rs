@@ -53,6 +53,7 @@ string_enum! { Type
 
 string_enum! { Clause
     Define = "define",
+    Redefine = "redefine",
     Undefine = "undefine",
     Insert = "insert",
     Delete = "delete",
@@ -106,10 +107,12 @@ string_enum! { Schema
     Then = "then",
 }
 
-string_enum! { Constraint
+string_enum! { Keyword
     Abstract = "abstract",
     As = "as",
+    Alias = "alias",
     Assign = "=",
+    Fun = "fun",
     Has = "has",
     IID = "iid",
     Is = "is",
@@ -131,6 +134,7 @@ string_enum! { Annotation
     Distinct = "distinct",
     Independent = "independent",
     Key = "key",
+    Range = "range",
     Regex = "regex",
     Unique = "unique",
     Values = "values",
@@ -182,12 +186,8 @@ string_enum! { Function
     Length = "length",
 }
 
-string_enum! { Projection
-    As = "as",
-}
-
 string_enum! { Char
-    // Question = "?",
+    Question = "?",
     Dollar = "$",
     Underscore = "_",
     CurlyLeft = "{",

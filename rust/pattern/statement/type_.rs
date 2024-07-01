@@ -6,12 +6,12 @@
 
 use std::fmt::{self, Write};
 
-use super::Type;
+use super::{Type, TypeAny};
 use crate::{
     annotation::Annotation,
     common::Span,
     identifier::{Label, ScopedLabel},
-    write_joined,
+    util::write_joined,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -66,63 +66,42 @@ impl fmt::Display for ValueType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Owned {
-    List(Type),
-    Attribute(Type, Option<Type>),
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
-    pub owned: Owned,
-    pub annotations: Vec<Annotation>,
     span: Option<Span>,
+    owned: TypeAny,
+    overridden: Option<Type>,
+    annotations: Vec<Annotation>,
 }
 
 impl Owns {
-    pub fn new(owned: Owned, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
-        Self { owned, annotations, span }
+    pub fn new(span: Option<Span>, owned: TypeAny, overridden: Option<Type>, annotations: Vec<Annotation>) -> Self {
+        Self { span, owned, overridden, annotations }
     }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Related {
-    List(Type),
-    Role(Type, Option<Type>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
-    pub related: Related,
-    pub annotations: Vec<Annotation>,
     span: Option<Span>,
+    related: TypeAny,
+    overridden: Option<Type>,
+    annotations: Vec<Annotation>,
 }
 
 impl Relates {
-    pub fn new(related: Related, annotations: Vec<Annotation>, span: Option<Span>) -> Self {
-        Self { related, annotations, span }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Played {
-    role: Type,
-    overridden: Option<Type>,
-}
-
-impl Played {
-    pub fn new(role: Type, overridden: Option<Type>) -> Self {
-        Self { role, overridden }
+    pub fn new(span: Option<Span>, related: TypeAny, overridden: Option<Type>, annotations: Vec<Annotation>) -> Self {
+        Self { span, related, overridden, annotations }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
-    played: Played,
     span: Option<Span>,
+    role: Type,
+    overridden: Option<Type>,
 }
 
 impl Plays {
-    pub fn new(played: Played, span: Option<Span>) -> Self {
-        Self { played, span }
+    pub fn new(span: Option<Span>, role: Type, overridden: Option<Type>) -> Self {
+        Self { span, role, overridden }
     }
 }

@@ -4,27 +4,27 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt::{self, Write};
+use std::fmt;
 
 use crate::{
     common::{token, Span, Spanned},
-    definition::Definable,
-    write_joined,
+    pretty::{indent, Pretty},
+    schema::definable::Definable,
 };
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Define {
-    definables: Vec<Definable>,
     span: Option<Span>,
+    definables: Vec<Definable>,
 }
 
 impl Define {
-    pub(crate) fn new(definables: Vec<Definable>, span: Option<Span>) -> Self {
-        Self { definables, span }
+    pub(crate) fn new(span: Option<Span>, definables: Vec<Definable>) -> Self {
+        Self { span, definables }
     }
 
     pub fn build(definables: Vec<Definable>) -> Self {
-        Self::new(definables, None)
+        Self::new(None, definables)
     }
 }
 
@@ -34,16 +34,29 @@ impl Spanned for Define {
     }
 }
 
+impl Pretty for Define {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        write!(f, "{}\n", token::Clause::Define)?;
+        for definable in &self.definables {
+            f.write_str("\n")?;
+            Pretty::fmt(definable, indent_level + 1, f);
+            f.write_str(";")?;
+        }
+        Ok(())
+    }
+}
+
 impl fmt::Display for Define {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        token::Clause::Define.fmt(f)?;
         if f.alternate() {
-            f.write_char('\n')?;
-        } else {
-            f.write_char(' ')?;
+            return Pretty::fmt(self, 0, f);
         }
-        let delimiter = if f.alternate() { ";\n" } else { "; " };
-        write_joined!(f, delimiter, self.definables)?;
-        f.write_str(";")
+
+        write!(f, "{}", token::Clause::Define)?;
+        for definable in &self.definables {
+            write!(f, " {};", definable)?;
+        }
+        Ok(())
     }
 }

@@ -4,12 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use std::fmt;
+
 use crate::{
     common::{
         token::{self, ArithmeticOperator},
         Span, Spanned,
     },
     identifier::{Identifier, Variable},
+    pretty::Pretty,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -93,7 +96,7 @@ impl Spanned for Paren {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Value {
     span: Option<Span>,
-    inner: String, // TODO
+    inner: String,
 }
 
 impl Value {
@@ -105,6 +108,14 @@ impl Value {
 impl Spanned for Value {
     fn span(&self) -> Option<Span> {
         self.span
+    }
+}
+
+impl Pretty for Value {}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.inner)
     }
 }
 

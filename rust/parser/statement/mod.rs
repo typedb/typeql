@@ -12,10 +12,10 @@ use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, Rule
 use crate::{
     common::{error::TypeQLError, token::Comparator, Spanned},
     parser::{
-        statement::type_::visit_statement_type, visit_label, visit_label_scoped, visit_list_label, visit_list_var,
-        visit_var,
+        statement::type_::visit_statement_type, visit_label, visit_label_list, visit_label_scoped, visit_var,
+        visit_var_list,
     },
-    pattern::statement::{comparison::Comparison, Statement, Type},
+    pattern::statement::{comparison::Comparison, Statement, Type, TypeAny},
 };
 
 mod single;
@@ -85,12 +85,12 @@ fn visit_type_ref_scoped(node: Node<'_>) -> Type {
     }
 }
 
-fn visit_type_ref_list(node: Node<'_>) -> Type {
+fn visit_type_ref_list(node: Node<'_>) -> TypeAny {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::list_var => Type::Variable(visit_list_var(child)),
-        Rule::list_label => Type::Label(visit_list_label(child)),
+        Rule::var_list => TypeAny::List(Type::Variable(visit_var_list(child))),
+        Rule::label_list => TypeAny::List(Type::Label(visit_label_list(child))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

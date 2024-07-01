@@ -11,7 +11,7 @@ use crate::{
     identifier::Variable,
     pattern::statement::Type,
     query::DataQuery,
-    write_joined,
+    util::write_joined,
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -156,7 +156,7 @@ impl fmt::Display for ProjectionKeyVar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.variable)?;
         if let Some(label) = &self.label {
-            write!(f, " {} {}", token::Projection::As, label)
+            write!(f, " {} {}", token::Keyword::As, label)
         } else {
             Ok(())
         }
@@ -182,7 +182,7 @@ impl fmt::Display for ProjectionAttribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.attribute)?;
         if let Some(label) = &self.label {
-            write!(f, " {} {}", token::Projection::As, label)
+            write!(f, " {} {}", token::Keyword::As, label)
         } else {
             Ok(())
         }

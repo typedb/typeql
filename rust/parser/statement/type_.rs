@@ -7,15 +7,13 @@
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        annotation::{
-            visit_annotations_owns, visit_annotations_relates, visit_annotations_sub, visit_annotations_value,
-        },
+        annotation::visit_annotations,
         statement::{visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_type_ref_scoped},
         visit_label, visit_label_scoped, visit_value_type_primitive, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     pattern::statement::{
-        type_::{LabelConstraint, Owned, Owns, Played, Plays, Related, Relates, Sub, SubKind, ValueType},
-        Statement, TypeConstraint, TypeStatement,
+        type_::{LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
+        Statement, TypeAny, TypeConstraint, TypeStatement,
     },
 };
 
@@ -48,7 +46,8 @@ fn visit_sub_constraint(node: Node<'_>) -> Sub {
     let mut children = node.into_children();
     let kind = visit_sub_token(children.consume_expected(Rule::SUB_));
     let supertype = visit_type_ref_any(children.consume_expected(Rule::type_ref_any));
-    let annotations = visit_annotations_sub(children.consume_expected(Rule::annotations_sub));
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
+    debug_assert_eq!(children.try_consume_any(), None);
     Sub::new(kind, supertype, annotations, span)
 }
 
@@ -72,7 +71,7 @@ fn visit_value_type_constraint(node: Node<'_>) -> ValueType {
         Rule::label => (crate::pattern::statement::Type::Label(visit_label(value_type_node)), Vec::new()),
         Rule::value_type_primitive => (
             crate::pattern::statement::Type::BuiltinValue(visit_value_type_primitive(value_type_node)),
-            visit_annotations_value(children.consume_expected(Rule::annotations_value)),
+            visit_annotations(children.consume_expected(Rule::annotations)),
         ),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
     };
@@ -101,22 +100,22 @@ fn visit_owns_constraint(node: Node<'_>) -> Owns {
     let mut children = node.into_children();
     children.skip_expected(Rule::OWNS);
 
-    let owned_type = children.consume_any();
-    let owned = match owned_type.as_rule() {
-        Rule::type_ref_list => Owned::List(visit_type_ref_list(owned_type)),
-        Rule::type_ref => {
-            let type_ = visit_type_ref(owned_type);
-            match children.try_consume_expected(Rule::AS) {
-                None => Owned::Attribute(type_, None),
-                Some(_) => Owned::Attribute(type_, Some(visit_type_ref(children.consume_expected(Rule::type_ref)))),
-            }
-        }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_type.to_string() }),
+    let child = children.consume_any();
+    let owned = match child.as_rule() {
+        Rule::type_ref => TypeAny::Type(visit_type_ref(child)),
+        Rule::type_ref_list => visit_type_ref_list(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
-    let annotations_owns = visit_annotations_owns(children.consume_expected(Rule::annotations_owns));
+    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
+        Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
+    } else {
+        None
+    };
+
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     debug_assert_eq!(children.try_consume_any(), None);
-    Owns::new(owned, annotations_owns, span)
+    Owns::new(span, owned, overridden, annotations)
 }
 
 fn visit_relates_constraint(node: Node<'_>) -> Relates {
@@ -125,22 +124,22 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
     let mut children = node.into_children();
     children.skip_expected(Rule::RELATES);
 
-    let related_role = children.consume_any();
-    let related = match related_role.as_rule() {
-        Rule::type_ref_list => Related::List(visit_type_ref_list(related_role)),
-        Rule::type_ref => {
-            let type_ = visit_type_ref(related_role);
-            match children.try_consume_expected(Rule::AS) {
-                None => Related::Role(type_, None),
-                Some(_) => Related::Role(type_, Some(visit_type_ref(children.consume_expected(Rule::type_ref)))),
-            }
-        }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_role.to_string() }),
+    let child = children.consume_any();
+    let related = match child.as_rule() {
+        Rule::type_ref => TypeAny::Type(visit_type_ref(child)),
+        Rule::type_ref_list => visit_type_ref_list(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
-    let annotations_relates = visit_annotations_relates(children.consume_expected(Rule::annotations_relates));
+    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
+        Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
+    } else {
+        None
+    };
+
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     debug_assert_eq!(children.try_consume_any(), None);
-    Relates::new(related, annotations_relates, span)
+    Relates::new(span, related, overridden, annotations)
 }
 
 fn visit_plays_constraint(node: Node<'_>) -> Plays {
@@ -149,12 +148,13 @@ fn visit_plays_constraint(node: Node<'_>) -> Plays {
     let mut children = node.into_children();
     children.skip_expected(Rule::PLAYS);
 
-    let role_type = visit_type_ref_scoped(children.consume_expected(Rule::type_ref_scoped));
-    let played = match children.try_consume_expected(Rule::AS) {
-        None => Played::new(role_type, None),
-        Some(_) => Played::new(role_type, Some(visit_type_ref(children.consume_expected(Rule::type_ref)))),
+    let role = visit_type_ref_scoped(children.consume_expected(Rule::type_ref_scoped));
+    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
+        Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
+    } else {
+        None
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
-    Plays::new(played, span)
+    Plays::new(span, role, overridden)
 }

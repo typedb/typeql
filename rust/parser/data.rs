@@ -14,7 +14,7 @@ use crate::{
         Spanned,
     },
     parser::{
-        schema::function::visit_definition_function, statement::thing::visit_statement_things, visit_integer_literal,
+        schema::function::visit_definition_function, statement::thing::visit_statement_thing, visit_integer_literal,
         visit_label, visit_var, visit_vars, RuleMatcher,
     },
     pattern::{statement::Type, Conjunction, Disjunction, Negation, Pattern, Try},
@@ -149,28 +149,21 @@ fn visit_pattern_try(node: Node<'_>) -> Try {
 fn visit_stage_insert(node: Node<'_>) -> Insert {
     debug_assert_eq!(node.as_rule(), Rule::stage_insert);
     let span = node.span();
-    let mut children = node.into_children();
-    let statement_things = children.skip_expected(Rule::INSERT).consume_expected(Rule::statement_things);
-    debug_assert_eq!(children.try_consume_any(), None);
-    Insert::new(span, visit_statement_things(statement_things))
+    let statement_things = node.into_children().skip_expected(Rule::INSERT).map(visit_statement_thing).collect();
+    Insert::new(span, statement_things)
 }
 
 fn visit_stage_delete(node: Node<'_>) -> Delete {
     debug_assert_eq!(node.as_rule(), Rule::stage_delete);
     let span = node.span();
-    let mut children = node.into_children();
-    let statement_things = children.skip_expected(Rule::DELETE).consume_expected(Rule::statement_things);
-    debug_assert_eq!(children.try_consume_any(), None);
-    Delete::new(span, visit_statement_things(statement_things))
+    let statement_things = node.into_children().skip_expected(Rule::DELETE).map(visit_statement_thing).collect();
+    Delete::new(span, statement_things)
 }
 
 fn visit_stage_put(node: Node<'_>) -> Put {
     debug_assert_eq!(node.as_rule(), Rule::stage_put);
     let span = node.span();
-    let mut children = node.into_children();
-    let statement_things =
-        visit_statement_things(children.skip_expected(Rule::PUT).consume_expected(Rule::statement_things));
-    debug_assert_eq!(children.try_consume_any(), None);
+    let statement_things = node.into_children().skip_expected(Rule::PUT).map(visit_statement_thing).collect();
     Put::new(span, statement_things)
 }
 
@@ -237,7 +230,7 @@ fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
     debug_assert_eq!(node.as_rule(), Rule::projection_attribute);
     let mut children = node.into_children();
     let attribute_label = Type::Label(visit_label(children.consume_expected(Rule::label)));
-    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
+    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_key_as_label);
     debug_assert!(children.try_consume_any().is_none());
     ProjectionAttribute::new(attribute_label, label)
 }
@@ -246,12 +239,12 @@ fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
     debug_assert_eq!(node.as_rule(), Rule::projection_key_var);
     let mut children = node.into_children();
     let variable = visit_var(children.consume_expected(Rule::var));
-    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_as_label);
+    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_key_as_label);
     debug_assert!(children.try_consume_any().is_none());
     ProjectionKeyVar::new(variable, label)
 }
 
-fn visit_projection_as_label(node: Node<'_>) -> ProjectionKeyLabel {
+fn visit_projection_key_as_label(node: Node<'_>) -> ProjectionKeyLabel {
     debug_assert_eq!(node.as_rule(), Rule::projection_key_as_label);
     let mut children = node.into_children();
     children.skip_expected(Rule::AS);

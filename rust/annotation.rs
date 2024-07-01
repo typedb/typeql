@@ -8,7 +8,8 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span},
-    write_joined,
+    expression::Value,
+    util::write_joined,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -43,10 +44,12 @@ impl Cardinality {
 
 impl fmt::Display for Cardinality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.max {
-            Some(max) => write!(f, "@{}({}, {})", token::Annotation::Cardinality, self.min, max),
-            None => write!(f, "@{}({}, *)", token::Annotation::Cardinality, self.min),
+        write!(f, "@{}({}..", token::Annotation::Cardinality, self.min)?;
+        if let Some(max) = self.max {
+            write!(f, "{}", max)?;
         }
+        f.write_char(')')?;
+        Ok(())
     }
 }
 
@@ -119,6 +122,34 @@ impl fmt::Display for Key {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Range {
+    span: Option<Span>,
+    min: Option<Value>,
+    max: Option<Value>,
+}
+
+impl Range {
+    pub fn new(span: Option<Span>, min: Option<Value>, max: Option<Value>) -> Self {
+        Self { span, min, max }
+    }
+}
+
+impl fmt::Display for Range {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}(", token::Annotation::Range)?;
+        if let Some(min) = &self.min {
+            write!(f, "{}", min)?;
+        }
+        f.write_str("..")?;
+        if let Some(max) = &self.max {
+            write!(f, "{}", max)?;
+        }
+        f.write_char(')')?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Regex {
     span: Option<Span>,
     regex: String,
@@ -182,6 +213,7 @@ pub enum Annotation {
     Distinct(Distinct),
     Independent(Independent),
     Key(Key),
+    Range(Range),
     Regex(Regex),
     Unique(Unique),
     Values(Values),
@@ -189,17 +221,17 @@ pub enum Annotation {
 
 impl fmt::Display for Annotation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let inner: &dyn fmt::Display = match self {
-            Self::Abstract(inner) => inner,
-            Self::Cardinality(inner) => inner,
-            Self::Cascade(inner) => inner,
-            Self::Distinct(inner) => inner,
-            Self::Independent(inner) => inner,
-            Self::Key(inner) => inner,
-            Self::Regex(inner) => inner,
-            Self::Unique(inner) => inner,
-            Self::Values(inner) => inner,
-        };
-        inner.fmt(f)
+        match self {
+            Self::Abstract(inner) => fmt::Display::fmt(inner, f),
+            Self::Cardinality(inner) => fmt::Display::fmt(inner, f),
+            Self::Cascade(inner) => fmt::Display::fmt(inner, f),
+            Self::Distinct(inner) => fmt::Display::fmt(inner, f),
+            Self::Independent(inner) => fmt::Display::fmt(inner, f),
+            Self::Key(inner) => fmt::Display::fmt(inner, f),
+            Self::Range(inner) => fmt::Display::fmt(inner, f),
+            Self::Regex(inner) => fmt::Display::fmt(inner, f),
+            Self::Unique(inner) => fmt::Display::fmt(inner, f),
+            Self::Values(inner) => fmt::Display::fmt(inner, f),
+        }
     }
 }

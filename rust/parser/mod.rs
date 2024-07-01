@@ -17,10 +17,13 @@ use crate::{
         error::{syntax_error, TypeQLError},
         token, LineColumn, Span, Spanned,
     },
-    definition::Definable,
     identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
-    pattern::{statement::BuiltinValueType, Pattern, Statement},
+    pattern::{
+        statement::{BuiltinValueType, Type},
+        Pattern, Statement,
+    },
     query::Query,
+    schema::definable::Definable,
     Result,
 };
 
@@ -181,6 +184,7 @@ fn visit_label(node: Node<'_>) -> Label {
     match child.as_rule() {
         Rule::identifier => Label::Identifier(visit_identifier(child)),
         Rule::kind => Label::Reserved(visit_kind(child)),
+        Rule::ROLE => Label::Reserved(ReservedLabel::new(child.span(), token::Type::Role)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -214,8 +218,8 @@ fn visit_identifier(node: Node<'_>) -> Identifier {
     Identifier::new(node.span(), node.as_str().to_owned())
 }
 
-fn visit_list_label(node: Node<'_>) -> Label {
-    debug_assert_eq!(node.as_rule(), Rule::list_label);
+fn visit_label_list(node: Node<'_>) -> Label {
+    debug_assert_eq!(node.as_rule(), Rule::label_list);
     visit_label(node.into_child())
 }
 
@@ -246,14 +250,19 @@ fn visit_vars(node: Node<'_>) -> Vec<Variable> {
     node.into_children().map(visit_var).collect()
 }
 
-fn visit_list_var(node: Node<'_>) -> Variable {
-    debug_assert_eq!(node.as_rule(), Rule::list_var);
+fn visit_var_list(node: Node<'_>) -> Variable {
+    debug_assert_eq!(node.as_rule(), Rule::var_list);
     visit_var(node.into_child())
 }
 
-fn visit_list_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
-    debug_assert_eq!(node.as_rule(), Rule::list_value_type_primitive);
-    visit_value_type_primitive(node.into_child())
+fn visit_value_type(node: Node<'_>) -> Type {
+    debug_assert_eq!(node.as_rule(), Rule::value_type);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::value_type_primitive => Type::BuiltinValue(visit_value_type_primitive(child)),
+        Rule::identifier => Type::Label(Label::Identifier(visit_identifier(child))),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
 }
 
 fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {

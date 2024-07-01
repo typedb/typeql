@@ -9,7 +9,7 @@ use std::fmt;
 use self::stage::Stage;
 use crate::{
     common::{Span, Spanned},
-    definition,
+    schema::definable,
 };
 
 pub mod stage;
@@ -17,11 +17,11 @@ pub mod stage;
 #[derive(Debug, Eq, PartialEq)]
 pub struct Preamble {
     span: Option<Span>,
-    function: definition::Function,
+    function: definable::Function,
 }
 
 impl Preamble {
-    pub fn new(span: Option<Span>, function: definition::Function) -> Self {
+    pub(crate) fn new(span: Option<Span>, function: definable::Function) -> Self {
         Self { span, function }
     }
 }

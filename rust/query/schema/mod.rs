@@ -6,24 +6,26 @@
 
 use std::fmt;
 
-pub use self::{define::Define, undefine::Undefine};
+pub use self::{define::Define, redefine::Redefine, undefine::Undefine};
 use crate::common::{Span, Spanned};
 
 mod define;
-
+mod redefine;
 mod undefine;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum SchemaQuery {
     Define(Define),
+    Redefine(Redefine),
     Undefine(Undefine),
 }
 
 impl Spanned for SchemaQuery {
     fn span(&self) -> Option<Span> {
         match self {
-            SchemaQuery::Define(define) => define.span(),
-            SchemaQuery::Undefine(undefine) => undefine.span(),
+            Self::Define(inner) => inner.span(),
+            Self::Redefine(inner) => inner.span(),
+            Self::Undefine(inner) => inner.span(),
         }
     }
 }
@@ -31,8 +33,9 @@ impl Spanned for SchemaQuery {
 impl fmt::Display for SchemaQuery {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Define(define_query) => fmt::Display::fmt(define_query, f),
-            Self::Undefine(undefine_query) => fmt::Display::fmt(undefine_query, f),
+            Self::Define(inner) => fmt::Display::fmt(inner, f),
+            Self::Redefine(inner) => fmt::Display::fmt(inner, f),
+            Self::Undefine(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }

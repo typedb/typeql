@@ -5,7 +5,7 @@
  */
 
 use self::isa::Isa;
-use super::{comparison, Statement, Type};
+use super::{comparison, Statement, Type, TypeAny};
 use crate::{
     common::Span,
     expression::{Expression, Value},
@@ -42,7 +42,7 @@ impl From<ThingStatement> for Pattern {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum RolePlayer {
-    Typed(Type, Variable),
+    Typed(TypeAny, Variable),
     Untyped(Variable),
 }
 
@@ -134,12 +134,12 @@ pub enum HasValue {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Has {
     span: Option<Span>,
-    type_: Option<Type>,
+    type_: Option<TypeAny>,
     value: HasValue,
 }
 
 impl Has {
-    pub fn new(span: Option<Span>, type_: Option<Type>, value: HasValue) -> Self {
+    pub fn new(span: Option<Span>, type_: Option<TypeAny>, value: HasValue) -> Self {
         Self { span, type_, value }
     }
 }
