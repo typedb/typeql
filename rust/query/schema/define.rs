@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt;
+use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span, Spanned},
@@ -37,11 +37,11 @@ impl Spanned for Define {
 impl Pretty for Define {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, "{}\n", token::Clause::Define)?;
+        write!(f, "{}", token::Clause::Define)?;
         for definable in &self.definables {
-            f.write_str("\n")?;
+            writeln!(f);
             Pretty::fmt(definable, indent_level + 1, f);
-            f.write_str(";")?;
+            f.write_char(';')?;
         }
         Ok(())
     }
@@ -50,13 +50,13 @@ impl Pretty for Define {
 impl fmt::Display for Define {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if f.alternate() {
-            return Pretty::fmt(self, 0, f);
+            Pretty::fmt(self, 0, f)
+        } else {
+            write!(f, "{}", token::Clause::Define)?;
+            for definable in &self.definables {
+                write!(f, " {};", definable)?;
+            }
+            Ok(())
         }
-
-        write!(f, "{}", token::Clause::Define)?;
-        for definable in &self.definables {
-            write!(f, " {};", definable)?;
-        }
-        Ok(())
     }
 }

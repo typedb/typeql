@@ -9,6 +9,7 @@ use std::fmt;
 use crate::{
     common::{token, Span, Spanned},
     identifier::{Identifier, Label, ScopedLabel},
+    pretty::Pretty,
     type_::{Type, TypeAny},
     util::write_joined,
 };
@@ -114,10 +115,14 @@ impl Spanned for Owns {
     }
 }
 
+impl Pretty for Owns {}
+
 impl fmt::Display for Owns {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("owns ")?;
-        todo!();
+        write!(f, "{} {}", token::Keyword::Owns, self.owned)?;
+        if let Some(overridden) = &self.overridden {
+            write!(f, " {} {}", token::Keyword::As, overridden)?;
+        }
         Ok(())
     }
 }
@@ -143,8 +148,10 @@ impl Spanned for Relates {
 
 impl fmt::Display for Relates {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("relates ")?;
-        todo!();
+        write!(f, "{} {}", token::Keyword::Relates, self.related)?;
+        if let Some(overridden) = &self.overridden {
+            write!(f, " {} {}", token::Keyword::As, overridden)?;
+        }
         Ok(())
     }
 }
@@ -170,8 +177,10 @@ impl Spanned for Plays {
 
 impl fmt::Display for Plays {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("plays ")?;
-        todo!();
+        write!(f, "{} {}", token::Keyword::Plays, self.role)?;
+        if let Some(overridden) = &self.overridden {
+            write!(f, " {} {}", token::Keyword::As, overridden)?;
+        }
         Ok(())
     }
 }

@@ -9,14 +9,14 @@ use crate::identifier::{Identifier, Label, Variable};
 #[macro_export]
 macro_rules! define {
     ($($def:expr),* $(,)?) => {
-        $crate::query::Define::build(vec![$($def.into()),*])
+        $crate::query::schema::Define::build(vec![$($def.into()),*])
     }
 }
 
 #[macro_export]
 macro_rules! undefine {
     ($($def:expr),* $(,)?) => {
-        $crate::query::Undefine::build(vec![$($def.into()),*])
+        $crate::query::schema::Undefine::build(vec![$($def.into()),*])
     }
 }
 

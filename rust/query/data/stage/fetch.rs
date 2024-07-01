@@ -7,11 +7,7 @@
 use std::fmt;
 
 use crate::{
-    common::{string::indent, token, Span},
-    identifier::Variable,
-    query::DataQuery,
-    type_::Type,
-    util::write_joined,
+    common::{token, Span}, identifier::Variable, pretty::{indent, Pretty}, query::DataQuery, type_::Type, util::write_joined
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -134,6 +130,28 @@ impl fmt::Display for Fetch {
     }
 }
 
+impl Pretty for Projection {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Projection::Variable(key) => {
+                write!(f, "{};", key)
+            }
+            Projection::Attribute(key, attrs) => {
+                write!(f, "{}: ", key)?;
+                write_joined!(f, ", ", attrs)?;
+                write!(f, ";")
+            }
+            Projection::Subquery(label, subquery) => {
+                writeln!(f, "{}: {{", label)?;
+                indent(indent_level, f)?;
+                Pretty::fmt(subquery, indent_level + 1, f)?;
+                write!(f, "}};")?;
+                Ok(())
+            }
+        }
+    }
+}
+
 impl fmt::Display for Projection {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -146,7 +164,7 @@ impl fmt::Display for Projection {
                 write!(f, ";")
             }
             Projection::Subquery(label, subquery) => {
-                write!(f, "{}: {{\n{}\n}};", label, indent(subquery.to_string().as_ref()))
+                write!(f, "{}: {{ {} }};", label, subquery)
             }
         }
     }

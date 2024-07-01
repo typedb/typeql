@@ -9,6 +9,7 @@ use std::fmt;
 use crate::{
     common::{token, Span},
     identifier::{Label, ScopedLabel, Variable},
+    pretty::Pretty,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -20,6 +21,14 @@ pub struct BuiltinValueType {
 impl BuiltinValueType {
     pub fn new(span: Option<Span>, name: token::ValueType) -> Self {
         Self { span, name }
+    }
+}
+
+impl Pretty for BuiltinValueType {}
+
+impl fmt::Display for BuiltinValueType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name)
     }
 }
 
@@ -37,7 +46,7 @@ impl fmt::Display for Type {
             Self::Label(inner) => fmt::Display::fmt(inner, f),
             Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
             Self::Variable(inner) => todo!(),
-            Self::BuiltinValue(inner) => todo!(),
+            Self::BuiltinValue(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }
@@ -48,6 +57,18 @@ pub enum TypeAny {
     Type(Type),         // person, friendship:friend, or $t
     Optional(Optional), // person?, friendship:friend?, or $t?
     List(List),         // person[], friendship:friend[], or $t[]
+}
+
+impl Pretty for TypeAny {}
+
+impl fmt::Display for TypeAny {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Type(inner) => fmt::Display::fmt(inner, f),
+            Self::Optional(inner) => fmt::Display::fmt(inner, f),
+            Self::List(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -62,6 +83,14 @@ impl Optional {
     }
 }
 
+impl Pretty for Optional {}
+
+impl fmt::Display for Optional {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}?", self.inner)
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
     span: Option<Span>,
@@ -71,5 +100,13 @@ pub struct List {
 impl List {
     pub fn new(span: Option<Span>, inner: Type) -> Self {
         Self { span, inner }
+    }
+}
+
+impl Pretty for List {}
+
+impl fmt::Display for List {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}[]", self.inner)
     }
 }

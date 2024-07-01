@@ -7,8 +7,7 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span, Spanned},
-    schema,
+    common::{token, Span, Spanned}, pretty::Pretty, schema
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -135,8 +134,10 @@ impl ScopedLabel {
     }
 }
 
+impl Pretty for ScopedLabel {}
+
 impl fmt::Display for ScopedLabel {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", self.scope, self.name)
     }
 }

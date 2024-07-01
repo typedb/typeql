@@ -11,7 +11,7 @@ use crate::{
     annotation::Annotation,
     common::{Span, Spanned},
     identifier::{Label, ReservedLabel},
-    pretty::Pretty,
+    pretty::{indent, Pretty},
     util::write_joined,
 };
 
@@ -48,10 +48,18 @@ impl Spanned for Type {
 
 impl Pretty for Type {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.label, f)?;
-        f.write_char(' ')?;
-        let joiner = if f.alternate() { ",\n    " } else { ", " };
-        write_joined!(f, joiner, &self.capabilities)?;
+        if let Some(kind) = &self.kind {
+            write!(f, "{} ", kind)?;
+        }
+        write!(f, "{}", self.label)?;
+        if let Some((first, rest)) = self.capabilities.split_first() {
+            write!(f, " {}", first)?;
+            for cap in rest {
+                writeln!(f, ",")?;
+                indent(indent_level, f)?;
+                write!(f, "{}", cap)?;
+            }
+        }
         Ok(())
     }
 }
@@ -84,9 +92,15 @@ impl Spanned for Capability {
     }
 }
 
+impl Pretty for Capability {}
+
 impl fmt::Display for Capability {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        write!(f, "{}", self.base)?;
+        for annotation in &self.annotations {
+            write!(f, " {}", annotation)?;
+        }
+        Ok(())
     }
 }
 

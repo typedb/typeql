@@ -8,8 +8,7 @@ use std::fmt;
 
 use self::stage::Stage;
 use crate::{
-    common::{Span, Spanned},
-    schema::definable,
+    common::{Span, Spanned}, pretty::Pretty, schema::definable
 };
 
 pub mod stage;
@@ -50,6 +49,12 @@ impl DataQuery {
 
 impl Spanned for DataQuery {
     fn span(&self) -> Option<Span> {
+        todo!()
+    }
+}
+
+impl Pretty for DataQuery {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         todo!()
     }
 }

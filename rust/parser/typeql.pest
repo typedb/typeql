@@ -361,7 +361,7 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
            | ALIAS | SUB | OWNS | AS | PLAYS | RELATES
            | IID | ISA | LINKS | HAS
            | IS | OR | NOT | TRY | IN
-           | OF | FROM
+           | OF
            | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
            | TRUE | FALSE
            }
@@ -369,6 +369,7 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
 unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
              | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
+             | FROM
              }
 
 // QUERY COMMAND KEYWORDS

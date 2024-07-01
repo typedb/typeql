@@ -8,6 +8,7 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span, Spanned},
+    pretty::{indent, Pretty},
     schema::undefinable::Undefinable,
 };
 
@@ -33,16 +34,29 @@ impl Spanned for Undefine {
     }
 }
 
+impl Pretty for Undefine {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        write!(f, "{}", token::Clause::Undefine)?;
+        for undefinable in &self.undefinables {
+            writeln!(f);
+            Pretty::fmt(undefinable, indent_level + 1, f);
+            f.write_char(';')?;
+        }
+        Ok(())
+    }
+}
+
 impl fmt::Display for Undefine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        token::Clause::Undefine.fmt(f)?;
         if f.alternate() {
-            f.write_char('\n')?;
+            Pretty::fmt(self, 0, f)
         } else {
-            f.write_char(' ')?;
+            token::Clause::Undefine.fmt(f)?;
+            for undefinable in &self.undefinables {
+                write!(f, " {};", undefinable)?;
+            }
+            Ok(())
         }
-        let delimiter = if f.alternate() { ";\n" } else { "; " };
-        // write_joined!(f, delimiter, self.undefinables)?;
-        f.write_str(";")
     }
 }
