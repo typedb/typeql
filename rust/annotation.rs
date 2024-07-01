@@ -9,8 +9,42 @@ use std::fmt::{self, Write};
 use crate::{
     common::{token, Span},
     expression::Value,
+    identifier::Identifier,
     util::write_joined,
 };
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Annotation {
+    Abstract(Abstract),
+    Cardinality(Cardinality),
+    Cascade(Cascade),
+    Distinct(Distinct),
+    Independent(Independent),
+    Key(Key),
+    Range(Range),
+    Regex(Regex),
+    Subkey(Subkey),
+    Unique(Unique),
+    Values(Values),
+}
+
+impl fmt::Display for Annotation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Abstract(inner) => fmt::Display::fmt(inner, f),
+            Self::Cardinality(inner) => fmt::Display::fmt(inner, f),
+            Self::Cascade(inner) => fmt::Display::fmt(inner, f),
+            Self::Distinct(inner) => fmt::Display::fmt(inner, f),
+            Self::Independent(inner) => fmt::Display::fmt(inner, f),
+            Self::Key(inner) => fmt::Display::fmt(inner, f),
+            Self::Range(inner) => fmt::Display::fmt(inner, f),
+            Self::Regex(inner) => fmt::Display::fmt(inner, f),
+            Self::Subkey(inner) => fmt::Display::fmt(inner, f),
+            Self::Unique(inner) => fmt::Display::fmt(inner, f),
+            Self::Values(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Abstract {
@@ -168,6 +202,24 @@ impl fmt::Display for Regex {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Subkey {
+    span: Option<Span>,
+    ident: Identifier,
+}
+
+impl Subkey {
+    pub fn new(span: Option<Span>, ident: Identifier) -> Self {
+        Self { span, ident }
+    }
+}
+
+impl fmt::Display for Subkey {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}({})", token::Annotation::Subkey, self.ident)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Unique {
     span: Option<Span>,
 }
@@ -202,36 +254,5 @@ impl fmt::Display for Values {
         write_joined!(f, ", ", &self.values)?;
         f.write_char(')')?;
         Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Annotation {
-    Abstract(Abstract),
-    Cardinality(Cardinality),
-    Cascade(Cascade),
-    Distinct(Distinct),
-    Independent(Independent),
-    Key(Key),
-    Range(Range),
-    Regex(Regex),
-    Unique(Unique),
-    Values(Values),
-}
-
-impl fmt::Display for Annotation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Abstract(inner) => fmt::Display::fmt(inner, f),
-            Self::Cardinality(inner) => fmt::Display::fmt(inner, f),
-            Self::Cascade(inner) => fmt::Display::fmt(inner, f),
-            Self::Distinct(inner) => fmt::Display::fmt(inner, f),
-            Self::Independent(inner) => fmt::Display::fmt(inner, f),
-            Self::Key(inner) => fmt::Display::fmt(inner, f),
-            Self::Range(inner) => fmt::Display::fmt(inner, f),
-            Self::Regex(inner) => fmt::Display::fmt(inner, f),
-            Self::Unique(inner) => fmt::Display::fmt(inner, f),
-            Self::Values(inner) => fmt::Display::fmt(inner, f),
-        }
     }
 }

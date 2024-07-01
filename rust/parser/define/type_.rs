@@ -28,7 +28,7 @@ pub(super) fn visit_definition_type(node: Node<'_>) -> Type {
     Type::new(span, kind, Label::Identifier(ident), traits)
 }
 
-fn visit_type_capability(node: Node<'_>) -> Capability {
+pub(in crate::parser) fn visit_type_capability(node: Node<'_>) -> Capability {
     debug_assert_eq!(node.as_rule(), Rule::type_capability);
     let span = node.span();
     let mut children = node.into_children();

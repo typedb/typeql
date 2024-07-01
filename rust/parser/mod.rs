@@ -17,18 +17,13 @@ use crate::{
     common::{
         error::{syntax_error, TypeQLError},
         token, LineColumn, Span, Spanned,
-    },
-    identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
-    pattern::{Pattern, Statement},
-    query::{Query, SchemaQuery},
-    schema::definable::Definable,
-    type_::{BuiltinValueType, List, Optional, Type},
-    Result,
+    }, identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable}, parser::redefine::visit_query_redefine, pattern::{Pattern, Statement}, query::{Query, SchemaQuery}, schema::definable::Definable, type_::{BuiltinValueType, List, Optional, Type}, Result
 };
 
 mod annotation;
 mod data;
 mod define;
+mod redefine;
 mod expression;
 mod statement;
 mod undefine;
@@ -184,6 +179,7 @@ fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
     let child = children.consume_any();
     let query = match child.as_rule() {
         Rule::query_define => SchemaQuery::Define(visit_query_define(child)),
+        Rule::query_redefine => SchemaQuery::Redefine(visit_query_redefine(child)),
         Rule::query_undefine => SchemaQuery::Undefine(visit_query_undefine(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };

@@ -192,7 +192,7 @@ projection_key_label = { quoted_string_literal | label }
 
 // SCHEMA QUERY ================================================================
 
-query_schema = { query_define | query_undefine } // | query_redefine }
+query_schema = { query_define | query_undefine | query_redefine }
 
 // DEFINE QUERY ================================================================
 
@@ -251,8 +251,8 @@ struct_destructor_value = { var | struct_destructor }
 
 // REDEFINE QUERY ==============================================================
 
-query_redefine = { UNDEFINE ~ ( redefinable ~ SEMICOLON )+ }
-redefinable = { identifier ~ type_capability }
+query_redefine = { REDEFINE ~ ( redefinable ~ SEMICOLON )+ }
+redefinable = { kind? ~ identifier ~ type_capability }
 
 // UNDEFINE QUERY ==============================================================
 
@@ -334,12 +334,13 @@ annotation = { ANNOTATION_ABSTRACT
              | annotation_card
              | annotation_range
              | annotation_regex
+             | annotation_subkey
              | annotation_values
              }
 
 annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ ".." ~ integer_literal? ~ PAREN_CLOSE }
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
-annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ label ~ PAREN_CLOSE }
+annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ identifier ~ PAREN_CLOSE }
 annotation_range = { ANNOTATION_RANGE ~ PAREN_OPEN ~ range ~ PAREN_CLOSE }
 annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ PAREN_CLOSE }
 
@@ -351,7 +352,7 @@ range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
 
-reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | INSERT | PUT | DELETE
+reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE
            | CHECK | FIRST
            | ENTITY | RELATION | ATTRIBUTE | ROLE
            | ASC | DESC
@@ -376,6 +377,7 @@ MATCH = @{ "match" ~ WB }
 FETCH = @{ "fetch" ~ WB }
 DEFINE = @{ "define" ~ WB }
 UNDEFINE = @{ "undefine" ~ WB }
+REDEFINE = @{ "redefine" ~ WB }
 INSERT = @{ "insert" ~ WB }
 PUT = @{ "put" ~ WB }
 UPDATE = @{ "update" ~ WB }
