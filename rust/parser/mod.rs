@@ -9,8 +9,9 @@ use pest_derive::Parser;
 
 use self::{
     data::{visit_pattern, visit_patterns},
-    schema::visit_definables,
+    define::{visit_definables, visit_query_define},
     statement::visit_statement,
+    undefine::visit_query_undefine,
 };
 use crate::{
     common::{
@@ -22,16 +23,17 @@ use crate::{
         statement::{BuiltinValueType, Type},
         Pattern, Statement,
     },
-    query::Query,
+    query::{Query, SchemaQuery},
     schema::definable::Definable,
     Result,
 };
 
 mod annotation;
 mod data;
+mod define;
 mod expression;
-mod schema;
 mod statement;
+mod undefine;
 
 #[cfg(test)]
 mod test;
@@ -170,8 +172,21 @@ fn visit_query(node: Node<'_>) -> Query {
     let mut children = node.into_children();
     let child = children.consume_any();
     let query = match child.as_rule() {
-        Rule::query_schema => Query::Schema(schema::visit_query_schema(child)),
+        Rule::query_schema => Query::Schema(visit_query_schema(child)),
         Rule::query_data => Query::Data(data::visit_query_data(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    debug_assert_eq!(children.try_consume_any(), None);
+    query
+}
+
+fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
+    debug_assert_eq!(node.as_rule(), Rule::query_schema);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    let query = match child.as_rule() {
+        Rule::query_define => SchemaQuery::Define(visit_query_define(child)),
+        Rule::query_undefine => SchemaQuery::Undefine(visit_query_undefine(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);

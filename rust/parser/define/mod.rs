@@ -8,45 +8,22 @@ pub(super) mod function;
 mod struct_;
 mod type_;
 
+use self::{function::visit_definition_function, struct_::visit_definition_struct, type_::visit_definition_type};
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, Spanned},
-    parser::schema::{
-        function::visit_definition_function, struct_::visit_definition_struct, type_::visit_definition_type,
-    },
-    query::schema::{Define, SchemaQuery, Undefine},
+    query::schema::Define,
     schema::definable::Definable,
 };
 
-pub(super) fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
-    debug_assert_eq!(node.as_rule(), Rule::query_schema);
-    let mut children = node.into_children();
-    let child = children.consume_any();
-    let query = match child.as_rule() {
-        Rule::query_define => SchemaQuery::Define(visit_query_define(child)),
-        Rule::query_undefine => SchemaQuery::Undefine(visit_query_undefine(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    };
-    debug_assert_eq!(children.try_consume_any(), None);
-    query
-}
-
-fn visit_query_define(node: Node<'_>) -> Define {
+pub(super) fn visit_query_define(node: Node<'_>) -> Define {
     debug_assert_eq!(node.as_rule(), Rule::query_define);
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::DEFINE);
-    let query = Define::new(span, visit_definables(children.consume_expected(Rule::definables)));
+    let definables = visit_definables(children.consume_expected(Rule::definables));
     debug_assert_eq!(children.try_consume_any(), None);
-    query
-}
-
-fn visit_query_undefine(node: Node<'_>) -> Undefine {
-    debug_assert_eq!(node.as_rule(), Rule::query_undefine);
-    let span = node.span();
-    let mut children = node.into_children();
-    children.skip_expected(Rule::UNDEFINE);
-    todo!()
+    Define::new(span, definables)
 }
 
 pub(super) fn visit_definables(node: Node<'_>) -> Vec<Definable> {

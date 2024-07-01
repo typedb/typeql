@@ -6,16 +6,16 @@
 
 use itertools::Itertools;
 
-use super::{statement::visit_statement, IntoChildNodes, Node, Rule};
+use super::{
+    define::function::visit_definition_function,
+    statement::{thing::visit_statement_thing, visit_statement},
+    visit_integer_literal, visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+};
 use crate::{
     common::{
         error::TypeQLError,
         token::{Aggregate, Order},
         Spanned,
-    },
-    parser::{
-        schema::function::visit_definition_function, statement::thing::visit_statement_thing, visit_integer_literal,
-        visit_label, visit_var, visit_vars, RuleMatcher,
     },
     pattern::{statement::Type, Conjunction, Disjunction, Negation, Pattern, Try},
     query::{
