@@ -4,19 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{collections::HashMap, fmt};
+use std::collections::HashMap;
 
 use self::{
     thing::{AttributeComparisonStatement, AttributeValueStatement, RelationStatement, ThingStatement},
     type_::{LabelConstraint, Owns, Plays, Relates, Sub, ValueType},
 };
 use crate::{
-    common::{
-        token::{self},
-        Span,
-    },
+    common::Span,
     expression::{Expression, FunctionCall},
-    identifier::{Label, ScopedLabel, Variable},
+    identifier::{Label, Variable},
+    type_::Type,
 };
 
 pub mod comparison;
@@ -83,45 +81,6 @@ pub struct Assignment {
 impl Assignment {
     pub fn new(span: Option<Span>, lhs: AssignmentPattern, rhs: Expression) -> Self {
         Self { span, lhs, rhs }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct BuiltinValueType {
-    span: Option<Span>,
-    name: token::ValueType,
-}
-
-impl BuiltinValueType {
-    pub fn new(span: Option<Span>, name: token::ValueType) -> Self {
-        Self { span, name }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-// TODO name?
-pub enum TypeAny {
-    Type(Type),     // person, friendship:friend, or $t
-    Optional(Type), // person?, friendship:friend?, or $t?
-    List(Type),     // person[], friendship:friend[], or $t[]
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Type {
-    Label(Label),                   // person
-    ScopedLabel(ScopedLabel),       // friendship:friend
-    Variable(Variable),             // $t
-    BuiltinValue(BuiltinValueType), // string
-}
-
-impl fmt::Display for Type {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Label(inner) => fmt::Display::fmt(inner, f),
-            Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
-            Self::Variable(inner) => todo!(),
-            Self::BuiltinValue(inner) => todo!(),
-        }
     }
 }
 

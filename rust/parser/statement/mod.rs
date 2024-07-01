@@ -15,7 +15,8 @@ use crate::{
         statement::type_::visit_statement_type, visit_label, visit_label_list, visit_label_scoped, visit_var,
         visit_var_list,
     },
-    pattern::statement::{comparison::Comparison, Statement, Type, TypeAny},
+    pattern::statement::{comparison::Comparison, Statement},
+    type_::{Type, TypeAny},
 };
 
 mod single;
@@ -89,8 +90,8 @@ fn visit_type_ref_list(node: Node<'_>) -> TypeAny {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::var_list => TypeAny::List(Type::Variable(visit_var_list(child))),
-        Rule::label_list => TypeAny::List(Type::Label(visit_label_list(child))),
+        Rule::var_list => TypeAny::List(visit_var_list(child)),
+        Rule::label_list => TypeAny::List(visit_label_list(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

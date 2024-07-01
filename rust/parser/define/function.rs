@@ -13,13 +13,13 @@ use crate::{
         visit_identifier, visit_label, visit_label_list, visit_var, visit_vars, IntoChildNodes, Node, Rule,
         RuleMatcher,
     },
-    pattern::statement::{Type, TypeAny},
     schema::definable::{
         function::{
             Argument, Output, ReturnSingle, ReturnStatement, ReturnStream, Signature, Single, SingleOutput, Stream,
         },
         Function,
     },
+    type_::{Type, TypeAny},
 };
 
 pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
@@ -138,7 +138,7 @@ fn visit_label_arg(node: Node<'_>) -> TypeAny {
     let child = node.into_child();
     match child.as_rule() {
         Rule::label => TypeAny::Type(Type::Label(visit_label(child))),
-        Rule::label_list => TypeAny::List(Type::Label(visit_label_list(child))),
+        Rule::label_list => TypeAny::List(visit_label_list(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

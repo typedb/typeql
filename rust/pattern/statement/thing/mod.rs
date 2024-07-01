@@ -5,12 +5,12 @@
  */
 
 use self::isa::Isa;
-use super::{comparison, Statement, Type, TypeAny};
+use super::{comparison, Statement};
 use crate::{
     common::Span,
     expression::{Expression, Value},
     identifier::Variable,
-    pattern::Pattern,
+    type_::{Type, TypeAny},
 };
 
 pub mod isa;
@@ -31,12 +31,6 @@ impl ThingStatement {
 impl From<ThingStatement> for Statement {
     fn from(val: ThingStatement) -> Self {
         Statement::Thing(val)
-    }
-}
-
-impl From<ThingStatement> for Pattern {
-    fn from(val: ThingStatement) -> Self {
-        Pattern::Statement(Statement::Thing(val))
     }
 }
 

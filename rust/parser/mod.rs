@@ -19,12 +19,10 @@ use crate::{
         token, LineColumn, Span, Spanned,
     },
     identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
-    pattern::{
-        statement::{BuiltinValueType, Type},
-        Pattern, Statement,
-    },
+    pattern::{Pattern, Statement},
     query::{Query, SchemaQuery},
     schema::definable::Definable,
+    type_::{BuiltinValueType, List, Optional, Type},
     Result,
 };
 
@@ -218,10 +216,10 @@ fn visit_kind(node: Node<'_>) -> ReservedLabel {
     ReservedLabel::new(span, token)
 }
 
-fn visit_label_scoped(label: Node<'_>) -> ScopedLabel {
-    debug_assert_eq!(label.as_rule(), Rule::label_scoped);
-    let span = label.span();
-    let mut children = label.into_children();
+fn visit_label_scoped(node: Node<'_>) -> ScopedLabel {
+    debug_assert_eq!(node.as_rule(), Rule::label_scoped);
+    let span = node.span();
+    let mut children = node.into_children();
     let scope = visit_label(children.consume_expected(Rule::label));
     let name = visit_label(children.consume_expected(Rule::label));
     debug_assert_eq!(children.try_consume_any(), None);
@@ -233,9 +231,11 @@ fn visit_identifier(node: Node<'_>) -> Identifier {
     Identifier::new(node.span(), node.as_str().to_owned())
 }
 
-fn visit_label_list(node: Node<'_>) -> Label {
+fn visit_label_list(node: Node<'_>) -> List {
     debug_assert_eq!(node.as_rule(), Rule::label_list);
-    visit_label(node.into_child())
+    let span = node.span();
+    let inner = Type::Label(visit_label(node.into_child()));
+    List::new(span, inner)
 }
 
 fn visit_var(node: Node<'_>) -> Variable {
@@ -265,9 +265,11 @@ fn visit_vars(node: Node<'_>) -> Vec<Variable> {
     node.into_children().map(visit_var).collect()
 }
 
-fn visit_var_list(node: Node<'_>) -> Variable {
+fn visit_var_list(node: Node<'_>) -> List {
     debug_assert_eq!(node.as_rule(), Rule::var_list);
-    visit_var(node.into_child())
+    let span = node.span();
+    let inner = visit_var(node.into_child());
+    List::new(span, Type::Variable(inner))
 }
 
 fn visit_value_type(node: Node<'_>) -> Type {
@@ -278,6 +280,13 @@ fn visit_value_type(node: Node<'_>) -> Type {
         Rule::identifier => Type::Label(Label::Identifier(visit_identifier(child))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
+}
+
+fn visit_value_type_optional(node: Node<'_>) -> Optional {
+    debug_assert_eq!(node.as_rule(), Rule::value_type_optional);
+    let span = node.span();
+    let inner = visit_value_type(node.into_child());
+    Optional::new(span, inner)
 }
 
 fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {

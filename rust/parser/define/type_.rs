@@ -12,9 +12,10 @@ use crate::{
         visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::type_::{
-        capability::{Alias, Owned, Owns, Plays, Related, Relates, Sub, ValueType},
+        capability::{Alias, Owns, Plays, Relates, Sub, ValueType},
         Capability, CapabilityBase, Type,
     },
+    type_::{Type as TypeRef, TypeAny},
 };
 
 pub(super) fn visit_definition_type(node: Node<'_>) -> Type {
@@ -75,7 +76,7 @@ fn visit_value_type_declaration(node: Node<'_>) -> ValueType {
     children.skip_expected(Rule::VALUE);
     let value_type_node = children.consume_any();
     let (value_type) = match value_type_node.as_rule() {
-        Rule::label => crate::pattern::statement::Type::Label(visit_label(value_type_node)),
+        Rule::label => TypeRef::Label(visit_label(value_type_node)),
         Rule::value_type => visit_value_type(value_type_node),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
     };
@@ -91,19 +92,17 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
 
     let owned_label = children.consume_any();
     let owned = match owned_label.as_rule() {
-        Rule::label_list => Owned::List(visit_label_list(owned_label)),
-        Rule::label => {
-            let label = visit_label(owned_label);
-            match children.try_consume_expected(Rule::AS) {
-                None => Owned::Attribute(label, None),
-                Some(_) => Owned::Attribute(label, Some(visit_label(children.consume_expected(Rule::label)))),
-            }
-        }
+        Rule::label_list => TypeAny::List(visit_label_list(owned_label)),
+        Rule::label => TypeAny::Type(TypeRef::Label(visit_label(owned_label))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
+    };
+    let overridden = match children.try_consume_expected(Rule::AS) {
+        None => None,
+        Some(_) => Some(visit_label(children.consume_expected(Rule::label))),
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
-    Owns::new(span, owned)
+    Owns::new(span, owned, overridden)
 }
 
 fn visit_relates_declaration(node: Node<'_>) -> Relates {
@@ -114,19 +113,16 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
 
     let related_label = children.consume_any();
     let related = match related_label.as_rule() {
-        Rule::label_list => Related::List(visit_label_list(related_label)),
-        Rule::label => {
-            let label = visit_label(related_label);
-            match children.try_consume_expected(Rule::AS) {
-                None => Related::Role(label, None),
-                Some(_) => Related::Role(label, Some(visit_label(children.consume_expected(Rule::label)))),
-            }
-        }
+        Rule::label_list => TypeAny::List(visit_label_list(related_label)),
+        Rule::label => TypeAny::Type(TypeRef::Label(visit_label(related_label))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
     };
-
+    let overridden = match children.try_consume_expected(Rule::AS) {
+        None => None,
+        Some(_) => Some(visit_label(children.consume_expected(Rule::label))),
+    };
     debug_assert_eq!(children.try_consume_any(), None);
-    Relates::new(span, related)
+    Relates::new(span, related, overridden)
 }
 
 fn visit_plays_declaration(node: Node<'_>) -> Plays {

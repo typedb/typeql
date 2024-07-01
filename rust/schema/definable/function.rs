@@ -9,9 +9,9 @@ use std::fmt::{self, Write};
 use crate::{
     common::{token, Span, Spanned},
     identifier::{Identifier, Variable},
-    pattern::statement::TypeAny,
     pretty::{indent, Pretty},
     query::data::stage::{Match, Modifier, Reduce},
+    type_::TypeAny,
 };
 
 #[derive(Debug, PartialEq, Eq)]

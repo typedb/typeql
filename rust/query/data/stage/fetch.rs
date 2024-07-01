@@ -9,8 +9,8 @@ use std::fmt;
 use crate::{
     common::{string::indent, token, Span},
     identifier::Variable,
-    pattern::statement::Type,
     query::DataQuery,
+    type_::Type,
     util::write_joined,
 };
 

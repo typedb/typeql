@@ -13,8 +13,9 @@ use crate::{
     },
     pattern::statement::{
         type_::{LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
-        Statement, TypeAny, TypeConstraint, TypeStatement,
+        Statement, TypeConstraint, TypeStatement,
     },
+    type_::{Type as TypeRef, TypeAny},
 };
 
 pub(super) fn visit_statement_type(node: Node<'_>) -> Statement {
@@ -68,9 +69,9 @@ fn visit_value_type_constraint(node: Node<'_>) -> ValueType {
     children.skip_expected(Rule::VALUE);
     let value_type_node = children.consume_any();
     let (value_type, annotations) = match value_type_node.as_rule() {
-        Rule::label => (crate::pattern::statement::Type::Label(visit_label(value_type_node)), Vec::new()),
+        Rule::label => (TypeRef::Label(visit_label(value_type_node)), Vec::new()),
         Rule::value_type_primitive => (
-            crate::pattern::statement::Type::BuiltinValue(visit_value_type_primitive(value_type_node)),
+            TypeRef::BuiltinValue(visit_value_type_primitive(value_type_node)),
             visit_annotations(children.consume_expected(Rule::annotations)),
         ),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),

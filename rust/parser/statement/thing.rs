@@ -9,9 +9,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     expression::Expression,
     parser::{
-        expression::{visit_expression_list, visit_expression_struct, visit_expression_value, visit_value_literal},
-        statement::visit_type_ref,
-        visit_label, visit_var, IntoChildNodes, Node, Rule, RuleMatcher,
+        expression::{visit_expression_list, visit_expression_struct, visit_expression_value, visit_value_literal}, statement::visit_type_ref, visit_label_list, visit_var, visit_var_list, IntoChildNodes, Node, Rule, RuleMatcher
     },
     pattern::statement::{
         thing::{
@@ -19,8 +17,9 @@ use crate::{
             AttributeComparisonStatement, AttributeValueStatement, Has, HasValue, Iid, Links, Relation,
             RelationStatement, RolePlayer, ThingConstraint, ThingStatement,
         },
-        Statement, Type, TypeAny,
+        Statement,
     },
+    type_::{Type, TypeAny},
 };
 
 pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
@@ -189,8 +188,8 @@ fn visit_type_ref_list(node: Node<'_>) -> TypeAny {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::var_list => TypeAny::List(Type::Variable(visit_var(child.into_child()))),
-        Rule::label_list => TypeAny::List(Type::Label(visit_label(child.into_child()))),
+        Rule::var_list => TypeAny::List(visit_var_list(child)),
+        Rule::label_list => TypeAny::List(visit_label_list(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

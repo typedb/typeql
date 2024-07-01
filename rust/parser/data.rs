@@ -17,7 +17,7 @@ use crate::{
         token::{Aggregate, Order},
         Spanned,
     },
-    pattern::{statement::Type, Conjunction, Disjunction, Negation, Pattern, Try},
+    pattern::{Conjunction, Disjunction, Negation, Pattern, Try},
     query::{
         data::{
             stage::{
@@ -30,6 +30,7 @@ use crate::{
         },
         DataQuery,
     },
+    type_::Type,
 };
 
 pub(super) fn visit_query_data(node: Node<'_>) -> DataQuery {

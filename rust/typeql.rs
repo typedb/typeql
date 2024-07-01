@@ -22,6 +22,7 @@ pub mod pattern;
 mod pretty;
 pub mod query;
 pub mod schema;
+pub mod type_;
 mod util;
 
 pub use common::Result;

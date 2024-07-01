@@ -9,6 +9,7 @@ use std::fmt;
 use crate::{
     common::{token, Span, Spanned},
     identifier::{Identifier, Label, ScopedLabel},
+    type_::{Type, TypeAny},
     util::write_joined,
 };
 
@@ -71,11 +72,11 @@ impl fmt::Display for Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     span: Option<Span>,
-    value_type: crate::pattern::statement::Type,
+    value_type: Type,
 }
 
 impl ValueType {
-    pub fn new(span: Option<Span>, value_type: crate::pattern::statement::Type) -> Self {
+    pub fn new(span: Option<Span>, value_type: Type) -> Self {
         Self { span, value_type }
     }
 }
@@ -95,30 +96,15 @@ impl fmt::Display for ValueType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Owned {
-    List(Label),
-    Attribute(Label, Option<Label>),
-}
-
-impl fmt::Display for Owned {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::List(label) => write!(f, "{label}[]"),
-            Self::Attribute(label, None) => write!(f, "{label}"),
-            Self::Attribute(label, Some(overridden)) => write!(f, "{label} as {overridden}"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
     span: Option<Span>,
-    owned: Owned,
+    owned: TypeAny,
+    overridden: Option<Label>,
 }
 
 impl Owns {
-    pub fn new(span: Option<Span>, owned: Owned) -> Self {
-        Self { span, owned }
+    pub fn new(span: Option<Span>, owned: TypeAny, overridden: Option<Label>) -> Self {
+        Self { span, owned, overridden }
     }
 }
 
@@ -131,36 +117,21 @@ impl Spanned for Owns {
 impl fmt::Display for Owns {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("owns ")?;
-        fmt::Display::fmt(&self.owned, f)?;
+        todo!();
         Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Related {
-    List(Label),
-    Role(Label, Option<Label>),
-}
-
-impl fmt::Display for Related {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::List(label) => write!(f, "{label}[]"),
-            Self::Role(label, None) => write!(f, "{label}"),
-            Self::Role(label, Some(overridden)) => write!(f, "{label} as {overridden}"),
-        }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     span: Option<Span>,
-    related: Related,
+    related: TypeAny,
+    overridden: Option<Label>,
 }
 
 impl Relates {
-    pub fn new(span: Option<Span>, related: Related) -> Self {
-        Self { span, related }
+    pub fn new(span: Option<Span>, related: TypeAny, overridden: Option<Label>) -> Self {
+        Self { span, related, overridden }
     }
 }
 
@@ -173,7 +144,7 @@ impl Spanned for Relates {
 impl fmt::Display for Relates {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("relates ")?;
-        fmt::Display::fmt(&self.related, f)?;
+        todo!();
         Ok(())
     }
 }

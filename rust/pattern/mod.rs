@@ -6,6 +6,7 @@
 
 use std::fmt;
 
+use self::statement::thing::ThingStatement;
 pub use self::statement::Statement;
 use crate::common::Span;
 
@@ -66,6 +67,12 @@ pub enum Pattern {
     Negation(Negation),
     Try(Try),
     Statement(Statement),
+}
+
+impl From<ThingStatement> for Pattern {
+    fn from(val: ThingStatement) -> Self {
+        Pattern::Statement(Statement::Thing(val))
+    }
 }
 
 impl fmt::Display for Pattern {

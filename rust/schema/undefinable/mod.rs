@@ -9,6 +9,7 @@ use std::fmt;
 use crate::{
     common::{token, Span},
     identifier::{Identifier, Label, ScopedLabel},
+    type_::Type,
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -102,12 +103,12 @@ impl fmt::Display for Sub {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
-    pub value_type: crate::pattern::statement::Type,
+    pub value_type: Type,
     pub span: Option<Span>,
 }
 
 impl ValueType {
-    pub fn new(value_type: crate::pattern::statement::Type, span: Option<Span>) -> Self {
+    pub fn new(value_type: Type, span: Option<Span>) -> Self {
         Self { value_type, span }
     }
 }

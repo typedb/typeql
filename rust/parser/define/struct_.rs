@@ -4,15 +4,46 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#[allow(unused)]
 use crate::{
-    parser::{IntoChildNodes, Node, Rule, RuleMatcher},
-    schema::{
-        definable,
-        definable::{Function, Struct},
-    },
+    common::{error::TypeQLError, Spanned},
+    parser::{visit_identifier, visit_value_type, visit_value_type_optional, IntoChildNodes, Node, Rule, RuleMatcher},
+    schema::definable::{struct_::Field, Struct},
+    type_::TypeAny,
 };
 
 pub(super) fn visit_definition_struct(node: Node<'_>) -> Struct {
-    todo!()
+    debug_assert_eq!(node.as_rule(), Rule::definition_struct);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::STRUCT);
+    let ident = visit_identifier(children.consume_expected(Rule::identifier));
+    let fields = visit_definition_struct_fields(children.consume_expected(Rule::definition_struct_fields));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Struct::new(span, ident, fields)
+}
+
+fn visit_definition_struct_fields(node: Node<'_>) -> Vec<Field> {
+    debug_assert_eq!(node.as_rule(), Rule::definition_struct_fields);
+    node.into_children().map(visit_definition_struct_field).collect()
+}
+
+fn visit_definition_struct_field(node: Node<'_>) -> Field {
+    debug_assert_eq!(node.as_rule(), Rule::definition_struct_field);
+    let span = node.span();
+    let mut children = node.into_children();
+    let key = visit_identifier(children.consume_expected(Rule::identifier));
+    children.skip_expected(Rule::VALUE);
+    let type_ = visit_struct_field_value_type(children.consume_expected(Rule::struct_field_value_type));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Field::new(span, key, type_)
+}
+
+fn visit_struct_field_value_type(node: Node<'_>) -> TypeAny {
+    debug_assert_eq!(node.as_rule(), Rule::struct_field_value_type);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::value_type => TypeAny::Type(visit_value_type(child)),
+        Rule::value_type_optional => TypeAny::Optional(visit_value_type_optional(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
 }

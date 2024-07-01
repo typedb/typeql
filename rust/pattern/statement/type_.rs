@@ -6,11 +6,11 @@
 
 use std::fmt::{self, Write};
 
-use super::{Type, TypeAny};
 use crate::{
     annotation::Annotation,
     common::Span,
     identifier::{Label, ScopedLabel},
+    type_::{Type, TypeAny},
     util::write_joined,
 };
 

@@ -199,7 +199,7 @@ query_schema = { query_define } // | query_undefine | query_redefine }
 query_define = { DEFINE ~ definables }
 
 definables = { definable+ }
-definable = { ( definition_type ~ SEMICOLON ) }//| definition_function | definition_struct }
+definable = { ( definition_type ~ SEMICOLON ) | /*definition_function |*/ definition_struct }
 
 // TYPE DEFINITION =============================================================
 

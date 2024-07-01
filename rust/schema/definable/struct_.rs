@@ -6,21 +6,18 @@
 
 use std::fmt;
 
-use crate::{
-    common::Span,
-    identifier::{Identifier, Label},
-    pretty::Pretty,
-};
+use crate::{common::Span, identifier::Identifier, pretty::Pretty, type_::TypeAny};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Struct {
     span: Option<Span>,
+    ident: Identifier,
     fields: Vec<Field>,
 }
 
 impl Struct {
-    pub fn new(span: Option<Span>, fields: Vec<Field>) -> Self {
-        Self { span, fields }
+    pub fn new(span: Option<Span>, ident: Identifier, fields: Vec<Field>) -> Self {
+        Self { span, ident, fields }
     }
 }
 
@@ -38,12 +35,13 @@ impl fmt::Display for Struct {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Field {
+    span: Option<Span>,
     key: Identifier,
-    type_: Label,
+    type_: TypeAny,
 }
 
 impl Field {
-    pub fn new(key: Identifier, type_: Label) -> Self {
-        Self { key, type_ }
+    pub fn new(span: Option<Span>, key: Identifier, type_: TypeAny) -> Self {
+        Self { span, key, type_ }
     }
 }

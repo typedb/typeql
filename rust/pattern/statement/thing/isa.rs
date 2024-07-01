@@ -4,8 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use super::super::Type;
-use crate::common::Span;
+use crate::{common::Span, type_::Type};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum IsaKind {
