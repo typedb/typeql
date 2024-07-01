@@ -28,7 +28,7 @@ use crate::{
                 fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar},
                 modifier::{Filter, Limit, Offset, OrderedVariable, Sort},
                 reduce::{Check, Count, First, ReduceAll, Stat},
-                Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage,
+                Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
             },
             Preamble,
         },
@@ -70,7 +70,7 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
         Rule::stage_match => Stage::Match(visit_stage_match(child)),
         Rule::stage_insert => Stage::Insert(visit_stage_insert(child)),
         Rule::stage_put => Stage::Put(visit_stage_put(child)),
-        Rule::stage_update => todo!(),
+        Rule::stage_update => Stage::Update(visit_stage_update(child)),
         Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
         Rule::stage_modifier => Stage::Modifier(visit_stage_modifier(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
@@ -159,6 +159,20 @@ fn visit_stage_insert(node: Node<'_>) -> Insert {
     Insert::new(span, statement_things)
 }
 
+fn visit_stage_put(node: Node<'_>) -> Put {
+    debug_assert_eq!(node.as_rule(), Rule::stage_put);
+    let span = node.span();
+    let statement_things = node.into_children().skip_expected(Rule::PUT).map(visit_statement_thing).collect();
+    Put::new(span, statement_things)
+}
+
+fn visit_stage_update(node: Node<'_>) -> Update {
+    debug_assert_eq!(node.as_rule(), Rule::stage_update);
+    let span = node.span();
+    let statement_things = node.into_children().skip_expected(Rule::UPDATE).map(visit_statement_thing).collect();
+    Update::new(span, statement_things)
+}
+
 fn visit_stage_delete(node: Node<'_>) -> Delete {
     debug_assert_eq!(node.as_rule(), Rule::stage_delete);
     let span = node.span();
@@ -190,13 +204,6 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
     };
     debug_assert_eq!(children.try_consume_any(), None);
     Deletable::new(span, kind)
-}
-
-fn visit_stage_put(node: Node<'_>) -> Put {
-    debug_assert_eq!(node.as_rule(), Rule::stage_put);
-    let span = node.span();
-    let statement_things = node.into_children().skip_expected(Rule::PUT).map(visit_statement_thing).collect();
-    Put::new(span, statement_things)
 }
 
 fn visit_stage_fetch(node: Node<'_>) -> Fetch {

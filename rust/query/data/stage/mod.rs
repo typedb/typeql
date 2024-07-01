@@ -10,10 +10,12 @@ mod insert;
 mod match_;
 pub mod modifier;
 mod put;
+mod update;
 pub mod reduce;
 
 pub use self::{
     delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Modifier, put::Put, reduce::Reduce,
+    update::Update
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -21,6 +23,7 @@ pub enum Stage {
     Match(Match),
     Insert(Insert),
     Put(Put),
+    Update(Update),
     Fetch(Fetch),
     Delete(Delete),
     Reduce(Reduce),
