@@ -8,7 +8,10 @@ use itertools::Itertools;
 
 use super::{
     define::function::visit_definition_function,
-    statement::{thing::visit_statement_thing, visit_statement},
+    statement::{
+        thing::{visit_relation, visit_statement_thing},
+        visit_statement,
+    },
     visit_integer_literal, visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
@@ -21,6 +24,7 @@ use crate::{
     query::{
         data::{
             stage::{
+                delete::{Deletable, DeletableKind},
                 fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar},
                 modifier::{Filter, Limit, Offset, OrderedVariable, Sort},
                 reduce::{Check, Count, First, ReduceAll, Stat},
@@ -66,6 +70,8 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
         Rule::stage_match => Stage::Match(visit_stage_match(child)),
         Rule::stage_insert => Stage::Insert(visit_stage_insert(child)),
         Rule::stage_put => Stage::Put(visit_stage_put(child)),
+        Rule::stage_update => todo!(),
+        Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
         Rule::stage_modifier => Stage::Modifier(visit_stage_modifier(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
@@ -76,7 +82,6 @@ fn visit_query_stage_final(node: Node<'_>) -> Stage {
     let span = node.span();
     let child = node.into_child();
     match child.as_rule() {
-        Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
         Rule::stage_fetch => Stage::Fetch(visit_stage_fetch(child)),
         Rule::stage_reduce => Stage::Reduce(visit_stage_reduce(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
@@ -157,8 +162,34 @@ fn visit_stage_insert(node: Node<'_>) -> Insert {
 fn visit_stage_delete(node: Node<'_>) -> Delete {
     debug_assert_eq!(node.as_rule(), Rule::stage_delete);
     let span = node.span();
-    let statement_things = node.into_children().skip_expected(Rule::DELETE).map(visit_statement_thing).collect();
-    Delete::new(span, statement_things)
+    let deletables = node.into_children().skip_expected(Rule::DELETE).map(visit_statement_deletable).collect();
+    Delete::new(span, deletables)
+}
+
+fn visit_statement_deletable(node: Node<'_>) -> Deletable {
+    debug_assert_eq!(node.as_rule(), Rule::statement_deletable);
+    let span = node.span();
+    let mut children = node.into_children();
+    let kind = match children.peek_rule().unwrap() {
+        Rule::var => DeletableKind::Concept { variable: visit_var(children.consume_expected(Rule::var)) },
+        Rule::LINKS => {
+            children.skip_expected(Rule::LINKS);
+            let players = visit_relation(children.consume_expected(Rule::relation));
+            children.skip_expected(Rule::OF);
+            let relation = visit_var(children.consume_expected(Rule::var));
+            DeletableKind::Links { players, relation }
+        }
+        Rule::HAS => {
+            children.skip_expected(Rule::HAS);
+            let attribute = visit_var(children.consume_expected(Rule::var));
+            children.skip_expected(Rule::OF);
+            let owner = visit_var(children.consume_expected(Rule::var));
+            DeletableKind::Has { attribute, owner }
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
+    };
+    debug_assert_eq!(children.try_consume_any(), None);
+    Deletable::new(span, kind)
 }
 
 fn visit_stage_put(node: Node<'_>) -> Put {

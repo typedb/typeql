@@ -10,8 +10,8 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
         data::{visit_reduce, visit_stage_match, visit_stage_modifier},
-        visit_identifier, visit_label, visit_label_list, visit_var, visit_vars, IntoChildNodes, Node, Rule,
-        RuleMatcher,
+        visit_identifier, visit_label, visit_label_list, visit_value_type, visit_value_type_list,
+        visit_value_type_optional, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::{
         function::{
@@ -112,6 +112,9 @@ fn visit_function_output_type(node: Node<'_>) -> TypeAny {
     debug_assert_eq!(node.as_rule(), Rule::function_output_type);
     let child = node.into_child();
     match child.as_rule() {
+        Rule::value_type => TypeAny::Type(visit_value_type(child)),
+        Rule::value_type_optional => TypeAny::Optional(visit_value_type_optional(child)),
+        Rule::value_type_list => TypeAny::List(visit_value_type_list(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

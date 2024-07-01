@@ -158,7 +158,7 @@ fn visit_links_constraint(node: Node<'_>) -> Links {
     Links::new(span, relation)
 }
 
-fn visit_relation(node: Node<'_>) -> Relation {
+pub(in crate::parser) fn visit_relation(node: Node<'_>) -> Relation {
     debug_assert_eq!(node.as_rule(), Rule::relation);
     let span = node.span();
     let role_players = node.into_children().map(visit_role_player).collect();

@@ -4,16 +4,35 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::{common::Span, pattern::Statement};
+use crate::{common::Span, identifier::Variable, pattern::statement::thing::Relation};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Delete {
     span: Option<Span>,
-    statements: Vec<Statement>,
+    deletables: Vec<Deletable>,
 }
 
 impl Delete {
-    pub(crate) fn new(span: Option<Span>, statements: Vec<Statement>) -> Self {
-        Self { span, statements }
+    pub fn new(span: Option<Span>, deletables: Vec<Deletable>) -> Self {
+        Self { span, deletables }
     }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct Deletable {
+    span: Option<Span>,
+    kind: DeletableKind,
+}
+
+impl Deletable {
+    pub fn new(span: Option<Span>, kind: DeletableKind) -> Self {
+        Self { span, kind }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum DeletableKind {
+    Has { attribute: Variable, owner: Variable },
+    Links { players: Relation, relation: Variable },
+    Concept { variable: Variable },
 }

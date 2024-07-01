@@ -9,13 +9,13 @@ use crate::{
     parser::{
         annotation::visit_annotations,
         statement::{visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_type_ref_scoped},
-        visit_label, visit_label_scoped, visit_value_type_primitive, IntoChildNodes, Node, Rule, RuleMatcher,
+        visit_label, visit_label_scoped, visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     pattern::statement::{
-        type_::{LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
+        type_::{LabelConstraint, Owns, Plays, Relates, Sub, SubKind, TypeConstraintBase, ValueType},
         Statement, TypeConstraint, TypeStatement,
     },
-    type_::{Type as TypeRef, TypeAny},
+    type_::TypeAny,
 };
 
 pub(super) fn visit_statement_type(node: Node<'_>) -> Statement {
@@ -29,14 +29,24 @@ pub(super) fn visit_statement_type(node: Node<'_>) -> Statement {
 
 fn visit_type_constraint(node: Node<'_>) -> TypeConstraint {
     debug_assert_eq!(node.as_rule(), Rule::type_constraint);
+    let span = node.span();
+    let mut children = node.into_children();
+    let base = visit_type_constraint_base(children.consume_expected(Rule::type_constraint_base));
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
+    debug_assert_eq!(children.try_consume_any(), None);
+    TypeConstraint::new(span, base, annotations)
+}
+
+fn visit_type_constraint_base(node: Node<'_>) -> TypeConstraintBase {
+    debug_assert_eq!(node.as_rule(), Rule::type_constraint_base);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::sub_constraint => TypeConstraint::Sub(visit_sub_constraint(child)),
-        Rule::value_type_constraint => TypeConstraint::ValueType(visit_value_type_constraint(child)),
-        Rule::label_constraint => TypeConstraint::Label(visit_label_constraint(child)),
-        Rule::owns_constraint => TypeConstraint::Owns(visit_owns_constraint(child)),
-        Rule::relates_constraint => TypeConstraint::Relates(visit_relates_constraint(child)),
-        Rule::plays_constraint => TypeConstraint::Plays(visit_plays_constraint(child)),
+        Rule::sub_constraint => TypeConstraintBase::Sub(visit_sub_constraint(child)),
+        Rule::value_type_constraint => TypeConstraintBase::ValueType(visit_value_type_constraint(child)),
+        Rule::label_constraint => TypeConstraintBase::Label(visit_label_constraint(child)),
+        Rule::owns_constraint => TypeConstraintBase::Owns(visit_owns_constraint(child)),
+        Rule::relates_constraint => TypeConstraintBase::Relates(visit_relates_constraint(child)),
+        Rule::plays_constraint => TypeConstraintBase::Plays(visit_plays_constraint(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -47,9 +57,8 @@ fn visit_sub_constraint(node: Node<'_>) -> Sub {
     let mut children = node.into_children();
     let kind = visit_sub_token(children.consume_expected(Rule::SUB_));
     let supertype = visit_type_ref_any(children.consume_expected(Rule::type_ref_any));
-    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     debug_assert_eq!(children.try_consume_any(), None);
-    Sub::new(kind, supertype, annotations, span)
+    Sub::new(span, kind, supertype)
 }
 
 fn visit_sub_token(node: Node<'_>) -> SubKind {
@@ -67,17 +76,9 @@ fn visit_value_type_constraint(node: Node<'_>) -> ValueType {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::VALUE);
-    let value_type_node = children.consume_any();
-    let (value_type, annotations) = match value_type_node.as_rule() {
-        Rule::label => (TypeRef::Label(visit_label(value_type_node)), Vec::new()),
-        Rule::value_type_primitive => (
-            TypeRef::BuiltinValue(visit_value_type_primitive(value_type_node)),
-            visit_annotations(children.consume_expected(Rule::annotations)),
-        ),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
-    };
+    let value_type = visit_value_type(children.consume_expected(Rule::value_type));
     debug_assert_eq!(children.try_consume_any(), None);
-    ValueType::new(value_type, annotations, span)
+    ValueType::new(span, value_type)
 }
 
 fn visit_label_constraint(node: Node<'_>) -> LabelConstraint {
@@ -114,9 +115,8 @@ fn visit_owns_constraint(node: Node<'_>) -> Owns {
         None
     };
 
-    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     debug_assert_eq!(children.try_consume_any(), None);
-    Owns::new(span, owned, overridden, annotations)
+    Owns::new(span, owned, overridden)
 }
 
 fn visit_relates_constraint(node: Node<'_>) -> Relates {
@@ -138,9 +138,8 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
         None
     };
 
-    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     debug_assert_eq!(children.try_consume_any(), None);
-    Relates::new(span, related, overridden, annotations)
+    Relates::new(span, related, overridden)
 }
 
 fn visit_plays_constraint(node: Node<'_>) -> Plays {

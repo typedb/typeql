@@ -19,7 +19,7 @@ eof_statement = { SOI ~ statement ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
-query = { query_schema } //| query_data }
+query = { query_schema | query_data }
 
 // DATA QUERIES ================================================================
 
@@ -86,18 +86,19 @@ statement = { statement_type | statement_thing_var | statement_single | statemen
 // TYPE STATEMENTS =============================================================
 
 statement_type = { type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* }
-type_constraint = { sub_constraint | value_type_constraint | label_constraint
-                  | owns_constraint | relates_constraint | plays_constraint
-                  }
+type_constraint = { type_constraint_base ~ annotations? }
+type_constraint_base = { sub_constraint | value_type_constraint | label_constraint
+                       | owns_constraint | relates_constraint | plays_constraint
+                       }
 
-sub_constraint = { SUB_ ~ type_ref_any ~ annotations? }
-value_type_constraint = { VALUE ~ value_type ~ annotations? }
+sub_constraint = { SUB_ ~ type_ref_any }
+value_type_constraint = { VALUE ~ value_type }
 label_constraint = { LABEL ~ ( label_scoped | label ) }
-owns_constraint = { OWNS ~ type_ref_list ~ annotations?
-                  | OWNS ~ type_ref ~ ( AS ~ type_ref )? ~ annotations?
+owns_constraint = { OWNS ~ type_ref_list
+                  | OWNS ~ type_ref ~ ( AS ~ type_ref )?
                   }
-relates_constraint = { RELATES ~ type_ref_list ~ annotations?
-                     | RELATES ~ type_ref ~ ( AS ~ type_ref )? ~ annotations?
+relates_constraint = { RELATES ~ type_ref_list
+                     | RELATES ~ type_ref ~ ( AS ~ type_ref )?
                      }
 plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
 
@@ -127,8 +128,8 @@ role_player = { type_ref_list ~ COLON ~ var
               | var
               }
 
-statement_deletable = { HAS? ~ var ~ OF ~ var
-                      | LINKS? ~ relation ~ OF ~ var
+statement_deletable = { HAS ~ var ~ OF ~ var
+                      | LINKS ~ relation ~ OF ~ var
                       | var
                       }
 
@@ -150,7 +151,7 @@ comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 expression = { expression_list | expression_value }
 
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
-expression_base = _{ expression_list_index | expression_parenthesis | expression_function | value_literal | var }
+expression_base = { expression_list_index | expression_parenthesis | expression_function | value_literal | var }
 
 expression_operator = _{ POWER | TIMES | DIVIDE | MODULO | PLUS | MINUS }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
@@ -199,7 +200,7 @@ query_schema = { query_define | query_undefine | query_redefine }
 query_define = { DEFINE ~ definables }
 
 definables = { definable+ }
-definable = { ( definition_type ~ SEMICOLON ) | /*definition_function |*/ definition_struct }
+definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
 
 // TYPE DEFINITION =============================================================
 
@@ -246,7 +247,7 @@ definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type }
 
 struct_field_value_type = { value_type_optional | value_type }
 
-struct_destructor = { CURLY_OPEN ~ identifier ~ COLON ~ struct_destructor_value }
+struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value }
 struct_destructor_value = { var | struct_destructor }
 
 // REDEFINE QUERY ==============================================================

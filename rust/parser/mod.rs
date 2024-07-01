@@ -285,6 +285,13 @@ fn visit_value_type_optional(node: Node<'_>) -> Optional {
     Optional::new(span, inner)
 }
 
+fn visit_value_type_list(node: Node<'_>) -> List {
+    debug_assert_eq!(node.as_rule(), Rule::value_type_list);
+    let span = node.span();
+    let inner = visit_value_type(node.into_child());
+    List::new(span, inner)
+}
+
 fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
     debug_assert_eq!(node.as_rule(), Rule::value_type_primitive);
     let span = node.span();

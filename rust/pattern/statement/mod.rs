@@ -8,9 +8,10 @@ use std::collections::HashMap;
 
 use self::{
     thing::{AttributeComparisonStatement, AttributeValueStatement, RelationStatement, ThingStatement},
-    type_::{LabelConstraint, Owns, Plays, Relates, Sub, ValueType},
+    type_::TypeConstraintBase,
 };
 use crate::{
+    annotation::Annotation,
     common::Span,
     expression::{Expression, FunctionCall},
     identifier::{Label, Variable},
@@ -98,13 +99,16 @@ impl TypeStatement {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum TypeConstraint {
-    Sub(Sub),
-    Label(LabelConstraint),
-    ValueType(ValueType),
-    Owns(Owns),
-    Relates(Relates),
-    Plays(Plays),
+pub struct TypeConstraint {
+    span: Option<Span>,
+    base: TypeConstraintBase,
+    annotations: Vec<Annotation>,
+}
+
+impl TypeConstraint {
+    pub fn new(span: Option<Span>, base: TypeConstraintBase, annotations: Vec<Annotation>) -> Self {
+        Self { span, base, annotations }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
