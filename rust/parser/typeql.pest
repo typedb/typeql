@@ -192,7 +192,7 @@ projection_key_label = { quoted_string_literal | label }
 
 // SCHEMA QUERY ================================================================
 
-query_schema = { query_define } // | query_undefine | query_redefine }
+query_schema = { query_define | query_undefine } // | query_redefine }
 
 // DEFINE QUERY ================================================================
 
@@ -261,12 +261,15 @@ query_undefine = { UNDEFINE ~ undefinables }
 undefinables = { ( undefinable ~ SEMICOLON )+ }
 undefinable = { undefine_from | undefine_function | undefine_struct | label }
 
-undefine_from = { annotation_kind ~ FROM ~ undefine_annotation_recipient
-                | AS ~ label ~ FROM ~ undefine_override_recipient
-                | type_capability_base ~ FROM ~ label
+undefine_from = { undefine_annotation_from_capability
+                | undefine_annotation_from_type
+                | undefine_capability
+                | undefine_override
                 }
-undefine_annotation_recipient = { label ~ type_capability_base? }
-undefine_override_recipient = { label ~ ( OWNS ~ label | RELATES ~ label | PLAYS ~ label_scoped ) }
+undefine_annotation_from_capability = { annotation_kind ~ FROM ~ label ~ type_capability_base }
+undefine_annotation_from_type = { annotation_kind ~ FROM ~ label }
+undefine_capability = { type_capability_base ~ FROM ~ label }
+undefine_override = { AS ~ label ~ FROM ~ label ~ type_capability_base }
 
 undefine_function = { FUN ~ identifier }
 undefine_struct = { STRUCT ~ identifier }

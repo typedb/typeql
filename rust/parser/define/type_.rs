@@ -38,7 +38,7 @@ fn visit_type_capability(node: Node<'_>) -> Capability {
     Capability::new(span, base, annotations)
 }
 
-fn visit_type_capability_base(node: Node<'_>) -> CapabilityBase {
+pub(in crate::parser) fn visit_type_capability_base(node: Node<'_>) -> CapabilityBase {
     debug_assert_eq!(node.as_rule(), Rule::type_capability_base);
     let child = node.into_child();
     match child.as_rule() {

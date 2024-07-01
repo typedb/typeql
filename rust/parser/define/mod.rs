@@ -6,7 +6,7 @@
 
 pub(super) mod function;
 mod struct_;
-mod type_;
+pub(super) mod type_;
 
 use self::{function::visit_definition_function, struct_::visit_definition_struct, type_::visit_definition_type};
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};

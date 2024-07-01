@@ -136,6 +136,7 @@ string_enum! { Annotation
     Key = "key",
     Range = "range",
     Regex = "regex",
+    Subkey = "subkey",
     Unique = "unique",
     Values = "values",
 }
