@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use super::Statement;
+use std::fmt;
+
 use crate::{
-    common::{token::Comparator, Span},
-    expression::{Expression, Value},
-    identifier::Variable,
-    pattern::Pattern,
+    common::{token, Span},
+    expression::Expression,
+    pretty::Pretty,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -25,43 +25,31 @@ impl ComparisonStatement {
     }
 }
 
-impl From<ComparisonStatement> for Statement {
-    fn from(val: ComparisonStatement) -> Self {
-        Statement::Comparison(val)
-    }
-}
+impl Pretty for ComparisonStatement {}
 
-impl From<ComparisonStatement> for Pattern {
-    fn from(val: ComparisonStatement) -> Self {
-        Pattern::Statement(val.into())
+impl fmt::Display for ComparisonStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.lhs, self.comparison)
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Comparison {
     span: Option<Span>,
-    comparator: Comparator,
+    comparator: token::Comparator,
     rhs: Expression,
 }
 
 impl Comparison {
-    pub(crate) fn new(span: Option<Span>, comparator: Comparator, rhs: Expression) -> Self {
+    pub(crate) fn new(span: Option<Span>, comparator: token::Comparator, rhs: Expression) -> Self {
         Self { span, comparator, rhs }
     }
 }
 
-impl Variable {
-    pub fn like(self, regex: impl Into<String>) -> ComparisonStatement {
-        Expression::Variable(self).like(regex)
-    }
-}
+impl Pretty for Comparison {}
 
-impl Expression {
-    pub fn like(self, regex: impl Into<String>) -> ComparisonStatement {
-        ComparisonStatement::new(
-            None,
-            self,
-            Comparison::new(None, Comparator::Like, Expression::Value(Value::new(None, regex.into()))),
-        )
+impl fmt::Display for Comparison {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.comparator, self.rhs)
     }
 }

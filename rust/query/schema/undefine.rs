@@ -39,8 +39,8 @@ impl Pretty for Undefine {
         indent(indent_level, f)?;
         write!(f, "{}", token::Clause::Undefine)?;
         for undefinable in &self.undefinables {
-            writeln!(f);
-            Pretty::fmt(undefinable, indent_level + 1, f);
+            writeln!(f)?;
+            Pretty::fmt(undefinable, indent_level + 1, f)?;
             f.write_char(';')?;
         }
         Ok(())

@@ -8,7 +8,9 @@ use std::fmt;
 
 use self::stage::Stage;
 use crate::{
-    common::{Span, Spanned}, pretty::Pretty, schema::definable
+    common::{Span, Spanned},
+    pretty::{indent, Pretty},
+    schema::definable,
 };
 
 pub mod stage;
@@ -22,6 +24,18 @@ pub struct Preamble {
 impl Preamble {
     pub(crate) fn new(span: Option<Span>, function: definable::Function) -> Self {
         Self { span, function }
+    }
+}
+
+impl Pretty for Preamble {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
+impl fmt::Display for Preamble {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
     }
 }
 
@@ -55,12 +69,39 @@ impl Spanned for DataQuery {
 
 impl Pretty for DataQuery {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        for preamble in &self.preambles {
+            indent(indent_level, f)?;
+            Pretty::fmt(preamble, indent_level, f)?;
+            writeln!(f)?;
+        }
+        if let Some((last, rest)) = self.stages.split_last() {
+            for stage in rest {
+                indent(indent_level, f)?;
+                Pretty::fmt(stage, indent_level, f)?;
+                writeln!(f)?;
+            }
+            indent(indent_level, f)?;
+            Pretty::fmt(last, indent_level, f)?;
+        }
+        Ok(())
     }
 }
 
 impl fmt::Display for DataQuery {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        if f.alternate() {
+            Pretty::fmt(self, 0, f)
+        } else {
+            for preamble in &self.preambles {
+                write!(f, "{} ", preamble)?;
+            }
+            if let Some((last, rest)) = self.stages.split_last() {
+                for stage in rest {
+                    write!(f, "{} ", stage)?;
+                }
+                write!(f, "{}", last)?;
+            }
+            Ok(())
+        }
     }
 }

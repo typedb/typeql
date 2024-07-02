@@ -7,7 +7,7 @@
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     annotation::{
-        Abstract, Annotation, Cardinality, Cascade, Distinct, Independent, Key, Range, Regex, Subkey, Unique, Values
+        Abstract, Annotation, Cardinality, Cascade, Distinct, Independent, Key, Range, Regex, Subkey, Unique, Values,
     },
     common::{error::TypeQLError, Spanned},
     expression::Value,
@@ -72,7 +72,6 @@ fn visit_range(node: Node<'_>) -> (Option<Value>, Option<Value>) {
 
 fn visit_range_full(node: Node<'_>) -> (Option<Value>, Option<Value>) {
     debug_assert_eq!(node.as_rule(), Rule::range_full);
-    let span = node.span();
     let mut children = node.into_children();
     let lower = visit_value_literal(children.consume_expected(Rule::value_literal));
     let upper = visit_value_literal(children.consume_expected(Rule::value_literal));
@@ -82,7 +81,6 @@ fn visit_range_full(node: Node<'_>) -> (Option<Value>, Option<Value>) {
 
 fn visit_range_from(node: Node<'_>) -> (Option<Value>, Option<Value>) {
     debug_assert_eq!(node.as_rule(), Rule::range_from);
-    let span = node.span();
     let mut children = node.into_children();
     let lower = visit_value_literal(children.consume_expected(Rule::value_literal));
     debug_assert_eq!(children.try_consume_any(), None);
@@ -91,7 +89,6 @@ fn visit_range_from(node: Node<'_>) -> (Option<Value>, Option<Value>) {
 
 fn visit_range_to(node: Node<'_>) -> (Option<Value>, Option<Value>) {
     debug_assert_eq!(node.as_rule(), Rule::range_to);
-    let span = node.span();
     let mut children = node.into_children();
     let upper = visit_value_literal(children.consume_expected(Rule::value_literal));
     debug_assert_eq!(children.try_consume_any(), None);
@@ -107,7 +104,6 @@ fn visit_annotation_subkey(node: Node<'_>) -> Subkey {
     debug_assert_eq!(children.try_consume_any(), None);
     Subkey::new(span, ident)
 }
-
 
 fn visit_annotation_regex(node: Node<'_>) -> Regex {
     debug_assert_eq!(node.as_rule(), Rule::annotation_regex);

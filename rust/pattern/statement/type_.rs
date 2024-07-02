@@ -7,8 +7,9 @@
 use std::fmt;
 
 use crate::{
-    common::Span,
+    common::{token, Span},
     identifier::{Label, ScopedLabel},
+    pretty::Pretty,
     type_::{Type, TypeAny},
 };
 
@@ -22,16 +23,65 @@ pub enum TypeConstraintBase {
     Plays(Plays),
 }
 
+impl Pretty for TypeConstraintBase {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Sub(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Label(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::ValueType(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Owns(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Relates(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Plays(inner) => Pretty::fmt(inner, indent_level, f),
+        }
+    }
+}
+
+impl fmt::Display for TypeConstraintBase {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Sub(inner) => fmt::Display::fmt(inner, f),
+            Self::Label(inner) => fmt::Display::fmt(inner, f),
+            Self::ValueType(inner) => fmt::Display::fmt(inner, f),
+            Self::Owns(inner) => fmt::Display::fmt(inner, f),
+            Self::Relates(inner) => fmt::Display::fmt(inner, f),
+            Self::Plays(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum LabelConstraint {
     Name(Label),
     Scoped(ScopedLabel),
 }
 
+impl Pretty for LabelConstraint {}
+
+impl fmt::Display for LabelConstraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Name(inner) => write!(f, "{} {}", token::Keyword::Label, inner),
+            Self::Scoped(inner) => write!(f, "{} {}", token::Keyword::Label, inner),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum SubKind {
     Direct,
     Transitive,
+}
+
+impl Pretty for SubKind {}
+
+impl fmt::Display for SubKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let token = match self {
+            Self::Transitive => token::Keyword::Sub,
+            Self::Direct => token::Keyword::SubX,
+        };
+        write!(f, "{}", token)
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -47,6 +97,14 @@ impl Sub {
     }
 }
 
+impl Pretty for Sub {}
+
+impl fmt::Display for Sub {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.kind, self.supertype)
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     span: Option<Span>,
@@ -59,11 +117,11 @@ impl ValueType {
     }
 }
 
+impl Pretty for ValueType {}
+
 impl fmt::Display for ValueType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("value ")?;
-        fmt::Display::fmt(&self.value_type, f)?;
-        Ok(())
+        write!(f, "{} {}", token::Keyword::ValueType, self.value_type)
     }
 }
 
@@ -80,6 +138,18 @@ impl Owns {
     }
 }
 
+impl Pretty for Owns {}
+
+impl fmt::Display for Owns {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Keyword::Owns, self.owned)?;
+        if let Some(overridden) = &self.overridden {
+            write!(f, " {} {}", token::Keyword::As, overridden)?;
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     span: Option<Span>,
@@ -93,6 +163,18 @@ impl Relates {
     }
 }
 
+impl Pretty for Relates {}
+
+impl fmt::Display for Relates {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Keyword::Relates, self.related)?;
+        if let Some(overridden) = &self.overridden {
+            write!(f, " {} {}", token::Keyword::As, overridden)?;
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
     span: Option<Span>,
@@ -103,5 +185,17 @@ pub struct Plays {
 impl Plays {
     pub fn new(span: Option<Span>, role: Type, overridden: Option<Type>) -> Self {
         Self { span, role, overridden }
+    }
+}
+
+impl Pretty for Plays {}
+
+impl fmt::Display for Plays {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Keyword::Plays, self.role)?;
+        if let Some(overridden) = &self.overridden {
+            write!(f, " {} {}", token::Keyword::As, overridden)?;
+        }
+        Ok(())
     }
 }

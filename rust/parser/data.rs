@@ -64,7 +64,6 @@ fn visit_preamble(node: Node<'_>) -> Preamble {
 
 fn visit_query_stage(node: Node<'_>) -> Stage {
     debug_assert_eq!(node.as_rule(), Rule::query_stage);
-    let span = node.span();
     let child = node.into_child();
     match child.as_rule() {
         Rule::stage_match => Stage::Match(visit_stage_match(child)),
@@ -79,7 +78,6 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
 
 fn visit_query_stage_final(node: Node<'_>) -> Stage {
     debug_assert_eq!(node.as_rule(), Rule::query_stage_final);
-    let span = node.span();
     let child = node.into_child();
     match child.as_rule() {
         Rule::stage_fetch => Stage::Fetch(visit_stage_fetch(child)),

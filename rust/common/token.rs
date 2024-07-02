@@ -64,6 +64,7 @@ string_enum! { Clause
 }
 
 string_enum! { Modifier
+    Filter = "filter",
     Sort = "sort",
     Offset = "offset",
     Limit = "limit",
@@ -116,17 +117,21 @@ string_enum! { Keyword
     Fun = "fun",
     Has = "has",
     IID = "iid",
+    In = "in",
     Is = "is",
     Isa = "isa",
     IsaX = "isa!",
+    Label = "label",
+    Not = "not",
     Of = "of",
+    Or = "or",
     Owns = "owns",
     Plays = "plays",
     Relates = "relates",
     Struct = "struct",
     Sub = "sub",
     SubX = "sub!",
-    Type = "type",
+    Try = "try",
     ValueType = "value",
 }
 

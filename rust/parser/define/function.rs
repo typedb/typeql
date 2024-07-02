@@ -40,7 +40,6 @@ pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
 
 fn visit_return_statement(node: Node<'_>) -> ReturnStatement {
     debug_assert_eq!(node.as_rule(), Rule::return_statement);
-    let span = node.span();
     let mut children = node.into_children();
 
     children.skip_expected(Rule::RETURN);

@@ -96,14 +96,12 @@ impl GrammarTree {
         let mut tree = GrammarTree::default();
         tree.rules.insert(
             "ASCII_DIGIT".into(),
-            Expansion::Alternatives(
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].into_iter().map(|digit| Expansion::Literal(digit.to_string())).collect(),
-            ),
+            Expansion::Alternatives((0..=9).map(|digit| Expansion::Literal(digit.to_string())).collect()),
         );
         tree.rules.insert(
             "ASCII_HEX_DIGIT".into(),
             Expansion::Alternatives(
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].into_iter().map(|digit| Expansion::Literal(digit.to_string())).collect(),
+                ('0'..='9').chain('a'..='f').map(|digit| Expansion::Literal(digit.to_string())).collect(),
             ),
         );
         tree.rules.insert(
@@ -115,12 +113,7 @@ impl GrammarTree {
         );
         tree.rules.insert(
             "ASCII_ALPHA".into(),
-            Expansion::Alternatives(
-                ['a', 'b', 'c', 'd', 'e', 'f', 'z']
-                    .into_iter()
-                    .map(|digit| Expansion::Literal(digit.to_string()))
-                    .collect(),
-            ),
+            Expansion::Alternatives(('a'..='z').map(|digit| Expansion::Literal(digit.to_string())).collect()),
         );
         tree.rules.insert(
             "ANY".into(),
@@ -324,15 +317,15 @@ fn generate(rules: &HashMap<String, Expansion>, rule_name: &str, max_depth: usiz
         match rule {
             Expansion::Sequence(seq) => stack.extend(seq.iter().rev()),
             Expansion::Alternatives(alts) => {
-                let finite_alts = alts.iter().filter(|exp| !exp.is_recursive(rules)).collect_vec();
-                let alt = if stack.len() >= max_depth {
+                let alt = if alts.len() > 100 || stack.len() < max_depth {
+                    &alts[bad_rng() as usize % alts.len()]
+                } else {
+                    let finite_alts = alts.iter().filter(|exp| !exp.is_recursive(rules)).collect_vec();
                     if finite_alts.is_empty() {
                         &alts[0] // first branch should be more likely to terminate earlier
                     } else {
                         finite_alts[bad_rng() as usize % finite_alts.len()]
                     }
-                } else {
-                    &alts[bad_rng() as usize % alts.len()]
                 };
                 stack.push(alt)
             }

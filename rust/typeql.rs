@@ -9,8 +9,9 @@
 #![deny(rust_2024_compatibility)]
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unused_must_use)]
-#![allow(unused)]
-#![warn(unused_imports)]
+#![allow(unreachable_code)]
+#![allow(unused_variables)]
+#![allow(dead_code)]
 
 pub mod annotation;
 pub mod builder;

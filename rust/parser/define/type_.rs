@@ -75,7 +75,7 @@ fn visit_value_type_declaration(node: Node<'_>) -> ValueType {
     let mut children = node.into_children();
     children.skip_expected(Rule::VALUE);
     let value_type_node = children.consume_any();
-    let (value_type) = match value_type_node.as_rule() {
+    let value_type = match value_type_node.as_rule() {
         Rule::label => TypeRef::Label(visit_label(value_type_node)),
         Rule::value_type => visit_value_type(value_type_node),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
@@ -96,9 +96,10 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
         Rule::label => TypeAny::Type(TypeRef::Label(visit_label(owned_label))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
     };
-    let overridden = match children.try_consume_expected(Rule::AS) {
-        None => None,
-        Some(_) => Some(visit_label(children.consume_expected(Rule::label))),
+    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
+        Some(visit_label(children.consume_expected(Rule::label)))
+    } else {
+        None
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
@@ -117,9 +118,10 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
         Rule::label => TypeAny::Type(TypeRef::Label(visit_label(related_label))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
     };
-    let overridden = match children.try_consume_expected(Rule::AS) {
-        None => None,
-        Some(_) => Some(visit_label(children.consume_expected(Rule::label))),
+    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
+        Some(visit_label(children.consume_expected(Rule::label)))
+    } else {
+        None
     };
     debug_assert_eq!(children.try_consume_any(), None);
     Relates::new(span, related, overridden)

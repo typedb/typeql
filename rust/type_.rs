@@ -40,12 +40,14 @@ pub enum Type {
     BuiltinValue(BuiltinValueType), // string
 }
 
+impl Pretty for Type {}
+
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Label(inner) => fmt::Display::fmt(inner, f),
             Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
-            Self::Variable(inner) => todo!(),
+            Self::Variable(inner) => fmt::Display::fmt(inner, f),
             Self::BuiltinValue(inner) => fmt::Display::fmt(inner, f),
         }
     }

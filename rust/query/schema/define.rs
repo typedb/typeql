@@ -39,8 +39,8 @@ impl Pretty for Define {
         indent(indent_level, f)?;
         write!(f, "{}", token::Clause::Define)?;
         for definable in &self.definables {
-            writeln!(f);
-            Pretty::fmt(definable, indent_level + 1, f);
+            writeln!(f)?;
+            Pretty::fmt(definable, indent_level + 1, f)?;
             f.write_char(';')?;
         }
         Ok(())

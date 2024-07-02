@@ -83,7 +83,6 @@ fn visit_value_type_constraint(node: Node<'_>) -> ValueType {
 
 fn visit_label_constraint(node: Node<'_>) -> LabelConstraint {
     debug_assert_eq!(node.as_rule(), Rule::label_constraint);
-    let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::LABEL);
     let label = children.consume_any();

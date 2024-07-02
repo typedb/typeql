@@ -7,7 +7,9 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span, Spanned}, pretty::Pretty, schema
+    common::{token, Span, Spanned},
+    pretty::Pretty,
+    schema,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -53,9 +55,14 @@ pub enum Variable {
     Named(Option<Span>, Identifier),
 }
 
+impl Pretty for Variable {}
+
 impl fmt::Display for Variable {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Variable::Anonymous(_) => write!(f, "$_"),
+            Variable::Named(_, ident) => write!(f, "${ident}"),
+        }
     }
 }
 

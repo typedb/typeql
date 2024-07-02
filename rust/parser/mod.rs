@@ -17,14 +17,21 @@ use crate::{
     common::{
         error::{syntax_error, TypeQLError},
         token, LineColumn, Span, Spanned,
-    }, identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable}, parser::redefine::visit_query_redefine, pattern::{Pattern, Statement}, query::{Query, SchemaQuery}, schema::definable::Definable, type_::{BuiltinValueType, List, Optional, Type}, Result
+    },
+    identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
+    parser::redefine::visit_query_redefine,
+    pattern::{Pattern, Statement},
+    query::{Query, SchemaQuery},
+    schema::definable::Definable,
+    type_::{BuiltinValueType, List, Optional, Type},
+    Result,
 };
 
 mod annotation;
 mod data;
 mod define;
-mod redefine;
 mod expression;
+mod redefine;
 mod statement;
 mod undefine;
 

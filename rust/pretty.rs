@@ -16,7 +16,14 @@ pub(crate) fn indent(indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Re
 }
 
 pub trait Pretty: fmt::Display {
+    #[allow(unused_variables)]
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(self, f)
+        write!(f, "{}", self)
+    }
+}
+
+impl<T: Pretty> Pretty for Box<T> {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        <T as Pretty>::fmt(self, indent_level, f)
     }
 }

@@ -9,7 +9,8 @@ use std::fmt;
 use super::definable::type_::CapabilityBase;
 use crate::{
     common::{token, Span},
-    identifier::{Identifier, Label}, pretty::Pretty,
+    identifier::{Identifier, Label},
+    pretty::Pretty,
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -36,7 +37,7 @@ impl fmt::Display for Undefinable {
             Self::Override(inner) => fmt::Display::fmt(inner, f),
             Self::Function(inner) => fmt::Display::fmt(inner, f),
             Self::Struct(inner) => fmt::Display::fmt(inner, f),
-        } 
+        }
     }
 }
 
@@ -170,4 +171,3 @@ impl fmt::Display for Struct {
         write!(f, "{} {}", token::Keyword::Struct, self.ident)
     }
 }
-

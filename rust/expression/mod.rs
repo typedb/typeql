@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt;
+use std::fmt::{self, Write};
 
 use crate::{
     common::{
@@ -13,6 +13,7 @@ use crate::{
     },
     identifier::{Identifier, Variable},
     pretty::Pretty,
+    util::write_joined,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -27,10 +28,29 @@ impl BuiltinFunctionName {
     }
 }
 
+impl Pretty for BuiltinFunctionName {}
+
+impl fmt::Display for BuiltinFunctionName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.token)
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum FunctionName {
     Builtin(BuiltinFunctionName),
     Identifier(Identifier),
+}
+
+impl Pretty for FunctionName {}
+
+impl fmt::Display for FunctionName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Builtin(inner) => fmt::Display::fmt(inner, f),
+            Self::Identifier(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -49,6 +69,17 @@ impl FunctionCall {
 impl Spanned for FunctionCall {
     fn span(&self) -> Option<Span> {
         self.span
+    }
+}
+
+impl Pretty for FunctionCall {}
+
+impl fmt::Display for FunctionCall {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}(", self.name)?;
+        write_joined!(f, ", ", self.args)?;
+        f.write_char(')')?;
+        Ok(())
     }
 }
 
@@ -75,6 +106,14 @@ impl Spanned for Operation {
     }
 }
 
+impl Pretty for Operation {}
+
+impl fmt::Display for Operation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {} {}", self.left, self.op, self.right)
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Paren {
     span: Option<Span>,
@@ -90,6 +129,14 @@ impl Paren {
 impl Spanned for Paren {
     fn span(&self) -> Option<Span> {
         self.span
+    }
+}
+
+impl Pretty for Paren {}
+
+impl fmt::Display for Paren {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({})", self.inner)
     }
 }
 
@@ -199,6 +246,38 @@ impl Spanned for Expression {
             Self::Paren(inner) => inner.span(),
             Self::List(inner) => inner.span(),
             Self::ListIndexRange(inner) => inner.span(),
+        }
+    }
+}
+
+impl Pretty for Expression {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            // Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
+            // Self::ListIndex(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Value(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Function(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Operation(inner) => Pretty::fmt(&**inner, indent_level, f),
+            Self::Paren(inner) => Pretty::fmt(&**inner, indent_level, f),
+            // Self::List(inner) => Pretty::fmt(inner, indent_level, f),
+            // Self::ListIndexRange(inner) => Pretty::fmt(inner, indent_level, f),
+            _ => todo!(),
+        }
+    }
+}
+
+impl fmt::Display for Expression {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Variable(inner) => fmt::Display::fmt(inner, f),
+            // Self::ListIndex(inner) => fmt::Display::fmt(inner, f),
+            Self::Value(inner) => fmt::Display::fmt(inner, f),
+            Self::Function(inner) => fmt::Display::fmt(inner, f),
+            Self::Operation(inner) => fmt::Display::fmt(inner, f),
+            Self::Paren(inner) => fmt::Display::fmt(inner, f),
+            // Self::List(inner) => fmt::Display::fmt(inner, f),
+            // Self::ListIndexRange(inner) => fmt::Display::fmt(inner, f),
+            _ => todo!("{:?}", self),
         }
     }
 }

@@ -23,7 +23,6 @@ pub(super) fn visit_query_redefine(node: Node<'_>) -> Redefine {
 fn visit_redefinable(node: Node<'_>) -> Definable {
     debug_assert_eq!(node.as_rule(), Rule::redefinable);
     let span = node.span();
-    let span = node.span();
     let mut children = node.into_children();
     let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
     let ident = visit_identifier(children.consume_expected(Rule::identifier));

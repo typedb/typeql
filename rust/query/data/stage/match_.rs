@@ -4,13 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt;
+use std::fmt::{self, Write};
 
-use super::Stage;
 use crate::{
     common::{token, Span},
     pattern::Pattern,
-    query::{DataQuery, Query},
+    pretty::{indent, Pretty},
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -34,20 +33,29 @@ impl Match {
     }
 }
 
-impl From<Match> for Query {
-    fn from(value: Match) -> Self {
-        Self::Data(DataQuery::new(None, Vec::new(), vec![Stage::Match(value)]))
+impl Pretty for Match {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", token::Clause::Match)?;
+        for pattern in &self.patterns {
+            writeln!(f)?;
+            indent(indent_level, f)?;
+            Pretty::fmt(pattern, indent_level, f)?;
+            f.write_char(';')?;
+        }
+        Ok(())
     }
 }
 
 impl fmt::Display for Match {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", token::Clause::Match)?;
-
-        for pattern in &self.patterns {
-            write!(f, "\n{pattern};")?;
+        if f.alternate() {
+            Pretty::fmt(self, 0, f)
+        } else {
+            write!(f, "{}", token::Clause::Match)?;
+            for pattern in &self.patterns {
+                write!(f, " {pattern};")?;
+            }
+            Ok(())
         }
-
-        Ok(())
     }
 }

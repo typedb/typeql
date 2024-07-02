@@ -107,7 +107,7 @@ pub fn visit_statement_in(node: Node<'_>) -> InStream {
     debug_assert_eq!(node.as_rule(), Rule::statement_in);
     let span = node.span();
     let mut children = node.into_children();
-    let mut lhs = visit_vars(children.consume_expected(Rule::vars));
+    let lhs = visit_vars(children.consume_expected(Rule::vars));
     children.skip_expected(Rule::IN);
     let rhs = visit_expression_function(children.consume_expected(Rule::expression_function));
     InStream::new(span, lhs, rhs)
