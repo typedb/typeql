@@ -191,10 +191,9 @@ impl Pretty for ThingConstraint {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Isa(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::Iid(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Iid(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Has(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::Links(inner) => Pretty::fmt(inner, indent_level, f),
-            _ => todo!(),
+            Self::Links(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
@@ -203,10 +202,9 @@ impl fmt::Display for ThingConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Isa(inner) => fmt::Display::fmt(inner, f),
-            // Self::Iid(inner) => fmt::Display::fmt(inner, f),
+            Self::Iid(inner) => fmt::Display::fmt(inner, f),
             Self::Has(inner) => fmt::Display::fmt(inner, f),
-            // Self::Links(inner) => fmt::Display::fmt(inner, f),
-            _ => todo!(),
+            Self::Links(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }
@@ -220,6 +218,14 @@ pub struct Iid {
 impl Iid {
     pub(crate) fn new(span: Option<Span>, iid: String) -> Self {
         Self { span, iid }
+    }
+}
+
+impl Pretty for Iid {}
+
+impl fmt::Display for Iid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Keyword::IID, self.iid)
     }
 }
 
@@ -285,5 +291,13 @@ pub struct Links {
 impl Links {
     pub fn new(span: Option<Span>, relation: Relation) -> Self {
         Self { span, relation }
+    }
+}
+
+impl Pretty for Links {}
+
+impl fmt::Display for Links {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Keyword::Links, self.relation)
     }
 }

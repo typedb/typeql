@@ -56,6 +56,8 @@ string_enum! { Clause
     Redefine = "redefine",
     Undefine = "undefine",
     Insert = "insert",
+    Put = "put",
+    Update = "update",
     Delete = "delete",
     Match = "match",
     Group = "group",
@@ -122,6 +124,7 @@ string_enum! { Keyword
     Isa = "isa",
     IsaX = "isa!",
     Label = "label",
+    Links = "links",
     Not = "not",
     Of = "of",
     Or = "or",
@@ -150,6 +153,8 @@ string_enum! { Annotation
 }
 
 string_enum! { Aggregate
+    Check = "check",
+    First = "first",
     Count = "count",
     Max = "max",
     Mean = "mean",

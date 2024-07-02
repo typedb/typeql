@@ -149,7 +149,7 @@ impl Pretty for TypeStatement {
             Pretty::fmt(first, indent_level, f)?;
             for constraint in rest {
                 f.write_str(",\n")?;
-                indent(indent_level, f)?;
+                indent(indent_level + 1, f)?;
                 Pretty::fmt(constraint, indent_level, f)?;
             }
         }

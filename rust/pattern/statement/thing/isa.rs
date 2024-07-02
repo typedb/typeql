@@ -6,7 +6,11 @@
 
 use std::fmt;
 
-use crate::{common::{token, Span}, pretty::Pretty, type_::Type};
+use crate::{
+    common::{token, Span},
+    pretty::Pretty,
+    type_::Type,
+};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Isa {
@@ -46,4 +50,3 @@ impl fmt::Display for IsaKind {
         write!(f, "{}", token)
     }
 }
-

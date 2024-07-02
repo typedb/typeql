@@ -399,3 +399,13 @@ $res = $a + (round($b + $c) + $d) * $e;"#;
 
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn test_schema_query() {
+    let query = r#"match
+$x plays starring:actor;
+sort $x asc;"#;
+    let parsed = parse_query(query).unwrap();
+    //     let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([(cvar("x"), Asc)]);
+    assert_valid_eq_repr!(expected, parsed, query);
+}

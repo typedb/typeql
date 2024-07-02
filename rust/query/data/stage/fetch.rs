@@ -127,11 +127,27 @@ impl<T: Into<ProjectionKeyVar>> ProjectionBuilder for T {
     }
 }
 
+impl Pretty for Fetch {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", token::Clause::Fetch)?;
+        for projection in &self.projections {
+            writeln!(f)?;
+            indent(indent_level, f)?;
+            Pretty::fmt(projection, indent_level, f)?;
+        }
+        Ok(())
+    }
+}
+
 impl fmt::Display for Fetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{}", token::Clause::Fetch)?;
-        write_joined!(f, "\n", self.projections)?;
-        Ok(())
+        if f.alternate() {
+            Pretty::fmt(self, 0, f)
+        } else {
+            write!(f, "{} ", token::Clause::Fetch)?;
+            write_joined!(f, " ", self.projections)?;
+            Ok(())
+        }
     }
 }
 
@@ -148,8 +164,9 @@ impl Pretty for Projection {
             }
             Projection::Subquery(label, subquery) => {
                 writeln!(f, "{}: {{", label)?;
-                indent(indent_level, f)?;
                 Pretty::fmt(subquery, indent_level + 1, f)?;
+                writeln!(f)?;
+                indent(indent_level, f)?;
                 write!(f, "}};")?;
                 Ok(())
             }
@@ -193,11 +210,7 @@ fn must_quote(_: &str) -> bool {
 impl fmt::Display for ProjectionKeyLabel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let label = &self.label;
-        if must_quote(label) {
-            write!(f, "\"{}\"", label)
-        } else {
-            write!(f, "{}", label)
-        }
+        write!(f, "{}", label)
     }
 }
 

@@ -38,13 +38,12 @@ impl Pretty for Stage {
         match self {
             Self::Match(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Insert(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::Put(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::Update(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::Fetch(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::Delete(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::Reduce(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Put(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Update(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Fetch(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Delete(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Reduce(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Modifier(inner) => Pretty::fmt(inner, indent_level, f),
-            _ => todo!(),
         }
     }
 }
@@ -54,13 +53,12 @@ impl fmt::Display for Stage {
         match self {
             Self::Match(inner) => fmt::Display::fmt(inner, f),
             Self::Insert(inner) => fmt::Display::fmt(inner, f),
-            // Self::Put(inner) => fmt::Display::fmt(inner, f),
-            // Self::Update(inner) => fmt::Display::fmt(inner, f),
-            // Self::Fetch(inner) => fmt::Display::fmt(inner, f),
-            // Self::Delete(inner) => fmt::Display::fmt(inner, f),
-            // Self::Reduce(inner) => fmt::Display::fmt(inner, f),
+            Self::Put(inner) => fmt::Display::fmt(inner, f),
+            Self::Update(inner) => fmt::Display::fmt(inner, f),
+            Self::Fetch(inner) => fmt::Display::fmt(inner, f),
+            Self::Delete(inner) => fmt::Display::fmt(inner, f),
+            Self::Reduce(inner) => fmt::Display::fmt(inner, f),
             Self::Modifier(inner) => fmt::Display::fmt(inner, f),
-            _ => todo!(),
         }
     }
 }

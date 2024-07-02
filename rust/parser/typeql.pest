@@ -105,7 +105,7 @@ plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
 // THING STATEMENTS ============================================================
 
 statement_thing = { statement_thing_var | statement_anon_relation }
-statement_anon_relation = { relation ~ ( COMMA ~ thing_constraint )* }
+statement_anon_relation = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* }
 
 statement_thing_var = { var ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
                       | var ~ ( value_literal | expression_struct ) ~ isa_constraint
@@ -362,13 +362,13 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
            | IID | ISA | LINKS | HAS
            | IS | OR | NOT | TRY | IN
            | OF
-           | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
            | TRUE | FALSE
            }
 
 unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
              | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
+             | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
              | FROM
              }
 

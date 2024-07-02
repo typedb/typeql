@@ -124,7 +124,9 @@ impl Pretty for Disjunction {
             f.write_str("{\n")?;
             for pattern in first {
                 indent(indent_level + 1, f)?;
-                writeln!(f, "{};", pattern)?;
+                Pretty::fmt(pattern, indent_level + 1, f)?;
+                writeln!(f, ";")?;
+                indent(indent_level, f)?;
             }
             f.write_char('}')?;
 
@@ -132,7 +134,9 @@ impl Pretty for Disjunction {
                 writeln!(f, " {} {{", token::Keyword::Or)?;
                 for pattern in branch {
                     indent(indent_level + 1, f)?;
-                    writeln!(f, "{};", pattern)?;
+                    Pretty::fmt(pattern, indent_level + 1, f)?;
+                    writeln!(f, ";")?;
+                    indent(indent_level, f)?;
                 }
                 f.write_char('}')?;
             }
