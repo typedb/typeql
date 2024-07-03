@@ -155,6 +155,27 @@ digit sub attribute,
 }
 
 #[test]
+fn when_parsing_as_in_define_result_is_same_as_sub() {
+    let query = r#"define
+parent sub role;
+child sub role;
+parenthood sub relation,
+    relates parent,
+    relates child;
+fatherhood sub parenthood,
+    relates father as parent,
+    relates son as child;"#;
+    let parsed = parse_query(query).unwrap();
+    //     let expected = typeql_define!(
+    //         type_("parent").sub("role"),
+    //         type_("child").sub("role"),
+    //         type_("parenthood").sub("relation").relates("parent").relates("child"),
+    //         type_("fatherhood").sub("parenthood").relates(("father", "parent")).relates(("son", "child"))
+    //     );
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
 fn undefine_attribute_type_regex() {
     let query = r#"undefine
 @regex from digit value string;"#;

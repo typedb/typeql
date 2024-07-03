@@ -409,3 +409,71 @@ sort $x asc;"#;
     //     let expected = typeql_match!(var("x").plays(("starring", "actor"))).sort([(cvar("x"), Asc)]);
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn when_parsing_as_in_match_result_is_same_as_sub() {
+    let query = r#"match
+$f sub parenthood,
+    relates father as parent,
+    relates son as child;"#;
+    let parsed = parse_query(query).unwrap();
+    //     let expected =
+    //         typeql_match!(var("f").sub("parenthood").relates(("father", "parent")).relates(("son", "child")));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_match_value_type_query() {
+    let query = r#"match
+$x value double;"#;
+    let parsed = parse_query(query).unwrap();
+    //     let expected = typeql_match!(var("x").value(ValueType::Double));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn when_parsing_date_keyword_parse_as_the_correct_value_type() {
+    let query = r#"match
+$x value datetime;"#;
+    let parsed = parse_query(query).unwrap();
+    //     let expected = typeql_match!(var("x").value(ValueType::DateTime));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_parsing_boolean() {
+    let query = r#"insert
+$_ has flag true;"#;
+    let parsed = parse_query(query).unwrap();
+    //     let expected = typeql_insert!(var(()).has(("flag", true)));
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_variables_everywhere_query() {
+    let query = r#"match
+($p: $x, $y);
+$x isa $z;
+$y == "crime";
+$z sub production;
+has-genre relates $p;"#;
+    let parsed = parse_query(query).unwrap();
+    // let expected = typeql_match!(
+    // rel((var("p"), cvar("x"))).links("y"),
+    // var("x").isa(cvar("z")),
+    // var("y").eq("crime"),
+    // var("z").sub("production"),
+    // type_("has-genre").relates(var("p")),
+    // );
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_parsing_relates_type_variable() {
+    let query = r#"match
+$x isa $type;
+$type relates someRole;"#;
+    let parsed = parse_query(query).unwrap();
+    // let expected = typeql_match!(var("x").isa(cvar("type")), cvar("type").relates("someRole"));
+    assert_valid_eq_repr!(expected, parsed, query);
+}

@@ -77,4 +77,3 @@
 //     let expected = Label { scope: None, name: String::from(label) };
 //     assert_eq!(expected, parsed);
 // }
-

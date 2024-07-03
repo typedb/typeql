@@ -117,4 +117,3 @@ fn when_parsing_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_erro
     assert!(report.contains("at 2:7"), "{report}");
     assert!(report.contains("$x isa"), "{report}");
 }
-
