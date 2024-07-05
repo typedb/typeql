@@ -23,18 +23,25 @@ pub mod pattern;
 mod pretty;
 pub mod query;
 pub mod schema;
+pub mod statement;
 pub mod type_;
 mod util;
+mod value;
 
-pub use common::Result;
-use identifier::Label;
-use parser::{
+use crate::parser::{
     visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
     visit_eof_statement,
 };
-use pattern::{Pattern, Statement};
-use query::Query;
-use schema::definable::Definable;
+pub use crate::{
+    common::Result,
+    identifier::{Label, ScopedLabel, Variable},
+    pattern::Pattern,
+    query::Query,
+    schema::definable::Definable,
+    statement::Statement,
+    type_::{Type, TypeAny},
+    value::Literal,
+};
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())

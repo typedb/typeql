@@ -6,14 +6,11 @@
 
 use std::fmt::{self, Write};
 
-use self::statement::thing::ThingStatement;
-pub use self::statement::Statement;
 use crate::{
     common::{token, Span},
     pretty::{indent, Pretty},
+    statement::{thing::Thing, Statement},
 };
-
-pub mod statement;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
@@ -175,8 +172,8 @@ pub enum Pattern {
     Statement(Statement),
 }
 
-impl From<ThingStatement> for Pattern {
-    fn from(val: ThingStatement) -> Self {
+impl From<Thing> for Pattern {
+    fn from(val: Thing) -> Self {
         Pattern::Statement(Statement::Thing(val))
     }
 }

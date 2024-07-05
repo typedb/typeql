@@ -58,7 +58,7 @@ impl Pretty for AnnotationType {}
 
 impl fmt::Display for AnnotationType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        write!(f, "@{} {} {}", self.annotation_kind, token::Keyword::From, self.type_)
     }
 }
 
@@ -128,7 +128,15 @@ impl Pretty for Override {}
 
 impl fmt::Display for Override {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        write!(
+            f,
+            "{} {} {} {} {}",
+            token::Keyword::As,
+            self.overridden,
+            token::Keyword::From,
+            self.type_,
+            self.capability
+        )
     }
 }
 

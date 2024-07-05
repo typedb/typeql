@@ -9,8 +9,8 @@ use std::fmt::{self, Write};
 use crate::{
     common::{token, Span},
     identifier::Variable,
-    pattern::statement::thing::Relation,
     pretty::{indent, Pretty},
+    statement::thing::Relation,
 };
 
 #[derive(Debug, Eq, PartialEq)]

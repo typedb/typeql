@@ -13,11 +13,11 @@ use crate::{
         statement::visit_type_ref,
         visit_label_list, visit_var, visit_var_list, IntoChildNodes, Node, Rule, RuleMatcher,
     },
-    pattern::statement::{
+    statement::{
         thing::{
             isa::{Isa, IsaKind},
-            AttributeComparisonStatement, AttributeValueStatement, Has, HasValue, Iid, Links, Relation, RolePlayer,
-            ThingConstraint, ThingStatement, ThingStatementHead,
+            AttributeComparisonStatement, AttributeValueStatement, Constraint, Has, HasValue, Head, Iid, Links,
+            Relation, RolePlayer, Thing,
         },
         Statement,
     },
@@ -40,11 +40,9 @@ pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
     let mut children = node.into_children();
     let var = visit_var(children.consume_expected(Rule::var));
     match children.peek_rule().unwrap() {
-        Rule::thing_constraint => Statement::Thing(ThingStatement::new(
-            span,
-            ThingStatementHead::Variable(var),
-            children.map(visit_thing_constraint).collect(),
-        )),
+        Rule::thing_constraint => {
+            Statement::Thing(Thing::new(span, Head::Variable(var), children.map(visit_thing_constraint).collect()))
+        }
         Rule::value_literal => {
             let value = visit_value_literal(children.consume_expected(Rule::value_literal));
             let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
@@ -71,19 +69,19 @@ pub(super) fn visit_statement_anon_relation(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement_anon_relation);
     let span = node.span();
     let mut children = node.into_children();
-    let head = ThingStatementHead::Relation(visit_relation(children.consume_expected(Rule::relation)));
+    let head = Head::Relation(visit_relation(children.consume_expected(Rule::relation)));
     let constraints = children.map(visit_thing_constraint).collect();
-    Statement::Thing(ThingStatement::new(span, head, constraints))
+    Statement::Thing(Thing::new(span, head, constraints))
 }
 
-fn visit_thing_constraint(node: Node<'_>) -> ThingConstraint {
+fn visit_thing_constraint(node: Node<'_>) -> Constraint {
     debug_assert_eq!(node.as_rule(), Rule::thing_constraint);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::isa_constraint => ThingConstraint::Isa(visit_isa_constraint(child)),
-        Rule::iid_constraint => ThingConstraint::Iid(visit_iid_constraint(child)),
-        Rule::has_constraint => ThingConstraint::Has(visit_has_constraint(child)),
-        Rule::links_constraint => ThingConstraint::Links(visit_links_constraint(child)),
+        Rule::isa_constraint => Constraint::Isa(visit_isa_constraint(child)),
+        Rule::iid_constraint => Constraint::Iid(visit_iid_constraint(child)),
+        Rule::has_constraint => Constraint::Has(visit_has_constraint(child)),
+        Rule::links_constraint => Constraint::Links(visit_links_constraint(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

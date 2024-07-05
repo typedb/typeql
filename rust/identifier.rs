@@ -22,6 +22,10 @@ impl Identifier {
     pub fn new(span: Option<Span>, ident: String) -> Self {
         Self { span, ident }
     }
+
+    pub fn as_str(&self) -> &str {
+        &self.ident
+    }
 }
 
 impl fmt::Display for Identifier {
@@ -53,6 +57,15 @@ impl From<String> for Identifier {
 pub enum Variable {
     Anonymous(Option<Span>),
     Named(Option<Span>, Identifier),
+}
+
+impl Variable {
+    pub fn name(&self) -> Option<&str> {
+        match self {
+            Self::Anonymous(_) => None,
+            Self::Named(_, ident) => Some(ident.as_str()),
+        }
+    }
 }
 
 impl Pretty for Variable {}
@@ -102,6 +115,15 @@ impl Spanned for ReservedLabel {
 pub enum Label {
     Identifier(Identifier),
     Reserved(ReservedLabel),
+}
+
+impl Label {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Label::Identifier(ident) => ident.as_str(),
+            Label::Reserved(reserved) => reserved.token.as_str(),
+        }
+    }
 }
 
 impl From<Label> for schema::definable::Type {

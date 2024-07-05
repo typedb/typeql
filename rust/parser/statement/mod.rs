@@ -15,7 +15,7 @@ use crate::{
         statement::type_::visit_statement_type, visit_label, visit_label_list, visit_label_scoped, visit_var,
         visit_var_list,
     },
-    pattern::statement::{comparison::Comparison, Statement},
+    statement::{comparison::Comparison, Statement},
     type_::{Type, TypeAny},
 };
 

@@ -11,9 +11,9 @@ use crate::{
     common::{error::TypeQLError, token, Spanned},
     expression::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
-        Value,
     },
     parser::{visit_identifier, visit_var},
+    value::Literal,
 };
 
 pub(super) fn visit_expression_function(node: Node<'_>) -> FunctionCall {
@@ -96,14 +96,14 @@ fn visit_list_index(node: Node<'_>) -> Expression {
     visit_expression_value(node.into_child())
 }
 
-pub(super) fn visit_value_literal(node: Node<'_>) -> Value {
+pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::value_literal);
-    Value::new(node.span(), node.as_str().to_owned()) // TODO parse value properly
+    Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
 }
 
-pub(super) fn visit_expression_struct(node: Node<'_>) -> Value {
+pub(super) fn visit_expression_struct(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::expression_struct);
-    Value::new(node.span(), node.as_str().to_owned()) // TODO parse value properly
+    Literal::new(node.span(), None, node.as_str().to_owned()) // TODO parse properly
 }
 
 fn visit_expression_parenthesis(node: Node<'_>) -> Paren {

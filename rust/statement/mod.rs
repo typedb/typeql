@@ -4,23 +4,18 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{
-    collections::HashMap,
-    fmt::{self, Write},
-};
+use std::{collections::HashMap, fmt};
 
 use self::{
     comparison::ComparisonStatement,
-    thing::{AttributeComparisonStatement, AttributeValueStatement, ThingStatement},
-    type_::TypeConstraintBase,
+    thing::{AttributeComparisonStatement, AttributeValueStatement},
 };
+pub use self::{thing::Thing, type_::Type};
 use crate::{
-    annotation::Annotation,
     common::{token, Span},
     expression::{Expression, FunctionCall},
     identifier::{Label, Variable},
-    pretty::{indent, Pretty},
-    type_::Type,
+    pretty::Pretty,
     util::write_joined,
 };
 
@@ -129,82 +124,15 @@ impl fmt::Display for Assignment {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct TypeStatement {
-    span: Option<Span>,
-    type_: Type,
-    constraints: Vec<TypeConstraint>,
-}
-
-impl TypeStatement {
-    pub fn new(span: Option<Span>, type_: Type, constraints: Vec<TypeConstraint>) -> Self {
-        Self { span, type_, constraints }
-    }
-}
-
-impl Pretty for TypeStatement {
-    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.type_)?;
-        if let Some((first, rest)) = self.constraints.split_first() {
-            f.write_char(' ')?;
-            Pretty::fmt(first, indent_level, f)?;
-            for constraint in rest {
-                f.write_str(",\n")?;
-                indent(indent_level + 1, f)?;
-                Pretty::fmt(constraint, indent_level, f)?;
-            }
-        }
-        Ok(())
-    }
-}
-
-impl fmt::Display for TypeStatement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.type_)?;
-        if let Some((first, rest)) = self.constraints.split_first() {
-            write!(f, " {}", first)?;
-            for constraint in rest {
-                write!(f, ", {}", constraint)?;
-            }
-        }
-        Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct TypeConstraint {
-    span: Option<Span>,
-    base: TypeConstraintBase,
-    annotations: Vec<Annotation>,
-}
-
-impl TypeConstraint {
-    pub fn new(span: Option<Span>, base: TypeConstraintBase, annotations: Vec<Annotation>) -> Self {
-        Self { span, base, annotations }
-    }
-}
-
-impl Pretty for TypeConstraint {}
-
-impl fmt::Display for TypeConstraint {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.base)?;
-        for annotation in &self.annotations {
-            write!(f, " {}", annotation)?;
-        }
-        Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
     Is(Is),
     InStream(InStream),
     Comparison(ComparisonStatement),
     Assignment(Assignment),
-    Thing(ThingStatement),
+    Thing(Thing),
     AttributeValue(AttributeValueStatement),
     AttributeComparison(AttributeComparisonStatement),
-    Type(TypeStatement),
+    Type(Type),
 }
 
 impl Pretty for Statement {

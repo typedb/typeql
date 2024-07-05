@@ -4,14 +4,82 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt;
+use std::fmt::{self, Write};
 
 use crate::{
+    annotation::Annotation,
     common::{token, Span},
     identifier::{Label, ScopedLabel},
-    pretty::Pretty,
-    type_::{Type, TypeAny},
+    pretty::{indent, Pretty},
+    type_::{Type as TypeRef, TypeAny},
 };
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Type {
+    span: Option<Span>,
+    pub type_: TypeRef,
+    pub constraints: Vec<Constraint>,
+}
+
+impl Type {
+    pub fn new(span: Option<Span>, type_: TypeRef, constraints: Vec<Constraint>) -> Self {
+        Self { span, type_, constraints }
+    }
+}
+
+impl Pretty for Type {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.type_)?;
+        if let Some((first, rest)) = self.constraints.split_first() {
+            f.write_char(' ')?;
+            Pretty::fmt(first, indent_level, f)?;
+            for constraint in rest {
+                f.write_str(",\n")?;
+                indent(indent_level + 1, f)?;
+                Pretty::fmt(constraint, indent_level, f)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.type_)?;
+        if let Some((first, rest)) = self.constraints.split_first() {
+            write!(f, " {}", first)?;
+            for constraint in rest {
+                write!(f, ", {}", constraint)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Constraint {
+    span: Option<Span>,
+    pub base: TypeConstraintBase,
+    pub annotations: Vec<Annotation>,
+}
+
+impl Constraint {
+    pub fn new(span: Option<Span>, base: TypeConstraintBase, annotations: Vec<Annotation>) -> Self {
+        Self { span, base, annotations }
+    }
+}
+
+impl Pretty for Constraint {}
+
+impl fmt::Display for Constraint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.base)?;
+        for annotation in &self.annotations {
+            write!(f, " {}", annotation)?;
+        }
+        Ok(())
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeConstraintBase {
@@ -88,11 +156,11 @@ impl fmt::Display for SubKind {
 pub struct Sub {
     span: Option<Span>,
     kind: SubKind,
-    supertype: Type,
+    supertype: TypeRef,
 }
 
 impl Sub {
-    pub fn new(span: Option<Span>, kind: SubKind, supertype: Type) -> Self {
+    pub fn new(span: Option<Span>, kind: SubKind, supertype: TypeRef) -> Self {
         Self { span, kind, supertype }
     }
 }
@@ -108,11 +176,11 @@ impl fmt::Display for Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     span: Option<Span>,
-    value_type: Type,
+    value_type: TypeRef,
 }
 
 impl ValueType {
-    pub fn new(span: Option<Span>, value_type: Type) -> Self {
+    pub fn new(span: Option<Span>, value_type: TypeRef) -> Self {
         Self { span, value_type }
     }
 }
@@ -129,11 +197,11 @@ impl fmt::Display for ValueType {
 pub struct Owns {
     span: Option<Span>,
     owned: TypeAny,
-    overridden: Option<Type>,
+    overridden: Option<TypeRef>,
 }
 
 impl Owns {
-    pub fn new(span: Option<Span>, owned: TypeAny, overridden: Option<Type>) -> Self {
+    pub fn new(span: Option<Span>, owned: TypeAny, overridden: Option<TypeRef>) -> Self {
         Self { span, owned, overridden }
     }
 }
@@ -154,11 +222,11 @@ impl fmt::Display for Owns {
 pub struct Relates {
     span: Option<Span>,
     related: TypeAny,
-    overridden: Option<Type>,
+    overridden: Option<TypeRef>,
 }
 
 impl Relates {
-    pub fn new(span: Option<Span>, related: TypeAny, overridden: Option<Type>) -> Self {
+    pub fn new(span: Option<Span>, related: TypeAny, overridden: Option<TypeRef>) -> Self {
         Self { span, related, overridden }
     }
 }
@@ -178,12 +246,12 @@ impl fmt::Display for Relates {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
     span: Option<Span>,
-    role: Type,
-    overridden: Option<Type>,
+    role: TypeRef,
+    overridden: Option<TypeRef>,
 }
 
 impl Plays {
-    pub fn new(span: Option<Span>, role: Type, overridden: Option<Type>) -> Self {
+    pub fn new(span: Option<Span>, role: TypeRef, overridden: Option<TypeRef>) -> Self {
         Self { span, role, overridden }
     }
 }

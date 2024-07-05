@@ -8,9 +8,9 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span},
-    expression::Value,
     identifier::Identifier,
     util::write_joined,
+    value::Literal,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -66,12 +66,12 @@ impl fmt::Display for Abstract {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cardinality {
     span: Option<Span>,
-    min: usize,
-    max: Option<usize>,
+    min: Literal,
+    max: Option<Literal>,
 }
 
 impl Cardinality {
-    pub fn new(span: Option<Span>, min: usize, max: Option<usize>) -> Self {
+    pub fn new(span: Option<Span>, min: Literal, max: Option<Literal>) -> Self {
         Self { span, min, max }
     }
 }
@@ -79,7 +79,7 @@ impl Cardinality {
 impl fmt::Display for Cardinality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}({}..", token::Annotation::Cardinality, self.min)?;
-        if let Some(max) = self.max {
+        if let Some(max) = &self.max {
             write!(f, "{}", max)?;
         }
         f.write_char(')')?;
@@ -158,12 +158,12 @@ impl fmt::Display for Key {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Range {
     span: Option<Span>,
-    min: Option<Value>,
-    max: Option<Value>,
+    min: Option<Literal>,
+    max: Option<Literal>,
 }
 
 impl Range {
-    pub fn new(span: Option<Span>, min: Option<Value>, max: Option<Value>) -> Self {
+    pub fn new(span: Option<Span>, min: Option<Literal>, max: Option<Literal>) -> Self {
         Self { span, min, max }
     }
 }

@@ -10,35 +10,36 @@ use self::isa::Isa;
 use super::{comparison, Statement};
 use crate::{
     common::{token, Span},
-    expression::{Expression, Value},
+    expression::Expression,
     identifier::Variable,
     pretty::{indent, Pretty},
     type_::{Type, TypeAny},
     util::write_joined,
+    value::Literal,
 };
 
 pub mod isa;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ThingStatement {
+pub struct Thing {
     span: Option<Span>,
-    head: ThingStatementHead,
-    constraints: Vec<ThingConstraint>,
+    pub head: Head,
+    pub constraints: Vec<Constraint>,
 }
 
-impl ThingStatement {
-    pub fn new(span: Option<Span>, head: ThingStatementHead, constraints: Vec<ThingConstraint>) -> Self {
+impl Thing {
+    pub fn new(span: Option<Span>, head: Head, constraints: Vec<Constraint>) -> Self {
         Self { span, head, constraints }
     }
 }
 
-impl From<ThingStatement> for Statement {
-    fn from(val: ThingStatement) -> Self {
+impl From<Thing> for Statement {
+    fn from(val: Thing) -> Self {
         Statement::Thing(val)
     }
 }
 
-impl Pretty for ThingStatement {
+impl Pretty for Thing {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.head)?;
         if let Some((first, rest)) = self.constraints.split_first() {
@@ -54,7 +55,7 @@ impl Pretty for ThingStatement {
     }
 }
 
-impl fmt::Display for ThingStatement {
+impl fmt::Display for Thing {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.head)?;
         if let Some((first, rest)) = self.constraints.split_first() {
@@ -68,12 +69,12 @@ impl fmt::Display for ThingStatement {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum ThingStatementHead {
+pub enum Head {
     Variable(Variable),
     Relation(Relation),
 }
 
-impl Pretty for ThingStatementHead {
+impl Pretty for Head {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
@@ -82,7 +83,7 @@ impl Pretty for ThingStatementHead {
     }
 }
 
-impl fmt::Display for ThingStatementHead {
+impl fmt::Display for Head {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variable(inner) => fmt::Display::fmt(inner, f),
@@ -94,11 +95,11 @@ impl fmt::Display for ThingStatementHead {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relation {
     span: Option<Span>,
-    role_players: Vec<RolePlayer>,
+    pub role_players: Vec<RolePlayer>,
 }
 
 impl Relation {
-    pub fn new(span: Option<Span>, role_players: Vec<RolePlayer>) -> Self {
+    pub(crate) fn new(span: Option<Span>, role_players: Vec<RolePlayer>) -> Self {
         Self { span, role_players }
     }
 }
@@ -135,12 +136,12 @@ impl fmt::Display for RolePlayer {
 pub struct AttributeValueStatement {
     span: Option<Span>,
     type_: Option<Type>,
-    value: Value,
+    value: Literal,
     isa: Isa,
 }
 
 impl AttributeValueStatement {
-    pub fn new(span: Option<Span>, type_: Option<Type>, value: Value, isa: Isa) -> Self {
+    pub fn new(span: Option<Span>, type_: Option<Type>, value: Literal, isa: Isa) -> Self {
         Self { span, type_, value, isa }
     }
 }
@@ -180,14 +181,14 @@ impl fmt::Display for AttributeComparisonStatement {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum ThingConstraint {
+pub enum Constraint {
     Isa(Isa),
     Iid(Iid),
     Has(Has),
     Links(Links),
 }
 
-impl Pretty for ThingConstraint {
+impl Pretty for Constraint {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Isa(inner) => Pretty::fmt(inner, indent_level, f),
@@ -198,7 +199,7 @@ impl Pretty for ThingConstraint {
     }
 }
 
-impl fmt::Display for ThingConstraint {
+impl fmt::Display for Constraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Isa(inner) => fmt::Display::fmt(inner, f),
@@ -232,8 +233,8 @@ impl fmt::Display for Iid {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Has {
     span: Option<Span>,
-    type_: Option<TypeAny>,
-    value: HasValue,
+    pub type_: Option<TypeAny>,
+    pub value: HasValue,
 }
 
 impl Has {
@@ -285,7 +286,7 @@ impl fmt::Display for HasValue {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Links {
     span: Option<Span>,
-    relation: Relation,
+    pub relation: Relation,
 }
 
 impl Links {

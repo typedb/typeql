@@ -10,8 +10,8 @@ use crate::{
         Abstract, Annotation, Cardinality, Cascade, Distinct, Independent, Key, Range, Regex, Subkey, Unique, Values,
     },
     common::{error::TypeQLError, Spanned},
-    expression::Value,
-    parser::{expression::visit_value_literal, visit_identifier},
+    parser::{expression::visit_value_literal, visit_identifier, visit_integer_literal},
+    value::Literal,
 };
 
 pub(super) fn visit_annotations(node: Node<'_>) -> Vec<Annotation> {
@@ -44,8 +44,8 @@ fn visit_annotation_card(node: Node<'_>) -> Cardinality {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::ANNOTATION_CARD);
-    let lower = children.consume_expected(Rule::integer_literal).as_str().parse().unwrap();
-    let upper = children.try_consume_expected(Rule::integer_literal).map(|child| child.as_str().parse().unwrap());
+    let lower = visit_integer_literal(children.consume_expected(Rule::integer_literal));
+    let upper = children.try_consume_expected(Rule::integer_literal).map(visit_integer_literal);
     debug_assert_eq!(children.try_consume_any(), None);
     Cardinality::new(span, lower, upper)
 }
@@ -59,7 +59,7 @@ fn visit_annotation_range(node: Node<'_>) -> Range {
     Range::new(span, lower, upper)
 }
 
-fn visit_range(node: Node<'_>) -> (Option<Value>, Option<Value>) {
+fn visit_range(node: Node<'_>) -> (Option<Literal>, Option<Literal>) {
     debug_assert_eq!(node.as_rule(), Rule::range);
     let child = node.into_child();
     match child.as_rule() {
@@ -70,7 +70,7 @@ fn visit_range(node: Node<'_>) -> (Option<Value>, Option<Value>) {
     }
 }
 
-fn visit_range_full(node: Node<'_>) -> (Option<Value>, Option<Value>) {
+fn visit_range_full(node: Node<'_>) -> (Option<Literal>, Option<Literal>) {
     debug_assert_eq!(node.as_rule(), Rule::range_full);
     let mut children = node.into_children();
     let lower = visit_value_literal(children.consume_expected(Rule::value_literal));
@@ -79,7 +79,7 @@ fn visit_range_full(node: Node<'_>) -> (Option<Value>, Option<Value>) {
     (Some(lower), Some(upper))
 }
 
-fn visit_range_from(node: Node<'_>) -> (Option<Value>, Option<Value>) {
+fn visit_range_from(node: Node<'_>) -> (Option<Literal>, Option<Literal>) {
     debug_assert_eq!(node.as_rule(), Rule::range_from);
     let mut children = node.into_children();
     let lower = visit_value_literal(children.consume_expected(Rule::value_literal));
@@ -87,7 +87,7 @@ fn visit_range_from(node: Node<'_>) -> (Option<Value>, Option<Value>) {
     (Some(lower), None)
 }
 
-fn visit_range_to(node: Node<'_>) -> (Option<Value>, Option<Value>) {
+fn visit_range_to(node: Node<'_>) -> (Option<Literal>, Option<Literal>) {
     debug_assert_eq!(node.as_rule(), Rule::range_to);
     let mut children = node.into_children();
     let upper = visit_value_literal(children.consume_expected(Rule::value_literal));

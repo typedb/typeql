@@ -42,8 +42,8 @@ impl fmt::Display for Preamble {
 #[derive(Debug, Eq, PartialEq)]
 pub struct DataQuery {
     span: Option<Span>,
-    preambles: Vec<Preamble>,
-    stages: Vec<Stage>,
+    pub preambles: Vec<Preamble>,
+    pub stages: Vec<Stage>,
 }
 
 impl DataQuery {

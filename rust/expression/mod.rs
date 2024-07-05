@@ -14,6 +14,7 @@ use crate::{
     identifier::{Identifier, Variable},
     pretty::Pretty,
     util::write_joined,
+    value::Literal,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -141,32 +142,6 @@ impl fmt::Display for Paren {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Value {
-    span: Option<Span>,
-    inner: String,
-}
-
-impl Value {
-    pub(crate) fn new(span: Option<Span>, inner: String) -> Self {
-        Self { span, inner }
-    }
-}
-
-impl Spanned for Value {
-    fn span(&self) -> Option<Span> {
-        self.span
-    }
-}
-
-impl Pretty for Value {}
-
-impl fmt::Display for Value {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.inner)
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ListIndex {
     span: Option<Span>,
     variable: Variable,
@@ -227,7 +202,7 @@ impl Spanned for ListIndexRange {
 pub enum Expression {
     Variable(Variable),
     ListIndex(Box<ListIndex>),
-    Value(Value),
+    Value(Literal),
     Function(FunctionCall),
     Operation(Box<Operation>),
     Paren(Box<Paren>),

@@ -8,10 +8,6 @@ pub(crate) fn quote(string: &str) -> String {
     format!("\"{string}\"")
 }
 
-pub(crate) fn unquote(quoted_string: &str) -> String {
-    String::from(&quoted_string[1..quoted_string.len() - 1])
-}
-
 pub(crate) fn escape_regex(regex: &str) -> String {
     regex.replace('/', r"\/")
 }

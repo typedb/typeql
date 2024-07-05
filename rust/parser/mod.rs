@@ -20,10 +20,12 @@ use crate::{
     },
     identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
     parser::redefine::visit_query_redefine,
-    pattern::{Pattern, Statement},
+    pattern::Pattern,
     query::{Query, SchemaQuery},
     schema::definable::Definable,
+    statement::Statement,
     type_::{BuiltinValueType, List, Optional, Type},
+    value::{Category, Literal},
     Result,
 };
 
@@ -318,7 +320,7 @@ fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
     BuiltinValueType::new(span, token)
 }
 
-fn visit_integer_literal(node: Node<'_>) -> u64 {
+fn visit_integer_literal(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::integer_literal);
-    node.as_str().parse().unwrap() // TODO what should happen if the number is too large?
+    Literal::new(node.span(), Some(Category::Integer), node.as_str().to_owned())
 }

@@ -36,8 +36,8 @@ impl fmt::Display for ComparisonStatement {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Comparison {
     span: Option<Span>,
-    comparator: token::Comparator,
-    rhs: Expression,
+    pub comparator: token::Comparator,
+    pub rhs: Expression,
 }
 
 impl Comparison {

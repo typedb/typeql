@@ -14,7 +14,7 @@ use crate::{
         statement::visit_comparison,
         visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },
-    pattern::statement::{
+    statement::{
         comparison::ComparisonStatement, Assignment, AssignmentPattern, DeconstructField, InStream, Is, Statement,
         StructDeconstruct,
     },

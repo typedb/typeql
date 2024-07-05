@@ -11,9 +11,9 @@ use crate::{
         statement::{visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_type_ref_scoped},
         visit_label, visit_label_scoped, visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
     },
-    pattern::statement::{
-        type_::{LabelConstraint, Owns, Plays, Relates, Sub, SubKind, TypeConstraintBase, ValueType},
-        Statement, TypeConstraint, TypeStatement,
+    statement::{
+        type_::{Constraint, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, TypeConstraintBase, ValueType},
+        Statement, Type,
     },
     type_::TypeAny,
 };
@@ -24,17 +24,17 @@ pub(super) fn visit_statement_type(node: Node<'_>) -> Statement {
     let mut children = node.into_children();
     let type_ = visit_type_ref_any(children.consume_expected(Rule::type_ref_any));
     let constraints = children.map(visit_type_constraint).collect();
-    Statement::Type(TypeStatement::new(span, type_, constraints))
+    Statement::Type(Type::new(span, type_, constraints))
 }
 
-fn visit_type_constraint(node: Node<'_>) -> TypeConstraint {
+fn visit_type_constraint(node: Node<'_>) -> Constraint {
     debug_assert_eq!(node.as_rule(), Rule::type_constraint);
     let span = node.span();
     let mut children = node.into_children();
     let base = visit_type_constraint_base(children.consume_expected(Rule::type_constraint_base));
     let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     debug_assert_eq!(children.try_consume_any(), None);
-    TypeConstraint::new(span, base, annotations)
+    Constraint::new(span, base, annotations)
 }
 
 fn visit_type_constraint_base(node: Node<'_>) -> TypeConstraintBase {
