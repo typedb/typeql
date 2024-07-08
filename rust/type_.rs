@@ -7,7 +7,10 @@
 use std::fmt;
 
 use crate::{
-    common::{identifier::Identifier, token, Span, Spanned}, pretty::Pretty, schema, variable::Variable
+    common::{identifier::Identifier, token, Span, Spanned},
+    pretty::Pretty,
+    schema,
+    variable::Variable,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

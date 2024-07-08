@@ -11,10 +11,10 @@ use crate::{
         token::{self, Order},
         Span,
     },
-    variable::Variable,
     pretty::Pretty,
     util::write_joined,
     value::Literal,
+    variable::Variable,
 };
 
 #[derive(Debug, Eq, PartialEq)]

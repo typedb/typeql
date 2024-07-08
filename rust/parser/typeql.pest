@@ -45,11 +45,11 @@ var_order = { var ~ ORDER? }
 // REDUCE ======================================================================
 
 stage_reduce = { reduce ~ SEMICOLON }
-reduce = { reduce_limited
+reduce = { CHECK
+         | reduce_first
          | reduce_all ~ ( COMMA ~ reduce_all )*
          }
 
-reduce_limited = { CHECK | reduce_first }
 reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
 
 reduce_all = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE

@@ -297,25 +297,14 @@ fn visit_stage_reduce(node: Node<'_>) -> Reduce {
 pub(super) fn visit_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::reduce);
     let mut children = node.into_children();
-    match children.peek_rule() {
-        Some(Rule::reduce_limited) => {
-            let reduce = visit_reduce_limited(children.consume_expected(Rule::reduce_limited));
-            debug_assert_eq!(children.try_consume_any(), None);
-            reduce
-        }
-        Some(Rule::reduce_all) => Reduce::All(children.map(visit_reduce_all).collect()),
+    let reduce = match children.peek_rule().unwrap() {
+        Rule::CHECK => Reduce::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
+        Rule::reduce_first => Reduce::First(visit_reduce_first(children.consume_expected(Rule::reduce_first))),
+        Rule::reduce_all => Reduce::All(children.by_ref().map(visit_reduce_all).collect()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
-    }
-}
-
-fn visit_reduce_limited(node: Node<'_>) -> Reduce {
-    debug_assert_eq!(node.as_rule(), Rule::reduce_limited);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::CHECK => Reduce::Check(Check::new(child.span())),
-        Rule::reduce_first => Reduce::First(visit_reduce_first(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
+    };
+    debug_assert!(children.try_consume_any().is_none());
+    reduce
 }
 
 fn visit_reduce_first(node: Node<'_>) -> First {

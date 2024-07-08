@@ -11,11 +11,11 @@ use super::{comparison, Statement};
 use crate::{
     common::{token, Span},
     expression::Expression,
-    variable::Variable,
     pretty::{indent, Pretty},
     type_::{Type, TypeAny},
     util::write_joined,
     value::Literal,
+    variable::Variable,
 };
 
 pub mod isa;

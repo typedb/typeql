@@ -12,7 +12,7 @@ use crate::{
         visit_label, visit_label_scoped, visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
-        type_::{Constraint, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ConstraintBase, ValueType},
+        type_::{Constraint, ConstraintBase, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
         Statement, Type,
     },
     type_::TypeAny,

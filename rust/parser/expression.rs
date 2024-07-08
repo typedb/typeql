@@ -103,7 +103,7 @@ pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
 
 pub(super) fn visit_quoted_string_literal(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::quoted_string_literal);
-    Literal::new(node.span(), Some(Category::String), node.as_str().to_owned()) 
+    Literal::new(node.span(), Some(Category::String), node.as_str().to_owned())
 }
 
 pub(super) fn visit_expression_struct(node: Node<'_>) -> Literal {

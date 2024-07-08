@@ -7,8 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span},
-    common::identifier::Identifier,
+    common::{identifier::Identifier, token, Span},
     util::write_joined,
     value::Literal,
 };
@@ -239,7 +238,7 @@ impl fmt::Display for Unique {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Values {
     span: Option<Span>,
-    values: Vec<Literal>, 
+    values: Vec<Literal>,
 }
 
 impl Values {

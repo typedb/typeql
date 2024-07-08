@@ -8,9 +8,9 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span},
-    variable::Variable,
     pretty::Pretty,
     util::write_joined,
+    variable::Variable,
 };
 
 #[derive(Debug, Eq, PartialEq)]
