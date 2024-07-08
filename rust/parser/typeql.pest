@@ -120,8 +120,8 @@ role_player = { type_ref_list ~ COLON ~ var
               | var
               }
 
-statement_deletable = { HAS ~ var ~ OF ~ var
-                      | LINKS ~ relation ~ OF ~ var
+statement_deletable = { HAS? ~ var ~ OF ~ var
+                      | LINKS? ~ relation ~ OF ~ var
                       | var
                       }
 

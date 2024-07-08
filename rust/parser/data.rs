@@ -183,20 +183,22 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
     let span = node.span();
     let mut children = node.into_children();
     let kind = match children.peek_rule().unwrap() {
-        Rule::var => DeletableKind::Concept { variable: visit_var(children.consume_expected(Rule::var)) },
-        Rule::LINKS => {
-            children.skip_expected(Rule::LINKS);
-            let players = visit_relation(children.consume_expected(Rule::relation));
-            children.skip_expected(Rule::OF);
-            let relation = visit_var(children.consume_expected(Rule::var));
-            DeletableKind::Links { players, relation }
+        Rule::var if children.len() == 1 => {
+            DeletableKind::Concept { variable: visit_var(children.consume_expected(Rule::var)) }
         }
-        Rule::HAS => {
-            children.skip_expected(Rule::HAS);
+        Rule::HAS | Rule::var => {
+            children.try_consume_expected(Rule::HAS);
             let attribute = visit_var(children.consume_expected(Rule::var));
             children.skip_expected(Rule::OF);
             let owner = visit_var(children.consume_expected(Rule::var));
             DeletableKind::Has { attribute, owner }
+        }
+        Rule::LINKS | Rule::relation => {
+            children.try_consume_expected(Rule::LINKS);
+            let players = visit_relation(children.consume_expected(Rule::relation));
+            children.skip_expected(Rule::OF);
+            let relation = visit_var(children.consume_expected(Rule::var));
+            DeletableKind::Links { players, relation }
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
@@ -325,16 +327,24 @@ fn visit_reduce_value(node: Node<'_>) -> ReduceValue {
             span,
             children.try_consume_expected(Rule::vars).map(visit_vars).unwrap_or_default(),
         )),
-        Rule::MAX => ReduceValue::Stat(Stat::new(span, Aggregate::Max, visit_var(children.consume_expected(Rule::var)))),
-        Rule::MIN => ReduceValue::Stat(Stat::new(span, Aggregate::Min, visit_var(children.consume_expected(Rule::var)))),
+        Rule::MAX => {
+            ReduceValue::Stat(Stat::new(span, Aggregate::Max, visit_var(children.consume_expected(Rule::var))))
+        }
+        Rule::MIN => {
+            ReduceValue::Stat(Stat::new(span, Aggregate::Min, visit_var(children.consume_expected(Rule::var))))
+        }
         Rule::MEAN => {
             ReduceValue::Stat(Stat::new(span, Aggregate::Mean, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MEDIAN => {
             ReduceValue::Stat(Stat::new(span, Aggregate::Median, visit_var(children.consume_expected(Rule::var))))
         }
-        Rule::STD => ReduceValue::Stat(Stat::new(span, Aggregate::Std, visit_var(children.consume_expected(Rule::var)))),
-        Rule::SUM => ReduceValue::Stat(Stat::new(span, Aggregate::Sum, visit_var(children.consume_expected(Rule::var)))),
+        Rule::STD => {
+            ReduceValue::Stat(Stat::new(span, Aggregate::Std, visit_var(children.consume_expected(Rule::var))))
+        }
+        Rule::SUM => {
+            ReduceValue::Stat(Stat::new(span, Aggregate::Sum, visit_var(children.consume_expected(Rule::var))))
+        }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.to_string() }),
     }
 }
