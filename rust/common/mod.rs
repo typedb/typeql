@@ -14,13 +14,13 @@ pub use error::Error;
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct LineColumn {
-    pub line: usize,
-    pub column: usize,
+    pub line: u32,
+    pub column: u32,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Span {
     pub begin: LineColumn,
     pub end: LineColumn,

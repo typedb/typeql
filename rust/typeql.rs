@@ -4,49 +4,53 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+#![deny(rust_2018_idioms)]
+#![deny(rust_2021_compatibility)]
+#![deny(rust_2024_compatibility)]
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unused_must_use)]
 
+pub mod annotation;
 pub mod builder;
 pub mod common;
+pub mod expression;
 pub mod parser;
 pub mod pattern;
+mod pretty;
 pub mod query;
-#[macro_use]
+pub mod schema;
+pub mod statement;
+pub mod type_;
 mod util;
+mod value;
+mod variable;
 
-pub use common::Result;
-use parser::visit_eof_query;
-use query::Query;
+use schema::definable::Struct;
+
+use crate::parser::{visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query};
+pub use crate::{
+    common::Result,
+    pattern::Pattern,
+    query::Query,
+    schema::definable::{Definable, Function},
+    statement::Statement,
+    type_::{Label, ScopedLabel, Type, TypeAny},
+    value::Literal,
+    variable::Variable,
+};
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())
 }
 
-// pub fn parse_queries(typeql_queries: &str) -> Result<impl Iterator<Item = Result<Query>> + '_> {
-//     visit_eof_queries(typeql_queries.trim_end())
-// }
+pub fn parse_label(typeql_label: &str) -> Result<Label> {
+    visit_eof_label(typeql_label)
+}
 
-// pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern> {
-//     visit_eof_pattern(typeql_pattern.trim_end())
-// }
+pub fn parse_definition_function(typeql_function: &str) -> Result<Function> {
+    visit_eof_definition_function(typeql_function.trim_end())
+}
 
-// pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>> {
-//     visit_eof_patterns(typeql_patterns.trim_end())
-// }
-
-// pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>> {
-//     visit_eof_definables(typeql_definables.trim_end())
-// }
-
-// pub fn parse_rule(typeql_rule: &str) -> Result<Rule> {
-//     visit_eof_schema_rule(typeql_rule.trim_end())
-// }
-
-// pub fn parse_statement(typeql_statement: &str) -> Result<Statement> {
-//     visit_eof_statement(typeql_statement.trim_end())
-// }
-
-// pub fn parse_label(typeql_label: &str) -> Result<Label> {
-//     visit_eof_label(typeql_label)
-// }
+pub fn parse_definition_struct(typeql_struct: &str) -> Result<Struct> {
+    visit_eof_definition_struct(typeql_struct.trim_end())
+}

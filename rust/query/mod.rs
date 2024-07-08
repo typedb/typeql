@@ -6,49 +6,38 @@
 
 use std::fmt;
 
-pub use self::typeql_define::TypeQLDefine;
-use crate::{common::{Span, Spanned}, enum_getter};
+use self::pipeline::stage::{Match, Stage};
+pub use self::{
+    pipeline::{stage, Pipeline},
+    schema::SchemaQuery,
+};
+use crate::util::enum_getter;
 
-mod typeql_define;
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum SchemaQuery {
-    Define(TypeQLDefine),
-}
-
-enum_getter! { SchemaQuery
-    into_define(Define) => TypeQLDefine,
-}
-
-impl Spanned for SchemaQuery {
-    fn span(&self) -> Option<Span> {
-        match self {
-            SchemaQuery::Define(define) => define.span(),
-        }
-    }
-}
-
-impl fmt::Display for SchemaQuery {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Define(define_query) => fmt::Display::fmt(define_query, f),
-        }
-    }
-}
+pub mod pipeline;
+pub mod schema;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Schema(SchemaQuery),
+    Pipeline(Pipeline),
 }
 
 enum_getter! { Query
     into_schema(Schema) => SchemaQuery,
+    into_pipeline(Pipeline) => Pipeline,
 }
 
 impl fmt::Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Schema(schema_query) => fmt::Display::fmt(schema_query, f),
+            Self::Pipeline(data_query) => fmt::Display::fmt(data_query, f),
         }
+    }
+}
+
+impl From<Match> for Query {
+    fn from(value: Match) -> Self {
+        Self::Pipeline(Pipeline::new(None, Vec::new(), vec![Stage::Match(value)]))
     }
 }

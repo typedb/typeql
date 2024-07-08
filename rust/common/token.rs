@@ -8,7 +8,7 @@ use std::fmt;
 
 macro_rules! string_enum {
     {$name:ident $($item:ident = $value:tt),* $(,)?} => {
-        #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+        #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
         pub enum $name {
             $($item),*
         }
@@ -45,7 +45,6 @@ macro_rules! string_enum {
 }
 
 string_enum! { Type
-    Thing = "thing",
     Entity = "entity",
     Relation = "relation",
     Attribute = "attribute",
@@ -54,8 +53,11 @@ string_enum! { Type
 
 string_enum! { Clause
     Define = "define",
+    Redefine = "redefine",
     Undefine = "undefine",
     Insert = "insert",
+    Put = "put",
+    Update = "update",
     Delete = "delete",
     Match = "match",
     Group = "group",
@@ -64,6 +66,7 @@ string_enum! { Clause
 }
 
 string_enum! { Modifier
+    Filter = "filter",
     Sort = "sort",
     Offset = "offset",
     Limit = "limit",
@@ -107,31 +110,51 @@ string_enum! { Schema
     Then = "then",
 }
 
-string_enum! { Constraint
+string_enum! { Keyword
     Abstract = "abstract",
     As = "as",
+    Alias = "alias",
     Assign = "=",
+    From = "from",
+    Fun = "fun",
     Has = "has",
     IID = "iid",
+    In = "in",
     Is = "is",
     Isa = "isa",
     IsaX = "isa!",
+    Label = "label",
+    Links = "links",
+    Not = "not",
+    Of = "of",
+    Or = "or",
     Owns = "owns",
     Plays = "plays",
-    Regex = "regex",
     Relates = "relates",
+    Struct = "struct",
     Sub = "sub",
     SubX = "sub!",
-    Type = "type",
+    Try = "try",
     ValueType = "value",
 }
 
 string_enum! { Annotation
+    Abstract = "abstract",
+    Cardinality = "card",
+    Cascade = "cascade",
+    Distinct = "distinct",
+    Independent = "independent",
     Key = "key",
+    Range = "range",
+    Regex = "regex",
+    Subkey = "subkey",
     Unique = "unique",
+    Values = "values",
 }
 
 string_enum! { Aggregate
+    Check = "check",
+    First = "first",
     Count = "count",
     Max = "max",
     Mean = "mean",
@@ -143,8 +166,12 @@ string_enum! { Aggregate
 
 string_enum! { ValueType
     Boolean = "boolean",
+    Date = "date",
     DateTime = "datetime",
+    DateTimeTZ = "datetime-tz",
+    Decimal = "decimal",
     Double = "double",
+    Duration = "duration",
     Long = "long",
     String = "string",
 }
@@ -170,14 +197,11 @@ string_enum! { Function
     Max = "max",
     Min = "min",
     Round = "round",
-}
-
-string_enum! { Projection
-    As = "as",
+    Length = "length",
 }
 
 string_enum! { Char
-    // Question = "?",
+    Question = "?",
     Dollar = "$",
     Underscore = "_",
     CurlyLeft = "{",

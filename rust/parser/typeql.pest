@@ -5,90 +5,61 @@
  */
 
 eof_query = { SOI ~ query ~ EOI }
-eof_queries = { SOI ~ query+ ~ EOI }
-eof_pattern = { SOI ~ pattern ~ EOI }
-eof_patterns = { SOI ~ patterns ~ EOI }
-eof_definables = { SOI ~ definables ~ EOI }
-eof_statement = { SOI ~ statement ~ EOI }
 eof_label = { SOI ~ label ~ EOI }
 eof_definition_function = { SOI ~ definition_function ~ EOI }
+eof_definition_struct = { SOI ~ definition_struct ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
-query = { query_schema | query_data }
+query = { query_schema | query_pipeline }
 
-query_schema = { query_define | query_undefine }
-query_define = { DEFINE ~ definables }
-query_undefine = { UNDEFINE ~ definables }
+// QUERY PIPELINES =============================================================
 
-query_data = { query_stage+ }
-query_stage = { stage_match
-              | stage_insert
-              | stage_delete
-              | stage_put
-              | stage_fetch
-              | stage_reduce
-              | stage_modifier
-              }
+query_pipeline = { preamble* ~ query_stage+ ~ query_stage_terminal? }
 
-// query_get_group_agg = { query_get ~ clause_group ~ stage_reduce }
-// query_get_group = { query_get ~ clause_group }
-// query_get_aggregate = { query_get ~ stage_reduce }
-// query_get = { stage_match ~ clause_get ~ stage_modifier* }
-// clause_group = { GROUP ~ VAR ~ SEMICOLON } // TODO: eliminate?
+preamble = { WITH ~ definition_function }
+query_stage = { stage_match | stage_insert | stage_put | stage_update | stage_delete | stage_modifier }
+query_stage_terminal = { stage_fetch | stage_reduce }
+
+// stage_group = { GROUP ~ var ~ SEMICOLON } // TODO: eliminate?
 
 stage_match = { MATCH ~ patterns }
-stage_insert = { INSERT ~ statement_things }
-stage_delete = { DELETE ~ statement_things }
-stage_put = { DELETE ~ statement_things }
-stage_fetch = { FETCH ~ projections }
-stage_reduce = { reduce ~ SEMICOLON }
-reduce = { reduce_limited
-         | reduce_all ~ ( COMMA ~ reduce_all )* }
-reduce_all = { COUNT ~ PAREN_OPEN ~ VAR? ~ ( COMMA ~ VAR )* ~ PAREN_CLOSE
-             | MAX ~ PAREN_OPEN ~ VAR ~ PAREN_CLOSE
-             | MEAN ~ PAREN_OPEN ~ VAR ~ PAREN_CLOSE
-             | MEDIAN ~ PAREN_OPEN ~ VAR ~ PAREN_CLOSE
-             | MIN ~ PAREN_OPEN ~ VAR ~ PAREN_CLOSE
-             | STD ~ PAREN_OPEN ~ VAR ~ PAREN_CLOSE
-             | SUM ~ PAREN_OPEN ~ VAR ~ PAREN_CLOSE
-             }
-reduce_limited = { CHECK | reduce_first }
-reduce_first = { FIRST ~ VAR ~ ( COMMA ~ VAR )* }
+
+stage_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
+stage_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
+stage_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
+
+stage_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
 
 // QUERY MODIFIERS =============================================================
 
-stage_modifier = { stage_filter ~ SEMICOLON | stage_sort ~ SEMICOLON | offset ~ SEMICOLON | stage_limit ~ SEMICOLON }
-stage_filter = { FILTER ~ VAR ~ ( COMMA ~ VAR )* }
-stage_limit = { LIMIT ~ LONG_VALUE }
+stage_modifier = { stage_filter ~ SEMICOLON | stage_sort ~ SEMICOLON | stage_offset ~ SEMICOLON | stage_limit ~ SEMICOLON }
+
+stage_filter = { FILTER ~ vars }
 stage_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* }
-var_order = { VAR ~ ORDER_? }
-offset = { OFFSET ~ LONG_VALUE }
+stage_offset = { OFFSET ~ integer_literal }
+stage_limit = { LIMIT ~ integer_literal }
 
-// FETCH QUERY =================================================================
+var_order = { var ~ ORDER? }
 
-projections = { ( projection ~ SEMICOLON )+ }
-projection = { projection_key_var ~ COLON ~ projection_attributes
-             | projection_key_var
-             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE }
+// REDUCE ======================================================================
 
-projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
-projection_attribute = { label ~ projection_key_as_label? }
+stage_reduce = { reduce ~ SEMICOLON }
+reduce = { CHECK
+         | reduce_first
+         | reduce_value ~ ( COMMA ~ reduce_value )*
+         }
 
-// TODO: we have to validate this is a fetch or reduce ended pipeline
-projection_subquery = { query_data }
+reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
 
-projection_key_var = { VAR ~ projection_key_as_label? }
-projection_key_as_label = { AS ~ projection_key_label }
-projection_key_label = { QUOTED_STRING | label }
-
-// SCHEMA QUERY ================================================================
-
-definables = { definable+ }
-definable = { ( definition_type ~ SEMICOLON ) 
-            // | definition_function
-            // | definition_struct
-            }
+reduce_value = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
+               | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               }
 
 // QUERY PATTERNS ==============================================================
 
@@ -102,220 +73,329 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_single | statement_multi }
+statement = { statement_type | statement_thing_var | statement_single | statement_relation_anonymous }
+
+// TYPE STATEMENTS =============================================================
+
+statement_type = { type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* }
+type_constraint = { type_constraint_base ~ annotations? }
+type_constraint_base = { sub_constraint | value_type_constraint | label_constraint
+                       | owns_constraint | relates_constraint | plays_constraint
+                       }
+
+sub_constraint = { SUB_ ~ type_ref_any }
+value_type_constraint = { VALUE ~ value_type }
+label_constraint = { LABEL ~ ( label_scoped | label ) }
+owns_constraint = { OWNS ~ type_ref_list
+                  | OWNS ~ type_ref ~ ( AS ~ type_ref )?
+                  }
+relates_constraint = { RELATES ~ type_ref_list
+                     | RELATES ~ type_ref ~ ( AS ~ type_ref )?
+                     }
+plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
+
+// THING STATEMENTS ============================================================
+
+statement_thing = { statement_thing_var | statement_relation_anonymous }
+statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* }
+
+statement_thing_var = { var ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
+                      | var ~ ( value_literal | expression_struct ) ~ isa_constraint
+                      | var ~ comparison ~ isa_constraint
+                      }
+
+thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
+
+isa_constraint = { ISA_ ~ type_ref }
+iid_constraint = { IID ~ iid_value }
+has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
+                 | HAS ~ type_ref ~ ( comparison | expression_value | var )
+                 | HAS ~ var
+                 }
+links_constraint = { LINKS ~ relation }
+
+relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE } // A list of role players in a Relations
+role_player = { type_ref_list ~ COLON ~ var
+              | type_ref ~ COLON ~ var
+              | var
+              }
+
+statement_deletable = { HAS? ~ var ~ OF ~ var
+                      | LINKS? ~ relation ~ OF ~ var
+                      | var
+                      }
 
 // SINGLE STATEMENTS ===========================================================
 
 statement_single = { statement_is | statement_comparison | statement_assignment | statement_in }
 
-statement_is = { VAR ~ IS ~ VAR }
+statement_is = { var ~ IS ~ var }
 statement_comparison = { expression_value ~ comparison }
-statement_assignment = { assignment_left ~ ASSIGN ~ expression_value_or_list }
-assignment_left = { VAR ~ ( COMMA ~ VAR )* | struct_destructor }
-statement_in = { VAR ~ ( COMMA ~ VAR )* ~ IN ~ expression_function }
-
-// MULTI STATEMENT =============================================================
-
-statement_multi = { statement_type | statement_thing }
-
-// TYPE STATEMENTS =============================================================
-
-statement_type = { type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* }
-type_constraint = { SUB_ ~ type_ref_any ~ annotations_sub
-                  | VALUE ~ value_type_primitive ~ annotations_value
-                  | TYPE ~ label_any
-                  | owns_constraint
-                  | relates_constraint
-                  | plays_constraint
-                  }
-
-owns_constraint = { OWNS ~ type_ref_list ~ annotations_owns
-                  | OWNS ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_owns
-                  }
-relates_constraint = { RELATES ~ type_ref_list ~ annotations_relates
-                     | RELATES ~ type_ref ~ ( AS ~ type_ref )? ~ annotations_relates
-                     }
-plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
-
-annotations_sub = { ( ANNOTATION_ABSTRACT | ANNOTATION_CASCADE | ANNOTATION_INDEPENDENT )* }
-annotations_owns = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_KEY | ANNOTATION_UNIQUE )* }
-annotations_relates = { ( annotation_card | ANNOTATION_DISTINCT | ANNOTATION_CASCADE )* } // ( ANNOTATION_ABSTRACT )?
-annotations_value = { ( annotation_regex | annotation_values )* }
-
-annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ ANNOTATION_CARD_LOWER ~ COMMA ~ ANNOTATION_CARD_UPPER ~ PAREN_CLOSE }
-annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ QUOTED_STRING ~ PAREN_CLOSE }
-annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ label ~ PAREN_CLOSE }
-annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_primitive ~ ( COMMA ~ value_primitive )* ~ PAREN_CLOSE }
-
-// THING STATEMENTS ============================================================
-
-statement_things = { ( statement_thing ~ SEMICOLON )+ }
-statement_thing = { thing_start ~ ( COMMA ~ thing_constraint )* }
-
-thing_start = { relation
-              | VAR ~ thing_constraint
-              | VAR ~ value_primitive ~ ISA_ ~ type_ref
-              | VAR ~ expression_struct ~ ISA_ ~ type_ref
-              | VAR ~ comparison ~ ISA_ ~ type_ref
-              }
-
-thing_constraint = { ISA_ ~ type_ref
-                   | IID ~ IID_VALUE
-                   | relates_constraint
-                   | has_constraint
-                   }
-
-has_constraint = { HAS ~ ( VAR | label ~ ( expression_value | comparison ) )
-                 | HAS ~ type_ref_list ~ ( expression_list | comparison )
-                 }
-relation_constraint = { LINKS ~ relation }
-
-relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE } // A list of role players in a Relations
-role_player = { type_ref_list ~ COLON ~ VAR
-              | type_ref ~ COLON ~ VAR
-              | VAR
-              }
-
-// COMPARISON CONSTRUCTS =======================================================
+statement_assignment = { assignment_left ~ ASSIGN ~ expression }
+assignment_left = { vars | struct_destructor }
+statement_in = { vars ~ IN ~ expression_function }
 
 comparison = { comparator ~ expression_value }
 comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 
 // EXPRESSION CONSTRUCTS =======================================================
 
-expression_value_or_list = { expression_value | expression_list }
+expression = { expression_list | expression_value }
 
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
-expression_base = _{ VAR | value_primitive | expression_function | expression_parenthesis | expression_list_index }
+expression_base = { expression_list_index | expression_parenthesis | expression_function | value_literal | var }
 
-expression_operator = _{ POWER | MULTIPLY | DIVIDE | MODULO | ADD | SUBTRACT }
+expression_operator = _{ POWER | TIMES | DIVIDE | MODULO | PLUS | MINUS }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
 
-expression_list_index = { VAR ~ list_index }
+expression_list_index = { var ~ list_index }
 list_index = { SQ_BRACKET_OPEN ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
-expression_function_name = { EXPR_FUNC_NAME | MAX | MIN | label }
-expression_arguments = { expression_value ~ ( COMMA ~ expression_value )* }
+expression_function_name = { builtin_func_name | identifier }
+expression_arguments = { expression ~ ( COMMA ~ expression )* }
 
-expression_list = { VAR | expression_list_new | expression_list_subrange }
+expression_list = { expression_list_subrange | expression_list_new }
 expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ SQ_BRACKET_CLOSE }
-expression_list_subrange = { VAR ~ list_range }
-list_range = { SQ_BRACKET_OPEN ~ expression_value ~ COLON ~ expression_value ~ SQ_BRACKET_CLOSE }
+expression_list_subrange = { var ~ list_range }
+list_range = { SQ_BRACKET_OPEN ~ expression_value ~ DOUBLE_DOT ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
 struct_value = { expression_value | expression_struct }
 
+// FETCH QUERY =================================================================
+
+stage_fetch = { FETCH ~ projections }
+
+projections = { ( projection ~ SEMICOLON )+ }
+projection = { projection_key_var ~ COLON ~ projection_attributes
+             | projection_key_var
+             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE
+             }
+
+projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
+projection_attribute = { label ~ projection_key_as_label? }
+
+// TODO: we have to validate this is a fetch or reduce ended pipeline
+projection_subquery = { query_pipeline }
+
+projection_key_var = { var ~ projection_key_as_label? }
+projection_key_as_label = { AS ~ projection_key_label }
+projection_key_label = { quoted_string_literal | label }
+
+// SCHEMA QUERY ================================================================
+
+query_schema = { query_define | query_undefine | query_redefine }
+
+// DEFINE QUERY ================================================================
+
+query_define = { DEFINE ~ definables }
+
+definables = { definable+ }
+definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
+
 // TYPE DEFINITION =============================================================
 
-definition_type = { label ~ type_constraint_declaration ~ ( COMMA ~ type_constraint_declaration )* }
-type_constraint_declaration = { sub_declaration
-                              | value_type_declaration
-                              | owns_declaration
-                              | relates_declaration
-                              | plays_declaration
-                              }
+definition_type = { kind? ~ identifier ~ type_capability ~ ( COMMA ~ type_capability )* }
+type_capability = { type_capability_base ~ annotations? }
+type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
+                       | owns_declaration | plays_declaration | relates_declaration
+                       }
 
-sub_declaration = { SUB ~ label ~ annotations_sub }
-value_type_declaration = { VALUE ~ ( value_type_primitive ~ annotations_value | label ) }
-owns_declaration = { OWNS ~ list_label ~ annotations_owns
-                   | OWNS ~ label ~ ( AS ~ label )? ~ annotations_owns
+sub_declaration = { SUB ~ label }
+alias_declaration = { ALIAS ~ label } 
+value_type_declaration = { VALUE ~ value_type }
+owns_declaration = { OWNS ~ label_list
+                   | OWNS ~ label ~ ( AS ~ label )?
                    }
-relates_declaration = { RELATES ~ list_label ~ annotations_relates
-                      | RELATES ~ label ~ ( AS ~ label )? ~ annotations_relates
-                      }
 plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }
+relates_declaration = { RELATES ~ label_list
+                      | RELATES ~ label ~ ( AS ~ label )?
+                      }
 
 // FUNCTION DEFINITION =========================================================
 
 definition_function = { FUN ~ function_signature ~ COLON ~ stage_match ~ stage_modifier* ~ return_statement }
 
-function_signature = { label ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_return }
+function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
-function_arguments = { ( function_argument ~ ( COMMA ~ function_argument ) * )? }
-function_argument = { VAR ~ COLON ~ label }
+function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* )? }
+function_argument = { var ~ COLON ~ label_arg }
 
-function_return = { function_return_stream | function_return_single }
-function_return_stream = { CURLY_OPEN ~ function_return_value ~ ( "," ~ function_return_value )* ~ CURLY_CLOSE }
-function_return_single = { function_return_value ~ ( "," ~ function_return_value )* }
-function_return_value = { function_return_value_optional | function_return_value_base }
-function_return_value_optional = { function_return_value_base ~ QUESTION }
-function_return_value_base = { label | list_label | value_type_primitive | list_value_type_primitive }
+function_output = { function_output_stream | function_output_single }
+function_output_stream = { CURLY_OPEN ~ function_output_type ~ ( COMMA ~ function_output_type )* ~ CURLY_CLOSE }
+function_output_single = { function_output_type ~ ( COMMA ~ function_output_type )* }
+function_output_type = { value_type_optional | value_type_list | value_type }
 
 return_statement = { RETURN ~ ( return_statement_stream | return_statement_single ) ~ SEMICOLON }
-return_statement_stream = { CURLY_OPEN ~ VAR ~ ( COMMA ~ VAR )* ~ CURLY_CLOSE }
-return_statement_single = { ( VAR | reduce ) ~ ( COMMA ~ ( VAR | reduce ) )* }
+return_statement_stream = { CURLY_OPEN ~ vars ~ CURLY_CLOSE }
+return_statement_single = { ( var | reduce ) ~ ( COMMA ~ ( var | reduce ) )* }
 
-// STRUCT CONSTRUCTS ===========================================================
+// STRUCT DEFINITION ===========================================================
 
-definition_struct = { STRUCT ~ label ~ COLON ~ definition_struct_fields ~ SEMICOLON }
+definition_struct = { STRUCT ~ identifier ~ COLON ~ definition_struct_fields ~ SEMICOLON }
 definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* }
-definition_struct_field = { struct_key ~ VALUE ~ ( value_type_primitive | label ) }
+definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type }
+
+struct_field_value_type = { value_type_optional | value_type }
 
 struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value }
-struct_destructor_value = { VAR | struct_destructor }
+struct_destructor_value = { var | struct_destructor }
 
-struct_key = { label }
+// REDEFINE QUERY ==============================================================
+
+query_redefine = { REDEFINE ~ ( redefinable ~ SEMICOLON )+ }
+redefinable = { kind? ~ identifier ~ type_capability }
+
+// UNDEFINE QUERY ==============================================================
+
+query_undefine = { UNDEFINE ~ undefinables }
+
+undefinables = { ( undefinable ~ SEMICOLON )+ }
+undefinable = { undefine_from | undefine_function | undefine_struct | label }
+
+undefine_from = { undefine_annotation_from_capability
+                | undefine_annotation_from_type
+                | undefine_capability
+                | undefine_override
+                }
+undefine_annotation_from_capability = { annotation_category ~ FROM ~ label ~ type_capability_base }
+undefine_annotation_from_type = { annotation_category ~ FROM ~ label }
+undefine_capability = { type_capability_base ~ FROM ~ label }
+undefine_override = { AS ~ label ~ FROM ~ label ~ type_capability_base }
+
+undefine_function = { FUN ~ identifier }
+undefine_struct = { STRUCT ~ identifier }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type_ref_any = { type_ref_scoped | type_ref | VAR }
-type_ref_scoped = { label_scoped | VAR }
-type_ref = { label | VAR }
-type_ref_list = { list_label | LIST_VAR }
+label = ${ kind | ROLE | identifier } // type label
+label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
-label_any = { label_scoped | label }
-label_scoped = { LABEL_SCOPED }
-label = { LABEL | type_native | unreserved }
-list_label = { LABEL ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
 
-// LITERAL INPUT VALUES ========================================================
+type_ref_any = { type_ref_scoped | type_ref }
+type_ref_scoped = { label_scoped | var }
+type_ref = { label | var }
+type_ref_list = { label_list | var_list }
 
-type_native = { ENTITY | ATTRIBUTE | RELATION | ROLE }
+label_arg = { label_list | label }
+label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
-value_type_primitive = { LONG | DOUBLE | STRING | BOOLEAN | DATETIME }
-list_value_type_primitive = { value_type_primitive ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+struct_key = { identifier }
 
-value_primitive = { QUOTED_STRING | DATETIME_VALUE | DATE_VALUE | BOOLEAN_
-                  | signed_double | signed_long
-                  }
+iid_value = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
 
-signed_double = { sign? ~ DOUBLE_VALUE }
-signed_long = { sign? ~ LONG_VALUE }
-sign = { ADD | SUBTRACT }
+// VARIABLES ===================================================================
 
-// UNRESERVED KEYWORDS =========================================================
-// Most of TypeQL syntax should not be reserved from being used as identifiers
+vars = { var ~ ( COMMA ~ var )* }
 
-unreserved = { VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS }
+var = ${ VAR_ANONYMOUS | var_named }
+VAR_ANONYMOUS = @{ "$_" ~ WB }
+var_named = ${ "$" ~ identifier_var }
+identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
+
+var_list = ${ var ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+
+// ========================================================
+
+value_type = { value_type_primitive | identifier }
+value_type_optional = { value_type ~ QUESTION }
+value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+
+value_type_primitive = { BOOLEAN | LONG | DOUBLE | DECIMAL
+                       | DATETIME_TZ | DATETIME | DATE | DURATION
+                       | STRING
+                       }
+value_literal = { quoted_string_literal | datetime_tz_literal | datetime_literal | date_literal
+                | boolean_literal | signed_decimal | signed_integer
+                }
+
+signed_decimal = { sign? ~ decimal_literal }
+signed_integer = { sign? ~ integer_literal }
+sign = { PLUS | MINUS }
+
+// ANNOTATIONS =================================================================
+
+annotations = { annotation+ }
+annotation = { ANNOTATION_ABSTRACT
+             | ANNOTATION_CASCADE
+             | ANNOTATION_DISTINCT
+             | ANNOTATION_INDEPENDENT
+             | ANNOTATION_KEY
+             | ANNOTATION_UNIQUE
+             | annotation_card
+             | annotation_range
+             | annotation_regex
+             | annotation_subkey
+             | annotation_values
+             }
+
+annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ DOUBLE_DOT ~ integer_literal? ~ PAREN_CLOSE }
+annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
+annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ identifier ~ PAREN_CLOSE }
+annotation_range = { ANNOTATION_RANGE ~ PAREN_OPEN ~ range ~ PAREN_CLOSE }
+annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ PAREN_CLOSE }
+
+range = { range_full | range_from | range_to }
+range_from = { range_bound ~ DOUBLE_DOT }
+range_to = { DOUBLE_DOT ~ range_bound }
+range_full = { range_bound ~ DOUBLE_DOT ~ range_bound }
+range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
 
+reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE
+           | ENTITY | RELATION | ATTRIBUTE | ROLE
+           | ASC | DESC
+           | STRUCT | FUN | RETURN
+           | ALIAS | SUB | OWNS | AS | PLAYS | RELATES
+           | IID | ISA | LINKS | HAS
+           | IS | OR | NOT | TRY | IN
+           | OF
+           | TRUE | FALSE
+           }
+
+unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
+             | CHECK | FIRST
+             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
+             | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
+             | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
+             | FROM
+             }
+
 // QUERY COMMAND KEYWORDS
 
+WITH = @{ "with" ~ WB }
 MATCH = @{ "match" ~ WB }
 FETCH = @{ "fetch" ~ WB }
 DEFINE = @{ "define" ~ WB }
 UNDEFINE = @{ "undefine" ~ WB }
+REDEFINE = @{ "redefine" ~ WB }
 INSERT = @{ "insert" ~ WB }
+PUT = @{ "put" ~ WB }
+UPDATE = @{ "update" ~ WB }
 DELETE = @{ "delete" ~ WB }
-CHECK = @{ "check" }
+
+CHECK = @{ "check" ~ WB }
 FIRST = @{ "first" ~ WB }
 
-// NATIVE TYPE KEYWORDS
+// THING KIND KEYWORDS
 
+kind = { ENTITY | ATTRIBUTE | RELATION }
 ENTITY = @{ "entity" ~ WB }
 ATTRIBUTE = @{ "attribute" ~ WB }
 RELATION = @{ "relation" ~ WB }
 ROLE = @{ "role" ~ WB }
 
-// DELETE AND GET QUERY MODIFIER KEYWORDS
+// QUERY MODIFIER KEYWORDS
 
 FILTER = @{ "filter" ~ WB }
 LIMIT = @{ "limit" ~ WB }
 OFFSET = @{ "offset" ~ WB }
 SORT = @{ "sort" ~ WB }
-ORDER_ = @{ ASC | DESC }
+
+ORDER = ${ ASC | DESC }
 ASC = @{ "asc" ~ WB }
 DESC = @{ "desc" ~ WB }
 
@@ -326,16 +406,32 @@ RETURN = @{ "return" ~ WB }
 
 // TYPE VARIABLE CONSTRAINT KEYWORDS
 
-TYPE = @{ "type" ~ WB }
+ALIAS = @{ "alias" ~ WB }
+AS = @{ "as" ~ WB }
+FROM = @{ "from" ~ WB }
+LABEL = @{ "label" ~ WB }
+OF = @{ "of" ~ WB }
+OWNS = @{ "owns" ~ WB }
+PLAYS = @{ "plays" ~ WB }
+RELATES = @{ "relates" ~ WB }
 SUB_ = ${ SUBX | SUB }
 SUB = @{ "sub" ~ WB }
 SUBX = @{ "sub!" ~ WB }
-OWNS = @{ "owns" ~ WB }
-AS = @{ "as" ~ WB }
-PLAYS = @{ "plays" ~ WB }
-RELATES = @{ "relates" ~ WB }
 
 // TYPE ANNOTATIONS
+
+annotation_category = ${ ANNOTATION_ABSTRACT
+                       | ANNOTATION_CARD
+                       | ANNOTATION_CASCADE
+                       | ANNOTATION_DISTINCT
+                       | ANNOTATION_INDEPENDENT
+                       | ANNOTATION_KEY
+                       | ANNOTATION_RANGE
+                       | ANNOTATION_REGEX
+                       | ANNOTATION_SUBKEY
+                       | ANNOTATION_UNIQUE
+                       | ANNOTATION_VALUES
+                       }
 
 // unparametrized
 ANNOTATION_ABSTRACT = @{ "@abstract" ~ WB }
@@ -346,14 +442,11 @@ ANNOTATION_INDEPENDENT = @{ "@independent" ~ WB }
 ANNOTATION_UNIQUE = @{ "@unique" ~ WB }
 
 // parametrized
-ANNOTATION_CARD = @{ "@card" }
-ANNOTATION_RANGE = @{ "@range" }
-ANNOTATION_REGEX = @{ "@regex" }
-ANNOTATION_SUBKEY = @{ "@subkey" }
-ANNOTATION_VALUES = @{ "@values" }
-
-ANNOTATION_CARD_LOWER = @{ ASCII_DIGIT+ }
-ANNOTATION_CARD_UPPER = @{ ASCII_DIGIT+ | "*" }
+ANNOTATION_CARD = @{ "@card" ~ WB }
+ANNOTATION_RANGE = @{ "@range" ~ WB }
+ANNOTATION_REGEX = @{ "@regex" ~ WB }
+ANNOTATION_SUBKEY = @{ "@subkey" ~ WB }
+ANNOTATION_VALUES = @{ "@values" ~ WB }
 
 // THING VARIABLE CONSTRAINT KEYWORDS
 
@@ -386,22 +479,22 @@ CONTAINS = @{ "contains" ~ WB }
 // ASSIGNMENT AND EXPRESSION KEYWORDS
 
 ASSIGN = @{ "=" }
-IN = @{ "in" }
+IN = @{ "in" ~ WB }
 
-ADD = @{ "+" }
-SUBTRACT = @{ "-" }
+PLUS = @{ "+" }
+MINUS = @{ "-" }
+TIMES = @{ "*" }
 DIVIDE = @{ "/" }
-MULTIPLY = @{ "*" }
 POWER = @{ "^" }
 MODULO = @{ "%" }
 
 // Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
-EXPR_FUNC_NAME = _{ ABS | CEIL | FLOOR | ROUND | LENGTH }
-ABS = @{ "abs" }
-CEIL = @{ "ceil" }
-FLOOR = @{ "floor" }
-ROUND = @{ "round" }
+builtin_func_name = ${ ABS | CEIL | FLOOR | ROUND | LENGTH | MAX | MIN }
+ABS = @{ "abs" ~ WB }
+CEIL = @{ "ceil" ~ WB }
+FLOOR = @{ "floor" ~ WB }
 LENGTH = @{ "length" ~ WB }
+ROUND = @{ "round" ~ WB }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
 
@@ -416,32 +509,36 @@ SUM = @{ "sum" ~ WB }
 
 // VALUE TYPE KEYWORDS
 
+BOOLEAN = @{ "boolean" ~ WB }
 LONG = @{ "long" ~ WB }
 DOUBLE = @{ "double" ~ WB }
-STRING = @{ "string" ~ WB }
-BOOLEAN = @{ "boolean" ~ WB }
+DECIMAL = @{ "decimal" ~ WB }
+
+DATE = @{ "date" ~ WB }
 DATETIME = @{ "datetime" ~ WB }
+DATETIME_TZ = @{ "datetime-tz" ~ WB }
+DURATION = @{ "duration" ~ WB }
+
+STRING = @{ "string" ~ WB }
 STRUCT = @{ "struct" ~ WB }
 
 // LITERAL VALUE KEYWORDS
-BOOLEAN_ = ${ TRUE | FALSE } // order of lexer declaration matters
+boolean_literal = ${ TRUE | FALSE } // order of lexer declaration matters
 TRUE = @{ "true" ~ WB }
 FALSE = @{ "false" ~ WB }
-QUOTED_STRING = @{ "\"" ~ ( !"\"" ~ !"\\" ~ ANY | ESCAPE_SEQ )* ~ "\""
-                 | "'" ~ ( !"'" ~ !"\\" ~ ANY | ESCAPE_SEQ )* ~ "'" }
-LONG_VALUE = @{ ASCII_DIGIT+ ~ WB }
-DOUBLE_VALUE = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ WB }
-DATE_VALUE = ${ DATE_FRAGMENT ~ WB }
-DATETIME_VALUE = ${ DATE_FRAGMENT ~ "T" ~ TIME ~ WB }
 
-// TYPEQL INPUT PATTERNS
-VAR = ${ VAR_ANONYMOUS | VAR_NAMED }
-VAR_ANONYMOUS = @{ "$_" ~ WB }
-VAR_NAMED = @{ "$" ~ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
-LIST_VAR = @{ VAR ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
-IID_VALUE = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
-LABEL = @{ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB }
-LABEL_SCOPED = ${ LABEL ~ ":" ~ LABEL ~ WB }
+integer_literal = @{ ASCII_DIGIT+ }
+decimal_literal = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ ( ^"e" ~ sign? ~ integer_literal )? }
+numeric_literal = @{ decimal_literal | integer_literal }
+
+date_literal = ${ date_fragment ~ WB }
+datetime_literal = ${ date_fragment ~ "T" ~ time ~ WB }
+datetime_tz_literal = ${ date_fragment ~ "T" ~ time ~ ( " " ~ iana_timezone | iso8601_timezone_offset ) ~ WB }
+
+duration_literal = ${ "P" ~ ( duration_weeks | duration_date ~ ( "T" ~ duration_time )? ) ~ WB}
+
+quoted_string_literal = @{ "\"" ~ ( !"\"" ~ !"\\" ~ ANY | escape_seq )* ~ "\""
+                         | "'" ~ ( !"'" ~ !"\\" ~ ANY | escape_seq )* ~ "'" }
 
 // PUNCTUATION =================================================================
 
@@ -454,6 +551,7 @@ CURLY_CLOSE = _{ "}" }
 COMMA = _{ "," }
 SEMICOLON = _{ ";" }
 COLON = _{ ":" }
+DOUBLE_DOT = _{ ".." }
 QUESTION = _{ "?" }
 ARROW = _{ "->" }
 
@@ -485,18 +583,41 @@ IDENTIFIER_LABEL_T = @{ IDENTIFIER_LABEL_H | ASCII_DIGIT | IDENTIFIER_CONNECTOR 
 IDENTIFIER_VAR_H = @{ IDENTIFIER_CHAR | ASCII_DIGIT }
 IDENTIFIER_VAR_T = @{ IDENTIFIER_VAR_H | IDENTIFIER_CONNECTOR }
 
-DATE_FRAGMENT = ${ YEAR ~ "-" ~ MONTH ~ "-" ~ DAY }
-MONTH = @{ ('0'..'1') ~ ASCII_DIGIT }
-DAY = @{ ('0'..'3') ~ ASCII_DIGIT }
-YEAR = @{ ASCII_DIGIT{4} | ( "+" | "-" ) ~ ASCII_DIGIT+ }
-TIME = ${ HOUR ~ COLON ~ MINUTE ~ ( COLON ~ SECOND ~ ( "." ~ SECOND_FRACTION )? )? }
-HOUR = @{ ( '0'..'2' ) ~ ASCII_DIGIT }
-MINUTE = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
-SECOND = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
-SECOND_FRACTION = @{ ASCII_DIGIT{1,3} } // between 1 and 3 digits
-ESCAPE_SEQ = @{ "\\" ~ ANY }
+date_fragment = ${ year ~ "-" ~ month ~ "-" ~ day }
+month = @{ "0" ~ ( '1'..'9' ) | "10" | "11" | "12" }
+day = @{ ( '0'..'3' ) ~ ASCII_DIGIT }
+year = @{ ASCII_DIGIT{4} | ( "+" | "-" ) ~ ASCII_DIGIT+ }
+time = ${ hour ~ COLON ~ minute ~ ( COLON ~ second ~ ( "." ~ second_fraction )? )? }
+hour = @{ ( '0'..'2' ) ~ ASCII_DIGIT }
+minute = @{ ( '0'..'5' ) ~ ASCII_DIGIT }
+second = @{ ( '0'..'6' ) ~ ASCII_DIGIT }
+second_fraction = @{ ASCII_DIGIT{1,9} } // between 1 and 9 digits
 
-WB = _{ &( PUNCTUATION | WHITESPACE | COMMENT | EOI ) } // Word boundary
+iso8601_timezone_offset = @{ "Z" | sign ~ hour ~ ( COLON? ~ minute )? } // "Z", "±HH", "±HHMM", "±HH:MM"
+
+iana_timezone = @{ iana_timezone_single ~ ( "/" ~ iana_timezone_single ){0,2} ~ WB }
+iana_timezone_single = @{ 'A'..'Z' ~ ( ASCII_ALPHANUMERIC | "_" | "-" | "+" )+ }
+
+duration_date = ${ duration_years ~ duration_months? ~ duration_days?
+                 | duration_months ~ duration_days?
+                 | duration_days
+                 }
+duration_years = ${ integer_literal ~ "Y" }
+duration_months = ${ integer_literal ~ "M" }
+duration_weeks = ${ integer_literal ~ "W" }
+duration_days = ${ integer_literal ~ "D" }
+
+duration_time = ${ duration_hours ~ duration_minutes? ~ duration_seconds?
+                 | duration_minutes ~ duration_seconds?
+                 | duration_seconds
+                 }
+duration_hours = ${ integer_literal ~ "H" }
+duration_minutes = ${ integer_literal ~ "M" }
+duration_seconds = ${ numeric_literal ~ "S" }
+
+escape_seq = @{ "\\" ~ ANY }
+
+WB = _{ &( !IDENTIFIER_CONNECTOR ~ PUNCTUATION | WHITESPACE | COMMENT | EOI ) } // Word boundary
 
 COMMENT = _{ "#" ~ ( !NEWLINE ~ ANY )* ~ ( NEWLINE | EOI ) }
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
