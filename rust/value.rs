@@ -7,8 +7,9 @@
 use std::fmt;
 
 use crate::{
-    common::{Span, Spanned},
+    common::{error::TypeQLError, Span, Spanned},
     pretty::Pretty,
+    Result,
 };
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -23,6 +24,21 @@ pub enum Category {
     String,
 }
 
+impl Category {
+    fn name(&self) -> &'static str {
+        match self {
+            Self::Boolean => "Boolean",
+            Self::Integer => "Integer",
+            Self::Decimal => "Decimal",
+            Self::Date => "Date",
+            Self::DateTime => "DateTime",
+            Self::DateTimeTZ => "DateTimeTZ",
+            Self::Duration => "Duration",
+            Self::String => "String",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Literal {
     span: Option<Span>,
@@ -35,10 +51,13 @@ impl Literal {
         Self { span, category, inner }
     }
 
-    pub fn parse_to_string(&self) -> String {
-        // TODO Result
-        assert!(!self.category.is_some_and(|cat| cat != Category::String), "{:?}", self.category);
-        parse_string(&self.inner)
+    pub fn parse_to_string(&self) -> Result<String> {
+        if self.category.is_some_and(|cat| cat != Category::String) {
+            Err(TypeQLError::InvalidLiteral { expected_variant: "String", variant: self.category.unwrap().name() }
+                .into())
+        } else {
+            parse_string(&self.inner)
+        }
     }
 }
 
@@ -56,18 +75,28 @@ impl fmt::Display for Literal {
     }
 }
 
-fn parse_string(escaped_string: &str) -> String {
-    // 1. unquote
-    let escaped_string = &escaped_string[1..escaped_string.len() - 1]; // TODO check it's quoted
+fn parse_string(escaped_string: &str) -> Result<String> {
+    let bytes = escaped_string.as_bytes();
+    // it's a bug if these fail; either in the parser or the builder
+    assert_eq!(bytes[0], bytes[bytes.len() - 1]);
+    assert!(matches!(bytes[0], b'\'' | b'"'));
+    let escaped_string = &escaped_string[1..escaped_string.len() - 1];
 
-    // 2. JSON unescape
     let mut buf = String::with_capacity(escaped_string.len());
 
     let mut rest = escaped_string;
     while !rest.is_empty() {
         let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
             let bytes = rest.as_bytes();
-            assert!(bytes.len() > 1, "TODO: handle improperly escaped string");
+
+            if bytes.len() < 2 {
+                return Err(TypeQLError::InvalidStringEscape {
+                    full_string: escaped_string.to_owned(),
+                    escape: String::from(r"\"),
+                }
+                .into());
+            }
+
             match bytes[1] {
                 BSP => ('\x08', 2),
                 TAB => ('\x09', 2),
@@ -76,7 +105,13 @@ fn parse_string(escaped_string: &str) -> String {
                 CR_ => ('\x0d', 2),
                 c @ (b'"' | b'\'' | b'\\') => (c as char, 2),
                 b'u' => todo!("Unicode escape handling"),
-                _other => panic!("unexpected escape character (this should be an Err(_))"),
+                _ => {
+                    return Err(TypeQLError::InvalidStringEscape {
+                        full_string: escaped_string.to_owned(),
+                        escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
+                    }
+                    .into())
+                }
             }
         } else {
             let char = rest.chars().next().expect("string is non-empty");
@@ -85,7 +120,7 @@ fn parse_string(escaped_string: &str) -> String {
         buf.push(char);
         rest = &rest[escaped_len..];
     }
-    buf
+    Ok(buf)
 }
 
 const BSP: u8 = b'b';
@@ -93,4 +128,3 @@ const TAB: u8 = b't';
 const LF_: u8 = b'n';
 const FF_: u8 = b'f';
 const CR_: u8 = b'r';
-

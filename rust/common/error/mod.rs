@@ -79,6 +79,10 @@ error_messages! { TypeQLError
         3: "There is a syntax error at {error_line_nr}:{error_col}:\n{formatted_error}",
     InvalidCasting { enum_name: &'static str, variant: &'static str, expected_variant: &'static str, typename: &'static str } =
         4: "Enum '{enum_name}::{variant}' does not match '{expected_variant}', and cannot be unwrapped into '{typename}'.",
+    InvalidLiteral { variant: &'static str, expected_variant: &'static str } =
+        5: "Attempting to parse a {variant} literal as {expected_variant}",
+    InvalidStringEscape { escape: String, full_string: String } =
+        6: "Encountered invalid escape sequence {escape:?} while parsing {full_string:?}.",
 /*
     MissingPatterns =
         5: "The query has not been provided with any patterns.",
