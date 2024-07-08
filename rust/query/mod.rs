@@ -7,7 +7,10 @@
 use std::fmt;
 
 use self::pipeline::stage::{Match, Stage};
-pub use self::{pipeline::Pipeline, schema::SchemaQuery};
+pub use self::{
+    pipeline::{stage, Pipeline},
+    schema::SchemaQuery,
+};
 use crate::util::enum_getter;
 
 pub mod pipeline;
