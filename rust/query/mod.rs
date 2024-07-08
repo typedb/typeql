@@ -8,6 +8,7 @@ use std::fmt;
 
 use self::data::stage::{Match, Stage};
 pub use self::{data::DataQuery, schema::SchemaQuery};
+use crate::util::enum_getter;
 
 pub mod data;
 pub mod schema;
@@ -16,6 +17,11 @@ pub mod schema;
 pub enum Query {
     Schema(SchemaQuery),
     Data(DataQuery),
+}
+
+enum_getter! { Query
+    into_schema(Schema) => SchemaQuery,
+    into_data(Data) => DataQuery,
 }
 
 impl fmt::Display for Query {

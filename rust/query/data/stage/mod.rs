@@ -19,7 +19,7 @@ pub use self::{
     delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Modifier, put::Put, reduce::Reduce,
     update::Update,
 };
-use crate::pretty::Pretty;
+use crate::{pretty::Pretty, util::enum_getter};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Stage {
@@ -31,6 +31,17 @@ pub enum Stage {
     Delete(Delete),
     Reduce(Reduce),
     Modifier(Modifier),
+}
+
+enum_getter! { Stage
+    into_match(Match) => Match,
+    into_insert(Insert) => Insert,
+    into_put(Put) => Put,
+    into_update(Update) => Update,
+    into_fetch(Fetch) => Fetch,
+    into_delete(Delete) => Delete,
+    into_reduce(Reduce) => Reduce,
+    into_modifier(Modifier) => Modifier,
 }
 
 impl Pretty for Stage {
