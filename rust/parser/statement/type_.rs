@@ -12,7 +12,7 @@ use crate::{
         visit_label, visit_label_scoped, visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
-        type_::{Constraint, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, TypeConstraintBase, ValueType},
+        type_::{Constraint, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ConstraintBase, ValueType},
         Statement, Type,
     },
     type_::TypeAny,
@@ -37,16 +37,16 @@ fn visit_type_constraint(node: Node<'_>) -> Constraint {
     Constraint::new(span, base, annotations)
 }
 
-fn visit_type_constraint_base(node: Node<'_>) -> TypeConstraintBase {
+fn visit_type_constraint_base(node: Node<'_>) -> ConstraintBase {
     debug_assert_eq!(node.as_rule(), Rule::type_constraint_base);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::sub_constraint => TypeConstraintBase::Sub(visit_sub_constraint(child)),
-        Rule::value_type_constraint => TypeConstraintBase::ValueType(visit_value_type_constraint(child)),
-        Rule::label_constraint => TypeConstraintBase::Label(visit_label_constraint(child)),
-        Rule::owns_constraint => TypeConstraintBase::Owns(visit_owns_constraint(child)),
-        Rule::relates_constraint => TypeConstraintBase::Relates(visit_relates_constraint(child)),
-        Rule::plays_constraint => TypeConstraintBase::Plays(visit_plays_constraint(child)),
+        Rule::sub_constraint => ConstraintBase::Sub(visit_sub_constraint(child)),
+        Rule::value_type_constraint => ConstraintBase::ValueType(visit_value_type_constraint(child)),
+        Rule::label_constraint => ConstraintBase::Label(visit_label_constraint(child)),
+        Rule::owns_constraint => ConstraintBase::Owns(visit_owns_constraint(child)),
+        Rule::relates_constraint => ConstraintBase::Relates(visit_relates_constraint(child)),
+        Rule::plays_constraint => ConstraintBase::Plays(visit_plays_constraint(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

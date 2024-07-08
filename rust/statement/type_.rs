@@ -59,12 +59,12 @@ impl fmt::Display for Type {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constraint {
     span: Option<Span>,
-    pub base: TypeConstraintBase,
+    pub base: ConstraintBase,
     pub annotations: Vec<Annotation>,
 }
 
 impl Constraint {
-    pub fn new(span: Option<Span>, base: TypeConstraintBase, annotations: Vec<Annotation>) -> Self {
+    pub fn new(span: Option<Span>, base: ConstraintBase, annotations: Vec<Annotation>) -> Self {
         Self { span, base, annotations }
     }
 }
@@ -82,7 +82,7 @@ impl fmt::Display for Constraint {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum TypeConstraintBase {
+pub enum ConstraintBase {
     Sub(Sub),
     Label(LabelConstraint),
     ValueType(ValueType),
@@ -91,7 +91,7 @@ pub enum TypeConstraintBase {
     Plays(Plays),
 }
 
-impl Pretty for TypeConstraintBase {
+impl Pretty for ConstraintBase {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Sub(inner) => Pretty::fmt(inner, indent_level, f),
@@ -104,7 +104,7 @@ impl Pretty for TypeConstraintBase {
     }
 }
 
-impl fmt::Display for TypeConstraintBase {
+impl fmt::Display for ConstraintBase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Sub(inner) => fmt::Display::fmt(inner, f),
