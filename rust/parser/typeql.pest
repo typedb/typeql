@@ -346,7 +346,6 @@ range_bound = _{ value_literal }
 // TYPEQL SYNTAX KEYWORDS ======================================================
 
 reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE
-           | CHECK | FIRST
            | ENTITY | RELATION | ATTRIBUTE | ROLE
            | ASC | DESC
            | STRUCT | FUN | RETURN
@@ -358,6 +357,7 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
            }
 
 unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
+             | CHECK | FIRST
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
              | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
              | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
