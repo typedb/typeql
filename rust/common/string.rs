@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+#![allow(dead_code)] // REASON: these will be used for builders
+
 pub(crate) fn quote(string: &str) -> String {
     format!("\"{string}\"")
 }

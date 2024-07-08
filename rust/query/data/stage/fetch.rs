@@ -203,10 +203,6 @@ impl fmt::Display for ProjectionKeyVar {
     }
 }
 
-fn must_quote(_: &str) -> bool {
-    true
-}
-
 impl fmt::Display for ProjectionKeyLabel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let label = &self.label;

@@ -28,13 +28,13 @@ impl Preamble {
 }
 
 impl Pretty for Preamble {
-    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         todo!()
     }
 }
 
 impl fmt::Display for Preamble {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         todo!()
     }
 }

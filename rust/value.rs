@@ -76,7 +76,7 @@ fn parse_string(escaped_string: &str) -> String {
                 CR_ => ('\x0d', 2),
                 c @ (b'"' | b'\'' | b'\\') => (c as char, 2),
                 b'u' => todo!("Unicode escape handling"),
-                other => panic!("unexpected escape character (this should be an Err(_))"),
+                _other => panic!("unexpected escape character (this should be an Err(_))"),
             }
         } else {
             let char = rest.chars().next().expect("string is non-empty");
@@ -88,20 +88,9 @@ fn parse_string(escaped_string: &str) -> String {
     buf
 }
 
-const HEX: u8 = 0;
 const BSP: u8 = b'b';
 const TAB: u8 = b't';
 const LF_: u8 = b'n';
 const FF_: u8 = b'f';
 const CR_: u8 = b'r';
 
-const ASCII_CONTROL: usize = 0x20;
-
-const ESCAPE: [u8; ASCII_CONTROL] = [
-    HEX, HEX, HEX, HEX, HEX, HEX, HEX, HEX, //
-    BSP, TAB, LF_, HEX, FF_, CR_, HEX, HEX, //
-    HEX, HEX, HEX, HEX, HEX, HEX, HEX, HEX, //
-    HEX, HEX, HEX, HEX, HEX, HEX, HEX, HEX, //
-];
-
-const HEX_DIGITS: &[u8; 0x10] = b"0123456789abcdef";

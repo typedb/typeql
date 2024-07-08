@@ -22,7 +22,7 @@ impl Struct {
 }
 
 impl Pretty for Struct {
-    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         todo!()
     }
 }
