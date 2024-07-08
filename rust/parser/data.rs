@@ -45,7 +45,7 @@ pub(super) fn visit_query_data(node: Node<'_>) -> DataQuery {
     let preambles = children.take_while_ref(|child| child.as_rule() == Rule::preamble).map(visit_preamble).collect();
     let mut stages =
         children.take_while_ref(|child| child.as_rule() == Rule::query_stage).map(visit_query_stage).collect_vec();
-    stages.extend(children.try_consume_expected(Rule::query_stage_final).map(visit_query_stage_final));
+    stages.extend(children.try_consume_expected(Rule::query_stage_terminal).map(visit_query_stage_terminal));
 
     debug_assert_eq!(children.try_consume_any(), None);
 
@@ -76,8 +76,8 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
     }
 }
 
-fn visit_query_stage_final(node: Node<'_>) -> Stage {
-    debug_assert_eq!(node.as_rule(), Rule::query_stage_final);
+fn visit_query_stage_terminal(node: Node<'_>) -> Stage {
+    debug_assert_eq!(node.as_rule(), Rule::query_stage_terminal);
     let child = node.into_child();
     match child.as_rule() {
         Rule::stage_fetch => Stage::Fetch(visit_stage_fetch(child)),

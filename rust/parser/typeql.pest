@@ -15,11 +15,11 @@ query = { query_schema | query_data }
 
 // DATA QUERIES ================================================================
 
-query_data = { preamble* ~ query_stage+ ~ query_stage_final? }
+query_data = { preamble* ~ query_stage+ ~ query_stage_terminal? }
 
 preamble = { WITH ~ definition_function }
 query_stage = { stage_match | stage_insert | stage_put | stage_update | stage_delete | stage_modifier }
-query_stage_final = { stage_fetch | stage_reduce }
+query_stage_terminal = { stage_fetch | stage_reduce }
 
 // stage_group = { GROUP ~ var ~ SEMICOLON } // TODO: eliminate?
 
