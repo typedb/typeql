@@ -161,6 +161,14 @@ impl Spanned for ListIndex {
     }
 }
 
+impl Pretty for ListIndex {}
+
+impl fmt::Display for ListIndex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}[{}]", self.variable, self.index)
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
     span: Option<Span>,
@@ -176,6 +184,17 @@ impl List {
 impl Spanned for List {
     fn span(&self) -> Option<Span> {
         self.span
+    }
+}
+
+impl Pretty for List {}
+
+impl fmt::Display for List {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_char('[')?;
+        write_joined!(f, ", ", self.items)?;
+        f.write_char(']')?;
+        Ok(())
     }
 }
 
@@ -196,6 +215,14 @@ impl ListIndexRange {
 impl Spanned for ListIndexRange {
     fn span(&self) -> Option<Span> {
         self.span
+    }
+}
+
+impl Pretty for ListIndexRange {}
+
+impl fmt::Display for ListIndexRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}[{}..{}]", self.var, self.from, self.to)
     }
 }
 
@@ -229,15 +256,14 @@ impl Spanned for Expression {
 impl Pretty for Expression {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            // Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::ListIndex(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::ListIndex(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Value(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Function(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Operation(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Paren(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::List(inner) => Pretty::fmt(inner, indent_level, f),
-            // Self::ListIndexRange(inner) => Pretty::fmt(inner, indent_level, f),
-            _ => todo!(),
+            Self::List(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::ListIndexRange(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
@@ -246,14 +272,13 @@ impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variable(inner) => fmt::Display::fmt(inner, f),
-            // Self::ListIndex(inner) => fmt::Display::fmt(inner, f),
+            Self::ListIndex(inner) => fmt::Display::fmt(inner, f),
             Self::Value(inner) => fmt::Display::fmt(inner, f),
             Self::Function(inner) => fmt::Display::fmt(inner, f),
             Self::Operation(inner) => fmt::Display::fmt(inner, f),
             Self::Paren(inner) => fmt::Display::fmt(inner, f),
-            // Self::List(inner) => fmt::Display::fmt(inner, f),
-            // Self::ListIndexRange(inner) => fmt::Display::fmt(inner, f),
-            _ => todo!("{:?}", self),
+            Self::List(inner) => fmt::Display::fmt(inner, f),
+            Self::ListIndexRange(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }
