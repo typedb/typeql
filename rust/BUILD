@@ -88,14 +88,7 @@ checkstyle_test(
     name = "checkstyle",
     include = glob([
         "*",
-        "builder/**",
-        "common/**",
-        "parser/**",
-        "pattern/**",
-        "query/**",
-        "tests/**",
-        "util/**",
-        "variable/**",
+        "*/**",
       ], exclude = [
         "target/**",
         "README.md",
