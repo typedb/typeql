@@ -21,7 +21,7 @@ use crate::{
     query::{Query, SchemaQuery},
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
-    value::{Category, Literal},
+    value::{Literal, Tag},
     variable::Variable,
     Result,
 };
@@ -303,7 +303,17 @@ fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
     BuiltinValueType::new(span, token)
 }
 
+fn visit_value_literal(node: Node<'_>) -> Literal {
+    debug_assert_eq!(node.as_rule(), Rule::value_literal);
+    Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
+}
+
+fn visit_quoted_string_literal(node: Node<'_>) -> Literal {
+    debug_assert_eq!(node.as_rule(), Rule::quoted_string_literal);
+    Literal::new(node.span(), Some(Tag::String), node.as_str().to_owned())
+}
+
 fn visit_integer_literal(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::integer_literal);
-    Literal::new(node.span(), Some(Category::Integer), node.as_str().to_owned())
+    Literal::new(node.span(), Some(Tag::Integral), node.as_str().to_owned())
 }

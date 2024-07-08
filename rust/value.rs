@@ -13,28 +13,35 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum Category {
+pub enum Tag {
     Boolean,
-    Integer,
+    Long,
+    Double,
     Decimal,
     Date,
     DateTime,
     DateTimeTZ,
     Duration,
     String,
+    // larger groupings when ambiguous
+    Integral,   // Long OR Fractional
+    Fractional, // Double OR Decimal
 }
 
-impl Category {
+impl Tag {
     fn name(&self) -> &'static str {
         match self {
             Self::Boolean => "Boolean",
-            Self::Integer => "Integer",
+            Self::Long => "Long",
+            Self::Double => "Double",
             Self::Decimal => "Decimal",
             Self::Date => "Date",
             Self::DateTime => "DateTime",
             Self::DateTimeTZ => "DateTimeTZ",
             Self::Duration => "Duration",
             Self::String => "String",
+            Self::Integral => "Integral",
+            Self::Fractional => "Fractional",
         }
     }
 }
@@ -42,19 +49,18 @@ impl Category {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Literal {
     span: Option<Span>,
-    pub category: Option<Category>,
+    pub tag: Option<Tag>,
     inner: String, // TODO this can be smarter
 }
 
 impl Literal {
-    pub(crate) fn new(span: Option<Span>, category: Option<Category>, inner: String) -> Self {
-        Self { span, category, inner }
+    pub(crate) fn new(span: Option<Span>, category: Option<Tag>, inner: String) -> Self {
+        Self { span, tag: category, inner }
     }
 
     pub fn parse_to_string(&self) -> Result<String> {
-        if self.category.is_some_and(|cat| cat != Category::String) {
-            Err(TypeQLError::InvalidLiteral { expected_variant: "String", variant: self.category.unwrap().name() }
-                .into())
+        if self.tag.is_some_and(|cat| cat != Tag::String) {
+            Err(TypeQLError::InvalidLiteral { expected_variant: "String", variant: self.tag.unwrap().name() }.into())
         } else {
             parse_string(&self.inner)
         }

@@ -6,14 +6,13 @@
 
 use pest::pratt_parser::{Assoc, Op, PrattParser};
 
-use super::{IntoChildNodes, Node, Rule, RuleMatcher};
+use super::{visit_identifier, visit_value_literal, visit_var, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
     expression::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
     },
-    parser::{visit_identifier, visit_var},
-    value::{Category, Literal},
+    value::Literal,
 };
 
 pub(super) fn visit_expression_function(node: Node<'_>) -> FunctionCall {
@@ -94,16 +93,6 @@ fn visit_expression_list_index(node: Node<'_>) -> ListIndex {
 fn visit_list_index(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::list_index);
     visit_expression_value(node.into_child())
-}
-
-pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
-    debug_assert_eq!(node.as_rule(), Rule::value_literal);
-    Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
-}
-
-pub(super) fn visit_quoted_string_literal(node: Node<'_>) -> Literal {
-    debug_assert_eq!(node.as_rule(), Rule::quoted_string_literal);
-    Literal::new(node.span(), Some(Category::String), node.as_str().to_owned())
 }
 
 pub(super) fn visit_expression_struct(node: Node<'_>) -> Literal {
