@@ -158,7 +158,7 @@ expression_arguments = { expression ~ ( COMMA ~ expression )* }
 expression_list = { expression_list_subrange | expression_list_new }
 expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ SQ_BRACKET_CLOSE }
 expression_list_subrange = { var ~ list_range }
-list_range = { SQ_BRACKET_OPEN ~ expression_value ~ COLON ~ expression_value ~ SQ_BRACKET_CLOSE }
+list_range = { SQ_BRACKET_OPEN ~ expression_value ~ DOUBLE_DOT ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
 struct_value = { expression_value | expression_struct }
@@ -331,16 +331,16 @@ annotation = { ANNOTATION_ABSTRACT
              | annotation_values
              }
 
-annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ ".." ~ integer_literal? ~ PAREN_CLOSE }
+annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ DOUBLE_DOT ~ integer_literal? ~ PAREN_CLOSE }
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
 annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ identifier ~ PAREN_CLOSE }
 annotation_range = { ANNOTATION_RANGE ~ PAREN_OPEN ~ range ~ PAREN_CLOSE }
 annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ PAREN_CLOSE }
 
 range = { range_full | range_from | range_to }
-range_from = { range_bound ~ ".." }
-range_to = { ".." ~ range_bound }
-range_full = { range_bound ~ ".." ~ range_bound }
+range_from = { range_bound ~ DOUBLE_DOT }
+range_to = { DOUBLE_DOT ~ range_bound }
+range_full = { range_bound ~ DOUBLE_DOT ~ range_bound }
 range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
@@ -551,6 +551,7 @@ CURLY_CLOSE = _{ "}" }
 COMMA = _{ "," }
 SEMICOLON = _{ ";" }
 COLON = _{ ":" }
+DOUBLE_DOT = _{ ".." }
 QUESTION = _{ "?" }
 ARROW = _{ "->" }
 
