@@ -6,7 +6,7 @@
 
 use self::{
     single::visit_statement_single,
-    thing::{visit_statement_anon_relation, visit_statement_thing_var},
+    thing::{visit_statement_relation_anonymous, visit_statement_thing_var},
 };
 use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
@@ -30,7 +30,7 @@ pub(super) fn visit_statement(node: Node<'_>) -> Statement {
         Rule::statement_single => visit_statement_single(child),
         Rule::statement_type => visit_statement_type(child),
         Rule::statement_thing_var => visit_statement_thing_var(child),
-        Rule::statement_anon_relation => visit_statement_anon_relation(child),
+        Rule::statement_relation_anonymous => visit_statement_relation_anonymous(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

@@ -29,7 +29,7 @@ pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
     let child = node.into_child();
     match child.as_rule() {
         Rule::statement_thing_var => visit_statement_thing_var(child),
-        Rule::statement_anon_relation => visit_statement_anon_relation(child),
+        Rule::statement_relation_anonymous => visit_statement_relation_anonymous(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -65,8 +65,8 @@ pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
     }
 }
 
-pub(super) fn visit_statement_anon_relation(node: Node<'_>) -> Statement {
-    debug_assert_eq!(node.as_rule(), Rule::statement_anon_relation);
+pub(super) fn visit_statement_relation_anonymous(node: Node<'_>) -> Statement {
+    debug_assert_eq!(node.as_rule(), Rule::statement_relation_anonymous);
     let span = node.span();
     let mut children = node.into_children();
     let head = Head::Relation(visit_relation(children.consume_expected(Rule::relation)));

@@ -73,7 +73,7 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_type | statement_thing_var | statement_single | statement_anon_relation }
+statement = { statement_type | statement_thing_var | statement_single | statement_relation_anonymous }
 
 // TYPE STATEMENTS =============================================================
 
@@ -96,8 +96,8 @@ plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
 
 // THING STATEMENTS ============================================================
 
-statement_thing = { statement_thing_var | statement_anon_relation }
-statement_anon_relation = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* }
+statement_thing = { statement_thing_var | statement_relation_anonymous }
+statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* }
 
 statement_thing_var = { var ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
                       | var ~ ( value_literal | expression_struct ) ~ isa_constraint
