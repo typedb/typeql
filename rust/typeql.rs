@@ -25,16 +25,15 @@ pub mod type_;
 mod util;
 mod value;
 
-use crate::parser::{
-    visit_eof_definables, visit_eof_label, visit_eof_pattern, visit_eof_patterns, visit_eof_queries, visit_eof_query,
-    visit_eof_statement,
-};
+use schema::definable::Struct;
+
+use crate::parser::{visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query};
 pub use crate::{
     common::Result,
     identifier::{Label, ScopedLabel, Variable},
     pattern::Pattern,
     query::Query,
-    schema::definable::Definable,
+    schema::definable::{Definable, Function},
     statement::Statement,
     type_::{Type, TypeAny},
     value::Literal,
@@ -44,26 +43,14 @@ pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())
 }
 
-pub fn parse_queries(typeql_queries: &str) -> Result<impl Iterator<Item = Query> + '_> {
-    visit_eof_queries(typeql_queries.trim_end())
-}
-
-pub fn parse_pattern(typeql_pattern: &str) -> Result<Pattern> {
-    visit_eof_pattern(typeql_pattern.trim_end())
-}
-
-pub fn parse_patterns(typeql_patterns: &str) -> Result<Vec<Pattern>> {
-    visit_eof_patterns(typeql_patterns.trim_end())
-}
-
-pub fn parse_definables(typeql_definables: &str) -> Result<Vec<Definable>> {
-    visit_eof_definables(typeql_definables.trim_end())
-}
-
-pub fn parse_statement(typeql_statement: &str) -> Result<Statement> {
-    visit_eof_statement(typeql_statement.trim_end())
-}
-
 pub fn parse_label(typeql_label: &str) -> Result<Label> {
     visit_eof_label(typeql_label)
+}
+
+pub fn parse_definition_function(typeql_function: &str) -> Result<Function> {
+    visit_eof_definition_function(typeql_function.trim_end())
+}
+
+pub fn parse_definition_struct(typeql_struct: &str) -> Result<Struct> {
+    visit_eof_definition_struct(typeql_struct.trim_end())
 }

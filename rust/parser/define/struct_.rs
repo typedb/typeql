@@ -11,7 +11,7 @@ use crate::{
     type_::TypeAny,
 };
 
-pub(super) fn visit_definition_struct(node: Node<'_>) -> Struct {
+pub(in crate::parser) fn visit_definition_struct(node: Node<'_>) -> Struct {
     debug_assert_eq!(node.as_rule(), Rule::definition_struct);
     let span = node.span();
     let mut children = node.into_children();

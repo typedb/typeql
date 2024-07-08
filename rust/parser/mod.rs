@@ -8,9 +8,7 @@ use pest::Parser;
 use pest_derive::Parser;
 
 use self::{
-    data::{visit_pattern, visit_patterns},
-    define::{visit_definables, visit_query_define},
-    statement::visit_statement,
+    define::{function::visit_definition_function, struct_::visit_definition_struct, visit_query_define},
     undefine::visit_query_undefine,
 };
 use crate::{
@@ -20,10 +18,8 @@ use crate::{
     },
     identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
     parser::redefine::visit_query_redefine,
-    pattern::Pattern,
     query::{Query, SchemaQuery},
-    schema::definable::Definable,
-    statement::Statement,
+    schema::definable,
     type_::{BuiltinValueType, List, Optional, Type},
     value::{Category, Literal},
     Result,
@@ -134,30 +130,16 @@ pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
     Ok(visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)))
 }
 
-pub(crate) fn visit_eof_queries(queries: &str) -> Result<impl Iterator<Item = Query> + '_> {
-    Ok(parse(Rule::eof_queries, queries)?
-        .consume_expected(Rule::eof_queries)
-        .into_children()
-        .filter(|child| matches!(child.as_rule(), Rule::query))
-        .map(visit_query))
-}
-
-pub(crate) fn visit_eof_pattern(pattern: &str) -> Result<Pattern> {
-    Ok(visit_pattern(parse_single(Rule::eof_pattern, pattern)?.into_children().consume_expected(Rule::pattern)))
-}
-
-pub(crate) fn visit_eof_patterns(patterns: &str) -> Result<Vec<Pattern>> {
-    Ok(visit_patterns(parse_single(Rule::eof_patterns, patterns)?.into_children().consume_expected(Rule::patterns)))
-}
-
-pub(crate) fn visit_eof_definables(definables: &str) -> Result<Vec<Definable>> {
-    Ok(visit_definables(
-        parse_single(Rule::eof_definables, definables)?.into_children().consume_expected(Rule::definables),
+pub(crate) fn visit_eof_definition_function(query: &str) -> Result<definable::Function> {
+    Ok(visit_definition_function(
+        parse_single(Rule::eof_definition_function, query)?.into_children().consume_expected(Rule::definition_function),
     ))
 }
 
-pub(crate) fn visit_eof_statement(statement: &str) -> Result<Statement> {
-    Ok(visit_statement(parse_single(Rule::eof_statement, statement)?.into_children().consume_expected(Rule::statement)))
+pub(crate) fn visit_eof_definition_struct(query: &str) -> Result<definable::Struct> {
+    Ok(visit_definition_struct(
+        parse_single(Rule::eof_definition_struct, query)?.into_children().consume_expected(Rule::definition_struct),
+    ))
 }
 
 pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {

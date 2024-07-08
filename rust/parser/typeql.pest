@@ -9,14 +9,6 @@ eof_label = { SOI ~ label ~ EOI }
 eof_definition_function = { SOI ~ definition_function ~ EOI }
 eof_definition_struct = { SOI ~ definition_struct ~ EOI }
 
-// TODO: do we need these?
-eof_queries = { SOI ~ query+ ~ EOI }
-eof_pattern = { SOI ~ pattern ~ EOI }
-eof_patterns = { SOI ~ patterns ~ EOI }
-eof_definables = { SOI ~ definables ~ EOI }
-// undefinables etc
-eof_statement = { SOI ~ statement ~ EOI }
-
 // TYPEQL QUERY LANGUAGE =======================================================
 
 query = { query_schema | query_data }
