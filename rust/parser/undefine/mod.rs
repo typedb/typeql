@@ -59,27 +59,27 @@ fn visit_undefine_annotation_from_capability(node: Node<'_>) -> AnnotationCapabi
     debug_assert_eq!(node.as_rule(), Rule::undefine_annotation_from_capability);
     let span = node.span();
     let mut children = node.into_children();
-    let annotation_kind = visit_annotation_kind(children.consume_expected(Rule::annotation_kind));
+    let annotation_category = visit_annotation_category(children.consume_expected(Rule::annotation_category));
     children.skip_expected(Rule::FROM);
     let type_ = visit_label(children.consume_expected(Rule::label));
     let capability = visit_type_capability_base(children.consume_expected(Rule::type_capability_base));
     debug_assert_eq!(children.try_consume_any(), None);
-    AnnotationCapability::new(span, annotation_kind, type_, capability)
+    AnnotationCapability::new(span, annotation_category, type_, capability)
 }
 
 fn visit_undefine_annotation_from_type(node: Node<'_>) -> AnnotationType {
     debug_assert_eq!(node.as_rule(), Rule::undefine_annotation_from_type);
     let span = node.span();
     let mut children = node.into_children();
-    let annotation_kind = visit_annotation_kind(children.consume_expected(Rule::annotation_kind));
+    let annotation_category = visit_annotation_category(children.consume_expected(Rule::annotation_category));
     children.skip_expected(Rule::FROM);
     let type_ = visit_label(children.consume_expected(Rule::label));
     debug_assert_eq!(children.try_consume_any(), None);
-    AnnotationType::new(span, annotation_kind, type_)
+    AnnotationType::new(span, annotation_category, type_)
 }
 
-fn visit_annotation_kind(node: Node<'_>) -> token::Annotation {
-    debug_assert_eq!(node.as_rule(), Rule::annotation_kind);
+fn visit_annotation_category(node: Node<'_>) -> token::Annotation {
+    debug_assert_eq!(node.as_rule(), Rule::annotation_category);
     let child = node.into_child();
     match child.as_rule() {
         Rule::ANNOTATION_ABSTRACT => token::Annotation::Abstract,

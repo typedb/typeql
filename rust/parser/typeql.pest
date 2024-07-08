@@ -259,8 +259,8 @@ undefine_from = { undefine_annotation_from_capability
                 | undefine_capability
                 | undefine_override
                 }
-undefine_annotation_from_capability = { annotation_kind ~ FROM ~ label ~ type_capability_base }
-undefine_annotation_from_type = { annotation_kind ~ FROM ~ label }
+undefine_annotation_from_capability = { annotation_category ~ FROM ~ label ~ type_capability_base }
+undefine_annotation_from_type = { annotation_category ~ FROM ~ label }
 undefine_capability = { type_capability_base ~ FROM ~ label }
 undefine_override = { AS ~ label ~ FROM ~ label ~ type_capability_base }
 
@@ -420,18 +420,18 @@ SUBX = @{ "sub!" ~ WB }
 
 // TYPE ANNOTATIONS
 
-annotation_kind = ${ ANNOTATION_ABSTRACT
-                   | ANNOTATION_CARD
-                   | ANNOTATION_CASCADE
-                   | ANNOTATION_DISTINCT
-                   | ANNOTATION_INDEPENDENT
-                   | ANNOTATION_KEY
-                   | ANNOTATION_RANGE
-                   | ANNOTATION_REGEX
-                   | ANNOTATION_SUBKEY
-                   | ANNOTATION_UNIQUE
-                   | ANNOTATION_VALUES
-                   }
+annotation_category = ${ ANNOTATION_ABSTRACT
+                       | ANNOTATION_CARD
+                       | ANNOTATION_CASCADE
+                       | ANNOTATION_DISTINCT
+                       | ANNOTATION_INDEPENDENT
+                       | ANNOTATION_KEY
+                       | ANNOTATION_RANGE
+                       | ANNOTATION_REGEX
+                       | ANNOTATION_SUBKEY
+                       | ANNOTATION_UNIQUE
+                       | ANNOTATION_VALUES
+                       }
 
 // unparametrized
 ANNOTATION_ABSTRACT = @{ "@abstract" ~ WB }

@@ -44,13 +44,13 @@ impl fmt::Display for Undefinable {
 #[derive(Debug, Eq, PartialEq)]
 pub struct AnnotationType {
     span: Option<Span>,
-    annotation_kind: token::Annotation,
+    annotation_category: token::Annotation,
     type_: Label,
 }
 
 impl AnnotationType {
-    pub fn new(span: Option<Span>, annotation_kind: token::Annotation, type_: Label) -> Self {
-        Self { span, annotation_kind, type_ }
+    pub fn new(span: Option<Span>, annotation_category: token::Annotation, type_: Label) -> Self {
+        Self { span, annotation_category, type_ }
     }
 }
 
@@ -58,14 +58,14 @@ impl Pretty for AnnotationType {}
 
 impl fmt::Display for AnnotationType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "@{} {} {}", self.annotation_kind, token::Keyword::From, self.type_)
+        write!(f, "@{} {} {}", self.annotation_category, token::Keyword::From, self.type_)
     }
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct AnnotationCapability {
     span: Option<Span>,
-    annotation_kind: token::Annotation,
+    annotation_category: token::Annotation,
     type_: Label,
     capability: CapabilityBase,
 }
@@ -73,11 +73,11 @@ pub struct AnnotationCapability {
 impl AnnotationCapability {
     pub fn new(
         span: Option<Span>,
-        annotation_kind: token::Annotation,
+        annotation_category: token::Annotation,
         type_: Label,
         capability: CapabilityBase,
     ) -> Self {
-        Self { span, annotation_kind, type_, capability }
+        Self { span, annotation_category, type_, capability }
     }
 }
 
@@ -85,7 +85,7 @@ impl Pretty for AnnotationCapability {}
 
 impl fmt::Display for AnnotationCapability {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "@{} {} {} {}", self.annotation_kind, token::Keyword::From, self.type_, self.capability)
+        write!(f, "@{} {} {} {}", self.annotation_category, token::Keyword::From, self.type_, self.capability)
     }
 }
 
