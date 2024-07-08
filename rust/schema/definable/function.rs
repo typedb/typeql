@@ -9,7 +9,7 @@ use std::fmt::{self, Write};
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
-    query::data::stage::{Match, Modifier, Reduce},
+    query::pipeline::stage::{Match, Modifier, Reduce},
     type_::TypeAny,
     variable::Variable,
 };

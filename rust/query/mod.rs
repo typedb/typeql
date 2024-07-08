@@ -6,35 +6,35 @@
 
 use std::fmt;
 
-use self::data::stage::{Match, Stage};
-pub use self::{data::DataQuery, schema::SchemaQuery};
+use self::pipeline::stage::{Match, Stage};
+pub use self::{pipeline::Pipeline, schema::SchemaQuery};
 use crate::util::enum_getter;
 
-pub mod data;
+pub mod pipeline;
 pub mod schema;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Query {
     Schema(SchemaQuery),
-    Data(DataQuery),
+    Pipeline(Pipeline),
 }
 
 enum_getter! { Query
     into_schema(Schema) => SchemaQuery,
-    into_data(Data) => DataQuery,
+    into_pipeline(Pipeline) => Pipeline,
 }
 
 impl fmt::Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Schema(schema_query) => fmt::Display::fmt(schema_query, f),
-            Self::Data(data_query) => fmt::Display::fmt(data_query, f),
+            Self::Pipeline(data_query) => fmt::Display::fmt(data_query, f),
         }
     }
 }
 
 impl From<Match> for Query {
     fn from(value: Match) -> Self {
-        Self::Data(DataQuery::new(None, Vec::new(), vec![Stage::Match(value)]))
+        Self::Pipeline(Pipeline::new(None, Vec::new(), vec![Stage::Match(value)]))
     }
 }

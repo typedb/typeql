@@ -9,7 +9,7 @@ use std::fmt;
 use crate::{
     common::{token, Span},
     pretty::{indent, Pretty},
-    query::DataQuery,
+    query::Pipeline,
     type_::Type,
     util::write_joined,
     variable::Variable,
@@ -31,7 +31,7 @@ impl Fetch {
 pub enum Projection {
     Variable(ProjectionKeyVar),
     Attribute(ProjectionKeyVar, Vec<ProjectionAttribute>),
-    Subquery(ProjectionKeyLabel, DataQuery),
+    Subquery(ProjectionKeyLabel, Pipeline),
 }
 
 #[derive(Debug, Eq, PartialEq)]

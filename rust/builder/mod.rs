@@ -23,7 +23,7 @@ macro_rules! undefine {
 #[macro_export]
 macro_rules! match_ {
     ($($pattern:expr),* $(,)?) => {
-        $crate::query::data::stage::Match::build(vec![$($pattern.into()),*])
+        $crate::query::pipeline::stage::Match::build(vec![$($pattern.into()),*])
     }
 }
 

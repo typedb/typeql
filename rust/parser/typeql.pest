@@ -11,11 +11,11 @@ eof_definition_struct = { SOI ~ definition_struct ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
-query = { query_schema | query_data }
+query = { query_schema | query_pipeline }
 
-// DATA QUERIES ================================================================
+// QUERY PIPELINES =============================================================
 
-query_data = { preamble* ~ query_stage+ ~ query_stage_terminal? }
+query_pipeline = { preamble* ~ query_stage+ ~ query_stage_terminal? }
 
 preamble = { WITH ~ definition_function }
 query_stage = { stage_match | stage_insert | stage_put | stage_update | stage_delete | stage_modifier }
@@ -177,7 +177,7 @@ projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute 
 projection_attribute = { label ~ projection_key_as_label? }
 
 // TODO: we have to validate this is a fetch or reduce ended pipeline
-projection_subquery = { query_data }
+projection_subquery = { query_pipeline }
 
 projection_key_var = { var ~ projection_key_as_label? }
 projection_key_as_label = { AS ~ projection_key_label }

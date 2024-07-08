@@ -40,13 +40,13 @@ impl fmt::Display for Preamble {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct DataQuery {
+pub struct Pipeline {
     span: Option<Span>,
     pub preambles: Vec<Preamble>,
     pub stages: Vec<Stage>,
 }
 
-impl DataQuery {
+impl Pipeline {
     pub fn new(span: Option<Span>, preambles: Vec<Preamble>, stages: Vec<Stage>) -> Self {
         Self { span, preambles, stages }
     }
@@ -61,13 +61,13 @@ impl DataQuery {
     }
 }
 
-impl Spanned for DataQuery {
+impl Spanned for Pipeline {
     fn span(&self) -> Option<Span> {
         todo!()
     }
 }
 
-impl Pretty for DataQuery {
+impl Pretty for Pipeline {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for preamble in &self.preambles {
             indent(indent_level, f)?;
@@ -87,7 +87,7 @@ impl Pretty for DataQuery {
     }
 }
 
-impl fmt::Display for DataQuery {
+impl fmt::Display for Pipeline {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if f.alternate() {
             Pretty::fmt(self, 0, f)

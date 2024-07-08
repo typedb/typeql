@@ -17,7 +17,7 @@ use crate::{
         identifier::Identifier,
         token, LineColumn, Span, Spanned,
     },
-    parser::redefine::visit_query_redefine,
+    parser::{pipeline::visit_query_pipeline, redefine::visit_query_redefine},
     query::{Query, SchemaQuery},
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
@@ -27,9 +27,9 @@ use crate::{
 };
 
 mod annotation;
-mod data;
 mod define;
 mod expression;
+mod pipeline;
 mod redefine;
 mod statement;
 mod undefine;
@@ -158,7 +158,7 @@ fn visit_query(node: Node<'_>) -> Query {
     let child = children.consume_any();
     let query = match child.as_rule() {
         Rule::query_schema => Query::Schema(visit_query_schema(child)),
-        Rule::query_data => Query::Data(data::visit_query_data(child)),
+        Rule::query_pipeline => Query::Pipeline(visit_query_pipeline(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);

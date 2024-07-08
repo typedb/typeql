@@ -22,7 +22,7 @@ use crate::{
     },
     pattern::{Conjunction, Disjunction, Negation, Pattern, Try},
     query::{
-        data::{
+        pipeline::{
             stage::{
                 delete::{Deletable, DeletableKind},
                 fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar},
@@ -32,13 +32,13 @@ use crate::{
             },
             Preamble,
         },
-        DataQuery,
+        Pipeline,
     },
     type_::Type,
 };
 
-pub(super) fn visit_query_data(node: Node<'_>) -> DataQuery {
-    debug_assert_eq!(node.as_rule(), Rule::query_data);
+pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
+    debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
     let span = node.span();
     let mut children = node.into_children();
 
@@ -49,7 +49,7 @@ pub(super) fn visit_query_data(node: Node<'_>) -> DataQuery {
 
     debug_assert_eq!(children.try_consume_any(), None);
 
-    DataQuery::new(span, preambles, stages)
+    Pipeline::new(span, preambles, stages)
 }
 
 fn visit_preamble(node: Node<'_>) -> Preamble {
@@ -255,9 +255,9 @@ fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
     }
 }
 
-fn visit_projection_subquery(node: Node<'_>) -> DataQuery {
+fn visit_projection_subquery(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::projection_subquery);
-    visit_query_data(node.into_child())
+    visit_query_pipeline(node.into_child())
 }
 
 fn visit_projection_attributes(node: Node<'_>) -> Vec<ProjectionAttribute> {
