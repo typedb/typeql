@@ -7,11 +7,11 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span, Spanned},
-    identifier::{Identifier, Variable},
+    common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
     query::data::stage::{Match, Modifier, Reduce},
     type_::TypeAny,
+    variable::Variable,
 };
 
 #[derive(Debug, PartialEq, Eq)]

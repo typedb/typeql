@@ -8,7 +8,7 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span},
-    identifier::Identifier,
+    common::identifier::Identifier,
     util::write_joined,
     value::Literal,
 };
@@ -186,11 +186,11 @@ impl fmt::Display for Range {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Regex {
     span: Option<Span>,
-    regex: String,
+    regex: Literal,
 }
 
 impl Regex {
-    pub fn new(span: Option<Span>, regex: String) -> Self {
+    pub fn new(span: Option<Span>, regex: Literal) -> Self {
         Self { span, regex }
     }
 }
@@ -239,11 +239,11 @@ impl fmt::Display for Unique {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Values {
     span: Option<Span>,
-    values: Vec<String>, // FIXME
+    values: Vec<Literal>, 
 }
 
 impl Values {
-    pub fn new(span: Option<Span>, values: Vec<String>) -> Self {
+    pub fn new(span: Option<Span>, values: Vec<Literal>) -> Self {
         Self { span, values }
     }
 }

@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::identifier::{Identifier, Label, Variable};
+use crate::{common::identifier::Identifier, type_::Label, variable::Variable};
 
 #[macro_export]
 macro_rules! define {

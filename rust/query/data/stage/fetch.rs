@@ -8,11 +8,11 @@ use std::fmt;
 
 use crate::{
     common::{token, Span},
-    identifier::Variable,
     pretty::{indent, Pretty},
     query::DataQuery,
     type_::Type,
     util::write_joined,
+    variable::Variable,
 };
 
 #[derive(Debug, Eq, PartialEq)]

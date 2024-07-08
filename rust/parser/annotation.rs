@@ -10,7 +10,10 @@ use crate::{
         Abstract, Annotation, Cardinality, Cascade, Distinct, Independent, Key, Range, Regex, Subkey, Unique, Values,
     },
     common::{error::TypeQLError, Spanned},
-    parser::{expression::visit_value_literal, visit_identifier, visit_integer_literal},
+    parser::{
+        expression::{visit_quoted_string_literal, visit_value_literal},
+        visit_identifier, visit_integer_literal,
+    },
     value::Literal,
 };
 
@@ -110,7 +113,7 @@ fn visit_annotation_regex(node: Node<'_>) -> Regex {
     let span = node.span();
     let mut children = node.into_children();
     children.consume_expected(Rule::ANNOTATION_REGEX);
-    let regex = children.consume_expected(Rule::quoted_string_literal).as_str().to_owned(); // FIXME unquote
+    let regex = visit_quoted_string_literal(children.consume_expected(Rule::quoted_string_literal));
     debug_assert_eq!(children.try_consume_any(), None);
     Regex::new(span, regex)
 }
@@ -118,6 +121,6 @@ fn visit_annotation_regex(node: Node<'_>) -> Regex {
 fn visit_annotation_values(node: Node<'_>) -> Values {
     debug_assert_eq!(node.as_rule(), Rule::annotation_values);
     let span = node.span();
-    let values = node.into_children().skip_expected(Rule::ANNOTATION_VALUES).map(|v| v.as_str().to_owned()).collect();
+    let values = node.into_children().skip_expected(Rule::ANNOTATION_VALUES).map(visit_value_literal).collect();
     Values::new(span, values)
 }

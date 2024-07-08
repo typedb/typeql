@@ -13,7 +13,7 @@ use crate::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
     },
     parser::{visit_identifier, visit_var},
-    value::Literal,
+    value::{Category, Literal},
 };
 
 pub(super) fn visit_expression_function(node: Node<'_>) -> FunctionCall {
@@ -99,6 +99,11 @@ fn visit_list_index(node: Node<'_>) -> Expression {
 pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::value_literal);
     Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
+}
+
+pub(super) fn visit_quoted_string_literal(node: Node<'_>) -> Literal {
+    debug_assert_eq!(node.as_rule(), Rule::quoted_string_literal);
+    Literal::new(node.span(), Some(Category::String), node.as_str().to_owned()) 
 }
 
 pub(super) fn visit_expression_struct(node: Node<'_>) -> Literal {

@@ -7,10 +7,9 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span, Spanned},
-    identifier::{Identifier, Label, ScopedLabel},
+    common::{identifier::Identifier, token, Span, Spanned},
     pretty::Pretty,
-    type_::{Type, TypeAny},
+    type_::{Label, ScopedLabel, Type, TypeAny},
     util::write_joined,
 };
 

@@ -4,9 +4,57 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::sync::OnceLock;
+use std::{fmt, sync::OnceLock};
 
 use regex::{Regex, RegexBuilder};
+
+use crate::{
+    common::{token, Span, Spanned},
+    pretty::Pretty,
+    schema,
+};
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct Identifier {
+    span: Option<Span>,
+    ident: String,
+}
+
+impl Identifier {
+    pub fn new(span: Option<Span>, ident: String) -> Self {
+        Self { span, ident }
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.ident
+    }
+}
+
+impl Pretty for Identifier {}
+
+impl fmt::Display for Identifier {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.ident, f)
+    }
+}
+
+impl Spanned for Identifier {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl From<&str> for Identifier {
+    fn from(value: &str) -> Self {
+        Self::new(None, value.to_owned())
+    }
+}
+
+impl From<String> for Identifier {
+    fn from(value: String) -> Self {
+        Self::new(None, value)
+    }
+}
 
 const IDENTIFIER_CHAR: &str = "A-Za-z\
             \\u00C0-\\u00D6\

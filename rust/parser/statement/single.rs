@@ -8,7 +8,6 @@ use itertools::Itertools;
 
 use crate::{
     common::{error::TypeQLError, Spanned},
-    identifier::Label,
     parser::{
         expression::{visit_expression, visit_expression_function, visit_expression_value},
         statement::visit_comparison,
@@ -18,6 +17,7 @@ use crate::{
         comparison::ComparisonStatement, Assignment, AssignmentPattern, DeconstructField, InStream, Is, Statement,
         StructDeconstruct,
     },
+    type_::Label,
 };
 
 pub(super) fn visit_statement_single(node: Node<'_>) -> Statement {

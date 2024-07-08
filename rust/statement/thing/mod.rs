@@ -11,7 +11,7 @@ use super::{comparison, Statement};
 use crate::{
     common::{token, Span},
     expression::Expression,
-    identifier::Variable,
+    variable::Variable,
     pretty::{indent, Pretty},
     type_::{Type, TypeAny},
     util::write_joined,

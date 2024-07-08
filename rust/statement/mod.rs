@@ -14,9 +14,10 @@ pub use self::{thing::Thing, type_::Type};
 use crate::{
     common::{token, Span},
     expression::{Expression, FunctionCall},
-    identifier::{Label, Variable},
     pretty::Pretty,
+    type_::Label,
     util::write_joined,
+    variable::Variable,
 };
 
 pub mod comparison;

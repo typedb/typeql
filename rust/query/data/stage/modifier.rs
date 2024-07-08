@@ -11,7 +11,7 @@ use crate::{
         token::{self, Order},
         Span,
     },
-    identifier::Variable,
+    variable::Variable,
     pretty::Pretty,
     util::write_joined,
     value::Literal,

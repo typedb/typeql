@@ -6,7 +6,6 @@
 
 use crate::{
     common::{error::TypeQLError, Spanned},
-    identifier::Label,
     parser::{
         annotation::visit_annotations, visit_identifier, visit_kind, visit_label, visit_label_list, visit_label_scoped,
         visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
@@ -15,7 +14,7 @@ use crate::{
         capability::{Alias, Owns, Plays, Relates, Sub, ValueType},
         Capability, CapabilityBase, Type,
     },
-    type_::{Type as TypeRef, TypeAny},
+    type_::{Label, Type as TypeRef, TypeAny},
 };
 
 pub(super) fn visit_definition_type(node: Node<'_>) -> Type {

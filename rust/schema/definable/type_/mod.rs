@@ -10,8 +10,8 @@ use self::capability::{Alias, Owns, Plays, Relates, Sub, ValueType};
 use crate::{
     annotation::Annotation,
     common::{Span, Spanned},
-    identifier::{Label, ReservedLabel},
     pretty::{indent, Pretty},
+    type_::{Label, ReservedLabel},
     util::write_joined,
 };
 

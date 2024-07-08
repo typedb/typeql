@@ -7,10 +7,10 @@
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::Spanned,
-    identifier::Label,
     parser::{define::type_::visit_type_capability, visit_identifier, visit_kind},
     query::schema::Redefine,
     schema::definable::{Definable, Type},
+    type_::Label,
 };
 
 pub(super) fn visit_query_redefine(node: Node<'_>) -> Redefine {

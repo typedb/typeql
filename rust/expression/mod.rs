@@ -8,13 +8,14 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{
+        identifier::Identifier,
         token::{self, ArithmeticOperator},
         Span, Spanned,
     },
-    identifier::{Identifier, Variable},
     pretty::Pretty,
     util::write_joined,
     value::Literal,
+    variable::Variable,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -7,9 +7,7 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span},
-    identifier::{Label, ScopedLabel, Variable},
-    pretty::Pretty,
+    common::{identifier::Identifier, token, Span, Spanned}, pretty::Pretty, schema, variable::Variable
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -53,6 +51,89 @@ impl fmt::Display for Type {
     }
 }
 
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct ReservedLabel {
+    span: Option<Span>,
+    token: token::Type,
+}
+
+impl ReservedLabel {
+    pub fn new(span: Option<Span>, token: token::Type) -> Self {
+        Self { span, token }
+    }
+}
+
+impl fmt::Display for ReservedLabel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.token, f)
+    }
+}
+
+impl Spanned for ReservedLabel {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub enum Label {
+    Identifier(Identifier),
+    Reserved(ReservedLabel),
+}
+
+impl Label {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Label::Identifier(ident) => ident.as_str(),
+            Label::Reserved(reserved) => reserved.token.as_str(),
+        }
+    }
+}
+
+impl From<Label> for schema::definable::Type {
+    fn from(label: Label) -> Self {
+        Self::build(label)
+    }
+}
+
+impl Spanned for Label {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Identifier(inner) => inner.span(),
+            Self::Reserved(inner) => inner.span(),
+        }
+    }
+}
+
+impl fmt::Display for Label {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Identifier(inner) => fmt::Display::fmt(inner, f),
+            Self::Reserved(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct ScopedLabel {
+    span: Option<Span>,
+    scope: Label,
+    name: Label,
+}
+
+impl ScopedLabel {
+    pub fn new(span: Option<Span>, scope: Label, name: Label) -> Self {
+        Self { span, scope, name }
+    }
+}
+
+impl Pretty for ScopedLabel {}
+
+impl fmt::Display for ScopedLabel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", self.scope, self.name)
+    }
+}
 #[derive(Debug, Clone, Eq, PartialEq)]
 // TODO name?
 pub enum TypeAny {

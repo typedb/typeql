@@ -6,7 +6,11 @@
 
 use std::fmt;
 
-use crate::{common::Span, identifier::Identifier, pretty::Pretty, type_::TypeAny};
+use crate::{
+    common::{identifier::Identifier, Span},
+    pretty::Pretty,
+    type_::TypeAny,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Struct {

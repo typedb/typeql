@@ -14,14 +14,15 @@ use self::{
 use crate::{
     common::{
         error::{syntax_error, TypeQLError},
+        identifier::Identifier,
         token, LineColumn, Span, Spanned,
     },
-    identifier::{Identifier, Label, ReservedLabel, ScopedLabel, Variable},
     parser::redefine::visit_query_redefine,
     query::{Query, SchemaQuery},
     schema::definable,
-    type_::{BuiltinValueType, List, Optional, Type},
+    type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
     value::{Category, Literal},
+    variable::Variable,
     Result,
 };
 

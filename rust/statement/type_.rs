@@ -9,9 +9,8 @@ use std::fmt::{self, Write};
 use crate::{
     annotation::Annotation,
     common::{token, Span},
-    identifier::{Label, ScopedLabel},
     pretty::{indent, Pretty},
-    type_::{Type as TypeRef, TypeAny},
+    type_::{Label, ScopedLabel, Type as TypeRef, TypeAny},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

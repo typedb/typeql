@@ -8,9 +8,9 @@ use std::fmt;
 
 use super::definable::type_::CapabilityBase;
 use crate::{
-    common::{token, Span},
-    identifier::{Identifier, Label},
+    common::{identifier::Identifier, token, Span},
     pretty::Pretty,
+    type_::Label,
 };
 
 #[derive(Debug, Eq, PartialEq)]

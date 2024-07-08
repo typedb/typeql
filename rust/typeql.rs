@@ -14,7 +14,6 @@ pub mod annotation;
 pub mod builder;
 pub mod common;
 pub mod expression;
-pub mod identifier;
 pub mod parser;
 pub mod pattern;
 mod pretty;
@@ -24,19 +23,20 @@ pub mod statement;
 pub mod type_;
 mod util;
 mod value;
+mod variable;
 
 use schema::definable::Struct;
 
 use crate::parser::{visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query};
 pub use crate::{
     common::Result,
-    identifier::{Label, ScopedLabel, Variable},
     pattern::Pattern,
     query::Query,
     schema::definable::{Definable, Function},
     statement::Statement,
-    type_::{Type, TypeAny},
+    type_::{Label, ScopedLabel, Type, TypeAny},
     value::Literal,
+    variable::Variable,
 };
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
