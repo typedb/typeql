@@ -17,7 +17,7 @@ use crate::{
 pub enum Reduce {
     Check(Check),
     First(First),
-    All(Vec<ReduceAll>),
+    Value(Vec<ReduceValue>),
 }
 
 impl Pretty for Reduce {
@@ -25,7 +25,7 @@ impl Pretty for Reduce {
         match self {
             Self::Check(inner) => Pretty::fmt(inner, indent_level, f),
             Self::First(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::All(inner) => {
+            Self::Value(inner) => {
                 write_joined!(f, ", ", inner)?;
                 f.write_char(';')?;
                 Ok(())
@@ -39,7 +39,7 @@ impl fmt::Display for Reduce {
         match self {
             Self::Check(inner) => fmt::Display::fmt(inner, f),
             Self::First(inner) => fmt::Display::fmt(inner, f),
-            Self::All(inner) => {
+            Self::Value(inner) => {
                 write_joined!(f, ", ", inner)?;
                 Ok(())
             }
@@ -90,12 +90,12 @@ impl fmt::Display for First {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum ReduceAll {
+pub enum ReduceValue {
     Count(Count),
     Stat(Stat),
 }
 
-impl Pretty for ReduceAll {
+impl Pretty for ReduceValue {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Count(inner) => Pretty::fmt(inner, indent_level, f),
@@ -104,7 +104,7 @@ impl Pretty for ReduceAll {
     }
 }
 
-impl fmt::Display for ReduceAll {
+impl fmt::Display for ReduceValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Count(inner) => fmt::Display::fmt(inner, f),

@@ -27,7 +27,7 @@ use crate::{
                 delete::{Deletable, DeletableKind},
                 fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar},
                 modifier::{Filter, Limit, Offset, OrderedVariable, Sort},
-                reduce::{Check, Count, First, ReduceAll, Stat},
+                reduce::{Check, Count, First, ReduceValue, Stat},
                 Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
             },
             Preamble,
@@ -300,7 +300,7 @@ pub(super) fn visit_reduce(node: Node<'_>) -> Reduce {
     let reduce = match children.peek_rule().unwrap() {
         Rule::CHECK => Reduce::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
         Rule::reduce_first => Reduce::First(visit_reduce_first(children.consume_expected(Rule::reduce_first))),
-        Rule::reduce_all => Reduce::All(children.by_ref().map(visit_reduce_all).collect()),
+        Rule::reduce_value => Reduce::Value(children.by_ref().map(visit_reduce_value).collect()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
     debug_assert!(children.try_consume_any().is_none());
@@ -315,26 +315,26 @@ fn visit_reduce_first(node: Node<'_>) -> First {
     First::new(span, variables)
 }
 
-fn visit_reduce_all(node: Node<'_>) -> ReduceAll {
-    debug_assert_eq!(node.as_rule(), Rule::reduce_all);
+fn visit_reduce_value(node: Node<'_>) -> ReduceValue {
+    debug_assert_eq!(node.as_rule(), Rule::reduce_value);
     let span = node.span();
     let mut children = node.into_children();
     let keyword = children.consume_any();
     match keyword.as_rule() {
-        Rule::COUNT => ReduceAll::Count(Count::new(
+        Rule::COUNT => ReduceValue::Count(Count::new(
             span,
             children.try_consume_expected(Rule::vars).map(visit_vars).unwrap_or_default(),
         )),
-        Rule::MAX => ReduceAll::Stat(Stat::new(span, Aggregate::Max, visit_var(children.consume_expected(Rule::var)))),
-        Rule::MIN => ReduceAll::Stat(Stat::new(span, Aggregate::Min, visit_var(children.consume_expected(Rule::var)))),
+        Rule::MAX => ReduceValue::Stat(Stat::new(span, Aggregate::Max, visit_var(children.consume_expected(Rule::var)))),
+        Rule::MIN => ReduceValue::Stat(Stat::new(span, Aggregate::Min, visit_var(children.consume_expected(Rule::var)))),
         Rule::MEAN => {
-            ReduceAll::Stat(Stat::new(span, Aggregate::Mean, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, Aggregate::Mean, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MEDIAN => {
-            ReduceAll::Stat(Stat::new(span, Aggregate::Median, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, Aggregate::Median, visit_var(children.consume_expected(Rule::var))))
         }
-        Rule::STD => ReduceAll::Stat(Stat::new(span, Aggregate::Std, visit_var(children.consume_expected(Rule::var)))),
-        Rule::SUM => ReduceAll::Stat(Stat::new(span, Aggregate::Sum, visit_var(children.consume_expected(Rule::var)))),
+        Rule::STD => ReduceValue::Stat(Stat::new(span, Aggregate::Std, visit_var(children.consume_expected(Rule::var)))),
+        Rule::SUM => ReduceValue::Stat(Stat::new(span, Aggregate::Sum, visit_var(children.consume_expected(Rule::var)))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.to_string() }),
     }
 }

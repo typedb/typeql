@@ -9,9 +9,8 @@ use std::{fmt, sync::OnceLock};
 use regex::{Regex, RegexBuilder};
 
 use crate::{
-    common::{token, Span, Spanned},
+    common::{Span, Spanned},
     pretty::Pretty,
-    schema,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]

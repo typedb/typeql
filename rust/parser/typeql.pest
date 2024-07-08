@@ -47,19 +47,19 @@ var_order = { var ~ ORDER? }
 stage_reduce = { reduce ~ SEMICOLON }
 reduce = { CHECK
          | reduce_first
-         | reduce_all ~ ( COMMA ~ reduce_all )*
+         | reduce_value ~ ( COMMA ~ reduce_value )*
          }
 
 reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
 
-reduce_all = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
-             | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-             }
+reduce_value = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
+               | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               }
 
 // QUERY PATTERNS ==============================================================
 
