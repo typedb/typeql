@@ -331,7 +331,7 @@ annotation = { ANNOTATION_ABSTRACT
              | annotation_values
              }
 
-annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ DOUBLE_DOT ~ integer_literal? ~ PAREN_CLOSE }
+annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ ( DOUBLE_DOT ~ integer_literal? )? ~ PAREN_CLOSE }
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
 annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ identifier ~ PAREN_CLOSE }
 annotation_range = { ANNOTATION_RANGE ~ PAREN_OPEN ~ range ~ PAREN_CLOSE }
