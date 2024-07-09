@@ -15,7 +15,7 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
     span: Option<Span>,
-    patterns: Vec<Pattern>,
+    pub patterns: Vec<Pattern>,
 }
 
 impl Conjunction {
@@ -44,7 +44,7 @@ impl fmt::Display for Conjunction {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Negation {
     span: Option<Span>,
-    patterns: Vec<Pattern>,
+    pub patterns: Vec<Pattern>,
 }
 
 impl Negation {
@@ -73,18 +73,18 @@ impl fmt::Display for Negation {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Try {
+pub struct Optional {
     span: Option<Span>,
-    patterns: Vec<Pattern>,
+    pub patterns: Vec<Pattern>,
 }
 
-impl Try {
+impl Optional {
     pub(crate) fn new(span: Option<Span>, patterns: Vec<Pattern>) -> Self {
         Self { span, patterns }
     }
 }
 
-impl Pretty for Try {
+impl Pretty for Optional {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ", token::Keyword::Not)?;
         pretty_fmt_patterns(&self.patterns, indent_level + 1, f)?;
@@ -92,7 +92,7 @@ impl Pretty for Try {
     }
 }
 
-impl fmt::Display for Try {
+impl fmt::Display for Optional {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {{", token::Keyword::Try)?;
         for pattern in &self.patterns {
@@ -106,7 +106,7 @@ impl fmt::Display for Try {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Disjunction {
     span: Option<Span>,
-    branches: Vec<Vec<Pattern>>,
+    pub branches: Vec<Vec<Pattern>>,
 }
 
 impl Disjunction {
@@ -168,7 +168,7 @@ pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),
     Negation(Negation),
-    Try(Try),
+    Optional(Optional),
     Statement(Statement),
 }
 
@@ -184,7 +184,7 @@ impl Pretty for Pattern {
             Self::Conjunction(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Disjunction(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Negation(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::Try(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Optional(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Statement(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
@@ -196,7 +196,7 @@ impl fmt::Display for Pattern {
             Self::Conjunction(inner) => fmt::Display::fmt(inner, f),
             Self::Disjunction(inner) => fmt::Display::fmt(inner, f),
             Self::Negation(inner) => fmt::Display::fmt(inner, f),
-            Self::Try(inner) => fmt::Display::fmt(inner, f),
+            Self::Optional(inner) => fmt::Display::fmt(inner, f),
             Self::Statement(inner) => fmt::Display::fmt(inner, f),
         }
     }

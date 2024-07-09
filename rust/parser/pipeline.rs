@@ -20,7 +20,7 @@ use crate::{
         token::{Aggregate, Order},
         Spanned,
     },
-    pattern::{Conjunction, Disjunction, Negation, Pattern, Try},
+    pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
     query::{
         pipeline::{
             stage::{
@@ -107,7 +107,7 @@ pub(super) fn visit_pattern(node: Node<'_>) -> Pattern {
         Rule::pattern_conjunction => Pattern::Conjunction(visit_pattern_conjunction(child)),
         Rule::pattern_disjunction => Pattern::Disjunction(visit_pattern_disjunction(child)),
         Rule::pattern_negation => Pattern::Negation(visit_pattern_negation(child)),
-        Rule::pattern_try => Pattern::Try(visit_pattern_try(child)),
+        Rule::pattern_try => Pattern::Optional(visit_pattern_try(child)),
         Rule::statement => Pattern::Statement(visit_statement(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
@@ -141,13 +141,13 @@ fn visit_pattern_negation(node: Node<'_>) -> Negation {
     Negation::new(span, visit_patterns(patterns))
 }
 
-fn visit_pattern_try(node: Node<'_>) -> Try {
+fn visit_pattern_try(node: Node<'_>) -> Optional {
     debug_assert_eq!(node.as_rule(), Rule::pattern_try);
     let span = node.span();
     let mut children = node.into_children();
     let patterns = children.skip_expected(Rule::TRY).consume_expected(Rule::patterns);
     debug_assert_eq!(children.try_consume_any(), None);
-    Try::new(span, visit_patterns(patterns))
+    Optional::new(span, visit_patterns(patterns))
 }
 
 fn visit_stage_insert(node: Node<'_>) -> Insert {
