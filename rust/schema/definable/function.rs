@@ -17,10 +17,10 @@ use crate::{
 #[derive(Debug, PartialEq, Eq)]
 pub struct Function {
     span: Option<Span>,
-    signature: Signature,
-    body: Match,
-    modifiers: Vec<Modifier>,
-    return_stmt: ReturnStatement,
+    pub signature: Signature,
+    pub body: Match,
+    pub modifiers: Vec<Modifier>,
+    pub return_stmt: ReturnStatement,
 }
 
 impl Function {
@@ -58,9 +58,9 @@ impl fmt::Display for Function {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Signature {
     span: Option<Span>,
-    ident: Identifier,
-    args: Vec<Argument>,
-    output: Output,
+    pub ident: Identifier,
+    pub args: Vec<Argument>,
+    pub output: Output,
 }
 
 impl Signature {
@@ -95,8 +95,8 @@ impl fmt::Display for Signature {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Argument {
     span: Option<Span>,
-    var: Variable,
-    type_: TypeAny,
+    pub var: Variable,
+    pub type_: TypeAny,
 }
 
 impl Argument {
@@ -141,7 +141,7 @@ impl fmt::Display for Output {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Stream {
     span: Option<Span>,
-    types: Vec<TypeAny>,
+    pub types: Vec<TypeAny>,
 }
 
 impl Stream {
@@ -171,7 +171,7 @@ impl fmt::Display for Stream {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Single {
     span: Option<Span>,
-    types: Vec<TypeAny>,
+    pub types: Vec<TypeAny>,
 }
 
 impl Single {
@@ -201,7 +201,7 @@ impl fmt::Display for Single {
 #[derive(Debug, PartialEq, Eq)]
 pub struct ReturnStream {
     span: Option<Span>,
-    vars: Vec<Variable>,
+    pub vars: Vec<Variable>,
 }
 
 impl ReturnStream {
@@ -219,7 +219,7 @@ pub enum SingleOutput {
 #[derive(Debug, PartialEq, Eq)]
 pub struct ReturnSingle {
     span: Option<Span>,
-    outputs: Vec<SingleOutput>,
+    pub outputs: Vec<SingleOutput>,
 }
 
 impl ReturnSingle {

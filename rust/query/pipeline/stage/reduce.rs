@@ -69,7 +69,7 @@ impl fmt::Display for Check {
 #[derive(Debug, Eq, PartialEq)]
 pub struct First {
     span: Option<Span>,
-    variables: Vec<Variable>,
+    pub variables: Vec<Variable>,
 }
 
 impl First {
@@ -116,7 +116,7 @@ impl fmt::Display for ReduceValue {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Count {
     span: Option<Span>,
-    variables: Vec<Variable>,
+    pub variables: Vec<Variable>,
 }
 
 impl Count {
@@ -139,8 +139,8 @@ impl fmt::Display for Count {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Stat {
     span: Option<Span>,
-    aggregate: token::Aggregate,
-    variable: Variable,
+    pub aggregate: token::Aggregate,
+    pub variable: Variable,
 }
 
 impl Stat {

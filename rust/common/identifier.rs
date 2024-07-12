@@ -16,7 +16,7 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Identifier {
     span: Option<Span>,
-    ident: String,
+    pub ident: String,
 }
 
 impl Identifier {

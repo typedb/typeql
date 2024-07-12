@@ -21,7 +21,7 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BuiltinFunctionName {
     span: Option<Span>,
-    token: token::Function,
+    pub token: token::Function,
 }
 
 impl BuiltinFunctionName {
@@ -58,8 +58,8 @@ impl fmt::Display for FunctionName {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FunctionCall {
     span: Option<Span>,
-    name: FunctionName,
-    args: Vec<Expression>,
+    pub name: FunctionName,
+    pub args: Vec<Expression>,
 }
 
 impl FunctionCall {
