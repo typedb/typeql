@@ -87,9 +87,9 @@ impl fmt::Display for FunctionCall {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Operation {
-    op: ArithmeticOperator,
-    left: Expression,
-    right: Expression,
+    pub op: ArithmeticOperator,
+    pub left: Expression,
+    pub right: Expression,
 }
 
 impl Operation {
@@ -119,7 +119,7 @@ impl fmt::Display for Operation {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Paren {
     span: Option<Span>,
-    inner: Expression,
+    pub inner: Expression,
 }
 
 impl Paren {
@@ -145,8 +145,8 @@ impl fmt::Display for Paren {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ListIndex {
     span: Option<Span>,
-    variable: Variable,
-    index: Expression,
+    pub variable: Variable,
+    pub index: Expression,
 }
 
 impl ListIndex {
@@ -172,7 +172,7 @@ impl fmt::Display for ListIndex {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
     span: Option<Span>,
-    items: Vec<Expression>,
+    pub items: Vec<Expression>,
 }
 
 impl List {
@@ -201,9 +201,9 @@ impl fmt::Display for List {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ListIndexRange {
     span: Option<Span>,
-    var: Variable,
-    from: Expression,
-    to: Expression,
+    pub var: Variable,
+    pub from: Expression,
+    pub to: Expression,
 }
 
 impl ListIndexRange {
