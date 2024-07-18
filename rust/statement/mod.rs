@@ -48,8 +48,8 @@ impl fmt::Display for Is {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct InStream {
     span: Option<Span>,
-    lhs: Vec<Variable>,
-    rhs: FunctionCall,
+    pub lhs: Vec<Variable>,
+    pub rhs: FunctionCall,
 }
 
 impl InStream {
@@ -106,8 +106,8 @@ impl fmt::Display for AssignmentPattern {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Assignment {
     span: Option<Span>,
-    lhs: AssignmentPattern,
-    rhs: Expression,
+    pub lhs: AssignmentPattern,
+    pub rhs: Expression,
 }
 
 impl Assignment {

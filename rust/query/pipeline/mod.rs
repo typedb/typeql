@@ -18,7 +18,7 @@ pub mod stage;
 #[derive(Debug, Eq, PartialEq)]
 pub struct Preamble {
     span: Option<Span>,
-    function: definable::Function,
+    pub function: definable::Function,
 }
 
 impl Preamble {
