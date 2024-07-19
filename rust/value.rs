@@ -47,23 +47,124 @@ impl Tag {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct BooleanLiteral {
+    pub(crate) value: String,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct StringLiteral {
+    pub(crate) value: String,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct IntegerLiteral {
+    pub(crate) value: String,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Sign {
+    Plus,
+    Minus
+}
+
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct SignedIntegerLiteral {
+    pub sign: Sign,
+    pub integral: String,
+}
+
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct SignedDecimalLiteral {
+    pub sign: Sign,
+    pub integral: String,
+    pub fractional: Option<String>,
+    pub exponent: Option<(Sign,String)>
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct DateFragment {
+    pub year: String,
+    pub month: String,
+    pub day: String,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct TimeFragment {
+    pub hour: String,
+    pub minute: String,
+    pub second: Option<String>,
+    pub second_fraction: Option<String>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct DateTimeTZLiteral {
+    pub date: DateFragment,
+    pub time: TimeFragment,
+    pub timezone: TimeZone,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct DateTimeLiteral {
+    pub date: DateFragment,
+    pub time: TimeFragment,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct DateLiteral {
+    pub date: DateFragment,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum TimeZone {
+    IANA(String, String),
+    ISO(String)
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct DurationLiteral {
+    pub date: Option<DurationDate>,
+    pub time: Option<DurationTime>
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum DurationDate {
+    Years(String),
+    Months(String),
+    Weeks(String),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum DurationTime {
+    Days(String),
+    Hours(String),
+    Minutes(String),
+    Seconds(String),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum ValueLiteral {
+    Boolean(BooleanLiteral),
+    Integer(SignedIntegerLiteral),
+    Decimal(SignedDecimalLiteral),
+    Date(DateFragment),
+    DateTime(DateFragment, TimeFragment),
+    DateTimeTz(DateFragment, TimeFragment, TimeZone),
+    Duration(DurationLiteral),
+    String(StringLiteral),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Literal {
     span: Option<Span>,
     pub tag: Option<Tag>,
-    pub inner: String, // TODO this can be smarter
+    pub inner: ValueLiteral, // TODO this can be smarter
 }
 
 impl Literal {
-    pub(crate) fn new(span: Option<Span>, category: Option<Tag>, inner: String) -> Self {
+    pub(crate) fn new(span: Option<Span>, category: Option<Tag>, inner: ValueLiteral) -> Self {
         Self { span, tag: category, inner }
-    }
-
-    pub fn parse_to_string(&self) -> Result<String> {
-        if self.tag.is_some_and(|cat| cat != Tag::String) {
-            Err(TypeQLError::InvalidLiteral { expected_variant: "String", variant: self.tag.unwrap().name() }.into())
-        } else {
-            parse_string(&self.inner)
-        }
     }
 }
 

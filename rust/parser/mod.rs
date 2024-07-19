@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use itertools::Itertools;
+use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 
@@ -21,10 +23,12 @@ use crate::{
     query::{Query, SchemaQuery},
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
-    value::{Literal, Tag},
+    value::{Literal, Tag, ValueLiteral},
+    value::{IntegerLiteral, DecimalLiteral, DateFragment, TimeFragment, TimeZone, DurationLiteral},
     variable::Variable,
     Result,
 };
+use crate::value::{BooleanLiteral, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, Sign, SignedDecimalLiteral, SignedIntegerLiteral, StringLiteral};
 
 mod annotation;
 mod define;
@@ -305,15 +309,117 @@ fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
 
 fn visit_value_literal(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::value_literal);
-    Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
+    let span = node.span();
+    let child = node.into_child();
+    let value_literal = match child.as_rule() {
+        Rule::quoted_string_literal => ValueLiteral::String(visit_quoted_string_literal(child)),
+        Rule::boolean_literal => ValueLiteral::Boolean(BooleanLiteral { value : child.as_str().to_owned() }),
+        Rule::signed_integer => ValueLiteral::Integer(visit_signed_integer(child)),
+        Rule::signed_decimal => ValueLiteral::Decimal(visit_signed_decimal(child)),
+
+        Rule::datetime_tz_literal => ValueLiteral::DateTimeTz(visit_datetime_tz_literal(child)),
+        Rule::datetime_literal => ValueLiteral::DateTime(visit_datetime_literal(child)),
+        Rule::date_literal => ValueLiteral::Date(visit_date_literal(child)),
+
+
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    // Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
+    Literal::new(node.span(), None, )
 }
 
-fn visit_quoted_string_literal(node: Node<'_>) -> Literal {
-    debug_assert_eq!(node.as_rule(), Rule::quoted_string_literal);
-    Literal::new(node.span(), Some(Tag::String), node.as_str().to_owned())
+fn visit_sign(node: Node<'_>) -> Sign {
+    debug_assert_eq!(node.as_rule(), Rule::sign);
+    match node.as_rule() {
+        Rule::PLUS =>Sign::Plus,
+        Rule::MIN => Sign::Minus,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
+    }
 }
 
-fn visit_integer_literal(node: Node<'_>) -> Literal {
+fn visit_integer_literal(node: Node<'_>) -> IntegerLiteral {
     debug_assert_eq!(node.as_rule(), Rule::integer_literal);
-    Literal::new(node.span(), Some(Tag::Integral), node.as_str().to_owned())
+    IntegerLiteral {  value: node.as_str().to_owned() }
+}
+
+fn visit_quoted_string_literal(node: Node<'_>) -> StringLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::quoted_string_literal);
+    StringLiteral { value: node.as_str().to_owned() }
+}
+
+fn visit_signed_integer(node: Node<'_>) -> SignedIntegerLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::signed_integer);
+    let mut children = node.into_children().collect::<Vec<_>>();
+    let integral = children.pop().unwrap();
+    let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
+    debug_assert_eq!(node.as_rule(), Rule::integer_literal);
+    SignedIntegerLiteral { sign, integral: integral.as_str().to_owned() }
+}
+
+fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::signed_integer);
+    let mut children = node.into_children().collect::<Vec<_>>();
+    let number = children.pop().unwrap();
+    let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
+    debug_assert_eq!(number.as_rule(), Rule::decimal_literal);
+    let (decimal,may_be_exponent) = number.into_children().collect::<Vec<_>>().split_at(2);
+    let (integral, fractional) = (decimal[0].as_str().to_owned(), decimal[1].as_str().to_owned());
+    debug_assert!(may_be_exponent.len() >= 1);
+    let exponent = may_be_exponent.pop().unwrap();
+    let exponent_sign = may_be_exponent.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
+    SignedDecimalLiteral { sign, integral, fractional, exponent: (exponent_sign, exponent) }
+}
+
+fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::datetime_tz_literal);
+    let (date_node, time_node, tz_node) = node.into_children().collect_tuple().unwrap();
+    let date =visit_date_fragment(date_node);
+    let time = visit_time(time_node);
+    let timezone = match tz_node.as_rule() {
+        Rule::iana_timezone => visit_iana_timezone(tz_node),
+        Rule::iso8601_timezone_offset => visit_iso8601_timezone_offset(tz_node),
+        _ => unreachable!()
+    };
+    DateTimeTZLiteral { date, time, timezone }
+}
+
+fn visit_datetime_literal(node: Node<'_>) -> DateTimeLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::datetime_literal);
+    let (date_node, time_node) = node.into_children().collect_tuple().unwrap();
+    let date =visit_date_fragment(date_node);
+    let time = visit_time(time_node);
+    DateTimeLiteral { date, time }
+}
+
+fn visit_date_literal(node: Node<'_>) -> DateLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::date_literal);
+    let date = visit_date_fragment(node);
+    DateLiteral { date }
+}
+
+fn visit_iso8601_timezone_offset(node: Node<'_>) -> TimeZone {
+    debug_assert_eq!(node.as_rule(), Rule::iso8601_timezone_offset);
+    TimeZone::ISO(node.as_str().to_owned())
+}
+
+fn visit_iana_timezone(node: Node<'_>) -> TimeZone {
+    debug_assert_eq!(node.as_rule(), Rule::iana_timezone);
+    let (first, second) = node.into_children().map(|node| node.as_str().to_owned()).collect_tuple().unwrap();
+    TimeZone::IANA(first, second)
+}
+
+fn visit_date_fragment(node: Node<'_>) -> DateFragment {
+    debug_assert_eq!(node.as_rule(), Rule::date_fragment);
+    let (year, month, day) =
+        node.into_children().map(|child| child.as_str().to_owned()).collect_tuple().unwrap();
+    DateFragment { year, month, day }
+}
+
+fn visit_time(node: Node<'_>) -> TimeFragment {
+    debug_assert_eq!(node.as_rule(), Rule::time);
+    let children = node.into_children().collect::<Vec<_>>();
+    let (hour, minute, second) =
+        children[0..3].map(|child| child.as_str().to_owned()).collect_tuple().unwrap();
+    let second_fraction = children.get(3).map(|node| node.as_str().to_owned());
+    TimeFragment { hour, minute, second, second_fraction }
 }

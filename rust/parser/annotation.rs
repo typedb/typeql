@@ -114,7 +114,7 @@ fn visit_annotation_regex(node: Node<'_>) -> Regex {
     children.consume_expected(Rule::ANNOTATION_REGEX);
     let regex = visit_quoted_string_literal(children.consume_expected(Rule::quoted_string_literal));
     debug_assert_eq!(children.try_consume_any(), None);
-    Regex::new(span, regex)
+    Regex::new(span, regex.value)
 }
 
 fn visit_annotation_values(node: Node<'_>) -> Values {
