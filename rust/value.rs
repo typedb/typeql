@@ -50,7 +50,7 @@ impl Tag {
 pub struct Literal {
     span: Option<Span>,
     pub tag: Option<Tag>,
-    inner: String, // TODO this can be smarter
+    pub inner: String, // TODO this can be smarter
 }
 
 impl Literal {
