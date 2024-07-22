@@ -97,7 +97,7 @@ fn visit_list_index(node: Node<'_>) -> Expression {
 
 pub(super) fn visit_expression_struct(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::expression_struct);
-    Literal::new(node.span(), None, node.as_str().to_owned()) // TODO parse properly
+    Literal::new(node.span(), None, todo!()) // TODO parse properly
 }
 
 fn visit_expression_parenthesis(node: Node<'_>) -> Paren {

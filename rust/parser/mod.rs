@@ -24,7 +24,7 @@ use crate::{
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
     value::{Literal, Tag, ValueLiteral},
-    value::{IntegerLiteral, DecimalLiteral, DateFragment, TimeFragment, TimeZone, DurationLiteral},
+    value::{IntegerLiteral, DateFragment, TimeFragment, TimeZone, DurationLiteral},
     variable::Variable,
     Result,
 };
@@ -325,7 +325,7 @@ fn visit_value_literal(node: Node<'_>) -> Literal {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     // Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
-    Literal::new(node.span(), None, )
+    Literal::new(span, None, value_literal)
 }
 
 fn visit_sign(node: Node<'_>) -> Sign {
@@ -352,22 +352,30 @@ fn visit_signed_integer(node: Node<'_>) -> SignedIntegerLiteral {
     let mut children = node.into_children().collect::<Vec<_>>();
     let integral = children.pop().unwrap();
     let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
-    debug_assert_eq!(node.as_rule(), Rule::integer_literal);
+    debug_assert_eq!(integral.as_rule(), Rule::integer_literal);
     SignedIntegerLiteral { sign, integral: integral.as_str().to_owned() }
 }
 
 fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
     debug_assert_eq!(node.as_rule(), Rule::signed_integer);
     let mut children = node.into_children().collect::<Vec<_>>();
-    let number = children.pop().unwrap();
-    let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
-    debug_assert_eq!(number.as_rule(), Rule::decimal_literal);
-    let (decimal,may_be_exponent) = number.into_children().collect::<Vec<_>>().split_at(2);
-    let (integral, fractional) = (decimal[0].as_str().to_owned(), decimal[1].as_str().to_owned());
-    debug_assert!(may_be_exponent.len() >= 1);
-    let exponent = may_be_exponent.pop().unwrap();
-    let exponent_sign = may_be_exponent.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
-    SignedDecimalLiteral { sign, integral, fractional, exponent: (exponent_sign, exponent) }
+    todo!()
+    // let decimal_node = children.pop().unwrap();
+    // let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
+    //
+    // let mut number = decimal_node.into_children().collect::<Vec<_>>();
+    // let (integral, fractional) = (number[0].as_str().to_owned(), number[1].as_str().to_owned());
+    // let (exponent_sign, exponent) = match number.len() {
+    //     3 => (Sign::Plus, number.pop().unwrap()),
+    //     4 => {
+    //         let exponent = number.pop().unwrap();
+    //         let exponent_sign = visit_sign(number.pop().unwrap());
+    //         (exponent_sign, exponent)
+    //     },
+    //     _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: decimal_node.to_string() }),
+    // };
+    //
+    // SignedDecimalLiteral { sign, integral, fractional, exponent: (exponent_sign, exponent) }
 }
 
 fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
@@ -378,7 +386,7 @@ fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
     let timezone = match tz_node.as_rule() {
         Rule::iana_timezone => visit_iana_timezone(tz_node),
         Rule::iso8601_timezone_offset => visit_iso8601_timezone_offset(tz_node),
-        _ => unreachable!()
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: tz_node.to_string() }),
     };
     DateTimeTZLiteral { date, time, timezone }
 }
@@ -418,8 +426,11 @@ fn visit_date_fragment(node: Node<'_>) -> DateFragment {
 fn visit_time(node: Node<'_>) -> TimeFragment {
     debug_assert_eq!(node.as_rule(), Rule::time);
     let children = node.into_children().collect::<Vec<_>>();
-    let (hour, minute, second) =
-        children[0..3].map(|child| child.as_str().to_owned()).collect_tuple().unwrap();
+    let (hour, minute, second) = (
+        children[0].as_str().to_owned(),
+        children[1].as_str().to_owned(),
+        children.get(2).map(|node| node.as_str().to_owned()),
+    );
     let second_fraction = children.get(3).map(|node| node.as_str().to_owned());
     TimeFragment { hour, minute, second, second_fraction }
 }

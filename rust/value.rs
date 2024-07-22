@@ -5,6 +5,7 @@
  */
 
 use std::fmt;
+use std::fmt::{Debug, Formatter};
 
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
@@ -129,6 +130,11 @@ pub struct DurationLiteral {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct StructLiteral {
+    // TODO
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum DurationDate {
     Years(String),
     Months(String),
@@ -148,9 +154,9 @@ pub enum ValueLiteral {
     Boolean(BooleanLiteral),
     Integer(SignedIntegerLiteral),
     Decimal(SignedDecimalLiteral),
-    Date(DateFragment),
-    DateTime(DateFragment, TimeFragment),
-    DateTimeTz(DateFragment, TimeFragment, TimeZone),
+    Date(DateLiteral),
+    DateTime(DateTimeLiteral),
+    DateTimeTz(DateTimeTZLiteral),
     Duration(DurationLiteral),
     String(StringLiteral),
 }
@@ -178,7 +184,25 @@ impl Pretty for Literal {}
 
 impl fmt::Display for Literal {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.inner)
+        self.inner.fmt(f)
+    }
+}
+
+impl fmt::Display for IntegerLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(self.value.as_str())
+    }
+}
+
+impl fmt::Display for StringLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(self.value.as_str())
+    }
+}
+
+impl fmt::Display for SignedDecimalLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        todo!()
     }
 }
 

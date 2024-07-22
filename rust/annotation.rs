@@ -78,9 +78,9 @@ impl Cardinality {
 
 impl fmt::Display for Cardinality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "@{}({}..", token::Annotation::Cardinality, self.min.integral)?;
+        write!(f, "@{}({}..", token::Annotation::Cardinality, self.min.value)?;
         if let Some(max) = &self.max {
-            write!(f, "{}", max.integral)?;
+            write!(f, "{}", max.value)?;
         }
         f.write_char(')')?;
         Ok(())
