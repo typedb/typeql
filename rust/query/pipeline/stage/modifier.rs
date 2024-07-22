@@ -13,10 +13,9 @@ use crate::{
     },
     pretty::Pretty,
     util::write_joined,
-    value::Literal,
+    value::{IntegerLiteral, Literal},
     variable::Variable,
 };
-use crate::value::IntegerLiteral;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct OrderedVariable {

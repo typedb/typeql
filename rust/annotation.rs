@@ -9,9 +9,8 @@ use std::fmt::{self, Write};
 use crate::{
     common::{identifier::Identifier, token, Span},
     util::write_joined,
-    value::{StringLiteral, Literal},
+    value::{IntegerLiteral, Literal, StringLiteral},
 };
-use crate::value::IntegerLiteral;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Annotation {

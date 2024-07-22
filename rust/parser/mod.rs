@@ -5,8 +5,7 @@
  */
 
 use itertools::Itertools;
-use pest::iterators::Pair;
-use pest::Parser;
+use pest::{iterators::Pair, Parser};
 use pest_derive::Parser;
 
 use self::{
@@ -23,12 +22,13 @@ use crate::{
     query::{Query, SchemaQuery},
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
-    value::{Literal, Tag, ValueLiteral},
-    value::{IntegerLiteral, DateFragment, TimeFragment, TimeZone, DurationLiteral},
+    value::{
+        BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, DurationLiteral, IntegerLiteral,
+        Literal, Sign, SignedDecimalLiteral, SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral,
+    },
     variable::Variable,
     Result,
 };
-use crate::value::{BooleanLiteral, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, Sign, SignedDecimalLiteral, SignedIntegerLiteral, StringLiteral};
 
 mod annotation;
 mod define;
@@ -313,7 +313,7 @@ fn visit_value_literal(node: Node<'_>) -> Literal {
     let child = node.into_child();
     let value_literal = match child.as_rule() {
         Rule::quoted_string_literal => ValueLiteral::String(visit_quoted_string_literal(child)),
-        Rule::boolean_literal => ValueLiteral::Boolean(BooleanLiteral { value : child.as_str().to_owned() }),
+        Rule::boolean_literal => ValueLiteral::Boolean(BooleanLiteral { value: child.as_str().to_owned() }),
         Rule::signed_integer => ValueLiteral::Integer(visit_signed_integer(child)),
         Rule::signed_decimal => ValueLiteral::Decimal(visit_signed_decimal(child)),
 
@@ -321,17 +321,15 @@ fn visit_value_literal(node: Node<'_>) -> Literal {
         Rule::datetime_literal => ValueLiteral::DateTime(visit_datetime_literal(child)),
         Rule::date_literal => ValueLiteral::Date(visit_date_literal(child)),
 
-
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    // Literal::new(node.span(), None, node.as_str().to_owned()) // TODO visit to get category
-    Literal::new(span, None, value_literal)
+    Literal::new(span, value_literal)
 }
 
 fn visit_sign(node: Node<'_>) -> Sign {
     debug_assert_eq!(node.as_rule(), Rule::sign);
     match node.as_rule() {
-        Rule::PLUS =>Sign::Plus,
+        Rule::PLUS => Sign::Plus,
         Rule::MIN => Sign::Minus,
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
     }
@@ -339,7 +337,7 @@ fn visit_sign(node: Node<'_>) -> Sign {
 
 fn visit_integer_literal(node: Node<'_>) -> IntegerLiteral {
     debug_assert_eq!(node.as_rule(), Rule::integer_literal);
-    IntegerLiteral {  value: node.as_str().to_owned() }
+    IntegerLiteral { value: node.as_str().to_owned() }
 }
 
 fn visit_quoted_string_literal(node: Node<'_>) -> StringLiteral {
@@ -381,7 +379,7 @@ fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
 fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
     debug_assert_eq!(node.as_rule(), Rule::datetime_tz_literal);
     let (date_node, time_node, tz_node) = node.into_children().collect_tuple().unwrap();
-    let date =visit_date_fragment(date_node);
+    let date = visit_date_fragment(date_node);
     let time = visit_time(time_node);
     let timezone = match tz_node.as_rule() {
         Rule::iana_timezone => visit_iana_timezone(tz_node),
@@ -394,7 +392,7 @@ fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
 fn visit_datetime_literal(node: Node<'_>) -> DateTimeLiteral {
     debug_assert_eq!(node.as_rule(), Rule::datetime_literal);
     let (date_node, time_node) = node.into_children().collect_tuple().unwrap();
-    let date =visit_date_fragment(date_node);
+    let date = visit_date_fragment(date_node);
     let time = visit_time(time_node);
     DateTimeLiteral { date, time }
 }
@@ -418,8 +416,7 @@ fn visit_iana_timezone(node: Node<'_>) -> TimeZone {
 
 fn visit_date_fragment(node: Node<'_>) -> DateFragment {
     debug_assert_eq!(node.as_rule(), Rule::date_fragment);
-    let (year, month, day) =
-        node.into_children().map(|child| child.as_str().to_owned()).collect_tuple().unwrap();
+    let (year, month, day) = node.into_children().map(|child| child.as_str().to_owned()).collect_tuple().unwrap();
     DateFragment { year, month, day }
 }
 

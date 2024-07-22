@@ -4,8 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt;
-use std::fmt::{Debug, Formatter};
+use std::{
+    fmt,
+    fmt::{Debug, Formatter},
+};
 
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
@@ -13,61 +15,26 @@ use crate::{
     Result,
 };
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum Tag {
-    Boolean,
-    Long,
-    Double,
-    Decimal,
-    Date,
-    DateTime,
-    DateTimeTZ,
-    Duration,
-    String,
-    // larger groupings when ambiguous
-    Integral,   // Long OR Fractional
-    Fractional, // Double OR Decimal
-}
-
-impl Tag {
-    fn name(&self) -> &'static str {
-        match self {
-            Self::Boolean => "Boolean",
-            Self::Long => "Long",
-            Self::Double => "Double",
-            Self::Decimal => "Decimal",
-            Self::Date => "Date",
-            Self::DateTime => "DateTime",
-            Self::DateTimeTZ => "DateTimeTZ",
-            Self::Duration => "Duration",
-            Self::String => "String",
-            Self::Integral => "Integral",
-            Self::Fractional => "Fractional",
-        }
-    }
-}
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BooleanLiteral {
-    pub(crate) value: String,
+    pub value: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StringLiteral {
-    pub(crate) value: String,
+    pub value: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IntegerLiteral {
-    pub(crate) value: String,
+    pub value: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Sign {
     Plus,
-    Minus
+    Minus,
 }
-
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SignedIntegerLiteral {
@@ -75,13 +42,12 @@ pub struct SignedIntegerLiteral {
     pub integral: String,
 }
 
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SignedDecimalLiteral {
     pub sign: Sign,
     pub integral: String,
     pub fractional: Option<String>,
-    pub exponent: Option<(Sign,String)>
+    pub exponent: Option<(Sign, String)>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -120,13 +86,13 @@ pub struct DateLiteral {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TimeZone {
     IANA(String, String),
-    ISO(String)
+    ISO(String),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DurationLiteral {
     pub date: Option<DurationDate>,
-    pub time: Option<DurationTime>
+    pub time: Option<DurationTime>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -164,13 +130,12 @@ pub enum ValueLiteral {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Literal {
     span: Option<Span>,
-    pub tag: Option<Tag>,
     pub inner: ValueLiteral, // TODO this can be smarter
 }
 
 impl Literal {
-    pub(crate) fn new(span: Option<Span>, category: Option<Tag>, inner: ValueLiteral) -> Self {
-        Self { span, tag: category, inner }
+    pub(crate) fn new(span: Option<Span>, inner: ValueLiteral) -> Self {
+        Self { span, inner }
     }
 }
 
@@ -183,7 +148,7 @@ impl Spanned for Literal {
 impl Pretty for Literal {}
 
 impl fmt::Display for Literal {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
 }
