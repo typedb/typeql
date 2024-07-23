@@ -2,9 +2,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-#
-
 imports_granularity = "Crate"
 group_imports = "StdExternalCrate"
 use_small_heuristics = "Max"
 max_width = 120
+match_arm_leading_pipes = "Preserve"
