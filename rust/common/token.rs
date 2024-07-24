@@ -162,6 +162,7 @@ string_enum! { Aggregate
     Min = "min",
     Std = "std",
     Sum = "sum",
+    List = "list",
 }
 
 string_enum! { ValueType

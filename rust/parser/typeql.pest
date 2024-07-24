@@ -59,6 +59,7 @@ reduce_value = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
                | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | LIST ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                }
 
 // QUERY PATTERNS ==============================================================
@@ -197,7 +198,7 @@ definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { kind? ~ identifier ~ type_capability ~ ( COMMA ~ type_capability )* }
+definition_type = { kind ~ identifier ~ type_capability ~ ( COMMA ~ type_capability )* }
 type_capability = { type_capability_base ~ annotations? }
 type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
                        | owns_declaration | plays_declaration | relates_declaration
@@ -240,13 +241,13 @@ definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type }
 
 struct_field_value_type = { value_type_optional | value_type }
 
-struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value }
+struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value ~ CURLY_CLOSE }
 struct_destructor_value = { var | struct_destructor }
 
 // REDEFINE QUERY ==============================================================
 
 query_redefine = { REDEFINE ~ ( redefinable ~ SEMICOLON )+ }
-redefinable = { kind? ~ identifier ~ type_capability }
+redefinable = { kind ~ identifier ~ type_capability }
 
 // UNDEFINE QUERY ==============================================================
 
@@ -270,7 +271,7 @@ undefine_struct = { STRUCT ~ identifier }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-label = ${ kind | ROLE | identifier } // type label
+label = ${ identifier } // type label
 label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
 identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
@@ -364,7 +365,7 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
 
 unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
              | CHECK | FIRST
-             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
+             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
              | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
              | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
              | FROM
@@ -502,7 +503,7 @@ FLOOR = @{ "floor" ~ WB }
 LENGTH = @{ "length" ~ WB }
 ROUND = @{ "round" ~ WB }
 
-// GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
+// GROUP AND AGGREGATE QUERY KEYWORDS
 
 GROUP = @{ "group" ~ WB }
 COUNT = @{ "count" ~ WB }
@@ -512,6 +513,7 @@ MEAN = @{ "mean" ~ WB }
 MEDIAN = @{ "median" ~ WB }
 STD = @{ "std" ~ WB }
 SUM = @{ "sum" ~ WB }
+LIST = @{ "list" ~ WB }
 
 // VALUE TYPE KEYWORDS
 
