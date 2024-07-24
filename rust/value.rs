@@ -8,6 +8,8 @@ use std::{
     fmt,
     fmt::{Debug, Formatter},
 };
+use std::fmt::Write;
+use std::path::Display;
 
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
@@ -45,9 +47,7 @@ pub struct SignedIntegerLiteral {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SignedDecimalLiteral {
     pub sign: Sign,
-    pub integral: String,
-    pub fractional: Option<String>,
-    pub exponent: Option<(Sign, String)>,
+    pub decimal: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -165,9 +165,20 @@ impl fmt::Display for StringLiteral {
     }
 }
 
+impl fmt::Display for Sign {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Sign::Plus => f.write_char('+'),
+            Sign::Minus => f.write_char('-'),
+        }
+    }
+}
+
 impl fmt::Display for SignedDecimalLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        todo!()
+        std::fmt::Display::fmt(&self.sign, f)?;
+        f.write_str(self.decimal.as_str())?;
+        Ok(())
     }
 }
 

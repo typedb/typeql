@@ -355,25 +355,11 @@ fn visit_signed_integer(node: Node<'_>) -> SignedIntegerLiteral {
 }
 
 fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
-    debug_assert_eq!(node.as_rule(), Rule::signed_integer);
+    debug_assert_eq!(node.as_rule(), Rule::signed_decimal);
     let mut children = node.into_children().collect::<Vec<_>>();
-    todo!()
-    // let decimal_node = children.pop().unwrap();
-    // let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
-    //
-    // let mut number = decimal_node.into_children().collect::<Vec<_>>();
-    // let (integral, fractional) = (number[0].as_str().to_owned(), number[1].as_str().to_owned());
-    // let (exponent_sign, exponent) = match number.len() {
-    //     3 => (Sign::Plus, number.pop().unwrap()),
-    //     4 => {
-    //         let exponent = number.pop().unwrap();
-    //         let exponent_sign = visit_sign(number.pop().unwrap());
-    //         (exponent_sign, exponent)
-    //     },
-    //     _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: decimal_node.to_string() }),
-    // };
-    //
-    // SignedDecimalLiteral { sign, integral, fractional, exponent: (exponent_sign, exponent) }
+    let decimal = children.pop().unwrap().as_str().to_owned();
+    let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
+    SignedDecimalLiteral { sign, decimal }
 }
 
 fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
