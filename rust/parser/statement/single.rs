@@ -11,7 +11,7 @@ use crate::{
     parser::{
         expression::{visit_expression, visit_expression_function, visit_expression_value},
         statement::visit_comparison,
-        visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+        visit_label, visit_var, visit_vars_assignment, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
         comparison::ComparisonStatement, Assignment, AssignmentPattern, DeconstructField, InStream, Is, Statement,
@@ -47,7 +47,7 @@ pub fn visit_assignment_left(node: Node<'_>) -> AssignmentPattern {
     debug_assert_eq!(node.as_rule(), Rule::assignment_left);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::vars => AssignmentPattern::Variables(visit_vars(child)),
+        Rule::vars_assignment => AssignmentPattern::Variables(visit_vars_assignment(child)),
         Rule::struct_destructor => AssignmentPattern::Deconstruct(visit_struct_destructor(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
@@ -107,7 +107,7 @@ pub fn visit_statement_in(node: Node<'_>) -> InStream {
     debug_assert_eq!(node.as_rule(), Rule::statement_in);
     let span = node.span();
     let mut children = node.into_children();
-    let lhs = visit_vars(children.consume_expected(Rule::vars));
+    let lhs = visit_vars_assignment(children.consume_expected(Rule::vars_assignment));
     children.skip_expected(Rule::IN);
     let rhs = visit_expression_function(children.consume_expected(Rule::expression_function));
     InStream::new(span, lhs, rhs)

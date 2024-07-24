@@ -15,13 +15,15 @@ use crate::{
 pub enum Variable {
     Anonymous(Option<Span>),
     Named(Option<Span>, Identifier),
+    OptionalAnonymous(Option<Span>),
+    OptionalNamed(Option<Span>, Identifier),
 }
 
 impl Variable {
     pub fn name(&self) -> Option<&str> {
         match self {
-            Self::Anonymous(_) => None,
-            Self::Named(_, ident) => Some(ident.as_str()),
+            Self::Anonymous(_) | Self::OptionalAnonymous(_) => None,
+            Self::Named(_, ident) | Self::OptionalNamed(_, ident) => Some(ident.as_str()),
         }
     }
 }
@@ -33,14 +35,19 @@ impl fmt::Display for Variable {
         match self {
             Variable::Anonymous(_) => write!(f, "$_"),
             Variable::Named(_, ident) => write!(f, "${ident}"),
+            Variable::OptionalAnonymous(_) => write!(f, "$_?"),
+            Variable::OptionalNamed(_, ident) => write!(f, "${ident}?"),
         }
     }
 }
 
 impl Spanned for Variable {
     fn span(&self) -> Option<Span> {
-        match self {
-            Variable::Anonymous(span) | Variable::Named(span, _) => *span,
+        match *self {
+            | Self::Anonymous(span)
+            | Self::Named(span, _)
+            | Self::OptionalAnonymous(span)
+            | Self::OptionalNamed(span, _) => span,
         }
     }
 }

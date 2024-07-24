@@ -132,8 +132,11 @@ statement_single = { statement_is | statement_comparison | statement_assignment 
 statement_is = { var ~ IS ~ var }
 statement_comparison = { expression_value ~ comparison }
 statement_assignment = { assignment_left ~ ASSIGN ~ expression }
-assignment_left = { vars | struct_destructor }
-statement_in = { vars ~ IN ~ expression_function }
+assignment_left = { vars_assignment | struct_destructor }
+statement_in = { vars_assignment ~ IN ~ expression_function }
+
+vars_assignment = { var_assignment ~ ( COMMA ~ var_assignment )* }
+var_assignment = { var_optional | var }
 
 comparison = { comparator ~ expression_value }
 comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
@@ -165,23 +168,21 @@ struct_value = { expression_value | expression_struct }
 
 // FETCH QUERY =================================================================
 
-stage_fetch = { FETCH ~ projections }
+stage_fetch = { FETCH ~ projection_object }
 
-projections = { ( projection ~ SEMICOLON )+ }
-projection = { projection_key_var ~ COLON ~ projection_attributes
-             | projection_key_var
-             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE
-             }
+projection = { projection_single | projection_object | projection_list }
 
-projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
-projection_attribute = { label ~ projection_key_as_label? }
+projection_object = { CURLY_OPEN ~ projection_object_field ~ ( COMMA ~ projection_object_field )* ~ CURLY_CLOSE }
+projection_object_field = { projection_key ~ COLON ~ projection }
+projection_key = { quoted_string_literal }
 
-// TODO: we have to validate this is a fetch or reduce ended pipeline
-projection_subquery = { query_pipeline }
+projection_list = { SQ_BRACKET_OPEN ~ projection_stream ~ SQ_BRACKET_CLOSE }
 
-projection_key_var = { var ~ projection_key_as_label? }
-projection_key_as_label = { AS ~ projection_key_label }
-projection_key_label = { quoted_string_literal | label }
+projection_stream = { expression_function | query_pipeline | projection_attribute }
+
+projection_single = { projection_attribute | expression | query_pipeline }
+
+projection_attribute = { var ~ DOT ~ label_arg }
 
 // SCHEMA QUERY ================================================================
 
@@ -203,7 +204,7 @@ type_capability_base = { sub_declaration | value_type_declaration | alias_declar
                        }
 
 sub_declaration = { SUB ~ label }
-alias_declaration = { ALIAS ~ label } 
+alias_declaration = { ALIAS ~ label }
 value_type_declaration = { VALUE ~ value_type }
 owns_declaration = { OWNS ~ label_list
                    | OWNS ~ label ~ ( AS ~ label )?
@@ -291,6 +292,8 @@ iid_value = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
 vars = { var ~ ( COMMA ~ var )* }
 
 var = ${ VAR_ANONYMOUS | var_named }
+var_optional = ${ var ~ QUESTION }
+
 VAR_ANONYMOUS = @{ "$_" ~ WB }
 var_named = ${ "$" ~ identifier_var }
 identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
@@ -554,6 +557,7 @@ CURLY_CLOSE = _{ "}" }
 COMMA = _{ "," }
 SEMICOLON = _{ ";" }
 COLON = _{ ":" }
+DOT = _{ "." }
 DOUBLE_DOT = _{ ".." }
 QUESTION = _{ "?" }
 ARROW = _{ "->" }

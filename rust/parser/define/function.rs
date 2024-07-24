@@ -135,7 +135,7 @@ fn visit_function_argument(node: Node<'_>) -> Argument {
     Argument::new(span, var, type_)
 }
 
-fn visit_label_arg(node: Node<'_>) -> TypeAny {
+pub fn visit_label_arg(node: Node<'_>) -> TypeAny {
     debug_assert_eq!(node.as_rule(), Rule::label_arg);
     let child = node.into_child();
     match child.as_rule() {

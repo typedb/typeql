@@ -8,13 +8,12 @@ use self::{
     single::visit_statement_single,
     thing::{visit_statement_relation_anonymous, visit_statement_thing_var},
 };
-use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, RuleMatcher};
+use super::{
+    expression::visit_expression_value, statement::type_::visit_statement_type, visit_label, visit_label_list,
+    visit_label_scoped, visit_var, visit_var_list, IntoChildNodes, Node, Rule, RuleMatcher,
+};
 use crate::{
     common::{error::TypeQLError, token::Comparator, Spanned},
-    parser::{
-        statement::type_::visit_statement_type, visit_label, visit_label_list, visit_label_scoped, visit_var,
-        visit_var_list,
-    },
     statement::{comparison::Comparison, Statement},
     type_::{Type, TypeAny},
 };
