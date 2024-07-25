@@ -10,7 +10,7 @@ use crate::{
     annotation::Annotation,
     common::{token, Span},
     pretty::{indent, Pretty},
-    type_::{Label, NamedType, ScopedLabel, TypeRef as TypeRef, TypeRefAny},
+    type_::{Label, NamedType, ScopedLabel, TypeRef, TypeRefAny},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
