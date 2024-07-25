@@ -130,7 +130,7 @@ pub enum ValueLiteral {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Literal {
     span: Option<Span>,
-    pub inner: ValueLiteral, // TODO this can be smarter
+    pub inner: ValueLiteral,
 }
 
 impl Literal {
