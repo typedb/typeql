@@ -32,5 +32,5 @@ pub fn var(name: impl Into<Identifier>) -> Variable {
 }
 
 pub fn type_(name: impl Into<Identifier>) -> Label {
-    Label::Identifier(name.into())
+    Label::new(None, name.into())
 }

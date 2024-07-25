@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use super::{IntoChildNodes, Node, Rule, RuleMatcher};
+use super::{
+    define::type_::visit_type_capability, type_::visit_label, visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
+};
 use crate::{
     common::Spanned,
-    parser::{define::type_::visit_type_capability, visit_identifier, visit_kind},
     query::schema::Redefine,
     schema::definable::{Definable, Type},
-    type_::Label,
 };
 
 pub(super) fn visit_query_redefine(node: Node<'_>) -> Redefine {
@@ -25,8 +25,8 @@ fn visit_redefinable(node: Node<'_>) -> Definable {
     let span = node.span();
     let mut children = node.into_children();
     let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
-    let ident = visit_identifier(children.consume_expected(Rule::identifier));
+    let label = visit_label(children.consume_expected(Rule::label));
     let capability = visit_type_capability(children.consume_expected(Rule::type_capability));
     debug_assert_eq!(children.try_consume_any(), None);
-    Definable::TypeDeclaration(Type::new(span, kind, Label::Identifier(ident), vec![capability]))
+    Definable::TypeDeclaration(Type::new(span, kind, label, vec![capability]))
 }

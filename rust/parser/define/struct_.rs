@@ -6,9 +6,13 @@
 
 use crate::{
     common::{error::TypeQLError, Spanned},
-    parser::{visit_identifier, visit_value_type, visit_value_type_optional, IntoChildNodes, Node, Rule, RuleMatcher},
+    parser::{
+        type_::{visit_value_type, visit_value_type_optional},
+        visit_identifier, IntoChildNodes, Node, Rule, RuleMatcher,
+    },
     schema::definable::{struct_::Field, Struct},
-    type_::TypeAny,
+    type_::TypeRefAny,
+    TypeRef,
 };
 
 pub(in crate::parser) fn visit_definition_struct(node: Node<'_>) -> Struct {
@@ -38,12 +42,12 @@ fn visit_definition_struct_field(node: Node<'_>) -> Field {
     Field::new(span, key, type_)
 }
 
-fn visit_struct_field_value_type(node: Node<'_>) -> TypeAny {
+fn visit_struct_field_value_type(node: Node<'_>) -> TypeRefAny {
     debug_assert_eq!(node.as_rule(), Rule::struct_field_value_type);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::value_type => TypeAny::Type(visit_value_type(child)),
-        Rule::value_type_optional => TypeAny::Optional(visit_value_type_optional(child)),
+        Rule::value_type => TypeRefAny::Type(TypeRef::Named(visit_value_type(child))),
+        Rule::value_type_optional => TypeRefAny::Optional(visit_value_type_optional(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

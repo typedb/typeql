@@ -71,13 +71,13 @@
 // group $x; sum $t;"#;
 
 //     let parsed = parse_query(query).unwrap().into_get_group_aggregate();
-//     let filter: [Variable; 2] = [var("x").into(), vvar("t").into()];
+//     let select: [Variable; 2] = [var("x").into(), vvar("t").into()];
 //     let expected = typeql_match!(
 //         var("i").links("x").links("s").isa("income-source"),
 //         var("i").has(("value", cvar("v"))).has(("tax-rate", cvar("r"))),
 //         var("t").assign(cvar("r").multiply(cvar("v"))),
 //     )
-//     .get_fixed(filter)
+//     .get_fixed(select)
 //     .group(var("x"))
 //     .sum(var("t"));
 

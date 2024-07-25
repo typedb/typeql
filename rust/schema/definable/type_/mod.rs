@@ -9,9 +9,9 @@ use std::fmt::{self, Write};
 use self::capability::{Alias, Owns, Plays, Relates, Sub, ValueType};
 use crate::{
     annotation::Annotation,
-    common::{Span, Spanned},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
-    type_::{Label, ReservedLabel},
+    type_::Label,
     util::write_joined,
 };
 
@@ -20,7 +20,7 @@ pub mod capability;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Type {
     span: Option<Span>,
-    kind: Option<ReservedLabel>,
+    kind: Option<token::Kind>,
     label: Label,
     capabilities: Vec<Capability>,
 }
@@ -28,7 +28,7 @@ pub struct Type {
 impl Type {
     pub(crate) fn new(
         span: Option<Span>,
-        kind: Option<ReservedLabel>,
+        kind: Option<token::Kind>,
         label: Label,
         capabilities: Vec<Capability>,
     ) -> Self {

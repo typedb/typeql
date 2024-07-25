@@ -40,7 +40,7 @@ $x value string @regex("(fe)male");"#;
 fn test_aggregate_count_query() {
     let query = r#"match
 ($x, $y) isa friendship;
-filter $x, $y;
+select $x, $y;
 count($x);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(rel("x").links("y").isa("friendship")).get_fixed([var("x"), cvar("y")]).count();

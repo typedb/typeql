@@ -9,7 +9,7 @@ use std::fmt;
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::Pretty,
-    type_::{Label, ScopedLabel, Type, TypeAny},
+    type_::{Label, NamedType, ScopedLabel, TypeRefAny},
     util::write_joined,
 };
 
@@ -51,7 +51,7 @@ impl Sub {
     }
 
     pub fn build(supertype_label: impl Into<Identifier>) -> Self {
-        Self::new(None, Label::Identifier(supertype_label.into()))
+        Self::new(None, Label::new(None, supertype_label.into()))
     }
 }
 
@@ -72,11 +72,11 @@ impl fmt::Display for Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     span: Option<Span>,
-    value_type: Type,
+    value_type: NamedType,
 }
 
 impl ValueType {
-    pub fn new(span: Option<Span>, value_type: Type) -> Self {
+    pub fn new(span: Option<Span>, value_type: NamedType) -> Self {
         Self { span, value_type }
     }
 }
@@ -98,12 +98,12 @@ impl fmt::Display for ValueType {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
     span: Option<Span>,
-    owned: TypeAny,
+    owned: TypeRefAny,
     overridden: Option<Label>,
 }
 
 impl Owns {
-    pub fn new(span: Option<Span>, owned: TypeAny, overridden: Option<Label>) -> Self {
+    pub fn new(span: Option<Span>, owned: TypeRefAny, overridden: Option<Label>) -> Self {
         Self { span, owned, overridden }
     }
 }
@@ -129,12 +129,12 @@ impl fmt::Display for Owns {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     span: Option<Span>,
-    related: TypeAny,
+    related: TypeRefAny,
     overridden: Option<Label>,
 }
 
 impl Relates {
-    pub fn new(span: Option<Span>, related: TypeAny, overridden: Option<Label>) -> Self {
+    pub fn new(span: Option<Span>, related: TypeRefAny, overridden: Option<Label>) -> Self {
         Self { span, related, overridden }
     }
 }

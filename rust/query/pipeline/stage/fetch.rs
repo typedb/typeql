@@ -11,7 +11,7 @@ use crate::{
     expression::{Expression, FunctionCall},
     pretty::Pretty,
     query::Pipeline,
-    Literal, Type, TypeAny, Variable,
+    Literal, TypeRefAny, Variable,
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -110,11 +110,11 @@ pub enum ProjectionStream {
 pub struct ProjectionAttribute {
     span: Option<Span>,
     owner: Variable,
-    attribute: TypeAny,
+    attribute: TypeRefAny,
 }
 
 impl ProjectionAttribute {
-    pub fn new(span: Option<Span>, owner: Variable, attribute: TypeAny) -> Self {
+    pub fn new(span: Option<Span>, owner: Variable, attribute: TypeRefAny) -> Self {
         Self { span, owner, attribute }
     }
 }

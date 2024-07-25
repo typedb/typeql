@@ -101,7 +101,7 @@ error_messages! { TypeQLError
     InvalidAttributeTypeRegex { regex: String } =
         12: "Invalid regular expression '{regex}'.",
     GetVarRepeating { variable: Variable } =
-        13: "The variable '{variable}' occurred more than once in get query filter.",
+        13: "The variable '{variable}' occurred more than once in get query select.",
     GetVarNotBound { variable: Variable } =
         14: "The get variable '{variable}' is not bound in the match clause.",
     AggregateVarNotBound { variable: Variable } =
@@ -117,7 +117,7 @@ error_messages! { TypeQLError
     InsertModifiersRequireMatch { insert: String } =
         20: "The insert query '{insert}' contains query modifiers that require a 'match' clause be specified",
     VariableNotNamed =
-        21: "Anonymous variable encountered in a match query filter.",
+        21: "Anonymous variable encountered in a match query select.",
     InvalidVariableName { name: String } =
         22: "The variable name '{name}' is invalid. Variables must be valid utf-8 identifiers without a leading underscore.",
     MissingConstraintRelationPlayer =

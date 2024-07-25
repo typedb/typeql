@@ -12,10 +12,9 @@ use self::{
 };
 pub use self::{thing::Thing, type_::Type};
 use crate::{
-    common::{token, Span},
+    common::{identifier::Identifier, token, Span},
     expression::{Expression, FunctionCall},
     pretty::Pretty,
-    type_::Label,
     util::write_joined,
     variable::Variable,
 };
@@ -77,11 +76,11 @@ pub enum DeconstructField {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StructDeconstruct {
     span: Option<Span>,
-    field_map: HashMap<Label, DeconstructField>,
+    field_map: HashMap<Identifier, DeconstructField>,
 }
 
 impl StructDeconstruct {
-    pub fn new(span: Option<Span>, field_map: HashMap<Label, DeconstructField>) -> Self {
+    pub fn new(span: Option<Span>, field_map: HashMap<Identifier, DeconstructField>) -> Self {
         Self { span, field_map }
     }
 }

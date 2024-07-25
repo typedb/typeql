@@ -44,7 +44,7 @@ macro_rules! string_enum {
     }
 }
 
-string_enum! { Type
+string_enum! { Kind
     Entity = "entity",
     Relation = "relation",
     Attribute = "attribute",
@@ -66,7 +66,7 @@ string_enum! { Clause
 }
 
 string_enum! { Modifier
-    Filter = "filter",
+    Select = "select",
     Sort = "sort",
     Offset = "offset",
     Limit = "limit",

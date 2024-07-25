@@ -9,7 +9,7 @@ use std::fmt;
 use crate::{
     common::{identifier::Identifier, Span},
     pretty::Pretty,
-    type_::TypeAny,
+    type_::TypeRefAny,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -41,11 +41,11 @@ impl fmt::Display for Struct {
 pub struct Field {
     span: Option<Span>,
     key: Identifier,
-    type_: TypeAny,
+    type_: TypeRefAny,
 }
 
 impl Field {
-    pub fn new(span: Option<Span>, key: Identifier, type_: TypeAny) -> Self {
+    pub fn new(span: Option<Span>, key: Identifier, type_: TypeRefAny) -> Self {
         Self { span, key, type_ }
     }
 }

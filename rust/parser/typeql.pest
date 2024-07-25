@@ -18,33 +18,33 @@ query = { query_schema | query_pipeline }
 query_pipeline = { preamble* ~ query_stage+ ~ query_stage_terminal? }
 
 preamble = { WITH ~ definition_function }
-query_stage = { stage_match | stage_insert | stage_put | stage_update | stage_delete | stage_modifier }
-query_stage_terminal = { stage_fetch | stage_reduce }
 
-// stage_group = { GROUP ~ var ~ SEMICOLON } // TODO: eliminate?
+query_stage = { clause_match | clause_insert | clause_put | clause_update | clause_delete | operator_stream }
 
-stage_match = { MATCH ~ patterns }
+query_stage_terminal = { clause_fetch | operator_reduce }
 
-stage_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
-stage_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
-stage_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
+clause_match = { MATCH ~ patterns }
 
-stage_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
+clause_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
+clause_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
+clause_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
+
+clause_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
 
 // QUERY MODIFIERS =============================================================
 
-stage_modifier = { stage_filter ~ SEMICOLON | stage_sort ~ SEMICOLON | stage_offset ~ SEMICOLON | stage_limit ~ SEMICOLON }
+operator_stream = { operator_select | operator_sort | operator_offset | operator_limit }
 
-stage_filter = { FILTER ~ vars }
-stage_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* }
-stage_offset = { OFFSET ~ integer_literal }
-stage_limit = { LIMIT ~ integer_literal }
+operator_select = { SELECT ~ vars ~ SEMICOLON }
+operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ SEMICOLON }
+operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
+operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
 
 // REDUCE ======================================================================
 
-stage_reduce = { reduce ~ SEMICOLON }
+operator_reduce = { reduce ~ SEMICOLON }
 reduce = { CHECK
          | reduce_first
          | reduce_value ~ ( COMMA ~ reduce_value )*
@@ -52,7 +52,7 @@ reduce = { CHECK
 
 reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
 
-reduce_value = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
+reduce_value = { COUNT ~ ( PAREN_OPEN ~ vars ~ PAREN_CLOSE )?
                | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
@@ -93,7 +93,7 @@ owns_constraint = { OWNS ~ type_ref_list
 relates_constraint = { RELATES ~ type_ref_list
                      | RELATES ~ type_ref ~ ( AS ~ type_ref )?
                      }
-plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
+plays_constraint = { PLAYS ~ type_ref ~ ( AS ~ type_ref )? }
 
 // THING STATEMENTS ============================================================
 
@@ -169,7 +169,7 @@ struct_value = { expression_value | expression_struct }
 
 // FETCH QUERY =================================================================
 
-stage_fetch = { FETCH ~ projection_object }
+clause_fetch = { FETCH ~ projection_object }
 
 projection = { projection_single | projection_object | projection_list }
 
@@ -183,7 +183,7 @@ projection_stream = { expression_function | query_pipeline | projection_attribut
 
 projection_single = { projection_attribute | expression | query_pipeline }
 
-projection_attribute = { var ~ DOT ~ label_arg }
+projection_attribute = { var ~ DOT ~ ( label_list | label ) }
 
 // SCHEMA QUERY ================================================================
 
@@ -198,7 +198,7 @@ definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { kind ~ identifier ~ type_capability ~ ( COMMA ~ type_capability )* }
+definition_type = { kind? ~ label ~ ( type_capability ~ ( COMMA ~ type_capability )* )? }
 type_capability = { type_capability_base ~ annotations? }
 type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
                        | owns_declaration | plays_declaration | relates_declaration
@@ -217,17 +217,16 @@ relates_declaration = { RELATES ~ label_list
 
 // FUNCTION DEFINITION =========================================================
 
-definition_function = { FUN ~ function_signature ~ COLON ~ stage_match ~ stage_modifier* ~ return_statement }
+definition_function = { FUN ~ function_signature ~ COLON ~ clause_match ~ operator_stream* ~ return_statement }
 
 function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
 function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* )? }
-function_argument = { var ~ COLON ~ label_arg }
+function_argument = { var ~ COLON ~ named_type_any }
 
 function_output = { function_output_stream | function_output_single }
-function_output_stream = { CURLY_OPEN ~ function_output_type ~ ( COMMA ~ function_output_type )* ~ CURLY_CLOSE }
-function_output_single = { function_output_type ~ ( COMMA ~ function_output_type )* }
-function_output_type = { value_type_optional | value_type_list | value_type }
+function_output_stream = { CURLY_OPEN ~ named_type_any ~ ( COMMA ~ named_type_any )* ~ CURLY_CLOSE }
+function_output_single = { named_type_any ~ ( COMMA ~ named_type_any )* }
 
 return_statement = { RETURN ~ ( return_statement_stream | return_statement_single ) ~ SEMICOLON }
 return_statement_stream = { CURLY_OPEN ~ vars ~ CURLY_CLOSE }
@@ -247,7 +246,7 @@ struct_destructor_value = { var | struct_destructor }
 // REDEFINE QUERY ==============================================================
 
 query_redefine = { REDEFINE ~ ( redefinable ~ SEMICOLON )+ }
-redefinable = { kind ~ identifier ~ type_capability }
+redefinable = { kind? ~ label ~ type_capability }
 
 // UNDEFINE QUERY ==============================================================
 
@@ -271,18 +270,22 @@ undefine_struct = { STRUCT ~ identifier }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
+type_ref = { named_type | var }
+type_ref_optional = { type_ref ~ QUESTION }
+type_ref_list = { type_ref ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+type_ref_any = { type_ref_optional | type_ref_list | type_ref }
+
+named_type = { value_type_primitive | label_scoped | label }
+named_type_optional = { named_type ~ QUESTION }
+named_type_list = { named_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+named_type_any = { named_type_optional | named_type_list | named_type }
+
 label = ${ identifier } // type label
+label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+
 label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
 identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
-
-type_ref_any = { type_ref_scoped | type_ref }
-type_ref_scoped = { label_scoped | var }
-type_ref = { label | var }
-type_ref_list = { label_list | var_list }
-
-label_arg = { label_list | label }
-label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 struct_key = { identifier }
 
@@ -301,9 +304,9 @@ identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
 
 var_list = ${ var ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
-// ========================================================
+// VALUES ========================================================
 
-value_type = { value_type_primitive | identifier }
+value_type = { value_type_primitive | label }
 value_type_optional = { value_type ~ QUESTION }
 value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
@@ -366,7 +369,7 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
 unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
              | CHECK | FIRST
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
-             | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
+             | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
              | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
              | FROM
              }
@@ -397,7 +400,7 @@ ROLE = @{ "role" ~ WB }
 
 // QUERY MODIFIER KEYWORDS
 
-FILTER = @{ "filter" ~ WB }
+SELECT = @{ "select" ~ WB }
 LIMIT = @{ "limit" ~ WB }
 OFFSET = @{ "offset" ~ WB }
 SORT = @{ "sort" ~ WB }

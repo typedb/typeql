@@ -9,6 +9,7 @@ use pest_derive::Parser;
 
 use self::{
     define::{function::visit_definition_function, struct_::visit_definition_struct, visit_query_define},
+    type_::visit_label,
     undefine::visit_query_undefine,
 };
 use crate::{
@@ -21,21 +22,22 @@ use crate::{
     query::{Query, SchemaQuery},
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
+    value::{Literal, Tag},
     variable::Variable,
-    Result,
+    Label, Result,
 };
 
 mod annotation;
 mod define;
 mod expression;
+mod literal;
 mod pipeline;
 mod redefine;
 mod statement;
-mod undefine;
-
-mod literal;
 #[cfg(test)]
 mod test;
+mod type_;
+mod undefine;
 
 #[derive(Parser)]
 #[grammar = "parser/typeql.pest"]
@@ -179,51 +181,21 @@ fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
     query
 }
 
-fn visit_label(node: Node<'_>) -> Label {
-    debug_assert_eq!(node.as_rule(), Rule::label);
+fn visit_kind(node: Node<'_>) -> token::Kind {
+    debug_assert_eq!(node.as_rule(), Rule::kind);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::identifier => Label::Identifier(visit_identifier(child)),
-        Rule::kind => Label::Reserved(visit_kind(child)),
-        Rule::ROLE => Label::Reserved(ReservedLabel::new(child.span(), token::Type::Role)),
+        Rule::ENTITY => token::Kind::Entity,
+        Rule::RELATION => token::Kind::Relation,
+        Rule::ATTRIBUTE => token::Kind::Attribute,
+        Rule::ROLE => token::Kind::Role,
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
-}
-
-fn visit_kind(node: Node<'_>) -> ReservedLabel {
-    debug_assert_eq!(node.as_rule(), Rule::kind);
-    let span = node.span();
-    let child = node.into_child();
-    let token = match child.as_rule() {
-        Rule::ENTITY => token::Type::Entity,
-        Rule::RELATION => token::Type::Relation,
-        Rule::ATTRIBUTE => token::Type::Attribute,
-        Rule::ROLE => token::Type::Role,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    };
-    ReservedLabel::new(span, token)
-}
-
-fn visit_label_scoped(node: Node<'_>) -> ScopedLabel {
-    debug_assert_eq!(node.as_rule(), Rule::label_scoped);
-    let span = node.span();
-    let mut children = node.into_children();
-    let scope = visit_label(children.consume_expected(Rule::label));
-    let name = visit_label(children.consume_expected(Rule::label));
-    debug_assert_eq!(children.try_consume_any(), None);
-    ScopedLabel::new(span, scope, name)
 }
 
 fn visit_identifier(node: Node<'_>) -> Identifier {
     debug_assert_eq!(node.as_rule(), Rule::identifier);
     Identifier::new(node.span(), node.as_str().to_owned())
-}
-
-fn visit_label_list(node: Node<'_>) -> List {
-    debug_assert_eq!(node.as_rule(), Rule::label_list);
-    let span = node.span();
-    let inner = Type::Label(visit_label(node.into_child()));
-    List::new(span, inner)
 }
 
 fn visit_var(node: Node<'_>) -> Variable {

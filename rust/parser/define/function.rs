@@ -9,9 +9,9 @@ use itertools::Itertools;
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        pipeline::{visit_reduce, visit_stage_match, visit_stage_modifier},
-        visit_identifier, visit_label, visit_label_list, visit_value_type, visit_value_type_list,
-        visit_value_type_optional, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+        pipeline::{visit_clause_match, visit_operator_stream, visit_reduce},
+        type_::visit_named_type_any,
+        visit_identifier, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::{
         function::{
@@ -19,7 +19,6 @@ use crate::{
         },
         Function,
     },
-    type_::{Type, TypeAny},
 };
 
 pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
@@ -29,9 +28,9 @@ pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
 
     children.skip_expected(Rule::FUN);
     let signature = visit_function_signature(children.consume_expected(Rule::function_signature));
-    let body = visit_stage_match(children.consume_expected(Rule::stage_match));
+    let body = visit_clause_match(children.consume_expected(Rule::clause_match));
     let modifiers =
-        children.take_while_ref(|node| node.as_rule() == Rule::stage_modifier).map(visit_stage_modifier).collect();
+        children.take_while_ref(|node| node.as_rule() == Rule::operator_stream).map(visit_operator_stream).collect();
     let return_stmt = visit_return_statement(children.consume_expected(Rule::return_statement));
 
     debug_assert_eq!(children.try_consume_any(), None);
@@ -98,24 +97,13 @@ fn visit_function_output(node: Node<'_>) -> Output {
 fn visit_function_output_stream(node: Node<'_>) -> Stream {
     debug_assert_eq!(node.as_rule(), Rule::function_output_stream);
     let span = node.span();
-    Stream::new(span, node.into_children().map(visit_function_output_type).collect())
+    Stream::new(span, node.into_children().map(visit_named_type_any).collect())
 }
 
 fn visit_function_output_single(node: Node<'_>) -> Single {
     debug_assert_eq!(node.as_rule(), Rule::function_output_single);
     let span = node.span();
-    Single::new(span, node.into_children().map(visit_function_output_type).collect())
-}
-
-fn visit_function_output_type(node: Node<'_>) -> TypeAny {
-    debug_assert_eq!(node.as_rule(), Rule::function_output_type);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::value_type => TypeAny::Type(visit_value_type(child)),
-        Rule::value_type_optional => TypeAny::Optional(visit_value_type_optional(child)),
-        Rule::value_type_list => TypeAny::List(visit_value_type_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
+    Single::new(span, node.into_children().map(visit_named_type_any).collect())
 }
 
 fn visit_function_arguments(node: Node<'_>) -> Vec<Argument> {
@@ -129,18 +117,8 @@ fn visit_function_argument(node: Node<'_>) -> Argument {
     let mut children = node.into_children();
 
     let var = visit_var(children.consume_expected(Rule::var));
-    let type_ = visit_label_arg(children.consume_expected(Rule::label_arg));
+    let type_ = visit_named_type_any(children.consume_expected(Rule::named_type_any));
 
     debug_assert_eq!(children.try_consume_any(), None);
     Argument::new(span, var, type_)
-}
-
-pub fn visit_label_arg(node: Node<'_>) -> TypeAny {
-    debug_assert_eq!(node.as_rule(), Rule::label_arg);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::label => TypeAny::Type(Type::Label(visit_label(child))),
-        Rule::label_list => TypeAny::List(visit_label_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
 }
