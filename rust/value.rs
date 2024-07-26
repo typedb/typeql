@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt::{self, Formatter, Write};
+use std::fmt::{self, Formatter};
 
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
