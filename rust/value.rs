@@ -315,7 +315,7 @@ impl fmt::Display for StructLiteral {
 }
 
 impl StringLiteral {
-    pub fn get_unescaped(escaped_string: &str) -> Result<String> {
+    pub fn unescape(escaped_string: &str) -> Result<String> {
         let bytes = escaped_string.as_bytes();
         // it's a bug if these fail; either in the parser or the builder
         assert_eq!(bytes[0], bytes[bytes.len() - 1]);

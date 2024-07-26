@@ -64,6 +64,7 @@ fn visit_signed_integer(node: Node<'_>) -> SignedIntegerLiteral {
         Rule::integer_literal => (None, visit_integer_literal(first_node).value),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
     };
+    debug_assert_eq!(children.try_consume_any(), None);
     SignedIntegerLiteral { sign, integral }
 }
 
@@ -78,6 +79,7 @@ fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
         Rule::decimal_literal => (None, first_node.as_str().to_owned()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
     };
+    debug_assert_eq!(children.try_consume_any(), None);
     SignedDecimalLiteral { sign, decimal }
 }
 
@@ -92,6 +94,7 @@ fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
         Rule::iso8601_timezone_offset => TimeZone::ISO(tz_node.as_str().to_owned()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: tz_node.to_string() }),
     };
+    debug_assert_eq!(children.try_consume_any(), None);
     DateTimeTZLiteral { date, time, timezone }
 }
 
@@ -100,6 +103,7 @@ fn visit_datetime_literal(node: Node<'_>) -> DateTimeLiteral {
     let mut children = node.into_children();
     let date = visit_date_fragment(children.consume_expected(Rule::date_fragment));
     let time = visit_time(children.consume_expected(Rule::time));
+    debug_assert_eq!(children.try_consume_any(), None);
     DateTimeLiteral { date, time }
 }
 
@@ -115,6 +119,7 @@ fn visit_date_fragment(node: Node<'_>) -> DateFragment {
     let year = children.consume_expected(Rule::year).as_str().to_owned();
     let month = children.consume_expected(Rule::month).as_str().to_owned();
     let day = children.consume_expected(Rule::day).as_str().to_owned();
+    debug_assert_eq!(children.try_consume_any(), None);
     DateFragment { year, month, day }
 }
 
@@ -123,15 +128,8 @@ fn visit_time(node: Node<'_>) -> TimeFragment {
     let mut children = node.into_children();
     let hour = children.consume_expected(Rule::hour).as_str().to_owned();
     let minute = children.consume_expected(Rule::minute).as_str().to_owned();
-    let second = if children.peek().is_some() {
-        Some(children.consume_expected(Rule::second).as_str().to_owned())
-    } else {
-        None
-    };
-    let second_fraction = if children.peek().is_some() {
-        Some(children.consume_expected(Rule::second_fraction).as_str().to_owned())
-    } else {
-        None
-    };
+    let second = children.try_consume_expected(Rule::second).map(|node| node.as_str().to_owned());
+    let second_fraction = children.try_consume_expected(Rule::second_fraction).map(|node| node.as_str().to_owned());
+    debug_assert_eq!(children.try_consume_any(), None);
     TimeFragment { hour, minute, second, second_fraction }
 }
