@@ -92,21 +92,21 @@ pub enum DurationLiteral {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StructLiteral {
-    // TODO
+    pub inner: String, // TODO
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DurationDate {
-    years: Option<String>,
-    months: Option<String>,
-    days: Option<String>,
+    pub years: Option<String>,
+    pub months: Option<String>,
+    pub days: Option<String>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DurationTime {
-    hours: Option<String>,
-    minutes: Option<String>,
-    seconds: Option<String>,
+    pub hours: Option<String>,
+    pub minutes: Option<String>,
+    pub seconds: Option<String>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -119,7 +119,7 @@ pub enum ValueLiteral {
     DateTimeTz(DateTimeTZLiteral),
     Duration(DurationLiteral),
     String(StringLiteral),
-    Struct(String), // TODO
+    Struct(StructLiteral),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -302,6 +302,12 @@ impl fmt::Display for DurationLiteral {
             }
         }
         Ok(())
+    }
+}
+
+impl fmt::Display for StructLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(self.inner.as_str())
     }
 }
 

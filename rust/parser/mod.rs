@@ -4,8 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use itertools::Itertools;
-use pest::{iterators::Pair, Parser};
+use pest::Parser;
 use pest_derive::Parser;
 
 use self::{
@@ -364,9 +363,10 @@ fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
 
 fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
     debug_assert_eq!(node.as_rule(), Rule::datetime_tz_literal);
-    let (date_node, time_node, tz_node) = node.into_children().collect_tuple().unwrap();
-    let date = visit_date_fragment(date_node);
-    let time = visit_time(time_node);
+    let mut children = node.into_children();
+    let date = visit_date_fragment(children.consume_expected(Rule::date_fragment));
+    let time = visit_time(children.consume_expected(Rule::time));
+    let tz_node = children.consume_any();
     let timezone = match tz_node.as_rule() {
         Rule::iana_timezone => TimeZone::IANA(tz_node.as_str().to_owned()),
         Rule::iso8601_timezone_offset => TimeZone::ISO(tz_node.as_str().to_owned()),
@@ -377,9 +377,9 @@ fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
 
 fn visit_datetime_literal(node: Node<'_>) -> DateTimeLiteral {
     debug_assert_eq!(node.as_rule(), Rule::datetime_literal);
-    let (date_node, time_node) = node.into_children().collect_tuple().unwrap();
-    let date = visit_date_fragment(date_node);
-    let time = visit_time(time_node);
+    let mut children = node.into_children();
+    let date = visit_date_fragment(children.consume_expected(Rule::date_fragment));
+    let time = visit_time(children.consume_expected(Rule::time));
     DateTimeLiteral { date, time }
 }
 
@@ -391,7 +391,10 @@ fn visit_date_literal(node: Node<'_>) -> DateLiteral {
 
 fn visit_date_fragment(node: Node<'_>) -> DateFragment {
     debug_assert_eq!(node.as_rule(), Rule::date_fragment);
-    let (year, month, day) = node.into_children().map(|child| child.as_str().to_owned()).collect_tuple().unwrap();
+    let mut children = node.into_children();
+    let year = children.consume_expected(Rule::year).as_str().to_owned();
+    let month = children.consume_expected(Rule::month).as_str().to_owned();
+    let day = children.consume_expected(Rule::day).as_str().to_owned();
     DateFragment { year, month, day }
 }
 
