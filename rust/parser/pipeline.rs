@@ -8,11 +8,12 @@ use itertools::Itertools;
 
 use super::{
     define::function::visit_definition_function,
+    literal::visit_integer_literal,
     statement::{
         thing::{visit_relation, visit_statement_thing},
         visit_statement,
     },
-    visit_integer_literal, visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+    visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
     common::{

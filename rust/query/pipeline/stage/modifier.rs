@@ -13,7 +13,7 @@ use crate::{
     },
     pretty::Pretty,
     util::write_joined,
-    value::Literal,
+    value::IntegerLiteral,
     variable::Variable,
 };
 
@@ -91,11 +91,11 @@ impl fmt::Display for Filter {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Offset {
     span: Option<Span>,
-    offset: Literal,
+    offset: IntegerLiteral,
 }
 
 impl Offset {
-    pub fn new(span: Option<Span>, offset: Literal) -> Self {
+    pub fn new(span: Option<Span>, offset: IntegerLiteral) -> Self {
         Self { span, offset }
     }
 }
@@ -111,11 +111,11 @@ impl fmt::Display for Offset {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Limit {
     span: Option<Span>,
-    limit: Literal,
+    limit: IntegerLiteral,
 }
 
 impl Limit {
-    pub fn new(span: Option<Span>, limit: Literal) -> Self {
+    pub fn new(span: Option<Span>, limit: IntegerLiteral) -> Self {
         Self { span, limit }
     }
 }

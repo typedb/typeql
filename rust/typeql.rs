@@ -22,7 +22,7 @@ pub mod schema;
 pub mod statement;
 pub mod type_;
 mod util;
-mod value;
+pub mod value;
 mod variable;
 
 use schema::definable::Struct;
@@ -35,7 +35,6 @@ pub use crate::{
     schema::definable::{Definable, Function},
     statement::Statement,
     type_::{Label, ScopedLabel, Type, TypeAny},
-    value::Literal,
     variable::Variable,
 };
 

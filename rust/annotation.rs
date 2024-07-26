@@ -9,7 +9,7 @@ use std::fmt::{self, Write};
 use crate::{
     common::{identifier::Identifier, token, Span},
     util::write_joined,
-    value::Literal,
+    value::{IntegerLiteral, Literal, StringLiteral},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -65,21 +65,21 @@ impl fmt::Display for Abstract {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cardinality {
     span: Option<Span>,
-    min: Literal,
-    max: Option<Literal>,
+    min: IntegerLiteral,
+    max: Option<IntegerLiteral>,
 }
 
 impl Cardinality {
-    pub fn new(span: Option<Span>, min: Literal, max: Option<Literal>) -> Self {
+    pub fn new(span: Option<Span>, min: IntegerLiteral, max: Option<IntegerLiteral>) -> Self {
         Self { span, min, max }
     }
 }
 
 impl fmt::Display for Cardinality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "@{}({}..", token::Annotation::Cardinality, self.min)?;
+        write!(f, "@{}({}..", token::Annotation::Cardinality, self.min.value)?;
         if let Some(max) = &self.max {
-            write!(f, "{}", max)?;
+            write!(f, "{}", max.value)?;
         }
         f.write_char(')')?;
         Ok(())
@@ -185,18 +185,18 @@ impl fmt::Display for Range {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Regex {
     span: Option<Span>,
-    regex: Literal,
+    regex: StringLiteral,
 }
 
 impl Regex {
-    pub fn new(span: Option<Span>, regex: Literal) -> Self {
+    pub fn new(span: Option<Span>, regex: StringLiteral) -> Self {
         Self { span, regex }
     }
 }
 
 impl fmt::Display for Regex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "@{}({})", token::Annotation::Regex, self.regex)
+        write!(f, "@{}({})", token::Annotation::Regex, self.regex.value)
     }
 }
 

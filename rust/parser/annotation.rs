@@ -5,8 +5,8 @@
  */
 
 use super::{
-    visit_identifier, visit_integer_literal, visit_quoted_string_literal, visit_value_literal, IntoChildNodes, Node,
-    Rule, RuleMatcher,
+    literal::{visit_integer_literal, visit_quoted_string_literal, visit_value_literal},
+    visit_identifier, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
     annotation::{

@@ -15,8 +15,8 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ComparisonStatement {
     span: Option<Span>,
-    lhs: Expression,
-    comparison: Comparison,
+    pub lhs: Expression,
+    pub comparison: Comparison,
 }
 
 impl ComparisonStatement {

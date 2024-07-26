@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use super::visit_comparison;
 use crate::{
     common::{error::TypeQLError, Spanned},
     expression::Expression,
     parser::{
         expression::{visit_expression_list, visit_expression_struct, visit_expression_value},
-        statement::visit_type_ref,
-        visit_label_list, visit_value_literal, visit_var, visit_var_list, IntoChildNodes, Node, Rule, RuleMatcher,
+        literal::visit_value_literal,
+        statement::{visit_comparison, visit_type_ref},
+        visit_label_list, visit_var, visit_var_list, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
         thing::{
