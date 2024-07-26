@@ -8,6 +8,7 @@ use itertools::Itertools;
 
 use super::{
     define::function::visit_definition_function,
+    literal::visit_integer_literal,
     statement::{
         thing::{visit_relation, visit_statement_thing},
         visit_statement,
@@ -20,7 +21,6 @@ use crate::{
         token::{Aggregate, Order},
         Spanned,
     },
-    parser::literal::visit_integer_literal,
     pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
     query::{
         pipeline::{

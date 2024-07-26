@@ -6,13 +6,12 @@
 
 use pest::pratt_parser::{Assoc, Op, PrattParser};
 
-use super::{visit_identifier, visit_var, IntoChildNodes, Node, Rule, RuleMatcher};
+use super::{literal::visit_value_literal, visit_identifier, visit_var, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
     expression::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
     },
-    parser::literal::visit_value_literal,
     value::{Literal, StructLiteral, ValueLiteral},
 };
 

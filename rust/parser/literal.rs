@@ -34,10 +34,11 @@ pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
 
 fn visit_sign(node: Node<'_>) -> Sign {
     debug_assert_eq!(node.as_rule(), Rule::sign);
-    match node.as_str() {
-        "+" => Sign::Plus,
-        "-" => Sign::Minus,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::PLUS => Sign::Plus,
+        Rule::MINUS => Sign::Minus,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
@@ -53,18 +54,30 @@ pub(super) fn visit_quoted_string_literal(node: Node<'_>) -> StringLiteral {
 
 fn visit_signed_integer(node: Node<'_>) -> SignedIntegerLiteral {
     debug_assert_eq!(node.as_rule(), Rule::signed_integer);
-    let mut children = node.into_children().collect::<Vec<_>>();
-    let integral = children.pop().unwrap();
-    let sign = children.pop().map(|node| visit_sign(node));
-    debug_assert_eq!(integral.as_rule(), Rule::integer_literal);
-    SignedIntegerLiteral { sign, integral: integral.as_str().to_owned() }
+    let mut children = node.into_children();
+    let first_node = children.consume_any();
+    let (sign, integral) = match first_node.as_rule() {
+        Rule::sign => (
+            Some(visit_sign(first_node)),
+            visit_integer_literal(children.consume_expected(Rule::integer_literal)).value,
+        ),
+        Rule::integer_literal => (None, visit_integer_literal(first_node).value),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
+    };
+    SignedIntegerLiteral { sign, integral }
 }
 
 fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
     debug_assert_eq!(node.as_rule(), Rule::signed_decimal);
-    let mut children = node.into_children().collect::<Vec<_>>();
-    let decimal = children.pop().unwrap().as_str().to_owned();
-    let sign = children.pop().map(|node| visit_sign(node));
+    let mut children = node.into_children();
+    let first_node = children.consume_any();
+    let (sign, decimal) = match first_node.as_rule() {
+        Rule::sign => {
+            (Some(visit_sign(first_node)), children.consume_expected(Rule::decimal_literal).as_str().to_owned())
+        }
+        Rule::decimal_literal => (None, first_node.as_str().to_owned()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
+    };
     SignedDecimalLiteral { sign, decimal }
 }
 
@@ -107,12 +120,18 @@ fn visit_date_fragment(node: Node<'_>) -> DateFragment {
 
 fn visit_time(node: Node<'_>) -> TimeFragment {
     debug_assert_eq!(node.as_rule(), Rule::time);
-    let children = node.into_children().collect::<Vec<_>>();
-    let (hour, minute, second) = (
-        children[0].as_str().to_owned(),
-        children[1].as_str().to_owned(),
-        children.get(2).map(|node| node.as_str().to_owned()),
-    );
-    let second_fraction = children.get(3).map(|node| node.as_str().to_owned());
+    let mut children = node.into_children();
+    let hour = children.consume_expected(Rule::hour).as_str().to_owned();
+    let minute = children.consume_expected(Rule::minute).as_str().to_owned();
+    let second = if children.peek().is_some() {
+        Some(children.consume_expected(Rule::second).as_str().to_owned())
+    } else {
+        None
+    };
+    let second_fraction = if children.peek().is_some() {
+        Some(children.consume_expected(Rule::second_fraction).as_str().to_owned())
+    } else {
+        None
+    };
     TimeFragment { hour, minute, second, second_fraction }
 }
