@@ -4,15 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use super::{
-    visit_identifier, visit_integer_literal, visit_quoted_string_literal, visit_value_literal, IntoChildNodes, Node,
-    Rule, RuleMatcher,
-};
+use super::{visit_identifier, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     annotation::{
         Abstract, Annotation, Cardinality, Cascade, Distinct, Independent, Key, Range, Regex, Subkey, Unique, Values,
     },
     common::{error::TypeQLError, Spanned},
+    parser::literal::{visit_integer_literal, visit_quoted_string_literal, visit_value_literal},
     value::Literal,
 };
 

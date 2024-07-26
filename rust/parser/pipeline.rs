@@ -12,7 +12,7 @@ use super::{
         thing::{visit_relation, visit_statement_thing},
         visit_statement,
     },
-    visit_integer_literal, visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+    visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
     common::{
@@ -20,6 +20,7 @@ use crate::{
         token::{Aggregate, Order},
         Spanned,
     },
+    parser::literal::visit_integer_literal,
     pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
     query::{
         pipeline::{
