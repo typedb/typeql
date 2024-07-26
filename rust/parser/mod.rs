@@ -23,8 +23,8 @@ use crate::{
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
     value::{
-        BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, IntegerLiteral,
-        Literal, Sign, SignedDecimalLiteral, SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral,
+        BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, IntegerLiteral, Literal, Sign,
+        SignedDecimalLiteral, SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral,
     },
     variable::Variable,
     Result,

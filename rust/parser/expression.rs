@@ -12,7 +12,7 @@ use crate::{
     expression::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
     },
-    value::Literal,
+    value::{Literal, ValueLiteral},
 };
 
 pub(super) fn visit_expression_function(node: Node<'_>) -> FunctionCall {
@@ -97,7 +97,7 @@ fn visit_list_index(node: Node<'_>) -> Expression {
 
 pub(super) fn visit_expression_struct(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::expression_struct);
-    Literal::new(node.span(), todo!()) // TODO parse properly
+    Literal::new(node.span(), ValueLiteral::Struct(node.as_str().to_owned())) // TODO parse properly
 }
 
 fn visit_expression_parenthesis(node: Node<'_>) -> Paren {

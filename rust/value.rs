@@ -4,7 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt::{self, Formatter, Write, write};
+use std::fmt::{self, Formatter, Write};
+
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
     pretty::Pretty,
@@ -118,6 +119,7 @@ pub enum ValueLiteral {
     DateTimeTz(DateTimeTZLiteral),
     Duration(DurationLiteral),
     String(StringLiteral),
+    Struct(String), // TODO
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -157,6 +159,7 @@ impl fmt::Display for ValueLiteral {
             ValueLiteral::DateTimeTz(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Duration(value) => fmt::Display::fmt(value, f),
             ValueLiteral::String(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::Struct(value) => fmt::Display::fmt(value, f),
         }
     }
 }
@@ -193,12 +196,10 @@ impl fmt::Display for TimeFragment {
         let (hour, minute) = (self.hour.as_str(), self.minute.as_str());
         match &self.second {
             None => write!(f, "{hour}:{minute}"),
-            Some(second) => {
-                match &self.second_fraction {
-                    None => write!(f, "{hour}:{minute}:{second}"),
-                    Some(second_fraction) => write!(f, "{hour}:{minute}:{second}.{second_fraction}"),
-                }
-            }
+            Some(second) => match &self.second_fraction {
+                None => write!(f, "{hour}:{minute}:{second}"),
+                Some(second_fraction) => write!(f, "{hour}:{minute}:{second}.{second_fraction}"),
+            },
         }
     }
 }
@@ -248,39 +249,38 @@ impl fmt::Display for BooleanLiteral {
     }
 }
 
-
 impl fmt::Display for SignedIntegerLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        std::fmt::Display::fmt(&self.sign, f)?;
+        fmt::Display::fmt(&self.sign, f)?;
         f.write_str(self.integral.as_str())
     }
 }
 
 impl fmt::Display for SignedDecimalLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        std::fmt::Display::fmt(&self.sign, f)?;
+        fmt::Display::fmt(&self.sign, f)?;
         f.write_str(self.decimal.as_str())
     }
 }
 
 impl fmt::Display for DateLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        std::fmt::Display::fmt(&self.date, f)
+        fmt::Display::fmt(&self.date, f)
     }
 }
 
 impl fmt::Display for DateTimeLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        std::fmt::Display::fmt(&self.date, f)?;
-        std::fmt::Display::fmt(&self.time, f)
+        fmt::Display::fmt(&self.date, f)?;
+        fmt::Display::fmt(&self.time, f)
     }
 }
 
 impl fmt::Display for DateTimeTZLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        std::fmt::Display::fmt(&self.date, f)?;
-        std::fmt::Display::fmt(&self.time, f)?;
-        std::fmt::Display::fmt(&self.timezone, f)?;
+        fmt::Display::fmt(&self.date, f)?;
+        fmt::Display::fmt(&self.time, f)?;
+        fmt::Display::fmt(&self.timezone, f)?;
         Ok(())
     }
 }
@@ -294,7 +294,7 @@ impl fmt::Display for DurationLiteral {
                 f.write_str("W")?;
             }
             DurationLiteral::DateAndTime(date, time) => {
-                std::fmt::Display::fmt(date, f)?;
+                fmt::Display::fmt(date, f)?;
                 match time {
                     None => {}
                     Some(time) => write!(f, "T{time}")?,
