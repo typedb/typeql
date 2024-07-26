@@ -13,7 +13,7 @@ use crate::{
     },
     pretty::Pretty,
     util::write_joined,
-    value::{IntegerLiteral, Literal},
+    value::IntegerLiteral,
     variable::Variable,
 };
 

@@ -23,7 +23,7 @@ use crate::{
     schema::definable,
     type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
     value::{
-        BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, DurationLiteral, IntegerLiteral,
+        BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, IntegerLiteral,
         Literal, Sign, SignedDecimalLiteral, SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral,
     },
     variable::Variable,
@@ -328,9 +328,9 @@ fn visit_value_literal(node: Node<'_>) -> Literal {
 
 fn visit_sign(node: Node<'_>) -> Sign {
     debug_assert_eq!(node.as_rule(), Rule::sign);
-    match node.as_rule() {
-        Rule::PLUS => Sign::Plus,
-        Rule::MIN => Sign::Minus,
+    match node.as_str() {
+        "+" => Sign::Plus,
+        "-" => Sign::Minus,
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
     }
 }
@@ -368,8 +368,8 @@ fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
     let date = visit_date_fragment(date_node);
     let time = visit_time(time_node);
     let timezone = match tz_node.as_rule() {
-        Rule::iana_timezone => visit_iana_timezone(tz_node),
-        Rule::iso8601_timezone_offset => visit_iso8601_timezone_offset(tz_node),
+        Rule::iana_timezone => TimeZone::IANA(tz_node.as_str().to_owned()),
+        Rule::iso8601_timezone_offset => TimeZone::ISO(tz_node.as_str().to_owned()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: tz_node.to_string() }),
     };
     DateTimeTZLiteral { date, time, timezone }
@@ -385,19 +385,8 @@ fn visit_datetime_literal(node: Node<'_>) -> DateTimeLiteral {
 
 fn visit_date_literal(node: Node<'_>) -> DateLiteral {
     debug_assert_eq!(node.as_rule(), Rule::date_literal);
-    let date = visit_date_fragment(node);
+    let date = visit_date_fragment(node.into_child());
     DateLiteral { date }
-}
-
-fn visit_iso8601_timezone_offset(node: Node<'_>) -> TimeZone {
-    debug_assert_eq!(node.as_rule(), Rule::iso8601_timezone_offset);
-    TimeZone::ISO(node.as_str().to_owned())
-}
-
-fn visit_iana_timezone(node: Node<'_>) -> TimeZone {
-    debug_assert_eq!(node.as_rule(), Rule::iana_timezone);
-    let (first, second) = node.into_children().map(|node| node.as_str().to_owned()).collect_tuple().unwrap();
-    TimeZone::IANA(first, second)
 }
 
 fn visit_date_fragment(node: Node<'_>) -> DateFragment {

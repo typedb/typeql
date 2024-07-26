@@ -4,13 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{
-    fmt,
-    fmt::{Debug, Formatter},
-};
-use std::fmt::Write;
-use std::path::Display;
-
+use std::fmt::{self, Formatter, Write, write};
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
     pretty::Pretty,
@@ -85,14 +79,14 @@ pub struct DateLiteral {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TimeZone {
-    IANA(String, String),
+    IANA(String),
     ISO(String),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct DurationLiteral {
-    pub date: Option<DurationDate>,
-    pub time: Option<DurationTime>,
+pub enum DurationLiteral {
+    Weeks(String),
+    DateAndTime(DurationDate, Option<DurationTime>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -101,18 +95,17 @@ pub struct StructLiteral {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum DurationDate {
-    Years(String),
-    Months(String),
-    Weeks(String),
+pub struct DurationDate {
+    years: Option<String>,
+    months: Option<String>,
+    days: Option<String>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum DurationTime {
-    Days(String),
-    Hours(String),
-    Minutes(String),
-    Seconds(String),
+pub struct DurationTime {
+    hours: Option<String>,
+    minutes: Option<String>,
+    seconds: Option<String>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -149,7 +142,22 @@ impl Pretty for Literal {}
 
 impl fmt::Display for Literal {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        self.inner.fmt(f)
+        fmt::Display::fmt(&self.inner, f)
+    }
+}
+
+impl fmt::Display for ValueLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            ValueLiteral::Boolean(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::Integer(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::Decimal(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::Date(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::DateTime(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::DateTimeTz(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::Duration(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::String(value) => fmt::Display::fmt(value, f),
+        }
     }
 }
 
@@ -168,16 +176,131 @@ impl fmt::Display for StringLiteral {
 impl fmt::Display for Sign {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Sign::Plus => f.write_char('+'),
-            Sign::Minus => f.write_char('-'),
+            Sign::Plus => f.write_str("+"),
+            Sign::Minus => f.write_str("-"),
         }
+    }
+}
+
+impl fmt::Display for DateFragment {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}-{}-{}", self.year, self.month, self.day)
+    }
+}
+
+impl fmt::Display for TimeFragment {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let (hour, minute) = (self.hour.as_str(), self.minute.as_str());
+        match &self.second {
+            None => write!(f, "{hour}:{minute}"),
+            Some(second) => {
+                match &self.second_fraction {
+                    None => write!(f, "{hour}:{minute}:{second}"),
+                    Some(second_fraction) => write!(f, "{hour}:{minute}:{second}.{second_fraction}"),
+                }
+            }
+        }
+    }
+}
+
+impl fmt::Display for TimeZone {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            TimeZone::IANA(value) => f.write_str(value),
+            TimeZone::ISO(value) => f.write_str(value),
+        }
+    }
+}
+
+impl fmt::Display for DurationDate {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(years) = &self.years {
+            write!(f, "{years}Y")?;
+        }
+        if let Some(months) = &self.months {
+            write!(f, "{months}M")?;
+        }
+        if let Some(days) = &self.days {
+            write!(f, "{days}D")?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for DurationTime {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(hours) = &self.hours {
+            write!(f, "{hours}H")?;
+        }
+        if let Some(minutes) = &self.minutes {
+            write!(f, "{minutes}M")?;
+        }
+        if let Some(seconds) = &self.seconds {
+            write!(f, "{seconds}S")?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for BooleanLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(self.value.as_str())
+    }
+}
+
+
+impl fmt::Display for SignedIntegerLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        std::fmt::Display::fmt(&self.sign, f)?;
+        f.write_str(self.integral.as_str())
     }
 }
 
 impl fmt::Display for SignedDecimalLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         std::fmt::Display::fmt(&self.sign, f)?;
-        f.write_str(self.decimal.as_str())?;
+        f.write_str(self.decimal.as_str())
+    }
+}
+
+impl fmt::Display for DateLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        std::fmt::Display::fmt(&self.date, f)
+    }
+}
+
+impl fmt::Display for DateTimeLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        std::fmt::Display::fmt(&self.date, f)?;
+        std::fmt::Display::fmt(&self.time, f)
+    }
+}
+
+impl fmt::Display for DateTimeTZLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        std::fmt::Display::fmt(&self.date, f)?;
+        std::fmt::Display::fmt(&self.time, f)?;
+        std::fmt::Display::fmt(&self.timezone, f)?;
+        Ok(())
+    }
+}
+
+impl fmt::Display for DurationLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str("P")?;
+        match self {
+            DurationLiteral::Weeks(weeks) => {
+                f.write_str(weeks)?;
+                f.write_str("W")?;
+            }
+            DurationLiteral::DateAndTime(date, time) => {
+                std::fmt::Display::fmt(date, f)?;
+                match time {
+                    None => {}
+                    Some(time) => write!(f, "T{time}")?,
+                }
+            }
+        }
         Ok(())
     }
 }
