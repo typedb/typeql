@@ -348,7 +348,7 @@ fn visit_signed_integer(node: Node<'_>) -> SignedIntegerLiteral {
     debug_assert_eq!(node.as_rule(), Rule::signed_integer);
     let mut children = node.into_children().collect::<Vec<_>>();
     let integral = children.pop().unwrap();
-    let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
+    let sign = children.pop().map(|node| visit_sign(node));
     debug_assert_eq!(integral.as_rule(), Rule::integer_literal);
     SignedIntegerLiteral { sign, integral: integral.as_str().to_owned() }
 }
@@ -357,7 +357,7 @@ fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
     debug_assert_eq!(node.as_rule(), Rule::signed_decimal);
     let mut children = node.into_children().collect::<Vec<_>>();
     let decimal = children.pop().unwrap().as_str().to_owned();
-    let sign = children.pop().map(|node| visit_sign(node)).unwrap_or(Sign::Plus);
+    let sign = children.pop().map(|node| visit_sign(node));
     SignedDecimalLiteral { sign, decimal }
 }
 

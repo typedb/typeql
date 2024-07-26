@@ -35,13 +35,13 @@ pub enum Sign {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SignedIntegerLiteral {
-    pub sign: Sign,
+    pub sign: Option<Sign>,
     pub integral: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct SignedDecimalLiteral {
-    pub sign: Sign,
+    pub sign: Option<Sign>,
     pub decimal: String,
 }
 
@@ -251,14 +251,18 @@ impl fmt::Display for BooleanLiteral {
 
 impl fmt::Display for SignedIntegerLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.sign, f)?;
+        if let Some(sign) = &self.sign {
+            fmt::Display::fmt(sign, f)?;
+        }
         f.write_str(self.integral.as_str())
     }
 }
 
 impl fmt::Display for SignedDecimalLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.sign, f)?;
+        if let Some(sign) = &self.sign {
+            fmt::Display::fmt(sign, f)?;
+        }
         f.write_str(self.decimal.as_str())
     }
 }
@@ -271,8 +275,7 @@ impl fmt::Display for DateLiteral {
 
 impl fmt::Display for DateTimeLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.date, f)?;
-        fmt::Display::fmt(&self.time, f)
+        write!(f, "{}T{}", &self.date, &self.time)
     }
 }
 
