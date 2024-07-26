@@ -314,52 +314,54 @@ impl fmt::Display for StructLiteral {
     }
 }
 
-fn parse_string(escaped_string: &str) -> Result<String> {
-    let bytes = escaped_string.as_bytes();
-    // it's a bug if these fail; either in the parser or the builder
-    assert_eq!(bytes[0], bytes[bytes.len() - 1]);
-    assert!(matches!(bytes[0], b'\'' | b'"'));
-    let escaped_string = &escaped_string[1..escaped_string.len() - 1];
+impl StringLiteral {
+    pub fn parse_to_string(escaped_string: &str) -> Result<String> {
+        let bytes = escaped_string.as_bytes();
+        // it's a bug if these fail; either in the parser or the builder
+        assert_eq!(bytes[0], bytes[bytes.len() - 1]);
+        assert!(matches!(bytes[0], b'\'' | b'"'));
+        let escaped_string = &escaped_string[1..escaped_string.len() - 1];
 
-    let mut buf = String::with_capacity(escaped_string.len());
+        let mut buf = String::with_capacity(escaped_string.len());
 
-    let mut rest = escaped_string;
-    while !rest.is_empty() {
-        let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
-            let bytes = rest.as_bytes();
+        let mut rest = escaped_string;
+        while !rest.is_empty() {
+            let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
+                let bytes = rest.as_bytes();
 
-            if bytes.len() < 2 {
-                return Err(TypeQLError::InvalidStringEscape {
-                    full_string: escaped_string.to_owned(),
-                    escape: String::from(r"\"),
-                }
-                .into());
-            }
-
-            match bytes[1] {
-                BSP => ('\x08', 2),
-                TAB => ('\x09', 2),
-                LF_ => ('\x0a', 2),
-                FF_ => ('\x0c', 2),
-                CR_ => ('\x0d', 2),
-                c @ (b'"' | b'\'' | b'\\') => (c as char, 2),
-                b'u' => todo!("Unicode escape handling"),
-                _ => {
+                if bytes.len() < 2 {
                     return Err(TypeQLError::InvalidStringEscape {
                         full_string: escaped_string.to_owned(),
-                        escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
+                        escape: String::from(r"\"),
                     }
-                    .into())
+                    .into());
                 }
-            }
-        } else {
-            let char = rest.chars().next().expect("string is non-empty");
-            (char, char.len_utf8())
-        };
-        buf.push(char);
-        rest = &rest[escaped_len..];
+
+                match bytes[1] {
+                    BSP => ('\x08', 2),
+                    TAB => ('\x09', 2),
+                    LF_ => ('\x0a', 2),
+                    FF_ => ('\x0c', 2),
+                    CR_ => ('\x0d', 2),
+                    c @ (b'"' | b'\'' | b'\\') => (c as char, 2),
+                    b'u' => todo!("Unicode escape handling"),
+                    _ => {
+                        return Err(TypeQLError::InvalidStringEscape {
+                            full_string: escaped_string.to_owned(),
+                            escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
+                        }
+                        .into())
+                    }
+                }
+            } else {
+                let char = rest.chars().next().expect("string is non-empty");
+                (char, char.len_utf8())
+            };
+            buf.push(char);
+            rest = &rest[escaped_len..];
+        }
+        Ok(buf)
     }
-    Ok(buf)
 }
 
 const BSP: u8 = b'b';
