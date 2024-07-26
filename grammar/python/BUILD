@@ -61,7 +61,7 @@ assemble_pip(
         "Environment :: Console",
         "Topic :: Database :: Front-Ends"
     ],
-    url = "https://github.com/vaticle/typeql",
+    url = "https://github.com/typedb/typeql",
     author = "TypeDB Community",
     author_email = "community@typedb.com",
     license = "AGPLv3",
