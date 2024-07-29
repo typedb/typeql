@@ -13,7 +13,7 @@ use self::{
 pub use self::{thing::Thing, type_::Type};
 use crate::{
     common::{identifier::Identifier, token, Span},
-    expression::{Expression, FunctionCall},
+    expression::Expression,
     pretty::Pretty,
     util::write_joined,
     variable::Variable,
@@ -45,21 +45,21 @@ impl fmt::Display for Is {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct InStream {
+pub struct InIterable {
     span: Option<Span>,
     pub lhs: Vec<Variable>,
-    pub rhs: FunctionCall,
+    pub rhs: Expression,
 }
 
-impl InStream {
-    pub(crate) fn new(span: Option<Span>, lhs: Vec<Variable>, rhs: FunctionCall) -> Self {
+impl InIterable {
+    pub(crate) fn new(span: Option<Span>, lhs: Vec<Variable>, rhs: Expression) -> Self {
         Self { span, lhs, rhs }
     }
 }
 
-impl Pretty for InStream {}
+impl Pretty for InIterable {}
 
-impl fmt::Display for InStream {
+impl fmt::Display for InIterable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write_joined!(f, ", ", self.lhs)?;
         write!(f, " {} {}", token::Keyword::In, self.rhs)?;
@@ -126,7 +126,7 @@ impl fmt::Display for Assignment {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
     Is(Is),
-    InStream(InStream),
+    InStream(InIterable),
     Comparison(ComparisonStatement),
     Assignment(Assignment),
     Thing(Thing),

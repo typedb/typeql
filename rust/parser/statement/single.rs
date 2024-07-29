@@ -8,13 +8,14 @@ use itertools::Itertools;
 
 use crate::{
     common::{error::TypeQLError, identifier::Identifier, Spanned},
+    expression::Expression,
     parser::{
-        expression::{visit_expression, visit_expression_function, visit_expression_value},
+        expression::{visit_expression, visit_expression_function, visit_expression_list, visit_expression_value},
         statement::visit_comparison,
         visit_identifier, visit_var, visit_vars_assignment, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
-        comparison::ComparisonStatement, Assignment, AssignmentPattern, DeconstructField, InStream, Is, Statement,
+        comparison::ComparisonStatement, Assignment, AssignmentPattern, DeconstructField, InIterable, Is, Statement,
         StructDeconstruct,
     },
 };
@@ -99,15 +100,22 @@ pub fn visit_statement_is(node: Node<'_>) -> Is {
     let lhs = visit_var(children.consume_expected(Rule::var));
     children.skip_expected(Rule::IS);
     let rhs = visit_var(children.consume_expected(Rule::var));
+    debug_assert_eq!(children.try_consume_any(), None);
     Is::new(span, lhs, rhs)
 }
 
-pub fn visit_statement_in(node: Node<'_>) -> InStream {
+pub fn visit_statement_in(node: Node<'_>) -> InIterable {
     debug_assert_eq!(node.as_rule(), Rule::statement_in);
     let span = node.span();
     let mut children = node.into_children();
     let lhs = visit_vars_assignment(children.consume_expected(Rule::vars_assignment));
     children.skip_expected(Rule::IN);
-    let rhs = visit_expression_function(children.consume_expected(Rule::expression_function));
-    InStream::new(span, lhs, rhs)
+    let child = children.consume_any();
+    let rhs = match child.as_rule() {
+        Rule::expression_function => Expression::Function(visit_expression_function(child)),
+        Rule::expression_list => visit_expression_list(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    debug_assert_eq!(children.try_consume_any(), None);
+    InIterable::new(span, lhs, rhs)
 }
