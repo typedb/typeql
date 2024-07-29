@@ -11,7 +11,8 @@ use crate::{
     expression::{Expression, FunctionCall},
     pretty::Pretty,
     query::Pipeline,
-    Literal, TypeRefAny, Variable,
+    value::StringLiteral,
+    TypeRefAny, Variable,
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -70,12 +71,12 @@ impl ProjectionObject {
 #[derive(Debug, Eq, PartialEq)]
 pub struct ProjectionObjectField {
     span: Option<Span>,
-    key: Literal,
+    key: StringLiteral,
     value: Projection,
 }
 
 impl ProjectionObjectField {
-    pub fn new(span: Option<Span>, key: Literal, value: Projection) -> Self {
+    pub fn new(span: Option<Span>, key: StringLiteral, value: Projection) -> Self {
         Self { span, key, value }
     }
 }

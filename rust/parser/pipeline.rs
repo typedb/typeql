@@ -15,7 +15,7 @@ use super::{
         visit_statement,
     },
     type_::{visit_label, visit_label_list},
-    visit_integer_literal, visit_quoted_string_literal, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+    visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
     common::{
@@ -42,7 +42,8 @@ use crate::{
         Pipeline,
     },
     type_::NamedType,
-    Literal, TypeRef, TypeRefAny,
+    value::StringLiteral,
+    TypeRef, TypeRefAny,
 };
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
@@ -278,7 +279,7 @@ fn visit_projection_object_field(node: Node<'_>) -> ProjectionObjectField {
     ProjectionObjectField::new(span, key, value)
 }
 
-fn visit_projection_key(node: Node<'_>) -> Literal {
+fn visit_projection_key(node: Node<'_>) -> StringLiteral {
     debug_assert_eq!(node.as_rule(), Rule::projection_key);
     visit_quoted_string_literal(node.into_child())
 }

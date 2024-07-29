@@ -15,7 +15,7 @@ use crate::{
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct BuiltinValueType {
     span: Option<Span>,
-    token: token::ValueType,
+    pub token: token::ValueType,
 }
 
 impl BuiltinValueType {
@@ -41,7 +41,7 @@ impl fmt::Display for BuiltinValueType {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Label {
     span: Option<Span>,
-    ident: Identifier,
+    pub ident: Identifier,
 }
 
 impl Label {
@@ -67,8 +67,8 @@ impl fmt::Display for Label {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct ScopedLabel {
     span: Option<Span>,
-    scope: Label,
-    name: Label,
+    pub scope: Label,
+    pub name: Label,
 }
 
 impl ScopedLabel {

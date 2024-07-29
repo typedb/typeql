@@ -21,10 +21,9 @@ use crate::{
     parser::{pipeline::visit_query_pipeline, redefine::visit_query_redefine},
     query::{Query, SchemaQuery},
     schema::definable,
-    type_::{BuiltinValueType, Label, List, Optional, ReservedLabel, ScopedLabel, Type},
-    value::{Literal, Tag},
-    variable::Variable,
-    Label, Result,
+    type_::Label,
+    variable::{Optional, Variable},
+    Result,
 };
 
 mod annotation;
@@ -34,10 +33,11 @@ mod literal;
 mod pipeline;
 mod redefine;
 mod statement;
-#[cfg(test)]
-mod test;
 mod type_;
 mod undefine;
+
+#[cfg(test)]
+mod test;
 
 #[derive(Parser)]
 #[grammar = "parser/typeql.pest"]
@@ -203,7 +203,7 @@ fn visit_var(node: Node<'_>) -> Variable {
     let span = node.span();
     let child = node.into_child();
     match child.as_rule() {
-        Rule::VAR_ANONYMOUS => Variable::Anonymous(span),
+        Rule::VAR_ANONYMOUS => Variable::Anonymous { span, optional: None },
         Rule::var_named => visit_var_named(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
@@ -213,16 +213,15 @@ fn visit_var_optional(node: Node<'_>) -> Variable {
     debug_assert_eq!(node.as_rule(), Rule::var_optional);
     let span = node.span();
     match visit_var(node.into_child()) {
-        Variable::Anonymous(_) => Variable::OptionalAnonymous(span),
-        Variable::Named(_, name) => Variable::OptionalNamed(span, name),
-        _ => unreachable!(),
+        Variable::Anonymous { .. } => Variable::Anonymous { span, optional: Some(Optional) },
+        Variable::Named { ident, .. } => Variable::Named { span, ident, optional: Some(Optional) },
     }
 }
 
 fn visit_var_named(node: Node<'_>) -> Variable {
     debug_assert_eq!(node.as_rule(), Rule::var_named);
     let span = node.span();
-    Variable::Named(span, visit_identifier_var(node.into_child()))
+    Variable::Named { span, ident: visit_identifier_var(node.into_child()), optional: None }
 }
 
 fn visit_identifier_var(node: Node<'_>) -> Identifier {
@@ -248,54 +247,4 @@ fn visit_var_assignment(node: Node<'_>) -> Variable {
         Rule::var_optional => visit_var_optional(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
-}
-
-fn visit_var_list(node: Node<'_>) -> List {
-    debug_assert_eq!(node.as_rule(), Rule::var_list);
-    let span = node.span();
-    let inner = visit_var(node.into_child());
-    List::new(span, Type::Variable(inner))
-}
-
-fn visit_value_type(node: Node<'_>) -> Type {
-    debug_assert_eq!(node.as_rule(), Rule::value_type);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::value_type_primitive => Type::BuiltinValue(visit_value_type_primitive(child)),
-        Rule::identifier => Type::Label(Label::Identifier(visit_identifier(child))),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
-}
-
-fn visit_value_type_optional(node: Node<'_>) -> Optional {
-    debug_assert_eq!(node.as_rule(), Rule::value_type_optional);
-    let span = node.span();
-    let inner = visit_value_type(node.into_child());
-    Optional::new(span, inner)
-}
-
-fn visit_value_type_list(node: Node<'_>) -> List {
-    debug_assert_eq!(node.as_rule(), Rule::value_type_list);
-    let span = node.span();
-    let inner = visit_value_type(node.into_child());
-    List::new(span, inner)
-}
-
-fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
-    debug_assert_eq!(node.as_rule(), Rule::value_type_primitive);
-    let span = node.span();
-    let child = node.into_child();
-    let token = match child.as_rule() {
-        Rule::BOOLEAN => token::ValueType::Boolean,
-        Rule::DATE => token::ValueType::Date,
-        Rule::DATETIME => token::ValueType::DateTime,
-        Rule::DATETIME_TZ => token::ValueType::DateTimeTZ,
-        Rule::DECIMAL => token::ValueType::Decimal,
-        Rule::DOUBLE => token::ValueType::Double,
-        Rule::DURATION => token::ValueType::Duration,
-        Rule::LONG => token::ValueType::Long,
-        Rule::STRING => token::ValueType::String,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    };
-    BuiltinValueType::new(span, token)
 }

@@ -10,9 +10,9 @@ use crate::{
     parser::{
         expression::{visit_expression_list, visit_expression_struct, visit_expression_value},
         literal::visit_value_literal,
-        statement::{visit_comparison, visit_type_ref},
+        statement::visit_comparison,
         type_::{visit_type_ref, visit_type_ref_list},
-        visit_label_list, visit_var, visit_var_list, IntoChildNodes, Node, Rule, RuleMatcher,
+        visit_var, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
         thing::{
