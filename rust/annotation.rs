@@ -65,24 +65,34 @@ impl fmt::Display for Abstract {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cardinality {
     span: Option<Span>,
-    min: IntegerLiteral,
-    max: Option<IntegerLiteral>,
+    range: CardinalityRange,
 }
 
 impl Cardinality {
-    pub fn new(span: Option<Span>, min: IntegerLiteral, max: Option<IntegerLiteral>) -> Self {
-        Self { span, min, max }
+    pub fn new(span: Option<Span>, range: CardinalityRange) -> Self {
+        Self { span, range }
     }
 }
 
 impl fmt::Display for Cardinality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "@{}({}..", token::Annotation::Cardinality, self.min.value)?;
-        if let Some(max) = &self.max {
-            write!(f, "{}", max.value)?;
+        write!(f, "@{}({})", token::Annotation::Cardinality, self.range)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum CardinalityRange {
+    Exact(IntegerLiteral),
+    Range(IntegerLiteral, Option<IntegerLiteral>),
+}
+
+impl fmt::Display for CardinalityRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Exact(exact) => write!(f, "{}", exact),
+            Self::Range(min, None) => write!(f, "{}..", min),
+            Self::Range(min, Some(max)) => write!(f, "{}..{}", min, max),
         }
-        f.write_char(')')?;
-        Ok(())
     }
 }
 

@@ -66,22 +66,22 @@ impl fmt::Display for Sort {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Filter {
+pub struct Select {
     span: Option<Span>,
     variables: Vec<Variable>,
 }
 
-impl Filter {
+impl Select {
     pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
         Self { span, variables }
     }
 }
 
-impl Pretty for Filter {}
+impl Pretty for Select {}
 
-impl fmt::Display for Filter {
+impl fmt::Display for Select {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Modifier::Filter)?;
+        write!(f, "{} ", token::Modifier::Select)?;
         write_joined!(f, ", ", self.variables)?;
         f.write_char(';')?;
         Ok(())
@@ -130,7 +130,7 @@ impl fmt::Display for Limit {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Modifier {
-    Filter(Filter),
+    Select(Select),
     Sort(Sort),
     Offset(Offset),
     Limit(Limit),
@@ -139,7 +139,7 @@ pub enum Modifier {
 impl Pretty for Modifier {
     fn fmt(&self, indent_level: usize, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Filter(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Select(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Sort(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Offset(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Limit(inner) => Pretty::fmt(inner, indent_level, f),
@@ -150,7 +150,7 @@ impl Pretty for Modifier {
 impl fmt::Display for Modifier {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Filter(inner) => fmt::Display::fmt(inner, f),
+            Self::Select(inner) => fmt::Display::fmt(inner, f),
             Self::Sort(inner) => fmt::Display::fmt(inner, f),
             Self::Offset(inner) => fmt::Display::fmt(inner, f),
             Self::Limit(inner) => fmt::Display::fmt(inner, f),

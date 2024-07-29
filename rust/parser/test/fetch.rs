@@ -28,7 +28,7 @@ label-a: {
 label-b: {
     match
     ($d, $c) isa director;
-    filter $d;
+    select $d;
     count();
 };"#;
     let parsed = parse_query(query).unwrap();

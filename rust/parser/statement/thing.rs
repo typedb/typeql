@@ -10,8 +10,9 @@ use crate::{
     parser::{
         expression::{visit_expression_list, visit_expression_struct, visit_expression_value},
         literal::visit_value_literal,
-        statement::{visit_comparison, visit_type_ref},
-        visit_label_list, visit_var, visit_var_list, IntoChildNodes, Node, Rule, RuleMatcher,
+        statement::visit_comparison,
+        type_::{visit_type_ref, visit_type_ref_list},
+        visit_var, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
         thing::{
@@ -21,7 +22,7 @@ use crate::{
         },
         Statement,
     },
-    type_::{Type, TypeAny},
+    type_::{TypeRef, TypeRefAny},
 };
 
 pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
@@ -47,13 +48,13 @@ pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
             let value = visit_value_literal(children.consume_expected(Rule::value_literal));
             let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
             debug_assert_eq!(children.try_consume_any(), None);
-            Statement::AttributeValue(AttributeValueStatement::new(span, Some(Type::Variable(var)), value, isa))
+            Statement::AttributeValue(AttributeValueStatement::new(span, Some(TypeRef::Variable(var)), value, isa))
         }
         Rule::expression_struct => {
             let value = visit_expression_struct(children.consume_expected(Rule::expression_struct));
             let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
             debug_assert_eq!(children.try_consume_any(), None);
-            Statement::AttributeValue(AttributeValueStatement::new(span, Some(Type::Variable(var)), value, isa))
+            Statement::AttributeValue(AttributeValueStatement::new(span, Some(TypeRef::Variable(var)), value, isa))
         }
         Rule::comparison => {
             let comparison = visit_comparison(children.consume_expected(Rule::comparison));
@@ -124,7 +125,7 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
     let has = match child.as_rule() {
         Rule::var => Has::new(span, None, HasValue::Variable(visit_var(child))),
         Rule::type_ref => {
-            let type_ = Some(TypeAny::Type(visit_type_ref(child)));
+            let type_ = Some(TypeRefAny::Type(visit_type_ref(child)));
             let value_node = children.consume_any();
             let value = match value_node.as_rule() {
                 Rule::comparison => HasValue::Comparison(visit_comparison(value_node)),
@@ -137,7 +138,7 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
             Has::new(span, type_, value)
         }
         Rule::type_ref_list => {
-            let type_ = Some(visit_type_ref_list(child));
+            let type_ = Some(TypeRefAny::List(visit_type_ref_list(child)));
             let value_node = children.consume_any();
             let value = match value_node.as_rule() {
                 Rule::var => HasValue::Variable(visit_var(value_node)),
@@ -176,23 +177,14 @@ fn visit_role_player(node: Node<'_>) -> RolePlayer {
     let role_player = match child.as_rule() {
         Rule::var => RolePlayer::Untyped(visit_var(child)),
         Rule::type_ref => {
-            RolePlayer::Typed(TypeAny::Type(visit_type_ref(child)), visit_var(children.consume_expected(Rule::var)))
+            RolePlayer::Typed(TypeRefAny::Type(visit_type_ref(child)), visit_var(children.consume_expected(Rule::var)))
         }
-        Rule::type_ref_list => {
-            RolePlayer::Typed(visit_type_ref_list(child), visit_var(children.consume_expected(Rule::var)))
-        }
+        Rule::type_ref_list => RolePlayer::Typed(
+            TypeRefAny::List(visit_type_ref_list(child)),
+            visit_var(children.consume_expected(Rule::var)),
+        ),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     role_player
-}
-
-fn visit_type_ref_list(node: Node<'_>) -> TypeAny {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::var_list => TypeAny::List(visit_var_list(child)),
-        Rule::label_list => TypeAny::List(visit_label_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
 }

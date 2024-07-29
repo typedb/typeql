@@ -7,14 +7,15 @@
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        annotation::visit_annotations, visit_identifier, visit_kind, visit_label, visit_label_list, visit_label_scoped,
-        visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
+        annotation::visit_annotations,
+        type_::{visit_label, visit_label_list, visit_label_scoped, visit_value_type},
+        visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::type_::{
         capability::{Alias, Owns, Plays, Relates, Sub, ValueType},
         Capability, CapabilityBase, Type,
     },
-    type_::{Label, Type as TypeRef, TypeAny},
+    type_::{NamedType, TypeRef, TypeRefAny},
 };
 
 pub(super) fn visit_definition_type(node: Node<'_>) -> Type {
@@ -22,9 +23,9 @@ pub(super) fn visit_definition_type(node: Node<'_>) -> Type {
     let span = node.span();
     let mut children = node.into_children();
     let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
-    let ident = visit_identifier(children.consume_expected(Rule::identifier));
+    let label = visit_label(children.consume_expected(Rule::label));
     let traits = children.map(visit_type_capability).collect();
-    Type::new(span, kind, Label::Identifier(ident), traits)
+    Type::new(span, kind, label, traits)
 }
 
 pub(in crate::parser) fn visit_type_capability(node: Node<'_>) -> Capability {
@@ -73,12 +74,7 @@ fn visit_value_type_declaration(node: Node<'_>) -> ValueType {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::VALUE);
-    let value_type_node = children.consume_any();
-    let value_type = match value_type_node.as_rule() {
-        Rule::label => TypeRef::Label(visit_label(value_type_node)),
-        Rule::value_type => visit_value_type(value_type_node),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_type_node.to_string() }),
-    };
+    let value_type = visit_value_type(children.consume_expected(Rule::value_type));
     debug_assert_eq!(children.try_consume_any(), None);
     ValueType::new(span, value_type)
 }
@@ -91,8 +87,8 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
 
     let owned_label = children.consume_any();
     let owned = match owned_label.as_rule() {
-        Rule::label_list => TypeAny::List(visit_label_list(owned_label)),
-        Rule::label => TypeAny::Type(TypeRef::Label(visit_label(owned_label))),
+        Rule::label_list => TypeRefAny::List(visit_label_list(owned_label)),
+        Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(owned_label)))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
     };
     let overridden = if children.try_consume_expected(Rule::AS).is_some() {
@@ -113,8 +109,8 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
 
     let related_label = children.consume_any();
     let related = match related_label.as_rule() {
-        Rule::label_list => TypeAny::List(visit_label_list(related_label)),
-        Rule::label => TypeAny::Type(TypeRef::Label(visit_label(related_label))),
+        Rule::label_list => TypeRefAny::List(visit_label_list(related_label)),
+        Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(related_label)))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
     };
     let overridden = if children.try_consume_expected(Rule::AS).is_some() {

@@ -8,15 +8,12 @@ use self::{
     single::visit_statement_single,
     thing::{visit_statement_relation_anonymous, visit_statement_thing_var},
 };
-use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, RuleMatcher};
+use super::{
+    expression::visit_expression_value, statement::type_::visit_statement_type, IntoChildNodes, Node, Rule, RuleMatcher,
+};
 use crate::{
     common::{error::TypeQLError, token::Comparator, Spanned},
-    parser::{
-        statement::type_::visit_statement_type, visit_label, visit_label_list, visit_label_scoped, visit_var,
-        visit_var_list,
-    },
     statement::{comparison::Comparison, Statement},
-    type_::{Type, TypeAny},
 };
 
 mod single;
@@ -54,44 +51,4 @@ fn visit_comparison(node: Node<'_>) -> Comparison {
     let rhs = visit_expression_value(children.consume_expected(Rule::expression_value));
     debug_assert_eq!(children.try_consume_any(), None);
     Comparison::new(span, comparator, rhs)
-}
-
-fn visit_type_ref_any(node: Node<'_>) -> Type {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref_any);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::type_ref => visit_type_ref(child),
-        Rule::type_ref_scoped => visit_type_ref_scoped(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
-}
-
-fn visit_type_ref(node: Node<'_>) -> Type {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::var => Type::Variable(visit_var(child)),
-        Rule::label => Type::Label(visit_label(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
-}
-
-fn visit_type_ref_scoped(node: Node<'_>) -> Type {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref_scoped);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::var => Type::Variable(visit_var(child)),
-        Rule::label_scoped => Type::ScopedLabel(visit_label_scoped(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
-}
-
-fn visit_type_ref_list(node: Node<'_>) -> TypeAny {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::var_list => TypeAny::List(visit_var_list(child)),
-        Rule::label_list => TypeAny::List(visit_label_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
 }

@@ -8,14 +8,16 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
         annotation::visit_annotations,
-        statement::{visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_type_ref_scoped},
-        visit_label, visit_label_scoped, visit_value_type, IntoChildNodes, Node, Rule, RuleMatcher,
+        type_::{
+            visit_label, visit_label_scoped, visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_value_type,
+        },
+        IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
         type_::{Constraint, ConstraintBase, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
         Statement, Type,
     },
-    type_::TypeAny,
+    type_::TypeRefAny,
 };
 
 pub(super) fn visit_statement_type(node: Node<'_>) -> Statement {
@@ -103,8 +105,8 @@ fn visit_owns_constraint(node: Node<'_>) -> Owns {
 
     let child = children.consume_any();
     let owned = match child.as_rule() {
-        Rule::type_ref => TypeAny::Type(visit_type_ref(child)),
-        Rule::type_ref_list => visit_type_ref_list(child),
+        Rule::type_ref => TypeRefAny::Type(visit_type_ref(child)),
+        Rule::type_ref_list => TypeRefAny::List(visit_type_ref_list(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
@@ -126,8 +128,8 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
 
     let child = children.consume_any();
     let related = match child.as_rule() {
-        Rule::type_ref => TypeAny::Type(visit_type_ref(child)),
-        Rule::type_ref_list => visit_type_ref_list(child),
+        Rule::type_ref => TypeRefAny::Type(visit_type_ref(child)),
+        Rule::type_ref_list => TypeRefAny::List(visit_type_ref_list(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
@@ -147,7 +149,7 @@ fn visit_plays_constraint(node: Node<'_>) -> Plays {
     let mut children = node.into_children();
     children.skip_expected(Rule::PLAYS);
 
-    let role = visit_type_ref_scoped(children.consume_expected(Rule::type_ref_scoped));
+    let role = visit_type_ref(children.consume_expected(Rule::type_ref));
     let overridden = if children.try_consume_expected(Rule::AS).is_some() {
         Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
     } else {

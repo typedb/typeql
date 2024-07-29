@@ -8,12 +8,14 @@ use itertools::Itertools;
 
 use super::{
     define::function::visit_definition_function,
-    literal::visit_integer_literal,
+    expression::{visit_expression, visit_expression_function},
+    literal::{visit_integer_literal, visit_quoted_string_literal},
     statement::{
         thing::{visit_relation, visit_statement_thing},
         visit_statement,
     },
-    visit_label, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+    type_::{visit_label, visit_label_list},
+    visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
     common::{
@@ -26,16 +28,22 @@ use crate::{
         pipeline::{
             stage::{
                 delete::{Deletable, DeletableKind},
-                fetch::{Projection, ProjectionAttribute, ProjectionKeyLabel, ProjectionKeyVar},
-                modifier::{Filter, Limit, Offset, OrderedVariable, Sort},
+                fetch::Projection,
+                modifier::{Limit, Offset, OrderedVariable, Select, Sort},
                 reduce::{Check, Count, First, ReduceValue, Stat},
                 Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
             },
             Preamble,
         },
+        stage::fetch::{
+            ProjectionAttribute, ProjectionList, ProjectionObject, ProjectionObjectField, ProjectionSingle,
+            ProjectionStream,
+        },
         Pipeline,
     },
-    type_::Type,
+    type_::NamedType,
+    value::StringLiteral,
+    TypeRef, TypeRefAny,
 };
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
@@ -67,12 +75,12 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
     debug_assert_eq!(node.as_rule(), Rule::query_stage);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::stage_match => Stage::Match(visit_stage_match(child)),
-        Rule::stage_insert => Stage::Insert(visit_stage_insert(child)),
-        Rule::stage_put => Stage::Put(visit_stage_put(child)),
-        Rule::stage_update => Stage::Update(visit_stage_update(child)),
-        Rule::stage_delete => Stage::Delete(visit_stage_delete(child)),
-        Rule::stage_modifier => Stage::Modifier(visit_stage_modifier(child)),
+        Rule::clause_match => Stage::Match(visit_clause_match(child)),
+        Rule::clause_insert => Stage::Insert(visit_clause_insert(child)),
+        Rule::clause_put => Stage::Put(visit_clause_put(child)),
+        Rule::clause_update => Stage::Update(visit_clause_update(child)),
+        Rule::clause_delete => Stage::Delete(visit_clause_delete(child)),
+        Rule::operator_stream => Stage::Modifier(visit_operator_stream(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -81,14 +89,14 @@ fn visit_query_stage_terminal(node: Node<'_>) -> Stage {
     debug_assert_eq!(node.as_rule(), Rule::query_stage_terminal);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::stage_fetch => Stage::Fetch(visit_stage_fetch(child)),
-        Rule::stage_reduce => Stage::Reduce(visit_stage_reduce(child)),
+        Rule::clause_fetch => Stage::Fetch(visit_clause_fetch(child)),
+        Rule::operator_reduce => Stage::Reduce(visit_operator_reduce(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-pub(super) fn visit_stage_match(node: Node<'_>) -> Match {
-    debug_assert_eq!(node.as_rule(), Rule::stage_match);
+pub(super) fn visit_clause_match(node: Node<'_>) -> Match {
+    debug_assert_eq!(node.as_rule(), Rule::clause_match);
     let span = node.span();
     let mut children = node.into_children();
     let patterns = visit_patterns(children.skip_expected(Rule::MATCH).consume_expected(Rule::patterns));
@@ -151,29 +159,29 @@ fn visit_pattern_try(node: Node<'_>) -> Optional {
     Optional::new(span, visit_patterns(patterns))
 }
 
-fn visit_stage_insert(node: Node<'_>) -> Insert {
-    debug_assert_eq!(node.as_rule(), Rule::stage_insert);
+fn visit_clause_insert(node: Node<'_>) -> Insert {
+    debug_assert_eq!(node.as_rule(), Rule::clause_insert);
     let span = node.span();
     let statement_things = node.into_children().skip_expected(Rule::INSERT).map(visit_statement_thing).collect();
     Insert::new(span, statement_things)
 }
 
-fn visit_stage_put(node: Node<'_>) -> Put {
-    debug_assert_eq!(node.as_rule(), Rule::stage_put);
+fn visit_clause_put(node: Node<'_>) -> Put {
+    debug_assert_eq!(node.as_rule(), Rule::clause_put);
     let span = node.span();
     let statement_things = node.into_children().skip_expected(Rule::PUT).map(visit_statement_thing).collect();
     Put::new(span, statement_things)
 }
 
-fn visit_stage_update(node: Node<'_>) -> Update {
-    debug_assert_eq!(node.as_rule(), Rule::stage_update);
+fn visit_clause_update(node: Node<'_>) -> Update {
+    debug_assert_eq!(node.as_rule(), Rule::clause_update);
     let span = node.span();
     let statement_things = node.into_children().skip_expected(Rule::UPDATE).map(visit_statement_thing).collect();
     Update::new(span, statement_things)
 }
 
-fn visit_stage_delete(node: Node<'_>) -> Delete {
-    debug_assert_eq!(node.as_rule(), Rule::stage_delete);
+fn visit_clause_delete(node: Node<'_>) -> Delete {
+    debug_assert_eq!(node.as_rule(), Rule::clause_delete);
     let span = node.span();
     let deletables = node.into_children().skip_expected(Rule::DELETE).map(visit_statement_deletable).collect();
     Delete::new(span, deletables)
@@ -207,93 +215,95 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
     Deletable::new(span, kind)
 }
 
-fn visit_stage_fetch(node: Node<'_>) -> Fetch {
-    debug_assert_eq!(node.as_rule(), Rule::stage_fetch);
+fn visit_clause_fetch(node: Node<'_>) -> Fetch {
+    debug_assert_eq!(node.as_rule(), Rule::clause_fetch);
     let span = node.span();
     let mut children = node.into_children();
-    let projections = visit_projections(children.skip_expected(Rule::FETCH).consume_expected(Rule::projections));
+    let projection_object =
+        visit_projection_object(children.skip_expected(Rule::FETCH).consume_expected(Rule::projection_object));
     debug_assert_eq!(children.try_consume_any(), None);
-    Fetch::new(span, projections)
-}
-
-fn visit_projections(node: Node<'_>) -> Vec<Projection> {
-    debug_assert_eq!(node.as_rule(), Rule::projections);
-    node.into_children().map(visit_projection).collect()
+    Fetch::new(span, projection_object)
 }
 
 fn visit_projection(node: Node<'_>) -> Projection {
     debug_assert_eq!(node.as_rule(), Rule::projection);
-    let mut children = node.into_children();
-    let child = children.consume_any();
+    let child = node.into_child();
     match child.as_rule() {
-        Rule::projection_key_var => {
-            let key_var = visit_projection_key_var(child);
-            let node = children.try_consume_any();
-            if let Some(n) = node {
-                let attrs = visit_projection_attributes(n);
-                Projection::Attribute(key_var, attrs)
-            } else {
-                Projection::Variable(key_var)
-            }
-        }
-        Rule::projection_key_label => {
-            let key_label = visit_projection_key_label(child);
-            let subquery = visit_projection_subquery(children.consume_expected(Rule::projection_subquery));
-            Projection::Subquery(key_label, subquery)
-        }
+        Rule::projection_object => Projection::Object(visit_projection_object(child)),
+        Rule::projection_list => Projection::List(visit_projection_list(child)),
+        Rule::projection_single => Projection::Single(visit_projection_single(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-fn visit_projection_key_label(node: Node<'_>) -> ProjectionKeyLabel {
-    debug_assert_eq!(node.as_rule(), Rule::projection_key_label);
-    let mut children = node.into_children();
-    let child = children.consume_any();
+fn visit_projection_single(node: Node<'_>) -> ProjectionSingle {
+    debug_assert_eq!(node.as_rule(), Rule::projection_single);
+    let child = node.into_child();
     match child.as_rule() {
-        Rule::quoted_string_literal => ProjectionKeyLabel { label: child.as_str().to_owned() },
-        Rule::label => ProjectionKeyLabel { label: child.as_str().to_owned() },
+        Rule::projection_attribute => ProjectionSingle::Attribute(visit_projection_attribute(child)),
+        Rule::query_pipeline => ProjectionSingle::Subquery(visit_query_pipeline(child)),
+        Rule::expression => ProjectionSingle::Expression(visit_expression(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
-}
-
-fn visit_projection_subquery(node: Node<'_>) -> Pipeline {
-    debug_assert_eq!(node.as_rule(), Rule::projection_subquery);
-    visit_query_pipeline(node.into_child())
-}
-
-fn visit_projection_attributes(node: Node<'_>) -> Vec<ProjectionAttribute> {
-    debug_assert_eq!(node.as_rule(), Rule::projection_attributes);
-    node.into_children().map(visit_projection_attribute).collect()
 }
 
 fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
     debug_assert_eq!(node.as_rule(), Rule::projection_attribute);
+    let span = node.span();
     let mut children = node.into_children();
-    let attribute_label = Type::Label(visit_label(children.consume_expected(Rule::label)));
-    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_key_as_label);
-    debug_assert!(children.try_consume_any().is_none());
-    ProjectionAttribute::new(attribute_label, label)
+    let owner = visit_var(children.consume_expected(Rule::var));
+    let child = children.consume_any();
+    let attribute = match child.as_rule() {
+        Rule::label_list => TypeRefAny::List(visit_label_list(child)),
+        Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(child)))),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    debug_assert_eq!(children.try_consume_any(), None);
+    ProjectionAttribute::new(span, owner, attribute)
 }
 
-fn visit_projection_key_var(node: Node<'_>) -> ProjectionKeyVar {
-    debug_assert_eq!(node.as_rule(), Rule::projection_key_var);
-    let mut children = node.into_children();
-    let variable = visit_var(children.consume_expected(Rule::var));
-    let label = children.try_consume_expected(Rule::projection_key_as_label).map(visit_projection_key_as_label);
-    debug_assert!(children.try_consume_any().is_none());
-    ProjectionKeyVar::new(variable, label)
+fn visit_projection_object(node: Node<'_>) -> ProjectionObject {
+    debug_assert_eq!(node.as_rule(), Rule::projection_object);
+    let span = node.span();
+    let fields = node.into_children().map(visit_projection_object_field).collect();
+    ProjectionObject::new(span, fields)
 }
 
-fn visit_projection_key_as_label(node: Node<'_>) -> ProjectionKeyLabel {
-    debug_assert_eq!(node.as_rule(), Rule::projection_key_as_label);
+fn visit_projection_object_field(node: Node<'_>) -> ProjectionObjectField {
+    debug_assert_eq!(node.as_rule(), Rule::projection_object_field);
+    let span = node.span();
     let mut children = node.into_children();
-    children.skip_expected(Rule::AS);
-    let label = visit_projection_key_label(children.consume_expected(Rule::projection_key_label));
-    debug_assert!(children.try_consume_any().is_none());
-    label
+    let key = visit_projection_key(children.consume_expected(Rule::projection_key));
+    let value = visit_projection(children.consume_expected(Rule::projection));
+    debug_assert_eq!(children.try_consume_any(), None);
+    ProjectionObjectField::new(span, key, value)
 }
-fn visit_stage_reduce(node: Node<'_>) -> Reduce {
-    debug_assert_eq!(node.as_rule(), Rule::stage_reduce);
+
+fn visit_projection_key(node: Node<'_>) -> StringLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::projection_key);
+    visit_quoted_string_literal(node.into_child())
+}
+
+fn visit_projection_list(node: Node<'_>) -> ProjectionList {
+    debug_assert_eq!(node.as_rule(), Rule::projection_list);
+    let span = node.span();
+    let stream = visit_projection_stream(node.into_child());
+    ProjectionList::new(span, stream)
+}
+
+fn visit_projection_stream(node: Node<'_>) -> ProjectionStream {
+    debug_assert_eq!(node.as_rule(), Rule::projection_stream);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::projection_attribute => ProjectionStream::Attribute(visit_projection_attribute(child)),
+        Rule::query_pipeline => ProjectionStream::Subquery(visit_query_pipeline(child)),
+        Rule::expression_function => ProjectionStream::Function(visit_expression_function(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_operator_reduce(node: Node<'_>) -> Reduce {
+    debug_assert_eq!(node.as_rule(), Rule::operator_reduce);
     visit_reduce(node.into_child())
 }
 
@@ -346,33 +356,37 @@ fn visit_reduce_value(node: Node<'_>) -> ReduceValue {
         Rule::SUM => {
             ReduceValue::Stat(Stat::new(span, Aggregate::Sum, visit_var(children.consume_expected(Rule::var))))
         }
+        Rule::LIST => {
+            // TODO      vvvv rename
+            ReduceValue::Stat(Stat::new(span, Aggregate::List, visit_var(children.consume_expected(Rule::var))))
+        }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.to_string() }),
     }
 }
 
-pub(super) fn visit_stage_modifier(node: Node<'_>) -> Modifier {
-    debug_assert_eq!(node.as_rule(), Rule::stage_modifier);
+pub(super) fn visit_operator_stream(node: Node<'_>) -> Modifier {
+    debug_assert_eq!(node.as_rule(), Rule::operator_stream);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::stage_filter => Modifier::Filter(visit_stage_filter(child)),
-        Rule::stage_sort => Modifier::Sort(visit_stage_sort(child)),
-        Rule::stage_offset => Modifier::Offset(visit_stage_offset(child)),
-        Rule::stage_limit => Modifier::Limit(visit_stage_limit(child)),
+        Rule::operator_select => Modifier::Select(visit_operator_select(child)),
+        Rule::operator_sort => Modifier::Sort(visit_operator_sort(child)),
+        Rule::operator_offset => Modifier::Offset(visit_operator_offset(child)),
+        Rule::operator_limit => Modifier::Limit(visit_operator_limit(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-fn visit_stage_filter(node: Node<'_>) -> Filter {
-    debug_assert_eq!(node.as_rule(), Rule::stage_filter);
+fn visit_operator_select(node: Node<'_>) -> Select {
+    debug_assert_eq!(node.as_rule(), Rule::operator_select);
     let span = node.span();
     let mut children = node.into_children();
-    let variables = visit_vars(children.skip_expected(Rule::FILTER).consume_expected(Rule::vars));
+    let variables = visit_vars(children.skip_expected(Rule::SELECT).consume_expected(Rule::vars));
     debug_assert_eq!(children.try_consume_any(), None);
-    Filter::new(span, variables)
+    Select::new(span, variables)
 }
 
-fn visit_stage_sort(node: Node<'_>) -> Sort {
-    debug_assert_eq!(node.as_rule(), Rule::stage_sort);
+fn visit_operator_sort(node: Node<'_>) -> Sort {
+    debug_assert_eq!(node.as_rule(), Rule::operator_sort);
     let span = node.span();
     let ordered_variables = node.into_children().skip_expected(Rule::SORT).map(visit_var_order).collect();
     Sort::new(span, ordered_variables)
@@ -398,8 +412,8 @@ fn visit_order(node: Node<'_>) -> Order {
     }
 }
 
-fn visit_stage_offset(node: Node<'_>) -> Offset {
-    debug_assert_eq!(node.as_rule(), Rule::stage_offset);
+fn visit_operator_offset(node: Node<'_>) -> Offset {
+    debug_assert_eq!(node.as_rule(), Rule::operator_offset);
     let span = node.span();
     let mut children = node.into_children();
     let offset = visit_integer_literal(children.skip_expected(Rule::OFFSET).consume_expected(Rule::integer_literal));
@@ -407,8 +421,8 @@ fn visit_stage_offset(node: Node<'_>) -> Offset {
     Offset::new(span, offset)
 }
 
-fn visit_stage_limit(node: Node<'_>) -> Limit {
-    debug_assert_eq!(node.as_rule(), Rule::stage_limit);
+fn visit_operator_limit(node: Node<'_>) -> Limit {
+    debug_assert_eq!(node.as_rule(), Rule::operator_limit);
     let span = node.span();
     let mut children = node.into_children();
     let limit = visit_integer_literal(children.skip_expected(Rule::LIMIT).consume_expected(Rule::integer_literal));

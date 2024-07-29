@@ -10,7 +10,7 @@ use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
     query::pipeline::stage::{Match, Modifier, Reduce},
-    type_::TypeAny,
+    type_::TypeRefAny,
     variable::Variable,
 };
 
@@ -96,11 +96,11 @@ impl fmt::Display for Signature {
 pub struct Argument {
     span: Option<Span>,
     pub var: Variable,
-    pub type_: TypeAny,
+    pub type_: TypeRefAny,
 }
 
 impl Argument {
-    pub fn new(span: Option<Span>, var: Variable, type_: TypeAny) -> Self {
+    pub fn new(span: Option<Span>, var: Variable, type_: TypeRefAny) -> Self {
         Self { span, var, type_ }
     }
 }
@@ -141,11 +141,11 @@ impl fmt::Display for Output {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Stream {
     span: Option<Span>,
-    pub types: Vec<TypeAny>,
+    pub types: Vec<TypeRefAny>,
 }
 
 impl Stream {
-    pub fn new(span: Option<Span>, types: Vec<TypeAny>) -> Self {
+    pub fn new(span: Option<Span>, types: Vec<TypeRefAny>) -> Self {
         Self { span, types }
     }
 }
@@ -171,11 +171,11 @@ impl fmt::Display for Stream {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Single {
     span: Option<Span>,
-    pub types: Vec<TypeAny>,
+    pub types: Vec<TypeRefAny>,
 }
 
 impl Single {
-    pub fn new(span: Option<Span>, types: Vec<TypeAny>) -> Self {
+    pub fn new(span: Option<Span>, types: Vec<TypeRefAny>) -> Self {
         Self { span, types }
     }
 }

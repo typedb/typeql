@@ -12,7 +12,7 @@ use crate::{
     common::{token, Span},
     expression::Expression,
     pretty::{indent, Pretty},
-    type_::{Type, TypeAny},
+    type_::{TypeRef, TypeRefAny},
     util::write_joined,
     value::Literal,
     variable::Variable,
@@ -117,7 +117,7 @@ impl fmt::Display for Relation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum RolePlayer {
-    Typed(TypeAny, Variable),
+    Typed(TypeRefAny, Variable),
     Untyped(Variable),
 }
 
@@ -135,13 +135,13 @@ impl fmt::Display for RolePlayer {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AttributeValueStatement {
     span: Option<Span>,
-    type_: Option<Type>,
+    type_: Option<TypeRef>,
     value: Literal,
     isa: Isa,
 }
 
 impl AttributeValueStatement {
-    pub fn new(span: Option<Span>, type_: Option<Type>, value: Literal, isa: Isa) -> Self {
+    pub fn new(span: Option<Span>, type_: Option<TypeRef>, value: Literal, isa: Isa) -> Self {
         Self { span, type_, value, isa }
     }
 }
@@ -233,12 +233,12 @@ impl fmt::Display for Iid {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Has {
     span: Option<Span>,
-    pub type_: Option<TypeAny>,
+    pub type_: Option<TypeRefAny>,
     pub value: HasValue,
 }
 
 impl Has {
-    pub fn new(span: Option<Span>, type_: Option<TypeAny>, value: HasValue) -> Self {
+    pub fn new(span: Option<Span>, type_: Option<TypeRefAny>, value: HasValue) -> Self {
         Self { span, type_, value }
     }
 }

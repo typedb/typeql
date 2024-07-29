@@ -10,7 +10,8 @@ use super::{
 };
 use crate::{
     annotation::{
-        Abstract, Annotation, Cardinality, Cascade, Distinct, Independent, Key, Range, Regex, Subkey, Unique, Values,
+        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Independent, Key, Range, Regex, Subkey,
+        Unique, Values,
     },
     common::{error::TypeQLError, Spanned},
     value::Literal,
@@ -46,10 +47,28 @@ fn visit_annotation_card(node: Node<'_>) -> Cardinality {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::ANNOTATION_CARD);
-    let lower = visit_integer_literal(children.consume_expected(Rule::integer_literal));
-    let upper = children.try_consume_expected(Rule::integer_literal).map(visit_integer_literal);
+    let child = children.consume_any();
+    let inner = match child.as_rule() {
+        Rule::cardinality_exact => visit_cardinality_exact(child),
+        Rule::cardinality_range => visit_cardinality_range(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
     debug_assert_eq!(children.try_consume_any(), None);
-    Cardinality::new(span, lower, upper)
+    Cardinality::new(span, inner)
+}
+
+fn visit_cardinality_exact(node: Node<'_>) -> CardinalityRange {
+    debug_assert_eq!(node.as_rule(), Rule::cardinality_exact);
+    CardinalityRange::Exact(visit_integer_literal(node.into_child()))
+}
+
+fn visit_cardinality_range(node: Node<'_>) -> CardinalityRange {
+    debug_assert_eq!(node.as_rule(), Rule::cardinality_range);
+    let mut children = node.into_children();
+    let min = visit_integer_literal(children.consume_expected(Rule::integer_literal));
+    let max = children.try_consume_expected(Rule::integer_literal).map(visit_integer_literal);
+    debug_assert_eq!(children.try_consume_any(), None);
+    CardinalityRange::Range(min, max)
 }
 
 fn visit_annotation_range(node: Node<'_>) -> Range {

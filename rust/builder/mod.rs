@@ -28,9 +28,9 @@ macro_rules! match_ {
 }
 
 pub fn var(name: impl Into<Identifier>) -> Variable {
-    Variable::Named(None, name.into())
+    Variable::Named { span: None, ident: name.into(), optional: None }
 }
 
 pub fn type_(name: impl Into<Identifier>) -> Label {
-    Label::Identifier(name.into())
+    Label::new(None, name.into())
 }

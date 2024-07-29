@@ -90,6 +90,7 @@ struct GrammarTree {
     roots: HashSet<String>,
     rules: HashMap<String, Expansion>,
 }
+
 impl GrammarTree {
     fn from_grammar(str: &str) -> Self {
         let mut tokens = syn::parse_str::<TokenStream>(str).unwrap().into_iter().collect_vec();
@@ -349,7 +350,21 @@ fn generate(rules: &HashMap<String, Expansion>, rule_name: &str, max_depth: usiz
                     }
                 }
             }
-            Expansion::Rule(rule) => stack.push(&rules[rule]),
+            Expansion::Rule(rule) => {
+                if rule == "identifier" {
+                    // avoid reserved
+                    let ident = loop {
+                        let ident = generate(rules, rule, max_depth);
+                        if parse_single(Rule::reserved, &ident).is_ok() {
+                            continue;
+                        }
+                        break ident;
+                    };
+                    buf.push_str(&ident)
+                } else {
+                    stack.push(&rules[rule])
+                }
+            }
             Expansion::Literal(literal) => buf.push_str(literal),
         }
     }

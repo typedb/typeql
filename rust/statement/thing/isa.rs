@@ -9,18 +9,18 @@ use std::fmt;
 use crate::{
     common::{token, Span},
     pretty::Pretty,
-    type_::Type,
+    type_::TypeRef,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Isa {
     span: Option<Span>,
     pub kind: IsaKind,
-    pub type_: Type,
+    pub type_: TypeRef,
 }
 
 impl Isa {
-    pub fn new(span: Option<Span>, kind: IsaKind, type_: Type) -> Self {
+    pub fn new(span: Option<Span>, kind: IsaKind, type_: TypeRef) -> Self {
         Self { span, kind, type_ }
     }
 }

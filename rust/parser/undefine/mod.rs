@@ -7,7 +7,7 @@
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
-    parser::{define::type_::visit_type_capability_base, visit_identifier, visit_label},
+    parser::{define::type_::visit_type_capability_base, type_::visit_label, visit_identifier},
     query::schema::Undefine,
     schema::undefinable::{
         AnnotationCapability, AnnotationType, CapabilityType, Function, Override, Struct, Undefinable,

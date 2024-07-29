@@ -12,16 +12,19 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Optional;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Variable {
-    Anonymous(Option<Span>),
-    Named(Option<Span>, Identifier),
+    Anonymous { span: Option<Span>, optional: Option<Optional> },
+    Named { span: Option<Span>, ident: Identifier, optional: Option<Optional> },
 }
 
 impl Variable {
     pub fn name(&self) -> Option<&str> {
         match self {
-            Self::Anonymous(_) => None,
-            Self::Named(_, ident) => Some(ident.as_str()),
+            Self::Anonymous { .. } => None,
+            Self::Named { ident, .. } => Some(ident.as_str()),
         }
     }
 }
@@ -31,16 +34,18 @@ impl Pretty for Variable {}
 impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Variable::Anonymous(_) => write!(f, "$_"),
-            Variable::Named(_, ident) => write!(f, "${ident}"),
+            Variable::Anonymous { optional: None, .. } => write!(f, "$_"),
+            Variable::Anonymous { optional: Some(Optional), .. } => write!(f, "$_?"),
+            Variable::Named { ident, optional: None, .. } => write!(f, "${ident}"),
+            Variable::Named { ident, optional: Some(Optional), .. } => write!(f, "${ident}?"),
         }
     }
 }
 
 impl Spanned for Variable {
     fn span(&self) -> Option<Span> {
-        match self {
-            Variable::Anonymous(span) | Variable::Named(span, _) => *span,
+        match *self {
+            Self::Anonymous { span, .. } | Self::Named { span, .. } => span,
         }
     }
 }

@@ -9,19 +9,24 @@ use std::fmt;
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::Pretty,
-    schema,
     variable::Variable,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct BuiltinValueType {
     span: Option<Span>,
-    name: token::ValueType,
+    pub token: token::ValueType,
 }
 
 impl BuiltinValueType {
-    pub fn new(span: Option<Span>, name: token::ValueType) -> Self {
-        Self { span, name }
+    pub fn new(span: Option<Span>, token: token::ValueType) -> Self {
+        Self { span, token }
+    }
+}
+
+impl Spanned for BuiltinValueType {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -29,104 +34,52 @@ impl Pretty for BuiltinValueType {}
 
 impl fmt::Display for BuiltinValueType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.name)
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Type {
-    Label(Label),                   // person
-    ScopedLabel(ScopedLabel),       // friendship:friend
-    Variable(Variable),             // $t
-    BuiltinValue(BuiltinValueType), // string
-}
-
-impl Pretty for Type {}
-
-impl fmt::Display for Type {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Label(inner) => fmt::Display::fmt(inner, f),
-            Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
-            Self::Variable(inner) => fmt::Display::fmt(inner, f),
-            Self::BuiltinValue(inner) => fmt::Display::fmt(inner, f),
-        }
+        write!(f, "{}", self.token)
     }
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub struct ReservedLabel {
+pub struct Label {
     span: Option<Span>,
-    token: token::Type,
-}
-
-impl ReservedLabel {
-    pub fn new(span: Option<Span>, token: token::Type) -> Self {
-        Self { span, token }
-    }
-}
-
-impl fmt::Display for ReservedLabel {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(&self.token, f)
-    }
-}
-
-impl Spanned for ReservedLabel {
-    fn span(&self) -> Option<Span> {
-        self.span
-    }
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub enum Label {
-    Identifier(Identifier),
-    Reserved(ReservedLabel),
+    pub ident: Identifier,
 }
 
 impl Label {
-    pub fn as_str(&self) -> &str {
-        match self {
-            Label::Identifier(ident) => ident.as_str(),
-            Label::Reserved(reserved) => reserved.token.as_str(),
-        }
-    }
-}
-
-impl From<Label> for schema::definable::Type {
-    fn from(label: Label) -> Self {
-        Self::build(label)
+    pub fn new(span: Option<Span>, ident: Identifier) -> Self {
+        Self { span, ident }
     }
 }
 
 impl Spanned for Label {
     fn span(&self) -> Option<Span> {
-        match self {
-            Self::Identifier(inner) => inner.span(),
-            Self::Reserved(inner) => inner.span(),
-        }
+        self.span
     }
 }
 
+impl Pretty for Label {}
+
 impl fmt::Display for Label {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Identifier(inner) => fmt::Display::fmt(inner, f),
-            Self::Reserved(inner) => fmt::Display::fmt(inner, f),
-        }
+        write!(f, "{}", self.ident)
     }
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct ScopedLabel {
     span: Option<Span>,
-    scope: Label,
-    name: Label,
+    pub scope: Label,
+    pub name: Label,
 }
 
 impl ScopedLabel {
     pub fn new(span: Option<Span>, scope: Label, name: Label) -> Self {
         Self { span, scope, name }
+    }
+}
+
+impl Spanned for ScopedLabel {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -137,17 +90,61 @@ impl fmt::Display for ScopedLabel {
         write!(f, "{}:{}", self.scope, self.name)
     }
 }
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub enum NamedType {
+    Label(Label),
+    Role(ScopedLabel),
+    BuiltinValueType(BuiltinValueType),
+}
+
+impl Spanned for NamedType {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Label(inner) => inner.span(),
+            Self::BuiltinValueType(inner) => inner.span(),
+            Self::Role(inner) => inner.span(),
+        }
+    }
+}
+
+impl fmt::Display for NamedType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Label(inner) => fmt::Display::fmt(inner, f),
+            Self::BuiltinValueType(inner) => fmt::Display::fmt(inner, f),
+            Self::Role(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
-// TODO name?
-pub enum TypeAny {
-    Type(Type),         // person, friendship:friend, or $t
+pub enum TypeRef {
+    Named(NamedType),   // person OR friendship:friend OR string
+    Variable(Variable), // $t
+}
+
+impl Pretty for TypeRef {}
+
+impl fmt::Display for TypeRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Named(inner) => fmt::Display::fmt(inner, f),
+            Self::Variable(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum TypeRefAny {
+    Type(TypeRef),      // person, friendship:friend, or $t
     Optional(Optional), // person?, friendship:friend?, or $t?
     List(List),         // person[], friendship:friend[], or $t[]
 }
 
-impl Pretty for TypeAny {}
+impl Pretty for TypeRefAny {}
 
-impl fmt::Display for TypeAny {
+impl fmt::Display for TypeRefAny {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Type(inner) => fmt::Display::fmt(inner, f),
@@ -160,11 +157,11 @@ impl fmt::Display for TypeAny {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Optional {
     span: Option<Span>,
-    inner: Type,
+    inner: TypeRef,
 }
 
 impl Optional {
-    pub fn new(span: Option<Span>, inner: Type) -> Self {
+    pub fn new(span: Option<Span>, inner: TypeRef) -> Self {
         Self { span, inner }
     }
 }
@@ -180,11 +177,11 @@ impl fmt::Display for Optional {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
     span: Option<Span>,
-    inner: Type,
+    inner: TypeRef,
 }
 
 impl List {
-    pub fn new(span: Option<Span>, inner: Type) -> Self {
+    pub fn new(span: Option<Span>, inner: TypeRef) -> Self {
         Self { span, inner }
     }
 }

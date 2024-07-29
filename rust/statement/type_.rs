@@ -10,18 +10,18 @@ use crate::{
     annotation::Annotation,
     common::{token, Span},
     pretty::{indent, Pretty},
-    type_::{Label, ScopedLabel, Type as TypeRef, TypeAny},
+    type_::{Label, NamedType, ScopedLabel, TypeRef, TypeRefAny},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Type {
     span: Option<Span>,
-    pub type_: TypeRef,
+    pub type_: TypeRefAny,
     pub constraints: Vec<Constraint>,
 }
 
 impl Type {
-    pub fn new(span: Option<Span>, type_: TypeRef, constraints: Vec<Constraint>) -> Self {
+    pub fn new(span: Option<Span>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
         Self { span, type_, constraints }
     }
 }
@@ -155,11 +155,11 @@ impl fmt::Display for SubKind {
 pub struct Sub {
     span: Option<Span>,
     kind: SubKind,
-    supertype: TypeRef,
+    supertype: TypeRefAny,
 }
 
 impl Sub {
-    pub fn new(span: Option<Span>, kind: SubKind, supertype: TypeRef) -> Self {
+    pub fn new(span: Option<Span>, kind: SubKind, supertype: TypeRefAny) -> Self {
         Self { span, kind, supertype }
     }
 }
@@ -175,11 +175,11 @@ impl fmt::Display for Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     span: Option<Span>,
-    value_type: TypeRef,
+    value_type: NamedType,
 }
 
 impl ValueType {
-    pub fn new(span: Option<Span>, value_type: TypeRef) -> Self {
+    pub fn new(span: Option<Span>, value_type: NamedType) -> Self {
         Self { span, value_type }
     }
 }
@@ -195,12 +195,12 @@ impl fmt::Display for ValueType {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
     span: Option<Span>,
-    owned: TypeAny,
+    owned: TypeRefAny,
     overridden: Option<TypeRef>,
 }
 
 impl Owns {
-    pub fn new(span: Option<Span>, owned: TypeAny, overridden: Option<TypeRef>) -> Self {
+    pub fn new(span: Option<Span>, owned: TypeRefAny, overridden: Option<TypeRef>) -> Self {
         Self { span, owned, overridden }
     }
 }
@@ -220,12 +220,12 @@ impl fmt::Display for Owns {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     span: Option<Span>,
-    related: TypeAny,
+    related: TypeRefAny,
     overridden: Option<TypeRef>,
 }
 
 impl Relates {
-    pub fn new(span: Option<Span>, related: TypeAny, overridden: Option<TypeRef>) -> Self {
+    pub fn new(span: Option<Span>, related: TypeRefAny, overridden: Option<TypeRef>) -> Self {
         Self { span, related, overridden }
     }
 }

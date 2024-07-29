@@ -44,7 +44,7 @@ fn test_relation_query() {
     let query = r#"match
 $brando "Marl B" isa name;
 (actor: $brando, $char, production-with-cast: $prod);
-filter $char, $prod;"#;
+select $char, $prod;"#;
 
     let parsed = parse_query(query).unwrap();
     // let expected = match_!(

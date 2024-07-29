@@ -58,7 +58,7 @@ fn tmp() {
     // fun test_stream_many($x: person) -> {name, age, dob}:
     //   match
     //     $x isa person, has name $name, has age $age, has dob $dob;
-    //   filter $name, $age, $dob;
+    //   select $name, $age, $dob;
     //   sort $name;
     //   offset 10;
     //   limit 10;

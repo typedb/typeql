@@ -25,17 +25,19 @@ mod util;
 pub mod value;
 mod variable;
 
-use schema::definable::Struct;
-
-use crate::parser::{visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query};
 pub use crate::{
     common::Result,
     pattern::Pattern,
     query::Query,
     schema::definable::{Definable, Function},
     statement::Statement,
-    type_::{Label, ScopedLabel, Type, TypeAny},
+    type_::{Label, ScopedLabel, TypeRef, TypeRefAny},
+    value::Literal,
     variable::Variable,
+};
+use crate::{
+    parser::{visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query},
+    schema::definable::Struct,
 };
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {

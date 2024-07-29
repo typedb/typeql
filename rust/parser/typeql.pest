@@ -18,33 +18,33 @@ query = { query_schema | query_pipeline }
 query_pipeline = { preamble* ~ query_stage+ ~ query_stage_terminal? }
 
 preamble = { WITH ~ definition_function }
-query_stage = { stage_match | stage_insert | stage_put | stage_update | stage_delete | stage_modifier }
-query_stage_terminal = { stage_fetch | stage_reduce }
 
-// stage_group = { GROUP ~ var ~ SEMICOLON } // TODO: eliminate?
+query_stage = { clause_match | clause_insert | clause_put | clause_update | clause_delete | operator_stream }
 
-stage_match = { MATCH ~ patterns }
+query_stage_terminal = { clause_fetch | operator_reduce }
 
-stage_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
-stage_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
-stage_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
+clause_match = { MATCH ~ patterns }
 
-stage_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
+clause_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
+clause_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
+clause_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
+
+clause_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
 
 // QUERY MODIFIERS =============================================================
 
-stage_modifier = { stage_filter ~ SEMICOLON | stage_sort ~ SEMICOLON | stage_offset ~ SEMICOLON | stage_limit ~ SEMICOLON }
+operator_stream = { operator_select | operator_sort | operator_offset | operator_limit }
 
-stage_filter = { FILTER ~ vars }
-stage_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* }
-stage_offset = { OFFSET ~ integer_literal }
-stage_limit = { LIMIT ~ integer_literal }
+operator_select = { SELECT ~ vars ~ SEMICOLON }
+operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ SEMICOLON }
+operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
+operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
 
 // REDUCE ======================================================================
 
-stage_reduce = { reduce ~ SEMICOLON }
+operator_reduce = { reduce ~ SEMICOLON }
 reduce = { CHECK
          | reduce_first
          | reduce_value ~ ( COMMA ~ reduce_value )*
@@ -52,13 +52,14 @@ reduce = { CHECK
 
 reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
 
-reduce_value = { COUNT ~ PAREN_OPEN ~ vars? ~ PAREN_CLOSE
+reduce_value = { COUNT ~ ( PAREN_OPEN ~ vars ~ PAREN_CLOSE )?
                | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+               | LIST ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                }
 
 // QUERY PATTERNS ==============================================================
@@ -92,7 +93,7 @@ owns_constraint = { OWNS ~ type_ref_list
 relates_constraint = { RELATES ~ type_ref_list
                      | RELATES ~ type_ref ~ ( AS ~ type_ref )?
                      }
-plays_constraint = { PLAYS ~ type_ref_scoped ~ ( AS ~ type_ref )? }
+plays_constraint = { PLAYS ~ type_ref ~ ( AS ~ type_ref )? }
 
 // THING STATEMENTS ============================================================
 
@@ -132,8 +133,11 @@ statement_single = { statement_is | statement_comparison | statement_assignment 
 statement_is = { var ~ IS ~ var }
 statement_comparison = { expression_value ~ comparison }
 statement_assignment = { assignment_left ~ ASSIGN ~ expression }
-assignment_left = { vars | struct_destructor }
-statement_in = { vars ~ IN ~ expression_function }
+assignment_left = { vars_assignment | struct_destructor }
+statement_in = { vars_assignment ~ IN ~ ( expression_function | expression_list ) }
+
+vars_assignment = { var_assignment ~ ( COMMA ~ var_assignment )* }
+var_assignment = { var_optional | var }
 
 comparison = { comparator ~ expression_value }
 comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
@@ -165,23 +169,21 @@ struct_value = { expression_value | expression_struct }
 
 // FETCH QUERY =================================================================
 
-stage_fetch = { FETCH ~ projections }
+clause_fetch = { FETCH ~ projection_object }
 
-projections = { ( projection ~ SEMICOLON )+ }
-projection = { projection_key_var ~ COLON ~ projection_attributes
-             | projection_key_var
-             | projection_key_label ~ COLON ~ CURLY_OPEN ~ projection_subquery ~ CURLY_CLOSE
-             }
+projection = { projection_single | projection_object | projection_list }
 
-projection_attributes = { projection_attribute ~ ( COMMA ~ projection_attribute )* }
-projection_attribute = { label ~ projection_key_as_label? }
+projection_object = { CURLY_OPEN ~ projection_object_field ~ ( COMMA ~ projection_object_field )* ~ CURLY_CLOSE }
+projection_object_field = { projection_key ~ COLON ~ projection }
+projection_key = { quoted_string_literal }
 
-// TODO: we have to validate this is a fetch or reduce ended pipeline
-projection_subquery = { query_pipeline }
+projection_list = { SQ_BRACKET_OPEN ~ projection_stream ~ SQ_BRACKET_CLOSE }
 
-projection_key_var = { var ~ projection_key_as_label? }
-projection_key_as_label = { AS ~ projection_key_label }
-projection_key_label = { quoted_string_literal | label }
+projection_stream = { expression_function | query_pipeline | projection_attribute }
+
+projection_single = { projection_attribute | expression | query_pipeline }
+
+projection_attribute = { var ~ DOT ~ ( label_list | label ) }
 
 // SCHEMA QUERY ================================================================
 
@@ -196,14 +198,14 @@ definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { kind? ~ identifier ~ type_capability ~ ( COMMA ~ type_capability )* }
+definition_type = { kind? ~ label ~ ( type_capability ~ ( COMMA ~ type_capability )* )? }
 type_capability = { type_capability_base ~ annotations? }
 type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
                        | owns_declaration | plays_declaration | relates_declaration
                        }
 
 sub_declaration = { SUB ~ label }
-alias_declaration = { ALIAS ~ label } 
+alias_declaration = { ALIAS ~ label }
 value_type_declaration = { VALUE ~ value_type }
 owns_declaration = { OWNS ~ label_list
                    | OWNS ~ label ~ ( AS ~ label )?
@@ -215,17 +217,16 @@ relates_declaration = { RELATES ~ label_list
 
 // FUNCTION DEFINITION =========================================================
 
-definition_function = { FUN ~ function_signature ~ COLON ~ stage_match ~ stage_modifier* ~ return_statement }
+definition_function = { FUN ~ function_signature ~ COLON ~ clause_match ~ operator_stream* ~ return_statement }
 
 function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
 function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* )? }
-function_argument = { var ~ COLON ~ label_arg }
+function_argument = { var ~ COLON ~ named_type_any }
 
 function_output = { function_output_stream | function_output_single }
-function_output_stream = { CURLY_OPEN ~ function_output_type ~ ( COMMA ~ function_output_type )* ~ CURLY_CLOSE }
-function_output_single = { function_output_type ~ ( COMMA ~ function_output_type )* }
-function_output_type = { value_type_optional | value_type_list | value_type }
+function_output_stream = { CURLY_OPEN ~ named_type_any ~ ( COMMA ~ named_type_any )* ~ CURLY_CLOSE }
+function_output_single = { named_type_any ~ ( COMMA ~ named_type_any )* }
 
 return_statement = { RETURN ~ ( return_statement_stream | return_statement_single ) ~ SEMICOLON }
 return_statement_stream = { CURLY_OPEN ~ vars ~ CURLY_CLOSE }
@@ -239,13 +240,13 @@ definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type }
 
 struct_field_value_type = { value_type_optional | value_type }
 
-struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value }
+struct_destructor = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_destructor_value ~ CURLY_CLOSE }
 struct_destructor_value = { var | struct_destructor }
 
 // REDEFINE QUERY ==============================================================
 
 query_redefine = { REDEFINE ~ ( redefinable ~ SEMICOLON )+ }
-redefinable = { kind? ~ identifier ~ type_capability }
+redefinable = { kind? ~ label ~ type_capability }
 
 // UNDEFINE QUERY ==============================================================
 
@@ -269,18 +270,22 @@ undefine_struct = { STRUCT ~ identifier }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-label = ${ kind | ROLE | identifier } // type label
+type_ref = { named_type | var }
+type_ref_optional = { type_ref ~ QUESTION }
+type_ref_list = { type_ref ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+type_ref_any = { type_ref_optional | type_ref_list | type_ref }
+
+named_type = { value_type_primitive | label_scoped | label }
+named_type_optional = { named_type ~ QUESTION }
+named_type_list = { named_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+named_type_any = { named_type_optional | named_type_list | named_type }
+
+label = ${ identifier } // type label
+label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+
 label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
 identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
-
-type_ref_any = { type_ref_scoped | type_ref }
-type_ref_scoped = { label_scoped | var }
-type_ref = { label | var }
-type_ref_list = { label_list | var_list }
-
-label_arg = { label_list | label }
-label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 struct_key = { identifier }
 
@@ -291,15 +296,15 @@ iid_value = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
 vars = { var ~ ( COMMA ~ var )* }
 
 var = ${ VAR_ANONYMOUS | var_named }
+var_optional = ${ var ~ QUESTION }
+
 VAR_ANONYMOUS = @{ "$_" ~ WB }
 var_named = ${ "$" ~ identifier_var }
 identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
 
-var_list = ${ var ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+// VALUES ========================================================
 
-// ========================================================
-
-value_type = { value_type_primitive | identifier }
+value_type = { value_type_primitive | label }
 value_type_optional = { value_type ~ QUESTION }
 value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
@@ -331,7 +336,10 @@ annotation = { ANNOTATION_ABSTRACT
              | annotation_values
              }
 
-annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ integer_literal ~ DOUBLE_DOT ~ integer_literal? ~ PAREN_CLOSE }
+annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ ( cardinality_range | cardinality_exact ) ~ PAREN_CLOSE }
+cardinality_range = { integer_literal ~ DOUBLE_DOT ~ integer_literal? }
+cardinality_exact = { integer_literal }
+
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
 annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ identifier ~ PAREN_CLOSE }
 annotation_range = { ANNOTATION_RANGE ~ PAREN_OPEN ~ range ~ PAREN_CLOSE }
@@ -358,8 +366,8 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
 
 unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
              | CHECK | FIRST
-             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM
-             | VALUE | FILTER | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
+             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
+             | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
              | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
              | FROM
              }
@@ -390,7 +398,7 @@ ROLE = @{ "role" ~ WB }
 
 // QUERY MODIFIER KEYWORDS
 
-FILTER = @{ "filter" ~ WB }
+SELECT = @{ "select" ~ WB }
 LIMIT = @{ "limit" ~ WB }
 OFFSET = @{ "offset" ~ WB }
 SORT = @{ "sort" ~ WB }
@@ -496,7 +504,7 @@ FLOOR = @{ "floor" ~ WB }
 LENGTH = @{ "length" ~ WB }
 ROUND = @{ "round" ~ WB }
 
-// GROUP AND AGGREGATE QUERY KEYWORDS (also used by COMPUTE QUERY)
+// GROUP AND AGGREGATE QUERY KEYWORDS
 
 GROUP = @{ "group" ~ WB }
 COUNT = @{ "count" ~ WB }
@@ -506,6 +514,7 @@ MEAN = @{ "mean" ~ WB }
 MEDIAN = @{ "median" ~ WB }
 STD = @{ "std" ~ WB }
 SUM = @{ "sum" ~ WB }
+LIST = @{ "list" ~ WB }
 
 // VALUE TYPE KEYWORDS
 
@@ -551,6 +560,7 @@ CURLY_CLOSE = _{ "}" }
 COMMA = _{ "," }
 SEMICOLON = _{ ";" }
 COLON = _{ ":" }
+DOT = _{ "." }
 DOUBLE_DOT = _{ ".." }
 QUESTION = _{ "?" }
 ARROW = _{ "->" }
