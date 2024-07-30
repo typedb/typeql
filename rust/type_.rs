@@ -157,7 +157,7 @@ impl fmt::Display for TypeRefAny {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Optional {
     span: Option<Span>,
-    inner: TypeRef,
+    pub inner: TypeRef,
 }
 
 impl Optional {
@@ -177,7 +177,7 @@ impl fmt::Display for Optional {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
     span: Option<Span>,
-    inner: TypeRef,
+    pub inner: TypeRef,
 }
 
 impl List {
