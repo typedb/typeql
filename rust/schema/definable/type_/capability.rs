@@ -16,7 +16,7 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Alias {
     span: Option<Span>,
-    aliases: Vec<Label>,
+    pub aliases: Vec<Label>,
 }
 
 impl Alias {
@@ -42,7 +42,7 @@ impl fmt::Display for Alias {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sub {
     span: Option<Span>,
-    supertype_label: Label,
+    pub supertype_label: Label,
 }
 
 impl Sub {
@@ -72,7 +72,7 @@ impl fmt::Display for Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     span: Option<Span>,
-    value_type: NamedType,
+    pub value_type: NamedType,
 }
 
 impl ValueType {
@@ -98,8 +98,8 @@ impl fmt::Display for ValueType {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
     span: Option<Span>,
-    owned: TypeRefAny,
-    overridden: Option<Label>,
+    pub owned: TypeRefAny,
+    pub overridden: Option<Label>,
 }
 
 impl Owns {
@@ -129,8 +129,8 @@ impl fmt::Display for Owns {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     span: Option<Span>,
-    related: TypeRefAny,
-    overridden: Option<Label>,
+    pub related: TypeRefAny,
+    pub overridden: Option<Label>,
 }
 
 impl Relates {
@@ -158,8 +158,8 @@ impl fmt::Display for Relates {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
     span: Option<Span>,
-    role: ScopedLabel,
-    overridden: Option<Label>,
+    pub role: ScopedLabel,
+    pub overridden: Option<Label>,
 }
 
 impl Plays {

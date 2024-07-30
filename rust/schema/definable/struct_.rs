@@ -12,11 +12,11 @@ use crate::{
     type_::TypeRefAny,
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
     span: Option<Span>,
-    ident: Identifier,
-    fields: Vec<Field>,
+    pub ident: Identifier,
+    pub fields: Vec<Field>,
 }
 
 impl Struct {
@@ -37,11 +37,11 @@ impl fmt::Display for Struct {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Field {
     span: Option<Span>,
-    key: Identifier,
-    type_: TypeRefAny,
+    pub key: Identifier,
+    pub type_: TypeRefAny,
 }
 
 impl Field {

@@ -15,7 +15,7 @@ use crate::{
 #[derive(Debug, Eq, PartialEq)]
 pub struct Undefine {
     span: Option<Span>,
-    undefinables: Vec<Undefinable>,
+    pub undefinables: Vec<Undefinable>,
 }
 
 impl Undefine {

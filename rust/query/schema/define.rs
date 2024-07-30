@@ -15,7 +15,7 @@ use crate::{
 #[derive(Debug, Eq, PartialEq)]
 pub struct Define {
     span: Option<Span>,
-    definables: Vec<Definable>,
+    pub definables: Vec<Definable>,
 }
 
 impl Define {

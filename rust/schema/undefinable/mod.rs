@@ -44,8 +44,8 @@ impl fmt::Display for Undefinable {
 #[derive(Debug, Eq, PartialEq)]
 pub struct AnnotationType {
     span: Option<Span>,
-    annotation_category: token::Annotation,
-    type_: Label,
+    pub annotation_category: token::Annotation,
+    pub type_: Label,
 }
 
 impl AnnotationType {
@@ -65,9 +65,9 @@ impl fmt::Display for AnnotationType {
 #[derive(Debug, Eq, PartialEq)]
 pub struct AnnotationCapability {
     span: Option<Span>,
-    annotation_category: token::Annotation,
-    type_: Label,
-    capability: CapabilityBase,
+    pub annotation_category: token::Annotation,
+    pub type_: Label,
+    pub capability: CapabilityBase,
 }
 
 impl AnnotationCapability {
@@ -92,8 +92,8 @@ impl fmt::Display for AnnotationCapability {
 #[derive(Debug, Eq, PartialEq)]
 pub struct CapabilityType {
     span: Option<Span>,
-    capability: CapabilityBase,
-    type_: Label,
+    pub capability: CapabilityBase,
+    pub type_: Label,
 }
 
 impl CapabilityType {
@@ -113,9 +113,9 @@ impl fmt::Display for CapabilityType {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Override {
     span: Option<Span>,
-    overridden: Label,
-    type_: Label,
-    capability: CapabilityBase,
+    pub overridden: Label,
+    pub type_: Label,
+    pub capability: CapabilityBase,
 }
 
 impl Override {
@@ -143,7 +143,7 @@ impl fmt::Display for Override {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Function {
     span: Option<Span>,
-    ident: Identifier,
+    pub ident: Identifier,
 }
 
 impl Function {
@@ -163,7 +163,7 @@ impl fmt::Display for Function {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Struct {
     span: Option<Span>,
-    ident: Identifier,
+    pub ident: Identifier,
 }
 
 impl Struct {
