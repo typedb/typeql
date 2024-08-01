@@ -65,7 +65,7 @@ impl fmt::Display for Abstract {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cardinality {
     span: Option<Span>,
-    range: CardinalityRange,
+    pub range: CardinalityRange,
 }
 
 impl Cardinality {
@@ -167,8 +167,8 @@ impl fmt::Display for Key {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Range {
     span: Option<Span>,
-    min: Option<Literal>,
-    max: Option<Literal>,
+    pub min: Option<Literal>,
+    pub max: Option<Literal>,
 }
 
 impl Range {
@@ -195,7 +195,7 @@ impl fmt::Display for Range {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Regex {
     span: Option<Span>,
-    regex: StringLiteral,
+    pub regex: StringLiteral,
 }
 
 impl Regex {
@@ -213,7 +213,7 @@ impl fmt::Display for Regex {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Subkey {
     span: Option<Span>,
-    ident: Identifier,
+    pub ident: Identifier,
 }
 
 impl Subkey {
@@ -248,7 +248,7 @@ impl fmt::Display for Unique {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Values {
     span: Option<Span>,
-    values: Vec<Literal>,
+    pub values: Vec<Literal>,
 }
 
 impl Values {

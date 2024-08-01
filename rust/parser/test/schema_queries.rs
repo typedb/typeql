@@ -10,7 +10,7 @@ use crate::parse_query;
 #[test]
 fn test_define_query_with_owns_overrides() {
     let query = r#"define
-triangle sub entity;
+entity triangle;
 triangle owns side-length;
 triangle-right-angled sub triangle;
 triangle-right-angled owns hypotenuse-length as side-length;"#;
@@ -27,8 +27,8 @@ triangle-right-angled owns hypotenuse-length as side-length;"#;
 #[test]
 fn test_define_query_with_relates_overrides() {
     let query = r#"define
-pokemon sub entity;
-evolves sub relation;
+entity pokemon;
+relation evolves;
 evolves relates from,
     relates to;
 evolves-final sub evolves;
@@ -49,11 +49,11 @@ evolves-final relates from-final as from;"#;
 #[test]
 fn test_define_query_with_plays_overrides() {
     let query = r#"define
-pokemon sub entity;
-evolves sub relation;
-evolves relates from,
+entity pokemon;
+relation evolves;
+relation evolves relates from,
     relates to;
-evolves-final sub evolves;
+relation evolves-final sub evolves;
 evolves-final relates from-final as from;
 pokemon plays evolves-final:from-final as from;"#;
 
@@ -76,10 +76,8 @@ pokemon plays evolves-final:from-final as from;"#;
 #[test]
 fn test_define_query() {
     let query = r#"define
-pokemon sub entity;
-evolution sub relation;
-evolves-from sub role;
-evolves-to sub role;
+entity pokemon;
+relation evolution;
 evolves relates from,
     relates to;
 pokemon plays evolves:from,
@@ -128,8 +126,8 @@ owns name from pokemon;"#;
 #[test]
 fn test_define_abstract_entity_query() {
     let query = r#"define
-concrete-type sub entity;
-abstract-type sub entity @abstract;"#;
+entity concrete-type;
+entity abstract-type @abstract;"#;
     let parsed = parse_query(query).unwrap();
     // let expected = define!(type_("concrete-type").sub("entity"), type_("abstract-type").sub("entity"));
     assert_valid_eq_repr!(expected, parsed, query);
@@ -138,8 +136,7 @@ abstract-type sub entity @abstract;"#;
 #[test]
 fn test_define_value_type_query() {
     let query = r#"define
-my-type sub attribute,
-    value long;"#;
+attribute my-type value long;"#;
     let parsed = parse_query(query).unwrap();
     // let expected = define!(type_("my-type").sub("attribute").value(ValueType::Long));
     assert_valid_eq_repr!(expected, parsed, query);
@@ -148,8 +145,7 @@ my-type sub attribute,
 #[test]
 fn define_attribute_type_regex() {
     let query = r#"define
-digit sub attribute,
-    value string @regex("\d");"#;
+attribute digit value string @regex("\d");"#;
     let parsed = parse_query(query).unwrap();
     // let expected = define!(type_("digit").sub("attribute").regex(r"\d"));
     assert_valid_eq_repr!(expected, parsed, query);
@@ -158,10 +154,7 @@ digit sub attribute,
 #[test]
 fn when_parsing_as_in_define_result_is_same_as_sub() {
     let query = r#"define
-parent sub role;
-child sub role;
-parenthood sub relation,
-    relates parent,
+relation parenthood relates parent,
     relates child;
 fatherhood sub parenthood,
     relates father as parent,

@@ -16,7 +16,7 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Delete {
     span: Option<Span>,
-    deletables: Vec<Deletable>,
+    pub deletables: Vec<Deletable>,
 }
 
 impl Delete {
@@ -55,7 +55,7 @@ impl fmt::Display for Delete {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Deletable {
     span: Option<Span>,
-    kind: DeletableKind,
+    pub kind: DeletableKind,
 }
 
 impl Deletable {

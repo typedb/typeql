@@ -52,7 +52,7 @@ fn when_comparing_count_query_using_typeql_and_rust_typeql_they_are_equivalent()
     let query = r#"match
 $x isa movie,
     has title "Godfather";
-count();"#;
+count($x);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(var("x").isa("movie").has(("title", "Godfather"))).count();
     assert_valid_eq_repr!(expected, parsed, query);
