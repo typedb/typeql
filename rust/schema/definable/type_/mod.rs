@@ -22,6 +22,7 @@ pub struct Type {
     span: Option<Span>,
     pub kind: Option<token::Kind>,
     pub label: Label,
+    pub annotations: Vec<Annotation>,
     pub capabilities: Vec<Capability>,
 }
 
@@ -30,13 +31,14 @@ impl Type {
         span: Option<Span>,
         kind: Option<token::Kind>,
         label: Label,
+        annotations: Vec<Annotation>,
         capabilities: Vec<Capability>,
     ) -> Self {
-        Self { span, kind, label, capabilities }
+        Self { span, kind, label, annotations, capabilities }
     }
 
     pub fn build(label: Label) -> Self {
-        Self::new(None, None, label, Vec::new())
+        Self::new(None, None, label, Vec::new(), Vec::new())
     }
 }
 
