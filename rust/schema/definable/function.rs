@@ -14,7 +14,7 @@ use crate::{
     variable::Variable,
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
     span: Option<Span>,
     pub signature: Signature,
@@ -55,7 +55,7 @@ impl fmt::Display for Function {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Signature {
     span: Option<Span>,
     pub ident: Identifier,
@@ -92,7 +92,7 @@ impl fmt::Display for Signature {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Argument {
     span: Option<Span>,
     pub var: Variable,
@@ -105,7 +105,7 @@ impl Argument {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Output {
     Stream(Stream),
     Single(Single),
@@ -138,7 +138,7 @@ impl fmt::Display for Output {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Stream {
     span: Option<Span>,
     pub types: Vec<TypeRefAny>,
@@ -168,7 +168,7 @@ impl fmt::Display for Stream {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Single {
     span: Option<Span>,
     pub types: Vec<TypeRefAny>,
@@ -198,7 +198,7 @@ impl fmt::Display for Single {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnStream {
     span: Option<Span>,
     pub vars: Vec<Variable>,
@@ -210,13 +210,13 @@ impl ReturnStream {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SingleOutput {
     Variable(Variable),
     Reduce(Reduce),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnSingle {
     span: Option<Span>,
     pub outputs: Vec<SingleOutput>,
@@ -228,7 +228,7 @@ impl ReturnSingle {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReturnStatement {
     Stream(ReturnStream),
     Single(ReturnSingle),

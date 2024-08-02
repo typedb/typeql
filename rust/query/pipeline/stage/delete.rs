@@ -13,7 +13,7 @@ use crate::{
     variable::Variable,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Delete {
     span: Option<Span>,
     deletables: Vec<Deletable>,
@@ -52,7 +52,7 @@ impl fmt::Display for Delete {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Deletable {
     span: Option<Span>,
     kind: DeletableKind,
@@ -76,7 +76,7 @@ impl fmt::Display for Deletable {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum DeletableKind {
     Has { attribute: Variable, owner: Variable },
     Links { players: Relation, relation: Variable },

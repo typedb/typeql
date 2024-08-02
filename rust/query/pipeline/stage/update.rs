@@ -12,7 +12,7 @@ use crate::{
     statement::Statement,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Update {
     span: Option<Span>,
     statements: Vec<Statement>,

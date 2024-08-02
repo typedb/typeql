@@ -21,7 +21,7 @@ pub use self::{
 };
 use crate::{pretty::Pretty, util::enum_getter};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Stage {
     Match(Match),
     Insert(Insert),

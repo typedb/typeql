@@ -17,7 +17,7 @@ use crate::{
     variable::Variable,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct OrderedVariable {
     span: Option<Span>,
     variable: Variable,
@@ -42,7 +42,7 @@ impl fmt::Display for OrderedVariable {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sort {
     span: Option<Span>,
     ordered_variables: Vec<OrderedVariable>,
@@ -65,7 +65,7 @@ impl fmt::Display for Sort {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Select {
     span: Option<Span>,
     variables: Vec<Variable>,
@@ -88,7 +88,7 @@ impl fmt::Display for Select {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Offset {
     span: Option<Span>,
     offset: IntegerLiteral,
@@ -108,7 +108,7 @@ impl fmt::Display for Offset {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Limit {
     span: Option<Span>,
     limit: IntegerLiteral,
@@ -128,7 +128,7 @@ impl fmt::Display for Limit {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Modifier {
     Select(Select),
     Sort(Sort),

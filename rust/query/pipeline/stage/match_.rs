@@ -12,7 +12,7 @@ use crate::{
     pretty::{indent, Pretty},
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Match {
     span: Option<Span>,
     pub patterns: Vec<Pattern>,

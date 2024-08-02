@@ -15,7 +15,7 @@ use crate::{
 
 pub mod stage;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Preamble {
     span: Option<Span>,
     pub function: definable::Function,
@@ -39,7 +39,7 @@ impl fmt::Display for Preamble {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Pipeline {
     span: Option<Span>,
     pub preambles: Vec<Preamble>,

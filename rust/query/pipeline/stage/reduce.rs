@@ -13,7 +13,7 @@ use crate::{
     variable::Variable,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Reduce {
     Check(Check),
     First(First),
@@ -47,7 +47,7 @@ impl fmt::Display for Reduce {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Check {
     span: Option<Span>,
 }
@@ -66,7 +66,7 @@ impl fmt::Display for Check {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct First {
     span: Option<Span>,
     pub variables: Vec<Variable>,
@@ -89,7 +89,7 @@ impl fmt::Display for First {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ReduceValue {
     Count(Count),
     Stat(Stat),
@@ -113,7 +113,7 @@ impl fmt::Display for ReduceValue {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Count {
     span: Option<Span>,
     pub variables: Vec<Variable>,
@@ -136,7 +136,7 @@ impl fmt::Display for Count {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Stat {
     span: Option<Span>,
     pub aggregate: token::Aggregate,

@@ -15,7 +15,7 @@ use crate::{
     TypeRefAny, Variable,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Fetch {
     span: Option<Span>,
     object: ProjectionObject,
@@ -37,7 +37,7 @@ impl fmt::Display for Fetch {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Projection {
     Object(ProjectionObject),
     List(ProjectionList),
@@ -50,7 +50,7 @@ impl fmt::Display for Projection {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ProjectionObject {
     span: Option<Span>,
     fields: Vec<ProjectionObjectField>,
@@ -68,7 +68,7 @@ impl ProjectionObject {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ProjectionObjectField {
     span: Option<Span>,
     key: StringLiteral,
@@ -81,7 +81,7 @@ impl ProjectionObjectField {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ProjectionList {
     span: Option<Span>,
     stream: ProjectionStream,
@@ -93,21 +93,21 @@ impl ProjectionList {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ProjectionSingle {
     Attribute(ProjectionAttribute),
     Expression(Expression),
     Subquery(Pipeline),
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ProjectionStream {
     Attribute(ProjectionAttribute),
     Function(FunctionCall),
     Subquery(Pipeline),
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ProjectionAttribute {
     span: Option<Span>,
     owner: Variable,
