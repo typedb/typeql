@@ -115,7 +115,7 @@ build:
 
 release:
   filter:
-    owner: type
+    owner: typedb
     branch: master
   validation:
     validate-release-notes:
