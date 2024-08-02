@@ -16,7 +16,6 @@ pub use thing::ThingStatement;
 pub use type_::TypeStatement;
 pub use value::ValueStatement;
 
-pub use crate::variable::{variable::Variable, variable_concept::ConceptVariable, variable_value::ValueVariable};
 use crate::{
     common::{error::TypeQLError, validatable::Validatable, Result},
     enum_wrapper,
