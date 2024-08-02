@@ -50,6 +50,7 @@ assemble_crate(
     repository = "https://github.com/vaticle/typeql",
     keywords = ["typeql", "typedb", "database", "strongly-typed"],
     authors = ["TypeDB Community <community@typedb.com>"]
+    universe_manifests = ["@vaticle_dependencies//library/crates:Cargo.toml"],
 )
 
 deploy_crate(
