@@ -167,8 +167,8 @@ impl fmt::Display for Key {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Range {
     span: Option<Span>,
-    min: Option<Literal>,
-    max: Option<Literal>,
+    pub min: Option<Literal>,
+    pub max: Option<Literal>,
 }
 
 impl Range {
