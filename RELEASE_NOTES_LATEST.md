@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@2.28.5
+cargo add typeql@2.28.6
 ```
 
 ## TypeQL Grammar and Language Library distributions for Java
@@ -20,12 +20,12 @@ cargo add typeql@2.28.5
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-grammar</artifactId>
-        <version>2.28.5</version>
+        <version>2.28.6</version>
     </dependency>
     <dependency>
         <groupId>com.vaticle.typeql</groupId>
         <artifactId>typeql-lang</artifactId>
-        <version>2.28.5</version>
+        <version>2.28.6</version>
     </dependency>
 </dependencies>
 ```
@@ -35,7 +35,7 @@ cargo add typeql@2.28.5
 Available through https://pypi.org
 
 ```
-pip install typeql-grammar==2.28.5
+pip install typeql-grammar==2.28.6
 ```
 
 
@@ -49,21 +49,9 @@ pip install typeql-grammar==2.28.5
 
 
 ## Other Improvements
-- **Make the author of the Python grammar and TypeQL Rust "TypeDB Community"**
-  
-  The `author` field of our Python grammar and Rust library is now **TypeDB Community** with the email being **community@typedb.com**.
-  
-  
-- **Update error messages to match Rust and Java implementations**
-  We fixed various logical and grammatical issues in the Java and Rust error messages, aiming to have similar errors from both implementations.
-  
-  
-- **Java and Rust error messages: grammatical fixes**
-  
-  We fixed various grammatical issues in the Java and Rust error messages.
-  
-  
-- **Update readme**
-  
+- **Use Universe manifest for features & version ranges of crates.io dependencies (#353)**
+
+- **Merge master into development after 2.28.5 release**
+
     
 
