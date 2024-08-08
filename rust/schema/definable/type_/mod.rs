@@ -56,7 +56,7 @@ impl Pretty for Type {
         write!(f, "{}", self.label)?;
         let rest = if !self.annotations.is_empty() {
             for annotation in &self.annotations {
-                write!(f, " {}", annotation)?; // Possibly empty
+                write!(f, " {}", annotation)?;
             }
             self.capabilities.as_slice()
         } else {
