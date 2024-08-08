@@ -37,8 +37,8 @@ assemble_maven(
     version_overrides = version(artifacts_org = artifacts, artifacts_repo={}),
     project_name = "TypeDB Common",
     project_description = "TypeDB Common classes and tools",
-    project_url = "https://github.com/vaticle/typeql",
-    scm_url = "https://github.com/vaticle/typeql",
+    project_url = "https://github.com/typedb/typeql",
+    scm_url = "https://github.com/typedb/typeql",
 )
 
 deploy_maven(
