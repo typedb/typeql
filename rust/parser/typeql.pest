@@ -198,7 +198,7 @@ definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { kind? ~ label ~ (annotations | type_capability)? ~ ( COMMA ~ type_capability )* }
+definition_type = { kind? ~ label ~ ( ( annotations | type_capability ) ~ ( COMMA ~ type_capability )* )? }
 type_capability = { type_capability_base ~ annotations? }
 type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
                        | owns_declaration | plays_declaration | relates_declaration

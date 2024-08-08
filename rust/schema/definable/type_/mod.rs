@@ -54,13 +54,23 @@ impl Pretty for Type {
             write!(f, "{} ", kind)?;
         }
         write!(f, "{}", self.label)?;
-        if let Some((first, rest)) = self.capabilities.split_first() {
-            write!(f, " {}", first)?;
-            for cap in rest {
-                writeln!(f, ",")?;
-                indent(indent_level, f)?;
-                write!(f, "{}", cap)?;
+        let rest = if !self.annotations.is_empty() {
+            for annotation in &self.annotations {
+                write!(f, " {}", annotation)?; // Possibly empty
             }
+            self.capabilities.as_slice()
+        } else {
+            if let Some((first, rest)) = self.capabilities.split_first() {
+                write!(f, " {}", first)?;
+                rest
+            } else {
+                self.capabilities.as_slice()
+            }
+        };
+        for cap in rest {
+            writeln!(f, ",")?;
+            indent(indent_level, f)?;
+            write!(f, "{}", cap)?;
         }
         Ok(())
     }
