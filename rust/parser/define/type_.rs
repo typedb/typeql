@@ -24,8 +24,9 @@ pub(super) fn visit_definition_type(node: Node<'_>) -> Type {
     let mut children = node.into_children();
     let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
     let label = visit_label(children.consume_expected(Rule::label));
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     let traits = children.map(visit_type_capability).collect();
-    Type::new(span, kind, label, traits)
+    Type::new(span, kind, label, annotations, traits)
 }
 
 pub(in crate::parser) fn visit_type_capability(node: Node<'_>) -> Capability {

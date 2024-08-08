@@ -22,6 +22,7 @@ pub struct Type {
     span: Option<Span>,
     pub kind: Option<token::Kind>,
     pub label: Label,
+    pub annotations: Vec<Annotation>,
     pub capabilities: Vec<Capability>,
 }
 
@@ -30,13 +31,14 @@ impl Type {
         span: Option<Span>,
         kind: Option<token::Kind>,
         label: Label,
+        annotations: Vec<Annotation>,
         capabilities: Vec<Capability>,
     ) -> Self {
-        Self { span, kind, label, capabilities }
+        Self { span, kind, label, annotations, capabilities }
     }
 
     pub fn build(label: Label) -> Self {
-        Self::new(None, None, label, Vec::new())
+        Self::new(None, None, label, Vec::new(), Vec::new())
     }
 }
 
@@ -52,13 +54,23 @@ impl Pretty for Type {
             write!(f, "{} ", kind)?;
         }
         write!(f, "{}", self.label)?;
-        if let Some((first, rest)) = self.capabilities.split_first() {
-            write!(f, " {}", first)?;
-            for cap in rest {
-                writeln!(f, ",")?;
-                indent(indent_level, f)?;
-                write!(f, "{}", cap)?;
+        let rest = if !self.annotations.is_empty() {
+            for annotation in &self.annotations {
+                write!(f, " {}", annotation)?;
             }
+            self.capabilities.as_slice()
+        } else {
+            if let Some((first, rest)) = self.capabilities.split_first() {
+                write!(f, " {}", first)?;
+                rest
+            } else {
+                self.capabilities.as_slice()
+            }
+        };
+        for cap in rest {
+            writeln!(f, ",")?;
+            indent(indent_level, f)?;
+            write!(f, "{}", cap)?;
         }
         Ok(())
     }
