@@ -15,7 +15,7 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Update {
     span: Option<Span>,
-    statements: Vec<Statement>,
+    pub statements: Vec<Statement>,
 }
 
 impl Update {

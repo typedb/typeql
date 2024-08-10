@@ -135,9 +135,9 @@ impl fmt::Display for RolePlayer {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AttributeValueStatement {
     span: Option<Span>,
-    type_: Option<TypeRef>,
-    value: Literal,
-    isa: Isa,
+    pub type_: Option<TypeRef>,
+    pub value: Literal,
+    pub isa: Isa,
 }
 
 impl AttributeValueStatement {
