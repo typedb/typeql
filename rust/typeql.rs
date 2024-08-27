@@ -12,7 +12,7 @@
 
 pub mod annotation;
 pub mod builder;
-pub mod common;
+mod common;
 pub mod expression;
 pub mod parser;
 pub mod pattern;
@@ -26,7 +26,9 @@ pub mod value;
 mod variable;
 
 pub use crate::{
-    common::Result,
+    annotation::Annotation,
+    common::{error::Error, identifier::Identifier, token, Result},
+    expression::Expression,
     pattern::Pattern,
     query::Query,
     schema::definable::{Definable, Function},
