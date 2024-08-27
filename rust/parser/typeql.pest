@@ -210,7 +210,7 @@ value_type_declaration = { VALUE ~ value_type }
 owns_declaration = { OWNS ~ label_list
                    | OWNS ~ label ~ ( AS ~ label )?
                    }
-plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ label )? }
+plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ named_type )? }
 relates_declaration = { RELATES ~ label_list
                       | RELATES ~ label ~ ( AS ~ label )?
                       }

@@ -159,11 +159,11 @@ impl fmt::Display for Relates {
 pub struct Plays {
     span: Option<Span>,
     pub role: ScopedLabel,
-    pub overridden: Option<Label>,
+    pub overridden: Option<NamedType>,
 }
 
 impl Plays {
-    pub fn new(span: Option<Span>, role: ScopedLabel, overridden: Option<Label>) -> Self {
+    pub fn new(span: Option<Span>, role: ScopedLabel, overridden: Option<NamedType>) -> Self {
         Self { span, role, overridden }
     }
 }
