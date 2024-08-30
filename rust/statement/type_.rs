@@ -16,13 +16,14 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Type {
     span: Option<Span>,
+    pub kind: Option<token::Kind>,
     pub type_: TypeRefAny,
     pub constraints: Vec<Constraint>,
 }
 
 impl Type {
-    pub fn new(span: Option<Span>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
-        Self { span, type_, constraints }
+    pub fn new(span: Option<Span>, kind: Option<token::Kind>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
+        Self { span, kind, type_, constraints }
     }
 }
 

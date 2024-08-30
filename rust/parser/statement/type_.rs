@@ -11,7 +11,7 @@ use crate::{
         type_::{
             visit_label, visit_label_scoped, visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_value_type,
         },
-        IntoChildNodes, Node, Rule, RuleMatcher,
+        visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
         type_::{Constraint, ConstraintBase, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
@@ -24,9 +24,10 @@ pub(super) fn visit_statement_type(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement_type);
     let span = node.span();
     let mut children = node.into_children();
+    let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
     let type_ = visit_type_ref_any(children.consume_expected(Rule::type_ref_any));
     let constraints = children.map(visit_type_constraint).collect();
-    Statement::Type(Type::new(span, type_, constraints))
+    Statement::Type(Type::new(span, kind, type_, constraints))
 }
 
 fn visit_type_constraint(node: Node<'_>) -> Constraint {
