@@ -8,7 +8,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
         annotation::visit_annotations,
-        type_::{visit_label, visit_label_list, visit_label_scoped, visit_value_type},
+        type_::{visit_label, visit_label_list, visit_label_scoped, visit_named_type, visit_value_type},
         visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::type_::{
@@ -131,7 +131,7 @@ fn visit_plays_declaration(node: Node<'_>) -> Plays {
 
     let role = visit_label_scoped(children.consume_expected(Rule::label_scoped));
     let overridden = if children.try_consume_expected(Rule::AS).is_some() {
-        Some(visit_label(children.consume_expected(Rule::label)))
+        Some(visit_named_type(children.consume_expected(Rule::named_type)))
     } else {
         None
     };
