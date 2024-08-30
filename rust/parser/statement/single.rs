@@ -25,7 +25,7 @@ pub(super) fn visit_statement_single(node: Node<'_>) -> Statement {
     let child = node.into_child();
     match child.as_rule() {
         Rule::statement_is => Statement::Is(visit_statement_is(child)),
-        Rule::statement_in => Statement::InStream(visit_statement_in(child)),
+        Rule::statement_in => Statement::InIterable(visit_statement_in(child)),
         Rule::statement_comparison => Statement::Comparison(visit_statement_comparison(child)),
         Rule::statement_assignment => Statement::Assignment(visit_statement_assignment(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),

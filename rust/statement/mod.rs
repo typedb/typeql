@@ -126,7 +126,7 @@ impl fmt::Display for Assignment {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Statement {
     Is(Is),
-    InStream(InIterable),
+    InIterable(InIterable),
     Comparison(ComparisonStatement),
     Assignment(Assignment),
     Thing(Thing),
@@ -139,7 +139,7 @@ impl Pretty for Statement {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Statement::Is(inner) => Pretty::fmt(inner, indent_level, f),
-            Statement::InStream(inner) => Pretty::fmt(inner, indent_level, f),
+            Statement::InIterable(inner) => Pretty::fmt(inner, indent_level, f),
             Statement::Comparison(inner) => Pretty::fmt(inner, indent_level, f),
             Statement::Assignment(inner) => Pretty::fmt(inner, indent_level, f),
             Statement::Thing(inner) => Pretty::fmt(inner, indent_level, f),
@@ -154,7 +154,7 @@ impl fmt::Display for Statement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Statement::Is(inner) => fmt::Display::fmt(inner, f),
-            Statement::InStream(inner) => fmt::Display::fmt(inner, f),
+            Statement::InIterable(inner) => fmt::Display::fmt(inner, f),
             Statement::Comparison(inner) => fmt::Display::fmt(inner, f),
             Statement::Assignment(inner) => fmt::Display::fmt(inner, f),
             Statement::Thing(inner) => fmt::Display::fmt(inner, f),

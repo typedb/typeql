@@ -27,7 +27,7 @@ pub struct IntegerLiteral {
     pub value: String,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Sign {
     Plus,
     Minus,
@@ -315,12 +315,13 @@ impl fmt::Display for StructLiteral {
 }
 
 impl StringLiteral {
-    pub fn unescape(escaped_string: &str) -> Result<String> {
-        let bytes = escaped_string.as_bytes();
+    pub fn unescape(&self) -> Result<String> {
+        let bytes = self.value.as_bytes();
         // it's a bug if these fail; either in the parser or the builder
         assert_eq!(bytes[0], bytes[bytes.len() - 1]);
         assert!(matches!(bytes[0], b'\'' | b'"'));
-        let escaped_string = &escaped_string[1..escaped_string.len() - 1];
+
+        let escaped_string = &self.value[1..self.value.len() - 1];
 
         let mut buf = String::with_capacity(escaped_string.len());
 
