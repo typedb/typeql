@@ -1,16 +1,14 @@
 [![TypeQL](./banner.png)](https://typedb.com/docs/typeql/2.x/overview)
 
-[![Factory](https://factory.vaticle.com/api/status/vaticle/typeql/badge.svg)](https://factory.vaticle.com/vaticle/typeql)
-[![GitHub release](https://img.shields.io/github/release/vaticle/typeql.svg)](https://github.com/vaticle/typeql/releases/latest)
-[![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=chat&logo=discord&logoColor=ffffff)](https://typedb.com/discord)
+[![Factory](https://factory.vaticle.com/api/status/typedb/typeql/badge.svg)](https://factory.vaticle.com/typedb/typeql)
+[![GitHub release](https://img.shields.io/github/release/typedb/typeql.svg)](https://github.com/typedb/typeql/releases/latest)
+[![Discord](https://img.shields.io/discord/665254494820368395?color=7389D8&label=discord&logo=discord&logoColor=ffffff)](https://typedb.com/discord)
 [![Discussion Forum](https://img.shields.io/badge/discourse-forum-blue.svg)](https://forum.typedb.com)
-[![Stack Overflow](https://img.shields.io/badge/stackoverflow-typedb-796de3.svg)](https://stackoverflow.com/questions/tagged/typedb)
-[![Stack Overflow](https://img.shields.io/badge/stackoverflow-typeql-3dce8c.svg)](https://stackoverflow.com/questions/tagged/typeql)
 [![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=flat)](https://cloudsmith.com)
 
 # Introducing TypeQL
 
-TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**. It is based on a novel, elegant, and declarative querying paradigm described in [recent research](https://typedb.com/papers/typeql-theory). TypeQL is designed to be intuitive and mirror natural language, making it straightforward to compose complex queries using high-level abstractions.
+TypeQL is the query language of **[TypeDB](https://github.com/typedb/typedb)**. It is based on a novel, elegant, and declarative querying paradigm described in [recent research](https://typedb.com/papers/typeql-theory). TypeQL is designed to be intuitive and mirror natural language, making it straightforward to compose complex queries using high-level abstractions.
 
 - Get started by [installing TypeDB](https://typedb.com/docs/home/install/overview).
 - Explore the basics of TypeDB in our easy [Crash Course](https://typedb.com/docs/home/crash-course).
@@ -19,7 +17,7 @@ TypeQL is the query language of **[TypeDB](https://github.com/vaticle/typedb)**.
 - Learn more at TypeDB's [Learning Center](https://typedb.com/learn).
 
 
-> **IMPORTANT NOTE:** > > TypeDB & TypeQL are in the process of being rewritten in [Rust](https://www.rust-lang.org). There will be significant refinement to the language, and minor breaks in backwards compatibility. Learn about the changes on our [roadmap issue on GitHub](https://github.com/vaticle/typedb/issues/6764). The biggest change to TypeDB 3.0 will be our storage data structure and architecture that significantly boosts performance. We’re aiming to release 3.0 in the summer this year, along with preliminary benchmarks of TypeDB.
+> **IMPORTANT NOTE:** > > TypeDB & TypeQL are in the process of being rewritten in [Rust](https://www.rust-lang.org). There will be significant refinement to the language, and minor breaks in backwards compatibility. Learn about the changes on our [roadmap issue on GitHub](https://github.com/typedb/typedb/issues/6764). The biggest change to TypeDB 3.0 will be our storage data structure and architecture that significantly boosts performance. We’re aiming to release 3.0 in the summer this year, along with preliminary benchmarks of TypeDB.
 
 ## A polymorphic query language
 
@@ -89,12 +87,12 @@ TypeQL's near-natural syntax and fully declarative properties make queries easil
 
 ```php
 match
-$kevin isa user, has email "kevin@vaticle.com";
+$kevin isa user, has email "kevin@typedb.com";
 
 insert
 $chloe isa full-time-employee,
     has full-name "Chloé Dupond",
-    has email "chloe@vaticle.com",
+    has email "chloe@typedb.com",
     has employee-id 185,
     has weekly-hours 35;
 $hire (employee: $chloe, ceo: $kevin) isa hiring,
@@ -111,16 +109,16 @@ $user isa user;
 
 match
 $user isa user;
-$user has email "john@vaticle.com";
+$user has email "john@typedb.com";
 
 match
 $user isa user;
-$user has email "john@vaticle.com";
+$user has email "john@typedb.com";
 (team: $team, member: $user) isa team-membership;
 
 match
 $user isa user;
-$user has email "john@vaticle.com";
+$user has email "john@typedb.com";
 (team: $team, member: $user) isa team-membership;
 $team has name "Engineering";
 ```
@@ -132,9 +130,9 @@ $team has name "Engineering";
 > If you are using TypeDB, you do not need additional libraries/tools to use TypeQL syntax natively.
 > However, if you would like to construct TypeQL queries programmatically, you can do so with "Language Libraries" listed below.
 
-- [TypeQL Grammar](https://github.com/vaticle/typeql/blob/master/grammar/README.md)
-- [TypeQL Language Library for Java](https://github.com/vaticle/typeql/blob/master/java)
-- [TypeQL Language Library for Rust (under development)](https://github.com/vaticle/typeql/blob/master/rust)
+- [TypeQL Grammar](https://github.com/typedb/typeql/blob/master/grammar/README.md)
+- [TypeQL Language Library for Java](https://github.com/typedb/typeql/blob/master/java)
+- [TypeQL Language Library for Rust (under development)](https://github.com/typedb/typeql/blob/master/rust)
 - [TypeQL Language Library for Python (under development)](https://github.com/typedb-osi/typeql-lang-python)
 
 
@@ -189,4 +187,4 @@ confidence.
 TypeQL grammar and language libraries are provided under the Mozilla Public License 2.0 (MPL 2.0),
 and therefore freely usable without restriction when unmodified.
 
-The full license can be founder at: [LICENSE](https://github.com/vaticle/typeql/blob/master/LICENSE).
+The full license can be founder at: [LICENSE](https://github.com/typedb/typeql/blob/master/LICENSE).
