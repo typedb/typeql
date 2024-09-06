@@ -16,13 +16,14 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Type {
     span: Option<Span>,
+    pub kind: Option<token::Kind>,
     pub type_: TypeRefAny,
     pub constraints: Vec<Constraint>,
 }
 
 impl Type {
-    pub fn new(span: Option<Span>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
-        Self { span, type_, constraints }
+    pub fn new(span: Option<Span>, kind: Option<token::Kind>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
+        Self { span, kind, type_, constraints }
     }
 }
 
@@ -154,8 +155,8 @@ impl fmt::Display for SubKind {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sub {
     span: Option<Span>,
-    kind: SubKind,
-    supertype: TypeRefAny,
+    pub kind: SubKind,
+    pub supertype: TypeRefAny,
 }
 
 impl Sub {
@@ -175,7 +176,7 @@ impl fmt::Display for Sub {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
     span: Option<Span>,
-    value_type: NamedType,
+    pub value_type: NamedType,
 }
 
 impl ValueType {
@@ -195,8 +196,8 @@ impl fmt::Display for ValueType {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
     span: Option<Span>,
-    owned: TypeRefAny,
-    overridden: Option<TypeRef>,
+    pub owned: TypeRefAny,
+    pub overridden: Option<TypeRef>,
 }
 
 impl Owns {
@@ -220,8 +221,8 @@ impl fmt::Display for Owns {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
     span: Option<Span>,
-    related: TypeRefAny,
-    overridden: Option<TypeRef>,
+    pub related: TypeRefAny,
+    pub overridden: Option<TypeRef>,
 }
 
 impl Relates {
@@ -245,8 +246,8 @@ impl fmt::Display for Relates {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
     span: Option<Span>,
-    role: TypeRef,
-    overridden: Option<TypeRef>,
+    pub role: TypeRef,
+    pub overridden: Option<TypeRef>,
 }
 
 impl Plays {
