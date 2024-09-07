@@ -171,21 +171,24 @@ struct_value = { expression_value | expression_struct }
 
 // FETCH QUERY =================================================================
 
-clause_fetch = { FETCH ~ projection_object }
+clause_fetch = { FETCH ~ fetch_object }
 
-projection = { projection_single | projection_object | projection_list }
+fetch_some = { fetch_single | fetch_object | fetch_list }
 
-projection_object = { CURLY_OPEN ~ projection_object_field ~ ( COMMA ~ projection_object_field )* ~ CURLY_CLOSE }
-projection_object_field = { projection_key ~ COLON ~ projection }
-projection_key = { quoted_string_literal }
+fetch_object = { CURLY_OPEN ~ fetch_body  ~ CURLY_CLOSE }
+fetch_body = { fetch_object_entries | fetch_attributes_all }
+fetch_object_entries = { fetch_object_entry ~ ( COMMA ~ fetch_object_entry )* }
+fetch_object_entry = { fetch_key ~ COLON ~ fetch_some }
+fetch_key = { quoted_string_literal }
 
-projection_list = { SQ_BRACKET_OPEN ~ projection_stream ~ SQ_BRACKET_CLOSE }
+fetch_list = { SQ_BRACKET_OPEN ~ fetch_stream ~ SQ_BRACKET_CLOSE }
 
-projection_stream = { expression_function | query_pipeline | projection_attribute }
+fetch_stream = { expression_function | query_pipeline | fetch_attribute }
 
-projection_single = { projection_attribute | expression | query_pipeline }
+fetch_single = { fetch_attribute | expression | query_pipeline }
 
-projection_attribute = { var ~ DOT ~ ( label_list | label ) }
+fetch_attribute = { var_named ~ DOT ~ ( label_list | label ) }
+fetch_attributes_all = { var_named ~ DOT ~ STAR }
 
 // SCHEMA QUERY ================================================================
 
@@ -559,6 +562,7 @@ SQ_BRACKET_OPEN = _{ "[" }
 SQ_BRACKET_CLOSE = _{ "]" }
 CURLY_OPEN = _{ "{" }
 CURLY_CLOSE = _{ "}" }
+STAR = _{ "*" }
 COMMA = _{ "," }
 SEMICOLON = _{ ";" }
 COLON = _{ ":" }

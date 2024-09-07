@@ -10,21 +10,6 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unused_must_use)]
 
-pub mod annotation;
-pub mod builder;
-mod common;
-pub mod expression;
-pub mod parser;
-pub mod pattern;
-mod pretty;
-pub mod query;
-pub mod schema;
-pub mod statement;
-pub mod type_;
-mod util;
-pub mod value;
-mod variable;
-
 pub use crate::{
     annotation::Annotation,
     common::{error::Error, identifier::Identifier, token, Result},
@@ -41,6 +26,21 @@ use crate::{
     parser::{visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query},
     schema::definable::Struct,
 };
+
+pub mod annotation;
+pub mod builder;
+mod common;
+pub mod expression;
+pub mod parser;
+pub mod pattern;
+mod pretty;
+pub mod query;
+pub mod schema;
+pub mod statement;
+pub mod type_;
+mod util;
+pub mod value;
+mod variable;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())

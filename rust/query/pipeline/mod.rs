@@ -11,6 +11,7 @@ use crate::{
     common::{Span, Spanned},
     pretty::{indent, Pretty},
     schema::definable,
+    token,
 };
 
 pub mod stage;
@@ -28,14 +29,17 @@ impl Preamble {
 }
 
 impl Pretty for Preamble {
-    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        writeln!(f, "{}", token::Clause::With)?;
+        Pretty::fmt(&self.function, indent_level + 1, f)?;
+        Ok(())
     }
 }
 
 impl fmt::Display for Preamble {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Clause::With, &self.function)
     }
 }
 
@@ -63,24 +67,21 @@ impl Pipeline {
 
 impl Spanned for Pipeline {
     fn span(&self) -> Option<Span> {
-        todo!()
+        self.span
     }
 }
 
 impl Pretty for Pipeline {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for preamble in &self.preambles {
-            indent(indent_level, f)?;
             Pretty::fmt(preamble, indent_level, f)?;
             writeln!(f)?;
         }
         if let Some((last, rest)) = self.stages.split_last() {
             for stage in rest {
-                indent(indent_level, f)?;
                 Pretty::fmt(stage, indent_level, f)?;
                 writeln!(f)?;
             }
-            indent(indent_level, f)?;
             Pretty::fmt(last, indent_level, f)?;
         }
         Ok(())

@@ -35,6 +35,7 @@ impl Match {
 
 impl Pretty for Match {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
         write!(f, "{}", token::Clause::Match)?;
         for pattern in &self.patterns {
             writeln!(f)?;

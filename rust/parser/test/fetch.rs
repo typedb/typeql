@@ -13,24 +13,30 @@ fn test_fetch_query() {
 $x isa movie,
     has title "Godfather",
     has release-date $d;
-fetch
-$d;
-$d as date;
-$x: name, title as t, name as "Movie name";
-$x as movie: name;
-$x as "Movie name": name;
-label-a: {
-    match
-    ($d, $c) isa director;
-    fetch
-    $d: name, age;
-};
-label-b: {
-    match
-    ($d, $c) isa director;
-    select $d;
-    count();
-};"#;
+fetch {
+    "d_only": $d,
+    "d optional attr": $d.title,
+    "d many attr": [ $d.name ],
+    "d everything": { $d.* },
+    "d object": {
+        "entry single 1": $x.name,
+        "entry single 2": $d + 10,
+        "entry single 3":
+            match
+            $x has name $n;
+            count($n);,
+        "entry object": {
+            "all": { $x.* }
+        },
+        "entry list": [
+            match
+            ($x, $y) isa bla;
+            fetch {
+                "y values": { $y.* }
+            }
+        ]
+    }
+}"#;
     let parsed = parse_query(query).unwrap();
     // let projections: Vec<Projection> = vec![
     // var("d").into(),
