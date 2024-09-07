@@ -189,7 +189,7 @@ impl Pretty for ValueType {}
 
 impl fmt::Display for ValueType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", token::Keyword::ValueType, self.value_type)
+        write!(f, "{} {}", token::Keyword::Value, self.value_type)
     }
 }
 

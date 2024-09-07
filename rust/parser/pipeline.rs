@@ -17,34 +17,28 @@ use super::{
     type_::{visit_label, visit_label_list},
     visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
-use crate::{
-    common::{
-        error::TypeQLError,
-        token::{Aggregate, Order},
-        Spanned,
-    },
-    pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
-    query::{
-        pipeline::{
-            stage::{
-                delete::{Deletable, DeletableKind},
-                fetch::Projection,
-                modifier::{Limit, Offset, OrderedVariable, Select, Sort},
-                reduce::{Check, Count, First, ReduceValue, Stat},
-                Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
-            },
-            Preamble,
+use crate::{common::{
+    error::TypeQLError,
+    token::{Aggregate, Order},
+    Spanned,
+}, pattern::{Conjunction, Disjunction, Negation, Optional, Pattern}, query::{
+    pipeline::{
+        stage::{
+            delete::{Deletable, DeletableKind},
+            fetch::FetchEntry,
+            modifier::{Limit, Offset, OrderedVariable, Select, Sort},
+            reduce::{Check, Count, First, ReduceValue, Stat},
+            Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
         },
-        stage::fetch::{
-            ProjectionAttribute, ProjectionList, ProjectionObject, ProjectionObjectField, ProjectionSingle,
-            ProjectionStream,
-        },
-        Pipeline,
+        Preamble,
     },
-    type_::NamedType,
-    value::StringLiteral,
-    TypeRef, TypeRefAny,
-};
+    stage::fetch::{
+        FetchAttribute, FetchList, FetchObject, FetchObjectEntry, FetchSingle,
+        FetchStream,
+    },
+    Pipeline,
+}, type_::NamedType, value::StringLiteral, TypeRef, TypeRefAny};
+use crate::query::stage::fetch::FetchBody;
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
@@ -219,39 +213,39 @@ fn visit_clause_fetch(node: Node<'_>) -> Fetch {
     debug_assert_eq!(node.as_rule(), Rule::clause_fetch);
     let span = node.span();
     let mut children = node.into_children();
-    let projection_object =
-        visit_projection_object(children.skip_expected(Rule::FETCH).consume_expected(Rule::projection_object));
+    let fetch_object =
+        visit_fetch_object(children.skip_expected(Rule::FETCH).consume_expected(Rule::fetch_object));
     debug_assert_eq!(children.try_consume_any(), None);
-    Fetch::new(span, projection_object)
+    Fetch::new(span, fetch_object)
 }
 
-fn visit_projection(node: Node<'_>) -> Projection {
-    debug_assert_eq!(node.as_rule(), Rule::projection);
+fn visit_fetch_some(node: Node<'_>) -> FetchEntry {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_some);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::projection_object => Projection::Object(visit_projection_object(child)),
-        Rule::projection_list => Projection::List(visit_projection_list(child)),
-        Rule::projection_single => Projection::Single(visit_projection_single(child)),
+        Rule::fetch_object => FetchEntry::Object(visit_fetch_object(child)),
+        Rule::fetch_list => FetchEntry::List(visit_fetch_list(child)),
+        Rule::fetch_single => FetchEntry::Single(visit_fetch_single(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-fn visit_projection_single(node: Node<'_>) -> ProjectionSingle {
-    debug_assert_eq!(node.as_rule(), Rule::projection_single);
+fn visit_fetch_single(node: Node<'_>) -> FetchSingle {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_single);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::projection_attribute => ProjectionSingle::Attribute(visit_projection_attribute(child)),
-        Rule::query_pipeline => ProjectionSingle::Subquery(visit_query_pipeline(child)),
-        Rule::expression => ProjectionSingle::Expression(visit_expression(child)),
+        Rule::fetch_attribute => FetchSingle::Attribute(visit_fetch_attribute(child)),
+        Rule::query_pipeline => FetchSingle::Subquery(visit_query_pipeline(child)),
+        Rule::expression => FetchSingle::Expression(visit_expression(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
-    debug_assert_eq!(node.as_rule(), Rule::projection_attribute);
+fn visit_fetch_attribute(node: Node<'_>) -> FetchAttribute {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_attribute);
     let span = node.span();
     let mut children = node.into_children();
-    let owner = visit_var(children.consume_expected(Rule::var));
+    let owner = visit_var(children.consume_expected(Rule::var_named));
     let child = children.consume_any();
     let attribute = match child.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(child)),
@@ -259,45 +253,62 @@ fn visit_projection_attribute(node: Node<'_>) -> ProjectionAttribute {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
-    ProjectionAttribute::new(span, owner, attribute)
+    FetchAttribute::new(span, owner, attribute)
 }
 
-fn visit_projection_object(node: Node<'_>) -> ProjectionObject {
-    debug_assert_eq!(node.as_rule(), Rule::projection_object);
-    let span = node.span();
-    let fields = node.into_children().map(visit_projection_object_field).collect();
-    ProjectionObject::new(span, fields)
-}
-
-fn visit_projection_object_field(node: Node<'_>) -> ProjectionObjectField {
-    debug_assert_eq!(node.as_rule(), Rule::projection_object_field);
+fn visit_fetch_object(node: Node<'_>) -> FetchObject {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_object);
     let span = node.span();
     let mut children = node.into_children();
-    let key = visit_projection_key(children.consume_expected(Rule::projection_key));
-    let value = visit_projection(children.consume_expected(Rule::projection));
-    debug_assert_eq!(children.try_consume_any(), None);
-    ProjectionObjectField::new(span, key, value)
+    let body = visit_fetch_object_body(children.consume_expected(Rule::fetch_body));
+    FetchObject::new(span, body)
 }
 
-fn visit_projection_key(node: Node<'_>) -> StringLiteral {
-    debug_assert_eq!(node.as_rule(), Rule::projection_key);
+fn visit_fetch_object_body(node: Node<'_>) -> FetchBody {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_body);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::fetch_object_entries => {
+            let entries = child.into_children().map(visit_fetch_object_entry).collect();
+            FetchBody::Entries(entries)
+        }
+        Rule::fetch_attributes_all => {
+            let var = visit_var(child.into_children().consume_expected(Rule::var_named));
+            FetchBody::AttributesAll(var)
+        },
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_fetch_object_entry(node: Node<'_>) -> FetchObjectEntry {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_object_entry);
+    let span = node.span();
+    let mut children = node.into_children();
+    let key = visit_fetch_key(children.consume_expected(Rule::fetch_key));
+    let value = visit_fetch_some(children.consume_expected(Rule::fetch_some));
+    debug_assert_eq!(children.try_consume_any(), None);
+    FetchObjectEntry::new(span, key, value)
+}
+
+fn visit_fetch_key(node: Node<'_>) -> StringLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_key);
     visit_quoted_string_literal(node.into_child())
 }
 
-fn visit_projection_list(node: Node<'_>) -> ProjectionList {
-    debug_assert_eq!(node.as_rule(), Rule::projection_list);
+fn visit_fetch_list(node: Node<'_>) -> FetchList {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_list);
     let span = node.span();
-    let stream = visit_projection_stream(node.into_child());
-    ProjectionList::new(span, stream)
+    let stream = visit_fetch_stream(node.into_child());
+    FetchList::new(span, stream)
 }
 
-fn visit_projection_stream(node: Node<'_>) -> ProjectionStream {
-    debug_assert_eq!(node.as_rule(), Rule::projection_stream);
+fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
+    debug_assert_eq!(node.as_rule(), Rule::fetch_stream);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::projection_attribute => ProjectionStream::Attribute(visit_projection_attribute(child)),
-        Rule::query_pipeline => ProjectionStream::Subquery(visit_query_pipeline(child)),
-        Rule::expression_function => ProjectionStream::Function(visit_expression_function(child)),
+        Rule::fetch_attribute => FetchStream::Attribute(visit_fetch_attribute(child)),
+        Rule::query_pipeline => FetchStream::Subquery(visit_query_pipeline(child)),
+        Rule::expression_function => FetchStream::Function(visit_expression_function(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

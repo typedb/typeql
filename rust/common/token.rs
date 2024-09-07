@@ -63,6 +63,7 @@ string_enum! { Clause
     Group = "group",
     Fetch = "fetch",
     Get = "get",
+    With = "with",
 }
 
 string_enum! { Modifier
@@ -104,12 +105,6 @@ impl Comparator {
     }
 }
 
-string_enum! { Schema
-    Rule = "rule",
-    When = "when",
-    Then = "then",
-}
-
 string_enum! { Keyword
     Abstract = "abstract",
     As = "as",
@@ -135,7 +130,7 @@ string_enum! { Keyword
     Sub = "sub",
     SubX = "sub!",
     Try = "try",
-    ValueType = "value",
+    Value = "value",
 }
 
 string_enum! { Annotation
@@ -205,6 +200,11 @@ string_enum! { Char
     Question = "?",
     Dollar = "$",
     Underscore = "_",
+    Dot = ".",
+    Semicolon = ";",
+    Colon = ":",
     CurlyLeft = "{",
     CurlyRight = "}",
+    SquareLeft = "[",
+    SquareRight = "]",
 }

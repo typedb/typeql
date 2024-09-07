@@ -7,11 +7,7 @@
 use std::fmt;
 
 use self::stage::Stage;
-use crate::{
-    common::{Span, Spanned},
-    pretty::{indent, Pretty},
-    schema::definable,
-};
+use crate::{common::{Span, Spanned}, pretty::{indent, Pretty}, schema::definable, token};
 
 pub mod stage;
 
@@ -28,14 +24,17 @@ impl Preamble {
 }
 
 impl Pretty for Preamble {
-    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        writeln!(f, "{}", token::Clause::With)?;
+        Pretty::fmt(&self.function, indent_level + 1, f)?;
+        Ok(())
     }
 }
 
 impl fmt::Display for Preamble {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", token::Clause::With, &self.function)
     }
 }
 
@@ -63,7 +62,7 @@ impl Pipeline {
 
 impl Spanned for Pipeline {
     fn span(&self) -> Option<Span> {
-        todo!()
+        self.span
     }
 }
 
