@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-mod steps;
-
 use cucumber::{StatsWriter, World};
 use steps::*;
+
+mod steps;
 
 fn main() {
     assert!(!futures::executor::block_on(

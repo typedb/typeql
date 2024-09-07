@@ -4,18 +4,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt;
-use std::fmt::{Formatter};
+use std::{fmt, fmt::Formatter};
 
 use crate::{
-    common::{token, Span},
+    common::{Span, token},
     expression::{Expression, FunctionCall},
-    pretty::Pretty,
+    pretty::{indent, Pretty},
     query::Pipeline,
-    value::StringLiteral,
-    TypeRefAny, Variable,
+    TypeRefAny,
+    value::StringLiteral, Variable,
 };
-use crate::pretty::indent;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Fetch {
@@ -33,7 +31,7 @@ impl Pretty for Fetch {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
         write!(f, "{} ", token::Clause::Fetch)?;
-        Pretty::fmt(&self.object, indent_level + 1, f)
+        Pretty::fmt(&self.object, indent_level, f)
     }
 }
 
@@ -55,9 +53,15 @@ pub enum FetchEntry {
 impl Pretty for FetchEntry {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            FetchEntry::Object(projection) => Pretty::fmt(projection, indent_level, f),
-            FetchEntry::List(projection) => Pretty::fmt(projection, indent_level, f),
-            FetchEntry::Single(projection) => Pretty::fmt(projection, indent_level, f),
+            FetchEntry::Object(entry) => {
+                write!(f, " ")?;
+                Pretty::fmt(entry, indent_level, f)
+            },
+            FetchEntry::List(entry) => {
+                write!(f, " ")?;
+                Pretty::fmt(entry, indent_level, f)
+            },
+            FetchEntry::Single(entry) => Pretty::fmt(entry, indent_level, f),
         }
     }
 }
@@ -65,9 +69,9 @@ impl Pretty for FetchEntry {
 impl fmt::Display for FetchEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FetchEntry::Object(projection) => fmt::Display::fmt(projection, f),
-            FetchEntry::List(projection) => fmt::Display::fmt(projection, f),
-            FetchEntry::Single(projection) => fmt::Display::fmt(projection, f),
+            FetchEntry::Object(entry) => fmt::Display::fmt(entry, f),
+            FetchEntry::List(entry) => fmt::Display::fmt(entry, f),
+            FetchEntry::Single(entry) => fmt::Display::fmt(entry, f),
         }
     }
 }
@@ -75,42 +79,41 @@ impl fmt::Display for FetchEntry {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchObject {
     span: Option<Span>,
-    body: FetchBody,
+    body: FetchObjectBody,
 }
 
 impl FetchObject {
-    pub fn new(span: Option<Span>, body: FetchBody) -> Self {
+    pub fn new(span: Option<Span>, body: FetchObjectBody) -> Self {
         Self { span, body }
     }
 }
 
 impl Pretty for FetchObject {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
-        indent(indent_level, f)?;
-        writeln!(f, "{}", token::Char::CurlyLeft)?;
-        Pretty::fmt(&self.body, indent_level + 1, f)?;
-        indent(indent_level, f)?;
-        write!(f, "{}", token::Char::CurlyRight)
+        Pretty::fmt(&self.body, indent_level, f)
     }
 }
 
 impl fmt::Display for FetchObject {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {}", token::Char::CurlyLeft, self.body, token::Char::CurlyRight)
+        fmt::Display::fmt(&self.body, f)
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum FetchBody {
+pub enum FetchObjectBody {
     Entries(Vec<FetchObjectEntry>),
     AttributesAll(Variable),
 }
 
-impl Pretty for FetchBody {
+impl Pretty for FetchObjectBody {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
+        // don't indent before left curly, since it will always be in the same line as the previous element
+        write!(f, "{}", token::Char::CurlyLeft)?;
         match self {
-            FetchBody::Entries(entries) => {
+            FetchObjectBody::Entries(entries) => {
                 if !entries.is_empty() {
+                    writeln!(f, "")?; // entries always go on new line
                     Pretty::fmt(&entries[0], indent_level + 1, f)?;
                     for field in &entries[1..] {
                         writeln!(f, ",")?;
@@ -118,33 +121,33 @@ impl Pretty for FetchBody {
                     }
                     writeln!(f, "")?;
                 }
-                Ok(())
-            }
-            FetchBody::AttributesAll(var) => {
                 indent(indent_level, f)?;
-                write!(f, "{}", var)
+                write!(f, "{}", token::Char::CurlyRight)
+            }
+            FetchObjectBody::AttributesAll(var) => {
+                write!(f, " {}{}{} {}", var, token::Char::Dot, token::Char::Star, token::Char::CurlyRight)
             }
         }
     }
 }
 
-impl fmt::Display for FetchBody {
+impl fmt::Display for FetchObjectBody {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ", token::Char::CurlyLeft)?;
         match self {
-            FetchBody::Entries(entries) => {
+            FetchObjectBody::Entries(entries) => {
                 if !entries.is_empty() {
                     write!(f, "{}", entries[0])?;
                     for field in &entries[1..] {
                         write!(f, ", {}", field)?;
                     }
                 }
-                Ok(())
             }
-            FetchBody::AttributesAll(var) => {
-                write!(f, "{}", var)
+            FetchObjectBody::AttributesAll(var) => {
+                write!(f, "{}", var)?;
             }
         }
-
+        write!(f, "{}", token::Char::CurlyRight)
     }
 }
 
@@ -164,7 +167,7 @@ impl FetchObjectEntry {
 impl Pretty for FetchObjectEntry {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, "\"{}\"{} ", self.key, token::Char::Colon)?;
+        write!(f, "{}{}", self.key, token::Char::Colon)?;
         Pretty::fmt(&self.value, indent_level, f)
     }
 }
@@ -189,18 +192,13 @@ impl FetchList {
 
 impl Pretty for FetchList {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
-        indent(indent_level, f)?;
-        writeln!(f, "{}", token::Char::SquareLeft)?;
-        Pretty::fmt(&self.stream, indent_level + 1, f)?;
-        writeln!(f, "")?;
-        indent(indent_level, f)?;
-        write!(f, "{}", token::Char::SquareRight)
+        Pretty::fmt(&self.stream, indent_level, f)
     }
 }
 
 impl fmt::Display for FetchList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {}", token::Char::SquareLeft, self.stream, token::Char::SquareRight)
+        fmt::Display::fmt(&self.stream, f)
     }
 }
 
@@ -214,9 +212,18 @@ pub enum FetchSingle {
 impl Pretty for FetchSingle {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            FetchSingle::Attribute(single) => Pretty::fmt(single, indent_level, f),
-            FetchSingle::Expression(single) => Pretty::fmt(single, indent_level, f),
-            FetchSingle::Subquery(single) => Pretty::fmt(single, indent_level, f),
+            FetchSingle::Attribute(single) => {
+                write!(f, " ")?;
+                Pretty::fmt(single, indent_level, f)
+            },
+            FetchSingle::Expression(single) => {
+                write!(f, " ")?;
+                Pretty::fmt(single, indent_level, f)
+            },
+            FetchSingle::Subquery(single) => {
+                writeln!(f, "")?;
+                Pretty::fmt(single, indent_level + 1, f)
+            }
         }
     }
 }
@@ -240,21 +247,39 @@ pub enum FetchStream {
 
 impl Pretty for FetchStream {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
+        // don't indent before left curly, since it will always be in the same line as the previous element
         match self {
-            FetchStream::Attribute(stream) => Pretty::fmt(stream, indent_level, f),
-            FetchStream::Function(stream) => Pretty::fmt(stream, indent_level, f),
-            FetchStream::Subquery(stream) => Pretty::fmt(stream, indent_level, f),
+            FetchStream::Attribute(stream) => {
+                write!(f, "{} ", token::Char::SquareLeft)?;
+                Pretty::fmt(stream, indent_level, f)?;
+                write!(f, " {}", token::Char::SquareRight)
+            }
+            FetchStream::Function(stream) => {
+                write!(f, "{} ", token::Char::SquareLeft)?;
+                Pretty::fmt(stream, indent_level, f)?;
+                write!(f, " {}", token::Char::SquareRight)
+            }
+            FetchStream::Subquery(stream) => {
+                writeln!(f, "{}", token::Char::SquareLeft)?;
+                Pretty::fmt(stream, indent_level + 1, f)?;
+                writeln!(f, "")?;
+                indent(indent_level, f)?;
+                write!(f, "{}", token::Char::SquareRight)
+            }
         }
     }
 }
 
 impl fmt::Display for FetchStream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ", token::Char::SquareLeft)?;
         match self {
             FetchStream::Attribute(stream) => fmt::Display::fmt(stream, f),
             FetchStream::Function(stream) => fmt::Display::fmt(stream, f),
             FetchStream::Subquery(stream) => fmt::Display::fmt(stream, f),
-        }    }
+        }?;
+        write!(f, "{}", token::Char::SquareRight)
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -270,12 +295,7 @@ impl FetchAttribute {
     }
 }
 
-impl Pretty for FetchAttribute {
-    fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
-        indent(indent_level, f)?;
-        fmt::Display::fmt(self, f)
-    }
-}
+impl Pretty for FetchAttribute {}
 
 impl fmt::Display for FetchAttribute {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

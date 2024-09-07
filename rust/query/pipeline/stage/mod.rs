@@ -4,6 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use std::fmt;
+
+pub use self::{
+    delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Modifier, put::Put, reduce::Reduce,
+    update::Update,
+};
+use crate::{pretty::Pretty, util::enum_getter};
+
 pub mod delete;
 pub mod fetch;
 mod insert;
@@ -12,14 +20,6 @@ pub mod modifier;
 mod put;
 pub mod reduce;
 mod update;
-
-use std::fmt;
-
-pub use self::{
-    delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Modifier, put::Put, reduce::Reduce,
-    update::Update,
-};
-use crate::{pretty::Pretty, util::enum_getter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Stage {

@@ -12,6 +12,7 @@ use crate::{
     util::write_joined,
     variable::Variable,
 };
+use crate::pretty::indent;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Reduce {
@@ -26,7 +27,15 @@ impl Pretty for Reduce {
             Self::Check(inner) => Pretty::fmt(inner, indent_level, f),
             Self::First(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Value(inner) => {
-                write_joined!(f, ", ", inner)?;
+                if !inner.is_empty() {
+                    indent(indent_level, f)?;
+                    let first = &inner[0];
+                    Pretty::fmt(first, indent_level, f)?;
+                    for element in &inner[1..] {
+                        write!(f, "{}", token::Char::Comma)?;
+                        Pretty::fmt(element, indent_level, f)?;
+                    }
+                }
                 f.write_char(';')?;
                 Ok(())
             }

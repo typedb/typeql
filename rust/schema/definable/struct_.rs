@@ -4,11 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt;
-use std::fmt::Formatter;
+use std::{fmt, fmt::Formatter};
 
-use crate::{common::{identifier::Identifier, Span}, pretty::Pretty, token, type_::TypeRefAny};
-use crate::pretty::indent;
+use crate::{
+    common::{identifier::Identifier, Span},
+    pretty::{indent, Pretty},
+    token,
+    type_::TypeRefAny,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {

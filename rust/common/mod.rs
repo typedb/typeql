@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+pub use error::Error;
+
 pub mod date_time;
 pub mod error;
 pub(crate) mod identifier;
 pub mod string;
 pub mod token;
-
-pub use error::Error;
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 

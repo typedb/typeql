@@ -6,39 +6,35 @@
 
 use itertools::Itertools;
 
-use super::{
-    define::function::visit_definition_function,
-    expression::{visit_expression, visit_expression_function},
-    literal::{visit_integer_literal, visit_quoted_string_literal},
-    statement::{
-        thing::{visit_relation, visit_statement_thing},
-        visit_statement,
+use super::{define::function::visit_definition_function, expression::{visit_expression, visit_expression_function}, literal::{visit_integer_literal, visit_quoted_string_literal}, statement::{
+    thing::{visit_relation, visit_statement_thing},
+    visit_statement,
+}, type_::{visit_label, visit_label_list}, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher, visit_var_named};
+use crate::{
+    common::{
+        error::TypeQLError,
+        token::{Aggregate, Order},
+        Spanned,
     },
-    type_::{visit_label, visit_label_list},
-    visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
-};
-use crate::{common::{
-    error::TypeQLError,
-    token::{Aggregate, Order},
-    Spanned,
-}, pattern::{Conjunction, Disjunction, Negation, Optional, Pattern}, query::{
-    pipeline::{
-        stage::{
-            delete::{Deletable, DeletableKind},
-            fetch::FetchEntry,
-            modifier::{Limit, Offset, OrderedVariable, Select, Sort},
-            reduce::{Check, Count, First, ReduceValue, Stat},
-            Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
+    pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
+    query::{
+        pipeline::{
+            stage::{
+                delete::{Deletable, DeletableKind},
+                fetch::FetchEntry,
+                modifier::{Limit, Offset, OrderedVariable, Select, Sort},
+                reduce::{Check, Count, First, ReduceValue, Stat},
+                Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
+            },
+            Preamble,
         },
-        Preamble,
+        stage::fetch::{FetchAttribute, FetchObjectBody, FetchList, FetchObject, FetchObjectEntry, FetchSingle, FetchStream},
+        Pipeline,
     },
-    stage::fetch::{
-        FetchAttribute, FetchList, FetchObject, FetchObjectEntry, FetchSingle,
-        FetchStream,
-    },
-    Pipeline,
-}, type_::NamedType, value::StringLiteral, TypeRef, TypeRefAny};
-use crate::query::stage::fetch::FetchBody;
+    type_::NamedType,
+    value::StringLiteral,
+    TypeRef, TypeRefAny,
+};
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
@@ -213,8 +209,7 @@ fn visit_clause_fetch(node: Node<'_>) -> Fetch {
     debug_assert_eq!(node.as_rule(), Rule::clause_fetch);
     let span = node.span();
     let mut children = node.into_children();
-    let fetch_object =
-        visit_fetch_object(children.skip_expected(Rule::FETCH).consume_expected(Rule::fetch_object));
+    let fetch_object = visit_fetch_object(children.skip_expected(Rule::FETCH).consume_expected(Rule::fetch_object));
     debug_assert_eq!(children.try_consume_any(), None);
     Fetch::new(span, fetch_object)
 }
@@ -245,7 +240,7 @@ fn visit_fetch_attribute(node: Node<'_>) -> FetchAttribute {
     debug_assert_eq!(node.as_rule(), Rule::fetch_attribute);
     let span = node.span();
     let mut children = node.into_children();
-    let owner = visit_var(children.consume_expected(Rule::var_named));
+    let owner = visit_var_named(children.consume_expected(Rule::var_named));
     let child = children.consume_any();
     let attribute = match child.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(child)),
@@ -264,18 +259,18 @@ fn visit_fetch_object(node: Node<'_>) -> FetchObject {
     FetchObject::new(span, body)
 }
 
-fn visit_fetch_object_body(node: Node<'_>) -> FetchBody {
+fn visit_fetch_object_body(node: Node<'_>) -> FetchObjectBody {
     debug_assert_eq!(node.as_rule(), Rule::fetch_body);
     let child = node.into_child();
     match child.as_rule() {
         Rule::fetch_object_entries => {
             let entries = child.into_children().map(visit_fetch_object_entry).collect();
-            FetchBody::Entries(entries)
+            FetchObjectBody::Entries(entries)
         }
         Rule::fetch_attributes_all => {
-            let var = visit_var(child.into_children().consume_expected(Rule::var_named));
-            FetchBody::AttributesAll(var)
-        },
+            let var = visit_var_named(child.into_children().consume_expected(Rule::var_named));
+            FetchObjectBody::AttributesAll(var)
+        }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

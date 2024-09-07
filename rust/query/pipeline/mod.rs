@@ -7,7 +7,12 @@
 use std::fmt;
 
 use self::stage::Stage;
-use crate::{common::{Span, Spanned}, pretty::{indent, Pretty}, schema::definable, token};
+use crate::{
+    common::{Span, Spanned},
+    pretty::{indent, Pretty},
+    schema::definable,
+    token,
+};
 
 pub mod stage;
 
@@ -69,17 +74,14 @@ impl Spanned for Pipeline {
 impl Pretty for Pipeline {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for preamble in &self.preambles {
-            indent(indent_level, f)?;
             Pretty::fmt(preamble, indent_level, f)?;
             writeln!(f)?;
         }
         if let Some((last, rest)) = self.stages.split_last() {
             for stage in rest {
-                indent(indent_level, f)?;
                 Pretty::fmt(stage, indent_level, f)?;
                 writeln!(f)?;
             }
-            indent(indent_level, f)?;
             Pretty::fmt(last, indent_level, f)?;
         }
         Ok(())
