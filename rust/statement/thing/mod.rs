@@ -135,14 +135,14 @@ impl fmt::Display for RolePlayer {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AttributeValueStatement {
     span: Option<Span>,
-    pub type_: Option<TypeRef>,
+    pub var: Variable,
     pub value: Literal,
     pub isa: Isa,
 }
 
 impl AttributeValueStatement {
-    pub fn new(span: Option<Span>, type_: Option<TypeRef>, value: Literal, isa: Isa) -> Self {
-        Self { span, type_, value, isa }
+    pub fn new(span: Option<Span>, var: Variable, value: Literal, isa: Isa) -> Self {
+        Self { span, var, value, isa }
     }
 }
 
@@ -150,9 +150,7 @@ impl Pretty for AttributeValueStatement {}
 
 impl fmt::Display for AttributeValueStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(type_) = &self.type_ {
-            write!(f, "{} ", type_)?;
-        }
+        write!(f, "{} ", self.var)?;
         write!(f, "{} {}", self.value, self.isa)?;
         Ok(())
     }
@@ -161,9 +159,9 @@ impl fmt::Display for AttributeValueStatement {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AttributeComparisonStatement {
     span: Option<Span>,
-    var: Variable,
-    comparison: comparison::Comparison,
-    isa: Isa,
+    pub var: Variable,
+    pub comparison: comparison::Comparison,
+    pub isa: Isa,
 }
 
 impl AttributeComparisonStatement {
