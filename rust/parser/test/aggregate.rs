@@ -11,7 +11,7 @@ use crate::parse_query;
 fn test_parsing_aggregate_std() {
     let query = r#"match
 $x isa movie;
-std($x);"#;
+reduce std($x);"#;
     let parsed = parse_query(query).unwrap();
     // let expected = typeql_match!(var("x").isa("movie")).std(cvar("x"));
     assert_valid_eq_repr!(expected, parsed, query);
@@ -41,7 +41,7 @@ fn test_aggregate_count_query() {
     let query = r#"match
 ($x, $y) isa friendship;
 select $x, $y;
-count($x);"#;
+reduce count($x);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(rel("x").links("y").isa("friendship")).get_fixed([var("x"), cvar("y")]).count();
     assert_valid_eq_repr!(expected, parsed, query);
@@ -52,7 +52,7 @@ fn when_comparing_count_query_using_typeql_and_rust_typeql_they_are_equivalent()
     let query = r#"match
 $x isa movie,
     has title "Godfather";
-count($x);"#;
+reduce count($x);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(var("x").isa("movie").has(("title", "Godfather"))).count();
     assert_valid_eq_repr!(expected, parsed, query);

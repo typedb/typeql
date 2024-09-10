@@ -217,19 +217,7 @@ pub enum SingleOutput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ReturnSingle {
-    span: Option<Span>,
-    pub outputs: Vec<SingleOutput>,
-}
-
-impl ReturnSingle {
-    pub fn new(span: Option<Span>, outputs: Vec<SingleOutput>) -> Self {
-        Self { span, outputs }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReturnStatement {
     Stream(ReturnStream),
-    Single(ReturnSingle),
+    Reduce(Reduce),
 }

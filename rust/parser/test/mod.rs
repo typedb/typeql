@@ -167,10 +167,10 @@ fn when_parsing_query_with_comments_they_are_ignored() {
     let query = r#"match
 # there's a comment here
 $x isa###WOW HERES ANOTHER###
-movie; count($x);"#;
+movie; reduce count($x);"#;
     let uncommented = r#"match
 $x isa movie;
-count($x);"#;
+reduce count($x);"#;
     let parsed = parse_query(query).unwrap();
     // let expected = typeql_match!(var("x").isa("movie")).count();
     assert_valid_eq_repr!(expected, parsed, uncommented);

@@ -8,11 +8,10 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span},
-    pretty::Pretty,
+    pretty::{indent, Pretty},
     util::write_joined,
     variable::Variable,
 };
-use crate::pretty::indent;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Reduce {
@@ -23,12 +22,13 @@ pub enum Reduce {
 
 impl Pretty for Reduce {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        write!(f, "{} ", token::Clause::Reduce)?;
         match self {
             Self::Check(inner) => Pretty::fmt(inner, indent_level, f),
             Self::First(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Value(inner) => {
                 if !inner.is_empty() {
-                    indent(indent_level, f)?;
                     let first = &inner[0];
                     Pretty::fmt(first, indent_level, f)?;
                     for element in &inner[1..] {
@@ -71,7 +71,7 @@ impl Pretty for Check {}
 
 impl fmt::Display for Check {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{};", token::Aggregate::Check)
+        write!(f, "{};", token::ReduceOperator::Check)
     }
 }
 
@@ -91,7 +91,7 @@ impl Pretty for First {}
 
 impl fmt::Display for First {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}(", token::Aggregate::First)?;
+        write!(f, "{}(", token::ReduceOperator::First)?;
         write_joined!(f, ", ", self.variables)?;
         f.write_str(");")?;
         Ok(())
@@ -138,7 +138,7 @@ impl Pretty for Count {}
 
 impl fmt::Display for Count {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}(", token::Aggregate::Count)?;
+        write!(f, "{}(", token::ReduceOperator::Count)?;
         write_joined!(f, ", ", self.variables)?;
         f.write_str(")")?;
         Ok(())
@@ -148,13 +148,13 @@ impl fmt::Display for Count {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Stat {
     span: Option<Span>,
-    pub aggregate: token::Aggregate,
+    pub reduce_operator: token::ReduceOperator,
     pub variable: Variable,
 }
 
 impl Stat {
-    pub fn new(span: Option<Span>, aggregate: token::Aggregate, variable: Variable) -> Self {
-        Self { span, aggregate, variable }
+    pub fn new(span: Option<Span>, aggregate: token::ReduceOperator, variable: Variable) -> Self {
+        Self { span, reduce_operator: aggregate, variable }
     }
 }
 
@@ -162,6 +162,6 @@ impl Pretty for Stat {}
 
 impl fmt::Display for Stat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}({})", self.aggregate, self.variable)
+        write!(f, "{}({})", self.reduce_operator, self.variable)
     }
 }
