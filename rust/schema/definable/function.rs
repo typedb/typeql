@@ -4,12 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt::{self, Write};
+use std::fmt::{self, Formatter, Write};
 
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
-    query::pipeline::stage::{Match, Modifier, Reduce},
+    query::{
+        pipeline::stage::{Match, Modifier},
+        stage::reduce::Reduction,
+    },
     type_::TypeRefAny,
     variable::Variable,
 };
@@ -199,6 +202,32 @@ impl fmt::Display for Single {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ReturnStatement {
+    Stream(ReturnStream),
+    Reduce(Reduction),
+}
+
+impl Pretty for ReturnStatement {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        fmt::Display::fmt(self, f)
+    }
+}
+
+impl fmt::Display for ReturnStatement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ReturnStatement::Stream(return_stream) => {
+                write!(f, "{} {}", token::Keyword::Return, return_stream)
+            }
+            ReturnStatement::Reduce(reduction) => {
+                write!(f, "{} {}", token::Keyword::Return, reduction)
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnStream {
     span: Option<Span>,
     pub vars: Vec<Variable>,
@@ -210,14 +239,13 @@ impl ReturnStream {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum SingleOutput {
-    Variable(Variable),
-    Reduce(Reduce),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ReturnStatement {
-    Stream(ReturnStream),
-    Reduce(Reduce),
+impl fmt::Display for ReturnStream {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        assert!(!self.vars.is_empty());
+        write!(f, "{}", self.vars[0])?;
+        for var in &self.vars[1..] {
+            write!(f, ", {}", var)?;
+        }
+        Ok(())
+    }
 }

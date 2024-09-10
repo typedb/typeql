@@ -126,6 +126,7 @@ string_enum! { Keyword
     Owns = "owns",
     Plays = "plays",
     Relates = "relates",
+    Return = "return",
     Struct = "struct",
     Sub = "sub",
     SubX = "sub!",

@@ -35,8 +35,11 @@ use crate::{
             },
             Preamble,
         },
-        stage::fetch::{
-            FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
+        stage::{
+            fetch::{
+                FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
+            },
+            reduce::Reduction,
         },
         Pipeline,
     },
@@ -321,16 +324,16 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::operator_reduce);
     let mut children = node.into_children();
     children.skip_expected(Rule::REDUCE);
-    visit_reduce(children.consume_any())
+    Reduce::new(visit_reduce(children.consume_any()))
 }
 
-pub(super) fn visit_reduce(node: Node<'_>) -> Reduce {
+pub(super) fn visit_reduce(node: Node<'_>) -> Reduction {
     debug_assert_eq!(node.as_rule(), Rule::reduce);
     let mut children = node.into_children();
     let reduce = match children.peek_rule().unwrap() {
-        Rule::CHECK => Reduce::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
-        Rule::reduce_first => Reduce::First(visit_reduce_first(children.consume_expected(Rule::reduce_first))),
-        Rule::reduce_value => Reduce::Value(children.by_ref().map(visit_reduce_value).collect()),
+        Rule::CHECK => Reduction::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
+        Rule::reduce_first => Reduction::First(visit_reduce_first(children.consume_expected(Rule::reduce_first))),
+        Rule::reduce_value => Reduction::Value(children.by_ref().map(visit_reduce_value).collect()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
     debug_assert!(children.try_consume_any().is_none());

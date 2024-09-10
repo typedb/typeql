@@ -14,36 +14,43 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Reduce {
-    Check(Check),
-    First(First),
-    Value(Vec<ReduceValue>),
+pub struct Reduce {
+    reduction: Reduction,
+}
+
+impl Reduce {
+    pub fn new(reduction: Reduction) -> Self {
+        Reduce { reduction }
+    }
 }
 
 impl Pretty for Reduce {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, "{} ", token::Clause::Reduce)?;
-        match self {
-            Self::Check(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::First(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::Value(inner) => {
-                if !inner.is_empty() {
-                    let first = &inner[0];
-                    Pretty::fmt(first, indent_level, f)?;
-                    for element in &inner[1..] {
-                        write!(f, "{}", token::Char::Comma)?;
-                        Pretty::fmt(element, indent_level, f)?;
-                    }
-                }
-                f.write_char(';')?;
-                Ok(())
-            }
-        }
+        write!(f, "{} {};", token::Clause::Reduce, self.reduction)
     }
 }
 
 impl fmt::Display for Reduce {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {};", token::Clause::Reduce, self.reduction)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Reduction {
+    Check(Check),
+    First(First),
+    Value(Vec<ReduceValue>),
+}
+
+impl Pretty for Reduction {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
+impl fmt::Display for Reduction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Check(inner) => fmt::Display::fmt(inner, f),
