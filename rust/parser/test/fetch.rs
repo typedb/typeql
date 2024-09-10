@@ -24,7 +24,7 @@ fetch {
         "entry single 3":
             match
             $x has name $n;
-            count($n);,
+            reduce count($n);,
         "entry object": {
             "all": { $x.* }
         },

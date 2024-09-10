@@ -14,9 +14,7 @@ use crate::{
         visit_identifier, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::{
-        function::{
-            Argument, Output, ReturnSingle, ReturnStatement, ReturnStream, Signature, Single, SingleOutput, Stream,
-        },
+        function::{Argument, Output, ReturnStatement, ReturnStream, Signature, Single, Stream},
         Function,
     },
 };
@@ -45,26 +43,12 @@ fn visit_return_statement(node: Node<'_>) -> ReturnStatement {
     let child = children.consume_any();
     let return_stmt = match child.as_rule() {
         Rule::return_statement_stream => ReturnStatement::Stream(visit_return_statement_stream(child)),
-        Rule::return_statement_single => ReturnStatement::Single(visit_return_statement_single(child)),
+        Rule::reduce => ReturnStatement::Reduce(visit_reduce(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
     return_stmt
-}
-
-fn visit_return_statement_single(node: Node<'_>) -> ReturnSingle {
-    debug_assert_eq!(node.as_rule(), Rule::return_statement_single);
-    let span = node.span();
-    let outputs = node
-        .into_children()
-        .map(|child| match child.as_rule() {
-            Rule::var => SingleOutput::Variable(visit_var(child)),
-            Rule::reduce => SingleOutput::Reduce(visit_reduce(child)),
-            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-        })
-        .collect();
-    ReturnSingle::new(span, outputs)
 }
 
 fn visit_return_statement_stream(node: Node<'_>) -> ReturnStream {

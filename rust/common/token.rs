@@ -62,8 +62,8 @@ string_enum! { Clause
     Match = "match",
     Group = "group",
     Fetch = "fetch",
-    Get = "get",
     With = "with",
+    Reduce = "reduce",
 }
 
 string_enum! { Modifier
@@ -147,7 +147,7 @@ string_enum! { Annotation
     Values = "values",
 }
 
-string_enum! { Aggregate
+string_enum! { ReduceOperator
     Check = "check",
     First = "first",
     Count = "count",

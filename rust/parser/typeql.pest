@@ -44,10 +44,10 @@ var_order = { var ~ ORDER? }
 
 // REDUCE ======================================================================
 
-operator_reduce = { reduce ~ SEMICOLON }
+operator_reduce = { REDUCE ~ reduce ~ SEMICOLON }
 reduce = { CHECK
          | reduce_first
-         | reduce_value ~ ( COMMA ~ reduce_value )*
+         | reduce_value ~ ( COMMA ~ reduce_value )* ~ COMMA?
          }
 
 reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
@@ -78,8 +78,8 @@ statement = { statement_type | statement_thing_var | statement_single | statemen
 
 // TYPE STATEMENTS =============================================================
 
-statement_type = { kind ~ type_ref_any ~ ( type_constraint ~ ( COMMA ~ type_constraint )* )?
-                 | type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* 
+statement_type = { kind ~ type_ref_any ~ ( type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA? )?
+                 | type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA?
                  }
 type_constraint = { type_constraint_base ~ annotations? }
 type_constraint_base = { sub_constraint | value_type_constraint | label_constraint
@@ -100,9 +100,9 @@ plays_constraint = { PLAYS ~ type_ref ~ ( AS ~ type_ref )? }
 // THING STATEMENTS ============================================================
 
 statement_thing = { statement_thing_var | statement_relation_anonymous }
-statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* }
+statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* ~ COMMA? }
 
-statement_thing_var = { var ~ thing_constraint ~ ( COMMA ~ thing_constraint )*
+statement_thing_var = { var ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?
                       | var ~ ( value_literal | expression_struct ) ~ isa_constraint
                       | var ~ comparison ~ isa_constraint
                       }
@@ -117,7 +117,7 @@ has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
                  }
 links_constraint = { LINKS ~ relation }
 
-relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ PAREN_CLOSE } // A list of role players in a Relations
+relation = { PAREN_OPEN ~ role_player ~ ( COMMA ~ role_player )* ~ COMMA? ~ PAREN_CLOSE } // A list of role players in a Relations
 role_player = { type_ref_list ~ COLON ~ var
               | type_ref ~ COLON ~ var
               | var
@@ -138,7 +138,7 @@ statement_assignment = { assignment_left ~ ASSIGN ~ expression }
 assignment_left = { vars_assignment | struct_destructor }
 statement_in = { vars_assignment ~ IN ~ ( expression_function | expression_list ) }
 
-vars_assignment = { var_assignment ~ ( COMMA ~ var_assignment )* }
+vars_assignment = { var_assignment ~ ( COMMA ~ var_assignment )* ~ COMMA? }
 var_assignment = { var_optional | var }
 
 comparison = { comparator ~ expression_value }
@@ -159,10 +159,10 @@ list_index = { SQ_BRACKET_OPEN ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
 expression_function_name = { builtin_func_name | identifier }
-expression_arguments = { expression ~ ( COMMA ~ expression )* }
+expression_arguments = { expression ~ ( COMMA ~ expression )* ~ COMMA? }
 
 expression_list = { expression_list_subrange | expression_list_new }
-expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ SQ_BRACKET_CLOSE }
+expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ COMMA? ~ SQ_BRACKET_CLOSE }
 expression_list_subrange = { var ~ list_range }
 list_range = { SQ_BRACKET_OPEN ~ expression_value ~ DOUBLE_DOT ~ expression_value ~ SQ_BRACKET_CLOSE }
 
@@ -177,7 +177,7 @@ fetch_some = { fetch_single | fetch_object | fetch_list }
 
 fetch_object = { CURLY_OPEN ~ fetch_body  ~ CURLY_CLOSE }
 fetch_body = { fetch_object_entries | fetch_attributes_all }
-fetch_object_entries = { fetch_object_entry ~ ( COMMA ~ fetch_object_entry )* }
+fetch_object_entries = { fetch_object_entry ~ ( COMMA ~ fetch_object_entry )* ~ COMMA? }
 fetch_object_entry = { fetch_key ~ COLON ~ fetch_some }
 fetch_key = { quoted_string_literal }
 
@@ -203,7 +203,7 @@ definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { kind? ~ label ~ ( ( annotations | type_capability ) ~ ( COMMA ~ type_capability )* )? }
+definition_type = { kind? ~ label ~ COMMA? ~ ( ( annotations | type_capability ) ~ ( COMMA ~ type_capability )* ~ COMMA? )? }
 type_capability = { type_capability_base ~ annotations? }
 type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
                        | owns_declaration | plays_declaration | relates_declaration
@@ -226,21 +226,20 @@ definition_function = { FUN ~ function_signature ~ COLON ~ clause_match ~ operat
 
 function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
-function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* )? }
+function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* ~ COMMA? )? }
 function_argument = { var ~ COLON ~ named_type_any }
 
 function_output = { function_output_stream | function_output_single }
-function_output_stream = { CURLY_OPEN ~ named_type_any ~ ( COMMA ~ named_type_any )* ~ CURLY_CLOSE }
-function_output_single = { named_type_any ~ ( COMMA ~ named_type_any )* }
+function_output_stream = { CURLY_OPEN ~ named_type_any ~ ( COMMA ~ named_type_any )* ~ COMMA? ~ CURLY_CLOSE }
+function_output_single = { named_type_any ~ ( COMMA ~ named_type_any )* ~ COMMA? }
 
-return_statement = { RETURN ~ ( return_statement_stream | return_statement_single ) ~ SEMICOLON }
+return_statement = { RETURN ~ ( return_statement_stream | reduce ) ~ SEMICOLON }
 return_statement_stream = { CURLY_OPEN ~ vars ~ CURLY_CLOSE }
-return_statement_single = { ( var | reduce ) ~ ( COMMA ~ ( var | reduce ) )* }
 
 // STRUCT DEFINITION ===========================================================
 
 definition_struct = { STRUCT ~ identifier ~ COLON ~ definition_struct_fields ~ SEMICOLON }
-definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* }
+definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* ~ COMMA? }
 definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type }
 
 struct_field_value_type = { value_type_optional | value_type }
@@ -348,7 +347,7 @@ cardinality_exact = { integer_literal }
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
 annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ identifier ~ PAREN_CLOSE }
 annotation_range = { ANNOTATION_RANGE ~ PAREN_OPEN ~ range ~ PAREN_CLOSE }
-annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ PAREN_CLOSE }
+annotation_values = { ANNOTATION_VALUES ~ PAREN_OPEN ~ value_literal ~ ( COMMA ~ value_literal )* ~ COMMA? ~ PAREN_CLOSE }
 
 range = { range_full | range_from | range_to }
 range_from = { range_bound ~ DOUBLE_DOT }
@@ -390,6 +389,7 @@ PUT = @{ "put" ~ WB }
 UPDATE = @{ "update" ~ WB }
 DELETE = @{ "delete" ~ WB }
 
+REDUCE = @{ "reduce" ~ WB }
 CHECK = @{ "check" ~ WB }
 FIRST = @{ "first" ~ WB }
 

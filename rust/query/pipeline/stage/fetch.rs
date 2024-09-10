@@ -7,12 +7,12 @@
 use std::{fmt, fmt::Formatter};
 
 use crate::{
-    common::{Span, token},
+    common::{token, Span},
     expression::{Expression, FunctionCall},
     pretty::{indent, Pretty},
     query::Pipeline,
-    TypeRefAny,
-    value::StringLiteral, Variable,
+    value::StringLiteral,
+    TypeRefAny, Variable,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -56,11 +56,11 @@ impl Pretty for FetchEntry {
             FetchEntry::Object(entry) => {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
-            },
+            }
             FetchEntry::List(entry) => {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
-            },
+            }
             FetchEntry::Single(entry) => Pretty::fmt(entry, indent_level, f),
         }
     }
@@ -215,11 +215,11 @@ impl Pretty for FetchSingle {
             FetchSingle::Attribute(single) => {
                 write!(f, " ")?;
                 Pretty::fmt(single, indent_level, f)
-            },
+            }
             FetchSingle::Expression(single) => {
                 write!(f, " ")?;
                 Pretty::fmt(single, indent_level, f)
-            },
+            }
             FetchSingle::Subquery(single) => {
                 writeln!(f, "")?;
                 Pretty::fmt(single, indent_level + 1, f)

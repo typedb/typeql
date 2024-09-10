@@ -6,14 +6,21 @@
 
 use itertools::Itertools;
 
-use super::{define::function::visit_definition_function, expression::{visit_expression, visit_expression_function}, literal::{visit_integer_literal, visit_quoted_string_literal}, statement::{
-    thing::{visit_relation, visit_statement_thing},
-    visit_statement,
-}, type_::{visit_label, visit_label_list}, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher, visit_var_named};
+use super::{
+    define::function::visit_definition_function,
+    expression::{visit_expression, visit_expression_function},
+    literal::{visit_integer_literal, visit_quoted_string_literal},
+    statement::{
+        thing::{visit_relation, visit_statement_thing},
+        visit_statement,
+    },
+    type_::{visit_label, visit_label_list},
+    visit_var, visit_var_named, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
+};
 use crate::{
     common::{
         error::TypeQLError,
-        token::{Aggregate, Order},
+        token::{Order, ReduceOperator},
         Spanned,
     },
     pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
@@ -28,7 +35,9 @@ use crate::{
             },
             Preamble,
         },
-        stage::fetch::{FetchAttribute, FetchObjectBody, FetchList, FetchObject, FetchObjectEntry, FetchSingle, FetchStream},
+        stage::fetch::{
+            FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
+        },
         Pipeline,
     },
     type_::NamedType,
@@ -310,7 +319,9 @@ fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
 
 fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::operator_reduce);
-    visit_reduce(node.into_child())
+    let mut children = node.into_children();
+    children.skip_expected(Rule::REDUCE);
+    visit_reduce(children.consume_any())
 }
 
 pub(super) fn visit_reduce(node: Node<'_>) -> Reduce {
@@ -345,26 +356,26 @@ fn visit_reduce_value(node: Node<'_>) -> ReduceValue {
             children.try_consume_expected(Rule::vars).map(visit_vars).unwrap_or_default(),
         )),
         Rule::MAX => {
-            ReduceValue::Stat(Stat::new(span, Aggregate::Max, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, ReduceOperator::Max, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MIN => {
-            ReduceValue::Stat(Stat::new(span, Aggregate::Min, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, ReduceOperator::Min, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MEAN => {
-            ReduceValue::Stat(Stat::new(span, Aggregate::Mean, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, ReduceOperator::Mean, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MEDIAN => {
-            ReduceValue::Stat(Stat::new(span, Aggregate::Median, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, ReduceOperator::Median, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::STD => {
-            ReduceValue::Stat(Stat::new(span, Aggregate::Std, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, ReduceOperator::Std, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::SUM => {
-            ReduceValue::Stat(Stat::new(span, Aggregate::Sum, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, ReduceOperator::Sum, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::LIST => {
             // TODO      vvvv rename
-            ReduceValue::Stat(Stat::new(span, Aggregate::List, visit_var(children.consume_expected(Rule::var))))
+            ReduceValue::Stat(Stat::new(span, ReduceOperator::List, visit_var(children.consume_expected(Rule::var))))
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.to_string() }),
     }
