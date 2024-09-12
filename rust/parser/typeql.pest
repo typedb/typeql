@@ -90,12 +90,12 @@ sub_constraint = { SUB_ ~ type_ref_any }
 value_type_constraint = { VALUE ~ value_type }
 label_constraint = { LABEL ~ ( label_scoped | label ) }
 owns_constraint = { OWNS ~ type_ref_list
-                  | OWNS ~ type_ref ~ ( AS ~ type_ref )?
+                  | OWNS ~ type_ref
                   }
 relates_constraint = { RELATES ~ type_ref_list
                      | RELATES ~ type_ref ~ ( AS ~ type_ref )?
                      }
-plays_constraint = { PLAYS ~ type_ref ~ ( AS ~ type_ref )? }
+plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
 
@@ -213,9 +213,9 @@ sub_declaration = { SUB ~ label }
 alias_declaration = { ALIAS ~ label }
 value_type_declaration = { VALUE ~ value_type }
 owns_declaration = { OWNS ~ label_list
-                   | OWNS ~ label ~ ( AS ~ label )?
+                   | OWNS ~ label
                    }
-plays_declaration = { PLAYS ~ label_scoped ~ ( AS ~ named_type )? }
+plays_declaration = { PLAYS ~ label_scoped }
 relates_declaration = { RELATES ~ label_list
                       | RELATES ~ label ~ ( AS ~ label )?
                       }
@@ -263,12 +263,12 @@ undefinable = { undefine_from | undefine_function | undefine_struct | label }
 undefine_from = { undefine_annotation_from_capability
                 | undefine_annotation_from_type
                 | undefine_capability
-                | undefine_override
+                | undefine_specialise
                 }
 undefine_annotation_from_capability = { annotation_category ~ FROM ~ label ~ type_capability_base }
 undefine_annotation_from_type = { annotation_category ~ FROM ~ label }
 undefine_capability = { type_capability_base ~ FROM ~ label }
-undefine_override = { AS ~ label ~ FROM ~ label ~ type_capability_base }
+undefine_specialise = { AS ~ label ~ FROM ~ label ~ type_capability_base }
 
 undefine_function = { FUN ~ identifier }
 undefine_struct = { STRUCT ~ identifier }

@@ -8,7 +8,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
         annotation::visit_annotations,
-        type_::{visit_label, visit_label_list, visit_label_scoped, visit_named_type, visit_value_type},
+        type_::{visit_label, visit_label_list, visit_label_scoped, visit_value_type},
         visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::type_::{
@@ -92,14 +92,9 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
         Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(owned_label)))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
     };
-    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
-        Some(visit_label(children.consume_expected(Rule::label)))
-    } else {
-        None
-    };
 
     debug_assert_eq!(children.try_consume_any(), None);
-    Owns::new(span, owned, overridden)
+    Owns::new(span, owned)
 }
 
 fn visit_relates_declaration(node: Node<'_>) -> Relates {
@@ -114,13 +109,13 @@ fn visit_relates_declaration(node: Node<'_>) -> Relates {
         Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(related_label)))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
     };
-    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
+    let specialised = if children.try_consume_expected(Rule::AS).is_some() {
         Some(visit_label(children.consume_expected(Rule::label)))
     } else {
         None
     };
     debug_assert_eq!(children.try_consume_any(), None);
-    Relates::new(span, related, overridden)
+    Relates::new(span, related, specialised)
 }
 
 fn visit_plays_declaration(node: Node<'_>) -> Plays {
@@ -130,12 +125,7 @@ fn visit_plays_declaration(node: Node<'_>) -> Plays {
     children.skip_expected(Rule::PLAYS);
 
     let role = visit_label_scoped(children.consume_expected(Rule::label_scoped));
-    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
-        Some(visit_named_type(children.consume_expected(Rule::named_type)))
-    } else {
-        None
-    };
 
     debug_assert_eq!(children.try_consume_any(), None);
-    Plays::new(span, role, overridden)
+    Plays::new(span, role)
 }

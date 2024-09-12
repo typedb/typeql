@@ -8,24 +8,7 @@ use super::assert_valid_eq_repr;
 use crate::parse_query;
 
 #[test]
-fn test_define_query_with_owns_overrides() {
-    let query = r#"define
-entity triangle;
-triangle owns side-length;
-triangle-right-angled sub triangle;
-triangle-right-angled owns hypotenuse-length as side-length;"#;
-    let parsed = parse_query(query).unwrap();
-    // let expected = define!(
-    // type_("triangle").sub("entity"),
-    // type_("triangle").owns("side-length"),
-    // type_("triangle-right-angled").sub("triangle"),
-    // type_("triangle-right-angled").owns("hypotenuse-length".as_("side-length"))
-    // );
-    assert_valid_eq_repr!(expected, parsed, query);
-}
-
-#[test]
-fn test_define_query_with_relates_overrides() {
+fn test_define_query_with_relates_specialises() {
     let query = r#"define
 entity pokemon;
 relation evolves;
@@ -47,7 +30,17 @@ evolves-final relates from-final as from;"#;
 }
 
 #[test]
-fn test_define_query_with_plays_overrides() {
+fn test_define_query_with_owns_specialises_is_not_allowed() {
+    let query = r#"define
+entity triangle;
+triangle owns side-length;
+triangle-right-angled sub triangle;
+triangle-right-angled owns hypotenuse-length as side-length;"#;
+    assert!(parse_query(query).is_err());
+}
+
+#[test]
+fn test_define_query_with_plays_specialises_is_not_allowed() {
     let query = r#"define
 entity pokemon;
 relation evolves;
@@ -57,20 +50,7 @@ relation evolves-final sub evolves;
 evolves-final relates from-final as from;
 pokemon plays evolves-final:from-final as from;"#;
 
-    let parsed = parse_query(query).unwrap();
-    // let expected = define!(
-    // type_("pokemon").sub("entity"),
-    // type_("evolves").sub("relation"),
-    // type_("evolves").relates("from").relates("to"),
-    // type_("evolves-final").sub("evolves"),
-    // type_("evolves-final").relates("from-final".as_("from").distinct()),
-    // type_("pokemon")
-    // .plays("evolves-final:from-final".ordered())
-    // .distinct()
-    // .card(0, None)
-    // );
-
-    assert_valid_eq_repr!(expected, parsed, query);
+    assert!(parse_query(query).is_err());
 }
 
 #[test]
