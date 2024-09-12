@@ -4,7 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{collections::HashMap, fmt};
+use std::{
+    collections::HashMap,
+    fmt,
+    fmt::{Display, Formatter},
+};
 
 use self::{
     comparison::ComparisonStatement,
@@ -14,7 +18,7 @@ pub use self::{thing::Thing, type_::Type};
 use crate::{
     common::{identifier::Identifier, token, Span},
     expression::Expression,
-    pretty::Pretty,
+    pretty::{indent, Pretty},
     util::write_joined,
     variable::Variable,
 };
@@ -73,6 +77,24 @@ pub enum DeconstructField {
     Deconstruct(StructDeconstruct),
 }
 
+impl Pretty for DeconstructField {
+    fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            DeconstructField::Variable(var) => Pretty::fmt(var, indent_level, f),
+            DeconstructField::Deconstruct(struct_deconstruct) => Pretty::fmt(struct_deconstruct, indent_level, f),
+        }
+    }
+}
+
+impl fmt::Display for DeconstructField {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            DeconstructField::Variable(var) => fmt::Display::fmt(var, f),
+            DeconstructField::Deconstruct(struct_deconstruct) => fmt::Display::fmt(struct_deconstruct, f),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StructDeconstruct {
     span: Option<Span>,
@@ -82,6 +104,23 @@ pub struct StructDeconstruct {
 impl StructDeconstruct {
     pub fn new(span: Option<Span>, field_map: HashMap<Identifier, DeconstructField>) -> Self {
         Self { span, field_map }
+    }
+}
+
+impl Pretty for StructDeconstruct {
+    fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        fmt::Display::fmt(self, f)
+    }
+}
+
+impl fmt::Display for StructDeconstruct {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", token::Char::CurlyLeft)?;
+        for (identifier, field_deconstruct) in &self.field_map {
+            write!(f, "{}{} {},", identifier, token::Char::Colon, field_deconstruct)?;
+        }
+        write!(f, "{}", token::Char::CurlyRight)
     }
 }
 
