@@ -48,13 +48,13 @@ pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
             let value = visit_value_literal(children.consume_expected(Rule::value_literal));
             let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
             debug_assert_eq!(children.try_consume_any(), None);
-            Statement::AttributeValue(AttributeValueStatement::new(span, Some(TypeRef::Variable(var)), value, isa))
+            Statement::AttributeValue(AttributeValueStatement::new(span, var, value, isa))
         }
         Rule::expression_struct => {
             let value = visit_expression_struct(children.consume_expected(Rule::expression_struct));
             let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
             debug_assert_eq!(children.try_consume_any(), None);
-            Statement::AttributeValue(AttributeValueStatement::new(span, Some(TypeRef::Variable(var)), value, isa))
+            Statement::AttributeValue(AttributeValueStatement::new(span, var, value, isa))
         }
         Rule::comparison => {
             let comparison = visit_comparison(children.consume_expected(Rule::comparison));
