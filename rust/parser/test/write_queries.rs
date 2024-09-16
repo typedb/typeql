@@ -70,12 +70,3 @@ $x has name "HELLO";"#;
     //     let expected = typeql_match!(var("x").isa("language")).insert(cvar("x").has(("name", "HELLO")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
-
-#[test]
-fn test_if_call_limit_hit() {
-    let query = "insert $p isa person, has age 10;";
-    let parsed = parse_query(query).unwrap();
-    //     let expected = typeql_match!(var("x").isa("language")).insert(cvar("x").has(("name", "HELLO")));
-    assert_valid_eq_repr!(expected, parsed, query);
-
-}
