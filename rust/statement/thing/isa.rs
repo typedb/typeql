@@ -12,7 +12,7 @@ use crate::{
     type_::TypeRef,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Isa {
     span: Option<Span>,
     pub kind: IsaKind,
@@ -33,7 +33,7 @@ impl fmt::Display for Isa {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum IsaKind {
     Exact,
     Subtype,
