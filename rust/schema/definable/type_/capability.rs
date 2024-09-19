@@ -99,12 +99,11 @@ impl fmt::Display for ValueType {
 pub struct Owns {
     span: Option<Span>,
     pub owned: TypeRefAny,
-    pub overridden: Option<Label>,
 }
 
 impl Owns {
-    pub fn new(span: Option<Span>, owned: TypeRefAny, overridden: Option<Label>) -> Self {
-        Self { span, owned, overridden }
+    pub fn new(span: Option<Span>, owned: TypeRefAny) -> Self {
+        Self { span, owned }
     }
 }
 
@@ -119,9 +118,6 @@ impl Pretty for Owns {}
 impl fmt::Display for Owns {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", token::Keyword::Owns, self.owned)?;
-        if let Some(overridden) = &self.overridden {
-            write!(f, " {} {}", token::Keyword::As, overridden)?;
-        }
         Ok(())
     }
 }
@@ -130,12 +126,12 @@ impl fmt::Display for Owns {
 pub struct Relates {
     span: Option<Span>,
     pub related: TypeRefAny,
-    pub overridden: Option<Label>,
+    pub specialised: Option<Label>,
 }
 
 impl Relates {
-    pub fn new(span: Option<Span>, related: TypeRefAny, overridden: Option<Label>) -> Self {
-        Self { span, related, overridden }
+    pub fn new(span: Option<Span>, related: TypeRefAny, specialised: Option<Label>) -> Self {
+        Self { span, related, specialised }
     }
 }
 
@@ -148,8 +144,8 @@ impl Spanned for Relates {
 impl fmt::Display for Relates {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", token::Keyword::Relates, self.related)?;
-        if let Some(overridden) = &self.overridden {
-            write!(f, " {} {}", token::Keyword::As, overridden)?;
+        if let Some(specialised) = &self.specialised {
+            write!(f, " {} {}", token::Keyword::As, specialised)?;
         }
         Ok(())
     }
@@ -159,12 +155,11 @@ impl fmt::Display for Relates {
 pub struct Plays {
     span: Option<Span>,
     pub role: ScopedLabel,
-    pub overridden: Option<NamedType>,
 }
 
 impl Plays {
-    pub fn new(span: Option<Span>, role: ScopedLabel, overridden: Option<NamedType>) -> Self {
-        Self { span, role, overridden }
+    pub fn new(span: Option<Span>, role: ScopedLabel) -> Self {
+        Self { span, role }
     }
 }
 
@@ -177,9 +172,6 @@ impl Spanned for Plays {
 impl fmt::Display for Plays {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", token::Keyword::Plays, self.role)?;
-        if let Some(overridden) = &self.overridden {
-            write!(f, " {} {}", token::Keyword::As, overridden)?;
-        }
         Ok(())
     }
 }

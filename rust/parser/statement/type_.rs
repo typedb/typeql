@@ -111,14 +111,8 @@ fn visit_owns_constraint(node: Node<'_>) -> Owns {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
-    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
-        Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
-    } else {
-        None
-    };
-
     debug_assert_eq!(children.try_consume_any(), None);
-    Owns::new(span, owned, overridden)
+    Owns::new(span, owned)
 }
 
 fn visit_relates_constraint(node: Node<'_>) -> Relates {
@@ -134,14 +128,14 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
-    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
+    let specialised = if children.try_consume_expected(Rule::AS).is_some() {
         Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
     } else {
         None
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
-    Relates::new(span, related, overridden)
+    Relates::new(span, related, specialised)
 }
 
 fn visit_plays_constraint(node: Node<'_>) -> Plays {
@@ -151,12 +145,7 @@ fn visit_plays_constraint(node: Node<'_>) -> Plays {
     children.skip_expected(Rule::PLAYS);
 
     let role = visit_type_ref(children.consume_expected(Rule::type_ref));
-    let overridden = if children.try_consume_expected(Rule::AS).is_some() {
-        Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
-    } else {
-        None
-    };
 
     debug_assert_eq!(children.try_consume_any(), None);
-    Plays::new(span, role, overridden)
+    Plays::new(span, role)
 }

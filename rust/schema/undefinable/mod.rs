@@ -10,6 +10,7 @@ use super::definable::type_::CapabilityBase;
 use crate::{
     common::{identifier::Identifier, token, Span},
     pretty::Pretty,
+    schema::definable::type_::capability::Relates,
     type_::Label,
 };
 
@@ -19,7 +20,7 @@ pub enum Undefinable {
     AnnotationType(AnnotationType),             // undefine @independent from name;
     AnnotationCapability(AnnotationCapability), // undefine @card from person owns name;
     CapabilityType(CapabilityType),             // undefine owns name from person;
-    Override(Override),                         // undefine as name from person owns first-name;
+    Specialise(Specialise),                     // undefine as parent from fathership relates father;
 
     Function(Function), // undefine fun reachable;
     Struct(Struct),     // undefine struct coords;
@@ -34,7 +35,7 @@ impl fmt::Display for Undefinable {
             Self::AnnotationType(inner) => fmt::Display::fmt(inner, f),
             Self::AnnotationCapability(inner) => fmt::Display::fmt(inner, f),
             Self::CapabilityType(inner) => fmt::Display::fmt(inner, f),
-            Self::Override(inner) => fmt::Display::fmt(inner, f),
+            Self::Specialise(inner) => fmt::Display::fmt(inner, f),
             Self::Function(inner) => fmt::Display::fmt(inner, f),
             Self::Struct(inner) => fmt::Display::fmt(inner, f),
         }
@@ -111,28 +112,28 @@ impl fmt::Display for CapabilityType {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Override {
+pub struct Specialise {
     span: Option<Span>,
-    pub overridden: Label,
+    pub specialised: Label,
     pub type_: Label,
-    pub capability: CapabilityBase,
+    pub capability: Relates,
 }
 
-impl Override {
-    pub fn new(span: Option<Span>, overridden: Label, type_: Label, capability: CapabilityBase) -> Self {
-        Self { span, overridden, type_, capability }
+impl Specialise {
+    pub fn new(span: Option<Span>, specialised: Label, type_: Label, relates: Relates) -> Self {
+        Self { span, specialised, type_, capability: relates }
     }
 }
 
-impl Pretty for Override {}
+impl Pretty for Specialise {}
 
-impl fmt::Display for Override {
+impl fmt::Display for Specialise {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{} {} {} {} {}",
             token::Keyword::As,
-            self.overridden,
+            self.specialised,
             token::Keyword::From,
             self.type_,
             self.capability

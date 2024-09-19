@@ -7,10 +7,14 @@
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
-    parser::{define::type_::visit_type_capability_base, type_::visit_label, visit_identifier},
+    parser::{
+        define::type_::{visit_relates_declaration, visit_type_capability_base},
+        type_::visit_label,
+        visit_identifier,
+    },
     query::schema::Undefine,
     schema::undefinable::{
-        AnnotationCapability, AnnotationType, CapabilityType, Function, Override, Struct, Undefinable,
+        AnnotationCapability, AnnotationType, CapabilityType, Function, Specialise, Struct, Undefinable,
     },
 };
 
@@ -50,7 +54,7 @@ fn visit_undefine_from(node: Node<'_>) -> Undefinable {
         }
         Rule::undefine_annotation_from_type => Undefinable::AnnotationType(visit_undefine_annotation_from_type(child)),
         Rule::undefine_capability => Undefinable::CapabilityType(visit_undefine_capability(child)),
-        Rule::undefine_override => Undefinable::Override(visit_undefine_override(child)),
+        Rule::undefine_specialise => Undefinable::Specialise(visit_undefine_specialise(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -108,17 +112,17 @@ fn visit_undefine_capability(node: Node<'_>) -> CapabilityType {
     CapabilityType::new(span, capability, type_)
 }
 
-fn visit_undefine_override(node: Node<'_>) -> Override {
-    debug_assert_eq!(node.as_rule(), Rule::undefine_override);
+fn visit_undefine_specialise(node: Node<'_>) -> Specialise {
+    debug_assert_eq!(node.as_rule(), Rule::undefine_specialise);
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::AS);
-    let overridden = visit_label(children.consume_expected(Rule::label));
+    let specialised = visit_label(children.consume_expected(Rule::label));
     children.skip_expected(Rule::FROM);
     let type_ = visit_label(children.consume_expected(Rule::label));
-    let capability = visit_type_capability_base(children.consume_expected(Rule::type_capability_base));
+    let relates = visit_relates_declaration(children.consume_expected(Rule::relates_declaration));
     debug_assert_eq!(children.try_consume_any(), None);
-    Override::new(span, overridden, type_, capability)
+    Specialise::new(span, specialised, type_, relates)
 }
 
 fn visit_undefine_struct(node: Node<'_>) -> Struct {
