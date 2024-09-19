@@ -7,7 +7,11 @@
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
-    parser::{define::type_::visit_type_capability_base, type_::visit_label, visit_identifier},
+    parser::{
+        define::type_::{visit_relates_declaration, visit_type_capability_base},
+        type_::visit_label,
+        visit_identifier,
+    },
     query::schema::Undefine,
     schema::undefinable::{
         AnnotationCapability, AnnotationType, CapabilityType, Function, Specialise, Struct, Undefinable,
@@ -116,9 +120,9 @@ fn visit_undefine_specialise(node: Node<'_>) -> Specialise {
     let specialised = visit_label(children.consume_expected(Rule::label));
     children.skip_expected(Rule::FROM);
     let type_ = visit_label(children.consume_expected(Rule::label));
-    let capability = visit_type_capability_base(children.consume_expected(Rule::type_capability_base));
+    let relates = visit_relates_declaration(children.consume_expected(Rule::relates_declaration));
     debug_assert_eq!(children.try_consume_any(), None);
-    Specialise::new(span, specialised, type_, capability)
+    Specialise::new(span, specialised, type_, relates)
 }
 
 fn visit_undefine_struct(node: Node<'_>) -> Struct {

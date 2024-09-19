@@ -10,6 +10,7 @@ use super::definable::type_::CapabilityBase;
 use crate::{
     common::{identifier::Identifier, token, Span},
     pretty::Pretty,
+    schema::definable::type_::capability::Relates,
     type_::Label,
 };
 
@@ -115,12 +116,12 @@ pub struct Specialise {
     span: Option<Span>,
     pub specialised: Label,
     pub type_: Label,
-    pub capability: CapabilityBase,
+    pub capability: Relates,
 }
 
 impl Specialise {
-    pub fn new(span: Option<Span>, specialised: Label, type_: Label, capability: CapabilityBase) -> Self {
-        Self { span, specialised, type_, capability }
+    pub fn new(span: Option<Span>, specialised: Label, type_: Label, relates: Relates) -> Self {
+        Self { span, specialised, type_, capability: relates }
     }
 }
 

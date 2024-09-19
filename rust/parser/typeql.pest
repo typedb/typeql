@@ -268,7 +268,7 @@ undefine_from = { undefine_annotation_from_capability
 undefine_annotation_from_capability = { annotation_category ~ FROM ~ label ~ type_capability_base }
 undefine_annotation_from_type = { annotation_category ~ FROM ~ label }
 undefine_capability = { type_capability_base ~ FROM ~ label }
-undefine_specialise = { AS ~ label ~ FROM ~ label ~ type_capability_base }
+undefine_specialise = { AS ~ label ~ FROM ~ label ~ relates_declaration }
 
 undefine_function = { FUN ~ identifier }
 undefine_struct = { STRUCT ~ identifier }

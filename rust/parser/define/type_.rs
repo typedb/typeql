@@ -97,7 +97,7 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
     Owns::new(span, owned)
 }
 
-fn visit_relates_declaration(node: Node<'_>) -> Relates {
+pub(in crate::parser) fn visit_relates_declaration(node: Node<'_>) -> Relates {
     debug_assert_eq!(node.as_rule(), Rule::relates_declaration);
     let span = node.span();
     let mut children = node.into_children();
