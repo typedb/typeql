@@ -134,7 +134,7 @@ impl fmt::Display for LabelConstraint {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum SubKind {
     Direct,
     Transitive,
