@@ -12,7 +12,7 @@ use crate::{
     common::{token, Span},
     expression::Expression,
     pretty::{indent, Pretty},
-    type_::{TypeRef, TypeRefAny},
+    type_::TypeRefAny,
     util::write_joined,
     value::Literal,
     variable::Variable,

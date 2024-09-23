@@ -9,6 +9,7 @@
 #![deny(rust_2024_compatibility)]
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unused_must_use)]
+#![allow(edition_2024_expr_fragment_specifier)]
 
 pub use crate::{
     annotation::Annotation,

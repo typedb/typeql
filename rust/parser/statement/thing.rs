@@ -22,7 +22,7 @@ use crate::{
         },
         Statement,
     },
-    type_::{TypeRef, TypeRefAny},
+    type_::TypeRefAny,
 };
 
 pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {

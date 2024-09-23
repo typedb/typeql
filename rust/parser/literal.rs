@@ -8,8 +8,9 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{IntoChildNodes, Node, Rule, RuleMatcher},
     value::{
-        BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, IntegerLiteral, Literal, Sign,
-        SignedDecimalLiteral, SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral,
+        BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, DurationDate, DurationLiteral,
+        DurationTime, IntegerLiteral, Literal, NumericLiteral, Sign, SignedDecimalLiteral, SignedIntegerLiteral,
+        StringLiteral, TimeFragment, TimeZone, ValueLiteral,
     },
 };
 
@@ -26,6 +27,7 @@ pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
         Rule::datetime_tz_literal => ValueLiteral::DateTimeTz(visit_datetime_tz_literal(child)),
         Rule::datetime_literal => ValueLiteral::DateTime(visit_datetime_literal(child)),
         Rule::date_literal => ValueLiteral::Date(visit_date_literal(child)),
+        Rule::duration_literal => ValueLiteral::Duration(visit_duration_literal(child)),
 
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
@@ -45,6 +47,11 @@ fn visit_sign(node: Node<'_>) -> Sign {
 pub(super) fn visit_integer_literal(node: Node<'_>) -> IntegerLiteral {
     debug_assert_eq!(node.as_rule(), Rule::integer_literal);
     IntegerLiteral { value: node.as_str().to_owned() }
+}
+
+pub(super) fn visit_numeric_literal(node: Node<'_>) -> NumericLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::numeric_literal);
+    NumericLiteral { value: node.as_str().to_owned() }
 }
 
 pub(super) fn visit_quoted_string_literal(node: Node<'_>) -> StringLiteral {
@@ -132,4 +139,76 @@ fn visit_time(node: Node<'_>) -> TimeFragment {
     let second_fraction = children.try_consume_expected(Rule::second_fraction).map(|node| node.as_str().to_owned());
     debug_assert_eq!(children.try_consume_any(), None);
     TimeFragment { hour, minute, second, second_fraction }
+}
+
+fn visit_duration_literal(node: Node<'_>) -> DurationLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_literal);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    let duration = match child.as_rule() {
+        Rule::duration_weeks => DurationLiteral::Weeks(visit_duration_weeks(child)),
+        Rule::duration_date => {
+            let date = visit_duration_date(child);
+            let time = children.try_consume_expected(Rule::duration_time).map(visit_duration_time);
+            DurationLiteral::DateAndTime(date, time)
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    debug_assert_eq!(children.try_consume_any(), None);
+    duration
+}
+
+fn visit_duration_weeks(node: Node<'_>) -> IntegerLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_weeks);
+    visit_integer_literal(node.into_child())
+}
+
+fn visit_duration_date(node: Node<'_>) -> DurationDate {
+    debug_assert_eq!(node.as_rule(), Rule::duration_date);
+    let mut children = node.into_children();
+    let years = children.try_consume_expected(Rule::duration_years).map(visit_duration_years);
+    let months = children.try_consume_expected(Rule::duration_months).map(visit_duration_months);
+    let days = children.try_consume_expected(Rule::duration_days).map(visit_duration_days);
+    debug_assert_eq!(children.try_consume_any(), None);
+    DurationDate { years, months, days }
+}
+
+fn visit_duration_years(node: Node<'_>) -> IntegerLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_years);
+    visit_integer_literal(node.into_child())
+}
+
+fn visit_duration_months(node: Node<'_>) -> IntegerLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_months);
+    visit_integer_literal(node.into_child())
+}
+
+fn visit_duration_days(node: Node<'_>) -> IntegerLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_days);
+    visit_integer_literal(node.into_child())
+}
+
+fn visit_duration_time(node: Node<'_>) -> DurationTime {
+    debug_assert_eq!(node.as_rule(), Rule::duration_time);
+    let mut children = node.into_children();
+    let hours = children.try_consume_expected(Rule::duration_hours).map(visit_duration_hours);
+    let minutes = children.try_consume_expected(Rule::duration_minutes).map(visit_duration_minutes);
+    let seconds = children.try_consume_expected(Rule::duration_seconds).map(visit_duration_seconds);
+    debug_assert_eq!(children.try_consume_any(), None);
+    DurationTime { hours, minutes, seconds }
+}
+
+fn visit_duration_hours(node: Node<'_>) -> IntegerLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_hours);
+    visit_integer_literal(node.into_child())
+}
+
+fn visit_duration_minutes(node: Node<'_>) -> IntegerLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_minutes);
+    visit_integer_literal(node.into_child())
+}
+
+fn visit_duration_seconds(node: Node<'_>) -> NumericLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::duration_seconds);
+    visit_numeric_literal(node.into_child())
 }
