@@ -212,4 +212,3 @@ fn visit_duration_seconds(node: Node<'_>) -> NumericLiteral {
     debug_assert_eq!(node.as_rule(), Rule::duration_seconds);
     visit_numeric_literal(node.into_child())
 }
-
