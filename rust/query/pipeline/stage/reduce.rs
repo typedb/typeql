@@ -15,25 +15,61 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Reduce {
-    reduction: Reduction,
+    pub reductions: Vec<ReduceAssign>,
+    pub within_group: Option<Vec<Variable>>,
 }
 
 impl Reduce {
-    pub fn new(reduction: Reduction) -> Self {
-        Reduce { reduction }
+    pub fn new(reductions: Vec<ReduceAssign>, within_group: Option<Vec<Variable>>) -> Self {
+        Reduce { reductions, within_group }
     }
 }
 
 impl Pretty for Reduce {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, "{} {};", token::Clause::Reduce, self.reduction)
+        write!(f, "{} ", token::Clause::Reduce)?;
+        write_joined!(f, ", ", self.reductions)?;
+        if let Some(group) = &self.within_group {
+            write!(f, " {} (", token::Clause::Within)?;
+            write_joined!(f, ", ", group)?;
+            write!(f, ")")?;
+        }
+        write!(f, ";")?;
+        Ok(())
     }
 }
 
 impl fmt::Display for Reduce {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {};", token::Clause::Reduce, self.reduction)
+        write!(f, "{} ", token::Clause::Reduce)?;
+        write_joined!(f, ", ", self.reductions)?;
+        if let Some(group) = &self.within_group {
+            write!(f, " {} (", token::Clause::Within)?;
+            write_joined!(f, ", ", group)?;
+            write!(f, ")")?;
+        }
+        write!(f, ";")?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ReduceAssign {
+    pub assign_to: Variable,
+    pub reduce_value: ReduceValue,
+}
+
+impl Pretty for ReduceAssign {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        indent(indent_level, f)?;
+        write!(f, "{} = {}", self.assign_to, self.reduce_value)
+    }
+}
+
+impl fmt::Display for ReduceAssign {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} = {}", self.assign_to, self.reduce_value)
     }
 }
 

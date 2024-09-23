@@ -19,9 +19,9 @@ query_pipeline = { preamble* ~ query_stage+ ~ query_stage_terminal? }
 
 preamble = { WITH ~ definition_function }
 
-query_stage = { clause_match | clause_insert | clause_put | clause_update | clause_delete | operator_stream }
+query_stage = { clause_match | clause_insert | clause_put | clause_update | clause_delete | operator_stream | operator_reduce }
 
-query_stage_terminal = { clause_fetch | operator_reduce }
+query_stage_terminal = { clause_fetch }
 
 clause_match = { MATCH ~ patterns }
 
@@ -30,6 +30,8 @@ clause_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
 clause_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
 
 clause_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
+
+operator_reduce = { REDUCE ~ reduce_assign+ ~ (WITHIN ~  PAREN_OPEN ~ vars ~ PAREN_CLOSE )? ~ SEMICOLON }
 
 // QUERY MODIFIERS =============================================================
 
@@ -41,10 +43,9 @@ operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
 operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
+reduce_assign = { (var ~ ASSIGN ~ reduce_value) }
 
 // REDUCE ======================================================================
-
-operator_reduce = { REDUCE ~ reduce ~ SEMICOLON }
 reduce = { CHECK
          | reduce_first
          | reduce_value ~ ( COMMA ~ reduce_value )* ~ COMMA?
@@ -393,6 +394,7 @@ DELETE = @{ "delete" ~ WB }
 REDUCE = @{ "reduce" ~ WB }
 CHECK = @{ "check" ~ WB }
 FIRST = @{ "first" ~ WB }
+WITHIN = @{ "within" ~ WB }
 
 // THING KIND KEYWORDS
 

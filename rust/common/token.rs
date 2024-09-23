@@ -60,7 +60,7 @@ string_enum! { Clause
     Update = "update",
     Delete = "delete",
     Match = "match",
-    Group = "group",
+    Within = "within",
     Fetch = "fetch",
     With = "with",
     Reduce = "reduce",

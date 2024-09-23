@@ -47,6 +47,7 @@ use crate::{
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
+use crate::query::stage::reduce::ReduceAssign;
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
@@ -83,6 +84,7 @@ fn visit_query_stage(node: Node<'_>) -> Stage {
         Rule::clause_update => Stage::Update(visit_clause_update(child)),
         Rule::clause_delete => Stage::Delete(visit_clause_delete(child)),
         Rule::operator_stream => Stage::Modifier(visit_operator_stream(child)),
+        Rule::operator_reduce => Stage::Reduce(visit_operator_reduce(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -92,7 +94,6 @@ fn visit_query_stage_terminal(node: Node<'_>) -> Stage {
     let child = node.into_child();
     match child.as_rule() {
         Rule::clause_fetch => Stage::Fetch(visit_clause_fetch(child)),
-        Rule::operator_reduce => Stage::Reduce(visit_operator_reduce(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -323,8 +324,33 @@ fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
 fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::operator_reduce);
     let mut children = node.into_children();
+    let mut reducers = Vec::new();
+    let mut group = None;
     children.skip_expected(Rule::REDUCE);
-    Reduce::new(visit_reduce(children.consume_any()))
+    while let Some(child) = children.try_consume_any() {
+        match child.as_rule() {
+            Rule::reduce_assign => {
+                reducers.push(visit_reduce_assign(child))
+            },
+            Rule::WITHIN => {
+                debug_assert!(reducers.len() > 0);
+                group = Some(visit_vars(children.consume_expected(Rule::vars)));
+                break;
+            }
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        }
+    }
+    debug_assert_eq!(children.try_consume_any(), None);
+    Reduce::new(reducers, group)
+}
+
+pub(super) fn visit_reduce_assign(node: Node<'_>) -> ReduceAssign {
+    debug_assert_eq!(node.as_rule(), Rule::reduce_assign);
+    let mut children = node.into_children();
+    let assign_to = visit_var(children.consume_expected(Rule::var));
+    children.consume_expected(Rule::ASSIGN);
+    let reduce_value = visit_reduce_value(children.consume_expected(Rule::reduce_value));
+    ReduceAssign { assign_to, reduce_value }
 }
 
 pub(super) fn visit_reduce(node: Node<'_>) -> Reduction {
