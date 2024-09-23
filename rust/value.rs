@@ -27,6 +27,11 @@ pub struct IntegerLiteral {
     pub value: String,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct NumericLiteral {
+    pub value: String,
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Sign {
     Plus,
@@ -86,7 +91,7 @@ pub enum TimeZone {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum DurationLiteral {
-    Weeks(String),
+    Weeks(IntegerLiteral),
     DateAndTime(DurationDate, Option<DurationTime>),
 }
 
@@ -97,16 +102,16 @@ pub struct StructLiteral {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DurationDate {
-    pub years: Option<String>,
-    pub months: Option<String>,
-    pub days: Option<String>,
+    pub years: Option<IntegerLiteral>,
+    pub months: Option<IntegerLiteral>,
+    pub days: Option<IntegerLiteral>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DurationTime {
-    pub hours: Option<String>,
-    pub minutes: Option<String>,
-    pub seconds: Option<String>,
+    pub hours: Option<IntegerLiteral>,
+    pub minutes: Option<IntegerLiteral>,
+    pub seconds: Option<NumericLiteral>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -165,6 +170,12 @@ impl fmt::Display for ValueLiteral {
 }
 
 impl fmt::Display for IntegerLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(self.value.as_str())
+    }
+}
+
+impl fmt::Display for NumericLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(self.value.as_str())
     }
@@ -292,10 +303,7 @@ impl fmt::Display for DurationLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str("P")?;
         match self {
-            DurationLiteral::Weeks(weeks) => {
-                f.write_str(weeks)?;
-                f.write_str("W")?;
-            }
+            DurationLiteral::Weeks(weeks) => write!(f, "{weeks}W")?,
             DurationLiteral::DateAndTime(date, time) => {
                 fmt::Display::fmt(date, f)?;
                 match time {

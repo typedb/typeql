@@ -318,7 +318,7 @@ value_type_primitive = { BOOLEAN | LONG | DOUBLE | DECIMAL
                        | STRING
                        }
 value_literal = { quoted_string_literal | datetime_tz_literal | datetime_literal | date_literal
-                | boolean_literal | signed_decimal | signed_integer
+                | duration_literal | boolean_literal | signed_decimal | signed_integer
                 }
 
 signed_decimal = { sign? ~ decimal_literal }
