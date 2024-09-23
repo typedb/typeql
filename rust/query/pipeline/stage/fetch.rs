@@ -113,13 +113,13 @@ impl Pretty for FetchObjectBody {
         match self {
             FetchObjectBody::Entries(entries) => {
                 if !entries.is_empty() {
-                    writeln!(f, "")?; // entries always go on new line
+                    writeln!(f)?; // entries always go on new line
                     Pretty::fmt(&entries[0], indent_level + 1, f)?;
                     for field in &entries[1..] {
                         writeln!(f, ",")?;
                         Pretty::fmt(field, indent_level + 1, f)?;
                     }
-                    writeln!(f, "")?;
+                    writeln!(f)?;
                 }
                 indent(indent_level, f)?;
                 write!(f, "{}", token::Char::CurlyRight)
@@ -221,7 +221,7 @@ impl Pretty for FetchSingle {
                 Pretty::fmt(single, indent_level, f)
             }
             FetchSingle::Subquery(single) => {
-                writeln!(f, "")?;
+                writeln!(f)?;
                 Pretty::fmt(single, indent_level + 1, f)
             }
         }
@@ -262,7 +262,7 @@ impl Pretty for FetchStream {
             FetchStream::Subquery(stream) => {
                 writeln!(f, "{}", token::Char::SquareLeft)?;
                 Pretty::fmt(stream, indent_level + 1, f)?;
-                writeln!(f, "")?;
+                writeln!(f)?;
                 indent(indent_level, f)?;
                 write!(f, "{}", token::Char::SquareRight)
             }

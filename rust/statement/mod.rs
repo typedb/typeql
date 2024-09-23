@@ -4,11 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{
-    collections::HashMap,
-    fmt,
-    fmt::{Display, Formatter},
-};
+use std::{collections::HashMap, fmt};
 
 use self::{
     comparison::ComparisonStatement,
@@ -78,7 +74,7 @@ pub enum DeconstructField {
 }
 
 impl Pretty for DeconstructField {
-    fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DeconstructField::Variable(var) => Pretty::fmt(var, indent_level, f),
             DeconstructField::Deconstruct(struct_deconstruct) => Pretty::fmt(struct_deconstruct, indent_level, f),
@@ -87,7 +83,7 @@ impl Pretty for DeconstructField {
 }
 
 impl fmt::Display for DeconstructField {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DeconstructField::Variable(var) => fmt::Display::fmt(var, f),
             DeconstructField::Deconstruct(struct_deconstruct) => fmt::Display::fmt(struct_deconstruct, f),
@@ -108,14 +104,14 @@ impl StructDeconstruct {
 }
 
 impl Pretty for StructDeconstruct {
-    fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
         fmt::Display::fmt(self, f)
     }
 }
 
 impl fmt::Display for StructDeconstruct {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", token::Char::CurlyLeft)?;
         for (identifier, field_deconstruct) in &self.field_map {
             write!(f, "{}{} {},", identifier, token::Char::Colon, field_deconstruct)?;

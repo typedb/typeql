@@ -29,13 +29,13 @@ impl Struct {
 impl Pretty for Struct {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, "{} {}{}\n", token::Keyword::Struct, self.ident, token::Char::Colon)?;
+        writeln!(f, "{} {}{}", token::Keyword::Struct, self.ident, token::Char::Colon)?;
         if !self.fields.is_empty() {
             Pretty::fmt(&self.fields[0], indent_level + 1, f)?;
             for field in &self.fields[1..] {
                 Pretty::fmt(field, indent_level + 1, f)?;
             }
-            writeln!(f, "")?;
+            writeln!(f)?;
         }
         writeln!(f, "{}", token::Char::Semicolon)
     }
