@@ -11,13 +11,12 @@ use crate::{
     pretty::{indent, Pretty},
     query::{
         pipeline::stage::{Match, Modifier},
-        stage::reduce::Reduction,
+        stage::{reduce::Reduction, Stage},
+        Pipeline,
     },
     type_::TypeRefAny,
     variable::Variable,
 };
-use crate::query::Pipeline;
-use crate::query::stage::Stage;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
@@ -27,11 +26,7 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn new(
-        span: Option<Span>,
-        signature: Signature,
-        block: FunctionBlock
-    ) -> Self {
+    pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock) -> Self {
         Self { span, signature, block }
     }
 }

@@ -6,16 +6,24 @@
 
 use itertools::Itertools;
 
-use super::{define::function::visit_definition_function, expression::{visit_expression, visit_expression_function}, literal::{visit_integer_literal, visit_quoted_string_literal}, statement::{
-    thing::{visit_relation, visit_statement_thing},
-    visit_statement,
-}, type_::{visit_label, visit_label_list}, visit_var, visit_var_named, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher, ChildNodes};
+use super::{
+    define::function::visit_definition_function,
+    expression::{visit_expression, visit_expression_function},
+    literal::{visit_integer_literal, visit_quoted_string_literal},
+    statement::{
+        thing::{visit_relation, visit_statement_thing},
+        visit_statement,
+    },
+    type_::{visit_label, visit_label_list},
+    visit_var, visit_var_named, visit_vars, visit_vars_assignment, ChildNodes, IntoChildNodes, Node, Rule, RuleMatcher,
+};
 use crate::{
     common::{
         error::TypeQLError,
         token::{Order, ReduceOperator},
         Spanned,
     },
+    parser::{define::function::visit_function_block, statement::single::visit_statement_assignment},
     pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
     query::{
         pipeline::{
@@ -37,11 +45,11 @@ use crate::{
         },
         Pipeline,
     },
+    statement::Statement,
     type_::NamedType,
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
-use crate::parser::define::function::visit_function_block;
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
@@ -166,8 +174,19 @@ fn visit_pattern_try(node: Node<'_>) -> Optional {
 fn visit_clause_insert(node: Node<'_>) -> Insert {
     debug_assert_eq!(node.as_rule(), Rule::clause_insert);
     let span = node.span();
-    let statement_things = node.into_children().skip_expected(Rule::INSERT).map(visit_statement_thing).collect();
-    Insert::new(span, statement_things)
+    let statements = node
+        .into_children()
+        .skip_expected(Rule::INSERT)
+        .map(|child| match child.as_rule() {
+            Rule::statement_thing => visit_statement_thing(child),
+            Rule::statement_assignment => Statement::Assignment(visit_statement_assignment(child)),
+            _ => unreachable!(
+                "Unrecognised statement inside insert clause: {:?}",
+                TypeQLError::IllegalGrammar { input: child.to_string() }
+            ),
+        })
+        .collect();
+    Insert::new(span, statements)
 }
 
 fn visit_clause_put(node: Node<'_>) -> Put {
@@ -317,9 +336,7 @@ fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
     match child.as_rule() {
         Rule::fetch_attribute => FetchStream::Attribute(visit_fetch_attribute(child)),
         Rule::function_block => FetchStream::SubQueryFunctionBlock(visit_function_block(child)),
-        Rule::query_stages => {
-            FetchStream::SubQueryFetch(visit_stages(child))
-        },
+        Rule::query_stages => FetchStream::SubQueryFetch(visit_stages(child)),
         Rule::expression_function => FetchStream::Function(visit_expression_function(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }

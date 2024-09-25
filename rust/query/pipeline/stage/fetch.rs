@@ -10,12 +10,11 @@ use crate::{
     common::{token, Span},
     expression::{Expression, FunctionCall},
     pretty::{indent, Pretty},
-    query::Pipeline,
+    query::{stage::Stage, Pipeline},
+    schema::definable::function::FunctionBlock,
     value::StringLiteral,
     TypeRefAny, Variable,
 };
-use crate::query::stage::Stage;
-use crate::schema::definable::function::FunctionBlock;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Fetch {
@@ -63,9 +62,7 @@ impl Pretty for FetchEntry {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
             }
-            FetchEntry::Single(entry) => {
-                Pretty::fmt(entry, indent_level, f)
-            },
+            FetchEntry::Single(entry) => Pretty::fmt(entry, indent_level, f),
         }
     }
 }
@@ -244,7 +241,7 @@ impl fmt::Display for FetchSingle {
                 write!(f, "{} ", token::Char::ParenLeft)?;
                 fmt::Display::fmt(single, f)?;
                 write!(f, " {}", token::Char::ParenRight)
-            },
+            }
         }
     }
 }
@@ -304,7 +301,7 @@ impl fmt::Display for FetchStream {
                     fmt::Display::fmt(stage, f)?;
                 }
                 Ok(())
-            },
+            }
             FetchStream::SubQueryFunctionBlock(block) => fmt::Display::fmt(block, f),
         }?;
         write!(f, "{}", token::Char::SquareRight)

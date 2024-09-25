@@ -9,17 +9,15 @@ use itertools::Itertools;
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        pipeline::{visit_clause_match, visit_operator_stream, visit_reduce},
+        pipeline::{visit_clause_match, visit_operator_stream, visit_query_stage, visit_reduce},
         type_::visit_named_type_any,
         visit_identifier, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::{
-        function::{Argument, Output, ReturnStatement, ReturnStream, Signature, Single, Stream},
+        function::{Argument, FunctionBlock, Output, ReturnStatement, ReturnStream, Signature, Single, Stream},
         Function,
     },
 };
-use crate::parser::pipeline::visit_query_stage;
-use crate::schema::definable::function::FunctionBlock;
 
 pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
     debug_assert_eq!(node.as_rule(), Rule::definition_function);
@@ -37,10 +35,7 @@ pub fn visit_function_block(node: Node<'_>) -> FunctionBlock {
     debug_assert_eq!(node.as_rule(), Rule::function_block);
     let mut children = node.into_children();
 
-    let stages = children
-        .take_while_ref(|node| node.as_rule() == Rule::query_stage)
-        .map(visit_query_stage)
-        .collect();
+    let stages = children.take_while_ref(|node| node.as_rule() == Rule::query_stage).map(visit_query_stage).collect();
 
     let return_stmt = visit_return_statement(children.consume_expected(Rule::return_statement));
     debug_assert_eq!(children.try_consume_any(), None);
