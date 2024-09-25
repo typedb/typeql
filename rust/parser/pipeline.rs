@@ -74,7 +74,7 @@ fn visit_preamble(node: Node<'_>) -> Preamble {
     Preamble::new(span, patterns)
 }
 
-fn visit_query_stage(node: Node<'_>) -> Stage {
+pub(super) fn visit_query_stage(node: Node<'_>) -> Stage {
     debug_assert_eq!(node.as_rule(), Rule::query_stage);
     let child = node.into_child();
     match child.as_rule() {
@@ -356,21 +356,21 @@ pub(super) fn visit_reduce(node: Node<'_>) -> Reduction {
     let mut children = node.into_children();
     let reduce = match children.peek_rule().unwrap() {
         Rule::CHECK => Reduction::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
-        Rule::reduce_first => Reduction::First(visit_reduce_first(children.consume_expected(Rule::reduce_first))),
+        // Rule::reduce_first => Reduction::First(visit_reduce_first(children.consume_expected(Rule::reduce_first))),
         Rule::reduce_value => Reduction::Value(children.by_ref().map(visit_reduce_value).collect()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
     debug_assert!(children.try_consume_any().is_none());
     reduce
 }
-
-fn visit_reduce_first(node: Node<'_>) -> First {
-    debug_assert_eq!(node.as_rule(), Rule::reduce_first);
-    let span = node.span();
-    let mut children = node.into_children();
-    let variables = visit_vars(children.skip_expected(Rule::FIRST).consume_expected(Rule::vars));
-    First::new(span, variables)
-}
+//
+// fn visit_reduce_first(node: Node<'_>) -> First {
+//     debug_assert_eq!(node.as_rule(), Rule::reduce_first);
+//     let span = node.span();
+//     let mut children = node.into_children();
+//     let variables = visit_vars(children.skip_expected(Rule::FIRST).consume_expected(Rule::vars));
+//     First::new(span, variables)
+// }
 
 fn visit_reduce_value(node: Node<'_>) -> ReduceValue {
     debug_assert_eq!(node.as_rule(), Rule::reduce_value);

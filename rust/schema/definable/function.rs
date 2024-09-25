@@ -16,25 +16,23 @@ use crate::{
     type_::TypeRefAny,
     variable::Variable,
 };
+use crate::query::Pipeline;
+use crate::query::stage::Stage;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
     span: Option<Span>,
     pub signature: Signature,
-    pub body: Match,
-    pub modifiers: Vec<Modifier>,
-    pub return_stmt: ReturnStatement,
+    pub block: FunctionBlock,
 }
 
 impl Function {
     pub fn new(
         span: Option<Span>,
         signature: Signature,
-        body: Match,
-        modifiers: Vec<Modifier>,
-        return_stmt: ReturnStatement,
+        block: FunctionBlock
     ) -> Self {
-        Self { span, signature, body, modifiers, return_stmt }
+        Self { span, signature, block }
     }
 }
 
@@ -44,16 +42,17 @@ impl Pretty for Function {
         write!(f, "{} ", token::Keyword::Fun)?;
         Pretty::fmt(&self.signature, indent_level, f)?;
         f.write_char(':')?;
+        f.write_str("\n")?;
+        Pretty::fmt(&self.block, indent_level + 1, f)?;
         Ok(())
     }
 }
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if f.alternate() {
-            return Pretty::fmt(self, 0, f);
-        }
-
+        // if f.alternate() {
+        //     return Pretty::fmt(self, 0, f);
+        // }
         todo!()
     }
 }
@@ -198,6 +197,36 @@ impl Pretty for Single {
 impl fmt::Display for Single {
     fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         todo!()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FunctionBlock {
+    pub stages: Vec<Stage>,
+    pub return_stmt: ReturnStatement,
+}
+
+impl FunctionBlock {
+    pub fn new(stages: Vec<Stage>, return_stmt: ReturnStatement) -> Self {
+        Self { stages, return_stmt }
+    }
+}
+
+impl Pretty for FunctionBlock {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for stage in &self.stages {
+            Pretty::fmt(stage, indent_level, f)?;
+        }
+        Pretty::fmt(&self.return_stmt, indent_level, f)
+    }
+}
+
+impl fmt::Display for FunctionBlock {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for stage in &self.stages {
+            fmt::Display::fmt(stage, f)?;
+        }
+        fmt::Display::fmt(&self.return_stmt, f)
     }
 }
 

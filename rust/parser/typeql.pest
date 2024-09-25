@@ -25,7 +25,7 @@ query_stage_terminal = { clause_fetch }
 
 clause_match = { MATCH ~ patterns }
 
-clause_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
+clause_insert = { INSERT ~ ( statement_thing ~ SEMICOLON | statement_assignment ~ SEMICOLON )+ }
 clause_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
 clause_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
 
@@ -48,11 +48,8 @@ reduce_assign = { (var ~ ASSIGN ~ reduce_value) }
 
 // REDUCE ======================================================================
 reduce = { CHECK
-         | reduce_first
          | reduce_value ~ ( COMMA ~ reduce_value )* ~ COMMA?
          }
-
-reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
 
 reduce_value = { COUNT ~ ( PAREN_OPEN ~ var ~ PAREN_CLOSE )?
                | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
@@ -185,9 +182,10 @@ fetch_key = { quoted_string_literal }
 
 fetch_list = { SQ_BRACKET_OPEN ~ fetch_stream ~ SQ_BRACKET_CLOSE }
 
-fetch_stream = { expression_function | query_pipeline | fetch_attribute }
+fetch_stream = { expression_function | function_block | fetch_subfetch | fetch_attribute }
+fetch_subfetch = { query_stage+ ~ clause_fetch }
 
-fetch_single = { fetch_attribute | expression | query_pipeline }
+fetch_single = { PAREN_OPEN? ~ fetch_attribute | expression | function_block ~ PAREN_CLOSE? }
 
 fetch_attribute = { var_named ~ DOT ~ ( label_list | label ) }
 fetch_attributes_all = { var_named ~ DOT ~ STAR }
@@ -224,12 +222,14 @@ relates_declaration = { RELATES ~ label_list
 
 // FUNCTION DEFINITION =========================================================
 
-definition_function = { FUN ~ function_signature ~ COLON ~ clause_match ~ operator_stream* ~ return_statement }
+definition_function = { FUN ~ function_signature ~ COLON ~ function_block }
 
 function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
 function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* ~ COMMA? )? }
 function_argument = { var ~ COLON ~ named_type_any }
+
+function_block = { query_stage+ ~ return_statement }
 
 function_output = { function_output_stream | function_output_single }
 function_output_stream = { CURLY_OPEN ~ named_type_any ~ ( COMMA ~ named_type_any )* ~ COMMA? ~ CURLY_CLOSE }
