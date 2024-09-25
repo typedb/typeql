@@ -8,11 +8,12 @@ use crate::parse_query;
 use crate::parser::test::assert_valid_eq_repr;
 
 #[test]
-fn test_aggregate_group_count_query() {
+fn test_reduce_within_query() {
     let query = r#"match
-($x, $y) isa friendship;
+($x, $y) isa friendship,
+    has age $a;
 select $x, $y;
-reduce $c = count($y) within ($x);"#;
+reduce $max = max($a), $min = min($a) within ($x, $y);"#;
     let parsed = parse_query(query).unwrap();
     assert_valid_eq_repr!(expected, parsed, query);
 }
