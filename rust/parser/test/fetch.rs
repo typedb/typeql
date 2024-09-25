@@ -21,10 +21,11 @@ fetch {
     "d object": {
         "entry single 1": $x.name,
         "entry single 2": $d + 10,
-        "entry single 3":
+        "entry single 3": (
             match
             $x has name $n;
-            reduce $c = count($n);,
+            return count($n);
+        ),
         "entry object": {
             "all": { $x.* }
         },

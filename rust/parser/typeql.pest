@@ -15,7 +15,8 @@ query = { query_schema | query_pipeline }
 
 // QUERY PIPELINES =============================================================
 
-query_pipeline = { preamble* ~ query_stage+ ~ query_stage_terminal? }
+query_pipeline = { preamble* ~ query_stages }
+query_stages = { query_stage+ ~ query_stage_terminal? }
 
 preamble = { WITH ~ definition_function }
 
@@ -182,10 +183,9 @@ fetch_key = { quoted_string_literal }
 
 fetch_list = { SQ_BRACKET_OPEN ~ fetch_stream ~ SQ_BRACKET_CLOSE }
 
-fetch_stream = { expression_function | function_block | fetch_subfetch | fetch_attribute }
-fetch_subfetch = { query_stage+ ~ clause_fetch }
+fetch_stream = { expression_function | function_block | query_stages | fetch_attribute }
 
-fetch_single = { PAREN_OPEN? ~ fetch_attribute | expression | function_block ~ PAREN_CLOSE? }
+fetch_single = { PAREN_OPEN? ~ ( fetch_attribute | expression | function_block ) ~ PAREN_CLOSE? }
 
 fetch_attribute = { var_named ~ DOT ~ ( label_list | label ) }
 fetch_attributes_all = { var_named ~ DOT ~ STAR }

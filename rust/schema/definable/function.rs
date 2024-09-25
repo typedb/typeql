@@ -217,6 +217,7 @@ impl Pretty for FunctionBlock {
         for stage in &self.stages {
             Pretty::fmt(stage, indent_level, f)?;
         }
+        write!(f, "\n")?;
         Pretty::fmt(&self.return_stmt, indent_level, f)
     }
 }
@@ -247,10 +248,10 @@ impl fmt::Display for ReturnStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ReturnStatement::Stream(return_stream) => {
-                write!(f, "{} {}", token::Keyword::Return, return_stream)
+                write!(f, "{} {};", token::Keyword::Return, return_stream)
             }
             ReturnStatement::Reduce(reduction) => {
-                write!(f, "{} {}", token::Keyword::Return, reduction)
+                write!(f, "{} {};", token::Keyword::Return, reduction)
             }
         }
     }

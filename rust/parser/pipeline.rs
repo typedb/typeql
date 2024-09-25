@@ -6,17 +6,10 @@
 
 use itertools::Itertools;
 
-use super::{
-    define::function::visit_definition_function,
-    expression::{visit_expression, visit_expression_function},
-    literal::{visit_integer_literal, visit_quoted_string_literal},
-    statement::{
-        thing::{visit_relation, visit_statement_thing},
-        visit_statement,
-    },
-    type_::{visit_label, visit_label_list},
-    visit_var, visit_var_named, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
-};
+use super::{define::function::visit_definition_function, expression::{visit_expression, visit_expression_function}, literal::{visit_integer_literal, visit_quoted_string_literal}, statement::{
+    thing::{visit_relation, visit_statement_thing},
+    visit_statement,
+}, type_::{visit_label, visit_label_list}, visit_var, visit_var_named, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher, ChildNodes};
 use crate::{
     common::{
         error::TypeQLError,
@@ -48,6 +41,7 @@ use crate::{
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
+use crate::parser::define::function::visit_function_block;
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
@@ -55,13 +49,20 @@ pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
     let mut children = node.into_children();
 
     let preambles = children.take_while_ref(|child| child.as_rule() == Rule::preamble).map(visit_preamble).collect();
-    let mut stages =
-        children.take_while_ref(|child| child.as_rule() == Rule::query_stage).map(visit_query_stage).collect_vec();
-    stages.extend(children.try_consume_expected(Rule::query_stage_terminal).map(visit_query_stage_terminal));
-
+    let stages = visit_stages(children.consume_expected(Rule::query_stages));
     debug_assert_eq!(children.try_consume_any(), None);
 
     Pipeline::new(span, preambles, stages)
+}
+
+fn visit_stages(node: Node<'_>) -> Vec<Stage> {
+    debug_assert_eq!(node.as_rule(), Rule::query_stages);
+    let mut children = node.into_children();
+    let mut stages =
+        children.take_while_ref(|child| child.as_rule() == Rule::query_stage).map(visit_query_stage).collect_vec();
+    stages.extend(children.try_consume_expected(Rule::query_stage_terminal).map(visit_query_stage_terminal));
+    debug_assert_eq!(children.try_consume_any(), None);
+    stages
 }
 
 fn visit_preamble(node: Node<'_>) -> Preamble {
@@ -243,7 +244,7 @@ fn visit_fetch_single(node: Node<'_>) -> FetchSingle {
     let child = node.into_child();
     match child.as_rule() {
         Rule::fetch_attribute => FetchSingle::Attribute(visit_fetch_attribute(child)),
-        Rule::query_pipeline => FetchSingle::Subquery(visit_query_pipeline(child)),
+        Rule::function_block => FetchSingle::FunctionBlock(visit_function_block(child)),
         Rule::expression => FetchSingle::Expression(visit_expression(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
@@ -315,7 +316,10 @@ fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
     let child = node.into_child();
     match child.as_rule() {
         Rule::fetch_attribute => FetchStream::Attribute(visit_fetch_attribute(child)),
-        Rule::query_pipeline => FetchStream::Subquery(visit_query_pipeline(child)),
+        Rule::function_block => FetchStream::SubQueryFunctionBlock(visit_function_block(child)),
+        Rule::query_stages => {
+            FetchStream::SubQueryFetch(visit_stages(child))
+        },
         Rule::expression_function => FetchStream::Function(visit_expression_function(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }

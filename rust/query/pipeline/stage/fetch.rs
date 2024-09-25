@@ -14,6 +14,8 @@ use crate::{
     value::StringLiteral,
     TypeRefAny, Variable,
 };
+use crate::query::stage::Stage;
+use crate::schema::definable::function::FunctionBlock;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Fetch {
@@ -61,7 +63,9 @@ impl Pretty for FetchEntry {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
             }
-            FetchEntry::Single(entry) => Pretty::fmt(entry, indent_level, f),
+            FetchEntry::Single(entry) => {
+                Pretty::fmt(entry, indent_level, f)
+            },
         }
     }
 }
@@ -206,7 +210,7 @@ impl fmt::Display for FetchList {
 pub enum FetchSingle {
     Attribute(FetchAttribute),
     Expression(Expression),
-    Subquery(Pipeline),
+    FunctionBlock(FunctionBlock),
 }
 
 impl Pretty for FetchSingle {
@@ -220,9 +224,12 @@ impl Pretty for FetchSingle {
                 write!(f, " ")?;
                 Pretty::fmt(single, indent_level, f)
             }
-            FetchSingle::Subquery(single) => {
+            FetchSingle::FunctionBlock(single) => {
+                write!(f, " {}\n", token::Char::ParenLeft)?;
+                Pretty::fmt(single, indent_level + 1, f)?;
                 writeln!(f)?;
-                Pretty::fmt(single, indent_level + 1, f)
+                indent(indent_level, f)?;
+                write!(f, "{}", token::Char::ParenRight)
             }
         }
     }
@@ -233,7 +240,11 @@ impl fmt::Display for FetchSingle {
         match self {
             FetchSingle::Attribute(single) => fmt::Display::fmt(single, f),
             FetchSingle::Expression(single) => fmt::Display::fmt(single, f),
-            FetchSingle::Subquery(single) => fmt::Display::fmt(single, f),
+            FetchSingle::FunctionBlock(single) => {
+                write!(f, "{} ", token::Char::ParenLeft)?;
+                fmt::Display::fmt(single, f)?;
+                write!(f, " {}", token::Char::ParenRight)
+            },
         }
     }
 }
@@ -242,7 +253,8 @@ impl fmt::Display for FetchSingle {
 pub enum FetchStream {
     Attribute(FetchAttribute),
     Function(FunctionCall),
-    Subquery(Pipeline),
+    SubQueryFetch(Vec<Stage>),
+    SubQueryFunctionBlock(FunctionBlock),
 }
 
 impl Pretty for FetchStream {
@@ -259,9 +271,20 @@ impl Pretty for FetchStream {
                 Pretty::fmt(stream, indent_level, f)?;
                 write!(f, " {}", token::Char::SquareRight)
             }
-            FetchStream::Subquery(stream) => {
+            FetchStream::SubQueryFetch(stages) => {
                 writeln!(f, "{}", token::Char::SquareLeft)?;
-                Pretty::fmt(stream, indent_level + 1, f)?;
+                Pretty::fmt(&stages[0], indent_level + 1, f)?;
+                for stage in &stages[1..] {
+                    write!(f, "\n")?;
+                    Pretty::fmt(stage, indent_level + 1, f)?;
+                }
+                writeln!(f, "")?;
+                indent(indent_level, f)?;
+                write!(f, "{}", token::Char::SquareRight)
+            }
+            FetchStream::SubQueryFunctionBlock(block) => {
+                writeln!(f, "{}", token::Char::SquareLeft)?;
+                Pretty::fmt(block, indent_level + 1, f)?;
                 writeln!(f)?;
                 indent(indent_level, f)?;
                 write!(f, "{}", token::Char::SquareRight)
@@ -276,7 +299,13 @@ impl fmt::Display for FetchStream {
         match self {
             FetchStream::Attribute(stream) => fmt::Display::fmt(stream, f),
             FetchStream::Function(stream) => fmt::Display::fmt(stream, f),
-            FetchStream::Subquery(stream) => fmt::Display::fmt(stream, f),
+            FetchStream::SubQueryFetch(stages) => {
+                for stage in stages {
+                    fmt::Display::fmt(stage, f)?;
+                }
+                Ok(())
+            },
+            FetchStream::SubQueryFunctionBlock(block) => fmt::Display::fmt(block, f),
         }?;
         write!(f, "{}", token::Char::SquareRight)
     }

@@ -207,6 +207,8 @@ string_enum! { Char
     Star = "*",
     Semicolon = ";",
     Colon = ":",
+    ParenLeft = "(",
+    ParenRight = ")",
     CurlyLeft = "{",
     CurlyRight = "}",
     SquareLeft = "[",
