@@ -39,7 +39,7 @@ use crate::{
             fetch::{
                 FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
             },
-            reduce::Reduction,
+            reduce::{ReduceAssign, Reduction},
         },
         Pipeline,
     },
@@ -47,7 +47,6 @@ use crate::{
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
-use crate::query::stage::reduce::ReduceAssign;
 
 pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
@@ -329,9 +328,7 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     children.skip_expected(Rule::REDUCE);
     while let Some(child) = children.try_consume_any() {
         match child.as_rule() {
-            Rule::reduce_assign => {
-                reducers.push(visit_reduce_assign(child))
-            },
+            Rule::reduce_assign => reducers.push(visit_reduce_assign(child)),
             Rule::WITHIN => {
                 debug_assert!(reducers.len() > 0);
                 group = Some(visit_vars(children.consume_expected(Rule::vars)));

@@ -4,8 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::parse_query;
-use crate::parser::test::assert_valid_eq_repr;
+use crate::{parse_query, parser::test::assert_valid_eq_repr};
 
 #[test]
 fn test_reduce_within_query() {
