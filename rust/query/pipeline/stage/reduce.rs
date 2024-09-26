@@ -31,9 +31,8 @@ impl Pretty for Reduce {
         write!(f, "{} ", token::Clause::Reduce)?;
         write_joined!(f, ", ", self.reductions)?;
         if let Some(group) = &self.within_group {
-            write!(f, " {} (", token::Clause::Within)?;
+            write!(f, " {} ", token::Clause::Within)?;
             write_joined!(f, ", ", group)?;
-            write!(f, ")")?;
         }
         write!(f, ";")?;
         Ok(())
@@ -168,12 +167,12 @@ impl fmt::Display for ReduceValue {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Count {
     span: Option<Span>,
-    pub variables: Vec<Variable>,
+    pub variable: Option<Variable>,
 }
 
 impl Count {
-    pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
-        Self { span, variables }
+    pub fn new(span: Option<Span>, variable: Option<Variable>) -> Self {
+        Self { span, variable }
     }
 }
 
@@ -181,9 +180,10 @@ impl Pretty for Count {}
 
 impl fmt::Display for Count {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}(", token::ReduceOperator::Count)?;
-        write_joined!(f, ", ", self.variables)?;
-        f.write_str(")")?;
+        write!(f, "{}", token::ReduceOperator::Count)?;
+        if let Some(variable) = &self.variable {
+            write!(f, "({})", variable)?;
+        }
         Ok(())
     }
 }

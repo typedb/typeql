@@ -31,7 +31,7 @@ clause_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
 
 clause_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
 
-operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ (WITHIN ~  PAREN_OPEN ~ vars ~ PAREN_CLOSE )? ~ SEMICOLON }
+operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ (WITHIN ~ vars )? ~ SEMICOLON }
 
 // QUERY MODIFIERS =============================================================
 
@@ -53,7 +53,7 @@ reduce = { CHECK
 
 reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
 
-reduce_value = { COUNT ~ ( PAREN_OPEN ~ vars ~ PAREN_CLOSE )?
+reduce_value = { COUNT ~ ( PAREN_OPEN ~ var ~ PAREN_CLOSE )?
                | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
                | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE

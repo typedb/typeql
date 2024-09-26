@@ -12,7 +12,16 @@ fn test_reduce_within_query() {
 ($x, $y) isa friendship,
     has age $a;
 select $x, $y;
-reduce $max = max($a), $min = min($a) within ($x, $y);"#;
+reduce $max = max($a), $min = min($a) within $x, $y;"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_count_without_parentheses() {
+    let query = r#"match
+$x isa friendship;
+reduce $count = count;"#;
     let parsed = parse_query(query).unwrap();
     assert_valid_eq_repr!(expected, parsed, query);
 }

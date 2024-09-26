@@ -377,10 +377,7 @@ fn visit_reduce_value(node: Node<'_>) -> ReduceValue {
     let mut children = node.into_children();
     let keyword = children.consume_any();
     match keyword.as_rule() {
-        Rule::COUNT => ReduceValue::Count(Count::new(
-            span,
-            children.try_consume_expected(Rule::vars).map(visit_vars).unwrap_or_default(),
-        )),
+        Rule::COUNT => ReduceValue::Count(Count::new(span, children.try_consume_expected(Rule::var).map(visit_var))),
         Rule::MAX => {
             ReduceValue::Stat(Stat::new(span, ReduceOperator::Max, visit_var(children.consume_expected(Rule::var))))
         }
