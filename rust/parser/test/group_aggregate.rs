@@ -4,17 +4,27 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-// #[test]
-// fn test_aggregate_group_count_query() {
-//     let query = r#"match
-// ($x, $y) isa friendship;
-// get $x, $y;
-// group $x; count;"#;
-//     let parsed = parse_query(query).unwrap().into_get_group_aggregate();
-//     let expected =
-//         typeql_match!(rel("x").links("y").isa("friendship")).get_fixed([var("x"), cvar("y")]).group(cvar("x")).count();
-//     assert_valid_eq_repr!(expected, parsed, query);
-// }
+use crate::{parse_query, parser::test::assert_valid_eq_repr};
+
+#[test]
+fn test_reduce_within_query() {
+    let query = r#"match
+($x, $y) isa friendship,
+    has age $a;
+select $x, $y;
+reduce $max = max($a), $min = min($a) within $x, $y;"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_count_without_parentheses() {
+    let query = r#"match
+$x isa friendship;
+reduce $count = count;"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
 
 // #[test]
 // fn test_single_line_group_aggregate_max_query() {
