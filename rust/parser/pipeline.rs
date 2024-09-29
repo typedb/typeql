@@ -39,6 +39,7 @@ use crate::{
             fetch::{
                 FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
             },
+            modifier::Require,
             reduce::{ReduceAssign, Reduction},
         },
         Pipeline,
@@ -412,6 +413,7 @@ pub(super) fn visit_operator_stream(node: Node<'_>) -> Modifier {
         Rule::operator_sort => Modifier::Sort(visit_operator_sort(child)),
         Rule::operator_offset => Modifier::Offset(visit_operator_offset(child)),
         Rule::operator_limit => Modifier::Limit(visit_operator_limit(child)),
+        Rule::operator_require => Modifier::Require(visit_operator_require(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -468,4 +470,13 @@ fn visit_operator_limit(node: Node<'_>) -> Limit {
     let limit = visit_integer_literal(children.skip_expected(Rule::LIMIT).consume_expected(Rule::integer_literal));
     debug_assert_eq!(children.try_consume_any(), None);
     Limit::new(span, limit)
+}
+
+fn visit_operator_require(node: Node<'_>) -> Require {
+    debug_assert_eq!(node.as_rule(), Rule::operator_require);
+    let span = node.span();
+    let mut children = node.into_children();
+    let variables = visit_vars(children.skip_expected(Rule::REQUIRE).consume_expected(Rule::vars));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Require::new(span, variables)
 }

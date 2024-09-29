@@ -129,11 +129,35 @@ impl fmt::Display for Limit {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Require {
+    span: Option<Span>,
+    pub variables: Vec<Variable>,
+}
+
+impl Require {
+    pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
+        Self { span, variables }
+    }
+}
+
+impl Pretty for Require {}
+
+impl fmt::Display for Require {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ", token::Modifier::Require)?;
+        write_joined!(f, ", ", self.variables)?;
+        f.write_char(';')?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Modifier {
     Select(Select),
     Sort(Sort),
     Offset(Offset),
     Limit(Limit),
+    Require(Require),
 }
 
 impl Pretty for Modifier {
@@ -143,6 +167,7 @@ impl Pretty for Modifier {
             Self::Sort(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Offset(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Limit(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Require(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
@@ -154,6 +179,7 @@ impl fmt::Display for Modifier {
             Self::Sort(inner) => fmt::Display::fmt(inner, f),
             Self::Offset(inner) => fmt::Display::fmt(inner, f),
             Self::Limit(inner) => fmt::Display::fmt(inner, f),
+            Self::Require(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }

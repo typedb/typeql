@@ -71,6 +71,7 @@ string_enum! { Modifier
     Sort = "sort",
     Offset = "offset",
     Limit = "limit",
+    Require = "require",
 }
 
 string_enum! { LogicOperator

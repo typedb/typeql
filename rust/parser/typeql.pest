@@ -35,12 +35,13 @@ operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ (WITHI
 
 // QUERY MODIFIERS =============================================================
 
-operator_stream = { operator_select | operator_sort | operator_offset | operator_limit }
+operator_stream = { operator_select | operator_sort | operator_offset | operator_limit | operator_require }
 
 operator_select = { SELECT ~ vars ~ SEMICOLON }
 operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ SEMICOLON }
 operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
 operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
+operator_require = { REQUIRE ~ vars ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
 reduce_assign = { (var ~ ASSIGN ~ reduce_value) }
@@ -410,6 +411,7 @@ SELECT = @{ "select" ~ WB }
 LIMIT = @{ "limit" ~ WB }
 OFFSET = @{ "offset" ~ WB }
 SORT = @{ "sort" ~ WB }
+REQUIRE = @{ "require" ~ WB }
 
 ORDER = ${ ASC | DESC }
 ASC = @{ "asc" ~ WB }
