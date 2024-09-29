@@ -247,6 +247,52 @@ fn visit_clause_fetch(node: Node<'_>) -> Fetch {
     Fetch::new(span, fetch_object)
 }
 
+
+// insert
+// let $value = 10 + 1;
+//
+// attribute name, value string;
+//
+// struct coordinate:
+//   x-coord value long,
+//   y-coord value long;
+//
+//
+// $age 10 isa age; $age == 10;
+//
+// $age $value isa age;
+// $age 10 + 1 isa age;
+// $age ($value + $other_value / 10) isa age;
+
+// $age isa age 10;
+// $age isa age $value;
+// $age isa age 10 + 1;
+//
+// $name isa age(10 + 1);
+// $name isa age($value);
+//
+//
+// $p isa person, has age 10+1;
+//
+// $x isa person, has age $attr; $attr == $value;
+// $x isa person, has age 10;  <---> $x isa person, has $a; $a isa age; $a == 10;
+//
+// $x isa person, has $attr; $attr isa age(10+1);
+// $x isa person, has age($value);
+// $name $value isa age;
+// $name == $value;
+// $name isa age(10 + 1);
+// $name isa age($value);
+//
+// $r isa marriage(spouse: $x)
+
+
+// match
+// ...
+// let $value = 10 + 11 / 2;
+// $p isa person, has age $value;
+// $p isa person, has age $attr; $attr == $value;
+
 fn visit_fetch_some(node: Node<'_>) -> FetchEntry {
     debug_assert_eq!(node.as_rule(), Rule::fetch_some);
     let child = node.into_child();

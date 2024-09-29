@@ -104,6 +104,8 @@ statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_
 
 statement_thing_var = { var ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?
                       | var ~ ( value_literal | expression_struct ) ~ isa_constraint
+                      // TODO: need to allow $x $name_value isa name;
+                      // option: $x isa name($value), extend to literals as well
                       | var ~ comparison ~ isa_constraint
                       }
 
