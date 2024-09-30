@@ -248,3 +248,13 @@ fn visit_var_assignment(node: Node<'_>) -> Variable {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
+
+fn visit_reduce_assignment_var(node: Node<'_>) -> Variable {
+    debug_assert_eq!(node.as_rule(), Rule::reduce_assignment_var);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::var => visit_var(child),
+        Rule::var_optional => visit_var_optional(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}

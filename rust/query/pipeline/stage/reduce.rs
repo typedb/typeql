@@ -28,10 +28,10 @@ impl Reduce {
 impl Pretty for Reduce {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, "{} ", token::Clause::Reduce)?;
+        write!(f, "{} ", token::Operator::Reduce)?;
         write_joined!(f, ", ", self.reductions)?;
         if let Some(group) = &self.within_group {
-            write!(f, " {} ", token::Clause::Within)?;
+            write!(f, " {} ", token::Keyword::Within)?;
             write_joined!(f, ", ", group)?;
         }
         write!(f, ";")?;
@@ -41,10 +41,10 @@ impl Pretty for Reduce {
 
 impl fmt::Display for Reduce {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Clause::Reduce)?;
+        write!(f, "{} ", token::Operator::Reduce)?;
         write_joined!(f, ", ", self.reductions)?;
         if let Some(group) = &self.within_group {
-            write!(f, " {} (", token::Clause::Within)?;
+            write!(f, " {} (", token::Keyword::Within)?;
             write_joined!(f, ", ", group)?;
             write!(f, ")")?;
         }
@@ -55,98 +55,30 @@ impl fmt::Display for Reduce {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ReduceAssign {
-    pub assign_to: Variable,
-    pub reduce_value: ReduceValue,
+    pub variable: Variable,
+    pub reducer: Reducer,
 }
 
 impl Pretty for ReduceAssign {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, "{} = {}", self.assign_to, self.reduce_value)
+        write!(f, "{} = {}", self.variable, self.reducer)
     }
 }
 
 impl fmt::Display for ReduceAssign {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} = {}", self.assign_to, self.reduce_value)
+        write!(f, "{} = {}", self.variable, self.reducer)
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Reduction {
-    Check(Check),
-    First(First),
-    Value(Vec<ReduceValue>),
-}
-
-impl Pretty for Reduction {
-    fn fmt(&self, _indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Display::fmt(self, f)
-    }
-}
-
-impl fmt::Display for Reduction {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Check(inner) => fmt::Display::fmt(inner, f),
-            Self::First(inner) => fmt::Display::fmt(inner, f),
-            Self::Value(inner) => {
-                write_joined!(f, ", ", inner)?;
-                Ok(())
-            }
-        }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Check {
-    span: Option<Span>,
-}
-
-impl Check {
-    pub fn new(span: Option<Span>) -> Self {
-        Self { span }
-    }
-}
-
-impl Pretty for Check {}
-
-impl fmt::Display for Check {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{};", token::ReduceOperator::Check)
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct First {
-    span: Option<Span>,
-    pub variables: Vec<Variable>,
-}
-
-impl First {
-    pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
-        Self { span, variables }
-    }
-}
-
-impl Pretty for First {}
-
-impl fmt::Display for First {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}(", token::ReduceOperator::First)?;
-        write_joined!(f, ", ", self.variables)?;
-        f.write_str(");")?;
-        Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum ReduceValue {
+pub enum Reducer {
     Count(Count),
     Stat(Stat),
 }
 
-impl Pretty for ReduceValue {
+impl Pretty for Reducer {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Count(inner) => Pretty::fmt(inner, indent_level, f),
@@ -155,7 +87,7 @@ impl Pretty for ReduceValue {
     }
 }
 
-impl fmt::Display for ReduceValue {
+impl fmt::Display for Reducer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Count(inner) => fmt::Display::fmt(inner, f),

@@ -9,7 +9,7 @@ use itertools::Itertools;
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        pipeline::{visit_clause_match, visit_operator_stream, visit_query_stage, visit_reduce},
+        pipeline::{visit_clause_match, visit_operator_stream, visit_query_stage},
         type_::visit_named_type_any,
         visit_identifier, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },
@@ -18,6 +18,8 @@ use crate::{
         Function,
     },
 };
+use crate::parser::pipeline::visit_reducer;
+use crate::schema::definable::function::{Check, ReturnReduction, ReturnSingle, SingleSelector};
 
 pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
     debug_assert_eq!(node.as_rule(), Rule::definition_function);
@@ -46,11 +48,11 @@ fn visit_return_statement(node: Node<'_>) -> ReturnStatement {
     debug_assert_eq!(node.as_rule(), Rule::return_statement);
     let mut children = node.into_children();
 
-    children.skip_expected(Rule::RETURN);
     let child = children.consume_any();
     let return_stmt = match child.as_rule() {
-        Rule::return_statement_stream => ReturnStatement::Stream(visit_return_statement_stream(child)),
-        Rule::reduce => ReturnStatement::Reduce(visit_reduce(child)),
+        Rule::return_stream => ReturnStatement::Stream(visit_return_stream(child)),
+        Rule::return_single => ReturnStatement::Single(visit_return_single(child)),
+        Rule::return_reduce => ReturnStatement::Reduce(visit_return_reduce(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
 
@@ -58,9 +60,56 @@ fn visit_return_statement(node: Node<'_>) -> ReturnStatement {
     return_stmt
 }
 
-fn visit_return_statement_stream(node: Node<'_>) -> ReturnStream {
-    debug_assert_eq!(node.as_rule(), Rule::return_statement_stream);
-    ReturnStream::new(node.span(), visit_vars(node.into_child()))
+fn visit_return_stream(node: Node<'_>) -> ReturnStream {
+    debug_assert_eq!(node.as_rule(), Rule::return_stream);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::RETURN);
+    let vars = visit_vars(children.consume_any());
+    debug_assert_eq!(children.try_consume_any(), None);
+    ReturnStream::new(span, vars)
+}
+
+fn visit_return_single(node: Node<'_>) -> ReturnSingle {
+    debug_assert_eq!(node.as_rule(), Rule::return_single);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::RETURN);
+    let selector = visit_return_single_selector(children.consume_expected(Rule::return_single_selector));
+    let vars = visit_vars(children.consume_any());
+    debug_assert_eq!(children.try_consume_any(), None);
+    ReturnSingle::new(span, selector, vars)
+}
+
+fn visit_return_single_selector(node: Node<'_>) -> SingleSelector {
+    debug_assert_eq!(node.as_rule(), Rule::return_single_selector);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::FIRST => SingleSelector::First,
+        Rule::LAST => SingleSelector::Last,
+        _ =>  unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+pub(super) fn visit_return_reduce(node: Node<'_>) -> ReturnReduction {
+    debug_assert_eq!(node.as_rule(), Rule::return_reduce);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::RETURN);
+    let return_reduce_reduction = visit_return_reduce_reduction(children.consume_expected(Rule::return_reduce_reduction));
+    debug_assert!(children.try_consume_any().is_none());
+    return_reduce_reduction
+}
+
+fn visit_return_reduce_reduction(node: Node<'_>) -> ReturnReduction {
+    debug_assert_eq!(node.as_rule(), Rule::return_reduce_reduction);
+    let mut children = node.into_children();
+    let reduction = match children.peek_rule().unwrap() {
+        Rule::CHECK => ReturnReduction::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
+        Rule::reducer => ReturnReduction::Value(children.by_ref().map(visit_reducer).collect()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
+    };
+    debug_assert!(children.try_consume_any().is_none());
+    reduction
 }
 
 fn visit_function_signature(node: Node<'_>) -> Signature {

@@ -6,17 +6,10 @@
 
 use itertools::Itertools;
 
-use super::{
-    define::function::visit_definition_function,
-    expression::{visit_expression, visit_expression_function},
-    literal::{visit_integer_literal, visit_quoted_string_literal},
-    statement::{
-        thing::{visit_relation, visit_statement_thing},
-        visit_statement,
-    },
-    type_::{visit_label, visit_label_list},
-    visit_var, visit_var_named, visit_vars, visit_vars_assignment, ChildNodes, IntoChildNodes, Node, Rule, RuleMatcher,
-};
+use super::{define::function::visit_definition_function, expression::{visit_expression, visit_expression_function}, literal::{visit_integer_literal, visit_quoted_string_literal}, statement::{
+    thing::{visit_relation, visit_statement_thing},
+    visit_statement,
+}, type_::{visit_label, visit_label_list}, visit_var, visit_var_named, visit_vars, visit_vars_assignment, ChildNodes, IntoChildNodes, Node, Rule, RuleMatcher, visit_reduce_assignment_var};
 use crate::{
     common::{
         error::TypeQLError,
@@ -31,8 +24,8 @@ use crate::{
                 delete::{Deletable, DeletableKind},
                 fetch::FetchEntry,
                 modifier::{Limit, Offset, OrderedVariable, Select, Sort},
-                reduce::{Check, Count, First, ReduceValue, Stat},
-                Delete, Fetch, Insert, Match, Modifier, Put, Reduce, Stage, Update,
+                reduce::{Count, Reducer, Stat},
+                Delete, Fetch, Insert, Match, Operator, Put, Reduce, Stage, Update,
             },
             Preamble,
         },
@@ -41,7 +34,7 @@ use crate::{
                 FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
             },
             modifier::Require,
-            reduce::{ReduceAssign, Reduction},
+            reduce::{ReduceAssign},
         },
         Pipeline,
     },
@@ -50,6 +43,7 @@ use crate::{
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
+use crate::schema::definable::function::{Check, ReturnReduction};
 
 pub(super) fn visit_query_pipeline_preambled(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline_preambled);
@@ -92,8 +86,7 @@ pub(super) fn visit_query_stage(node: Node<'_>) -> Stage {
         Rule::clause_put => Stage::Put(visit_clause_put(child)),
         Rule::clause_update => Stage::Update(visit_clause_update(child)),
         Rule::clause_delete => Stage::Delete(visit_clause_delete(child)),
-        Rule::operator_stream => Stage::Modifier(visit_operator_stream(child)),
-        Rule::operator_reduce => Stage::Reduce(visit_operator_reduce(child)),
+        Rule::operator_stream => Stage::Operator(visit_operator_stream(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -388,6 +381,19 @@ fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
     }
 }
 
+pub(super) fn visit_operator_stream(node: Node<'_>) -> Operator {
+    debug_assert_eq!(node.as_rule(), Rule::operator_stream);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::operator_select => Operator::Select(visit_operator_select(child)),
+        Rule::operator_sort => Operator::Sort(visit_operator_sort(child)),
+        Rule::operator_offset => Operator::Offset(visit_operator_offset(child)),
+        Rule::operator_limit => Operator::Limit(visit_operator_limit(child)),
+        Rule::operator_reduce => Operator::Reduce(visit_operator_reduce(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
 fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::operator_reduce);
     let mut children = node.into_children();
@@ -409,79 +415,46 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     Reduce::new(reducers, group)
 }
 
+
 pub(super) fn visit_reduce_assign(node: Node<'_>) -> ReduceAssign {
     debug_assert_eq!(node.as_rule(), Rule::reduce_assign);
     let mut children = node.into_children();
-    let assign_to = visit_var(children.consume_expected(Rule::var));
+    let variable = visit_reduce_assignment_var(children.consume_expected(Rule::reduce_assignment_var));
     children.consume_expected(Rule::ASSIGN);
-    let reduce_value = visit_reduce_value(children.consume_expected(Rule::reduce_value));
-    ReduceAssign { assign_to, reduce_value }
+    let reducer = visit_reducer(children.consume_expected(Rule::reducer));
+    ReduceAssign { variable, reducer }
 }
 
-pub(super) fn visit_reduce(node: Node<'_>) -> Reduction {
-    debug_assert_eq!(node.as_rule(), Rule::reduce);
-    let mut children = node.into_children();
-    let reduce = match children.peek_rule().unwrap() {
-        Rule::CHECK => Reduction::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
-        // Rule::reduce_first => Reduction::First(visit_reduce_first(children.consume_expected(Rule::reduce_first))),
-        Rule::reduce_value => Reduction::Value(children.by_ref().map(visit_reduce_value).collect()),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
-    };
-    debug_assert!(children.try_consume_any().is_none());
-    reduce
-}
-//
-// fn visit_reduce_first(node: Node<'_>) -> First {
-//     debug_assert_eq!(node.as_rule(), Rule::reduce_first);
-//     let span = node.span();
-//     let mut children = node.into_children();
-//     let variables = visit_vars(children.skip_expected(Rule::FIRST).consume_expected(Rule::vars));
-//     First::new(span, variables)
-// }
-
-fn visit_reduce_value(node: Node<'_>) -> ReduceValue {
-    debug_assert_eq!(node.as_rule(), Rule::reduce_value);
+pub(crate) fn visit_reducer(node: Node<'_>) -> Reducer {
+    debug_assert_eq!(node.as_rule(), Rule::reducer);
     let span = node.span();
     let mut children = node.into_children();
     let keyword = children.consume_any();
     match keyword.as_rule() {
-        Rule::COUNT => ReduceValue::Count(Count::new(span, children.try_consume_expected(Rule::var).map(visit_var))),
+        Rule::COUNT => Reducer::Count(Count::new(span, children.try_consume_expected(Rule::var).map(visit_var))),
         Rule::MAX => {
-            ReduceValue::Stat(Stat::new(span, ReduceOperator::Max, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Stat(Stat::new(span, ReduceOperator::Max, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MIN => {
-            ReduceValue::Stat(Stat::new(span, ReduceOperator::Min, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Stat(Stat::new(span, ReduceOperator::Min, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MEAN => {
-            ReduceValue::Stat(Stat::new(span, ReduceOperator::Mean, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Stat(Stat::new(span, ReduceOperator::Mean, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::MEDIAN => {
-            ReduceValue::Stat(Stat::new(span, ReduceOperator::Median, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Stat(Stat::new(span, ReduceOperator::Median, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::STD => {
-            ReduceValue::Stat(Stat::new(span, ReduceOperator::Std, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Stat(Stat::new(span, ReduceOperator::Std, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::SUM => {
-            ReduceValue::Stat(Stat::new(span, ReduceOperator::Sum, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Stat(Stat::new(span, ReduceOperator::Sum, visit_var(children.consume_expected(Rule::var))))
         }
         Rule::LIST => {
             // TODO      vvvv rename
-            ReduceValue::Stat(Stat::new(span, ReduceOperator::List, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Stat(Stat::new(span, ReduceOperator::List, visit_var(children.consume_expected(Rule::var))))
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.to_string() }),
-    }
-}
-
-pub(super) fn visit_operator_stream(node: Node<'_>) -> Modifier {
-    debug_assert_eq!(node.as_rule(), Rule::operator_stream);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::operator_select => Modifier::Select(visit_operator_select(child)),
-        Rule::operator_sort => Modifier::Sort(visit_operator_sort(child)),
-        Rule::operator_offset => Modifier::Offset(visit_operator_offset(child)),
-        Rule::operator_limit => Modifier::Limit(visit_operator_limit(child)),
-        Rule::operator_require => Modifier::Require(visit_operator_require(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 

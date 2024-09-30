@@ -16,6 +16,7 @@ use crate::{
     value::IntegerLiteral,
     variable::Variable,
 };
+use crate::query::stage::Reduce;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct OrderedVariable {
@@ -58,7 +59,7 @@ impl Pretty for Sort {}
 
 impl fmt::Display for Sort {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Modifier::Sort)?;
+        write!(f, "{} ", token::Operator::Sort)?;
         write_joined!(f, ", ", self.ordered_variables)?;
         f.write_char(';')?;
         Ok(())
@@ -81,7 +82,7 @@ impl Pretty for Select {}
 
 impl fmt::Display for Select {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Modifier::Select)?;
+        write!(f, "{} ", token::Operator::Select)?;
         write_joined!(f, ", ", self.variables)?;
         f.write_char(';')?;
         Ok(())
@@ -104,7 +105,7 @@ impl Pretty for Offset {}
 
 impl fmt::Display for Offset {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {};", token::Modifier::Offset, self.offset)
+        write!(f, "{} {};", token::Operator::Offset, self.offset)
     }
 }
 
@@ -124,7 +125,7 @@ impl Pretty for Limit {}
 
 impl fmt::Display for Limit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {};", token::Modifier::Limit, self.limit)
+        write!(f, "{} {};", token::Operator::Limit, self.limit)
     }
 }
 
@@ -152,33 +153,36 @@ impl fmt::Display for Require {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Modifier {
+pub enum Operator {
     Select(Select),
     Sort(Sort),
     Offset(Offset),
     Limit(Limit),
+    Reduce(Reduce),
     Require(Require),
 }
 
-impl Pretty for Modifier {
+impl Pretty for Operator {
     fn fmt(&self, indent_level: usize, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Select(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Sort(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Offset(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Limit(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Reduce(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Require(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
 
-impl fmt::Display for Modifier {
+impl fmt::Display for Operator {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Select(inner) => fmt::Display::fmt(inner, f),
             Self::Sort(inner) => fmt::Display::fmt(inner, f),
             Self::Offset(inner) => fmt::Display::fmt(inner, f),
             Self::Limit(inner) => fmt::Display::fmt(inner, f),
+            Self::Reduce(inner) => fmt::Display::fmt(inner, f),
             Self::Require(inner) => fmt::Display::fmt(inner, f),
         }
     }

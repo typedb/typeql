@@ -10,13 +10,15 @@ use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
     query::{
-        pipeline::stage::{Match, Modifier},
-        stage::{reduce::Reduction, Stage},
+        pipeline::stage::{Match, Operator},
+        stage::{Stage},
         Pipeline,
     },
     type_::TypeRefAny,
     variable::Variable,
 };
+use crate::query::stage::reduce::Reducer;
+use crate::util::write_joined;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
@@ -229,7 +231,8 @@ impl fmt::Display for FunctionBlock {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReturnStatement {
     Stream(ReturnStream),
-    Reduce(Reduction),
+    Single(ReturnSingle),
+    Reduce(ReturnReduction),
 }
 
 impl Pretty for ReturnStatement {
@@ -244,6 +247,9 @@ impl fmt::Display for ReturnStatement {
         match self {
             ReturnStatement::Stream(return_stream) => {
                 write!(f, "{} {};", token::Keyword::Return, return_stream)
+            }
+            ReturnStatement::Single(return_single) => {
+                write!(f, "{} {};", token::Keyword::Return, return_single)
             }
             ReturnStatement::Reduce(reduction) => {
                 write!(f, "{} {};", token::Keyword::Return, reduction)
@@ -274,3 +280,87 @@ impl fmt::Display for ReturnStream {
         Ok(())
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ReturnSingle {
+    span: Option<Span>,
+    pub selector: SingleSelector,
+    pub vars: Vec<Variable>,
+}
+
+impl ReturnSingle {
+    pub fn new(span: Option<Span>, selector: SingleSelector, vars: Vec<Variable>) -> Self {
+        Self { span, selector, vars }
+    }
+}
+
+impl fmt::Display for ReturnSingle {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        assert!(!self.vars.is_empty());
+        write!(f, "{}", self.selector)?;
+        write!(f, "{}", self.vars[0])?;
+        for var in &self.vars[1..] {
+            write!(f, ", {}", var)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SingleSelector {
+    First,
+    Last,
+}
+
+impl fmt::Display for SingleSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            SingleSelector::First => write!(f, "{}", token::Keyword::First),
+            SingleSelector::Last => write!(f, "{}", token::Keyword::Last),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum ReturnReduction {
+    Check(Check),
+    Value(Vec<Reducer>),
+}
+
+impl Pretty for ReturnReduction {
+    fn fmt(&self, _indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
+impl fmt::Display for ReturnReduction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Check(inner) => fmt::Display::fmt(inner, f),
+            Self::Value(inner) => {
+                write_joined!(f, ", ", inner)?;
+                Ok(())
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Check {
+    span: Option<Span>,
+}
+
+impl Check {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl Pretty for Check {}
+
+impl fmt::Display for Check {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{};", token::Keyword::Check)
+    }
+}
+
