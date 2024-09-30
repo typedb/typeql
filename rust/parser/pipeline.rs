@@ -51,20 +51,20 @@ use crate::{
     TypeRef, TypeRefAny,
 };
 
-pub(super) fn visit_query_pipeline(node: Node<'_>) -> Pipeline {
-    debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
+pub(super) fn visit_query_pipeline_preambled(node: Node<'_>) -> Pipeline {
+    debug_assert_eq!(node.as_rule(), Rule::query_pipeline_preambled);
     let span = node.span();
     let mut children = node.into_children();
 
     let preambles = children.take_while_ref(|child| child.as_rule() == Rule::preamble).map(visit_preamble).collect();
-    let stages = visit_stages(children.consume_expected(Rule::query_stages));
+    let stages = visit_query_pipeline(children.consume_expected(Rule::query_pipeline));
     debug_assert_eq!(children.try_consume_any(), None);
 
     Pipeline::new(span, preambles, stages)
 }
 
-fn visit_stages(node: Node<'_>) -> Vec<Stage> {
-    debug_assert_eq!(node.as_rule(), Rule::query_stages);
+fn visit_query_pipeline(node: Node<'_>) -> Vec<Stage> {
+    debug_assert_eq!(node.as_rule(), Rule::query_pipeline);
     let mut children = node.into_children();
     let mut stages =
         children.take_while_ref(|child| child.as_rule() == Rule::query_stage).map(visit_query_stage).collect_vec();
@@ -382,7 +382,7 @@ fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
     match child.as_rule() {
         Rule::fetch_attribute => FetchStream::Attribute(visit_fetch_attribute(child)),
         Rule::function_block => FetchStream::SubQueryFunctionBlock(visit_function_block(child)),
-        Rule::query_stages => FetchStream::SubQueryFetch(visit_stages(child)),
+        Rule::query_pipeline => FetchStream::SubQueryFetch(visit_query_pipeline(child)),
         Rule::expression_function => FetchStream::Function(visit_expression_function(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
