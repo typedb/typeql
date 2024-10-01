@@ -344,6 +344,7 @@ pub(super) fn visit_operator_stream(node: Node<'_>) -> Operator {
         Rule::operator_offset => Operator::Offset(visit_operator_offset(child)),
         Rule::operator_limit => Operator::Limit(visit_operator_limit(child)),
         Rule::operator_reduce => Operator::Reduce(visit_operator_reduce(child)),
+        Rule::operator_require => Operator::Require(visit_operator_require(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
