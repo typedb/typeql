@@ -34,7 +34,7 @@ clause_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
 
 // STREAM OPERATORS  ===========================================================
 
-operator_stream = { operator_select | operator_sort | operator_offset | operator_limit | operator_reduce }
+operator_stream = { operator_select | operator_sort | operator_offset | operator_limit | operator_require | operator_reduce }
 
 operator_select = { SELECT ~ vars ~ SEMICOLON }
 operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ SEMICOLON }
