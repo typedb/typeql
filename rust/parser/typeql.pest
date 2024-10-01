@@ -11,58 +11,51 @@ eof_definition_struct = { SOI ~ definition_struct ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
-query = { query_schema | query_pipeline }
+query = { query_schema | query_pipeline_preambled }
 
 // QUERY PIPELINES =============================================================
 
-query_pipeline = { preamble* ~ query_stage+ ~ query_stage_terminal? }
+query_pipeline_preambled = { preamble* ~ query_pipeline }
+query_pipeline = { query_stage+ ~ query_stage_terminal? }
 
 preamble = { WITH ~ definition_function }
 
-query_stage = { clause_match | clause_insert | clause_put | clause_update | clause_delete | operator_stream | operator_reduce }
+query_stage = { clause_match | clause_insert | clause_put | clause_update | clause_delete | operator_stream }
 
-query_stage_terminal = { clause_fetch }
+query_stage_terminal = { clause_fetch ~ SEMICOLON }
 
 clause_match = { MATCH ~ patterns }
 
-clause_insert = { INSERT ~ ( statement_thing ~ SEMICOLON )+ }
+clause_insert = { INSERT ~ ( statement_thing ~ SEMICOLON | statement_assignment ~ SEMICOLON )+ }
 clause_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
 clause_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
 
 clause_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
 
-operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ (WITHIN ~ vars )? ~ SEMICOLON }
+// STREAM OPERATORS  ===========================================================
 
-// QUERY MODIFIERS =============================================================
-
-operator_stream = { operator_select | operator_sort | operator_offset | operator_limit | operator_require }
+operator_stream = { operator_select | operator_sort | operator_offset | operator_limit | operator_reduce }
 
 operator_select = { SELECT ~ vars ~ SEMICOLON }
 operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ SEMICOLON }
 operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
 operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
 operator_require = { REQUIRE ~ vars ~ SEMICOLON }
+operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ (WITHIN ~ vars )? ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
-reduce_assign = { (var ~ ASSIGN ~ reduce_value) }
+reduce_assign = { (reduce_assignment_var ~ ASSIGN ~ reducer) }
 
-// REDUCE ======================================================================
-reduce = { CHECK
-         | reduce_first
-         | reduce_value ~ ( COMMA ~ reduce_value )* ~ COMMA?
-         }
-
-reduce_first = { FIRST ~ PAREN_OPEN ~ vars ~ PAREN_CLOSE }
-
-reduce_value = { COUNT ~ ( PAREN_OPEN ~ var ~ PAREN_CLOSE )?
-               | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-               | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-               | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-               | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-               | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-               | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-               | LIST ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-               }
+reduce_assignment_var = { var_optional | var }
+reducer = { COUNT ~ ( PAREN_OPEN ~ var ~ PAREN_CLOSE )?
+          | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | LIST ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          }
 
 // QUERY PATTERNS ==============================================================
 
@@ -106,6 +99,8 @@ statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_
 
 statement_thing_var = { var ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?
                       | var ~ ( value_literal | expression_struct ) ~ isa_constraint
+                      // TODO: need to allow $x $name_value isa name;
+                      // option: $x isa name($value), extend to literals as well
                       | var ~ comparison ~ isa_constraint
                       }
 
@@ -185,9 +180,9 @@ fetch_key = { quoted_string_literal }
 
 fetch_list = { SQ_BRACKET_OPEN ~ fetch_stream ~ SQ_BRACKET_CLOSE }
 
-fetch_stream = { expression_function | query_pipeline | fetch_attribute }
+fetch_stream = { expression_function | function_block | query_pipeline | fetch_attribute }
 
-fetch_single = { fetch_attribute | expression | query_pipeline }
+fetch_single = { PAREN_OPEN? ~ ( fetch_attribute | expression | function_block ) ~ PAREN_CLOSE? }
 
 fetch_attribute = { var_named ~ DOT ~ ( label_list | label ) }
 fetch_attributes_all = { var_named ~ DOT ~ STAR }
@@ -224,19 +219,28 @@ relates_declaration = { RELATES ~ label_list
 
 // FUNCTION DEFINITION =========================================================
 
-definition_function = { FUN ~ function_signature ~ COLON ~ clause_match ~ operator_stream* ~ return_statement }
+definition_function = { FUN ~ function_signature ~ COLON ~ function_block }
 
 function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
 function_arguments = { ( function_argument ~ ( COMMA ~ function_argument )* ~ COMMA? )? }
 function_argument = { var ~ COLON ~ named_type_any }
 
+function_block = { query_stage+ ~ return_statement }
+
 function_output = { function_output_stream | function_output_single }
 function_output_stream = { CURLY_OPEN ~ named_type_any ~ ( COMMA ~ named_type_any )* ~ COMMA? ~ CURLY_CLOSE }
 function_output_single = { named_type_any ~ ( COMMA ~ named_type_any )* ~ COMMA? }
 
-return_statement = { RETURN ~ ( return_statement_stream | reduce ) ~ SEMICOLON }
-return_statement_stream = { CURLY_OPEN ~ vars ~ CURLY_CLOSE }
+return_statement = { ( return_stream | return_single | return_reduce ) ~ SEMICOLON }
+// return_statement = { RETURN ~ ( return_statement_stream | reduce ) ~ SEMICOLON }
+return_stream = { RETURN ~ CURLY_OPEN ~ vars ~ CURLY_CLOSE }
+return_single = { RETURN ~ return_single_selector ~ vars }
+return_single_selector = { FIRST | LAST }
+return_reduce = { RETURN ~ return_reduce_reduction }
+return_reduce_reduction = { CHECK
+                          | reducer ~ ( COMMA ~ reducer )* ~ COMMA?
+                          }
 
 // STRUCT DEFINITION ===========================================================
 
@@ -395,6 +399,7 @@ DELETE = @{ "delete" ~ WB }
 REDUCE = @{ "reduce" ~ WB }
 CHECK = @{ "check" ~ WB }
 FIRST = @{ "first" ~ WB }
+LAST = @{ "last" ~ WB }
 WITHIN = @{ "within" ~ WB }
 
 // THING KIND KEYWORDS

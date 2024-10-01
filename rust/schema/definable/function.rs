@@ -10,10 +10,12 @@ use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
     query::{
-        pipeline::stage::{Match, Modifier},
-        stage::reduce::Reduction,
+        pipeline::stage::{Match, Operator},
+        stage::{reduce::Reducer, Stage},
+        Pipeline,
     },
     type_::TypeRefAny,
+    util::write_joined,
     variable::Variable,
 };
 
@@ -21,20 +23,12 @@ use crate::{
 pub struct Function {
     span: Option<Span>,
     pub signature: Signature,
-    pub body: Match,
-    pub modifiers: Vec<Modifier>,
-    pub return_stmt: ReturnStatement,
+    pub block: FunctionBlock,
 }
 
 impl Function {
-    pub fn new(
-        span: Option<Span>,
-        signature: Signature,
-        body: Match,
-        modifiers: Vec<Modifier>,
-        return_stmt: ReturnStatement,
-    ) -> Self {
-        Self { span, signature, body, modifiers, return_stmt }
+    pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock) -> Self {
+        Self { span, signature, block }
     }
 }
 
@@ -44,16 +38,17 @@ impl Pretty for Function {
         write!(f, "{} ", token::Keyword::Fun)?;
         Pretty::fmt(&self.signature, indent_level, f)?;
         f.write_char(':')?;
+        f.write_str("\n")?;
+        Pretty::fmt(&self.block, indent_level + 1, f)?;
         Ok(())
     }
 }
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if f.alternate() {
-            return Pretty::fmt(self, 0, f);
-        }
-
+        // if f.alternate() {
+        //     return Pretty::fmt(self, 0, f);
+        // }
         todo!()
     }
 }
@@ -202,9 +197,41 @@ impl fmt::Display for Single {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FunctionBlock {
+    pub stages: Vec<Stage>,
+    pub return_stmt: ReturnStatement,
+}
+
+impl FunctionBlock {
+    pub fn new(stages: Vec<Stage>, return_stmt: ReturnStatement) -> Self {
+        Self { stages, return_stmt }
+    }
+}
+
+impl Pretty for FunctionBlock {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for stage in &self.stages {
+            Pretty::fmt(stage, indent_level, f)?;
+        }
+        write!(f, "\n")?;
+        Pretty::fmt(&self.return_stmt, indent_level, f)
+    }
+}
+
+impl fmt::Display for FunctionBlock {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for stage in &self.stages {
+            fmt::Display::fmt(stage, f)?;
+        }
+        fmt::Display::fmt(&self.return_stmt, f)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReturnStatement {
     Stream(ReturnStream),
-    Reduce(Reduction),
+    Single(ReturnSingle),
+    Reduce(ReturnReduction),
 }
 
 impl Pretty for ReturnStatement {
@@ -218,10 +245,13 @@ impl fmt::Display for ReturnStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ReturnStatement::Stream(return_stream) => {
-                write!(f, "{} {}", token::Keyword::Return, return_stream)
+                write!(f, "{} {};", token::Keyword::Return, return_stream)
+            }
+            ReturnStatement::Single(return_single) => {
+                write!(f, "{} {};", token::Keyword::Return, return_single)
             }
             ReturnStatement::Reduce(reduction) => {
-                write!(f, "{} {}", token::Keyword::Return, reduction)
+                write!(f, "{} {};", token::Keyword::Return, reduction)
             }
         }
     }
@@ -242,10 +272,93 @@ impl ReturnStream {
 impl fmt::Display for ReturnStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         assert!(!self.vars.is_empty());
+        write!(f, "{} {}", token::Char::CurlyLeft, self.vars[0])?;
+        for var in &self.vars[1..] {
+            write!(f, ", {}", var)?;
+        }
+        write!(f, " {}", token::Char::CurlyRight)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ReturnSingle {
+    span: Option<Span>,
+    pub selector: SingleSelector,
+    pub vars: Vec<Variable>,
+}
+
+impl ReturnSingle {
+    pub fn new(span: Option<Span>, selector: SingleSelector, vars: Vec<Variable>) -> Self {
+        Self { span, selector, vars }
+    }
+}
+
+impl fmt::Display for ReturnSingle {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        assert!(!self.vars.is_empty());
+        write!(f, "{} ", self.selector)?;
         write!(f, "{}", self.vars[0])?;
         for var in &self.vars[1..] {
             write!(f, ", {}", var)?;
         }
         Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SingleSelector {
+    First,
+    Last,
+}
+
+impl fmt::Display for SingleSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            SingleSelector::First => write!(f, "{}", token::Keyword::First),
+            SingleSelector::Last => write!(f, "{}", token::Keyword::Last),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum ReturnReduction {
+    Check(Check),
+    Value(Vec<Reducer>),
+}
+
+impl Pretty for ReturnReduction {
+    fn fmt(&self, _indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
+impl fmt::Display for ReturnReduction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Check(inner) => fmt::Display::fmt(inner, f),
+            Self::Value(inner) => {
+                write_joined!(f, ", ", inner)?;
+                Ok(())
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Check {
+    span: Option<Span>,
+}
+
+impl Check {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl Pretty for Check {}
+
+impl fmt::Display for Check {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{};", token::Keyword::Check)
     }
 }

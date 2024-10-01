@@ -16,7 +16,7 @@ use crate::{
     statement::{comparison::Comparison, Statement},
 };
 
-mod single;
+pub(super) mod single;
 pub(super) mod thing;
 pub(super) mod type_;
 

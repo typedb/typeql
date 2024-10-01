@@ -60,17 +60,16 @@ string_enum! { Clause
     Update = "update",
     Delete = "delete",
     Match = "match",
-    Within = "within",
     Fetch = "fetch",
     With = "with",
-    Reduce = "reduce",
 }
 
-string_enum! { Modifier
+string_enum! { Operator
     Select = "select",
     Sort = "sort",
     Offset = "offset",
     Limit = "limit",
+    Reduce = "reduce",
     Require = "require",
 }
 
@@ -111,6 +110,8 @@ string_enum! { Keyword
     As = "as",
     Alias = "alias",
     Assign = "=",
+    Check = "check",
+    First = "first",
     From = "from",
     Fun = "fun",
     Has = "has",
@@ -120,6 +121,7 @@ string_enum! { Keyword
     Isa = "isa",
     IsaX = "isa!",
     Label = "label",
+    Last = "last",
     Links = "links",
     Not = "not",
     Of = "of",
@@ -133,6 +135,7 @@ string_enum! { Keyword
     SubX = "sub!",
     Try = "try",
     Value = "value",
+    Within = "within",
 }
 
 string_enum! { Annotation
@@ -150,8 +153,6 @@ string_enum! { Annotation
 }
 
 string_enum! { ReduceOperator
-    Check = "check",
-    First = "first",
     Count = "count",
     Max = "max",
     Mean = "mean",
@@ -207,6 +208,8 @@ string_enum! { Char
     Star = "*",
     Semicolon = ";",
     Colon = ":",
+    ParenLeft = "(",
+    ParenRight = ")",
     CurlyLeft = "{",
     CurlyRight = "}",
     SquareLeft = "[",

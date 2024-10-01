@@ -18,7 +18,7 @@ use crate::{
         identifier::Identifier,
         token, LineColumn, Span, Spanned,
     },
-    parser::{pipeline::visit_query_pipeline, redefine::visit_query_redefine},
+    parser::{pipeline::visit_query_pipeline_preambled, redefine::visit_query_redefine},
     query::{Query, SchemaQuery},
     schema::definable,
     type_::Label,
@@ -160,7 +160,7 @@ fn visit_query(node: Node<'_>) -> Query {
     let child = children.consume_any();
     let query = match child.as_rule() {
         Rule::query_schema => Query::Schema(visit_query_schema(child)),
-        Rule::query_pipeline => Query::Pipeline(visit_query_pipeline(child)),
+        Rule::query_pipeline_preambled => Query::Pipeline(visit_query_pipeline_preambled(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
@@ -241,6 +241,16 @@ fn visit_vars_assignment(node: Node<'_>) -> Vec<Variable> {
 
 fn visit_var_assignment(node: Node<'_>) -> Variable {
     debug_assert_eq!(node.as_rule(), Rule::var_assignment);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::var => visit_var(child),
+        Rule::var_optional => visit_var_optional(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_reduce_assignment_var(node: Node<'_>) -> Variable {
+    debug_assert_eq!(node.as_rule(), Rule::reduce_assignment_var);
     let child = node.into_child();
     match child.as_rule() {
         Rule::var => visit_var(child),

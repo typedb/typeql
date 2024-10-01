@@ -7,7 +7,7 @@
 use std::fmt;
 
 pub use self::{
-    delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Modifier, put::Put, reduce::Reduce,
+    delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Operator, put::Put, reduce::Reduce,
     update::Update,
 };
 use crate::{pretty::Pretty, util::enum_getter};
@@ -29,8 +29,7 @@ pub enum Stage {
     Update(Update),
     Fetch(Fetch),
     Delete(Delete),
-    Reduce(Reduce),
-    Modifier(Modifier),
+    Operator(Operator),
 }
 
 enum_getter! { Stage
@@ -40,8 +39,7 @@ enum_getter! { Stage
     into_update(Update) => Update,
     into_fetch(Fetch) => Fetch,
     into_delete(Delete) => Delete,
-    into_reduce(Reduce) => Reduce,
-    into_modifier(Modifier) => Modifier,
+    into_modifier(Operator) => Operator,
 }
 
 impl Pretty for Stage {
@@ -53,8 +51,7 @@ impl Pretty for Stage {
             Self::Update(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Fetch(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Delete(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::Reduce(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::Modifier(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Operator(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
@@ -68,8 +65,7 @@ impl fmt::Display for Stage {
             Self::Update(inner) => fmt::Display::fmt(inner, f),
             Self::Fetch(inner) => fmt::Display::fmt(inner, f),
             Self::Delete(inner) => fmt::Display::fmt(inner, f),
-            Self::Reduce(inner) => fmt::Display::fmt(inner, f),
-            Self::Modifier(inner) => fmt::Display::fmt(inner, f),
+            Self::Operator(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }
