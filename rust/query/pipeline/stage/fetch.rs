@@ -18,8 +18,8 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Fetch {
-    span: Option<Span>,
-    object: FetchObject,
+    pub span: Option<Span>,
+    pub object: FetchObject,
 }
 
 impl Fetch {
@@ -80,8 +80,8 @@ impl fmt::Display for FetchEntry {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchObject {
-    span: Option<Span>,
-    body: FetchObjectBody,
+    pub span: Option<Span>,
+    pub body: FetchObjectBody,
 }
 
 impl FetchObject {
@@ -155,9 +155,9 @@ impl fmt::Display for FetchObjectBody {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchObjectEntry {
-    span: Option<Span>,
-    key: StringLiteral,
-    value: FetchEntry,
+    pub span: Option<Span>,
+    pub key: StringLiteral,
+    pub value: FetchEntry,
 }
 
 impl FetchObjectEntry {
@@ -182,8 +182,8 @@ impl fmt::Display for FetchObjectEntry {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchList {
-    span: Option<Span>,
-    stream: FetchStream,
+    pub span: Option<Span>,
+    pub stream: FetchStream,
 }
 
 impl FetchList {
@@ -317,9 +317,9 @@ impl fmt::Display for FetchStream {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchAttribute {
-    span: Option<Span>,
-    owner: Variable,
-    attribute: TypeRefAny,
+    pub span: Option<Span>,
+    pub owner: Variable,
+    pub attribute: TypeRefAny,
 }
 
 impl FetchAttribute {
