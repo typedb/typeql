@@ -261,7 +261,6 @@ fn visit_fetch_single(node: Node<'_>) -> FetchSingle {
     debug_assert_eq!(node.as_rule(), Rule::fetch_single);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::var_named => FetchSingle::Variable(visit_var_named(child)),
         Rule::fetch_attribute => FetchSingle::Attribute(visit_fetch_attribute(child)),
         Rule::function_block => FetchSingle::FunctionBlock(visit_function_block(child)),
         Rule::expression => FetchSingle::Expression(visit_expression(child)),

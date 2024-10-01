@@ -206,7 +206,6 @@ impl fmt::Display for FetchList {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum FetchSingle {
-    Variable(Variable),
     Attribute(FetchAttribute),
     Expression(Expression),
     FunctionBlock(FunctionBlock),
@@ -215,10 +214,6 @@ pub enum FetchSingle {
 impl Pretty for FetchSingle {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            FetchSingle::Variable(single) => {
-                write!(f, " ")?;
-                Pretty::fmt(single, indent_level, f)
-            }
             FetchSingle::Attribute(single) => {
                 write!(f, " ")?;
                 Pretty::fmt(single, indent_level, f)
@@ -241,7 +236,6 @@ impl Pretty for FetchSingle {
 impl fmt::Display for FetchSingle {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FetchSingle::Variable(single) => fmt::Display::fmt(single, f),
             FetchSingle::Attribute(single) => fmt::Display::fmt(single, f),
             FetchSingle::Expression(single) => fmt::Display::fmt(single, f),
             FetchSingle::FunctionBlock(single) => {
