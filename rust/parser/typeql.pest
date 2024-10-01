@@ -182,7 +182,7 @@ fetch_list = { SQ_BRACKET_OPEN ~ fetch_stream ~ SQ_BRACKET_CLOSE }
 
 fetch_stream = { expression_function | function_block | query_pipeline | fetch_attribute }
 
-fetch_single = { PAREN_OPEN? ~ ( fetch_attribute | expression | function_block ) ~ PAREN_CLOSE? }
+fetch_single = { PAREN_OPEN? ~ ( var_named | fetch_attribute | expression | function_block ) ~ PAREN_CLOSE? }
 
 fetch_attribute = { var_named ~ DOT ~ ( label_list | label ) }
 fetch_attributes_all = { var_named ~ DOT ~ STAR }
