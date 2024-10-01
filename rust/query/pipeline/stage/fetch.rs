@@ -10,7 +10,7 @@ use crate::{
     common::{token, Span},
     expression::{Expression, FunctionCall},
     pretty::{indent, Pretty},
-    query::{stage::Stage},
+    query::stage::Stage,
     schema::definable::function::FunctionBlock,
     value::StringLiteral,
     TypeRefAny, Variable,

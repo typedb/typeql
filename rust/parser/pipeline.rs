@@ -6,10 +6,18 @@
 
 use itertools::Itertools;
 
-use super::{define::function::visit_definition_function, expression::{visit_expression, visit_expression_function}, literal::{visit_integer_literal, visit_quoted_string_literal}, statement::{
-    thing::{visit_relation, visit_statement_thing},
-    visit_statement,
-}, type_::{visit_label, visit_label_list}, visit_var, visit_var_named, visit_vars, visit_vars_assignment, ChildNodes, IntoChildNodes, Node, Rule, RuleMatcher, visit_reduce_assignment_var};
+use super::{
+    define::function::visit_definition_function,
+    expression::{visit_expression, visit_expression_function},
+    literal::{visit_integer_literal, visit_quoted_string_literal},
+    statement::{
+        thing::{visit_relation, visit_statement_thing},
+        visit_statement,
+    },
+    type_::{visit_label, visit_label_list},
+    visit_reduce_assignment_var, visit_var, visit_var_named, visit_vars, visit_vars_assignment, ChildNodes,
+    IntoChildNodes, Node, Rule, RuleMatcher,
+};
 use crate::{
     common::{
         error::TypeQLError,
@@ -34,16 +42,16 @@ use crate::{
                 FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
             },
             modifier::Require,
-            reduce::{ReduceAssign},
+            reduce::ReduceAssign,
         },
         Pipeline,
     },
+    schema::definable::function::{Check, ReturnReduction},
     statement::Statement,
     type_::NamedType,
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
-use crate::schema::definable::function::{Check, ReturnReduction};
 
 pub(super) fn visit_query_pipeline_preambled(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline_preambled);
@@ -369,7 +377,6 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(children.try_consume_any(), None);
     Reduce::new(reduce_assignments, group)
 }
-
 
 pub(super) fn visit_reduce_assign(node: Node<'_>) -> ReduceAssign {
     debug_assert_eq!(node.as_rule(), Rule::reduce_assign);

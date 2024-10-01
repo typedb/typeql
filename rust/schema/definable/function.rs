@@ -11,14 +11,13 @@ use crate::{
     pretty::{indent, Pretty},
     query::{
         pipeline::stage::{Match, Operator},
-        stage::{Stage},
+        stage::{reduce::Reducer, Stage},
         Pipeline,
     },
     type_::TypeRefAny,
+    util::write_joined,
     variable::Variable,
 };
-use crate::query::stage::reduce::Reducer;
-use crate::util::write_joined;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
@@ -273,7 +272,7 @@ impl ReturnStream {
 impl fmt::Display for ReturnStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         assert!(!self.vars.is_empty());
-        write!(f, "{} {}", token::Char::CurlyLeft , self.vars[0])?;
+        write!(f, "{} {}", token::Char::CurlyLeft, self.vars[0])?;
         for var in &self.vars[1..] {
             write!(f, ", {}", var)?;
         }
@@ -363,4 +362,3 @@ impl fmt::Display for Check {
         write!(f, "{};", token::Keyword::Check)
     }
 }
-

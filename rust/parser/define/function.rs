@@ -9,17 +9,18 @@ use itertools::Itertools;
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        pipeline::{visit_clause_match, visit_operator_stream, visit_query_stage},
+        pipeline::{visit_clause_match, visit_operator_stream, visit_query_stage, visit_reducer},
         type_::visit_named_type_any,
         visit_identifier, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::{
-        function::{Argument, FunctionBlock, Output, ReturnStatement, ReturnStream, Signature, Single, Stream},
+        function::{
+            Argument, Check, FunctionBlock, Output, ReturnReduction, ReturnSingle, ReturnStatement, ReturnStream,
+            Signature, Single, SingleSelector, Stream,
+        },
         Function,
     },
 };
-use crate::parser::pipeline::visit_reducer;
-use crate::schema::definable::function::{Check, ReturnReduction, ReturnSingle, SingleSelector};
 
 pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
     debug_assert_eq!(node.as_rule(), Rule::definition_function);
@@ -87,7 +88,7 @@ fn visit_return_single_selector(node: Node<'_>) -> SingleSelector {
     match child.as_rule() {
         Rule::FIRST => SingleSelector::First,
         Rule::LAST => SingleSelector::Last,
-        _ =>  unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
@@ -95,7 +96,8 @@ pub(super) fn visit_return_reduce(node: Node<'_>) -> ReturnReduction {
     debug_assert_eq!(node.as_rule(), Rule::return_reduce);
     let mut children = node.into_children();
     children.skip_expected(Rule::RETURN);
-    let return_reduce_reduction = visit_return_reduce_reduction(children.consume_expected(Rule::return_reduce_reduction));
+    let return_reduce_reduction =
+        visit_return_reduce_reduction(children.consume_expected(Rule::return_reduce_reduction));
     debug_assert!(children.try_consume_any().is_none());
     return_reduce_reduction
 }

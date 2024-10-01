@@ -12,11 +12,11 @@ use crate::{
         Span,
     },
     pretty::Pretty,
+    query::stage::Reduce,
     util::write_joined,
     value::IntegerLiteral,
     variable::Variable,
 };
-use crate::query::stage::Reduce;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct OrderedVariable {
