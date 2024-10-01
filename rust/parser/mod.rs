@@ -121,7 +121,10 @@ fn parse(rule: Rule, string: &str) -> Result<ChildNodes<'_>> {
     let result = TypeQLParser::parse(rule, string);
     match result {
         Ok(nodes) => Ok(nodes),
-        Err(error) => Err(syntax_error(string, error).into()),
+        Err(error) => {
+            dbg!(&error);
+            Err(syntax_error(string, error).into())
+        }
     }
 }
 

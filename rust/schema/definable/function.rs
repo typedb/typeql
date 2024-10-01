@@ -9,11 +9,7 @@ use std::fmt::{self, Formatter, Write};
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
-    query::{
-        pipeline::stage::{Match, Operator},
-        stage::{reduce::Reducer, Stage},
-        Pipeline,
-    },
+    query::stage::{reduce::Reducer, Stage},
     type_::TypeRefAny,
     util::write_joined,
     variable::Variable,

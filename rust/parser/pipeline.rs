@@ -15,8 +15,7 @@ use super::{
         visit_statement,
     },
     type_::{visit_label, visit_label_list},
-    visit_reduce_assignment_var, visit_var, visit_var_named, visit_vars, visit_vars_assignment, ChildNodes,
-    IntoChildNodes, Node, Rule, RuleMatcher,
+    visit_reduce_assignment_var, visit_var, visit_var_named, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
     common::{
@@ -46,7 +45,6 @@ use crate::{
         },
         Pipeline,
     },
-    schema::definable::function::{Check, ReturnReduction},
     statement::Statement,
     type_::NamedType,
     value::StringLiteral,

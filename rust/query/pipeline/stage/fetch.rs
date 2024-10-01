@@ -266,6 +266,7 @@ impl Pretty for FetchStream {
         // don't indent before left curly, since it will always be in the same line as the previous element
         match self {
             FetchStream::Attribute(stream) => {
+                // [ $x.name ]
                 write!(f, "{} ", token::Char::SquareLeft)?;
                 Pretty::fmt(stream, indent_level, f)?;
                 write!(f, " {}", token::Char::SquareRight)
@@ -325,6 +326,10 @@ pub struct FetchAttribute {
 impl FetchAttribute {
     pub fn new(span: Option<Span>, owner: Variable, attribute: TypeRefAny) -> Self {
         Self { span, owner, attribute }
+    }
+
+    pub fn is_list(&self) -> bool {
+        matches!(self.attribute, TypeRefAny::List(_))
     }
 }
 
