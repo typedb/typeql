@@ -397,14 +397,14 @@ pub(super) fn visit_operator_stream(node: Node<'_>) -> Operator {
 fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::operator_reduce);
     let mut children = node.into_children();
-    let mut reducers = Vec::new();
+    let mut reduce_assignments = Vec::new();
     let mut group = None;
     children.skip_expected(Rule::REDUCE);
     while let Some(child) = children.try_consume_any() {
         match child.as_rule() {
-            Rule::reduce_assign => reducers.push(visit_reduce_assign(child)),
+            Rule::reduce_assign => reduce_assignments.push(visit_reduce_assign(child)),
             Rule::WITHIN => {
-                debug_assert!(reducers.len() > 0);
+                debug_assert!(reduce_assignments.len() > 0);
                 group = Some(visit_vars(children.consume_expected(Rule::vars)));
                 break;
             }
@@ -412,7 +412,7 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
         }
     }
     debug_assert_eq!(children.try_consume_any(), None);
-    Reduce::new(reducers, group)
+    Reduce::new(reduce_assignments, group)
 }
 
 
