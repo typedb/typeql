@@ -10,7 +10,7 @@ use crate::{
     common::{token, Span},
     expression::{Expression, FunctionCall},
     pretty::{indent, Pretty},
-    query::{stage::Stage, Pipeline},
+    query::{stage::Stage},
     schema::definable::function::FunctionBlock,
     value::StringLiteral,
     TypeRefAny, Variable,
@@ -32,7 +32,8 @@ impl Pretty for Fetch {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
         write!(f, "{} ", token::Clause::Fetch)?;
-        Pretty::fmt(&self.object, indent_level, f)
+        Pretty::fmt(&self.object, indent_level, f)?;
+        write!(f, "{}", token::Char::Semicolon)
     }
 }
 
@@ -40,7 +41,7 @@ impl fmt::Display for Fetch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ", token::Clause::Fetch)?;
         fmt::Display::fmt(&self.object, f)?;
-        Ok(())
+        write!(f, "{}", token::Char::Semicolon)
     }
 }
 

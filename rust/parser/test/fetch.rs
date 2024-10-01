@@ -10,34 +10,44 @@ use crate::parse_query;
 #[test]
 fn test_fetch_query() {
     let query = r#"match
-$x isa movie,
-    has title "Godfather",
-    has release-date $d;
+$x isa person,
+    has $a;
+$a isa age;
+$a == 10;
 fetch {
-    "d_only": $d,
-    "d optional attr": $d.title,
-    "d many attr": [ $d.name ],
-    "d everything": { $d.* },
-    "d object": {
-        "entry single 1": $x.name,
-        "entry single 2": $d + 10,
-        "entry single 3": (
-            match
-            $x has name $n;
-            return count($n);
-        ),
-        "entry object": {
-            "all": { $x.* }
-        },
-        "entry list": [
-            match
-            ($x, $y) isa bla;
-            fetch {
-                "y values": { $y.* }
-            }
-        ]
-    }
-}"#;
+    "single attr": $a,
+    "single-card attributes": $x.age,
+    "single value expression": $a + 1,
+    "single answer block": (
+        match
+        $x has name $name;
+        return first $name;
+    ),
+    "reduce answer block": (
+        match
+        $x has name $name;
+        return count($name);
+    ),
+    "list positional return block": [
+        match
+        $x has name $n,
+            has age $a;
+        return { $n, $a };
+    ],
+    "list pipeline": [
+        match
+        $x has name $n,
+            has age $a;
+        fetch {
+            "name": $n
+        };
+    ],
+    "list higher-card attributes": [ $x.name ],
+    "list attributes": $x.name[],
+    "all attributes": { $x.* }
+};"#;
+    // TODO: Include list expression function
+    // # "list expression function": [ all_names($x) ],
     let parsed = parse_query(query).unwrap();
     // let projections: Vec<Projection> = vec![
     // var("d").into(),

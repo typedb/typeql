@@ -22,7 +22,7 @@ preamble = { WITH ~ definition_function }
 
 query_stage = { clause_match | clause_insert | clause_put | clause_update | clause_delete | operator_stream }
 
-query_stage_terminal = { clause_fetch }
+query_stage_terminal = { clause_fetch ~ SEMICOLON }
 
 clause_match = { MATCH ~ patterns }
 

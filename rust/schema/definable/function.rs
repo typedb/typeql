@@ -273,11 +273,11 @@ impl ReturnStream {
 impl fmt::Display for ReturnStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         assert!(!self.vars.is_empty());
-        write!(f, "{}", self.vars[0])?;
+        write!(f, "{} {}", token::Char::CurlyLeft , self.vars[0])?;
         for var in &self.vars[1..] {
             write!(f, ", {}", var)?;
         }
-        Ok(())
+        write!(f, " {}", token::Char::CurlyRight)
     }
 }
 
@@ -297,7 +297,7 @@ impl ReturnSingle {
 impl fmt::Display for ReturnSingle {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         assert!(!self.vars.is_empty());
-        write!(f, "{}", self.selector)?;
+        write!(f, "{} ", self.selector)?;
         write!(f, "{}", self.vars[0])?;
         for var in &self.vars[1..] {
             write!(f, ", {}", var)?;
