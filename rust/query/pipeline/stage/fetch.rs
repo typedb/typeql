@@ -46,34 +46,34 @@ impl fmt::Display for Fetch {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum FetchEntry {
+pub enum FetchSome {
     Object(FetchObject),
     List(FetchList),
     Single(FetchSingle),
 }
 
-impl Pretty for FetchEntry {
+impl Pretty for FetchSome {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            FetchEntry::Object(entry) => {
+            FetchSome::Object(entry) => {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
             }
-            FetchEntry::List(entry) => {
+            FetchSome::List(entry) => {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
             }
-            FetchEntry::Single(entry) => Pretty::fmt(entry, indent_level, f),
+            FetchSome::Single(entry) => Pretty::fmt(entry, indent_level, f),
         }
     }
 }
 
-impl fmt::Display for FetchEntry {
+impl fmt::Display for FetchSome {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FetchEntry::Object(entry) => fmt::Display::fmt(entry, f),
-            FetchEntry::List(entry) => fmt::Display::fmt(entry, f),
-            FetchEntry::Single(entry) => fmt::Display::fmt(entry, f),
+            FetchSome::Object(entry) => fmt::Display::fmt(entry, f),
+            FetchSome::List(entry) => fmt::Display::fmt(entry, f),
+            FetchSome::Single(entry) => fmt::Display::fmt(entry, f),
         }
     }
 }
@@ -157,11 +157,11 @@ impl fmt::Display for FetchObjectBody {
 pub struct FetchObjectEntry {
     pub span: Option<Span>,
     pub key: StringLiteral,
-    pub value: FetchEntry,
+    pub value: FetchSome,
 }
 
 impl FetchObjectEntry {
-    pub fn new(span: Option<Span>, key: StringLiteral, value: FetchEntry) -> Self {
+    pub fn new(span: Option<Span>, key: StringLiteral, value: FetchSome) -> Self {
         Self { span, key, value }
     }
 }

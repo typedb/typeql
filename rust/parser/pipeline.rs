@@ -30,7 +30,7 @@ use crate::{
         pipeline::{
             stage::{
                 delete::{Deletable, DeletableKind},
-                fetch::FetchEntry,
+                fetch::FetchSome,
                 modifier::{Limit, Offset, OrderedVariable, Select, Sort},
                 reduce::{Count, Reducer, Stat},
                 Delete, Fetch, Insert, Match, Operator, Put, Reduce, Stage, Update,
@@ -248,13 +248,13 @@ fn visit_clause_fetch(node: Node<'_>) -> Fetch {
     Fetch::new(span, fetch_object)
 }
 
-fn visit_fetch_some(node: Node<'_>) -> FetchEntry {
+fn visit_fetch_some(node: Node<'_>) -> FetchSome {
     debug_assert_eq!(node.as_rule(), Rule::fetch_some);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::fetch_object => FetchEntry::Object(visit_fetch_object(child)),
-        Rule::fetch_list => FetchEntry::List(visit_fetch_list(child)),
-        Rule::fetch_single => FetchEntry::Single(visit_fetch_single(child)),
+        Rule::fetch_object => FetchSome::Object(visit_fetch_object(child)),
+        Rule::fetch_list => FetchSome::List(visit_fetch_list(child)),
+        Rule::fetch_single => FetchSome::Single(visit_fetch_single(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
