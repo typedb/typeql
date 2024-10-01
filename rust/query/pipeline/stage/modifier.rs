@@ -145,7 +145,7 @@ impl Pretty for Require {}
 
 impl fmt::Display for Require {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Modifier::Require)?;
+        write!(f, "{} ", token::Operator::Require)?;
         write_joined!(f, ", ", self.variables)?;
         f.write_char(';')?;
         Ok(())
