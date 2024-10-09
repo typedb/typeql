@@ -9,7 +9,7 @@ use itertools::Itertools;
 use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
-        pipeline::{visit_clause_match, visit_operator_stream, visit_query_stage, visit_reducer},
+        pipeline::{visit_query_stage, visit_reducer},
         type_::visit_named_type_any,
         visit_identifier, visit_var, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
     },

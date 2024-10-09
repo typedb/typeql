@@ -18,8 +18,8 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Fetch {
-    span: Option<Span>,
-    object: FetchObject,
+    pub span: Option<Span>,
+    pub object: FetchObject,
 }
 
 impl Fetch {
@@ -46,42 +46,42 @@ impl fmt::Display for Fetch {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum FetchEntry {
+pub enum FetchSome {
     Object(FetchObject),
     List(FetchList),
     Single(FetchSingle),
 }
 
-impl Pretty for FetchEntry {
+impl Pretty for FetchSome {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            FetchEntry::Object(entry) => {
+            FetchSome::Object(entry) => {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
             }
-            FetchEntry::List(entry) => {
+            FetchSome::List(entry) => {
                 write!(f, " ")?;
                 Pretty::fmt(entry, indent_level, f)
             }
-            FetchEntry::Single(entry) => Pretty::fmt(entry, indent_level, f),
+            FetchSome::Single(entry) => Pretty::fmt(entry, indent_level, f),
         }
     }
 }
 
-impl fmt::Display for FetchEntry {
+impl fmt::Display for FetchSome {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FetchEntry::Object(entry) => fmt::Display::fmt(entry, f),
-            FetchEntry::List(entry) => fmt::Display::fmt(entry, f),
-            FetchEntry::Single(entry) => fmt::Display::fmt(entry, f),
+            FetchSome::Object(entry) => fmt::Display::fmt(entry, f),
+            FetchSome::List(entry) => fmt::Display::fmt(entry, f),
+            FetchSome::Single(entry) => fmt::Display::fmt(entry, f),
         }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchObject {
-    span: Option<Span>,
-    body: FetchObjectBody,
+    pub span: Option<Span>,
+    pub body: FetchObjectBody,
 }
 
 impl FetchObject {
@@ -155,13 +155,13 @@ impl fmt::Display for FetchObjectBody {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchObjectEntry {
-    span: Option<Span>,
-    key: StringLiteral,
-    value: FetchEntry,
+    pub span: Option<Span>,
+    pub key: StringLiteral,
+    pub value: FetchSome,
 }
 
 impl FetchObjectEntry {
-    pub fn new(span: Option<Span>, key: StringLiteral, value: FetchEntry) -> Self {
+    pub fn new(span: Option<Span>, key: StringLiteral, value: FetchSome) -> Self {
         Self { span, key, value }
     }
 }
@@ -182,8 +182,8 @@ impl fmt::Display for FetchObjectEntry {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchList {
-    span: Option<Span>,
-    stream: FetchStream,
+    pub span: Option<Span>,
+    pub stream: FetchStream,
 }
 
 impl FetchList {
@@ -260,6 +260,7 @@ impl Pretty for FetchStream {
         // don't indent before left curly, since it will always be in the same line as the previous element
         match self {
             FetchStream::Attribute(stream) => {
+                // [ $x.name ]
                 write!(f, "{} ", token::Char::SquareLeft)?;
                 Pretty::fmt(stream, indent_level, f)?;
                 write!(f, " {}", token::Char::SquareRight)
@@ -311,14 +312,18 @@ impl fmt::Display for FetchStream {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FetchAttribute {
-    span: Option<Span>,
-    owner: Variable,
-    attribute: TypeRefAny,
+    pub span: Option<Span>,
+    pub owner: Variable,
+    pub attribute: TypeRefAny,
 }
 
 impl FetchAttribute {
     pub fn new(span: Option<Span>, owner: Variable, attribute: TypeRefAny) -> Self {
         Self { span, owner, attribute }
+    }
+
+    pub fn is_list(&self) -> bool {
+        matches!(self.attribute, TypeRefAny::List(_))
     }
 }
 
