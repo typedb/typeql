@@ -194,13 +194,14 @@ impl fmt::Display for Single {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FunctionBlock {
+    pub span: Option<Span>,
     pub stages: Vec<Stage>,
     pub return_stmt: ReturnStatement,
 }
 
 impl FunctionBlock {
-    pub fn new(stages: Vec<Stage>, return_stmt: ReturnStatement) -> Self {
-        Self { stages, return_stmt }
+    pub fn new(span: Option<Span>, stages: Vec<Stage>, return_stmt: ReturnStatement) -> Self {
+        Self { span, stages, return_stmt }
     }
 }
 

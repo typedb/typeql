@@ -36,13 +36,13 @@ pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
 
 pub fn visit_function_block(node: Node<'_>) -> FunctionBlock {
     debug_assert_eq!(node.as_rule(), Rule::function_block);
+    let span = node.span();
     let mut children = node.into_children();
-
     let stages = children.take_while_ref(|node| node.as_rule() == Rule::query_stage).map(visit_query_stage).collect();
 
     let return_stmt = visit_return_statement(children.consume_expected(Rule::return_statement));
     debug_assert_eq!(children.try_consume_any(), None);
-    FunctionBlock::new(stages, return_stmt)
+    FunctionBlock::new(span, stages, return_stmt)
 }
 
 fn visit_return_statement(node: Node<'_>) -> ReturnStatement {
