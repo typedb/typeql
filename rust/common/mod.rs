@@ -10,7 +10,7 @@ pub use error::Error;
 
 pub mod date_time;
 pub mod error;
-pub(crate) mod identifier;
+pub mod identifier;
 pub mod string;
 pub mod token;
 
