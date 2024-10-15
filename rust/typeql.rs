@@ -30,7 +30,7 @@ use crate::{
 
 pub mod annotation;
 pub mod builder;
-mod common;
+pub mod common;
 pub mod expression;
 pub mod parser;
 pub mod pattern;
