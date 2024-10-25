@@ -42,7 +42,7 @@ impl fmt::Display for Undefinable {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationType {
     span: Option<Span>,
     pub annotation_category: token::Annotation,
@@ -63,7 +63,7 @@ impl fmt::Display for AnnotationType {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationCapability {
     span: Option<Span>,
     pub annotation_category: token::Annotation,
@@ -90,7 +90,7 @@ impl fmt::Display for AnnotationCapability {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CapabilityType {
     span: Option<Span>,
     pub capability: CapabilityBase,
@@ -111,7 +111,7 @@ impl fmt::Display for CapabilityType {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Specialise {
     span: Option<Span>,
     pub specialised: Label,
@@ -141,7 +141,7 @@ impl fmt::Display for Specialise {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
     span: Option<Span>,
     pub ident: Identifier,
@@ -161,7 +161,7 @@ impl fmt::Display for Function {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
     span: Option<Span>,
     pub ident: Identifier,
