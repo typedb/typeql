@@ -23,9 +23,18 @@ public abstract class YAML {
         return wrap(new org.yaml.snakeyaml.Yaml().load(yaml));
     }
 
+    public static YAML load(java.lang.String yaml, org.yaml.snakeyaml.LoaderOptions options) {
+        return wrap(new org.yaml.snakeyaml.Yaml(options).load(yaml));
+    }
+
     public static YAML load(Path filePath) throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream(filePath.toFile());
         return wrap(new org.yaml.snakeyaml.Yaml().load(inputStream));
+    }
+
+    public static YAML load(Path filePath, org.yaml.snakeyaml.LoaderOptions options) throws FileNotFoundException {
+        FileInputStream inputStream = new FileInputStream(filePath.toFile());
+        return wrap(new org.yaml.snakeyaml.Yaml(options).load(inputStream));
     }
 
     private static YAML wrap(Object yaml) {
