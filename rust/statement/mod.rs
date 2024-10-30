@@ -26,8 +26,8 @@ pub mod type_;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Is {
     span: Option<Span>,
-    lhs: Variable,
-    rhs: Variable,
+    pub lhs: Variable,
+    pub rhs: Variable,
 }
 
 impl Is {
