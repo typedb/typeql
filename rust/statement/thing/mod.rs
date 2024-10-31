@@ -211,7 +211,7 @@ impl fmt::Display for Constraint {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Iid {
     span: Option<Span>,
-    iid: String,
+    pub iid: String,
 }
 
 impl Iid {
