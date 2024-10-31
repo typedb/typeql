@@ -324,23 +324,19 @@ impl fmt::Display for StructLiteral {
 
 impl StringLiteral {
     pub fn unescape(&self) -> Result<String> {
-        self.process_unescape(|bytes, buf, rest| {
-            match bytes[1] {
-                BSP => Ok(('\x08', 2)),
-                TAB => Ok(('\x09', 2)),
-                LF_ => Ok(('\x0a', 2)),
-                FF_ => Ok(('\x0c', 2)),
-                CR_ => Ok(('\x0d', 2)),
-                c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
-                b'u' => todo!("Unicode escape handling"),
-                _ => {
-                    Err(TypeQLError::InvalidStringEscape {
-                        full_string: rest.to_owned(),
-                        escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
-                    }
-                        .into())
-                }
+        self.process_unescape(|bytes, buf, rest| match bytes[1] {
+            BSP => Ok(('\x08', 2)),
+            TAB => Ok(('\x09', 2)),
+            LF_ => Ok(('\x0a', 2)),
+            FF_ => Ok(('\x0c', 2)),
+            CR_ => Ok(('\x0d', 2)),
+            c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
+            b'u' => todo!("Unicode escape handling"),
+            _ => Err(TypeQLError::InvalidStringEscape {
+                full_string: rest.to_owned(),
+                escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
             }
+            .into()),
         })
     }
 
@@ -352,8 +348,8 @@ impl StringLiteral {
     }
 
     fn process_unescape<F>(&self, escape_handler: F) -> Result<String>
-        where
-            F: Fn(&[u8], &mut String, &str) -> Result<(char, usize)>,
+    where
+        F: Fn(&[u8], &mut String, &str) -> Result<(char, usize)>,
     {
         let bytes = self.value.as_bytes();
         assert_eq!(bytes[0], bytes[bytes.len() - 1]);
@@ -372,7 +368,7 @@ impl StringLiteral {
                         full_string: escaped_string.to_owned(),
                         escape: String::from(r"\"),
                     }
-                        .into());
+                    .into());
                 }
 
                 escape_handler(bytes, &mut buf, escaped_string)?
