@@ -324,16 +324,41 @@ impl fmt::Display for StructLiteral {
 
 impl StringLiteral {
     pub fn unescape(&self) -> Result<String> {
+        self.process_unescape(|bytes, buf, rest| match bytes[1] {
+            BSP => Ok(('\x08', 2)),
+            TAB => Ok(('\x09', 2)),
+            LF_ => Ok(('\x0a', 2)),
+            FF_ => Ok(('\x0c', 2)),
+            CR_ => Ok(('\x0d', 2)),
+            c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
+            b'u' => todo!("Unicode escape handling"),
+            _ => Err(TypeQLError::InvalidStringEscape {
+                full_string: rest.to_owned(),
+                escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
+            }
+            .into()),
+        })
+    }
+
+    pub fn unescape_regex(&self) -> Result<String> {
+        self.process_unescape(|bytes, _, _| match bytes[1] {
+            c @ b'"' => Ok((c as char, 2)),
+            _ => Ok(('\\', 1)),
+        })
+    }
+
+    fn process_unescape<F>(&self, escape_handler: F) -> Result<String>
+    where
+        F: Fn(&[u8], &mut String, &str) -> Result<(char, usize)>,
+    {
         let bytes = self.value.as_bytes();
-        // it's a bug if these fail; either in the parser or the builder
         assert_eq!(bytes[0], bytes[bytes.len() - 1]);
         assert!(matches!(bytes[0], b'\'' | b'"'));
 
         let escaped_string = &self.value[1..self.value.len() - 1];
-
         let mut buf = String::with_capacity(escaped_string.len());
-
         let mut rest = escaped_string;
+
         while !rest.is_empty() {
             let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
                 let bytes = rest.as_bytes();
@@ -346,22 +371,7 @@ impl StringLiteral {
                     .into());
                 }
 
-                match bytes[1] {
-                    BSP => ('\x08', 2),
-                    TAB => ('\x09', 2),
-                    LF_ => ('\x0a', 2),
-                    FF_ => ('\x0c', 2),
-                    CR_ => ('\x0d', 2),
-                    c @ (b'"' | b'\'' | b'\\') => (c as char, 2),
-                    b'u' => todo!("Unicode escape handling"),
-                    _ => {
-                        return Err(TypeQLError::InvalidStringEscape {
-                            full_string: escaped_string.to_owned(),
-                            escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
-                        }
-                        .into())
-                    }
-                }
+                escape_handler(bytes, &mut buf, escaped_string)?
             } else {
                 let char = rest.chars().next().expect("string is non-empty");
                 (char, char.len_utf8())
