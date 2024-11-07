@@ -30,7 +30,6 @@ target/
 *.class
 
 # Cargo files #
-Cargo.toml
 Cargo.lock
 
 # Mobile Tools for Java (J2ME) files #
