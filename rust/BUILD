@@ -53,7 +53,7 @@ assemble_crate(
     homepage = "https://github.com/vaticle/typeql",
     repository = "https://github.com/vaticle/typeql",
     keywords = ["typeql", "typedb", "database", "strongly-typed"],
-    authors = ["Vaticle <community@vaticle.com>"]
+    authors = ["TypeDB <community@typedb.com>"]
 )
 
 deploy_crate(
