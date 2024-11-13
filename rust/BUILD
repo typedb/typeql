@@ -50,8 +50,8 @@ assemble_crate(
     readme_file = "//:README.md",
     license = "Apache-2.0",
     license_file = "//:LICENSE",
-    homepage = "https://github.com/vaticle/typeql",
-    repository = "https://github.com/vaticle/typeql",
+    homepage = "https://github.com/typedb/typeql",
+    repository = "https://github.com/typedb/typeql",
     keywords = ["typeql", "typedb", "database", "strongly-typed"],
     authors = ["TypeDB <community@typedb.com>"]
 )
