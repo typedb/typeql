@@ -9,7 +9,7 @@ workspace(name = "vaticle_typeql")
 # Load @typedb_dependencies #
 ################################
 
-load("//dependencies/vaticle:repositories.bzl", "typedb_dependencies")
+load("//dependencies/typedb:repositories.bzl", "typedb_dependencies")
 typedb_dependencies()
 
 # Load //builder/python
@@ -120,7 +120,7 @@ install_uploader_deps()
 # Load @typedb dependencies #
 ################################
 
-load("//dependencies/vaticle:repositories.bzl", "typedb_behaviour")
+load("//dependencies/typedb:repositories.bzl", "typedb_behaviour")
 typedb_behaviour()
 
 load("@typedb_dependencies//tool/common:deps.bzl", typedb_dependencies_tool_maven_artifacts = "maven_artifacts")
