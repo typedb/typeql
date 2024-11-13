@@ -4,11 +4,11 @@
 
 
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test", "rustfmt_test")
-load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
-load("@vaticle_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
-load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
+load("@typedb_bazel_distribution//github:rules.bzl", "deploy_github")
+load("@typedb_bazel_distribution//crates:rules.bzl", "assemble_crate", "deploy_crate")
+load("@typedb_dependencies//distribution:deployment.bzl", "deployment")
+load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@typedb_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
 load("//:deployment.bzl", deployment_github = "deployment")
 
 rust_library(

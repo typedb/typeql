@@ -4,15 +4,15 @@
 
 
 load("@rules_rust//rust:defs.bzl", "rust_test")
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 rust_test(
     name = "test_behaviour",
     srcs = ["test_behaviour.rs", "steps.rs"],
     data = [
-        "@vaticle_typedb_behaviour//query/explanation:features",
-        "@vaticle_typedb_behaviour//query/language:features",
-        "@vaticle_typedb_behaviour//query/reasoner:features",
+        "@typedb_behaviour//query/explanation:features",
+        "@typedb_behaviour//query/language:features",
+        "@typedb_behaviour//query/reasoner:features",
     ],
     deps = [
         "//rust:typeql",

@@ -17,26 +17,26 @@ build:
     dependency-analysis:
       image: vaticle-ubuntu-22.04
       command: |
-        bazel run @vaticle_dependencies//factory/analysis:dependency-analysis
+        bazel run @typedb_dependencies//factory/analysis:dependency-analysis
   correctness:
     build:
       image: vaticle-ubuntu-22.04
       command: |
         bazel build //... --test_output=errors
-        bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
+        bazel run @typedb_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
         bazel test $(bazel query 'kind(rustfmt_test, //...)') --@rules_rust//:rustfmt.toml=//rust:rustfmt_config
     build-dependency:
       image: vaticle-ubuntu-22.04
       command: |
-        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
+        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
-        bazel run @vaticle_dependencies//tool/unuseddeps:unused-deps -- list
+        bazel run @typedb_dependencies//tool/unuseddeps:unused-deps -- list
     test-java:
       image: vaticle-ubuntu-22.04
       command: |
-        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
+        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel test //java/common/... --test_output=errors
         bazel test //java/parser/... --test_output=errors
         bazel test //java/pattern/... --test_output=errors
@@ -45,7 +45,7 @@ build:
     test-rust:
       image: vaticle-ubuntu-22.04
       command: |
-        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
+        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel test //rust:typeql_unit_tests --test_output=errors
         bazel test //rust/tests/behaviour:test_behaviour --test_output=errors
     deploy-crate-snapshot:
@@ -56,7 +56,7 @@ build:
       dependencies: [build, build-dependency, test-rust]
       command: |
         export DEPLOY_CRATE_TOKEN=$REPO_TYPEDB_CRATES_TOKEN
-        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
+        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //rust:deploy_crate -- snapshot
     deploy-maven-snapshot:
       filter:
@@ -67,7 +67,7 @@ build:
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
-        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
+        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/builder:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
@@ -111,7 +111,7 @@ build:
         - test-deployment-maven
       command: |
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @vaticle_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@${FACTORY_COMMIT}
+          bazel run @typedb_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@${FACTORY_COMMIT}
 
 release:
   filter:
@@ -122,7 +122,7 @@ release:
       image: vaticle-ubuntu-22.04
       command: |
         export NOTES_VALIDATE_TOKEN=$REPO_GITHUB_TOKEN
-        bazel run @vaticle_dependencies//tool/release/notes:validate --test_output=streamed -- $FACTORY_OWNER $FACTORY_REPO ./RELEASE_NOTES_LATEST.md
+        bazel run @typedb_dependencies//tool/release/notes:validate --test_output=streamed -- $FACTORY_OWNER $FACTORY_REPO ./RELEASE_NOTES_LATEST.md
   deployment:
     deploy-github:
       image: vaticle-ubuntu-22.04
@@ -141,7 +141,7 @@ release:
       dependencies: [ deploy-github ]
       command: |
         export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
-        bazel run @vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh
+        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(cat VERSION) //rust:deploy_crate -- release
     deploy-maven-release:
       image: vaticle-ubuntu-22.04
@@ -176,4 +176,4 @@ release:
         - deploy-pip-release
       command: |
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @vaticle_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@$(cat VERSION)
+          bazel run @typedb_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@$(cat VERSION)

@@ -4,11 +4,11 @@
 
 
 exports_files(["VERSION"], visibility = ["//visibility:public"])
-load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@vaticle_dependencies//distribution/maven:version.bzl", "version")
-load("@vaticle_dependencies//library/maven:artifacts.bzl", "artifacts")
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
+load("@typedb_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@typedb_dependencies//distribution/maven:version.bzl", "version")
+load("@typedb_dependencies//library/maven:artifacts.bzl", "artifacts")
+load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@typedb_dependencies//distribution:deployment.bzl", "deployment")
 
 java_library(
     name = "common",

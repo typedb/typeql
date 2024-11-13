@@ -5,9 +5,9 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
+load("@typedb_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@typedb_dependencies//distribution:deployment.bzl", "deployment")
 
 java_library(
     name = "query",

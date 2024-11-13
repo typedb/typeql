@@ -3,9 +3,9 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
-load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
+load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@typedb_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
+load("@typedb_bazel_distribution//github:rules.bzl", "deploy_github")
 load("//:deployment.bzl", "deployment")
 
 exports_files(
@@ -52,13 +52,13 @@ checkstyle_test(
 filegroup(
     name = "tools",
     data = [
-        "@vaticle_dependencies//tool/ide:rust_sync",
-        "@vaticle_dependencies//library/maven:update",
-        "@vaticle_dependencies//tool/bazelinstall:remote_cache_setup.sh",
-        "@vaticle_dependencies//tool/checkstyle:test-coverage",
-        "@vaticle_dependencies//tool/release/notes:create",
-        "@vaticle_dependencies//tool/sonarcloud:code-analysis",
-        "@vaticle_dependencies//tool/unuseddeps:unused-deps",
+        "@typedb_dependencies//tool/ide:rust_sync",
+        "@typedb_dependencies//library/maven:update",
+        "@typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh",
+        "@typedb_dependencies//tool/checkstyle:test-coverage",
+        "@typedb_dependencies//tool/release/notes:create",
+        "@typedb_dependencies//tool/sonarcloud:code-analysis",
+        "@typedb_dependencies//tool/unuseddeps:unused-deps",
         "@rust_analyzer_toolchain_tools//lib/rustlib/src:rustc_srcs"
     ],
 )

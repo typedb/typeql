@@ -5,11 +5,11 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load("@vaticle_bazel_distribution//github:rules.bzl", "deploy_github")
-load("@vaticle_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-load("@vaticle_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
+load("@typedb_bazel_distribution//github:rules.bzl", "deploy_github")
+load("@typedb_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@typedb_dependencies//distribution:deployment.bzl", "deployment")
+load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@typedb_dependencies//tool/release/deps:rules.bzl", "release_validate_deps")
 load("//:deployment.bzl", github_deployment = "deployment")
 
 java_library(
@@ -77,10 +77,10 @@ checkstyle_test(
 filegroup(
     name = "ci",
     data = [
-        "@vaticle_dependencies//library/maven:update",
-        "@vaticle_dependencies//tool/checkstyle:test-coverage",
-        "@vaticle_dependencies//tool/release/notes:create",
-        "@vaticle_dependencies//tool/sonarcloud:code-analysis",
-        "@vaticle_dependencies//tool/unuseddeps:unused-deps",
+        "@typedb_dependencies//library/maven:update",
+        "@typedb_dependencies//tool/checkstyle:test-coverage",
+        "@typedb_dependencies//tool/release/notes:create",
+        "@typedb_dependencies//tool/sonarcloud:code-analysis",
+        "@typedb_dependencies//tool/unuseddeps:unused-deps",
     ],
 )

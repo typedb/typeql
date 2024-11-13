@@ -4,7 +4,7 @@
 
 
 package(default_visibility = ["//java/test/behaviour:__subpackages__"])
-load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
     name = "steps",
@@ -31,9 +31,9 @@ java_test(
         ":steps",
     ],
     data = [
-        "@vaticle_typedb_behaviour//query/explanation:features",
-        "@vaticle_typedb_behaviour//query/language:features",
-        "@vaticle_typedb_behaviour//query/reasoner:features",
+        "@typedb_behaviour//query/explanation:features",
+        "@typedb_behaviour//query/language:features",
+        "@typedb_behaviour//query/reasoner:features",
     ],
     visibility = ["//visibility:public"],
     size = "small",

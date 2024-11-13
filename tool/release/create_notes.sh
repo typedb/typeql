@@ -3,4 +3,4 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
-bazel run @vaticle_dependencies//tool/release/notes:create -- vaticle typeql HEAD $(cat VERSION) ./RELEASE_TEMPLATE.md ./RELEASE_NOTES_LATEST.md
+bazel run @typedb_dependencies//tool/release/notes:create -- vaticle typeql HEAD $(cat VERSION) ./RELEASE_TEMPLATE.md ./RELEASE_NOTES_LATEST.md
