@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
-workspace(name = "vaticle_typeql")
+workspace(name = "typeql")
 
 ################################
 # Load @typedb_dependencies #
@@ -129,17 +129,17 @@ load("@typedb_dependencies//tool/common:deps.bzl", typedb_dependencies_tool_mave
 # Load @maven dependencies #
 ############################
 
-load("//dependencies/maven:artifacts.bzl", vaticle_typeql_artifacts = "artifacts")
+load("//dependencies/maven:artifacts.bzl", typeql_artifacts = "artifacts")
 load("@typedb_dependencies//library/maven:rules.bzl", "maven")
 maven(
     typedb_bazel_distribution_maven_artifacts +
     typedb_dependencies_tool_maven_artifacts +
-    vaticle_typeql_artifacts
+    typeql_artifacts
 )
 
 ############################################
-# Generate @vaticle_typeql_workspace_refs #
+# Generate @typeql_workspace_refs #
 ############################################
 
 load("@typedb_bazel_distribution//common:rules.bzl", "workspace_refs")
-workspace_refs(name = "vaticle_typeql_workspace_refs")
+workspace_refs(name = "typeql_workspace_refs")

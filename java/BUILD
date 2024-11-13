@@ -26,14 +26,14 @@ java_library(
 
         # Internal Repository Dependencies
         "//common/java:common",
-        "@vaticle_typeql//grammar/java:typeql-grammar",
+        "@typeql//grammar/java:typeql-grammar",
     ],
 )
 
 assemble_maven(
     name = "assemble-maven",
     target = ":typeql-lang",
-    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json",
+    workspace_refs = "@typeql_workspace_refs//:refs.json",
 )
 
 deploy_maven(

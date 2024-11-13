@@ -33,7 +33,7 @@ java_library(
 assemble_maven(
     name = "assemble-maven",
     target = ":common",
-    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json",
+    workspace_refs = "@typeql_workspace_refs//:refs.json",
     version_overrides = version(artifacts_org = artifacts, artifacts_repo={}),
     project_name = "TypeDB Common",
     project_description = "TypeDB Common classes and tools",

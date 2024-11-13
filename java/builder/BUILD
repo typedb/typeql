@@ -29,7 +29,7 @@ java_library(
 assemble_maven(
   name = "assemble-maven",
   target = ":builder",
-  workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
+  workspace_refs = "@typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(

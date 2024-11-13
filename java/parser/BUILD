@@ -23,7 +23,7 @@ java_library(
         "//java/query:query",
 
         # Internal Repository Dependencies
-        "@vaticle_typeql//grammar/java:typeql-grammar",
+        "@typeql//grammar/java:typeql-grammar",
         "//common/java:common",
 
         # External dependencies
@@ -36,7 +36,7 @@ java_library(
 assemble_maven(
     name = "assemble-maven",
     target = ":parser",
-    workspace_refs = "@vaticle_typeql_workspace_refs//:refs.json"
+    workspace_refs = "@typeql_workspace_refs//:refs.json"
 )
 
 deploy_maven(
