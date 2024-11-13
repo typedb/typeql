@@ -26,7 +26,7 @@ java_library(
     ],
     visibility = ["//visibility:public"],
     tags = [
-        "maven_coordinates=com.vaticle.typedb:typedb-common:{pom_version}",
+        "maven_coordinates=com.typedb.typedb:typedb-common:{pom_version}",
     ],
 )
 

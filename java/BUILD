@@ -15,7 +15,7 @@ load("//:deployment.bzl", github_deployment = "deployment")
 java_library(
     name = "typeql-lang",
     srcs = ["TypeQL.java"],
-    tags = ["maven_coordinates=com.vaticle.typeql:typeql-lang:{pom_version}"],
+    tags = ["maven_coordinates=com.typedb.typeql:typeql-lang:{pom_version}"],
     deps = [
         # Internal Package Dependencies
         "//java/common:common",

@@ -14,7 +14,7 @@ antlr(
     srcs = ["//grammar:TypeQL.g4"],
     language = "Java",
     visitor = True,
-    package = "com.vaticle.typeql.grammar",
+    package = "com.typedb.typeql.grammar",
 )
 
 java_library(
@@ -23,7 +23,7 @@ java_library(
     deps = [
         "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
     ],
-    tags = ["maven_coordinates=com.vaticle.typeql:typeql-grammar:{pom_version}", "checkstyle_ignore"],
+    tags = ["maven_coordinates=com.typedb.typeql:typeql-grammar:{pom_version}", "checkstyle_ignore"],
 )
 
 assemble_maven(
