@@ -30,7 +30,7 @@ java_library(
         "@maven//:com_google_code_findbugs_jsr305",
         "@maven//:org_antlr_antlr4_runtime", # sync version with @antlr4_runtime//jar
     ],
-    tags = ["maven_coordinates=com.typedb.typeql:typeql-parser:{pom_version}"],
+    tags = ["maven_coordinates=com.vaticle.typeql:typeql-parser:{pom_version}"],
 )
 
 assemble_maven(
