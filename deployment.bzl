@@ -4,6 +4,6 @@
 
 
 deployment = {
-  'github.organisation': 'vaticle',
+  'github.organisation': 'typedb',
   'github.repository': 'typeql'
 }
