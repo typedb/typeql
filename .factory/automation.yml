@@ -41,7 +41,8 @@ build:
         bazel test //java/parser/... --test_output=errors
         bazel test //java/pattern/... --test_output=errors
         bazel test //java/query/... --test_output=errors
-        bazel test //java/test/... --test_output=errors
+        bazel test //java/test/deployment/... --test_output=errors
+        bazel test //java/test/behaviour/... --test_output=errors
     test-rust:
       image: typedb-ubuntu-22.04
       command: |
