@@ -4,23 +4,23 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.builder;
+package com.typeql.lang.builder;
 
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.lang.common.Reference;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
-import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.expression.Expression;
-import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
-import com.vaticle.typeql.lang.pattern.statement.builder.ConceptStatementBuilder;
-import com.vaticle.typeql.lang.pattern.statement.builder.ThingStatementBuilder;
-import com.vaticle.typeql.lang.pattern.statement.builder.TypeStatementBuilder;
-import com.vaticle.typeql.lang.query.TypeQLFetch;
+import com.typeql.lang.common.Reference;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.pattern.constraint.ConceptConstraint;
+import com.typeql.lang.pattern.constraint.Predicate;
+import com.typeql.lang.pattern.constraint.ThingConstraint;
+import com.typeql.lang.pattern.constraint.TypeConstraint;
+import com.typeql.lang.pattern.expression.Expression;
+import com.typeql.lang.pattern.statement.ConceptStatement;
+import com.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.pattern.statement.TypeStatement;
+import com.typeql.lang.pattern.statement.builder.ConceptStatementBuilder;
+import com.typeql.lang.pattern.statement.builder.ThingStatementBuilder;
+import com.typeql.lang.pattern.statement.builder.TypeStatementBuilder;
+import com.typeql.lang.query.TypeQLFetch;
 
 import java.util.List;
 import java.util.Set;

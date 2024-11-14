@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.parser;
+package com.typeql.lang.parser;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
@@ -16,8 +16,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_DETAILED;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_NO_DETAILS;
+import static com.typeql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_DETAILED;
+import static com.typeql.lang.common.exception.ErrorMessage.SYNTAX_ERROR_NO_DETAILS;
 
 /**
  * ANTLR error listener that listens for syntax errors, and record them.

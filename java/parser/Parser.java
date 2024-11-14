@@ -4,47 +4,47 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.parser;
+package com.typeql.lang.parser;
 
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.grammar.TypeQLBaseVisitor;
-import com.vaticle.typeql.grammar.TypeQLLexer;
-import com.vaticle.typeql.grammar.TypeQLParser;
-import com.vaticle.typeql.lang.builder.ConceptVariableBuilder;
-import com.vaticle.typeql.lang.builder.ValueVariableBuilder;
-import com.vaticle.typeql.lang.common.Reference;
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.Conjunction;
-import com.vaticle.typeql.lang.pattern.Definable;
-import com.vaticle.typeql.lang.pattern.Disjunction;
-import com.vaticle.typeql.lang.pattern.Negation;
-import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
-import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
-import com.vaticle.typeql.lang.pattern.expression.Expression;
-import com.vaticle.typeql.lang.pattern.expression.Expression.Operation;
-import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
-import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
-import com.vaticle.typeql.lang.query.TypeQLDefine;
-import com.vaticle.typeql.lang.query.TypeQLDelete;
-import com.vaticle.typeql.lang.query.TypeQLFetch;
-import com.vaticle.typeql.lang.query.TypeQLGet;
-import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLQuery;
-import com.vaticle.typeql.lang.query.TypeQLQuery.MatchClause;
-import com.vaticle.typeql.lang.query.TypeQLQuery.Modifiers;
-import com.vaticle.typeql.lang.query.TypeQLUndefine;
-import com.vaticle.typeql.lang.query.TypeQLUpdate;
+import com.typeql.grammar.TypeQLBaseVisitor;
+import com.typeql.grammar.TypeQLLexer;
+import com.typeql.grammar.TypeQLParser;
+import com.typeql.lang.builder.ConceptVariableBuilder;
+import com.typeql.lang.builder.ValueVariableBuilder;
+import com.typeql.lang.common.Reference;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.Conjunction;
+import com.typeql.lang.pattern.Definable;
+import com.typeql.lang.pattern.Disjunction;
+import com.typeql.lang.pattern.Negation;
+import com.typeql.lang.pattern.Pattern;
+import com.typeql.lang.pattern.constraint.Predicate;
+import com.typeql.lang.pattern.constraint.ThingConstraint;
+import com.typeql.lang.pattern.constraint.TypeConstraint;
+import com.typeql.lang.pattern.constraint.ValueConstraint;
+import com.typeql.lang.pattern.expression.Expression;
+import com.typeql.lang.pattern.expression.Expression.Operation;
+import com.typeql.lang.pattern.schema.Rule;
+import com.typeql.lang.pattern.statement.ConceptStatement;
+import com.typeql.lang.pattern.statement.Statement;
+import com.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.pattern.statement.TypeStatement;
+import com.typeql.lang.pattern.statement.ValueStatement;
+import com.typeql.lang.query.TypeQLDefine;
+import com.typeql.lang.query.TypeQLDelete;
+import com.typeql.lang.query.TypeQLFetch;
+import com.typeql.lang.query.TypeQLGet;
+import com.typeql.lang.query.TypeQLInsert;
+import com.typeql.lang.query.TypeQLQuery;
+import com.typeql.lang.query.TypeQLQuery.MatchClause;
+import com.typeql.lang.query.TypeQLQuery.Modifiers;
+import com.typeql.lang.query.TypeQLUndefine;
+import com.typeql.lang.query.TypeQLUpdate;
 import org.antlr.v4.runtime.ANTLRErrorStrategy;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
@@ -71,9 +71,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.pair;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
-import static com.vaticle.typeql.lang.common.util.Strings.unescapeRegex;
+import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
+import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
+import static com.typeql.lang.common.util.Strings.unescapeRegex;
 import static java.util.stream.Collectors.toList;
 import static org.antlr.v4.runtime.atn.PredictionMode.LL_EXACT_AMBIG_DETECTION;
 import static org.antlr.v4.runtime.atn.PredictionMode.SLL;
@@ -815,15 +815,15 @@ public class Parser extends TypeQLBaseVisitor {
         } else if (ctx.value() != null) {
             Object value = visitValue(ctx.value());
             if (value instanceof Long) {
-                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Long((Long) value);
+                return new com.typeql.lang.pattern.expression.Expression.Constant.Long((Long) value);
             } else if (value instanceof Double) {
-                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Double((Double) value);
+                return new com.typeql.lang.pattern.expression.Expression.Constant.Double((Double) value);
             } else if (value instanceof Boolean) {
-                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Boolean((Boolean) value);
+                return new com.typeql.lang.pattern.expression.Expression.Constant.Boolean((Boolean) value);
             } else if (value instanceof String) {
-                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.String((String) value);
+                return new com.typeql.lang.pattern.expression.Expression.Constant.String((String) value);
             } else if (value instanceof LocalDateTime) {
-                return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.DateTime((LocalDateTime) value);
+                return new com.typeql.lang.pattern.expression.Expression.Constant.DateTime((LocalDateTime) value);
             } else {
                 throw TypeQLException.of(ILLEGAL_GRAMMAR.message(ctx.getText()));
             }
@@ -833,7 +833,7 @@ public class Parser extends TypeQLBaseVisitor {
     }
 
     @Override
-    public com.vaticle.typeql.lang.pattern.expression.Expression.Function visitExpression_function(TypeQLParser.Expression_functionContext ctx) {
+    public com.typeql.lang.pattern.expression.Expression.Function visitExpression_function(TypeQLParser.Expression_functionContext ctx) {
         TypeQLToken.Expression.Function function = Arrays.stream(TypeQLToken.Expression.Function.values())
                 .filter(f -> f.toString().equals(ctx.expression_function_name().getText()))
                 .findFirst().orElse(null);

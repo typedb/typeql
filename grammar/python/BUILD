@@ -21,7 +21,7 @@ antlr(
     srcs = [":python-grammar"],
     language = "Python3",
     visitor = True,
-    package = "com.vaticle.typeql.grammar",
+    package = "com.typeql.grammar",
 )
 
 genrule(
@@ -33,7 +33,7 @@ genrule(
         "TypeQLPythonVisitor.py",
     ],
     srcs = [":python-antlr"],
-    cmd = "mv $(execpath :python-antlr)/com/vaticle/typeql/grammar/*.py $(@D)",
+    cmd = "mv $(execpath :python-antlr)/com/typeql/grammar/*.py $(@D)",
 )
 
 py_library(

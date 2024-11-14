@@ -22,7 +22,7 @@ java_library(
 java_test(
     name = "test",
     srcs = ["TypeQLTest.java"],
-    test_class = "com.vaticle.typeql.lang.test.behaviour.typeql.TypeQLTest",
+    test_class = "com.typeql.lang.test.behaviour.typeql.TypeQLTest",
     deps = [
         # External dependencies from Maven
         "@maven//:io_cucumber_cucumber_junit",

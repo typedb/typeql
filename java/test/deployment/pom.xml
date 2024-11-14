@@ -38,7 +38,7 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.vaticle.typeql</groupId>
+            <groupId>com.typeql</groupId>
             <artifactId>typeql-lang</artifactId>
             <version>TYPEQL_LANG_VERSION_MARKER</version>
             <scope>test</scope>

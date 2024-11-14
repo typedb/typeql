@@ -4,18 +4,18 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement;
+package com.typeql.lang.pattern.statement;
 
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.constraint.ValueConstraint;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
 
 public class ValueStatement extends Statement {
     private final TypeQLVariable.Value variable;

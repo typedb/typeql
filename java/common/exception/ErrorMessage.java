@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.common.exception;
+package com.typeql.lang.common.exception;
 
 public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessage {
 

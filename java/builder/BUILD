@@ -23,7 +23,7 @@ java_library(
         # Internal Repository Dependencies
         "//common/java:common",
     ],
-    tags = ["maven_coordinates=com.vaticle.typeql:typeql-builder:{pom_version}"],
+    tags = ["maven_coordinates=com.typeql:typeql-builder:{pom_version}"],
 )
 
 assemble_maven(

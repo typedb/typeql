@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement;
+package com.typeql.lang.pattern.statement;
 
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.pattern.constraint.ConceptConstraint;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static java.util.Collections.emptyList;
 
 public class ConceptStatement extends Statement {

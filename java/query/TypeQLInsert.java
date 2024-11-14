@@ -4,16 +4,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query;
+package com.typeql.lang.query;
 
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.statement.ThingStatement;
 
 import java.util.List;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.INSERT;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
-import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
+import static com.typeql.lang.common.TypeQLToken.Clause.INSERT;
+import static com.typeql.lang.common.exception.ErrorMessage.NO_VARIABLE_IN_SCOPE_INSERT;
+import static com.typeql.lang.pattern.Pattern.validateNamesUnique;
 import static java.util.stream.Stream.concat;
 
 public class TypeQLInsert extends TypeQLWritable.InsertOrDelete {

@@ -4,24 +4,24 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement.builder;
+package com.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.pattern.constraint.Predicate;
+import com.typeql.lang.pattern.statement.Statement;
 
 import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GTE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LT;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LTE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.GTE;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.LT;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.LTE;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
+import static com.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
+import static com.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
 
 public interface PredicateBuilder<VAR_TYPE extends Statement> {
 

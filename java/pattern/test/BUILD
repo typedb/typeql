@@ -11,7 +11,7 @@ load("@typedb_dependencies//distribution:deployment.bzl", "deployment")
 java_test(
     name = "normalisation",
     srcs = ["NormalisationTest.java"],
-    test_class = "com.vaticle.typeql.lang.pattern.test.NormalisationTest",
+    test_class = "com.typeql.lang.pattern.test.NormalisationTest",
     deps = [
         # Internal Package Dependencies
         "//java:typeql-lang",

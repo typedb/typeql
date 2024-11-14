@@ -4,19 +4,19 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.schema;
+package com.typeql.lang.pattern.schema;
 
-import com.vaticle.typeql.lang.common.Reference;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.Conjunction;
-import com.vaticle.typeql.lang.pattern.Definable;
-import com.vaticle.typeql.lang.pattern.Disjunction;
-import com.vaticle.typeql.lang.pattern.Negation;
-import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.common.Reference;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.Conjunction;
+import com.typeql.lang.pattern.Definable;
+import com.typeql.lang.pattern.Disjunction;
+import com.typeql.lang.pattern.Negation;
+import com.typeql.lang.pattern.Pattern;
+import com.typeql.lang.pattern.constraint.ThingConstraint;
+import com.typeql.lang.pattern.statement.Statement;
+import com.typeql.lang.pattern.statement.ThingStatement;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -24,23 +24,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.RULE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.THEN;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Schema.WHEN;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ROLES;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_RELATION_VARIABLE;
-import static com.vaticle.typeql.lang.common.util.Strings.indent;
+import static com.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Schema.RULE;
+import static com.typeql.lang.common.TypeQLToken.Schema.THEN;
+import static com.typeql.lang.common.TypeQLToken.Schema.WHEN;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_HAS;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_ROLES;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_VARIABLES;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_MISSING_PATTERNS;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_WHEN_NESTED_NEGATION;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_RULE_THEN_RELATION_VARIABLE;
+import static com.typeql.lang.common.util.Strings.indent;
 
 public class Rule implements Definable {
     private final String label;

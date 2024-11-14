@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement.builder;
+package com.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
-import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.pattern.constraint.Predicate;
+import com.typeql.lang.pattern.constraint.ThingConstraint;
+import com.typeql.lang.pattern.statement.ThingStatement;
 
 import java.time.LocalDateTime;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
 
 public interface ThingStatementBuilder {
 

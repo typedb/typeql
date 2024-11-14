@@ -4,9 +4,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.common;
+package com.typeql.lang.common;
 
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.common.exception.TypeQLException;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -14,10 +14,10 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_TYPE_LABEL;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
+import static com.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_TYPE_LABEL;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_VARIABLE_NAME;
 
 public abstract class Reference {
 

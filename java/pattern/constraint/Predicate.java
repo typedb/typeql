@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.constraint;
+package com.typeql.lang.pattern.constraint;
 
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.common.util.Strings;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.common.util.Strings;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -17,15 +17,15 @@ import java.util.Set;
 
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_PREDICATE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
-import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
-import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CONSTRAINT_DATETIME_PRECISION;
+import static com.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_PREDICATE;
+import static com.typeql.lang.common.exception.ErrorMessage.MISSING_CONSTRAINT_VALUE;
+import static com.typeql.lang.common.util.Strings.escapeRegex;
+import static com.typeql.lang.common.util.Strings.quoteString;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 

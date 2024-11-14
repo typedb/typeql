@@ -26,7 +26,7 @@ You can learn more about TypeQL Language Library for Java from [typedb.com/docs]
 
 <dependencies>
     <dependency>
-        <groupId>com.vaticle.typeql</groupId>
+        <groupId>com.typeql</groupId>
         <artifactId>typeql-lang</artifactId>
         <version>{version}</version>
     </dependency>
@@ -57,6 +57,6 @@ Replace `{version}` with the version number, in which you can find the latest on
    ```
    The Maven JAR and POM will be produced at: 
    ```
-   bazel-bin/java/com.vaticle.typeql:lang.jar
+   bazel-bin/java/com.typeql:lang.jar
    bazel-bin/java/pom.xml
    ```

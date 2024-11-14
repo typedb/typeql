@@ -11,7 +11,7 @@ java_test(
     srcs = [
         "DebugTest.java",
     ],
-    test_class = "com.vaticle.typeql.lang.test.behaviour.debug.DebugTest",
+    test_class = "com.typeql.lang.test.behaviour.debug.DebugTest",
     deps = [
         # Internal Package Dependencies
 

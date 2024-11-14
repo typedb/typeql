@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query;
+package com.typeql.lang.query;
 
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.statement.ThingStatement;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.DELETE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_DELETE;
+import static com.typeql.lang.common.TypeQLToken.Clause.DELETE;
+import static com.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_DELETE;
 import static java.util.Objects.requireNonNull;
 
 public class TypeQLDelete extends TypeQLWritable.InsertOrDelete {

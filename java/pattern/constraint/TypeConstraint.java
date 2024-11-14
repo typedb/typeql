@@ -4,15 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.constraint;
+package com.typeql.lang.pattern.constraint;
 
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLToken.Annotation;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLToken.Annotation;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -25,24 +25,24 @@ import java.util.regex.PatternSyntaxException;
 
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.AS;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.OWNS;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.PLAYS;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.REGEX;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.RELATES;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.SUB;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.SUBX;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.TYPE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Constraint.VALUE_TYPE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Type.RELATION;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_ANNOTATION;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static com.vaticle.typeql.lang.common.util.Strings.escapeRegex;
-import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
+import static com.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Constraint.AS;
+import static com.typeql.lang.common.TypeQLToken.Constraint.OWNS;
+import static com.typeql.lang.common.TypeQLToken.Constraint.PLAYS;
+import static com.typeql.lang.common.TypeQLToken.Constraint.REGEX;
+import static com.typeql.lang.common.TypeQLToken.Constraint.RELATES;
+import static com.typeql.lang.common.TypeQLToken.Constraint.SUB;
+import static com.typeql.lang.common.TypeQLToken.Constraint.SUBX;
+import static com.typeql.lang.common.TypeQLToken.Constraint.TYPE;
+import static com.typeql.lang.common.TypeQLToken.Constraint.VALUE_TYPE;
+import static com.typeql.lang.common.TypeQLToken.Type.RELATION;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_ANNOTATION;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_ATTRIBUTE_TYPE_REGEX;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static com.typeql.lang.common.util.Strings.escapeRegex;
+import static com.typeql.lang.common.util.Strings.quoteString;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 

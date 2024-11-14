@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.expression;
+package com.typeql.lang.pattern.expression;
 
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,11 +17,11 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.PARAN_CLOSE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.PARAN_OPEN;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.typeql.lang.common.TypeQLToken.Char.PARAN_CLOSE;
+import static com.typeql.lang.common.TypeQLToken.Char.PARAN_OPEN;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Expression {
 

@@ -4,9 +4,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern;
+package com.typeql.lang.pattern;
 
-import com.vaticle.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.TypeQLVariable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -15,13 +15,13 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Operator.OR;
-import static com.vaticle.typeql.lang.common.util.Strings.indent;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Operator.OR;
+import static com.typeql.lang.common.util.Strings.indent;
 import static java.util.stream.Collectors.toList;
 
 public class Disjunction<T extends Pattern> implements Pattern {

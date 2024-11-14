@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement;
+package com.typeql.lang.pattern.statement;
 
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.Definable;
-import com.vaticle.typeql.lang.pattern.constraint.Constraint;
-import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.statement.builder.TypeStatementBuilder;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.Definable;
+import com.typeql.lang.pattern.constraint.Constraint;
+import com.typeql.lang.pattern.constraint.TypeConstraint;
+import com.typeql.lang.pattern.statement.builder.TypeStatementBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,11 +20,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.set;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
-import static com.vaticle.typeql.lang.common.util.Strings.indent;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
+import static com.typeql.lang.common.util.Strings.indent;
 
 public class TypeStatement extends Statement implements TypeStatementBuilder, Definable {
 

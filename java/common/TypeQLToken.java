@@ -4,15 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.common;
+package com.typeql.lang.common;
 
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.common.exception.TypeQLException;
 
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public class TypeQLToken {
 

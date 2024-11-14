@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query;
+package com.typeql.lang.query;
 
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.Conjunction;
-import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.Conjunction;
+import com.typeql.lang.pattern.Pattern;
+import com.typeql.lang.pattern.statement.Statement;
+import com.typeql.lang.pattern.statement.ThingStatement;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -28,20 +28,20 @@ import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.MATCH;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Modifier.LIMIT;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Modifier.OFFSET;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Modifier.SORT;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_VARIABLE_NOT_MATCHED;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_SORTED;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Clause.MATCH;
+import static com.typeql.lang.common.TypeQLToken.Modifier.LIMIT;
+import static com.typeql.lang.common.TypeQLToken.Modifier.OFFSET;
+import static com.typeql.lang.common.TypeQLToken.Modifier.SORT;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_VARIABLE_NOT_MATCHED;
+import static com.typeql.lang.common.exception.ErrorMessage.MATCH_PATTERN_STATEMENT_HAS_NO_NAMED_VARIABLE;
+import static com.typeql.lang.common.exception.ErrorMessage.VARIABLE_NOT_SORTED;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;

@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query.test;
+package com.typeql.lang.query.test;
 
-import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.common.exception.ErrorMessage;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.query.TypeQLDelete;
-import com.vaticle.typeql.lang.query.TypeQLQuery.MatchClause;
+import com.typeql.lang.TypeQL;
+import com.typeql.lang.common.exception.ErrorMessage;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.query.TypeQLDelete;
+import com.typeql.lang.query.TypeQLQuery.MatchClause;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.TypeQL.cVar;
+import static com.typeql.lang.TypeQL.cVar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 

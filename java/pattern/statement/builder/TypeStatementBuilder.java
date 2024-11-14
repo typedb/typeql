@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement.builder;
+package com.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.pattern.constraint.TypeConstraint;
-import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.pattern.constraint.TypeConstraint;
+import com.typeql.lang.pattern.statement.TypeStatement;
 
 public interface TypeStatementBuilder {
 

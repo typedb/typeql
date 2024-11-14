@@ -4,46 +4,46 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang;
+package com.typeql.lang;
 
-import com.vaticle.typeql.grammar.TypeQLLexer;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.parser.Parser;
-import com.vaticle.typeql.lang.pattern.Conjunction;
-import com.vaticle.typeql.lang.pattern.Definable;
-import com.vaticle.typeql.lang.pattern.Disjunction;
-import com.vaticle.typeql.lang.pattern.Negation;
-import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
-import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.query.TypeQLDefine;
-import com.vaticle.typeql.lang.query.TypeQLFetch;
-import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLQuery;
-import com.vaticle.typeql.lang.query.TypeQLUndefine;
-import com.vaticle.typeql.lang.builder.ConceptVariableBuilder;
-import com.vaticle.typeql.lang.builder.ValueVariableBuilder;
+import com.typeql.grammar.TypeQLLexer;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.parser.Parser;
+import com.typeql.lang.pattern.Conjunction;
+import com.typeql.lang.pattern.Definable;
+import com.typeql.lang.pattern.Disjunction;
+import com.typeql.lang.pattern.Negation;
+import com.typeql.lang.pattern.Pattern;
+import com.typeql.lang.pattern.constraint.Predicate;
+import com.typeql.lang.pattern.constraint.ThingConstraint;
+import com.typeql.lang.pattern.schema.Rule;
+import com.typeql.lang.pattern.statement.Statement;
+import com.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.pattern.statement.TypeStatement;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.query.TypeQLDefine;
+import com.typeql.lang.query.TypeQLFetch;
+import com.typeql.lang.query.TypeQLInsert;
+import com.typeql.lang.query.TypeQLQuery;
+import com.typeql.lang.query.TypeQLUndefine;
+import com.typeql.lang.builder.ConceptVariableBuilder;
+import com.typeql.lang.builder.ValueVariableBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.GTE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LT;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.LTE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_TYPE_LABEL;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.GTE;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.LT;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.LTE;
+import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.NEQ;
+import static com.typeql.lang.common.TypeQLToken.Predicate.SubString.CONTAINS;
+import static com.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_TYPE_LABEL;
 
 public class TypeQL {
 
@@ -341,120 +341,120 @@ public class TypeQL {
 
     public static abstract class Expression {
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function min(com.vaticle.typeql.lang.pattern.expression.Expression... args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function min(com.typeql.lang.pattern.expression.Expression... args) {
             return min(list(args));
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function min(List<com.vaticle.typeql.lang.pattern.expression.Expression> args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function min(List<com.typeql.lang.pattern.expression.Expression> args) {
             return function(TypeQLToken.Expression.Function.MIN, args);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function max(com.vaticle.typeql.lang.pattern.expression.Expression... args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function max(com.typeql.lang.pattern.expression.Expression... args) {
             return max(list(args));
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function max(List<com.vaticle.typeql.lang.pattern.expression.Expression> args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function max(List<com.typeql.lang.pattern.expression.Expression> args) {
             return function(TypeQLToken.Expression.Function.MAX, args);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function floor(com.vaticle.typeql.lang.pattern.expression.Expression... args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function floor(com.typeql.lang.pattern.expression.Expression... args) {
             return floor(list(args));
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function floor(List<com.vaticle.typeql.lang.pattern.expression.Expression> args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function floor(List<com.typeql.lang.pattern.expression.Expression> args) {
             return function(TypeQLToken.Expression.Function.FLOOR, args);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function ceil(com.vaticle.typeql.lang.pattern.expression.Expression... args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function ceil(com.typeql.lang.pattern.expression.Expression... args) {
             return ceil(list(args));
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function ceil(List<com.vaticle.typeql.lang.pattern.expression.Expression> args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function ceil(List<com.typeql.lang.pattern.expression.Expression> args) {
             return function(TypeQLToken.Expression.Function.CEIL, args);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function round(com.vaticle.typeql.lang.pattern.expression.Expression... args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function round(com.typeql.lang.pattern.expression.Expression... args) {
             return round(list(args));
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function round(List<com.vaticle.typeql.lang.pattern.expression.Expression> args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function round(List<com.typeql.lang.pattern.expression.Expression> args) {
             return function(TypeQLToken.Expression.Function.ROUND, args);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function abs(com.vaticle.typeql.lang.pattern.expression.Expression... args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function abs(com.typeql.lang.pattern.expression.Expression... args) {
             return abs(list(args));
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function abs(List<com.vaticle.typeql.lang.pattern.expression.Expression> args) {
+        public static com.typeql.lang.pattern.expression.Expression.Function abs(List<com.typeql.lang.pattern.expression.Expression> args) {
             return function(TypeQLToken.Expression.Function.ABS, args);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Function function(TypeQLToken.Expression.Function function, List<com.vaticle.typeql.lang.pattern.expression.Expression> args) {
-            return new com.vaticle.typeql.lang.pattern.expression.Expression.Function(function, args);
+        public static com.typeql.lang.pattern.expression.Expression.Function function(TypeQLToken.Expression.Function function, List<com.typeql.lang.pattern.expression.Expression> args) {
+            return new com.typeql.lang.pattern.expression.Expression.Function(function, args);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Parenthesis parenthesis(com.vaticle.typeql.lang.pattern.expression.Expression expression) {
-            return new com.vaticle.typeql.lang.pattern.expression.Expression.Parenthesis(expression);
+        public static com.typeql.lang.pattern.expression.Expression.Parenthesis parenthesis(com.typeql.lang.pattern.expression.Expression expression) {
+            return new com.typeql.lang.pattern.expression.Expression.Parenthesis(expression);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Boolean constant(boolean value) {
-            return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Boolean(value);
+        public static com.typeql.lang.pattern.expression.Expression.Constant.Boolean constant(boolean value) {
+            return new com.typeql.lang.pattern.expression.Expression.Constant.Boolean(value);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Long constant(long value) {
-            return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Long(value);
+        public static com.typeql.lang.pattern.expression.Expression.Constant.Long constant(long value) {
+            return new com.typeql.lang.pattern.expression.Expression.Constant.Long(value);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Double constant(double value) {
-            return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.Double(value);
+        public static com.typeql.lang.pattern.expression.Expression.Constant.Double constant(double value) {
+            return new com.typeql.lang.pattern.expression.Expression.Constant.Double(value);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Constant.String constant(String value) {
-            return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.String(value);
+        public static com.typeql.lang.pattern.expression.Expression.Constant.String constant(String value) {
+            return new com.typeql.lang.pattern.expression.Expression.Constant.String(value);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression.Constant.DateTime constant(LocalDateTime value) {
-            return new com.vaticle.typeql.lang.pattern.expression.Expression.Constant.DateTime(value);
+        public static com.typeql.lang.pattern.expression.Expression.Constant.DateTime constant(LocalDateTime value) {
+            return new com.typeql.lang.pattern.expression.Expression.Constant.DateTime(value);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression add(
-                com.vaticle.typeql.lang.pattern.expression.Expression a,
-                com.vaticle.typeql.lang.pattern.expression.Expression b
+        public static com.typeql.lang.pattern.expression.Expression add(
+                com.typeql.lang.pattern.expression.Expression a,
+                com.typeql.lang.pattern.expression.Expression b
         ) {
             return a.add(b);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression sub(
-                com.vaticle.typeql.lang.pattern.expression.Expression a,
-                com.vaticle.typeql.lang.pattern.expression.Expression b
+        public static com.typeql.lang.pattern.expression.Expression sub(
+                com.typeql.lang.pattern.expression.Expression a,
+                com.typeql.lang.pattern.expression.Expression b
         ) {
             return a.subtract(b);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression mul(
-                com.vaticle.typeql.lang.pattern.expression.Expression a,
-                com.vaticle.typeql.lang.pattern.expression.Expression b
+        public static com.typeql.lang.pattern.expression.Expression mul(
+                com.typeql.lang.pattern.expression.Expression a,
+                com.typeql.lang.pattern.expression.Expression b
         ) {
             return a.multiply(b);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression div(
-                com.vaticle.typeql.lang.pattern.expression.Expression a,
-                com.vaticle.typeql.lang.pattern.expression.Expression b
+        public static com.typeql.lang.pattern.expression.Expression div(
+                com.typeql.lang.pattern.expression.Expression a,
+                com.typeql.lang.pattern.expression.Expression b
         ) {
             return a.divide(b);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression mod(
-                com.vaticle.typeql.lang.pattern.expression.Expression a,
-                com.vaticle.typeql.lang.pattern.expression.Expression b
+        public static com.typeql.lang.pattern.expression.Expression mod(
+                com.typeql.lang.pattern.expression.Expression a,
+                com.typeql.lang.pattern.expression.Expression b
         ) {
             return a.modulo(b);
         }
 
-        public static com.vaticle.typeql.lang.pattern.expression.Expression pow(
-                com.vaticle.typeql.lang.pattern.expression.Expression a,
-                com.vaticle.typeql.lang.pattern.expression.Expression b
+        public static com.typeql.lang.pattern.expression.Expression pow(
+                com.typeql.lang.pattern.expression.Expression a,
+                com.typeql.lang.pattern.expression.Expression b
         ) {
             return a.power(b);
         }

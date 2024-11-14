@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.test.deployment.src.test.java;
+package com.typeql.lang.test.deployment.src.test.java;
 
-import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.query.TypeQLGet;
-import com.vaticle.typeql.lang.query.TypeQLQuery;
+import com.typeql.lang.TypeQL;
+import com.typeql.lang.query.TypeQLGet;
+import com.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
-import static com.vaticle.typeql.lang.TypeQL.and;
-import static com.vaticle.typeql.lang.TypeQL.match;
-import static com.vaticle.typeql.lang.TypeQL.or;
-import static com.vaticle.typeql.lang.TypeQL.rel;
+import static com.typeql.lang.TypeQL.and;
+import static com.typeql.lang.TypeQL.match;
+import static com.typeql.lang.TypeQL.or;
+import static com.typeql.lang.TypeQL.rel;
 import static org.junit.Assert.assertEquals;
 
 public class MavenApplicationTest {

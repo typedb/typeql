@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.builder;
+package com.typeql.lang.builder;
 
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.lang.common.Reference;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.pattern.constraint.Predicate;
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
-import com.vaticle.typeql.lang.pattern.expression.Expression;
-import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
-import com.vaticle.typeql.lang.pattern.statement.builder.ValueStatementBuilder;
-import com.vaticle.typeql.lang.query.TypeQLFetch;
+import com.typeql.lang.common.Reference;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.pattern.constraint.Predicate;
+import com.typeql.lang.pattern.constraint.ValueConstraint;
+import com.typeql.lang.pattern.expression.Expression;
+import com.typeql.lang.pattern.statement.ValueStatement;
+import com.typeql.lang.pattern.statement.builder.ValueStatementBuilder;
+import com.typeql.lang.query.TypeQLFetch;
 
 import java.util.List;
 import java.util.Set;

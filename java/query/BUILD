@@ -26,7 +26,7 @@ java_library(
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",
     ],
-    tags = ["maven_coordinates=com.vaticle.typeql:typeql-query:{pom_version}"],
+    tags = ["maven_coordinates=com.typeql:typeql-query:{pom_version}"],
 )
 
 assemble_maven(

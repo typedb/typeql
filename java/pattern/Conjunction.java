@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern;
+package com.typeql.lang.pattern;
 
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.ErrorMessage;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.ErrorMessage;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.statement.Statement;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -24,16 +24,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
-import static com.vaticle.typeql.lang.common.util.Strings.indent;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON_NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON_SPACE;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
+import static com.typeql.lang.common.exception.ErrorMessage.MISSING_PATTERNS;
+import static com.typeql.lang.common.util.Strings.indent;
 import static java.util.stream.Collectors.toList;
 
 public class Conjunction<T extends Pattern> implements Pattern {

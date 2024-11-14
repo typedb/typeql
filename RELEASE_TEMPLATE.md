@@ -18,12 +18,12 @@ cargo add typeql@{version}
 
 <dependencies>
     <dependency>
-        <groupId>com.vaticle.typeql</groupId>
+        <groupId>com.typeql</groupId>
         <artifactId>typeql-grammar</artifactId>
         <version>{version}</version>
     </dependency>
     <dependency>
-        <groupId>com.vaticle.typeql</groupId>
+        <groupId>com.typeql</groupId>
         <artifactId>typeql-lang</artifactId>
         <version>{version}</version>
     </dependency>

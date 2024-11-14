@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.test.behaviour.typeql;
+package com.typeql.lang.test.behaviour.typeql;
 
-import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.query.TypeQLDefine;
-import com.vaticle.typeql.lang.query.TypeQLDelete;
-import com.vaticle.typeql.lang.query.TypeQLFetch;
-import com.vaticle.typeql.lang.query.TypeQLGet;
-import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLQuery;
-import com.vaticle.typeql.lang.query.TypeQLUndefine;
-import com.vaticle.typeql.lang.query.TypeQLUpdate;
+import com.typeql.lang.TypeQL;
+import com.typeql.lang.query.TypeQLDefine;
+import com.typeql.lang.query.TypeQLDelete;
+import com.typeql.lang.query.TypeQLFetch;
+import com.typeql.lang.query.TypeQLGet;
+import com.typeql.lang.query.TypeQLInsert;
+import com.typeql.lang.query.TypeQLQuery;
+import com.typeql.lang.query.TypeQLUndefine;
+import com.typeql.lang.query.TypeQLUpdate;
 import io.cucumber.java.en.Given;
 
 import java.util.List;

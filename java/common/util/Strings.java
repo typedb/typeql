@@ -4,15 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.common.util;
+package com.typeql.lang.common.util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.INDENTATION;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.INDENTATION;
+import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 
 public class Strings {
 

@@ -4,24 +4,24 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query;
+package com.typeql.lang.query;
 
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.exception.ErrorMessage;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.Definable;
-import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.exception.ErrorMessage;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.Definable;
+import com.typeql.lang.pattern.schema.Rule;
+import com.typeql.lang.pattern.statement.TypeStatement;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.DEFINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.UNDEFINE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
-import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
+import static com.typeql.lang.common.TypeQLToken.Clause.DEFINE;
+import static com.typeql.lang.common.TypeQLToken.Clause.UNDEFINE;
+import static com.typeql.lang.common.exception.ErrorMessage.MISSING_DEFINABLES;
+import static com.typeql.lang.query.TypeQLQuery.appendClause;
 
 abstract class TypeQLDefinable implements TypeQLQuery {
 

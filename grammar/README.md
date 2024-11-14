@@ -20,7 +20,7 @@ If you would like to develop language TypeQL plugins or extension in Java, and r
 
 <dependencies>
 <dependency>
-    <groupId>com.vaticle.typeql</groupId>
+    <groupId>com.typeql</groupId>
     <artifactId>typeql-grammar</artifactId>
     <version>{version}</version>
 </dependency>

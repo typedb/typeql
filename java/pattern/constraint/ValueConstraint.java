@@ -4,20 +4,20 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.constraint;
+package com.typeql.lang.pattern.constraint;
 
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.expression.Expression;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.expression.Expression;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class ValueConstraint extends Constraint {
 
@@ -49,11 +49,11 @@ public abstract class ValueConstraint extends Constraint {
 
     public static class Predicate extends ValueConstraint {
 
-        private final com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate;
+        private final com.typeql.lang.pattern.constraint.Predicate<?> predicate;
         private final Set<TypeQLVariable> variables;
         private final int hash;
 
-        public Predicate(com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate) {
+        public Predicate(com.typeql.lang.pattern.constraint.Predicate<?> predicate) {
             this.predicate = predicate;
             this.variables = predicate.variables().stream().map(TypeQLVariable::cloneVar).collect(Collectors.toSet());
             this.hash = Objects.hash(Predicate.class, this.predicate);
@@ -64,7 +64,7 @@ public abstract class ValueConstraint extends Constraint {
             return variables;
         }
 
-        public com.vaticle.typeql.lang.pattern.constraint.Predicate<?> predicate() {
+        public com.typeql.lang.pattern.constraint.Predicate<?> predicate() {
             return predicate;
         }
 

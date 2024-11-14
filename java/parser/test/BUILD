@@ -7,7 +7,7 @@ load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_test(
     name = "parser-test",
-    test_class = "com.vaticle.typeql.lang.parser.test.ParserTest",
+    test_class = "com.typeql.lang.parser.test.ParserTest",
     srcs = ["ParserTest.java"],
     deps = [
         "//java:typeql-lang",

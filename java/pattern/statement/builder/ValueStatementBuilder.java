@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement.builder;
+package com.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.pattern.constraint.ValueConstraint;
-import com.vaticle.typeql.lang.pattern.expression.Expression;
-import com.vaticle.typeql.lang.pattern.statement.ValueStatement;
+import com.typeql.lang.pattern.constraint.ValueConstraint;
+import com.typeql.lang.pattern.expression.Expression;
+import com.typeql.lang.pattern.statement.ValueStatement;
 
 public interface ValueStatementBuilder extends PredicateBuilder<ValueStatement> {
 

@@ -4,24 +4,24 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.parser.test;
+package com.typeql.lang.parser.test;
 
-import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.TypeQL.Expression;
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.Conjunction;
-import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
-import com.vaticle.typeql.lang.query.TypeQLDefine;
-import com.vaticle.typeql.lang.query.TypeQLDelete;
-import com.vaticle.typeql.lang.query.TypeQLFetch;
-import com.vaticle.typeql.lang.query.TypeQLGet;
-import com.vaticle.typeql.lang.query.TypeQLInsert;
-import com.vaticle.typeql.lang.query.TypeQLQuery;
-import com.vaticle.typeql.lang.query.TypeQLUndefine;
-import com.vaticle.typeql.lang.query.TypeQLUpdate;
+import com.typeql.lang.TypeQL;
+import com.typeql.lang.TypeQL.Expression;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.Conjunction;
+import com.typeql.lang.pattern.Pattern;
+import com.typeql.lang.pattern.statement.ThingStatement;
+import com.typeql.lang.query.TypeQLDefine;
+import com.typeql.lang.query.TypeQLDelete;
+import com.typeql.lang.query.TypeQLFetch;
+import com.typeql.lang.query.TypeQLGet;
+import com.typeql.lang.query.TypeQLInsert;
+import com.typeql.lang.query.TypeQLQuery;
+import com.typeql.lang.query.TypeQLUndefine;
+import com.typeql.lang.query.TypeQLUpdate;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,23 +34,23 @@ import java.util.List;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.pair;
-import static com.vaticle.typeql.lang.TypeQL.and;
-import static com.vaticle.typeql.lang.TypeQL.cVar;
-import static com.vaticle.typeql.lang.TypeQL.define;
-import static com.vaticle.typeql.lang.TypeQL.gte;
-import static com.vaticle.typeql.lang.TypeQL.insert;
-import static com.vaticle.typeql.lang.TypeQL.label;
-import static com.vaticle.typeql.lang.TypeQL.lt;
-import static com.vaticle.typeql.lang.TypeQL.lte;
-import static com.vaticle.typeql.lang.TypeQL.match;
-import static com.vaticle.typeql.lang.TypeQL.not;
-import static com.vaticle.typeql.lang.TypeQL.or;
-import static com.vaticle.typeql.lang.TypeQL.parseQuery;
-import static com.vaticle.typeql.lang.TypeQL.rel;
-import static com.vaticle.typeql.lang.TypeQL.rule;
-import static com.vaticle.typeql.lang.TypeQL.type;
-import static com.vaticle.typeql.lang.TypeQL.undefine;
-import static com.vaticle.typeql.lang.TypeQL.vVar;
+import static com.typeql.lang.TypeQL.and;
+import static com.typeql.lang.TypeQL.cVar;
+import static com.typeql.lang.TypeQL.define;
+import static com.typeql.lang.TypeQL.gte;
+import static com.typeql.lang.TypeQL.insert;
+import static com.typeql.lang.TypeQL.label;
+import static com.typeql.lang.TypeQL.lt;
+import static com.typeql.lang.TypeQL.lte;
+import static com.typeql.lang.TypeQL.match;
+import static com.typeql.lang.TypeQL.not;
+import static com.typeql.lang.TypeQL.or;
+import static com.typeql.lang.TypeQL.parseQuery;
+import static com.typeql.lang.TypeQL.rel;
+import static com.typeql.lang.TypeQL.rule;
+import static com.typeql.lang.TypeQL.type;
+import static com.typeql.lang.TypeQL.undefine;
+import static com.typeql.lang.TypeQL.vVar;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.AllOf.allOf;
@@ -560,8 +560,8 @@ public class ParserTest {
                 "get;\n" +
                 "sort ?l desc;";
         TypeQLGet parsed = TypeQL.parseQuery(query).asGet();
-        com.vaticle.typeql.lang.pattern.expression.Expression a = Expression.constant(100);
-        com.vaticle.typeql.lang.pattern.expression.Expression b = cVar("r");
+        com.typeql.lang.pattern.expression.Expression a = Expression.constant(100);
+        com.typeql.lang.pattern.expression.Expression b = cVar("r");
         TypeQLGet expected = match(
                 cVar("x").isa("movie").has("rating", cVar("r")),
                 vVar("l").assign(a.subtract(b))
@@ -800,8 +800,8 @@ public class ParserTest {
                 "get $x, ?t;\n" +
                 "group $x; sum ?t;";
         TypeQLGet.Group.Aggregate parsed = parseQuery(query).asGetGroupAggregate();
-        com.vaticle.typeql.lang.pattern.expression.Expression a = cVar("r");
-        com.vaticle.typeql.lang.pattern.expression.Expression b = cVar("v");
+        com.typeql.lang.pattern.expression.Expression a = cVar("r");
+        com.typeql.lang.pattern.expression.Expression b = cVar("v");
         TypeQLGet.Group.Aggregate expected = match(
                 cVar("i").rel(cVar("x")).rel(cVar("s")).isa("income-source"),
                 cVar("i").has("value", cVar("v")).has("tax-rate", cVar("r")),
@@ -1242,8 +1242,8 @@ public class ParserTest {
 
     @Test
     public void testRuleAttachAttributeByValue() {
-        com.vaticle.typeql.lang.pattern.expression.Expression a = cVar("a");
-        com.vaticle.typeql.lang.pattern.expression.Expression b = Expression.constant(365);
+        com.typeql.lang.pattern.expression.Expression a = cVar("a");
+        com.typeql.lang.pattern.expression.Expression b = Expression.constant(365);
         Conjunction<? extends Pattern> whenPattern = and(
                 cVar("x").has("age", cVar("a")),
                 vVar("d").assign(a.multiply(b))

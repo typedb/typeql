@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement;
+package com.typeql.lang.pattern.statement;
 
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.statement.builder.ThingStatementBuilder;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.constraint.ThingConstraint;
+import com.typeql.lang.pattern.statement.builder.ThingStatementBuilder;
 
 import javax.annotation.Nullable;
 import java.util.LinkedList;
@@ -18,11 +18,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
-import static com.vaticle.typeql.lang.common.util.Strings.indent;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_CONSTRAINT_REPETITION;
+import static com.typeql.lang.common.util.Strings.indent;
 
 public abstract class ThingStatement<T extends ThingStatement<T>> extends Statement {
 

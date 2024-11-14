@@ -4,15 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.test;
+package com.typeql.lang.pattern.test;
 
-import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.pattern.Conjunctable;
-import com.vaticle.typeql.lang.pattern.Conjunction;
-import com.vaticle.typeql.lang.pattern.Disjunction;
-import com.vaticle.typeql.lang.pattern.Pattern;
-import com.vaticle.typeql.lang.query.TypeQLGet;
-import com.vaticle.typeql.lang.query.TypeQLQuery;
+import com.typeql.lang.TypeQL;
+import com.typeql.lang.pattern.Conjunctable;
+import com.typeql.lang.pattern.Conjunction;
+import com.typeql.lang.pattern.Disjunction;
+import com.typeql.lang.pattern.Pattern;
+import com.typeql.lang.query.TypeQLGet;
+import com.typeql.lang.query.TypeQLQuery;
 import org.junit.Test;
 
 import java.util.List;

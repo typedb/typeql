@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query;
+package com.typeql.lang.query;
 
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.pattern.Definable;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.pattern.Definable;
 
 import java.util.List;
 

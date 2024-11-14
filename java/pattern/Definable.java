@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern;
+package com.typeql.lang.pattern;
 
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.pattern.schema.Rule;
-import com.vaticle.typeql.lang.pattern.statement.TypeStatement;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.pattern.schema.Rule;
+import com.typeql.lang.pattern.statement.TypeStatement;
 
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Definable {
 

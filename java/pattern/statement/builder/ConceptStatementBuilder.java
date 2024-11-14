@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.pattern.statement.builder;
+package com.typeql.lang.pattern.statement.builder;
 
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.pattern.constraint.ConceptConstraint;
-import com.vaticle.typeql.lang.pattern.statement.ConceptStatement;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.pattern.constraint.ConceptConstraint;
+import com.typeql.lang.pattern.statement.ConceptStatement;
 
 public interface ConceptStatementBuilder {
 

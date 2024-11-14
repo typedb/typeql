@@ -4,15 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query;
+package com.typeql.lang.query;
 
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.lang.common.Reference;
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.query.builder.ProjectionBuilder;
+import com.typeql.lang.common.Reference;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.query.builder.ProjectionBuilder;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,21 +22,21 @@ import java.util.stream.Stream;
 import static com.vaticle.typedb.common.collection.Collections.concatToList;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.util.Objects.className;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.FETCH;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Projection.AS;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
-import static com.vaticle.typeql.lang.common.util.Strings.indent;
-import static com.vaticle.typeql.lang.common.util.Strings.quoteString;
-import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
-import static com.vaticle.typeql.lang.query.TypeQLQuery.appendClause;
-import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
+import static com.typeql.lang.common.TypeQLToken.Char.COLON;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
+import static com.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
+import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Clause.FETCH;
+import static com.typeql.lang.common.TypeQLToken.Projection.AS;
+import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
+import static com.typeql.lang.common.util.Strings.indent;
+import static com.typeql.lang.common.util.Strings.quoteString;
+import static com.typeql.lang.pattern.Pattern.validateNamesUnique;
+import static com.typeql.lang.query.TypeQLQuery.appendClause;
+import static com.typeql.lang.query.TypeQLQuery.appendModifiers;
 
 public class TypeQLFetch implements TypeQLQuery {
 

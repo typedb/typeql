@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query;
+package com.typeql.lang.query;
 
-import com.vaticle.typeql.lang.common.TypeQLArg;
-import com.vaticle.typeql.lang.common.TypeQLToken;
-import com.vaticle.typeql.lang.common.TypeQLVariable;
-import com.vaticle.typeql.lang.common.exception.ErrorMessage;
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
-import com.vaticle.typeql.lang.query.builder.Aggregatable;
+import com.typeql.lang.common.TypeQLArg;
+import com.typeql.lang.common.TypeQLToken;
+import com.typeql.lang.common.TypeQLVariable;
+import com.typeql.lang.common.exception.ErrorMessage;
+import com.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.query.builder.Aggregatable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,18 +21,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Char.SPACE;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.GET;
-import static com.vaticle.typeql.lang.common.TypeQLToken.Clause.GROUP;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.FILTER_VARIABLE_ANONYMOUS;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
-import static com.vaticle.typeql.lang.pattern.Pattern.validateNamesUnique;
-import static com.vaticle.typeql.lang.query.TypeQLQuery.appendModifiers;
+import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
+import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
+import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON;
+import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
+import static com.typeql.lang.common.TypeQLToken.Clause.GET;
+import static com.typeql.lang.common.TypeQLToken.Clause.GROUP;
+import static com.typeql.lang.common.exception.ErrorMessage.FILTER_VARIABLE_ANONYMOUS;
+import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_FILTER_VARIABLE_REPEATING;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_COUNT_VARIABLE_ARGUMENT;
+import static com.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE;
+import static com.typeql.lang.pattern.Pattern.validateNamesUnique;
+import static com.typeql.lang.query.TypeQLQuery.appendModifiers;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 

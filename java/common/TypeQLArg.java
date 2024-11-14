@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.common;
+package com.typeql.lang.common;
 
-import com.vaticle.typeql.lang.common.exception.TypeQLException;
+import com.typeql.lang.common.exception.TypeQLException;
 
-import static com.vaticle.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
+import static com.typeql.lang.common.exception.ErrorMessage.INVALID_SORTING_ORDER;
 
 public class TypeQLArg {
 

@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.query.builder;
+package com.typeql.lang.query.builder;
 
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.collection.Pair;
-import com.vaticle.typeql.lang.common.Reference;
-import com.vaticle.typeql.lang.query.TypeQLFetch;
-import com.vaticle.typeql.lang.query.TypeQLGet;
+import com.typeql.lang.common.Reference;
+import com.typeql.lang.query.TypeQLFetch;
+import com.typeql.lang.query.TypeQLGet;
 
 import java.util.List;
 import java.util.stream.Collectors;

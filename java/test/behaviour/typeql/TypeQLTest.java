@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typeql.lang.test.behaviour.typeql;
+package com.typeql.lang.test.behaviour.typeql;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         strict = true,
         plugin = "pretty",
-        glue = "com.vaticle.typeql.lang.test.behaviour",
+        glue = "com.typeql.lang.test.behaviour",
         features = "external/typedb_behaviour/query",
         tags = "not @ignore and not @ignore-typeql"
 )
@@ -31,7 +31,7 @@ public class TypeQLTest {
     //    Use '//<this>/<package>/<name>:test'
     //
     // 5) Update 'Bazel Flags':
-    //    a) Remove the line that says: '--test_filter=com.vaticle.typeql.lang.*'
+    //    a) Remove the line that says: '--test_filter=com.typeql.lang.*'
     //    b) Use the following Bazel flags:
     //       --cache_test_results=no : to make sure you're not using cache
     //       --test_output=streamed : to make sure all output is printed

@@ -7,7 +7,7 @@ load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_test(
     name = "typeql-query-test",
-    test_class = "com.vaticle.typeql.lang.query.test.TypeQLQueryTest",
+    test_class = "com.typeql.lang.query.test.TypeQLQueryTest",
     srcs = ["TypeQLQueryTest.java"],
     deps = [
         "//java:typeql-lang",
@@ -20,7 +20,7 @@ java_test(
 
 java_test(
     name = "typeql-delete-test",
-    test_class = "com.vaticle.typeql.lang.query.test.TypeQLDeleteTest",
+    test_class = "com.typeql.lang.query.test.TypeQLDeleteTest",
     srcs = ["TypeQLDeleteTest.java"],
     deps = [
         "//java:typeql-lang",
