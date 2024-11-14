@@ -6,8 +6,8 @@
 
 package com.typeql.lang.pattern.constraint;
 
-import com.vaticle.typedb.common.collection.Either;
-import com.vaticle.typedb.common.collection.Pair;
+import com.typedb.common.collection.Either;
+import com.typedb.common.collection.Pair;
 import com.typeql.lang.common.TypeQLToken;
 import com.typeql.lang.common.TypeQLVariable;
 import com.typeql.lang.common.exception.TypeQLException;
@@ -26,9 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typedb.common.collection.Collections.pair;
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.pair;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.typeql.lang.common.TypeQLToken.Char.PARAN_CLOSE;

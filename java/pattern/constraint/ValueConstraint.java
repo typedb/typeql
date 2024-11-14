@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 

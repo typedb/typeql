@@ -12,7 +12,7 @@ import com.typeql.lang.pattern.statement.ThingStatement;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 import static com.typeql.lang.common.TypeQLToken.Clause.DELETE;
 import static com.typeql.lang.common.exception.ErrorMessage.VARIABLE_OUT_OF_SCOPE_DELETE;
 import static java.util.Objects.requireNonNull;

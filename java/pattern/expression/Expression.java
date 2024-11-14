@@ -6,7 +6,7 @@
 
 package com.typeql.lang.pattern.expression;
 
-import com.vaticle.typedb.common.collection.Pair;
+import com.typedb.common.collection.Pair;
 import com.typeql.lang.common.TypeQLToken;
 import com.typeql.lang.common.TypeQLVariable;
 import com.typeql.lang.common.exception.TypeQLException;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.typeql.lang.common.TypeQLToken.Char.PARAN_CLOSE;
 import static com.typeql.lang.common.TypeQLToken.Char.PARAN_OPEN;

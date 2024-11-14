@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;
 import static com.typeql.lang.common.TypeQLToken.Char.SEMICOLON;

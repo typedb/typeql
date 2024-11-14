@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.collection.Collections.list;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.typeql.lang.common.exception.ErrorMessage.MATCH_HAS_UNBOUNDED_NESTED_PATTERN;
 

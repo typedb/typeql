@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typedb.common.collection;
+package com.typedb.common.collection;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 import static java.util.Collections.emptyIterator;
 import static java.util.Collections.singletonList;
 

@@ -10,7 +10,7 @@ import com.typeql.lang.common.exception.TypeQLException;
 import com.typeql.lang.pattern.schema.Rule;
 import com.typeql.lang.pattern.statement.TypeStatement;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public interface Definable {

@@ -6,8 +6,8 @@
 
 package com.typeql.lang.query.builder;
 
-import com.vaticle.typedb.common.collection.Either;
-import com.vaticle.typedb.common.collection.Pair;
+import com.typedb.common.collection.Either;
+import com.typedb.common.collection.Pair;
 import com.typeql.lang.common.Reference;
 import com.typeql.lang.query.TypeQLFetch;
 import com.typeql.lang.query.TypeQLGet;

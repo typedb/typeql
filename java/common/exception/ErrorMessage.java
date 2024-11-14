@@ -6,7 +6,7 @@
 
 package com.typeql.lang.common.exception;
 
-public class ErrorMessage extends com.vaticle.typedb.common.exception.ErrorMessage {
+public class ErrorMessage extends com.typedb.common.exception.ErrorMessage {
 
     public static final ErrorMessage ILLEGAL_STATE =
             new ErrorMessage(1, "Illegal internal state!");

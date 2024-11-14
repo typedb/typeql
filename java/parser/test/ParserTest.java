@@ -32,8 +32,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typedb.common.collection.Collections.pair;
+import static com.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.pair;
 import static com.typeql.lang.TypeQL.and;
 import static com.typeql.lang.TypeQL.cVar;
 import static com.typeql.lang.TypeQL.define;

@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typedb.common.exception;
+package com.typedb.common.exception;
 
 import java.util.HashMap;
 import java.util.Map;

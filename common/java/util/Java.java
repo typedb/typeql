@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typedb.common.util;
+package com.typedb.common.util;
 
 public class Java {
     public static Integer UNKNOWN_VERSION = -1;

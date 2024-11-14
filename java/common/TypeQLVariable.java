@@ -8,7 +8,7 @@ package com.typeql.lang.common;
 
 import com.typeql.lang.common.exception.TypeQLException;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public abstract class TypeQLVariable {

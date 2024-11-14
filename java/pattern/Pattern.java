@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.typeql.lang.common.exception.ErrorMessage.VARIABLE_NAME_CONFLICT;
 

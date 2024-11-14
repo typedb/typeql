@@ -10,7 +10,7 @@ import com.typeql.lang.common.exception.ErrorMessage;
 import com.typeql.lang.common.exception.TypeQLException;
 import com.typeql.lang.pattern.statement.Statement;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 
 public interface Conjunctable extends Pattern {
 

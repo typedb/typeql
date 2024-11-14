@@ -6,8 +6,8 @@
 
 package com.typeql.lang.query;
 
-import com.vaticle.typedb.common.collection.Either;
-import com.vaticle.typedb.common.collection.Pair;
+import com.typedb.common.collection.Either;
+import com.typedb.common.collection.Pair;
 import com.typeql.lang.common.Reference;
 import com.typeql.lang.common.TypeQLArg;
 import com.typeql.lang.common.TypeQLVariable;
@@ -19,9 +19,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.vaticle.typedb.common.collection.Collections.concatToList;
-import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.collection.Collections.concatToList;
+import static com.typedb.common.collection.Collections.list;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.typeql.lang.common.TypeQLToken.Char.COMMA_SPACE;
 import static com.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;

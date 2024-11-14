@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.vaticle.typedb.common.collection.Collections.set;
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.collection.Collections.set;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
 import static com.typeql.lang.common.TypeQLToken.Predicate.SubString.LIKE;

@@ -19,7 +19,7 @@ import org.junit.rules.ExpectedException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 import static com.typeql.lang.TypeQL.cVar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

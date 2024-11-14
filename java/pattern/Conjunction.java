@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 import static com.typeql.lang.common.TypeQLToken.Char.CURLY_CLOSE;
 import static com.typeql.lang.common.TypeQLToken.Char.CURLY_OPEN;
 import static com.typeql.lang.common.TypeQLToken.Char.NEW_LINE;

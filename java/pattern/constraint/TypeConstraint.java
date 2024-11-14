@@ -6,8 +6,8 @@
 
 package com.typeql.lang.pattern.constraint;
 
-import com.vaticle.typedb.common.collection.Either;
-import com.vaticle.typedb.common.collection.Pair;
+import com.typedb.common.collection.Either;
+import com.typedb.common.collection.Pair;
 import com.typeql.lang.common.TypeQLArg;
 import com.typeql.lang.common.TypeQLToken;
 import com.typeql.lang.common.TypeQLToken.Annotation;
@@ -23,8 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 
-import static com.vaticle.typedb.common.collection.Collections.set;
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.collection.Collections.set;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static com.typeql.lang.common.TypeQLToken.Constraint.AS;

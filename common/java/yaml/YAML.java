@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.vaticle.typedb.common.yaml;
+package com.typedb.common.yaml;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 
 public abstract class YAML {
 

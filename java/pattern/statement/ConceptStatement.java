@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 import static com.typeql.lang.common.TypeQLToken.Char.SPACE;
 import static java.util.Collections.emptyList;
 

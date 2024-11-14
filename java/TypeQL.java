@@ -34,7 +34,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.EQ;
 import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.GT;
 import static com.typeql.lang.common.TypeQLToken.Predicate.Equality.GTE;

@@ -6,8 +6,8 @@
 
 package com.typeql.lang.parser;
 
-import com.vaticle.typedb.common.collection.Either;
-import com.vaticle.typedb.common.collection.Pair;
+import com.typedb.common.collection.Either;
+import com.typedb.common.collection.Pair;
 import com.typeql.grammar.TypeQLBaseVisitor;
 import com.typeql.grammar.TypeQLLexer;
 import com.typeql.grammar.TypeQLParser;
@@ -70,7 +70,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.vaticle.typedb.common.collection.Collections.pair;
+import static com.typedb.common.collection.Collections.pair;
 import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_GRAMMAR;
 import static com.typeql.lang.common.exception.ErrorMessage.ILLEGAL_STATE;
 import static com.typeql.lang.common.util.Strings.unescapeRegex;

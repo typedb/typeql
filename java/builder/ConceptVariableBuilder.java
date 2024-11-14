@@ -6,7 +6,7 @@
 
 package com.typeql.lang.builder;
 
-import com.vaticle.typedb.common.collection.Pair;
+import com.typedb.common.collection.Pair;
 import com.typeql.lang.common.Reference;
 import com.typeql.lang.common.TypeQLVariable;
 import com.typeql.lang.pattern.constraint.ConceptConstraint;
@@ -25,7 +25,7 @@ import com.typeql.lang.query.TypeQLFetch;
 import java.util.List;
 import java.util.Set;
 
-import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.typedb.common.collection.Collections.list;
 
 public class ConceptVariableBuilder extends TypeQLVariable.Concept implements
         ConceptStatementBuilder,

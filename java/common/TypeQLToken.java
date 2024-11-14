@@ -11,7 +11,7 @@ import com.typeql.lang.common.exception.TypeQLException;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 
 public class TypeQLToken {

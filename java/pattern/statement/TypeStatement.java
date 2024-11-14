@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.typedb.common.collection.Collections.set;
 import static com.typeql.lang.common.TypeQLToken.Char.COMMA;
 import static com.typeql.lang.common.TypeQLToken.Char.COMMA_NEW_LINE;
 import static com.typeql.lang.common.TypeQLToken.Char.SPACE;

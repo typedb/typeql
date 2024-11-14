@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static com.vaticle.typedb.common.util.Objects.className;
+import static com.typedb.common.util.Objects.className;
 import static com.typeql.lang.common.TypeQLToken.Char.COLON;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_CASTING;
 import static com.typeql.lang.common.exception.ErrorMessage.INVALID_TYPE_LABEL;
