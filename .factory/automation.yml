@@ -33,12 +33,6 @@ build:
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @typedb_dependencies//tool/unuseddeps:unused-deps -- list
-    cargo-toml-sync:
-      image: vaticle-ubuntu-22.04
-      command: |
-        tool/ide/rust/sync.sh
-        git add .
-        git diff --exit-code HEAD
     test-java:
       image: typedb-ubuntu-22.04
       command: |
