@@ -95,5 +95,6 @@ checkstyle_test(
         "**/Cargo.toml",
         "**/Cargo.lock",
     ]),
+    exclude = ["Cargo.toml"],
     license_type = "mpl-header",
 )
