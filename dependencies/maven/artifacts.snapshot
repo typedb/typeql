@@ -43,5 +43,4 @@
 @maven//:org_jsoup_jsoup_1_16_1
 @maven//:org_kohsuke_github_api_1_101
 @maven//:org_slf4j_slf4j_api_2_0_0
-@maven//:org_yaml_snakeyaml_2_2
 @maven//:org_zeroturnaround_zt_exec_1_10

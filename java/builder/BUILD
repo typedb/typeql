@@ -21,7 +21,7 @@ java_library(
         "//java/query",
 
         # Internal Repository Dependencies
-        "//common/java:common",
+        "@typedb_dependencies//common/java:typedb-common",
     ],
     tags = ["maven_coordinates=com.typeql:typeql-builder:{pom_version}"],
 )

@@ -25,7 +25,7 @@ java_library(
         "//java/query:query",
 
         # Internal Repository Dependencies
-        "//common/java:common",
+        "@typedb_dependencies//common/java:typedb-common",
         "@typeql//grammar/java:typeql-grammar",
     ],
 )

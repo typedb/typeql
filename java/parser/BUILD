@@ -24,7 +24,7 @@ java_library(
 
         # Internal Repository Dependencies
         "@typeql//grammar/java:typeql-grammar",
-        "//common/java:common",
+        "@typedb_dependencies//common/java:typedb-common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",

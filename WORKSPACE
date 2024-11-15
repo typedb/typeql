@@ -84,9 +84,9 @@ unuseddeps_deps()
 load("@typedb_dependencies//tool/sonarcloud:deps.bzl", "sonarcloud_dependencies")
 sonarcloud_dependencies()
 
-######################################
+###################################
 # Load @typedb_bazel_distribution #
-######################################
+###################################
 
 load("@typedb_dependencies//distribution:deps.bzl", "typedb_bazel_distribution")
 typedb_bazel_distribution()
@@ -116,13 +116,14 @@ uploader_dpes()
 load("@typedb_bazel_distribution_uploader//:requirements.bzl", install_uploader_deps = "install_deps")
 install_uploader_deps()
 
-################################
-# Load @typedb dependencies #
-################################
+#############################
+# Load @typedb_dependencies #
+#############################
 
 load("//dependencies/typedb:repositories.bzl", "typedb_behaviour")
 typedb_behaviour()
 
+load("@typedb_dependencies//common/java:artifacts.bzl", typedb_common_java_maven_artifacts = "maven_artifacts")
 load("@typedb_dependencies//tool/common:deps.bzl", typedb_dependencies_tool_maven_artifacts = "maven_artifacts")
 
 ############################
@@ -133,6 +134,7 @@ load("//dependencies/maven:artifacts.bzl", typeql_artifacts = "artifacts")
 load("@typedb_dependencies//library/maven:rules.bzl", "maven")
 maven(
     typedb_bazel_distribution_maven_artifacts +
+    typedb_common_java_maven_artifacts +
     typedb_dependencies_tool_maven_artifacts +
     typeql_artifacts
 )

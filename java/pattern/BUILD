@@ -25,7 +25,7 @@ java_library(
         "//java/common:common",
 
         # Internal Repository Dependencies
-        "//common/java:common",
+        "@typedb_dependencies//common/java:typedb-common",
 
         # External dependencies
         "@maven//:com_google_code_findbugs_jsr305",

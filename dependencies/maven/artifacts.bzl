@@ -12,6 +12,5 @@ artifacts = [
     "org.antlr:antlr4-runtime",
     "org.hamcrest:hamcrest-library",
     "org.slf4j:slf4j-api",
-    "org.yaml:snakeyaml",
     "org.zeroturnaround:zt-exec",
 ]

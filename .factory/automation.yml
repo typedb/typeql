@@ -76,7 +76,6 @@ build:
         bazel run --define version=$(git rev-parse HEAD) //java/query:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java/parser:deploy-maven -- snapshot
         bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //common/java:deploy-maven -- snapshot
     deploy-pip-snapshot:
       filter:
         owner: typedb
@@ -157,7 +156,6 @@ release:
         bazel run --define version=$(cat VERSION) //java/query:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java/parser:deploy-maven -- release
         bazel run --define version=$(cat VERSION) //java:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //common/java:deploy-maven -- release
     deploy-pip-release:
       image: typedb-ubuntu-20.04
       dependencies: [ deploy-github ]

@@ -27,7 +27,7 @@ java_test(
         "//java/common:common",
         "//java/pattern:pattern",
         "//java/query:query",
-        "//common/java:common",
+        "@typedb_dependencies//common/java:typedb-common",
     ],
     size = "small",
 )
