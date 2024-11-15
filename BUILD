@@ -38,6 +38,7 @@ checkstyle_test(
         ".bazel-remote-cache.rc",
         ".bazel-cache-credential.json",
         "banner.png",
+        "Cargo.toml",
     ],
     license_type = "mpl-header",
 )
