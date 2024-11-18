@@ -170,7 +170,7 @@ struct_value = { expression_value | expression_struct }
 
 clause_fetch = { FETCH ~ fetch_object }
 
-fetch_some = { fetch_single | fetch_object | fetch_list }
+fetch_some = { fetch_list | fetch_single | fetch_object }
 
 fetch_object = { CURLY_OPEN ~ fetch_body  ~ CURLY_CLOSE }
 fetch_body = { fetch_object_entries | fetch_attributes_all }
