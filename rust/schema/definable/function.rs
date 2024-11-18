@@ -5,6 +5,7 @@
  */
 
 use std::fmt::{self, Formatter, Write};
+use std::ptr::write;
 
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
@@ -67,7 +68,7 @@ impl Signature {
 impl Pretty for Signature {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}(", self.ident)?;
-        todo!("write args");
+        self.args.iter().try_for_each(|arg| write!(f, "{}: {}", arg.var, arg.type_))?;
         write!(f, ") -> ")?;
         Pretty::fmt(&self.output, indent_level, f)?;
         Ok(())
@@ -80,7 +81,7 @@ impl fmt::Display for Signature {
             Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{}(", self.ident)?;
-            todo!("write args");
+            self.args.iter().try_for_each(|arg| write!(f, "{}: {}", arg.var, arg.type_))?;
             write!(f, ") -> {}", self.output)?;
             Ok(())
         }
@@ -158,8 +159,10 @@ impl Pretty for Stream {
 }
 
 impl fmt::Display for Stream {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{ ")?;
+        write_joined!(f, ", ", self.types)?;
+        write!(f, " }}")
     }
 }
 
@@ -188,8 +191,8 @@ impl Pretty for Single {
 }
 
 impl fmt::Display for Single {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write_joined!(f, ", ", self.types)
     }
 }
 
