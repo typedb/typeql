@@ -4,8 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt::{self, Formatter, Write};
-use std::ptr::write;
+use std::{
+    fmt::{self, Formatter, Write},
+    ptr::write,
+};
 
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},

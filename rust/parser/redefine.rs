@@ -8,8 +8,11 @@ use super::{
     define::type_::visit_type_capability, type_::visit_label, visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
-    common::Spanned,
-    parser::annotation::visit_annotations,
+    common::{error::TypeQLError, Spanned},
+    parser::{
+        annotation::visit_annotations,
+        define::{function::visit_definition_function, struct_::visit_definition_struct},
+    },
     query::schema::Redefine,
     schema::definable::{Definable, Type},
 };
@@ -23,6 +26,15 @@ pub(super) fn visit_query_redefine(node: Node<'_>) -> Redefine {
 
 fn visit_redefinable(node: Node<'_>) -> Definable {
     debug_assert_eq!(node.as_rule(), Rule::redefinable);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::redefinable_type => visit_redefinable_kind(child),
+        Rule::definition_function => Definable::Function(visit_definition_function(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    }
+}
+
+fn visit_redefinable_kind(node: Node<'_>) -> Definable {
     let span = node.span();
     let mut children = node.into_children();
     let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
