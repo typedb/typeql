@@ -20,6 +20,7 @@ pub type Result<T = ()> = std::result::Result<T, Error>;
 pub struct LineColumn {
     pub line: u32,
     pub column: u32,
+    pub offset: usize,
 }
 
 impl Display for LineColumn {
@@ -36,6 +37,16 @@ pub struct Span {
 
 pub trait Spanned {
     fn span(&self) -> Option<Span>;
+}
+
+pub trait ExtractSpan {
+    fn extract(&self, span: Span) -> &str;
+}
+
+impl ExtractSpan for &str {
+    fn extract(&self, span: Span) -> &str {
+        &self[span.begin.offset..span.end.offset]
+    }
 }
 
 pub trait DisplaySpanned: Spanned {
