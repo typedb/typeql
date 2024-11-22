@@ -23,12 +23,11 @@ pub struct Function {
     span: Option<Span>,
     pub signature: Signature,
     pub block: FunctionBlock,
-    pub unparsed: String,
 }
 
 impl Function {
-    pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock, unparsed: String) -> Self {
-        Self { span, signature, block, unparsed }
+    pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock) -> Self {
+        Self { span, signature, block }
     }
 }
 
