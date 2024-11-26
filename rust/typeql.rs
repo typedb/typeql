@@ -11,6 +11,8 @@
 #![deny(unused_must_use)]
 #![allow(edition_2024_expr_fragment_specifier)]
 
+use std::collections::HashSet;
+use std::sync::OnceLock;
 pub use crate::{
     annotation::Annotation,
     common::{error::Error, identifier::Identifier, token, Result},
@@ -57,4 +59,11 @@ pub fn parse_definition_function(typeql_function: &str) -> Result<Function> {
 
 pub fn parse_definition_struct(typeql_struct: &str) -> Result<Struct> {
     visit_eof_definition_struct(typeql_struct.trim_end())
+}
+
+static RESERVED_KEYWORDS: OnceLock<HashSet<&'static str>> = OnceLock::new();
+pub fn is_reserved_keyword(word: &str) -> bool {
+    RESERVED_KEYWORDS.get_or_init(|| {
+        HashSet::from_iter(token::Keyword::NAMES.iter().copied())
+    }).contains(word)
 }

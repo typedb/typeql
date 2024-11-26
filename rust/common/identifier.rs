@@ -8,10 +8,7 @@ use std::{fmt, sync::OnceLock};
 
 use regex::{Regex, RegexBuilder};
 
-use crate::{
-    common::{Span, Spanned},
-    pretty::Pretty,
-};
+use crate::{common::{Span, Spanned}, is_reserved_keyword, pretty::Pretty};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Identifier {
@@ -25,6 +22,7 @@ impl Identifier {
     }
 
     pub fn as_str(&self) -> &str {
+        debug_assert!(!is_reserved_keyword(&self.ident));
         &self.ident
     }
 }
