@@ -20,32 +20,36 @@ pub type Result<T = ()> = std::result::Result<T, Error>;
 pub struct LineColumn {
     pub line: u32,
     pub column: u32,
-    pub offset: usize,
-}
-
-impl Display for LineColumn {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}", self.line, self.column)
-    }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Span {
-    pub begin: LineColumn,
-    pub end: LineColumn,
+    pub begin_offset: usize,
+    pub end_offset: usize,
 }
 
 pub trait Spanned {
     fn span(&self) -> Option<Span>;
 }
 
-pub trait ExtractSpan {
+pub trait Spannable {
     fn extract(&self, span: Span) -> &str;
+
+    fn line_col(&self, span: Span) -> Option<(LineColumn, LineColumn)>;
 }
 
-impl ExtractSpan for &str {
+impl Spannable for &str {
     fn extract(&self, span: Span) -> &str {
-        &self[span.begin.offset..span.end.offset]
+        &self[span.begin_offset..span.end_offset]
+    }
+
+    fn line_col(&self, span: Span) -> Option<(LineColumn, LineColumn)> {
+        let (begin_line, begin_col) = pest::Position::new(self, span.begin_offset)?.line_col();
+        let (end_line, end_col) = pest::Position::new(self, span.end_offset)?.line_col();
+        Some((
+            LineColumn { line: begin_line as u32, column: begin_col as u32 },
+            LineColumn { line: end_line as u32, column: end_col as u32 },
+        ))
     }
 }
 
@@ -57,7 +61,7 @@ impl<T: Spanned + Display> DisplaySpanned for T {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.span().is_some() {
             // TODO: experiment to see if including span end is helpful
-            write!(f, "Declaration at {}:\n{}", self.span().unwrap().begin, self)
+            write!(f, "Declaration at {}:\n{}", self.span().unwrap().begin_offset, self)
         } else {
             write!(f, "{}", self)
         }
@@ -67,6 +71,6 @@ impl<T: Spanned + Display> DisplaySpanned for T {
 impl Display for Span {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // TODO: test if writing the end as well looks better!
-        write!(f, "{}", self.begin)
+        write!(f, "{}", self.begin_offset)
     }
 }
