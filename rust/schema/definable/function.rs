@@ -49,8 +49,8 @@ impl fmt::Display for Function {
         if f.alternate() {
             return Pretty::fmt(self, 0, f);
         } else {
-            self.signature.fmt(f)?;
-            self.block.fmt(f)
+            std::fmt::Display::fmt(&self.signature, f)?;
+            std::fmt::Display::fmt(&self.block, f)
         }
     }
 }
@@ -74,7 +74,10 @@ impl Pretty for Signature {
         write!(f, "{}(", self.ident)?;
         if self.args.len() > 0 {
             Pretty::fmt(&self.args[0], indent_level, f)?;
-            self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {}: {}", arg.var, arg.type_))?;
+            self.args[1..self.args.len()].iter().try_for_each(|arg| {
+                f.write_str(", ")?;
+                Pretty::fmt(arg, indent_level, f)
+            })?;
         }
         write!(f, ") -> ")?;
         Pretty::fmt(&self.output, indent_level, f)?;
@@ -89,8 +92,8 @@ impl fmt::Display for Signature {
         } else {
             write!(f, "{}(", self.ident)?;
             if self.args.len() > 0 {
-                write!(f, ", {}: {}", self.args[0].var, self.args[0].type_)?;
-                self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {}: {}", arg.var, arg.type_))?;
+                write!(f, "{}", self.args[0])?;
+                self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {arg}"))?;
             }
             write!(f, ") -> {}", self.output)?;
             Ok(())
@@ -108,6 +111,13 @@ pub struct Argument {
 impl Argument {
     pub fn new(span: Option<Span>, var: Variable, type_: TypeRefAny) -> Self {
         Self { span, var, type_ }
+    }
+}
+
+impl Pretty for Argument {}
+impl fmt::Display for Argument {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.var, self.type_)
     }
 }
 
@@ -248,13 +258,13 @@ impl fmt::Display for ReturnStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ReturnStatement::Stream(return_stream) => {
-                write!(f, "{} {};", token::Keyword::Return, return_stream)
+                write!(f, "{} {}", token::Keyword::Return, return_stream)
             }
             ReturnStatement::Single(return_single) => {
-                write!(f, "{} {};", token::Keyword::Return, return_single)
+                write!(f, "{} {}", token::Keyword::Return, return_single)
             }
             ReturnStatement::Reduce(reduction) => {
-                write!(f, "{} {};", token::Keyword::Return, reduction)
+                write!(f, "{} {}", token::Keyword::Return, reduction)
             }
         }
     }

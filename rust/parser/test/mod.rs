@@ -13,6 +13,7 @@ mod builtin_functions;
 mod disjunctions;
 mod error;
 mod fetch;
+mod functions;
 mod group;
 mod group_aggregate;
 mod list;
