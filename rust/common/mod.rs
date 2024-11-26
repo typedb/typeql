@@ -55,7 +55,6 @@ impl Spannable for &str {
 
 impl Display for Span {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        // TODO: test if writing the end as well looks better!
-        write!(f, "{}", self.begin_offset)
+        write!(f, "begin-offset: {}, end-offset: {}", self.begin_offset, self.end_offset)
     }
 }
