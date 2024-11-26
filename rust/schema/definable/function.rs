@@ -5,7 +5,7 @@
  */
 
 use std::{
-    fmt::{self, Formatter, Write},
+    fmt::{self, Debug, Formatter, Write},
     ptr::write,
 };
 
@@ -46,10 +46,12 @@ impl Pretty for Function {
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // if f.alternate() {
-        //     return Pretty::fmt(self, 0, f);
-        // }
-        todo!()
+        if f.alternate() {
+            return Pretty::fmt(self, 0, f);
+        } else {
+            self.signature.fmt(f)?;
+            self.block.fmt(f)
+        }
     }
 }
 
@@ -70,7 +72,10 @@ impl Signature {
 impl Pretty for Signature {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}(", self.ident)?;
-        self.args.iter().try_for_each(|arg| write!(f, "{}: {}", arg.var, arg.type_))?;
+        if self.args.len() > 0 {
+            Pretty::fmt(&self.args[0], indent_level, f)?;
+            self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {}: {}", arg.var, arg.type_))?;
+        }
         write!(f, ") -> ")?;
         Pretty::fmt(&self.output, indent_level, f)?;
         Ok(())
@@ -83,7 +88,10 @@ impl fmt::Display for Signature {
             Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{}(", self.ident)?;
-            self.args.iter().try_for_each(|arg| write!(f, "{}: {}", arg.var, arg.type_))?;
+            if self.args.len() > 0 {
+                write!(f, ", {}: {}", self.args[0].var, self.args[0].type_)?;
+                self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {}: {}", arg.var, arg.type_))?;
+            }
             write!(f, ") -> {}", self.output)?;
             Ok(())
         }
@@ -154,11 +162,7 @@ impl Spanned for Stream {
     }
 }
 
-impl Pretty for Stream {
-    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
-    }
-}
+impl Pretty for Stream {}
 
 impl fmt::Display for Stream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -186,11 +190,7 @@ impl Spanned for Single {
     }
 }
 
-impl Pretty for Single {
-    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
-    }
-}
+impl Pretty for Single {}
 
 impl fmt::Display for Single {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
