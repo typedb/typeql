@@ -53,21 +53,6 @@ impl Spannable for &str {
     }
 }
 
-pub trait DisplaySpanned: Spanned {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result;
-}
-
-impl<T: Spanned + Display> DisplaySpanned for T {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.span().is_some() {
-            // TODO: experiment to see if including span end is helpful
-            write!(f, "Declaration at {}:\n{}", self.span().unwrap().begin_offset, self)
-        } else {
-            write!(f, "{}", self)
-        }
-    }
-}
-
 impl Display for Span {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // TODO: test if writing the end as well looks better!

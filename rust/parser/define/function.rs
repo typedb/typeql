@@ -25,12 +25,13 @@ use crate::{
 pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
     debug_assert_eq!(node.as_rule(), Rule::definition_function);
     let span = node.span();
+    let unparsed = node.as_span().as_str().to_owned();
     let mut children = node.into_children();
     children.skip_expected(Rule::FUN);
     let signature = visit_function_signature(children.consume_expected(Rule::function_signature));
     let block = visit_function_block(children.consume_expected(Rule::function_block));
     debug_assert_eq!(children.try_consume_any(), None);
-    Function::new(span, signature, block)
+    Function::new(span, signature, block, unparsed)
 }
 
 pub fn visit_function_block(node: Node<'_>) -> FunctionBlock {
