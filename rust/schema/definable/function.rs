@@ -4,7 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::fmt::{self, Formatter, Write};
+use std::{
+    fmt::{self, Debug, Formatter, Write},
+    ptr::write,
+};
 
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
@@ -20,11 +23,12 @@ pub struct Function {
     span: Option<Span>,
     pub signature: Signature,
     pub block: FunctionBlock,
+    pub unparsed: String,
 }
 
 impl Function {
-    pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock) -> Self {
-        Self { span, signature, block }
+    pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock, unparsed: String) -> Self {
+        Self { span, signature, block, unparsed }
     }
 }
 
@@ -42,10 +46,12 @@ impl Pretty for Function {
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // if f.alternate() {
-        //     return Pretty::fmt(self, 0, f);
-        // }
-        todo!()
+        if f.alternate() {
+            return Pretty::fmt(self, 0, f);
+        } else {
+            std::fmt::Display::fmt(&self.signature, f)?;
+            std::fmt::Display::fmt(&self.block, f)
+        }
     }
 }
 
@@ -66,7 +72,13 @@ impl Signature {
 impl Pretty for Signature {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}(", self.ident)?;
-        todo!("write args");
+        if self.args.len() > 0 {
+            Pretty::fmt(&self.args[0], indent_level, f)?;
+            self.args[1..self.args.len()].iter().try_for_each(|arg| {
+                f.write_str(", ")?;
+                Pretty::fmt(arg, indent_level, f)
+            })?;
+        }
         write!(f, ") -> ")?;
         Pretty::fmt(&self.output, indent_level, f)?;
         Ok(())
@@ -79,7 +91,10 @@ impl fmt::Display for Signature {
             Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{}(", self.ident)?;
-            todo!("write args");
+            if self.args.len() > 0 {
+                write!(f, "{}", self.args[0])?;
+                self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {arg}"))?;
+            }
             write!(f, ") -> {}", self.output)?;
             Ok(())
         }
@@ -96,6 +111,13 @@ pub struct Argument {
 impl Argument {
     pub fn new(span: Option<Span>, var: Variable, type_: TypeRefAny) -> Self {
         Self { span, var, type_ }
+    }
+}
+
+impl Pretty for Argument {}
+impl fmt::Display for Argument {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.var, self.type_)
     }
 }
 
@@ -150,15 +172,13 @@ impl Spanned for Stream {
     }
 }
 
-impl Pretty for Stream {
-    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
-    }
-}
+impl Pretty for Stream {}
 
 impl fmt::Display for Stream {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{{ ")?;
+        write_joined!(f, ", ", self.types)?;
+        write!(f, " }}")
     }
 }
 
@@ -180,15 +200,11 @@ impl Spanned for Single {
     }
 }
 
-impl Pretty for Single {
-    fn fmt(&self, _indent_level: usize, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
-    }
-}
+impl Pretty for Single {}
 
 impl fmt::Display for Single {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write_joined!(f, ", ", self.types)
     }
 }
 

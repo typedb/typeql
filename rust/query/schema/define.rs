@@ -41,7 +41,6 @@ impl Pretty for Define {
         for definable in &self.definables {
             writeln!(f)?;
             Pretty::fmt(definable, indent_level + 1, f)?;
-            f.write_char(';')?;
         }
         Ok(())
     }
