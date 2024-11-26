@@ -72,6 +72,7 @@ impl Pretty for Type {
             indent(indent_level, f)?;
             write!(f, "{}", cap)?;
         }
+        f.write_char(';')?;
         Ok(())
     }
 }

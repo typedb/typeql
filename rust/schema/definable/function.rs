@@ -258,13 +258,13 @@ impl fmt::Display for ReturnStatement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ReturnStatement::Stream(return_stream) => {
-                write!(f, "{} {}", token::Keyword::Return, return_stream)
+                write!(f, "{} {};", token::Keyword::Return, return_stream)
             }
             ReturnStatement::Single(return_single) => {
-                write!(f, "{} {}", token::Keyword::Return, return_single)
+                write!(f, "{} {};", token::Keyword::Return, return_single)
             }
             ReturnStatement::Reduce(reduction) => {
-                write!(f, "{} {}", token::Keyword::Return, reduction)
+                write!(f, "{} {};", token::Keyword::Return, reduction)
             }
         }
     }
