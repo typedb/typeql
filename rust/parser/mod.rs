@@ -16,7 +16,7 @@ use crate::{
     common::{
         error::{syntax_error, TypeQLError},
         identifier::Identifier,
-        token, LineColumn, Span, Spanned,
+        token, Span, Spanned,
     },
     parser::{pipeline::visit_query_pipeline_preambled, redefine::visit_query_redefine},
     query::{Query, SchemaQuery},
@@ -48,14 +48,9 @@ type ChildNodes<'a> = pest::iterators::Pairs<'a, Rule>;
 
 impl Spanned for Node<'_> {
     fn span(&self) -> Option<Span> {
-        let (begin_line, begin_col) = self.as_span().start_pos().line_col();
-        let (end_line, end_col) = self.as_span().end_pos().line_col();
         let begin_offset = self.as_span().start_pos().pos();
         let end_offset = self.as_span().end_pos().pos();
-        Some(Span {
-            begin: LineColumn { line: begin_line as u32, column: begin_col as u32, offset: begin_offset },
-            end: LineColumn { line: end_line as u32, column: end_col as u32, offset: end_offset },
-        })
+        Some(Span { begin_offset, end_offset })
     }
 }
 
