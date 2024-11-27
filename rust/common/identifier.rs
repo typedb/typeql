@@ -8,8 +8,11 @@ use std::{fmt, sync::OnceLock};
 
 use regex::{Regex, RegexBuilder};
 
-use crate::{common::{Span, Spanned}, is_reserved_keyword, pretty::Pretty};
-use crate::common::error::TypeQLError;
+use crate::{
+    common::{error::TypeQLError, Span, Spanned},
+    is_reserved_keyword,
+    pretty::Pretty,
+};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Identifier {

@@ -9,7 +9,7 @@ use std::{error::Error as StdError, fmt};
 use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
-use crate::{error_messages, Identifier, util::write_joined};
+use crate::{error_messages, util::write_joined, Identifier};
 
 #[macro_use]
 mod macros;
