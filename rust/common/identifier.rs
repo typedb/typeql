@@ -23,7 +23,7 @@ impl Identifier {
     }
 
     pub fn as_str_unreserved(&self) -> Result<&str, TypeQLError> {
-        if is_reserved_keyword(&self.ident) {
+        if !is_reserved_keyword(&self.ident) {
             Ok(&self.ident)
         } else {
             Err(TypeQLError::ReservedKeywordAsIdentifier { identifier: self.ident.to_owned() })
