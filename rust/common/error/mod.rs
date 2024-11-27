@@ -9,7 +9,7 @@ use std::{error::Error as StdError, fmt};
 use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
-use crate::{error_messages, util::write_joined};
+use crate::{error_messages, Identifier, util::write_joined};
 
 #[macro_use]
 mod macros;
@@ -83,7 +83,7 @@ error_messages! { TypeQLError
         5: "Attempting to parse a {variant} literal as {expected_variant}",
     InvalidStringEscape { escape: String, full_string: String } =
         6: "Encountered invalid escape sequence {escape:?} while parsing {full_string:?}.",
-    ReservedKeywordAsIdentifier { identifier: String } =
+    ReservedKeywordAsIdentifier { identifier: Identifier } =
         7: "A reserved keyword '{identifier}' was used as identifier.",
 /*
     MissingPatterns =

@@ -26,7 +26,7 @@ impl Identifier {
         if !is_reserved_keyword(&self.ident) {
             Ok(&self.ident)
         } else {
-            Err(TypeQLError::ReservedKeywordAsIdentifier { identifier: self.ident.to_owned() })
+            Err(TypeQLError::ReservedKeywordAsIdentifier { identifier: self.clone() })
         }
     }
 
