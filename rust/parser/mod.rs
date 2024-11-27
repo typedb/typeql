@@ -119,7 +119,6 @@ fn parse(rule: Rule, string: &str) -> Result<ChildNodes<'_>> {
     match result {
         Ok(nodes) => Ok(nodes),
         Err(error) => {
-            dbg!(&error);
             Err(syntax_error(string, error).into())
         }
     }
