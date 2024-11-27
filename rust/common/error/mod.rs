@@ -83,6 +83,8 @@ error_messages! { TypeQLError
         5: "Attempting to parse a {variant} literal as {expected_variant}",
     InvalidStringEscape { escape: String, full_string: String } =
         6: "Encountered invalid escape sequence {escape:?} while parsing {full_string:?}.",
+    ReservedKeywordAsIdentifier { identifier: String } =
+        7: "A reserved keyword '{identifier}' was used as identifier.",
 /*
     MissingPatterns =
         5: "The query has not been provided with any patterns.",

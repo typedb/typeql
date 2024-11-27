@@ -24,7 +24,7 @@ impl Variable {
     pub fn name(&self) -> Option<&str> {
         match self {
             Self::Anonymous { .. } => None,
-            Self::Named { ident, .. } => Some(ident.as_str()),
+            Self::Named { ident, .. } => Some(ident.as_str_unchecked()),
         }
     }
 }

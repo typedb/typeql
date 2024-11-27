@@ -9,6 +9,7 @@ use std::{fmt, sync::OnceLock};
 use regex::{Regex, RegexBuilder};
 
 use crate::{common::{Span, Spanned}, is_reserved_keyword, pretty::Pretty};
+use crate::common::error::TypeQLError;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Identifier {
@@ -21,8 +22,15 @@ impl Identifier {
         Self { span, ident }
     }
 
-    pub fn as_str(&self) -> &str {
-        debug_assert!(!is_reserved_keyword(&self.ident));
+    pub fn as_str_unreserved(&self) -> Result<&str, TypeQLError> {
+        if is_reserved_keyword(&self.ident) {
+            Ok(&self.ident)
+        } else {
+            Err(TypeQLError::ReservedKeywordAsIdentifier { identifier: self.ident.to_owned() })
+        }
+    }
+
+    pub fn as_str_unchecked(&self) -> &str {
         &self.ident
     }
 }
