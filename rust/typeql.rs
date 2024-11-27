@@ -13,6 +13,8 @@
 
 use std::{collections::HashSet, sync::OnceLock};
 
+use itertools::chain;
+
 pub use crate::{
     annotation::Annotation,
     common::{error::Error, identifier::Identifier, token, Result},
@@ -63,5 +65,11 @@ pub fn parse_definition_struct(typeql_struct: &str) -> Result<Struct> {
 
 static RESERVED_KEYWORDS: OnceLock<HashSet<&'static str>> = OnceLock::new();
 pub fn is_reserved_keyword(word: &str) -> bool {
-    RESERVED_KEYWORDS.get_or_init(|| HashSet::from_iter(token::Keyword::NAMES.iter().copied())).contains(word)
+    RESERVED_KEYWORDS
+        .get_or_init(|| {
+            chain!(token::Kind::NAMES, token::Keyword::NAMES, token::Order::NAMES, token::BooleanValue::NAMES,)
+                .map(|s| *s)
+                .collect::<HashSet<&'static str>>()
+        })
+        .contains(word)
 }

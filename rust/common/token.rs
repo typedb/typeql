@@ -217,3 +217,8 @@ string_enum! { Char
     SquareLeft = "[",
     SquareRight = "]",
 }
+
+string_enum! { BooleanValue
+    True = "true",
+    False = "false",
+}
