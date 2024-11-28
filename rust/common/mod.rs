@@ -22,40 +22,39 @@ pub struct LineColumn {
     pub column: u32,
 }
 
-impl Display for LineColumn {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}", self.line, self.column)
-    }
-}
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Span {
-    pub begin: LineColumn,
-    pub end: LineColumn,
+    pub begin_offset: usize,
+    pub end_offset: usize,
 }
 
 pub trait Spanned {
     fn span(&self) -> Option<Span>;
 }
 
-pub trait DisplaySpanned: Spanned {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result;
+pub trait Spannable {
+    fn extract(&self, span: Span) -> &str;
+
+    fn line_col(&self, span: Span) -> Option<(LineColumn, LineColumn)>;
 }
 
-impl<T: Spanned + Display> DisplaySpanned for T {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.span().is_some() {
-            // TODO: experiment to see if including span end is helpful
-            write!(f, "Declaration at {}:\n{}", self.span().unwrap().begin, self)
-        } else {
-            write!(f, "{}", self)
-        }
+impl Spannable for &str {
+    fn extract(&self, span: Span) -> &str {
+        &self[span.begin_offset..span.end_offset]
+    }
+
+    fn line_col(&self, span: Span) -> Option<(LineColumn, LineColumn)> {
+        let (begin_line, begin_col) = pest::Position::new(self, span.begin_offset)?.line_col();
+        let (end_line, end_col) = pest::Position::new(self, span.end_offset)?.line_col();
+        Some((
+            LineColumn { line: begin_line as u32, column: begin_col as u32 },
+            LineColumn { line: end_line as u32, column: end_col as u32 },
+        ))
     }
 }
 
 impl Display for Span {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        // TODO: test if writing the end as well looks better!
-        write!(f, "{}", self.begin)
+        write!(f, "begin-offset: {}, end-offset: {}", self.begin_offset, self.end_offset)
     }
 }

@@ -101,7 +101,7 @@ impl Operation {
 impl Spanned for Operation {
     fn span(&self) -> Option<Span> {
         if let (Some(left), Some(right)) = (self.left.span(), self.right.span()) {
-            Some(Span { begin: left.begin, end: right.end })
+            Some(Span { begin_offset: left.begin_offset, end_offset: right.end_offset })
         } else {
             None
         }

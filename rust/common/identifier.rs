@@ -9,7 +9,8 @@ use std::{fmt, sync::OnceLock};
 use regex::{Regex, RegexBuilder};
 
 use crate::{
-    common::{Span, Spanned},
+    common::{error::TypeQLError, Span, Spanned},
+    is_reserved_keyword,
     pretty::Pretty,
 };
 
@@ -24,7 +25,15 @@ impl Identifier {
         Self { span, ident }
     }
 
-    pub fn as_str(&self) -> &str {
+    pub fn as_str_unreserved(&self) -> Result<&str, TypeQLError> {
+        if !is_reserved_keyword(&self.ident) {
+            Ok(&self.ident)
+        } else {
+            Err(TypeQLError::ReservedKeywordAsIdentifier { identifier: self.clone() })
+        }
+    }
+
+    pub fn as_str_unchecked(&self) -> &str {
         &self.ident
     }
 }
