@@ -36,6 +36,7 @@ pub fn visit_statement_assignment(node: Node<'_>) -> Assignment {
     debug_assert_eq!(node.as_rule(), Rule::statement_assignment);
     let span = node.span();
     let mut children = node.into_children();
+    children.skip_expected(Rule::LET);
     let lhs = visit_assignment_left(children.consume_expected(Rule::assignment_left));
     children.skip_expected(Rule::ASSIGN);
     let rhs = visit_expression(children.consume_expected(Rule::expression));
@@ -108,6 +109,7 @@ pub fn visit_statement_in(node: Node<'_>) -> InIterable {
     debug_assert_eq!(node.as_rule(), Rule::statement_in);
     let span = node.span();
     let mut children = node.into_children();
+    children.skip_expected(Rule::LET);
     let lhs = visit_vars_assignment(children.consume_expected(Rule::vars_assignment));
     children.skip_expected(Rule::IN);
     let child = children.consume_any();

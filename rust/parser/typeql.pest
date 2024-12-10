@@ -131,9 +131,9 @@ statement_single = { statement_is | statement_comparison | statement_assignment 
 
 statement_is = { var ~ IS ~ var }
 statement_comparison = { expression_value ~ comparison }
-statement_assignment = { assignment_left ~ ASSIGN ~ expression }
+statement_assignment = { LET ~ assignment_left ~ ASSIGN ~ expression }
 assignment_left = { vars_assignment | struct_destructor }
-statement_in = { vars_assignment ~ IN ~ ( expression_function | expression_list ) }
+statement_in = { LET ~ vars_assignment ~ IN ~ ( expression_function | expression_list ) }
 
 vars_assignment = { var_assignment ~ ( COMMA ~ var_assignment )* ~ COMMA? }
 var_assignment = { var_optional | var }
@@ -502,6 +502,7 @@ CONTAINS = @{ "contains" ~ WB }
 
 // ASSIGNMENT AND EXPRESSION KEYWORDS
 
+LET = @{ "let" }
 ASSIGN = @{ "=" }
 IN = @{ "in" ~ WB }
 
