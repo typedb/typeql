@@ -180,6 +180,8 @@ impl fmt::Display for AttributeComparisonStatement {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Constraint {
+    IsaRelation(Isa, Relation),
+    IsaAttribute(Isa, Expression),
     Isa(Isa),
     Iid(Iid),
     Has(Has),
@@ -193,6 +195,12 @@ impl Pretty for Constraint {
             Self::Iid(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Has(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Links(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::IsaRelation(isa, relation) => {
+                todo!()
+            },
+            Self::IsaAttribute(isa, expr) => {
+                todo!()
+            }
         }
     }
 }
@@ -204,6 +212,8 @@ impl fmt::Display for Constraint {
             Self::Iid(inner) => fmt::Display::fmt(inner, f),
             Self::Has(inner) => fmt::Display::fmt(inner, f),
             Self::Links(inner) => fmt::Display::fmt(inner, f),
+            Self::IsaRelation(isa, relation) => write!(f, "{} {} {}", token::Keyword::Isa, isa.type_, relation),
+            Self::IsaAttribute(isa, expr) => write!(f, "{} {} {}", token::Keyword::Isa, isa.type_, expr),
         }
     }
 }

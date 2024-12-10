@@ -104,8 +104,12 @@ statement_thing_var = { var ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constr
                       | var ~ comparison ~ isa_constraint
                       }
 
-thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
+thing_constraint = { isa_relation_constraint | isa_attribute_constraint |  isa_constraint
+                   | iid_constraint | has_constraint | links_constraint
+                   }
 
+isa_relation_constraint = { ISA_ ~ type_ref ~ relation }
+isa_attribute_constraint = { ISA_ ~ type_ref ~ expression }
 isa_constraint = { ISA_ ~ type_ref }
 iid_constraint = { IID ~ iid_value }
 has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )

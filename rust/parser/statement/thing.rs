@@ -24,6 +24,7 @@ use crate::{
     },
     type_::TypeRefAny,
 };
+use crate::parser::expression::visit_expression;
 
 pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement_thing);
@@ -79,12 +80,42 @@ fn visit_thing_constraint(node: Node<'_>) -> Constraint {
     debug_assert_eq!(node.as_rule(), Rule::thing_constraint);
     let child = node.into_child();
     match child.as_rule() {
+        Rule::isa_relation_constraint => {
+            let (isa, relation) = visit_isa_relation_constraint(child);
+            Constraint::IsaRelation(isa, relation)
+        },
+        Rule::isa_attribute_constraint => {
+            let (isa, expression) = visit_isa_attribute_constraint(child);
+            Constraint::IsaAttribute(isa, expression)
+        },
         Rule::isa_constraint => Constraint::Isa(visit_isa_constraint(child)),
         Rule::iid_constraint => Constraint::Iid(visit_iid_constraint(child)),
         Rule::has_constraint => Constraint::Has(visit_has_constraint(child)),
         Rule::links_constraint => Constraint::Links(visit_links_constraint(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
+}
+
+fn visit_isa_relation_constraint(node: Node<'_>) -> (Isa, Relation) {
+    debug_assert_eq!(node.as_rule(), Rule::isa_relation_constraint);
+    let span = node.span();
+    let mut children = node.into_children();
+    let kind = visit_isa_token(children.consume_expected(Rule::ISA_));
+    let type_ = visit_type_ref(children.consume_expected(Rule::type_ref));
+    let relation = visit_relation(children.consume_expected(Rule::relation));
+    debug_assert_eq!(children.try_consume_any(), None);
+    (Isa::new(span, kind, type_), relation)
+}
+
+fn visit_isa_attribute_constraint(node: Node<'_>) -> (Isa, Expression) {
+    debug_assert_eq!(node.as_rule(), Rule::isa_attribute_constraint);
+    let span = node.span();
+    let mut children = node.into_children();
+    let kind = visit_isa_token(children.consume_expected(Rule::ISA_));
+    let type_ = visit_type_ref(children.consume_expected(Rule::type_ref));
+    let relation = visit_expression(children.consume_expected(Rule::expression));
+    debug_assert_eq!(children.try_consume_any(), None);
+    (Isa::new(span, kind, type_), relation)
 }
 
 fn visit_isa_constraint(node: Node<'_>) -> Isa {
