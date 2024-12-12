@@ -154,7 +154,7 @@ impl Pretty for Assignment {}
 
 impl fmt::Display for Assignment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} = {}", self.lhs, self.rhs)
+        write!(f, "let {} = {}", self.lhs, self.rhs)
     }
 }
 

@@ -12,7 +12,7 @@ fn test_or_query() {
     let query = r#"match
 $x isa movie;
 {
-    $y == "drama" isa genre;
+    $y isa genre == "drama";
     ($x, $y);
 } or {
     $x == "The Muppets";

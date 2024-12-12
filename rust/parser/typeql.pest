@@ -69,7 +69,7 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_type | statement_thing_var | statement_single | statement_relation_anonymous }
+statement = { statement_single | statement_type | statement_thing_var | statement_relation_anonymous }
 
 // TYPE STATEMENTS =============================================================
 
@@ -98,19 +98,13 @@ statement_thing = { statement_thing_var | statement_relation_anonymous }
 statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* ~ COMMA? }
 
 statement_thing_var = { var ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?
-                      | var ~ ( value_literal | expression_struct ) ~ isa_constraint
                       // TODO: need to allow $x $name_value isa name;
                       // option: $x isa name($value), extend to literals as well
-                      | var ~ comparison ~ isa_constraint
+                      | !reserved ~ type_ref ~ relation
                       }
 
-thing_constraint = { isa_relation_constraint | isa_attribute_constraint |  isa_constraint
-                   | iid_constraint | has_constraint | links_constraint
-                   }
-
-isa_relation_constraint = { ISA_ ~ type_ref ~ relation }
-isa_attribute_constraint = { ISA_ ~ type_ref ~ expression }
-isa_constraint = { ISA_ ~ type_ref }
+thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
+isa_constraint = { ISA_ ~ type_ref ~ (relation | value_literal | expression | expression_struct | comparison)? }
 iid_constraint = { IID ~ iid_value }
 has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
                  | HAS ~ type_ref ~ ( comparison | expression_value | var )

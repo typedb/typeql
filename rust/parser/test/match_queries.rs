@@ -42,7 +42,7 @@ $x isa person,
 #[test]
 fn test_relation_query() {
     let query = r#"match
-$brando "Marl B" isa name;
+$brando isa name "Marl B";
 (actor: $brando, $char, production-with-cast: $prod);
 select $char, $prod;"#;
 
@@ -155,7 +155,7 @@ fn test_predicate_query_4() {
     let query = r#"match
 $x has age $y;
 $y >= $z;
-$z 18 isa age;"#;
+$z isa age 18;"#;
 
     let parsed = parse_query(query).unwrap();
     // let expected = ();
@@ -367,8 +367,8 @@ $x isa movie,
 #[test]
 fn test_parsing_attribute_query_by_value_variable() {
     let query = r#"match
-$x = 5;
-$a == $x isa age;"#;
+let $x = 5;
+$a isa age == $x;"#;
 
     let parsed = parse_query(query).unwrap();
     // let expected = match_!(var("x").assign(5), var("a").equals(var("x")).isa("age"));
@@ -379,7 +379,7 @@ $a == $x isa age;"#;
 #[test]
 fn test_parsing_precedence_operators() {
     let query = r#"match
-$res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
+let $res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
 
     let parsed = parse_query(query).unwrap();
     // let expected = match_!(var("res").assign(
@@ -391,7 +391,7 @@ $res = $a / $b * $c + $d ^ $e ^ $f / $g;"#;
 #[test]
 fn test_parsing_precedence_function_and_parentheses() {
     let query = r#"match
-$res = $a + (round($b + $c) + $d) * $e;"#;
+let $res = $a + (round($b + $c) + $d) * $e;"#;
 
     let parsed = parse_query(query).unwrap();
     // let expected =

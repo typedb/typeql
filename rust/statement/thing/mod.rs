@@ -71,7 +71,8 @@ impl fmt::Display for Thing {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Head {
     Variable(Variable),
-    Relation(Relation),
+    Relation(Relation), // TODO: DEPRECATE
+    Headless,
 }
 
 impl Pretty for Head {
@@ -79,6 +80,7 @@ impl Pretty for Head {
         match self {
             Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Relation(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Headless => Ok(()),
         }
     }
 }
@@ -88,6 +90,7 @@ impl fmt::Display for Head {
         match self {
             Self::Variable(inner) => fmt::Display::fmt(inner, f),
             Self::Relation(inner) => fmt::Display::fmt(inner, f),
+            Self::Headless => Ok(()),
         }
     }
 }
@@ -180,8 +183,6 @@ impl fmt::Display for AttributeComparisonStatement {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Constraint {
-    IsaRelation(Isa, Relation),
-    IsaAttribute(Isa, Expression),
     Isa(Isa),
     Iid(Iid),
     Has(Has),
@@ -195,12 +196,6 @@ impl Pretty for Constraint {
             Self::Iid(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Has(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Links(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::IsaRelation(isa, relation) => {
-                todo!()
-            },
-            Self::IsaAttribute(isa, expr) => {
-                todo!()
-            }
         }
     }
 }
@@ -212,8 +207,6 @@ impl fmt::Display for Constraint {
             Self::Iid(inner) => fmt::Display::fmt(inner, f),
             Self::Has(inner) => fmt::Display::fmt(inner, f),
             Self::Links(inner) => fmt::Display::fmt(inner, f),
-            Self::IsaRelation(isa, relation) => write!(f, "{} {} {}", token::Keyword::Isa, isa.type_, relation),
-            Self::IsaAttribute(isa, expr) => write!(f, "{} {} {}", token::Keyword::Isa, isa.type_, expr),
         }
     }
 }

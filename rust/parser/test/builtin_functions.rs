@@ -12,9 +12,9 @@ fn test_function_min() {
     let query = r#"match
 $x isa commodity,
     has price $p;
-(commodity: $x, qty: $q) isa order;
-$net = $p * $q;
-$gross = min($net * 1.21, $net + 100.0);"#;
+$oder isa order (commodity: $x, qty: $q);
+let $net = $p * $q;
+let $gross = min($net * 1.21, $net + 100.0);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
     //         var("x").isa("commodity").has(("price", cvar("p"))),
@@ -30,9 +30,9 @@ fn test_function_max() {
     let query = r#"match
 $x isa commodity,
     has price $p;
-(commodity: $x, qty: $q) isa order;
-$net = $p * $q;
-$gross = max($net * 1.21, $net + 100.0);"#;
+$order isa order (commodity: $x, qty: $q);
+let $net = $p * $q;
+let $gross = max($net * 1.21, $net + 100.0);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
     //         var("x").isa("commodity").has(("price", cvar("p"))),
@@ -48,9 +48,9 @@ fn test_function_abs() {
     let query = r#"match
 $x isa commodity,
     has price $p;
-(commodity: $x, qty: $q) isa order;
-$net = $p * $q;
-$value = abs($net * 1.21);"#;
+$order isa order (commodity: $x, qty: $q);
+let $net = $p * $q;
+let $value = abs($net * 1.21);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
     //         var("x").isa("commodity").has(("price", cvar("p"))),
@@ -67,8 +67,8 @@ fn test_function_ceil() {
 $x isa commodity,
     has price $p;
 (commodity: $x, qty: $q) isa order;
-$net = $p * $q;
-$value = ceil($net * 1.21);"#;
+let $net = $p * $q;
+let $value = ceil($net * 1.21);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
     //         var("x").isa("commodity").has(("price", cvar("p"))),
@@ -84,9 +84,9 @@ fn test_function_floor() {
     let query = r#"match
 $x isa commodity,
     has price $p;
-(commodity: $x, qty: $q) isa order;
-$net = $p * $q;
-$value = floor($net * 1.21);"#;
+$order isa order (commodity: $x, qty: $q);
+let $net = $p * $q;
+let $value = floor($net * 1.21);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
     //         var("x").isa("commodity").has(("price", cvar("p"))),
@@ -102,9 +102,9 @@ fn test_function_round() {
     let query = r#"match
 $x isa commodity,
     has price $p;
-(commodity: $x, qty: $q) isa order;
-$net = $p * $q;
-$value = round($net * 1.21);"#;
+$order isa order (commodity: $x, qty: $q);
+let $net = $p * $q;
+let $value = round($net * 1.21);"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
     //         var("x").isa("commodity").has(("price", cvar("p"))),
