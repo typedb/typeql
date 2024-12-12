@@ -57,6 +57,23 @@ select $char, $prod;"#;
 }
 
 #[test]
+fn test_labelled_relation() {
+    let query = r#"match
+$brando isa name "Marl B";
+casting (actor: $brando, $char, production-with-cast: $prod);
+select $char, $prod;"#;
+
+    let parsed = parse_query(query).unwrap();
+    // let expected = match_!(
+    // var("brando").equals("Marl B").isa("name"),
+    // rel(("actor", "brando")).links("char").links(("production-with-cast", "prod")),
+    // )
+    // .get_fixed([var("char"), var("prod")]);
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
 fn test_role_type_scoped_globally() {
     let query = r#"match
 $m relates spouse;"#;

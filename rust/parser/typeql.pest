@@ -69,7 +69,7 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_single | statement_type | statement_thing_var | statement_relation_anonymous }
+statement = { statement_single | statement_type | statement_thing }
 
 // TYPE STATEMENTS =============================================================
 
@@ -93,15 +93,8 @@ relates_constraint = { RELATES ~ type_ref_list
 plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
-
-statement_thing = { statement_thing_var | statement_relation_anonymous }
-statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* ~ COMMA? }
-
-statement_thing_var = { var ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?
-                      // TODO: need to allow $x $name_value isa name;
-                      // option: $x isa name($value), extend to literals as well
-                      | !reserved ~ type_ref ~ relation
-                      }
+statement_thing = { (var | statement_relation_anonymous) ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA? }
+statement_relation_anonymous = { relation } //{ (!reserved ~ type_ref?) ~ relation }
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
 isa_constraint = { ISA_ ~ type_ref ~ (relation | value_literal | expression | expression_struct | comparison)? }

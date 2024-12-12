@@ -16,6 +16,7 @@ use crate::{
     util::write_joined,
     value::Literal,
     variable::Variable,
+    TypeRef,
 };
 
 pub mod isa;
@@ -71,16 +72,15 @@ impl fmt::Display for Thing {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Head {
     Variable(Variable),
-    Relation(Relation), // TODO: DEPRECATE
-    Headless,
+    Relation(Option<TypeRef>, Relation), // TODO: DEPRECATE
 }
 
 impl Pretty for Head {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::Relation(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::Headless => Ok(()),
+            Self::Relation(Some(type_ref), relation) => write!(f, "{} {}", type_ref, relation),
+            Self::Relation(None, relation) => Pretty::fmt(relation, indent_level, f),
         }
     }
 }
@@ -89,8 +89,8 @@ impl fmt::Display for Head {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variable(inner) => fmt::Display::fmt(inner, f),
-            Self::Relation(inner) => fmt::Display::fmt(inner, f),
-            Self::Headless => Ok(()),
+            Self::Relation(Some(type_ref), relation) => write!(f, "{} {}", type_ref, relation),
+            Self::Relation(None, inner) => fmt::Display::fmt(inner, f),
         }
     }
 }

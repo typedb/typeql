@@ -22,46 +22,37 @@ use crate::{
         Statement,
     },
     type_::TypeRefAny,
+    TypeRef,
 };
 
 pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement_thing);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::statement_thing_var => visit_statement_thing_var(child),
-        Rule::statement_relation_anonymous => visit_statement_relation_anonymous(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
-}
-
-pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
-    debug_assert_eq!(node.as_rule(), Rule::statement_thing_var);
     let span = node.span();
     let mut children = node.into_children();
     let child = children.consume_any();
+    let mut constraints = Vec::new();
     match child.as_rule() {
         Rule::var => {
             let var = visit_var(child);
-            Statement::Thing(Thing::new(span, Head::Variable(var), children.map(visit_thing_constraint).collect()))
+            constraints.extend(children.map(visit_thing_constraint));
+            Statement::Thing(Thing::new(span, Head::Variable(var), constraints))
         }
-        Rule::type_ref => {
-            let type_ = visit_type_ref(child);
-            let relation = visit_relation(children.consume_expected(Rule::relation));
-            let instance_constraint = Some(IsaInstanceConstraint::Relation(relation));
-            let constraint = Constraint::Isa(Isa::new(span, IsaKind::Subtype, type_, instance_constraint));
-            Statement::Thing(Thing::new(span, Head::Headless, vec![constraint]))
+        Rule::statement_relation_anonymous => {
+            let (type_ref_opt, relation) = visit_statement_relation_anonymous(child);
+            constraints.extend(children.map(visit_thing_constraint));
+            Statement::Thing(Thing::new(span, Head::Relation(type_ref_opt, relation), constraints))
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-pub(super) fn visit_statement_relation_anonymous(node: Node<'_>) -> Statement {
+pub(super) fn visit_statement_relation_anonymous(node: Node<'_>) -> (Option<TypeRef>, Relation) {
     debug_assert_eq!(node.as_rule(), Rule::statement_relation_anonymous);
     let span = node.span();
     let mut children = node.into_children();
-    let head = Head::Relation(visit_relation(children.consume_expected(Rule::relation)));
-    let constraints = children.map(visit_thing_constraint).collect();
-    Statement::Thing(Thing::new(span, head, constraints))
+    let type_ = children.try_consume_expected(Rule::type_ref).map(visit_type_ref);
+    let relation = visit_relation(children.consume_expected(Rule::relation));
+    (type_, relation)
 }
 
 fn visit_thing_constraint(node: Node<'_>) -> Constraint {
