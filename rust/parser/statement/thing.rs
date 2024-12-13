@@ -30,16 +30,21 @@ pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
     let span = node.span();
     let mut children = node.into_children();
     let child = children.consume_any();
-    let mut constraints = Vec::new();
     match child.as_rule() {
         Rule::var => {
             let var = visit_var(child);
-            constraints.extend(children.map(visit_thing_constraint));
+            let constraints = visit_thing_constraint_list(children.consume_expected(Rule::thing_constraint_list));
             Statement::Thing(Thing::new(span, Head::Variable(var), constraints))
         }
         Rule::statement_relation_anonymous => {
             let (type_ref_opt, relation) = visit_statement_relation_anonymous(child);
-            constraints.extend(children.map(visit_thing_constraint));
+            let constraints = if let Some(constraint_list) = children.try_consume_expected(Rule::thing_constraint_list)
+            {
+                visit_thing_constraint_list(constraint_list)
+            } else {
+                debug_assert_eq!(children.try_consume_any(), None);
+                vec![]
+            };
             Statement::Thing(Thing::new(span, Head::Relation(type_ref_opt, relation), constraints))
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
@@ -53,6 +58,12 @@ pub(super) fn visit_statement_relation_anonymous(node: Node<'_>) -> (Option<Type
     let type_ = children.try_consume_expected(Rule::type_ref).map(visit_type_ref);
     let relation = visit_relation(children.consume_expected(Rule::relation));
     (type_, relation)
+}
+
+fn visit_thing_constraint_list(node: Node<'_>) -> Vec<Constraint> {
+    debug_assert_eq!(node.as_rule(), Rule::thing_constraint_list);
+    let children = node.into_children();
+    children.map(visit_thing_constraint).collect()
 }
 
 fn visit_thing_constraint(node: Node<'_>) -> Constraint {

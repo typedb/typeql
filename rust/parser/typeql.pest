@@ -93,8 +93,11 @@ relates_constraint = { RELATES ~ type_ref_list
 plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
-statement_thing = { (var | statement_relation_anonymous) ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?}
+statement_thing = { var ~ COMMA? ~ thing_constraint_list
+                  | statement_relation_anonymous ~ (COMMA? ~ thing_constraint_list)?
+                  }
 statement_relation_anonymous = { (!reserved ~ type_ref?) ~ relation }
+thing_constraint_list = {thing_constraint ~ (COMMA ~ thing_constraint)* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
 isa_constraint = { ISA_ ~ type_ref ~ (relation | value_literal | expression | expression_struct | comparison)? }
