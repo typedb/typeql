@@ -72,7 +72,7 @@ impl fmt::Display for Thing {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Head {
     Variable(Variable),
-    Relation(Option<TypeRef>, Relation), // TODO: DEPRECATE
+    Relation(Option<TypeRef>, Relation),
 }
 
 impl Pretty for Head {
