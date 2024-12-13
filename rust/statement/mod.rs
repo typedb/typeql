@@ -6,10 +6,7 @@
 
 use std::{collections::HashMap, fmt};
 
-use self::{
-    comparison::ComparisonStatement,
-    thing::{AttributeComparisonStatement, AttributeValueStatement},
-};
+use self::comparison::ComparisonStatement;
 pub use self::{thing::Thing, type_::Type};
 use crate::{
     common::{identifier::Identifier, token, Span},
@@ -165,8 +162,6 @@ pub enum Statement {
     Comparison(ComparisonStatement),
     Assignment(Assignment),
     Thing(Thing),
-    AttributeValue(AttributeValueStatement),
-    AttributeComparison(AttributeComparisonStatement),
     Type(Type),
 }
 
@@ -178,8 +173,6 @@ impl Pretty for Statement {
             Statement::Comparison(inner) => Pretty::fmt(inner, indent_level, f),
             Statement::Assignment(inner) => Pretty::fmt(inner, indent_level, f),
             Statement::Thing(inner) => Pretty::fmt(inner, indent_level, f),
-            Statement::AttributeValue(inner) => Pretty::fmt(inner, indent_level, f),
-            Statement::AttributeComparison(inner) => Pretty::fmt(inner, indent_level, f),
             Statement::Type(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
@@ -193,8 +186,6 @@ impl fmt::Display for Statement {
             Statement::Comparison(inner) => fmt::Display::fmt(inner, f),
             Statement::Assignment(inner) => fmt::Display::fmt(inner, f),
             Statement::Thing(inner) => fmt::Display::fmt(inner, f),
-            Statement::AttributeValue(inner) => fmt::Display::fmt(inner, f),
-            Statement::AttributeComparison(inner) => fmt::Display::fmt(inner, f),
             Statement::Type(inner) => fmt::Display::fmt(inner, f),
         }
     }
