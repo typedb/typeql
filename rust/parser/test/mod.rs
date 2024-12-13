@@ -22,6 +22,7 @@ mod modifiers;
 mod nonquery;
 mod regex;
 mod schema_queries;
+mod sugar;
 mod write_queries;
 
 macro_rules! assert_valid_eq_repr {
