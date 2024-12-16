@@ -173,7 +173,7 @@ string_enum! { ValueType
     Decimal = "decimal",
     Double = "double",
     Duration = "duration",
-    Long = "long",
+    Integer = "integer",
     String = "string",
 }
 

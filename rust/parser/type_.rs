@@ -135,7 +135,7 @@ pub(super) fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
         Rule::DECIMAL => token::ValueType::Decimal,
         Rule::DOUBLE => token::ValueType::Double,
         Rule::DURATION => token::ValueType::Duration,
-        Rule::LONG => token::ValueType::Long,
+        Rule::INTEGER => token::ValueType::Integer,
         Rule::STRING => token::ValueType::String,
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };

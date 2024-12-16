@@ -66,12 +66,12 @@ fn tmp() {
     //   limit 10;
     //   return { $name, $age, $dob };
 
-    // fun test_single_1($x: person) -> long:
+    // fun test_single_1($x: person) -> integer:
     //   match
     //     $x isa person;
     //   return count($x);
 
-    // fun test_single_many($x: person) -> long, long:
+    // fun test_single_many($x: person) -> integer, integer:
     //   match
     //     $x isa person, has age $a;
     //   return count($x), sum($a);
@@ -83,7 +83,7 @@ fn tmp() {
     //     $y in get_all_dob($x);
     //   return { $x, $age, $y };
 
-    // fun test_single_optional($x: person) -> name?, long, double?:
+    // fun test_single_optional($x: person) -> name?, integer, double?:
     //   match
     //     $x isa person, has age $age;
     //     try { $one_name = get_a_name($x); };
@@ -105,7 +105,7 @@ fn tmp() {
     // $x = 10 + 11;
 
     // person sub attribute @abstract,
-    //   value long @values(1,2,3);
+    //   value integer @values(1,2,3);
 
     // $person sub attribute @abstract;
     // $person sub $parent, value string @regex("abc");

@@ -116,9 +116,9 @@ entity abstract-type @abstract;"#;
 #[test]
 fn test_define_value_type_query() {
     let query = r#"define
-attribute my-type value long;"#;
+attribute my-type value integer;"#;
     let parsed = parse_query(query).unwrap();
-    // let expected = define!(type_("my-type").sub("attribute").value(ValueType::Long));
+    // let expected = define!(type_("my-type").sub("attribute").value(ValueType::Integer));
     assert_valid_eq_repr!(expected, parsed, query);
 }
 

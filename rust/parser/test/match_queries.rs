@@ -363,7 +363,7 @@ $x has release-date 1000-11-12T13:14:15.0001234567;"#;
 }
 
 #[test]
-fn test_parsing_long_predicate_query() {
+fn test_parsing_integer_predicate_query() {
     let query = r#"match
 $x isa movie,
     has tmdb-vote-count <= 400;"#;

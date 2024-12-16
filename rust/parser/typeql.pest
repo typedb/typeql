@@ -314,7 +314,7 @@ value_type = { value_type_primitive | label }
 value_type_optional = { value_type ~ QUESTION }
 value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
-value_type_primitive = { BOOLEAN | LONG | DOUBLE | DECIMAL
+value_type_primitive = { BOOLEAN | INTEGER | DOUBLE | DECIMAL
                        | DATETIME_TZ | DATETIME | DATE | DURATION
                        | STRING
                        }
@@ -375,7 +375,7 @@ unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
              | CHECK | FIRST
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
              | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
-             | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
+             | BOOLEAN | INTEGER | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
              }
 
 // QUERY COMMAND KEYWORDS
@@ -530,7 +530,7 @@ LIST = @{ "list" ~ WB }
 // VALUE TYPE KEYWORDS
 
 BOOLEAN = @{ "boolean" ~ WB }
-LONG = @{ "long" ~ WB }
+INTEGER = @{ "integer" ~ WB }
 DOUBLE = @{ "double" ~ WB }
 DECIMAL = @{ "decimal" ~ WB }
 
