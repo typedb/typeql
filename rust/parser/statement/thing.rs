@@ -36,8 +36,8 @@ pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
             let constraints = visit_thing_constraint_list(children.consume_expected(Rule::thing_constraint_list));
             Statement::Thing(Thing::new(span, Head::Variable(var), constraints))
         }
-        Rule::statement_relation_anonymous => {
-            let (type_ref_opt, relation) = visit_statement_relation_anonymous(child);
+        Rule::thing_relation_anonymous => {
+            let (type_ref_opt, relation) = visit_thing_relation_anonymous(child);
             let constraints = if let Some(constraint_list) = children.try_consume_expected(Rule::thing_constraint_list)
             {
                 visit_thing_constraint_list(constraint_list)
@@ -51,8 +51,8 @@ pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
     }
 }
 
-pub(super) fn visit_statement_relation_anonymous(node: Node<'_>) -> (Option<TypeRef>, Relation) {
-    debug_assert_eq!(node.as_rule(), Rule::statement_relation_anonymous);
+pub(super) fn visit_thing_relation_anonymous(node: Node<'_>) -> (Option<TypeRef>, Relation) {
+    debug_assert_eq!(node.as_rule(), Rule::thing_relation_anonymous);
     let span = node.span();
     let mut children = node.into_children();
     let type_ = children.try_consume_expected(Rule::type_ref).map(visit_type_ref);
