@@ -8,7 +8,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     expression::Expression,
     parser::{
-        expression::{visit_expression_list, visit_expression_struct, visit_expression_value},
+        expression::{visit_expression, visit_expression_list, visit_expression_struct, visit_expression_value},
         literal::visit_value_literal,
         statement::visit_comparison,
         type_::{visit_type_ref, visit_type_ref_list},
@@ -16,63 +16,54 @@ use crate::{
     },
     statement::{
         thing::{
-            isa::{Isa, IsaKind},
-            AttributeComparisonStatement, AttributeValueStatement, Constraint, Has, HasValue, Head, Iid, Links,
-            Relation, RolePlayer, Thing,
+            isa::{Isa, IsaInstanceConstraint, IsaKind},
+            Constraint, Has, HasValue, Head, Iid, Links, Relation, RolePlayer, Thing,
         },
         Statement,
     },
     type_::TypeRefAny,
+    TypeRef,
 };
 
 pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement_thing);
-    let child = node.into_child();
+    let span = node.span();
+    let mut children = node.into_children();
+    let child = children.consume_any();
     match child.as_rule() {
-        Rule::statement_thing_var => visit_statement_thing_var(child),
-        Rule::statement_relation_anonymous => visit_statement_relation_anonymous(child),
+        Rule::var => {
+            let var = visit_var(child);
+            let constraints = visit_thing_constraint_list(children.consume_expected(Rule::thing_constraint_list));
+            Statement::Thing(Thing::new(span, Head::Variable(var), constraints))
+        }
+        Rule::thing_relation_anonymous => {
+            let (type_ref_opt, relation) = visit_thing_relation_anonymous(child);
+            let constraints = if let Some(constraint_list) = children.try_consume_expected(Rule::thing_constraint_list)
+            {
+                visit_thing_constraint_list(constraint_list)
+            } else {
+                debug_assert_eq!(children.try_consume_any(), None);
+                vec![]
+            };
+            Statement::Thing(Thing::new(span, Head::Relation(type_ref_opt, relation), constraints))
+        }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-pub(super) fn visit_statement_thing_var(node: Node<'_>) -> Statement {
-    debug_assert_eq!(node.as_rule(), Rule::statement_thing_var);
+pub(super) fn visit_thing_relation_anonymous(node: Node<'_>) -> (Option<TypeRef>, Relation) {
+    debug_assert_eq!(node.as_rule(), Rule::thing_relation_anonymous);
     let span = node.span();
     let mut children = node.into_children();
-    let var = visit_var(children.consume_expected(Rule::var));
-    match children.peek_rule().unwrap() {
-        Rule::thing_constraint => {
-            Statement::Thing(Thing::new(span, Head::Variable(var), children.map(visit_thing_constraint).collect()))
-        }
-        Rule::value_literal => {
-            let value = visit_value_literal(children.consume_expected(Rule::value_literal));
-            let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
-            debug_assert_eq!(children.try_consume_any(), None);
-            Statement::AttributeValue(AttributeValueStatement::new(span, var, value, isa))
-        }
-        Rule::expression_struct => {
-            let value = visit_expression_struct(children.consume_expected(Rule::expression_struct));
-            let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
-            debug_assert_eq!(children.try_consume_any(), None);
-            Statement::AttributeValue(AttributeValueStatement::new(span, var, value, isa))
-        }
-        Rule::comparison => {
-            let comparison = visit_comparison(children.consume_expected(Rule::comparison));
-            let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
-            debug_assert_eq!(children.try_consume_any(), None);
-            Statement::AttributeComparison(AttributeComparisonStatement::new(span, var, comparison, isa))
-        }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
-    }
+    let type_ = children.try_consume_expected(Rule::type_ref).map(visit_type_ref);
+    let relation = visit_relation(children.consume_expected(Rule::relation));
+    (type_, relation)
 }
 
-pub(super) fn visit_statement_relation_anonymous(node: Node<'_>) -> Statement {
-    debug_assert_eq!(node.as_rule(), Rule::statement_relation_anonymous);
-    let span = node.span();
-    let mut children = node.into_children();
-    let head = Head::Relation(visit_relation(children.consume_expected(Rule::relation)));
-    let constraints = children.map(visit_thing_constraint).collect();
-    Statement::Thing(Thing::new(span, head, constraints))
+fn visit_thing_constraint_list(node: Node<'_>) -> Vec<Constraint> {
+    debug_assert_eq!(node.as_rule(), Rule::thing_constraint_list);
+    let children = node.into_children();
+    children.map(visit_thing_constraint).collect()
 }
 
 fn visit_thing_constraint(node: Node<'_>) -> Constraint {
@@ -93,8 +84,15 @@ fn visit_isa_constraint(node: Node<'_>) -> Isa {
     let mut children = node.into_children();
     let kind = visit_isa_token(children.consume_expected(Rule::ISA_));
     let type_ = visit_type_ref(children.consume_expected(Rule::type_ref));
-    debug_assert_eq!(children.try_consume_any(), None);
-    Isa::new(span, kind, type_)
+    let instance_constraint = children.try_consume_any().map(|child| match child.as_rule() {
+        Rule::relation => IsaInstanceConstraint::Relation(visit_relation(child)),
+        Rule::expression => IsaInstanceConstraint::Expression(visit_expression(child)),
+        Rule::expression_struct => IsaInstanceConstraint::Struct(visit_expression_struct(child)),
+        Rule::value_literal => IsaInstanceConstraint::Value(visit_value_literal(child)),
+        Rule::comparison => IsaInstanceConstraint::Comparison(visit_comparison(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    });
+    Isa::new(span, kind, type_, instance_constraint)
 }
 
 fn visit_isa_token(node: Node<'_>) -> IsaKind {

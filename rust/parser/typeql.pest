@@ -69,7 +69,7 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_type | statement_thing_var | statement_single | statement_relation_anonymous }
+statement = { statement_single | statement_type | statement_thing }
 
 // TYPE STATEMENTS =============================================================
 
@@ -93,20 +93,14 @@ relates_constraint = { RELATES ~ type_ref_list
 plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
-
-statement_thing = { statement_thing_var | statement_relation_anonymous }
-statement_relation_anonymous = { relation ~ thing_constraint? ~ ( COMMA ~ thing_constraint )* ~ COMMA? }
-
-statement_thing_var = { var ~ COMMA? ~ thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?
-                      | var ~ ( value_literal | expression_struct ) ~ isa_constraint
-                      // TODO: need to allow $x $name_value isa name;
-                      // option: $x isa name($value), extend to literals as well
-                      | var ~ comparison ~ isa_constraint
-                      }
+statement_thing = { var ~ COMMA? ~ thing_constraint_list
+                  | thing_relation_anonymous ~ (COMMA? ~ thing_constraint_list)?
+                  }
+thing_relation_anonymous = { (!reserved ~ type_ref?) ~ relation }
+thing_constraint_list = {thing_constraint ~ (COMMA ~ thing_constraint)* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
-
-isa_constraint = { ISA_ ~ type_ref }
+isa_constraint = { ISA_ ~ type_ref ~ (relation | value_literal | expression | expression_struct | comparison)? }
 iid_constraint = { IID ~ iid_value }
 has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
                  | HAS ~ type_ref ~ ( comparison | expression_value | var )
@@ -131,9 +125,9 @@ statement_single = { statement_is | statement_comparison | statement_assignment 
 
 statement_is = { var ~ IS ~ var }
 statement_comparison = { expression_value ~ comparison }
-statement_assignment = { assignment_left ~ ASSIGN ~ expression }
+statement_assignment = { LET ~ assignment_left ~ ASSIGN ~ expression }
 assignment_left = { vars_assignment | struct_destructor }
-statement_in = { vars_assignment ~ IN ~ ( expression_function | expression_list ) }
+statement_in = { LET ~ vars_assignment ~ IN ~ ( expression_function | expression_list ) }
 
 vars_assignment = { var_assignment ~ ( COMMA ~ var_assignment )* ~ COMMA? }
 var_assignment = { var_optional | var }
@@ -320,7 +314,7 @@ value_type = { value_type_primitive | label }
 value_type_optional = { value_type ~ QUESTION }
 value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
-value_type_primitive = { BOOLEAN | LONG | DOUBLE | DECIMAL
+value_type_primitive = { BOOLEAN | INTEGER | DOUBLE | DECIMAL
                        | DATETIME_TZ | DATETIME | DATE | DURATION
                        | STRING
                        }
@@ -381,7 +375,7 @@ unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
              | CHECK | FIRST
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
              | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
-             | BOOLEAN | LONG | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
+             | BOOLEAN | INTEGER | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
              }
 
 // QUERY COMMAND KEYWORDS
@@ -502,6 +496,7 @@ CONTAINS = @{ "contains" ~ WB }
 
 // ASSIGNMENT AND EXPRESSION KEYWORDS
 
+LET = @{ "let" }
 ASSIGN = @{ "=" }
 IN = @{ "in" ~ WB }
 
@@ -535,7 +530,7 @@ LIST = @{ "list" ~ WB }
 // VALUE TYPE KEYWORDS
 
 BOOLEAN = @{ "boolean" ~ WB }
-LONG = @{ "long" ~ WB }
+INTEGER = @{ "integer" ~ WB }
 DOUBLE = @{ "double" ~ WB }
 DECIMAL = @{ "decimal" ~ WB }
 

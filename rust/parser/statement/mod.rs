@@ -4,15 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use self::{
-    single::visit_statement_single,
-    thing::{visit_statement_relation_anonymous, visit_statement_thing_var},
-};
+use self::single::visit_statement_single;
 use super::{
     expression::visit_expression_value, statement::type_::visit_statement_type, IntoChildNodes, Node, Rule, RuleMatcher,
 };
 use crate::{
     common::{error::TypeQLError, token::Comparator, Spanned},
+    parser::statement::thing::visit_statement_thing,
     statement::{comparison::Comparison, Statement},
 };
 
@@ -26,8 +24,7 @@ pub(super) fn visit_statement(node: Node<'_>) -> Statement {
     match child.as_rule() {
         Rule::statement_single => visit_statement_single(child),
         Rule::statement_type => visit_statement_type(child),
-        Rule::statement_thing_var => visit_statement_thing_var(child),
-        Rule::statement_relation_anonymous => visit_statement_relation_anonymous(child),
+        Rule::statement_thing => visit_statement_thing(child),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

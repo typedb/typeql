@@ -16,6 +16,7 @@ use crate::{
     util::write_joined,
     value::Literal,
     variable::Variable,
+    TypeRef,
 };
 
 pub mod isa;
@@ -71,14 +72,15 @@ impl fmt::Display for Thing {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Head {
     Variable(Variable),
-    Relation(Relation),
+    Relation(Option<TypeRef>, Relation),
 }
 
 impl Pretty for Head {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
-            Self::Relation(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Relation(Some(type_ref), relation) => write!(f, "{} {}", type_ref, relation),
+            Self::Relation(None, relation) => Pretty::fmt(relation, indent_level, f),
         }
     }
 }
@@ -87,7 +89,8 @@ impl fmt::Display for Head {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variable(inner) => fmt::Display::fmt(inner, f),
-            Self::Relation(inner) => fmt::Display::fmt(inner, f),
+            Self::Relation(Some(type_ref), relation) => write!(f, "{} {}", type_ref, relation),
+            Self::Relation(None, inner) => fmt::Display::fmt(inner, f),
         }
     }
 }
@@ -129,52 +132,6 @@ impl fmt::Display for RolePlayer {
             RolePlayer::Typed(type_, var) => write!(f, "{type_}: {var}"),
             RolePlayer::Untyped(var) => write!(f, "{var}"),
         }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct AttributeValueStatement {
-    span: Option<Span>,
-    pub var: Variable,
-    pub value: Literal,
-    pub isa: Isa,
-}
-
-impl AttributeValueStatement {
-    pub fn new(span: Option<Span>, var: Variable, value: Literal, isa: Isa) -> Self {
-        Self { span, var, value, isa }
-    }
-}
-
-impl Pretty for AttributeValueStatement {}
-
-impl fmt::Display for AttributeValueStatement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", self.var)?;
-        write!(f, "{} {}", self.value, self.isa)?;
-        Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct AttributeComparisonStatement {
-    span: Option<Span>,
-    pub var: Variable,
-    pub comparison: comparison::Comparison,
-    pub isa: Isa,
-}
-
-impl AttributeComparisonStatement {
-    pub fn new(span: Option<Span>, var: Variable, comparison: comparison::Comparison, isa: Isa) -> Self {
-        Self { span, var, comparison, isa }
-    }
-}
-
-impl Pretty for AttributeComparisonStatement {}
-
-impl fmt::Display for AttributeComparisonStatement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {} {}", self.var, self.comparison, self.isa)
     }
 }
 

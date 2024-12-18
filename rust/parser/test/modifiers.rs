@@ -23,7 +23,7 @@ fn test_get_sort_on_value_variable() {
     let query = r#"match
 $x isa movie,
     has rating $r;
-$l = 100 - $r;
+let $l = 100 - $r;
 sort $l desc;"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
@@ -41,7 +41,7 @@ fn test_get_sort_multiple() {
 $x isa movie,
     has title $t,
     has rating $r;
-$rate = $r * 100;
+let $rate = $r * 100;
 sort $rate desc, $t;"#;
     let parsed = parse_query(query).unwrap();
     //     let expected = typeql_match!(
