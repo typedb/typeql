@@ -96,11 +96,11 @@ plays_constraint = { PLAYS ~ type_ref }
 statement_thing = { var ~ COMMA? ~ thing_constraint_list
                   | thing_relation_anonymous ~ (COMMA? ~ thing_constraint_list)?
                   }
-thing_relation_anonymous = { (!reserved ~ type_ref?) ~ relation }
+thing_relation_anonymous = { type_ref? ~ relation }
 thing_constraint_list = {thing_constraint ~ (COMMA ~ thing_constraint)* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
-isa_constraint = { ISA_ ~ type_ref ~ (relation | value_literal | expression | expression_struct | comparison)? }
+isa_constraint = { ISA_ ~ type_ref ~ (relation | expression  | value_literal | expression_struct | comparison)? }
 iid_constraint = { IID ~ iid_value }
 has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
                  | HAS ~ type_ref ~ ( comparison | expression_value | var )
@@ -291,7 +291,7 @@ label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
-identifier = @{ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
+identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
 
 struct_key = { identifier }
 

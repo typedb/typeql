@@ -12,10 +12,10 @@ fn test_define_query_with_relates_specialises() {
     let query = r#"define
 entity pokemon;
 relation evolves;
-evolves relates from,
-    relates to;
+evolves relates pre,
+    relates post;
 evolves-final sub evolves;
-evolves-final relates from-final as from;"#;
+evolves-final relates pre-final as pre;"#;
 
     let parsed = parse_query(query).unwrap();
     // let expected = define!(
@@ -58,10 +58,10 @@ fn test_define_query() {
     let query = r#"define
 entity pokemon;
 relation evolution;
-evolves relates from,
-    relates to;
-pokemon plays evolves:from,
-    plays evolves:to,
+evolves relates pre,
+    relates post;
+pokemon plays evolves:pre,
+    plays evolves:post,
     owns name;"#;
 
     let parsed = parse_query(query).unwrap();
@@ -82,12 +82,12 @@ fn when_parsing_undefine_query_result_is_same_as_java_typeql() {
     let query = r#"undefine
 pokemon;
 evolution;
-evolves-from;
-evolves-to;
-relates from from evolves;
-relates to from evolves;
-plays evolves:from from pokemon;
-plays evolves:to from pokemon;
+evolves-pre;
+evolves-post;
+relates pre from evolves;
+relates post from evolves;
+plays evolves:pre from pokemon;
+plays evolves:post from pokemon;
 owns name from pokemon;"#;
 
     let parsed = parse_query(query).unwrap();
