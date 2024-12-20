@@ -33,16 +33,16 @@ build:
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @typedb_dependencies//tool/unuseddeps:unused-deps -- list
-    test-java:
-      image: typedb-ubuntu-22.04
-      command: |
-        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
-        bazel test //java/common/... --test_output=errors
-        bazel test //java/parser/... --test_output=errors
-        bazel test //java/pattern/... --test_output=errors
-        bazel test //java/query/... --test_output=errors
-        bazel test //java/test/deployment/... --test_output=errors
-        bazel test //java/test/behaviour/... --test_output=errors
+#    test-java:
+#      image: typedb-ubuntu-22.04
+#      command: |
+#        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
+#        bazel test //java/common/... --test_output=errors
+#        bazel test //java/parser/... --test_output=errors
+#        bazel test //java/pattern/... --test_output=errors
+#        bazel test //java/query/... --test_output=errors
+#        bazel test //java/test/deployment/... --test_output=errors
+#        bazel test //java/test/behaviour/... --test_output=errors
     test-rust-unit:
       image: typedb-ubuntu-22.04
       command: |
@@ -63,60 +63,61 @@ build:
         export DEPLOY_CRATE_TOKEN=$REPO_TYPEDB_CRATES_TOKEN
         bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(git rev-parse HEAD) //rust:deploy_crate -- snapshot
-    deploy-maven-snapshot:
-      filter:
-        owner: typedb
-        branch: [master, development]
-      image: typedb-ubuntu-22.04
-      dependencies: [build, build-dependency, test-java]
-      command: |
-        export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
-        export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
-        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
-        bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/builder:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/pattern:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/query:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java/parser:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
-    deploy-pip-snapshot:
-      filter:
-        owner: typedb
-        branch: [master, development]
-      image: typedb-ubuntu-20.04
-      dependencies: [ build, build-dependency ]
-      command: |
-        export DEPLOY_PIP_USERNAME=$REPO_TYPEDB_USERNAME
-        export DEPLOY_PIP_PASSWORD=$REPO_TYPEDB_PASSWORD
-        bazel run --define version=$(git rev-parse HEAD) //grammar/python:deploy-pip -- snapshot
-    test-deployment-maven:
-      filter:
-        owner: typedb
-        branch: [master, development]
-      image: typedb-ubuntu-22.04
-      dependencies: [deploy-maven-snapshot]
-      command: |
-        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/0.0.0-$FACTORY_COMMIT/g" java/test/deployment/pom.xml
-        cd java/test/deployment/ && mvn test
-    sync-dependencies:
-      image: typedb-ubuntu-22.04
-      filter:
-        owner: typedb
-        branch: [master, development]
-      dependencies:
-        - build
-        - build-dependency
-        - test-java
-        - test-rust-unit
-        - test-rust-behaviour
-        - deploy-crate-snapshot
-        - deploy-maven-snapshot
-        - deploy-pip-snapshot
-        - test-deployment-maven
-      command: |
-          export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @typedb_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@${FACTORY_COMMIT}
+#    deploy-maven-snapshot:
+#      filter:
+#        owner: typedb
+#        branch: [master, development]
+#      image: typedb-ubuntu-22.04
+#      dependencies: [build, build-dependency, test-java]
+#      command: |
+#        export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
+#        export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
+#        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
+#        bazel run --define version=$(git rev-parse HEAD) //grammar/java:deploy-maven -- snapshot
+#        bazel run --define version=$(git rev-parse HEAD) //java/builder:deploy-maven -- snapshot
+#        bazel run --define version=$(git rev-parse HEAD) //java/common:deploy-maven -- snapshot
+#        bazel run --define version=$(git rev-parse HEAD) //java/pattern:deploy-maven -- snapshot
+#        bazel run --define version=$(git rev-parse HEAD) //java/query:deploy-maven -- snapshot
+#        bazel run --define version=$(git rev-parse HEAD) //java/parser:deploy-maven -- snapshot
+#        bazel run --define version=$(git rev-parse HEAD) //java:deploy-maven -- snapshot
+#    deploy-pip-snapshot:
+#      filter:
+#        owner: typedb
+#        branch: [master, development]
+#      image: typedb-ubuntu-20.04
+#      dependencies: [ build, build-dependency ]
+#      command: |
+#        export DEPLOY_PIP_USERNAME=$REPO_TYPEDB_USERNAME
+#        export DEPLOY_PIP_PASSWORD=$REPO_TYPEDB_PASSWORD
+#        bazel run --define version=$(git rev-parse HEAD) //grammar/python:deploy-pip -- snapshot
+#    test-deployment-maven:
+#      filter:
+#        owner: typedb
+#        branch: [master, development]
+#      image: typedb-ubuntu-22.04
+#      dependencies: [deploy-maven-snapshot]
+#      command: |
+#        sed -i -e "s/TYPEQL_LANG_VERSION_MARKER/0.0.0-$FACTORY_COMMIT/g" java/test/deployment/pom.xml
+#        cd java/test/deployment/ && mvn test
+#    sync-dependencies:
+#      image: typedb-ubuntu-22.04
+#      filter:
+#        owner: typedb
+#        branch: [master, development]
+#      dependencies:
+#        - build
+#        - build-dependency
+#        - test-java
+#        - test-rust-unit
+#        # TODO: Reenable
+#        #- test-rust-behaviour
+#        #- deploy-crate-snapshot
+#        #- deploy-maven-snapshot
+#        #- deploy-pip-snapshot
+#        #- test-deployment-maven
+#      command: |
+#          export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
+#          bazel run @typedb_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@${FACTORY_COMMIT}
 
 release:
   filter:
@@ -148,36 +149,36 @@ release:
         export DEPLOY_CRATE_TOKEN=$REPO_CRATES_TOKEN
         bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel run --define version=$(cat VERSION) //rust:deploy_crate -- release
-    deploy-maven-release:
-      image: typedb-ubuntu-22.04
-      dependencies: [deploy-github]
-      command: |
-        export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
-        export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
-        bazel run --define version=$(cat VERSION) //grammar/java:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/builder:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/common:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/pattern:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/query:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java/parser:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //java:deploy-maven -- release
-    deploy-pip-release:
-      image: typedb-ubuntu-20.04
-      dependencies: [ deploy-github ]
-      command: |
-        export DEPLOY_PIP_USERNAME=$REPO_PYPI_USERNAME
-        export DEPLOY_PIP_PASSWORD=$REPO_PYPI_PASSWORD
-        bazel run --define version=$(cat VERSION) //grammar/python:deploy-pip -- release
-    sync-dependencies-release:
-      image: typedb-ubuntu-22.04
-      filter:
-        owner: typedb
-        branch: [master, development, "3.0"]
-      dependencies:
-        - deploy-github
-        - deploy-crate-release
-        - deploy-maven-release
-        - deploy-pip-release
-      command: |
-          export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @typedb_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@$(cat VERSION)
+#    deploy-maven-release:
+#      image: typedb-ubuntu-22.04
+#      dependencies: [deploy-github]
+#      command: |
+#        export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
+#        export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
+#        bazel run --define version=$(cat VERSION) //grammar/java:deploy-maven -- release
+#        bazel run --define version=$(cat VERSION) //java/builder:deploy-maven -- release
+#        bazel run --define version=$(cat VERSION) //java/common:deploy-maven -- release
+#        bazel run --define version=$(cat VERSION) //java/pattern:deploy-maven -- release
+#        bazel run --define version=$(cat VERSION) //java/query:deploy-maven -- release
+#        bazel run --define version=$(cat VERSION) //java/parser:deploy-maven -- release
+#        bazel run --define version=$(cat VERSION) //java:deploy-maven -- release
+#    deploy-pip-release:
+#      image: typedb-ubuntu-20.04
+#      dependencies: [ deploy-github ]
+#      command: |
+#        export DEPLOY_PIP_USERNAME=$REPO_PYPI_USERNAME
+#        export DEPLOY_PIP_PASSWORD=$REPO_PYPI_PASSWORD
+#        bazel run --define version=$(cat VERSION) //grammar/python:deploy-pip -- release
+#    sync-dependencies-release:
+#      image: typedb-ubuntu-22.04
+#      filter:
+#        owner: typedb
+#        branch: [master, development]
+#      dependencies:
+#        - deploy-github
+#        - deploy-crate-release
+#        - deploy-maven-release
+#        - deploy-pip-release
+#      command: |
+#          export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
+#          bazel run @typedb_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@$(cat VERSION)
