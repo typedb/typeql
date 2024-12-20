@@ -58,7 +58,7 @@ build:
         owner: typedb
         branch: [master, development, "3.0"]
       image: typedb-ubuntu-22.04
-      dependencies: [build, build-dependency, test-rust]
+      dependencies: [build, build-dependency, test-rust-unit]
       command: |
         export DEPLOY_CRATE_TOKEN=$REPO_TYPEDB_CRATES_TOKEN
         bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
@@ -108,7 +108,8 @@ build:
         - build
         - build-dependency
         - test-java
-        - test-rust
+        - test-rust-unit
+        - test-rust-behaviour
         - deploy-crate-snapshot
         - deploy-maven-snapshot
         - deploy-pip-snapshot
