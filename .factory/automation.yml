@@ -58,7 +58,7 @@ build:
         owner: typedb
         branch: [master, development, "3.0"]
       image: typedb-ubuntu-22.04
-      dependencies: [build, build-dependency, test-rust-unit]
+      dependencies: [build, build-dependency, test-rust-unit] # TODO: Add test-rust-behaviour
       command: |
         export DEPLOY_CRATE_TOKEN=$REPO_TYPEDB_CRATES_TOKEN
         bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
