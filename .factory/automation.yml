@@ -13,7 +13,7 @@ build:
   quality:
     filter:
       owner: typedb
-      branch: [master, development]
+      branch: [master, development, "3.0"]
     dependency-analysis:
       image: typedb-ubuntu-22.04
       command: |
@@ -56,7 +56,7 @@ build:
     deploy-crate-snapshot:
       filter:
         owner: typedb
-        branch: [master, development]
+        branch: [master, development, "3.0"]
       image: typedb-ubuntu-22.04
       dependencies: [build, build-dependency, test-rust]
       command: |
@@ -120,7 +120,7 @@ build:
 release:
   filter:
     owner: typedb
-    branch: master
+    branch: [master, "3.0"]
   validation:
     validate-release-notes:
       image: typedb-ubuntu-22.04
@@ -171,7 +171,7 @@ release:
       image: typedb-ubuntu-22.04
       filter:
         owner: typedb
-        branch: [master, development]
+        branch: [master, development, "3.0"]
       dependencies:
         - deploy-github
         - deploy-crate-release
