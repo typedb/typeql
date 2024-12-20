@@ -56,7 +56,7 @@ build:
     deploy-crate-snapshot:
       filter:
         owner: typedb
-        branch: [master, development, "3.0"]
+        branch: [master, development, "3.0",  enable-snapshot-release-on-3.0--trial]
       image: typedb-ubuntu-22.04
       dependencies: [build, build-dependency, test-rust]
       command: |
