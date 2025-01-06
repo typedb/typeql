@@ -16,12 +16,12 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Reduce {
     pub reduce_assignments: Vec<ReduceAssign>,
-    pub within_group: Option<Vec<Variable>>,
+    pub groupby: Option<Vec<Variable>>,
 }
 
 impl Reduce {
-    pub fn new(reduce_assignments: Vec<ReduceAssign>, within_group: Option<Vec<Variable>>) -> Self {
-        Reduce { reduce_assignments, within_group }
+    pub fn new(reduce_assignments: Vec<ReduceAssign>, groupby: Option<Vec<Variable>>) -> Self {
+        Reduce { reduce_assignments, groupby: groupby }
     }
 }
 
@@ -30,8 +30,8 @@ impl Pretty for Reduce {
         indent(indent_level, f)?;
         write!(f, "{} ", token::Operator::Reduce)?;
         write_joined!(f, ", ", self.reduce_assignments)?;
-        if let Some(group) = &self.within_group {
-            write!(f, " {} ", token::Keyword::Within)?;
+        if let Some(group) = &self.groupby {
+            write!(f, " {} ", token::Keyword::Groupby)?;
             write_joined!(f, ", ", group)?;
         }
         write!(f, ";")?;
@@ -43,8 +43,8 @@ impl fmt::Display for Reduce {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ", token::Operator::Reduce)?;
         write_joined!(f, ", ", self.reduce_assignments)?;
-        if let Some(group) = &self.within_group {
-            write!(f, " {} (", token::Keyword::Within)?;
+        if let Some(group) = &self.groupby {
+            write!(f, " {} (", token::Keyword::Groupby)?;
             write_joined!(f, ", ", group)?;
             write!(f, ")")?;
         }
