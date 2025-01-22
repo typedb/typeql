@@ -282,7 +282,7 @@ impl fmt::Display for SignedDecimalLiteral {
         if let Some(sign) = &self.sign {
             fmt::Display::fmt(sign, f)?;
         }
-        f.write_str(self.decimal.as_str())
+        write!(f, "{}dec", self.decimal.as_str())
     }
 }
 

@@ -489,7 +489,7 @@ $type relates someRole;"#;
 }
 
 #[test]
-fn test_parsing_doublee_decimal_literal() {
+fn test_parsing_double_decimal_literal() {
     let query = r#"match
 let $x = -5.0 + -4.0dec;"#;
 

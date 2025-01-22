@@ -80,14 +80,13 @@ fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
     debug_assert_eq!(node.as_rule(), Rule::signed_decimal);
     let mut children = node.into_children();
     let first_node = children.consume_any();
-    let (sign, decimal) = match first_node.as_rule() {
-        Rule::sign => {
-            (Some(visit_sign(first_node)), children.consume_expected(Rule::decimal_literal).as_str().to_owned())
-        }
-        Rule::decimal_literal => (None, first_node.as_str().to_owned()),
+    let (sign, decimal_with_suffix) = match first_node.as_rule() {
+        Rule::sign => (Some(visit_sign(first_node)), children.consume_expected(Rule::decimal_literal).as_str()),
+        Rule::decimal_literal => (None, first_node.as_str()),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
+    let decimal = decimal_with_suffix.trim_end_matches("dec").to_owned();
     SignedDecimalLiteral { sign, decimal }
 }
 
