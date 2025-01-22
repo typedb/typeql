@@ -487,3 +487,14 @@ $type relates someRole;"#;
     // let expected = typeql_match!(var("x").isa(cvar("type")), cvar("type").relates("someRole"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn test_parsing_doublee_decimal_literal() {
+    let query = r#"match
+let $x = -5.0 + -4.0dec;"#;
+
+    let parsed = parse_query(query).unwrap();
+    // let expected = match_!(var("x").assign(5), var("a").equals(var("x")).isa("age"));
+
+    assert_valid_eq_repr!(expected, parsed, query);
+}

@@ -9,8 +9,8 @@ use crate::{
     parser::{IntoChildNodes, Node, Rule, RuleMatcher},
     value::{
         BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, DurationDate, DurationLiteral,
-        DurationTime, IntegerLiteral, Literal, NumericLiteral, Sign, SignedDecimalLiteral, SignedIntegerLiteral,
-        StringLiteral, TimeFragment, TimeZone, ValueLiteral,
+        DurationTime, IntegerLiteral, Literal, NumericLiteral, Sign, SignedDecimalLiteral, SignedDoubleLiteral,
+        SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral,
     },
 };
 
@@ -23,6 +23,7 @@ pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
         Rule::boolean_literal => ValueLiteral::Boolean(BooleanLiteral { value: child.as_str().to_owned() }),
         Rule::signed_integer => ValueLiteral::Integer(visit_signed_integer(child)),
         Rule::signed_decimal => ValueLiteral::Decimal(visit_signed_decimal(child)),
+        Rule::signed_double => ValueLiteral::Double(visit_signed_double(child)),
 
         Rule::datetime_tz_literal => ValueLiteral::DateTimeTz(visit_datetime_tz_literal(child)),
         Rule::datetime_literal => ValueLiteral::DateTime(visit_datetime_literal(child)),
@@ -88,6 +89,21 @@ fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
     };
     debug_assert_eq!(children.try_consume_any(), None);
     SignedDecimalLiteral { sign, decimal }
+}
+
+fn visit_signed_double(node: Node<'_>) -> SignedDoubleLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::signed_double);
+    let mut children = node.into_children();
+    let first_node = children.consume_any();
+    let (sign, double) = match first_node.as_rule() {
+        Rule::sign => {
+            (Some(visit_sign(first_node)), children.consume_expected(Rule::double_literal).as_str().to_owned())
+        }
+        Rule::double_literal => (None, first_node.as_str().to_owned()),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
+    };
+    debug_assert_eq!(children.try_consume_any(), None);
+    SignedDoubleLiteral { sign, double }
 }
 
 fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
