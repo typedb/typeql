@@ -492,9 +492,7 @@ $type relates someRole;"#;
 fn test_parsing_double_decimal_literal() {
     let query = r#"match
 let $x = -5.0 + -4.0dec;"#;
-
     let parsed = parse_query(query).unwrap();
-    // let expected = match_!(var("x").assign(5), var("a").equals(var("x")).isa("age"));
-
+    // let expected = todo!("When typeql builders exist");
     assert_valid_eq_repr!(expected, parsed, query);
 }
