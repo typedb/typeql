@@ -487,3 +487,12 @@ $type relates someRole;"#;
     // let expected = typeql_match!(var("x").isa(cvar("type")), cvar("type").relates("someRole"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn test_parsing_double_decimal_literal() {
+    let query = r#"match
+let $x = -5.0 + -4.0dec;"#;
+    let parsed = parse_query(query).unwrap();
+    // let expected = todo!("When typeql builders exist");
+    assert_valid_eq_repr!(expected, parsed, query);
+}

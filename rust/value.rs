@@ -9,7 +9,7 @@ use std::fmt::{self, Formatter};
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
     pretty::Pretty,
-    Result,
+    token, Result,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -42,6 +42,12 @@ pub enum Sign {
 pub struct SignedIntegerLiteral {
     pub sign: Option<Sign>,
     pub integral: String,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct SignedDoubleLiteral {
+    pub sign: Option<Sign>,
+    pub double: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -119,6 +125,7 @@ pub enum ValueLiteral {
     Boolean(BooleanLiteral),
     Integer(SignedIntegerLiteral),
     Decimal(SignedDecimalLiteral),
+    Double(SignedDoubleLiteral),
     Date(DateLiteral),
     DateTime(DateTimeLiteral),
     DateTimeTz(DateTimeTZLiteral),
@@ -159,6 +166,7 @@ impl fmt::Display for ValueLiteral {
             ValueLiteral::Boolean(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Integer(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Decimal(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::Double(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Date(value) => fmt::Display::fmt(value, f),
             ValueLiteral::DateTime(value) => fmt::Display::fmt(value, f),
             ValueLiteral::DateTimeTz(value) => fmt::Display::fmt(value, f),
@@ -274,7 +282,16 @@ impl fmt::Display for SignedDecimalLiteral {
         if let Some(sign) = &self.sign {
             fmt::Display::fmt(sign, f)?;
         }
-        f.write_str(self.decimal.as_str())
+        write!(f, "{}dec", self.decimal.as_str())
+    }
+}
+
+impl fmt::Display for SignedDoubleLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if let Some(sign) = &self.sign {
+            fmt::Display::fmt(sign, f)?;
+        }
+        f.write_str(self.double.as_str())
     }
 }
 
