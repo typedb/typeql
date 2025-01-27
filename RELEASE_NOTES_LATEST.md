@@ -3,11 +3,9 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.0.1
+cargo add typeql@3.0.3
 ```
 
-## Code Refactors
-- **Rename within to groupby**
-  
-  We rename `within` to `groupby`, in better alignment with expected terminology.
-  
+## New Features
+- **Add 'dec' suffix to decimal literals**
+  Require decimal literals to be suffixed with 'dec'
