@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.0.3
+cargo add typeql@3.0.4
 ```
 
 ## New Features
