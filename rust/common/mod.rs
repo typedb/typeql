@@ -4,9 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use std::cmp::min;
 use std::fmt::{Display, Formatter};
+use itertools::Itertools;
 
 pub use error::Error;
+use crate::common::error::{SYNTAX_ANNOTATED_INDENT, SYNTAX_ANNOTATED_INDICATOR_COL, SYNTAX_ANNOTATED_INDICATOR_LINE};
 
 pub mod date_time;
 pub mod error;
@@ -36,6 +39,8 @@ pub trait Spannable {
     fn extract(&self, span: Span) -> &str;
 
     fn line_col(&self, span: Span) -> Option<(LineColumn, LineColumn)>;
+
+    fn extract_annotated_line_col(&self, line_col: (usize, usize), lines_before: usize, lines_after: usize) -> Option<String>;
 }
 
 impl Spannable for &str {
@@ -50,6 +55,32 @@ impl Spannable for &str {
             LineColumn { line: begin_line as u32, column: begin_col as u32 },
             LineColumn { line: end_line as u32, column: end_col as u32 },
         ))
+    }
+
+    fn extract_annotated_line_col(&self, line_col: (usize, usize), lines_before: usize, lines_after: usize) -> Option<String> {
+        let (line, col) = line_col;
+        let mut annotated = false;
+        let lines: Vec<_> = self
+            .lines()
+            .enumerate()
+            .map(|(i, line_string)| {
+                if i == line {
+                    annotated = true;
+                    format!(
+                        "{SYNTAX_ANNOTATED_INDICATOR_LINE}{line_string}\n{}{SYNTAX_ANNOTATED_INDICATOR_COL}",
+                        " ".repeat(SYNTAX_ANNOTATED_INDENT + col))
+                } else {
+                    format!("{}{line_string}", " ".repeat(SYNTAX_ANNOTATED_INDENT))
+                }
+            })
+            .collect();
+        if annotated {
+            let lines_start = line.checked_sub(lines_before).unwrap_or(0);
+            let lines_end = min(lines.len(), line.checked_add(lines_after).unwrap_or(usize::MAX));
+            Some(lines[lines_start..lines_end].join("\n"))
+        } else {
+            None
+        }
     }
 }
 
