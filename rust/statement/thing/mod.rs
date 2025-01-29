@@ -9,7 +9,7 @@ use std::fmt::{self, Write};
 use self::isa::Isa;
 use super::{comparison, Statement};
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     expression::Expression,
     pretty::{indent, Pretty},
     type_::TypeRefAny,
@@ -37,6 +37,12 @@ impl Thing {
 impl From<Thing> for Statement {
     fn from(val: Thing) -> Self {
         Statement::Thing(val)
+    }
+}
+
+impl Spanned for Thing {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -104,6 +110,12 @@ pub struct Relation {
 impl Relation {
     pub(crate) fn new(span: Option<Span>, role_players: Vec<RolePlayer>) -> Self {
         Self { span, role_players }
+    }
+}
+
+impl Spanned for Relation {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -177,6 +189,12 @@ impl Iid {
     }
 }
 
+impl Spanned for Iid {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Iid {}
 
 impl fmt::Display for Iid {
@@ -195,6 +213,12 @@ pub struct Has {
 impl Has {
     pub fn new(span: Option<Span>, type_: Option<TypeRefAny>, value: HasValue) -> Self {
         Self { span, type_, value }
+    }
+}
+
+impl Spanned for Has {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -247,6 +271,12 @@ pub struct Links {
 impl Links {
     pub fn new(span: Option<Span>, relation: Relation) -> Self {
         Self { span, relation }
+    }
+}
+
+impl Spanned for Links {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

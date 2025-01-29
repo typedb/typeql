@@ -4,11 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::cmp::min;
-use std::fmt::{Display, Formatter};
-use itertools::Itertools;
+use std::{
+    cmp::min,
+    fmt::{Display, Formatter},
+};
 
 pub use error::Error;
+use itertools::Itertools;
+
 use crate::common::error::{SYNTAX_ANNOTATED_INDENT, SYNTAX_ANNOTATED_INDICATOR_COL, SYNTAX_ANNOTATED_INDICATOR_LINE};
 
 pub mod date_time;
@@ -40,7 +43,12 @@ pub trait Spannable {
 
     fn line_col(&self, span: Span) -> Option<(LineColumn, LineColumn)>;
 
-    fn extract_annotated_line_col(&self, line_col: (usize, usize), lines_before: usize, lines_after: usize) -> Option<String>;
+    fn extract_annotated_line_col(
+        &self,
+        line_col: (usize, usize),
+        lines_before: usize,
+        lines_after: usize,
+    ) -> Option<String>;
 }
 
 impl Spannable for &str {
@@ -57,7 +65,12 @@ impl Spannable for &str {
         ))
     }
 
-    fn extract_annotated_line_col(&self, line_col: (usize, usize), lines_before: usize, lines_after: usize) -> Option<String> {
+    fn extract_annotated_line_col(
+        &self,
+        line_col: (usize, usize),
+        lines_before: usize,
+        lines_after: usize,
+    ) -> Option<String> {
         let (line, col) = line_col;
         let mut annotated = false;
         let lines: Vec<_> = self
@@ -68,7 +81,8 @@ impl Spannable for &str {
                     annotated = true;
                     format!(
                         "{SYNTAX_ANNOTATED_INDICATOR_LINE}{line_string}\n{}{SYNTAX_ANNOTATED_INDICATOR_COL}",
-                        " ".repeat(SYNTAX_ANNOTATED_INDENT + col))
+                        " ".repeat(SYNTAX_ANNOTATED_INDENT + col)
+                    )
                 } else {
                     format!("{}{line_string}", " ".repeat(SYNTAX_ANNOTATED_INDENT))
                 }

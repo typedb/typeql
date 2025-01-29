@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use std::process::exit;
+
 use super::assert_valid_eq_repr;
 use crate::parse_query;
 
@@ -48,7 +50,14 @@ fetch {
 };"#;
     // TODO: Include list expression function
     // # "list expression function": [ all_names($x) ],
-    let parsed = parse_query(query).unwrap();
+    let parsed = parse_query(query);
+    let parsed = match parsed {
+        Ok(parsed) => parsed,
+        Err(err) => {
+            println!("{}", err);
+            exit(1)
+        }
+    };
     // let projections: Vec<Projection> = vec![
     // var("d").into(),
     // var("d").label("date").into(),

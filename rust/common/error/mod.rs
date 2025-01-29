@@ -9,8 +9,7 @@ use std::{error::Error as StdError, fmt};
 use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
-use crate::{error_messages, util::write_joined, Identifier};
-use crate::common::Spannable;
+use crate::{common::Spannable, error_messages, util::write_joined, Identifier};
 
 #[macro_use]
 mod macros;
@@ -46,9 +45,7 @@ pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) 
     };
     // error_line_nr is 1-indexed, we operate on 0-offset
     let error_line = error_line_nr - 1;
-    let formatted_error = query
-        .extract_annotated_line_col((error_line, error_col), usize::MAX, usize::MAX)
-        .unwrap();
+    let formatted_error = query.extract_annotated_line_col((error_line, error_col), usize::MAX, usize::MAX).unwrap();
     TypeQLError::SyntaxErrorDetailed { error_line_nr, error_col, formatted_error }
 }
 

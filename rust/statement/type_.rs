@@ -8,7 +8,7 @@ use std::fmt::{self, Write};
 
 use crate::{
     annotation::Annotation,
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     type_::{Label, NamedType, ScopedLabel, TypeRef, TypeRefAny},
 };
@@ -24,6 +24,12 @@ pub struct Type {
 impl Type {
     pub fn new(span: Option<Span>, kind: Option<token::Kind>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
         Self { span, kind, type_, constraints }
+    }
+}
+
+impl Spanned for Type {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -66,6 +72,12 @@ pub struct Constraint {
 impl Constraint {
     pub fn new(span: Option<Span>, base: ConstraintBase, annotations: Vec<Annotation>) -> Self {
         Self { span, base, annotations }
+    }
+}
+
+impl Spanned for Constraint {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -165,6 +177,12 @@ impl Sub {
     }
 }
 
+impl Spanned for Sub {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Sub {}
 
 impl fmt::Display for Sub {
@@ -185,6 +203,12 @@ impl ValueType {
     }
 }
 
+impl Spanned for ValueType {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for ValueType {}
 
 impl fmt::Display for ValueType {
@@ -202,6 +226,12 @@ pub struct Owns {
 impl Owns {
     pub fn new(span: Option<Span>, owned: TypeRefAny) -> Self {
         Self { span, owned }
+    }
+}
+
+impl Spanned for Owns {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -227,6 +257,12 @@ impl Relates {
     }
 }
 
+impl Spanned for Relates {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Relates {}
 
 impl fmt::Display for Relates {
@@ -248,6 +284,12 @@ pub struct Plays {
 impl Plays {
     pub fn new(span: Option<Span>, role: TypeRef) -> Self {
         Self { span, role }
+    }
+}
+
+impl Spanned for Plays {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
