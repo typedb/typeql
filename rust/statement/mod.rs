@@ -9,7 +9,7 @@ use std::{collections::HashMap, fmt};
 use self::comparison::ComparisonStatement;
 pub use self::{thing::Thing, type_::Type};
 use crate::{
-    common::{identifier::Identifier, token, Span},
+    common::{identifier::Identifier, token, Span, Spanned},
     expression::Expression,
     pretty::{indent, Pretty},
     util::write_joined,
@@ -33,6 +33,12 @@ impl Is {
     }
 }
 
+impl Spanned for Is {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Is {}
 
 impl fmt::Display for Is {
@@ -51,6 +57,12 @@ pub struct InIterable {
 impl InIterable {
     pub(crate) fn new(span: Option<Span>, lhs: Vec<Variable>, rhs: Expression) -> Self {
         Self { span, lhs, rhs }
+    }
+}
+
+impl Spanned for InIterable {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -100,6 +112,12 @@ impl StructDeconstruct {
     }
 }
 
+impl Spanned for StructDeconstruct {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for StructDeconstruct {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
@@ -144,6 +162,12 @@ pub struct Assignment {
 impl Assignment {
     pub fn new(span: Option<Span>, lhs: AssignmentPattern, rhs: Expression) -> Self {
         Self { span, lhs, rhs }
+    }
+}
+
+impl Spanned for Assignment {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

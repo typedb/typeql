@@ -9,7 +9,7 @@ use std::fmt::{self, Write};
 use crate::{
     common::{
         token::{self, Order},
-        Span,
+        Span, Spanned,
     },
     pretty::Pretty,
     query::stage::Reduce,
@@ -28,6 +28,12 @@ pub struct OrderedVariable {
 impl OrderedVariable {
     pub fn new(span: Option<Span>, variable: Variable, ordering: Option<Order>) -> Self {
         Self { span, variable, ordering }
+    }
+}
+
+impl Spanned for OrderedVariable {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -55,6 +61,12 @@ impl Sort {
     }
 }
 
+impl Spanned for Sort {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Sort {}
 
 impl fmt::Display for Sort {
@@ -75,6 +87,12 @@ pub struct Select {
 impl Select {
     pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
         Self { span, variables }
+    }
+}
+
+impl Spanned for Select {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -101,6 +119,12 @@ impl Offset {
     }
 }
 
+impl Spanned for Offset {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Offset {}
 
 impl fmt::Display for Offset {
@@ -121,6 +145,12 @@ impl Limit {
     }
 }
 
+impl Spanned for Limit {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Limit {}
 
 impl fmt::Display for Limit {
@@ -138,6 +168,12 @@ pub struct Require {
 impl Require {
     pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
         Self { span, variables }
+    }
+}
+
+impl Spanned for Require {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

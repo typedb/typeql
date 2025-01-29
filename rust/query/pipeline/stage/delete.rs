@@ -7,7 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     statement::thing::Relation,
     variable::Variable,
@@ -61,6 +61,12 @@ pub struct Deletable {
 impl Deletable {
     pub fn new(span: Option<Span>, kind: DeletableKind) -> Self {
         Self { span, kind }
+    }
+}
+
+impl Spanned for Deletable {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

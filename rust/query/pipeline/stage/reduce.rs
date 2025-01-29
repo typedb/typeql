@@ -7,8 +7,9 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
+    query::stage::modifier::Require,
     util::write_joined,
     variable::Variable,
 };
@@ -108,6 +109,12 @@ impl Count {
     }
 }
 
+impl Spanned for Count {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Count {}
 
 impl fmt::Display for Count {
@@ -130,6 +137,12 @@ pub struct Stat {
 impl Stat {
     pub fn new(span: Option<Span>, aggregate: token::ReduceOperator, variable: Variable) -> Self {
         Self { span, reduce_operator: aggregate, variable }
+    }
+}
+
+impl Spanned for Stat {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
