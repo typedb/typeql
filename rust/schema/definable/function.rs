@@ -32,6 +32,12 @@ impl Function {
     }
 }
 
+impl Spanned for Function {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Function {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;

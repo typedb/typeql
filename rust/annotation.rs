@@ -7,10 +7,11 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{identifier::Identifier, token, Span},
+    common::{identifier::Identifier, Span, token},
     util::write_joined,
     value::{IntegerLiteral, Literal, StringLiteral},
 };
+use crate::common::Spanned;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Annotation {
@@ -25,6 +26,24 @@ pub enum Annotation {
     Subkey(Subkey),
     Unique(Unique),
     Values(Values),
+}
+
+impl Spanned for Annotation {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Annotation::Abstract(annotation) => annotation.span(),
+            Annotation::Cardinality(annotation) => annotation.span(),
+            Annotation::Cascade(annotation) => annotation.span(),
+            Annotation::Distinct(annotation) => annotation.span(),
+            Annotation::Independent(annotation) => annotation.span(),
+            Annotation::Key(annotation) => annotation.span(),
+            Annotation::Range(annotation) => annotation.span(),
+            Annotation::Regex(annotation) => annotation.span(),
+            Annotation::Subkey(annotation) => annotation.span(),
+            Annotation::Unique(annotation) => annotation.span(),
+            Annotation::Values(annotation) => annotation.span(),
+        }
+    }
 }
 
 impl fmt::Display for Annotation {
@@ -56,6 +75,12 @@ impl Abstract {
     }
 }
 
+impl Spanned for Abstract {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl fmt::Display for Abstract {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}", token::Annotation::Abstract)
@@ -71,6 +96,12 @@ pub struct Cardinality {
 impl Cardinality {
     pub fn new(span: Option<Span>, range: CardinalityRange) -> Self {
         Self { span, range }
+    }
+}
+
+impl Spanned for Cardinality {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -107,6 +138,12 @@ impl Cascade {
     }
 }
 
+impl Spanned for Cascade {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl fmt::Display for Cascade {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}", token::Annotation::Cascade)
@@ -121,6 +158,12 @@ pub struct Distinct {
 impl Distinct {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Distinct {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -141,6 +184,12 @@ impl Independent {
     }
 }
 
+impl Spanned for Independent {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl fmt::Display for Independent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}", token::Annotation::Independent)
@@ -155,6 +204,12 @@ pub struct Key {
 impl Key {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Key {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -174,6 +229,12 @@ pub struct Range {
 impl Range {
     pub fn new(span: Option<Span>, min: Option<Literal>, max: Option<Literal>) -> Self {
         Self { span, min, max }
+    }
+}
+
+impl Spanned for Range {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -204,6 +265,12 @@ impl Regex {
     }
 }
 
+impl Spanned for Regex {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl fmt::Display for Regex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}({})", token::Annotation::Regex, self.regex.value)
@@ -219,6 +286,12 @@ pub struct Subkey {
 impl Subkey {
     pub fn new(span: Option<Span>, ident: Identifier) -> Self {
         Self { span, ident }
+    }
+}
+
+impl Spanned for Subkey {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -239,6 +312,12 @@ impl Unique {
     }
 }
 
+impl Spanned for Unique {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl fmt::Display for Unique {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}", token::Annotation::Unique)
@@ -254,6 +333,12 @@ pub struct Values {
 impl Values {
     pub fn new(span: Option<Span>, values: Vec<Literal>) -> Self {
         Self { span, values }
+    }
+}
+
+impl Spanned for Values {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
