@@ -13,6 +13,7 @@ use crate::{
     schema::definable::type_::capability::Relates,
     type_::Label,
 };
+use crate::common::Spanned;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Undefinable {
@@ -55,6 +56,12 @@ impl AnnotationType {
     }
 }
 
+impl Spanned for AnnotationType {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for AnnotationType {}
 
 impl fmt::Display for AnnotationType {
@@ -82,6 +89,12 @@ impl AnnotationCapability {
     }
 }
 
+impl Spanned for AnnotationCapability {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for AnnotationCapability {}
 
 impl fmt::Display for AnnotationCapability {
@@ -100,6 +113,12 @@ pub struct CapabilityType {
 impl CapabilityType {
     pub fn new(span: Option<Span>, capability: CapabilityBase, type_: Label) -> Self {
         Self { span, capability, type_ }
+    }
+}
+
+impl Spanned for CapabilityType {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -122,6 +141,12 @@ pub struct Specialise {
 impl Specialise {
     pub fn new(span: Option<Span>, specialised: Label, type_: Label, relates: Relates) -> Self {
         Self { span, specialised, type_, capability: relates }
+    }
+}
+
+impl Spanned for Specialise {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -153,6 +178,12 @@ impl Function {
     }
 }
 
+impl Spanned for Function {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Function {}
 
 impl fmt::Display for Function {
@@ -170,6 +201,12 @@ pub struct Struct {
 impl Struct {
     pub fn new(span: Option<Span>, ident: Identifier) -> Self {
         Self { span, ident }
+    }
+}
+
+impl Spanned for Struct {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
