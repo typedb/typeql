@@ -39,13 +39,14 @@ impl From<Vec<TypeQLError>> for Error {
 }
 
 pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) -> TypeQLError {
-    let (error_line_nr, error_col) = match error.line_col {
+    let (error_line_nr, error_col_nr) = match error.line_col {
         LineColLocation::Pos((line, col)) => (line, col),
         LineColLocation::Span((line, col), _) => (line, col),
     };
-    // error_line_nr is 1-indexed, we operate on 0-offset
+    // error_line_nr and error_col_nr is 1-indexed, we operate on 0-offset
     let error_line = error_line_nr - 1;
-    let formatted_error = query.extract_annotated_line_col((error_line, error_col), usize::MAX, usize::MAX).unwrap();
+    let error_col = error_col_nr - 1;
+    let formatted_error = query.extract_annotated_line_col(error_line, error_col, usize::MAX, usize::MAX).unwrap();
     TypeQLError::SyntaxErrorDetailed { error_line_nr, error_col, formatted_error }
 }
 

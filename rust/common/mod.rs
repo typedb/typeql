@@ -45,7 +45,8 @@ pub trait Spannable {
 
     fn extract_annotated_line_col(
         &self,
-        line_col: (usize, usize),
+        line: usize,
+        col: usize,
         lines_before: usize,
         lines_after: usize,
     ) -> Option<String>;
@@ -67,11 +68,11 @@ impl Spannable for &str {
 
     fn extract_annotated_line_col(
         &self,
-        line_col: (usize, usize),
+        line: usize,
+        col: usize,
         lines_before: usize,
         lines_after: usize,
     ) -> Option<String> {
-        let (line, col) = line_col;
         let mut annotated = false;
         let lines: Vec<_> = self
             .lines()
@@ -90,7 +91,7 @@ impl Spannable for &str {
             .collect();
         if annotated {
             let lines_start = line.checked_sub(lines_before).unwrap_or(0);
-            let lines_end = min(lines.len(), line.checked_add(lines_after).unwrap_or(usize::MAX));
+            let lines_end = min(lines.len(), line.checked_add(lines_after.checked_add(1).unwrap_or(usize::MAX)).unwrap_or(usize::MAX));
             Some(lines[lines_start..lines_end].join("\n"))
         } else {
             None
