@@ -15,7 +15,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Reduce {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub reduce_assignments: Vec<ReduceAssign>,
     pub groupby: Option<Vec<Variable>>,
 }
@@ -105,7 +105,7 @@ impl fmt::Display for Reducer {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Count {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variable: Option<Variable>,
 }
 
@@ -135,7 +135,7 @@ impl fmt::Display for Count {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Stat {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub reduce_operator: token::ReduceOperator,
     pub variable: Variable,
 }

@@ -16,7 +16,7 @@ use crate::{
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Isa {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: IsaKind,
     pub type_: TypeRef,
     pub constraint: Option<IsaInstanceConstraint>,

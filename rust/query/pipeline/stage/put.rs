@@ -14,7 +14,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Put {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub statements: Vec<Statement>,
 }
 

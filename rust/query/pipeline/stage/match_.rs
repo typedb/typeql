@@ -14,7 +14,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Match {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
 }
 

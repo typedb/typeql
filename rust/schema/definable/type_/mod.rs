@@ -19,7 +19,7 @@ pub mod capability;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Type {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: Option<token::Kind>,
     pub label: Label,
     pub annotations: Vec<Annotation>,
@@ -88,7 +88,7 @@ impl fmt::Display for Type {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Capability {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub base: CapabilityBase,
     pub annotations: Vec<Annotation>,
 }

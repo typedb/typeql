@@ -65,7 +65,7 @@ impl fmt::Display for Annotation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Abstract {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Abstract {
@@ -88,7 +88,7 @@ impl fmt::Display for Abstract {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cardinality {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub range: CardinalityRange,
 }
 
@@ -128,7 +128,7 @@ impl fmt::Display for CardinalityRange {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cascade {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Cascade {
@@ -151,7 +151,7 @@ impl fmt::Display for Cascade {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Distinct {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Distinct {
@@ -174,7 +174,7 @@ impl fmt::Display for Distinct {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Independent {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Independent {
@@ -197,7 +197,7 @@ impl fmt::Display for Independent {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Key {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Key {
@@ -220,7 +220,7 @@ impl fmt::Display for Key {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Range {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub min: Option<Literal>,
     pub max: Option<Literal>,
 }
@@ -254,7 +254,7 @@ impl fmt::Display for Range {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Regex {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub regex: StringLiteral,
 }
 
@@ -278,7 +278,7 @@ impl fmt::Display for Regex {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Subkey {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 
@@ -302,7 +302,7 @@ impl fmt::Display for Subkey {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Unique {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Unique {
@@ -325,7 +325,7 @@ impl fmt::Display for Unique {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Values {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub values: Vec<Literal>,
 }
 

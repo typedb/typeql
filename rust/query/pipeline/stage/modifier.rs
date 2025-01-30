@@ -20,7 +20,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct OrderedVariable {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variable: Variable,
     pub ordering: Option<Order>,
 }
@@ -51,7 +51,7 @@ impl fmt::Display for OrderedVariable {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sort {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ordered_variables: Vec<OrderedVariable>,
 }
 
@@ -80,7 +80,7 @@ impl fmt::Display for Sort {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Select {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variables: Vec<Variable>,
 }
 
@@ -109,7 +109,7 @@ impl fmt::Display for Select {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Offset {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub offset: IntegerLiteral,
 }
 
@@ -135,7 +135,7 @@ impl fmt::Display for Offset {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Limit {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub limit: IntegerLiteral,
 }
 
@@ -161,7 +161,7 @@ impl fmt::Display for Limit {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Require {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variables: Vec<Variable>,
 }
 

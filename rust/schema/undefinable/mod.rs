@@ -44,7 +44,7 @@ impl fmt::Display for Undefinable {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub annotation_category: token::Annotation,
     pub type_: Label,
 }
@@ -71,7 +71,7 @@ impl fmt::Display for AnnotationType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationCapability {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub annotation_category: token::Annotation,
     pub type_: Label,
     pub capability: CapabilityBase,
@@ -104,7 +104,7 @@ impl fmt::Display for AnnotationCapability {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CapabilityType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub capability: CapabilityBase,
     pub type_: Label,
 }
@@ -131,7 +131,7 @@ impl fmt::Display for CapabilityType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Specialise {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub specialised: Label,
     pub type_: Label,
     pub capability: Relates,
@@ -167,7 +167,7 @@ impl fmt::Display for Specialise {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 
@@ -193,7 +193,7 @@ impl fmt::Display for Function {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 

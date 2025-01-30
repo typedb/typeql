@@ -22,7 +22,7 @@ pub mod type_;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Is {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: Variable,
     pub rhs: Variable,
 }
@@ -49,7 +49,7 @@ impl fmt::Display for Is {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct InIterable {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: Vec<Variable>,
     pub rhs: Expression,
 }
@@ -102,7 +102,7 @@ impl fmt::Display for DeconstructField {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StructDeconstruct {
-    span: Option<Span>,
+    pub span: Option<Span>,
     field_map: HashMap<Identifier, DeconstructField>,
 }
 
@@ -154,7 +154,7 @@ impl fmt::Display for AssignmentPattern {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Assignment {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: AssignmentPattern,
     pub rhs: Expression,
 }

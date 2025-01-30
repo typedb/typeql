@@ -15,7 +15,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Type {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: Option<token::Kind>,
     pub type_: TypeRefAny,
     pub constraints: Vec<Constraint>,
@@ -64,7 +64,7 @@ impl fmt::Display for Type {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constraint {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub base: ConstraintBase,
     pub annotations: Vec<Annotation>,
 }
@@ -166,7 +166,7 @@ impl fmt::Display for SubKind {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sub {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: SubKind,
     pub supertype: TypeRefAny,
 }
@@ -193,7 +193,7 @@ impl fmt::Display for Sub {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub value_type: NamedType,
 }
 
@@ -219,7 +219,7 @@ impl fmt::Display for ValueType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub owned: TypeRefAny,
 }
 
@@ -246,7 +246,7 @@ impl fmt::Display for Owns {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub related: TypeRefAny,
     pub specialised: Option<TypeRef>,
 }
@@ -277,7 +277,7 @@ impl fmt::Display for Relates {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub role: TypeRef,
 }
 

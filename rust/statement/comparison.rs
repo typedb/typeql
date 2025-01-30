@@ -14,7 +14,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ComparisonStatement {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: Expression,
     pub comparison: Comparison,
 }
@@ -41,7 +41,7 @@ impl fmt::Display for ComparisonStatement {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Comparison {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub comparator: token::Comparator,
     pub rhs: Expression,
 }

@@ -15,7 +15,7 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
     pub fields: Vec<Field>,
 }
@@ -62,7 +62,7 @@ impl fmt::Display for Struct {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Field {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub key: Identifier,
     pub type_: TypeRefAny,
 }

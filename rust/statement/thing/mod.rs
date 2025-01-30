@@ -22,7 +22,7 @@ pub mod isa;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Thing {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub head: Head,
     pub constraints: Vec<Constraint>,
 }
@@ -102,7 +102,7 @@ impl fmt::Display for Head {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relation {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub role_players: Vec<RolePlayer>,
 }
 
@@ -178,7 +178,7 @@ impl fmt::Display for Constraint {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Iid {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub iid: String,
 }
 
@@ -204,7 +204,7 @@ impl fmt::Display for Iid {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Has {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub type_: Option<TypeRefAny>,
     pub value: HasValue,
 }
@@ -263,7 +263,7 @@ impl fmt::Display for HasValue {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Links {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub relation: Relation,
 }
 

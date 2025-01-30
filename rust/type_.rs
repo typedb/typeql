@@ -14,7 +14,7 @@ use crate::{
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct BuiltinValueType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub token: token::ValueType,
 }
 
@@ -40,7 +40,7 @@ impl fmt::Display for BuiltinValueType {
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Label {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 
@@ -66,7 +66,7 @@ impl fmt::Display for Label {
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct ScopedLabel {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub scope: Label,
     pub name: Label,
 }
@@ -174,7 +174,7 @@ impl fmt::Display for TypeRefAny {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Optional {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub inner: TypeRef,
 }
 
@@ -199,7 +199,7 @@ impl fmt::Display for Optional {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub inner: TypeRef,
 }
 

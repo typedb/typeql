@@ -17,7 +17,7 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub signature: Signature,
     pub block: FunctionBlock,
     pub unparsed: String,
@@ -60,7 +60,7 @@ impl fmt::Display for Function {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Signature {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
     pub args: Vec<Argument>,
     pub output: Output,
@@ -106,7 +106,7 @@ impl fmt::Display for Signature {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Argument {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub var: Variable,
     pub type_: TypeRefAny,
 }
@@ -159,7 +159,7 @@ impl fmt::Display for Output {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Stream {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub types: Vec<TypeRefAny>,
 }
 
@@ -187,7 +187,7 @@ impl fmt::Display for Stream {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Single {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub types: Vec<TypeRefAny>,
 }
 
@@ -275,7 +275,7 @@ impl fmt::Display for ReturnStatement {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnStream {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub vars: Vec<Variable>,
 }
 
@@ -298,7 +298,7 @@ impl fmt::Display for ReturnStream {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnSingle {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub selector: SingleSelector,
     pub vars: Vec<Variable>,
 }
@@ -362,7 +362,7 @@ impl fmt::Display for ReturnReduction {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Check {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Check {
