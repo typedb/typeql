@@ -7,11 +7,10 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{identifier::Identifier, Span, token},
+    common::{identifier::Identifier, token, Span, Spanned},
     util::write_joined,
     value::{IntegerLiteral, Literal, StringLiteral},
 };
-use crate::common::Spanned;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Annotation {

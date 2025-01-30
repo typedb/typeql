@@ -8,12 +8,11 @@ use std::fmt;
 
 use super::definable::type_::CapabilityBase;
 use crate::{
-    common::{identifier::Identifier, token, Span},
+    common::{identifier::Identifier, token, Span, Spanned},
     pretty::Pretty,
     schema::definable::type_::capability::Relates,
     type_::Label,
 };
-use crate::common::Spanned;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Undefinable {

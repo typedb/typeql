@@ -7,12 +7,11 @@
 use std::{fmt, fmt::Formatter};
 
 use crate::{
-    common::{identifier::Identifier, Span},
+    common::{identifier::Identifier, Span, Spanned},
     pretty::{indent, Pretty},
     token,
     type_::TypeRefAny,
 };
-use crate::common::Spanned;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {

@@ -9,10 +9,7 @@ use super::{
 };
 use crate::{
     common::{error::TypeQLError, Spanned},
-    parser::{
-        annotation::visit_annotations,
-        define::{function::visit_definition_function, struct_::visit_definition_struct},
-    },
+    parser::{annotation::visit_annotations, define::function::visit_definition_function},
     query::schema::Redefine,
     schema::definable::{Definable, Type},
 };

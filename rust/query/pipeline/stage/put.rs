@@ -7,7 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     statement::Statement,
 };
@@ -21,6 +21,12 @@ pub struct Put {
 impl Put {
     pub(crate) fn new(span: Option<Span>, statements: Vec<Statement>) -> Self {
         Self { span, statements }
+    }
+}
+
+impl Spanned for Put {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

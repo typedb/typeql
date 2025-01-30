@@ -4,10 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{
-    fmt::{self, Debug, Formatter, Write},
-    ptr::write,
-};
+use std::fmt::{self, Debug, Formatter, Write};
 
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},

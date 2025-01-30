@@ -25,6 +25,12 @@ impl Delete {
     }
 }
 
+impl Spanned for Delete {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Delete {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", token::Clause::Delete)?;

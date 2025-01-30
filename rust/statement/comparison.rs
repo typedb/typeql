@@ -7,11 +7,10 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     expression::Expression,
     pretty::Pretty,
 };
-use crate::common::Spanned;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ComparisonStatement {

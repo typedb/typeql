@@ -14,7 +14,6 @@ use crate::{
     pretty::{indent, Pretty},
     type_::TypeRefAny,
     util::write_joined,
-    value::Literal,
     variable::Variable,
     TypeRef,
 };

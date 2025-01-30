@@ -11,7 +11,6 @@ use crate::{
     pretty::Pretty,
     statement::{comparison::Comparison, thing::Relation},
     type_::TypeRef,
-    value::ValueLiteral,
     Expression, Literal,
 };
 

@@ -9,7 +9,7 @@ use std::fmt::{self, Formatter};
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
     pretty::Pretty,
-    token, Result,
+    Result,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

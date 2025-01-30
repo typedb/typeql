@@ -9,20 +9,26 @@ use std::fmt;
 use crate::{
     common::{token, Span, Spanned},
     pretty::{indent, Pretty},
-    query::stage::modifier::Require,
     util::write_joined,
     variable::Variable,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Reduce {
+    span: Option<Span>,
     pub reduce_assignments: Vec<ReduceAssign>,
     pub groupby: Option<Vec<Variable>>,
 }
 
 impl Reduce {
-    pub fn new(reduce_assignments: Vec<ReduceAssign>, groupby: Option<Vec<Variable>>) -> Self {
-        Reduce { reduce_assignments, groupby: groupby }
+    pub fn new(span: Option<Span>, reduce_assignments: Vec<ReduceAssign>, groupby: Option<Vec<Variable>>) -> Self {
+        Reduce { span, reduce_assignments, groupby: groupby }
+    }
+}
+
+impl Spanned for Reduce {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

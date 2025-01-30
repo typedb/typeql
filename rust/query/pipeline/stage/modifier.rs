@@ -198,6 +198,19 @@ pub enum Operator {
     Require(Require),
 }
 
+impl Spanned for Operator {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Select(inner) => inner.span(),
+            Self::Sort(inner) => inner.span(),
+            Self::Offset(inner) => inner.span(),
+            Self::Limit(inner) => inner.span(),
+            Self::Reduce(inner) => inner.span(),
+            Self::Require(inner) => inner.span(),
+        }
+    }
+}
+
 impl Pretty for Operator {
     fn fmt(&self, indent_level: usize, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

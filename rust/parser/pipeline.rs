@@ -357,6 +357,7 @@ pub(super) fn visit_operator_stream(node: Node<'_>) -> Operator {
 
 fn visit_operator_reduce(node: Node<'_>) -> Reduce {
     debug_assert_eq!(node.as_rule(), Rule::operator_reduce);
+    let span = node.span();
     let mut children = node.into_children();
     let mut reduce_assignments = Vec::new();
     let mut group = None;
@@ -373,7 +374,7 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
         }
     }
     debug_assert_eq!(children.try_consume_any(), None);
-    Reduce::new(reduce_assignments, group)
+    Reduce::new(span, reduce_assignments, group)
 }
 
 pub(super) fn visit_reduce_assign(node: Node<'_>) -> ReduceAssign {
