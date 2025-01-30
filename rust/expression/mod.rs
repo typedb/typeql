@@ -30,6 +30,12 @@ impl BuiltinFunctionName {
     }
 }
 
+impl Spanned for BuiltinFunctionName {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for BuiltinFunctionName {}
 
 impl fmt::Display for BuiltinFunctionName {
@@ -45,6 +51,15 @@ pub enum FunctionName {
 }
 
 impl Pretty for FunctionName {}
+
+impl Spanned for FunctionName {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Builtin(inner) => inner.span(),
+            Self::Identifier(inner) => inner.span(),
+        }
+    }
+}
 
 impl fmt::Display for FunctionName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

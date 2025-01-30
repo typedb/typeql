@@ -11,6 +11,7 @@ use crate::{
     expression::Expression,
     pretty::Pretty,
 };
+use crate::common::Spanned;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ComparisonStatement {
@@ -43,6 +44,12 @@ pub struct Comparison {
 impl Comparison {
     pub(crate) fn new(span: Option<Span>, comparator: token::Comparator, rhs: Expression) -> Self {
         Self { span, comparator, rhs }
+    }
+}
+
+impl Spanned for Comparison {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

@@ -124,6 +124,15 @@ pub enum TypeRef {
     Variable(Variable), // $t
 }
 
+impl Spanned for TypeRef {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Named(named) => named.span(),
+            Self::Variable(var) => var.span(),
+        }
+    }
+}
+
 impl Pretty for TypeRef {}
 
 impl fmt::Display for TypeRef {
@@ -143,6 +152,15 @@ pub enum TypeRefAny {
 }
 
 impl Pretty for TypeRefAny {}
+impl Spanned for TypeRefAny {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Type(inner) => inner.span(),
+            Self::Optional(inner) => inner.span(),
+            Self::List(inner) => inner.span(),
+        }
+    }
+}
 
 impl fmt::Display for TypeRefAny {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -165,6 +183,11 @@ impl Optional {
         Self { span, inner }
     }
 }
+impl Spanned for Optional {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
 
 impl Pretty for Optional {}
 
@@ -183,6 +206,12 @@ pub struct List {
 impl List {
     pub fn new(span: Option<Span>, inner: TypeRef) -> Self {
         Self { span, inner }
+    }
+}
+
+impl Spanned for List {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
