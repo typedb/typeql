@@ -359,7 +359,7 @@ $x has release-date 1000-11-12T13:14:15.0001234567;"#;
 
     let parsed = parse_query(query);
     assert!(parsed.is_err());
-    assert!(parsed.unwrap_err().to_string().contains(" at 2:50"));
+    assert!(parsed.unwrap_err().to_string().contains(" near 2:49"));
 }
 
 #[test]

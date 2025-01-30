@@ -283,7 +283,6 @@ impl ReturnStream {
     pub fn new(span: Option<Span>, vars: Vec<Variable>) -> Self {
         Self { span, vars }
     }
-
 }
 
 impl Spanned for ReturnStream {
