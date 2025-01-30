@@ -7,7 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{identifier::Identifier, token, Span},
+    common::{identifier::Identifier, token, Span, Spanned},
     util::write_joined,
     value::{IntegerLiteral, Literal, StringLiteral},
 };
@@ -25,6 +25,24 @@ pub enum Annotation {
     Subkey(Subkey),
     Unique(Unique),
     Values(Values),
+}
+
+impl Spanned for Annotation {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Annotation::Abstract(annotation) => annotation.span(),
+            Annotation::Cardinality(annotation) => annotation.span(),
+            Annotation::Cascade(annotation) => annotation.span(),
+            Annotation::Distinct(annotation) => annotation.span(),
+            Annotation::Independent(annotation) => annotation.span(),
+            Annotation::Key(annotation) => annotation.span(),
+            Annotation::Range(annotation) => annotation.span(),
+            Annotation::Regex(annotation) => annotation.span(),
+            Annotation::Subkey(annotation) => annotation.span(),
+            Annotation::Unique(annotation) => annotation.span(),
+            Annotation::Values(annotation) => annotation.span(),
+        }
+    }
 }
 
 impl fmt::Display for Annotation {
@@ -47,12 +65,18 @@ impl fmt::Display for Annotation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Abstract {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Abstract {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Abstract {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -64,13 +88,19 @@ impl fmt::Display for Abstract {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cardinality {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub range: CardinalityRange,
 }
 
 impl Cardinality {
     pub fn new(span: Option<Span>, range: CardinalityRange) -> Self {
         Self { span, range }
+    }
+}
+
+impl Spanned for Cardinality {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -98,12 +128,18 @@ impl fmt::Display for CardinalityRange {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cascade {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Cascade {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Cascade {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -115,12 +151,18 @@ impl fmt::Display for Cascade {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Distinct {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Distinct {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Distinct {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -132,12 +174,18 @@ impl fmt::Display for Distinct {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Independent {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Independent {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Independent {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -149,12 +197,18 @@ impl fmt::Display for Independent {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Key {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Key {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Key {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -166,7 +220,7 @@ impl fmt::Display for Key {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Range {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub min: Option<Literal>,
     pub max: Option<Literal>,
 }
@@ -174,6 +228,12 @@ pub struct Range {
 impl Range {
     pub fn new(span: Option<Span>, min: Option<Literal>, max: Option<Literal>) -> Self {
         Self { span, min, max }
+    }
+}
+
+impl Spanned for Range {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -194,13 +254,19 @@ impl fmt::Display for Range {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Regex {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub regex: StringLiteral,
 }
 
 impl Regex {
     pub fn new(span: Option<Span>, regex: StringLiteral) -> Self {
         Self { span, regex }
+    }
+}
+
+impl Spanned for Regex {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -212,13 +278,19 @@ impl fmt::Display for Regex {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Subkey {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 
 impl Subkey {
     pub fn new(span: Option<Span>, ident: Identifier) -> Self {
         Self { span, ident }
+    }
+}
+
+impl Spanned for Subkey {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -230,12 +302,18 @@ impl fmt::Display for Subkey {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Unique {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Unique {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Unique {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -247,13 +325,19 @@ impl fmt::Display for Unique {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Values {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub values: Vec<Literal>,
 }
 
 impl Values {
     pub fn new(span: Option<Span>, values: Vec<Literal>) -> Self {
         Self { span, values }
+    }
+}
+
+impl Spanned for Values {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

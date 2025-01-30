@@ -8,14 +8,14 @@ use std::fmt::{self, Write};
 
 use crate::{
     annotation::Annotation,
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     type_::{Label, NamedType, ScopedLabel, TypeRef, TypeRefAny},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Type {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: Option<token::Kind>,
     pub type_: TypeRefAny,
     pub constraints: Vec<Constraint>,
@@ -24,6 +24,12 @@ pub struct Type {
 impl Type {
     pub fn new(span: Option<Span>, kind: Option<token::Kind>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
         Self { span, kind, type_, constraints }
+    }
+}
+
+impl Spanned for Type {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -58,7 +64,7 @@ impl fmt::Display for Type {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Constraint {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub base: ConstraintBase,
     pub annotations: Vec<Annotation>,
 }
@@ -66,6 +72,12 @@ pub struct Constraint {
 impl Constraint {
     pub fn new(span: Option<Span>, base: ConstraintBase, annotations: Vec<Annotation>) -> Self {
         Self { span, base, annotations }
+    }
+}
+
+impl Spanned for Constraint {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -154,7 +166,7 @@ impl fmt::Display for SubKind {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sub {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: SubKind,
     pub supertype: TypeRefAny,
 }
@@ -162,6 +174,12 @@ pub struct Sub {
 impl Sub {
     pub fn new(span: Option<Span>, kind: SubKind, supertype: TypeRefAny) -> Self {
         Self { span, kind, supertype }
+    }
+}
+
+impl Spanned for Sub {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -175,13 +193,19 @@ impl fmt::Display for Sub {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub value_type: NamedType,
 }
 
 impl ValueType {
     pub fn new(span: Option<Span>, value_type: NamedType) -> Self {
         Self { span, value_type }
+    }
+}
+
+impl Spanned for ValueType {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -195,13 +219,19 @@ impl fmt::Display for ValueType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub owned: TypeRefAny,
 }
 
 impl Owns {
     pub fn new(span: Option<Span>, owned: TypeRefAny) -> Self {
         Self { span, owned }
+    }
+}
+
+impl Spanned for Owns {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -216,7 +246,7 @@ impl fmt::Display for Owns {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub related: TypeRefAny,
     pub specialised: Option<TypeRef>,
 }
@@ -224,6 +254,12 @@ pub struct Relates {
 impl Relates {
     pub fn new(span: Option<Span>, related: TypeRefAny, specialised: Option<TypeRef>) -> Self {
         Self { span, related, specialised }
+    }
+}
+
+impl Spanned for Relates {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -241,13 +277,19 @@ impl fmt::Display for Relates {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub role: TypeRef,
 }
 
 impl Plays {
     pub fn new(span: Option<Span>, role: TypeRef) -> Self {
         Self { span, role }
+    }
+}
+
+impl Spanned for Plays {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

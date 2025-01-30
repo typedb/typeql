@@ -9,13 +9,14 @@ use std::{error::Error as StdError, fmt};
 use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
-use crate::{error_messages, util::write_joined, Identifier};
+use crate::{common::Spannable, error_messages, util::write_joined, Identifier};
 
 #[macro_use]
 mod macros;
 
-const SYNTAX_ERROR_INDENT: usize = 4;
-const SYNTAX_ERROR_INDICATOR: &str = "--> ";
+pub(crate) const SYNTAX_ANNOTATED_INDENT: usize = 4;
+pub(crate) const SYNTAX_ANNOTATED_INDICATOR_LINE: &str = "--> ";
+pub(crate) const SYNTAX_ANNOTATED_INDICATOR_COL: &str = "^";
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Error {
@@ -38,23 +39,16 @@ impl From<Vec<TypeQLError>> for Error {
 }
 
 pub(crate) fn syntax_error<T: pest::RuleType>(query: &str, error: PestError<T>) -> TypeQLError {
-    let (error_line_nr, error_col) = match error.line_col {
+    let (error_line_nr, error_col_nr) = match error.line_col {
         LineColLocation::Pos((line, col)) => (line, col),
         LineColLocation::Span((line, col), _) => (line, col),
     };
-    // error_line_nr is 1-indexed, we operate on 0-offset
+    // error_line_nr and error_col_nr is 1-indexed, we operate on 0-offset
     let error_line = error_line_nr - 1;
+    let error_col = error_col_nr - 1;
     let formatted_error = query
-        .lines()
-        .enumerate()
-        .map(|(i, line)| {
-            if i == error_line {
-                format!("{SYNTAX_ERROR_INDICATOR}{line}")
-            } else {
-                format!("{}{line}", " ".repeat(SYNTAX_ERROR_INDENT))
-            }
-        })
-        .join("\n");
+        .extract_annotated_line_col(error_line, error_col, usize::MAX, usize::MAX)
+        .unwrap_or_else(|| String::new());
     TypeQLError::SyntaxErrorDetailed { error_line_nr, error_col, formatted_error }
 }
 
@@ -76,7 +70,7 @@ pub fn collect_err(i: impl IntoIterator<Item = Result<(), Error>>) -> Result<(),
 error_messages! { TypeQLError
     code: "TQL", type: "TypeQL Error",
     SyntaxErrorDetailed { error_line_nr: usize, error_col: usize, formatted_error: String } =
-        3: "There is a syntax error at {error_line_nr}:{error_col}:\n{formatted_error}",
+        3: "There is a syntax error near {error_line_nr}:{error_col}:\n{formatted_error}",
     InvalidCasting { enum_name: &'static str, variant: &'static str, expected_variant: &'static str, typename: &'static str } =
         4: "Enum '{enum_name}::{variant}' does not match '{expected_variant}', and cannot be unwrapped into '{typename}'.",
     InvalidLiteral { variant: &'static str, expected_variant: &'static str } =

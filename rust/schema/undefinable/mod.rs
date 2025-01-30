@@ -8,7 +8,7 @@ use std::fmt;
 
 use super::definable::type_::CapabilityBase;
 use crate::{
-    common::{identifier::Identifier, token, Span},
+    common::{identifier::Identifier, token, Span, Spanned},
     pretty::Pretty,
     schema::definable::type_::capability::Relates,
     type_::Label,
@@ -44,7 +44,7 @@ impl fmt::Display for Undefinable {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub annotation_category: token::Annotation,
     pub type_: Label,
 }
@@ -52,6 +52,12 @@ pub struct AnnotationType {
 impl AnnotationType {
     pub fn new(span: Option<Span>, annotation_category: token::Annotation, type_: Label) -> Self {
         Self { span, annotation_category, type_ }
+    }
+}
+
+impl Spanned for AnnotationType {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -65,7 +71,7 @@ impl fmt::Display for AnnotationType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationCapability {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub annotation_category: token::Annotation,
     pub type_: Label,
     pub capability: CapabilityBase,
@@ -82,6 +88,12 @@ impl AnnotationCapability {
     }
 }
 
+impl Spanned for AnnotationCapability {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for AnnotationCapability {}
 
 impl fmt::Display for AnnotationCapability {
@@ -92,7 +104,7 @@ impl fmt::Display for AnnotationCapability {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CapabilityType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub capability: CapabilityBase,
     pub type_: Label,
 }
@@ -100,6 +112,12 @@ pub struct CapabilityType {
 impl CapabilityType {
     pub fn new(span: Option<Span>, capability: CapabilityBase, type_: Label) -> Self {
         Self { span, capability, type_ }
+    }
+}
+
+impl Spanned for CapabilityType {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -113,7 +131,7 @@ impl fmt::Display for CapabilityType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Specialise {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub specialised: Label,
     pub type_: Label,
     pub capability: Relates,
@@ -122,6 +140,12 @@ pub struct Specialise {
 impl Specialise {
     pub fn new(span: Option<Span>, specialised: Label, type_: Label, relates: Relates) -> Self {
         Self { span, specialised, type_, capability: relates }
+    }
+}
+
+impl Spanned for Specialise {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -143,13 +167,19 @@ impl fmt::Display for Specialise {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 
 impl Function {
     pub fn new(span: Option<Span>, ident: Identifier) -> Self {
         Self { span, ident }
+    }
+}
+
+impl Spanned for Function {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -163,13 +193,19 @@ impl fmt::Display for Function {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 
 impl Struct {
     pub fn new(span: Option<Span>, ident: Identifier) -> Self {
         Self { span, ident }
+    }
+}
+
+impl Spanned for Struct {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

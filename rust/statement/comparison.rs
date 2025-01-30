@@ -7,14 +7,14 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     expression::Expression,
     pretty::Pretty,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ComparisonStatement {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: Expression,
     pub comparison: Comparison,
 }
@@ -22,6 +22,12 @@ pub struct ComparisonStatement {
 impl ComparisonStatement {
     pub fn new(span: Option<Span>, lhs: Expression, comparison: Comparison) -> Self {
         Self { span, lhs, comparison }
+    }
+}
+
+impl Spanned for ComparisonStatement {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -35,7 +41,7 @@ impl fmt::Display for ComparisonStatement {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Comparison {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub comparator: token::Comparator,
     pub rhs: Expression,
 }
@@ -43,6 +49,12 @@ pub struct Comparison {
 impl Comparison {
     pub(crate) fn new(span: Option<Span>, comparator: token::Comparator, rhs: Expression) -> Self {
         Self { span, comparator, rhs }
+    }
+}
+
+impl Spanned for Comparison {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

@@ -4,10 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use std::{
-    fmt::{self, Debug, Formatter, Write},
-    ptr::write,
-};
+use std::fmt::{self, Debug, Formatter, Write};
 
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
@@ -20,7 +17,7 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Function {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub signature: Signature,
     pub block: FunctionBlock,
     pub unparsed: String,
@@ -29,6 +26,12 @@ pub struct Function {
 impl Function {
     pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock, unparsed: String) -> Self {
         Self { span, signature, block, unparsed }
+    }
+}
+
+impl Spanned for Function {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -57,7 +60,7 @@ impl fmt::Display for Function {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Signature {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
     pub args: Vec<Argument>,
     pub output: Output,
@@ -103,7 +106,7 @@ impl fmt::Display for Signature {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Argument {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub var: Variable,
     pub type_: TypeRefAny,
 }
@@ -156,7 +159,7 @@ impl fmt::Display for Output {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Stream {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub types: Vec<TypeRefAny>,
 }
 
@@ -184,7 +187,7 @@ impl fmt::Display for Stream {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Single {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub types: Vec<TypeRefAny>,
 }
 
@@ -272,7 +275,7 @@ impl fmt::Display for ReturnStatement {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnStream {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub vars: Vec<Variable>,
 }
 
@@ -281,6 +284,14 @@ impl ReturnStream {
         Self { span, vars }
     }
 }
+
+impl Spanned for ReturnStream {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for ReturnStream {}
 
 impl fmt::Display for ReturnStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -295,7 +306,7 @@ impl fmt::Display for ReturnStream {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReturnSingle {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub selector: SingleSelector,
     pub vars: Vec<Variable>,
 }
@@ -305,6 +316,14 @@ impl ReturnSingle {
         Self { span, selector, vars }
     }
 }
+
+impl Spanned for ReturnSingle {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for ReturnSingle {}
 
 impl fmt::Display for ReturnSingle {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -336,7 +355,16 @@ impl fmt::Display for SingleSelector {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ReturnReduction {
     Check(Check),
-    Value(Vec<Reducer>),
+    Value(Vec<Reducer>, Option<Span>),
+}
+
+impl Spanned for ReturnReduction {
+    fn span(&self) -> Option<Span> {
+        match self {
+            ReturnReduction::Check(check) => check.span(),
+            ReturnReduction::Value(_, span) => *span,
+        }
+    }
 }
 
 impl Pretty for ReturnReduction {
@@ -349,7 +377,7 @@ impl fmt::Display for ReturnReduction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Check(inner) => fmt::Display::fmt(inner, f),
-            Self::Value(inner) => {
+            Self::Value(inner, _) => {
                 write_joined!(f, ", ", inner)?;
                 Ok(())
             }
@@ -359,12 +387,18 @@ impl fmt::Display for ReturnReduction {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Check {
-    span: Option<Span>,
+    pub span: Option<Span>,
 }
 
 impl Check {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Check {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

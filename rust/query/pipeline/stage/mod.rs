@@ -10,7 +10,11 @@ pub use self::{
     delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Operator, put::Put, reduce::Reduce,
     update::Update,
 };
-use crate::{pretty::Pretty, util::enum_getter};
+use crate::{
+    common::{Span, Spanned},
+    pretty::Pretty,
+    util::enum_getter,
+};
 
 pub mod delete;
 pub mod fetch;
@@ -40,6 +44,20 @@ enum_getter! { Stage
     into_fetch(Fetch) => Fetch,
     into_delete(Delete) => Delete,
     into_modifier(Operator) => Operator,
+}
+
+impl Spanned for Stage {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Match(inner) => inner.span(),
+            Self::Insert(inner) => inner.span(),
+            Self::Put(inner) => inner.span(),
+            Self::Update(inner) => inner.span(),
+            Self::Fetch(inner) => inner.span(),
+            Self::Delete(inner) => inner.span(),
+            Self::Operator(inner) => inner.span(),
+        }
+    }
 }
 
 impl Pretty for Stage {

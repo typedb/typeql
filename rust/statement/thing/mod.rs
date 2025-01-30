@@ -9,12 +9,11 @@ use std::fmt::{self, Write};
 use self::isa::Isa;
 use super::{comparison, Statement};
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     expression::Expression,
     pretty::{indent, Pretty},
     type_::TypeRefAny,
     util::write_joined,
-    value::Literal,
     variable::Variable,
     TypeRef,
 };
@@ -23,7 +22,7 @@ pub mod isa;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Thing {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub head: Head,
     pub constraints: Vec<Constraint>,
 }
@@ -37,6 +36,12 @@ impl Thing {
 impl From<Thing> for Statement {
     fn from(val: Thing) -> Self {
         Statement::Thing(val)
+    }
+}
+
+impl Spanned for Thing {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -97,13 +102,19 @@ impl fmt::Display for Head {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relation {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub role_players: Vec<RolePlayer>,
 }
 
 impl Relation {
     pub(crate) fn new(span: Option<Span>, role_players: Vec<RolePlayer>) -> Self {
         Self { span, role_players }
+    }
+}
+
+impl Spanned for Relation {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -167,13 +178,19 @@ impl fmt::Display for Constraint {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Iid {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub iid: String,
 }
 
 impl Iid {
     pub(crate) fn new(span: Option<Span>, iid: String) -> Self {
         Self { span, iid }
+    }
+}
+
+impl Spanned for Iid {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -187,7 +204,7 @@ impl fmt::Display for Iid {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Has {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub type_: Option<TypeRefAny>,
     pub value: HasValue,
 }
@@ -195,6 +212,12 @@ pub struct Has {
 impl Has {
     pub fn new(span: Option<Span>, type_: Option<TypeRefAny>, value: HasValue) -> Self {
         Self { span, type_, value }
+    }
+}
+
+impl Spanned for Has {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -240,13 +263,19 @@ impl fmt::Display for HasValue {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Links {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub relation: Relation,
 }
 
 impl Links {
     pub fn new(span: Option<Span>, relation: Relation) -> Self {
         Self { span, relation }
+    }
+}
+
+impl Spanned for Links {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

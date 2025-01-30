@@ -7,14 +7,14 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pattern::Pattern,
     pretty::{indent, Pretty},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Match {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
 }
 
@@ -30,6 +30,12 @@ impl Match {
     pub fn and(mut self, pattern: Pattern) -> Self {
         self.patterns.push(pattern);
         self
+    }
+}
+
+impl Spanned for Match {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

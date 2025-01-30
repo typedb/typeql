@@ -7,20 +7,26 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     statement::Statement,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Insert {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub statements: Vec<Statement>,
 }
 
 impl Insert {
     pub(crate) fn new(span: Option<Span>, statements: Vec<Statement>) -> Self {
         Self { span, statements }
+    }
+}
+
+impl Spanned for Insert {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

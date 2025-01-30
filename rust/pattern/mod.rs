@@ -14,7 +14,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Conjunction {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
 }
 
@@ -43,7 +43,7 @@ impl fmt::Display for Conjunction {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Negation {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
 }
 
@@ -74,7 +74,7 @@ impl fmt::Display for Negation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Optional {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
 }
 
@@ -105,7 +105,7 @@ impl fmt::Display for Optional {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Disjunction {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub branches: Vec<Vec<Pattern>>,
 }
 

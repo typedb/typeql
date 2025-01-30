@@ -15,7 +15,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Alias {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub aliases: Vec<Label>,
 }
 
@@ -41,7 +41,7 @@ impl fmt::Display for Alias {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sub {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub supertype_label: Label,
 }
 
@@ -71,7 +71,7 @@ impl fmt::Display for Sub {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ValueType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub value_type: NamedType,
 }
 
@@ -97,7 +97,7 @@ impl fmt::Display for ValueType {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Owns {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub owned: TypeRefAny,
 }
 
@@ -124,7 +124,7 @@ impl fmt::Display for Owns {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Relates {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub related: TypeRefAny,
     pub specialised: Option<Label>,
 }
@@ -153,7 +153,7 @@ impl fmt::Display for Relates {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Plays {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub role: ScopedLabel,
 }
 

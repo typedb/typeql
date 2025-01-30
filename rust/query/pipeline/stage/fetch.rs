@@ -7,7 +7,7 @@
 use std::{fmt, fmt::Formatter};
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     expression::{Expression, FunctionCall},
     pretty::{indent, Pretty},
     query::stage::Stage,
@@ -25,6 +25,12 @@ pub struct Fetch {
 impl Fetch {
     pub fn new(span: Option<Span>, object: FetchObject) -> Self {
         Self { span, object }
+    }
+}
+
+impl Spanned for Fetch {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -87,6 +93,12 @@ pub struct FetchObject {
 impl FetchObject {
     pub fn new(span: Option<Span>, body: FetchObjectBody) -> Self {
         Self { span, body }
+    }
+}
+
+impl Spanned for FetchObject {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -166,6 +178,12 @@ impl FetchObjectEntry {
     }
 }
 
+impl Spanned for FetchObjectEntry {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for FetchObjectEntry {
     fn fmt(&self, indent_level: usize, f: &mut Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
@@ -189,6 +207,12 @@ pub struct FetchList {
 impl FetchList {
     pub fn new(span: Option<Span>, stream: FetchStream) -> Self {
         Self { span, stream }
+    }
+}
+
+impl Spanned for FetchList {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -324,6 +348,12 @@ impl FetchAttribute {
 
     pub fn is_list(&self) -> bool {
         matches!(self.attribute, TypeRefAny::List(_))
+    }
+}
+
+impl Spanned for FetchAttribute {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

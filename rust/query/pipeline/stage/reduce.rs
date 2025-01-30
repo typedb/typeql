@@ -7,7 +7,7 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     util::write_joined,
     variable::Variable,
@@ -15,13 +15,20 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Reduce {
+    pub span: Option<Span>,
     pub reduce_assignments: Vec<ReduceAssign>,
     pub groupby: Option<Vec<Variable>>,
 }
 
 impl Reduce {
-    pub fn new(reduce_assignments: Vec<ReduceAssign>, groupby: Option<Vec<Variable>>) -> Self {
-        Reduce { reduce_assignments, groupby: groupby }
+    pub fn new(span: Option<Span>, reduce_assignments: Vec<ReduceAssign>, groupby: Option<Vec<Variable>>) -> Self {
+        Reduce { span, reduce_assignments, groupby: groupby }
+    }
+}
+
+impl Spanned for Reduce {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -98,13 +105,19 @@ impl fmt::Display for Reducer {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Count {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variable: Option<Variable>,
 }
 
 impl Count {
     pub fn new(span: Option<Span>, variable: Option<Variable>) -> Self {
         Self { span, variable }
+    }
+}
+
+impl Spanned for Count {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -122,7 +135,7 @@ impl fmt::Display for Count {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Stat {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub reduce_operator: token::ReduceOperator,
     pub variable: Variable,
 }
@@ -130,6 +143,12 @@ pub struct Stat {
 impl Stat {
     pub fn new(span: Option<Span>, aggregate: token::ReduceOperator, variable: Variable) -> Self {
         Self { span, reduce_operator: aggregate, variable }
+    }
+}
+
+impl Spanned for Stat {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

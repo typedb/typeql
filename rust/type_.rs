@@ -14,7 +14,7 @@ use crate::{
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub struct BuiltinValueType {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub token: token::ValueType,
 }
 
@@ -40,7 +40,7 @@ impl fmt::Display for BuiltinValueType {
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Label {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
 }
 
@@ -66,7 +66,7 @@ impl fmt::Display for Label {
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct ScopedLabel {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub scope: Label,
     pub name: Label,
 }
@@ -124,6 +124,15 @@ pub enum TypeRef {
     Variable(Variable), // $t
 }
 
+impl Spanned for TypeRef {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Named(named) => named.span(),
+            Self::Variable(var) => var.span(),
+        }
+    }
+}
+
 impl Pretty for TypeRef {}
 
 impl fmt::Display for TypeRef {
@@ -143,6 +152,15 @@ pub enum TypeRefAny {
 }
 
 impl Pretty for TypeRefAny {}
+impl Spanned for TypeRefAny {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Type(inner) => inner.span(),
+            Self::Optional(inner) => inner.span(),
+            Self::List(inner) => inner.span(),
+        }
+    }
+}
 
 impl fmt::Display for TypeRefAny {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -156,13 +174,18 @@ impl fmt::Display for TypeRefAny {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Optional {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub inner: TypeRef,
 }
 
 impl Optional {
     pub fn new(span: Option<Span>, inner: TypeRef) -> Self {
         Self { span, inner }
+    }
+}
+impl Spanned for Optional {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -176,13 +199,19 @@ impl fmt::Display for Optional {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub inner: TypeRef,
 }
 
 impl List {
     pub fn new(span: Option<Span>, inner: TypeRef) -> Self {
         Self { span, inner }
+    }
+}
+
+impl Spanned for List {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

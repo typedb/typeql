@@ -20,13 +20,19 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BuiltinFunctionName {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub token: token::Function,
 }
 
 impl BuiltinFunctionName {
     pub fn new(span: Option<Span>, token: token::Function) -> Self {
         Self { span, token }
+    }
+}
+
+impl Spanned for BuiltinFunctionName {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -46,6 +52,15 @@ pub enum FunctionName {
 
 impl Pretty for FunctionName {}
 
+impl Spanned for FunctionName {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Builtin(inner) => inner.span(),
+            Self::Identifier(inner) => inner.span(),
+        }
+    }
+}
+
 impl fmt::Display for FunctionName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -57,7 +72,7 @@ impl fmt::Display for FunctionName {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FunctionCall {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub name: FunctionName,
     pub args: Vec<Expression>,
 }
@@ -118,7 +133,7 @@ impl fmt::Display for Operation {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Paren {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub inner: Expression,
 }
 
@@ -144,7 +159,7 @@ impl fmt::Display for Paren {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ListIndex {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variable: Variable,
     pub index: Expression,
 }
@@ -171,7 +186,7 @@ impl fmt::Display for ListIndex {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct List {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub items: Vec<Expression>,
 }
 
@@ -200,7 +215,7 @@ impl fmt::Display for List {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ListIndexRange {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub var: Variable,
     pub from: Expression,
     pub to: Expression,

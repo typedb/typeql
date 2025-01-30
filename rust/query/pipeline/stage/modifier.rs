@@ -9,7 +9,7 @@ use std::fmt::{self, Write};
 use crate::{
     common::{
         token::{self, Order},
-        Span,
+        Span, Spanned,
     },
     pretty::Pretty,
     query::stage::Reduce,
@@ -20,7 +20,7 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct OrderedVariable {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variable: Variable,
     pub ordering: Option<Order>,
 }
@@ -28,6 +28,12 @@ pub struct OrderedVariable {
 impl OrderedVariable {
     pub fn new(span: Option<Span>, variable: Variable, ordering: Option<Order>) -> Self {
         Self { span, variable, ordering }
+    }
+}
+
+impl Spanned for OrderedVariable {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -45,13 +51,19 @@ impl fmt::Display for OrderedVariable {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Sort {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ordered_variables: Vec<OrderedVariable>,
 }
 
 impl Sort {
     pub fn new(span: Option<Span>, ordered_variables: Vec<OrderedVariable>) -> Self {
         Self { span, ordered_variables }
+    }
+}
+
+impl Spanned for Sort {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -68,13 +80,19 @@ impl fmt::Display for Sort {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Select {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variables: Vec<Variable>,
 }
 
 impl Select {
     pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
         Self { span, variables }
+    }
+}
+
+impl Spanned for Select {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -91,13 +109,19 @@ impl fmt::Display for Select {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Offset {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub offset: IntegerLiteral,
 }
 
 impl Offset {
     pub fn new(span: Option<Span>, offset: IntegerLiteral) -> Self {
         Self { span, offset }
+    }
+}
+
+impl Spanned for Offset {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -111,13 +135,19 @@ impl fmt::Display for Offset {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Limit {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub limit: IntegerLiteral,
 }
 
 impl Limit {
     pub fn new(span: Option<Span>, limit: IntegerLiteral) -> Self {
         Self { span, limit }
+    }
+}
+
+impl Spanned for Limit {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -131,13 +161,19 @@ impl fmt::Display for Limit {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Require {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub variables: Vec<Variable>,
 }
 
 impl Require {
     pub fn new(span: Option<Span>, variables: Vec<Variable>) -> Self {
         Self { span, variables }
+    }
+}
+
+impl Spanned for Require {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -160,6 +196,19 @@ pub enum Operator {
     Limit(Limit),
     Reduce(Reduce),
     Require(Require),
+}
+
+impl Spanned for Operator {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Select(inner) => inner.span(),
+            Self::Sort(inner) => inner.span(),
+            Self::Offset(inner) => inner.span(),
+            Self::Limit(inner) => inner.span(),
+            Self::Reduce(inner) => inner.span(),
+            Self::Require(inner) => inner.span(),
+        }
+    }
 }
 
 impl Pretty for Operator {

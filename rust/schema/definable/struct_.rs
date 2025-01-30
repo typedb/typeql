@@ -7,7 +7,7 @@
 use std::{fmt, fmt::Formatter};
 
 use crate::{
-    common::{identifier::Identifier, Span},
+    common::{identifier::Identifier, Span, Spanned},
     pretty::{indent, Pretty},
     token,
     type_::TypeRefAny,
@@ -15,7 +15,7 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Struct {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub ident: Identifier,
     pub fields: Vec<Field>,
 }
@@ -23,6 +23,12 @@ pub struct Struct {
 impl Struct {
     pub fn new(span: Option<Span>, ident: Identifier, fields: Vec<Field>) -> Self {
         Self { span, ident, fields }
+    }
+}
+
+impl Spanned for Struct {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -56,7 +62,7 @@ impl fmt::Display for Struct {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Field {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub key: Identifier,
     pub type_: TypeRefAny,
 }
@@ -64,6 +70,12 @@ pub struct Field {
 impl Field {
     pub fn new(span: Option<Span>, key: Identifier, type_: TypeRefAny) -> Self {
         Self { span, key, type_ }
+    }
+}
+
+impl Spanned for Field {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

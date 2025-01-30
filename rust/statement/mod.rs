@@ -9,7 +9,7 @@ use std::{collections::HashMap, fmt};
 use self::comparison::ComparisonStatement;
 pub use self::{thing::Thing, type_::Type};
 use crate::{
-    common::{identifier::Identifier, token, Span},
+    common::{identifier::Identifier, token, Span, Spanned},
     expression::Expression,
     pretty::{indent, Pretty},
     util::write_joined,
@@ -22,7 +22,7 @@ pub mod type_;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Is {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: Variable,
     pub rhs: Variable,
 }
@@ -30,6 +30,12 @@ pub struct Is {
 impl Is {
     pub(crate) fn new(span: Option<Span>, lhs: Variable, rhs: Variable) -> Self {
         Self { span, lhs, rhs }
+    }
+}
+
+impl Spanned for Is {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -43,7 +49,7 @@ impl fmt::Display for Is {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct InIterable {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: Vec<Variable>,
     pub rhs: Expression,
 }
@@ -51,6 +57,12 @@ pub struct InIterable {
 impl InIterable {
     pub(crate) fn new(span: Option<Span>, lhs: Vec<Variable>, rhs: Expression) -> Self {
         Self { span, lhs, rhs }
+    }
+}
+
+impl Spanned for InIterable {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -90,13 +102,19 @@ impl fmt::Display for DeconstructField {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StructDeconstruct {
-    span: Option<Span>,
+    pub span: Option<Span>,
     field_map: HashMap<Identifier, DeconstructField>,
 }
 
 impl StructDeconstruct {
     pub fn new(span: Option<Span>, field_map: HashMap<Identifier, DeconstructField>) -> Self {
         Self { span, field_map }
+    }
+}
+
+impl Spanned for StructDeconstruct {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -136,7 +154,7 @@ impl fmt::Display for AssignmentPattern {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Assignment {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub lhs: AssignmentPattern,
     pub rhs: Expression,
 }
@@ -144,6 +162,12 @@ pub struct Assignment {
 impl Assignment {
     pub fn new(span: Option<Span>, lhs: AssignmentPattern, rhs: Expression) -> Self {
         Self { span, lhs, rhs }
+    }
+}
+
+impl Spanned for Assignment {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -163,6 +187,19 @@ pub enum Statement {
     Assignment(Assignment),
     Thing(Thing),
     Type(Type),
+}
+
+impl Spanned for Statement {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Statement::Is(inner) => inner.span(),
+            Statement::InIterable(inner) => inner.span(),
+            Statement::Comparison(inner) => inner.span(),
+            Statement::Assignment(inner) => inner.span(),
+            Statement::Thing(inner) => inner.span(),
+            Statement::Type(inner) => inner.span(),
+        }
+    }
 }
 
 impl Pretty for Statement {

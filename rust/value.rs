@@ -9,7 +9,7 @@ use std::fmt::{self, Formatter};
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
     pretty::Pretty,
-    token, Result,
+    Result,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -136,7 +136,7 @@ pub enum ValueLiteral {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Literal {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub inner: ValueLiteral,
 }
 

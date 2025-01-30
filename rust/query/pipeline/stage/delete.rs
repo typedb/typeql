@@ -7,7 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     statement::thing::Relation,
     variable::Variable,
@@ -15,13 +15,19 @@ use crate::{
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Delete {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub deletables: Vec<Deletable>,
 }
 
 impl Delete {
     pub fn new(span: Option<Span>, deletables: Vec<Deletable>) -> Self {
         Self { span, deletables }
+    }
+}
+
+impl Spanned for Delete {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 
@@ -54,13 +60,19 @@ impl fmt::Display for Delete {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Deletable {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: DeletableKind,
 }
 
 impl Deletable {
     pub fn new(span: Option<Span>, kind: DeletableKind) -> Self {
         Self { span, kind }
+    }
+}
+
+impl Spanned for Deletable {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

@@ -7,17 +7,16 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span},
+    common::{token, Span, Spanned},
     pretty::Pretty,
     statement::{comparison::Comparison, thing::Relation},
     type_::TypeRef,
-    value::ValueLiteral,
     Expression, Literal,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Isa {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub kind: IsaKind,
     pub type_: TypeRef,
     pub constraint: Option<IsaInstanceConstraint>,
@@ -26,6 +25,12 @@ pub struct Isa {
 impl Isa {
     pub fn new(span: Option<Span>, kind: IsaKind, type_: TypeRef, constraint: Option<IsaInstanceConstraint>) -> Self {
         Self { span, kind, type_, constraint }
+    }
+}
+
+impl Spanned for Isa {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

@@ -18,7 +18,7 @@ pub mod stage;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Preamble {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub function: definable::Function,
 }
 
@@ -45,7 +45,7 @@ impl fmt::Display for Preamble {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Pipeline {
-    span: Option<Span>,
+    pub span: Option<Span>,
     pub preambles: Vec<Preamble>,
     pub stages: Vec<Stage>,
 }
