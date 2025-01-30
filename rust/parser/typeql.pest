@@ -41,6 +41,7 @@ operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ SEMICOLON }
 operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
 operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
 operator_require = { REQUIRE ~ vars ~ SEMICOLON }
+operator_distinct = { DISTINCT ~ SEMICOLON }
 operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ (GROUPBY ~ vars )? ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
@@ -413,6 +414,7 @@ LIMIT = @{ "limit" ~ WB }
 OFFSET = @{ "offset" ~ WB }
 SORT = @{ "sort" ~ WB }
 REQUIRE = @{ "require" ~ WB }
+DISTINCT = @{ "distinct" ~ WB }
 
 ORDER = ${ ASC | DESC }
 ASC = @{ "asc" ~ WB }
