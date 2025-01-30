@@ -283,7 +283,16 @@ impl ReturnStream {
     pub fn new(span: Option<Span>, vars: Vec<Variable>) -> Self {
         Self { span, vars }
     }
+
 }
+
+impl Spanned for ReturnStream {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for ReturnStream {}
 
 impl fmt::Display for ReturnStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -308,6 +317,14 @@ impl ReturnSingle {
         Self { span, selector, vars }
     }
 }
+
+impl Spanned for ReturnSingle {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for ReturnSingle {}
 
 impl fmt::Display for ReturnSingle {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -339,7 +356,16 @@ impl fmt::Display for SingleSelector {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ReturnReduction {
     Check(Check),
-    Value(Vec<Reducer>),
+    Value(Vec<Reducer>, Option<Span>),
+}
+
+impl Spanned for ReturnReduction {
+    fn span(&self) -> Option<Span> {
+        match self {
+            ReturnReduction::Check(check) => check.span(),
+            ReturnReduction::Value(_, span) => *span,
+        }
+    }
 }
 
 impl Pretty for ReturnReduction {
@@ -352,7 +378,7 @@ impl fmt::Display for ReturnReduction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Check(inner) => fmt::Display::fmt(inner, f),
-            Self::Value(inner) => {
+            Self::Value(inner, _) => {
                 write_joined!(f, ", ", inner)?;
                 Ok(())
             }
@@ -368,6 +394,12 @@ pub struct Check {
 impl Check {
     pub fn new(span: Option<Span>) -> Self {
         Self { span }
+    }
+}
+
+impl Spanned for Check {
+    fn span(&self) -> Option<Span> {
+        self.span
     }
 }
 

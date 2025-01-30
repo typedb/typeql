@@ -104,10 +104,11 @@ pub(super) fn visit_return_reduce(node: Node<'_>) -> ReturnReduction {
 
 fn visit_return_reduce_reduction(node: Node<'_>) -> ReturnReduction {
     debug_assert_eq!(node.as_rule(), Rule::return_reduce_reduction);
+    let span = node.span();
     let mut children = node.into_children();
     let reduction = match children.peek_rule().unwrap() {
         Rule::CHECK => ReturnReduction::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
-        Rule::reducer => ReturnReduction::Value(children.by_ref().map(visit_reducer).collect()),
+        Rule::reducer => ReturnReduction::Value(children.by_ref().map(visit_reducer).collect(), span),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
     };
     debug_assert!(children.try_consume_any().is_none());
