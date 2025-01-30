@@ -25,6 +25,12 @@ impl ComparisonStatement {
     }
 }
 
+impl Spanned for ComparisonStatement {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for ComparisonStatement {}
 
 impl fmt::Display for ComparisonStatement {

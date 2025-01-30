@@ -189,6 +189,19 @@ pub enum Statement {
     Type(Type),
 }
 
+impl Spanned for Statement {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Statement::Is(inner) => inner.span(),
+            Statement::InIterable(inner) => inner.span(),
+            Statement::Comparison(inner) => inner.span(),
+            Statement::Assignment(inner) => inner.span(),
+            Statement::Thing(inner) => inner.span(),
+            Statement::Type(inner) => inner.span(),
+        }
+    }
+}
+
 impl Pretty for Statement {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
