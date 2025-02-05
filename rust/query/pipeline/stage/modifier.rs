@@ -200,6 +200,12 @@ impl Distinct {
     }
 }
 
+impl Spanned for Distinct {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
 impl Pretty for Distinct {}
 
 impl fmt::Display for Distinct {
@@ -230,6 +236,7 @@ impl Spanned for Operator {
             Self::Limit(inner) => inner.span(),
             Self::Reduce(inner) => inner.span(),
             Self::Require(inner) => inner.span(),
+            Self::Distinct(inner) => inner.span(),
         }
     }
 }
