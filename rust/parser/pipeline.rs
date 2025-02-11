@@ -30,7 +30,7 @@ use crate::{
             stage::{
                 delete::{Deletable, DeletableKind},
                 fetch::FetchSome,
-                modifier::{Limit, Offset, OrderedVariable, Select, Sort, Require, Distinct},
+                modifier::{Distinct, Limit, Offset, OrderedVariable, Require, Select, Sort},
                 reduce::{Count, Reducer, Stat},
                 Delete, Fetch, Insert, Match, Operator, Put, Reduce, Stage, Update,
             },

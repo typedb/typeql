@@ -188,7 +188,6 @@ impl fmt::Display for Require {
     }
 }
 
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Distinct {
     span: Option<Span>,
