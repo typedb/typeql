@@ -210,9 +210,7 @@ impl Pretty for Distinct {}
 
 impl fmt::Display for Distinct {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Operator::Distinct)?;
-        f.write_char(';')?;
-        Ok(())
+        write!(f, "{};", token::Operator::Distinct)
     }
 }
 
