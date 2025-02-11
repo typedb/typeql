@@ -73,6 +73,7 @@ string_enum! { Operator
     Limit = "limit",
     Reduce = "reduce",
     Require = "require",
+    Distinct = "distinct",
 }
 
 string_enum! { LogicOperator

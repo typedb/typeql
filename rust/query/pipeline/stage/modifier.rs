@@ -189,6 +189,31 @@ impl fmt::Display for Require {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Distinct {
+    span: Option<Span>,
+}
+
+impl Distinct {
+    pub fn new(span: Option<Span>) -> Self {
+        Self { span }
+    }
+}
+
+impl Spanned for Distinct {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for Distinct {}
+
+impl fmt::Display for Distinct {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{};", token::Operator::Distinct)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Operator {
     Select(Select),
     Sort(Sort),
@@ -196,6 +221,7 @@ pub enum Operator {
     Limit(Limit),
     Reduce(Reduce),
     Require(Require),
+    Distinct(Distinct),
 }
 
 impl Spanned for Operator {
@@ -207,6 +233,7 @@ impl Spanned for Operator {
             Self::Limit(inner) => inner.span(),
             Self::Reduce(inner) => inner.span(),
             Self::Require(inner) => inner.span(),
+            Self::Distinct(inner) => inner.span(),
         }
     }
 }
@@ -220,6 +247,7 @@ impl Pretty for Operator {
             Self::Limit(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Reduce(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Require(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Distinct(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
@@ -233,6 +261,7 @@ impl fmt::Display for Operator {
             Self::Limit(inner) => fmt::Display::fmt(inner, f),
             Self::Reduce(inner) => fmt::Display::fmt(inner, f),
             Self::Require(inner) => fmt::Display::fmt(inner, f),
+            Self::Distinct(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }

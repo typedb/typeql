@@ -30,7 +30,7 @@ use crate::{
             stage::{
                 delete::{Deletable, DeletableKind},
                 fetch::FetchSome,
-                modifier::{Limit, Offset, OrderedVariable, Select, Sort},
+                modifier::{Distinct, Limit, Offset, OrderedVariable, Require, Select, Sort},
                 reduce::{Count, Reducer, Stat},
                 Delete, Fetch, Insert, Match, Operator, Put, Reduce, Stage, Update,
             },
@@ -40,7 +40,6 @@ use crate::{
             fetch::{
                 FetchAttribute, FetchList, FetchObject, FetchObjectBody, FetchObjectEntry, FetchSingle, FetchStream,
             },
-            modifier::Require,
             reduce::ReduceAssign,
         },
         Pipeline,
@@ -351,6 +350,7 @@ pub(super) fn visit_operator_stream(node: Node<'_>) -> Operator {
         Rule::operator_limit => Operator::Limit(visit_operator_limit(child)),
         Rule::operator_reduce => Operator::Reduce(visit_operator_reduce(child)),
         Rule::operator_require => Operator::Require(visit_operator_require(child)),
+        Rule::operator_distinct => Operator::Distinct(visit_operator_distinct(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -480,4 +480,13 @@ fn visit_operator_require(node: Node<'_>) -> Require {
     let variables = visit_vars(children.skip_expected(Rule::REQUIRE).consume_expected(Rule::vars));
     debug_assert_eq!(children.try_consume_any(), None);
     Require::new(span, variables)
+}
+
+fn visit_operator_distinct(node: Node<'_>) -> Distinct {
+    debug_assert_eq!(node.as_rule(), Rule::operator_distinct);
+    let span = node.span();
+    let mut children = node.into_children();
+    let _ = children.skip_expected(Rule::DISTINCT);
+    debug_assert_eq!(children.try_consume_any(), None);
+    Distinct::new(span)
 }
