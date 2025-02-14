@@ -10,7 +10,7 @@ use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
     query::stage::{reduce::Reducer, Stage},
-    type_::TypeRefAny,
+    type_::{NamedTypeAny, TypeRefAny},
     util::write_joined,
     variable::Variable,
 };
@@ -108,11 +108,11 @@ impl fmt::Display for Signature {
 pub struct Argument {
     pub span: Option<Span>,
     pub var: Variable,
-    pub type_: TypeRefAny,
+    pub type_: NamedTypeAny,
 }
 
 impl Argument {
-    pub fn new(span: Option<Span>, var: Variable, type_: TypeRefAny) -> Self {
+    pub fn new(span: Option<Span>, var: Variable, type_: NamedTypeAny) -> Self {
         Self { span, var, type_ }
     }
 }
@@ -160,11 +160,11 @@ impl fmt::Display for Output {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Stream {
     pub span: Option<Span>,
-    pub types: Vec<TypeRefAny>,
+    pub types: Vec<NamedTypeAny>,
 }
 
 impl Stream {
-    pub fn new(span: Option<Span>, types: Vec<TypeRefAny>) -> Self {
+    pub fn new(span: Option<Span>, types: Vec<NamedTypeAny>) -> Self {
         Self { span, types }
     }
 }
@@ -188,11 +188,11 @@ impl fmt::Display for Stream {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Single {
     pub span: Option<Span>,
-    pub types: Vec<TypeRefAny>,
+    pub types: Vec<NamedTypeAny>,
 }
 
 impl Single {
-    pub fn new(span: Option<Span>, types: Vec<TypeRefAny>) -> Self {
+    pub fn new(span: Option<Span>, types: Vec<NamedTypeAny>) -> Self {
         Self { span, types }
     }
 }

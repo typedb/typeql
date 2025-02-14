@@ -74,15 +74,15 @@ statement = { statement_single | statement_type | statement_thing }
 
 // TYPE STATEMENTS =============================================================
 
-statement_type = { kind ~ type_ref_any ~ ( type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA? )?
-                 | type_ref_any ~ type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA?
+statement_type = { kind ~ type_ref ~ ( type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA? )?
+                 | type_ref~ type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA?
                  }
 type_constraint = { type_constraint_base ~ annotations? }
 type_constraint_base = { sub_constraint | value_type_constraint | label_constraint
                        | owns_constraint | relates_constraint | plays_constraint
                        }
 
-sub_constraint = { SUB_ ~ type_ref_any }
+sub_constraint = { SUB_ ~ type_ref }
 value_type_constraint = { VALUE ~ value_type }
 label_constraint = { LABEL ~ ( label_scoped | label ) }
 owns_constraint = { OWNS ~ type_ref_list
@@ -277,12 +277,10 @@ undefine_struct = { STRUCT ~ identifier }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
 
-type_ref = { named_type | var }
-type_ref_optional = { type_ref ~ QUESTION }
+type_ref = { label_scoped | label | var }
 type_ref_list = { type_ref ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
-type_ref_any = { type_ref_optional | type_ref_list | type_ref }
 
-named_type = { value_type_primitive | label_scoped | label }
+named_type = { value_type_primitive | label }
 named_type_optional = { named_type ~ QUESTION }
 named_type_list = { named_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 named_type_any = { named_type_optional | named_type_list | named_type }

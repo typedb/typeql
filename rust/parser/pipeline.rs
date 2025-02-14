@@ -275,7 +275,7 @@ fn visit_fetch_attribute(node: Node<'_>) -> FetchAttribute {
     let child = children.consume_any();
     let attribute = match child.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(child)),
-        Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(child)))),
+        Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(child))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);

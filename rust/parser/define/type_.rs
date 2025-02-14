@@ -89,7 +89,7 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
     let owned_label = children.consume_any();
     let owned = match owned_label.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(owned_label)),
-        Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(owned_label)))),
+        Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(owned_label))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
     };
 
@@ -106,7 +106,7 @@ pub(in crate::parser) fn visit_relates_declaration(node: Node<'_>) -> Relates {
     let related_label = children.consume_any();
     let related = match related_label.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(related_label)),
-        Rule::label => TypeRefAny::Type(TypeRef::Named(NamedType::Label(visit_label(related_label)))),
+        Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(related_label))),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
     };
     let specialised = if children.try_consume_expected(Rule::AS).is_some() {

@@ -8,9 +8,7 @@ use crate::{
     common::{error::TypeQLError, Spanned},
     parser::{
         annotation::visit_annotations,
-        type_::{
-            visit_label, visit_label_scoped, visit_type_ref, visit_type_ref_any, visit_type_ref_list, visit_value_type,
-        },
+        type_::{visit_label, visit_label_scoped, visit_type_ref, visit_type_ref_list, visit_value_type},
         visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     statement::{
@@ -25,7 +23,7 @@ pub(super) fn visit_statement_type(node: Node<'_>) -> Statement {
     let span = node.span();
     let mut children = node.into_children();
     let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
-    let type_ = visit_type_ref_any(children.consume_expected(Rule::type_ref_any));
+    let type_ = visit_type_ref(children.consume_expected(Rule::type_ref));
     let constraints = children.map(visit_type_constraint).collect();
     Statement::Type(Type::new(span, kind, type_, constraints))
 }
@@ -59,7 +57,7 @@ fn visit_sub_constraint(node: Node<'_>) -> Sub {
     let span = node.span();
     let mut children = node.into_children();
     let kind = visit_sub_token(children.consume_expected(Rule::SUB_));
-    let supertype = visit_type_ref_any(children.consume_expected(Rule::type_ref_any));
+    let supertype = visit_type_ref(children.consume_expected(Rule::type_ref));
     debug_assert_eq!(children.try_consume_any(), None);
     Sub::new(span, kind, supertype)
 }

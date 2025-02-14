@@ -7,52 +7,35 @@
 use super::{visit_identifier, visit_var, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token, Spanned},
-    type_::{BuiltinValueType, Label, List, NamedType, Optional, TypeRef},
-    ScopedLabel, TypeRefAny,
+    type_::{BuiltinValueType, Label, NamedType, NamedTypeAny, NamedTypeList, NamedTypeOptional, TypeRef, TypeRefList},
+    ScopedLabel,
 };
-
-pub(super) fn visit_type_ref_any(node: Node<'_>) -> TypeRefAny {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref_any);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::type_ref => TypeRefAny::Type(visit_type_ref(child)),
-        Rule::type_ref_optional => TypeRefAny::Optional(visit_type_ref_optional(child)),
-        Rule::type_ref_list => TypeRefAny::List(visit_type_ref_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    }
-}
 
 pub(super) fn visit_type_ref(node: Node<'_>) -> TypeRef {
     debug_assert_eq!(node.as_rule(), Rule::type_ref);
     let child = node.into_child();
     match child.as_rule() {
         Rule::var => TypeRef::Variable(visit_var(child)),
-        Rule::named_type => TypeRef::Named(visit_named_type(child)),
+        Rule::label => TypeRef::Label(visit_label(child)),
+        Rule::label_scoped => TypeRef::Scoped(visit_label_scoped(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-pub(super) fn visit_type_ref_optional(node: Node<'_>) -> Optional {
-    debug_assert_eq!(node.as_rule(), Rule::type_ref_optional);
-    let span = node.span();
-    let inner = visit_type_ref(node.into_child());
-    Optional::new(span, inner)
-}
-
-pub(super) fn visit_type_ref_list(node: Node<'_>) -> List {
+pub(super) fn visit_type_ref_list(node: Node<'_>) -> TypeRefList {
     debug_assert_eq!(node.as_rule(), Rule::type_ref_list);
     let span = node.span();
     let inner = visit_type_ref(node.into_child());
-    List::new(span, inner)
+    TypeRefList::new(span, inner)
 }
 
-pub(super) fn visit_named_type_any(node: Node<'_>) -> TypeRefAny {
+pub(super) fn visit_named_type_any(node: Node<'_>) -> NamedTypeAny {
     debug_assert_eq!(node.as_rule(), Rule::named_type_any);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::named_type => TypeRefAny::Type(TypeRef::Named(visit_named_type(child))),
-        Rule::named_type_optional => TypeRefAny::Optional(visit_named_type_optional(child)),
-        Rule::named_type_list => TypeRefAny::List(visit_named_type_list(child)),
+        Rule::named_type => NamedTypeAny::Simple(visit_named_type(child)),
+        Rule::named_type_optional => NamedTypeAny::Optional(visit_named_type_optional(child)),
+        Rule::named_type_list => NamedTypeAny::List(visit_named_type_list(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
@@ -62,24 +45,23 @@ pub(super) fn visit_named_type(node: Node<'_>) -> NamedType {
     let child = node.into_child();
     match child.as_rule() {
         Rule::label => NamedType::Label(visit_label(child)),
-        Rule::label_scoped => NamedType::Role(visit_label_scoped(child)),
         Rule::value_type_primitive => NamedType::BuiltinValueType(visit_value_type_primitive(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }
 
-pub(super) fn visit_named_type_optional(node: Node<'_>) -> Optional {
+pub(super) fn visit_named_type_optional(node: Node<'_>) -> NamedTypeOptional {
     debug_assert_eq!(node.as_rule(), Rule::named_type_optional);
     let span = node.span();
-    let inner = TypeRef::Named(visit_named_type(node.into_child()));
-    Optional::new(span, inner)
+    let inner = visit_named_type(node.into_child());
+    NamedTypeOptional::new(span, inner)
 }
 
-pub(super) fn visit_named_type_list(node: Node<'_>) -> List {
+pub(super) fn visit_named_type_list(node: Node<'_>) -> NamedTypeList {
     debug_assert_eq!(node.as_rule(), Rule::named_type_list);
     let span = node.span();
-    let inner = TypeRef::Named(visit_named_type(node.into_child()));
-    List::new(span, inner)
+    let inner = visit_named_type(node.into_child());
+    NamedTypeList::new(span, inner)
 }
 
 pub(super) fn visit_label(node: Node<'_>) -> Label {
@@ -89,11 +71,11 @@ pub(super) fn visit_label(node: Node<'_>) -> Label {
     Label::new(span, ident)
 }
 
-pub(super) fn visit_label_list(node: Node<'_>) -> List {
+pub(super) fn visit_label_list(node: Node<'_>) -> TypeRefList {
     debug_assert_eq!(node.as_rule(), Rule::label_list);
     let span = node.span();
-    let inner = TypeRef::Named(NamedType::Label(visit_label(node.into_child())));
-    List::new(span, inner)
+    let inner = TypeRef::Label(visit_label(node.into_child()));
+    TypeRefList::new(span, inner)
 }
 
 pub(super) fn visit_label_scoped(node: Node<'_>) -> ScopedLabel {
@@ -116,11 +98,11 @@ pub(super) fn visit_value_type(node: Node<'_>) -> NamedType {
     }
 }
 
-pub(super) fn visit_value_type_optional(node: Node<'_>) -> Optional {
+pub(super) fn visit_value_type_optional(node: Node<'_>) -> NamedTypeOptional {
     debug_assert_eq!(node.as_rule(), Rule::value_type_optional);
     let span = node.span();
     let inner = visit_value_type(node.into_child());
-    Optional::new(span, TypeRef::Named(inner))
+    NamedTypeOptional::new(span, inner)
 }
 
 pub(super) fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
