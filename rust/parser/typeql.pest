@@ -75,7 +75,7 @@ statement = { statement_single | statement_type | statement_thing }
 // TYPE STATEMENTS =============================================================
 
 statement_type = { kind ~ type_ref ~ ( type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA? )?
-                 | type_ref~ type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA?
+                 | type_ref ~ type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA?
                  }
 type_constraint = { type_constraint_base ~ annotations? }
 type_constraint_base = { sub_constraint | value_type_constraint | label_constraint
