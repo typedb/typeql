@@ -10,7 +10,7 @@ use crate::{
     common::{identifier::Identifier, Span, Spanned},
     pretty::{indent, Pretty},
     token,
-    type_::TypeRefAny,
+    type_::{NamedTypeAny, TypeRefAny},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -64,11 +64,11 @@ impl fmt::Display for Struct {
 pub struct Field {
     pub span: Option<Span>,
     pub key: Identifier,
-    pub type_: TypeRefAny,
+    pub type_: NamedTypeAny,
 }
 
 impl Field {
-    pub fn new(span: Option<Span>, key: Identifier, type_: TypeRefAny) -> Self {
+    pub fn new(span: Option<Span>, key: Identifier, type_: NamedTypeAny) -> Self {
         Self { span, key, type_ }
     }
 }

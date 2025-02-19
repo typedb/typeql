@@ -11,7 +11,7 @@ use crate::{
         visit_identifier, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::{struct_::Field, Struct},
-    type_::TypeRefAny,
+    type_::{NamedType, NamedTypeAny, TypeRefAny},
     TypeRef,
 };
 
@@ -42,12 +42,12 @@ fn visit_definition_struct_field(node: Node<'_>) -> Field {
     Field::new(span, key, type_)
 }
 
-fn visit_struct_field_value_type(node: Node<'_>) -> TypeRefAny {
+fn visit_struct_field_value_type(node: Node<'_>) -> NamedTypeAny {
     debug_assert_eq!(node.as_rule(), Rule::struct_field_value_type);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::value_type => TypeRefAny::Type(TypeRef::Named(visit_value_type(child))),
-        Rule::value_type_optional => TypeRefAny::Optional(visit_value_type_optional(child)),
+        Rule::value_type => NamedTypeAny::Simple(visit_value_type(child)),
+        Rule::value_type_optional => NamedTypeAny::Optional(visit_value_type_optional(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     }
 }

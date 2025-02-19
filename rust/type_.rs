@@ -94,7 +94,6 @@ impl fmt::Display for ScopedLabel {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum NamedType {
     Label(Label),
-    Role(ScopedLabel),
     BuiltinValueType(BuiltinValueType),
 }
 
@@ -103,7 +102,6 @@ impl Spanned for NamedType {
         match self {
             Self::Label(inner) => inner.span(),
             Self::BuiltinValueType(inner) => inner.span(),
-            Self::Role(inner) => inner.span(),
         }
     }
 }
@@ -113,21 +111,101 @@ impl fmt::Display for NamedType {
         match self {
             Self::Label(inner) => fmt::Display::fmt(inner, f),
             Self::BuiltinValueType(inner) => fmt::Display::fmt(inner, f),
-            Self::Role(inner) => fmt::Display::fmt(inner, f),
         }
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub enum NamedTypeAny {
+    Simple(NamedType),
+    List(NamedTypeList),
+    Optional(NamedTypeOptional),
+}
+
+impl Spanned for NamedTypeAny {
+    fn span(&self) -> Option<Span> {
+        match self {
+            Self::Simple(named) => named.span(),
+            Self::List(list) => list.span(),
+            Self::Optional(optional) => optional.span(),
+        }
+    }
+}
+
+impl Pretty for NamedTypeAny {}
+
+impl fmt::Display for NamedTypeAny {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Simple(inner) => fmt::Display::fmt(inner, f),
+            Self::List(inner) => fmt::Display::fmt(inner, f),
+            Self::Optional(inner) => fmt::Display::fmt(inner, f),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+pub struct NamedTypeList {
+    pub span: Option<Span>,
+    pub inner: NamedType,
+}
+
+impl NamedTypeList {
+    pub fn new(span: Option<Span>, inner: NamedType) -> Self {
+        Self { span, inner }
+    }
+}
+impl Spanned for NamedTypeList {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for NamedTypeList {}
+
+impl fmt::Display for NamedTypeList {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}[]", self.inner)
+    }
+}
+
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+pub struct NamedTypeOptional {
+    pub span: Option<Span>,
+    pub inner: NamedType,
+}
+
+impl NamedTypeOptional {
+    pub fn new(span: Option<Span>, inner: NamedType) -> Self {
+        Self { span, inner }
+    }
+}
+impl Spanned for NamedTypeOptional {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for NamedTypeOptional {}
+
+impl fmt::Display for NamedTypeOptional {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}?", self.inner)
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeRef {
-    Named(NamedType),   // person OR friendship:friend OR string
+    Label(Label), // person OR friendship:friend OR string
+    Scoped(ScopedLabel),
     Variable(Variable), // $t
 }
 
 impl Spanned for TypeRef {
     fn span(&self) -> Option<Span> {
         match self {
-            Self::Named(named) => named.span(),
+            Self::Label(label) => label.span(),
+            Self::Scoped(scoped) => scoped.span(),
             Self::Variable(var) => var.span(),
         }
     }
@@ -138,7 +216,8 @@ impl Pretty for TypeRef {}
 impl fmt::Display for TypeRef {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Named(inner) => fmt::Display::fmt(inner, f),
+            Self::Label(inner) => fmt::Display::fmt(inner, f),
+            Self::Scoped(inner) => fmt::Display::fmt(inner, f),
             Self::Variable(inner) => fmt::Display::fmt(inner, f),
         }
     }
@@ -146,9 +225,8 @@ impl fmt::Display for TypeRef {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TypeRefAny {
-    Type(TypeRef),      // person, friendship:friend, or $t
-    Optional(Optional), // person?, friendship:friend?, or $t?
-    List(List),         // person[], friendship:friend[], or $t[]
+    Type(TypeRef),     // person, friendship:friend, or $t
+    List(TypeRefList), // person[], friendship:friend[], or $t[]
 }
 
 impl Pretty for TypeRefAny {}
@@ -156,7 +234,6 @@ impl Spanned for TypeRefAny {
     fn span(&self) -> Option<Span> {
         match self {
             Self::Type(inner) => inner.span(),
-            Self::Optional(inner) => inner.span(),
             Self::List(inner) => inner.span(),
         }
     }
@@ -166,58 +243,32 @@ impl fmt::Display for TypeRefAny {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Type(inner) => fmt::Display::fmt(inner, f),
-            Self::Optional(inner) => fmt::Display::fmt(inner, f),
             Self::List(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Optional {
+pub struct TypeRefList {
     pub span: Option<Span>,
     pub inner: TypeRef,
 }
 
-impl Optional {
-    pub fn new(span: Option<Span>, inner: TypeRef) -> Self {
-        Self { span, inner }
-    }
-}
-impl Spanned for Optional {
-    fn span(&self) -> Option<Span> {
-        self.span
-    }
-}
-
-impl Pretty for Optional {}
-
-impl fmt::Display for Optional {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}?", self.inner)
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct List {
-    pub span: Option<Span>,
-    pub inner: TypeRef,
-}
-
-impl List {
+impl TypeRefList {
     pub fn new(span: Option<Span>, inner: TypeRef) -> Self {
         Self { span, inner }
     }
 }
 
-impl Spanned for List {
+impl Spanned for TypeRefList {
     fn span(&self) -> Option<Span> {
         self.span
     }
 }
 
-impl Pretty for List {}
+impl Pretty for TypeRefList {}
 
-impl fmt::Display for List {
+impl fmt::Display for TypeRefList {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}[]", self.inner)
     }

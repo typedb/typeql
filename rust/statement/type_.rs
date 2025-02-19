@@ -17,12 +17,12 @@ use crate::{
 pub struct Type {
     pub span: Option<Span>,
     pub kind: Option<token::Kind>,
-    pub type_: TypeRefAny,
+    pub type_: TypeRef,
     pub constraints: Vec<Constraint>,
 }
 
 impl Type {
-    pub fn new(span: Option<Span>, kind: Option<token::Kind>, type_: TypeRefAny, constraints: Vec<Constraint>) -> Self {
+    pub fn new(span: Option<Span>, kind: Option<token::Kind>, type_: TypeRef, constraints: Vec<Constraint>) -> Self {
         Self { span, kind, type_, constraints }
     }
 }
@@ -168,11 +168,11 @@ impl fmt::Display for SubKind {
 pub struct Sub {
     pub span: Option<Span>,
     pub kind: SubKind,
-    pub supertype: TypeRefAny,
+    pub supertype: TypeRef,
 }
 
 impl Sub {
-    pub fn new(span: Option<Span>, kind: SubKind, supertype: TypeRefAny) -> Self {
+    pub fn new(span: Option<Span>, kind: SubKind, supertype: TypeRef) -> Self {
         Self { span, kind, supertype }
     }
 }
