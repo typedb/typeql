@@ -167,6 +167,10 @@ fn visit_duration_literal(node: Node<'_>) -> DurationLiteral {
             let time = children.try_consume_expected(Rule::duration_time).map(visit_duration_time);
             DurationLiteral::DateAndTime(date, time)
         }
+        Rule::duration_time => {
+            let time = visit_duration_time(child);
+            DurationLiteral::Time(time)
+        }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
