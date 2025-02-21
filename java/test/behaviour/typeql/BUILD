@@ -32,8 +32,8 @@ java_test(
     ],
     data = [
         "@typedb_behaviour//query/explanation:features",
+        "@typedb_behaviour//query/functions:features",
         "@typedb_behaviour//query/language:features",
-        "@typedb_behaviour//query/reasoner:features",
     ],
     visibility = ["//visibility:public"],
     size = "small",

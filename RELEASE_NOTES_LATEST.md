@@ -3,32 +3,38 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.0.5
+cargo add typeql@3.1.0-rc0
 ```
 
-## New Features
 
+## New Features
+- **3.0 distinct**
+
+  Added the `distinct` query pipeline stage.
 
 ## Bugs Fixed
-
+- **Allow duration literals without date component**
+  
+  We modify the grammar to accept a `duration_literal` without a date component (e.g. `PT1S`) as per the standard. 
+  
+  
 
 ## Code Refactors
-- **Enhance error printing and query source span availability**
-  
-  We improve the error messages to show a `^` column indicator along with `-->` line indicator:
-  ```
-          define
-          attribute name value string;
-  -->     entity person owns name @range(0..10);
-                                  ^
-  ```
-  
-  We also expose more information about where in the original query spans which sourced various internal data structures.
-  
+- **Restrict by grammar refactoring type_ref and named_type**
+  Restrict by grammar refactoring type_ref and named_type
   
   
 
 ## Other Improvements
+   
+- **Rustfmt**
 
+- **Simplify formatting**
+
+- **remove py env**
+
+- **spanned for distinct**
+
+- **Grammar fix**
     
 

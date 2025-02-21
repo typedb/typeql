@@ -11,8 +11,8 @@ rust_test(
     srcs = ["test_behaviour.rs", "steps.rs"],
     data = [
         "@typedb_behaviour//query/explanation:features",
+        "@typedb_behaviour//query/functions:features",
         "@typedb_behaviour//query/language:features",
-        "@typedb_behaviour//query/reasoner:features",
     ],
     deps = [
         "//rust:typeql",
