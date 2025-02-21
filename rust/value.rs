@@ -99,6 +99,7 @@ pub enum TimeZone {
 pub enum DurationLiteral {
     Weeks(IntegerLiteral),
     DateAndTime(DurationDate, Option<DurationTime>),
+    Time(DurationTime),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -328,6 +329,7 @@ impl fmt::Display for DurationLiteral {
                     Some(time) => write!(f, "T{time}")?,
                 }
             }
+            DurationLiteral::Time(time) => write!(f, "T{time}")?,
         }
         Ok(())
     }
