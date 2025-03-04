@@ -9,7 +9,7 @@ def typedb_dependencies():
     git_repository(
         name = "typedb_dependencies",
         remote = "https://github.com/farost/dependencies",
-        commit = "90d1114908dfd183aa87026a3eba1b210c4457eb", # sync-marker: do not remove this comment, this is used for sync-dependencies by @typedb_dependencies
+        commit = "3364a72f9ba384865e3b6ac950012d427726c8f0", # sync-marker: do not remove this comment, this is used for sync-dependencies by @typedb_dependencies
     )
 
 def typedb_behaviour():
