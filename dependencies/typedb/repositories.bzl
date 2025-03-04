@@ -5,6 +5,7 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 def typedb_dependencies():
+    # TODO: Return typedb
     git_repository(
         name = "typedb_dependencies",
         remote = "https://github.com/farost/dependencies",
