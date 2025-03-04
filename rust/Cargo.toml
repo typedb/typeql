@@ -20,40 +20,40 @@ features = {}
 		default-features = false
 
 	[dev-dependencies.syn]
-		features = ["clone-impls", "default", "derive", "extra-traits", "full", "parsing", "printing", "proc-macro", "visit-mut"]
-		version = "2.0.77"
+		features = ["clone-impls", "default", "derive", "extra-traits", "fold", "full", "parsing", "printing", "proc-macro", "visit", "visit-mut"]
+		version = "2.0.99"
 		default-features = false
 
 	[dev-dependencies.proc-macro2]
 		features = ["default", "proc-macro"]
-		version = "1.0.86"
+		version = "1.0.94"
 		default-features = false
 
 	[dev-dependencies.futures]
 		features = ["alloc", "async-await", "default", "executor", "futures-executor", "std", "thread-pool"]
-		version = "0.3.30"
+		version = "0.3.31"
 		default-features = false
 
 [dependencies]
 
 	[dependencies.pest]
 		features = ["default", "memchr", "std"]
-		version = "2.7.13"
+		version = "2.7.15"
 		default-features = false
 
 	[dependencies.regex]
 		features = ["default", "perf", "perf-backtrack", "perf-cache", "perf-dfa", "perf-inline", "perf-literal", "perf-onepass", "std", "unicode", "unicode-age", "unicode-bool", "unicode-case", "unicode-gencat", "unicode-perl", "unicode-script", "unicode-segment"]
-		version = "1.10.6"
+		version = "1.11.1"
 		default-features = false
 
 	[dependencies.pest_derive]
 		features = ["default", "std"]
-		version = "2.7.13"
+		version = "2.7.15"
 		default-features = false
 
 	[dependencies.chrono]
-		features = ["alloc", "android-tzdata", "clock", "default", "iana-time-zone", "js-sys", "now", "oldtime", "serde", "std", "wasm-bindgen", "wasmbind", "winapi", "windows-targets"]
-		version = "0.4.38"
+		features = ["alloc", "android-tzdata", "clock", "default", "iana-time-zone", "js-sys", "now", "oldtime", "serde", "std", "wasm-bindgen", "wasmbind", "winapi", "windows-link"]
+		version = "0.4.40"
 		default-features = false
 
 	[dependencies.itertools]
