@@ -20,21 +20,13 @@ cargo add typeql@3.1.0-rc0
   
 
 ## Code Refactors
-- **Restrict by grammar refactoring type_ref and named_type**
+- **Restrict by grammar refactoring type_ref and named_type**- 
+  
   Restrict by grammar refactoring type_ref and named_type
   
   
 
 ## Other Improvements
-   
-- **Rustfmt**
-
-- **Simplify formatting**
-
-- **remove py env**
-
-- **spanned for distinct**
-
-- **Grammar fix**
-    
-
+- **Update dependencies to avoid conflicts with the server**
+  
+  Update dependencies and the generated Cargo files for the newest version of the target repo.
