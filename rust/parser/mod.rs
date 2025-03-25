@@ -126,7 +126,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
     Ok(parse(rule, string)?.consume_any())
 }
 
-pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, String, usize)> {
+pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, usize)> {
     let parsed = parse_single(Rule::eof_query_prefix, string);
     match parsed {
         Ok(node) => {
@@ -134,8 +134,7 @@ pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, String, usize)>
             let query = children.consume_expected(Rule::query);
             let _remaining = children.consume_expected(Rule::any);
             let end_of_query_index = query.as_str().len();
-            let as_str = query.as_str().to_owned();
-            Ok((visit_query(query), as_str, end_of_query_index))
+            Ok((visit_query(query), end_of_query_index))
         }
         Err(error) => Err(error),
     }

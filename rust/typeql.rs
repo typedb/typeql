@@ -54,7 +54,7 @@ pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())
 }
 
-pub fn parse_query_from(string: &str) -> Result<(Query, String, usize)> {
+pub fn parse_query_from(string: &str) -> Result<(Query, usize)> {
     visit_query_prefix(string)
 }
 
