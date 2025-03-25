@@ -133,7 +133,7 @@ pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, usize)> {
             let mut children = node.into_children();
             let query = children.consume_expected(Rule::query);
             let _remaining = children.consume_expected(Rule::any);
-            let end_of_query_index = query.as_str().len();
+            let end_of_query_index = query.span().unwrap().end_offset;
             Ok((visit_query(query), end_of_query_index))
         }
         Err(error) => Err(error),

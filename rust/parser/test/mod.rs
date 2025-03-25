@@ -159,7 +159,15 @@ fn test_parsing_query_prefix() {
     match
     "#;
     let (_query, remainder_index) = parse_query_from(input).unwrap();
-    assert!(&input[remainder_index..].trim().starts_with("match"))
+    assert!(&input[remainder_index..].trim().starts_with("match"));
+
+    let input = r#"
+    define
+      entity person;
+# TODO: test comment
+"#;
+    let (_query, remainder_index) = parse_query_from(input).unwrap();
+    assert!(&input[remainder_index..].trim().is_empty());
 }
 
 #[test]
