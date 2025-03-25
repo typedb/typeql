@@ -126,6 +126,20 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
     Ok(parse(rule, string)?.consume_any())
 }
 
+pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, usize)> {
+    let parsed = parse_single(Rule::eof_query_prefix, string);
+    match parsed {
+        Ok(node) => {
+            let mut children = node.into_children();
+            let query = children.consume_expected(Rule::query);
+            let remaining = children.consume_expected(Rule::any);
+            let end_of_query_index = query.as_str().len();
+            Ok((visit_query(query), end_of_query_index + 1))
+        }
+        Err(error) => Err(error),
+    }
+}
+
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
     Ok(visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)))
 }

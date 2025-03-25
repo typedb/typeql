@@ -6,7 +6,6 @@
 
 use std::{error::Error as StdError, fmt};
 
-use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
 use crate::{common::Spannable, error_messages, util::write_joined, Identifier};

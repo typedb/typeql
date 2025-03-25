@@ -10,7 +10,7 @@ use crate::{
     common::{identifier::Identifier, Span, Spanned},
     pretty::{indent, Pretty},
     token,
-    type_::{NamedTypeAny, TypeRefAny},
+    type_::NamedTypeAny,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]

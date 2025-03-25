@@ -28,7 +28,10 @@ pub use crate::{
     variable::Variable,
 };
 use crate::{
-    parser::{visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query},
+    parser::{
+        visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query,
+        visit_query_prefix,
+    },
     schema::definable::Struct,
 };
 
@@ -49,6 +52,10 @@ mod variable;
 
 pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())
+}
+
+pub fn parse_query_from(string: &str) -> Result<(Query, usize)> {
+    visit_query_prefix(string)
 }
 
 pub fn parse_label(typeql_label: &str) -> Result<Label> {

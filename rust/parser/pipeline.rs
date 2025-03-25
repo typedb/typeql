@@ -45,7 +45,6 @@ use crate::{
         Pipeline,
     },
     statement::Statement,
-    type_::NamedType,
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
