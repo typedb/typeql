@@ -12,7 +12,7 @@ use std::{
 pub use error::Error;
 use itertools::Itertools;
 
-use crate::common::error::SYNTAX_ANNOTATED_INDENT;
+use crate::common::error::{SYNTAX_ANNOTATED_INDENT, SYNTAX_ANNOTATED_INDICATOR_COL, SYNTAX_ANNOTATED_INDICATOR_LINE};
 
 pub mod date_time;
 pub mod error;
