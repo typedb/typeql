@@ -162,11 +162,45 @@ fn test_parsing_query_prefix() {
     assert!(&input[remainder_index..].trim().starts_with("match"));
 
     let input = r#"
-    define
-      entity person;
-# TODO: test comment
+define
+
+# --- Common properties ---
+
+attribute id, value string;
+attribute type, value string;
+attribute spec_version, value string;
+attribute created_by_ref, value string;
+attribute created, value datetime;
+attribute modified, value datetime;
+attribute revoked, value boolean;
+attribute confidence, value integer;
+attribute lang, value string;
+attribute defanged, value boolean;
+
+attribute labels, value string; # to be used as a list
+
+# TODO: The following properties are not included as they are lists or dictionaries:
+# - external_references (list of external-reference)
+# - object_marking_refs (list of identifiers)
+# - granular_markings (list of granular-marking)
+# - extensions (dictionary)
+
+# --- Properties listed by multiple objects ---
+attribute alias_, value string;
+attribute description, value string;
+attribute first_seen, value datetime;
+attribute last_seen, value datetime;
+attribute objective, value string;
+
+# TODO: requires struct types
+# attribute kill_chain_phase, value kill_chain_phase_struct;
+# struct kill_chain_phase_struct:
+#   kill_chain_name value string,
+#   phase_name value string;
 "#;
     let (_query, remainder_index) = parse_query_from(input).unwrap();
+    dbg!("query: {}, remainder_index: {}", _query, remainder_index);
+    dbg!("String from remaidner index: '{}'", &input[remainder_index..]);
     assert!(&input[remainder_index..].trim().is_empty());
 }
 
