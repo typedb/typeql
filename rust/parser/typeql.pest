@@ -568,15 +568,15 @@ quoted_string_literal = @{ "\"" ~ ( !"\"" ~ !"\\" ~ ANY | escape_seq )* ~ "\""
 
 // PUNCTUATION =================================================================
 
-PAREN_OPEN = _{ "(" }
-PAREN_CLOSE = _{ ")" }
-SQ_BRACKET_OPEN = _{ "[" }
-SQ_BRACKET_CLOSE = _{ "]" }
-CURLY_OPEN = _{ "{" }
-CURLY_CLOSE = _{ "}" }
-STAR = _{ "*" }
-COMMA = _{ "," }
-SEMICOLON = _{ ";" }
+PAREN_OPEN = _{ "(" ~ COMMENT? }
+PAREN_CLOSE = _{ ")"  ~ COMMENT? }
+SQ_BRACKET_OPEN = _{ "[" ~ COMMENT? }
+SQ_BRACKET_CLOSE = _{ "]"  ~ COMMENT? }
+CURLY_OPEN = _{ "{"  ~ COMMENT? }
+CURLY_CLOSE = _{ "}"  ~ COMMENT? }
+STAR = _{ "*"  ~ COMMENT? }
+COMMA = _{ ","  ~ COMMENT? }
+SEMICOLON = _{ ";" ~ COMMENT? }
 COLON = _{ ":" }
 DOT = _{ "." }
 DOUBLE_DOT = _{ ".." }
