@@ -154,7 +154,9 @@ impl GrammarTree {
             }
 
             let expansion = visit(&mut children, &mut tree, &rule_name, is_atomic).flatten();
-            tree.rules.insert(rule_name, expansion);
+            if !rule_name.ends_with("no_test") {
+                tree.rules.insert(rule_name, expansion);
+            }
         }
 
         tree
