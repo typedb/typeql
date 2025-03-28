@@ -22,6 +22,12 @@ pub struct Error {
     errors: Vec<TypeQLError>,
 }
 
+impl Error {
+    pub fn errors(&self) -> &[TypeQLError] {
+        &self.errors
+    }
+}
+
 impl StdError for Error {}
 
 impl From<TypeQLError> for Error {
