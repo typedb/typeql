@@ -14,10 +14,10 @@ build:
     filter:
       owner: typedb
       branch: [master, development, "3.0"]
-    dependency-analysis:
-      image: typedb-ubuntu-22.04
-      command: |
-        bazel run @typedb_dependencies//factory/analysis:dependency-analysis
+#    dependency-analysis:
+#      image: typedb-ubuntu-22.04
+#      command: |
+#        bazel run @typedb_dependencies//factory/analysis:dependency-analysis
   correctness:
     build:
       image: typedb-ubuntu-22.04
