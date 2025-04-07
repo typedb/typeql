@@ -10,10 +10,10 @@ config:
     typedb-behaviour: [build]
 
 build:
-  quality:
-    filter:
-      owner: typedb
-      branch: [master, development, "3.0"]
+#  quality:
+#    filter:
+#      owner: typedb
+#      branch: [master, development, "3.0"]
 #    dependency-analysis:
 #      image: typedb-ubuntu-22.04
 #      command: |
