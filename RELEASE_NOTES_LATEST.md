@@ -3,14 +3,12 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.1.0-rc0
+cargo add typeql@3.1.0
 ```
 
 
 ## New Features
-- **3.0 distinct**
 
-  Added the `distinct` query pipeline stage.
 
 ## Bugs Fixed
 - **Allow duration literals without date component**
@@ -20,13 +18,40 @@ cargo add typeql@3.1.0-rc0
   
 
 ## Code Refactors
-- **Restrict by grammar refactoring type_ref and named_type**- 
-  
+- **Restrict by grammar refactoring type_ref and named_type**
   Restrict by grammar refactoring type_ref and named_type
   
   
 
 ## Other Improvements
+- **Update dependencies**
+
+- **Cleanup release notes**
+
 - **Update dependencies to avoid conflicts with the server**
-  
   Update dependencies and the generated Cargo files for the newest version of the target repo.
+  
+  
+- **Update dependencies. Update version to 3.1.0-rc0 and release notes**
+
+- **3.0 distinct**
+  
+  Added distinct stage.
+  
+  
+- **rustfmt**
+
+- **trigger factory**
+
+- **Simplify formatting**
+
+- **remove py env**
+
+- **spanned for distinct**
+
+- **grammer fix**
+
+- **distinct**
+
+    
+
