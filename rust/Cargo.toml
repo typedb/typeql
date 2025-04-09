@@ -21,7 +21,7 @@ features = {}
 
 	[dev-dependencies.syn]
 		features = ["clone-impls", "default", "derive", "extra-traits", "fold", "full", "parsing", "printing", "proc-macro", "visit", "visit-mut"]
-		version = "2.0.99"
+		version = "2.0.100"
 		default-features = false
 
 	[dev-dependencies.proc-macro2]
@@ -38,7 +38,7 @@ features = {}
 
 	[dependencies.pest]
 		features = ["default", "memchr", "std"]
-		version = "2.7.15"
+		version = "2.8.0"
 		default-features = false
 
 	[dependencies.regex]
@@ -48,7 +48,7 @@ features = {}
 
 	[dependencies.pest_derive]
 		features = ["default", "std"]
-		version = "2.7.15"
+		version = "2.8.0"
 		default-features = false
 
 	[dependencies.chrono]
