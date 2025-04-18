@@ -13,7 +13,7 @@ use std::{
 use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
-use crate::{Error, parse_definition_function, parse_definition_struct};
+use crate::{parse_definition_function, parse_definition_struct, Error};
 #[allow(unused)]
 use crate::{
     parse_label, parse_query,
@@ -123,10 +123,7 @@ impl GrammarTree {
                 ['a', 'x', 'Y', '1', '人'].into_iter().map(|char| Expansion::Literal(char.to_string())).collect(),
             ),
         );
-        tree.rules.insert(
-            "COMMENT".into(),
-            Expansion::Literal("# test comment \n".into())
-        );
+        tree.rules.insert("COMMENT".into(), Expansion::Literal("# test comment \n".into()));
 
         while !tokens.is_empty() {
             let rule_name = match tokens.remove(0) {
