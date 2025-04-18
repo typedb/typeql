@@ -11,8 +11,7 @@ use crate::{
         visit_identifier, IntoChildNodes, Node, Rule, RuleMatcher,
     },
     schema::definable::{struct_::Field, Struct},
-    type_::{NamedType, NamedTypeAny, TypeRefAny},
-    TypeRef,
+    type_::NamedTypeAny,
 };
 
 pub(in crate::parser) fn visit_definition_struct(node: Node<'_>) -> Struct {

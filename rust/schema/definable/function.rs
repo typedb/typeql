@@ -10,7 +10,7 @@ use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
     query::stage::{reduce::Reducer, Stage},
-    type_::{NamedTypeAny, TypeRefAny},
+    type_::NamedTypeAny,
     util::write_joined,
     variable::Variable,
 };

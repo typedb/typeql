@@ -15,7 +15,7 @@ use crate::{
         capability::{Alias, Owns, Plays, Relates, Sub, ValueType},
         Capability, CapabilityBase, Type,
     },
-    type_::{NamedType, TypeRef, TypeRefAny},
+    type_::{TypeRef, TypeRefAny},
 };
 
 pub(super) fn visit_definition_type(node: Node<'_>) -> Type {

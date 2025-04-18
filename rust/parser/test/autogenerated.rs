@@ -13,7 +13,7 @@ use std::{
 use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
-use crate::{parse_definition_function, parse_definition_struct};
+use crate::{parse_definition_function, parse_definition_struct, Error};
 #[allow(unused)]
 use crate::{
     parse_label, parse_query,
@@ -123,6 +123,7 @@ impl GrammarTree {
                 ['a', 'x', 'Y', '1', '人'].into_iter().map(|char| Expansion::Literal(char.to_string())).collect(),
             ),
         );
+        tree.rules.insert("COMMENT".into(), Expansion::Literal("# test comment \n".into()));
 
         while !tokens.is_empty() {
             let rule_name = match tokens.remove(0) {
@@ -154,7 +155,9 @@ impl GrammarTree {
             }
 
             let expansion = visit(&mut children, &mut tree, &rule_name, is_atomic).flatten();
-            tree.rules.insert(rule_name, expansion);
+            if !rule_name.ends_with("no_test") {
+                tree.rules.insert(rule_name, expansion);
+            }
         }
 
         tree
@@ -290,7 +293,7 @@ fn all_rules_covered_by_visitors() {
 
     for rule in tree.roots {
         if !parsers.contains_key(rule.as_str()) {
-            continue; // FIXME should be removed
+            continue;
         }
         for _ in 0..ITERS_PER_DEPTH {
             for max_depth in MIN_DEPTH..=MAX_DEPTH {

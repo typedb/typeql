@@ -6,7 +6,6 @@
 
 use std::{error::Error as StdError, fmt};
 
-use itertools::Itertools;
 use pest::error::{Error as PestError, LineColLocation};
 
 use crate::{common::Spannable, error_messages, util::write_joined, Identifier};
@@ -21,6 +20,12 @@ pub(crate) const SYNTAX_ANNOTATED_INDICATOR_COL: &str = "^";
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Error {
     errors: Vec<TypeQLError>,
+}
+
+impl Error {
+    pub fn errors(&self) -> &[TypeQLError] {
+        &self.errors
+    }
 }
 
 impl StdError for Error {}
