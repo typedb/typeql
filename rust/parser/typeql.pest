@@ -361,7 +361,7 @@ range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
 
-reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE
+reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE | END
            | ENTITY | RELATION | ATTRIBUTE | ROLE
            | ASC | DESC
            | STRUCT | FUN | RETURN
