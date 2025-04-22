@@ -4,8 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::{parse_queries, parse_query};
-use crate::parser::test::assert_valid_eq_repr;
+use crate::{parse_queries, parse_query, parser::test::assert_valid_eq_repr};
 
 #[test]
 fn test_data_pipeline() {
@@ -66,7 +65,6 @@ watches (watched: $x, watcher: $y);
     let parsed = parse_queries(queries).unwrap();
     assert_eq!(parsed.len(), 3);
 }
-
 
 #[test]
 fn test_parsing_mixing_query_types() {

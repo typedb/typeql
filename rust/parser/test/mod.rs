@@ -20,11 +20,11 @@ mod list;
 mod match_queries;
 mod modifiers;
 mod nonquery;
+mod pipeline;
 mod regex;
 mod schema_queries;
 mod sugar;
 mod write_queries;
-mod pipeline;
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
