@@ -163,6 +163,14 @@ fn test_parsing_query_prefix() {
     assert!(&input[remainder_index..].trim().starts_with("match"));
 
     let input = r#"
+    define
+      entity person;
+    end;
+    "#;
+    let (_query, remainder_index) = parse_query_from(input).unwrap();
+    assert!(&input[remainder_index..].trim().is_empty());
+
+    let input = r#"
 define
 
 # --- Common properties ---

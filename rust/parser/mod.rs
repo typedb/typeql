@@ -127,7 +127,7 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 }
 
 pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, usize)> {
-    let parsed = parse_single(Rule::eof_query_prefix, string);
+    let parsed = parse_single(Rule::query_prefix, string);
     match parsed {
         Ok(node) => {
             let mut children = node.into_children();

@@ -83,12 +83,16 @@ $y isa person;
 fetch {
   "all": { $y.* },
 };
+end;
 
 match
 $y isa person,
     has name "Rocky";
 insert
 watches (watched: $x, watcher: $y);
+fetch {
+  "bla": { $y.* };
+};
 "#;
     let parsed = parse_queries(queries).unwrap();
     assert_eq!(parsed.len(), 4);
