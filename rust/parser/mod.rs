@@ -127,13 +127,12 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
 }
 
 pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, usize)> {
-    let parsed = parse_single(Rule::eof_query_prefix_partial, string);
+    let parsed = parse_single(Rule::eof_query_prefix, string);
     match parsed {
         Ok(node) => {
             let mut children = node.into_children();
             let query = children.consume_expected(Rule::query);
-            let remaining = children.consume_expected(Rule::any_partial);
-            let end_of_query_index = remaining.span().unwrap().begin_offset;
+            let end_of_query_index = query.span().unwrap().end_offset;
             Ok((visit_query(query), end_of_query_index))
         }
         Err(error) => Err(error),
@@ -174,6 +173,7 @@ fn visit_query(node: Node<'_>) -> Query {
         Rule::query_pipeline_preambled => Query::Pipeline(visit_query_pipeline_preambled(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
+    let _end_marker = children.try_consume_any();
     debug_assert_eq!(children.try_consume_any(), None);
     query
 }

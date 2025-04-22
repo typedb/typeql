@@ -24,6 +24,7 @@ mod regex;
 mod schema_queries;
 mod sugar;
 mod write_queries;
+mod pipeline;
 
 macro_rules! assert_valid_eq_repr {
     ($expected:ident, $parsed:ident, $query:ident) => {
@@ -165,7 +166,7 @@ fn test_parsing_query_prefix() {
 define
 
 # --- Common properties ---
-attribute id, value string;
+attribute id, value string; # an inline comment
 attribute type, value string;
 
 # TODO:  testing containing comments and newlines...
