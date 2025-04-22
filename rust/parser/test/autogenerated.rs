@@ -13,7 +13,7 @@ use std::{
 use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 
-use crate::{parse_definition_function, parse_definition_struct, Error};
+use crate::{parse_definition_function, parse_definition_struct};
 #[allow(unused)]
 use crate::{
     parse_label, parse_query,
