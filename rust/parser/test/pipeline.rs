@@ -91,7 +91,7 @@ $y isa person,
 insert
 watches (watched: $x, watcher: $y);
 fetch {
-  "bla": { $y.* };
+  "bla": { $y.* },
 };
 "#;
     let parsed = parse_queries(queries).unwrap();
