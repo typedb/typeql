@@ -5,14 +5,13 @@
  */
 
 use std::fmt;
-use crate::common::error::TypeQLError::InvalidCasting;
 
 use self::pipeline::stage::{Match, Stage};
 pub use self::{
     pipeline::{stage, Pipeline},
     schema::SchemaQuery,
 };
-use crate::util::enum_getter;
+use crate::{common::error::TypeQLError::InvalidCasting, util::enum_getter};
 
 pub mod pipeline;
 pub mod schema;
@@ -36,7 +35,7 @@ impl Query {
             Query::Schema(_, explicit_end) | Query::Pipeline(_, explicit_end) => *explicit_end,
         }
     }
-    
+
     pub fn set_explicit_end(&mut self, explicit_end: bool) {
         match self {
             Query::Schema(_, end) => *end = explicit_end,
@@ -47,23 +46,29 @@ impl Query {
     pub fn into_schema(self) -> SchemaQuery {
         match self {
             Self::Schema(schema, _) => schema,
-            _ => panic!("{}", InvalidCasting {
-                enum_name: stringify!(Query),
-                variant: self.variant_name(),
-                expected_variant: stringify!( Schema ),
-                typename: stringify!( SchemaQuery ),
-            }),
+            _ => panic!(
+                "{}",
+                InvalidCasting {
+                    enum_name: stringify!(Query),
+                    variant: self.variant_name(),
+                    expected_variant: stringify!(Schema),
+                    typename: stringify!(SchemaQuery),
+                }
+            ),
         }
     }
     pub fn into_pipeline(self) -> Pipeline {
         match self {
             Self::Pipeline(pipeline, _) => pipeline,
-            _ => panic!("{}", InvalidCasting {
-                enum_name: stringify!(Query),
-                variant: self.variant_name(),
-                expected_variant: stringify!( Pipeline ),
-                typename: stringify!( Pipeline ),
-            }),
+            _ => panic!(
+                "{}",
+                InvalidCasting {
+                    enum_name: stringify!(Query),
+                    variant: self.variant_name(),
+                    expected_variant: stringify!(Pipeline),
+                    typename: stringify!(Pipeline),
+                }
+            ),
         }
     }
 }
