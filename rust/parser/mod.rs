@@ -168,12 +168,15 @@ fn visit_query(node: Node<'_>) -> Query {
     debug_assert_eq!(node.as_rule(), Rule::query);
     let mut children = node.into_children();
     let child = children.consume_any();
-    let query = match child.as_rule() {
-        Rule::query_schema => Query::Schema(visit_query_schema(child)),
-        Rule::query_pipeline_preambled => Query::Pipeline(visit_query_pipeline_preambled(child)),
+    let mut query = match child.as_rule() {
+        Rule::query_schema => Query::Schema(visit_query_schema(child), false),
+        Rule::query_pipeline_preambled => Query::Pipeline(visit_query_pipeline_preambled(child), false),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
     };
-    let _end_marker = children.try_consume_any();
+    match children.try_consume_expected(Rule::query_end) {
+        None => query.set_explicit_end(false),
+        Some(_) => query.set_explicit_end(true),
+    }
     debug_assert_eq!(children.try_consume_any(), None);
     query
 }
