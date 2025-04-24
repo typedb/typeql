@@ -5,7 +5,6 @@
  */
 
 eof_query = { SOI ~ query ~ EOI }
-query_prefix = { SOI ~ query }
 eof_label = { SOI ~ label ~ EOI }
 eof_definition_function = { SOI ~ definition_function ~ EOI }
 eof_definition_struct = { SOI ~ definition_struct ~ EOI }

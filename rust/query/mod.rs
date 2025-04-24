@@ -13,8 +13,7 @@ pub use self::{
 };
 use crate::{
     common::{error::TypeQLError::InvalidCasting, Span},
-    pretty::Pretty,
-    token, TypeRef,
+    token,
 };
 
 pub mod pipeline;
@@ -22,9 +21,9 @@ pub mod schema;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Query {
-    span: Option<Span>,
-    structure: QueryStructure,
-    has_explicit_end: bool,
+    pub span: Option<Span>,
+    pub structure: QueryStructure,
+    pub has_explicit_end: bool,
 }
 
 impl Query {

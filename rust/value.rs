@@ -343,7 +343,7 @@ impl fmt::Display for StructLiteral {
 
 impl StringLiteral {
     pub fn unescape(&self) -> Result<String> {
-        self.process_unescape(|bytes, buf, rest| match bytes[1] {
+        self.process_unescape(|bytes, _buf, rest| match bytes[1] {
             BSP => Ok(('\x08', 2)),
             TAB => Ok(('\x09', 2)),
             LF_ => Ok(('\x0a', 2)),

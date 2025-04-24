@@ -65,7 +65,9 @@ pub fn parse_queries(mut typeql_queries: &str) -> Result<Vec<Query>> {
 }
 
 pub fn parse_query_from(string: &str) -> Result<(Query, usize)> {
-    visit_query_prefix(string)
+    let query = visit_query_prefix(string)?;
+    let end_offset = query.span.unwrap().end_offset;
+    Ok((query, end_offset))
 }
 
 pub fn parse_label(typeql_label: &str) -> Result<Label> {

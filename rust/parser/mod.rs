@@ -126,21 +126,12 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
     Ok(parse(rule, string)?.consume_any())
 }
 
-pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, usize)> {
-    let parsed = parse_single(Rule::query_prefix, string);
-    match parsed {
-        Ok(node) => {
-            let mut children = node.into_children();
-            let query = children.consume_expected(Rule::query);
-            let end_of_query_index = query.span().unwrap().end_offset;
-            Ok((visit_query(query), end_of_query_index))
-        }
-        Err(error) => Err(error),
-    }
-}
-
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
     Ok(visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)))
+}
+
+pub(crate) fn visit_query_prefix(query: &str) -> Result<Query> {
+    Ok(visit_query(parse_single(Rule::query, query)?))
 }
 
 pub(crate) fn visit_eof_definition_function(query: &str) -> Result<definable::Function> {
@@ -181,7 +172,7 @@ fn visit_query_structure(node: Node<'_>) -> QueryStructure {
     debug_assert_eq!(node.as_rule(), Rule::query_structure);
     let mut children = node.into_children();
     let child = children.consume_any();
-    let mut query_structure = match child.as_rule() {
+    let query_structure = match child.as_rule() {
         Rule::query_schema => QueryStructure::Schema(visit_query_schema(child)),
         Rule::query_pipeline_preambled => QueryStructure::Pipeline(visit_query_pipeline_preambled(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
