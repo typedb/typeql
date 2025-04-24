@@ -19,7 +19,7 @@ use crate::{
         token, Span, Spanned,
     },
     parser::{pipeline::visit_query_pipeline_preambled, redefine::visit_query_redefine},
-    query::{Query, SchemaQuery},
+    query::{Query, QueryStructure, SchemaQuery},
     schema::definable,
     type_::Label,
     variable::{Optional, Variable},
@@ -166,19 +166,27 @@ pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
 
 fn visit_query(node: Node<'_>) -> Query {
     debug_assert_eq!(node.as_rule(), Rule::query);
+    let span = node.span();
     let mut children = node.into_children();
-    let child = children.consume_any();
-    let mut query = match child.as_rule() {
-        Rule::query_schema => Query::Schema(visit_query_schema(child), false),
-        Rule::query_pipeline_preambled => Query::Pipeline(visit_query_pipeline_preambled(child), false),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    let query_structure = visit_query_structure(children.consume_expected(Rule::query_structure));
+    let query = match children.try_consume_expected(Rule::query_end) {
+        None => Query::new(span, query_structure, false),
+        Some(_) => Query::new(span, query_structure, true),
     };
-    match children.try_consume_expected(Rule::query_end) {
-        None => query.set_explicit_end(false),
-        Some(_) => query.set_explicit_end(true),
-    }
     debug_assert_eq!(children.try_consume_any(), None);
     query
+}
+
+fn visit_query_structure(node: Node<'_>) -> QueryStructure {
+    debug_assert_eq!(node.as_rule(), Rule::query_structure);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    let mut query_structure = match child.as_rule() {
+        Rule::query_schema => QueryStructure::Schema(visit_query_schema(child)),
+        Rule::query_pipeline_preambled => QueryStructure::Pipeline(visit_query_pipeline_preambled(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    query_structure
 }
 
 fn visit_query_schema(node: Node<'_>) -> SchemaQuery {

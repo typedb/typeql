@@ -11,45 +11,72 @@ pub use self::{
     pipeline::{stage, Pipeline},
     schema::SchemaQuery,
 };
-use crate::{common::error::TypeQLError::InvalidCasting, util::enum_getter};
+use crate::{
+    common::{error::TypeQLError::InvalidCasting, Span},
+    pretty::Pretty,
+    token, TypeRef,
+};
 
 pub mod pipeline;
 pub mod schema;
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum Query {
-    Schema(SchemaQuery, bool),
-    Pipeline(Pipeline, bool),
+pub struct Query {
+    span: Option<Span>,
+    structure: QueryStructure,
+    has_explicit_end: bool,
 }
 
 impl Query {
-    fn variant_name(&self) -> &'static str {
-        match self {
-            Self::Schema(_, _) => "Schema",
-            Self::Pipeline(_, _) => "Pipeline",
-        }
+    pub(crate) fn new(span: Option<Span>, structure: QueryStructure, has_explicit_end: bool) -> Self {
+        Self { span, structure, has_explicit_end }
     }
 
     pub fn has_explicit_end(&self) -> bool {
-        match self {
-            Query::Schema(_, explicit_end) | Query::Pipeline(_, explicit_end) => *explicit_end,
-        }
+        self.has_explicit_end
     }
 
-    pub fn set_explicit_end(&mut self, explicit_end: bool) {
+    pub fn into_structure(self) -> QueryStructure {
+        self.structure
+    }
+}
+
+impl fmt::Display for Query {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.structure, f)?;
+        if self.has_explicit_end {
+            if f.alternate() {
+                write!(f, "\n{}", token::Clause::End)
+            } else {
+                write!(f, "{}", token::Clause::End)
+            }
+        } else {
+            Ok(())
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum QueryStructure {
+    Schema(SchemaQuery),
+    Pipeline(Pipeline),
+}
+
+impl QueryStructure {
+    fn variant_name(&self) -> &'static str {
         match self {
-            Query::Schema(_, end) => *end = explicit_end,
-            Query::Pipeline(_, end) => *end = explicit_end,
+            Self::Schema(_) => "Schema",
+            Self::Pipeline(_) => "Pipeline",
         }
     }
 
     pub fn into_schema(self) -> SchemaQuery {
         match self {
-            Self::Schema(schema, _) => schema,
+            Self::Schema(schema) => schema,
             _ => panic!(
                 "{}",
                 InvalidCasting {
-                    enum_name: stringify!(Query),
+                    enum_name: stringify!(QueryStructure),
                     variant: self.variant_name(),
                     expected_variant: stringify!(Schema),
                     typename: stringify!(SchemaQuery),
@@ -57,13 +84,14 @@ impl Query {
             ),
         }
     }
+
     pub fn into_pipeline(self) -> Pipeline {
         match self {
-            Self::Pipeline(pipeline, _) => pipeline,
+            QueryStructure::Pipeline(pipeline) => pipeline,
             _ => panic!(
                 "{}",
                 InvalidCasting {
-                    enum_name: stringify!(Query),
+                    enum_name: stringify!(QueryStructure),
                     variant: self.variant_name(),
                     expected_variant: stringify!(Pipeline),
                     typename: stringify!(Pipeline),
@@ -73,17 +101,17 @@ impl Query {
     }
 }
 
-impl fmt::Display for Query {
+impl fmt::Display for QueryStructure {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Schema(schema_query, _) => fmt::Display::fmt(schema_query, f),
-            Self::Pipeline(data_query, _) => fmt::Display::fmt(data_query, f),
+            Self::Schema(schema_query) => fmt::Display::fmt(schema_query, f),
+            Self::Pipeline(data_query) => fmt::Display::fmt(data_query, f),
         }
     }
 }
 
 impl From<Match> for Query {
     fn from(value: Match) -> Self {
-        Self::Pipeline(Pipeline::new(None, Vec::new(), vec![Stage::Match(value)]), false)
+        Self::new(None, QueryStructure::Pipeline(Pipeline::new(None, Vec::new(), vec![Stage::Match(value)])), false)
     }
 }

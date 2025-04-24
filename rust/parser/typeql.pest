@@ -12,7 +12,8 @@ eof_definition_struct = { SOI ~ definition_struct ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
-query = { ( query_schema | query_pipeline_preambled ) ~ query_end? }
+query = { query_structure ~ query_end? }
+query_structure = { query_schema | query_pipeline_preambled }
 query_end = { END ~ SEMICOLON }
 
 // QUERY PIPELINES =============================================================
