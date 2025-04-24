@@ -155,9 +155,7 @@ impl GrammarTree {
             }
 
             let expansion = visit(&mut children, &mut tree, &rule_name, is_atomic).flatten();
-            if !rule_name.ends_with("_partial") {
-                tree.rules.insert(rule_name, expansion);
-            }
+            tree.rules.insert(rule_name, expansion);
         }
 
         tree

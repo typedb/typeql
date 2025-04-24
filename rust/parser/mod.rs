@@ -19,7 +19,7 @@ use crate::{
         token, Span, Spanned,
     },
     parser::{pipeline::visit_query_pipeline_preambled, redefine::visit_query_redefine},
-    query::{Query, SchemaQuery},
+    query::{Query, QueryStructure, SchemaQuery},
     schema::definable,
     type_::Label,
     variable::{Optional, Variable},
@@ -126,22 +126,12 @@ fn parse_single(rule: Rule, string: &str) -> Result<Node<'_>> {
     Ok(parse(rule, string)?.consume_any())
 }
 
-pub(crate) fn visit_query_prefix(string: &str) -> Result<(Query, usize)> {
-    let parsed = parse_single(Rule::eof_query_prefix_partial, string);
-    match parsed {
-        Ok(node) => {
-            let mut children = node.into_children();
-            let query = children.consume_expected(Rule::query);
-            let remaining = children.consume_expected(Rule::any_partial);
-            let end_of_query_index = remaining.span().unwrap().begin_offset;
-            Ok((visit_query(query), end_of_query_index))
-        }
-        Err(error) => Err(error),
-    }
-}
-
 pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
     Ok(visit_query(parse_single(Rule::eof_query, query)?.into_children().consume_expected(Rule::query)))
+}
+
+pub(crate) fn visit_query_prefix(query: &str) -> Result<Query> {
+    Ok(visit_query(parse_single(Rule::query_prefix, query)?.into_child()))
 }
 
 pub(crate) fn visit_eof_definition_function(query: &str) -> Result<definable::Function> {
@@ -167,15 +157,27 @@ pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
 
 fn visit_query(node: Node<'_>) -> Query {
     debug_assert_eq!(node.as_rule(), Rule::query);
+    let span = node.span();
     let mut children = node.into_children();
-    let child = children.consume_any();
-    let query = match child.as_rule() {
-        Rule::query_schema => Query::Schema(visit_query_schema(child)),
-        Rule::query_pipeline_preambled => Query::Pipeline(visit_query_pipeline_preambled(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    let query_structure = visit_query_structure(children.consume_expected(Rule::query_structure));
+    let query = match children.try_consume_expected(Rule::query_end) {
+        None => Query::new(span, query_structure, false),
+        Some(_) => Query::new(span, query_structure, true),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     query
+}
+
+fn visit_query_structure(node: Node<'_>) -> QueryStructure {
+    debug_assert_eq!(node.as_rule(), Rule::query_structure);
+    let mut children = node.into_children();
+    let child = children.consume_any();
+    let query_structure = match child.as_rule() {
+        Rule::query_schema => QueryStructure::Schema(visit_query_schema(child)),
+        Rule::query_pipeline_preambled => QueryStructure::Pipeline(visit_query_pipeline_preambled(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+    };
+    query_structure
 }
 
 fn visit_query_schema(node: Node<'_>) -> SchemaQuery {

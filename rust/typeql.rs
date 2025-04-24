@@ -54,8 +54,20 @@ pub fn parse_query(typeql_query: &str) -> Result<Query> {
     visit_eof_query(typeql_query.trim_end())
 }
 
+pub fn parse_queries(mut typeql_queries: &str) -> Result<Vec<Query>> {
+    let mut queries = Vec::new();
+    while !typeql_queries.trim().is_empty() {
+        let (query, remainder_index) = parse_query_from(typeql_queries)?;
+        queries.push(query);
+        typeql_queries = &typeql_queries[remainder_index..];
+    }
+    Ok(queries)
+}
+
 pub fn parse_query_from(string: &str) -> Result<(Query, usize)> {
-    visit_query_prefix(string)
+    let query = visit_query_prefix(string)?;
+    let end_offset = query.span.unwrap().end_offset;
+    Ok((query, end_offset))
 }
 
 pub fn parse_label(typeql_label: &str) -> Result<Label> {

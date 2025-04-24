@@ -20,6 +20,7 @@ mod list;
 mod match_queries;
 mod modifiers;
 mod nonquery;
+mod pipeline;
 mod regex;
 mod schema_queries;
 mod sugar;
@@ -36,96 +37,6 @@ macro_rules! assert_valid_eq_repr {
     };
 }
 use assert_valid_eq_repr;
-
-// #[test]
-fn tmp() {
-    let query_string = r#"
-    define
-       name sub attribute, value string @regex("^(foo|bar)$") @values("foo", "bar");
-       person sub entity;
-       person owns name[] @card(0, *);
-    "#;
-    let result = parse_query(query_string);
-    eprintln!("{result:#?}");
-    eprintln!("{:#}", result.unwrap());
-    panic!();
-
-    // let query_fn = r#"
-    // define
-    // fun test_stream_1($x: person) -> {name}:
-    //   match
-    //    $x isa person, has name $name;
-    //   return {$x};
-
-    // fun test_stream_many($x: person) -> {name, age, dob}:
-    //   match
-    //     $x isa person, has name $name, has age $age, has dob $dob;
-    //   select $name, $age, $dob;
-    //   sort $name;
-    //   offset 10;
-    //   limit 10;
-    //   return { $name, $age, $dob };
-
-    // fun test_single_1($x: person) -> integer:
-    //   match
-    //     $x isa person;
-    //   return count($x);
-
-    // fun test_single_many($x: person) -> integer, integer:
-    //   match
-    //     $x isa person, has age $a;
-    //   return count($x), sum($a);
-
-    // fun test_stream_optional($x: person) -> { name, age?, dob }:
-    //   match
-    //     $x isa person, has name $name;
-    //     try { $x has age $age; };
-    //     $y in get_all_dob($x);
-    //   return { $x, $age, $y };
-
-    // fun test_single_optional($x: person) -> name?, integer, double?:
-    //   match
-    //     $x isa person, has age $age;
-    //     try { $one_name = get_a_name($x); };
-    //   return $one_name, count($x), std($age);
-    //  "#;
-    // let result = TypeQLParser::parse(Rule::eof_query, query_fn);
-    // dbg!("{}", &result);
-
-    // let query_list_card = r#"
-    // match
-    // $x is $y;
-
-    // $x > $y;
-    // $x like "abc";
-    // $x like $y;
-    // $x == $y;
-
-    // $x = $y;
-    // $x = 10 + 11;
-
-    // person sub attribute @abstract,
-    //   value integer @values(1,2,3);
-
-    // $person sub attribute @abstract;
-    // $person sub $parent, value string @regex("abc");
-
-    // $person type person;
-
-    // $x sub entity,
-    //     owns age as abstract_age @card(0,*) @key @unique,
-    //     owns name[] @card(0, *) @distinct,
-    //     owns $attr[];
-
-    // $x sub relation,
-    //     relates friend @card(10, 100) @cascade,
-    //     relates best-friend[] @distinct,
-    //     relates $role[];
-    // get;
-    // "#;
-    // let result = TypeQLParser::parse(Rule::eof_query, query_list_card);
-    // dbg!("{}", &result);
-}
 
 // #[test]
 // fn when_parsing_date_error_when_handling_overly_precise_nanos() {
@@ -162,10 +73,18 @@ fn test_parsing_query_prefix() {
     assert!(&input[remainder_index..].trim().starts_with("match"));
 
     let input = r#"
+    define
+      entity person;
+    end;
+    "#;
+    let (_query, remainder_index) = parse_query_from(input).unwrap();
+    assert!(&input[remainder_index..].trim().is_empty());
+
+    let input = r#"
 define
 
 # --- Common properties ---
-attribute id, value string;
+attribute id, value string; # an inline comment
 attribute type, value string;
 
 # TODO:  testing containing comments and newlines...

@@ -64,6 +64,7 @@ string_enum! { Clause
     Match = "match",
     Fetch = "fetch",
     With = "with",
+    End = "end",
 }
 
 string_enum! { Operator

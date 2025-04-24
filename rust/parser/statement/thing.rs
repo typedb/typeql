@@ -53,7 +53,7 @@ pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
 
 pub(super) fn visit_thing_relation_anonymous(node: Node<'_>) -> (Option<TypeRef>, Relation) {
     debug_assert_eq!(node.as_rule(), Rule::thing_relation_anonymous);
-    let span = node.span();
+    let _span = node.span();
     let mut children = node.into_children();
     let type_ = children.try_consume_expected(Rule::type_ref).map(visit_type_ref);
     let relation = visit_relation(children.consume_expected(Rule::relation));
