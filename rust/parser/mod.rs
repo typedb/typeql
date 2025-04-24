@@ -131,7 +131,7 @@ pub(crate) fn visit_eof_query(query: &str) -> Result<Query> {
 }
 
 pub(crate) fn visit_query_prefix(query: &str) -> Result<Query> {
-    Ok(visit_query(parse_single(Rule::query, query)?))
+    Ok(visit_query(parse_single(Rule::query_prefix, query)?.into_child()))
 }
 
 pub(crate) fn visit_eof_definition_function(query: &str) -> Result<definable::Function> {
