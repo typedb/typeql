@@ -62,7 +62,13 @@ insert
 watches (watched: $x, watcher: $y);
 # this is another commnet
 "#;
-    let parsed = parse_queries(queries).unwrap();
+    let parsed = match parse_queries(queries) {
+        Ok(parsed) => parsed,
+        Err(err) => {
+            println!("{}", err);
+            panic!("")
+        }
+    };
     assert_eq!(parsed.len(), 3);
 }
 
