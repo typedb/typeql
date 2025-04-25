@@ -88,7 +88,7 @@ fn test_syntax_error_pointer() {
     let parsed = parse_query("match\n$x of");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
-    assert!(report.contains("near 2:3"), "{report}");
+    assert!(report.contains("Near 2:3"), "{report}");
     assert!(report.contains("$x of"), "{report}");
 }
 
@@ -97,7 +97,7 @@ fn when_parsing_incorrect_syntax_trailing_query_whitespace_is_ignored() {
     let parsed = parse_query("match\n$x isa \n");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
-    assert!(report.contains("near 2:6"), "{report}");
+    assert!(report.contains("Near 2:6"), "{report}");
     assert!(report.contains("$x isa"), "{report}");
 }
 
@@ -114,6 +114,6 @@ fn when_parsing_incorrect_syntax_throw_typeql_syntax_exception_with_helpful_erro
     let parsed = parse_query("match\n$x isa");
     assert!(parsed.is_err());
     let report = parsed.unwrap_err().to_string();
-    assert!(report.contains("near 2:6"), "{report}");
+    assert!(report.contains("Near 2:6"), "{report}");
     assert!(report.contains("$x isa"), "{report}");
 }
