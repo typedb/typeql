@@ -211,7 +211,7 @@ owns_declaration = { OWNS ~ label_list
                    | OWNS ~ label
                    }
 plays_declaration = { PLAYS ~ label_scoped }
-relates_declaration = { RELATES ~ label_list
+relates_declaration = { RELATES ~ label_list ~ ( AS ~ label_list )?
                       | RELATES ~ label ~ ( AS ~ label )?
                       }
 
