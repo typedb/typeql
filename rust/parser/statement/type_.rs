@@ -127,7 +127,13 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
     };
 
     let specialised = if children.try_consume_expected(Rule::AS).is_some() {
-        Some(visit_type_ref(children.consume_expected(Rule::type_ref)))
+        let next = children.consume_any();
+        let specialised = match next.as_rule() {
+            Rule::type_ref => TypeRefAny::Type(visit_type_ref(next)),
+            Rule::type_ref_list => TypeRefAny::List(visit_type_ref_list(next)),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: next.to_string() }),
+        };
+        Some(specialised)
     } else {
         None
     };

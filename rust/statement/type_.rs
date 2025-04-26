@@ -248,11 +248,11 @@ impl fmt::Display for Owns {
 pub struct Relates {
     pub span: Option<Span>,
     pub related: TypeRefAny,
-    pub specialised: Option<TypeRef>,
+    pub specialised: Option<TypeRefAny>,
 }
 
 impl Relates {
-    pub fn new(span: Option<Span>, related: TypeRefAny, specialised: Option<TypeRef>) -> Self {
+    pub fn new(span: Option<Span>, related: TypeRefAny, specialised: Option<TypeRefAny>) -> Self {
         Self { span, related, specialised }
     }
 }
