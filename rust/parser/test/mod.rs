@@ -125,18 +125,3 @@ reduce $c1 = count($x);"#;
     // let expected = typeql_match!(var("x").isa("movie")).count();
     assert_valid_eq_repr!(expected, parsed, uncommented);
 }
-
-#[test]
-fn tmp() {
-    let query = r#"define
-    relation light, relates color[];
-    relation traffic-light, relates tlight[] as color[];"#;
-    let parsed = match parse_query(query) {
-        Ok(parsed) => parsed,
-        Err(err) => {
-            println!("{}", err);
-            panic!("")
-        }
-    };
-    // let expected = typeql_match!(var("x").isa("movie")).count();
-}
