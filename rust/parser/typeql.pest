@@ -91,7 +91,7 @@ label_constraint = { LABEL ~ ( label_scoped | label ) }
 owns_constraint = { OWNS ~ type_ref_list
                   | OWNS ~ type_ref
                   }
-relates_constraint = { RELATES ~ type_ref_list
+relates_constraint = { RELATES ~ type_ref_list ~ ( AS ~ type_ref_list )?
                      | RELATES ~ type_ref ~ ( AS ~ type_ref )?
                      }
 plays_constraint = { PLAYS ~ type_ref }
@@ -211,7 +211,7 @@ owns_declaration = { OWNS ~ label_list
                    | OWNS ~ label
                    }
 plays_declaration = { PLAYS ~ label_scoped }
-relates_declaration = { RELATES ~ label_list
+relates_declaration = { RELATES ~ label_list ~ ( AS ~ label_list )?
                       | RELATES ~ label ~ ( AS ~ label )?
                       }
 

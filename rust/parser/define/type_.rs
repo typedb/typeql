@@ -110,7 +110,13 @@ pub(in crate::parser) fn visit_relates_declaration(node: Node<'_>) -> Relates {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
     };
     let specialised = if children.try_consume_expected(Rule::AS).is_some() {
-        Some(visit_label(children.consume_expected(Rule::label)))
+        let node = children.consume_any();
+        let specialised = match node.as_rule() {
+            Rule::label_list => TypeRefAny::List(visit_label_list(node)),
+            Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(node))),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
+        };
+        Some(specialised)
     } else {
         None
     };
