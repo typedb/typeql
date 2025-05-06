@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.2.0-rc2
+cargo add typeql@3.2.0
 ```
 
 
@@ -77,5 +77,9 @@ cargo add typeql@3.2.0-rc2
 
 - **Update README.md**
 
+- **Update dependencies reference**
+  Update dependencies reference to avoid conflicts with TypeDB server.
+  
+  
     
 
