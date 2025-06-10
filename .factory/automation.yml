@@ -13,7 +13,7 @@ build:
 #  quality:
 #    filter:
 #      owner: typedb
-#      branch: [master, development, "3.0"]
+#      branch: [master]
 #    dependency-analysis:
 #      image: typedb-ubuntu-22.04
 #      command: |
@@ -56,9 +56,9 @@ build:
     deploy-crate-snapshot:
       filter:
         owner: typedb
-        branch: [master, development, "3.0"]
+        branch: [master]
       image: typedb-ubuntu-22.04
-      dependencies: [build, build-dependency, test-rust-unit] # TODO: Add test-rust-behaviour
+      dependencies: [build, test-rust-unit] # TODO: Add test-rust-behaviour, build-dependency
       command: |
         export DEPLOY_CRATE_TOKEN=$REPO_TYPEDB_CRATES_TOKEN
         bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
@@ -66,7 +66,7 @@ build:
 #    deploy-maven-snapshot:
 #      filter:
 #        owner: typedb
-#        branch: [master, development]
+#        branch: [master]
 #      image: typedb-ubuntu-22.04
 #      dependencies: [build, build-dependency, test-java]
 #      command: |
@@ -83,7 +83,7 @@ build:
 #    deploy-pip-snapshot:
 #      filter:
 #        owner: typedb
-#        branch: [master, development]
+#        branch: [master]
 #      image: typedb-ubuntu-20.04
 #      dependencies: [ build, build-dependency ]
 #      command: |
@@ -93,7 +93,7 @@ build:
 #    test-deployment-maven:
 #      filter:
 #        owner: typedb
-#        branch: [master, development]
+#        branch: [master]
 #      image: typedb-ubuntu-22.04
 #      dependencies: [deploy-maven-snapshot]
 #      command: |
@@ -103,7 +103,7 @@ build:
 #      image: typedb-ubuntu-22.04
 #      filter:
 #        owner: typedb
-#        branch: [master, development]
+#        branch: [master]
 #      dependencies:
 #        - build
 #        - build-dependency
@@ -122,7 +122,7 @@ build:
 release:
   filter:
     owner: typedb
-    branch: [master, "3.0"]
+    branch: [master]
   validation:
     validate-release-notes:
       image: typedb-ubuntu-22.04
@@ -173,7 +173,7 @@ release:
 #      image: typedb-ubuntu-22.04
 #      filter:
 #        owner: typedb
-#        branch: [master, development]
+#        branch: [master]
 #      dependencies:
 #        - deploy-github
 #        - deploy-crate-release
