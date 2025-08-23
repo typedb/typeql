@@ -18,7 +18,7 @@ TypeQL is the query language of **[TypeDB](https://github.com/typedb/typedb)**.
 - **Built for consistency**. TypeQL patterns are underpinned by a powerful type system that ensure safety and consistency of database applications.
 
 [//]: # (TODO: Substitute by a "TypeQL in 20 queries" or something more newbie-friendly)
-Explore the full power of TypeQL in the [official language guide](https://typedb.com/docs/typeql/).
+Explore the full range of TypeQL in the [official language reference](https://typedb.com/docs/reference/typeql/).
 
 ## A polymorphic query language
 
@@ -141,9 +141,12 @@ To access the most recent TypeQL grammar, see [typeql.pest](rust/parser/typeql.p
 
 If you want to begin your journey with TypeDB, you can explore the following resources:
 
+* [TypeDB Get Started Guide](https://typedb.com/docs/home/get-started/overview)
+* [TypeDB Academy](https://typedb.com/docs/academy)
 * More on TypeDB's [features](https://typedb.com/features)
 * In-depth dive into TypeDB's [philosophy](https://typedb.com/philosophy)
-* [TypeDB Quickstart](https://typedb.com/docs/home/quickstart) and [Crash Course](https://typedb.com/docs/home/crash-course)
+* [TypeDB CE repo](https://github.com/typedb/typedb-core)
+* [TypeDB Studio repo](https://github.com/typedb/typedb-studio)
 
 ## Contributions
 
