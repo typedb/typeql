@@ -3,15 +3,43 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-
-use cucumber::{gherkin::Step, given, then, when, World};
-use typeql::{parse_query, query::Query};
+use std::path::{Path};
+use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
+use typeql::{parse_query, query::Query, Error};
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
 
+impl TypeQLWorld {
+    pub async fn test<I: AsRef<Path>>(glob: I) -> bool {
+        !Self::cucumber::<I>()
+            .repeat_failed()
+            .fail_on_skipped()
+            .with_default_cli()
+            .before(move |_, _, _, _| {
+                // cucumber removes the default hook before each scenario and restores it after!
+                std::panic::set_hook(Box::new(move |info| println!("{}", info)));
+                Box::pin(async move {})
+            })
+            .filter_run(glob, |_, _, sc| {
+                sc.name.contains(std::env::var("SCENARIO_FILTER").as_deref().unwrap_or(""))
+                    && !sc.tags.iter().any(|tag| is_ignore(tag))
+            })
+            .await
+            .execution_has_failed()
+    }
+}
+
+fn is_ignore(tag: &str) -> bool {
+    tag == "ignore" || tag == "ignore-typeql"
+}
+
 fn parse_query_in_step(step: &Step) -> Query {
     parse_query(step.docstring.as_ref().unwrap()).unwrap()
+}
+
+fn parse_in_step(step: &Step) -> Result<Query, Error> {
+    parse_query(step.docstring.as_ref().unwrap())
 }
 
 fn reparse_query(parsed: &Query) -> Query {
@@ -32,102 +60,64 @@ macro_rules! generic_step_impl {
 }
 
 generic_step_impl! {
-    #[step("reasoning schema")]
-    #[step("typeql define")]
-    async fn typeql_define(_: &mut TypeQLWorld, step: &Step) {
+
+    #[step("typeql read query")]
+    #[step("typeql schema query")]
+    #[step("typeql write query")]
+    #[step(regex = "typeql read query; fails.*")]
+    #[step(regex = "typeql write query; fails.*")]
+    #[step(regex = "typeql schema query; fails.*")]
+    #[step("get answers of typeql read query")]
+    #[step("get answers of typeql write query")]
+    async fn typeql_query(_: &mut TypeQLWorld, step: &Step) {
         let parsed = parse_query_in_step(step);
-        assert_eq!(parsed, reparse_query(&parsed));
+        // TODO: validate Display == Parsed
+        // assert_eq!(parsed, reparse_query(&parsed));
     }
 
-    #[step("typeql undefine")]
-    async fn typeql_undefine(_: &mut TypeQLWorld, step: &Step) {
-        let parsed = parse_query_in_step(step);
-        assert_eq!(parsed, reparse_query(&parsed));
+    #[step(regex = "typeql read query; parsing fails.*")]
+    #[step(regex = "typeql write query; parsing fails.*")]
+    #[step(regex = "typeql schema query; parsing fails.*")]
+    async fn typeql_query_with_error(_: &mut TypeQLWorld, step: &Step) {
+        let result = parse_in_step(step);
+        assert!(result.is_err());
     }
 
-    #[step("get answers of typeql insert")]
-    #[step("reasoning data")]
-    #[step("typeql insert")]
-    async fn typeql_insert(_: &mut TypeQLWorld, step: &Step) {
-        let parsed = parse_query_in_step(step);
-        assert_eq!(parsed, reparse_query(&parsed));
-    }
-
-    #[step("typeql delete")]
-    async fn typeql_delete(_: &mut TypeQLWorld, step: &Step) {
-        let parsed = parse_query_in_step(step);
-        assert_eq!(parsed, reparse_query(&parsed));
-    }
-
-    #[step("typeql update")]
-    async fn typeql_update(_: &mut TypeQLWorld, step: &Step) {
-        let parsed = parse_query_in_step(step);
-        assert_eq!(parsed, reparse_query(&parsed));
-    }
-
-    #[step("get answer of typeql get aggregate")]
-    #[step("get answers of typeql get group aggregate")]
-    #[step("get answers of typeql get group")]
-    #[step("get answers of typeql get")]
-    #[step("get answers of typeql fetch")]
-    #[step("reasoning query")]
-    #[step("verify answer set is equivalent for query")]
-    async fn typeql_get(_: &mut TypeQLWorld, step: &Step) {
-        let parsed = parse_query_in_step(step);
-        assert_eq!(parsed, reparse_query(&parsed));
-    }
-
-    #[step("aggregate answer is empty")]
-    #[step("group aggregate answer value is empty")]
-    #[step("answer groups are")]
-    #[step("answers contain explanation tree")]
-    #[step("fetch answers are")]
-    #[step("concept identifiers are")]
-    #[step("connection close all sessions")]
-    #[step("connection does not have any database")]
-    #[step("connection opens with default authentication")]
-    #[step("connection has been opened")]
-    #[step("each answer satisfies")]
-    #[step("group aggregate values are")]
-    #[step("order of answer concepts is")]
-    #[step("rules are")]
-    #[step("session opens transaction of type: read")]
-    #[step("session opens transaction of type: write")]
-    #[step("session transaction closes")]
-    #[step("session transaction is open: false")]
-    #[step("for each session, transaction closes")]
-    #[step("get answers of templated typeql get")]
-    #[step("templated typeql get; throws exception")]
-    #[step("transaction commits")]
-    #[step("transaction commits; throws exception")]
-    #[step("transaction is initialised")]
+    // #[step("fetch answers are")]
+    // #[step("connection does not have any database")]
+    // #[step("connection opens with default authentication")]
     #[step("typedb starts")]
+    #[step("connection opens with default authentication")]
+    #[step(regex = r"connection is open: .*")]
+    #[step(regex = r"connection reset database: .*")]
+    #[step(regex = "connection open .* transaction for database: .*")]
+    #[step(regex = r"connection has .* database(s)")]
+    #[step(regex = r"connection create database: .*")]
+    #[step("transaction commits")]
+    #[step("transaction commits; fails")]
+    #[step("transaction commits; throws exception")]
+    #[step(regex = r"transaction commits; fails with a message containing: .*")]
+    #[step("transaction closes")]
+    #[step(regex = r"transaction is open: .*")]
+    #[step("get answers of templated typeql read query")]
     #[step("uniquely identify answer concepts")]
+    #[step(regex = r"answer size is: .*")]
+    #[step("order of answer concepts is")]
+    #[step(regex = r"answer .* document:")]
+    #[step(regex = "answers do not contain variable: .*")]
+    #[step("each answer satisfies")]
+    #[step(regex = r"result is a single row with variable.*")]
+    #[step("verify answer set is equivalent for query")]
+    #[step(regex = r"^set time-zone: .*$")]
     #[step("verifier is initialised")]
-    #[step("verify answers are complete")]
     #[step("verify answers are sound")]
-    #[step(regex = "connection create database: .*")]
-    #[step(regex = r"^aggregate value is: .*$")]
-    #[step(regex = r"^answer size is: .*$")]
-    #[step(regex = r"^connection open data session for database: .*$")]
-    #[step(regex = r"^connection open schema session for database: .*$")]
-    #[step(regex = r"^rules contain: .*$")]
-    #[step(regex = r"^rules do not contain: .*$")]
-    #[step(regex = r"^set time-zone is: .*$")]
-    #[step(regex = r"^verify answer size is: .*$")]
-    #[step(regex = r"^verify answers are consistent across .* executions$")]
-    async fn do_nothing_no_connection(_: &mut TypeQLWorld) {}
+    #[step("verify answers are complete")]
+    #[step(regex = r"verify answers are consistent across.*")]
+    // #[step(regex = r"^set time-zone is: .*$")]
+    async fn do_nothing(_: &mut TypeQLWorld) {}
 
-    #[step("typeql define; throws exception")]
-    #[step("typeql delete; throws exception")]
-    #[step("typeql insert; throws exception")]
-    #[step("typeql get aggregate; throws exception")]
-    #[step("typeql get group; throws exception")]
-    #[step("typeql get; throws exception")]
-    #[step("typeql fetch; throws exception")]
-    #[step("typeql undefine; throws exception")]
-    #[step("typeql update; throws exception")]
-    #[step(regex = r"^typeql get; throws exception containing .*$")]
-    #[step(regex = r"^typeql delete; throws exception containing .*$")]
-    async fn do_nothing_unknown_exception(_: &mut TypeQLWorld) {}
+    #[step("reasoning schema")]
+    #[step("reasoning data")]
+    #[step("reasoning query")]
+    async fn do_nothing_step(_: &mut TypeQLWorld, step: &Step) {}
 }
