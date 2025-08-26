@@ -193,7 +193,7 @@ query_schema = { query_define | query_undefine | query_redefine }
 
 query_define = { DEFINE ~ definables }
 
-definables = { definable+ }
+definables = { definable* }
 definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
 
 // TYPE DEFINITION =============================================================
@@ -253,7 +253,7 @@ struct_destructor_value = { var | struct_destructor }
 
 // REDEFINE QUERY ==============================================================
 
-query_redefine = { REDEFINE ~ ( redefinable )+ }
+query_redefine = { REDEFINE ~ ( redefinable )* }
 redefinable = { redefinable_type | definition_function }
 redefinable_type = { kind? ~ label ~ ( annotations | type_capability ) ~ SEMICOLON }
 // TODO: add `redefine <person> label <new_person_label>
@@ -262,7 +262,7 @@ redefinable_type = { kind? ~ label ~ ( annotations | type_capability ) ~ SEMICOL
 
 query_undefine = { UNDEFINE ~ undefinables }
 
-undefinables = { ( undefinable ~ SEMICOLON )+ }
+undefinables = { ( undefinable ~ SEMICOLON )* }
 undefinable = { undefine_from | undefine_function | undefine_struct | label }
 
 undefine_from = { undefine_annotation_from_capability
