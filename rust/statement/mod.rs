@@ -70,6 +70,7 @@ impl Pretty for InIterable {}
 
 impl fmt::Display for InIterable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ", token::Keyword::Let)?;
         write_joined!(f, ", ", self.lhs)?;
         write!(f, " {} {}", token::Keyword::In, self.rhs)?;
         Ok(())
@@ -175,7 +176,7 @@ impl Pretty for Assignment {}
 
 impl fmt::Display for Assignment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "let {} = {}", self.lhs, self.rhs)
+        write!(f, "{} {} = {}", token::Keyword::Let, self.lhs, self.rhs)
     }
 }
 

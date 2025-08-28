@@ -35,6 +35,9 @@ impl Spanned for Type {
 
 impl Pretty for Type {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(kind) = &self.kind {
+            write!(f, "{} ", kind)?;
+        }
         write!(f, "{}", self.type_)?;
         if let Some((first, rest)) = self.constraints.split_first() {
             f.write_char(' ')?;
@@ -51,6 +54,9 @@ impl Pretty for Type {
 
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(kind) = &self.kind {
+            write!(f, "{} ", kind)?;
+        }
         write!(f, "{}", self.type_)?;
         if let Some((first, rest)) = self.constraints.split_first() {
             write!(f, " {}", first)?;

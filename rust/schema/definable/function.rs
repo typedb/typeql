@@ -52,7 +52,9 @@ impl fmt::Display for Function {
         if f.alternate() {
             return Pretty::fmt(self, 0, f);
         } else {
+            write!(f, "{} ", token::Keyword::Fun)?;
             std::fmt::Display::fmt(&self.signature, f)?;
+            write!(f, "{} ", token::Char::Colon)?;
             std::fmt::Display::fmt(&self.block, f)
         }
     }
@@ -239,6 +241,7 @@ impl fmt::Display for FunctionBlock {
         for stage in &self.stages {
             fmt::Display::fmt(stage, f)?;
         }
+        write!(f, " ")?;
         fmt::Display::fmt(&self.return_stmt, f)
     }
 }
@@ -406,6 +409,6 @@ impl Pretty for Check {}
 
 impl fmt::Display for Check {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{};", token::Keyword::Check)
+        write!(f, "{}", token::Keyword::Check)
     }
 }

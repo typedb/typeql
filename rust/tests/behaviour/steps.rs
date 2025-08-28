@@ -34,12 +34,8 @@ fn is_ignore(tag: &str) -> bool {
     tag == "ignore" || tag == "ignore-typeql"
 }
 
-fn parse_query_in_step(step: &Step) -> Query {
-    parse_query(step.docstring.as_ref().unwrap()).unwrap()
-}
-
-fn parse_in_step(step: &Step) -> Result<Query, Error> {
-    parse_query(step.docstring.as_ref().unwrap())
+fn get_step_query(step: &Step) -> &str {
+    step.docstring.as_ref().unwrap()
 }
 
 fn reparse_query(parsed: &Query) -> Query {
@@ -59,6 +55,27 @@ macro_rules! generic_step_impl {
     };
 }
 
+/// Strip out all whitespace, commas, and comments, and compare only the raw text content of the query
+fn strip_all(query: &str) -> String {
+    let mut result = String::new();
+    let mut in_comment = false;
+    for ch in query.chars() {
+        // strip comments
+        if ch == '\n' {
+            in_comment = false;
+        } else if ch == typeql::token::Char::Hash.as_str().chars().next().unwrap() || in_comment == true {
+            // this token::Char should be a Char enum not a String enum!
+            in_comment = true;
+            continue;
+        }
+        // strip whitespace and commas
+        if !ch.is_whitespace() && ch != ',' {
+            result.push(ch);
+        }
+    }
+    result
+}
+
 generic_step_impl! {
 
     #[step("typeql read query")]
@@ -70,16 +87,20 @@ generic_step_impl! {
     #[step("get answers of typeql read query")]
     #[step("get answers of typeql write query")]
     async fn typeql_query(_: &mut TypeQLWorld, step: &Step) {
-        let parsed = parse_query_in_step(step);
-        // TODO: validate Display == Parsed
-        // assert_eq!(parsed, reparse_query(&parsed));
+        let query_string = get_step_query(step).trim();
+        let parsed = parse_query(query_string).expect("Unexpected query parsing error.");
+        assert_eq!(
+            strip_all(query_string),
+            strip_all(&parsed.to_string())
+        );
     }
 
     #[step(regex = "typeql read query; parsing fails.*")]
     #[step(regex = "typeql write query; parsing fails.*")]
     #[step(regex = "typeql schema query; parsing fails.*")]
     async fn typeql_query_with_error(_: &mut TypeQLWorld, step: &Step) {
-        let result = parse_in_step(step);
+        let query_string = get_step_query(step);
+        let result = parse_query(query_string);
         assert!(result.is_err());
     }
 

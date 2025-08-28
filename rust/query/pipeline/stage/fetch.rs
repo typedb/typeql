@@ -158,7 +158,7 @@ impl fmt::Display for FetchObjectBody {
                 }
             }
             FetchObjectBody::AttributesAll(var) => {
-                write!(f, "{}", var)?;
+                write!(f, " {}{}{}", var, token::Char::Dot, token::Char::Star)?
             }
         }
         write!(f, "{}", token::Char::CurlyRight)
@@ -194,7 +194,7 @@ impl Pretty for FetchObjectEntry {
 
 impl fmt::Display for FetchObjectEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "\"{}\"{} {}", self.key, token::Char::Colon, self.value)
+        write!(f, "{}{} {}", self.key, token::Char::Colon, self.value)
     }
 }
 
