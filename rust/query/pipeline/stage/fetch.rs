@@ -157,9 +157,7 @@ impl fmt::Display for FetchObjectBody {
                     }
                 }
             }
-            FetchObjectBody::AttributesAll(var) => {
-                write!(f, " {}{}{}", var, token::Char::Dot, token::Char::Star)?
-            }
+            FetchObjectBody::AttributesAll(var) => write!(f, " {}{}{}", var, token::Char::Dot, token::Char::Star)?,
         }
         write!(f, "{}", token::Char::CurlyRight)
     }

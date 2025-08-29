@@ -35,7 +35,7 @@ impl Spanned for Reduce {
 impl Pretty for Reduce {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         indent(indent_level, f)?;
-        write!(f, " {} ", token::Operator::Reduce)?;
+        write!(f, "{} ", token::Operator::Reduce)?;
         write_joined!(f, ", ", self.reduce_assignments)?;
         if let Some(group) = &self.groupby {
             write!(f, " {} ", token::Keyword::Groupby)?;
@@ -48,7 +48,7 @@ impl Pretty for Reduce {
 
 impl fmt::Display for Reduce {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, " {} ", token::Operator::Reduce)?;
+        write!(f, "{} ", token::Operator::Reduce)?;
         write_joined!(f, ", ", self.reduce_assignments)?;
         if let Some(group) = &self.groupby {
             write!(f, " {} ", token::Keyword::Groupby)?;
