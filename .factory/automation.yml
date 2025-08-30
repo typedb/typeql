@@ -48,11 +48,11 @@ build:
       command: |
         bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
         bazel test //rust:typeql_unit_tests --test_output=errors
-#    test-rust-behaviour:
-#      image: typedb-ubuntu-22.04
-#      command: |
-#        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
-#        bazel test //rust/tests/behaviour:test_behaviour --test_output=errors
+    test-rust-behaviour:
+      image: typedb-ubuntu-22.04
+      command: |
+        bazel run @typedb_dependencies//tool/bazelinstall:remote_cache_setup.sh
+        bazel test //rust/tests/behaviour:test_behaviour --test_output=errors
     deploy-crate-snapshot:
       filter:
         owner: typedb

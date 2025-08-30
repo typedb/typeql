@@ -53,7 +53,7 @@ impl fmt::Display for Define {
         } else {
             write!(f, "{}", token::Clause::Define)?;
             for definable in &self.definables {
-                write!(f, " {};", definable)?;
+                write!(f, " {}", definable)?;
             }
             Ok(())
         }

@@ -54,21 +54,11 @@ impl Pretty for Type {
             write!(f, "{} ", kind)?;
         }
         write!(f, "{}", self.label)?;
-        let rest = if !self.annotations.is_empty() {
-            for annotation in &self.annotations {
-                write!(f, " {}", annotation)?;
-            }
-            self.capabilities.as_slice()
-        } else {
-            if let Some((first, rest)) = self.capabilities.split_first() {
-                write!(f, " {}", first)?;
-                rest
-            } else {
-                self.capabilities.as_slice()
-            }
-        };
-        for cap in rest {
-            writeln!(f, ",")?;
+        for annotation in &self.annotations {
+            write!(f, " {}", annotation)?;
+        }
+        for cap in &self.capabilities {
+            write!(f, ",\n")?;
             indent(indent_level, f)?;
             write!(f, "{}", cap)?;
         }
@@ -79,9 +69,18 @@ impl Pretty for Type {
 
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(kind) = &self.kind {
+            write!(f, "{} ", kind)?;
+        }
         fmt::Display::fmt(&self.label, f)?;
-        f.write_char(' ')?;
-        write_joined!(f, ", ", &self.capabilities)?;
+        for annotation in &self.annotations {
+            write!(f, " {}", annotation)?;
+        }
+        for cap in &self.capabilities {
+            write!(f, ", ")?;
+            write!(f, "{}", cap)?;
+        }
+        f.write_char(';')?;
         Ok(())
     }
 }

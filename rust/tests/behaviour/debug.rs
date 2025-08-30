@@ -4,9 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use cucumber::{StatsWriter, World};
 use steps::*;
 
 #[tokio::test]
 async fn test() {
-    assert!(TypeQLWorld::test("../typedb_behaviour/").await);
+    assert!(TypeQLWorld::test("./tests/behaviour/").await);
 }

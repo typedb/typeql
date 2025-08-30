@@ -12,10 +12,13 @@ fn test_define_query_with_relates_specialises() {
     let query = r#"define
 entity pokemon;
 relation evolves;
-evolves relates pre,
+evolves,
+    relates pre,
     relates post;
-evolves-final sub evolves;
-evolves-final relates pre-final as pre;"#;
+evolves-final,
+    sub evolves;
+evolves-final,
+    relates pre-final as pre;"#;
 
     let parsed = parse_query(query).unwrap();
     // let expected = define!(
@@ -44,11 +47,12 @@ fn test_define_query_with_plays_specialises_is_not_allowed() {
     let query = r#"define
 entity pokemon;
 relation evolves;
-relation evolves relates from,
+relation evolves,
+    relates from,
     relates to;
 relation evolves-final sub evolves;
-evolves-final relates from-final as from;
-pokemon plays evolves-final:from-final as from;"#;
+evolves-final, relates from-final as from;
+pokemon, plays evolves-final:from-final as from;"#;
 
     assert!(parse_query(query).is_err());
 }
@@ -58,9 +62,11 @@ fn test_define_query() {
     let query = r#"define
 entity pokemon;
 relation evolution;
-evolves relates pre,
+evolves,
+    relates pre,
     relates post;
-pokemon plays evolves:pre,
+pokemon,
+    plays evolves:pre,
     plays evolves:post,
     owns name;"#;
 
@@ -116,7 +122,8 @@ entity abstract-type @abstract;"#;
 #[test]
 fn test_define_value_type_query() {
     let query = r#"define
-attribute my-type value integer;"#;
+attribute my-type,
+    value integer;"#;
     let parsed = parse_query(query).unwrap();
     // let expected = define!(type_("my-type").sub("attribute").value(ValueType::Integer));
     assert_valid_eq_repr!(expected, parsed, query);
@@ -125,7 +132,8 @@ attribute my-type value integer;"#;
 #[test]
 fn define_attribute_type_regex() {
     let query = r#"define
-attribute digit value string @regex("\d");"#;
+attribute digit,
+    value string @regex("\d");"#;
     let parsed = parse_query(query).unwrap();
     // let expected = define!(type_("digit").sub("attribute").regex(r"\d"));
     assert_valid_eq_repr!(expected, parsed, query);
@@ -134,9 +142,11 @@ attribute digit value string @regex("\d");"#;
 #[test]
 fn when_parsing_as_in_define_result_is_same_as_sub() {
     let query = r#"define
-relation parenthood relates parent,
+relation parenthood,
+    relates parent,
     relates child;
-fatherhood sub parenthood,
+fatherhood,
+    sub parenthood,
     relates father as parent,
     relates son as child;"#;
     let parsed = parse_query(query).unwrap();

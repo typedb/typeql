@@ -51,9 +51,8 @@ impl fmt::Display for Reduce {
         write!(f, "{} ", token::Operator::Reduce)?;
         write_joined!(f, ", ", self.reduce_assignments)?;
         if let Some(group) = &self.groupby {
-            write!(f, " {} (", token::Keyword::Groupby)?;
+            write!(f, " {} ", token::Keyword::Groupby)?;
             write_joined!(f, ", ", group)?;
-            write!(f, ")")?;
         }
         write!(f, ";")?;
         Ok(())

@@ -215,10 +215,10 @@ impl fmt::Display for TimeFragment {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let (hour, minute) = (self.hour.as_str(), self.minute.as_str());
         match &self.second {
-            None => write!(f, "{hour}:{minute}"),
+            None => write!(f, "T{hour}:{minute}"),
             Some(second) => match &self.second_fraction {
-                None => write!(f, "{hour}:{minute}:{second}"),
-                Some(second_fraction) => write!(f, "{hour}:{minute}:{second}.{second_fraction}"),
+                None => write!(f, "T{hour}:{minute}:{second}"),
+                Some(second_fraction) => write!(f, "T{hour}:{minute}:{second}.{second_fraction}"),
             },
         }
     }
@@ -304,7 +304,7 @@ impl fmt::Display for DateLiteral {
 
 impl fmt::Display for DateTimeLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}T{}", &self.date, &self.time)
+        write!(f, "{}{}", &self.date, &self.time)
     }
 }
 

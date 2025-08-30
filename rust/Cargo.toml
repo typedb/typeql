@@ -14,6 +14,11 @@ features = {}
 
 [dev-dependencies]
 
+	[dev-dependencies.tokio]
+		features = ["bytes", "default", "fs", "full", "io-std", "io-util", "libc", "macros", "mio", "net", "parking_lot", "process", "rt", "rt-multi-thread", "signal", "signal-hook-registry", "socket2", "sync", "time", "tokio-macros"]
+		version = "1.44.2"
+		default-features = false
+
 	[dev-dependencies.cucumber]
 		features = ["default", "macros"]
 		version = "0.19.1"
@@ -32,6 +37,11 @@ features = {}
 	[dev-dependencies.futures]
 		features = ["alloc", "async-await", "default", "executor", "futures-executor", "std", "thread-pool"]
 		version = "0.3.31"
+		default-features = false
+
+	[dev-dependencies.steps]
+		path = "../rust/tests/behaviour"
+		features = []
 		default-features = false
 
 [dependencies]
@@ -66,6 +76,6 @@ features = {}
 	name = "test_behaviour"
 
 [[test]]
-	path = "tests/behaviour/test_debug.rs"
+	path = "tests/behaviour/debug.rs"
 	name = "test_debug"
 
