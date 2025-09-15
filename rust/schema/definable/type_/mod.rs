@@ -51,26 +51,24 @@ impl Spanned for Type {
 impl Pretty for Type {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(kind) = &self.kind {
-            write!(f, "{} ", kind)?;
+            write!(f, "{kind} ")?;
         }
         write!(f, "{}", self.label)?;
         let rest = if !self.annotations.is_empty() {
             for annotation in &self.annotations {
-                write!(f, " {}", annotation)?;
+                write!(f, " {annotation}")?;
             }
             self.capabilities.as_slice()
+        } else if let Some((first, rest)) = self.capabilities.split_first() {
+            write!(f, " {first}")?;
+            rest
         } else {
-            if let Some((first, rest)) = self.capabilities.split_first() {
-                write!(f, " {}", first)?;
-                rest
-            } else {
-                self.capabilities.as_slice()
-            }
+            self.capabilities.as_slice()
         };
         for cap in rest {
             writeln!(f, ",")?;
             indent(indent_level, f)?;
-            write!(f, "{}", cap)?;
+            write!(f, "{cap}")?;
         }
         f.write_char(';')?;
         Ok(())
@@ -80,8 +78,18 @@ impl Pretty for Type {
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.label, f)?;
-        f.write_char(' ')?;
-        write_joined!(f, ", ", &self.capabilities)?;
+        // Include annotations after the label, before capabilities
+        for annotation in &self.annotations {
+            write!(f, " {annotation}")?;
+        }
+        // Add comma and space before capabilities if both annotations and capabilities exist
+        if !self.annotations.is_empty() && !self.capabilities.is_empty() {
+            write!(f, ", ")?;
+            write_joined!(f, ", ", &self.capabilities)?;
+        } else if !self.capabilities.is_empty() {
+            f.write_char(' ')?;
+            write_joined!(f, ", ", &self.capabilities)?;
+        }
         Ok(())
     }
 }
@@ -111,7 +119,7 @@ impl fmt::Display for Capability {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.base)?;
         for annotation in &self.annotations {
-            write!(f, " {}", annotation)?;
+            write!(f, " {annotation}")?;
         }
         Ok(())
     }
