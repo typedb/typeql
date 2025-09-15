@@ -41,7 +41,7 @@ pub mod common;
 pub mod expression;
 pub mod parser;
 pub mod pattern;
-mod pretty;
+pub mod pretty;
 pub mod query;
 pub mod schema;
 pub mod statement;
