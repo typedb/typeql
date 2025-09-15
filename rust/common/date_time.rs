@@ -6,6 +6,7 @@
 
 use chrono::{NaiveDateTime, Timelike};
 
+#[allow(dead_code)]
 pub(crate) fn parse(date_time_text: &str) -> Option<NaiveDateTime> {
     let has_seconds = date_time_text.matches(':').count() == 2;
     if has_seconds {
@@ -23,7 +24,7 @@ pub(crate) fn parse(date_time_text: &str) -> Option<NaiveDateTime> {
         NaiveDateTime::parse_from_str(date_time_text, "%Y-%m-%dT%H:%M").ok()
     }
 }
-
+#[allow(dead_code)]
 pub(crate) fn format(date_time: &NaiveDateTime) -> String {
     if date_time.time().nanosecond() > 0 {
         date_time.format("%Y-%m-%dT%H:%M:%S.%3f").to_string()
