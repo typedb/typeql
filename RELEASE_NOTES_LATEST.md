@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.5.0-rc0
+cargo add typeql@3.5.0
 ```
 
 
@@ -20,7 +20,6 @@ cargo add typeql@3.5.0-rc0
   
 
 ## Other Improvements
-- **Bump behaviour**
 
 - **Simplify type statements, allow empty define queries, bring back BDD**
   
