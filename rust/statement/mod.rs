@@ -6,6 +6,9 @@
 
 use std::{collections::HashMap, fmt};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use self::comparison::ComparisonStatement;
 pub use self::{thing::Thing, type_::Type};
 use crate::{
@@ -21,6 +24,7 @@ pub mod thing;
 pub mod type_;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Is {
     pub span: Option<Span>,
     pub lhs: Variable,
@@ -48,6 +52,7 @@ impl fmt::Display for Is {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct InIterable {
     pub span: Option<Span>,
     pub lhs: Vec<Variable>,
@@ -77,6 +82,7 @@ impl fmt::Display for InIterable {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum DeconstructField {
     Variable(Variable),
     Deconstruct(StructDeconstruct),
@@ -101,6 +107,7 @@ impl fmt::Display for DeconstructField {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct StructDeconstruct {
     pub span: Option<Span>,
     field_map: HashMap<Identifier, DeconstructField>,
@@ -136,6 +143,7 @@ impl fmt::Display for StructDeconstruct {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum AssignmentPattern {
     Variables(Vec<Variable>),
     Deconstruct(StructDeconstruct),
@@ -153,6 +161,7 @@ impl fmt::Display for AssignmentPattern {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Assignment {
     pub span: Option<Span>,
     pub lhs: AssignmentPattern,
@@ -180,6 +189,7 @@ impl fmt::Display for Assignment {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Statement {
     Is(Is),
     InIterable(InIterable),

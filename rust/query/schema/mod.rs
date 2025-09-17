@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 pub use self::{define::Define, redefine::Redefine, undefine::Undefine};
 use crate::common::{Span, Spanned};
 
@@ -14,6 +17,7 @@ mod redefine;
 mod undefine;
 
 #[derive(Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum SchemaQuery {
     Define(Define),
     Redefine(Redefine),

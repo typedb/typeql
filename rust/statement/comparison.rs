@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{token, Span, Spanned},
     expression::Expression,
@@ -13,6 +16,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ComparisonStatement {
     pub span: Option<Span>,
     pub lhs: Expression,
@@ -40,6 +44,7 @@ impl fmt::Display for ComparisonStatement {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Comparison {
     pub span: Option<Span>,
     pub comparator: token::Comparator,

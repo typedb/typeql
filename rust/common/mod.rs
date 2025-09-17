@@ -21,6 +21,9 @@ pub mod token;
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct LineColumn {
     pub line: u32,
@@ -28,6 +31,7 @@ pub struct LineColumn {
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Span {
     pub begin_offset: usize,
     pub end_offset: usize,

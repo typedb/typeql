@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use self::capability::{Alias, Owns, Plays, Relates, Sub, ValueType};
 use crate::{
     annotation::Annotation,
@@ -18,6 +21,7 @@ use crate::{
 pub mod capability;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Type {
     pub span: Option<Span>,
     pub kind: Option<token::Kind>,
@@ -95,6 +99,7 @@ impl fmt::Display for Type {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Capability {
     pub span: Option<Span>,
     pub base: CapabilityBase,
@@ -126,6 +131,7 @@ impl fmt::Display for Capability {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum CapabilityBase {
     Sub(Sub),
     Alias(Alias),

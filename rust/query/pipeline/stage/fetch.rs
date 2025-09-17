@@ -6,6 +6,9 @@
 
 use std::{fmt, fmt::Formatter};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{token, Span, Spanned},
     expression::{Expression, FunctionCall},
@@ -17,6 +20,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Fetch {
     pub span: Option<Span>,
     pub object: FetchObject,
@@ -52,6 +56,7 @@ impl fmt::Display for Fetch {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum FetchSome {
     Object(FetchObject),
     List(FetchList),
@@ -85,6 +90,7 @@ impl fmt::Display for FetchSome {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct FetchObject {
     pub span: Option<Span>,
     pub body: FetchObjectBody,
@@ -115,6 +121,7 @@ impl fmt::Display for FetchObject {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum FetchObjectBody {
     Entries(Vec<FetchObjectEntry>),
     AttributesAll(Variable),
@@ -166,6 +173,7 @@ impl fmt::Display for FetchObjectBody {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct FetchObjectEntry {
     pub span: Option<Span>,
     pub key: StringLiteral,
@@ -199,6 +207,7 @@ impl fmt::Display for FetchObjectEntry {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct FetchList {
     pub span: Option<Span>,
     pub stream: FetchStream,
@@ -229,6 +238,7 @@ impl fmt::Display for FetchList {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum FetchSingle {
     Attribute(FetchAttribute),
     Expression(Expression),
@@ -272,6 +282,7 @@ impl fmt::Display for FetchSingle {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum FetchStream {
     Attribute(FetchAttribute),
     Function(FunctionCall),
@@ -335,6 +346,7 @@ impl fmt::Display for FetchStream {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct FetchAttribute {
     pub span: Option<Span>,
     pub owner: Variable,

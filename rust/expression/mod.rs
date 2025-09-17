@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{
         identifier::Identifier,
@@ -19,6 +22,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct BuiltinFunctionName {
     pub span: Option<Span>,
     pub token: token::Function,
@@ -45,6 +49,7 @@ impl fmt::Display for BuiltinFunctionName {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum FunctionName {
     Builtin(BuiltinFunctionName),
     Identifier(Identifier),
@@ -71,6 +76,7 @@ impl fmt::Display for FunctionName {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct FunctionCall {
     pub span: Option<Span>,
     pub name: FunctionName,
@@ -101,6 +107,7 @@ impl fmt::Display for FunctionCall {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Operation {
     pub op: ArithmeticOperator,
     pub left: Expression,
@@ -132,6 +139,7 @@ impl fmt::Display for Operation {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Paren {
     pub span: Option<Span>,
     pub inner: Expression,
@@ -158,6 +166,7 @@ impl fmt::Display for Paren {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ListIndex {
     pub span: Option<Span>,
     pub variable: Variable,
@@ -185,6 +194,7 @@ impl fmt::Display for ListIndex {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct List {
     pub span: Option<Span>,
     pub items: Vec<Expression>,
@@ -214,6 +224,7 @@ impl fmt::Display for List {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ListIndexRange {
     pub span: Option<Span>,
     pub var: Variable,
@@ -242,6 +253,7 @@ impl fmt::Display for ListIndexRange {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Expression {
     Variable(Variable),
     ListIndex(Box<ListIndex>),

@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{
         token::{self, Order},
@@ -19,6 +22,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct OrderedVariable {
     pub span: Option<Span>,
     pub variable: Variable,
@@ -50,6 +54,7 @@ impl fmt::Display for OrderedVariable {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Sort {
     pub span: Option<Span>,
     pub ordered_variables: Vec<OrderedVariable>,
@@ -79,6 +84,7 @@ impl fmt::Display for Sort {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Select {
     pub span: Option<Span>,
     pub variables: Vec<Variable>,
@@ -108,6 +114,7 @@ impl fmt::Display for Select {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Offset {
     pub span: Option<Span>,
     pub offset: IntegerLiteral,
@@ -134,6 +141,7 @@ impl fmt::Display for Offset {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Limit {
     pub span: Option<Span>,
     pub limit: IntegerLiteral,
@@ -160,6 +168,7 @@ impl fmt::Display for Limit {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Require {
     pub span: Option<Span>,
     pub variables: Vec<Variable>,
@@ -189,6 +198,7 @@ impl fmt::Display for Require {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Distinct {
     span: Option<Span>,
 }
@@ -214,6 +224,7 @@ impl fmt::Display for Distinct {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Operator {
     Select(Select),
     Sort(Sort),

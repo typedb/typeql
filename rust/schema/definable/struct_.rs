@@ -6,6 +6,9 @@
 
 use std::{fmt, fmt::Formatter};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{identifier::Identifier, Span, Spanned},
     pretty::{indent, Pretty},
@@ -14,6 +17,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Struct {
     pub span: Option<Span>,
     pub ident: Identifier,
@@ -61,6 +65,7 @@ impl fmt::Display for Struct {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Field {
     pub span: Option<Span>,
     pub key: Identifier,

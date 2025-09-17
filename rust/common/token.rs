@@ -6,9 +6,13 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 macro_rules! string_enum {
     {$name:ident $($item:ident = $value:tt),* $(,)?} => {
         #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+        #[cfg_attr(feature = "quine", derive(Quine))]
         pub enum $name {
             $($item),*
         }

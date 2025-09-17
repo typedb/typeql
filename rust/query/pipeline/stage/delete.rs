@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{token, Span, Spanned},
     pretty::{indent, Pretty},
@@ -14,6 +17,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Delete {
     pub span: Option<Span>,
     pub deletables: Vec<Deletable>,
@@ -59,6 +63,7 @@ impl fmt::Display for Delete {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Deletable {
     pub span: Option<Span>,
     pub kind: DeletableKind,
@@ -89,6 +94,7 @@ impl fmt::Display for Deletable {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum DeletableKind {
     Has { attribute: Variable, owner: Variable },
     Links { players: Relation, relation: Variable },

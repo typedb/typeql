@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::Pretty,
@@ -14,6 +17,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Alias {
     pub span: Option<Span>,
     pub aliases: Vec<Label>,
@@ -40,6 +44,7 @@ impl fmt::Display for Alias {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Sub {
     pub span: Option<Span>,
     pub supertype_label: Label,
@@ -70,6 +75,7 @@ impl fmt::Display for Sub {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ValueType {
     pub span: Option<Span>,
     pub value_type: NamedType,
@@ -96,6 +102,7 @@ impl fmt::Display for ValueType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Owns {
     pub span: Option<Span>,
     pub owned: TypeRefAny,
@@ -123,6 +130,7 @@ impl fmt::Display for Owns {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Relates {
     pub span: Option<Span>,
     pub related: TypeRefAny,
@@ -152,6 +160,7 @@ impl fmt::Display for Relates {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Plays {
     pub span: Option<Span>,
     pub role: ScopedLabel,

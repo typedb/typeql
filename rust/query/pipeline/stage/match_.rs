@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{token, Span, Spanned},
     pattern::Pattern,
@@ -13,6 +16,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Match {
     pub span: Option<Span>,
     pub patterns: Vec<Pattern>,

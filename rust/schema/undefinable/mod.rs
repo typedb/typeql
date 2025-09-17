@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use super::definable::type_::CapabilityBase;
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
@@ -15,6 +18,7 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Undefinable {
     Type(Label),                                // undefine person;
     AnnotationType(AnnotationType),             // undefine @independent from name;
@@ -43,6 +47,7 @@ impl fmt::Display for Undefinable {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct AnnotationType {
     pub span: Option<Span>,
     pub annotation_category: token::Annotation,
@@ -70,6 +75,7 @@ impl fmt::Display for AnnotationType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct AnnotationCapability {
     pub span: Option<Span>,
     pub annotation_category: token::Annotation,
@@ -103,6 +109,7 @@ impl fmt::Display for AnnotationCapability {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct CapabilityType {
     pub span: Option<Span>,
     pub capability: CapabilityBase,
@@ -130,6 +137,7 @@ impl fmt::Display for CapabilityType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Specialise {
     pub span: Option<Span>,
     pub specialised: Label,
@@ -166,6 +174,7 @@ impl fmt::Display for Specialise {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Function {
     pub span: Option<Span>,
     pub ident: Identifier,
@@ -192,6 +201,7 @@ impl fmt::Display for Function {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Struct {
     pub span: Option<Span>,
     pub ident: Identifier,

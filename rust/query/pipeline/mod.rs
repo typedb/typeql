@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use self::stage::Stage;
 use crate::{
     common::{Span, Spanned},
@@ -17,6 +20,7 @@ use crate::{
 pub mod stage;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Preamble {
     pub span: Option<Span>,
     pub function: definable::Function,
@@ -44,6 +48,7 @@ impl fmt::Display for Preamble {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Pipeline {
     pub span: Option<Span>,
     pub preambles: Vec<Preamble>,

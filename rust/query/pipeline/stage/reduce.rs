@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{token, Span, Spanned},
     pretty::{indent, Pretty},
@@ -14,6 +17,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Reduce {
     pub span: Option<Span>,
     pub reduce_assignments: Vec<ReduceAssign>,
@@ -61,6 +65,7 @@ impl fmt::Display for Reduce {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ReduceAssign {
     pub variable: Variable,
     pub reducer: Reducer,
@@ -80,6 +85,7 @@ impl fmt::Display for ReduceAssign {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Reducer {
     Count(Count),
     Stat(Stat),
@@ -104,6 +110,7 @@ impl fmt::Display for Reducer {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Count {
     pub span: Option<Span>,
     pub variable: Option<Variable>,
@@ -134,6 +141,7 @@ impl fmt::Display for Count {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Stat {
     pub span: Option<Span>,
     pub reduce_operator: token::ReduceOperator,

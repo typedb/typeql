@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     annotation::Annotation,
     common::{token, Span, Spanned},
@@ -14,6 +17,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Type {
     pub span: Option<Span>,
     pub kind: Option<token::Kind>,
@@ -63,6 +67,7 @@ impl fmt::Display for Type {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Constraint {
     pub span: Option<Span>,
     pub base: ConstraintBase,
@@ -94,6 +99,7 @@ impl fmt::Display for Constraint {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum ConstraintBase {
     Sub(Sub),
     Label(LabelConstraint),
@@ -130,6 +136,7 @@ impl fmt::Display for ConstraintBase {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum LabelConstraint {
     Name(Label),
     Scoped(ScopedLabel),
@@ -147,6 +154,7 @@ impl fmt::Display for LabelConstraint {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum SubKind {
     Direct,
     Transitive,
@@ -165,6 +173,7 @@ impl fmt::Display for SubKind {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Sub {
     pub span: Option<Span>,
     pub kind: SubKind,
@@ -192,6 +201,7 @@ impl fmt::Display for Sub {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ValueType {
     pub span: Option<Span>,
     pub value_type: NamedType,
@@ -218,6 +228,7 @@ impl fmt::Display for ValueType {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Owns {
     pub span: Option<Span>,
     pub owned: TypeRefAny,
@@ -245,6 +256,7 @@ impl fmt::Display for Owns {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Relates {
     pub span: Option<Span>,
     pub related: TypeRefAny,
@@ -276,6 +288,7 @@ impl fmt::Display for Relates {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Plays {
     pub span: Option<Span>,
     pub role: TypeRef,

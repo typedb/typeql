@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Debug, Formatter, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::{indent, Pretty},
@@ -16,6 +19,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Function {
     pub span: Option<Span>,
     pub signature: Signature,
@@ -59,6 +63,7 @@ impl fmt::Display for Function {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Signature {
     pub span: Option<Span>,
     pub ident: Identifier,
@@ -105,6 +110,7 @@ impl fmt::Display for Signature {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Argument {
     pub span: Option<Span>,
     pub var: Variable,
@@ -125,6 +131,7 @@ impl fmt::Display for Argument {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Output {
     Stream(Stream),
     Single(Single),
@@ -158,6 +165,7 @@ impl fmt::Display for Output {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Stream {
     pub span: Option<Span>,
     pub types: Vec<NamedTypeAny>,
@@ -186,6 +194,7 @@ impl fmt::Display for Stream {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Single {
     pub span: Option<Span>,
     pub types: Vec<NamedTypeAny>,
@@ -212,6 +221,7 @@ impl fmt::Display for Single {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct FunctionBlock {
     pub span: Option<Span>,
     pub stages: Vec<Stage>,
@@ -244,6 +254,7 @@ impl fmt::Display for FunctionBlock {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum ReturnStatement {
     Stream(ReturnStream),
     Single(ReturnSingle),
@@ -274,6 +285,7 @@ impl fmt::Display for ReturnStatement {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ReturnStream {
     pub span: Option<Span>,
     pub vars: Vec<Variable>,
@@ -305,6 +317,7 @@ impl fmt::Display for ReturnStream {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ReturnSingle {
     pub span: Option<Span>,
     pub selector: SingleSelector,
@@ -338,6 +351,7 @@ impl fmt::Display for ReturnSingle {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum SingleSelector {
     First,
     Last,
@@ -353,6 +367,7 @@ impl fmt::Display for SingleSelector {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum ReturnReduction {
     Check(Check),
     Value(Vec<Reducer>, Option<Span>),
@@ -386,6 +401,7 @@ impl fmt::Display for ReturnReduction {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Check {
     pub span: Option<Span>,
 }

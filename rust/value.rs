@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Formatter};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
     pretty::Pretty,
@@ -13,50 +16,59 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct BooleanLiteral {
     pub value: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct StringLiteral {
     pub value: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct IntegerLiteral {
     pub value: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct NumericLiteral {
     pub value: String,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Sign {
     Plus,
     Minus,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct SignedIntegerLiteral {
     pub sign: Option<Sign>,
     pub integral: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct SignedDoubleLiteral {
     pub sign: Option<Sign>,
     pub double: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct SignedDecimalLiteral {
     pub sign: Option<Sign>,
     pub decimal: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct DateFragment {
     pub year: String,
     pub month: String,
@@ -64,6 +76,7 @@ pub struct DateFragment {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct TimeFragment {
     pub hour: String,
     pub minute: String,
@@ -72,6 +85,7 @@ pub struct TimeFragment {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct DateTimeTZLiteral {
     pub date: DateFragment,
     pub time: TimeFragment,
@@ -79,23 +93,27 @@ pub struct DateTimeTZLiteral {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct DateTimeLiteral {
     pub date: DateFragment,
     pub time: TimeFragment,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct DateLiteral {
     pub date: DateFragment,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum TimeZone {
     IANA(String),
     ISO(String),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum DurationLiteral {
     Weeks(IntegerLiteral),
     DateAndTime(DurationDate, Option<DurationTime>),
@@ -103,11 +121,13 @@ pub enum DurationLiteral {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct StructLiteral {
     pub inner: String, // TODO
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct DurationDate {
     pub years: Option<IntegerLiteral>,
     pub months: Option<IntegerLiteral>,
@@ -115,6 +135,7 @@ pub struct DurationDate {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct DurationTime {
     pub hours: Option<IntegerLiteral>,
     pub minutes: Option<IntegerLiteral>,
@@ -122,6 +143,7 @@ pub struct DurationTime {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum ValueLiteral {
     Boolean(BooleanLiteral),
     Integer(SignedIntegerLiteral),
@@ -136,6 +158,7 @@ pub enum ValueLiteral {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Literal {
     pub span: Option<Span>,
     pub inner: ValueLiteral,

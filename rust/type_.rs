@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     pretty::Pretty,
@@ -13,6 +16,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct BuiltinValueType {
     pub span: Option<Span>,
     pub token: token::ValueType,
@@ -39,6 +43,7 @@ impl fmt::Display for BuiltinValueType {
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Label {
     pub span: Option<Span>,
     pub ident: Identifier,
@@ -65,6 +70,7 @@ impl fmt::Display for Label {
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct ScopedLabel {
     pub span: Option<Span>,
     pub scope: Label,
@@ -92,6 +98,7 @@ impl fmt::Display for ScopedLabel {
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum NamedType {
     Label(Label),
     BuiltinValueType(BuiltinValueType),
@@ -116,6 +123,7 @@ impl fmt::Display for NamedType {
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum NamedTypeAny {
     Simple(NamedType),
     List(NamedTypeList),
@@ -145,6 +153,7 @@ impl fmt::Display for NamedTypeAny {
 }
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct NamedTypeList {
     pub span: Option<Span>,
     pub inner: NamedType,
@@ -170,6 +179,7 @@ impl fmt::Display for NamedTypeList {
 }
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct NamedTypeOptional {
     pub span: Option<Span>,
     pub inner: NamedType,
@@ -195,6 +205,7 @@ impl fmt::Display for NamedTypeOptional {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum TypeRef {
     Label(Label), // person OR friendship:friend OR string
     Scoped(ScopedLabel),
@@ -224,6 +235,7 @@ impl fmt::Display for TypeRef {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum TypeRefAny {
     Type(TypeRef),     // person, friendship:friend, or $t
     List(TypeRefList), // person[], friendship:friend[], or $t[]
@@ -249,6 +261,7 @@ impl fmt::Display for TypeRefAny {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct TypeRefList {
     pub span: Option<Span>,
     pub inner: TypeRef,

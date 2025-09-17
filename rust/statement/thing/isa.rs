@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{token, Span, Spanned},
     pretty::Pretty,
@@ -15,6 +18,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Isa {
     pub span: Option<Span>,
     pub kind: IsaKind,
@@ -47,6 +51,7 @@ impl fmt::Display for Isa {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum IsaKind {
     Exact,
     Subtype,
@@ -65,6 +70,7 @@ impl fmt::Display for IsaKind {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum IsaInstanceConstraint {
     Relation(Relation),
     Value(Literal),

@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{token, Span},
     pretty::{indent, Pretty},
@@ -13,6 +16,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Conjunction {
     pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
@@ -42,6 +46,7 @@ impl fmt::Display for Conjunction {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Negation {
     pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
@@ -73,6 +78,7 @@ impl fmt::Display for Negation {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Optional {
     pub span: Option<Span>,
     pub patterns: Vec<Pattern>,
@@ -104,6 +110,7 @@ impl fmt::Display for Optional {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Disjunction {
     pub span: Option<Span>,
     pub branches: Vec<Vec<Pattern>>,
@@ -164,6 +171,7 @@ impl fmt::Display for Disjunction {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Pattern {
     Conjunction(Conjunction),
     Disjunction(Disjunction),

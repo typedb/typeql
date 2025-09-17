@@ -6,15 +6,20 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{identifier::Identifier, Span, Spanned},
     pretty::Pretty,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Optional;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Variable {
     Anonymous { span: Option<Span>, optional: Option<Optional> },
     Named { span: Option<Span>, ident: Identifier, optional: Option<Optional> },

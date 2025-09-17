@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 pub use self::{function::Function, struct_::Struct, type_::Type};
 use crate::pretty::Pretty;
 
@@ -14,6 +17,7 @@ pub mod struct_;
 pub mod type_;
 
 #[derive(Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Definable {
     TypeDeclaration(Type),
     Function(Function),

@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 pub use self::{
     delete::Delete, fetch::Fetch, insert::Insert, match_::Match, modifier::Operator, put::Put, reduce::Reduce,
     update::Update,
@@ -26,6 +29,7 @@ pub mod reduce;
 mod update;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Stage {
     Match(Match),
     Insert(Insert),

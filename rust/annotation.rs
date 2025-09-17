@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{identifier::Identifier, token, Span, Spanned},
     util::write_joined,
@@ -13,6 +16,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Annotation {
     Abstract(Abstract),
     Cardinality(Cardinality),
@@ -64,6 +68,7 @@ impl fmt::Display for Annotation {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Abstract {
     pub span: Option<Span>,
 }
@@ -87,6 +92,7 @@ impl fmt::Display for Abstract {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Cardinality {
     pub span: Option<Span>,
     pub range: CardinalityRange,
@@ -111,6 +117,7 @@ impl fmt::Display for Cardinality {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum CardinalityRange {
     Exact(IntegerLiteral),
     Range(IntegerLiteral, Option<IntegerLiteral>),
@@ -127,6 +134,7 @@ impl fmt::Display for CardinalityRange {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Cascade {
     pub span: Option<Span>,
 }
@@ -150,6 +158,7 @@ impl fmt::Display for Cascade {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Distinct {
     pub span: Option<Span>,
 }
@@ -173,6 +182,7 @@ impl fmt::Display for Distinct {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Independent {
     pub span: Option<Span>,
 }
@@ -196,6 +206,7 @@ impl fmt::Display for Independent {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Key {
     pub span: Option<Span>,
 }
@@ -219,6 +230,7 @@ impl fmt::Display for Key {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Range {
     pub span: Option<Span>,
     pub min: Option<Literal>,
@@ -253,6 +265,7 @@ impl fmt::Display for Range {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Regex {
     pub span: Option<Span>,
     pub regex: StringLiteral,
@@ -277,6 +290,7 @@ impl fmt::Display for Regex {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Subkey {
     pub span: Option<Span>,
     pub ident: Identifier,
@@ -301,6 +315,7 @@ impl fmt::Display for Subkey {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Unique {
     pub span: Option<Span>,
 }
@@ -324,6 +339,7 @@ impl fmt::Display for Unique {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Values {
     pub span: Option<Span>,
     pub values: Vec<Literal>,

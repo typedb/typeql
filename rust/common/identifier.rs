@@ -8,6 +8,9 @@ use std::{fmt, sync::OnceLock};
 
 use regex::{Regex, RegexBuilder};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
     is_reserved_keyword,
@@ -15,6 +18,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Identifier {
     pub span: Option<Span>,
     ident: String,

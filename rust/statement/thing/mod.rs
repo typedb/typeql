@@ -6,6 +6,9 @@
 
 use std::fmt::{self, Write};
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use self::isa::Isa;
 use super::{comparison, Statement};
 use crate::{
@@ -21,6 +24,7 @@ use crate::{
 pub mod isa;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Thing {
     pub span: Option<Span>,
     pub head: Head,
@@ -75,6 +79,7 @@ impl fmt::Display for Thing {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Head {
     Variable(Variable),
     Relation(Option<TypeRef>, Relation),
@@ -101,6 +106,7 @@ impl fmt::Display for Head {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Relation {
     pub span: Option<Span>,
     pub role_players: Vec<RolePlayer>,
@@ -130,6 +136,7 @@ impl fmt::Display for Relation {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum RolePlayer {
     Typed(TypeRefAny, Variable),
     Untyped(Variable),
@@ -147,6 +154,7 @@ impl fmt::Display for RolePlayer {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum Constraint {
     Isa(Isa),
     Iid(Iid),
@@ -177,6 +185,7 @@ impl fmt::Display for Constraint {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Iid {
     pub span: Option<Span>,
     pub iid: String,
@@ -203,6 +212,7 @@ impl fmt::Display for Iid {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Has {
     pub span: Option<Span>,
     pub type_: Option<TypeRefAny>,
@@ -235,6 +245,7 @@ impl fmt::Display for Has {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum HasValue {
     Variable(Variable),
     Expression(Expression),
@@ -262,6 +273,7 @@ impl fmt::Display for HasValue {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Links {
     pub span: Option<Span>,
     pub relation: Relation,

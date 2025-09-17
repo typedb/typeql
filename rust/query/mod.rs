@@ -6,6 +6,9 @@
 
 use std::fmt;
 
+#[cfg(feature = "quine")]
+use {polyquine::Quine, proc_macro2::TokenStream};
+
 use self::pipeline::stage::{Match, Stage};
 pub use self::{
     pipeline::{stage, Pipeline},
@@ -20,6 +23,7 @@ pub mod pipeline;
 pub mod schema;
 
 #[derive(Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub struct Query {
     pub span: Option<Span>,
     pub structure: QueryStructure,
@@ -56,6 +60,7 @@ impl fmt::Display for Query {
 }
 
 #[derive(Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "quine", derive(Quine))]
 pub enum QueryStructure {
     Schema(SchemaQuery),
     Pipeline(Pipeline),
