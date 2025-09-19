@@ -91,7 +91,7 @@ pub(super) fn visit_query_stage(node: Node<'_>) -> Stage {
         Rule::clause_update => Stage::Update(visit_clause_update(child)),
         Rule::clause_delete => Stage::Delete(visit_clause_delete(child)),
         Rule::operator_stream => Stage::Operator(visit_operator_stream(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -100,7 +100,7 @@ fn visit_query_stage_terminal(node: Node<'_>) -> Stage {
     let child = node.into_child();
     match child.as_rule() {
         Rule::clause_fetch => Stage::Fetch(visit_clause_fetch(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -127,7 +127,7 @@ pub(super) fn visit_pattern(node: Node<'_>) -> Pattern {
         Rule::pattern_negation => Pattern::Negation(visit_pattern_negation(child)),
         Rule::pattern_try => Pattern::Optional(visit_pattern_try(child)),
         Rule::statement => Pattern::Statement(visit_statement(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -179,7 +179,7 @@ fn visit_clause_insert(node: Node<'_>) -> Insert {
             Rule::statement_assignment => Statement::Assignment(visit_statement_assignment(child)),
             _ => unreachable!(
                 "Unrecognised statement inside insert clause: {:?}",
-                TypeQLError::IllegalGrammar { input: child.to_string() }
+                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
             ),
         })
         .collect();
@@ -229,7 +229,7 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
             let relation = visit_var(children.consume_expected(Rule::var));
             DeletableKind::Links { players, relation }
         }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     Deletable::new(span, kind)
@@ -251,7 +251,7 @@ fn visit_fetch_some(node: Node<'_>) -> FetchSome {
         Rule::fetch_object => FetchSome::Object(visit_fetch_object(child)),
         Rule::fetch_list => FetchSome::List(visit_fetch_list(child)),
         Rule::fetch_single => FetchSome::Single(visit_fetch_single(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -262,7 +262,7 @@ fn visit_fetch_single(node: Node<'_>) -> FetchSingle {
         Rule::fetch_attribute => FetchSingle::Attribute(visit_fetch_attribute(child)),
         Rule::function_block => FetchSingle::FunctionBlock(visit_function_block(child)),
         Rule::expression => FetchSingle::Expression(visit_expression(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -275,7 +275,7 @@ fn visit_fetch_attribute(node: Node<'_>) -> FetchAttribute {
     let attribute = match child.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(child)),
         Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(child))),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     FetchAttribute::new(span, owner, attribute)
@@ -301,7 +301,7 @@ fn visit_fetch_object_body(node: Node<'_>) -> FetchObjectBody {
             let var = visit_var_named(child.into_children().consume_expected(Rule::var_named));
             FetchObjectBody::AttributesAll(var)
         }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -335,7 +335,7 @@ fn visit_fetch_stream(node: Node<'_>) -> FetchStream {
         Rule::function_block => FetchStream::SubQueryFunctionBlock(visit_function_block(child)),
         Rule::query_pipeline => FetchStream::SubQueryFetch(visit_query_pipeline(child)),
         Rule::expression_function => FetchStream::Function(visit_expression_function(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -350,7 +350,7 @@ pub(super) fn visit_operator_stream(node: Node<'_>) -> Operator {
         Rule::operator_reduce => Operator::Reduce(visit_operator_reduce(child)),
         Rule::operator_require => Operator::Require(visit_operator_require(child)),
         Rule::operator_distinct => Operator::Distinct(visit_operator_distinct(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -369,7 +369,7 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
                 group = Some(visit_vars(children.consume_expected(Rule::vars)));
                 break;
             }
-            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
         }
     }
     debug_assert_eq!(children.try_consume_any(), None);
@@ -414,7 +414,7 @@ pub(crate) fn visit_reducer(node: Node<'_>) -> Reducer {
             // TODO      vvvv rename
             Reducer::Stat(Stat::new(span, ReduceOperator::List, visit_var(children.consume_expected(Rule::var))))
         }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.as_str().to_owned() }),
     }
 }
 
@@ -450,7 +450,7 @@ fn visit_order(node: Node<'_>) -> Order {
     match child.as_rule() {
         Rule::ASC => Order::Asc,
         Rule::DESC => Order::Desc,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 

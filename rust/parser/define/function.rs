@@ -54,7 +54,7 @@ fn visit_return_statement(node: Node<'_>) -> ReturnStatement {
         Rule::return_stream => ReturnStatement::Stream(visit_return_stream(child)),
         Rule::return_single => ReturnStatement::Single(visit_return_single(child)),
         Rule::return_reduce => ReturnStatement::Reduce(visit_return_reduce(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
@@ -88,7 +88,7 @@ fn visit_return_single_selector(node: Node<'_>) -> SingleSelector {
     match child.as_rule() {
         Rule::FIRST => SingleSelector::First,
         Rule::LAST => SingleSelector::Last,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -109,7 +109,7 @@ fn visit_return_reduce_reduction(node: Node<'_>) -> ReturnReduction {
     let reduction = match children.peek_rule().unwrap() {
         Rule::CHECK => ReturnReduction::Check(Check::new(children.consume_expected(Rule::CHECK).span())),
         Rule::reducer => ReturnReduction::Value(children.by_ref().map(visit_reducer).collect(), span),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.as_str().to_owned() }),
     };
     debug_assert!(children.try_consume_any().is_none());
     reduction
@@ -133,7 +133,7 @@ fn visit_function_output(node: Node<'_>) -> Output {
     match child.as_rule() {
         Rule::function_output_stream => Output::Stream(visit_function_output_stream(child)),
         Rule::function_output_single => Output::Single(visit_function_output_single(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 

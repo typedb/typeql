@@ -38,6 +38,6 @@ pub(super) fn visit_definable(node: Node<'_>) -> Definable {
         Rule::definition_type => Definable::TypeDeclaration(visit_definition_type(child)),
         Rule::definition_function => Definable::Function(visit_definition_function(child)),
         Rule::definition_struct => Definable::Struct(visit_definition_struct(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }

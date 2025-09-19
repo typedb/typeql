@@ -48,7 +48,7 @@ fn visit_type_constraint_base(node: Node<'_>) -> ConstraintBase {
         Rule::owns_constraint => ConstraintBase::Owns(visit_owns_constraint(child)),
         Rule::relates_constraint => ConstraintBase::Relates(visit_relates_constraint(child)),
         Rule::plays_constraint => ConstraintBase::Plays(visit_plays_constraint(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -68,7 +68,7 @@ fn visit_sub_token(node: Node<'_>) -> SubKind {
     match child.as_rule() {
         Rule::SUB => SubKind::Transitive,
         Rule::SUBX => SubKind::Direct,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -90,7 +90,7 @@ fn visit_label_constraint(node: Node<'_>) -> LabelConstraint {
     let label = match label.as_rule() {
         Rule::label => LabelConstraint::Name(visit_label(label)),
         Rule::label_scoped => LabelConstraint::Scoped(visit_label_scoped(label)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: label.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: label.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     label
@@ -106,7 +106,7 @@ fn visit_owns_constraint(node: Node<'_>) -> Owns {
     let owned = match child.as_rule() {
         Rule::type_ref => TypeRefAny::Type(visit_type_ref(child)),
         Rule::type_ref_list => TypeRefAny::List(visit_type_ref_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
@@ -123,7 +123,7 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
     let related = match child.as_rule() {
         Rule::type_ref => TypeRefAny::Type(visit_type_ref(child)),
         Rule::type_ref_list => TypeRefAny::List(visit_type_ref_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
 
     let specialised = if children.try_consume_expected(Rule::AS).is_some() {
@@ -131,7 +131,7 @@ fn visit_relates_constraint(node: Node<'_>) -> Relates {
         let specialised = match next.as_rule() {
             Rule::type_ref => TypeRefAny::Type(visit_type_ref(next)),
             Rule::type_ref_list => TypeRefAny::List(visit_type_ref_list(next)),
-            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: next.to_string() }),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: next.as_str().to_owned() }),
         };
         Some(specialised)
     } else {

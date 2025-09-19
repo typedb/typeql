@@ -28,7 +28,7 @@ pub(super) fn visit_statement_single(node: Node<'_>) -> Statement {
         Rule::statement_in => Statement::InIterable(visit_statement_in(child)),
         Rule::statement_comparison => Statement::Comparison(visit_statement_comparison(child)),
         Rule::statement_assignment => Statement::Assignment(visit_statement_assignment(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -50,7 +50,7 @@ pub fn visit_assignment_left(node: Node<'_>) -> AssignmentPattern {
     match child.as_rule() {
         Rule::vars_assignment => AssignmentPattern::Variables(visit_vars_assignment(child)),
         Rule::struct_destructor => AssignmentPattern::Deconstruct(visit_struct_destructor(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -75,7 +75,7 @@ fn visit_struct_destructor_value(node: Node<'_>) -> DeconstructField {
     match child.as_rule() {
         Rule::var => DeconstructField::Variable(visit_var(child)),
         Rule::struct_destructor => DeconstructField::Deconstruct(visit_struct_destructor(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -116,7 +116,7 @@ pub fn visit_statement_in(node: Node<'_>) -> InIterable {
     let rhs = match child.as_rule() {
         Rule::expression_function => Expression::Function(visit_expression_function(child)),
         Rule::expression_list => visit_expression_list(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     InIterable::new(span, lhs, rhs)

@@ -18,7 +18,7 @@ pub(super) fn visit_type_ref(node: Node<'_>) -> TypeRef {
         Rule::var => TypeRef::Variable(visit_var(child)),
         Rule::label => TypeRef::Label(visit_label(child)),
         Rule::label_scoped => TypeRef::Scoped(visit_label_scoped(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -36,7 +36,7 @@ pub(super) fn visit_named_type_any(node: Node<'_>) -> NamedTypeAny {
         Rule::named_type => NamedTypeAny::Simple(visit_named_type(child)),
         Rule::named_type_optional => NamedTypeAny::Optional(visit_named_type_optional(child)),
         Rule::named_type_list => NamedTypeAny::List(visit_named_type_list(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -46,7 +46,7 @@ pub(super) fn visit_named_type(node: Node<'_>) -> NamedType {
     match child.as_rule() {
         Rule::label => NamedType::Label(visit_label(child)),
         Rule::value_type_primitive => NamedType::BuiltinValueType(visit_value_type_primitive(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -94,7 +94,7 @@ pub(super) fn visit_value_type(node: Node<'_>) -> NamedType {
     match child.as_rule() {
         Rule::value_type_primitive => NamedType::BuiltinValueType(visit_value_type_primitive(child)),
         Rule::label => NamedType::Label(visit_label(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -119,7 +119,7 @@ pub(super) fn visit_value_type_primitive(node: Node<'_>) -> BuiltinValueType {
         Rule::DURATION => token::ValueType::Duration,
         Rule::INTEGER => token::ValueType::Integer,
         Rule::STRING => token::ValueType::String,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     BuiltinValueType::new(span, token)
 }
