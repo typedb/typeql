@@ -365,7 +365,7 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
         match child.as_rule() {
             Rule::reduce_assign => reduce_assignments.push(visit_reduce_assign(child)),
             Rule::GROUPBY => {
-                debug_assert!(reduce_assignments.len() > 0);
+                debug_assert!(!reduce_assignments.is_empty());
                 group = Some(visit_vars(children.consume_expected(Rule::vars)));
                 break;
             }

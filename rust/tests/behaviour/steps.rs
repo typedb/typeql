@@ -6,7 +6,7 @@
 use std::path::Path;
 
 use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
-use typeql::{parse_query, query::Query, Error};
+use typeql::{parse_query, query::Query};
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
@@ -64,7 +64,7 @@ fn strip_all(query: &str) -> String {
         // strip comments
         if ch == '\n' {
             in_comment = false;
-        } else if ch == typeql::token::Char::Hash.as_str().chars().next().unwrap() || in_comment == true {
+        } else if ch == typeql::token::Char::Hash.as_str().chars().next().unwrap() || in_comment {
             // this token::Char should be a Char enum not a String enum!
             in_comment = true;
             continue;
@@ -136,10 +136,8 @@ generic_step_impl! {
     #[step("verify answers are complete")]
     #[step(regex = r"verify answers are consistent across.*")]
     // #[step(regex = r"^set time-zone is: .*$")]
-    async fn do_nothing(_: &mut TypeQLWorld) {}
-
     #[step("reasoning schema")]
     #[step("reasoning data")]
     #[step("reasoning query")]
-    async fn do_nothing_step(_: &mut TypeQLWorld, step: &Step) {}
+    async fn do_nothing(_: &mut TypeQLWorld) {}
 }

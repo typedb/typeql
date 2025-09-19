@@ -172,12 +172,11 @@ fn visit_query_structure(node: Node<'_>) -> QueryStructure {
     debug_assert_eq!(node.as_rule(), Rule::query_structure);
     let mut children = node.into_children();
     let child = children.consume_any();
-    let query_structure = match child.as_rule() {
+    match child.as_rule() {
         Rule::query_schema => QueryStructure::Schema(visit_query_schema(child)),
         Rule::query_pipeline_preambled => QueryStructure::Pipeline(visit_query_pipeline_preambled(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
-    };
-    query_structure
+    }
 }
 
 fn visit_query_schema(node: Node<'_>) -> SchemaQuery {

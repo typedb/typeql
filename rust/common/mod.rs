@@ -89,7 +89,7 @@ impl Spannable for &str {
             })
             .collect();
         if annotated {
-            let lines_start = line.checked_sub(lines_before).unwrap_or(0);
+            let lines_start = line.saturating_sub(lines_before);
             let lines_end = min(
                 lines.len(),
                 line.checked_add(lines_after.checked_add(1).unwrap_or(usize::MAX)).unwrap_or(usize::MAX),

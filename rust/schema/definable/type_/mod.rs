@@ -12,7 +12,6 @@ use crate::{
     common::{token, Span, Spanned},
     pretty::{indent, Pretty},
     type_::Label,
-    util::write_joined,
 };
 
 pub mod capability;
@@ -58,7 +57,7 @@ impl Pretty for Type {
             write!(f, " {}", annotation)?;
         }
         for cap in &self.capabilities {
-            write!(f, ",\n")?;
+            writeln!(f, ",")?;
             indent(indent_level, f)?;
             write!(f, "{}", cap)?;
         }

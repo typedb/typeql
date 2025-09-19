@@ -22,7 +22,7 @@ pub struct Reduce {
 
 impl Reduce {
     pub fn new(span: Option<Span>, reduce_assignments: Vec<ReduceAssign>, groupby: Option<Vec<Variable>>) -> Self {
-        Reduce { span, reduce_assignments, groupby: groupby }
+        Reduce { span, reduce_assignments, groupby }
     }
 }
 
