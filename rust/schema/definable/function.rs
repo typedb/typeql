@@ -96,7 +96,7 @@ impl fmt::Display for Signature {
             Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{}(", self.ident)?;
-            if self.args.len() > 0 {
+            if !self.args.is_empty() {
                 write!(f, "{}", self.args[0])?;
                 self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {arg}"))?;
             }
@@ -231,7 +231,7 @@ impl Pretty for FunctionBlock {
         for stage in &self.stages {
             Pretty::fmt(stage, indent_level, f)?;
         }
-        write!(f, "\n")?;
+        writeln!(f)?;
         Pretty::fmt(&self.return_stmt, indent_level, f)
     }
 }

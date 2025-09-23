@@ -6,7 +6,7 @@
 use std::path::Path;
 
 use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
-use typeql::{parse_query, query::Query};
+use typeql::parse_query;
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
@@ -37,11 +37,6 @@ fn is_ignore(tag: &str) -> bool {
 
 fn get_step_query(step: &Step) -> &str {
     step.docstring.as_ref().unwrap()
-}
-
-fn reparse_query(parsed: &Query) -> Query {
-    let query_string = &parsed.to_string();
-    parse_query(query_string).unwrap()
 }
 
 macro_rules! generic_step_impl {
