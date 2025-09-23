@@ -29,11 +29,11 @@ query_stage_terminal = { clause_fetch ~ SEMICOLON }
 
 clause_match = { MATCH ~ patterns }
 
-clause_insert = { INSERT ~ ( statement_thing ~ SEMICOLON | statement_assignment ~ SEMICOLON )+ }
+clause_insert = { INSERT ~ ( ( statement_thing | statement_assignment | pattern_try ) ~ SEMICOLON )+ }
 clause_put = { PUT ~ ( statement_thing ~ SEMICOLON )+ }
 clause_update = { UPDATE ~ ( statement_thing ~ SEMICOLON )+ }
 
-clause_delete = { DELETE ~ ( statement_deletable ~ SEMICOLON )+ }
+clause_delete = { DELETE ~ ( ( statement_deletable | pattern_try_deletable ) ~ SEMICOLON )+ }
 
 // STREAM OPERATORS  ===========================================================
 
@@ -122,6 +122,8 @@ statement_deletable = { HAS? ~ var ~ OF ~ var
                       | LINKS? ~ relation ~ OF ~ var
                       | var
                       }
+
+pattern_try_deletable = { TRY ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
 
 // SINGLE STATEMENTS ===========================================================
 
