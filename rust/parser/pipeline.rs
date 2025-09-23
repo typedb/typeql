@@ -175,8 +175,9 @@ fn visit_clause_insert(node: Node<'_>) -> Insert {
         .into_children()
         .skip_expected(Rule::INSERT)
         .map(|child| match child.as_rule() {
-            Rule::statement_thing => visit_statement_thing(child),
-            Rule::statement_assignment => Statement::Assignment(visit_statement_assignment(child)),
+            Rule::statement_thing => Pattern::Statement(visit_statement_thing(child)),
+            Rule::statement_assignment => Pattern::Statement(Statement::Assignment(visit_statement_assignment(child))),
+            Rule::pattern_try => Pattern::Optional(visit_pattern_try(child)),
             _ => unreachable!(
                 "Unrecognised statement inside insert clause: {:?}",
                 TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
@@ -203,7 +204,18 @@ fn visit_clause_update(node: Node<'_>) -> Update {
 fn visit_clause_delete(node: Node<'_>) -> Delete {
     debug_assert_eq!(node.as_rule(), Rule::clause_delete);
     let span = node.span();
-    let deletables = node.into_children().skip_expected(Rule::DELETE).map(visit_statement_deletable).collect();
+    let deletables = node
+        .into_children()
+        .skip_expected(Rule::DELETE)
+        .map(|child| match child.as_rule() {
+            Rule::statement_deletable => visit_statement_deletable(child),
+            Rule::pattern_try_deletable => visit_pattern_try_deletable(child),
+            _ => unreachable!(
+                "Unrecognised statement inside delete clause: {:?}",
+                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
+            ),
+        })
+        .collect();
     Delete::new(span, deletables)
 }
 
@@ -233,6 +245,24 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
     };
     debug_assert_eq!(children.try_consume_any(), None);
     Deletable::new(span, kind)
+}
+
+fn visit_pattern_try_deletable(node: Node<'_>) -> Deletable {
+    debug_assert_eq!(node.as_rule(), Rule::pattern_try_deletable);
+    let span = node.span();
+    let deletables = node
+        .into_children()
+        .skip_expected(Rule::TRY)
+        .map(|child| match child.as_rule() {
+            Rule::statement_deletable => visit_statement_deletable(child),
+            Rule::pattern_try_deletable => visit_pattern_try_deletable(child),
+            _ => unreachable!(
+                "Unrecognised statement inside delete clause: {:?}",
+                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
+            ),
+        })
+        .collect();
+    Deletable::new(span, DeletableKind::Try { deletables })
 }
 
 fn visit_clause_fetch(node: Node<'_>) -> Fetch {

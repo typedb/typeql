@@ -93,9 +93,27 @@ pub enum DeletableKind {
     Has { attribute: Variable, owner: Variable },
     Links { players: Relation, relation: Variable },
     Concept { variable: Variable },
+    Try { deletables: Vec<Deletable> },
 }
 
-impl Pretty for DeletableKind {}
+impl Pretty for DeletableKind {
+    fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Try { deletables } => {
+                writeln!(f, "{} {{", token::Keyword::Try)?;
+                for deletable in deletables {
+                    indent(indent_level + 1, f)?;
+                    Pretty::fmt(deletable, indent_level + 1, f)?;
+                    writeln!(f, ";")?;
+                    indent(indent_level, f)?;
+                }
+                f.write_char('}')?;
+                Ok(())
+            }
+            _ => write!(f, "{}", self),
+        }
+    }
+}
 
 impl fmt::Display for DeletableKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -107,6 +125,14 @@ impl fmt::Display for DeletableKind {
                 write!(f, "{} {} {} {}", token::Keyword::Links, players, token::Keyword::Of, relation)
             }
             Self::Concept { variable } => write!(f, "{}", variable),
+            Self::Try { deletables } => {
+                write!(f, "{} {{ ", token::Keyword::Try)?;
+                for deletable in deletables {
+                    write!(f, "{}; ", deletable)?;
+                }
+                f.write_char('}')?;
+                Ok(())
+            }
         }
     }
 }
