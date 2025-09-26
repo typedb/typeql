@@ -262,7 +262,7 @@ fn visit_pattern_try_deletable(node: Node<'_>) -> Deletable {
             ),
         })
         .collect();
-    Deletable::new(span, DeletableKind::Try { deletables })
+    Deletable::new(span, DeletableKind::Optional { deletables })
 }
 
 fn visit_clause_fetch(node: Node<'_>) -> Fetch {
