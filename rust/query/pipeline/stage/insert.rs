@@ -8,8 +8,8 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span, Spanned},
-    pretty::{indent, Pretty},
     pattern::Pattern,
+    pretty::{indent, Pretty},
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
