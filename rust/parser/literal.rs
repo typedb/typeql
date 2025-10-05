@@ -30,7 +30,7 @@ pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
         Rule::date_literal => ValueLiteral::Date(visit_date_literal(child)),
         Rule::duration_literal => ValueLiteral::Duration(visit_duration_literal(child)),
 
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     Literal::new(span, value_literal)
 }
@@ -41,7 +41,7 @@ fn visit_sign(node: Node<'_>) -> Sign {
     match child.as_rule() {
         Rule::PLUS => Sign::Plus,
         Rule::MINUS => Sign::Minus,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -70,7 +70,7 @@ fn visit_signed_integer(node: Node<'_>) -> SignedIntegerLiteral {
             visit_integer_literal(children.consume_expected(Rule::integer_literal)).value,
         ),
         Rule::integer_literal => (None, visit_integer_literal(first_node).value),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     SignedIntegerLiteral { sign, integral }
@@ -83,7 +83,7 @@ fn visit_signed_decimal(node: Node<'_>) -> SignedDecimalLiteral {
     let (sign, decimal_with_suffix) = match first_node.as_rule() {
         Rule::sign => (Some(visit_sign(first_node)), children.consume_expected(Rule::decimal_literal).as_str()),
         Rule::decimal_literal => (None, first_node.as_str()),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     let decimal = decimal_with_suffix.trim_end_matches("dec").to_owned();
@@ -99,7 +99,7 @@ fn visit_signed_double(node: Node<'_>) -> SignedDoubleLiteral {
             (Some(visit_sign(first_node)), children.consume_expected(Rule::double_literal).as_str().to_owned())
         }
         Rule::double_literal => (None, first_node.as_str().to_owned()),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: first_node.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     SignedDoubleLiteral { sign, double }
@@ -114,7 +114,7 @@ fn visit_datetime_tz_literal(node: Node<'_>) -> DateTimeTZLiteral {
     let timezone = match tz_node.as_rule() {
         Rule::iana_timezone => TimeZone::IANA(tz_node.as_str().to_owned()),
         Rule::iso8601_timezone_offset => TimeZone::ISO(tz_node.as_str().to_owned()),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: tz_node.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: tz_node.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     DateTimeTZLiteral { date, time, timezone }
@@ -171,7 +171,7 @@ fn visit_duration_literal(node: Node<'_>) -> DurationLiteral {
             let time = visit_duration_time(child);
             DurationLiteral::Time(time)
         }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     duration

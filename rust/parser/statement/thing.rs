@@ -47,7 +47,7 @@ pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
             };
             Statement::Thing(Thing::new(span, Head::Relation(type_ref_opt, relation), constraints))
         }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -74,7 +74,7 @@ fn visit_thing_constraint(node: Node<'_>) -> Constraint {
         Rule::iid_constraint => Constraint::Iid(visit_iid_constraint(child)),
         Rule::has_constraint => Constraint::Has(visit_has_constraint(child)),
         Rule::links_constraint => Constraint::Links(visit_links_constraint(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -90,7 +90,7 @@ fn visit_isa_constraint(node: Node<'_>) -> Isa {
         Rule::expression_struct => IsaInstanceConstraint::Struct(visit_expression_struct(child)),
         Rule::value_literal => IsaInstanceConstraint::Value(visit_value_literal(child)),
         Rule::comparison => IsaInstanceConstraint::Comparison(visit_comparison(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     });
     Isa::new(span, kind, type_, instance_constraint)
 }
@@ -101,7 +101,7 @@ fn visit_isa_token(node: Node<'_>) -> IsaKind {
     match child.as_rule() {
         Rule::ISA => IsaKind::Subtype,
         Rule::ISAX => IsaKind::Exact,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -131,7 +131,7 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
                     Expression::Variable(variable) => HasValue::Variable(variable),
                     expr => HasValue::Expression(expr),
                 },
-                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_node.to_string() }),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_node.as_str().to_owned() }),
             };
             Has::new(span, type_, value)
         }
@@ -142,11 +142,11 @@ fn visit_has_constraint(node: Node<'_>) -> Has {
                 Rule::var => HasValue::Variable(visit_var(value_node)),
                 Rule::comparison => HasValue::Comparison(visit_comparison(value_node)),
                 Rule::expression_list => HasValue::Expression(visit_expression_list(value_node)),
-                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_node.to_string() }),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: value_node.as_str().to_owned() }),
             };
             Has::new(span, type_, value)
         }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     has
@@ -181,7 +181,7 @@ fn visit_role_player(node: Node<'_>) -> RolePlayer {
             TypeRefAny::List(visit_type_ref_list(child)),
             visit_var(children.consume_expected(Rule::var)),
         ),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     role_player

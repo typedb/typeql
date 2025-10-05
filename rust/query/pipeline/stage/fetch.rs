@@ -245,7 +245,7 @@ impl Pretty for FetchSingle {
                 Pretty::fmt(single, indent_level, f)
             }
             FetchSingle::FunctionBlock(single) => {
-                write!(f, " {}\n", token::Char::ParenLeft)?;
+                writeln!(f, " {}", token::Char::ParenLeft)?;
                 Pretty::fmt(single, indent_level + 1, f)?;
                 writeln!(f)?;
                 indent(indent_level, f)?;
@@ -296,10 +296,10 @@ impl Pretty for FetchStream {
                 writeln!(f, "{}", token::Char::SquareLeft)?;
                 Pretty::fmt(&stages[0], indent_level + 1, f)?;
                 for stage in &stages[1..] {
-                    write!(f, "\n")?;
+                    writeln!(f)?;
                     Pretty::fmt(stage, indent_level + 1, f)?;
                 }
-                writeln!(f, "")?;
+                writeln!(f)?;
                 indent(indent_level, f)?;
                 write!(f, "{}", token::Char::SquareRight)
             }

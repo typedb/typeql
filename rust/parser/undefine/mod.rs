@@ -41,7 +41,7 @@ fn visit_undefinable(node: Node<'_>) -> Undefinable {
         Rule::undefine_struct => Undefinable::Struct(visit_undefine_struct(child)),
         Rule::undefine_function => Undefinable::Function(visit_undefine_function(child)),
         Rule::label => Undefinable::Type(visit_label(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -55,7 +55,7 @@ fn visit_undefine_from(node: Node<'_>) -> Undefinable {
         Rule::undefine_annotation_from_type => Undefinable::AnnotationType(visit_undefine_annotation_from_type(child)),
         Rule::undefine_capability => Undefinable::CapabilityType(visit_undefine_capability(child)),
         Rule::undefine_specialise => Undefinable::Specialise(visit_undefine_specialise(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -97,7 +97,7 @@ fn visit_annotation_category(node: Node<'_>) -> token::Annotation {
         Rule::ANNOTATION_SUBKEY => token::Annotation::Subkey,
         Rule::ANNOTATION_UNIQUE => token::Annotation::Unique,
         Rule::ANNOTATION_VALUES => token::Annotation::Values,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 

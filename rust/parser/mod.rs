@@ -172,12 +172,11 @@ fn visit_query_structure(node: Node<'_>) -> QueryStructure {
     debug_assert_eq!(node.as_rule(), Rule::query_structure);
     let mut children = node.into_children();
     let child = children.consume_any();
-    let query_structure = match child.as_rule() {
+    match child.as_rule() {
         Rule::query_schema => QueryStructure::Schema(visit_query_schema(child)),
         Rule::query_pipeline_preambled => QueryStructure::Pipeline(visit_query_pipeline_preambled(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
-    };
-    query_structure
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+    }
 }
 
 fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
@@ -188,7 +187,7 @@ fn visit_query_schema(node: Node<'_>) -> SchemaQuery {
         Rule::query_define => SchemaQuery::Define(visit_query_define(child)),
         Rule::query_redefine => SchemaQuery::Redefine(visit_query_redefine(child)),
         Rule::query_undefine => SchemaQuery::Undefine(visit_query_undefine(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     query
@@ -202,7 +201,7 @@ fn visit_kind(node: Node<'_>) -> token::Kind {
         Rule::RELATION => token::Kind::Relation,
         Rule::ATTRIBUTE => token::Kind::Attribute,
         Rule::ROLE => token::Kind::Role,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -218,7 +217,7 @@ fn visit_var(node: Node<'_>) -> Variable {
     match child.as_rule() {
         Rule::VAR_ANONYMOUS => Variable::Anonymous { span, optional: None },
         Rule::var_named => visit_var_named(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -258,7 +257,7 @@ fn visit_var_assignment(node: Node<'_>) -> Variable {
     match child.as_rule() {
         Rule::var => visit_var(child),
         Rule::var_optional => visit_var_optional(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -268,6 +267,6 @@ fn visit_reduce_assignment_var(node: Node<'_>) -> Variable {
     match child.as_rule() {
         Rule::var => visit_var(child),
         Rule::var_optional => visit_var_optional(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }

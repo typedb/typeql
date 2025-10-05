@@ -47,6 +47,6 @@ fn visit_struct_field_value_type(node: Node<'_>) -> NamedTypeAny {
     match child.as_rule() {
         Rule::value_type => NamedTypeAny::Simple(visit_value_type(child)),
         Rule::value_type_optional => NamedTypeAny::Optional(visit_value_type_optional(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }

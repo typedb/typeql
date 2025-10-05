@@ -50,7 +50,7 @@ impl Pretty for Function {
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if f.alternate() {
-            return Pretty::fmt(self, 0, f);
+            Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{} ", token::Keyword::Fun)?;
             std::fmt::Display::fmt(&self.signature, f)?;
@@ -77,7 +77,7 @@ impl Signature {
 impl Pretty for Signature {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}(", self.ident)?;
-        if self.args.len() > 0 {
+        if !self.args.is_empty() {
             Pretty::fmt(&self.args[0], indent_level, f)?;
             self.args[1..self.args.len()].iter().try_for_each(|arg| {
                 f.write_str(", ")?;
@@ -96,7 +96,7 @@ impl fmt::Display for Signature {
             Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{}(", self.ident)?;
-            if self.args.len() > 0 {
+            if !self.args.is_empty() {
                 write!(f, "{}", self.args[0])?;
                 self.args[1..self.args.len()].iter().try_for_each(|arg| write!(f, ", {arg}"))?;
             }
@@ -231,7 +231,7 @@ impl Pretty for FunctionBlock {
         for stage in &self.stages {
             Pretty::fmt(stage, indent_level, f)?;
         }
-        write!(f, "\n")?;
+        writeln!(f)?;
         Pretty::fmt(&self.return_stmt, indent_level, f)
     }
 }

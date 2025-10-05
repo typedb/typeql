@@ -49,7 +49,7 @@ pub(in crate::parser) fn visit_type_capability_base(node: Node<'_>) -> Capabilit
         Rule::owns_declaration => CapabilityBase::Owns(visit_owns_declaration(child)),
         Rule::relates_declaration => CapabilityBase::Relates(visit_relates_declaration(child)),
         Rule::plays_declaration => CapabilityBase::Plays(visit_plays_declaration(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -90,7 +90,7 @@ fn visit_owns_declaration(node: Node<'_>) -> Owns {
     let owned = match owned_label.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(owned_label)),
         Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(owned_label))),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: owned_label.as_str().to_owned() }),
     };
 
     debug_assert_eq!(children.try_consume_any(), None);
@@ -107,14 +107,14 @@ pub(in crate::parser) fn visit_relates_declaration(node: Node<'_>) -> Relates {
     let related = match related_label.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(related_label)),
         Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(related_label))),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: related_label.as_str().to_owned() }),
     };
     let specialised = if children.try_consume_expected(Rule::AS).is_some() {
         let node = children.consume_any();
         let specialised = match node.as_rule() {
             Rule::label_list => TypeRefAny::List(visit_label_list(node)),
             Rule::label => TypeRefAny::Type(TypeRef::Label(visit_label(node))),
-            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.to_string() }),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: node.as_str().to_owned() }),
         };
         Some(specialised)
     } else {

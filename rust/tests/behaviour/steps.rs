@@ -6,7 +6,7 @@
 use std::path::Path;
 
 use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
-use typeql::{parse_query, query::Query, Error};
+use typeql::parse_query;
 
 #[derive(Debug, Default, World)]
 pub struct TypeQLWorld;
@@ -39,11 +39,6 @@ fn get_step_query(step: &Step) -> &str {
     step.docstring.as_ref().unwrap()
 }
 
-fn reparse_query(parsed: &Query) -> Query {
-    let query_string = &parsed.to_string();
-    parse_query(query_string).unwrap()
-}
-
 macro_rules! generic_step_impl {
     {$($(#[step($pattern:expr)])+ async fn $fn_name:ident $args:tt $body:tt)+} => {
         $($(
@@ -64,7 +59,7 @@ fn strip_all(query: &str) -> String {
         // strip comments
         if ch == '\n' {
             in_comment = false;
-        } else if ch == typeql::token::Char::Hash.as_str().chars().next().unwrap() || in_comment == true {
+        } else if ch == typeql::token::Char::Hash.as_str().chars().next().unwrap() || in_comment {
             // this token::Char should be a Char enum not a String enum!
             in_comment = true;
             continue;
@@ -136,10 +131,8 @@ generic_step_impl! {
     #[step("verify answers are complete")]
     #[step(regex = r"verify answers are consistent across.*")]
     // #[step(regex = r"^set time-zone is: .*$")]
-    async fn do_nothing(_: &mut TypeQLWorld) {}
-
     #[step("reasoning schema")]
     #[step("reasoning data")]
     #[step("reasoning query")]
-    async fn do_nothing_step(_: &mut TypeQLWorld, step: &Step) {}
+    async fn do_nothing(_: &mut TypeQLWorld) {}
 }

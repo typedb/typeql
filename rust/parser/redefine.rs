@@ -27,7 +27,7 @@ fn visit_redefinable(node: Node<'_>) -> Definable {
     match child.as_rule() {
         Rule::redefinable_type => visit_redefinable_kind(child),
         Rule::definition_function => Definable::Function(visit_definition_function(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 

@@ -37,7 +37,7 @@ pub(super) fn visit_expression(node: Node<'_>) -> Expression {
     match child.as_rule() {
         Rule::expression_value => visit_expression_value(child),
         Rule::expression_list => visit_expression_list(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -61,7 +61,7 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
                 Rule::DIVIDE => token::ArithmeticOperator::Divide,
                 Rule::MODULO => token::ArithmeticOperator::Modulo,
                 Rule::POWER => token::ArithmeticOperator::Power,
-                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: op.to_string() }),
+                _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: op.as_str().to_owned() }),
             };
             Expression::Operation(Box::new(Operation::new(op, left, right)))
         })
@@ -77,7 +77,7 @@ fn visit_expression_base(node: Node<'_>) -> Expression {
         Rule::expression_function => Expression::Function(visit_expression_function(child)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(child))),
         Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(child))),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -112,7 +112,7 @@ pub(super) fn visit_expression_list(node: Node<'_>) -> Expression {
     match child.as_rule() {
         Rule::expression_list_new => visit_expression_list_new(child),
         Rule::expression_list_subrange => visit_expression_list_subrange(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -148,7 +148,7 @@ fn visit_expression_function_name(node: Node<'_>) -> FunctionName {
     match child.as_rule() {
         Rule::identifier => FunctionName::Identifier(visit_identifier(child)),
         Rule::builtin_func_name => FunctionName::Builtin(visit_builtin_func_name(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -164,7 +164,7 @@ fn visit_builtin_func_name(node: Node<'_>) -> BuiltinFunctionName {
         Rule::MAX => token::Function::Max,
         Rule::MIN => token::Function::Min,
         Rule::ROUND => token::Function::Round,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     BuiltinFunctionName::new(span, token)
 }

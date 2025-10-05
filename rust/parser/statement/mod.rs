@@ -25,7 +25,7 @@ pub(super) fn visit_statement(node: Node<'_>) -> Statement {
         Rule::statement_single => visit_statement_single(child),
         Rule::statement_type => visit_statement_type(child),
         Rule::statement_thing => visit_statement_thing(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -43,7 +43,7 @@ fn visit_comparison(node: Node<'_>) -> Comparison {
         Rule::LT => Comparator::Lt,
         Rule::CONTAINS => Comparator::Contains,
         Rule::LIKE => Comparator::Like,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: comparator_node.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: comparator_node.as_str().to_owned() }),
     };
     let rhs = visit_expression_value(children.consume_expected(Rule::expression_value));
     debug_assert_eq!(children.try_consume_any(), None);

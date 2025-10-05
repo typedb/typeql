@@ -38,7 +38,7 @@ fn visit_annotation(node: Node<'_>) -> Annotation {
         Rule::annotation_regex => Annotation::Regex(visit_annotation_regex(child)),
         Rule::annotation_subkey => Annotation::Subkey(visit_annotation_subkey(child)),
         Rule::annotation_values => Annotation::Values(visit_annotation_values(child)),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
@@ -51,7 +51,7 @@ fn visit_annotation_card(node: Node<'_>) -> Cardinality {
     let inner = match child.as_rule() {
         Rule::cardinality_exact => visit_cardinality_exact(child),
         Rule::cardinality_range => visit_cardinality_range(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
     Cardinality::new(span, inner)
@@ -87,7 +87,7 @@ fn visit_range(node: Node<'_>) -> (Option<Literal>, Option<Literal>) {
         Rule::range_full => visit_range_full(child),
         Rule::range_from => visit_range_from(child),
         Rule::range_to => visit_range_to(child),
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.to_string() }),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
