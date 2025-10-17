@@ -8,19 +8,19 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span, Spanned},
+    pattern::Pattern,
     pretty::{indent, Pretty},
-    statement::Statement,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Update {
     pub span: Option<Span>,
-    pub statements: Vec<Statement>,
+    pub patterns: Vec<Pattern>,
 }
 
 impl Update {
-    pub(crate) fn new(span: Option<Span>, statements: Vec<Statement>) -> Self {
-        Self { span, statements }
+    pub(crate) fn new(span: Option<Span>, patterns: Vec<Pattern>) -> Self {
+        Self { span, patterns }
     }
 }
 
@@ -33,10 +33,10 @@ impl Spanned for Update {
 impl Pretty for Update {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", token::Clause::Update)?;
-        for statement in &self.statements {
+        for pattern in &self.patterns {
             writeln!(f)?;
             indent(indent_level, f)?;
-            Pretty::fmt(statement, indent_level, f)?;
+            Pretty::fmt(pattern, indent_level, f)?;
             f.write_char(';')?;
         }
         Ok(())
@@ -49,8 +49,8 @@ impl fmt::Display for Update {
             Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{}", token::Clause::Update)?;
-            for statement in &self.statements {
-                write!(f, " {statement};")?;
+            for pattern in &self.patterns {
+                write!(f, " {pattern};")?;
             }
             Ok(())
         }

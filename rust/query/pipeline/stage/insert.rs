@@ -8,19 +8,19 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{token, Span, Spanned},
+    pattern::Pattern,
     pretty::{indent, Pretty},
-    statement::Statement,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Insert {
     pub span: Option<Span>,
-    pub statements: Vec<Statement>,
+    pub patterns: Vec<Pattern>,
 }
 
 impl Insert {
-    pub(crate) fn new(span: Option<Span>, statements: Vec<Statement>) -> Self {
-        Self { span, statements }
+    pub(crate) fn new(span: Option<Span>, patterns: Vec<Pattern>) -> Self {
+        Self { span, patterns }
     }
 }
 
@@ -33,10 +33,10 @@ impl Spanned for Insert {
 impl Pretty for Insert {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", token::Clause::Insert)?;
-        for statement in &self.statements {
+        for pattern in &self.patterns {
             writeln!(f)?;
             indent(indent_level, f)?;
-            Pretty::fmt(statement, indent_level, f)?;
+            Pretty::fmt(pattern, indent_level, f)?;
             f.write_char(';')?;
         }
         Ok(())
@@ -49,7 +49,7 @@ impl fmt::Display for Insert {
             Pretty::fmt(self, 0, f)
         } else {
             write!(f, "{}", token::Clause::Insert)?;
-            for statement in &self.statements {
+            for statement in &self.patterns {
                 write!(f, " {statement};")?;
             }
             Ok(())
