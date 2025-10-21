@@ -117,21 +117,25 @@ impl Pretty for DeletableKind {
 
 impl fmt::Display for DeletableKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Has { attribute, owner } => {
-                write!(f, "{} {} {} {}", token::Keyword::Has, attribute, token::Keyword::Of, owner)
-            }
-            Self::Links { players, relation } => {
-                write!(f, "{} {} {} {}", token::Keyword::Links, players, token::Keyword::Of, relation)
-            }
-            Self::Concept { variable } => write!(f, "{}", variable),
-            Self::Optional { deletables } => {
-                write!(f, "{} {{ ", token::Keyword::Try)?;
-                for deletable in deletables {
-                    write!(f, "{}; ", deletable)?;
+        if f.alternate() {
+            Pretty::fmt(self, 0, f)
+        } else {
+            match self {
+                Self::Has { attribute, owner } => {
+                    write!(f, "{} {} {} {}", token::Keyword::Has, attribute, token::Keyword::Of, owner)
                 }
-                f.write_char('}')?;
-                Ok(())
+                Self::Links { players, relation } => {
+                    write!(f, "{} {} {} {}", token::Keyword::Links, players, token::Keyword::Of, relation)
+                }
+                Self::Concept { variable } => write!(f, "{}", variable),
+                Self::Optional { deletables } => {
+                    write!(f, "{} {{ ", token::Keyword::Try)?;
+                    for deletable in deletables {
+                        write!(f, "{}; ", deletable)?;
+                    }
+                    f.write_char('}')?;
+                    Ok(())
+                }
             }
         }
     }
