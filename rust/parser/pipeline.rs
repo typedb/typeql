@@ -245,7 +245,6 @@ fn visit_pattern_try_deletable(node: Node<'_>) -> Deletable {
         .skip_expected(Rule::TRY)
         .map(|child| match child.as_rule() {
             Rule::statement_deletable => visit_statement_deletable(child),
-            Rule::pattern_try_deletable => visit_pattern_try_deletable(child),
             _ => unreachable!(
                 "Unrecognised statement inside delete clause: {:?}",
                 TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
