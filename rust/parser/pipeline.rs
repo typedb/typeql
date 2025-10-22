@@ -10,10 +10,7 @@ use super::{
     define::function::visit_definition_function,
     expression::{visit_expression, visit_expression_function},
     literal::{visit_integer_literal, visit_quoted_string_literal},
-    statement::{
-        thing::{visit_relation, visit_statement_thing},
-        visit_statement,
-    },
+    statement::{thing::visit_relation, visit_statement},
     type_::{visit_label, visit_label_list},
     visit_reduce_assignment_var, visit_var, visit_var_named, visit_vars, IntoChildNodes, Node, Rule, RuleMatcher,
 };
@@ -23,7 +20,7 @@ use crate::{
         token::{Order, ReduceOperator},
         Spanned,
     },
-    parser::{define::function::visit_function_block, statement::single::visit_statement_assignment},
+    parser::define::function::visit_function_block,
     pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
     query::{
         pipeline::{
@@ -44,7 +41,6 @@ use crate::{
         },
         Pipeline,
     },
-    statement::Statement,
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
@@ -171,39 +167,45 @@ fn visit_pattern_try(node: Node<'_>) -> Optional {
 fn visit_clause_insert(node: Node<'_>) -> Insert {
     debug_assert_eq!(node.as_rule(), Rule::clause_insert);
     let span = node.span();
-    let statements = node
-        .into_children()
-        .skip_expected(Rule::INSERT)
-        .map(|child| match child.as_rule() {
-            Rule::statement_thing => visit_statement_thing(child),
-            Rule::statement_assignment => Statement::Assignment(visit_statement_assignment(child)),
-            _ => unreachable!(
-                "Unrecognised statement inside insert clause: {:?}",
-                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
-            ),
-        })
-        .collect();
-    Insert::new(span, statements)
+    let mut children = node.into_children();
+    let patterns = visit_patterns(children.skip_expected(Rule::INSERT).consume_expected(Rule::patterns));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Insert::new(span, patterns)
 }
 
 fn visit_clause_put(node: Node<'_>) -> Put {
     debug_assert_eq!(node.as_rule(), Rule::clause_put);
     let span = node.span();
-    let statement_things = node.into_children().skip_expected(Rule::PUT).map(visit_statement_thing).collect();
-    Put::new(span, statement_things)
+    let mut children = node.into_children();
+    let patterns = visit_patterns(children.skip_expected(Rule::PUT).consume_expected(Rule::patterns));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Put::new(span, patterns)
 }
 
 fn visit_clause_update(node: Node<'_>) -> Update {
     debug_assert_eq!(node.as_rule(), Rule::clause_update);
     let span = node.span();
-    let statement_things = node.into_children().skip_expected(Rule::UPDATE).map(visit_statement_thing).collect();
-    Update::new(span, statement_things)
+    let mut children = node.into_children();
+    let patterns = visit_patterns(children.skip_expected(Rule::UPDATE).consume_expected(Rule::patterns));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Update::new(span, patterns)
 }
 
 fn visit_clause_delete(node: Node<'_>) -> Delete {
     debug_assert_eq!(node.as_rule(), Rule::clause_delete);
     let span = node.span();
-    let deletables = node.into_children().skip_expected(Rule::DELETE).map(visit_statement_deletable).collect();
+    let deletables = node
+        .into_children()
+        .skip_expected(Rule::DELETE)
+        .map(|child| match child.as_rule() {
+            Rule::statement_deletable => visit_statement_deletable(child),
+            Rule::pattern_try_deletable => visit_pattern_try_deletable(child),
+            _ => unreachable!(
+                "Unrecognised statement inside delete clause: {:?}",
+                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
+            ),
+        })
+        .collect();
     Delete::new(span, deletables)
 }
 
@@ -233,6 +235,23 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
     };
     debug_assert_eq!(children.try_consume_any(), None);
     Deletable::new(span, kind)
+}
+
+fn visit_pattern_try_deletable(node: Node<'_>) -> Deletable {
+    debug_assert_eq!(node.as_rule(), Rule::pattern_try_deletable);
+    let span = node.span();
+    let deletables = node
+        .into_children()
+        .skip_expected(Rule::TRY)
+        .map(|child| match child.as_rule() {
+            Rule::statement_deletable => visit_statement_deletable(child),
+            _ => unreachable!(
+                "Unrecognised statement inside delete clause: {:?}",
+                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
+            ),
+        })
+        .collect();
+    Deletable::new(span, DeletableKind::Optional { deletables })
 }
 
 fn visit_clause_fetch(node: Node<'_>) -> Fetch {
