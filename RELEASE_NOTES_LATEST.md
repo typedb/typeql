@@ -3,52 +3,28 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.5.0
+cargo add typeql@3.7.0-rc0
 ```
 
 
 ## New Features
-
+- **Try blocks in write stages**
+  
+  We allow `try {}` blocks in all write stages, viz. `insert`, `delete`, `put`, and `update`.
+  
+  
 
 ## Bugs Fixed
 
 
 ## Code Refactors
-- **Remove Java and update README**
-  Remove deprecated Java code and grammar and update READMEs to align with the recent changes in TypeDB 3.x.
-  
-  
+
 
 ## Other Improvements
+- **Change CODEOWNERS**
 
-- **Simplify type statements, allow empty define queries, bring back BDD**
+- **Fix illegal grammar error formatting**
   
-  Composite changes:
-  1) We clean up the grammar for Type statements in both Patterns and Definables, which now allow commas after a `<kind> <variable>` query: 
-  ```
-  match entity $x, sub $y;
-  ```
-  is now legal with the comma. This is a more regular language that is easier to generate.
-  
-  2) we allow empty define/undefine/redefine queries:
-  ```
-  define
-  ```
-  
-  This addresses: https://github.com/typedb/typedb/issues/7531
-  
-  3) We also re-enable half of our 2.x BDD suite, which parses every query in the behaviour repository (though we leave out the other 2.x half, which converts the parsed results back into strings, reparses, and validates the cycle is equivalent), ensuring we don't get parsing errors when we don't expect them and we do when they are expected.
+  We fix the (internal) illegal grammar error formatting to show the part of the query that caused the error rather than the corresponding parsed subtree.
   
   
-- **Update README**
-
-- **Update factory/automation.yml**
-  Fix build. Remove excessive branches
-  
-  
-- **Update README.md**
-  Update contributors
-  
-  
-    
-
