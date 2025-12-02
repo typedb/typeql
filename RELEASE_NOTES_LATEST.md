@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.7.0-rc0
+cargo add typeql@3.7.0
 ```
 
 
@@ -20,11 +20,11 @@ cargo add typeql@3.7.0-rc0
 ## Code Refactors
 
 
-## Other Improvements
+## Other Improvements 
+   
 - **Change CODEOWNERS**
 
 - **Fix illegal grammar error formatting**
   
   We fix the (internal) illegal grammar error formatting to show the part of the query that caused the error rather than the corresponding parsed subtree.
-  
   
