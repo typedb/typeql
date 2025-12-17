@@ -588,11 +588,14 @@ ARROW = _{ "->" }
 
 // FRAGMENTS OF KEYWORDS =======================================================
 
-IDENTIFIER_LABEL_H = @{ XID_START }
-IDENTIFIER_LABEL_T = @{ XID_CONTINUE }
+IDENTIFIER_START = @{ XID_START }
+IDENTIFIER_CONTINUE = @{ "-" | XID_CONTINUE }
 
-IDENTIFIER_VAR_H = @{ XID_START | ASCII_DIGIT }
-IDENTIFIER_VAR_T = @{ XID_CONTINUE }
+IDENTIFIER_LABEL_H = @{ IDENTIFIER_START }
+IDENTIFIER_LABEL_T = @{ IDENTIFIER_CONTINUE }
+
+IDENTIFIER_VAR_H = @{ IDENTIFIER_START | ASCII_DIGIT }
+IDENTIFIER_VAR_T = @{ IDENTIFIER_CONTINUE }
 
 date_fragment = ${ year ~ "-" ~ month ~ "-" ~ day }
 month = @{ "0" ~ ( '1'..'9' ) | "10" | "11" | "12" }
@@ -628,7 +631,7 @@ duration_seconds = ${ numeric_literal ~ "S" }
 
 escape_seq = @{ "\\" ~ ANY }
 
-WB = _{ &( !XID_CONTINUE | COMMENT | EOI ) } // Word boundary
+WB = _{ &( !IDENTIFIER_CONTINUE | COMMENT | EOI ) } // Word boundary
 
 COMMENT = _{ "#" ~ ( !NEWLINE ~ ANY )* ~ ( NEWLINE | EOI ) }
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
