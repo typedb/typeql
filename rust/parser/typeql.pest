@@ -631,7 +631,7 @@ duration_seconds = ${ numeric_literal ~ "S" }
 
 escape_seq = @{ "\\" ~ ANY }
 
-WB = _{ !IDENTIFIER_CONTINUE | EOI } // Word boundary
+WB = _{ !IDENTIFIER_CONTINUE } // Word boundary
 
 COMMENT = _{ "#" ~ ( !NEWLINE ~ ANY )* ~ ( NEWLINE | EOI ) }
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
