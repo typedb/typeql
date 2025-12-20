@@ -29,13 +29,12 @@ pub use crate::{
 };
 use crate::{
     parser::{
-        visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query,
+        visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query, visit_eof_value,
         visit_query_prefix,
     },
     schema::definable::Struct,
+    value::ValueLiteral,
 };
-use crate::parser::visit_eof_value;
-use crate::value::ValueLiteral;
 
 pub mod annotation;
 pub mod builder;

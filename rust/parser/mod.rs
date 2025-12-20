@@ -18,15 +18,14 @@ use crate::{
         identifier::Identifier,
         token, Span, Spanned,
     },
-    parser::{pipeline::visit_query_pipeline_preambled, redefine::visit_query_redefine},
+    parser::{literal::visit_value_literal, pipeline::visit_query_pipeline_preambled, redefine::visit_query_redefine},
     query::{Query, QueryStructure, SchemaQuery},
     schema::definable,
     type_::Label,
+    value::ValueLiteral,
     variable::{Optional, Variable},
     Result,
 };
-use crate::parser::literal::visit_value_literal;
-use crate::value::ValueLiteral;
 
 mod annotation;
 mod define;
@@ -158,9 +157,8 @@ pub(crate) fn visit_eof_label(label: &str) -> Result<Label> {
 }
 
 pub(crate) fn visit_eof_value(value: &str) -> Result<ValueLiteral> {
-    Ok(visit_value_literal(
-        parse_single(Rule::eof_value, value)?.into_children().consume_expected(Rule::value_literal)
-    ).inner)
+    Ok(visit_value_literal(parse_single(Rule::eof_value, value)?.into_children().consume_expected(Rule::value_literal))
+        .inner)
 }
 
 fn visit_query(node: Node<'_>) -> Query {
