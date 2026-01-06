@@ -118,6 +118,20 @@ impl GrammarTree {
             Expansion::Alternatives(('a'..='z').map(|digit| Expansion::Literal(digit.to_string())).collect()),
         );
         tree.rules.insert(
+            "XID_START".into(),
+            Expansion::Alternatives(('a'..='z').map(|char| Expansion::Literal(char.to_string())).collect()),
+        );
+        tree.rules.insert(
+            "XID_CONTINUE".into(),
+            Expansion::Alternatives(
+                ('a'..='z')
+                    .chain('0'..='9')
+                    .chain(['-', '_'])
+                    .map(|char| Expansion::Literal(char.to_string()))
+                    .collect(),
+            ),
+        );
+        tree.rules.insert(
             "ANY".into(),
             Expansion::Alternatives(
                 ['a', 'x', 'Y', '1', '人'].into_iter().map(|char| Expansion::Literal(char.to_string())).collect(),
