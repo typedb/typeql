@@ -40,12 +40,12 @@ clause_delete = { DELETE ~ ( ( statement_deletable | pattern_try_deletable ) ~ S
 operator_stream = { operator_select | operator_sort | operator_distinct | operator_offset | operator_limit | operator_require | operator_reduce }
 
 operator_select = { SELECT ~ vars ~ SEMICOLON }
-operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ SEMICOLON }
+operator_sort = { SORT ~ var_order ~ ( COMMA ~ var_order )* ~ COMMA? ~ SEMICOLON }
 operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
 operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
 operator_require = { REQUIRE ~ vars ~ SEMICOLON }
 operator_distinct = { DISTINCT ~ SEMICOLON }
-operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ (GROUPBY ~ vars )? ~ SEMICOLON }
+operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ COMMA? ~ (GROUPBY ~ vars )? ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
 reduce_assign = { (reduce_assignment_var ~ ASSIGN ~ reducer) }
@@ -77,8 +77,8 @@ statement = { statement_single | statement_type | statement_thing }
 
 // TYPE STATEMENTS =============================================================
 
-statement_type = { kind ~ type_ref ~ ( COMMA? ~ type_constraint ~ ( COMMA ~ type_constraint )* )?
-                 | type_ref ~ COMMA? ~ type_constraint ~ ( COMMA ~ type_constraint )*
+statement_type = { kind ~ type_ref ~ ( COMMA? ~ type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA? )?
+                 | type_ref ~ COMMA? ~ type_constraint ~ ( COMMA ~ type_constraint )* ~ COMMA?
                  }
 type_constraint = { type_constraint_base ~ annotations? }
 type_constraint_base = { sub_constraint | value_type_constraint | label_constraint
@@ -200,7 +200,7 @@ definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition
 
 // TYPE DEFINITION =============================================================
 
-definition_type = { kind? ~ label ~ ( ( annotations |  COMMA? ~ type_capability ) ~ ( COMMA ~ type_capability )* )? }
+definition_type = { kind? ~ label ~ ( ( annotations |  COMMA? ~ type_capability ) ~ ( COMMA ~ type_capability )* ~ COMMA? )? }
 type_capability = { type_capability_base ~ annotations? }
 type_capability_base = { sub_declaration | value_type_declaration | alias_declaration
                        | owns_declaration | plays_declaration | relates_declaration
@@ -303,7 +303,7 @@ iid_value = @{ "0x" ~ ASCII_HEX_DIGIT+ ~ WB }
 
 // VARIABLES ===================================================================
 
-vars = { var ~ ( COMMA ~ var )* }
+vars = { var ~ ( COMMA ~ var )* ~ COMMA? }
 
 var = ${ VAR_ANONYMOUS | var_named }
 var_optional = ${ var ~ QUESTION }
