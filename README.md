@@ -1,4 +1,4 @@
-[![TypeQL](./banner.png)](https://typedb.com/docs/typeql/2.x/overview)
+[![TypeQL](https://github.com/typedb/.github/raw/master/profile/banner.png)](https://typedb.com/docs/typeql/2.x/overview)
 
 [![Factory](https://factory.vaticle.com/api/status/typedb/typeql/badge.svg)](https://factory.vaticle.com/typedb/typeql)
 [![GitHub release](https://img.shields.io/github/release/typedb/typeql.svg)](https://github.com/typedb/typeql/releases/latest)
