@@ -9,6 +9,7 @@ query_prefix = { SOI ~ query }
 eof_label = { SOI ~ label ~ EOI }
 eof_definition_function = { SOI ~ definition_function ~ EOI }
 eof_definition_struct = { SOI ~ definition_struct ~ EOI }
+eof_value = { SOI ~ value_literal ~ EOI }
 
 // TYPEQL QUERY LANGUAGE =======================================================
 
@@ -564,7 +565,7 @@ date_literal = ${ date_fragment ~ WB }
 datetime_literal = ${ date_fragment ~ "T" ~ time ~ WB }
 datetime_tz_literal = ${ date_fragment ~ "T" ~ time ~ ( " " ~ iana_timezone | iso8601_timezone_offset ) ~ WB }
 
-duration_literal = ${ "P" ~ ( duration_weeks | duration_date ~ ( "T" ~ duration_time )? | "T" ~ duration_time ) ~ WB}
+duration_literal = ${ "P" ~ ( duration_weeks | duration_date ~ ( "T" ~ duration_time )? | "T" ~ duration_time ) ~ WB }
 
 quoted_string_literal = @{ "\"" ~ ( !"\"" ~ !"\\" ~ ANY | escape_seq )* ~ "\""
                          | "'" ~ ( !"'" ~ !"\\" ~ ANY | escape_seq )* ~ "'" }

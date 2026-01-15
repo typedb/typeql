@@ -29,10 +29,11 @@ pub use crate::{
 };
 use crate::{
     parser::{
-        visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query,
+        visit_eof_definition_function, visit_eof_definition_struct, visit_eof_label, visit_eof_query, visit_eof_value,
         visit_query_prefix,
     },
     schema::definable::Struct,
+    value::ValueLiteral,
 };
 
 pub mod annotation;
@@ -80,6 +81,10 @@ pub fn parse_definition_function(typeql_function: &str) -> Result<Function> {
 
 pub fn parse_definition_struct(typeql_struct: &str) -> Result<Struct> {
     visit_eof_definition_struct(typeql_struct.trim_end())
+}
+
+pub fn parse_value(value: &str) -> Result<ValueLiteral> {
+    visit_eof_value(value.trim_end())
 }
 
 static RESERVED_KEYWORDS: OnceLock<HashSet<&'static str>> = OnceLock::new();
