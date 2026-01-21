@@ -377,7 +377,7 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
            | FIRST | LAST
            }
 
-unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
+unreserved = { ABS | CEIL | FLOOR | ROUND | LEN
              | CHECK | FIRST
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
              | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
@@ -519,14 +519,14 @@ MODULO = @{ "%" }
 // Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
 builtin_func_name = ${ ABS
                      | CEIL | FLOOR | ROUND
-                     | LENGTH
+                     | LEN
                      | MAX | MIN
                      | LABEL | IID
                      }
 ABS = @{ "abs" ~ WB }
 CEIL = @{ "ceil" ~ WB }
 FLOOR = @{ "floor" ~ WB }
-LENGTH = @{ "length" ~ WB }
+LEN = @{ "len" ~ WB }
 ROUND = @{ "round" ~ WB }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS

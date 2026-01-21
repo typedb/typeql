@@ -162,7 +162,7 @@ fn visit_builtin_func_name(node: Node<'_>) -> BuiltinFunctionName {
         Rule::FLOOR => token::Function::Floor,
         Rule::IID => token::Function::Iid,
         Rule::LABEL => token::Function::Label,
-        Rule::LENGTH => token::Function::Length,
+        Rule::LEN => token::Function::Len,
         Rule::MAX => token::Function::Max,
         Rule::MIN => token::Function::Min,
         Rule::ROUND => token::Function::Round,

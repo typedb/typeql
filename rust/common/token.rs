@@ -200,7 +200,7 @@ string_enum! { Function
     Floor = "floor",
     Iid = "iid",
     Label = "label",
-    Length = "length",
+    Len = "len",
     Max = "max",
     Min = "min",
     Round = "round",
