@@ -46,10 +46,10 @@ operator_offset = { OFFSET ~ integer_literal ~ SEMICOLON }
 operator_limit = { LIMIT ~ integer_literal ~ SEMICOLON }
 operator_require = { REQUIRE ~ vars ~ SEMICOLON }
 operator_distinct = { DISTINCT ~ SEMICOLON }
-operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ COMMA? ~ (GROUPBY ~ vars )? ~ SEMICOLON }
+operator_reduce = { REDUCE ~ reduce_assign ~ ( COMMA ~ reduce_assign )* ~ COMMA? ~ ( GROUPBY ~ vars )? ~ SEMICOLON }
 
 var_order = { var ~ ORDER? }
-reduce_assign = { (reduce_assignment_var ~ ASSIGN ~ reducer) }
+reduce_assign = { ( reduce_assignment_var ~ ASSIGN ~ reducer ) }
 
 reduce_assignment_var = { var_optional | var }
 reducer = { COUNT ~ ( PAREN_OPEN ~ var ~ PAREN_CLOSE )?
@@ -99,13 +99,13 @@ plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
 statement_thing = { var ~ COMMA? ~ thing_constraint_list
-                  | thing_relation_anonymous ~ (COMMA? ~ thing_constraint_list)?
+                  | thing_relation_anonymous ~ ( COMMA? ~ thing_constraint_list )?
                   }
 thing_relation_anonymous = { type_ref? ~ relation }
-thing_constraint_list = {thing_constraint ~ (COMMA ~ thing_constraint)* ~ COMMA?}
+thing_constraint_list = {thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
-isa_constraint = { ISA_ ~ type_ref ~ (relation | expression  | value_literal | expression_struct | comparison)? }
+isa_constraint = { ISA_ ~ type_ref ~ ( relation | expression  | value_literal | expression_struct | comparison )? }
 iid_constraint = { IID ~ iid_value }
 has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
                  | HAS ~ type_ref ~ ( comparison | expression_value | var )
@@ -377,7 +377,7 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
            | FIRST | LAST
            }
 
-unreserved = { ABS | CEIL | FLOOR | ROUND | LENGTH
+unreserved = { ABS | CEIL | FLOOR | ROUND | LEN
              | CHECK | FIRST
              | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
              | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
@@ -517,11 +517,16 @@ POWER = @{ "^" }
 MODULO = @{ "%" }
 
 // Incomplete list of function names usable in expressions. The 'expression_function_name' rule references all function names.
-builtin_func_name = ${ ABS | CEIL | FLOOR | ROUND | LENGTH | MAX | MIN }
+builtin_func_name = ${ ABS
+                     | CEIL | FLOOR | ROUND
+                     | LEN
+                     | MAX | MIN
+                     | LABEL | IID
+                     }
 ABS = @{ "abs" ~ WB }
 CEIL = @{ "ceil" ~ WB }
 FLOOR = @{ "floor" ~ WB }
-LENGTH = @{ "length" ~ WB }
+LEN = @{ "len" ~ WB }
 ROUND = @{ "round" ~ WB }
 
 // GROUP AND AGGREGATE QUERY KEYWORDS

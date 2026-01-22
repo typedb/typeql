@@ -198,10 +198,12 @@ string_enum! { Function
     Abs = "abs",
     Ceil = "ceil",
     Floor = "floor",
+    Iid = "iid",
+    Label = "label",
+    Len = "len",
     Max = "max",
     Min = "min",
     Round = "round",
-    Length = "length",
 }
 
 string_enum! { Char
