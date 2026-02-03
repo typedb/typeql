@@ -57,12 +57,9 @@ register_toolchains("@rust_toolchains//:all")
 
 # Rust crates from typedb_dependencies
 # Use isolate=True to avoid conflict with typedb_dependencies' crate extension
-crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate", isolate = True)
-crate.from_cargo(
-    name = "crates",
-    cargo_lockfile = "@typedb_dependencies//:library/crates/Cargo.lock",
-    manifests = ["@typedb_dependencies//:library/crates/Cargo.toml"],
-)
+# Rust crates - import from typedb_dependencies' crate extension
+# This ensures type compatibility across all TypeDB modules
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
 use_repo(crate, "crates")
 
 # Register Kotlin toolchain
