@@ -557,7 +557,7 @@ TRUE = @{ "true" ~ WB }
 FALSE = @{ "false" ~ WB }
 
 integer_literal = @{ ASCII_DIGIT+ }
-decimal_literal = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ "dec" }
+decimal_literal = @{ ASCII_DIGIT+ ~ ( "." ~ ASCII_DIGIT+ )? ~ "dec" }
 double_literal = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ ~ ( ^"e" ~ sign? ~ integer_literal )? }
 numeric_literal = @{ double_literal | integer_literal }
 
