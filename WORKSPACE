@@ -46,20 +46,12 @@ rules_antlr_dependencies(antlr_version, JAVA)
 load("@typedb_dependencies//builder/rust:deps.bzl", rust_deps = "deps")
 rust_deps()
 
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains", "rust_analyzer_toolchain_tools_repository")
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies")
 rules_rust_dependencies()
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 rust_analyzer_dependencies()
-load("@rules_rust//rust:defs.bzl", "rust_common")
-rust_register_toolchains(
-    edition = "2021",
-    versions = ["1.81.0"],
-)
-
-rust_analyzer_toolchain_tools_repository(
-    name = "rust_analyzer_toolchain_tools",
-    version = "1.81.0",
-)
+load("@typedb_dependencies//builder/rust:versions.bzl", "rust_toolchain_versioned")
+rust_toolchain_versioned()
 
 load("@typedb_dependencies//library/crates:crates.bzl", "fetch_crates")
 fetch_crates()
