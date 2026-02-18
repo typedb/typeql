@@ -183,7 +183,8 @@ fn visit(
     is_atomic: bool,
 ) -> Expansion {
     let mut vec = Vec::new();
-    while let Some(child) = children.next() {
+    loop {
+        let Some(child) = children.next() else { break };
         match child {
             TokenTree::Ident(ident) => {
                 if ident == "SOI" {
@@ -199,7 +200,8 @@ fn visit(
             }
             TokenTree::Group(group) => {
                 if group.delimiter() == Delimiter::Parenthesis {
-                    vec.push(visit(&mut group.stream().into_iter(), tree, rule_name, is_atomic))
+                    let mut iter = group.stream().into_iter();
+                    vec.push(visit(&mut iter, tree, rule_name, is_atomic))
                 } else if group.delimiter() == Delimiter::Brace {
                     // repetition
                     let mut inner = group.stream().into_iter();
