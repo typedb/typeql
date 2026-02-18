@@ -17,26 +17,26 @@ bazel_dep(name = "rules_rust", version = "0.56.0")
 bazel_dep(name = "rules_kotlin", version = "2.0.0")
 bazel_dep(name = "rules_pkg", version = "1.0.1")
 
-# typedb_dependencies via local path override (until published to BCR)
+# typedb ecosystem dependencies
 bazel_dep(name = "typedb_dependencies", version = "0.0.0")
-local_path_override(
+git_override(
     module_name = "typedb_dependencies",
-    path = "../dependencies",
+    remote = "https://github.com/typedb/dependencies",
+    commit = "5a7279d66110f269375a0bf641d0686ccf8a9bff",
 )
 
-# typedb_bazel_distribution is a transitive dependency via typedb_dependencies
-# Must be overridden here since root module overrides take precedence
 bazel_dep(name = "typedb_bazel_distribution", version = "0.0.0")
-local_path_override(
+git_override(
     module_name = "typedb_bazel_distribution",
-    path = "../bazel-distribution",
+    remote = "https://github.com/typedb/bazel-distribution",
+    commit = "5b417d0f9acf8b550851ef72a2388ca7eb92a5bf",
 )
 
-# typedb_behaviour for BDD tests
 bazel_dep(name = "typedb_behaviour", version = "0.0.0")
-local_path_override(
+git_override(
     module_name = "typedb_behaviour",
-    path = "../typedb-behaviour",
+    remote = "https://github.com/typedb/typedb-behaviour",
+    commit = "7f0b7fdac4aca550c81e8f979a7af6843e077221",
 )
 
 # Python toolchain
