@@ -29,6 +29,9 @@ rust_test(
         "@typedb_behaviour//query/functions:features",
         "@typedb_behaviour//query/language:features",
     ],
+    env = {
+        "TYPEDB_BEHAVIOUR_FEATURE_MARKER": "$(rootpath @typedb_behaviour//query/language:define.feature)",
+    },
 )
 
 rust_test(
