@@ -38,7 +38,6 @@ checkstyle_test(
     exclude = [
         ".bazel-remote-cache.rc",
         ".bazel-cache-credential.json",
-        ".claude/settings.local.json",
         "MODULE.bazel.lock",
         "banner.png",
         "Cargo.toml",
