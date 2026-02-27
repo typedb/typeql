@@ -62,6 +62,5 @@ filegroup(
         "@typedb_dependencies//tool/release/notes:create",
         "@typedb_dependencies//tool/sonarcloud:code-analysis",
         "@typedb_dependencies//tool/unuseddeps:unused-deps",
-        "@rust_analyzer_toolchain_tools//lib/rustlib/src:rustc_srcs"
     ],
 )
