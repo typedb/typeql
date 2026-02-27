@@ -62,7 +62,6 @@ filegroup(
         "@typedb_dependencies//tool/release/notes:create",
         "@typedb_dependencies//tool/sonarcloud:code-analysis",
         "@typedb_dependencies//tool/unuseddeps:unused-deps",
-        # Note: @rust_analyzer_toolchain_tools removed - not needed for build,
-        # only for IDE support. Can be set up separately if needed.
+        "@rust_analyzer_toolchain_tools//lib/rustlib/src:rustc_srcs"
     ],
 )
