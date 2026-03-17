@@ -64,18 +64,28 @@ impl From<String> for Identifier {
     }
 }
 
+const UNDERSCORE: &str = "_";
+const HYPHEN: &str = r"\-";
+const ASCII_DIGIT: &str = "0-9";
+const XID_START: &str = r"\p{XID_Start}";
+const XID_CONTINUE: &str = r"\p{XID_Continue}";
+
 pub fn is_valid_label(identifier: &str) -> bool {
     static REGEX: OnceLock<Regex> = OnceLock::new();
-    let regex = REGEX.get_or_init(|| Regex::new(r"^[_\p{XID_Start}][\-\p{XID_Continue}]*$").unwrap());
+    let regex = REGEX.get_or_init(|| {
+        let head = format!("{UNDERSCORE}{XID_START}");
+        let tail = format!("{HYPHEN}{XID_CONTINUE}");
+        Regex::new(&format!("^[{head}][{tail}]*$")).unwrap()
+    });
     regex.is_match(identifier)
 }
-
-const ASCII_DIGIT: &str = "0-9";
 
 pub fn is_valid_var_identifier(identifier: &str) -> bool {
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| {
-        Regex::new(&format!(r"^[\p{{XID_Start}}{ASCII_DIGIT}][\-\p{{XID_Continue}}]*$")).unwrap()
+        let head = format!("{XID_START}{ASCII_DIGIT}");
+        let tail = format!("{HYPHEN}{XID_CONTINUE}");
+        Regex::new(&format!("^[{head}][{tail}]*$")).unwrap()
     });
     regex.is_match(identifier)
 }
