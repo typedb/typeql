@@ -87,7 +87,7 @@ pub fn is_valid_identifier(identifier: &str) -> bool {
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| {
         let identifier_tail = format!("{}{}{}", IDENTIFIER_CHAR, IDENTIFIER_CONNECTOR, IDENTIFIER_DIGIT);
-        let identifier_pattern = format!("^[{}][{}]*$", IDENTIFIER_CHAR, identifier_tail);
+        let identifier_pattern = format!("^[{}_][{}]*$", IDENTIFIER_CHAR, identifier_tail);
         RegexBuilder::new(&identifier_pattern).build().unwrap()
     });
     regex.is_match(identifier)
