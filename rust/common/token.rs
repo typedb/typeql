@@ -157,8 +157,11 @@ string_enum! { Annotation
     Values = "values",
 }
 
-string_enum! { ReduceOperatorStat
+string_enum! { ReduceOperatorCount
     Count = "count",
+}
+
+string_enum! { ReduceOperatorStat
     Max = "max",
     Mean = "mean",
     Median = "median",
