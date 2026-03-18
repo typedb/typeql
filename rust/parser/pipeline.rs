@@ -17,7 +17,7 @@ use super::{
 use crate::{
     common::{
         error::TypeQLError,
-        token::{Order, ReduceOperatorStat},
+        token::{Order, ReduceOperatorCollect, ReduceOperatorStat},
         Spanned,
     },
     parser::define::function::visit_function_block,
@@ -41,7 +41,6 @@ use crate::{
         },
         Pipeline,
     },
-    token::ReduceOperatorCollect,
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
