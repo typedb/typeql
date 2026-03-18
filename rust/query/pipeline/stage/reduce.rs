@@ -127,7 +127,7 @@ impl Pretty for Count {}
 
 impl fmt::Display for Count {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", token::ReduceOperatorStat::Count)?;
+        write!(f, "{}", token::ReduceOperatorCount::Count)?;
         if let Some(variable) = &self.variable {
             write!(f, "({})", variable)?;
         }
