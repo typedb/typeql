@@ -127,7 +127,7 @@ impl Pretty for Count {}
 
 impl fmt::Display for Count {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", token::ReduceOperator::Count)?;
+        write!(f, "{}", token::ReduceOperatorStat::Count)?;
         if let Some(variable) = &self.variable {
             write!(f, "({})", variable)?;
         }
@@ -138,12 +138,12 @@ impl fmt::Display for Count {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Stat {
     pub span: Option<Span>,
-    pub reduce_operator: token::ReduceOperator,
+    pub reduce_operator: token::ReduceOperatorStat,
     pub variable: Variable,
 }
 
 impl Stat {
-    pub fn new(span: Option<Span>, aggregate: token::ReduceOperator, variable: Variable) -> Self {
+    pub fn new(span: Option<Span>, aggregate: token::ReduceOperatorStat, variable: Variable) -> Self {
         Self { span, reduce_operator: aggregate, variable }
     }
 }
@@ -165,12 +165,12 @@ impl fmt::Display for Stat {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Collect {
     pub span: Option<Span>,
-    pub reduce_operator: token::ReduceOperator,
+    pub reduce_operator: token::ReduceOperatorCollect,
     pub variable: Variable,
 }
 
 impl Collect {
-    pub fn new(span: Option<Span>, aggregate: token::ReduceOperator, variable: Variable) -> Self {
+    pub fn new(span: Option<Span>, aggregate: token::ReduceOperatorCollect, variable: Variable) -> Self {
         Self { span, reduce_operator: aggregate, variable }
     }
 }

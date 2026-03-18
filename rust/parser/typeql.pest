@@ -53,14 +53,11 @@ reduce_assign = { ( reduce_assignment_var ~ ASSIGN ~ reducer ) }
 
 reduce_assignment_var = { var_optional | var }
 reducer = { COUNT ~ ( PAREN_OPEN ~ var ~ PAREN_CLOSE )?
-          | MAX ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-          | MIN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-          | MEAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-          | MEDIAN ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-          | STD ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-          | SUM ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
-          | LIST ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | reducer_stat ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
+          | reducer_collect ~ PAREN_OPEN ~ var ~ PAREN_CLOSE
           }
+reducer_stat = { MAX | MIN | MEAN | MEDIAN | STD | SUM }
+reducer_collect = { LIST }
 
 // QUERY PATTERNS ==============================================================
 
