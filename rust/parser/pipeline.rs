@@ -41,10 +41,10 @@ use crate::{
         },
         Pipeline,
     },
+    token::ReduceOperatorCollect,
     value::StringLiteral,
     TypeRef, TypeRefAny,
 };
-use crate::token::ReduceOperatorCollect;
 
 pub(super) fn visit_query_pipeline_preambled(node: Node<'_>) -> Pipeline {
     debug_assert_eq!(node.as_rule(), Rule::query_pipeline_preambled);
