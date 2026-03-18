@@ -28,7 +28,7 @@ use crate::{
                 delete::{Deletable, DeletableKind},
                 fetch::FetchSome,
                 modifier::{Distinct, Limit, Offset, OrderedVariable, Require, Select, Sort},
-                reduce::{Count, Reducer, Stat},
+                reduce::{Collect, Count, Reducer, Stat},
                 Delete, Fetch, Insert, Match, Operator, Put, Reduce, Stage, Update,
             },
             Preamble,
@@ -431,7 +431,7 @@ pub(crate) fn visit_reducer(node: Node<'_>) -> Reducer {
         }
         Rule::LIST => {
             // TODO      vvvv rename
-            Reducer::Stat(Stat::new(span, ReduceOperator::List, visit_var(children.consume_expected(Rule::var))))
+            Reducer::Collect(Collect::new(span, ReduceOperator::List, visit_var(children.consume_expected(Rule::var))))
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.as_str().to_owned() }),
     }

@@ -82,6 +82,7 @@ impl fmt::Display for ReduceAssign {
 pub enum Reducer {
     Count(Count),
     Stat(Stat),
+    Collect(Collect),
 }
 
 impl Pretty for Reducer {
@@ -89,6 +90,7 @@ impl Pretty for Reducer {
         match self {
             Self::Count(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Stat(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Collect(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
@@ -98,6 +100,7 @@ impl fmt::Display for Reducer {
         match self {
             Self::Count(inner) => fmt::Display::fmt(inner, f),
             Self::Stat(inner) => fmt::Display::fmt(inner, f),
+            Self::Collect(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }
@@ -154,6 +157,33 @@ impl Spanned for Stat {
 impl Pretty for Stat {}
 
 impl fmt::Display for Stat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}({})", self.reduce_operator, self.variable)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Collect {
+    pub span: Option<Span>,
+    pub reduce_operator: token::ReduceOperator,
+    pub variable: Variable,
+}
+
+impl Collect {
+    pub fn new(span: Option<Span>, aggregate: token::ReduceOperator, variable: Variable) -> Self {
+        Self { span, reduce_operator: aggregate, variable }
+    }
+}
+
+impl Spanned for Collect {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for Collect {}
+
+impl fmt::Display for Collect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}({})", self.reduce_operator, self.variable)
     }
