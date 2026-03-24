@@ -3,47 +3,35 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.8.0
+cargo add typeql@3.8.2
 ```
 
 
 ## New Features
-- **Add built-in functions iid() and label()**
+- **Allow leading underscore in type labels**
   
-  We add `iid()` and `label()` to the built-in functions in the TypeQL grammar.
+  We relax our identifier rules, allowing `_` as a leading underscore in type labels. This does NOT extend to variables, since we have some complexity around anonymous variables for the time being we don't want to modify.
   
   
 
 ## Bugs Fixed
-- **Use XID_START and XID_CONTINUE character classes**
-  
-  We use `XID_START` and `XID_CONTINUE` character classes provided by pest instead of manually listing unicode codepoint ranges for our identifiers. We also change the definition of the word boundary (`WB`) to be "any character that is not an identifier continuation character" that resolves parsing bugs such as `let $var= 4;` failing to parse: `=` is not `PUNCTUATION`, so not valid word boundary.
-  
-  
+
 
 ## Code Refactors
-
+- **Introduce Collector variant of Reducer to accomodate the unimplemented list reducer**
+  It was placed under Stat, which it is not and caused confusion & crashes in core.
+  
+  
 
 ## Other Improvements
-- **Expose value parser**
+- **Add tests for end; clause in query pipelines**
   
-  We expose value parsing as a top-level function, and update the value literal definitions. This lets us re-use the value parser for test frameworks in other repositories.
+  Add tests for `end;` statements
   
+- **Allow decimal syntax without a period**
   
-- **Update TypeQL banner image link in README**
-
-- **Add contributing guidelines to CONTRIBUTING.md**
-
-- **Allow trailing commas (#421)**
+  To give both humans and LLMs more flexibility when writing `decimal` value types, we no longer requiring the `.0` in `xxx.0dec`. This is unambiguous since the `dec` suffix already syntactically differentiates when a value is a decimal.
   
-  To simplify writing and generating queries, we allow trailing commas anywhere we use a comma separated list of variables, statements, reductions, etc.
-  
-  
-- **Remove discussion and Stack Overflow links**
-
-- **Allow trailing commas**
-  
-  To simplify writing and generating queries, we allow trailing commas anywhere we use a comma separated list of variables, statements, reductions, etc.
   
     
 
