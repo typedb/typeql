@@ -342,6 +342,16 @@ impl fmt::Display for StructLiteral {
 }
 
 impl StringLiteral {
+    fn unescape_unicode<'a>(bytes: &'a [u8]) -> std::result::Result<char, &'a str> {
+        let as_hex = std::str::from_utf8(bytes).expect("Should still be utf8");
+        if bytes.len() == 4 {
+            let as_u32 = u32::from_str_radix(as_hex, 16).map_err(|_| as_hex)?;
+            char::from_u32(as_u32).ok_or(as_hex)
+        } else {
+            Err(as_hex)
+        }
+    }
+
     pub fn unescape(&self) -> Result<String> {
         self.process_unescape(|bytes, _buf, rest| match bytes[1] {
             BSP => Ok(('\x08', 2)),
@@ -350,7 +360,13 @@ impl StringLiteral {
             FF_ => Ok(('\x0c', 2)),
             CR_ => Ok(('\x0d', 2)),
             c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
-            b'u' => todo!("Unicode escape handling"),
+            b'u' => Self::unescape_unicode(&bytes[2..std::cmp::min(6, bytes.len())]).map(|c| (c, 6)).map_err(|hex| {
+                TypeQLError::InvalidUnicodeEscapeInString {
+                    full_string: rest.to_owned(),
+                    escape: format!(r"\u{}", hex),
+                }
+                .into()
+            }),
             _ => Err(TypeQLError::InvalidStringEscape {
                 full_string: rest.to_owned(),
                 escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
@@ -407,3 +423,45 @@ const TAB: u8 = b't';
 const LF_: u8 = b'n';
 const FF_: u8 = b'f';
 const CR_: u8 = b'r';
+
+#[cfg(test)]
+pub mod tests {
+    use crate::value::TypeQLError;
+    #[test]
+    fn test_unicode_unescape() {
+        {
+            // Works
+            let escaped = r#""... \u0ca0\u005f\u0ca0""#;
+            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
+                panic!("Not parsed as string");
+            };
+            assert_eq!(parsed.unescape().unwrap().as_str(), "... ಠ_ಠ");
+        }
+
+        {
+            // Not enough bytes
+            let escaped = r#""... \u012""#;
+            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
+                panic!("Not parsed as string");
+            };
+            let error = parsed.unescape().unwrap_err();
+            let TypeQLError::InvalidUnicodeEscapeInString { escape, .. } = &error.errors()[0] else {
+                panic!("Wrong error type. Was {error:?}")
+            };
+            assert_eq!(escape, r"\u012");
+        }
+
+        {
+            // Invalid hex
+            let escaped = r#""... \uwu/ ...""#;
+            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
+                panic!("Not parsed as string");
+            };
+            let error = parsed.unescape().unwrap_err();
+            let TypeQLError::InvalidUnicodeEscapeInString { escape, .. } = &error.errors()[0] else {
+                panic!("Wrong error type. Was {error:?}")
+            };
+            assert_eq!(escape, r"\uwu/ ");
+        }
+    }
+}
