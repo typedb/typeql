@@ -439,6 +439,15 @@ pub mod tests {
         }
 
         {
+            // Capital hex works too
+            let escaped = r#""... \u0CA0\u005F\u0CA0""#;
+            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
+                panic!("Not parsed as string");
+            };
+            assert_eq!(parsed.unescape().unwrap().as_str(), "... ಠ_ಠ");
+        }
+
+        {
             // Not enough bytes
             let escaped = r#""... \u012""#;
             let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
