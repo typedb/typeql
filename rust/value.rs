@@ -383,26 +383,29 @@ impl StringLiteral {
 
         let escaped_string = &self.value[1..self.value.len() - 1];
         let mut buf = Vec::with_capacity(escaped_string.len());
-        let mut rest = escaped_string;
+        let mut rest: &[u8] = escaped_string.as_bytes();
         while !rest.is_empty() {
-            let escaped_len = if rest.as_bytes()[0] == b'\\' {
-                match escape_handler(rest.as_bytes()) {
+            let escaped_len = if rest[0] == b'\\' {
+                match escape_handler(rest) {
                     Ok((char, escaped_len)) => {
                         let start = buf.len();
-                        buf.resize(buf.len() + char.len_utf8(),0);
+                        buf.resize(buf.len() + char.len_utf8(), 0);
                         char.encode_utf8(&mut buf[start..]);
                         rest = &rest[escaped_len..];
-                    },
-                    Err(considered_escape_byte_length) => {
-                        let considered_escape_sequence = rest.chars().take(considered_escape_byte_length).collect();
+                    }
+                    Err(considered_escape_seq_length) => {
+                        let offset = escaped_string.len() - rest.len();
+                        let considered_escape_sequence =
+                            escaped_string[offset..].chars().take(considered_escape_seq_length).collect();
                         return Err(TypeQLError::InvalidStringEscape {
                             full_string: escaped_string.to_owned(),
                             escape: considered_escape_sequence,
-                        }.into());
+                        }
+                        .into());
                     }
                 }
             } else {
-                buf.push(rest.as_bytes()[0]);
+                buf.push(rest[0]);
                 rest = &rest[1..];
             };
         }
@@ -487,7 +490,7 @@ pub mod tests {
         assert_unescapes_to(r#""a\"b\"c""#, r#"a"b"c"#); // works
         assert_unescapes_to(r#""a\'b\'c""#, r#"a'b'c"#); // works
         assert_unescapes_to(r#""a\\b\\c""#, r#"a\b\c"#); // works
-        //  - Unicode
+                                                         //  - Unicode
         assert_unescapes_to(r#""abc \u0ca0\u005f\u0ca0""#, "abc ಠ_ಠ"); // works
         assert_unescapes_to(r#""abc \u0CA0\u005F\u0CA0""#, "abc ಠ_ಠ"); // caps
         assert_unescapes_to(r#""abc \u0CA01234""#, "abc ಠ1234"); // consumes only 4
@@ -499,6 +502,9 @@ pub mod tests {
         assert_unescape_errors(r#""abc \u""#, r"\u"); // Not enough bytes
         assert_unescape_errors(r#""abc \u012""#, r"\u012"); // Not enough bytes
         assert_unescape_errors(r#""abc \uwu/ abc""#, r"\uwu/ "); // Invalid hex
+        assert_unescape_errors(r#""abc \uΣ12Σ abc""#, r"\uΣ12Σ"); // Invalid hex, 4 chars more than 4 bytes
+        assert_unescape_errors(r#""abc \u123Σ abc""#, r"\u123Σ"); // Invalid hex, 4 chars more than 4 bytes
+
         // Cases that fail at parsing
         {
             let escaped = r#""abc\""#;
@@ -536,7 +542,11 @@ pub mod tests {
             string_literal.unescape().unwrap();
         }
         let end = Instant::now();
-        println!("{iters} on string of length {} iters in {}", string_literal.value.as_str().len(), (end - start).as_secs_f64())
+        println!(
+            "{iters} on string of length {} iters in {}",
+            string_literal.value.as_str().len(),
+            (end - start).as_secs_f64()
+        )
     }
 
     fn generate_string(length: usize, mapper: fn(u32) -> u32) -> String {
@@ -546,18 +556,42 @@ pub mod tests {
         let mut text = String::with_capacity(capacity as usize);
         text.push('"');
         let mut sanity: i64 = capacity;
-        while text.as_str().len() < length+1 && sanity >= 0 {
+        while text.as_str().len() < length + 1 && sanity >= 0 {
             sanity -= 1;
             match char::from_u32(mapper(rng.next_u32())) {
-                Some('\\')  => { text.push('\\'); text.push('\\'); }
-                Some('\'') => { text.push('\\'); text.push('\''); }
-                Some('\"') => { text.push('\\'); text.push('\"'); }
-                Some('\x08') => { text.push('\\'); text.push('b'); }
-                Some('\x09') => { text.push('\\'); text.push('t'); }
-                Some('\x0a') => { text.push('\\'); text.push('n'); }
-                Some('\x0c') => { text.push('\\'); text.push('f'); }
-                Some('\x0d') => { text.push('\\'); text.push('r'); }
-                Some(ch) => { text.push(ch) },
+                Some('\\') => {
+                    text.push('\\');
+                    text.push('\\');
+                }
+                Some('\'') => {
+                    text.push('\\');
+                    text.push('\'');
+                }
+                Some('\"') => {
+                    text.push('\\');
+                    text.push('\"');
+                }
+                Some('\x08') => {
+                    text.push('\\');
+                    text.push('b');
+                }
+                Some('\x09') => {
+                    text.push('\\');
+                    text.push('t');
+                }
+                Some('\x0a') => {
+                    text.push('\\');
+                    text.push('n');
+                }
+                Some('\x0c') => {
+                    text.push('\\');
+                    text.push('f');
+                }
+                Some('\x0d') => {
+                    text.push('\\');
+                    text.push('r');
+                }
+                Some(ch) => text.push(ch),
                 None => {}
             }
         }
@@ -565,5 +599,4 @@ pub mod tests {
         assert!(text.as_str().len() > length && text.as_str().len() < length + 10);
         text
     }
-
 }
