@@ -360,13 +360,17 @@ impl StringLiteral {
             FF_ => Ok(('\x0c', 2)),
             CR_ => Ok(('\x0d', 2)),
             c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
-            b'u' => Self::unescape_unicode(&bytes[2..std::cmp::min(6, bytes.len())]).map(|c| (c, 6)).map_err(|hex| {
-                TypeQLError::InvalidUnicodeEscapeInString {
-                    full_string: rest.to_owned(),
-                    escape: format!(r"\u{}", hex),
+            b'u' => {
+                compile_error!("Our 'escape' fields are wrong because \"rest\" isn't acutally rest here.");
+                let escape = &bytes[2..std::cmp::min(6, bytes.len())];
+                match decode_four_hex_bytes(escape) {
+                    Some(char) => Ok((char, 6)),
+                    None => Err(TypeQLError::InvalidUnicodeEscapeInString {
+                                full_string: rest.to_owned(),
+                                escape: format!(r"\u{}", &rest[2..6]),
+                            }.into())
                 }
-                .into()
-            }),
+            },
             _ => Err(TypeQLError::InvalidStringEscape {
                 full_string: rest.to_owned(),
                 escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
@@ -424,6 +428,21 @@ const LF_: u8 = b'n';
 const FF_: u8 = b'f';
 const CR_: u8 = b'r';
 
+#[allow(arithmetic_overflow)]
+fn decode_four_hex_bytes(bytes: &[u8]) -> Option<char> {
+    if bytes.len() == 4 {
+        let u32_le: u32 = 0u32
+            | (bytes[0] as char).to_digit(16)? << 12
+            | (bytes[1] as char).to_digit(16)? <<  8
+            | (bytes[2] as char).to_digit(16)? <<  4
+            | (bytes[3] as char).to_digit(16)? <<  0 ;
+        debug_assert!(char::from_u32(u32_le).is_some());
+        char::from_u32(u32_le)
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
     use crate::value::TypeQLError;
@@ -445,6 +464,15 @@ pub mod tests {
                 panic!("Not parsed as string");
             };
             assert_eq!(parsed.unescape().unwrap().as_str(), "... ಠ_ಠ");
+        }
+
+        {
+            // Longer ones are just
+            let escaped = r#""... \u0CA01234""#;
+            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
+                panic!("Not parsed as string");
+            };
+            assert_eq!(parsed.unescape().unwrap().as_str(), "... ಠ1234");
         }
 
         {
