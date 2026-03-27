@@ -84,8 +84,6 @@ error_messages! { TypeQLError
         6: "Encountered invalid escape sequence {escape:?} while parsing {full_string:?}.",
     ReservedKeywordAsIdentifier { identifier: Identifier } =
         7: "A reserved keyword '{identifier}' was used as identifier.",
-    InvalidUnicodeEscapeInString { escape: String, full_string: String } =
-        8: "Encountered an invalid unicode escape sequence {escape:?} while parsing {full_string:?}.",
 /*
     MissingPatterns =
         5: "The query has not been provided with any patterns.",

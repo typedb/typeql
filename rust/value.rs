@@ -353,42 +353,39 @@ impl StringLiteral {
     }
 
     pub fn unescape(&self) -> Result<String> {
-        self.process_unescape(|bytes, _buf, rest| match bytes[1] {
-            BSP => Ok(('\x08', 2)),
-            TAB => Ok(('\x09', 2)),
-            LF_ => Ok(('\x0a', 2)),
-            FF_ => Ok(('\x0c', 2)),
-            CR_ => Ok(('\x0d', 2)),
-            c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
-            b'u' => {
-                compile_error!("Our 'escape' fields are wrong because \"rest\" isn't acutally rest here.");
-                let escape = &bytes[2..std::cmp::min(6, bytes.len())];
-                match decode_four_hex_bytes(escape) {
-                    Some(char) => Ok((char, 6)),
-                    None => Err(TypeQLError::InvalidUnicodeEscapeInString {
-                                full_string: rest.to_owned(),
-                                escape: format!(r"\u{}", &rest[2..6]),
-                            }.into())
-                }
-            },
-            _ => Err(TypeQLError::InvalidStringEscape {
-                full_string: rest.to_owned(),
-                escape: format!(r"\{}", rest.chars().nth(1).unwrap()),
+        self.process_unescape(|bytes| {
+            if bytes.len() < 2 {
+                return Err(1);
             }
-            .into()),
+            match bytes[1] {
+                BSP => Ok(('\x08', 2)),
+                TAB => Ok(('\x09', 2)),
+                LF_ => Ok(('\x0a', 2)),
+                FF_ => Ok(('\x0c', 2)),
+                CR_ => Ok(('\x0d', 2)),
+                c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
+                b'u' => {
+                    let escape = &bytes[2..std::cmp::min(6, bytes.len())];
+                    match decode_four_hex_bytes(escape) {
+                        Some(char) => Ok((char, 6)),
+                        None => Err(6),
+                    }
+                }
+                _ => Err(2),
+            }
         })
     }
 
     pub fn unescape_regex(&self) -> Result<String> {
-        self.process_unescape(|bytes, _, _| match bytes[1] {
-            c @ b'"' => Ok((c as char, 2)),
+        self.process_unescape(|bytes| match bytes.get(1) {
+            Some(b'"') => Ok(('"', 2)),
             _ => Ok(('\\', 1)),
         })
     }
 
     fn process_unescape<F>(&self, escape_handler: F) -> Result<String>
     where
-        F: Fn(&[u8], &mut String, &str) -> Result<(char, usize)>,
+        F: Fn(&[u8]) -> std::result::Result<(char, usize), usize>,
     {
         let bytes = self.value.as_bytes();
         assert_eq!(bytes[0], bytes[bytes.len() - 1]);
@@ -400,17 +397,13 @@ impl StringLiteral {
 
         while !rest.is_empty() {
             let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
-                let bytes = rest.as_bytes();
-
-                if bytes.len() < 2 {
-                    return Err(TypeQLError::InvalidStringEscape {
+                escape_handler(rest.as_bytes()).map_err(|expected_escaped_len| {
+                    let safe_len = std::cmp::min(rest.len(), expected_escaped_len);
+                    Into::<crate::common::error::Error>::into(TypeQLError::InvalidStringEscape {
                         full_string: escaped_string.to_owned(),
-                        escape: String::from(r"\"),
-                    }
-                    .into());
-                }
-
-                escape_handler(bytes, &mut buf, escaped_string)?
+                        escape: rest[..safe_len].to_owned(),
+                    })
+                })?
             } else {
                 let char = rest.chars().next().expect("string is non-empty");
                 (char, char.len_utf8())
@@ -433,9 +426,9 @@ fn decode_four_hex_bytes(bytes: &[u8]) -> Option<char> {
     if bytes.len() == 4 {
         let u32_le: u32 = 0u32
             | (bytes[0] as char).to_digit(16)? << 12
-            | (bytes[1] as char).to_digit(16)? <<  8
-            | (bytes[2] as char).to_digit(16)? <<  4
-            | (bytes[3] as char).to_digit(16)? <<  0 ;
+            | (bytes[1] as char).to_digit(16)? << 8
+            | (bytes[2] as char).to_digit(16)? << 4
+            | (bytes[3] as char).to_digit(16)? << 0;
         debug_assert!(char::from_u32(u32_le).is_some());
         char::from_u32(u32_le)
     } else {
@@ -445,60 +438,82 @@ fn decode_four_hex_bytes(bytes: &[u8]) -> Option<char> {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::value::TypeQLError;
+    use crate::{
+        value::{StringLiteral, TypeQLError},
+        Result,
+    };
+
+    fn parse_to_string_literal(escaped: &str) -> StringLiteral {
+        let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
+            panic!("Not parsed as string");
+        };
+        parsed
+    }
+
     #[test]
-    fn test_unicode_unescape() {
+    fn test_unescape_regex() {
         {
-            // Works
-            let escaped = r#""... \u0ca0\u005f\u0ca0""#;
-            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
-                panic!("Not parsed as string");
-            };
-            assert_eq!(parsed.unescape().unwrap().as_str(), "... ಠ_ಠ");
+            let escaped = r#""a\"b\"c""#;
+            let unescaped = parse_to_string_literal(escaped).unescape_regex().unwrap();
+            assert_eq!(unescaped.as_str(), r#"a"b"c"#);
         }
-
         {
-            // Capital hex works too
-            let escaped = r#""... \u0CA0\u005F\u0CA0""#;
-            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
-                panic!("Not parsed as string");
-            };
-            assert_eq!(parsed.unescape().unwrap().as_str(), "... ಠ_ಠ");
+            let escaped = r#""abc\123""#;
+            let unescaped = parse_to_string_literal(escaped).unescape_regex().unwrap();
+            assert_eq!(unescaped.as_str(), r#"abc\123"#);
         }
-
+        // Cases that fail at parsing
         {
-            // Longer ones are just
-            let escaped = r#""... \u0CA01234""#;
-            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
-                panic!("Not parsed as string");
-            };
-            assert_eq!(parsed.unescape().unwrap().as_str(), "... ಠ1234");
+            let escaped = r#""abc\""#;
+            assert!(crate::parse_value(escaped).is_err()); // Parsing fails as incomplete string literal
+            let string_literal = StringLiteral { value: escaped.to_owned() };
+            let unescaped = string_literal.unescape_regex().unwrap();
+            assert_eq!(unescaped.as_str(), r#"abc\"#);
         }
+    }
 
+    fn assert_unescapes_to(escaped: &str, expected: &str) {
+        let unescaped = parse_to_string_literal(escaped).unescape().unwrap();
+        assert_eq!(unescaped, expected);
+    }
+
+    fn assert_unescape_errors(escaped: &str, expected_escape_sequence: &str) {
+        let error = parse_to_string_literal(escaped).unescape().unwrap_err();
+        let TypeQLError::InvalidStringEscape { escape, .. } = &error.errors()[0] else {
+            panic!("Wrong error type. Was {error:?}")
+        };
+        assert_eq!(escape, expected_escape_sequence);
+    }
+
+    #[test]
+    fn test_unescape() {
+        // Succeeds
+        assert_unescapes_to(r#""a\tb\tc""#, "a\tb\tc"); // works
+        assert_unescapes_to(r#""a\"b\"c""#, r#"a"b"c"#); // works
+        assert_unescapes_to(r#""a\'b\'c""#, r#"a'b'c"#); // works
+        assert_unescapes_to(r#""a\\b\\c""#, r#"a\b\c"#); // works
+                                                         //  - Unicode
+        assert_unescapes_to(r#""abc \u0ca0\u005f\u0ca0""#, "abc ಠ_ಠ"); // works
+        assert_unescapes_to(r#""abc \u0CA0\u005F\u0CA0""#, "abc ಠ_ಠ"); // caps
+        assert_unescapes_to(r#""abc \u0CA01234""#, "abc ಠ1234"); // consumes only 4
+
+        // Errors
+        assert_unescape_errors(r#""ab\c""#, r"\c"); // Invalid escape
+
+        //  - Unicode
+        assert_unescape_errors(r#""abc \u""#, r"\u"); // Not enough bytes
+        assert_unescape_errors(r#""abc \u012""#, r"\u012"); // Not enough bytes
+        assert_unescape_errors(r#""abc \uwu/ abc""#, r"\uwu/ "); // Invalid hex
+                                                                 // Cases that fail at parsing
         {
-            // Not enough bytes
-            let escaped = r#""... \u012""#;
-            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
-                panic!("Not parsed as string");
-            };
-            let error = parsed.unescape().unwrap_err();
-            let TypeQLError::InvalidUnicodeEscapeInString { escape, .. } = &error.errors()[0] else {
+            let escaped = r#""abc\""#;
+            assert!(crate::parse_value(escaped).is_err()); // Parsing fails as incomplete string literal
+            let string_literal = StringLiteral { value: escaped.to_owned() };
+            let error = string_literal.unescape().unwrap_err();
+            let TypeQLError::InvalidStringEscape { escape, .. } = &error.errors()[0] else {
                 panic!("Wrong error type. Was {error:?}")
             };
-            assert_eq!(escape, r"\u012");
-        }
-
-        {
-            // Invalid hex
-            let escaped = r#""... \uwu/ ...""#;
-            let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
-                panic!("Not parsed as string");
-            };
-            let error = parsed.unescape().unwrap_err();
-            let TypeQLError::InvalidUnicodeEscapeInString { escape, .. } = &error.errors()[0] else {
-                panic!("Wrong error type. Was {error:?}")
-            };
-            assert_eq!(escape, r"\uwu/ ");
+            assert_eq!(escape, r#"\"#);
         }
     }
 }
