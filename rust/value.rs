@@ -341,7 +341,18 @@ impl fmt::Display for StructLiteral {
     }
 }
 
+
 impl StringLiteral {
+    fn unescape_unicode<'a>(bytes: &'a [u8]) -> std::result::Result<char, &'a str> {
+        let as_hex = std::str::from_utf8(bytes).expect("Should still be utf8");
+        if bytes.len() == 4 {
+            let as_u32 = u32::from_str_radix(as_hex, 16).map_err(|_| as_hex)?;
+            char::from_u32(as_u32).ok_or(as_hex)
+        } else {
+            Err(as_hex)
+        }
+    }
+
     pub fn unescape(&self) -> Result<String> {
         self.process_unescape(|bytes| {
             if bytes.len() < 2 {
@@ -382,31 +393,28 @@ impl StringLiteral {
         assert!(matches!(bytes[0], b'\'' | b'"'));
 
         let escaped_string = &self.value[1..self.value.len() - 1];
-        let mut buf = Vec::with_capacity(escaped_string.len());
+        let mut buf = String::with_capacity(escaped_string.len());
         let mut rest = escaped_string;
+
         while !rest.is_empty() {
-            let escaped_len = if rest.as_bytes()[0] == b'\\' {
+            let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
                 match escape_handler(rest.as_bytes()) {
-                    Ok((char, escaped_len)) => {
-                        let start = buf.len();
-                        buf.resize(buf.len() + char.len_utf8(),0);
-                        char.encode_utf8(&mut buf[start..]);
-                        rest = &rest[escaped_len..];
-                    },
+                    Ok((char, escaped_len)) => (char, escaped_len),
                     Err(considered_escape_byte_length) => {
-                        let considered_escape_sequence = rest.chars().take(considered_escape_byte_length).collect();
                         return Err(TypeQLError::InvalidStringEscape {
                             full_string: escaped_string.to_owned(),
-                            escape: considered_escape_sequence,
+                            escape: rest.chars().take(considered_escape_byte_length).collect(),
                         }.into());
                     }
                 }
             } else {
-                buf.push(rest.as_bytes()[0]);
-                rest = &rest[1..];
+                let char = rest.chars().next().expect("string is non-empty");
+                (char, char.len_utf8())
             };
+            buf.push(char);
+            rest = &rest[escaped_len..];
         }
-        Ok(String::from_utf8(buf).expect("Expected valid utf8").to_owned())
+        Ok(buf)
     }
 }
 
