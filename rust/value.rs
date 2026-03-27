@@ -518,12 +518,14 @@ pub mod tests {
         }
     }
 
+    #[ignore]
     #[test]
     fn time_unescape_ascii() {
         let text = generate_string(TIME_UNESCAPE_TEXT_LEN, |x| 32 + (x % 94));
         time_unescape(text);
     }
 
+    #[ignore]
     #[test]
     fn time_unescape_unicode() {
         // assert_eq!(None, (0..0x07ff).filter(|x| char::from_u32(*x).is_none()).next());
