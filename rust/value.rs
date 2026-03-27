@@ -342,16 +342,6 @@ impl fmt::Display for StructLiteral {
 }
 
 impl StringLiteral {
-    fn unescape_unicode<'a>(bytes: &'a [u8]) -> std::result::Result<char, &'a str> {
-        let as_hex = std::str::from_utf8(bytes).expect("Should still be utf8");
-        if bytes.len() == 4 {
-            let as_u32 = u32::from_str_radix(as_hex, 16).map_err(|_| as_hex)?;
-            char::from_u32(as_u32).ok_or(as_hex)
-        } else {
-            Err(as_hex)
-        }
-    }
-
     pub fn unescape(&self) -> Result<String> {
         self.process_unescape(|bytes| {
             if bytes.len() < 2 {
@@ -392,28 +382,31 @@ impl StringLiteral {
         assert!(matches!(bytes[0], b'\'' | b'"'));
 
         let escaped_string = &self.value[1..self.value.len() - 1];
-        let mut buf = String::with_capacity(escaped_string.len());
+        let mut buf = Vec::with_capacity(escaped_string.len());
         let mut rest = escaped_string;
-
         while !rest.is_empty() {
-            let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
+            let escaped_len = if rest.as_bytes()[0] == b'\\' {
                 match escape_handler(rest.as_bytes()) {
-                    Ok((char, escaped_len)) => (char, escaped_len),
+                    Ok((char, escaped_len)) => {
+                        let start = buf.len();
+                        buf.resize(buf.len() + char.len_utf8(),0);
+                        char.encode_utf8(&mut buf[start..]);
+                        rest = &rest[escaped_len..];
+                    },
                     Err(considered_escape_byte_length) => {
+                        let considered_escape_sequence = rest.chars().take(considered_escape_byte_length).collect();
                         return Err(TypeQLError::InvalidStringEscape {
                             full_string: escaped_string.to_owned(),
-                            escape: rest.chars().take(considered_escape_byte_length).collect(),
+                            escape: considered_escape_sequence,
                         }.into());
                     }
                 }
             } else {
-                let char = rest.chars().next().expect("string is non-empty");
-                (char, char.len_utf8())
+                buf.push(rest.as_bytes()[0]);
+                rest = &rest[1..];
             };
-            buf.push(char);
-            rest = &rest[escaped_len..];
         }
-        Ok(buf)
+        Ok(String::from_utf8(buf).expect("Expected valid utf8").to_owned())
     }
 }
 
@@ -494,7 +487,7 @@ pub mod tests {
         assert_unescapes_to(r#""a\"b\"c""#, r#"a"b"c"#); // works
         assert_unescapes_to(r#""a\'b\'c""#, r#"a'b'c"#); // works
         assert_unescapes_to(r#""a\\b\\c""#, r#"a\b\c"#); // works
-                                                         //  - Unicode
+        //  - Unicode
         assert_unescapes_to(r#""abc \u0ca0\u005f\u0ca0""#, "abc ಠ_ಠ"); // works
         assert_unescapes_to(r#""abc \u0CA0\u005F\u0CA0""#, "abc ಠ_ಠ"); // caps
         assert_unescapes_to(r#""abc \u0CA01234""#, "abc ಠ1234"); // consumes only 4
@@ -506,7 +499,7 @@ pub mod tests {
         assert_unescape_errors(r#""abc \u""#, r"\u"); // Not enough bytes
         assert_unescape_errors(r#""abc \u012""#, r"\u012"); // Not enough bytes
         assert_unescape_errors(r#""abc \uwu/ abc""#, r"\uwu/ "); // Invalid hex
-                                                                 // Cases that fail at parsing
+        // Cases that fail at parsing
         {
             let escaped = r#""abc\""#;
             assert!(crate::parse_value(escaped).is_err()); // Parsing fails as incomplete string literal
@@ -518,4 +511,59 @@ pub mod tests {
             assert_eq!(escape, r#"\"#);
         }
     }
+
+    #[test]
+    fn time_unescape_ascii() {
+        let text = generate_string(TIME_UNESCAPE_TEXT_LEN, |x| 32 + (x % 94));
+        time_unescape(text);
+    }
+
+    #[test]
+    fn time_unescape_unicode() {
+        // assert_eq!(None, (0..0x07ff).filter(|x| char::from_u32(*x).is_none()).next());
+        let text = generate_string(TIME_UNESCAPE_TEXT_LEN, move |x| x & 0x07ff);
+        time_unescape(text);
+    }
+
+    const TIME_UNESCAPE_TEXT_LEN: usize = 100000;
+    fn time_unescape(text: String) {
+        use std::time::Instant;
+        let iters = 10000;
+
+        let string_literal = StringLiteral { value: text };
+        let start = Instant::now();
+        for _ in 0..iters {
+            string_literal.unescape().unwrap();
+        }
+        let end = Instant::now();
+        println!("{iters} on string of length {} iters in {}", string_literal.value.as_str().len(), (end - start).as_secs_f64())
+    }
+
+    fn generate_string(length: usize, mapper: fn(u32) -> u32) -> String {
+        use rand::{thread_rng, Rng, RngCore};
+        let mut rng = thread_rng();
+        let capacity: i64 = (1.2 * length as f64).ceil() as i64;
+        let mut text = String::with_capacity(capacity as usize);
+        text.push('"');
+        let mut sanity: i64 = capacity;
+        while text.as_str().len() < length+1 && sanity >= 0 {
+            sanity -= 1;
+            match char::from_u32(mapper(rng.next_u32())) {
+                Some('\\')  => { text.push('\\'); text.push('\\'); }
+                Some('\'') => { text.push('\\'); text.push('\''); }
+                Some('\"') => { text.push('\\'); text.push('\"'); }
+                Some('\x08') => { text.push('\\'); text.push('b'); }
+                Some('\x09') => { text.push('\\'); text.push('t'); }
+                Some('\x0a') => { text.push('\\'); text.push('n'); }
+                Some('\x0c') => { text.push('\\'); text.push('f'); }
+                Some('\x0d') => { text.push('\\'); text.push('r'); }
+                Some(ch) => { text.push(ch) },
+                None => {}
+            }
+        }
+        text.push('"');
+        assert!(text.as_str().len() > length && text.as_str().len() < length + 10);
+        text
+    }
+
 }

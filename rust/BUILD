@@ -40,6 +40,7 @@ rust_test(
     deps = [
         "@crates//:syn",
         "@crates//:proc-macro2",
+        "@crates//:rand",
     ],
 )
 
