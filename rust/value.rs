@@ -397,13 +397,15 @@ impl StringLiteral {
 
         while !rest.is_empty() {
             let (char, escaped_len) = if rest.as_bytes()[0] == b'\\' {
-                escape_handler(rest.as_bytes()).map_err(|expected_escaped_len| {
-                    let safe_len = std::cmp::min(rest.len(), expected_escaped_len);
-                    Into::<crate::common::error::Error>::into(TypeQLError::InvalidStringEscape {
-                        full_string: escaped_string.to_owned(),
-                        escape: rest[..safe_len].to_owned(),
-                    })
-                })?
+                match escape_handler(rest.as_bytes()) {
+                    Ok((char, escaped_len)) => (char, escaped_len),
+                    Err(considered_escape_byte_length) => {
+                        return Err(TypeQLError::InvalidStringEscape {
+                            full_string: escaped_string.to_owned(),
+                            escape: rest.chars().take(considered_escape_byte_length).collect(),
+                        }.into());
+                    }
+                }
             } else {
                 let char = rest.chars().next().expect("string is non-empty");
                 (char, char.len_utf8())
