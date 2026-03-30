@@ -21,6 +21,7 @@ mod match_queries;
 mod modifiers;
 mod nonquery;
 mod pipeline;
+mod perf;
 mod regex;
 mod schema_queries;
 mod sugar;
