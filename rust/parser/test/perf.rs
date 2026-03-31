@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 // TODO: Move to benches?
 use std::time::{Duration, Instant};
 
@@ -16,7 +22,7 @@ fn do_timing(query: &str, n_iters: usize) -> Duration {
     end - start
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn time_isa() {
     let mut query: String = "match\n".to_owned();
@@ -31,7 +37,7 @@ fn time_isa() {
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn time_var_sub() {
     let mut query: String = "match\n".to_owned();
@@ -46,7 +52,7 @@ fn time_var_sub() {
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn time_label_sub() {
     let mut query: String = "match\n".to_owned();
@@ -61,7 +67,7 @@ fn time_label_sub() {
     );
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 fn time_or() {
     let stmt = "$v_abc123 isa t_abc123 == 123456;\n";
