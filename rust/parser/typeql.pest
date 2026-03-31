@@ -71,7 +71,13 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_single | statement_type | statement_thing }
+statement = { statement_assignment
+            | statement_in
+            | statement_is
+            | statement_thing
+            | statement_type
+            | statement_comparison
+            }
 
 // TYPE STATEMENTS =============================================================
 
@@ -124,8 +130,6 @@ statement_deletable = { HAS? ~ var ~ OF ~ var
 pattern_try_deletable = { TRY ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
 
 // SINGLE STATEMENTS ===========================================================
-
-statement_single = { statement_is | statement_comparison | statement_assignment | statement_in }
 
 statement_is = { var ~ IS ~ var }
 statement_comparison = { expression_value ~ comparison }
