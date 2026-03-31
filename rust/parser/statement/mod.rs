@@ -6,7 +6,7 @@
 
 use self::{
     single::{visit_statement_assignment, visit_statement_comparison, visit_statement_in, visit_statement_is},
-    thing::visit_statement_thing,
+    thing::{visit_statement_thing_basic, visit_statement_thing_relation_anonymous},
     type_::visit_statement_type,
 };
 use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, RuleMatcher};
@@ -23,7 +23,8 @@ pub(super) fn visit_statement(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::statement_thing => visit_statement_thing(child),
+        Rule::statement_thing_basic => visit_statement_thing_basic(child),
+        Rule::statement_thing_relation_anonymous => visit_statement_thing_relation_anonymous(child),
         Rule::statement_type => visit_statement_type(child),
         Rule::statement_is => Statement::Is(visit_statement_is(child)),
         Rule::statement_in => Statement::InIterable(visit_statement_in(child)),

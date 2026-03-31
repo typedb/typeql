@@ -73,10 +73,11 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 statement = { statement_assignment
             | statement_in
+            | statement_thing_basic
             | statement_is
-            | statement_thing
             | statement_type
             | statement_comparison
+            | statement_thing_relation_anonymous
             }
 
 // TYPE STATEMENTS =============================================================
@@ -101,10 +102,8 @@ relates_constraint = { RELATES ~ type_ref_list ~ ( AS ~ type_ref_list )?
 plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
-statement_thing = { var ~ COMMA? ~ thing_constraint_list
-                  | thing_relation_anonymous ~ ( COMMA? ~ thing_constraint_list )?
-                  }
-thing_relation_anonymous = { type_ref? ~ relation }
+statement_thing_basic = { var ~ COMMA? ~ thing_constraint_list }
+statement_thing_relation_anonymous = { type_ref? ~ relation ~ ( COMMA? ~ thing_constraint_list )? }
 thing_constraint_list = {thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
