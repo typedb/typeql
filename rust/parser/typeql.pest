@@ -196,7 +196,7 @@ query_schema = { query_define | query_undefine | query_redefine }
 
 query_define = { DEFINE ~ definables }
 
-definables = { definable* }
+definables = { (!query_end ~ definable)* } // !query_end to avoid ambiguity
 definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
 
 // TYPE DEFINITION =============================================================
@@ -265,7 +265,7 @@ redefinable_type = { kind? ~ label ~ ( annotations | type_capability ) ~ SEMICOL
 
 query_undefine = { UNDEFINE ~ undefinables }
 
-undefinables = { ( undefinable ~ SEMICOLON )* }
+undefinables = { ( !query_end ~ undefinable ~ SEMICOLON )* } // !query_end to avoid ambiguity
 undefinable = { undefine_from | undefine_function | undefine_struct | label }
 
 undefine_from = { undefine_annotation_from_capability
