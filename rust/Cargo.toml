@@ -19,9 +19,29 @@ features = {}
 		version = "1.47.1"
 		default-features = false
 
+	[dev-dependencies.rand]
+		features = ["alloc", "default", "getrandom", "libc", "rand_chacha", "small_rng", "std", "std_rng"]
+		version = "0.8.5"
+		default-features = false
+
+	[dev-dependencies.tracing]
+		features = ["attributes", "default", "log", "std", "tracing-attributes"]
+		version = "0.1.41"
+		default-features = false
+
+	[dev-dependencies.criterion]
+		features = ["cargo_bench_support", "default", "plotters", "rayon"]
+		version = "0.5.1"
+		default-features = false
+
 	[dev-dependencies.cucumber]
 		features = ["default", "macros"]
 		version = "0.19.1"
+		default-features = false
+
+	[dev-dependencies.pprof]
+		features = ["cpp", "criterion", "default", "flamegraph", "inferno"]
+		version = "0.13.0"
 		default-features = false
 
 	[dev-dependencies.syn]
@@ -70,6 +90,10 @@ features = {}
 		features = ["default", "use_alloc", "use_std"]
 		version = "0.10.5"
 		default-features = false
+
+[[bench]]
+	name = "bench_parser"
+	harness = false
 
 [[test]]
 	path = "tests/behaviour/test_behaviour.rs"
