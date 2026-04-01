@@ -15,12 +15,8 @@ features = {}
 [dependencies]
 
 	[dependencies.cucumber]
-		features = ["default", "macros"]
-		version = "0.19.1"
-		default-features = false
+		workspace = true
 
 	[dependencies.typeql]
-		path = "../../../rust"
-		features = []
-		default-features = false
+		workspace = true
 
