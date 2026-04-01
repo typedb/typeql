@@ -4,9 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+use std::path::Path;
+
 use steps::*;
 
 #[tokio::test]
 async fn test() {
-    assert!(TypeQLWorld::test("../typedb_behaviour/").await);
+    let marker = std::env::var("TYPEDB_BEHAVIOUR_FEATURE_MARKER")
+        .expect("TYPEDB_BEHAVIOUR_FEATURE_MARKER env var must be set by Bazel");
+    let behaviour_root = Path::new(&marker)
+        .parent().unwrap()   // .../query/language/
+        .parent().unwrap()   // .../query/
+        .parent().unwrap();  // .../typedb_behaviour+/
+    assert!(TypeQLWorld::test(behaviour_root).await);
 }

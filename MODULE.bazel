@@ -1,0 +1,81 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+module(
+    name = "typeql",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+# ===========================================================
+# Common
+# ===========================================================
+
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+
+# ===========================================================
+# Languages & toolchains
+# ===========================================================
+
+# Rust
+bazel_dep(name = "rules_rust", version = "0.56.0")
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.81.0"],
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
+
+# Python
+bazel_dep(name = "rules_python", version = "1.0.0")
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    is_default = True,
+    python_version = "3.11",
+)
+
+# Kotlin
+bazel_dep(name = "rules_kotlin", version = "2.0.0")
+register_toolchains("@rules_kotlin//kotlin/internal:default_toolchain")
+
+# Java
+bazel_dep(name = "rules_java", version = "8.6.2")
+
+# ===========================================================
+# Package managers
+# ===========================================================
+
+# Rust crates
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+use_repo(crate, "crates")
+
+# Maven
+bazel_dep(name = "rules_jvm_external", version = "6.6")
+
+# ===========================================================
+# TypeDB repos
+# ===========================================================
+
+bazel_dep(name = "typedb_dependencies", version = "0.0.0")
+git_override(
+    module_name = "typedb_dependencies",
+    remote = "https://github.com/typedb/dependencies",
+    commit = "72a2ee5bdd90ea76129889b30f89da51bcdc7909",
+)
+
+bazel_dep(name = "typedb_bazel_distribution", version = "0.0.0")
+git_override(
+    module_name = "typedb_bazel_distribution",
+    remote = "https://github.com/typedb/bazel-distribution",
+    commit = "4e400ddcc52da12809db323874eb3516ee9ab5c3",
+)
+
+bazel_dep(name = "typedb_behaviour", version = "0.0.0")
+git_override(
+    module_name = "typedb_behaviour",
+    remote = "https://github.com/typedb/typedb-behaviour",
+    commit = "bc1e71c9334272178104f657b0996d9f15be66c9",
+)

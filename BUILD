@@ -30,6 +30,7 @@ checkstyle_test(
         ".gitignore",
         ".factory/automation.yml",
         "BUILD",
+        "MODULE.bazel",
         "WORKSPACE",
         "deployment.bzl",
         "requirements.txt",
@@ -37,6 +38,7 @@ checkstyle_test(
     exclude = [
         ".bazel-remote-cache.rc",
         ".bazel-cache-credential.json",
+        "MODULE.bazel.lock",
         "banner.png",
         "Cargo.toml",
     ],
@@ -60,6 +62,5 @@ filegroup(
         "@typedb_dependencies//tool/release/notes:create",
         "@typedb_dependencies//tool/sonarcloud:code-analysis",
         "@typedb_dependencies//tool/unuseddeps:unused-deps",
-        "@rust_analyzer_toolchain_tools//lib/rustlib/src:rustc_srcs"
     ],
 )
