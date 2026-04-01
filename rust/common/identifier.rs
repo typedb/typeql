@@ -6,7 +6,7 @@
 
 use std::{fmt, sync::OnceLock};
 
-use regex::{Regex, RegexBuilder};
+use regex::Regex;
 
 use crate::{
     common::{error::TypeQLError, Span, Spanned},
@@ -64,31 +64,18 @@ impl From<String> for Identifier {
     }
 }
 
-const IDENTIFIER_CHAR: &str = "A-Za-z\
-            \\u00C0-\\u00D6\
-            \\u00D8-\\u00F6\
-            \\u00F8-\\u02FF\
-            \\u0370-\\u037D\
-            \\u037F-\\u1FFF\
-            \\u200C-\\u200D\
-            \\u2070-\\u218F\
-            \\u2C00-\\u2FEF\
-            \\u3001-\\uD7FF\
-            \\uF900-\\uFDCF\
-            \\uFDF0-\\uFFFD";
-const IDENTIFIER_CONNECTOR: &str = "_\
-            \\-\
-            \\u00B7\
-            \\u0300-\\u036F\
-            \\u203F-\\u2040";
-const IDENTIFIER_DIGIT: &str = "0-9";
+const UNDERSCORE: &str = "_";
+const HYPHEN: &str = r"\-";
+const ASCII_DIGIT: &str = "0-9";
+const XID_START: &str = r"\p{XID_Start}";
+const XID_CONTINUE: &str = r"\p{XID_Continue}";
 
-pub fn is_valid_identifier(identifier: &str) -> bool {
+pub fn is_valid_label(identifier: &str) -> bool {
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| {
-        let identifier_tail = format!("{}{}{}", IDENTIFIER_CHAR, IDENTIFIER_CONNECTOR, IDENTIFIER_DIGIT);
-        let identifier_pattern = format!("^[{}][{}]*$", IDENTIFIER_CHAR, identifier_tail);
-        RegexBuilder::new(&identifier_pattern).build().unwrap()
+        let head_classes = format!("{UNDERSCORE}{XID_START}");
+        let tail_classes = format!("{HYPHEN}{XID_CONTINUE}");
+        Regex::new(&format!("^[{head_classes}][{tail_classes}]*$")).unwrap()
     });
     regex.is_match(identifier)
 }
@@ -96,10 +83,40 @@ pub fn is_valid_identifier(identifier: &str) -> bool {
 pub fn is_valid_var_identifier(identifier: &str) -> bool {
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| {
-        let identifier_head = format!("{}{}", IDENTIFIER_CHAR, IDENTIFIER_DIGIT);
-        let identifier_tail = format!("{}{}{}", IDENTIFIER_CHAR, IDENTIFIER_DIGIT, IDENTIFIER_CONNECTOR);
-        let identifier_pattern = format!("^[{}][{}]*$", identifier_head, identifier_tail);
-        RegexBuilder::new(&identifier_pattern).build().unwrap()
+        let head_classes = format!("{XID_START}{ASCII_DIGIT}");
+        let tail_classes = format!("{HYPHEN}{XID_CONTINUE}");
+        Regex::new(&format!("^[{head_classes}][{tail_classes}]*$")).unwrap()
     });
     regex.is_match(identifier)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_valid_label() {
+        assert!(is_valid_label("person"));
+        assert!(is_valid_label("_private"));
+        assert!(is_valid_label("_leading-underscore"));
+        assert!(is_valid_label("type-with-hyphens"));
+        assert!(is_valid_label("name123"));
+        assert!(is_valid_label("café"));
+        assert!(!is_valid_label("0starts-with-digit"));
+        assert!(!is_valid_label("-starts-with-hyphen"));
+        assert!(!is_valid_label(""));
+        assert!(!is_valid_label("has space"));
+    }
+
+    #[test]
+    fn test_is_valid_var_identifier() {
+        assert!(is_valid_var_identifier("person"));
+        assert!(is_valid_var_identifier("0starts-with-digit"));
+        assert!(is_valid_var_identifier("name123"));
+        assert!(is_valid_var_identifier("café"));
+        assert!(!is_valid_var_identifier("_leading-underscore"));
+        assert!(!is_valid_var_identifier("-starts-with-hyphen"));
+        assert!(!is_valid_var_identifier(""));
+        assert!(!is_valid_var_identifier("has space"));
+    }
 }

@@ -3,14 +3,14 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.7.0
+cargo add typeql@3.8.2
 ```
 
 
 ## New Features
-- **Try blocks in write stages**
+- **Allow leading underscore in type labels**
   
-  We allow `try {}` blocks in all write stages, viz. `insert`, `delete`, `put`, and `update`.
+  We relax our identifier rules, allowing `_` as a leading underscore in type labels. This does NOT extend to variables, since we have some complexity around anonymous variables for the time being we don't want to modify.
   
   
 
@@ -18,13 +18,20 @@ cargo add typeql@3.7.0
 
 
 ## Code Refactors
-
-
-## Other Improvements 
-   
-- **Change CODEOWNERS**
-
-- **Fix illegal grammar error formatting**
+- **Introduce Collector variant of Reducer to accomodate the unimplemented list reducer**
+  It was placed under Stat, which it is not and caused confusion & crashes in core.
   
-  We fix the (internal) illegal grammar error formatting to show the part of the query that caused the error rather than the corresponding parsed subtree.
   
+
+## Other Improvements
+- **Add tests for end; clause in query pipelines**
+  
+  Add tests for `end;` statements
+  
+- **Allow decimal syntax without a period**
+  
+  To give both humans and LLMs more flexibility when writing `decimal` value types, we no longer requiring the `.0` in `xxx.0dec`. This is unambiguous since the `dec` suffix already syntactically differentiates when a value is a decimal.
+  
+  
+    
+

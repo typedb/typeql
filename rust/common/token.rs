@@ -157,14 +157,20 @@ string_enum! { Annotation
     Values = "values",
 }
 
-string_enum! { ReduceOperator
+string_enum! { ReduceOperatorCount
     Count = "count",
+}
+
+string_enum! { ReduceOperatorStat
     Max = "max",
     Mean = "mean",
     Median = "median",
     Min = "min",
     Std = "std",
     Sum = "sum",
+}
+
+string_enum! { ReduceOperatorCollect
     List = "list",
 }
 

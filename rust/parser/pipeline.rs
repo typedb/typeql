@@ -17,7 +17,7 @@ use super::{
 use crate::{
     common::{
         error::TypeQLError,
-        token::{Order, ReduceOperator},
+        token::{Order, ReduceOperatorCollect, ReduceOperatorStat},
         Spanned,
     },
     parser::define::function::visit_function_block,
@@ -28,7 +28,7 @@ use crate::{
                 delete::{Deletable, DeletableKind},
                 fetch::FetchSome,
                 modifier::{Distinct, Limit, Offset, OrderedVariable, Require, Select, Sort},
-                reduce::{Count, Reducer, Stat},
+                reduce::{Collect, Count, Reducer, Stat},
                 Delete, Fetch, Insert, Match, Operator, Put, Reduce, Stage, Update,
             },
             Preamble,
@@ -411,29 +411,38 @@ pub(crate) fn visit_reducer(node: Node<'_>) -> Reducer {
     let keyword = children.consume_any();
     match keyword.as_rule() {
         Rule::COUNT => Reducer::Count(Count::new(span, children.try_consume_expected(Rule::var).map(visit_var))),
-        Rule::MAX => {
-            Reducer::Stat(Stat::new(span, ReduceOperator::Max, visit_var(children.consume_expected(Rule::var))))
+        Rule::reducer_stat => {
+            let operator = visit_reducer_stat(keyword);
+            Reducer::Stat(Stat::new(span, operator, visit_var(children.consume_expected(Rule::var))))
         }
-        Rule::MIN => {
-            Reducer::Stat(Stat::new(span, ReduceOperator::Min, visit_var(children.consume_expected(Rule::var))))
-        }
-        Rule::MEAN => {
-            Reducer::Stat(Stat::new(span, ReduceOperator::Mean, visit_var(children.consume_expected(Rule::var))))
-        }
-        Rule::MEDIAN => {
-            Reducer::Stat(Stat::new(span, ReduceOperator::Median, visit_var(children.consume_expected(Rule::var))))
-        }
-        Rule::STD => {
-            Reducer::Stat(Stat::new(span, ReduceOperator::Std, visit_var(children.consume_expected(Rule::var))))
-        }
-        Rule::SUM => {
-            Reducer::Stat(Stat::new(span, ReduceOperator::Sum, visit_var(children.consume_expected(Rule::var))))
-        }
-        Rule::LIST => {
-            // TODO      vvvv rename
-            Reducer::Stat(Stat::new(span, ReduceOperator::List, visit_var(children.consume_expected(Rule::var))))
+        Rule::reducer_collect => {
+            let operator = visit_reducer_collect(keyword);
+            Reducer::Collect(Collect::new(span, operator, visit_var(children.consume_expected(Rule::var))))
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.as_str().to_owned() }),
+    }
+}
+
+fn visit_reducer_stat(node: Node<'_>) -> ReduceOperatorStat {
+    debug_assert_eq!(node.as_rule(), Rule::reducer_stat);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::MAX => ReduceOperatorStat::Max,
+        Rule::MIN => ReduceOperatorStat::Min,
+        Rule::MEAN => ReduceOperatorStat::Mean,
+        Rule::MEDIAN => ReduceOperatorStat::Median,
+        Rule::STD => ReduceOperatorStat::Std,
+        Rule::SUM => ReduceOperatorStat::Sum,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+    }
+}
+
+fn visit_reducer_collect(node: Node<'_>) -> ReduceOperatorCollect {
+    debug_assert_eq!(node.as_rule(), Rule::reducer_collect);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::LIST => ReduceOperatorCollect::List,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
