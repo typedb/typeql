@@ -383,9 +383,9 @@ impl StringLiteral {
 
         let escaped_string = &self.value[1..self.value.len() - 1];
         let mut buf = Vec::with_capacity(escaped_string.len());
-        let mut rest: &[u8] = escaped_string.as_bytes();
+        let mut rest = escaped_string.as_bytes();
         while !rest.is_empty() {
-            let escaped_len = if rest[0] == b'\\' {
+            if rest[0] == b'\\' {
                 match escape_handler(rest) {
                     Ok((char, escaped_len)) => {
                         let start = buf.len();
@@ -407,7 +407,7 @@ impl StringLiteral {
             } else {
                 buf.push(rest[0]);
                 rest = &rest[1..];
-            };
+            }
         }
         Ok(String::from_utf8(buf).expect("Expected valid utf8").to_owned())
     }
@@ -422,13 +422,13 @@ const CR_: u8 = b'r';
 #[allow(arithmetic_overflow)]
 fn decode_four_hex_bytes(bytes: &[u8]) -> Option<char> {
     if bytes.len() == 4 {
-        let u32_le: u32 = 0u32
+        let as_u32: u32 = 0u32
             | (bytes[0] as char).to_digit(16)? << 12
             | (bytes[1] as char).to_digit(16)? << 8
             | (bytes[2] as char).to_digit(16)? << 4
             | (bytes[3] as char).to_digit(16)? << 0;
-        debug_assert!(char::from_u32(u32_le).is_some());
-        char::from_u32(u32_le)
+        debug_assert!(char::from_u32(as_u32).is_some());
+        char::from_u32(as_u32)
     } else {
         None
     }
@@ -470,40 +470,44 @@ pub mod tests {
         }
     }
 
-    fn assert_unescapes_to(escaped: &str, expected: &str) {
-        let unescaped = parse_to_string_literal(escaped).unescape().unwrap();
-        assert_eq!(unescaped, expected);
+    macro_rules! assert_unescapes_to {
+        ($escaped: expr, $expected: expr) => {
+            let unescaped = parse_to_string_literal($escaped).unescape().unwrap();
+            assert_eq!(unescaped, $expected);
+        };
     }
 
-    fn assert_unescape_errors(escaped: &str, expected_escape_sequence: &str) {
-        let error = parse_to_string_literal(escaped).unescape().unwrap_err();
-        let TypeQLError::InvalidStringEscape { escape, .. } = &error.errors()[0] else {
-            panic!("Wrong error type. Was {error:?}")
+    macro_rules! assert_unescape_errors {
+        ($escaped: expr, $expected_escape_sequence: expr) => {
+            let error = parse_to_string_literal($escaped).unescape().unwrap_err();
+            let TypeQLError::InvalidStringEscape { escape, .. } = &error.errors()[0] else {
+                panic!("Wrong error type. Was {error:?}")
+            };
+            assert_eq!(escape, $expected_escape_sequence);
         };
-        assert_eq!(escape, expected_escape_sequence);
     }
 
     #[test]
     fn test_unescape() {
         // Succeeds
-        assert_unescapes_to(r#""a\tb\tc""#, "a\tb\tc"); // works
-        assert_unescapes_to(r#""a\"b\"c""#, r#"a"b"c"#); // works
-        assert_unescapes_to(r#""a\'b\'c""#, r#"a'b'c"#); // works
-        assert_unescapes_to(r#""a\\b\\c""#, r#"a\b\c"#); // works
-                                                         //  - Unicode
-        assert_unescapes_to(r#""abc \u0ca0\u005f\u0ca0""#, "abc ಠ_ಠ"); // works
-        assert_unescapes_to(r#""abc \u0CA0\u005F\u0CA0""#, "abc ಠ_ಠ"); // caps
-        assert_unescapes_to(r#""abc \u0CA01234""#, "abc ಠ1234"); // consumes only 4
+        assert_unescapes_to!(r#""a\tb\tc""#, "a\tb\tc"); // works
+        assert_unescapes_to!(r#""a\"b\"c""#, r#"a"b"c"#); // works
+        assert_unescapes_to!(r#""a\'b\'c""#, r#"a'b'c"#); // works
+        assert_unescapes_to!(r#""a\\b\\c""#, r#"a\b\c"#); // works
+                                                          //  - Unicode
+        assert_unescapes_to!(r#""abc \u0ca0\u005f\u0ca0""#, "abc ಠ_ಠ"); // works
+        assert_unescapes_to!(r#""abc \u0CA0\u005F\u0CA0""#, "abc ಠ_ಠ"); // caps
+        assert_unescapes_to!(r#""abc \u0CA01234""#, "abc ಠ1234"); // consumes only 4
 
         // Errors
-        assert_unescape_errors(r#""ab\c""#, r"\c"); // Invalid escape
+        assert_unescape_errors!(r#""ab\c""#, r"\c"); // Invalid escape
 
         //  - Unicode
-        assert_unescape_errors(r#""abc \u""#, r"\u"); // Not enough bytes
-        assert_unescape_errors(r#""abc \u012""#, r"\u012"); // Not enough bytes
-        assert_unescape_errors(r#""abc \uwu/ abc""#, r"\uwu/ "); // Invalid hex
-        assert_unescape_errors(r#""abc \uΣ12Σ abc""#, r"\uΣ12Σ"); // Invalid hex, 4 chars more than 4 bytes
-        assert_unescape_errors(r#""abc \u123Σ abc""#, r"\u123Σ"); // Invalid hex, 4 chars more than 4 bytes
+        assert_unescape_errors!(r#""abc \u""#, r"\u"); // Not enough bytes
+        assert_unescape_errors!(r#""abc \u012""#, r"\u012"); // Not enough bytes
+        assert_unescape_errors!(r#""abc \uwu/ abc""#, r"\uwu/ "); // Invalid hex
+        assert_unescape_errors!(r#""abc \uΣ12Σ abc""#, r"\uΣ12Σ"); // Invalid hex, 4 chars more than 4 bytes
+        assert_unescape_errors!(r#""abc \u123Σ abc""#, r"\u123Σ"); // Invalid hex, 4 chars more than 4 bytes
 
         // Cases that fail at parsing
         {
@@ -557,48 +561,42 @@ pub mod tests {
         let capacity: i64 = (1.2 * length as f64).ceil() as i64;
         let mut text = String::with_capacity(capacity as usize);
         text.push('"');
-        let mut sanity: i64 = capacity;
-        while text.as_str().len() < length + 1 && sanity >= 0 {
-            sanity -= 1;
+
+        for _ in 0..capacity {
+            if text.len() > length {
+                break;
+            }
             match char::from_u32(mapper(rng.next_u32())) {
                 Some('\\') => {
-                    text.push('\\');
-                    text.push('\\');
+                    text += "\\\\";
                 }
                 Some('\'') => {
-                    text.push('\\');
-                    text.push('\'');
+                    text += "\\\'";
                 }
                 Some('\"') => {
-                    text.push('\\');
-                    text.push('\"');
+                    text += "\\\"";
                 }
                 Some('\x08') => {
-                    text.push('\\');
-                    text.push('b');
+                    text += r"\b";
                 }
                 Some('\x09') => {
-                    text.push('\\');
-                    text.push('t');
+                    text += r"\t";
                 }
                 Some('\x0a') => {
-                    text.push('\\');
-                    text.push('n');
+                    text += r"\n";
                 }
                 Some('\x0c') => {
-                    text.push('\\');
-                    text.push('f');
+                    text += r"\f";
                 }
                 Some('\x0d') => {
-                    text.push('\\');
-                    text.push('r');
+                    text += r"\r";
                 }
                 Some(ch) => text.push(ch),
                 None => {}
             }
         }
         text.push('"');
-        assert!(text.as_str().len() > length && text.as_str().len() < length + 10);
+        assert!(text.len() > length && text.len() < length + 10);
         text
     }
 }
