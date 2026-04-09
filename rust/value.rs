@@ -354,7 +354,7 @@ impl StringLiteral {
                 FF_ => Ok(('\x0c', 2)),
                 CR_ => Ok(('\x0d', 2)),
                 c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
-                b'u' => match decode_next_four_hex_bytes_or_with_braces(&bytes[2..]) {
+                b'u' => match decode_unicode_hex_escape(&bytes[2..]) {
                     Ok((ch, consumed)) => Ok((ch, consumed + 2)),
                     Err(consumed) => Err(consumed + 2),
                 },
@@ -391,17 +391,14 @@ impl StringLiteral {
                         rest = &rest[escaped_len..];
                     }
                     Err(considered_byte_length) => {
-                        let mut s = String::with_capacity(considered_byte_length + 4);
                         let offset = escaped_string.len() - rest.len();
-                        for c in escaped_string[offset..].chars() {
-                            if s.len() >= considered_byte_length {
-                                break;
-                            }
-                            s.push(c);
+                        let mut end = std::cmp::min(offset + considered_byte_length, escaped_string.len());
+                        while !escaped_string.is_char_boundary(end) {
+                            end += 1;
                         }
                         return Err(TypeQLError::InvalidStringEscape {
                             full_string: escaped_string.to_owned(),
-                            escape: s,
+                            escape: escaped_string[offset..end].to_owned(),
                         }
                         .into());
                     }
@@ -422,7 +419,7 @@ const FF_: u8 = b'f';
 const CR_: u8 = b'r';
 
 #[allow(arithmetic_overflow)]
-fn decode_next_four_hex_bytes_or_with_braces(bytes: &[u8]) -> std::result::Result<(char, usize), usize> {
+fn decode_unicode_hex_escape(bytes: &[u8]) -> std::result::Result<(char, usize), usize> {
     if bytes.is_empty() {
         Err(0)
     } else if bytes[0] == b'{' {
