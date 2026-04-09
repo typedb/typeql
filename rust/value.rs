@@ -354,13 +354,10 @@ impl StringLiteral {
                 FF_ => Ok(('\x0c', 2)),
                 CR_ => Ok(('\x0d', 2)),
                 c @ (b'"' | b'\'' | b'\\') => Ok((c as char, 2)),
-                b'u' => {
-                    let escape = &bytes[2..std::cmp::min(6, bytes.len())];
-                    match decode_four_hex_bytes(escape) {
-                        Some(char) => Ok((char, 6)),
-                        None => Err(6),
-                    }
-                }
+                b'u' => match decode_next_four_hex_bytes_or_with_braces(&bytes[2..]) {
+                    Ok((ch, consumed)) => Ok((ch, consumed + 2)),
+                    Err(consumed) => Err(consumed + 2),
+                },
                 _ => Err(2),
             }
         })
@@ -393,13 +390,18 @@ impl StringLiteral {
                         char.encode_utf8(&mut buf[start..]);
                         rest = &rest[escaped_len..];
                     }
-                    Err(considered_escape_seq_length) => {
+                    Err(considered_byte_length) => {
+                        let mut s = String::with_capacity(considered_byte_length + 4);
                         let offset = escaped_string.len() - rest.len();
-                        let considered_escape_sequence =
-                            escaped_string[offset..].chars().take(considered_escape_seq_length).collect();
+                        for c in escaped_string[offset..].chars() {
+                            if s.len() >= considered_byte_length {
+                                break;
+                            }
+                            s.push(c);
+                        }
                         return Err(TypeQLError::InvalidStringEscape {
                             full_string: escaped_string.to_owned(),
-                            escape: considered_escape_sequence,
+                            escape: s,
                         }
                         .into());
                     }
@@ -420,18 +422,35 @@ const FF_: u8 = b'f';
 const CR_: u8 = b'r';
 
 #[allow(arithmetic_overflow)]
-fn decode_four_hex_bytes(bytes: &[u8]) -> Option<char> {
-    if bytes.len() == 4 {
-        let as_u32: u32 = 0u32
-            | (bytes[0] as char).to_digit(16)? << 12
-            | (bytes[1] as char).to_digit(16)? << 8
-            | (bytes[2] as char).to_digit(16)? << 4
-            | (bytes[3] as char).to_digit(16)? << 0;
-        debug_assert!(char::from_u32(as_u32).is_some());
-        char::from_u32(as_u32)
+fn decode_next_four_hex_bytes_or_with_braces(bytes: &[u8]) -> std::result::Result<(char, usize), usize> {
+    if bytes.is_empty() {
+        Err(0)
+    } else if bytes[0] == b'{' {
+        let safe_len = std::cmp::min(bytes.len(), 8);
+        if let Some(i) = bytes[..safe_len].iter().position(|b| *b == b'}') {
+            unicode_char_from_hex(&bytes[1..i]).map(|c| (c, i + 1)).ok_or(i + 1)
+        } else {
+            Err(safe_len)
+        }
     } else {
-        None
+        if bytes.len() >= 4 {
+            unicode_char_from_hex(&bytes[0..4]).map(|c| (c, 4)).ok_or(4)
+        } else {
+            Err(std::cmp::min(bytes.len(), 4))
+        }
     }
+}
+
+fn unicode_char_from_hex(bytes: &[u8]) -> Option<char> {
+    if bytes.is_empty() || bytes.len() > 6 {
+        return None;
+    }
+    let mut as_u32 = 0u32;
+    // from_ascii_radix is still experimental
+    for b in bytes {
+        as_u32 = (as_u32 << 4) | (*b as char).to_digit(16)?;
+    }
+    char::from_u32(as_u32)
 }
 
 #[cfg(test)]
@@ -498,6 +517,8 @@ pub mod tests {
         assert_unescapes_to!(r#""abc \u0ca0\u005f\u0ca0""#, "abc ಠ_ಠ"); // works
         assert_unescapes_to!(r#""abc \u0CA0\u005F\u0CA0""#, "abc ಠ_ಠ"); // caps
         assert_unescapes_to!(r#""abc \u0CA01234""#, "abc ಠ1234"); // consumes only 4
+        assert_unescapes_to!(r#""abc \u{0CA0}1234""#, "abc ಠ1234"); // braces with only 4
+        assert_unescapes_to!(r#""abc \u{130ED}\u{13153}1234""#, "abc 𓃭𓅓1234"); // braces with 6
 
         // Errors
         assert_unescape_errors!(r#""ab\c""#, r"\c"); // Invalid escape
@@ -506,8 +527,12 @@ pub mod tests {
         assert_unescape_errors!(r#""abc \u""#, r"\u"); // Not enough bytes
         assert_unescape_errors!(r#""abc \u012""#, r"\u012"); // Not enough bytes
         assert_unescape_errors!(r#""abc \uwu/ abc""#, r"\uwu/ "); // Invalid hex
-        assert_unescape_errors!(r#""abc \uΣ12Σ abc""#, r"\uΣ12Σ"); // Invalid hex, 4 chars more than 4 bytes
+        assert_unescape_errors!(r#""abc \uΣ12Σ abc""#, r"\uΣ12"); // Invalid hex, 3 chars more than 4 bytes
         assert_unescape_errors!(r#""abc \u123Σ abc""#, r"\u123Σ"); // Invalid hex, 4 chars more than 4 bytes
+        assert_unescape_errors!(r#""abc \u{""#, r"\u{"); // Not enough bytes
+        assert_unescape_errors!(r#""abc \u{123Σ} abc""#, r"\u{123Σ}"); // Invalid hex with braces
+        assert_unescape_errors!(r#""abc \u{1234567} abc""#, r"\u{1234567"); // Too many characters, stop at 8
+        assert_unescape_errors!(r#""abc \u{213456} abc""#, r"\u{213456}"); // Above valid range
 
         // Cases that fail at parsing
         {
