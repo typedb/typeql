@@ -22,3 +22,14 @@ rust_test(
     tags = ["manual"],  # in order for bazel test //... to not fail
     use_libtest_harness = False,
 )
+
+checkstyle_test(
+    name = "checkstyle",
+    include = glob([
+        "*",
+    ]),
+    exclude = glob([
+        "Cargo.*",
+    ]),
+    license_type = "mpl-header",
+)
