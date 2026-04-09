@@ -20,7 +20,6 @@ mod list;
 mod match_queries;
 mod modifiers;
 mod nonquery;
-mod perf;
 mod pipeline;
 mod regex;
 mod schema_queries;
