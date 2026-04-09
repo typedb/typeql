@@ -25,39 +25,28 @@ use crate::{
     TypeRef,
 };
 
-pub(in crate::parser) fn visit_statement_thing(node: Node<'_>) -> Statement {
-    debug_assert_eq!(node.as_rule(), Rule::statement_thing);
+pub(in crate::parser) fn visit_statement_thing_basic(node: Node<'_>) -> Statement {
+    debug_assert_eq!(node.as_rule(), Rule::statement_thing_basic);
     let span = node.span();
     let mut children = node.into_children();
-    let child = children.consume_any();
-    match child.as_rule() {
-        Rule::var => {
-            let var = visit_var(child);
-            let constraints = visit_thing_constraint_list(children.consume_expected(Rule::thing_constraint_list));
-            Statement::Thing(Thing::new(span, Head::Variable(var), constraints))
-        }
-        Rule::thing_relation_anonymous => {
-            let (type_ref_opt, relation) = visit_thing_relation_anonymous(child);
-            let constraints = if let Some(constraint_list) = children.try_consume_expected(Rule::thing_constraint_list)
-            {
-                visit_thing_constraint_list(constraint_list)
-            } else {
-                debug_assert_eq!(children.try_consume_any(), None);
-                vec![]
-            };
-            Statement::Thing(Thing::new(span, Head::Relation(type_ref_opt, relation), constraints))
-        }
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
-    }
+    let var = visit_var(children.consume_expected(Rule::var));
+    let constraints = visit_thing_constraint_list(children.consume_expected(Rule::thing_constraint_list));
+    Statement::Thing(Thing::new(span, Head::Variable(var), constraints))
 }
 
-pub(super) fn visit_thing_relation_anonymous(node: Node<'_>) -> (Option<TypeRef>, Relation) {
-    debug_assert_eq!(node.as_rule(), Rule::thing_relation_anonymous);
-    let _span = node.span();
+pub(super) fn visit_statement_thing_relation_anonymous(node: Node<'_>) -> Statement {
+    debug_assert_eq!(node.as_rule(), Rule::statement_thing_relation_anonymous);
+    let span = node.span();
     let mut children = node.into_children();
-    let type_ = children.try_consume_expected(Rule::type_ref).map(visit_type_ref);
+    let type_ref_opt = children.try_consume_expected(Rule::type_ref).map(visit_type_ref);
     let relation = visit_relation(children.consume_expected(Rule::relation));
-    (type_, relation)
+    let constraints = if let Some(constraint_list) = children.try_consume_expected(Rule::thing_constraint_list) {
+        visit_thing_constraint_list(constraint_list)
+    } else {
+        debug_assert_eq!(children.try_consume_any(), None);
+        vec![]
+    };
+    Statement::Thing(Thing::new(span, Head::Relation(type_ref_opt, relation), constraints))
 }
 
 fn visit_thing_constraint_list(node: Node<'_>) -> Vec<Constraint> {
