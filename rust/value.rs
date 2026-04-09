@@ -567,32 +567,16 @@ pub mod tests {
                 break;
             }
             match char::from_u32(mapper(rng.next_u32())) {
-                Some('\\') => {
-                    text += "\\\\";
-                }
-                Some('\'') => {
-                    text += "\\\'";
-                }
-                Some('\"') => {
-                    text += "\\\"";
-                }
-                Some('\x08') => {
-                    text += r"\b";
-                }
-                Some('\x09') => {
-                    text += r"\t";
-                }
-                Some('\x0a') => {
-                    text += r"\n";
-                }
-                Some('\x0c') => {
-                    text += r"\f";
-                }
-                Some('\x0d') => {
-                    text += r"\r";
-                }
+                Some('\\') => text += r"\\",
+                Some('\'') => text += r"\'",
+                Some('\"') => text += r#"\""#,
+                Some('\x08') => text += r"\b",
+                Some('\x09') => text += r"\t",
+                Some('\x0a') => text += r"\n",
+                Some('\x0c') => text += r"\f",
+                Some('\x0d') => text += r"\r",
                 Some(ch) => text.push(ch),
-                None => {}
+                None => (),
             }
         }
         text.push('"');
