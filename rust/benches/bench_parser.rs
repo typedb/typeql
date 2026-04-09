@@ -9,6 +9,7 @@ use std::{fs::File, os::raw::c_int, path::Path};
 use criterion::{criterion_group, criterion_main, profiler::Profiler, Criterion};
 use pprof::ProfilerGuard;
 
+const N_LINES: usize = 1000;
 fn get_query_isa() -> String {
     let mut query: String = "match\n".to_owned();
     (0..N_LINES).for_each(|_| query.push_str("$v_abc123 isa t_abc123 == 123456;\n"));
@@ -27,6 +28,12 @@ fn get_query_label_sub() -> String {
     query
 }
 
+fn get_query_expression() -> String {
+    let mut query: String = "match\n".to_owned();
+    (0..N_LINES).for_each(|_| query.push_str("let $volume = (4/3) * 3.14 * pow($r, 3) ;\n"));
+    query
+}
+
 fn get_query_disjunctions() -> String {
     let stmt = "$v_abc123 isa t_abc123 == 123456;\n";
     let line = format!("{{ {stmt} }} or\n");
@@ -37,16 +44,34 @@ fn get_query_disjunctions() -> String {
     query
 }
 
+fn get_query_many_inserts() -> String {
+    let mut query: String = "".to_owned();
+    (0..N_LINES).for_each(|_| query.push_str("insert $_ isa person;\n"));
+    query
+}
+
+fn get_define_label_sub() -> String {
+    let mut query: String = "define\n".to_owned();
+    (0..N_LINES).for_each(|_| query.push_str("t_pqr456 sub t_abc123;\n"));
+    query
+}
+
 fn criterion_benchmark(c: &mut Criterion) {
     println!("In criterion benchmark");
     let query_isa = get_query_isa();
     let query_label_sub = get_query_isa();
     let query_var_sub = get_query_var_sub();
+    let query_expression = get_query_expression();
     let query_disjunctions = get_query_disjunctions();
+    let query_many_inserts = get_query_many_inserts();
+    let define_label_sub = get_define_label_sub();
     c.bench_function("parse-isa", |b| b.iter(|| typeql::parse_query(query_isa.as_str()).unwrap()));
     c.bench_function("parse-var-sub", |b| b.iter(|| typeql::parse_query(query_var_sub.as_str()).unwrap()));
     c.bench_function("parse-label-sub", |b| b.iter(|| typeql::parse_query(query_label_sub.as_str()).unwrap()));
+    c.bench_function("parse-expression", |b| b.iter(|| typeql::parse_query(query_expression.as_str()).unwrap()));
     c.bench_function("parse-disjunctions", |b| b.iter(|| typeql::parse_query(query_disjunctions.as_str()).unwrap()));
+    c.bench_function("parse-many-inserts", |b| b.iter(|| typeql::parse_query(query_many_inserts.as_str()).unwrap()));
+    c.bench_function("parse-define-sub", |b| b.iter(|| typeql::parse_query(define_label_sub.as_str()).unwrap()));
 }
 // --- Code to generate flamegraphs copied from https://www.jibbow.com/posts/criterion-flamegraphs/ ---
 // This causes a SIGBUS on (mac) arm64 if the frequency is set too high.
