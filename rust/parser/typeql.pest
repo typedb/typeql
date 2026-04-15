@@ -378,13 +378,6 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
            | FIRST | LAST
            }
 
-unreserved = { ABS | CEIL | FLOOR | ROUND | LEN
-             | CHECK | FIRST
-             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
-             | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
-             | BOOLEAN | INTEGER | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
-             }
-
 // QUERY COMMAND KEYWORDS
 
 WITH = @{ "with" ~ WB }
