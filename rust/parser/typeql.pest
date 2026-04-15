@@ -71,7 +71,14 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 // STATEMENTS ==================================================================
 
-statement = { statement_single | statement_type | statement_thing }
+statement = { statement_assignment
+            | statement_in
+            | statement_thing_basic
+            | statement_is
+            | statement_type
+            | statement_comparison
+            | statement_thing_relation_anonymous
+            }
 
 // TYPE STATEMENTS =============================================================
 
@@ -95,10 +102,8 @@ relates_constraint = { RELATES ~ type_ref_list ~ ( AS ~ type_ref_list )?
 plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
-statement_thing = { var ~ COMMA? ~ thing_constraint_list
-                  | thing_relation_anonymous ~ ( COMMA? ~ thing_constraint_list )?
-                  }
-thing_relation_anonymous = { type_ref? ~ relation }
+statement_thing_basic = { var ~ COMMA? ~ thing_constraint_list }
+statement_thing_relation_anonymous = { type_ref? ~ relation ~ ( COMMA? ~ thing_constraint_list )? }
 thing_constraint_list = {thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
@@ -124,8 +129,6 @@ statement_deletable = { HAS? ~ var ~ OF ~ var
 pattern_try_deletable = { TRY ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
 
 // SINGLE STATEMENTS ===========================================================
-
-statement_single = { statement_is | statement_comparison | statement_assignment | statement_in }
 
 statement_is = { var ~ IS ~ var }
 statement_comparison = { expression_value ~ comparison }
@@ -193,7 +196,7 @@ query_schema = { query_define | query_undefine | query_redefine }
 
 query_define = { DEFINE ~ definables }
 
-definables = { definable* }
+definables = { (!query_end ~ definable)* } // !query_end to avoid ambiguity
 definable = { ( definition_type ~ SEMICOLON ) | definition_function | definition_struct }
 
 // TYPE DEFINITION =============================================================
@@ -262,7 +265,7 @@ redefinable_type = { kind? ~ label ~ ( annotations | type_capability ) ~ SEMICOL
 
 query_undefine = { UNDEFINE ~ undefinables }
 
-undefinables = { ( undefinable ~ SEMICOLON )* }
+undefinables = { ( !query_end ~ undefinable ~ SEMICOLON )* } // !query_end to avoid ambiguity
 undefinable = { undefine_from | undefine_function | undefine_struct | label }
 
 undefine_from = { undefine_annotation_from_capability
@@ -293,7 +296,7 @@ label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
 label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
-identifier = @{ !reserved ~ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
+identifier = @{ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
 
 struct_key = { identifier }
 
@@ -361,7 +364,8 @@ range_full = { range_bound ~ DOUBLE_DOT ~ range_bound }
 range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
-
+// Unused / Reference only. See typeql::is_reserved_keyword for implemented truth.
+eof_reserved = { SOI ~ reserved ~ EOI }
 reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE | END
            | ENTITY | RELATION | ATTRIBUTE | ROLE
            | ASC | DESC
@@ -373,13 +377,6 @@ reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSE
            | OF | FROM
            | FIRST | LAST
            }
-
-unreserved = { ABS | CEIL | FLOOR | ROUND | LEN
-             | CHECK | FIRST
-             | COUNT | MAX | MIN | MEAN | MEDIAN | STD | SUM | LIST
-             | VALUE | SELECT | SORT | LIMIT | OFFSET | GROUP | LIKE | CONTAINS
-             | BOOLEAN | INTEGER | DOUBLE | DECIMAL | DATETIME_TZ | DATETIME | DATE | DURATION | STRING
-             }
 
 // QUERY COMMAND KEYWORDS
 

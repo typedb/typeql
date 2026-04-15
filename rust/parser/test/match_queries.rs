@@ -67,6 +67,26 @@ select $char, $prod;"#;
 }
 
 #[test]
+fn test_labelled_relation_without_role() {
+    let query = r#"match
+$brando isa name "Marl B";
+casting ($brando, $char, $prod);
+select $char, $prod;"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_comparison_which_looks_like_relation() {
+    let query = r#"match
+$brando isa name "Marl B";
+somefunc($brando, $char, $prod) > 5;
+select $char, $prod;"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
 fn test_role_type_scoped_globally() {
     let query = r#"match
 $m relates spouse;"#;

@@ -4,13 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use self::single::visit_statement_single;
-use super::{
-    expression::visit_expression_value, statement::type_::visit_statement_type, IntoChildNodes, Node, Rule, RuleMatcher,
+use self::{
+    single::{visit_statement_assignment, visit_statement_comparison, visit_statement_in, visit_statement_is},
+    thing::{visit_statement_thing_basic, visit_statement_thing_relation_anonymous},
+    type_::visit_statement_type,
 };
+use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
     common::{error::TypeQLError, token::Comparator, Spanned},
-    parser::statement::thing::visit_statement_thing,
     statement::{comparison::Comparison, Statement},
 };
 
@@ -22,9 +23,13 @@ pub(super) fn visit_statement(node: Node<'_>) -> Statement {
     debug_assert_eq!(node.as_rule(), Rule::statement);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::statement_single => visit_statement_single(child),
+        Rule::statement_thing_basic => visit_statement_thing_basic(child),
+        Rule::statement_thing_relation_anonymous => visit_statement_thing_relation_anonymous(child),
         Rule::statement_type => visit_statement_type(child),
-        Rule::statement_thing => visit_statement_thing(child),
+        Rule::statement_is => Statement::Is(visit_statement_is(child)),
+        Rule::statement_in => Statement::InIterable(visit_statement_in(child)),
+        Rule::statement_comparison => Statement::Comparison(visit_statement_comparison(child)),
+        Rule::statement_assignment => Statement::Assignment(visit_statement_assignment(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
