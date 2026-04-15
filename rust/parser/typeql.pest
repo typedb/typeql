@@ -103,7 +103,7 @@ plays_constraint = { PLAYS ~ type_ref }
 
 // THING STATEMENTS ============================================================
 statement_thing_basic = { var ~ COMMA? ~ thing_constraint_list }
-statement_thing_relation_anonymous = { type_ref? ~ relation ~ ( COMMA? ~ thing_constraint_list )? }
+statement_thing_relation_anonymous = { !reserved ~ type_ref? ~ relation ~ ( COMMA? ~ thing_constraint_list )? }
 thing_constraint_list = {thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
@@ -364,7 +364,7 @@ range_full = { range_bound ~ DOUBLE_DOT ~ range_bound }
 range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
-// Unused / Reference only. See typeql::is_reserved_keyword for implemented truth.
+// Reference. See typeql::is_reserved_keyword for implemented truth.
 eof_reserved = { SOI ~ reserved ~ EOI }
 reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE | END
            | ENTITY | RELATION | ATTRIBUTE | ROLE
