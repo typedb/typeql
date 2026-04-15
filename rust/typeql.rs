@@ -13,8 +13,6 @@
 
 use std::{collections::HashSet, sync::OnceLock};
 
-use itertools::chain;
-
 pub use crate::{
     annotation::Annotation,
     common::{error::Error, identifier::Identifier, token, Result},
@@ -87,13 +85,76 @@ pub fn parse_value(value: &str) -> Result<ValueLiteral> {
     visit_eof_value(value.trim_end())
 }
 
-static RESERVED_KEYWORDS: OnceLock<HashSet<&'static str>> = OnceLock::new();
+static RESERVED_KEYWORDS_LOOKUP: OnceLock<HashSet<&'static str>> = OnceLock::new();
+pub fn generate_reserved_keywords_lookup() -> HashSet<&'static str> {
+    HashSet::from(KEYWORDS)
+}
+
 pub fn is_reserved_keyword(word: &str) -> bool {
-    RESERVED_KEYWORDS
-        .get_or_init(|| {
-            chain!(token::Kind::NAMES, token::Keyword::NAMES, token::Order::NAMES, token::BooleanValue::NAMES,)
-                .map(|s| *s)
-                .collect::<HashSet<&'static str>>()
-        })
-        .contains(word)
+    RESERVED_KEYWORDS_LOOKUP.get_or_init(generate_reserved_keywords_lookup).contains(word)
+}
+
+const KEYWORDS: [&str; 41] = [
+    "with",
+    "match",
+    "fetch",
+    "update",
+    "define",
+    "undefine",
+    "redefine",
+    "insert",
+    "put",
+    "delete",
+    "end",
+    "entity",
+    "relation",
+    "attribute",
+    "role",
+    "asc",
+    "desc",
+    "struct",
+    "fun",
+    "return",
+    "alias",
+    "sub",
+    "owns",
+    "as",
+    "plays",
+    "relates",
+    "iid",
+    "isa",
+    "links",
+    "has",
+    "is",
+    "or",
+    "not",
+    "try",
+    "in",
+    "true",
+    "false",
+    "of",
+    "from",
+    "first",
+    "last",
+];
+
+#[cfg(test)]
+pub mod tests {
+    use itertools::Itertools;
+
+    use crate::parser;
+
+    #[test]
+    fn ensure_keyword_in_sync_with_grammar_reserved() {
+        // Works as long as the rulename is the content.
+        let grammar_keywords: Vec<_> = parser::Rule::all_rules()
+            .iter()
+            .map(|w| format!("{w:?}").to_lowercase())
+            .filter(|w| parser::tests::is_keyword(w.as_str()))
+            .unique()
+            .sorted()
+            .collect();
+        let typeql_keywords: Vec<_> = super::KEYWORDS.iter().map(|x| x.clone().to_owned()).sorted().collect();
+        assert_eq!(grammar_keywords, typeql_keywords);
+    }
 }

@@ -66,7 +66,6 @@ select $char, $prod;"#;
     assert_valid_eq_repr!(expected, parsed, query);
 }
 
-
 #[test]
 fn test_labelled_relation_without_role() {
     let query = r#"match

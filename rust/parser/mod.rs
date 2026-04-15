@@ -276,3 +276,10 @@ fn visit_reduce_assignment_var(node: Node<'_>) -> Variable {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
+
+#[cfg(test)]
+pub mod tests {
+    pub fn is_keyword(identifier: &str) -> bool {
+        super::parse(super::Rule::reserved, identifier).is_ok()
+    }
+}
