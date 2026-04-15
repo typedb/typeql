@@ -15,7 +15,6 @@ rust_test(
         "//rust:typeql",
 
         "@crates//:rand",
-        "@crates//:tracing",
         "@crates//:criterion",
         "@crates//:pprof",
     ],
