@@ -364,7 +364,7 @@ range_full = { range_bound ~ DOUBLE_DOT ~ range_bound }
 range_bound = _{ value_literal }
 
 // TYPEQL SYNTAX KEYWORDS ======================================================
-
+// Unused / Reference only. See typeql.rs::is_reserved_keyword for the implemented truth
 reserved = { WITH | MATCH | FETCH | UPDATE | DEFINE | UNDEFINE | REDEFINE | INSERT | PUT | DELETE | END
            | ENTITY | RELATION | ATTRIBUTE | ROLE
            | ASC | DESC
