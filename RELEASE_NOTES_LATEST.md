@@ -3,14 +3,13 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.8.2
+cargo add typeql@3.8.4-rc0
 ```
 
 
 ## New Features
-- **Allow leading underscore in type labels**
-  
-  We relax our identifier rules, allowing `_` as a leading underscore in type labels. This does NOT extend to variables, since we have some complexity around anonymous variables for the time being we don't want to modify.
+- **Implement unicode unescaping**
+  Escaped unicode characters can be used in TypeQL string literals. These must be of the form `\uXXXX` (exactly 4 hex digits), or `\u{XX...X}` (1 to 6 hex digits).
   
   
 
@@ -18,20 +17,15 @@ cargo add typeql@3.8.2
 
 
 ## Code Refactors
-- **Introduce Collector variant of Reducer to accomodate the unimplemented list reducer**
-  It was placed under Stat, which it is not and caused confusion & crashes in core.
-  
-  
+
 
 ## Other Improvements
-- **Add tests for end; clause in query pipelines**
+- **Fix parser for inserting with anonymous relation syntax**
+  Fixes a bug in parsing for inserting with anonymous relation syntax
   
-  Add tests for `end;` statements
   
-- **Allow decimal syntax without a period**
-  
-  To give both humans and LLMs more flexibility when writing `decimal` value types, we no longer requiring the `.0` in `xxx.0dec`. This is unambiguous since the `dec` suffix already syntactically differentiates when a value is a decimal.
-  
+- **Minor grammar refactor for parser performance improvements**
+  Reordering the choices to boost performance by failing faster and having more frequent alternatives earlier. Also removes the `!reserved` check for identifiers and expects this to be handled in an application post-check.
   
     
 
