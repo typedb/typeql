@@ -7,8 +7,8 @@
 use std::{fmt, fmt::Formatter};
 
 use crate::{
-    common::{identifier::Identifier, Span, Spanned},
-    pretty::{indent, Pretty},
+    common::{Span, Spanned, identifier::Identifier},
+    pretty::{Pretty, indent},
     token,
     type_::NamedTypeAny,
 };

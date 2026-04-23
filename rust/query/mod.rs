@@ -8,11 +8,11 @@ use std::fmt;
 
 use self::pipeline::stage::{Match, Stage};
 pub use self::{
-    pipeline::{stage, Pipeline},
+    pipeline::{Pipeline, stage},
     schema::SchemaQuery,
 };
 use crate::{
-    common::{error::TypeQLError::InvalidCasting, Span},
+    common::{Span, error::TypeQLError::InvalidCasting},
     token,
 };
 
@@ -44,11 +44,7 @@ impl fmt::Display for Query {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.structure, f)?;
         if self.has_explicit_end {
-            if f.alternate() {
-                write!(f, "\n{}", token::Clause::End)
-            } else {
-                write!(f, "{}", token::Clause::End)
-            }
+            if f.alternate() { write!(f, "\n{}", token::Clause::End) } else { write!(f, "{}", token::Clause::End) }
         } else {
             Ok(())
         }

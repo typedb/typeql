@@ -7,7 +7,7 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span, Spanned},
+    common::{Span, Spanned, token},
     expression::Expression,
     pretty::Pretty,
 };

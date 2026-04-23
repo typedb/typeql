@@ -5,24 +5,25 @@
  */
 
 use crate::{
-    common::{error::TypeQLError, Spanned},
+    TypeRef,
+    common::{Spanned, error::TypeQLError},
     expression::Expression,
     parser::{
+        IntoChildNodes, Node, Rule, RuleMatcher,
         expression::{visit_expression, visit_expression_list, visit_expression_struct, visit_expression_value},
         literal::visit_value_literal,
         statement::visit_comparison,
         type_::{visit_type_ref, visit_type_ref_list},
-        visit_var, IntoChildNodes, Node, Rule, RuleMatcher,
+        visit_var,
     },
     statement::{
-        thing::{
-            isa::{Isa, IsaInstanceConstraint, IsaKind},
-            Constraint, Has, HasValue, Head, Iid, Links, Relation, RolePlayer, Thing,
-        },
         Statement,
+        thing::{
+            Constraint, Has, HasValue, Head, Iid, Links, Relation, RolePlayer, Thing,
+            isa::{Isa, IsaInstanceConstraint, IsaKind},
+        },
     },
     type_::TypeRefAny,
-    TypeRef,
 };
 
 pub(in crate::parser) fn visit_statement_thing_basic(node: Node<'_>) -> Statement {

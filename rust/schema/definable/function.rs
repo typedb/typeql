@@ -7,9 +7,9 @@
 use std::fmt::{self, Debug, Formatter, Write};
 
 use crate::{
-    common::{identifier::Identifier, token, Span, Spanned},
-    pretty::{indent, Pretty},
-    query::stage::{reduce::Reducer, Stage},
+    common::{Span, Spanned, identifier::Identifier, token},
+    pretty::{Pretty, indent},
+    query::stage::{Stage, reduce::Reducer},
     type_::NamedTypeAny,
     util::write_joined,
     variable::Variable,

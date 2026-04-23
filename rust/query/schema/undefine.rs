@@ -7,8 +7,8 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span, Spanned},
-    pretty::{indent, Pretty},
+    common::{Span, Spanned, token},
+    pretty::{Pretty, indent},
     schema::undefinable::Undefinable,
 };
 

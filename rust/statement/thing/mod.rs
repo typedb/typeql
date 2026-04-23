@@ -7,15 +7,15 @@
 use std::fmt::{self, Write};
 
 use self::isa::Isa;
-use super::{comparison, Statement};
+use super::{Statement, comparison};
 use crate::{
-    common::{token, Span, Spanned},
+    TypeRef,
+    common::{Span, Spanned, token},
     expression::Expression,
-    pretty::{indent, Pretty},
+    pretty::{Pretty, indent},
     type_::TypeRefAny,
     util::write_joined,
     variable::Variable,
-    TypeRef,
 };
 
 pub mod isa;

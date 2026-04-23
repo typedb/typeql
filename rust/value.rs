@@ -7,9 +7,9 @@
 use std::fmt::{self, Formatter};
 
 use crate::{
-    common::{error::TypeQLError, Span, Spanned},
-    pretty::Pretty,
     Result,
+    common::{Span, Spanned, error::TypeQLError},
+    pretty::Pretty,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -453,8 +453,8 @@ fn unicode_char_from_hex(bytes: &[u8]) -> Option<char> {
 #[cfg(test)]
 pub mod tests {
     use crate::{
-        value::{StringLiteral, TypeQLError},
         Result,
+        value::{StringLiteral, TypeQLError},
     };
 
     fn parse_to_string_literal(escaped: &str) -> StringLiteral {
@@ -510,7 +510,7 @@ pub mod tests {
         assert_unescapes_to!(r#""a\"b\"c""#, r#"a"b"c"#); // works
         assert_unescapes_to!(r#""a\'b\'c""#, r#"a'b'c"#); // works
         assert_unescapes_to!(r#""a\\b\\c""#, r#"a\b\c"#); // works
-                                                          //  - Unicode
+        //  - Unicode
         assert_unescapes_to!(r#""abc \u0ca0\u005f\u0ca0""#, "abc ಠ_ಠ"); // works
         assert_unescapes_to!(r#""abc \u0CA0\u005F\u0CA0""#, "abc ಠ_ಠ"); // caps
         assert_unescapes_to!(r#""abc \u0CA01234""#, "abc ಠ1234"); // consumes only 4
@@ -578,7 +578,7 @@ pub mod tests {
     }
 
     fn generate_string(length: usize, mapper: fn(u32) -> u32) -> String {
-        use rand::{thread_rng, Rng, RngCore};
+        use rand::{Rng, RngCore, thread_rng};
         let mut rng = thread_rng();
         let capacity: i64 = (1.2 * length as f64).ceil() as i64;
         let mut text = String::with_capacity(capacity as usize);

@@ -7,7 +7,7 @@
 use self::{function::visit_definition_function, struct_::visit_definition_struct, type_::visit_definition_type};
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
-    common::{error::TypeQLError, Spanned},
+    common::{Spanned, error::TypeQLError},
     query::schema::Define,
     schema::definable::Definable,
 };

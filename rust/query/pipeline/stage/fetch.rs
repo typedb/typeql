@@ -7,13 +7,13 @@
 use std::{fmt, fmt::Formatter};
 
 use crate::{
-    common::{token, Span, Spanned},
+    TypeRefAny, Variable,
+    common::{Span, Spanned, token},
     expression::{Expression, FunctionCall},
-    pretty::{indent, Pretty},
+    pretty::{Pretty, indent},
     query::stage::Stage,
     schema::definable::function::FunctionBlock,
     value::StringLiteral,
-    TypeRefAny, Variable,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -7,11 +7,11 @@
 use std::fmt;
 
 use crate::{
-    common::{token, Span, Spanned},
+    Expression, Literal,
+    common::{Span, Spanned, token},
     pretty::Pretty,
     statement::{comparison::Comparison, thing::Relation},
     type_::TypeRef,
-    Expression, Literal,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]

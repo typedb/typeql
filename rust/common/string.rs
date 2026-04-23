@@ -20,9 +20,5 @@ pub(crate) fn unescape_regex(regex: &str) -> String {
 
 pub(crate) fn format_double(double: f64) -> String {
     let formatted = format!("{double:.12}").trim_end_matches('0').to_string();
-    if formatted.ends_with('.') {
-        formatted + "0"
-    } else {
-        formatted
-    }
+    if formatted.ends_with('.') { formatted + "0" } else { formatted }
 }

@@ -8,9 +8,9 @@ use std::fmt::{self, Write};
 
 use crate::{
     common::{
+        Span, Spanned,
         identifier::Identifier,
         token::{self, ArithmeticOperator},
-        Span, Spanned,
     },
     pretty::Pretty,
     util::write_joined,

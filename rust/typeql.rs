@@ -15,7 +15,7 @@ use std::{collections::HashSet, sync::OnceLock};
 
 pub use crate::{
     annotation::Annotation,
-    common::{error::Error, identifier::Identifier, token, Result},
+    common::{Result, error::Error, identifier::Identifier, token},
     expression::Expression,
     pattern::Pattern,
     query::Query,
