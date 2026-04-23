@@ -7,7 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{token, Span, Spanned},
+    common::{Span, Spanned, token},
     schema::definable::Definable,
     util::write_joined,
 };

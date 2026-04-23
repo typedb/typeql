@@ -5,15 +5,16 @@
  */
 
 use crate::{
-    common::{error::TypeQLError, Spanned},
+    common::{Spanned, error::TypeQLError},
     parser::{
+        IntoChildNodes, Node, Rule, RuleMatcher,
         annotation::visit_annotations,
         type_::{visit_label, visit_label_scoped, visit_type_ref, visit_type_ref_list, visit_value_type},
-        visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
+        visit_kind,
     },
     statement::{
-        type_::{Constraint, ConstraintBase, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
         Statement, Type,
+        type_::{Constraint, ConstraintBase, LabelConstraint, Owns, Plays, Relates, Sub, SubKind, ValueType},
     },
     type_::TypeRefAny,
 };

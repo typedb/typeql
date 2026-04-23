@@ -9,7 +9,7 @@ use std::{fmt, sync::OnceLock};
 use regex::Regex;
 
 use crate::{
-    common::{error::TypeQLError, Span, Spanned},
+    common::{Span, Spanned, error::TypeQLError},
     is_reserved_keyword,
     pretty::Pretty,
 };

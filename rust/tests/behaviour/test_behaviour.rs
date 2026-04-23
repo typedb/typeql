@@ -13,8 +13,11 @@ async fn test() {
     let marker = std::env::var("TYPEDB_BEHAVIOUR_FEATURE_MARKER")
         .expect("TYPEDB_BEHAVIOUR_FEATURE_MARKER env var must be set by Bazel");
     let behaviour_root = Path::new(&marker)
-        .parent().unwrap()   // .../query/language/
-        .parent().unwrap()   // .../query/
-        .parent().unwrap();  // .../typedb_behaviour+/
+        .parent()
+        .unwrap() // .../query/language/
+        .parent()
+        .unwrap() // .../query/
+        .parent()
+        .unwrap(); // .../typedb_behaviour+/
     assert!(TypeQLWorld::test(behaviour_root).await);
 }

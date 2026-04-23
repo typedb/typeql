@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    common::{error::TypeQLError, Spanned},
+    common::{Spanned, error::TypeQLError},
     parser::{IntoChildNodes, Node, Rule, RuleMatcher},
     value::{
         BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, DurationDate, DurationLiteral,

@@ -6,7 +6,7 @@
 
 use std::{fs::File, os::raw::c_int, path::Path};
 
-use criterion::{criterion_group, criterion_main, profiler::Profiler, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main, profiler::Profiler};
 use pprof::ProfilerGuard;
 
 const N_LINES: usize = 1000;

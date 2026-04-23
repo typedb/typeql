@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use super::{visit_identifier, visit_var, IntoChildNodes, Node, Rule, RuleMatcher};
+use super::{IntoChildNodes, Node, Rule, RuleMatcher, visit_identifier, visit_var};
 use crate::{
-    common::{error::TypeQLError, token, Spanned},
-    type_::{BuiltinValueType, Label, NamedType, NamedTypeAny, NamedTypeList, NamedTypeOptional, TypeRef, TypeRefList},
     ScopedLabel,
+    common::{Spanned, error::TypeQLError, token},
+    type_::{BuiltinValueType, Label, NamedType, NamedTypeAny, NamedTypeList, NamedTypeOptional, TypeRef, TypeRefList},
 };
 
 pub(super) fn visit_type_ref(node: Node<'_>) -> TypeRef {

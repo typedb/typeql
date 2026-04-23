@@ -5,7 +5,7 @@
  */
 use std::path::Path;
 
-use cucumber::{gherkin::Step, given, then, when, StatsWriter, World};
+use cucumber::{StatsWriter, World, gherkin::Step, given, then, when};
 use typeql::parse_query;
 
 #[derive(Debug, Default, World)]

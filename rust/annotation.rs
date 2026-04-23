@@ -7,7 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
-    common::{identifier::Identifier, token, Span, Spanned},
+    common::{Span, Spanned, identifier::Identifier, token},
     util::write_joined,
     value::{IntegerLiteral, Literal, StringLiteral},
 };

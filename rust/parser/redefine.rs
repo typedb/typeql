@@ -5,10 +5,10 @@
  */
 
 use super::{
-    define::type_::visit_type_capability, type_::visit_label, visit_kind, IntoChildNodes, Node, Rule, RuleMatcher,
+    IntoChildNodes, Node, Rule, RuleMatcher, define::type_::visit_type_capability, type_::visit_label, visit_kind,
 };
 use crate::{
-    common::{error::TypeQLError, Spanned},
+    common::{Spanned, error::TypeQLError},
     parser::{annotation::visit_annotations, define::function::visit_definition_function},
     query::schema::Redefine,
     schema::definable::{Definable, Type},

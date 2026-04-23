@@ -9,10 +9,10 @@ use self::{
     thing::{visit_statement_thing_basic, visit_statement_thing_relation_anonymous},
     type_::visit_statement_type,
 };
-use super::{expression::visit_expression_value, IntoChildNodes, Node, Rule, RuleMatcher};
+use super::{IntoChildNodes, Node, Rule, RuleMatcher, expression::visit_expression_value};
 use crate::{
-    common::{error::TypeQLError, token::Comparator, Spanned},
-    statement::{comparison::Comparison, Statement},
+    common::{Spanned, error::TypeQLError, token::Comparator},
+    statement::{Statement, comparison::Comparison},
 };
 
 pub(super) mod single;
