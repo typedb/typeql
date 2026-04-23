@@ -6,21 +6,18 @@ features = {}
 
 [package]
 	name = "steps"
-	edition = "2021"
+	edition = "2024"
 	version = "0.0.0"
 
 [lib]
 	path = "steps.rs"
+	crate-type = ["lib"]
 
 [dependencies]
 
 	[dependencies.cucumber]
-		features = ["default", "macros"]
-		version = "0.19.1"
-		default-features = false
+		workspace = true
 
 	[dependencies.typeql]
-		path = "../../../rust"
-		features = []
-		default-features = false
+		workspace = true
 
