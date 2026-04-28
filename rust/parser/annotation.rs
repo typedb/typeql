@@ -11,8 +11,7 @@ use super::{
 };
 use crate::{
     annotation::{
-        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Independent, Key, Range, Regex, Subkey,
-        Unique, Values,
+        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Doc, Independent, Key, Meta, Range, Regex, Subkey, Unique, Values
     },
     common::{Spanned, error::TypeQLError},
     value::Literal,
@@ -35,6 +34,8 @@ fn visit_annotation(node: Node<'_>) -> Annotation {
         Rule::ANNOTATION_KEY => Annotation::Key(Key::new(span)),
         Rule::ANNOTATION_UNIQUE => Annotation::Unique(Unique::new(span)),
         Rule::annotation_card => Annotation::Cardinality(visit_annotation_card(child)),
+        Rule::annotation_doc => Annotation::Doc(visit_annotation_doc(child)),
+        Rule::annotation_meta => Annotation::Meta(visit_annotation_meta(child)),
         Rule::annotation_range => Annotation::Range(visit_annotation_range(child)),
         Rule::annotation_regex => Annotation::Regex(visit_annotation_regex(child)),
         Rule::annotation_subkey => Annotation::Subkey(visit_annotation_subkey(child)),
@@ -70,6 +71,27 @@ fn visit_cardinality_range(node: Node<'_>) -> CardinalityRange {
     let max = children.try_consume_expected(Rule::integer_literal).map(visit_integer_literal);
     debug_assert_eq!(children.try_consume_any(), None);
     CardinalityRange::Range(min, max)
+}
+
+fn visit_annotation_doc(node: Node<'_>) -> Doc {
+    debug_assert_eq!(node.as_rule(), Rule::annotation_doc);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.consume_expected(Rule::ANNOTATION_DOC);
+    let doc = visit_quoted_string_literal(children.consume_expected(Rule::quoted_string_literal));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Doc::new(span, doc)
+}
+
+fn visit_annotation_meta(node: Node<'_>) -> Meta {
+    debug_assert_eq!(node.as_rule(), Rule::annotation_meta);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.consume_expected(Rule::ANNOTATION_META);
+    let key = visit_quoted_string_literal(children.consume_expected(Rule::quoted_string_literal));
+    let value = visit_quoted_string_literal(children.consume_expected(Rule::quoted_string_literal));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Meta::new(span, key, value)
 }
 
 fn visit_annotation_range(node: Node<'_>) -> Range {

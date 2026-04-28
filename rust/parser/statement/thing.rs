@@ -5,7 +5,6 @@
  */
 
 use crate::{
-    TypeRef,
     common::{Spanned, error::TypeQLError},
     expression::Expression,
     parser::{

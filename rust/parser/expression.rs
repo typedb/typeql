@@ -12,6 +12,7 @@ use crate::{
     expression::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
     },
+    parser::{type_::visit_label_scoped, visit_label},
     value::{Literal, StructLiteral, ValueLiteral},
 };
 
@@ -77,6 +78,8 @@ fn visit_expression_base(node: Node<'_>) -> Expression {
         Rule::expression_function => Expression::Function(visit_expression_function(child)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(child))),
         Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(child))),
+        Rule::label_scoped => Expression::ScopedLabel(visit_label_scoped(child)),
+        Rule::label => Expression::Label(visit_label(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
