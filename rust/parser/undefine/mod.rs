@@ -6,15 +6,17 @@
 
 use super::{IntoChildNodes, Node, Rule, RuleMatcher};
 use crate::{
-    common::{Spanned, error::TypeQLError, token},
+    common::{Spanned, error::TypeQLError},
     parser::{
         define::type_::{visit_relates_declaration, visit_type_capability_base},
+        literal::visit_quoted_string_literal,
         type_::visit_label,
         visit_identifier,
     },
     query::schema::Undefine,
     schema::undefinable::{
-        AnnotationCapability, AnnotationType, CapabilityType, Function, Specialise, Struct, Undefinable,
+        AnnotationCapability, AnnotationCategory, AnnotationType, CapabilityType, Function, Specialise, Struct,
+        Undefinable,
     },
 };
 
@@ -82,23 +84,30 @@ fn visit_undefine_annotation_from_type(node: Node<'_>) -> AnnotationType {
     AnnotationType::new(span, annotation_category, type_)
 }
 
-fn visit_annotation_category(node: Node<'_>) -> token::Annotation {
+fn visit_annotation_category(node: Node<'_>) -> AnnotationCategory {
     debug_assert_eq!(node.as_rule(), Rule::annotation_category);
-    let child = node.into_child();
-    match child.as_rule() {
-        Rule::ANNOTATION_ABSTRACT => token::Annotation::Abstract,
-        Rule::ANNOTATION_CARD => token::Annotation::Cardinality,
-        Rule::ANNOTATION_CASCADE => token::Annotation::Cascade,
-        Rule::ANNOTATION_DISTINCT => token::Annotation::Distinct,
-        Rule::ANNOTATION_INDEPENDENT => token::Annotation::Independent,
-        Rule::ANNOTATION_KEY => token::Annotation::Key,
-        Rule::ANNOTATION_RANGE => token::Annotation::Range,
-        Rule::ANNOTATION_REGEX => token::Annotation::Regex,
-        Rule::ANNOTATION_SUBKEY => token::Annotation::Subkey,
-        Rule::ANNOTATION_UNIQUE => token::Annotation::Unique,
-        Rule::ANNOTATION_VALUES => token::Annotation::Values,
-        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
-    }
+    let mut children = node.into_children();
+    let keyword = children.consume_any();
+    let annotation_category = match keyword.as_rule() {
+        Rule::ANNOTATION_ABSTRACT => AnnotationCategory::Abstract,
+        Rule::ANNOTATION_CARD => AnnotationCategory::Cardinality,
+        Rule::ANNOTATION_CASCADE => AnnotationCategory::Cascade,
+        Rule::ANNOTATION_DISTINCT => AnnotationCategory::Distinct,
+        Rule::ANNOTATION_DOC => AnnotationCategory::Doc,
+        Rule::ANNOTATION_INDEPENDENT => AnnotationCategory::Independent,
+        Rule::ANNOTATION_KEY => AnnotationCategory::Key,
+        Rule::ANNOTATION_META => AnnotationCategory::Meta(visit_quoted_string_literal(
+            children.consume_expected(Rule::quoted_string_literal),
+        )),
+        Rule::ANNOTATION_RANGE => AnnotationCategory::Range,
+        Rule::ANNOTATION_REGEX => AnnotationCategory::Regex,
+        Rule::ANNOTATION_SUBKEY => AnnotationCategory::Subkey,
+        Rule::ANNOTATION_UNIQUE => AnnotationCategory::Unique,
+        Rule::ANNOTATION_VALUES => AnnotationCategory::Values,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: keyword.as_str().to_owned() }),
+    };
+    debug_assert_eq!(children.try_consume_any(), None);
+    annotation_category
 }
 
 fn visit_undefine_capability(node: Node<'_>) -> CapabilityType {

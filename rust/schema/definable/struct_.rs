@@ -7,6 +7,7 @@
 use std::{fmt, fmt::Formatter};
 
 use crate::{
+    Annotation,
     common::{Span, Spanned, identifier::Identifier},
     pretty::{Pretty, indent},
     token,
@@ -18,11 +19,12 @@ pub struct Struct {
     pub span: Option<Span>,
     pub ident: Identifier,
     pub fields: Vec<Field>,
+    pub annotations: Vec<Annotation>,
 }
 
 impl Struct {
-    pub fn new(span: Option<Span>, ident: Identifier, fields: Vec<Field>) -> Self {
-        Self { span, ident, fields }
+    pub fn new(span: Option<Span>, ident: Identifier, fields: Vec<Field>, annotations: Vec<Annotation>) -> Self {
+        Self { span, ident, fields, annotations }
     }
 }
 
@@ -65,11 +67,12 @@ pub struct Field {
     pub span: Option<Span>,
     pub key: Identifier,
     pub type_: NamedTypeAny,
+    pub annotations: Vec<Annotation>,
 }
 
 impl Field {
-    pub fn new(span: Option<Span>, key: Identifier, type_: NamedTypeAny) -> Self {
-        Self { span, key, type_ }
+    pub fn new(span: Option<Span>, key: Identifier, type_: NamedTypeAny, annotations: Vec<Annotation>) -> Self {
+        Self { span, key, type_, annotations }
     }
 }
 

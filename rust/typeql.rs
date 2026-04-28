@@ -154,7 +154,7 @@ pub mod tests {
             .unique()
             .sorted()
             .collect();
-        let typeql_keywords: Vec<_> = super::KEYWORDS.iter().map(|x| x.clone().to_owned()).sorted().collect();
+        let typeql_keywords = super::KEYWORDS.into_iter().sorted().collect_vec();
         assert_eq!(grammar_keywords, typeql_keywords);
     }
 }

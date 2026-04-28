@@ -10,6 +10,7 @@ use crate::{
     common::{Spanned, error::TypeQLError},
     parser::{
         IntoChildNodes, Node, Rule, RuleMatcher,
+        annotation::visit_annotations,
         pipeline::{visit_query_stage, visit_reducer},
         type_::visit_named_type_any,
         visit_identifier, visit_var, visit_vars,
@@ -30,9 +31,10 @@ pub(in crate::parser) fn visit_definition_function(node: Node<'_>) -> Function {
     let mut children = node.into_children();
     children.skip_expected(Rule::FUN);
     let signature = visit_function_signature(children.consume_expected(Rule::function_signature));
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     let block = visit_function_block(children.consume_expected(Rule::function_block));
     debug_assert_eq!(children.try_consume_any(), None);
-    Function::new(span, signature, block, unparsed)
+    Function::new(span, signature, annotations, block, unparsed)
 }
 
 pub fn visit_function_block(node: Node<'_>) -> FunctionBlock {

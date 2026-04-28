@@ -33,6 +33,7 @@ rust_test(
     env = {
         "TYPEDB_BEHAVIOUR_FEATURE_MARKER": "$(rootpath @typedb_behaviour//query/language:define.feature)",
     },
+    timeout = "long",
 )
 
 rust_test(

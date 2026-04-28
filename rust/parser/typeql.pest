@@ -107,7 +107,7 @@ statement_thing_relation_anonymous = { !reserved ~ type_ref? ~ relation ~ ( COMM
 thing_constraint_list = {thing_constraint ~ ( COMMA ~ thing_constraint )* ~ COMMA?}
 
 thing_constraint = { isa_constraint | iid_constraint | has_constraint | links_constraint }
-isa_constraint = { ISA_ ~ type_ref ~ ( relation | expression  | value_literal | expression_struct | comparison )? }
+isa_constraint = { ISA_ ~ type_ref ~ ( relation | comparison | expression | value_literal | expression_struct )? }
 iid_constraint = { IID ~ iid_value }
 has_constraint = { HAS ~ type_ref_list ~ ( comparison | expression_list | var )
                  | HAS ~ type_ref ~ ( comparison | expression_value | var )
@@ -147,7 +147,7 @@ comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 expression = { expression_list | expression_value }
 
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
-expression_base = { expression_list_index | expression_parenthesis | expression_function | value_literal | var }
+expression_base = { expression_list_index | expression_parenthesis | expression_function | value_literal | var | label_scoped | label }
 
 expression_operator = _{ POWER | TIMES | DIVIDE | MODULO | PLUS | MINUS }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
@@ -183,7 +183,7 @@ fetch_list = { SQ_BRACKET_OPEN ~ fetch_stream ~ SQ_BRACKET_CLOSE }
 
 fetch_stream = { expression_function | function_block | query_pipeline | fetch_attribute }
 
-fetch_single = { PAREN_OPEN? ~ ( fetch_attribute | expression | function_block ) ~ PAREN_CLOSE? }
+fetch_single = { PAREN_OPEN? ~ ( function_block | fetch_attribute | expression ) ~ PAREN_CLOSE? }
 
 fetch_attribute = { var_named ~ DOT ~ ( label_list | label ) }
 fetch_attributes_all = { var_named ~ DOT ~ STAR }
@@ -220,7 +220,7 @@ relates_declaration = { RELATES ~ label_list ~ ( AS ~ label_list )?
 
 // FUNCTION DEFINITION =========================================================
 
-definition_function = { FUN ~ function_signature ~ COLON ~ function_block }
+definition_function = { FUN ~ function_signature ~ annotations? ~ COLON ~ function_block }
 
 function_signature = { identifier ~ PAREN_OPEN ~ function_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
@@ -245,9 +245,9 @@ return_reduce_reduction = { CHECK
 
 // STRUCT DEFINITION ===========================================================
 
-definition_struct = { STRUCT ~ identifier ~ COLON ~ definition_struct_fields ~ SEMICOLON }
+definition_struct = { STRUCT ~ identifier ~ annotations? ~ COLON ~ definition_struct_fields ~ SEMICOLON }
 definition_struct_fields = { definition_struct_field ~ ( COMMA ~ definition_struct_field )* ~ COMMA? }
-definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type }
+definition_struct_field = { identifier ~ VALUE ~ struct_field_value_type ~ annotations? }
 
 struct_field_value_type = { value_type_optional | value_type }
 
@@ -342,6 +342,8 @@ annotation = { ANNOTATION_ABSTRACT
              | ANNOTATION_KEY
              | ANNOTATION_UNIQUE
              | annotation_card
+             | annotation_doc
+             | annotation_meta
              | annotation_range
              | annotation_regex
              | annotation_subkey
@@ -351,6 +353,9 @@ annotation = { ANNOTATION_ABSTRACT
 annotation_card = { ANNOTATION_CARD ~ PAREN_OPEN ~ ( cardinality_range | cardinality_exact ) ~ PAREN_CLOSE }
 cardinality_range = { integer_literal ~ DOUBLE_DOT ~ integer_literal? }
 cardinality_exact = { integer_literal }
+
+annotation_doc = { ANNOTATION_DOC ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
+annotation_meta = { ANNOTATION_META ~ PAREN_OPEN ~ quoted_string_literal ~ COMMA ~ quoted_string_literal ~ PAREN_CLOSE }
 
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
 annotation_subkey = { ANNOTATION_SUBKEY ~ PAREN_OPEN ~ identifier ~ PAREN_CLOSE }
@@ -445,8 +450,10 @@ annotation_category = ${ ANNOTATION_ABSTRACT
                        | ANNOTATION_CARD
                        | ANNOTATION_CASCADE
                        | ANNOTATION_DISTINCT
+                       | ANNOTATION_DOC
                        | ANNOTATION_INDEPENDENT
                        | ANNOTATION_KEY
+                       | ( ANNOTATION_META ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE )
                        | ANNOTATION_RANGE
                        | ANNOTATION_REGEX
                        | ANNOTATION_SUBKEY
@@ -464,6 +471,8 @@ ANNOTATION_UNIQUE = @{ "@unique" ~ WB }
 
 // parametrized
 ANNOTATION_CARD = @{ "@card" ~ WB }
+ANNOTATION_DOC = @{ "@doc" ~ WB }
+ANNOTATION_META = @{ "@meta" ~ WB }
 ANNOTATION_RANGE = @{ "@range" ~ WB }
 ANNOTATION_REGEX = @{ "@regex" ~ WB }
 ANNOTATION_SUBKEY = @{ "@subkey" ~ WB }
