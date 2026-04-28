@@ -73,7 +73,6 @@ fn strip_all(query: &str) -> String {
 }
 
 generic_step_impl! {
-
     #[step("typeql read query")]
     #[step("typeql schema query")]
     #[step("typeql write query")]
@@ -84,7 +83,10 @@ generic_step_impl! {
     #[step("get answers of typeql write query")]
     async fn typeql_query(_: &mut TypeQLWorld, step: &Step) {
         let query_string = get_step_query(step).trim();
-        let parsed = parse_query(query_string).expect("Unexpected query parsing error.");
+        let parsed = match parse_query(query_string) {
+            Ok(parsed) => parsed,
+            Err(err) => panic!("Unexpected query parsing error: {err}"),
+        };
         assert_eq!(
             strip_all(query_string),
             strip_all(&parsed.to_string())

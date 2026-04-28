@@ -16,7 +16,7 @@ use crate::{
         visit_identifier, visit_var, visit_vars_assignment,
     },
     statement::{
-        Assignment, AssignmentPattern, DeconstructField, InIterable, Is, Statement, StructDeconstruct,
+        Assignment, AssignmentPattern, DeconstructField, InIterable, Is, StructDeconstruct,
         comparison::ComparisonStatement,
     },
 };

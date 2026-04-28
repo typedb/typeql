@@ -6,12 +6,12 @@
 
 use std::{
     collections::{HashMap, HashSet},
-    hash::{Hash, Hasher},
     sync::{Mutex, OnceLock},
 };
 
 use itertools::Itertools;
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
+use rand::{Rng, thread_rng};
 
 use crate::{parse_definition_function, parse_definition_struct};
 #[allow(unused)]
@@ -270,7 +270,7 @@ fn grammar() -> GrammarTree {
     GrammarTree::from_grammar(include_str!("../typeql.pest"))
 }
 
-const ITERS_PER_DEPTH: usize = 10;
+const ITERS_PER_DEPTH: usize = 100;
 const MIN_DEPTH: usize = 3;
 const MAX_DEPTH: usize = 10;
 
@@ -315,15 +315,10 @@ fn all_rules_covered_by_visitors() {
     }
 }
 
-fn bad_rng() -> u64 {
-    let mut hasher = std::hash::DefaultHasher::new();
-    std::time::Instant::now().hash(&mut hasher);
-    hasher.finish()
-}
-
-const MAX_REP: u64 = 5;
+const MAX_REP: u64 = 15;
 
 fn generate(rules: &HashMap<String, Expansion>, rule_name: &str, max_depth: usize) -> String {
+    let mut rng = thread_rng();
     let space = Expansion::Literal(" ".into());
     let mut buf = String::new();
     let mut stack = vec![&rules[rule_name]];
@@ -332,13 +327,13 @@ fn generate(rules: &HashMap<String, Expansion>, rule_name: &str, max_depth: usiz
             Expansion::Sequence(seq) => stack.extend(seq.iter().rev()),
             Expansion::Alternatives(alts) => {
                 let alt = if alts.len() > 100 || stack.len() < max_depth {
-                    &alts[bad_rng() as usize % alts.len()]
+                    &alts[rng.gen_range(0..alts.len())]
                 } else {
                     let finite_alts = alts.iter().filter(|exp| !exp.is_recursive(rules)).collect_vec();
                     if finite_alts.is_empty() {
                         &alts[0] // first branch should be more likely to terminate earlier
                     } else {
-                        finite_alts[bad_rng() as usize % finite_alts.len()]
+                        finite_alts[rng.gen_range(0..finite_alts.len())]
                     }
                 };
                 stack.push(alt)
@@ -351,9 +346,9 @@ fn generate(rules: &HashMap<String, Expansion>, rule_name: &str, max_depth: usiz
                     }
                 } else {
                     match rep_kind {
-                        RepKind::Maybe => bad_rng() % 2,
-                        RepKind::Star => bad_rng() % MAX_REP,
-                        RepKind::Plus => bad_rng() % (MAX_REP - 1) + 1,
+                        RepKind::Maybe => rng.gen_range(0..=1),
+                        RepKind::Star => rng.gen_range(0..MAX_REP),
+                        RepKind::Plus => rng.gen_range(1..MAX_REP),
                     }
                 };
                 if num > 0 {

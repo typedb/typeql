@@ -7,6 +7,7 @@
 use std::fmt::{self, Write};
 
 use crate::{
+    Label, ScopedLabel,
     common::{
         Span, Spanned,
         identifier::Identifier,
@@ -251,6 +252,8 @@ pub enum Expression {
     Paren(Box<Paren>),
     List(List),
     ListIndexRange(Box<ListIndexRange>),
+    ScopedLabel(ScopedLabel),
+    Label(Label),
 }
 
 impl Spanned for Expression {
@@ -264,6 +267,8 @@ impl Spanned for Expression {
             Self::Paren(inner) => inner.span(),
             Self::List(inner) => inner.span(),
             Self::ListIndexRange(inner) => inner.span(),
+            Self::ScopedLabel(inner) => inner.span(),
+            Self::Label(inner) => inner.span(),
         }
     }
 }
@@ -279,6 +284,8 @@ impl Pretty for Expression {
             Self::Paren(inner) => Pretty::fmt(inner, indent_level, f),
             Self::List(inner) => Pretty::fmt(inner, indent_level, f),
             Self::ListIndexRange(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::ScopedLabel(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Label(inner) => Pretty::fmt(inner, indent_level, f),
         }
     }
 }
@@ -294,6 +301,8 @@ impl fmt::Display for Expression {
             Self::Paren(inner) => fmt::Display::fmt(inner, f),
             Self::List(inner) => fmt::Display::fmt(inner, f),
             Self::ListIndexRange(inner) => fmt::Display::fmt(inner, f),
+            Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
+            Self::Label(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }

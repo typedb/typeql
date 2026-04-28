@@ -8,7 +8,7 @@ use std::{error::Error as StdError, fmt};
 
 use pest::error::{Error as PestError, LineColLocation};
 
-use crate::{Identifier, common::Spannable, error_messages, util::write_joined};
+use crate::{Identifier, common::Spannable, util::write_joined};
 
 #[macro_use]
 mod macros;

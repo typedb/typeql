@@ -12,6 +12,7 @@ use crate::{
     pretty::Pretty,
     schema::definable::type_::capability::Relates,
     type_::Label,
+    value::StringLiteral,
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -43,14 +44,53 @@ impl fmt::Display for Undefinable {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub enum AnnotationCategory {
+    Abstract,
+    Cardinality,
+    Cascade,
+    Distinct,
+    Doc,
+    Independent,
+    Key,
+    Meta(StringLiteral),
+    Range,
+    Regex,
+    Subkey,
+    Unique,
+    Values,
+}
+
+impl Pretty for AnnotationCategory {}
+
+impl fmt::Display for AnnotationCategory {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Abstract => fmt::Display::fmt(&token::Annotation::Abstract, f),
+            Self::Cardinality => fmt::Display::fmt(&token::Annotation::Cardinality, f),
+            Self::Cascade => fmt::Display::fmt(&token::Annotation::Cascade, f),
+            Self::Distinct => fmt::Display::fmt(&token::Annotation::Distinct, f),
+            Self::Doc => fmt::Display::fmt(&token::Annotation::Doc, f),
+            Self::Independent => fmt::Display::fmt(&token::Annotation::Independent, f),
+            Self::Key => fmt::Display::fmt(&token::Annotation::Key, f),
+            Self::Meta(values) => write!(f, "{}({})", token::Annotation::Meta, values),
+            Self::Range => fmt::Display::fmt(&token::Annotation::Range, f),
+            Self::Regex => fmt::Display::fmt(&token::Annotation::Regex, f),
+            Self::Subkey => fmt::Display::fmt(&token::Annotation::Subkey, f),
+            Self::Unique => fmt::Display::fmt(&token::Annotation::Unique, f),
+            Self::Values => fmt::Display::fmt(&token::Annotation::Values, f),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationType {
     pub span: Option<Span>,
-    pub annotation_category: token::Annotation,
+    pub annotation_category: AnnotationCategory,
     pub type_: Label,
 }
 
 impl AnnotationType {
-    pub fn new(span: Option<Span>, annotation_category: token::Annotation, type_: Label) -> Self {
+    pub fn new(span: Option<Span>, annotation_category: AnnotationCategory, type_: Label) -> Self {
         Self { span, annotation_category, type_ }
     }
 }
@@ -72,7 +112,7 @@ impl fmt::Display for AnnotationType {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AnnotationCapability {
     pub span: Option<Span>,
-    pub annotation_category: token::Annotation,
+    pub annotation_category: AnnotationCategory,
     pub type_: Label,
     pub capability: CapabilityBase,
 }
@@ -80,7 +120,7 @@ pub struct AnnotationCapability {
 impl AnnotationCapability {
     pub fn new(
         span: Option<Span>,
-        annotation_category: token::Annotation,
+        annotation_category: AnnotationCategory,
         type_: Label,
         capability: CapabilityBase,
     ) -> Self {
