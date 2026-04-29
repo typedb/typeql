@@ -61,6 +61,14 @@ $x has age 25;"#;
 }
 
 #[test]
+fn insert_with_commas_is_accepted() {
+    let query = r#"insert
+$x isa person, has name "alice", has age 30,;
+(parent: $p, child: $c,) isa family;"#;
+    parse_query(query).unwrap();
+}
+
+#[test]
 fn test_match_insert_query() {
     let query = r#"match
 $x isa language;

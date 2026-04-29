@@ -258,7 +258,7 @@ struct_destructor_value = { var | struct_destructor }
 
 query_redefine = { REDEFINE ~ ( redefinable )* }
 redefinable = { redefinable_type | definition_function }
-redefinable_type = { kind? ~ label ~ ( annotations | type_capability ) ~ SEMICOLON }
+redefinable_type = { kind? ~ label ~ COMMA? ~ ( annotations | type_capability ) ~ SEMICOLON }
 // TODO: add `redefine <person> label <new_person_label>
 
 // UNDEFINE QUERY ==============================================================

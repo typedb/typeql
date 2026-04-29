@@ -8,6 +8,21 @@ use super::assert_valid_eq_repr;
 use crate::parse_query;
 
 #[test]
+fn match_with_commas_is_accepted() {
+    let query = r#"match
+$x isa person, has name $n, has age $a,;
+($a, $b,) isa friendship;
+let $list = [$a, $b,];
+let $f = max($a, $b,);
+let $u, $v, in [$a, $b,];
+select $x, $n, $a,;
+sort $a asc, $n desc,;
+require $x, $n,;
+reduce $count = count, $total = sum($a),;"#;
+    parse_query(query).unwrap();
+}
+
+#[test]
 fn test_simple_query() {
     let query = r#"match
 $x isa movie;"#;

@@ -76,3 +76,14 @@ fetch {
     // .fetch(projections);
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn fetch_with_commas_is_accepted() {
+    let query = r#"match
+$x isa person;
+fetch {
+    "name": $x.name,
+    "age": $x.age,
+};"#;
+    parse_query(query).unwrap();
+}
