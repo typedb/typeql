@@ -170,8 +170,6 @@ fn undefine_attribute_type_regex() {
 
 #[test]
 fn redefine_with_leading_comma_is_accepted() {
-    // Mirrors `define`'s leading-comma sugar: `define person, owns name;` is
-    // accepted, and `redefine` should accept the same form.
     let with_comma = r#"redefine
 person, owns name @card(0..10);
 entity person, owns email @card(0..1);"#;
@@ -181,4 +179,16 @@ entity person, owns email @card(0..1);"#;
 person owns name @card(0..10);
 entity person owns email @card(0..1);"#;
     parse_query(without_comma).unwrap();
+}
+
+#[test]
+fn define_with_commas_is_accepted() {
+    let query = r#"define
+entity person,
+    owns name,
+    owns age,;
+struct point: x value double, y value double,;
+fun greet($p: person, $g: string,) -> string:
+    match $p has name $n; return first $n;"#;
+    parse_query(query).unwrap();
 }
