@@ -167,3 +167,18 @@ fn undefine_attribute_type_regex() {
     // let expected = undefine!(type_("digit").regex(r"\d"));
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn redefine_with_leading_comma_is_accepted() {
+    // Mirrors `define`'s leading-comma sugar: `define person, owns name;` is
+    // accepted, and `redefine` should accept the same form.
+    let with_comma = r#"redefine
+person, owns name @card(0..10);
+entity person, owns email @card(0..1);"#;
+    parse_query(with_comma).unwrap();
+
+    let without_comma = r#"redefine
+person owns name @card(0..10);
+entity person owns email @card(0..1);"#;
+    parse_query(without_comma).unwrap();
+}
