@@ -7,7 +7,7 @@ common --experimental_isolated_extension_usages
 
 try-import ./.bazel-remote-cache.rc
 
-build --incompatible_strict_action_env --java_language_version=11 --javacopt='--release 11' --enable_runfiles --legacy_external_runfiles
+build --incompatible_strict_action_env --java_runtime_version=remotejdk_21 --enable_runfiles --legacy_external_runfiles
 run --incompatible_strict_action_env
 test --incompatible_strict_action_env
 
