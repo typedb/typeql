@@ -67,9 +67,7 @@ impl<'a> IntoChildNodes<'a> for Node<'a> {
         let child = children.consume_any();
         match children.try_consume_any() {
             None => child,
-            Some(next) => {
-                unreachable!("{child} is followed by more tokens: {next}")
-            }
+            Some(next) => unreachable!("{child} is followed by more tokens: {next}"),
         }
     }
 

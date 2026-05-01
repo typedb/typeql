@@ -453,12 +453,12 @@ fn unicode_char_from_hex(bytes: &[u8]) -> Option<char> {
 #[cfg(test)]
 pub mod tests {
     use crate::{
-        Result,
+        ValueLiteral, parse_value,
         value::{StringLiteral, TypeQLError},
     };
 
     fn parse_to_string_literal(escaped: &str) -> StringLiteral {
-        let crate::ValueLiteral::String(parsed) = crate::parse_value(escaped).unwrap() else {
+        let ValueLiteral::String(parsed) = parse_value(escaped).unwrap() else {
             panic!("Not parsed as string");
         };
         parsed
@@ -578,7 +578,7 @@ pub mod tests {
     }
 
     fn generate_string(length: usize, mapper: fn(u32) -> u32) -> String {
-        use rand::{Rng, RngCore, thread_rng};
+        use rand::{RngCore, thread_rng};
         let mut rng = thread_rng();
         let capacity: i64 = (1.2 * length as f64).ceil() as i64;
         let mut text = String::with_capacity(capacity as usize);

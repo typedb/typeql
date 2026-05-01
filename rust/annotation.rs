@@ -18,8 +18,10 @@ pub enum Annotation {
     Cardinality(Cardinality),
     Cascade(Cascade),
     Distinct(Distinct),
+    Doc(Doc),
     Independent(Independent),
     Key(Key),
+    Meta(Meta),
     Range(Range),
     Regex(Regex),
     Subkey(Subkey),
@@ -34,8 +36,10 @@ impl Spanned for Annotation {
             Annotation::Cardinality(annotation) => annotation.span(),
             Annotation::Cascade(annotation) => annotation.span(),
             Annotation::Distinct(annotation) => annotation.span(),
+            Annotation::Doc(annotation) => annotation.span(),
             Annotation::Independent(annotation) => annotation.span(),
             Annotation::Key(annotation) => annotation.span(),
+            Annotation::Meta(annotation) => annotation.span(),
             Annotation::Range(annotation) => annotation.span(),
             Annotation::Regex(annotation) => annotation.span(),
             Annotation::Subkey(annotation) => annotation.span(),
@@ -52,8 +56,10 @@ impl fmt::Display for Annotation {
             Self::Cardinality(inner) => fmt::Display::fmt(inner, f),
             Self::Cascade(inner) => fmt::Display::fmt(inner, f),
             Self::Distinct(inner) => fmt::Display::fmt(inner, f),
+            Self::Doc(inner) => fmt::Display::fmt(inner, f),
             Self::Independent(inner) => fmt::Display::fmt(inner, f),
             Self::Key(inner) => fmt::Display::fmt(inner, f),
+            Self::Meta(inner) => fmt::Display::fmt(inner, f),
             Self::Range(inner) => fmt::Display::fmt(inner, f),
             Self::Regex(inner) => fmt::Display::fmt(inner, f),
             Self::Subkey(inner) => fmt::Display::fmt(inner, f),
@@ -173,6 +179,30 @@ impl fmt::Display for Distinct {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Doc {
+    pub span: Option<Span>,
+    pub doc: StringLiteral,
+}
+
+impl Doc {
+    pub fn new(span: Option<Span>, doc: StringLiteral) -> Self {
+        Self { span, doc }
+    }
+}
+
+impl Spanned for Doc {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl fmt::Display for Doc {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}({})", token::Annotation::Doc, self.doc.value)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Independent {
     pub span: Option<Span>,
 }
@@ -215,6 +245,31 @@ impl Spanned for Key {
 impl fmt::Display for Key {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}", token::Annotation::Key)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Meta {
+    pub span: Option<Span>,
+    pub key: StringLiteral,
+    pub value: StringLiteral,
+}
+
+impl Meta {
+    pub fn new(span: Option<Span>, key: StringLiteral, value: StringLiteral) -> Self {
+        Self { span, key, value }
+    }
+}
+
+impl Spanned for Meta {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl fmt::Display for Meta {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}({}, {})", token::Annotation::Meta, self.key.value, self.value.value)
     }
 }
 
