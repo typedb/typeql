@@ -301,7 +301,7 @@ fn all_rules_covered_by_visitors() {
         ("eof_definition_function", (|s| parse_definition_function(s).map(|_| ()).unwrap()) as fn(&str)),
         ("eof_definition_struct", (|s| parse_definition_struct(s).map(|_| ()).unwrap()) as fn(&str)),
     ]
-        .into();
+    .into();
 
     for rule in tree.roots {
         if !parsers.contains_key(rule.as_str()) {
