@@ -183,8 +183,7 @@ fn visit(
     is_atomic: bool,
 ) -> Expansion {
     let mut vec = Vec::new();
-    loop {
-        let Some(child) = children.next() else { break };
+    while let Some(child) = children.next() {
         match child {
             TokenTree::Ident(ident) => {
                 if ident == "SOI" {
@@ -200,8 +199,7 @@ fn visit(
             }
             TokenTree::Group(group) => {
                 if group.delimiter() == Delimiter::Parenthesis {
-                    let mut iter = group.stream().into_iter();
-                    vec.push(visit(&mut iter, tree, rule_name, is_atomic))
+                    vec.push(visit(&mut group.stream().into_iter(), tree, rule_name, is_atomic))
                 } else if group.delimiter() == Delimiter::Brace {
                     // repetition
                     let mut inner = group.stream().into_iter();
@@ -303,7 +301,7 @@ fn all_rules_covered_by_visitors() {
         ("eof_definition_function", (|s| parse_definition_function(s).map(|_| ()).unwrap()) as fn(&str)),
         ("eof_definition_struct", (|s| parse_definition_struct(s).map(|_| ()).unwrap()) as fn(&str)),
     ]
-    .into();
+        .into();
 
     for rule in tree.roots {
         if !parsers.contains_key(rule.as_str()) {
