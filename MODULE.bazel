@@ -71,25 +71,25 @@ bazel_dep(name = "rules_jvm_external", version = "6.6")
 # TypeDB repos
 # ===========================================================
 
-bazel_dep(name = "typedb_dependencies", version = "0.0.0")
-git_override(
-    module_name = "typedb_dependencies",
-    remote = "https://github.com/typedb/dependencies",
-    commit = "32a7fde17ad17b775a8ccc0867c87f119749e7ea",
-)
-
 bazel_dep(name = "typedb_bazel_distribution", version = "0.0.0")
 git_override(
     module_name = "typedb_bazel_distribution",
     remote = "https://github.com/typedb/bazel-distribution",
-    commit = "4e400ddcc52da12809db323874eb3516ee9ab5c3",
+    commit = "6c81a5180ed94a11c989e06a4ff8215df6da163e",
+)
+
+bazel_dep(name = "typedb_dependencies", version = "0.0.0")
+git_override(
+    module_name = "typedb_dependencies",
+    remote = "https://github.com/typedb/dependencies",
+    commit = "48ef6e41f9f0deadc0d59bb0e9d4a58efd0099af",
 )
 
 bazel_dep(name = "typedb_behaviour", version = "0.0.0")
 git_override(
     module_name = "typedb_behaviour",
     remote = "https://github.com/typedb/typedb-behaviour",
-    commit = "bc1e71c9334272178104f657b0996d9f15be66c9",
+    commit = "d3bb01333c67b41eeac23d2291e243b047cb518d",
 )
 
 # workspace_refs for rust sync
