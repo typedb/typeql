@@ -8,6 +8,7 @@ use crate::{
     common::{Spanned, error::TypeQLError},
     parser::{
         IntoChildNodes, Node, Rule, RuleMatcher,
+        annotation::visit_annotations,
         type_::{visit_value_type, visit_value_type_optional},
         visit_identifier,
     },
@@ -21,9 +22,10 @@ pub(in crate::parser) fn visit_definition_struct(node: Node<'_>) -> Struct {
     let mut children = node.into_children();
     children.skip_expected(Rule::STRUCT);
     let ident = visit_identifier(children.consume_expected(Rule::identifier));
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     let fields = visit_definition_struct_fields(children.consume_expected(Rule::definition_struct_fields));
     debug_assert_eq!(children.try_consume_any(), None);
-    Struct::new(span, ident, fields)
+    Struct::new(span, ident, fields, annotations)
 }
 
 fn visit_definition_struct_fields(node: Node<'_>) -> Vec<Field> {
@@ -38,8 +40,9 @@ fn visit_definition_struct_field(node: Node<'_>) -> Field {
     let key = visit_identifier(children.consume_expected(Rule::identifier));
     children.skip_expected(Rule::VALUE);
     let type_ = visit_struct_field_value_type(children.consume_expected(Rule::struct_field_value_type));
+    let annotations = children.try_consume_expected(Rule::annotations).map(visit_annotations).unwrap_or_default();
     debug_assert_eq!(children.try_consume_any(), None);
-    Field::new(span, key, type_)
+    Field::new(span, key, type_, annotations)
 }
 
 fn visit_struct_field_value_type(node: Node<'_>) -> NamedTypeAny {

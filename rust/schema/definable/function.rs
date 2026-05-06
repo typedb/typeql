@@ -7,6 +7,7 @@
 use std::fmt::{self, Debug, Formatter, Write};
 
 use crate::{
+    Annotation,
     common::{Span, Spanned, identifier::Identifier, token},
     pretty::{Pretty, indent},
     query::stage::{Stage, reduce::Reducer},
@@ -19,13 +20,20 @@ use crate::{
 pub struct Function {
     pub span: Option<Span>,
     pub signature: Signature,
+    pub annotations: Vec<Annotation>,
     pub block: FunctionBlock,
     pub unparsed: String,
 }
 
 impl Function {
-    pub fn new(span: Option<Span>, signature: Signature, block: FunctionBlock, unparsed: String) -> Self {
-        Self { span, signature, block, unparsed }
+    pub fn new(
+        span: Option<Span>,
+        signature: Signature,
+        annotations: Vec<Annotation>,
+        block: FunctionBlock,
+        unparsed: String,
+    ) -> Self {
+        Self { span, signature, annotations, block, unparsed }
     }
 }
 
@@ -40,6 +48,9 @@ impl Pretty for Function {
         indent(indent_level, f)?;
         write!(f, "{} ", token::Keyword::Fun)?;
         Pretty::fmt(&self.signature, indent_level, f)?;
+        for annotation in &self.annotations {
+            write!(f, " {}", annotation)?;
+        }
         f.write_char(':')?;
         f.write_str("\n")?;
         Pretty::fmt(&self.block, indent_level + 1, f)?;
@@ -54,6 +65,9 @@ impl fmt::Display for Function {
         } else {
             write!(f, "{} ", token::Keyword::Fun)?;
             std::fmt::Display::fmt(&self.signature, f)?;
+            for annotation in &self.annotations {
+                write!(f, " {}", annotation)?;
+            }
             write!(f, "{} ", token::Char::Colon)?;
             std::fmt::Display::fmt(&self.block, f)
         }
