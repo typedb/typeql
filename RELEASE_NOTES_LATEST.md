@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.10.4
+cargo add typeql@3.11.0-rc0
 ```
 
 
@@ -17,13 +17,8 @@ cargo add typeql@3.10.4
 
 
 ## Other Improvements
-- **Allow leading comma in redefine constraints**
-  
-  Mirrors the leading-comma sugar already accepted by `define`: `define person, owns name;` parses, but `redefine person, owns name @card(0..10);` did not. Make `redefinable_type` accept an optional COMMA between the label and the constraint so concat-based query generation has the same shape for define and redefine.
-  
-  
-- **Update Rust dependencies**
-  
+- **Update dependencies for cluster-support merge**
+  Update dependencies to avoid build conflicts.
   
   
     
