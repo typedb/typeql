@@ -96,9 +96,11 @@ fn visit_annotation_category(node: Node<'_>) -> AnnotationCategory {
         Rule::ANNOTATION_DOC => AnnotationCategory::Doc,
         Rule::ANNOTATION_INDEPENDENT => AnnotationCategory::Independent,
         Rule::ANNOTATION_KEY => AnnotationCategory::Key,
-        Rule::ANNOTATION_META => AnnotationCategory::Meta(visit_quoted_string_literal(
-            children.consume_expected(Rule::quoted_string_literal),
-        )),
+        Rule::ANNOTATION_META => {
+            let str = children.consume_expected(Rule::quoted_string_literal);
+            let span = str.span();
+            AnnotationCategory::Meta(visit_quoted_string_literal(str), span)
+        }
         Rule::ANNOTATION_RANGE => AnnotationCategory::Range,
         Rule::ANNOTATION_REGEX => AnnotationCategory::Regex,
         Rule::ANNOTATION_SUBKEY => AnnotationCategory::Subkey,
