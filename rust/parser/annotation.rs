@@ -11,7 +11,8 @@ use super::{
 };
 use crate::{
     annotation::{
-        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Doc, Independent, Key, Meta, Range, Regex, Subkey, Unique, Values
+        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Doc, Independent, Key, Meta, Range,
+        Regex, Subkey, Unique, Values,
     },
     common::{Spanned, error::TypeQLError},
     value::Literal,
