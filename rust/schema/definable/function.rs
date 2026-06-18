@@ -49,10 +49,9 @@ impl Pretty for Function {
         write!(f, "{} ", token::Keyword::Fun)?;
         Pretty::fmt(&self.signature, indent_level, f)?;
         for annotation in &self.annotations {
-            write!(f, " {}", annotation)?;
+            write!(f, "\n    {}", annotation)?;
         }
-        f.write_char(':')?;
-        f.write_str("\n")?;
+        f.write_str(":\n")?;
         Pretty::fmt(&self.block, indent_level + 1, f)?;
         Ok(())
     }
