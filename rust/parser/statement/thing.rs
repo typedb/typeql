@@ -9,8 +9,7 @@ use crate::{
     expression::Expression,
     parser::{
         IntoChildNodes, Node, Rule, RuleMatcher,
-        expression::{visit_expression, visit_expression_list, visit_expression_struct, visit_expression_value},
-        literal::visit_value_literal,
+        expression::{visit_expression, visit_expression_list, visit_expression_value},
         statement::visit_comparison,
         type_::{visit_type_ref, visit_type_ref_list},
         visit_var,
@@ -76,8 +75,6 @@ fn visit_isa_constraint(node: Node<'_>) -> Isa {
     let instance_constraint = children.try_consume_any().map(|child| match child.as_rule() {
         Rule::relation => IsaInstanceConstraint::Relation(visit_relation(child)),
         Rule::expression => IsaInstanceConstraint::Expression(visit_expression(child)),
-        Rule::expression_struct => IsaInstanceConstraint::Struct(visit_expression_struct(child)),
-        Rule::value_literal => IsaInstanceConstraint::Value(visit_value_literal(child)),
         Rule::comparison => IsaInstanceConstraint::Comparison(visit_comparison(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     });

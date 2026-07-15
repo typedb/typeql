@@ -7,7 +7,7 @@
 use std::fmt;
 
 use crate::{
-    Expression, Literal,
+    Expression,
     common::{Span, Spanned, token},
     pretty::Pretty,
     statement::{comparison::Comparison, thing::Relation},
@@ -67,10 +67,8 @@ impl fmt::Display for IsaKind {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum IsaInstanceConstraint {
     Relation(Relation),
-    Value(Literal),
     Expression(Expression),
     Comparison(Comparison),
-    Struct(Literal),
 }
 
 impl Pretty for IsaInstanceConstraint {}
@@ -79,10 +77,8 @@ impl fmt::Display for IsaInstanceConstraint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Relation(relation) => write!(f, "{}", relation),
-            Self::Value(value) => write!(f, "{}", value),
             Self::Expression(expr) => write!(f, "{}", expr),
             Self::Comparison(cmp) => write!(f, "{}", cmp),
-            Self::Struct(value) => write!(f, "{}", value),
         }
     }
 }

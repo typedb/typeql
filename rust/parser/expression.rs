@@ -6,13 +6,17 @@
 
 use pest::pratt_parser::{Assoc, Op, PrattParser};
 
-use super::{IntoChildNodes, Node, Rule, RuleMatcher, literal::visit_value_literal, visit_identifier, visit_var};
+use super::{
+    IntoChildNodes, Node, Rule, RuleMatcher, literal::visit_value_literal, statement::single::visit_struct_key,
+    type_::visit_label_scoped, visit_identifier, visit_label, visit_var,
+};
 use crate::{
+    Identifier,
     common::{Spanned, error::TypeQLError, token},
     expression::{
-        BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
+        BuiltinFunctionName, Expression, FieldAccess, FunctionCall, FunctionName, List, ListIndex, ListIndexRange,
+        Operation, Paren,
     },
-    parser::{type_::visit_label_scoped, visit_label},
     value::{Literal, StructLiteral, ValueLiteral},
 };
 
@@ -50,7 +54,9 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
         .op(Op::infix(Rule::TIMES, Assoc::Left)
             | Op::infix(Rule::DIVIDE, Assoc::Left)
             | Op::infix(Rule::MODULO, Assoc::Left))
-        .op(Op::infix(Rule::POWER, Assoc::Right));
+        .op(Op::infix(Rule::POWER, Assoc::Right))
+        .op(Op::postfix(Rule::field_access))
+        .op(Op::postfix(Rule::list_index));
 
     pratt_parser
         .map_primary(visit_expression_base)
@@ -66,6 +72,11 @@ pub(super) fn visit_expression_value(node: Node<'_>) -> Expression {
             };
             Expression::Operation(Box::new(Operation::new(op, left, right)))
         })
+        .map_postfix(|lhs, op| match op.as_rule() {
+            Rule::field_access => Expression::FieldAccess(Box::new(FieldAccess::new(lhs, visit_field_access(op)))),
+            Rule::list_index => Expression::ListIndex(Box::new(ListIndex::new(lhs, visit_list_index(op)))),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: op.as_str().to_owned() }),
+        })
         .parse(node.into_children())
 }
 
@@ -77,25 +88,21 @@ fn visit_expression_base(node: Node<'_>) -> Expression {
         Rule::value_literal => Expression::Value(visit_value_literal(child)),
         Rule::expression_function => Expression::Function(visit_expression_function(child)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(child))),
-        Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(child))),
         Rule::label_scoped => Expression::ScopedLabel(visit_label_scoped(child)),
         Rule::label => Expression::Label(visit_label(child)),
+        Rule::expression_struct => Expression::Value(visit_expression_struct(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
-}
-
-fn visit_expression_list_index(node: Node<'_>) -> ListIndex {
-    debug_assert_eq!(node.as_rule(), Rule::expression_list_index);
-    let span = node.span();
-    let mut children = node.into_children();
-    let variable = visit_var(children.consume_expected(Rule::var));
-    let index = visit_list_index(children.consume_expected(Rule::list_index));
-    ListIndex::new(span, variable, index)
 }
 
 fn visit_list_index(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::list_index);
     visit_expression_value(node.into_child())
+}
+
+fn visit_field_access(node: Node<'_>) -> Identifier {
+    debug_assert_eq!(node.as_rule(), Rule::field_access);
+    visit_struct_key(node.into_child())
 }
 
 pub(super) fn visit_expression_struct(node: Node<'_>) -> Literal {

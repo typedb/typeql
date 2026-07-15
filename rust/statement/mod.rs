@@ -9,6 +9,7 @@ use std::{collections::HashMap, fmt};
 use self::comparison::ComparisonStatement;
 pub use self::{thing::Thing, type_::Type};
 use crate::{
+    Label,
     common::{Span, Spanned, identifier::Identifier, token},
     expression::Expression,
     pretty::{Pretty, indent},
@@ -104,12 +105,13 @@ impl fmt::Display for DeconstructField {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StructDeconstruct {
     pub span: Option<Span>,
+    struct_name: Label,
     field_map: HashMap<Identifier, DeconstructField>,
 }
 
 impl StructDeconstruct {
-    pub fn new(span: Option<Span>, field_map: HashMap<Identifier, DeconstructField>) -> Self {
-        Self { span, field_map }
+    pub fn new(span: Option<Span>, struct_name: Label, field_map: HashMap<Identifier, DeconstructField>) -> Self {
+        Self { span, struct_name, field_map }
     }
 }
 
@@ -128,7 +130,7 @@ impl Pretty for StructDeconstruct {
 
 impl fmt::Display for StructDeconstruct {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", token::Char::CurlyLeft)?;
+        write!(f, "{} {}", self.struct_name, token::Char::CurlyLeft)?;
         for (identifier, field_deconstruct) in &self.field_map {
             write!(f, "{}{} {},", identifier, token::Char::Colon, field_deconstruct)?;
         }
@@ -148,7 +150,7 @@ impl fmt::Display for AssignmentPattern {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Variables(vars) => write_joined!(f, ", ", vars),
-            Self::Deconstruct(_) => todo!(),
+            Self::Deconstruct(inner) => fmt::Display::fmt(inner, f),
         }
     }
 }

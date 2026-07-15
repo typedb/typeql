@@ -160,20 +160,21 @@ impl fmt::Display for Paren {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ListIndex {
-    pub span: Option<Span>,
-    pub variable: Variable,
-    pub index: Expression,
+    pub receiver: Expression,
+    pub index: Expression, // FIXME: this should be an Index struct the span of which includes the square brackets
 }
 
 impl ListIndex {
-    pub fn new(span: Option<Span>, variable: Variable, index: Expression) -> Self {
-        Self { span, variable, index }
+    pub fn new(receiver: Expression, index: Expression) -> Self {
+        Self { receiver, index }
     }
 }
 
 impl Spanned for ListIndex {
     fn span(&self) -> Option<Span> {
-        self.span
+        let rspan = self.receiver.span()?;
+        let lspan = self.index.span()?;
+        Some(Span { begin_offset: rspan.begin_offset, end_offset: lspan.end_offset })
     }
 }
 
@@ -181,7 +182,35 @@ impl Pretty for ListIndex {}
 
 impl fmt::Display for ListIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}[{}]", self.variable, self.index)
+        write!(f, "{}[{}]", self.receiver, self.index)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct FieldAccess {
+    pub receiver: Expression,
+    pub field: Identifier,
+}
+
+impl FieldAccess {
+    pub fn new(receiver: Expression, field: Identifier) -> Self {
+        Self { receiver, field }
+    }
+}
+
+impl Spanned for FieldAccess {
+    fn span(&self) -> Option<Span> {
+        let rspan = self.receiver.span()?;
+        let lspan = self.field.span()?;
+        Some(Span { begin_offset: rspan.begin_offset, end_offset: lspan.end_offset })
+    }
+}
+
+impl Pretty for FieldAccess {}
+
+impl fmt::Display for FieldAccess {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}.{}", self.receiver, self.field)
     }
 }
 
@@ -246,6 +275,7 @@ impl fmt::Display for ListIndexRange {
 pub enum Expression {
     Variable(Variable),
     ListIndex(Box<ListIndex>),
+    FieldAccess(Box<FieldAccess>),
     Value(Literal),
     Function(FunctionCall),
     Operation(Box<Operation>),
@@ -261,6 +291,7 @@ impl Spanned for Expression {
         match self {
             Self::Variable(inner) => inner.span(),
             Self::ListIndex(inner) => inner.span(),
+            Self::FieldAccess(inner) => inner.span(),
             Self::Value(inner) => inner.span(),
             Self::Function(inner) => inner.span(),
             Self::Operation(inner) => inner.span(),
@@ -278,6 +309,7 @@ impl Pretty for Expression {
         match self {
             Self::Variable(inner) => Pretty::fmt(inner, indent_level, f),
             Self::ListIndex(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::FieldAccess(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Value(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Function(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Operation(inner) => Pretty::fmt(inner, indent_level, f),
@@ -295,6 +327,7 @@ impl fmt::Display for Expression {
         match self {
             Self::Variable(inner) => fmt::Display::fmt(inner, f),
             Self::ListIndex(inner) => fmt::Display::fmt(inner, f),
+            Self::FieldAccess(inner) => fmt::Display::fmt(inner, f),
             Self::Value(inner) => fmt::Display::fmt(inner, f),
             Self::Function(inner) => fmt::Display::fmt(inner, f),
             Self::Operation(inner) => fmt::Display::fmt(inner, f),

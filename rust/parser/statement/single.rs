@@ -13,7 +13,7 @@ use crate::{
         IntoChildNodes, Node, Rule, RuleMatcher,
         expression::{visit_expression, visit_expression_function, visit_expression_list, visit_expression_value},
         statement::visit_comparison,
-        visit_identifier, visit_var, visit_vars_assignment,
+        visit_identifier, visit_label, visit_var, visit_vars_assignment,
     },
     statement::{
         Assignment, AssignmentPattern, DeconstructField, InIterable, Is, StructDeconstruct,
@@ -38,37 +38,39 @@ pub fn visit_assignment_left(node: Node<'_>) -> AssignmentPattern {
     let child = node.into_child();
     match child.as_rule() {
         Rule::vars_assignment => AssignmentPattern::Variables(visit_vars_assignment(child)),
-        Rule::struct_destructor => AssignmentPattern::Deconstruct(visit_struct_destructor(child)),
+        Rule::struct_deconstruct => AssignmentPattern::Deconstruct(visit_struct_deconstruct(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
-fn visit_struct_destructor(node: Node<'_>) -> StructDeconstruct {
-    debug_assert_eq!(node.as_rule(), Rule::struct_destructor);
+fn visit_struct_deconstruct(node: Node<'_>) -> StructDeconstruct {
+    debug_assert_eq!(node.as_rule(), Rule::struct_deconstruct);
     let span = node.span();
     let mut children = node.into_children();
+
+    let struct_name = visit_label(children.consume_expected(Rule::label));
 
     let field_map = children
         .by_ref()
         .tuple_windows()
-        .map(|(key, value)| (visit_struct_key(key), visit_struct_destructor_value(value)))
+        .map(|(key, value)| (visit_struct_key(key), visit_struct_deconstruct_value(value)))
         .collect();
 
     debug_assert_eq!(children.try_consume_any(), None);
-    StructDeconstruct::new(span, field_map)
+    StructDeconstruct::new(span, struct_name, field_map)
 }
 
-fn visit_struct_destructor_value(node: Node<'_>) -> DeconstructField {
-    debug_assert_eq!(node.as_rule(), Rule::struct_destructor_value);
+fn visit_struct_deconstruct_value(node: Node<'_>) -> DeconstructField {
+    debug_assert_eq!(node.as_rule(), Rule::struct_deconstruct_value);
     let child = node.into_child();
     match child.as_rule() {
         Rule::var => DeconstructField::Variable(visit_var(child)),
-        Rule::struct_destructor => DeconstructField::Deconstruct(visit_struct_destructor(child)),
+        Rule::struct_deconstruct => DeconstructField::Deconstruct(visit_struct_deconstruct(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
-fn visit_struct_key(node: Node<'_>) -> Identifier {
+pub(crate) fn visit_struct_key(node: Node<'_>) -> Identifier {
     debug_assert_eq!(node.as_rule(), Rule::struct_key);
     visit_identifier(node.into_child())
 }
