@@ -22,7 +22,7 @@ pub struct StringLiteral {
     pub value: String,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct IntegerLiteral {
     pub value: String,
 }

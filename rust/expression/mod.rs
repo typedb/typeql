@@ -215,6 +215,33 @@ impl fmt::Display for List {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct VectorLiteral {
+    pub span: Option<Span>,
+    pub list: Expression,
+    pub precision: token::VectorPrecision,
+}
+
+impl VectorLiteral {
+    pub fn new(span: Option<Span>, list: Expression, precision: token::VectorPrecision) -> Self {
+        Self { span, list, precision }
+    }
+}
+
+impl Spanned for VectorLiteral {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for VectorLiteral {}
+
+impl fmt::Display for VectorLiteral {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "vector({}, \"{}\")", self.list, self.precision)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ListIndexRange {
     pub span: Option<Span>,
     pub var: Variable,
@@ -251,6 +278,7 @@ pub enum Expression {
     Operation(Box<Operation>),
     Paren(Box<Paren>),
     List(List),
+    Vector(Box<VectorLiteral>),
     ListIndexRange(Box<ListIndexRange>),
     ScopedLabel(ScopedLabel),
     Label(Label),
@@ -266,6 +294,7 @@ impl Spanned for Expression {
             Self::Operation(inner) => inner.span(),
             Self::Paren(inner) => inner.span(),
             Self::List(inner) => inner.span(),
+            Self::Vector(inner) => inner.span(),
             Self::ListIndexRange(inner) => inner.span(),
             Self::ScopedLabel(inner) => inner.span(),
             Self::Label(inner) => inner.span(),
@@ -283,6 +312,7 @@ impl Pretty for Expression {
             Self::Operation(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Paren(inner) => Pretty::fmt(inner, indent_level, f),
             Self::List(inner) => Pretty::fmt(inner, indent_level, f),
+            Self::Vector(inner) => Pretty::fmt(inner, indent_level, f),
             Self::ListIndexRange(inner) => Pretty::fmt(inner, indent_level, f),
             Self::ScopedLabel(inner) => Pretty::fmt(inner, indent_level, f),
             Self::Label(inner) => Pretty::fmt(inner, indent_level, f),
@@ -300,6 +330,7 @@ impl fmt::Display for Expression {
             Self::Operation(inner) => fmt::Display::fmt(inner, f),
             Self::Paren(inner) => fmt::Display::fmt(inner, f),
             Self::List(inner) => fmt::Display::fmt(inner, f),
+            Self::Vector(inner) => fmt::Display::fmt(inner, f),
             Self::ListIndexRange(inner) => fmt::Display::fmt(inner, f),
             Self::ScopedLabel(inner) => fmt::Display::fmt(inner, f),
             Self::Label(inner) => fmt::Display::fmt(inner, f),

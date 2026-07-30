@@ -11,6 +11,7 @@ use crate::{
     common::{Spanned, error::TypeQLError, token},
     expression::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
+        VectorLiteral,
     },
     parser::{type_::visit_label_scoped, visit_label},
     value::{Literal, StructLiteral, ValueLiteral},
@@ -78,10 +79,23 @@ fn visit_expression_base(node: Node<'_>) -> Expression {
         Rule::expression_function => Expression::Function(visit_expression_function(child)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(child))),
         Rule::expression_list_index => Expression::ListIndex(Box::new(visit_expression_list_index(child))),
+        Rule::vector_literal => Expression::Vector(Box::new(visit_vector_literal(child))),
         Rule::label_scoped => Expression::ScopedLabel(visit_label_scoped(child)),
         Rule::label => Expression::Label(visit_label(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
+}
+
+fn visit_vector_literal(node: Node<'_>) -> VectorLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::vector_literal);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::VECTOR);
+    let list = visit_expression_list(children.consume_expected(Rule::expression_list));
+    let precision =
+        token::VectorPrecision::from(children.consume_expected(Rule::vector_precision).as_str().trim_matches('"'));
+    debug_assert_eq!(children.try_consume_any(), None);
+    VectorLiteral::new(span, list, precision)
 }
 
 fn visit_expression_list_index(node: Node<'_>) -> ListIndex {

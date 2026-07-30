@@ -4,11 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use super::{IntoChildNodes, Node, Rule, RuleMatcher, visit_identifier, visit_var};
+use super::{IntoChildNodes, Node, Rule, RuleMatcher, literal::visit_integer_literal, visit_identifier, visit_var};
 use crate::{
     ScopedLabel,
     common::{Spanned, error::TypeQLError, token},
-    type_::{BuiltinValueType, Label, NamedType, NamedTypeAny, NamedTypeList, NamedTypeOptional, TypeRef, TypeRefList},
+    type_::{
+        BuiltinValueType, Label, NamedType, NamedTypeAny, NamedTypeList, NamedTypeOptional, TypeRef, TypeRefList,
+        VectorType,
+    },
 };
 
 pub(super) fn visit_type_ref(node: Node<'_>) -> TypeRef {
@@ -45,6 +48,7 @@ pub(super) fn visit_named_type(node: Node<'_>) -> NamedType {
     let child = node.into_child();
     match child.as_rule() {
         Rule::label => NamedType::Label(visit_label(child)),
+        Rule::value_type_vector => NamedType::Vector(visit_value_type_vector(child)),
         Rule::value_type_primitive => NamedType::BuiltinValueType(visit_value_type_primitive(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
@@ -92,10 +96,23 @@ pub(super) fn visit_value_type(node: Node<'_>) -> NamedType {
     debug_assert_eq!(node.as_rule(), Rule::value_type);
     let child = node.into_child();
     match child.as_rule() {
+        Rule::value_type_vector => NamedType::Vector(visit_value_type_vector(child)),
         Rule::value_type_primitive => NamedType::BuiltinValueType(visit_value_type_primitive(child)),
         Rule::label => NamedType::Label(visit_label(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
+}
+
+pub(super) fn visit_value_type_vector(node: Node<'_>) -> VectorType {
+    debug_assert_eq!(node.as_rule(), Rule::value_type_vector);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::VECTOR);
+    let length = visit_integer_literal(children.consume_expected(Rule::integer_literal));
+    let precision =
+        token::VectorPrecision::from(children.consume_expected(Rule::vector_precision).as_str().trim_matches('"'));
+    debug_assert_eq!(children.try_consume_any(), None);
+    VectorType::new(span, length, precision)
 }
 
 pub(super) fn visit_value_type_optional(node: Node<'_>) -> NamedTypeOptional {

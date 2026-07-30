@@ -149,7 +149,7 @@ comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 expression = { expression_list | expression_value }
 
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
-expression_base = { expression_list_index | expression_parenthesis | expression_function | value_literal | var | label_scoped | label }
+expression_base = { expression_list_index | expression_parenthesis | vector_literal | expression_function | value_literal | var | label_scoped | label }
 
 expression_operator = _{ POWER | TIMES | DIVIDE | MODULO | PLUS | MINUS }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
@@ -168,6 +168,8 @@ list_range = { SQ_BRACKET_OPEN ~ expression_value ~ DOUBLE_DOT ~ expression_valu
 
 expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
 struct_value = { expression_value | expression_struct }
+
+vector_literal = { VECTOR ~ PAREN_OPEN ~ expression_list ~ COMMA ~ vector_precision ~ PAREN_CLOSE }
 
 // FETCH QUERY =================================================================
 
@@ -288,7 +290,7 @@ undefine_struct = { STRUCT ~ identifier }
 type_ref = { label_scoped | label | var }
 type_ref_list = { type_ref ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 
-named_type = { value_type_primitive | label }
+named_type = { value_type_vector | value_type_primitive | label }
 named_type_optional = { named_type ~ QUESTION }
 named_type_list = { named_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 named_type_any = { named_type_optional | named_type_list | named_type }
@@ -317,9 +319,11 @@ identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
 
 // VALUES ========================================================
 
-value_type = { value_type_primitive | label }
+value_type = { value_type_vector | value_type_primitive | label }
 value_type_optional = { value_type ~ QUESTION }
 value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
+value_type_vector = { VECTOR ~ PAREN_OPEN ~ integer_literal ~ COMMA ~ vector_precision ~ PAREN_CLOSE }
+vector_precision = @{ "\"" ~ "float32" ~ "\"" }
 
 value_type_primitive = { BOOLEAN | INTEGER | DOUBLE | DECIMAL
                        | DATETIME_TZ | DATETIME | DATE | DURATION
@@ -561,6 +565,7 @@ DURATION = @{ "duration" ~ WB }
 
 STRING = @{ "string" ~ WB }
 STRUCT = @{ "struct" ~ WB }
+VECTOR = @{ "vector" ~ WB }
 
 // LITERAL VALUE KEYWORDS
 boolean_literal = ${ TRUE | FALSE } // order of lexer declaration matters
