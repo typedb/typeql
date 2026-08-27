@@ -7,7 +7,6 @@
 use std::fmt;
 
 use crate::{
-    Variable,
     common::{Span, Spanned},
     pretty::Pretty,
     schema::definable::function::Argument,
