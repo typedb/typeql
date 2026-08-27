@@ -141,5 +141,6 @@ generic_step_impl! {
     #[step("reasoning data")]
     #[step("reasoning query")]
     #[step("query is given rows")]
+    #[step("set query given rows")]
     async fn do_nothing(_: &mut TypeQLWorld) {}
 }
