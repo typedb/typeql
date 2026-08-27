@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.12.2
+cargo add typeql@3.13.0-rc0
 ```
 
 
@@ -11,16 +11,16 @@ cargo add typeql@3.12.2
 
 
 ## Bugs Fixed
-
+- **Allow scientific notation for double literal without decimal part**
+  
+  Allow literals like `1e-6` to parse without requiring `1.0e-6`.
+  
+  
 
 ## Code Refactors
 
 
 ## Other Improvements
-- **Introduce grammar changes for renaming types**
-  Entity, relation and attribute types can be renamed by doing `redefine old-label label new-label;`. Role types can be renamed by doing `redefine declaration-relation:old-role label new-role;`.
-  
-  
-  
+
     
 
