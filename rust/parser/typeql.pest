@@ -70,6 +70,12 @@ pattern_disjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE ~ ( OR ~ CURLY_OPEN 
 pattern_negation = { NOT ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
+write_patterns = { ( write_pattern ~ SEMICOLON )+ }
+write_pattern = { statement | pattern_try | pattern_if }
+write_pattern_if = { write_if_clause ~ CURLY_OPEN ~ statement+ ~ CURLY_CLOSE }
+write_if_clause = IF ~ CURLY_OPEN ~ ( write_condition ~ SEMICOLON )+ ~ CURLY_CLOSE
+write_condition = { statement_isset | statement_comparison | var ~ isa_constraint }
+
 // STATEMENTS ==================================================================
 
 statement = { statement_assignment
@@ -125,11 +131,11 @@ role_player = { type_ref_list ~ COLON ~ var
 
 statement_deletable = { HAS? ~ var ~ OF ~ var
                       | LINKS? ~ relation ~ OF ~ var
-                      | statement_isset
                       | var
                       }
 
 pattern_try_deletable = { TRY ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
+pattern_if_deletable = { write_if_clause ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
 
 // SINGLE STATEMENTS ===========================================================
 
@@ -505,6 +511,7 @@ ISSET = @{ "isset" }
 OR = @{ "or" ~ WB }
 NOT = @{ "not" ~ WB }
 TRY = @{ "try" ~ WB }
+IF = @{ "if" ~ WB }
 
 // COMPARATOR KEYWORDS
 
