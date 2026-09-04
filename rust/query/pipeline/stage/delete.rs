@@ -9,7 +9,11 @@ use std::fmt::{self, Write};
 use crate::{
     common::{Span, Spanned, token},
     pretty::{Pretty, indent},
-    statement::thing::Relation,
+    statement::{
+        IsSet,
+        comparison::ComparisonStatement,
+        thing::{Relation, isa::Isa},
+    },
     util::write_joined,
     variable::Variable,
 };
@@ -96,6 +100,14 @@ pub enum DeletableKind {
     Concept { variable: Variable },
     Optional { deletables: Vec<Deletable> },
     IsSet { variables: Vec<Variable> },
+    If { conditions: Vec<WriteCondition>, deletables: Vec<Deletable> },
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum WriteCondition {
+    IsSet(IsSet),
+    Comparison(ComparisonStatement),
+    Isa { variable: Variable, isa: Isa },
 }
 
 impl Pretty for DeletableKind {
@@ -112,7 +124,36 @@ impl Pretty for DeletableKind {
                 f.write_char('}')?;
                 Ok(())
             }
+            Self::If { conditions, deletables } => {
+                write!(f, "{} {{ ", token::Keyword::If)?;
+                for condition in conditions {
+                    write!(f, "{}; ", condition)?;
+                }
+                write!(f, "}} {{")?;
+                for deletable in deletables {
+                    indent(indent_level + 1, f)?;
+                    Pretty::fmt(deletable, indent_level + 1, f)?;
+                    writeln!(f, ";")?;
+                    indent(indent_level, f)?;
+                }
+                f.write_char('}')?;
+                Ok(())
+            }
             _ => write!(f, "{}", self),
+        }
+    }
+}
+
+impl Pretty for WriteCondition {}
+
+impl fmt::Display for WriteCondition {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::IsSet(isset) => {
+                write!(f, "{} ", token::Keyword::IsSet).and_then(|_| write_joined!(f, ", ", isset.variables))
+            }
+            Self::Comparison(cmp) => write!(f, "{}", cmp),
+            Self::Isa { variable, isa } => write!(f, "{} {}", variable, isa),
         }
     }
 }
@@ -141,6 +182,18 @@ impl fmt::Display for DeletableKind {
                 Self::IsSet { variables } => {
                     write!(f, "{} ", token::Keyword::IsSet)?;
                     write_joined!(f, ", ", variables)?;
+                    Ok(())
+                }
+                Self::If { conditions, deletables } => {
+                    write!(f, "{} {{ ", token::Keyword::If)?;
+                    for condition in conditions {
+                        write!(f, "{}; ", condition)?;
+                    }
+                    write!(f, "}} {{ ")?;
+                    for deletable in deletables {
+                        write!(f, "{}; ", deletable)?;
+                    }
+                    f.write_char('}')?;
                     Ok(())
                 }
             }
