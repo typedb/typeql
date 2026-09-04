@@ -32,9 +32,9 @@ query_stage_terminal = { clause_fetch ~ SEMICOLON }
 
 clause_match = { MATCH ~ patterns }
 
-clause_insert = { INSERT ~ patterns }
-clause_put = { PUT ~ patterns }
-clause_update = { UPDATE ~ patterns }
+clause_insert = { INSERT ~ write_patterns }
+clause_put = { PUT ~ write_patterns }
+clause_update = { UPDATE ~ write_patterns }
 
 clause_delete = { DELETE ~ ( ( statement_deletable | pattern_try_deletable ) ~ SEMICOLON )+ }
 
