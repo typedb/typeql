@@ -36,11 +36,12 @@ use crate::{
             Preamble,
             stage::{
                 Delete, Fetch, Insert, Match, Operator, Put, Reduce, Stage, Update,
-                delete::{Deletable, DeletableKind, WriteCondition},
+                delete::{Deletable, DeletableKind},
                 fetch::FetchSome,
                 given::Given,
                 modifier::{Distinct, Limit, Offset, OrderedVariable, Require, Select, Sort},
                 reduce::{Collect, Count, Reducer, Stat},
+                write_pattern::{WriteCondition, WritePattern, WritePatternIf},
             },
         },
         stage::{
@@ -189,7 +190,7 @@ fn visit_clause_insert(node: Node<'_>) -> Insert {
     debug_assert_eq!(node.as_rule(), Rule::clause_insert);
     let span = node.span();
     let mut children = node.into_children();
-    let patterns = visit_patterns(children.skip_expected(Rule::INSERT).consume_expected(Rule::patterns));
+    let patterns = visit_write_patterns(children.skip_expected(Rule::INSERT).consume_expected(Rule::write_patterns));
     debug_assert_eq!(children.try_consume_any(), None);
     Insert::new(span, patterns)
 }
@@ -198,7 +199,7 @@ fn visit_clause_put(node: Node<'_>) -> Put {
     debug_assert_eq!(node.as_rule(), Rule::clause_put);
     let span = node.span();
     let mut children = node.into_children();
-    let patterns = visit_patterns(children.skip_expected(Rule::PUT).consume_expected(Rule::patterns));
+    let patterns = visit_write_patterns(children.skip_expected(Rule::PUT).consume_expected(Rule::write_patterns));
     debug_assert_eq!(children.try_consume_any(), None);
     Put::new(span, patterns)
 }
@@ -207,9 +208,39 @@ fn visit_clause_update(node: Node<'_>) -> Update {
     debug_assert_eq!(node.as_rule(), Rule::clause_update);
     let span = node.span();
     let mut children = node.into_children();
-    let patterns = visit_patterns(children.skip_expected(Rule::UPDATE).consume_expected(Rule::patterns));
+    let patterns = visit_write_patterns(children.skip_expected(Rule::UPDATE).consume_expected(Rule::write_patterns));
     debug_assert_eq!(children.try_consume_any(), None);
     Update::new(span, patterns)
+}
+
+fn visit_write_patterns(node: Node<'_>) -> Vec<WritePattern> {
+    debug_assert_eq!(node.as_rule(), Rule::write_patterns);
+    node.into_children().map(visit_write_pattern).collect()
+}
+
+fn visit_write_pattern(node: Node<'_>) -> WritePattern {
+    debug_assert_eq!(node.as_rule(), Rule::write_pattern);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::statement => WritePattern::Statement(visit_statement(child)),
+        Rule::pattern_try => WritePattern::Optional(visit_pattern_try(child)),
+        Rule::write_pattern_if => visit_write_pattern_if(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+    }
+}
+
+fn visit_write_pattern_if(node: Node<'_>) -> WritePattern {
+    debug_assert_eq!(node.as_rule(), Rule::write_pattern_if);
+    let span = node.span();
+    let mut children = node.into_children();
+    let conditions = visit_write_if_clause(children.consume_expected(Rule::write_if_clause));
+    let statements = children
+        .map(|child| match child.as_rule() {
+            Rule::statement => visit_statement(child),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+        })
+        .collect();
+    WritePattern::If(WritePatternIf::new(span, conditions, statements))
 }
 
 fn visit_clause_delete(node: Node<'_>) -> Delete {

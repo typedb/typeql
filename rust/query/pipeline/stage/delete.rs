@@ -9,11 +9,8 @@ use std::fmt::{self, Write};
 use crate::{
     common::{Span, Spanned, token},
     pretty::{Pretty, indent},
-    statement::{
-        IsSet,
-        comparison::ComparisonStatement,
-        thing::{Relation, isa::Isa},
-    },
+    query::pipeline::stage::write_pattern::WriteCondition,
+    statement::thing::Relation,
     util::write_joined,
     variable::Variable,
 };
@@ -103,13 +100,6 @@ pub enum DeletableKind {
     If { conditions: Vec<WriteCondition>, deletables: Vec<Deletable> },
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum WriteCondition {
-    IsSet(IsSet),
-    Comparison(ComparisonStatement),
-    Isa { variable: Variable, isa: Isa },
-}
-
 impl Pretty for DeletableKind {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -140,20 +130,6 @@ impl Pretty for DeletableKind {
                 Ok(())
             }
             _ => write!(f, "{}", self),
-        }
-    }
-}
-
-impl Pretty for WriteCondition {}
-
-impl fmt::Display for WriteCondition {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::IsSet(isset) => {
-                write!(f, "{} ", token::Keyword::IsSet).and_then(|_| write_joined!(f, ", ", isset.variables))
-            }
-            Self::Comparison(cmp) => write!(f, "{}", cmp),
-            Self::Isa { variable, isa } => write!(f, "{} {}", variable, isa),
         }
     }
 }
