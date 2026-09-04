@@ -284,10 +284,6 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
             let relation = visit_var(children.consume_expected(Rule::var));
             DeletableKind::Links { players, relation }
         }
-        Rule::statement_isset => {
-            let variables = visit_statement_isset(children.consume_expected(Rule::statement_isset)).variables;
-            DeletableKind::IsSet { variables }
-        }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.as_str().to_owned() }),
     };
     debug_assert_eq!(children.try_consume_any(), None);
