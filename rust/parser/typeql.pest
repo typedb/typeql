@@ -36,7 +36,7 @@ clause_insert = { INSERT ~ write_patterns }
 clause_put = { PUT ~ write_patterns }
 clause_update = { UPDATE ~ write_patterns }
 
-clause_delete = { DELETE ~ ( ( statement_deletable | pattern_try_deletable ) ~ SEMICOLON )+ }
+clause_delete = { DELETE ~ ( ( statement_deletable | pattern_if_deletable | pattern_try_deletable ) ~ SEMICOLON )+ }
 
 // STREAM OPERATORS  ===========================================================
 
@@ -72,7 +72,7 @@ pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 
 write_patterns = { ( write_pattern ~ SEMICOLON )+ }
 write_pattern = { statement | pattern_try | write_pattern_if }
-write_pattern_if = { write_if_clause ~ CURLY_OPEN ~ statement+ ~ CURLY_CLOSE }
+write_pattern_if = { write_if_clause ~ CURLY_OPEN ~ ( statement ~ SEMICOLON )+ ~ CURLY_CLOSE }
 write_if_clause = { IF ~ CURLY_OPEN ~ ( write_condition ~ SEMICOLON )+ ~ CURLY_CLOSE }
 write_condition = { statement_isset | statement_comparison | var ~ isa_constraint }
 
