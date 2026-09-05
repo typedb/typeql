@@ -204,7 +204,6 @@ impl fmt::Display for IsSet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ", token::Keyword::IsSet)?;
         write_joined!(f, ", ", self.variables)?;
-        f.write_char(';')?;
         Ok(())
     }
 }
