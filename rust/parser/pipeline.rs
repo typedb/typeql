@@ -234,13 +234,8 @@ fn visit_write_pattern_if(node: Node<'_>) -> WritePattern {
     let span = node.span();
     let mut children = node.into_children();
     let conditions = visit_write_if_clause(children.consume_expected(Rule::write_if_clause));
-    let statements = children
-        .map(|child| match child.as_rule() {
-            Rule::statement => visit_statement(child),
-            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
-        })
-        .collect();
-    WritePattern::If(WritePatternIf::new(span, conditions, statements))
+    let patterns = visit_write_patterns(children.consume_expected(Rule::write_patterns));
+    WritePattern::If(WritePatternIf::new(span, conditions, patterns))
 }
 
 fn visit_clause_delete(node: Node<'_>) -> Delete {
