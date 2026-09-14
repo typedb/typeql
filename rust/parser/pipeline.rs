@@ -13,7 +13,7 @@ use super::{
     literal::{visit_integer_literal, visit_quoted_string_literal},
     statement::{thing::visit_relation, visit_statement},
     type_::{visit_label, visit_label_list},
-    visit_reduce_assignment_var, visit_var, visit_var_named, visit_var_optional, visit_vars,
+    visit_var, visit_var_or_optional, visit_vars,
 };
 use crate::{
     TypeRef, TypeRefAny,
@@ -311,7 +311,7 @@ fn visit_fetch_attribute(node: Node<'_>) -> FetchAttribute {
     debug_assert_eq!(node.as_rule(), Rule::fetch_attribute);
     let span = node.span();
     let mut children = node.into_children();
-    let owner = visit_var_optional(children.consume_expected(Rule::var_optional));
+    let owner = visit_var_or_optional(children.consume_expected(Rule::var_or_optional));
     let child = children.consume_any();
     let attribute = match child.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(child)),
@@ -339,7 +339,7 @@ fn visit_fetch_object_body(node: Node<'_>) -> FetchObjectBody {
             FetchObjectBody::Entries(entries)
         }
         Rule::fetch_attributes_all => {
-            let var = visit_var_optional(child.into_children().consume_expected(Rule::var_optional));
+            let var = visit_var_or_optional(child.into_children().consume_expected(Rule::var_or_optional));
             FetchObjectBody::AttributesAll(var)
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
@@ -420,7 +420,7 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
 pub(super) fn visit_reduce_assign(node: Node<'_>) -> ReduceAssign {
     debug_assert_eq!(node.as_rule(), Rule::reduce_assign);
     let mut children = node.into_children();
-    let variable = visit_reduce_assignment_var(children.consume_expected(Rule::reduce_assignment_var));
+    let variable = visit_var_or_optional(children.consume_expected(Rule::var_or_optional));
     children.consume_expected(Rule::ASSIGN);
     let reducer = visit_reducer(children.consume_expected(Rule::reducer));
     ReduceAssign { variable, reducer }
