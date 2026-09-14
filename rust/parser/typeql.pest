@@ -152,12 +152,12 @@ comparator = { EQ | NEQ | GTE | GT | LTE | LT | CONTAINS | LIKE }
 expression = { expression_list | expression_value }
 
 expression_value = { expression_base ~ ( expression_operator ~ expression_base )* }
-expression_base = { expression_list_index | expression_parenthesis | expression_function | value_literal | var | label_scoped | label }
+expression_base = { expression_list_index | expression_parenthesis | expression_function | value_literal | var_optional | label_scoped | label }
 
 expression_operator = _{ POWER | TIMES | DIVIDE | MODULO | PLUS | MINUS }
 expression_parenthesis = { PAREN_OPEN ~ expression_value ~ PAREN_CLOSE }
 
-expression_list_index = { var ~ list_index }
+expression_list_index = { var_optional ~ list_index }
 list_index = { SQ_BRACKET_OPEN ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
@@ -167,7 +167,7 @@ expression_arguments = { expression ~ ( COMMA ~ expression )* ~ COMMA? }
 
 expression_list = { expression_list_subrange | expression_list_new }
 expression_list_new = { SQ_BRACKET_OPEN ~ expression_value ~ ( COMMA ~ expression_value )* ~ COMMA? ~ SQ_BRACKET_CLOSE }
-expression_list_subrange = { var ~ list_range }
+expression_list_subrange = { var_optional ~ list_range }
 list_range = { SQ_BRACKET_OPEN ~ expression_value ~ DOUBLE_DOT ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_struct = { CURLY_OPEN ~ struct_key ~ COLON ~ struct_value ~ CURLY_CLOSE }
@@ -191,8 +191,8 @@ fetch_stream = { expression_function | function_block | query_pipeline | fetch_a
 
 fetch_single = { PAREN_OPEN? ~ ( function_block | fetch_attribute | expression ) ~ PAREN_CLOSE? }
 
-fetch_attribute = { var_named ~ DOT ~ ( label_list | label ) }
-fetch_attributes_all = { var_named ~ DOT ~ STAR }
+fetch_attribute = { var_optional ~ DOT ~ ( label_list | label ) }
+fetch_attributes_all = { var_optional ~ DOT ~ STAR }
 
 // SCHEMA QUERY ================================================================
 
