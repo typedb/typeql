@@ -119,7 +119,7 @@ impl Pretty for DeletableKind {
                 for condition in conditions {
                     write!(f, "{}; ", condition)?;
                 }
-                write!(f, "}} {{")?;
+                write!(f, "}} {} {{", token::Keyword::Then)?;
                 for deletable in deletables {
                     indent(indent_level + 1, f)?;
                     Pretty::fmt(deletable, indent_level + 1, f)?;
@@ -165,7 +165,7 @@ impl fmt::Display for DeletableKind {
                     for condition in conditions {
                         write!(f, "{}; ", condition)?;
                     }
-                    write!(f, "}} {{ ")?;
+                    write!(f, "}} {} {{ ", token::Keyword::Then)?;
                     for deletable in deletables {
                         write!(f, "{}; ", deletable)?;
                     }

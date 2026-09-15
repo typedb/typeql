@@ -77,7 +77,7 @@ impl Pretty for WritePatternIf {
         for condition in &self.conditions {
             write!(f, "{}; ", condition)?;
         }
-        writeln!(f, "}} {{")?;
+        writeln!(f, "}} {} {{", token::Keyword::Then)?;
         for pattern in &self.patterns {
             indent(indent_level + 1, f)?;
             Pretty::fmt(pattern, indent_level + 1, f)?;
@@ -97,7 +97,7 @@ impl fmt::Display for WritePatternIf {
             for condition in &self.conditions {
                 write!(f, "{}; ", condition)?;
             }
-            write!(f, "}} {{ ")?;
+            write!(f, "}} {} {{ ", token::Keyword::Then)?;
             for pattern in &self.patterns {
                 write!(f, "{}; ", pattern)?;
             }
@@ -118,10 +118,7 @@ impl Pretty for WriteCondition {}
 impl fmt::Display for WriteCondition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::IsSet(isset) => {
-                write!(f, "{} ", token::Keyword::IsSet)?;
-                write_joined!(f, ", ", isset.variables)
-            }
+            Self::IsSet(isset) => write!(f, "{}", isset),
             Self::Comparison(cmp) => write!(f, "{}", cmp),
             Self::Isa { variable, isa } => write!(f, "{} {}", variable, isa),
         }
