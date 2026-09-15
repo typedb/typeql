@@ -78,3 +78,16 @@ $x has name "HELLO";"#;
     //     let expected = typeql_match!(var("x").isa("language")).insert(cvar("x").has(("name", "HELLO")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn test_match_insert_if_query() {
+    let query = r#"match
+$x isa language;
+try { $x has age $a, has name $n; };
+insert
+if { isset $a, $n; } then {
+    $x has name "HELLO";
+};"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}

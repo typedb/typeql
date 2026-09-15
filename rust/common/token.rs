@@ -141,6 +141,7 @@ string_enum! { Keyword
     Struct = "struct",
     Sub = "sub",
     SubX = "sub!",
+    Then = "then",
     Try = "try",
     Value = "value",
     Groupby = "groupby",

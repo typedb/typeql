@@ -234,6 +234,7 @@ fn visit_write_pattern_if(node: Node<'_>) -> WritePattern {
     let span = node.span();
     let mut children = node.into_children();
     let conditions = visit_write_if_clause(children.consume_expected(Rule::write_if_clause));
+    children.skip_expected(Rule::THEN);
     let patterns = visit_write_patterns(children.consume_expected(Rule::write_patterns));
     WritePattern::If(WritePatternIf::new(span, conditions, patterns))
 }
@@ -307,6 +308,7 @@ fn visit_pattern_if_deletable(node: Node<'_>) -> Deletable {
     let span = node.span();
     let mut children = node.into_children();
     let conditions = visit_write_if_clause(children.consume_expected(Rule::write_if_clause));
+    children.skip_expected(Rule::THEN);
     let deletables = children
         .map(|child| match child.as_rule() {
             Rule::statement_deletable => visit_statement_deletable(child),
