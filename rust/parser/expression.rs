@@ -7,7 +7,7 @@
 use pest::pratt_parser::{Assoc, Op, PrattParser};
 
 use super::{
-    IntoChildNodes, Node, Rule, RuleMatcher, literal::visit_value_literal, visit_identifier, visit_var_or_optional,
+    IntoChildNodes, Node, Rule, RuleMatcher, literal::visit_value_literal, visit_identifier, visit_var_or_propagate,
 };
 use crate::{
     common::{Spanned, error::TypeQLError, token},
@@ -76,7 +76,7 @@ fn visit_expression_base(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression_base);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::var_or_optional => Expression::Variable(visit_var_or_optional(child)),
+        Rule::var_or_propagate => Expression::Variable(visit_var_or_propagate(child)),
         Rule::value_literal => Expression::Value(visit_value_literal(child)),
         Rule::expression_function => Expression::Function(visit_expression_function(child)),
         Rule::expression_parenthesis => Expression::Paren(Box::new(visit_expression_parenthesis(child))),
@@ -91,7 +91,7 @@ fn visit_expression_list_index(node: Node<'_>) -> ListIndex {
     debug_assert_eq!(node.as_rule(), Rule::expression_list_index);
     let span = node.span();
     let mut children = node.into_children();
-    let variable = visit_var_or_optional(children.consume_expected(Rule::var_or_optional));
+    let variable = visit_var_or_propagate(children.consume_expected(Rule::var_or_propagate));
     let index = visit_list_index(children.consume_expected(Rule::list_index));
     ListIndex::new(span, variable, index)
 }
@@ -126,7 +126,7 @@ fn visit_expression_list_subrange(node: Node<'_>) -> Expression {
     debug_assert_eq!(node.as_rule(), Rule::expression_list_subrange);
     let span = node.span();
     let mut children = node.into_children();
-    let var = visit_var_or_optional(children.consume_expected(Rule::var_or_optional));
+    let var = visit_var_or_propagate(children.consume_expected(Rule::var_or_propagate));
     let (from, to) = visit_list_range(children.consume_expected(Rule::list_range));
     debug_assert_eq!(children.try_consume_any(), None);
     Expression::ListIndexRange(Box::new(ListIndexRange::new(span, var, from, to)))
