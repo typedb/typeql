@@ -22,7 +22,10 @@ use crate::{
         error::TypeQLError,
         token::{Order, ReduceOperatorCollect, ReduceOperatorStat},
     },
-    parser::define::function::{visit_function_block, visit_pipeline_arguments},
+    parser::{
+        define::function::{visit_function_block, visit_pipeline_arguments},
+        statement::single::visit_statement_isset,
+    },
     pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
     query::{
         Pipeline,
@@ -245,6 +248,10 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
             children.skip_expected(Rule::OF);
             let relation = visit_var(children.consume_expected(Rule::var));
             DeletableKind::Links { players, relation }
+        }
+        Rule::statement_isset => {
+            let variables = visit_statement_isset(children.consume_expected(Rule::statement_isset)).variables;
+            DeletableKind::IsSet { variables }
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.as_str().to_owned() }),
     };
