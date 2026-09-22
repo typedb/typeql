@@ -32,11 +32,11 @@ query_stage_terminal = { clause_fetch ~ SEMICOLON }
 
 clause_match = { MATCH ~ patterns }
 
-clause_insert = { INSERT ~ patterns }
-clause_put = { PUT ~ patterns }
-clause_update = { UPDATE ~ patterns }
+clause_insert = { INSERT ~ write_patterns }
+clause_put = { PUT ~ write_patterns }
+clause_update = { UPDATE ~ write_patterns }
 
-clause_delete = { DELETE ~ ( ( statement_deletable | pattern_try_deletable ) ~ SEMICOLON )+ }
+clause_delete = { DELETE ~ ( ( statement_deletable | pattern_if_deletable | pattern_try_deletable ) ~ SEMICOLON )+ }
 
 // STREAM OPERATORS  ===========================================================
 
@@ -69,6 +69,12 @@ pattern_conjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 pattern_disjunction = { CURLY_OPEN ~ patterns ~ CURLY_CLOSE ~ ( OR ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE )+ }
 pattern_negation = { NOT ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
 pattern_try = { TRY ~ CURLY_OPEN ~ patterns ~ CURLY_CLOSE }
+
+write_patterns = { ( write_pattern ~ SEMICOLON )+ }
+write_pattern = { statement | pattern_try | write_pattern_if }
+write_pattern_if = { write_if_clause ~ THEN ~ CURLY_OPEN ~ write_patterns ~ CURLY_CLOSE }
+write_if_clause = { IF ~ CURLY_OPEN ~ ( write_condition ~ SEMICOLON )+ ~ CURLY_CLOSE }
+write_condition = { statement_isset | statement_comparison | var ~ isa_constraint }
 
 // STATEMENTS ==================================================================
 
@@ -125,11 +131,11 @@ role_player = { type_ref_list ~ COLON ~ var
 
 statement_deletable = { HAS? ~ var ~ OF ~ var
                       | LINKS? ~ relation ~ OF ~ var
-                      | statement_isset
                       | var
                       }
 
 pattern_try_deletable = { TRY ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
+pattern_if_deletable = { write_if_clause ~ THEN ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
 
 // SINGLE STATEMENTS ===========================================================
 
@@ -505,6 +511,8 @@ ISSET = @{ "isset" }
 OR = @{ "or" ~ WB }
 NOT = @{ "not" ~ WB }
 TRY = @{ "try" ~ WB }
+IF = @{ "if" ~ WB }
+THEN = @{ "then" ~ WB }
 
 // COMPARATOR KEYWORDS
 
