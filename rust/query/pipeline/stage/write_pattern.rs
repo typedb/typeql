@@ -56,12 +56,12 @@ impl fmt::Display for WritePattern {
 pub struct WritePatternIf {
     pub span: Option<Span>,
     pub conditions: Vec<WriteCondition>,
-    pub patterns: Vec<WritePattern>,
+    pub then: Vec<WritePattern>,
 }
 
 impl WritePatternIf {
-    pub fn new(span: Option<Span>, conditions: Vec<WriteCondition>, patterns: Vec<WritePattern>) -> Self {
-        Self { span, conditions, patterns }
+    pub fn new(span: Option<Span>, conditions: Vec<WriteCondition>, then: Vec<WritePattern>) -> Self {
+        Self { span, conditions, then }
     }
 }
 
@@ -78,7 +78,7 @@ impl Pretty for WritePatternIf {
             write!(f, "{}; ", condition)?;
         }
         writeln!(f, "}} {} {{", token::Keyword::Then)?;
-        for pattern in &self.patterns {
+        for pattern in &self.then {
             indent(indent_level + 1, f)?;
             Pretty::fmt(pattern, indent_level + 1, f)?;
             writeln!(f, ";")?;
@@ -98,7 +98,7 @@ impl fmt::Display for WritePatternIf {
                 write!(f, "{}; ", condition)?;
             }
             write!(f, "}} {} {{ ", token::Keyword::Then)?;
-            for pattern in &self.patterns {
+            for pattern in &self.then {
                 write!(f, "{}; ", pattern)?;
             }
             f.write_char('}')
