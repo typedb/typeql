@@ -97,3 +97,12 @@ $x has name "HELLO";"#;
     //     let expected = typeql_match!(var("x").isa("language")).insert(cvar("x").has(("name", "HELLO")));
     assert_valid_eq_repr!(expected, parsed, query);
 }
+
+#[test]
+fn test_insert_vector_value_invalid_precision_is_syntax_error() {
+    let query = r#"insert
+$x isa document,
+    has embedding vector([1.0, 2.0, 3.0], "supercalifragilisticexpialidocious");"#;
+    let error = parse_query(query).unwrap_err();
+    assert!(error.to_string().contains("expected FLOAT32"), "unexpected error: {error}");
+}
