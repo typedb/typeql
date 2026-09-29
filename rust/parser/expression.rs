@@ -13,7 +13,10 @@ use crate::{
         BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
         VectorLiteral,
     },
-    parser::{type_::visit_label_scoped, visit_label},
+    parser::{
+        type_::{visit_label_scoped, visit_vector_precision},
+        visit_label,
+    },
     value::{Literal, StructLiteral, ValueLiteral},
 };
 
@@ -92,8 +95,7 @@ fn visit_vector_literal(node: Node<'_>) -> VectorLiteral {
     let mut children = node.into_children();
     children.skip_expected(Rule::VECTOR);
     let list = visit_expression_list(children.consume_expected(Rule::expression_list));
-    let precision =
-        token::VectorPrecision::from(children.consume_expected(Rule::vector_precision).as_str().trim_matches('"'));
+    let precision = visit_vector_precision(children.consume_expected(Rule::vector_precision));
     debug_assert_eq!(children.try_consume_any(), None);
     VectorLiteral::new(span, list, precision)
 }

@@ -109,10 +109,18 @@ pub(super) fn visit_value_type_vector(node: Node<'_>) -> VectorType {
     let mut children = node.into_children();
     children.skip_expected(Rule::VECTOR);
     let length = visit_integer_literal(children.consume_expected(Rule::integer_literal));
-    let precision =
-        token::VectorPrecision::from(children.consume_expected(Rule::vector_precision).as_str().trim_matches('"'));
+    let precision = visit_vector_precision(children.consume_expected(Rule::vector_precision));
     debug_assert_eq!(children.try_consume_any(), None);
     VectorType::new(span, length, precision)
+}
+
+pub(super) fn visit_vector_precision(node: Node<'_>) -> token::VectorPrecision {
+    debug_assert_eq!(node.as_rule(), Rule::vector_precision);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::FLOAT32 => token::VectorPrecision::Float32,
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+    }
 }
 
 pub(super) fn visit_value_type_optional(node: Node<'_>) -> NamedTypeOptional {
