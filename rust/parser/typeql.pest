@@ -226,7 +226,7 @@ relates_declaration = { RELATES ~ label_list ~ ( AS ~ label_list )?
 
 definition_function = { FUN ~ function_signature ~ annotations? ~ COLON ~ function_block }
 
-function_signature = { identifier ~ PAREN_OPEN ~ pipeline_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
+function_signature = { !parameterised_type_name ~ identifier ~ PAREN_OPEN ~ pipeline_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
 pipeline_arguments = { ( pipeline_argument ~ ( COMMA ~ pipeline_argument )* ~ COMMA? )? }
 pipeline_argument = { var ~ COLON ~ named_type_any }
@@ -282,7 +282,7 @@ undefine_annotation_from_type = { annotation_category ~ FROM ~ label }
 undefine_capability = { type_capability_base ~ FROM ~ label }
 undefine_specialise = { AS ~ label ~ FROM ~ label ~ relates_declaration }
 
-undefine_function = { FUN ~ identifier }
+undefine_function = { FUN ~ !parameterised_type_name ~ identifier }
 undefine_struct = { STRUCT ~ identifier }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================

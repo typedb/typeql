@@ -201,3 +201,12 @@ fun greet($p: person, $g: string,) -> string:
     match $p has name $n; return first $n;"#;
     parse_query(query).unwrap();
 }
+
+#[test]
+fn test_define_function_named_vector_is_syntax_error() {
+    let query = r#"define
+fun vector($x: integer) -> integer:
+    match let $y = $x; return first $y;"#;
+    parse_query(query).unwrap_err();
+    parse_query("undefine fun vector;").unwrap_err();
+}
