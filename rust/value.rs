@@ -8,8 +8,9 @@ use std::fmt::{self, Formatter};
 
 use crate::{
     Result,
-    common::{Span, Spanned, error::TypeQLError},
+    common::{Span, Spanned, error::TypeQLError, token},
     pretty::Pretty,
+    util::write_joined,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -122,7 +123,20 @@ pub struct DurationTime {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub enum VectorElement {
+    Integer(SignedIntegerLiteral),
+    Double(SignedDoubleLiteral),
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct VectorLiteral {
+    pub elements: Vec<VectorElement>,
+    pub precision: token::VectorPrecision,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ValueLiteral {
+    Vector(VectorLiteral),
     Boolean(BooleanLiteral),
     Integer(SignedIntegerLiteral),
     Decimal(SignedDecimalLiteral),
@@ -161,9 +175,27 @@ impl fmt::Display for Literal {
     }
 }
 
+impl fmt::Display for VectorElement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            VectorElement::Integer(value) => fmt::Display::fmt(value, f),
+            VectorElement::Double(value) => fmt::Display::fmt(value, f),
+        }
+    }
+}
+
+impl fmt::Display for VectorLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "vector([")?;
+        write_joined!(f, ", ", self.elements)?;
+        write!(f, "], \"{}\")", self.precision)
+    }
+}
+
 impl fmt::Display for ValueLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
+            ValueLiteral::Vector(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Boolean(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Integer(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Decimal(value) => fmt::Display::fmt(value, f),

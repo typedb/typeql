@@ -106,3 +106,17 @@ $x isa document,
     let error = parse_query(query).unwrap_err();
     assert!(error.to_string().contains("expected FLOAT32"), "unexpected error: {error}");
 }
+
+#[test]
+fn test_insert_vector_value_non_literal_element_is_syntax_error() {
+    let query = r#"insert
+$x isa document,
+    has embedding vector([1 + 1, 5.0], "float32");"#;
+    parse_query(query).unwrap_err();
+}
+
+#[test]
+fn test_parse_value_vector() {
+    let value = crate::parse_value(r#"vector([1.0, -2, 3.5], "float32")"#).unwrap();
+    assert_eq!(value.to_string(), r#"vector([1.0, -2, 3.5], "float32")"#);
+}
