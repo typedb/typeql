@@ -123,20 +123,13 @@ pub struct DurationTime {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum VectorElement {
-    Integer(SignedIntegerLiteral),
-    Double(SignedDoubleLiteral),
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct VectorLiteral {
-    pub elements: Vec<VectorElement>,
+    pub elements: Vec<SignedDoubleLiteral>,
     pub precision: token::VectorPrecision,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ValueLiteral {
-    Vector(VectorLiteral),
     Boolean(BooleanLiteral),
     Integer(SignedIntegerLiteral),
     Decimal(SignedDecimalLiteral),
@@ -147,6 +140,7 @@ pub enum ValueLiteral {
     Duration(DurationLiteral),
     String(StringLiteral),
     Struct(StructLiteral),
+    Vector(VectorLiteral),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -175,27 +169,9 @@ impl fmt::Display for Literal {
     }
 }
 
-impl fmt::Display for VectorElement {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            VectorElement::Integer(value) => fmt::Display::fmt(value, f),
-            VectorElement::Double(value) => fmt::Display::fmt(value, f),
-        }
-    }
-}
-
-impl fmt::Display for VectorLiteral {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "vector([")?;
-        write_joined!(f, ", ", self.elements)?;
-        write!(f, "], \"{}\")", self.precision)
-    }
-}
-
 impl fmt::Display for ValueLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            ValueLiteral::Vector(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Boolean(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Integer(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Decimal(value) => fmt::Display::fmt(value, f),
@@ -206,6 +182,7 @@ impl fmt::Display for ValueLiteral {
             ValueLiteral::Duration(value) => fmt::Display::fmt(value, f),
             ValueLiteral::String(value) => fmt::Display::fmt(value, f),
             ValueLiteral::Struct(value) => fmt::Display::fmt(value, f),
+            ValueLiteral::Vector(value) => fmt::Display::fmt(value, f),
         }
     }
 }
@@ -370,6 +347,14 @@ impl fmt::Display for DurationLiteral {
 impl fmt::Display for StructLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(self.inner.as_str())
+    }
+}
+
+impl fmt::Display for VectorLiteral {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "vector([")?;
+        write_joined!(f, ", ", self.elements)?;
+        write!(f, "], \"{}\")", self.precision)
     }
 }
 
