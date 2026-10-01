@@ -6,15 +6,13 @@
 
 use crate::{
     common::{Spanned, error::TypeQLError},
-    parser::{IntoChildNodes, Node, Rule, RuleMatcher},
+    parser::{IntoChildNodes, Node, Rule, RuleMatcher, type_::visit_vector_precision},
     value::{
         BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, DurationDate, DurationLiteral,
         DurationTime, IntegerLiteral, Literal, NumericLiteral, Sign, SignedDecimalLiteral, SignedDoubleLiteral,
         SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral, VectorElement, VectorLiteral,
     },
 };
-
-use crate::parser::type_::visit_vector_precision;
 
 pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
     debug_assert_eq!(node.as_rule(), Rule::value_literal);
