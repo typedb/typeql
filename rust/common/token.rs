@@ -189,6 +189,10 @@ string_enum! { ValueType
     String = "string",
 }
 
+string_enum! { VectorPrecision
+    Float32 = "float32",
+}
+
 string_enum! { Order
     Asc = "asc",
     Desc = "desc",

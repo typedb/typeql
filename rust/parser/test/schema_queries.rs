@@ -130,6 +130,15 @@ attribute my-type,
 }
 
 #[test]
+fn test_define_vector_value_type_query() {
+    let query = r#"define
+attribute embedding,
+    value vector(64, "float32");"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
 fn define_attribute_type_regex() {
     let query = r#"define
 attribute digit,
@@ -191,4 +200,13 @@ struct point: x value double, y value double,;
 fun greet($p: person, $g: string,) -> string:
     match $p has name $n; return first $n;"#;
     parse_query(query).unwrap();
+}
+
+#[test]
+fn test_define_function_named_vector_is_syntax_error() {
+    let query = r#"define
+fun vector($x: integer) -> integer:
+    match let $y = $x; return first $y;"#;
+    parse_query(query).unwrap_err();
+    parse_query("undefine fun vector;").unwrap_err();
 }

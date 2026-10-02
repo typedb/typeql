@@ -6,11 +6,11 @@
 
 use crate::{
     common::{Spanned, error::TypeQLError},
-    parser::{IntoChildNodes, Node, Rule, RuleMatcher},
+    parser::{IntoChildNodes, Node, Rule, RuleMatcher, type_::visit_vector_precision},
     value::{
         BooleanLiteral, DateFragment, DateLiteral, DateTimeLiteral, DateTimeTZLiteral, DurationDate, DurationLiteral,
         DurationTime, IntegerLiteral, Literal, NumericLiteral, Sign, SignedDecimalLiteral, SignedDoubleLiteral,
-        SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral,
+        SignedIntegerLiteral, StringLiteral, TimeFragment, TimeZone, ValueLiteral, VectorLiteral,
     },
 };
 
@@ -19,6 +19,7 @@ pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
     let span = node.span();
     let child = node.into_child();
     let value_literal = match child.as_rule() {
+        Rule::vector_literal => ValueLiteral::Vector(visit_vector_literal(child)),
         Rule::quoted_string_literal => ValueLiteral::String(visit_quoted_string_literal(child)),
         Rule::boolean_literal => ValueLiteral::Boolean(BooleanLiteral { value: child.as_str().to_owned() }),
         Rule::signed_integer => ValueLiteral::Integer(visit_signed_integer(child)),
@@ -33,6 +34,30 @@ pub(super) fn visit_value_literal(node: Node<'_>) -> Literal {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     Literal::new(span, value_literal)
+}
+
+fn visit_vector_literal(node: Node<'_>) -> VectorLiteral {
+    debug_assert_eq!(node.as_rule(), Rule::vector_literal);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::VECTOR);
+    let elements = visit_vector_elements(children.consume_expected(Rule::vector_elements));
+    let precision = visit_vector_precision(children.consume_expected(Rule::vector_precision));
+    debug_assert_eq!(children.try_consume_any(), None);
+    VectorLiteral { elements, precision }
+}
+
+fn visit_vector_elements(node: Node<'_>) -> Vec<SignedDoubleLiteral> {
+    debug_assert_eq!(node.as_rule(), Rule::vector_elements);
+    node.into_children()
+        .map(|child| match child.as_rule() {
+            Rule::signed_double => visit_signed_double(child),
+            Rule::signed_integer => {
+                let SignedIntegerLiteral { sign, integral } = visit_signed_integer(child);
+                SignedDoubleLiteral { sign, double: integral }
+            }
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+        })
+        .collect()
 }
 
 fn visit_sign(node: Node<'_>) -> Sign {
