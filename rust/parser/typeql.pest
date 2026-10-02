@@ -158,7 +158,7 @@ expression_list_index = { var ~ list_index }
 list_index = { SQ_BRACKET_OPEN ~ expression_value ~ SQ_BRACKET_CLOSE }
 
 expression_function = { expression_function_name ~ PAREN_OPEN ~ expression_arguments? ~ PAREN_CLOSE }
-expression_function_name = { builtin_func_name | !parameterised_type_name ~ identifier } // a parameterised type name only parses as its dedicated rule, so malformed vector(...) errors there instead of falling back to an unresolvable function call
+expression_function_name = { builtin_func_name | function_identifier }
 expression_arguments = { expression ~ ( COMMA ~ expression )* ~ COMMA? }
 
 expression_list = { expression_list_subrange | expression_list_new }
@@ -225,7 +225,7 @@ relates_declaration = { RELATES ~ label_list ~ ( AS ~ label_list )?
 
 definition_function = { FUN ~ function_signature ~ annotations? ~ COLON ~ function_block }
 
-function_signature = { !parameterised_type_name ~ identifier ~ PAREN_OPEN ~ pipeline_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
+function_signature = { function_identifier ~ PAREN_OPEN ~ pipeline_arguments ~ PAREN_CLOSE ~ ARROW ~ function_output }
 
 pipeline_arguments = { ( pipeline_argument ~ ( COMMA ~ pipeline_argument )* ~ COMMA? )? }
 pipeline_argument = { var ~ COLON ~ named_type_any }
@@ -281,7 +281,7 @@ undefine_annotation_from_type = { annotation_category ~ FROM ~ label }
 undefine_capability = { type_capability_base ~ FROM ~ label }
 undefine_specialise = { AS ~ label ~ FROM ~ label ~ relates_declaration }
 
-undefine_function = { FUN ~ !parameterised_type_name ~ identifier }
+undefine_function = { FUN ~ function_identifier }
 undefine_struct = { STRUCT ~ identifier }
 
 // TYPE, LABEL AND IDENTIFIER CONSTRUCTS =======================================
@@ -300,6 +300,8 @@ label_list = { label ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
 label_scoped = ${ label ~ COLON ~ label ~ WB } // fully qualified role type label
 
 identifier = @{ IDENTIFIER_LABEL_H ~ IDENTIFIER_LABEL_T* ~ WB } // user defined type, function, struct, or struct field
+function_identifier = _{ !reserved_function_identifier ~ identifier }
+reserved_function_identifier = _{ parametrized_value_type }
 
 struct_key = { identifier }
 
@@ -321,7 +323,7 @@ identifier_var = @{ IDENTIFIER_VAR_H ~ IDENTIFIER_VAR_T* ~ WB }
 value_type = { value_type_vector | value_type_primitive | label }
 value_type_optional = { value_type ~ QUESTION }
 value_type_list = { value_type ~ SQ_BRACKET_OPEN ~ SQ_BRACKET_CLOSE }
-parameterised_type_name = _{ VECTOR } // types taking parameters, e.g. vector(64, "float32")
+parametrized_value_type = _{ VECTOR }
 value_type_vector = { VECTOR ~ PAREN_OPEN ~ integer_literal ~ COMMA ~ vector_precision ~ PAREN_CLOSE }
 vector_precision = ${ "\"" ~ FLOAT32 ~ "\"" }
 
