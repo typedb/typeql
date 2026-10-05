@@ -20,6 +20,7 @@ pub enum Annotation {
     Distinct(Distinct),
     Doc(Doc),
     Independent(Independent),
+    Index(Index),
     Key(Key),
     Meta(Meta),
     Range(Range),
@@ -38,6 +39,7 @@ impl Spanned for Annotation {
             Annotation::Distinct(annotation) => annotation.span(),
             Annotation::Doc(annotation) => annotation.span(),
             Annotation::Independent(annotation) => annotation.span(),
+            Annotation::Index(annotation) => annotation.span(),
             Annotation::Key(annotation) => annotation.span(),
             Annotation::Meta(annotation) => annotation.span(),
             Annotation::Range(annotation) => annotation.span(),
@@ -58,6 +60,7 @@ impl fmt::Display for Annotation {
             Self::Distinct(inner) => fmt::Display::fmt(inner, f),
             Self::Doc(inner) => fmt::Display::fmt(inner, f),
             Self::Independent(inner) => fmt::Display::fmt(inner, f),
+            Self::Index(inner) => fmt::Display::fmt(inner, f),
             Self::Key(inner) => fmt::Display::fmt(inner, f),
             Self::Meta(inner) => fmt::Display::fmt(inner, f),
             Self::Range(inner) => fmt::Display::fmt(inner, f),
@@ -222,6 +225,32 @@ impl Spanned for Independent {
 impl fmt::Display for Independent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}", token::Annotation::Independent)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Index {
+    pub span: Option<Span>,
+    pub metrics: Vec<token::IndexMetric>,
+}
+
+impl Index {
+    pub fn new(span: Option<Span>, metrics: Vec<token::IndexMetric>) -> Self {
+        Self { span, metrics }
+    }
+}
+
+impl Spanned for Index {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl fmt::Display for Index {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}(", token::Annotation::Index)?;
+        write_joined!(f, ", ", &self.metrics)?;
+        write!(f, ")")
     }
 }
 

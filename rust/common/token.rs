@@ -151,6 +151,7 @@ string_enum! { Annotation
     Distinct = "distinct",
     Doc = "doc",
     Independent = "independent",
+    Index = "index",
     Key = "key",
     Meta = "meta",
     Range = "range",
@@ -191,6 +192,10 @@ string_enum! { ValueType
 
 string_enum! { VectorPrecision
     Float32 = "float32",
+}
+
+string_enum! { IndexMetric
+    Cosine = "cosine",
 }
 
 string_enum! { Order

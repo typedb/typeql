@@ -354,6 +354,7 @@ annotation = { ANNOTATION_ABSTRACT
              | ANNOTATION_UNIQUE
              | annotation_card
              | annotation_doc
+             | annotation_index
              | annotation_meta
              | annotation_range
              | annotation_regex
@@ -366,6 +367,8 @@ cardinality_range = { integer_literal ~ DOUBLE_DOT ~ integer_literal? }
 cardinality_exact = { integer_literal }
 
 annotation_doc = { ANNOTATION_DOC ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
+annotation_index = { ANNOTATION_INDEX ~ PAREN_OPEN ~ index_metric ~ ( COMMA ~ index_metric )* ~ COMMA? ~ PAREN_CLOSE }
+index_metric = { COSINE }
 annotation_meta = { ANNOTATION_META ~ PAREN_OPEN ~ quoted_string_literal ~ COMMA ~ quoted_string_literal ~ PAREN_CLOSE }
 
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
@@ -464,6 +467,7 @@ annotation_category = ${ ANNOTATION_ABSTRACT
                        | ANNOTATION_DISTINCT
                        | ANNOTATION_DOC
                        | ANNOTATION_INDEPENDENT
+                       | ANNOTATION_INDEX
                        | ANNOTATION_KEY
                        | ( ANNOTATION_META ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE )
                        | ANNOTATION_RANGE
@@ -484,6 +488,7 @@ ANNOTATION_UNIQUE = @{ "@unique" ~ WB }
 // parametrized
 ANNOTATION_CARD = @{ "@card" ~ WB }
 ANNOTATION_DOC = @{ "@doc" ~ WB }
+ANNOTATION_INDEX = @{ "@index" ~ WB }
 ANNOTATION_META = @{ "@meta" ~ WB }
 ANNOTATION_RANGE = @{ "@range" ~ WB }
 ANNOTATION_REGEX = @{ "@regex" ~ WB }
@@ -572,6 +577,7 @@ STRING = @{ "string" ~ WB }
 STRUCT = @{ "struct" ~ WB }
 VECTOR = @{ "vector" ~ WB }
 FLOAT32 = @{ "float32" ~ WB }
+COSINE = @{ "cosine" ~ WB }
 
 // LITERAL VALUE KEYWORDS
 boolean_literal = ${ TRUE | FALSE } // order of lexer declaration matters
