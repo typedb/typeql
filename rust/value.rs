@@ -354,7 +354,7 @@ impl fmt::Display for VectorLiteral {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "vector([")?;
         write_joined!(f, ", ", self.elements)?;
-        write!(f, "], \"{}\")", self.precision)
+        write!(f, r#"], "{}")"#, self.precision)
     }
 }
 
