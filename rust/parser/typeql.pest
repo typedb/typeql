@@ -367,8 +367,9 @@ cardinality_range = { integer_literal ~ DOUBLE_DOT ~ integer_literal? }
 cardinality_exact = { integer_literal }
 
 annotation_doc = { ANNOTATION_DOC ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
-annotation_index = { ANNOTATION_INDEX ~ PAREN_OPEN ~ index_metric ~ ( COMMA ~ index_metric )* ~ COMMA? ~ PAREN_CLOSE }
-index_metric = { COSINE }
+annotation_index = { ANNOTATION_INDEX ~ PAREN_OPEN ~ index_spec ~ ( COMMA ~ index_spec )* ~ COMMA? ~ PAREN_CLOSE }
+index_spec = ${ HNSW ~ COLON ~ hnsw_metric } // category-scoped index spec, e.g. hnsw:cosine
+hnsw_metric = { COSINE }
 annotation_meta = { ANNOTATION_META ~ PAREN_OPEN ~ quoted_string_literal ~ COMMA ~ quoted_string_literal ~ PAREN_CLOSE }
 
 annotation_regex = { ANNOTATION_REGEX ~ PAREN_OPEN ~ quoted_string_literal ~ PAREN_CLOSE }
@@ -577,6 +578,7 @@ STRING = @{ "string" ~ WB }
 STRUCT = @{ "struct" ~ WB }
 VECTOR = @{ "vector" ~ WB }
 FLOAT32 = @{ "float32" ~ WB }
+HNSW = @{ "hnsw" ~ WB }
 COSINE = @{ "cosine" ~ WB }
 
 // LITERAL VALUE KEYWORDS

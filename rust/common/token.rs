@@ -194,7 +194,7 @@ string_enum! { VectorPrecision
     Float32 = "float32",
 }
 
-string_enum! { IndexMetric
+string_enum! { HnswMetric
     Cosine = "cosine",
 }
 

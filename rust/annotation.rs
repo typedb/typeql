@@ -229,14 +229,27 @@ impl fmt::Display for Independent {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub enum IndexSpec {
+    Hnsw(token::HnswMetric),
+}
+
+impl fmt::Display for IndexSpec {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            IndexSpec::Hnsw(metric) => write!(f, "hnsw:{metric}"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Index {
     pub span: Option<Span>,
-    pub metrics: Vec<token::IndexMetric>,
+    pub specs: Vec<IndexSpec>,
 }
 
 impl Index {
-    pub fn new(span: Option<Span>, metrics: Vec<token::IndexMetric>) -> Self {
-        Self { span, metrics }
+    pub fn new(span: Option<Span>, specs: Vec<IndexSpec>) -> Self {
+        Self { span, specs }
     }
 }
 
@@ -249,7 +262,7 @@ impl Spanned for Index {
 impl fmt::Display for Index {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}(", token::Annotation::Index)?;
-        write_joined!(f, ", ", &self.metrics)?;
+        write_joined!(f, ", ", &self.specs)?;
         write!(f, ")")
     }
 }

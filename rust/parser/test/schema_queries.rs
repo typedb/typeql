@@ -215,9 +215,10 @@ fun vector($x: integer) -> integer:
 fn test_define_vector_value_type_with_index_annotation() {
     let query = r#"define
 attribute embedding,
-    value vector(64, "float32") @index(cosine);"#;
+    value vector(64, "float32") @index(hnsw:cosine);"#;
     let parsed = parse_query(query).unwrap();
     assert_valid_eq_repr!(expected, parsed, query);
     parse_query("undefine @index from embedding;").unwrap();
     parse_query(r#"define attribute e, value vector(4, "float32") @index(metrics=[cosine]);"#).unwrap_err();
+    parse_query(r#"define attribute e, value vector(4, "float32") @index(cosine);"#).unwrap_err();
 }

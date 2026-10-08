@@ -11,8 +11,8 @@ use super::{
 };
 use crate::{
     annotation::{
-        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Doc, Independent, Index, Key, Meta,
-        Range, Regex, Subkey, Unique, Values,
+        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Doc, Independent, Index, IndexSpec,
+        Key, Meta, Range, Regex, Subkey, Unique, Values,
     },
     common::{Spanned, error::TypeQLError, token},
     value::Literal,
@@ -51,15 +51,24 @@ fn visit_annotation_index(node: Node<'_>) -> Index {
     let span = node.span();
     let mut children = node.into_children();
     children.skip_expected(Rule::ANNOTATION_INDEX);
-    let metrics = children.map(visit_index_metric).collect();
-    Index::new(span, metrics)
+    let specs = children.map(visit_index_spec).collect();
+    Index::new(span, specs)
 }
 
-fn visit_index_metric(node: Node<'_>) -> token::IndexMetric {
-    debug_assert_eq!(node.as_rule(), Rule::index_metric);
+fn visit_index_spec(node: Node<'_>) -> IndexSpec {
+    debug_assert_eq!(node.as_rule(), Rule::index_spec);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::HNSW);
+    let metric = visit_hnsw_metric(children.consume_expected(Rule::hnsw_metric));
+    debug_assert_eq!(children.try_consume_any(), None);
+    IndexSpec::Hnsw(metric)
+}
+
+fn visit_hnsw_metric(node: Node<'_>) -> token::HnswMetric {
+    debug_assert_eq!(node.as_rule(), Rule::hnsw_metric);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::COSINE => token::IndexMetric::Cosine,
+        Rule::COSINE => token::HnswMetric::Cosine,
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
