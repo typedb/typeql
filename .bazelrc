@@ -8,6 +8,7 @@ common --experimental_isolated_extension_usages
 try-import ./.bazel-remote-cache.rc
 
 build --incompatible_strict_action_env --java_runtime_version=remotejdk_21 --enable_runfiles --legacy_external_runfiles
+build --@rules_rust//rust/settings:rustfmt.toml=//rust:rustfmt.toml
 run --incompatible_strict_action_env
 test --incompatible_strict_action_env
 
