@@ -36,7 +36,7 @@ clause_insert = { INSERT ~ write_patterns }
 clause_put = { PUT ~ write_patterns }
 clause_update = { UPDATE ~ write_patterns }
 
-clause_delete = { DELETE ~ ( ( statement_deletable | pattern_if_deletable | pattern_try_deletable ) ~ SEMICOLON )+ }
+clause_delete = { DELETE ~ delete_patterns }
 
 // STREAM OPERATORS  ===========================================================
 
@@ -129,13 +129,16 @@ role_player = { type_ref_list ~ COLON ~ var
               | var
               }
 
+
+delete_patterns = { ( delete_pattern ~ SEMICOLON )+ }
+delete_pattern = { statement_deletable | pattern_if_deletable | pattern_try_deletable }
 statement_deletable = { HAS? ~ var ~ OF ~ var
                       | LINKS? ~ relation ~ OF ~ var
                       | var
                       }
 
-pattern_try_deletable = { TRY ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
-pattern_if_deletable = { write_if_clause ~ THEN ~ CURLY_OPEN ~ ( statement_deletable ~ SEMICOLON )+ ~ CURLY_CLOSE }
+pattern_try_deletable = { TRY ~ CURLY_OPEN ~ delete_patterns ~ CURLY_CLOSE }
+pattern_if_deletable = { write_if_clause ~ THEN ~ CURLY_OPEN ~ delete_patterns ~ CURLY_CLOSE }
 
 // SINGLE STATEMENTS ===========================================================
 
