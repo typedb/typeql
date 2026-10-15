@@ -96,7 +96,6 @@ pub enum DeletableKind {
     Links { players: Relation, relation: Variable },
     Concept { variable: Variable },
     Optional { deletables: Vec<Deletable> },
-    IsSet { variables: Vec<Variable> },
     If { conditions: Vec<WriteCondition>, deletables: Vec<Deletable> },
 }
 
@@ -153,11 +152,6 @@ impl fmt::Display for DeletableKind {
                         write!(f, "{}; ", deletable)?;
                     }
                     f.write_char('}')?;
-                    Ok(())
-                }
-                Self::IsSet { variables } => {
-                    write!(f, "{} ", token::Keyword::IsSet)?;
-                    write_joined!(f, ", ", variables)?;
                     Ok(())
                 }
                 Self::If { conditions, deletables } => {

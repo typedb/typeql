@@ -92,7 +92,7 @@ bazel_dep(name = "typedb_behaviour", version = "0.0.0")
 git_override(
     module_name = "typedb_behaviour",
     remote = "https://github.com/krishnangovindraj/typedb-behaviour",
-    commit = "4ff438ec60080874e78866148775c9635cfef977",
+    commit = "0d338b53c522b74ee773b0ea7638e79f1fd67cd1",
 )
 
 # workspace_refs for rust sync
