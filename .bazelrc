@@ -5,6 +5,9 @@
 # Enable isolated extension usages for crate universe
 common --experimental_isolated_extension_usages
 
+# Default to modern standard when building this workspace
+common --incompatible_default_to_explicit_init_py
+
 try-import ./.bazel-remote-cache.rc
 
 build --incompatible_strict_action_env --java_runtime_version=remotejdk_21 --enable_runfiles --legacy_external_runfiles
