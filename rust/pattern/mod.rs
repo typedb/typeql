@@ -86,7 +86,7 @@ impl Optional {
 
 impl Pretty for Optional {
     fn fmt(&self, indent_level: usize, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ", token::Keyword::Not)?;
+        write!(f, "{} ", token::Keyword::Try)?;
         pretty_fmt_patterns(&self.patterns, indent_level + 1, f)?;
         Ok(())
     }

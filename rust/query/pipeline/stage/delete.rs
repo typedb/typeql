@@ -9,7 +9,9 @@ use std::fmt::{self, Write};
 use crate::{
     common::{Span, Spanned, token},
     pretty::{Pretty, indent},
+    query::pipeline::stage::write_pattern::WriteCondition,
     statement::thing::Relation,
+    util::write_joined,
     variable::Variable,
 };
 
@@ -94,6 +96,7 @@ pub enum DeletableKind {
     Links { players: Relation, relation: Variable },
     Concept { variable: Variable },
     Optional { deletables: Vec<Deletable> },
+    If { conditions: Vec<WriteCondition>, deletables: Vec<Deletable> },
 }
 
 impl Pretty for DeletableKind {
@@ -101,6 +104,21 @@ impl Pretty for DeletableKind {
         match self {
             Self::Optional { deletables } => {
                 writeln!(f, "{} {{", token::Keyword::Try)?;
+                for deletable in deletables {
+                    indent(indent_level + 1, f)?;
+                    Pretty::fmt(deletable, indent_level + 1, f)?;
+                    writeln!(f, ";")?;
+                    indent(indent_level, f)?;
+                }
+                f.write_char('}')?;
+                Ok(())
+            }
+            Self::If { conditions, deletables } => {
+                write!(f, "{} {{ ", token::Keyword::If)?;
+                for condition in conditions {
+                    write!(f, "{}; ", condition)?;
+                }
+                write!(f, "}} {} {{", token::Keyword::Then)?;
                 for deletable in deletables {
                     indent(indent_level + 1, f)?;
                     Pretty::fmt(deletable, indent_level + 1, f)?;
@@ -130,6 +148,18 @@ impl fmt::Display for DeletableKind {
                 Self::Concept { variable } => write!(f, "{}", variable),
                 Self::Optional { deletables } => {
                     write!(f, "{} {{ ", token::Keyword::Try)?;
+                    for deletable in deletables {
+                        write!(f, "{}; ", deletable)?;
+                    }
+                    f.write_char('}')?;
+                    Ok(())
+                }
+                Self::If { conditions, deletables } => {
+                    write!(f, "{} {{ ", token::Keyword::If)?;
+                    for condition in conditions {
+                        write!(f, "{}; ", condition)?;
+                    }
+                    write!(f, "}} {} {{ ", token::Keyword::Then)?;
                     for deletable in deletables {
                         write!(f, "{}; ", deletable)?;
                     }
