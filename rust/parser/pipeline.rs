@@ -409,7 +409,9 @@ fn visit_fetch_object_body(node: Node<'_>) -> FetchObjectBody {
             FetchObjectBody::Entries(entries)
         }
         Rule::fetch_attributes_all => {
-            let var = visit_var_or_propagate_optional(child.into_children().consume_expected(Rule::var_or_propagate_optional));
+            let var = visit_var_or_propagate_optional(
+                child.into_children().consume_expected(Rule::var_or_propagate_optional),
+            );
             FetchObjectBody::AttributesAll(var)
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
