@@ -13,7 +13,7 @@ use super::{
     literal::{visit_integer_literal, visit_quoted_string_literal},
     statement::{thing::visit_relation, visit_statement},
     type_::{visit_label, visit_label_list},
-    visit_assignment_var, visit_var, visit_var_or_propagate, visit_vars,
+    visit_assignment_var, visit_var, visit_var_or_propagate_optional, visit_vars,
 };
 use crate::{
     TypeRef, TypeRefAny,
@@ -381,7 +381,7 @@ fn visit_fetch_attribute(node: Node<'_>) -> FetchAttribute {
     debug_assert_eq!(node.as_rule(), Rule::fetch_attribute);
     let span = node.span();
     let mut children = node.into_children();
-    let owner = visit_var_or_propagate(children.consume_expected(Rule::var_or_propagate));
+    let owner = visit_var_or_propagate_optional(children.consume_expected(Rule::var_or_propagate_optional));
     let child = children.consume_any();
     let attribute = match child.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(child)),
@@ -409,7 +409,7 @@ fn visit_fetch_object_body(node: Node<'_>) -> FetchObjectBody {
             FetchObjectBody::Entries(entries)
         }
         Rule::fetch_attributes_all => {
-            let var = visit_var_or_propagate(child.into_children().consume_expected(Rule::var_or_propagate));
+            let var = visit_var_or_propagate_optional(child.into_children().consume_expected(Rule::var_or_propagate_optional));
             FetchObjectBody::AttributesAll(var)
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),

@@ -226,8 +226,8 @@ fn visit_var(node: Node<'_>) -> Variable {
     }
 }
 
-fn visit_var_or_propagate(node: Node<'_>) -> Variable {
-    debug_assert_eq!(node.as_rule(), Rule::var_or_propagate);
+fn visit_var_or_propagate_optional(node: Node<'_>) -> Variable {
+    debug_assert_eq!(node.as_rule(), Rule::var_or_propagate_optional);
     let child = node.into_child();
     match child.as_rule() {
         Rule::var => visit_var(child),
