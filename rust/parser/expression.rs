@@ -10,7 +10,8 @@ use super::{IntoChildNodes, Node, Rule, RuleMatcher, literal::visit_value_litera
 use crate::{
     common::{Spanned, error::TypeQLError, token},
     expression::{
-        BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange, Operation, Paren,
+        BuiltinFunctionName, Expression, FunctionCall, FunctionName, List, ListIndex, ListIndexRange,
+        NamespacedFunctionName, Operation, Paren,
     },
     parser::{type_::visit_label_scoped, visit_label},
     value::{Literal, StructLiteral, ValueLiteral},
@@ -151,6 +152,7 @@ fn visit_expression_function_name(node: Node<'_>) -> FunctionName {
     match child.as_rule() {
         Rule::identifier => FunctionName::Identifier(visit_identifier(child)),
         Rule::builtin_func_name => FunctionName::Builtin(visit_builtin_func_name(child)),
+        Rule::namespaced_identifier => FunctionName::Namespaced(visit_namespaced_identifier(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
@@ -172,4 +174,11 @@ fn visit_builtin_func_name(node: Node<'_>) -> BuiltinFunctionName {
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     };
     BuiltinFunctionName::new(span, token)
+}
+
+fn visit_namespaced_identifier(node: Node<'_>) -> NamespacedFunctionName {
+    debug_assert_eq!(node.as_rule(), Rule::namespaced_identifier);
+    let span = node.span();
+    let name = node.as_str().to_owned();
+    NamespacedFunctionName::new(span, name)
 }

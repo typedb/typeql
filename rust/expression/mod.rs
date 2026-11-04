@@ -46,8 +46,35 @@ impl fmt::Display for BuiltinFunctionName {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub struct NamespacedFunctionName {
+    pub span: Option<Span>,
+    pub name: String,
+}
+
+impl NamespacedFunctionName {
+    pub fn new(span: Option<Span>, name: String) -> Self {
+        Self { span, name }
+    }
+}
+
+impl Spanned for NamespacedFunctionName {
+    fn span(&self) -> Option<Span> {
+        self.span
+    }
+}
+
+impl Pretty for NamespacedFunctionName {}
+
+impl fmt::Display for NamespacedFunctionName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum FunctionName {
     Builtin(BuiltinFunctionName),
+    Namespaced(NamespacedFunctionName),
     Identifier(Identifier),
 }
 
@@ -57,6 +84,7 @@ impl Spanned for FunctionName {
     fn span(&self) -> Option<Span> {
         match self {
             Self::Builtin(inner) => inner.span(),
+            Self::Namespaced(inner) => inner.span(),
             Self::Identifier(inner) => inner.span(),
         }
     }
@@ -66,6 +94,7 @@ impl fmt::Display for FunctionName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Builtin(inner) => fmt::Display::fmt(inner, f),
+            Self::Namespaced(inner) => fmt::Display::fmt(inner, f),
             Self::Identifier(inner) => fmt::Display::fmt(inner, f),
         }
     }

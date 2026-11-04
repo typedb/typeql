@@ -42,12 +42,15 @@ rust_host_tools = use_extension("@rules_rust//rust:extensions.bzl", "rust_host_t
 rust_host_tools.host_tools(version = "1.93.0")
 
 # Python
-bazel_dep(name = "rules_python", version = "1.0.0")
+bazel_dep(name = "rules_python", version = "2.3.2")
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
     is_default = True,
     python_version = "3.11",
 )
+
+rules_python_config = use_extension("@rules_python//python/extensions:config.bzl", "config")
+rules_python_config.explicit_init_py(default = True)
 
 # Kotlin
 bazel_dep(name = "rules_kotlin", version = "2.0.0")
@@ -75,21 +78,21 @@ bazel_dep(name = "typedb_bazel_distribution", version = "0.0.0")
 git_override(
     module_name = "typedb_bazel_distribution",
     remote = "https://github.com/typedb/bazel-distribution",
-    commit = "dd811cf28715bbce8374e5e0f9defaf772e7dd36",
+    commit = "3140b73924132511cfd4015479816f94351b90a8",
 )
 
 bazel_dep(name = "typedb_dependencies", version = "0.0.0")
 git_override(
     module_name = "typedb_dependencies",
     remote = "https://github.com/typedb/dependencies",
-    commit = "8428a895a99930b8974ce3056f362f390486eb92",
+    commit = "502af30cfbe6b52e968c4ee16305483e88f4b854",
 )
 
 bazel_dep(name = "typedb_behaviour", version = "0.0.0")
 git_override(
     module_name = "typedb_behaviour",
     remote = "https://github.com/typedb/typedb-behaviour",
-    commit = "27d4a189ba94b68efe453cacdc227e310b00decc",
+    commit = "63c4480c7fa38875d745c5c5ccc2a4fbea2bb683",
 )
 
 # workspace_refs for rust sync

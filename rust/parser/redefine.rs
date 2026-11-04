@@ -9,9 +9,9 @@ use super::{
 };
 use crate::{
     common::{Spanned, error::TypeQLError},
-    parser::{annotation::visit_annotations, define::function::visit_definition_function},
+    parser::{annotation::visit_annotations, define::function::visit_definition_function, type_::visit_label_scoped},
     query::schema::Redefine,
-    schema::definable::{Definable, Type},
+    schema::definable::{Definable, RoleTypeRename, Type, TypeRename},
 };
 
 pub(super) fn visit_query_redefine(node: Node<'_>) -> Redefine {
@@ -25,13 +25,46 @@ fn visit_redefinable(node: Node<'_>) -> Definable {
     debug_assert_eq!(node.as_rule(), Rule::redefinable);
     let child = node.into_child();
     match child.as_rule() {
-        Rule::redefinable_type => visit_redefinable_kind(child),
+        Rule::redefinable_label => visit_redefinable_label(child),
+        Rule::redefinable_type => visit_redefinable_type(child),
         Rule::definition_function => Definable::Function(visit_definition_function(child)),
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }
 
-fn visit_redefinable_kind(node: Node<'_>) -> Definable {
+fn visit_redefinable_label(node: Node<'_>) -> Definable {
+    debug_assert_eq!(node.as_rule(), Rule::redefinable_label);
+    let span = node.span();
+    let mut children = node.into_children();
+    let first_child = children.consume_any();
+    match first_child.as_rule() {
+        Rule::kind => {
+            let kind = Some(visit_kind(first_child));
+            let from = visit_label(children.consume_expected(Rule::label));
+            children.skip_expected(Rule::LABEL);
+            let to = visit_label(children.consume_expected(Rule::label));
+            Definable::TypeRename(TypeRename { kind, from, to, span })
+        }
+        Rule::label => {
+            let kind = None;
+            let from = visit_label(first_child);
+            children.skip_expected(Rule::LABEL);
+            let to = visit_label(children.consume_expected(Rule::label));
+            Definable::TypeRename(TypeRename { kind, from, to, span })
+        }
+        Rule::label_scoped => {
+            let from = visit_label_scoped(first_child);
+            children.skip_expected(Rule::LABEL);
+            let to = visit_label(children.consume_expected(Rule::label));
+            Definable::RoleTypeRename(RoleTypeRename { from, to, span })
+        }
+        _ => {
+            unreachable!("{}", TypeQLError::IllegalGrammar { input: first_child.as_str().to_owned() })
+        }
+    }
+}
+
+fn visit_redefinable_type(node: Node<'_>) -> Definable {
     let span = node.span();
     let mut children = node.into_children();
     let kind = children.try_consume_expected(Rule::kind).map(visit_kind);
