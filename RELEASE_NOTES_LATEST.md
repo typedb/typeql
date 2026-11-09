@@ -3,7 +3,7 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.14.0
+cargo add typeql@3.15.0-rc0
 ```
 
 
@@ -17,9 +17,11 @@ cargo add typeql@3.14.0
 
 
 ## Other Improvements
-- **Update dependencies to include ordered toml files**
-  Update dependencies to include ordered toml files
+- **Introduce isset constraints, expression short-circuiting & 'if' conditions in writes**
+  Introduces isset constraints, expression short-circuiting & 'if' conditions in writes
   
   
+- **Update bazelrc to squash python init.py warning**
+
     
 
