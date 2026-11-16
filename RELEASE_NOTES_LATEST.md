@@ -17,11 +17,6 @@ cargo add typeql@3.15.0
 
 
 ## Other Improvements
-- **Prepare release 3.15.0-rc0**
-  Bump version & prepare release notes
-  
-  
-  
 - **Introduce isset constraints, expression short-circuiting & 'if' conditions in writes**
   Introduces isset constraints, expression short-circuiting & 'if' conditions in writes
   
