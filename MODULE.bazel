@@ -20,26 +20,17 @@ bazel_dep(name = "rules_pkg", version = "1.0.1")
 # ===========================================================
 
 # Rust
-bazel_dep(name = "rules_rust", version = "0.56.0")
-# Backport a bug fix from rules_rust 0.58 (bazelbuild/rules_rust#3251)
-git_override(
-    module_name = "rules_rust",
-    remote = "https://github.com/bazelbuild/rules_rust",
-    tag = "0.56.0",
-    patches = ["@@typedb_dependencies+//patches:rules_rust.patch"],
-)
+bazel_dep(name = "rules_rust", version = "0.75.0")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2024",
-    versions = ["1.93.0"],
+    versions = ["1.98.0"],
     rustfmt_version = "nightly/2026-04-15",
 )
 use_repo(rust, "rust_toolchains")
 register_toolchains("@rust_toolchains//:all")
 
-rust_host_tools = use_extension("@rules_rust//rust:extensions.bzl", "rust_host_tools")
-rust_host_tools.host_tools(version = "1.93.0")
 
 # Python
 bazel_dep(name = "rules_python", version = "2.3.2")
@@ -64,7 +55,7 @@ bazel_dep(name = "rules_java", version = "8.6.2")
 # ===========================================================
 
 # Rust crates
-crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate = use_extension("@typedb_dependencies//library/crates:extensions.bzl", "typedb_crates")
 use_repo(crate, "crates")
 
 # Maven
