@@ -22,7 +22,6 @@ rust_library(
         "parser/typeql.pest",
     ],
     deps = [
-        "@crates//:tz-rs",
         "@crates//:itertools",
         "@crates//:pest",
         "@crates//:regex",

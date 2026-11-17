@@ -76,6 +76,3 @@
 			default-features = false
 			features = []
 			path = "rust"
-
-[workspace.dependencies.tz-rs]
-version = "0.7.3"

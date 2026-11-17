@@ -64,6 +64,3 @@
 [[test]]
 	name = "test_debug"
 	path = "tests/behaviour/debug.rs"
-
-[dependencies.tz-rs]
-workspace = true
