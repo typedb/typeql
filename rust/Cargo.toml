@@ -12,9 +12,6 @@
 
 [dependencies]
 
-	[dependencies.chrono]
-		workspace = true
-
 	[dependencies.itertools]
 		workspace = true
 
@@ -67,3 +64,6 @@
 [[test]]
 	name = "test_debug"
 	path = "tests/behaviour/debug.rs"
+
+[dependencies.tz-rs]
+workspace = true
