@@ -7,11 +7,6 @@
 
 	[workspace.dependencies]
 
-		[workspace.dependencies.chrono]
-			default-features = false
-			features = ["alloc", "clock", "default", "iana-time-zone", "js-sys", "now", "oldtime", "std", "wasm-bindgen", "wasmbind", "winapi", "windows-link"]
-			version = "0.4.45"
-
 		[workspace.dependencies.criterion]
 			default-features = false
 			features = ["cargo_bench_support", "default", "plotters", "rayon"]
