@@ -11,10 +11,10 @@ use super::{
 };
 use crate::{
     annotation::{
-        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Doc, Independent, Key, Meta, Range,
-        Regex, Subkey, Unique, Values,
+        Abstract, Annotation, Cardinality, CardinalityRange, Cascade, Distinct, Doc, Independent, Index, IndexSpec,
+        Key, Meta, Range, Regex, Subkey, Unique, Values,
     },
-    common::{Spanned, error::TypeQLError},
+    common::{Spanned, error::TypeQLError, token},
     value::Literal,
 };
 
@@ -36,11 +36,39 @@ fn visit_annotation(node: Node<'_>) -> Annotation {
         Rule::ANNOTATION_UNIQUE => Annotation::Unique(Unique::new(span)),
         Rule::annotation_card => Annotation::Cardinality(visit_annotation_card(child)),
         Rule::annotation_doc => Annotation::Doc(visit_annotation_doc(child)),
+        Rule::annotation_index => Annotation::Index(visit_annotation_index(child)),
         Rule::annotation_meta => Annotation::Meta(visit_annotation_meta(child)),
         Rule::annotation_range => Annotation::Range(visit_annotation_range(child)),
         Rule::annotation_regex => Annotation::Regex(visit_annotation_regex(child)),
         Rule::annotation_subkey => Annotation::Subkey(visit_annotation_subkey(child)),
         Rule::annotation_values => Annotation::Values(visit_annotation_values(child)),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+    }
+}
+
+fn visit_annotation_index(node: Node<'_>) -> Index {
+    debug_assert_eq!(node.as_rule(), Rule::annotation_index);
+    let span = node.span();
+    let mut children = node.into_children();
+    children.skip_expected(Rule::ANNOTATION_INDEX);
+    let specs = children.map(visit_index_spec).collect();
+    Index::new(span, specs)
+}
+
+fn visit_index_spec(node: Node<'_>) -> IndexSpec {
+    debug_assert_eq!(node.as_rule(), Rule::index_spec);
+    let mut children = node.into_children();
+    children.skip_expected(Rule::HNSW);
+    let metric = visit_hnsw_metric(children.consume_expected(Rule::hnsw_metric));
+    debug_assert_eq!(children.try_consume_any(), None);
+    IndexSpec::Hnsw(metric)
+}
+
+fn visit_hnsw_metric(node: Node<'_>) -> token::HnswMetric {
+    debug_assert_eq!(node.as_rule(), Rule::hnsw_metric);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::COSINE => token::HnswMetric::Cosine,
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
     }
 }

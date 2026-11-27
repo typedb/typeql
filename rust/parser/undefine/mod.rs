@@ -95,6 +95,7 @@ fn visit_annotation_category(node: Node<'_>) -> AnnotationCategory {
         Rule::ANNOTATION_DISTINCT => AnnotationCategory::Distinct,
         Rule::ANNOTATION_DOC => AnnotationCategory::Doc,
         Rule::ANNOTATION_INDEPENDENT => AnnotationCategory::Independent,
+        Rule::ANNOTATION_INDEX => AnnotationCategory::Index,
         Rule::ANNOTATION_KEY => AnnotationCategory::Key,
         Rule::ANNOTATION_META => {
             let str = children.consume_expected(Rule::quoted_string_literal);
