@@ -130,6 +130,15 @@ attribute my-type,
 }
 
 #[test]
+fn test_define_vector_value_type_query() {
+    let query = r#"define
+attribute embedding,
+    value vector(64, "float32");"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
 fn define_attribute_type_regex() {
     let query = r#"define
 attribute digit,
@@ -191,4 +200,41 @@ struct point: x value double, y value double,;
 fun greet($p: person, $g: string,) -> string:
     match $p has name $n; return first $n;"#;
     parse_query(query).unwrap();
+}
+
+#[test]
+fn redefine_rename_type() {
+    let query = r#"redefine
+person label user;"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn redefine_role_type() {
+    let query = r#"redefine
+rel:old-role label new-role;"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+}
+
+#[test]
+fn test_define_function_named_vector_is_syntax_error() {
+    let query = r#"define
+fun vector($x: integer) -> integer:
+    match let $y = $x; return first $y;"#;
+    parse_query(query).unwrap_err();
+    parse_query("undefine fun vector;").unwrap_err();
+}
+
+#[test]
+fn test_define_vector_value_type_with_index_annotation() {
+    let query = r#"define
+attribute embedding,
+    value vector(64, "float32") @index(hnsw:cosine);"#;
+    let parsed = parse_query(query).unwrap();
+    assert_valid_eq_repr!(expected, parsed, query);
+    parse_query("undefine @index from embedding;").unwrap();
+    parse_query(r#"define attribute e, value vector(4, "float32") @index(metrics=[cosine]);"#).unwrap_err();
+    parse_query(r#"define attribute e, value vector(4, "float32") @index(cosine);"#).unwrap_err();
 }

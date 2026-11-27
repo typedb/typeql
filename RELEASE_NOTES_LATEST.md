@@ -3,50 +3,49 @@
 
 Available through https://crates.io/crates/typeql.
 ```
-cargo add typeql@3.12.0
+cargo add typeql@3.16.0-rc0
 ```
 
 
 ## New Features
-- **@doc and @meta annotations**
+- **Support vector value type**
   
-  We implement `@doc("docstring")` and `@meta("key", "value")` schema annotations. These annotations can be attached to types and capabilities i.e. `owns`, `plays`, `relates`, and `sub`:
+  Adds support for declaring `vector`. This lets users work with embeddings, and later express vector-similarity queries.
   
-  ```php
+  1. Declaring a vector embedding attribute 
+  ```typeql
   define
-  entity person @doc("this represents an individual client") @meta("icon", ":silhouette.png"),
-    owns name @doc("full name including title");
-  ```
-  ```php
-  match
-    $x isa client;
-    let $x_icon = get_meta("icon", $t); # get each client with a UI display icon hint
+  attribute embedding,
+      value vector(64, "float32");
   ```
   
-  These annotations can also be attached to function definitions. They go at the end of the signature, before the colon introducing the body of the function:
-  ```php
-  define
-  fun get_random_number() -> integer
-      @doc("chosen by a fair dice roll"):
-  match
-    let $rand = 4;
-  return first $rand;
+  2. Inserting a vector embedding attribute: using declarative syntax
+  ```typeql
+  insert
+  $x isa document,
+      has embedding vector([1.0, 2.0, 3.0], "float32");
+  ```
+  
+  3. Inserting a vector embedding attribute: using `given` syntax
+  ```typeql
+  given $e: vector(64, "float32");
+  insert
+  $x isa document,
+      has embedding $e;
   ```
   
   
-- **Add given stage**
-  Adds the 'given' stage to the language.
-  
-  
-  
-
 ## Bugs Fixed
 
-
 ## Code Refactors
-
-
+- **Simplify workspace referencing**
+  Update workspace reference setup in `MODULE.bazel` to support the new simplified approach that avoids keeping a separate dictionary of dependencies.
+  
+  
 ## Other Improvements
-
+- **Update dependency refs**
+  
+  
+  
     
 

@@ -120,11 +120,13 @@ string_enum! { Keyword
     Fun = "fun",
     Given = "given",
     Has = "has",
+    If = "if",
     IID = "iid",
     In = "in",
     Is = "is",
     Isa = "isa",
     IsaX = "isa!",
+    IsSet = "isset",
     Label = "label",
     Last = "last",
     Let = "let",
@@ -139,6 +141,7 @@ string_enum! { Keyword
     Struct = "struct",
     Sub = "sub",
     SubX = "sub!",
+    Then = "then",
     Try = "try",
     Value = "value",
     Groupby = "groupby",
@@ -151,6 +154,7 @@ string_enum! { Annotation
     Distinct = "distinct",
     Doc = "doc",
     Independent = "independent",
+    Index = "index",
     Key = "key",
     Meta = "meta",
     Range = "range",
@@ -187,6 +191,14 @@ string_enum! { ValueType
     Duration = "duration",
     Integer = "integer",
     String = "string",
+}
+
+string_enum! { VectorPrecision
+    Float32 = "float32",
+}
+
+string_enum! { HnswMetric
+    Cosine = "cosine",
 }
 
 string_enum! { Order

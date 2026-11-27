@@ -13,7 +13,7 @@ use super::{
     literal::{visit_integer_literal, visit_quoted_string_literal},
     statement::{thing::visit_relation, visit_statement},
     type_::{visit_label, visit_label_list},
-    visit_reduce_assignment_var, visit_var, visit_var_named, visit_vars,
+    visit_assignment_var, visit_var, visit_var_or_propagate_optional, visit_vars,
 };
 use crate::{
     TypeRef, TypeRefAny,
@@ -22,7 +22,13 @@ use crate::{
         error::TypeQLError,
         token::{Order, ReduceOperatorCollect, ReduceOperatorStat},
     },
-    parser::define::function::{visit_function_block, visit_pipeline_arguments},
+    parser::{
+        define::function::{visit_function_block, visit_pipeline_arguments},
+        statement::{
+            single::{visit_statement_comparison, visit_statement_isset},
+            thing::visit_isa_constraint,
+        },
+    },
     pattern::{Conjunction, Disjunction, Negation, Optional, Pattern},
     query::{
         Pipeline,
@@ -35,6 +41,7 @@ use crate::{
                 given::Given,
                 modifier::{Distinct, Limit, Offset, OrderedVariable, Require, Select, Sort},
                 reduce::{Collect, Count, Reducer, Stat},
+                write_pattern::{WriteCondition, WritePattern, WritePatternIf},
             },
         },
         stage::{
@@ -183,7 +190,7 @@ fn visit_clause_insert(node: Node<'_>) -> Insert {
     debug_assert_eq!(node.as_rule(), Rule::clause_insert);
     let span = node.span();
     let mut children = node.into_children();
-    let patterns = visit_patterns(children.skip_expected(Rule::INSERT).consume_expected(Rule::patterns));
+    let patterns = visit_write_patterns(children.skip_expected(Rule::INSERT).consume_expected(Rule::write_patterns));
     debug_assert_eq!(children.try_consume_any(), None);
     Insert::new(span, patterns)
 }
@@ -192,7 +199,7 @@ fn visit_clause_put(node: Node<'_>) -> Put {
     debug_assert_eq!(node.as_rule(), Rule::clause_put);
     let span = node.span();
     let mut children = node.into_children();
-    let patterns = visit_patterns(children.skip_expected(Rule::PUT).consume_expected(Rule::patterns));
+    let patterns = visit_write_patterns(children.skip_expected(Rule::PUT).consume_expected(Rule::write_patterns));
     debug_assert_eq!(children.try_consume_any(), None);
     Put::new(span, patterns)
 }
@@ -201,27 +208,94 @@ fn visit_clause_update(node: Node<'_>) -> Update {
     debug_assert_eq!(node.as_rule(), Rule::clause_update);
     let span = node.span();
     let mut children = node.into_children();
-    let patterns = visit_patterns(children.skip_expected(Rule::UPDATE).consume_expected(Rule::patterns));
+    let patterns = visit_write_patterns(children.skip_expected(Rule::UPDATE).consume_expected(Rule::write_patterns));
     debug_assert_eq!(children.try_consume_any(), None);
     Update::new(span, patterns)
+}
+
+fn visit_write_patterns(node: Node<'_>) -> Vec<WritePattern> {
+    debug_assert_eq!(node.as_rule(), Rule::write_patterns);
+    node.into_children().map(visit_write_pattern).collect()
+}
+
+fn visit_write_pattern(node: Node<'_>) -> WritePattern {
+    debug_assert_eq!(node.as_rule(), Rule::write_pattern);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::statement => WritePattern::Statement(visit_statement(child)),
+        Rule::pattern_try => WritePattern::Optional(visit_pattern_try(child)),
+        Rule::write_pattern_if => visit_write_pattern_if(child),
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+    }
+}
+
+fn visit_write_pattern_if(node: Node<'_>) -> WritePattern {
+    debug_assert_eq!(node.as_rule(), Rule::write_pattern_if);
+    let span = node.span();
+    let mut children = node.into_children();
+    let conditions = visit_write_if_clause(children.consume_expected(Rule::write_if_clause));
+    children.skip_expected(Rule::THEN);
+    let then = visit_write_patterns(children.consume_expected(Rule::write_patterns));
+    WritePattern::If(WritePatternIf::new(span, conditions, then))
+}
+
+fn visit_write_if_clause(node: Node<'_>) -> Vec<WriteCondition> {
+    debug_assert_eq!(node.as_rule(), Rule::write_if_clause);
+    node.into_children()
+        .skip_expected(Rule::IF)
+        .map(|child| match child.as_rule() {
+            Rule::write_condition => visit_write_condition(child),
+            _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
+        })
+        .collect()
+}
+
+fn visit_write_condition(node: Node<'_>) -> WriteCondition {
+    debug_assert_eq!(node.as_rule(), Rule::write_condition);
+    let mut children = node.into_children();
+    match children.peek_rule().unwrap() {
+        Rule::statement_isset => {
+            WriteCondition::IsSet(visit_statement_isset(children.consume_expected(Rule::statement_isset)))
+        }
+        Rule::statement_comparison => WriteCondition::Comparison(visit_statement_comparison(
+            children.consume_expected(Rule::statement_comparison),
+        )),
+        Rule::var => {
+            let variable = visit_var(children.consume_expected(Rule::var));
+            let isa = visit_isa_constraint(children.consume_expected(Rule::isa_constraint));
+            WriteCondition::Isa { variable, isa }
+        }
+        _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: children.as_str().to_owned() }),
+    }
 }
 
 fn visit_clause_delete(node: Node<'_>) -> Delete {
     debug_assert_eq!(node.as_rule(), Rule::clause_delete);
     let span = node.span();
-    let deletables = node
-        .into_children()
-        .skip_expected(Rule::DELETE)
-        .map(|child| match child.as_rule() {
-            Rule::statement_deletable => visit_statement_deletable(child),
-            Rule::pattern_try_deletable => visit_pattern_try_deletable(child),
-            _ => unreachable!(
-                "Unrecognised statement inside delete clause: {:?}",
-                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
-            ),
-        })
-        .collect();
+    let mut children = node.into_children();
+    let deletables =
+        visit_delete_patterns(children.skip_expected(Rule::DELETE).consume_expected(Rule::delete_patterns));
+    debug_assert_eq!(children.try_consume_any(), None);
     Delete::new(span, deletables)
+}
+
+fn visit_delete_patterns(node: Node<'_>) -> Vec<Deletable> {
+    debug_assert_eq!(node.as_rule(), Rule::delete_patterns);
+    node.into_children().map(visit_delete_pattern).collect()
+}
+
+fn visit_delete_pattern(node: Node<'_>) -> Deletable {
+    debug_assert_eq!(node.as_rule(), Rule::delete_pattern);
+    let child = node.into_child();
+    match child.as_rule() {
+        Rule::statement_deletable => visit_statement_deletable(child),
+        Rule::pattern_try_deletable => visit_pattern_try_deletable(child),
+        Rule::pattern_if_deletable => visit_pattern_if_deletable(child),
+        _ => unreachable!(
+            "Unrecognised statement inside delete clause: {:?}",
+            TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
+        ),
+    }
 }
 
 fn visit_statement_deletable(node: Node<'_>) -> Deletable {
@@ -255,18 +329,21 @@ fn visit_statement_deletable(node: Node<'_>) -> Deletable {
 fn visit_pattern_try_deletable(node: Node<'_>) -> Deletable {
     debug_assert_eq!(node.as_rule(), Rule::pattern_try_deletable);
     let span = node.span();
-    let deletables = node
-        .into_children()
-        .skip_expected(Rule::TRY)
-        .map(|child| match child.as_rule() {
-            Rule::statement_deletable => visit_statement_deletable(child),
-            _ => unreachable!(
-                "Unrecognised statement inside delete clause: {:?}",
-                TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }
-            ),
-        })
-        .collect();
+    let mut children = node.into_children();
+    let deletables = visit_delete_patterns(children.skip_expected(Rule::TRY).consume_expected(Rule::delete_patterns));
+    debug_assert_eq!(children.try_consume_any(), None);
     Deletable::new(span, DeletableKind::Optional { deletables })
+}
+
+fn visit_pattern_if_deletable(node: Node<'_>) -> Deletable {
+    debug_assert_eq!(node.as_rule(), Rule::pattern_if_deletable);
+    let span = node.span();
+    let mut children = node.into_children();
+    let conditions = visit_write_if_clause(children.consume_expected(Rule::write_if_clause));
+    children.skip_expected(Rule::THEN);
+    let deletables = visit_delete_patterns(children.consume_expected(Rule::delete_patterns));
+    debug_assert_eq!(children.try_consume_any(), None);
+    Deletable::new(span, DeletableKind::If { conditions, deletables })
 }
 
 fn visit_clause_fetch(node: Node<'_>) -> Fetch {
@@ -304,7 +381,7 @@ fn visit_fetch_attribute(node: Node<'_>) -> FetchAttribute {
     debug_assert_eq!(node.as_rule(), Rule::fetch_attribute);
     let span = node.span();
     let mut children = node.into_children();
-    let owner = visit_var_named(children.consume_expected(Rule::var_named));
+    let owner = visit_var_or_propagate_optional(children.consume_expected(Rule::var_or_propagate_optional));
     let child = children.consume_any();
     let attribute = match child.as_rule() {
         Rule::label_list => TypeRefAny::List(visit_label_list(child)),
@@ -332,7 +409,9 @@ fn visit_fetch_object_body(node: Node<'_>) -> FetchObjectBody {
             FetchObjectBody::Entries(entries)
         }
         Rule::fetch_attributes_all => {
-            let var = visit_var_named(child.into_children().consume_expected(Rule::var_named));
+            let var = visit_var_or_propagate_optional(
+                child.into_children().consume_expected(Rule::var_or_propagate_optional),
+            );
             FetchObjectBody::AttributesAll(var)
         }
         _ => unreachable!("{}", TypeQLError::IllegalGrammar { input: child.as_str().to_owned() }),
@@ -413,7 +492,7 @@ fn visit_operator_reduce(node: Node<'_>) -> Reduce {
 pub(super) fn visit_reduce_assign(node: Node<'_>) -> ReduceAssign {
     debug_assert_eq!(node.as_rule(), Rule::reduce_assign);
     let mut children = node.into_children();
-    let variable = visit_reduce_assignment_var(children.consume_expected(Rule::reduce_assignment_var));
+    let variable = visit_assignment_var(children.consume_expected(Rule::assignment_var));
     children.consume_expected(Rule::ASSIGN);
     let reducer = visit_reducer(children.consume_expected(Rule::reducer));
     ReduceAssign { variable, reducer }
